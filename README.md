@@ -16,3 +16,21 @@ This is a **separate game project** from PayAviator. It includes the same 20 ori
 - **Android App:** GitHub **Actions > Build Varnethryl Android APK**, then download the generated debug APK artifact.
 
 Both builds use the **exact same `www/` folder**. The Android Capacitor bridge hides the PWA install prompt in native mode. See the separate Android and WebApp ZIPs for dedicated repos and detailed steps. The Android APK needs a GitHub Actions build; it is not precompiled inside this ZIP.
+
+
+## GitHub repository setup (both versions)
+
+This repository's workflow files MUST be at these exact paths on the `main` branch:
+
+- `.github/workflows/build-android.yml` — produces a **debug** APK in Actions artifacts.
+- `.github/workflows/deploy-pages.yml` — publishes the `www/` web app to GitHub Pages.
+
+The directory starts with a dot (`.github`); make sure hidden folders are uploaded.
+Do NOT upload the ZIP archive itself to GitHub: extract it, then upload the files and folders INSIDE `Varnethryl-main/` to the repository root.
+The game assets remain in `www/`, next to `package.json` at the repository root.
+
+To publish the website: open **Settings → Pages → Build and deployment → Source: GitHub Actions**, then open **Actions → Publish Varnethryl Web App**. The published site should appear under `https://littlemann766.github.io/Varnethryl/` after successful deployment, unless you configure a custom domain.
+
+To install a test Android APK: open **Actions → Build Varnethryl Android APK**, run the workflow if necessary, then download the `Varnethryl-RPG-debug-APK` artifact. This is a debug build for testing, not a production-signed Play Store release.
+
+If Actions instead says **Get started with GitHub Actions**, the `.github/workflows/` files are still missing or are in the wrong directory. If the workflows appear but don't run, check **Settings → Actions → General** for repository Actions settings.

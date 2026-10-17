@@ -1,7 +1,7 @@
 import * as THREE from '../../www/proto3d/vendor/three.module.js';
 import { GLTFLoader } from '../../www/proto3d/vendor/jsm/loaders/GLTFLoader.js';
-const ORDER = ['aldric','darius','selene','seraphine','talia','finn','brynn','mirelle','nyx','vesper','thorne','orin','elira'];
-const LABEL = {aldric:'Sir Aldric',darius:'Darius Umbral',selene:'Selene Frostveil',seraphine:'Dame Seraphine',talia:'Talia Stormcall',finn:'Finn Valecourt',brynn:'Brynn Cogwright',mirelle:'Mirelle Thornroot',nyx:'Nyx Varrin',vesper:'Vesper Crowe',thorne:'Brother Thorne',orin:'Orin Ashlance', elira: 'Lady Elira'};
+const ORDER = ['aldric','darius','selene','seraphine','talia','finn','brynn','mirelle','nyx','vesper','thorne','orin', 'elira', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk', 'wolf'];
+const LABEL = {aldric:'Sir Aldric',darius:'Darius Umbral',selene:'Selene Frostveil',seraphine:'Dame Seraphine',talia:'Talia Stormcall',finn:'Finn Valecourt',brynn:'Brynn Cogwright',mirelle:'Mirelle Thornroot',nyx:'Nyx Varrin',vesper:'Vesper Crowe',thorne:'Brother Thorne',orin:'Orin Ashlance',elira:'Lady Elira',rook:'Rook Wildbane',asha:'Asha Ironfist',rowan:'Rowan Firebrand',kael:'Kael Runebinder',cedric:'Cedric Vale',morwen:'Morwen Blackveil',garruk:'Garruk Stonefist',wolf:'Wolf (Rook companion)'};
 const qs = new URLSearchParams(location.search);
 const R = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true});
 R.setPixelRatio(Math.min(devicePixelRatio,2)); R.setSize(innerWidth,innerHeight);
@@ -50,6 +50,6 @@ const up=e=>{ptrs.delete(e.pointerId);pd=0;}; cv.addEventListener('pointerup',up
 cv.addEventListener('wheel',e=>{e.preventDefault();state.dist=Math.max(2,Math.min(11,state.dist*(1+e.deltaY*.0015)));},{passive:false});
 addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
 function frame(){const dt=clock.getDelta(); if(mixer)mixer.update(qs.get('t')?0:dt); if(state.spin)state.yaw+=dt*.6;
-  const fit=Math.max(1,(state.h||1.9)/1.75),d=fit*state.dist*(cam.aspect<1?Math.min(1.7,.95/Math.max(.5,cam.aspect)):1),p=state.pitch; cam.position.set(Math.sin(state.yaw)*Math.cos(p)*d,1.05+Math.sin(p)*d,Math.cos(state.yaw)*Math.cos(p)*d); cam.lookAt(0,(1.05+(cam.aspect<1?.35:0))*Math.max(1,fit*.95),0); R.render(scene,cam); requestAnimationFrame(frame);}
+  const fit=Math.max(1,(state.h||1.9)/1.75),d=fit*state.dist*(cam.aspect<1?Math.min(1.7,.95/Math.max(.5,cam.aspect)):1),p=state.pitch; cam.position.set(Math.sin(state.yaw)*Math.cos(p)*d,1.05+Math.sin(p)*d,Math.cos(state.yaw)*Math.cos(p)*d); cam.lookAt(0,(1.05+(cam.aspect<1?.35:0))*Math.max(1,fit*.95)+.3,0); R.render(scene,cam); requestAnimationFrame(frame);}
 window.__state=state; window.__load=load; window.__play=play;
 window.__ready=load(state.id).then(frame).catch(e=>{status.textContent='Error: '+e;});

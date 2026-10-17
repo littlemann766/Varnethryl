@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
-export const ORDER = ['aldric', 'darius', 'selene', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'orin'];
-export const LABEL = { aldric: 'Sir Aldric', darius: 'Darius Umbral', selene: 'Selene Frostveil', seraphine: 'Dame Seraphine', talia: 'Talia Stormcall', finn: 'Finn Valecourt', brynn: 'Brynn Cogwright', mirelle: 'Mirelle Thornroot', nyx: 'Nyx Varrin', vesper: 'Vesper Crowe', thorne: 'Brother Thorne', orin: 'Orin Ashlance' };
+export const ORDER = ['aldric', 'darius', 'selene', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'orin', 'elira', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk', 'wolf'];
+export const LABEL = { aldric: 'Sir Aldric', darius: 'Darius Umbral', selene: 'Selene Frostveil', seraphine: 'Dame Seraphine', talia: 'Talia Stormcall', finn: 'Finn Valecourt', brynn: 'Brynn Cogwright', mirelle: 'Mirelle Thornroot', nyx: 'Nyx Varrin', vesper: 'Vesper Crowe', thorne: 'Brother Thorne', orin: 'Orin Ashlance', elira: 'Lady Elira', rook: 'Rook Wildbane', asha: 'Asha Ironfist', rowan: 'Rowan Firebrand', kael: 'Kael Runebinder', cedric: 'Cedric Vale', morwen: 'Morwen Blackveil', garruk: 'Garruk Stonefist', wolf: 'Wolf (Rook companion)' };
 const qs = new URLSearchParams(location.search);
 const R = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); R.setPixelRatio(Math.min(devicePixelRatio, 2)); R.setSize(innerWidth, innerHeight); R.shadowMap.enabled = true; R.toneMapping = THREE.ACESFilmicToneMapping; R.outputColorSpace = THREE.SRGBColorSpace; document.body.appendChild(R.domElement);
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x2b2733); scene.fog = new THREE.Fog(0x2b2733, 6, 14);

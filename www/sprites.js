@@ -31,5 +31,7 @@ export function enemy(name){loadManifest();if(!manifest)return null;let s=slug(n
  const e=entry('e'+s,`assets/enemies/${m.file}`,m.height>90?192:128,m.height>90?192:128,{rim:'190,215,255',strength:.9});e.height=m.height;e.faces=m.faces||'right';return e}
 // white silhouette for hit flash (lazy)
 export function flash(e,left){if(!e.ready)return null;const k=left?'fl':'fr';if(!e[k])e[k]=bake(e.img,e.w,e.h,{flip:left,white:true});return e[k]}
+// class-coloured silhouette aura (cast charge-up); cached per colour
+export function aura(e,left,col){const k='au'+(left?'l':'r')+col;if(!e[k]){const w=e.w,h=e.h,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.filter=`blur(${Math.max(2,w/22)}px)`;x.drawImage(left?e.l:e.r,0,0);x.filter='none';x.globalCompositeOperation='source-in';x.fillStyle=col;x.fillRect(0,0,w,h);e[k]=c}return e[k]}
 export const variant=(e,left)=>left?e.l:e.r;
 export function preload(ids,enemyNames){ids.forEach(hero);(enemyNames||[]).forEach(enemy)}

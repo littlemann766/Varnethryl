@@ -1,6 +1,7 @@
 import * as Settings from './settings.js';
 import * as Controls from './controls.js';
-import * as Motion from './motion.js';
+import * as Motion from './motion.js'
+import * as CM from './classmotion.js';
 import * as Sprites from './sprites.js';
 import * as Hud from './hud.js';
 import * as World from './world.js';
@@ -62,20 +63,20 @@ function enemyAttacks(enemy,dt){if(enemy.hp<=0)return;let options=state.party.ma
  if(dist<=70&&runtime.time>enemy.attackAt){let defense=combinedStats(target.id).def;let hurt=Math.max(12,Math.round(enemy.attack*1000/(1000+defense)));let dodge=HEROES[target.id].agi*.005;if(Math.random()<dodge)hurt=0;runtime.hp[target.id]=Math.max(0,(runtime.hp[target.id]||0)-hurt);logDamage(target.x,target.y-15,hurt?`-${fmt(hurt)}`:'DODGE',hurt?'#ff6979':'#bfffea');enemy.attackAt=runtime.time+(enemy.boss?2300:1750);if(runtime.hp[target.id]<=0){runtime.hp[target.id]=heroMax(target.id);state.gold=Math.max(0,state.gold-25);log(`${HEROES[target.id].name} fell and returned to the guild infirmary (-25 gold).`);for(const pid of state.party)runtime.hp[pid]=heroMax(pid);enterZone('village');toast('Party recovered at Liongate Village.');}}
  if(enemy.burn>0&&Math.floor(runtime.time/1000)!==Math.floor((runtime.time-dt)/1000)){let n=Math.round(enemy.burn*.22);enemy.hp-=n;enemy.burn-=n;logDamage(enemy.x,enemy.y,n,'#ff9255');if(enemy.hp<=0)enemyDefeated(enemy,state.active)}
 }
-function tick(dt){runtime.time+=dt;state.secondsPlayed+=(dt/1000);Controls.tick();{
+function tick(dt){dt=CM.timeScale(dt,runtime.time+dt,Settings.reducedMotion());runtime.time+=dt;state.secondsPlayed+=(dt/1000);Controls.tick();{
  // Analog locomotion: acceleration/inertia, dead zone handled in controls, magnitude drives speed (walk/jog/run), turn-in-place gate.
  const inp=Controls.readInput(runtime.keys,runtime.walkingTarget,runtime.x,runtime.y);
  if(runtime.walkingTarget&&!inp.mag)runtime.walkingTarget=null;
  runtime.vx??=0;runtime.vy??=0;runtime.faceA??=0;
- const sp=Math.hypot(runtime.vx,runtime.vy);let tm=inp.mag*Motion.moveMul(runtime.time),tx=inp.x*tm*Motion.MAXV,ty=inp.y*tm*Motion.MAXV;
+ const PR=Motion.profile(state.active),VM=Motion.MAXV*PR.spd,sp=Math.hypot(runtime.vx,runtime.vy);let tm=inp.mag*Motion.moveMul(runtime.time),tx=inp.x*tm*VM,ty=inp.y*tm*VM;
  if(inp.mag>0){const ia=Math.atan2(inp.y,inp.x);let da=Math.atan2(Math.sin(ia-runtime.faceA),Math.cos(ia-runtime.faceA));
-  runtime.faceA+=Math.max(-.02*dt,Math.min(.02*dt,da));          // body rotates toward intent at a limited rate
+  runtime.faceA+=Math.max(-.02*PR.turn*dt,Math.min(.02*PR.turn*dt,da));          // body rotates toward intent at a limited rate
   if(sp<.05){const al=Math.max(.12,Math.cos(da));tx*=al*al;ty*=al*al}}   // turn in place before setting off
  let ex=tx-runtime.vx,ey=ty-runtime.vy;const ed=Math.hypot(ex,ey),speeding=Math.hypot(tx,ty)>sp,reverse=(tx*runtime.vx+ty*runtime.vy)<0&&sp>.06;
- const acc=(speeding&&!reverse?.0007:reverse?.0016:.0006)*dt;
+ const acc=(speeding&&!reverse?.0007:reverse?.0016:.0006)*PR.acc*(reverse?1:1)*dt;
  if(ed<=acc){runtime.vx=tx;runtime.vy=ty}else{runtime.vx+=ex/ed*acc;runtime.vy+=ey/ed*acc}
  if(runtime.vkick){runtime.vx+=runtime.vkick.x*dt*.5;runtime.vy+=runtime.vkick.y*dt*.5;runtime.vkick=null}
- const spd=Math.hypot(runtime.vx,runtime.vy);if(spd>Motion.MAXV*1.4){runtime.vx*=Motion.MAXV*1.4/spd;runtime.vy*=Motion.MAXV*1.4/spd}
+ const spd=Math.hypot(runtime.vx,runtime.vy);if(spd>VM*1.4){runtime.vx*=VM*1.4/spd;runtime.vy*=VM*1.4/spd}
  runtime.moving=spd>.012;runtime.speed=spd;
  if(Math.abs(runtime.vx)>.01)directions[state.active]=runtime.vx<0?-1:1;
  runtime.x=clamp(runtime.x+runtime.vx*dt,35,1820);runtime.y=clamp(runtime.y+runtime.vy*dt,35,1170)}
@@ -96,11 +97,11 @@ const worldSprites=HEROES.map(h=>{const img=new Image();img.src=h.sprite;return 
 const directions={};const attackPulse={};
 function drawHuman(x,y,id,controlled=false){(runtime.drawn=runtime.drawn||[]).push(id);
  const hero=HEROES[id],img=worldSprites[id],now=runtime.time;
- if((!controlled||!Motion.isActing(runtime.time))&&runtime.time-(attackPulse[id]||-5000)<40&&runtime.time-(runtime.lastActAt?.[id]||-5000)>300){(runtime.lastActAt??={})[id]=runtime.time;Motion.act(id,'basic',runtime.time)}
+ if((!controlled||!Motion.isActing(runtime.time))&&runtime.time-(attackPulse[id]||-5000)<40&&runtime.time-(runtime.lastActAt?.[id]||-5000)>300){(runtime.lastActAt??={})[id]=runtime.time;Motion.act(id,'basic',runtime.time);{const en=runtime.enemy.filter(e=>e.hp>0).sort((p,q)=>Math.hypot(p.x-x,p.y-y)-Math.hypot(q.x-x,q.y-y))[0],dr=directions[id]||1,d=Motion.ACT.basic,pf=Motion.profile(id);CM.strikeFx(id,'basic',null,x,y,en?en.x:x+dr*90,en?en.y:y,runtime.time+d.wind*pf.family.windMul*pf.atk,{dir:dr})}}
  const P=Motion.pose(id,x,y,now,controlled?runtime.faceA:null,Settings.reducedMotion());
  C.save();C.translate(Math.round(x),Math.round(y));const HS=World.active(state.zone)?1.5:1;C.scale(HS,HS); // painted scenes: characters at painted-art scale
  // ground contact: shadow stretches with the lunge/stride, planted feet marked on the ground
- C.fillStyle=World.active(state.zone)?'#06131a38':'#06131aa8';C.beginPath();C.ellipse(P.dx*.5,14,19+Math.abs(P.dx)*.4+P.run*2,6,0,0,Math.PI*2);C.fill();
+ C.fillStyle=World.active(state.zone)?'#06131a38':'#06131aa8';C.beginPath();C.ellipse(P.dx*.5,14,Math.max(8,19+Math.abs(P.dx)*.4+P.run*2-P.hover*.9),6-P.hover*.12,0,0,Math.PI*2);C.fill();
  if(P.speed>.012){for(const f of Motion.feet(P,id)){C.fillStyle=`rgba(6,19,26,${.42-f.lift*.3})`;C.beginPath();C.ellipse(f.x,13+f.y-f.lift*3,3.2,1.5,0,0,Math.PI*2);C.fill()}}
  if(controlled){C.strokeStyle='#f3cc79';C.lineWidth=2;C.beginPath();C.ellipse(0,13,24,9,0,0,Math.PI*2);C.stroke();
   const fa=runtime.faceA||0;C.fillStyle='#f3cc79';C.save();C.translate(Math.cos(fa)*24,13+Math.sin(fa)*9);C.rotate(Math.atan2(Math.sin(fa)*9,Math.cos(fa)*24));C.beginPath();C.moveTo(5,0);C.lineTo(-3,-3.5);C.lineTo(-3,3.5);C.closePath();C.fill();C.restore()}
@@ -111,6 +112,7 @@ function drawHuman(x,y,id,controlled=false){(runtime.drawn=runtime.drawn||[]).pu
    // painted sprite: baked right-facing + mirrored variants (rim light stays on the lit side); yaw squeeze eases through the pivot
    const SP=Sprites.hero(id),pv=SP.ready?Sprites.variant(SP,P.sx<0):null;
    C.imageSmoothingEnabled=true;C.imageSmoothingQuality='high';C.drawImage(pv||img,-26,-59,52,70);C.imageSmoothingEnabled=false;
+   {const rm=Settings.reducedMotion(),pf=Motion.profile(id);if(SP.ready&&pf.family.glow&&(P.stage==='wind'||P.stage==='strike')){const au=Sprites.aura(SP,P.sx<0,(pf.tint||CM.VFX[pf.fx].c)[1]);C.save();C.globalCompositeOperation='lighter';C.globalAlpha=(P.stage==='wind'?P.stageP*.45:.45*(1-P.stageP))*(rm?.5:1);C.drawImage(au,-26,-59,52,70);C.restore()}CM.chargeGlow(C,P,id,rm);CM.weaponTrail(C,P,id,rm)}
    const item=equipped(id).find(it=>it.type==='weapon');
    if(item?.level===15){ // Masterwork aura, using the equipped weapon's current rarity
      const brightness=.25+.25*Math.sin(now*.012+id);
@@ -126,7 +128,7 @@ function drawHuman(x,y,id,controlled=false){(runtime.drawn=runtime.drawn||[]).pu
  C.restore();
 }
 function drawTree(x,y,big){rect(x-5,y-4,9,20,'#57432a');polygon(x,y-22,big?26:21,state.zone==='forest'?'#2f714c':'#3c6f48',5);polygon(x,y-38,big?18:14,'#44835b',5);rect(x-1,y-41,3,4,'#74a471')}
-function drawWorld(){const canvas=runtime.canvas;let cw=canvas.clientWidth,ch=canvas.clientHeight;if(!cw||!ch)return;let dpr=Math.min(window.devicePixelRatio||1,2);let w=Math.round(cw*dpr),h=Math.round(ch*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}C.setTransform(dpr,0,0,dpr,0,0);C.imageSmoothingEnabled=false;let camX=clamp(runtime.x-cw/2,0,1850-cw),camY=World.active(state.zone)?clamp(runtime.y-ch*.6,-ch*.45,1210-ch):clamp(runtime.y-ch/2,0,1210-ch);runtime.camera={x:camX,y:camY};let z=ZONES.find(x=>x.id===state.zone);rect(0,0,cw,ch,z.color);const nowT=performance.now(),paintedWorld=World.drawBackdrop(C,cw,ch,camX,camY,state.zone,nowT),painted=paintedWorld||Hud.drawBackground(C,cw,ch,camX,camY);
+function drawWorld(){const canvas=runtime.canvas;let cw=canvas.clientWidth,ch=canvas.clientHeight;if(!cw||!ch)return;let dpr=Math.min(window.devicePixelRatio||1,2);let w=Math.round(cw*dpr),h=Math.round(ch*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}C.setTransform(dpr,0,0,dpr,0,0);C.imageSmoothingEnabled=false;let camX=clamp(runtime.x-cw/2,0,1850-cw),camY=World.active(state.zone)?clamp(runtime.y-ch*.6,-ch*.45,1210-ch):clamp(runtime.y-ch/2,0,1210-ch);{const sh=CM.camera(runtime.time,Settings.reducedMotion());camX+=sh.x;camY+=sh.y}runtime.camera={x:camX,y:camY};let z=ZONES.find(x=>x.id===state.zone);rect(0,0,cw,ch,z.color);const nowT=performance.now(),paintedWorld=World.drawBackdrop(C,cw,ch,camX,camY,state.zone,nowT),painted=paintedWorld||Hud.drawBackground(C,cw,ch,camX,camY);
  let tx0=Math.floor(camX/40)-1,ty0=Math.floor(camY/40)-1,tx1=Math.ceil((camX+cw)/40)+1,ty1=Math.ceil((camY+ch)/40)+1;
  if(!painted)for(let yy=ty0;yy<ty1;yy++)for(let xx=tx0;xx<tx1;xx++){let p=hash(xx,yy),x=xx*40-camX,y=yy*40-camY;rect(x,y,40,40,z.kind==='safe'?(p>.48?'#39714e':'#3e7752'):z.kind==='wild'?(p>.47?'#265139':'#2b573d'):z.kind==='frost'?(p>.5?'#c9dde8':'#bcd3e0'):(p>.5?'#4e555a':'#525b60'));if(z.kind==='safe'&&Math.abs(yy-7)<2 || z.kind!=='safe'&&Math.abs(yy-7)<1){rect(x,y,40,40,z.kind==='safe'?'#ae996f':'#67645a')}else if(p>.95){rect(x+15,y+14,8,5,'#a3ad8c')}else if(p<.05){rect(x+4,y+9,4,8,'#82a96f')}}
  C.save();C.translate(-camX,-camY);
@@ -134,7 +136,7 @@ function drawWorld(){const canvas=runtime.canvas;let cw=canvas.clientWidth,ch=ca
  if(!painted)for(let yy=1;yy<31;yy++)for(let xx=1;xx<47;xx++){let x=xx*40+hash(xx,1)*15,y=yy*40+hash(3,yy)*11,p=hash(xx+43,yy+26);if(Math.abs(yy-7)<3||(state.zone==='village'&&yy<13&&xx<35))continue;if(p>(state.zone==='forest'?.89:state.zone==='village'?.95:.96))drawTree(x,y,p>.95);else if(p<.032){rect(x-10,y-5,18,9,'#737679');rect(x-3,y-10,15,7,'#999897')}}
  for(const [side,to] of Object.entries(z.portal||{})){let x=side==='right'?1780:75;rect(x-9,210,17,230,'#c2a367');rect(x-27,200,53,16,'#ead39b');C.fillStyle='#f5e6b7';C.textAlign='center';C.font='bold 17px monospace';C.fillText(`→ ${ZONES.find(p=>p.id===to)?.name||''}`,x,177)}
  if(paintedWorld){World.drawProps(C,state.zone,camX,camY,cw,ch,runtime.y,'back');World.drawPond(C,450,430,100,70,nowT);for(const pid of state.party.filter(p=>p!==state.active)){let p=runtime.companions[pid]||{x:runtime.x-35,y:runtime.y+15};World.shadow(C,p.x,p.y+8)}World.shadow(C,runtime.x,runtime.y+8)}
- runtime.drawn=[];{let oth=state.party.filter(p=>p!==state.active);for(let i=1;i<=oth.length;i++){let id=oth[i-1],pos=runtime.companions[id]||{x:runtime.x-35*i,y:runtime.y+15};drawHuman(pos.x,pos.y,id)}}drawHuman(runtime.x,runtime.y,state.active,true);
+ runtime.drawn=[];{let oth=state.party.filter(p=>p!==state.active);for(let i=1;i<=oth.length;i++){let id=oth[i-1],pos=runtime.companions[id]||{x:runtime.x-35*i,y:runtime.y+15};drawHuman(pos.x,pos.y,id)}}drawHuman(runtime.x,runtime.y,state.active,true);CM.drawFx(C,runtime.time,Settings.reducedMotion());
  for(const enemy of runtime.enemy){const HS=World.active(state.zone)?1.5:1,ES=Sprites.enemy(enemy.name),art=ES&&ES.ready?ES:null,S=enemy.boss?1.3:1.35,hurt=runtime.time-(enemy.flash||-999)<110,bob=Math.sin(runtime.time*.004+enemy.id)*1.5;
   if(art){ // painted enemy: contact shadow, breathing squash, face the nearest party member, white flash when hit
    const dh=art.height*HS*256/242,dw=dh,pad=dh*6/256;
@@ -202,4 +204,4 @@ resetHP();renderAll();if(state.zone==='boss')spawnEnemies();requestAnimationFram
 // Service worker installation and updates are managed by pwa.js.
 Hud.init({get state(){return state},runtime,HEROES,ZONES,heroMax,fmt,esc,toast,switchTab,modal,level:nLevel,log,Controls,renderAdventure});
 Controls.init({get state(){return state},runtime,HEROES,nearestEnemy,hitEnemy,basicAttack,combinedStats,heroMax,logDamage,fmt,log,toast,renderTarget,inAdventure:()=>view.tab==='adventure'&&!Settings.isEditing()});
-window.__vn={World,Controls,Motion,Settings,get state(){return state},runtime,combinedStats,enterZone,heroMax};
+window.__vn={World,Controls,Motion,CM,Settings,get state(){return state},runtime,combinedStats,enterZone,heroMax};

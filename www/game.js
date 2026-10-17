@@ -1,6 +1,7 @@
 import * as Settings from './settings.js';
 import * as Controls from './controls.js';
 import * as Motion from './motion.js';
+import * as Sprites from './sprites.js';
 import * as Hud from './hud.js';
 import * as World from './world.js';
 import {HEROES,ZONES,TIERS,SUBSTAT_POOL,ABILITIES,WEAPON_ART,ENEMIES} from './data.js';
@@ -37,8 +38,9 @@ const runtime={x:330,y:300,companions:{},enemy:[],target:null,effects:[],particl
 function heroMax(id){return combinedStats(id).hp}
 function resetHP(){for(const id of state.party){runtime.hp[id]=Math.min(runtime.hp[id]??heroMax(id),heroMax(id));}runtime.hp[state.active]??=heroMax(state.active)}
 function enterZone(id){if(!ZONES.some(z=>z.id===id))return;state.zone=id;runtime.x=330;runtime.y=300;runtime.enemy=[];runtime.target=null;runtime.companions={};runtime.walkingTarget=null;runtime.spawnAt=0;for(const p of state.party)runtime.hp[p]??=heroMax(p); if(id==='boss')spawnEnemies();log(`Entered ${ZONES.find(z=>z.id===id).name}.`);renderAdventure();save()}
-function spawnEnemies(){let types=ENEMIES[state.zone]||[];if(!types.length)return;let max=state.zone==='boss'?1:state.zone==='forest'?5:4;if(runtime.enemy.length>=max)return;
- let template=sample(types);let x=runtime.x+rand(-365,365),y=runtime.y+rand(-260,260);x=clamp(x,105,1700);y=clamp(y,105,1080);if(Math.hypot(x-runtime.x,y-runtime.y)<120)x+=170;
+const SHOW_ENEMIES=/[?&]showEnemies=1/.test(location.search); // screenshot/dev aid: spawn enemies in the safe village
+function spawnEnemies(){let types=ENEMIES[state.zone]||(SHOW_ENEMIES?[...ENEMIES.forest,...ENEMIES.ruins,...ENEMIES.frost]:[]);if(!types.length)return;let max=state.zone==='boss'?1:state.zone==='forest'?5:4;if(runtime.enemy.length>=max)return;
+ let template=sample(types);let x=runtime.x+rand(-365,365),y=runtime.y+rand(-260,260);x=clamp(x,105,1700);y=clamp(y,105,1080);if(Math.hypot(x-runtime.x,y-runtime.y)<120)x+=170;if(SHOW_ENEMIES){x=runtime.x+rand(150,330)*(runtime.enemy.length%2?-1:1);y=runtime.y+rand(-80,80)}
  let levels={standard:{hp:1,attack:1,reward:1,label:'Standard'},veteran:{hp:5,attack:2.1,reward:2,label:'Veteran'},elite:{hp:15,attack:3.8,reward:3,label:'Elite'},mythic:{hp:45,attack:7,reward:5,label:'Mythic'}};let difficulty=template.boss?(levels[state.bossDifficulty]||levels.standard):levels.standard;let hp=template.hp*difficulty.hp;runtime.enemy.push({...template,id:++runtime.enemyIds,name:template.boss?`${difficulty.label} ${template.name}`:template.name,attack:Math.round(template.attack*difficulty.attack),gold:Math.round(template.gold*difficulty.reward),xp:Math.round(template.xp*difficulty.reward),x,y,maxHp:hp,hp,attackAt:0,stunned:0,slowUntil:0,burn:0,dx:0,dy:0});runtime.spawnAt=runtime.time+2400;
 }
 function logDamage(x,y,n,color){runtime.effects.push({x,y,n,color,birth:runtime.time});if(runtime.effects.length>45)runtime.effects.shift()}
@@ -79,7 +81,7 @@ function tick(dt){runtime.time+=dt;state.secondsPlayed+=(dt/1000);Controls.tick(
  runtime.x=clamp(runtime.x+runtime.vx*dt,35,1820);runtime.y=clamp(runtime.y+runtime.vy*dt,35,1170)}
  if(runtime.x>1790&&ZONES.find(z=>z.id===state.zone)?.portal?.right){enterZone(ZONES.find(z=>z.id===state.zone).portal.right);runtime.x=160;}if(runtime.x<55&&ZONES.find(z=>z.id===state.zone)?.portal?.left){enterZone(ZONES.find(z=>z.id===state.zone).portal.left);runtime.x=1650;}
  const others=state.party.filter(p=>p!==state.active);for(const k of Object.keys(runtime.companions))if(!others.includes(+k))delete runtime.companions[k];for(let i=1;i<=others.length;i++){let id=others[i-1],anchorX=runtime.x-((i%2===1)?44:-40),anchorY=runtime.y+30+Math.floor(i/2)*27;let c=runtime.companions[id]||{x:anchorX,y:anchorY,attackAt:0};let dist=Math.hypot(anchorX-c.x,anchorY-c.y);if(dist>2){let q=Math.min(dist,dt*.2);c.x+=(anchorX-c.x)/dist*q;c.y+=(anchorY-c.y)/dist*q}c.walking=dist>2;if(dist>3)directions[id]=anchorX-c.x<0?-1:1;runtime.companions[id]=c;let enemy=nearestEnemy(190,c.x,c.y);if(enemy&&runtime.time>c.attackAt){attackPulse[id]=runtime.time;hitEnemy(enemy,id,HEROES[id].style==='heal'?.56:.72);c.attackAt=runtime.time+1350;}if(HEROES[id].style==='heal'&&runtime.time>(c.healAt||0)){let low=state.party.find(id2=>runtime.hp[id2]/heroMax(id2)<.48);if(low!==undefined){let n=Math.round(combinedStats(id).attack*1.5);runtime.hp[low]=Math.min(heroMax(low),runtime.hp[low]+n);logDamage(c.x,c.y-26,`+${fmt(n)}`,'#6fe4bc');c.healAt=runtime.time+8000;}}}
- if(state.zone!=='village'){if(runtime.enemy.length< (state.zone==='boss'?1:state.zone==='forest'?5:4)&&runtime.time>runtime.spawnAt)spawnEnemies();for(const e of runtime.enemy)enemyAttacks(e,dt);runtime.enemy=runtime.enemy.filter(e=>e.hp>0);let active=HEROES[state.active];let range=['mage','heal','ranged','support'].includes(active.style)?205:92;if(nearestEnemy(range)&&runtime.time>=runtime.attackUntil)basicAttack();}
+ if(state.zone!=='village'||SHOW_ENEMIES){if(runtime.enemy.length< (state.zone==='boss'?1:state.zone==='forest'?5:4)&&runtime.time>runtime.spawnAt)spawnEnemies();for(const e of runtime.enemy)enemyAttacks(e,dt);runtime.enemy=runtime.enemy.filter(e=>e.hp>0);let active=HEROES[state.active];let range=['mage','heal','ranged','support'].includes(active.style)?205:92;if(nearestEnemy(range)&&runtime.time>=runtime.attackUntil)basicAttack();}
  runtime.effects=runtime.effects.filter(e=>runtime.time-e.birth<1200);
  let danger=state.zone!=='village'&&runtime.enemy.some(e=>e.hp>0&&Math.hypot(e.x-runtime.x,e.y-runtime.y)<360);if(!danger){let rate=state.zone==='village'?.25:.012;for(const id of state.party){let m=heroMax(id);runtime.hp[id]=Math.min(m,(runtime.hp[id]??m)+m*rate*dt/1000)}}
 if(runtime.time-runtime.lastSave>6000){runtime.lastSave=runtime.time;save();}}
@@ -96,7 +98,7 @@ function drawHuman(x,y,id,controlled=false){(runtime.drawn=runtime.drawn||[]).pu
  const hero=HEROES[id],img=worldSprites[id],now=runtime.time;
  if((!controlled||!Motion.isActing(runtime.time))&&runtime.time-(attackPulse[id]||-5000)<40&&runtime.time-(runtime.lastActAt?.[id]||-5000)>300){(runtime.lastActAt??={})[id]=runtime.time;Motion.act(id,'basic',runtime.time)}
  const P=Motion.pose(id,x,y,now,controlled?runtime.faceA:null,Settings.reducedMotion());
- C.save();C.translate(Math.round(x),Math.round(y));
+ C.save();C.translate(Math.round(x),Math.round(y));const HS=World.active(state.zone)?1.5:1;C.scale(HS,HS); // painted scenes: characters at painted-art scale
  // ground contact: shadow stretches with the lunge/stride, planted feet marked on the ground
  C.fillStyle=World.active(state.zone)?'#06131a38':'#06131aa8';C.beginPath();C.ellipse(P.dx*.5,14,19+Math.abs(P.dx)*.4+P.run*2,6,0,0,Math.PI*2);C.fill();
  if(P.speed>.012){for(const f of Motion.feet(P,id)){C.fillStyle=`rgba(6,19,26,${.42-f.lift*.3})`;C.beginPath();C.ellipse(f.x,13+f.y-f.lift*3,3.2,1.5,0,0,Math.PI*2);C.fill()}}
@@ -105,8 +107,10 @@ function drawHuman(x,y,id,controlled=false){(runtime.drawn=runtime.drawn||[]).pu
  const bob=0,pulse=Math.max(0,1-(now-(attackPulse[id]||-5000))/280);
  if(img.complete && img.naturalWidth){
    // pose about the feet: lean/rotate, yaw (turn-in-place pivot), stride bob, settle squash
-   C.translate(P.dx,11+P.dy);C.rotate(P.lean);C.scale(P.sx,P.sy);C.translate(0,-11);
-   C.imageSmoothingEnabled=Math.abs(P.lean)>.02||Math.abs(P.sx)<.99;C.drawImage(img,-26,-59,52,70);C.imageSmoothingEnabled=false;
+   C.translate(P.dx,11+P.dy);C.rotate(P.lean);C.scale(Math.abs(P.sx),P.sy);C.translate(0,-11);
+   // painted sprite: baked right-facing + mirrored variants (rim light stays on the lit side); yaw squeeze eases through the pivot
+   const SP=Sprites.hero(id),pv=SP.ready?Sprites.variant(SP,P.sx<0):null;
+   C.imageSmoothingEnabled=true;C.imageSmoothingQuality='high';C.drawImage(pv||img,-26,-59,52,70);C.imageSmoothingEnabled=false;
    const item=equipped(id).find(it=>it.type==='weapon');
    if(item?.level===15){ // Masterwork aura, using the equipped weapon's current rarity
      const brightness=.25+.25*Math.sin(now*.012+id);
@@ -131,8 +135,16 @@ function drawWorld(){const canvas=runtime.canvas;let cw=canvas.clientWidth,ch=ca
  for(const [side,to] of Object.entries(z.portal||{})){let x=side==='right'?1780:75;rect(x-9,210,17,230,'#c2a367');rect(x-27,200,53,16,'#ead39b');C.fillStyle='#f5e6b7';C.textAlign='center';C.font='bold 17px monospace';C.fillText(`→ ${ZONES.find(p=>p.id===to)?.name||''}`,x,177)}
  if(paintedWorld){World.drawProps(C,state.zone,camX,camY,cw,ch,runtime.y,'back');World.drawPond(C,450,430,100,70,nowT);for(const pid of state.party.filter(p=>p!==state.active)){let p=runtime.companions[pid]||{x:runtime.x-35,y:runtime.y+15};World.shadow(C,p.x,p.y+8)}World.shadow(C,runtime.x,runtime.y+8)}
  runtime.drawn=[];{let oth=state.party.filter(p=>p!==state.active);for(let i=1;i<=oth.length;i++){let id=oth[i-1],pos=runtime.companions[id]||{x:runtime.x-35*i,y:runtime.y+15};drawHuman(pos.x,pos.y,id)}}drawHuman(runtime.x,runtime.y,state.active,true);
- for(const enemy of runtime.enemy){const S=enemy.boss?1.3:1.35,hurt=runtime.time-(enemy.flash||-999)<110,bob=Math.sin(runtime.time*.004+enemy.id)*1.5;C.fillStyle='#0008';C.beginPath();C.ellipse(enemy.x,enemy.y+12,21*S,8*S,0,0,7);C.fill();C.save();C.translate(enemy.x,enemy.y+bob);C.scale(S,S);if(hurt)C.translate(Math.sin(runtime.time)*2,0);polygon(0,-8,enemy.boss?34:16,hurt?'#ffffff':enemy.color,enemy.boss?8:5);rect(-9,3,18,8,hurt?'#fff':'#463c4a');rect(-5,-12,3,3,'#1a0d12');rect(3,-12,3,3,'#1a0d12');C.restore();
-  const bw=enemy.boss?70:44,by=enemy.y-(enemy.boss?72:42);rect(enemy.x-bw/2,by,bw,6,'#130e12');rect(enemy.x-bw/2,by,bw*clamp(enemy.hp/enemy.maxHp,0,1),6,enemy.boss?'#f04c64':'#db8a70');C.font='bold 11px system-ui,sans-serif';C.textAlign='center';C.fillStyle='#fbe6d2';C.fillText(enemy.boss?'ASHEN TITAN':enemy.name,enemy.x,by-4);
+ for(const enemy of runtime.enemy){const HS=World.active(state.zone)?1.5:1,ES=Sprites.enemy(enemy.name),art=ES&&ES.ready?ES:null,S=enemy.boss?1.3:1.35,hurt=runtime.time-(enemy.flash||-999)<110,bob=Math.sin(runtime.time*.004+enemy.id)*1.5;
+  if(art){ // painted enemy: contact shadow, breathing squash, face the nearest party member, white flash when hit
+   const dh=art.height*HS*256/242,dw=dh,pad=dh*6/256;
+   const dirx=(runtime.x-enemy.x),left=(dirx<0)===(art.faces!=='left');
+   const sq=1+Math.sin(runtime.time*.0035+enemy.id)*.012;
+   C.fillStyle='#06131a66';C.beginPath();C.ellipse(enemy.x,enemy.y+12,dw*.3,dw*.085,0,0,7);C.fill();
+   C.save();C.translate(enemy.x+(hurt?Math.sin(runtime.time)*2:0),enemy.y+12+pad);C.scale(1/sq,sq);C.imageSmoothingEnabled=true;C.imageSmoothingQuality='high';
+   C.drawImage(hurt?Sprites.flash(art,left):Sprites.variant(art,left),-dw/2,-dh,dw,dh);C.imageSmoothingEnabled=false;C.restore();
+  }else{C.fillStyle='#0008';C.beginPath();C.ellipse(enemy.x,enemy.y+12,21*S,8*S,0,0,7);C.fill();C.save();C.translate(enemy.x,enemy.y+bob);C.scale(S,S);if(hurt)C.translate(Math.sin(runtime.time)*2,0);polygon(0,-8,enemy.boss?34:16,hurt?'#ffffff':enemy.color,enemy.boss?8:5);rect(-9,3,18,8,hurt?'#fff':'#463c4a');rect(-5,-12,3,3,'#1a0d12');rect(3,-12,3,3,'#1a0d12');C.restore()}
+  const bw=enemy.boss?70:44,by=art?enemy.y+8-art.height*HS-6:enemy.y-(enemy.boss?72:42);rect(enemy.x-bw/2,by,bw,6,'#130e12');rect(enemy.x-bw/2,by,bw*clamp(enemy.hp/enemy.maxHp,0,1),6,enemy.boss?'#f04c64':'#db8a70');C.font='bold 11px system-ui,sans-serif';C.textAlign='center';C.fillStyle='#fbe6d2';C.fillText(enemy.boss?'ASHEN TITAN':enemy.name,enemy.x,by-4);
   if(runtime.target===enemy.id){C.strokeStyle='#ffd56a';C.lineWidth=2.5;C.setLineDash([6,4]);C.beginPath();C.ellipse(enemy.x,enemy.y+12,28*S,11*S,0,0,7);C.stroke();C.setLineDash([])}}
  for(const f of runtime.effects){let t=(runtime.time-f.birth)/1200;let e=1-Math.pow(1-t,3),pop=t<.12?1+(1-t/.12)*.5:1;C.globalAlpha=t<.6?1:1-(t-.6)/.4;C.font=`bold ${Math.round(19*pop)}px system-ui,sans-serif`;C.textAlign='center';C.lineWidth=3;C.strokeStyle='#000b';C.strokeText(typeof f.n==='number'?fmt(f.n):f.n,f.x,f.y-35-e*40);C.fillStyle=f.color;C.fillText(typeof f.n==='number'?fmt(f.n):f.n,f.x,f.y-35-e*40);C.globalAlpha=1}C.restore();if(paintedWorld){C.save();C.translate(-camX,-camY);World.drawProps(C,state.zone,camX,camY,cw,ch,runtime.y,'front');C.restore();World.drawFore(C,state.zone,cw,ch,camX,camY,nowT);World.drawFx(C,state.zone,cw,ch,camX,camY,nowT)}}
 function renderCounters(){$('goldCount').textContent=fmt(state.gold);$('shardCount').textContent=fmt(state.shards);$('accountLevel').textContent=fmt(state.accountLevel)}

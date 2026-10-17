@@ -193,9 +193,9 @@ export function bind(a) {
 }
 export function rebind() { state_ = api.state(); ensure(state_); render(); }
 // ---------- progression ----------
-// Mortimer walks with the party only once V2 has begun (V1 done and V2 active) or is complete. Progress that is inconsistent
-// (e.g. a hand-edited/imported save with V1 done but later chapters not) must not spawn him.
-function mortimerPresent() { const v = state_ && state_.veyra; if (!v || !Array.isArray(v.done) || !v.done.includes('V1')) return false; return v.done.includes('V2') || (v.ch === 2 && v.stage === 'active'); }
+// Mortimer walks with the party from V2 on. Restored to the 0.4.0-0.6.0 looser rule (V1 done and not merely "offered"): any save that
+// has finished V1 and has moved on shows him, including saves whose chapter bookkeeping is slightly off. A fresh save never shows him.
+function mortimerPresent() { const v = state_ && state_.veyra; if (!v || !Array.isArray(v.done) || !v.done.includes('V1')) return false; return v.ch >= 3 || v.stage !== 'offer' || v.done.includes('V2'); }
 function unlockCheck() {
   const v = state_.veyra;
   if (v.stage === 'locked' && (state_.kills >= 3 || state_.questStep >= 1)) { v.stage = 'offer'; api.log('A bat has delivered a letter to Liongate. Open the story card to read it.'); api.save(); setTimeout(render, 0); }

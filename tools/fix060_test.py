@@ -3,7 +3,7 @@ Usage: (cd www && python3 -m http.server 8977) then VN_URL=http://localhost:8977
 1. Negative first-frame dt (rAF timestamp earlier than performance.now() at module start, common on slow phones)
    used to make runtime.x/y/vx/vy NaN: blank world, no movement. Simulated by shifting rAF timestamps back.
 2. An exception inside a frame must not stop the render loop.
-3. Mortimer is drawn only when V1 is done and V2 is active/done."""
+3. Mortimer needs V1 done (never on a fresh save); with V1 done he shows unless V2 is merely offered (pre-e7aab0b rule restored)."""
 import os, sys
 from playwright.sync_api import sync_playwright
 URL = os.environ.get('VN_URL', 'http://localhost:8977/index.html')
@@ -49,9 +49,9 @@ with sync_playwright() as p:
     ok('V2 active: Mortimer walks with the party', present(2, 'active', 1))
     ok('V2 done, V3 offered: Mortimer present', present(3, 'offer', 2))
     ok('V4 active: Mortimer present', present(4, 'active', 3))
-    ok('inconsistent save (ch3, only V1 done): no Mortimer', not present(3, 'active', 1))
-    ok('inconsistent save (ch1 finished, V1 done): no Mortimer', not present(1, 'finished', 1))
-    ok('inconsistent save (ch2 locked, V1 done): no Mortimer', not present(2, 'locked', 1))
+    ok('V1 done, ch3 (bookkeeping off): Mortimer still shown (legacy saves)', present(3, 'active', 1))
+    ok('V1 done, stage finished: Mortimer shown', present(1, 'finished', 1))
+    ok('V1 not done but later chapters set (ch3 active, done empty): no Mortimer', not present(3, 'active', 0))
     pg.evaluate("window.__m=0"); present(2, 'offer', 1); pg.wait_for_timeout(300); ok('not drawn on the map when absent', pg.evaluate("window.__m") == 0)
     present(2, 'active', 1); pg.evaluate("window.__m=0"); pg.wait_for_timeout(400); ok('drawn on the map when present', pg.evaluate("window.__m") > 0)
     b.close()

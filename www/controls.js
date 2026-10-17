@@ -1,6 +1,7 @@
 // Varnethryl on-screen controls: analog stick (phone/app), D-pad (web only), 5-button skill cluster with cooldown/charge rings.
 import * as Settings from './settings.js';
 import {resolve,SLOTS,ICONS} from './skills.js';
+import * as CM from './classmotion.js';
 import * as Motion from './motion.js';
 const $=id=>document.getElementById(id);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -49,7 +50,7 @@ let busy=0;
 export function basic(){const rt=api.runtime,hero=api.HEROES[api.state.active];if(rt.time<rt.attackUntil||rt.time<busy)return;
  const range=['mage','heal','ranged','support'].includes(hero.style)?255:98,e=inRange(range);
  if(!e){toast('Get closer to an enemy to attack.');return}
- faceTo(e);const d=Motion.act(api.state.active,'basic',rt.time);Settings.sfx('hit');
+ faceTo(e);const d=Motion.act(api.state.active,'basic',rt.time);Settings.sfx('hit');CM.strikeFx(api.state.active,'basic',null,rt.x,rt.y,e.x,e.y,rt.time+d.wind,{dir:e.x<rt.x?-1:1});
  const id=api.state.active;busy=rt.time+d.wind+d.strike+60;
  queue(d.wind,()=>{if(api.state.active!==id)return;const t=inRange(range+12);if(t){rt.attackUntil=0;const ok=api.basicAttack(true);if(ok)addCharge(id,5)}})}
 const pend=[];function queue(ms,fn){pend.push({at:api.runtime.time+ms,fn})}
@@ -59,16 +60,17 @@ export function tick(){const t=api.runtime.time;for(let i=pend.length-1;i>=0;i--
 export function useSkill(slot){const rt=api.runtime,id=api.state.active,hero=api.HEROES[id],sk=heroSkills()[slot],c=cdOf(id);
  if(slot==='ultimate'){if(ch(id)<(sk.charge||100)){toast(`Ultimate charging (${Math.floor(ch(id))}%).`);return}}
  else if(rt.time<(c[slot]||0)){toast(`${sk.name} recharging (${Math.ceil((c[slot]-rt.time)/1000)}s).`);return}
- const heal=hero.style==='heal'||hero.style==='support';let tgt=null;
+ const heal=sk.effect==='heal'||sk.effect==='buff';let tgt=null;
  if(!heal){tgt=inRange(sk.range);if(!tgt){toast('Move within range of an enemy.');return}faceTo(tgt)}
- const d=Motion.act(id,sk.act,rt.time);Settings.sfx('skill');Settings.haptic(slot==='ultimate'?40:slot==='superHeavy'?25:14);
+ const d=Motion.act(id,sk.act,rt.time,sk.anim);Settings.sfx('skill');{const dir=tgt?(tgt.x<rt.x?-1:1):(heroFace.angle!=null&&Math.cos(heroFace.angle)<0?-1:1);CM.strikeFx(id,sk.act,sk.fx,rt.x,rt.y,tgt?tgt.x:rt.x+dir*90,tgt?tgt.y:rt.y,rt.time+d.wind,{dir,tintAll:false})}Settings.haptic(slot==='ultimate'?40:slot==='superHeavy'?25:14);
  if(slot==='ultimate')charge[id]=0;else c[slot]=rt.time+sk.cd+d.wind;
  // lunge momentum: push the hero forward a little as the strike lands (keeps motion continuous with locomotion)
  queue(d.wind,()=>{if(api.state.active!==id)return;
-  if(heal){for(const p of api.state.party){const n=Math.round(api.combinedStats(id).attack*sk.mult*.6);rt.hp[p]=Math.min(api.heroMax(p),(rt.hp[p]||0)+n);api.logDamage(rt.x,rt.y-50,`+${api.fmt(n)}`,'#75efd1')}}
+  if(heal){const f=sk.effect==='buff'?.25:.6;if(sk.effect==='buff')rt.buffUntil=rt.time+8000;for(const p of api.state.party){const n=Math.round(api.combinedStats(id).attack*sk.mult*f);rt.hp[p]=Math.min(api.heroMax(p),(rt.hp[p]||0)+n);api.logDamage(rt.x,rt.y-50,`+${api.fmt(n)}`,sk.effect==='buff'?'#ffe08a':'#75efd1')}}
   else{const t=rt.enemy.find(x=>x.id===(tgt&&tgt.id)&&x.hp>0)||inRange(sk.range+20);if(t){api.hitEnemy(t,id,sk.mult);
-    if(sk.splash)for(const e of rt.enemy)if(e!==t&&e.hp>0&&Math.hypot(e.x-t.x,e.y-t.y)<sk.splash)api.hitEnemy(e,id,sk.mult*.45)}}
-  const lunge=Motion.ACT[sk.act]?.lunge||6,a=heroFace.angle??0;rt.vkick={x:Math.cos(a)*lunge*.012,y:Math.sin(a)*lunge*.012};
+    if(sk.splash)for(const e of rt.enemy)if(e!==t&&e.hp>0&&Math.hypot(e.x-t.x,e.y-t.y)<sk.splash)api.hitEnemy(e,id,sk.mult*.45);
+    if(sk.effect==='control')for(const e of rt.enemy)if(e.hp>0&&Math.hypot(e.x-t.x,e.y-t.y)<=(sk.splash||1))e.slowUntil=rt.time+3500;if(sk.effect==='summon'&&api.state.party.length)for(const p of api.state.party){if(p!==id)api.hitEnemy(t,p,.5)}}}
+  const lunge=(d.lunge||6)*(sk.effect==='dash'?2.2:1),a=heroFace.angle??0;rt.vkick={x:Math.cos(a)*lunge*.012,y:Math.sin(a)*lunge*.012};
   if(slot!=='ultimate')addCharge(id,slot==='minor'?8:slot==='heavy'?14:22);
   api.log(`${hero.name} used ${sk.name}!`)})}
 // ---------- HUD refresh (rings) ----------

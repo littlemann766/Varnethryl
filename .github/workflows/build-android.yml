@@ -28,14 +28,37 @@ jobs:
         run: npx cap add android
       - name: Copy web assets
         run: npx cap sync android
-      - name: Build installable debug APK
+      - name: Configure stable signing and versionCode
+        env:
+          VARNETHRYL_KEYSTORE_B64: ${{ secrets.VARNETHRYL_KEYSTORE_B64 }}
+          VARNETHRYL_KEYSTORE_PASSWORD: ${{ secrets.VARNETHRYL_KEYSTORE_PASSWORD }}
+          VARNETHRYL_KEY_ALIAS: ${{ secrets.VARNETHRYL_KEY_ALIAS }}
+          VARNETHRYL_KEY_PASSWORD: ${{ secrets.VARNETHRYL_KEY_PASSWORD }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          echo "$VARNETHRYL_KEYSTORE_B64" | base64 -d > android/app/varnethryl-release.jks
+          VNAME=$(node -p "require('./package.json').version")
+          VCODE=$((30200 + RUN_NUMBER))
+          echo "versionName=$VNAME versionCode=$VCODE"
+          python3 tools/configure_android_signing.py "$VNAME" "$VCODE"
+      - name: Build signed APKs (debug and release)
+        env:
+          VARNETHRYL_KEYSTORE_PASSWORD: ${{ secrets.VARNETHRYL_KEYSTORE_PASSWORD }}
+          VARNETHRYL_KEY_ALIAS: ${{ secrets.VARNETHRYL_KEY_ALIAS }}
+          VARNETHRYL_KEY_PASSWORD: ${{ secrets.VARNETHRYL_KEY_PASSWORD }}
         run: |
           chmod +x android/gradlew
           cd android
-          ./gradlew assembleDebug --no-daemon
-      - name: Upload APK artifact
+          ./gradlew assembleDebug assembleRelease --no-daemon
+      - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: Varnethryl-RPG-debug-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - name: Upload release APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Varnethryl-RPG-release-APK
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error

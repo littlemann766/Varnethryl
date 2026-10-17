@@ -1,5 +1,8 @@
 // Varnethryl 3D prototype: Liongate-style village. Standalone, does not touch the 2D game.
 import * as THREE from './vendor/three.module.js';
+import { makeAldricTextures, buildAldric } from './aldric.js';
+import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
+import { makeEnterable } from './interiors.js';
 
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -136,10 +139,12 @@ function building(cx, cz, w, d, h, opt = {}) {
   addBoxCol(cx, cz, w + 0.3, d + 0.3);
   return g;
 }
-building(-13, -9, 9, 7, 4.6, { sign: true });                       // inn
-building(13, -10, 7.5, 6.5, 4.2, { roof: mats.roofB, wall: mats.wallB }); // smithy
-building(0, -19, 13, 7.5, 5.4, { roof: mats.roofG, roofH: 4.2, sign: true }); // guild hall
-building(-15, 9, 6, 6, 3.8, { roof: mats.roofR });
+const enterables = [];
+const ectx = { scene, mats, colliders };
+enterables.push(makeEnterable(ectx, { id: 'inn', cx: -13, cz: -9, w: 9, d: 7, h: 4.6, sign: true, interior: 'inn' }));
+enterables.push(makeEnterable(ectx, { id: 'smithy', cx: 13, cz: -10, w: 7.5, d: 6.5, h: 4.2, roof: mats.roofB, wall: mats.wallB, interior: 'smith', rug2: true }));
+enterables.push(makeEnterable(ectx, { id: 'guildhall', cx: 0, cz: -19, w: 13, d: 7.5, h: 5.4, roof: mats.roofG, roofH: 4.2, sign: true, interior: 'hall' }));
+enterables.push(makeEnterable(ectx, { id: 'house', cx: -15, cz: 9, w: 6.4, d: 6.4, h: 3.8, roof: mats.roofR, interior: 'house' }));
 building(15, 10, 6, 5.5, 3.8, { roof: mats.roofB, wall: mats.wallB });
 building(-21, -18, 5.5, 5.5, 3.6, { roof: mats.roofG });
 building(21, -2, 5.5, 6, 3.6, { roof: mats.roofR, wall: mats.wallB });
@@ -220,62 +225,21 @@ function mergeStatic() {
 }
 mergeStatic();
 
-// ---------- hero: low-poly knight from primitives ----------
-function buildKnight() {
-  const root = new THREE.Group();
-  const body = new THREE.Group(); root.add(body);       // bobs
-  const P = (geo, mat, x, y, z, parent) => mesh(geo, mat, x, y, z, parent || body);
-  // legs (pivot at hip y=0.95)
-  const mkLeg = sx => {
-    const pv = new THREE.Group(); pv.position.set(sx * 0.2, 0.95, 0); body.add(pv);
-    P(new THREE.BoxGeometry(0.28, 0.55, 0.3), mats.cloth, 0, -0.28, 0, pv);
-    P(new THREE.BoxGeometry(0.3, 0.5, 0.34), mats.armor, 0, -0.62, 0.0, pv);
-    P(new THREE.BoxGeometry(0.34, 0.16, 0.5), mats.dark, 0, -0.9, 0.08, pv);
-    return pv;
-  };
-  const legL = mkLeg(-1), legR = mkLeg(1);
-  // torso
-  P(new THREE.BoxGeometry(0.85, 0.7, 0.5), mats.armor, 0, 1.3, 0);
-  P(new THREE.BoxGeometry(0.88, 0.22, 0.54), mats.cloth, 0, 0.98, 0);
-  P(new THREE.BoxGeometry(0.3, 0.3, 0.06), mats.gold, 0, 1.35, 0.28);      // chest emblem
-  // head + helm
-  const head = new THREE.Group(); head.position.set(0, 1.88, 0); body.add(head);
-  P(new THREE.SphereGeometry(0.3, 12, 10), mats.steel, 0, 0, 0, head);
-  P(new THREE.BoxGeometry(0.34, 0.07, 0.1), mats.dark, 0, 0.02, 0.27, head);   // visor slit
-  P(new THREE.ConeGeometry(0.1, 0.55, 6), mats.plume, 0, 0.45, -0.05, head).rotation.x = -0.35;
-  // shoulders
-  for (const sx of [-1, 1]) P(new THREE.SphereGeometry(0.24, 8, 6), mats.steel, sx * 0.55, 1.6, 0);
-  // arms (pivot at shoulder)
-  const mkArm = sx => {
-    const pv = new THREE.Group(); pv.position.set(sx * 0.58, 1.55, 0); body.add(pv);
-    P(new THREE.BoxGeometry(0.22, 0.6, 0.24), mats.cloth, 0, -0.3, 0, pv);
-    P(new THREE.BoxGeometry(0.26, 0.28, 0.28), mats.steel, 0, -0.68, 0, pv);
-    return pv;
-  };
-  const armL = mkArm(-1), armR = mkArm(1);
-  // sword in right hand
-  const sword = new THREE.Group(); sword.position.set(0, -0.7, 0.1); armR.add(sword);
-  P(new THREE.BoxGeometry(0.08, 0.9, 0.04), mats.steel, 0, 0.45, 0.2, sword);
-  P(new THREE.BoxGeometry(0.36, 0.07, 0.1), mats.gold, 0, 0.0, 0.2, sword);
-  sword.rotation.x = Math.PI / 2.4;
-  // shield on left arm
-  const shield = P(new THREE.CylinderGeometry(0.4, 0.4, 0.07, 8), mats.cloth, -0.18, -0.45, 0.0, armL);
-  shield.rotation.z = Math.PI / 2; shield.position.x = -0.22;
-  P(new THREE.CylinderGeometry(0.1, 0.1, 0.1, 8), mats.gold, -0.27, -0.45, 0, armL).rotation.z = Math.PI / 2;
-  // cape
-  const cape = P(new THREE.BoxGeometry(0.75, 1.0, 0.07), mats.plume, 0, 1.25, -0.3);
-  root.userData = { body, legL, legR, armL, armR, cape, head };
-  return root;
-}
-const hero = buildKnight();
-hero.position.set(0, 0, 14);
-scene.add(hero);
+// ---------- hero: Sir Aldric (see aldric.js) ----------
+const ALDRIC_TEX = await makeAldricTextures();
+const HT = await makeHeroTextures();
+const HEROES = [buildAldric(ALDRIC_TEX), buildUmbral(HT), buildSelene(HT)];
+const HERO_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil'];
+let hero = HEROES[0];
+HEROES.forEach((h, i) => { h.position.set(0, 0, 14); h.visible = i === 0; scene.add(h); });
+function setHero(i) { hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach((b, k) => b.classList.toggle('on', k === i)); }
+{ const bar = document.getElementById('heroes'); HERO_NAMES.forEach((n, i) => { const b = document.createElement('button'); b.textContent = n.split(' ').pop(); b.title = n; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => { e.stopPropagation(); setHero(i); }); bar.appendChild(b); }); const q = new URLSearchParams(location.search).get('hero'); if (q != null && HEROES[+q]) setHero(+q); }
 // blob shadow is the real shadow map; no extra.
 const marker = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.55, 20), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: 0.9, depthWrite: false }));
 marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = false; scene.add(marker);
 
 // ---------- input ----------
-const state = { heroX: 0, heroZ: 14, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0 };
+const state = { inside: null, zoom: 1, heroX: 0, heroZ: 14, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0 };
 const keys = new Set();
 addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
@@ -382,30 +346,36 @@ function updateHero(dt) {
   } else state.speed *= 0.8;
   state.moving = state.speed > 0.5;
   hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw;
+  let ins = null; for (const e of enterables) if (e.update(state.heroX, state.heroZ)) ins = e.id; state.inside = ins;
   animateHero(dt);
 }
 
-let walkT = 0, idleT = 0;
+let walkT = 0, idleT = 0, prevYaw = 0;
 function animateHero(dt) {
   const u = hero.userData, w = Math.min(1, state.speed / SPEED);
   walkT += dt * (4 + state.speed * 1.9); idleT += dt;
-  const s = Math.sin(walkT) * 0.9 * w;
+  const s = Math.sin(walkT) * 0.85 * w;
   u.legL.rotation.x = s; u.legR.rotation.x = -s;
-  u.armL.rotation.x = -s * 0.7; u.armR.rotation.x = s * 0.5 - 0.15;
-  const idle = 1 - w;
-  u.body.position.y = Math.abs(Math.cos(walkT)) * 0.09 * w + Math.sin(idleT * 2) * 0.012 * idle;
-  u.armL.rotation.z = 0.08 + Math.sin(idleT * 2) * 0.03 * idle; u.armR.rotation.z = -0.08 - Math.sin(idleT * 2) * 0.03 * idle;
-  u.head.rotation.y = Math.sin(idleT * 0.8) * 0.25 * idle;
-  u.cape.rotation.x = 0.12 + w * 0.35 + Math.sin(walkT * 2) * 0.05 * w;
+  u.armL.rotation.x = -s * 0.6; u.armR.rotation.x = u.armRBase !== undefined ? u.armRBase + s * 0.08 : s * 0.45 - 0.1;
+  const idle = 1 - w, br = Math.sin(idleT * 2);
+  u.body.position.y = Math.abs(Math.cos(walkT)) * 0.07 * w + br * 0.012 * idle;
+  u.armL.rotation.z = 0.1 + br * 0.02 * idle; u.armR.rotation.z = -0.1 - br * 0.02 * idle;
+  u.head.rotation.y = Math.sin(idleT * 0.8) * 0.22 * idle;
+  u.tab.rotation.x = -Math.abs(s) * (u.gown ? 0.12 : 0.35);
+  if (u.hairBack) u.hairBack.rotation.x = 0.04 + w * 0.2 + Math.sin(idleT * 1.6) * 0.03 + Math.sin(walkT * 2) * 0.05 * w;
+  if (u.glow) u.glow.opacity = 0.38 + 0.1 * Math.sin(idleT * 5);
+  if (u.staff) u.staff.position.y = br * 0.01;
+  let dy = state.yaw - prevYaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); prevYaw = state.yaw;
+  u.capeUpdate(idleT, w, THREE.MathUtils.clamp(-dy / Math.max(dt, 1e-3) * 0.06, -0.6, 0.6));
 }
 
 // ---------- camera ----------
 const camPos = new THREE.Vector3(0, 8, 24), camLook = new THREE.Vector3(0, 1.5, 14);
 function updateCamera(dt, snap) {
   const portrait = innerHeight > innerWidth;
-  const dist = portrait ? 10.5 : 9, height = portrait ? 7.2 : 6.2;
+  const z = state.zoom || 1, close = z < 1, dist = close ? (portrait ? 7.0 : 6.0) * (z / 0.3) : (portrait ? 10.5 : 9), height = close ? 2.2 : (portrait ? 7.2 : 6.2);
   const want = new THREE.Vector3(state.heroX + Math.sin(state.camYaw) * dist, height, state.heroZ + Math.cos(state.camYaw) * dist);
-  const look = new THREE.Vector3(state.heroX, 1.6, state.heroZ);
+  const look = new THREE.Vector3(state.heroX, close ? 1.05 : 1.6, state.heroZ);
   const k = snap ? 1 : 1 - Math.pow(0.0015, dt);
   camPos.lerp(want, k); camLook.lerp(look, k);
   camera.position.copy(camPos); camera.lookAt(camLook);
@@ -441,10 +411,12 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 window.__p3d = {
-  state, colliders, hero, THREE, renderer,
+  state, colliders, get hero() { return hero; }, THREE, renderer, enterables,
   get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   teleport(x, z) { state.heroX = x; state.heroZ = z; state.target = null; },
   setCamYaw(y) { state.camYaw = y; },
+  setZoom(z) { state.zoom = z; },
+  setHero, get heroIndex() { return HEROES.indexOf(hero); },
   tapAt: tapMoveTo,
 };

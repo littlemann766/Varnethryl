@@ -1,6 +1,6 @@
 // Varnethryl settings + movable on-screen buttons. Additive: stored in localStorage and in save envelope state.settings{}.
 const SKEY='varnethryl_settings_v1';
-export const DEFAULTS={musicVolume:0.5,sfxVolume:0.8,haptics:true,reducedMotion:null,textSize:'normal',layout:{},floatingStick:false,hudOpacity:1,hudScale:1,showQuest:true,showParty:true,showChat:true,updatedAt:0};
+export const DEFAULTS={musicVolume:0.5,sfxVolume:0.8,haptics:true,reducedMotion:null,textSize:'normal',layout:{},floatingStick:false,graphics:'auto',hudOpacity:1,hudScale:1,showQuest:true,showParty:true,showChat:true,updatedAt:0};
 export const LAYOUT_KEYS=['dpad','stick','touchSkill','skillHeavy','skillSuper','skillUlt','touchAttack','hudHero','hudMenu','hudMini','hudQuest','hudChat','hudPotions'];
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const $=id=>document.getElementById(id);
@@ -15,6 +15,7 @@ function sanitize(o){o=o&&typeof o==='object'?o:{};const r={...DEFAULTS,layout:{
  if(typeof o.reducedMotion==='boolean')r.reducedMotion=o.reducedMotion;
  if(['normal','large','xlarge'].includes(o.textSize))r.textSize=o.textSize;
  if(o.layout&&typeof o.layout==='object')for(const k of LAYOUT_KEYS){const p=o.layout[k];if(p&&isFinite(p.x)&&isFinite(p.y))r.layout[k]={x:clamp(+p.x,0,1),y:clamp(+p.y,0,1)}}
+ if(['auto','high','medium','low'].includes(o.graphics))r.graphics=o.graphics;
  if(typeof o.floatingStick==='boolean')r.floatingStick=o.floatingStick;
  if(typeof o.hudOpacity==='number')r.hudOpacity=clamp(o.hudOpacity,.4,1);
  if(typeof o.hudScale==='number')r.hudScale=clamp(o.hudScale,.8,1.3);
@@ -110,6 +111,7 @@ export function render(host,{toastFn,switchTab,resetAdventure}){toast=toastFn;co
  <article class="panel"><span class="eyebrow">COMFORT</span>
   <div class="setRow toggle"><span>Haptics / vibration<small>Short buzz when you tap attack or skill.</small></span><button type="button" class="switch" id="setHaptics" role="switch" aria-checked="${S.haptics}" aria-label="Haptics"><i></i></button></div>
   <div class="setRow toggle"><span>Reduced motion<small>${S.reducedMotion===null?'Following your device setting.':'Turns off animations and fades.'}</small></span><button type="button" class="switch" id="setMotion" role="switch" aria-checked="${reducedMotion()}" aria-label="Reduced motion"><i></i></button></div>
+  <div class="setRow"><span>Graphics quality<small>Auto picks Medium on phones and lowers itself if the game stutters. Low turns off particles, mist and shimmer.</small></span><div class="seg" id="setGfx" role="group" aria-label="Graphics quality">${[['auto','Auto'],['high','High'],['medium','Medium'],['low','Low']].map(([v,l])=>`<button type="button" data-gfx="${v}" class="${(S.graphics||'auto')===v?'selected':''}">${l}</button>`).join('')}</div></div>
   <div class="setRow"><span>Text size</span><div class="seg" id="setText" role="group" aria-label="Text size">${[['normal','Normal'],['large','Large'],['xlarge','Extra large']].map(([v,l])=>`<button type="button" data-ts="${v}" class="${S.textSize===v?'selected':''}">${l}</button>`).join('')}</div></div></article>
  <article class="panel"><span class="eyebrow">CONTROLS</span><div class="setRow toggle"><span>Floating stick<small>${MODE==='stick'?'The stick appears wherever you touch on the left side.':'Phone/app only — the web app uses the D-pad and keyboard.'}</small></span><button type="button" class="switch" id="setFloat" role="switch" aria-checked="${S.floatingStick}" aria-label="Floating stick"><i></i></button></div><h2>Button layout</h2><p class="micro">Move the analog stick (or D-pad on the web app) and every skill button wherever your thumbs reach. They snap to a grid and stay inside the safe screen area.</p>
   <div class="quickButtons"><button class="gold" id="setEditLayout" type="button">✥ Edit button layout</button><button id="setResetLayout" type="button">Reset layout</button></div></article>
@@ -124,6 +126,7 @@ export function render(host,{toastFn,switchTab,resetAdventure}){toast=toastFn;co
  $('setSfx').oninput=e=>{S.sfxVolume=e.target.value/100;$('setSfxV').textContent=e.target.value+'%'};$('setSfx').onchange=()=>{persist();sfx('ui')};
  $('setHaptics').onclick=()=>{S.haptics=!S.haptics;persist();rerender();if(S.haptics)haptic(30)};
  $('setMotion').onclick=()=>{S.reducedMotion=!reducedMotion();persist();apply();rerender()};
+ $('setGfx').onclick=e=>{const b=e.target.closest('[data-gfx]');if(!b)return;S.graphics=b.dataset.gfx;persist();rerender()};
  $('setText').onclick=e=>{const b=e.target.closest('[data-ts]');if(!b)return;S.textSize=b.dataset.ts;persist();apply();rerender()};
  $('setFloat').onclick=()=>{S.floatingStick=!S.floatingStick;persist();rerender();window.dispatchEvent(new Event('vn-controls'))};
  $('setHudOp').oninput=e=>{S.hudOpacity=e.target.value/100;$('setHudOpV').textContent=e.target.value+'%';window.dispatchEvent(new Event('vn-hud'))};$('setHudOp').onchange=persist;

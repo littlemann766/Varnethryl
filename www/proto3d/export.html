@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><title>proto3d GLB export</title>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFExporter } from './vendor/jsm/exporters/GLTFExporter.js';
+import { CHARS, ORDER } from './chars.js';
+// faceted look survives export: non-indexed geometry + recomputed flat normals, no UVs (flat colour materials)
+function flatten(root) { root.traverse(o => { if (!o.isMesh) return; let g = o.geometry; if (g.index) g = g.toNonIndexed(); g.deleteAttribute('uv'); g.computeVertexNormals(); o.geometry = g; }); }
+window.exportOne = id => new Promise((res, rej) => {
+  const rig = CHARS[id].build(); flatten(rig.root); rig.root.updateMatrixWorld(true);
+  new GLTFExporter().parse(rig.root, buf => { const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); res(btoa(s)); }, rej, { binary: true, animations: rig.clips(), onlyVisible: false });
+});
+window.ORDER = ORDER; window.ready = true;
+</script>

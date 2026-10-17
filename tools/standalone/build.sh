@@ -4,7 +4,7 @@ set -e; cd "$(dirname "$0")"; ROOT=../..; ESB=${ESBUILD:-/tmp/esb/node_modules/.
 $ESB entry.js --bundle --minify --alias:three=$ROOT/www/proto3d/vendor/three.module.js --format=iife --target=es2020 --outfile=/tmp/viewer.bundle.js --log-level=warning
 python3 - <<PY
 import base64,json
-R='$ROOT'; ids='aldric darius selene seraphine talia finn brynn mirelle nyx vesper thorne'.split()
+R='$ROOT'; ids='aldric darius selene seraphine talia finn brynn mirelle nyx vesper thorne orin'.split()
 m={i:base64.b64encode(open(f'{R}/www/proto3d/models/{i}.glb','rb').read()).decode() for i in ids}
 css="""html,body{margin:0;height:100%;background:#17151c;color:#e8dcc0;font:14px system-ui,sans-serif;overflow:hidden;overscroll-behavior:none}
 #ui{position:fixed;left:0;right:0;top:0;padding:8px;background:#000a;z-index:2;display:flex;flex-direction:column;gap:6px}

@@ -1,4 +1,4 @@
-// The 11 VARNETHRYL hero prototypes (from the boss's character sheets). Each build() returns a rig {root,bones,update,clips}.
+// The 12 VARNETHRYL hero prototypes (from the boss's character sheets). Each build() returns a rig {root,bones,update,clips}.
 import * as THREE from 'three';
 import * as K from './chars_core.js';
 const { makeCtx, humanoid, platePack, belt, strapX, hair, hood, furCollar, cape, tabard, skirt, emblem, skull, finalize } = K;
@@ -185,4 +185,35 @@ CHARS.thorne = { name: 'Brother Thorne', sheetKey: 'x9', build() {
   hold(c, h.hips, 'hand_R', st.g, 0, -.05, 0, .3);
   const book = K.book(c, blue, gold, .17, .23); emblem(c, book, 'cross', .14, gold, 0, 0, .03); book.position.set(0, -.12, .06); book.rotation.set(-.3, 0, 0); c.bones.hand_L.add(book);
   return finalize(c, h.root, { R: 1, L: 1 }, B => { B.upperArm_L.rotation.set(-.5, 0, .15); B.foreArm_L.rotation.set(-1.2, 0, 0); }); } };
-export const ORDER = ['aldric', 'darius', 'selene', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne'];
+
+CHARS.orin = { name: 'Orin Ashlance', sheetKey: 'orin', build() {
+  const c = makeCtx({ name: 'Orin_Ashlance', bulk: 1.12, sw: 1.06, skin: 0xe2b48c, hair: 0x6a4025, under: 0x4a4e56, pants: 0x4a4e56, sleeve: 0x7a808a, glove: 0x5a3720, boot: 0x5a5e66 });
+  const h = humanoid(c), { steel, gold, leather, dleather } = pal(c), blue = 0x1f3f95, cream = 0xefe3c4, mail = c.M(0x6b7078, { m: .6, r: .55, n: 'chainmail' });
+  platePack(c, { steel, trim: gold, bigPauld: true }); hair(c, 'messy', 0x6a4025); belt(c, leather, gold);
+  skirt(c, { col: 0x6b7078, trim: 0x8a9098, len: .3, top: .15, bot: .24, y: -.06, zs: .8 });
+  tabard(c, { w: .32, len: .62, col: blue, trim: gold, point: .06, z: .172 });
+  const cr = tabard(c, { w: .17, len: .56, col: cream, trim: blue, emblem: 'lion', emblem2: 'fleur', point: .05, z: .186 });
+  const cp = cape(c, { topW: .56, botW: 1.1, len: 1.05, col: blue, trim: gold.color.getHex(), lining: 0x182f72, waves: 8 }); cp.len = 1.05;
+  backEmblem(c, cp, 'lion', .55, gold, .42); for (const k of [-1, 1]) emblem(c, cp.cb, 'fleur', .13, gold, k * .27, -.9, cp.z(.9) - .026, PI);
+  // sword at belt (left hip), sheathed
+  const sg = new THREE.Group(); c.add(sg, c.G.box(.045, .8, .02), dleather, 0, -.4, 0); c.add(sg, c.G.box(.05, .04, .026), gold, 0, -.02, 0); c.add(sg, c.G.box(.05, .05, .026), gold, 0, -.8, 0);
+  c.add(sg, c.G.cyl(.016, .016, .13, 6), c.M(0x4a2b18), 0, .08, 0); c.add(sg, c.G.box(.2, .028, .03), gold, 0, .02, 0); c.add(sg, c.G.sph(.024, 6, 5), gold, 0, .16, 0);
+  sg.position.set(-.21, -.04, .02); sg.rotation.set(-.12, 0, .12); c.bones.hips.add(sg);
+  // spear: shaft, steel head, gold collar, lion banner, tassels
+  const sp = new THREE.Group(), wood = c.M(0x6b4528, { r: .7, n: 'wood' });
+  c.add(sp, c.G.cyl(.02, .024, 1.95, 6), wood, 0, .33, 0); c.add(sp, c.G.cone(.02, .08, 5), gold, 0, -.69, 0, { r: [PI, 0, 0] });
+  const hd = new THREE.Shape(); hd.moveTo(0, 0); hd.lineTo(.05, .1); hd.lineTo(0, .3); hd.lineTo(-.05, .1); hd.closePath();
+  const hg = new THREE.ExtrudeGeometry(hd, { depth: .014, bevelEnabled: false }); hg.translate(0, 0, -.007); c.add(sp, hg, c.M(0xd5dae0, { m: .8, r: .3, n: 'spearhead' }), 0, 1.33, 0);
+  c.add(sp, c.G.cyl(.032, .032, .05, 6), gold, 0, 1.3, 0); c.add(sp, c.G.cyl(.026, .026, .04, 6), gold, 0, .9, 0);
+  const bn = new THREE.Group(); bn.position.set(0, 1.24, 0); sp.add(bn);
+  c.add(bn, c.G.cyl(.01, .01, .3, 4), gold, .14, 0, 0, { r: [0, 0, PI / 2] });
+  const bs = new THREE.Shape(); bs.moveTo(0, 0); bs.lineTo(.28, 0); bs.lineTo(.28, -.62); bs.lineTo(.14, -.54); bs.lineTo(0, -.62); bs.closePath();
+  const bg = new THREE.ExtrudeGeometry(bs, { depth: .01, bevelEnabled: false }); c.add(bn, bg, c.M(blue, { r: .9, d: 1, n: 'banner' }), 0, -.01, -.005);
+  c.add(bn, c.G.box(.28, .02, .014), gold, .14, -.015, 0); c.add(bn, c.G.box(.22, .2, .012), c.M(cream, { r: .9, d: 1 }), .14, -.14, 0, {});
+  emblem(c, bn, 'lion', .2, c.M(blue, { r: .6 }), .14, -.15, .01, 0); emblem(c, bn, 'lion', .2, c.M(blue, { r: .6 }), .14, -.15, -.01, PI);
+  emblem(c, bn, 'fleur', .1, gold, .14, -.38, .008, 0); emblem(c, bn, 'fleur', .1, gold, .14, -.38, -.008, PI);
+  for (const x of [.02, .14, .26]) { c.add(bn, c.G.cyl(.012, .012, .1, 5), gold, x, -.62 - (x == .14 ? -.02 : 0), 0, {}); c.add(bn, c.G.cone(.025, .12, 6), c.M(0xd2a43c, { m: .3, r: .6, d: 1 }), x, -.7, 0, { r: [PI, 0, 0] }); }
+  hold(c, h.hips, 'hand_R', sp, 0, -.05, .0, .3, 0, .13);
+  for (const k of [-1, 1]) K.pouch(c, c.bones.hips, 0x5a3720, k * .17, -.06, -.04, .7, gold);
+  return finalize(c, h.root, { R: 1 }); } };
+export const ORDER = ['aldric', 'darius', 'selene', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'orin'];

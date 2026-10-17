@@ -98,6 +98,8 @@ export function render(host,{toastFn,switchTab,resetAdventure}){toast=toastFn;co
   <div class="setRow"><span>Text size</span><div class="seg" id="setText" role="group" aria-label="Text size">${[['normal','Normal'],['large','Large'],['xlarge','Extra large']].map(([v,l])=>`<button type="button" data-ts="${v}" class="${S.textSize===v?'selected':''}">${l}</button>`).join('')}</div></div></article>
  <article class="panel"><span class="eyebrow">CONTROLS</span><h2>Button layout</h2><p class="micro">Move the D-pad, Skill and Attack buttons wherever your thumbs reach. They snap to a grid and stay inside the safe screen area.</p>
   <div class="quickButtons"><button class="gold" id="setEditLayout" type="button">✥ Edit button layout</button><button id="setResetLayout" type="button">Reset layout</button></div></article>
+ <article class="panel"><span class="eyebrow">EXPERIMENTAL</span><h2>3D prototype</h2><p class="micro">A small 3D village with a 3D knight, to test how a 3D Varnethryl would run on your phone. Separate from the game; use the Game link to come back.</p>
+  <div class="quickButtons"><a class="gold" href="proto3d.html" style="display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none">Open 3D prototype</a></div></article>
  <article class="panel"><span class="eyebrow">RESET</span><h2>Defaults</h2><p class="micro">Resets sound, comfort and layout only. Your progress is not touched.</p>
   <div class="quickButtons"><button class="danger" id="setResetAll" type="button">Reset settings</button></div></article></div>`;
  const rerender=()=>render(host,{toastFn,switchTab,resetAdventure});

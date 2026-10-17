@@ -62,7 +62,7 @@ with sync_playwright() as p:
     ok(name+' ult resets charge',pg.evaluate("!document.getElementById('skillUlt').classList.contains('ready')"))
     pg.screenshot(path=D+f'{name}-7-after-ultimate.png')
     # layout editor with new controls
-    pg.click('#openSettings');pg.wait_for_timeout(300)
+    pg.click('#hudMain');pg.click('#openSettings');pg.wait_for_timeout(300)
     pg.click('#setFloat');pg.click('#setFloat')  # toggle on/off
     pg.screenshot(path=D+f'{name}-8-settings.png',full_page=True)
     pg.click('#setEditLayout');pg.wait_for_timeout(700)

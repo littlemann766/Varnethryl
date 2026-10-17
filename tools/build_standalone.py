@@ -11,7 +11,9 @@ import json
 root=Path(__file__).resolve().parents[1]
 w=root/'www'
 html=(w/'index.html').read_text(encoding='utf-8')
-html=html.replace('<link rel="manifest" href="manifest.webmanifest"/>','').replace('<link rel="icon" href="icon.svg" type="image/svg+xml"/>','').replace('<script defer src="pwa.js"></script>','<script>'+ (w/'pwa.js').read_text(encoding='utf-8') +'</script>')
+import re
+html=re.sub(r'<div id="brandLoader".*?</div><div id="brandTitle".*?</button></div>','',html,flags=re.S).replace('<link rel="stylesheet" href="brand.css"/>','').replace('<script src="brand.js"></script>','')  # brand screens need external art; skip in standalone
+html=html.replace('<link rel="manifest" href="manifest.webmanifest"/>','').replace('<link rel="apple-touch-icon" href="apple-touch-icon.png"/>','').replace('<script defer src="pwa.js"></script>','<script>'+ (w/'pwa.js').read_text(encoding='utf-8') +'</script>')
 html=html.replace('<link rel="stylesheet" href="styles.css"/>','<style>'+(w/'styles.css').read_text(encoding='utf-8')+'</style>')
 def embed(kind,n):
  return ['data:image/webp;base64,'+base64.b64encode((w/'assets'/kind/f'{i}.webp').read_bytes()).decode('ascii') for i in range(n)]

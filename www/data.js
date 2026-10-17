@@ -27,6 +27,8 @@ export const ZONES = [
  {id:'forest',name:'Whispering Wilds',subtitle:'Wolves, thieves and forgotten trails',level:1,kind:'wild',portal:{left:'village',right:'ruins'},color:'#244b3c'},
  {id:'ruins',name:'Ashen Ruins',subtitle:'Ancient soldiers and forbidden magic',level:6,kind:'ruins',portal:{left:'forest',right:'frost'},color:'#55505a'},
  {id:'frost',name:'Frostbite Pass',subtitle:'Icy winds and hungry hounds · Between the ruins and the vault',level:12,kind:'frost',portal:{left:'ruins',right:'boss'},color:'#2f4a5e'},
+ {id:'coast',name:'Tidewrack Coast',subtitle:'Story zone · The sirens sing against you',level:14,kind:'coast',quest:true,portal:{},color:'#2f7f86'},
+ {id:'hollow',name:'Dusk Hollow',subtitle:'Story zone · The brothers\' manor',level:20,kind:'hollow',quest:true,portal:{},color:'#241d33'},
  {id:'boss',name:'The Titan Vault',subtitle:'Dungeon boss encounter · High-level challenge',level:20,kind:'boss',portal:{left:'frost'},color:'#4b3543'}
 ];
 export const TIERS=[
@@ -64,5 +66,7 @@ export const ENEMIES={
  forest:[{name:'Wild Wolf',hp:1050,attack:42,xp:60,gold:36,color:'#ad9987'},{name:'Forest Raider',hp:1450,attack:56,xp:90,gold:60,color:'#d59066'},{name:'Vine Wraith',hp:1700,attack:66,xp:120,gold:78,color:'#75bca1'}],
  ruins:[{name:'Ash Skeleton',hp:5600,attack:270,xp:230,gold:240,color:'#b8c6b6'},{name:'Rune Sentinel',hp:10500,attack:430,xp:380,gold:390,color:'#829db6'}],
  frost:[{name:'Frost Hound',hp:14000,attack:560,xp:520,gold:480,color:'#a9d3e8'},{name:'Ice Wraith',hp:19000,attack:700,xp:700,gold:650,color:'#8fb4ff'},{name:'Glacier Brute',hp:27000,attack:820,xp:950,gold:900,color:'#7fd0d8'}],
+ coast:[{name:'Brine Crab',hp:16000,attack:520,xp:420,gold:380,color:'#d98c6c'},{name:'Tide Sprite',hp:21000,attack:600,xp:560,gold:520,color:'#6fd0d6'}],
+ hollow:[{name:'Dusk Court Thrall',hp:30000,attack:760,xp:800,gold:720,color:'#6b5a86'},{name:'Shadowblade Elf',hp:36000,attack:880,xp:1000,gold:900,color:'#4b4a70'}],
  boss:[{name:'The Ashen Titan',hp:250000,attack:2100,xp:2400,gold:5200,color:'#d9787d',boss:true}]
 };

@@ -17,9 +17,16 @@ def embed(kind,n):
  return ['data:image/webp;base64,'+base64.b64encode((w/'assets'/kind/f'{i}.webp').read_bytes()).decode('ascii') for i in range(n)]
 assets={'heroes':embed('heroes',20),'weapons':embed('weapons',15),'sprites':['data:image/png;base64,'+base64.b64encode((w/'assets'/'sprites'/f'{i}.png').read_bytes()).decode('ascii') for i in range(20)]}
 data=(w/'data.js').read_text(encoding='utf-8').replace('export const','const')
-js=(w/'game.js').read_text(encoding='utf-8').replace("import {HEROES,ZONES,TIERS,SUBSTAT_POOL,ABILITIES,WEAPON_ART,ENEMIES} from './data.js';",'')
+import re
+def as_namespace(name,path):
+ src=(w/path).read_text(encoding='utf-8')
+ names=re.findall(r'^export (?:const|function|let) (\w+)',src,re.M)
+ src=re.sub(r'^export ','',src,flags=re.M)
+ return f'const {name}=(()=>{{\n{src}\nreturn {{{",".join(names)}}};}})();\n'
+mods=as_namespace('Settings','settings.js')+as_namespace('Quest','quest.js')
+js=(w/'game.js').read_text(encoding='utf-8').replace("import {HEROES,ZONES,TIERS,SUBSTAT_POOL,ABILITIES,WEAPON_ART,ENEMIES} from './data.js';",'').replace("import * as Settings from './settings.js';",'').replace("import * as Quest from './quest.js';",'')
 js=js.replace('assets/weapons/${idx}.webp','${ASSET_URLS.weapons[idx]}').replace('assets/weapons/${WEAPON_ART[it.heroId]}.webp','${ASSET_URLS.weapons[WEAPON_ART[it.heroId]]}')
-script='const ASSET_URLS='+json.dumps(assets,separators=(',',':'))+';\n'+data+'\nHEROES.forEach((h,i)=>{h.image=ASSET_URLS.heroes[i];h.sprite=ASSET_URLS.sprites[i]});\n'+js
+script='const ASSET_URLS='+json.dumps(assets,separators=(',',':'))+';\n'+data+'\n'+mods+'HEROES.forEach((h,i)=>{h.image=ASSET_URLS.heroes[i];h.sprite=ASSET_URLS.sprites[i]});\n'+js
 html=html.replace('<script type="module" src="game.js"></script>','<script type="module">\n'+script.replace('</script>','<\\/script>')+'\n</script>')
 p=root/'PLAY-VARNETHRYL.html';p.write_text(html,encoding='utf-8')
 print(f'Created {p.name} ({p.stat().st_size:,} bytes)')

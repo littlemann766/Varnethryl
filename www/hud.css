@@ -1,0 +1,173 @@
+/* Varnethryl full-screen HUD (dark navy + aged gold, bevelled rings, Cinzel). Loaded after styles.css. */
+@font-face{font-family:'Cinzel';src:url(fonts/Cinzel.woff) format('woff');font-weight:400 900;font-display:swap}
+:root{--sat:env(safe-area-inset-top,0px);--sar:env(safe-area-inset-right,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);
+ --g1:#f6e2a2;--g2:#d9b25f;--g3:#8a6a2b;--g4:#4a3512;--navy:rgba(9,14,26,.78);--hs:1;--ho:1;--b:1;--sk0:62px;--gap0:14px;--serif:'Cinzel',Georgia,'Times New Roman',serif}
+html[data-hud=land]{--b:.8;--sk0:50px;--gap0:9px}
+html[data-hud=port]{--b:.74;--sk0:46px;--gap0:7px}
+html{--u:calc(var(--b)*var(--hs));--sk:calc(var(--sk0)*var(--hs));--gap:calc(var(--gap0)*var(--hs));--row:calc(5*var(--sk) + 4*var(--gap))}
+html[data-hud-small="1"]{--sk0:44px;--gap0:6px}
+/* ---- edge-to-edge world ---- */
+body.hud-on{overflow:hidden;overscroll-behavior:none}
+html:has(body.hud-on){overflow:hidden}
+body.hud-on main{padding:0;max-width:none;margin:0}
+body.hud-on #adventure.active{display:block;animation:none}
+body.hud-on .adventureTop,body.hud-on .adventureSide,body.hud-on .partyPanel{display:none}
+body.hud-on .worldFrame{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;z-index:1;border:0;border-radius:0;max-height:none;min-height:0;aspect-ratio:auto;box-shadow:none;scroll-margin:0;touch-action:none}
+body.hud-on .worldHud{display:none}
+body.hud-on canvas{touch-action:none}
+body.hud-on .topbar{position:fixed;left:0;right:0;top:0;z-index:40;transform:translateY(-115%);visibility:hidden;transition:transform .2s,visibility 0s .2s;padding-top:calc(8px + var(--sat))}
+body.hud-on .bottomNav{transform:translateY(115%);visibility:hidden;transition:transform .2s,visibility 0s .2s}
+body.hud-on.menu-open .topbar,body.hud-on.menu-open .bottomNav{transform:none;visibility:visible;transition:transform .2s}
+body.hud-on #toast{top:calc(var(--sat) + 70px*var(--b));z-index:45}
+#hud{position:absolute;inset:0;pointer-events:none;font-family:var(--serif);color:#f1e6c8;opacity:var(--ho);z-index:2;--crest:#4a7fe0;--crest2:#e0bb62}
+#hud>*{position:absolute;pointer-events:auto}
+#hud button{font-family:inherit;border-radius:0;transition:none}
+.worldFrame.editing #hud{opacity:1}
+/* ---- shared chrome ---- */
+.hudPanel{background:linear-gradient(180deg,rgba(20,28,48,.82),rgba(8,12,22,.82));border:1px solid var(--g3);border-radius:calc(6px*var(--u));box-shadow:inset 0 0 0 1px rgba(255,226,150,.13),inset 0 1px 0 rgba(255,236,180,.22),0 4px 16px rgba(0,0,0,.65);backdrop-filter:blur(3px)}
+#hud svg{display:block;width:100%;height:100%}
+/* ---- hero frame ---- */
+#hudHero{left:calc(var(--sal) + 12px);top:calc(var(--sat) + 10px);width:calc(236px*var(--u));padding:0;background:none;border:0;box-shadow:none;backdrop-filter:none;cursor:pointer}
+.heroRow{display:flex;gap:calc(8px*var(--u));align-items:center}
+.face{position:relative;flex:none;width:calc(64px*var(--u));height:calc(64px*var(--u));border-radius:50%;padding:calc(3px*var(--u));background:conic-gradient(from 200deg,var(--g1),var(--g2),var(--g4),var(--g2),var(--g1),var(--g2),var(--g4),var(--g1));box-shadow:0 0 0 1px #000a,0 3px 10px #000b,0 0 14px color-mix(in srgb,var(--crest) 55%,transparent)}
+.face img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:50% 18%;background:#10182a;border:1.5px solid #0009;display:block}
+.lvl{position:absolute;right:calc(-5px*var(--u));bottom:calc(-5px*var(--u));min-width:calc(25px*var(--u));height:calc(25px*var(--u));padding:0 3px;border-radius:50%;display:grid;place-items:center;font:700 calc(12px*var(--u))/1 system-ui,sans-serif;color:var(--g1);background:radial-gradient(#26324f,#0b1020);border:calc(2px*var(--u)) solid var(--g2);box-shadow:0 2px 5px #000b}
+.heroInfo{flex:1;min-width:0}
+.hname{font:700 calc(15px*var(--u))/1.15 var(--serif);letter-spacing:.03em;color:#fff2cd;text-shadow:0 1px 3px #000,0 0 8px #000;margin-bottom:calc(3px*var(--u));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{position:relative;height:calc(13px*var(--u));margin-bottom:calc(3px*var(--u));background:#070a12;border:1px solid #000;border-radius:2px;box-shadow:0 0 0 1px rgba(217,178,95,.55),0 2px 4px #0009;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;width:100%;transition:width .2s}
+.bar.hp i{background:linear-gradient(180deg,#f06a6a 0,#d03a3a 45%,#7d1717 100%)}
+.bar.mp i{background:linear-gradient(180deg,#6fb8ff 0,#2f7fd6 45%,#143c80 100%)}
+.bar i::after{content:"";position:absolute;left:0;right:0;top:0;height:40%;background:linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,0))}
+.bar span{position:relative;display:block;text-align:center;font:600 calc(9.5px*var(--u))/calc(13px*var(--u)) system-ui,sans-serif;color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000;letter-spacing:.02em}
+/* party list */
+.party{margin-top:calc(8px*var(--u));display:flex;flex-direction:column;gap:calc(4px*var(--u))}
+.pm{display:flex;align-items:center;gap:calc(7px*var(--u));width:calc(190px*var(--u));padding:calc(3px*var(--u)) calc(8px*var(--u)) calc(3px*var(--u)) calc(3px*var(--u));background:linear-gradient(90deg,rgba(20,28,48,.8),rgba(8,12,22,.55));border:1px solid rgba(138,106,43,.8);border-radius:calc(22px*var(--u)) calc(4px*var(--u)) calc(4px*var(--u)) calc(22px*var(--u));color:inherit;text-align:left;min-height:calc(34px*var(--u));position:relative;padding-right:calc(30px*var(--u))}
+.pm img{width:calc(30px*var(--u));height:calc(30px*var(--u));flex:none;border-radius:50%;border:1.5px solid var(--g2);object-fit:cover;object-position:50% 18%}
+.pn{font:600 calc(11.5px*var(--u))/1 var(--serif);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 2px #000;align-self:flex-start;margin-top:calc(4px*var(--u))}
+.pl{position:absolute;right:calc(8px*var(--u));top:calc(4px*var(--u));font:700 calc(11px*var(--u))/1 system-ui,sans-serif;color:var(--g1)}
+.pb{position:absolute;left:calc(40px*var(--u));right:calc(8px*var(--u));bottom:calc(5px*var(--u));height:calc(4px*var(--u));background:#06080e;border-radius:2px;box-shadow:0 0 0 1px #000}
+.pb u{display:block;height:100%;width:100%;border-radius:2px;background:linear-gradient(#69d58a,#2f9a55);text-decoration:none}
+html.hud-noparty .party{display:none}
+/* ---- logo ---- */
+#hudLogo{left:50%;top:calc(var(--sat) + 4px);width:calc(310px*var(--u));max-width:36vw;height:auto;transform:translateX(-50%);pointer-events:none;filter:drop-shadow(0 2px 6px #000) drop-shadow(0 0 14px rgba(70,120,190,.5));user-select:none}
+/* ---- menu icons ---- */
+.hudMenu{display:flex;gap:calc(6px*var(--u));right:calc(var(--sar) + 12px + 124px*var(--u) + 12px);top:calc(var(--sat) + 14px*var(--u))}
+.ib{position:relative;width:calc(38px*var(--u));height:calc(38px*var(--u));min-width:38px;min-height:38px;padding:calc(8px*var(--u));display:grid;place-items:center;border-radius:calc(6px*var(--u));color:var(--g1);background:linear-gradient(180deg,rgba(26,36,60,.9),rgba(8,12,22,.9));border:1px solid var(--g2)!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,236,180,.3),0 3px 8px #000a}
+.ib:active,.pt:active{filter:brightness(1.4)}
+html[data-hud=land] .ib,html[data-hud=port] .ib{min-width:40px;min-height:40px;width:40px;height:40px;padding:9px}
+/* ---- minimap ---- */
+.mini{right:calc(var(--sar) + 12px);top:calc(var(--sat) + 10px);width:calc(124px*var(--u));height:calc(124px*var(--u));border-radius:50%;cursor:pointer;box-shadow:0 4px 14px #000b,0 0 0 1px #000}
+.mini canvas{position:absolute;inset:5%;width:90%;height:90%;border-radius:50%}
+.mring{position:absolute;inset:0;pointer-events:none}
+.mring circle{fill:none;stroke:url(#none);stroke:var(--g2);stroke-width:4.2}
+.mring circle.in{stroke:#000;stroke-opacity:.7;stroke-width:1.2}
+.mring .n{fill:var(--g1);stroke:#000;stroke-width:.6}
+.mini em{position:absolute;left:50%;top:calc(100% + 2px);transform:translateX(-50%);font:600 calc(9.5px*var(--u))/1 var(--serif);font-style:normal;letter-spacing:.06em;white-space:nowrap;color:var(--g1);text-shadow:0 1px 3px #000,0 0 6px #000;pointer-events:none}
+/* ---- quest tracker ---- */
+.quest{right:calc(var(--sar) + 12px);top:calc(var(--sat) + 10px + 124px*var(--u) + 20px*var(--u));width:calc(214px*var(--u));padding:calc(8px*var(--u)) calc(10px*var(--u))}
+.quest h4{margin:0 0 calc(4px*var(--u));font:700 calc(13px*var(--u))/1.2 var(--serif);color:var(--g1);letter-spacing:.03em;padding-left:calc(16px*var(--u));position:relative}
+.quest h4::before,.quest li::before{content:"";position:absolute;left:calc(2px*var(--u));top:calc(4px*var(--u));width:calc(8px*var(--u));height:calc(8px*var(--u));background:var(--crest2);transform:rotate(45deg);box-shadow:0 0 5px var(--crest2)}
+.quest ul{margin:0;padding:0;list-style:none}
+.quest li{position:relative;padding:calc(2px*var(--u)) 0 calc(2px*var(--u)) calc(16px*var(--u));font:calc(11.5px*var(--u))/1.35 system-ui,sans-serif;color:#e9e2cf}
+.quest li::before{width:calc(6px*var(--u));height:calc(6px*var(--u));top:calc(7px*var(--u));left:calc(3px*var(--u));background:none;border:1px solid var(--g2);box-shadow:none}
+html.hud-noquest .quest{display:none}
+/* ---- chat (web only) ---- */
+.chat{left:calc(var(--sal) + 12px);bottom:calc(var(--sab) + 10px);width:calc(310px*var(--u));height:calc(168px*var(--u));display:flex;flex-direction:column;font:calc(11.5px*var(--u))/1.4 system-ui,sans-serif;overflow:hidden;padding:0}
+.tabs{display:flex;border-bottom:1px solid var(--g3);background:rgba(0,0,0,.25)}
+.tabs button{flex:1;padding:calc(5px*var(--u)) 0;font:600 calc(11px*var(--u)) var(--serif)!important;background:none;border:0;color:#b9ae92;border-radius:0}
+.tabs button.on{color:var(--g1);background:rgba(217,178,95,.14);box-shadow:inset 0 -2px var(--g2)}
+.chat .log{flex:1;overflow:auto;padding:calc(6px*var(--u)) calc(9px*var(--u));scrollbar-width:thin}
+.chat .log p{margin:0 0 2px;color:#efe7d2;font-size:inherit}.chat .log p.sys{color:#e6d9ae}.chat .log b{color:var(--g2)}
+.chat .in{display:flex;align-items:center;gap:6px;border-top:1px solid var(--g3);padding:calc(3px*var(--u)) calc(6px*var(--u));background:rgba(0,0,0,.28)}
+.chat .in input{flex:1;min-width:0;background:none;border:0;outline:0;color:#f1e6c8;font:inherit;padding:calc(4px*var(--u)) 2px}
+.chat .in input::placeholder{color:#8e8873}
+.chat .cic,.chat .in button{width:calc(16px*var(--u));height:calc(16px*var(--u));color:var(--g2);flex:none;padding:0;background:none;border:0}
+.chat .in button{width:calc(22px*var(--u));height:calc(22px*var(--u));padding:3px}
+html:not([data-ctl=dpad]) .chat,html:not([data-hud=web]) .chat,html.hud-nochat .chat{display:none}
+/* ---- potions ---- */
+.pots{right:calc(var(--sar) + 12px);bottom:calc(var(--sab) + 14px);display:flex;gap:calc(7px*var(--u))}
+.pt{position:relative;width:calc(46px*var(--u));height:calc(46px*var(--u));min-width:40px;min-height:40px;padding:calc(9px*var(--u));display:grid;place-items:center;border-radius:calc(6px*var(--u));color:#fff;background:linear-gradient(180deg,rgba(26,36,60,.92),rgba(8,12,22,.92));border:1px solid var(--g2)!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,236,180,.25),0 3px 8px #000a}
+.pt svg{filter:drop-shadow(0 0 4px currentColor)}
+.pt.hp{color:#ff6b6b}.pt.mp{color:#63b3ff}.pt.buff{color:#7fe08f}.pt.bagb{color:var(--g1)}
+.pt small{position:absolute;right:3px;bottom:2px;font:700 calc(11px*var(--u))/1 system-ui,sans-serif;color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000}
+.pt kbd{position:absolute;left:3px;top:1px;font:600 8px/1 system-ui,sans-serif;color:#b8aa80}
+html:not([data-hud=web]) .pt kbd{display:none}
+.pt.empty{opacity:.45;filter:grayscale(.6)}.pt.active{box-shadow:0 0 0 2px #7fe08f,0 0 12px #7fe08f}
+/* ---- skill buttons: gold-ringed rounds, numbered 1-5 ---- */
+html body .touchControls :is(#touchAttack,#touchSkill,#skillHeavy,#skillSuper,#skillUlt){width:var(--sk);height:var(--sk);border-radius:50%;border:calc(3.5px*var(--hs)) solid transparent;padding:0;
+ background:radial-gradient(circle at 50% 32%,#34456c 0,#141c33 58%,#080c18 100%) padding-box,conic-gradient(from 215deg,var(--g1),var(--g2) 12%,var(--g4) 28%,var(--g2) 44%,var(--g1) 55%,var(--g2) 70%,var(--g4) 85%,var(--g1)) border-box!important;
+ box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.75),inset 0 0 12px rgba(0,0,0,.9),0 0 0 1px rgba(0,0,0,.9),0 4px 12px rgba(0,0,0,.8),0 0 14px rgba(217,178,95,.22);color:var(--g1);
+ right:auto;top:auto;bottom:calc(var(--sab) + 36px);left:calc(50% + (var(--i) - 2)*(var(--sk) + var(--gap)) - var(--sk)/2)}
+html body .touchControls .skillBtn small{display:none}
+html body .touchControls .skillBtn .ico{width:100%;height:100%}
+html body .touchControls .skillBtn .ico svg{width:54%;height:54%;stroke-width:1.7;filter:drop-shadow(0 0 5px rgba(246,226,162,.55)) drop-shadow(0 1px 1px #000)}
+html body .touchControls .skillBtn .ico img{width:56%;height:56%}
+.skillBtn::before{content:"";position:absolute;inset:6%;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 45%);pointer-events:none}
+.skillBtn .num{position:absolute;top:calc(100% + 5px);left:0;right:0;text-align:center;font:700 calc(12px*var(--hs))/1 system-ui,sans-serif;font-style:normal;color:var(--g2);text-shadow:0 1px 3px #000;pointer-events:none}
+#touchAttack{--i:0}#touchSkill{--i:1}#skillHeavy{--i:2}#skillSuper{--i:3}#skillUlt{--i:4}
+html body .touchControls #skillUlt#skillUlt{border-color:transparent;box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.75),inset 0 0 12px rgba(0,0,0,.9),0 0 0 1px #000,0 4px 12px #000c,0 0 18px rgba(255,201,79,.45)}
+html body .touchControls #skillUlt.ready{animation:ultPulse 1.2s ease-in-out infinite;box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.75),0 0 0 1px #000,0 0 22px #8de9ff,0 0 6px #fff8}
+html body .touchControls .skillBtn.cooling{filter:none}
+html body .touchControls .skillBtn .ring{inset:calc(-6px*var(--hs))}
+html body .touchControls .skillBtn.cooling::after{font:700 calc(16px*var(--hs)) system-ui,sans-serif;right:auto;color:#fff}
+#skillDivider{display:flex;align-items:center;gap:6px;left:calc(50% - var(--row)/2);width:var(--row);bottom:calc(var(--sab) + 9px);height:8px;pointer-events:none}
+#skillDivider i{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--g2) 40%,var(--g2) 60%,transparent)}
+#skillDivider b{width:8px;height:8px;transform:rotate(45deg);background:var(--g1);box-shadow:0 0 6px var(--g2),0 0 0 1px #000}
+#skillDivider.off{display:none}
+/* ---- stick / d-pad skin ---- */
+html body #stick{width:calc(112px*var(--hs));height:calc(112px*var(--hs));background:radial-gradient(circle at 50% 45%,rgba(30,44,74,.55) 0,rgba(10,16,30,.6) 66%,rgba(6,10,20,.75) 100%);border:3px solid var(--g3);box-shadow:inset 0 0 18px #000a,0 0 0 1px #000,0 4px 14px #000a,0 0 0 4px rgba(217,178,95,.12)}
+html body #stickKnob{background:radial-gradient(circle at 38% 30%,var(--g1),var(--g2) 55%,var(--g4));border:1px solid #ffe9b5}
+html body .dpad{left:calc(var(--sal) + 12px + 310px*var(--u) + 12px);bottom:calc(var(--sab) + 12px)}
+html body .dpad{gap:2px}html body .dpad>div{gap:2px}
+html body .dpad button{background:linear-gradient(180deg,rgba(26,36,60,.9),rgba(8,12,22,.9));border:1px solid var(--g2);color:var(--g1);border-radius:6px;box-shadow:inset 0 1px 0 rgba(255,236,180,.25),0 3px 8px #000a;width:36px;height:34px;min-height:0;padding:0}
+html.hud-nochat body .dpad,html[data-hud=web].hud-nochat .dpad{left:calc(var(--sal) + 14px)}
+/* ---- target bar ---- */
+body.hud-on .combatHud{top:calc(var(--sat) + 58px*var(--b));background:linear-gradient(180deg,rgba(20,28,48,.85),rgba(8,12,22,.85));border:1px solid var(--g3);font-family:var(--serif);color:var(--g1);z-index:3}
+/* ---- WEB defaults are above. PHONE LANDSCAPE ---- */
+html[data-hud=land] #hudHero{width:calc(210px*var(--u))}
+html[data-hud=land] #hudLogo{width:calc(300px*var(--u));max-width:30vw}
+html[data-hud=land] .mini{width:calc(124px*var(--u));height:calc(124px*var(--u));right:calc(var(--sar) + 10px)}
+html[data-hud=land] .hudMenu{right:calc(var(--sar) + 10px + 124px*var(--u) + 10px);top:calc(var(--sat) + 8px)}
+html[data-hud=land] .quest{width:calc(190px*var(--u));padding:calc(6px*var(--u)) calc(8px*var(--u));right:calc(var(--sar) + 10px)}
+html[data-hud=land] .party{display:none}
+html[data-hud=land] #hudHero.open .party{display:flex}
+html[data-hud=land] .pots{bottom:calc(var(--sab) + 8px);right:calc(var(--sar) + 12px)}
+html[data-hud=land] .pt{width:40px;height:40px;padding:8px}
+html[data-hud=land] .pt.bagb{display:none}
+html[data-hud=land] .touchControls :is(#touchAttack,#touchSkill,#skillHeavy,#skillSuper,#skillUlt),html[data-hud=port] .touchControls :is(#touchAttack,#touchSkill,#skillHeavy,#skillSuper,#skillUlt){left:calc(var(--sal) + 14px + var(--i)*(var(--sk) + var(--gap)))}
+html[data-hud=land] #skillDivider,html[data-hud=port] #skillDivider{left:calc(var(--sal) + 14px)}
+html[data-hud=land] body #stick,html[data-hud=land] #stick{left:auto;right:calc(var(--sar) + 26px);bottom:calc(var(--sab) + 58px);width:calc(100px*var(--hs));height:calc(100px*var(--hs))}
+html[data-hud=land] .combatHud{max-width:210px}
+/* ---- PHONE PORTRAIT ---- */
+html[data-hud=port] #hudHero{top:calc(var(--sat) + 38px);width:calc(250px*var(--u))}
+html[data-hud=port] #hudLogo{width:calc(260px*var(--u));max-width:46vw;top:calc(var(--sat) + 8px)}
+html[data-hud=port] .mini{width:calc(124px*var(--u));height:calc(124px*var(--u))}
+html[data-hud=port] .hudMenu{flex-direction:column;right:calc(var(--sar) + 12px);top:calc(var(--sat) + 10px + 124px*var(--u) + 22px*var(--u) + 118px*var(--u))}
+html[data-hud=port] .quest{width:calc(200px*var(--u))}
+html[data-hud=port] .party{display:none}html[data-hud=port] #hudHero.open .party{display:flex}
+html[data-hud=port] .pots{flex-direction:column;right:calc(var(--sar) + 12px);bottom:calc(var(--sab) + 44px)}
+html[data-hud=port] .pt{width:42px;height:42px;padding:8px}html[data-hud=port] .pt.bagb{display:none}
+html[data-hud=port] .touchControls :is(#touchAttack,#touchSkill,#skillHeavy,#skillSuper,#skillUlt){bottom:calc(var(--sab) + 24px + 104px*var(--hs) + 36px)}
+html[data-hud=port] #skillDivider{bottom:calc(var(--sab) + 24px + 104px*var(--hs) + 14px)}
+html[data-hud=land] #skillDivider{bottom:calc(var(--sab) + 9px)}
+html[data-hud=port] #stick{left:calc(var(--sal) + 22px);bottom:calc(var(--sab) + 24px);width:calc(104px*var(--hs));height:calc(104px*var(--hs))}
+/* ---- small phones: collapse by priority (skills/stick > hero > minimap > quest > potions > menu > party) ---- */
+html[data-hud-small="1"] .quest{display:none}
+html[data-hud-small="1"] .party{display:none!important}
+html[data-hud-small="1"] .mini{width:calc(92px*var(--u));height:calc(92px*var(--u))}
+html[data-hud-small="1"] .hudMenu{right:calc(var(--sar) + 10px + 92px*var(--u) + 8px)}
+html[data-hud-small="1"][data-hud=port] .hudMenu{top:calc(var(--sat) + 10px + 92px*var(--u) + 24px);right:calc(var(--sar) + 12px)}
+html[data-hud-small="1"] #hudHero{width:calc(190px*var(--u))}
+html[data-hud-small="1"][data-hud=port] .pots{bottom:calc(var(--sab) + 12px)}
+html[data-hud-small="1"] .mini em{display:none}
+@media (max-height:340px){html[data-hud=land] .pt.mp,html[data-hud=land] .pt.buff{display:none}}
+/* ---- layout editor tweaks ---- */
+body.hud-on #layoutBar{top:calc(var(--sat) + 6px);left:50%;right:auto;transform:translateX(-50%);width:min(380px,calc(100vw - 24px));z-index:30}
+.worldFrame.editing #hud>.movable{pointer-events:auto;touch-action:none;outline:2px dashed #3ddc97;outline-offset:3px}
+.worldFrame.editing #hud>.movable.dragging{outline-color:#fbbf24}
+.worldFrame.editing #hud button,.worldFrame.editing #hud input{pointer-events:none}
+.worldFrame.editing #hudMini{cursor:grab}
+.worldFrame.editing #skillDivider{display:none}
+@media(prefers-reduced-motion:reduce){html body .touchControls #skillUlt.ready{animation:none}}
+html[data-hud=port] body.hud-on .combatHud{top:auto;bottom:calc(var(--sab) + 24px + 104px*var(--hs) + 36px + var(--sk) + 28px);max-width:min(300px,calc(100vw - 100px));left:var(--sal);right:auto;margin-left:14px}

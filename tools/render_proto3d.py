@@ -10,11 +10,11 @@ class Q(http.server.SimpleHTTPRequestHandler):
 srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Q, directory=ROOT)); port = srv.server_address[1]
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 SH = '/workspace/sheets/'
-SHEETS = dict(aldric='aldric', darius='darius', selene='selene', seraphine='x0', talia='x1', finn='x2', brynn='x3', mirelle='x6', nyx='x7', vesper='x8', thorne='x9', orin='orin2', elira='elira', rook='rook', wolf='rook', asha='asha', rowan='rowan', kael='kael', cedric='cedric', morwen='morwen', garruk='garruk')
-NAMES = dict(aldric='Sir Aldric', darius='Darius Umbral', selene='Selene Frostveil', seraphine='Dame Seraphine', talia='Talia Stormcall', finn='Finn Valecourt', brynn='Brynn Cogwright', mirelle='Mirelle Thornroot', nyx='Nyx Varrin', vesper='Vesper Crowe', thorne='Brother Thorne', orin='Orin Ashlance', elira='Lady Elira', rook='Rook Wildbane', wolf='Wolf (Rook companion)', asha='Asha Ironfist', rowan='Rowan Firebrand', kael='Kael Runebinder', cedric='Cedric Vale', morwen='Morwen Blackveil', garruk='Garruk Stonefist')
+SHEETS = dict(aldric='aldric', darius='darius', selene='selene', seraphine='x0', talia='x1', finn='x2', brynn='x3', mirelle='x6', nyx='x7', vesper='x8', thorne='x9', orin='orin2', elira='elira', elira_a='elira', rook='rook', wolf='rook', asha='asha', rowan='rowan', kael='kael', cedric='cedric', morwen='morwen', garruk='garruk')
+NAMES = dict(aldric='Sir Aldric', darius='Darius Umbral', selene='Selene Frostveil', seraphine='Dame Seraphine', talia='Talia Stormcall', finn='Finn Valecourt', brynn='Brynn Cogwright', mirelle='Mirelle Thornroot', nyx='Nyx Varrin', vesper='Vesper Crowe', thorne='Brother Thorne', orin='Orin Ashlance', elira='Lady Elira', elira_a='Elira (Lucky v2 first try)', rook='Rook Wildbane', wolf='Wolf (Rook companion)', asha='Asha Ironfist', rowan='Rowan Firebrand', kael='Kael Runebinder', cedric='Cedric Vale', morwen='Morwen Blackveil', garruk='Garruk Stonefist')
 only = os.environ.get('ONLY', '').split(',') if os.environ.get('ONLY') else list(SHEETS)
 W, H = 520, 760
-NEW = ('orin2', 'elira', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk')
+NEW = ('orin2', 'elira', 'elira_a', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk')
 def front_crop(k):  # front view crop from sheet (first of four turnarounds)
     sk = SHEETS[k]
     if sk in NEW:

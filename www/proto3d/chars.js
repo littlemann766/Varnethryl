@@ -219,7 +219,7 @@ CHARS.orin = { name: 'Orin Ashlance', sheetKey: 'orin2', build() {
   for (const k of [-1, 1]) K.pouch(c, c.bones.hips, 0x5a3720, k * .17, -.06, -.04, .7, gold);
   return finalize(c, h.root, { R: 1 }); } };
 
-CHARS.elira = { name: 'Lady Elira', sheetKey: 'x5', build() {
+CHARS.elira_a = { name: 'Lady Elira', sheetKey: 'x5', build() {
   const c = makeCtx({ name: 'Lady_Elira',  fem: true, nobust: true, elf: true, bulk: .92, sw: .96, skin: 0xf2cba8, hair: 0xe3b564, eye: 0x4a8a58, under: 0x2c6a3c, pants: 0x2e2a28, sleeve: 0xeee6d2, glove: 0x2a2018, boot: 0x5a3a22 });
   const h = humanoid(c), { gold, leather, dleather } = pal(c), green = 0x1f5a30, lea = c.M(0x6e4528, { r: .8, t: 'leather', n: 'leather' });
   c.add(c.bones.chest, c.G.cyl(.17, .12, .26, 8), lea, 0, .09, .012, { s: [1, 1, .72] }); belt(c, dleather, gold); strapX(c, leather, gold);
@@ -240,38 +240,40 @@ CHARS.elira = { name: 'Lady Elira', sheetKey: 'x5', build() {
   const dg = K.dagger(c, gold); dg.position.set(-.19, -.1, .06); dg.rotation.set(PI - .2, 0, .15); dg.scale.setScalar(.8); c.bones.hips.add(dg);
   K.leafCluster(c, c.bones.hips, 5, .03, 0x4f9a3f, -.12, .1, .6);
   const bw = K.bow(c, { gold, len: .62 }); hold(c, h.hips, 'hand_L', bw, 0, -.07, .0, PI / 2, 0, 0);
+  return finalize(c, h.root, { L: 1 }, B => { B.upperArm_L.rotation.set(-1.2, 0, .22); B.foreArm_L.rotation.set(-.2, 0, 0); B.upperArm_R.rotation.set(.05, 0, -.18); }); } };
+
 // ================= batch 2: Elira, Rook (+wolf), Asha, Rowan, Kael, Cedric, Morwen, Garruk =================
 const ear = (c, col) => { for (const k of [-1, 1]) c.add(c.bones.head, c.G.cone(.03, .11, 4), col, k * .105, .1, -.02, { r: [-.2, 0, -k * 1.45], s: [1, 1, .4] }); };
 const gemMat = (c, col, ei = 1.3) => c.M(col, { e: col, ei, r: .15, n: 'gem' + col });
 const streamer = (c, par, col, x, y, z, n = 3) => { for (let i = 0; i < n; i++) c.add(par, c.G.cone(.016, .16 + i * .03, 4), c.M(col, { d: 1 }), x + (i - 1) * .018, y - i * .01, z, { r: [PI, 0, (i - 1) * .2], s: [1, 1, .3] }); };
 
-CHARS.elira_b = { name: 'Lady Elira', sheetKey: 'elira', build() {
-  const c = makeCtx({ name: 'Lady_Elira', fem: true, nobust: true, bulk: .9, sw: .96, skin: 0xf2cdaa, hair: 0xe3b650, under: 0x2f6a3a, pants: 0x34343a, sleeve: 0x4a3322, glove: 0x2c2018, boot: 0x5a3820 });
+CHARS.elira = { name: 'Lady Elira', sheetKey: 'elira', build() {
+  const c = makeCtx({ name: 'Lady_Elira', fem: true, nobust: true, elf: true, eye: 0x3f8a4a, bulk: .9, sw: .96, skin: 0xf2cdaa, hair: 0xe3b650, under: 0x2f6a3a, pants: 0x34343a, sleeve: 0x4a3322, glove: 0x2c2018, boot: 0x5a3820 });
   const h = humanoid(c), { gold, leather, dleather } = pal(c), green = 0x2a5a32, brownLeather = c.M(0x6a4428, { r: .8, n: 'brownarmor' }), bronze = c.M(0x8a6234, { m: .35, r: .5, n: 'bronzeplate' });
   platePack(c, { steel: bronze, trim: gold, cuirass: brownLeather, cuisse: false, tassets: false, noGaunt: true }); belt(c, dleather, gold); strapX(c, dleather, gold);
-  c.add(c.bones.chest, c.G.cyl(.16, .12, .12, 8), c.M(0x2f6a3a, { r: .85 }), 0, .2, .005, { s: [1, 1, .74] });
-  hair(c, 'wavy', 0xe3b650, { len: .85 }); ear(c, c.M(0xf2cdaa)); hood(c, c.M(0x28542f, { r: .95, d: 1, n: 'hood' }), 1.1);
-  tabard(c, { w: .24, len: .7, col: green, trim: gold, emblem: 'sprig', point: .09, z: .19, y: -.02 });
-  skirt(c, { col: green, trim: 0xd2a43c, len: .7, top: .17, bot: .36, y: -.04, zs: .8, ragged: .05, segs: 16 });
+  c.add(c.bones.chest, c.G.cyl(.16, .12, .12, 8), c.M(0x2f6a3a, { r: .85, t: 'cloth' }), 0, .2, .005, { s: [1, 1, .74] });
+  hair(c, 'wavy', 0xe3b650, { len: .85 }); hood(c, c.M(0x28542f, { r: .95, d: 1, n: 'hood' }), 1.1);
+  tabard(c, { w: .24, len: .46, col: green, trim: gold, emblem: 'sprig', point: .09, z: .19, y: -.02 });
+  skirt(c, { col: green, trim: 0xd2a43c, len: .42, top: .17, bot: .3, y: -.04, zs: .8, ragged: .05, segs: 16 });
   const cp = cape(c, { topW: .6, botW: 1.22, len: 1.05, col: green, trim: gold.color.getHex(), lining: 0x1f4426, waves: 9, ragged: .07, segs: 18, seed: 14, wrap: .14 }); cp.len = 1.05; backEmblem(c, cp, 'sprig', .6, gold, .5);
   for (const S of ['L', 'R']) { c.add(c.bones['foreArm_' + S], c.G.cyl(.056, .05, .2, 8), dleather, 0, -.15, 0); c.add(c.bones['foreArm_' + S], c.G.cyl(.058, .058, .02, 8), gold, 0, -.06, 0); c.add(c.bones['shin_' + S], c.G.sph(.07, 6, 5), bronze, 0, .01, .055, { s: [1, 1, .6] }); }
-  K.quiver(c, brownLeather, gold, 6); K.pouch(c, c.bones.hips, 0x5a3720, .2, -.06, .02, 1, gold);
+  K.quiver2(c, brownLeather, gold, 6); K.pouch(c, c.bones.hips, 0x5a3720, .2, -.06, .02, 1, gold);
   const dg = K.dagger(c, gold); dg.position.set(-.2, -.1, .04); dg.rotation.set(PI - .3, 0, -.2); dg.scale.setScalar(.8); c.bones.hips.add(dg);
-  const bw = K.bow(c, { wood: c.M(0x7a5028, { r: .6, n: 'bowwood' }), gold, r: .62 }); hold(c, h.hips, 'hand_L', bw, 0, -.04, .02, 0, -PI / 2, 0);
+  const bw = K.bow2(c, { wood: c.M(0x7a5028, { r: .6, n: 'bowwood' }), gold, r: .62 }); hold(c, h.hips, 'hand_L', bw, 0, -.04, .02, 0, -PI / 2, 0);
   return finalize(c, h.root, { L: 1 }, B => { B.upperArm_L.rotation.set(-.35, 0, .12); B.foreArm_L.rotation.set(-.5, 0, 0); }); } };
 
 CHARS.rook = { name: 'Rook Wildbane', sheetKey: 'rook', build() {
-  const c = makeCtx({ name: 'Rook_Wildbane', bulk: 1.12, sw: 1.1, skin: 0xc9966c, hair: 0x6a4126, under: 0x4a3322, pants: 0x4a3a2c, sleeve: 0x4a3322, glove: 0x3a281a, boot: 0x5a3a22 });
-  const h = humanoid(c), { gold, leather, dleather } = pal(c), fur = c.M(0xd8cbaa, { r: 1, n: 'fur' }), dfur = c.M(0x8a7a5e, { r: 1, n: 'furdark' }), green = 0x2a5a32, bronze = c.M(0x8a6234, { m: .35, r: .5, n: 'bronzeplate' });
-  platePack(c, { steel: bronze, trim: gold, cuirass: c.M(0x5a3a22, { r: .8 }), cuisse: false, tassets: false, noGaunt: true }); belt(c, dleather, gold); strapX(c, leather, gold);
+  const c = makeCtx({ name: 'Rook_Wildbane', eye: 0x5a3a22, beard: 0x4a2c18, brow: .85, bulk: 1.12, sw: 1.1, skin: 0xc9966c, hair: 0x6a4126, under: 0x4a3322, pants: 0x4a3a2c, sleeve: 0x4a3322, glove: 0x3a281a, boot: 0x5a3a22 });
+  const h = humanoid(c), { gold, leather, dleather } = pal(c), fur = c.M(0xd8cbaa, { r: 1, n: 'fur', t: 'fur' }), dfur = c.M(0x8a7a5e, { r: 1, n: 'furdark', t: 'fur' }), green = 0x2a5a32, bronze = c.M(0x8a6234, { m: .35, r: .5, n: 'bronzeplate' });
+  platePack(c, { steel: bronze, trim: gold, cuirass: c.M(0x5a3a22, { r: .8, t: 'leather' }), cuisse: false, tassets: false, noGaunt: true }); belt(c, dleather, gold); strapX(c, leather, gold);
   c.add(c.bones.chest, c.G.box(.05, .42, .02), leather, .03, .1, .128, { r: [0, 0, -.6] });
-  hair(c, 'messy', 0x6a4126); for (const k of [-1, 1]) c.add(c.bones.head, c.G.cyl(.02, .015, .26, 5), c.M(0x6a4126, { r: .9 }), k * .1, -.05, -.02);
-  c.add(c.bones.head, c.G.box(.09, .06, .04), c.M(0x5a3820, { r: .9 }), 0, .02, .09, { s: [1, .8, .5] });
-  K.furMantle(c, fur, dfur, .27, .1); for (const S of ['L', 'R']) { K.furCuff(c, c.bones['foreArm_' + S], fur, .06, -.1); K.furCuff(c, c.bones['shin_' + S], fur, .075, -.12, .045); c.add(c.bones['foreArm_' + S], c.G.cyl(.06, .054, .17, 8), c.M(0x5a3820, { r: .85 }), 0, -.17, 0); }
+  hair(c, 'messy', 0x6a4126); for (const k of [-1, 1]) c.add(c.bones.head, c.G.cyl(.02, .015, .26, 5), c.M(0x6a4126, { r: .9, t: 'cloth' }), k * .1, -.05, -.02);
+  c.add(c.bones.head, c.G.box(.09, .06, .04), c.M(0x5a3820, { r: .9, t: 'cloth' }), 0, .02, .09, { s: [1, .8, .5] });
+  K.furMantle(c, fur, dfur, .22, .07); for (const S of ['L', 'R']) { K.furCuff(c, c.bones['foreArm_' + S], fur, .06, -.1); K.furCuff(c, c.bones['shin_' + S], fur, .075, -.12, .045); c.add(c.bones['foreArm_' + S], c.G.cyl(.06, .054, .17, 8), c.M(0x5a3820, { r: .85, t: 'cloth' }), 0, -.17, 0); }
   tabard(c, { w: .26, len: .66, col: green, trim: gold, emblem: 'sprig', point: .09, z: .19, y: -.02 });
   skirt(c, { col: 0x2a5a32, trim: 0xd2a43c, len: .55, top: .17, bot: .34, y: -.04, zs: .85, ragged: .1, segs: 16 });
   const cp = cape(c, { topW: .6, botW: 1.2, len: 1.1, col: green, trim: gold.color.getHex(), lining: 0x1f4426, waves: 9, ragged: .12, segs: 18, seed: 8, wrap: .14 }); cp.len = 1.1; backEmblem(c, cp, 'sprig', .6, gold, .55);
-  K.quiver(c, c.M(0x5a3a22, { r: .8 }), gold, 6); K.pouch(c, c.bones.hips, 0x5a3720, .2, -.06, .02, 1, gold);
+  K.quiver2(c, c.M(0x5a3a22, { r: .8, t: 'leather' }), gold, 6); K.pouch(c, c.bones.hips, 0x5a3720, .2, -.06, .02, 1, gold);
   for (let i = 0; i < 4; i++) c.add(c.bones.hips, c.G.cone(.016, .07, 4), c.M(0xf0ead8), -.1 + i * .045, -.08, .165, { r: [PI, 0, 0] });
   const sp = new THREE.Group(), wood = c.M(0x6b4528, { r: .7, n: 'wood' }), steelH = c.M(0xc6cdd4, { m: .7, r: .35, n: 'spearhead' });
   c.add(sp, c.G.cyl(.02, .024, 1.9, 6), wood, 0, .1, 0); c.add(sp, c.G.cone(.022, .09, 5), gold, 0, -.89, 0, { r: [PI, 0, 0] });
@@ -284,31 +286,31 @@ CHARS.rook = { name: 'Rook Wildbane', sheetKey: 'rook', build() {
 CHARS.wolf = { name: 'Wolf', sheetKey: 'rook', build() { return K.wolfRig(); } };
 
 CHARS.asha = { name: 'Asha Ironfist', sheetKey: 'asha', build() {
-  const c = makeCtx({ name: 'Asha_Ironfist', fem: true, nobust: true, bulk: .92, sw: .96, skin: 0xb98260, hair: 0x2c1a14, under: 0xb8222c, pants: 0xeee4d0, sleeve: 0xb98260, glove: 0xe9e1cf, boot: 0x5a3a22 });
+  const c = makeCtx({ name: 'Asha_Ironfist', eye: 0x3a2418, fem: true, nobust: true, bulk: .92, sw: .96, skin: 0xb98260, hair: 0x2c1a14, under: 0xb8222c, pants: 0xeee4d0, sleeve: 0xb98260, glove: 0xe9e1cf, boot: 0x5a3a22 });
   const h = humanoid(c), { gold, leather, dleather } = pal(c), red = 0xb8222c, cream = 0xeee4d0, bronze = c.M(0x8a6234, { m: .35, r: .5, n: 'bronzeplate' });
-  belt(c, c.M(red, { r: .9 }), gold); c.add(c.bones.chest, c.G.cyl(.15, .12, .2, 8), c.M(red, { r: .85 }), 0, .12, .006, { s: [1, 1, .74] });
+  belt(c, c.M(red, { r: .9, t: 'cloth' }), gold); c.add(c.bones.chest, c.G.cyl(.15, .12, .2, 8), c.M(red, { r: .85, t: 'cloth' }), 0, .12, .006, { s: [1, 1, .74] });
   tabard(c, { w: .3, len: .66, col: red, trim: gold, emblem: 'ornate', point: .1, z: .17, y: -.02 }); const bk = tabard(c, { w: .3, len: .62, col: red, trim: gold, point: .1, z: -.17, y: -.02 }); bk.rotation.set(.1, PI, 0);
   for (const k of [-1, 1]) { const g = tabard(c, { w: .15, len: .5, col: red, trim: gold, point: .07, z: 0, y: -.02 }); g.position.set(k * .17, -.02, .0); g.rotation.set(0, k * PI / 2, 0); }
   skirt(c, { col: cream, trim: 0xd2a43c, len: .46, top: .17, bot: .27, y: -.05, ragged: .06, segs: 14 });
   for (let i = 0; i < 9; i++) c.add(c.bones.spine, c.G.sph(.028, 5, 4), c.M(0x4a2c1a, { r: .7 }), Math.sin(i * .5 - 2.2) * .17, -.04 - Math.abs(Math.sin(i * .5 - 2.2)) * .06, Math.cos(i * .5 - 2.2) * .12 + .0);
-  hair(c, 'wavy', 0x2c1a14, { len: .75 }); c.add(c.bones.head, c.G.sph(.06, 6, 5), c.M(0x2c1a14, { r: .9 }), 0, .27, -.03); c.add(c.bones.head, c.G.tor(.113, .014, 4, 14), c.M(red, { r: .9 }), 0, .15, 0, { r: [PI / 2 - .05, 0, 0] });
+  hair(c, 'wavy', 0x2c1a14, { len: .75 }); c.add(c.bones.head, c.G.sph(.06, 6, 5), c.M(0x2c1a14, { r: .9, t: 'cloth' }), 0, .27, -.03); c.add(c.bones.head, c.G.tor(.113, .014, 4, 14), c.M(red, { r: .9, t: 'cloth' }), 0, .15, 0, { r: [PI / 2 - .05, 0, 0] });
   for (const k of [-1, 1]) c.add(c.bones.head, c.G.cone(.018, .2, 4), c.M(red, { d: 1 }), k * .04, .16, -.14, { r: [PI - .2, 0, k * .3], s: [1, 1, .3] });
   for (const S of ['L', 'R']) { const fa = c.bones['foreArm_' + S], ua = c.bones['upperArm_' + S]; c.add(fa, c.G.cyl(.058, .05, .24, 8), c.M(0xeee4d0, { r: .95, n: 'wrap' }), 0, -.15, 0); c.add(fa, c.G.cyl(.06, .06, .035, 8), gold, 0, -.04, 0); c.add(ua, c.G.cyl(.058, .056, .05, 8), gold, 0, -.16, 0);
-    c.add(c.bones['hand_' + S], c.G.sph(.062, 7, 5), c.M(0xeee4d0, { r: .95 }), 0, -.05, .0, { s: [1, 1.15, 1] }); c.add(c.bones['shin_' + S], c.G.cyl(.066, .056, .2, 8), bronze, 0, -.27, 0); c.add(c.bones['shin_' + S], c.G.cyl(.058, .058, .03, 8), c.M(0xeee4d0, { r: .95 }), 0, -.38, 0); c.add(c.bones['shin_' + S], c.G.sph(.07, 6, 5), bronze, 0, .01, .055, { s: [1, 1, .6] }); c.add(c.bones['thigh_' + S], c.G.cyl(.105, .09, .3, 8), c.M(cream, { r: .95, n: 'baggy' }), 0, -.18, 0); }
+    c.add(c.bones['hand_' + S], c.G.sph(.062, 7, 5), c.M(0xeee4d0, { r: .95, t: 'cloth' }), 0, -.05, .0, { s: [1, 1.15, 1] }); c.add(c.bones['shin_' + S], c.G.cyl(.066, .056, .2, 8), bronze, 0, -.27, 0); c.add(c.bones['shin_' + S], c.G.cyl(.058, .058, .03, 8), c.M(0xeee4d0, { r: .95, t: 'cloth' }), 0, -.38, 0); c.add(c.bones['shin_' + S], c.G.sph(.07, 6, 5), bronze, 0, .01, .055, { s: [1, 1, .6] }); c.add(c.bones['thigh_' + S], c.G.cyl(.105, .09, .3, 8), c.M(cream, { r: .95, n: 'baggy' }), 0, -.18, 0); }
   for (const S of ['L', 'R']) K.kiRing(c, c.bones['hand_' + S], 0xffc84a, -.05);
   c.add(c.bones.chest, c.G.cyl(.04, .04, .015, 8), gold, 0, .1, .142, { r: [PI / 2, 0, 0] });
   const cp = cape(c, { topW: .3, botW: .55, len: .5, col: red, trim: gold.color.getHex(), waves: 7, ragged: .12, segs: 12, seed: 4, back: .13 }); cp.len = .5;
   return finalize(c, h.root, { L: 1, R: 1 }, B => { B.upperArm_L.rotation.set(-.5, 0, .45); B.foreArm_L.rotation.set(-1.2, 0, 0); B.upperArm_R.rotation.set(-.5, 0, -.45); B.foreArm_R.rotation.set(-1.2, 0, 0); B.thigh_L.rotation.set(0, 0, -.12); B.thigh_R.rotation.set(0, 0, .12); }); } };
 
 CHARS.rowan = { name: 'Rowan Firebrand', sheetKey: 'rowan', build() {
-  const c = makeCtx({ name: 'Rowan_Firebrand', bulk: 1.0, sw: 1.02, skin: 0xe4b58e, hair: 0x5a3822, under: 0x1f3470, pants: 0x28243a, sleeve: 0x1f3470, glove: 0x4a3020, boot: 0x4a3220 });
+  const c = makeCtx({ name: 'Rowan_Firebrand', eye: 0x5a3a22, bulk: 1.0, sw: 1.02, skin: 0xe4b58e, hair: 0x5a3822, under: 0x1f3470, pants: 0x28243a, sleeve: 0x1f3470, glove: 0x4a3020, boot: 0x4a3220 });
   const h = humanoid(c), { gold, leather, dleather } = pal(c), crim = 0xa8202c, bronze = c.M(0x8a6234, { m: .35, r: .5, n: 'bronzeplate' });
-  platePack(c, { steel: bronze, trim: gold, cuirass: c.M(0x1f3470, { r: .85 }), cuisse: false, tassets: false }); belt(c, leather, gold); strapX(c, leather, gold); hair(c, 'swept', 0x5a3822);
+  platePack(c, { steel: bronze, trim: gold, cuirass: c.M(0x1f3470, { r: .85, t: 'cloth' }), cuisse: false, tassets: false }); belt(c, leather, gold); strapX(c, leather, gold); hair(c, 'swept', 0x5a3822);
   tabard(c, { w: .26, len: .78, col: 0x1f3470, trim: gold, emblem: 'ornate', point: .08, z: .18, y: -.02 });
   skirt(c, { col: crim, trim: 0xd2a43c, len: .6, top: .17, bot: .34, y: -.05, zs: .85, ragged: .05, segs: 16 });
-  c.add(c.bones.neck, c.G.cyl(.14, .21, .14, 8, true), c.M(crim, { r: .95, d: 1 }), 0, -.0, -.02, { s: [1, 1, 1.05] });
+  c.add(c.bones.neck, c.G.cyl(.14, .21, .14, 8, true), c.M(crim, { r: .95, d: 1, t: 'cloth' }), 0, -.0, -.02, { s: [1, 1, 1.05] });
   const cp = cape(c, { topW: .6, botW: 1.2, len: 1.05, col: crim, trim: gold.color.getHex(), lining: 0x7a1620, waves: 9, ragged: .08, segs: 18, seed: 12, wrap: .14 }); cp.len = 1.05; backEmblem(c, cp, 'sun', .6, gold, .5);
-  c.add(cp.cb, c.G.dome(.14, 8, 4), c.M(crim, { r: .95, d: 1 }), 0, .03, -.1, { s: [1.2, .8, 1], r: [-.5, 0, 0] });
+  c.add(cp.cb, c.G.dome(.14, 8, 4), c.M(crim, { r: .95, d: 1, t: 'cloth' }), 0, .03, -.1, { s: [1.2, .8, 1], r: [-.5, 0, 0] });
   const bk = K.book(c, 0x8a1c2a, gold, .15, .2); bk.position.set(-.2, -.08, .05); bk.rotation.set(0, PI / 2, .1); c.bones.hips.add(bk); emblem(c, bk, 'sun', .1, gold, 0, 0, .03);
   K.pouch(c, c.bones.hips, 0x5a3720, .2, -.06, .02, .9, gold);
   const st = K.staff(c, 'none', { gold, wood: c.M(0x6b4a2a, { r: .6, m: .3 }), len: 1.85, twist: true, wood2: 0x8a6030 });
@@ -319,9 +321,9 @@ CHARS.rowan = { name: 'Rowan Firebrand', sheetKey: 'rowan', build() {
   return finalize(c, h.root, { R: 1, L: 1 }, B => { B.upperArm_L.rotation.set(-.6, 0, .4); B.foreArm_L.rotation.set(-1.0, 0, 0); }); } };
 
 CHARS.kael = { name: 'Kael Runebinder', sheetKey: 'kael', build() {
-  const c = makeCtx({ name: 'Kael_Runebinder', bulk: .96, sw: 1.0, skin: 0xe4b99a, hair: 0x1c1822, under: 0x1f2f78, pants: 0x20284a, sleeve: 0x1f2f78, glove: 0x3a2c22, boot: 0x4a3626 });
+  const c = makeCtx({ name: 'Kael_Runebinder', eye: 0x4a6ab0, bulk: .96, sw: 1.0, skin: 0xe4b99a, hair: 0x1c1822, under: 0x1f2f78, pants: 0x20284a, sleeve: 0x1f2f78, glove: 0x3a2c22, boot: 0x4a3626 });
   const h = humanoid(c), { gold, leather, dleather } = pal(c), navy = 0x1f2f78, silver = c.M(0xb9c2d4, { m: .5, r: .4, n: 'silver' }), cream = 0xe9e2cf;
-  platePack(c, { steel: c.M(0x3a3e58, { m: .4, r: .5, n: 'darkmetal' }), trim: gold, cuirass: c.M(0x1f2f78, { r: .85 }), cuisse: false, greaves: true, tassets: false, noGaunt: true }); belt(c, dleather, gold); strapX(c, leather, gold); hair(c, 'messy', 0x1c1822);
+  platePack(c, { steel: c.M(0x3a3e58, { m: .4, r: .5, n: 'darkmetal' }), trim: gold, cuirass: c.M(0x1f2f78, { r: .85, t: 'cloth' }), cuisse: false, greaves: true, tassets: false, noGaunt: true }); belt(c, dleather, gold); strapX(c, leather, gold); hair(c, 'messy', 0x1c1822);
   skirt(c, { col: navy, trim: 0xd2a43c, len: .95, top: .17, bot: .42, y: -.05, ragged: .04, segs: 16 });
   tabard(c, { w: .26, len: .85, col: cream, trim: gold, emblem: 'ornate', point: .09, z: .21, y: -.02 }); for (const k of [-1, 1]) { const g = tabard(c, { w: .1, len: .8, col: navy, trim: gold, point: .08, z: .205, y: -.02 }); g.position.x = k * .17; }
   for (const S of ['L', 'R']) bellK(c, S, navy);
@@ -336,31 +338,31 @@ CHARS.kael = { name: 'Kael Runebinder', sheetKey: 'kael', build() {
   const glyphs = new THREE.Group(); glyphs.position.set(0, -.28, .08); c.bones.hand_L.add(glyphs);
   [[0, .06, .05, 0], [-.17, .12, 0, .5], [.17, .1, -.03, -.5], [-.1, .28, -.04, .2], [.12, .3, .0, -.3]].forEach(([x, y, z, r], i) => { const g = K.glyph(c, i % 2 ? 0x6ac4ff : 0x4a8cff, .075 + (i == 0) * .02); g.position.set(x, y, z); g.rotation.y = r; glyphs.add(g); });
   return finalize(c, h.root, { R: 1, L: 1 }, B => { B.upperArm_L.rotation.set(-.5, 0, .45); B.foreArm_L.rotation.set(-1.15, 0, 0); }); } };
-function bellK(c, S, col) { const { add, G, M, bones: B } = c; add(B['foreArm_' + S], G.cyl(.06, .15, .3, 8, true), M(col, { r: .9, d: 1 }), 0, -.15, 0); add(B['foreArm_' + S], G.cyl(.15, .15, .03, 8, true), M(0xe9e2cf, { m: .3, r: .55, d: 1 }), 0, -.3, 0); }
+function bellK(c, S, col) { const { add, G, M, bones: B } = c; add(B['foreArm_' + S], G.cyl(.06, .15, .3, 8, true), M(col, { r: .9, d: 1, t: 'cloth' }), 0, -.15, 0); add(B['foreArm_' + S], G.cyl(.15, .15, .03, 8, true), M(0xe9e2cf, { m: .3, r: .55, d: 1 }), 0, -.3, 0); }
 
 CHARS.cedric = { name: 'Cedric Vale', sheetKey: 'cedric', build() {
-  const c = makeCtx({ name: 'Cedric_Vale', bulk: .94, sw: .98, skin: 0xe6b68e, hair: 0x7a4426, under: 0x1f3a78, pants: 0x34283a, sleeve: 0xf0e6cf, glove: 0x4a3020, boot: 0x5a3a20 });
+  const c = makeCtx({ name: 'Cedric_Vale', eye: 0x5f8a3a, bulk: .94, sw: .98, skin: 0xe6b68e, hair: 0x7a4426, under: 0x1f3a78, pants: 0x34283a, sleeve: 0xf0e6cf, glove: 0x4a3020, boot: 0x5a3a20 });
   const h = humanoid(c), { gold, leather, dleather } = pal(c), navy = 0x1f3a78, crim = 0x8a1830, cream = 0xf0e6cf;
   c.add(c.bones.chest, c.G.cyl(.205, .15, .31, 8), c.M(navy, { r: .85, n: 'doublet' }), 0, .08, .004, { s: [1, 1, .7] }); belt(c, dleather, gold);
-  c.add(c.bones.chest, c.G.tor(.1, .03, 5, 12), c.M(cream, { r: .95 }), 0, .26, .0, { r: [PI / 2 - .2, 0, 0] });
+  c.add(c.bones.chest, c.G.tor(.1, .03, 5, 12), c.M(cream, { r: .95, t: 'cloth' }), 0, .26, .0, { r: [PI / 2 - .2, 0, 0] });
   skirt(c, { col: navy, trim: 0xd2a43c, len: .36, top: .16, bot: .3, y: -.05, zs: .85, ragged: .03, segs: 16 }); tabard(c, { w: .2, len: .42, col: navy, trim: gold, emblem: 'ornate', point: .06, z: .18, y: -.02 });
-  for (const S of ['L', 'R']) { c.add(c.bones['upperArm_' + S], c.G.sph(.075, 7, 5), c.M(cream, { r: .95 }), 0, -.1, 0, { s: [1, 1.3, 1] }); c.add(c.bones['foreArm_' + S], c.G.cyl(.06, .06, .12, 8), c.M(cream, { r: .95 }), 0, -.08, 0); c.add(c.bones['foreArm_' + S], c.G.cyl(.06, .052, .15, 8), c.M(0x4a3020), 0, -.2, 0); c.add(c.bones['shin_' + S], c.G.cyl(.1, .07, .15, 8, true), c.M(0x5a3a20, { d: 1 }), 0, -.0, 0); c.add(c.bones['shin_' + S], c.G.cyl(.075, .06, .3, 8), c.M(0x5a3a20, { r: .8 }), 0, -.28, 0); }
+  for (const S of ['L', 'R']) { c.add(c.bones['upperArm_' + S], c.G.sph(.075, 7, 5), c.M(cream, { r: .95, t: 'cloth' }), 0, -.1, 0, { s: [1, 1.3, 1] }); c.add(c.bones['foreArm_' + S], c.G.cyl(.06, .06, .12, 8), c.M(cream, { r: .95, t: 'cloth' }), 0, -.08, 0); c.add(c.bones['foreArm_' + S], c.G.cyl(.06, .052, .15, 8), c.M(0x4a3020), 0, -.2, 0); c.add(c.bones['shin_' + S], c.G.cyl(.1, .07, .15, 8, true), c.M(0x5a3a20, { d: 1 }), 0, -.0, 0); c.add(c.bones['shin_' + S], c.G.cyl(.075, .06, .3, 8), c.M(0x5a3a20, { r: .8, t: 'leather' }), 0, -.28, 0); }
   hair(c, 'curly', 0x7a4426); K.hat(c, 0x1f3a78, 0xd2a43c); for (let i = 0; i < 3; i++) { K.feather(c, c.bones.head, i ? 0xf4efe0 : 0xf4efe0, .12 + i * .02, .27 + i * .02, -.02, [.3 - i * .2, .6 - i * .2, -1.1 + i * .1], .3 + i * .03); }
   const cp = cape(c, { topW: .55, botW: 1.1, len: 1.0, col: crim, trim: gold.color.getHex(), lining: 0x6a1226, waves: 9, ragged: .06, segs: 16, seed: 17, wrap: .14 }); cp.len = 1.0; backEmblem(c, cp, 'lion', .55, gold, .45);
-  c.add(c.bones.shoulder_R, c.G.dome(.15, 8, 4), c.M(crim, { r: .95, d: 1 }), -.05, .03, 0, { s: [1.2, .9, 1.2], r: [0, 0, .3] });
+  c.add(c.bones.shoulder_R, c.G.dome(.15, 8, 4), c.M(crim, { r: .95, d: 1, t: 'cloth' }), -.05, .03, 0, { s: [1.2, .9, 1.2], r: [0, 0, .3] });
   K.pouch(c, c.bones.hips, 0x5a3720, -.2, -.05, .03, .9, gold);
   const lu = K.lute(c, { wood: c.M(0xb07a3a, { r: .55, n: 'lutewood' }), gold }); lu.scale.setScalar(.95); lu.position.set(.03, -.07, .19); lu.rotation.set(.1, 0, 1.0); c.bones.chest.add(lu);
   return finalize(c, h.root, { R: 1, L: 1 }, B => { B.upperArm_R.rotation.set(-.55, 0, -.15); B.foreArm_R.rotation.set(-1.0, 0, 0); B.upperArm_L.rotation.set(-.75, 0, .2); B.foreArm_L.rotation.set(-1.0, 0, 0); }); } };
 
 CHARS.morwen = { name: 'Morwen Blackveil', sheetKey: 'morwen', build() {
-  const c = makeCtx({ name: 'Morwen_Blackveil', fem: true, nobust: true, bulk: .92, sw: .96, skin: 0xe8d2c4, hair: 0x241636, under: 0x1c1620, pants: 0x1c1620, sleeve: 0x241c2c, glove: 0x1c1620, boot: 0x241a22 });
+  const c = makeCtx({ name: 'Morwen_Blackveil', eye: 0x8a4ac8, fem: true, nobust: true, bulk: .92, sw: .96, skin: 0xe8d2c4, hair: 0x241636, under: 0x1c1620, pants: 0x1c1620, sleeve: 0x241c2c, glove: 0x1c1620, boot: 0x241a22 });
   const h = humanoid(c), { gold, leather, dleather } = pal(c), vio = 0x6a2aa8, blk = 0x1a1420, bone = c.M(0xe8e0cc, { r: .8, n: 'bone' }), silver = c.M(0x9a96a8, { m: .5, r: .45, n: 'silver' });
-  platePack(c, { steel: c.M(0x3a3340, { m: .4, r: .5, n: 'darkplate' }), trim: silver, cuirass: c.M(0x241c2c, { r: .7 }), cuisse: false, tassets: false, noGaunt: true }); belt(c, c.M(0x2c2230, { r: .8 }), silver);
+  platePack(c, { steel: c.M(0x3a3340, { m: .4, r: .5, n: 'darkplate' }), trim: silver, cuirass: c.M(0x241c2c, { r: .7 }), cuisse: false, tassets: false, noGaunt: true }); belt(c, c.M(0x2c2230, { r: .8, t: 'leather' }), silver);
   skirt(c, { col: blk, trim: 0x6a2aa8, len: .98, top: .17, bot: .42, y: -.05, ragged: .12, segs: 16 }); skirt(c, { col: 0x4a2078, trim: 0x8a5ac8, len: .8, top: .16, bot: .34, y: -.03, zs: .8, ragged: .1, segs: 16 });
   tabard(c, { w: .22, len: .7, col: 0x2c2036, trim: silver, emblem: 'cross', point: .1, z: .19, y: -.02, tilt: -.04 });
   hair(c, 'wavy', 0x241636, { len: .95 }); hood(c, c.M(blk, { r: .95, d: 1, n: 'hood' }), 1.2);
   const cp = cape(c, { topW: .6, botW: 1.3, len: 1.1, col: blk, trim: vio, lining: 0x4a2078, waves: 10, ragged: .24, segs: 20, seed: 23, wrap: .15 }); cp.len = 1.1; backEmblem(c, cp, 'ornate', .6, c.M(0xa88ad0, { r: .5 }), .5);
-  c.add(c.bones.neck, c.G.cyl(.15, .2, .13, 8, true), c.M(blk, { r: .95, d: 1 }), 0, -.02, -.02, { s: [1, 1, 1.05] });
+  c.add(c.bones.neck, c.G.cyl(.15, .2, .13, 8, true), c.M(blk, { r: .95, d: 1, t: 'cloth' }), 0, -.02, -.02, { s: [1, 1, 1.05] });
   K.skull(c, c.bones.hips, bone, .04, 0, -.05, .2); chain(c, c.bones.hips, silver, 0, -.09, .21, 5); for (const [x, y] of [[-.13, -.08], [.13, -.1]]) { K.skull(c, c.bones.hips, bone, .028, x, y, .17); }
   for (const k of [-1, 1]) { K.skull(c, c.bones['shoulder_' + (k > 0 ? 'L' : 'R')], bone, .035, k * .06, .11, .06); chain(c, c.bones.chest, silver, k * .06, .22, .1, 4, -.045); }
   c.add(c.bones.chest, c.G.oct(.03), gemMat(c, 0xb050ff, 1), 0, .17, .13, { s: [.7, 1.5, .7] });
@@ -374,15 +376,14 @@ CHARS.morwen = { name: 'Morwen Blackveil', sheetKey: 'morwen', build() {
   return finalize(c, h.root, { R: 1, L: 1 }, B => { B.upperArm_L.rotation.set(-.55, 0, .45); B.foreArm_L.rotation.set(-1.0, 0, 0); }); } };
 
 CHARS.garruk = { name: 'Garruk Stonefist', sheetKey: 'garruk', build() {
-  const c = makeCtx({ name: 'Garruk_Stonefist', bulk: 1.42, sw: 1.32, skin: 0xc08a60, hair: 0x4a2c1c, under: 0x4a3020, pants: 0x4a3828, sleeve: 0xc08a60, glove: 0x3a281a, boot: 0x4a3220 });
-  const h = humanoid(c), { gold, leather, dleather } = pal(c), fur = c.M(0xd2c2a0, { r: 1, n: 'fur' }), dfur = c.M(0x6a5236, { r: 1, n: 'furdark' }), iron = c.M(0x5c5e66, { m: .5, r: .5, n: 'darkiron' }), crim = 0x8a1c22;
-  platePack(c, { steel: iron, trim: gold, cuirass: c.M(0x4a3020, { r: .85 }), cuisse: false, tassets: false, bigPauld: true, pauld: 'spike' }); belt(c, dleather, gold); strapX(c, dleather, gold);
+  const c = makeCtx({ name: 'Garruk_Stonefist', eye: 0x5a3820, beard: 0x3a2214, scar: true, brow: .95, bulk: 1.42, sw: 1.32, skin: 0xc08a60, hair: 0x4a2c1c, under: 0x4a3020, pants: 0x4a3828, sleeve: 0xc08a60, glove: 0x3a281a, boot: 0x4a3220 });
+  const h = humanoid(c), { gold, leather, dleather } = pal(c), fur = c.M(0xd2c2a0, { r: 1, n: 'fur', t: 'fur' }), dfur = c.M(0x6a5236, { r: 1, n: 'furdark', t: 'fur' }), iron = c.M(0x5c5e66, { m: .5, r: .5, n: 'darkiron' }), crim = 0x8a1c22;
+  platePack(c, { steel: iron, trim: gold, cuirass: c.M(0x4a3020, { r: .85, t: 'cloth' }), cuisse: false, tassets: false, bigPauld: true, pauld: 'spike' }); belt(c, dleather, gold); strapX(c, dleather, gold);
   c.add(c.bones.chest, c.G.box(.05, .42, .02), dleather, .04, .1, .132, { r: [0, 0, -.6] });
   for (const [x, y, rz] of [[-.12, .18, .6], [.1, .05, -.3]]) c.add(c.bones.chest, c.G.box(.02, .1, .01), c.M(0xa82020, { e: 0xa82020, ei: .2 }), x, y, .135, { r: [0, 0, rz] });
   hair(c, 'long', 0x4a2c1c, { len: .55 }); hair(c, 'messy', 0x4a2c1c);
   c.add(c.bones.head, c.G.box(.14, .1, .08), c.M(0x4a2c1c, { r: 1 }), 0, -.0, .06, { s: [1, 1, .7] }); c.add(c.bones.head, c.G.cone(.07, .12, 5), c.M(0x4a2c1c), 0, -.09, .07, { r: [PI + .2, 0, 0] });
-  c.add(c.bones.head, c.G.box(.12, .02, .03), c.M(0x2a1a10), 0, .125, .105);
-  K.furMantle(c, fur, dfur, .3, .11); for (const S of ['L', 'R']) { K.furCuff(c, c.bones['foreArm_' + S], fur, .09, -.05, .05); K.furCuff(c, c.bones['shin_' + S], fur, .1, -.14, .055); K.furCuff(c, c.bones['shin_' + S], fur, .09, -.38, .045); }
+  K.furMantle(c, fur, dfur, .25, .075); for (const S of ['L', 'R']) { K.furCuff(c, c.bones['foreArm_' + S], fur, .09, -.05, .05); K.furCuff(c, c.bones['shin_' + S], fur, .1, -.14, .055); K.furCuff(c, c.bones['shin_' + S], fur, .09, -.38, .045); }
   skirt(c, { col: crim, trim: 0x6a1418, len: .55, top: .2, bot: .34, y: -.04, zs: .85, ragged: .16, segs: 16 }); tabard(c, { w: .26, len: .5, col: crim, trim: gold, emblem: 'ornate', point: .1, z: .22, y: -.03 });
   const cp = cape(c, { topW: .72, botW: 1.3, len: 1.1, col: crim, trim: 0x4a1014, lining: 0x5a1014, waves: 9, ragged: .3, segs: 20, seed: 29, wrap: .12 }); cp.len = 1.1; backEmblem(c, cp, 'ornate', .6, c.M(0xd8c8a8, { r: .7 }), .5);
   K.pouch(c, c.bones.hips, 0x4a3020, .27, -.07, .02, 1.1, gold); for (let i = 0; i < 3; i++) c.add(c.bones.hips, c.G.cone(.018, .09, 4), c.M(0xf0ead8), -.12 + i * .05, -.1, .21, { r: [PI, 0, 0] });

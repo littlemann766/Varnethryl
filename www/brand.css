@@ -1,0 +1,12 @@
+#brandLoader,#brandTitle{position:fixed;inset:0;z-index:99999;background:#05040a;display:flex;align-items:center;justify-content:center;transition:opacity .6s ease}
+#brandLoader img#brandLoaderImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+#brandLoader.wide img#brandLoaderImg{object-fit:contain}
+.brandSpin{position:absolute;bottom:max(24px,env(safe-area-inset-bottom));left:50%;width:44px;height:44px;margin-left:-22px;animation:brandSpin 1.6s linear infinite;filter:drop-shadow(0 0 8px #8a5cff)}
+@keyframes brandSpin{to{transform:rotate(360deg)}}
+.brandOut{opacity:0;pointer-events:none}
+#brandTitle{flex-direction:column;gap:10px;text-align:center;background:radial-gradient(circle at 50% 40%,#2a1450 0,#0a0612 60%,#020104 100%);color:#e9dfc4;padding:16px}
+#brandTitle[hidden]{display:none}
+.brandEmblem{width:min(56vmin,420px);height:auto;filter:drop-shadow(0 0 28px rgba(150,90,255,.55))}
+#brandTitle h1{margin:0;font-family:Georgia,'Times New Roman',serif;letter-spacing:.28em;font-size:clamp(26px,6vmin,52px);color:#d9c58f;text-shadow:0 2px 12px #000}
+#brandTitle p{margin:0 0 14px;opacity:.75;font-style:italic;font-size:clamp(12px,2.4vmin,18px)}
+@media (prefers-reduced-motion:reduce){.brandSpin{animation:none}#brandLoader,#brandTitle{transition:none}}

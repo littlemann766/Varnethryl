@@ -186,7 +186,7 @@ CHARS.thorne = { name: 'Brother Thorne', sheetKey: 'x9', build() {
   const book = K.book(c, blue, gold, .17, .23); emblem(c, book, 'cross', .14, gold, 0, 0, .03); book.position.set(0, -.12, .06); book.rotation.set(-.3, 0, 0); c.bones.hand_L.add(book);
   return finalize(c, h.root, { R: 1, L: 1 }, B => { B.upperArm_L.rotation.set(-.5, 0, .15); B.foreArm_L.rotation.set(-1.2, 0, 0); }); } };
 
-CHARS.orin = { name: 'Orin Ashlance', sheetKey: 'orin', build() {
+CHARS.orin = { name: 'Orin Ashlance', sheetKey: 'orin2', build() {
   const c = makeCtx({ name: 'Orin_Ashlance', eye: 0x5a4028, brow: .4, bulk: 1.12, sw: 1.06, skin: 0xe2b48c, hair: 0x6a4025, under: 0x4a4e56, pants: 0x4a4e56, sleeve: 0x7a808a, glove: 0x5a3720, boot: 0x5a5e66 });
   const h = humanoid(c), { steel, gold, leather, dleather } = pal(c), blue = 0x1f3f95, cream = 0xefe3c4, mail = c.M(0x6b7078, { m: .6, r: .55, n: 'chainmail' });
   platePack(c, { steel, trim: gold, bigPauld: true }); hair(c, 'messy', 0x6a4025); belt(c, leather, gold);
@@ -199,21 +199,23 @@ CHARS.orin = { name: 'Orin Ashlance', sheetKey: 'orin', build() {
   const sg = new THREE.Group(); c.add(sg, c.G.box(.045, .8, .02), dleather, 0, -.4, 0); c.add(sg, c.G.box(.05, .04, .026), gold, 0, -.02, 0); c.add(sg, c.G.box(.05, .05, .026), gold, 0, -.8, 0);
   c.add(sg, c.G.cyl(.016, .016, .13, 6), c.M(0x4a2b18), 0, .08, 0); c.add(sg, c.G.box(.2, .028, .03), gold, 0, .02, 0); c.add(sg, c.G.sph(.024, 6, 5), gold, 0, .16, 0);
   sg.position.set(-.21, -.04, .02); sg.rotation.set(-.12, 0, .12); c.bones.hips.add(sg);
-  // spear: shaft, steel head, gold collar, lion banner, tassels
-  const sp = new THREE.Group(), wood = c.M(0x6b4528, { r: .7, n: 'wood' });
-  c.add(sp, c.G.cyl(.02, .024, 1.95, 6), wood, 0, .33, 0); c.add(sp, c.G.cone(.02, .08, 5), gold, 0, -.69, 0, { r: [PI, 0, 0] });
-  const hd = new THREE.Shape(); hd.moveTo(0, 0); hd.lineTo(.05, .1); hd.lineTo(0, .3); hd.lineTo(-.05, .1); hd.closePath();
-  const hg = new THREE.ExtrudeGeometry(hd, { depth: .014, bevelEnabled: false }); hg.translate(0, 0, -.007); c.add(sp, hg, c.M(0xd5dae0, { m: .8, r: .3, n: 'spearhead' }), 0, 1.33, 0);
-  c.add(sp, c.G.cyl(.032, .032, .05, 6), gold, 0, 1.3, 0); c.add(sp, c.G.cyl(.026, .026, .04, 6), gold, 0, .9, 0);
-  const bn = new THREE.Group(); bn.position.set(0, 1.24, 0); sp.add(bn);
-  c.add(bn, c.G.cyl(.01, .01, .3, 4), gold, .14, 0, 0, { r: [0, 0, PI / 2] });
-  const bs = new THREE.Shape(); bs.moveTo(0, 0); bs.lineTo(.28, 0); bs.lineTo(.28, -.62); bs.lineTo(.14, -.54); bs.lineTo(0, -.62); bs.closePath();
-  const bg = new THREE.ExtrudeGeometry(bs, { depth: .01, bevelEnabled: false }); c.add(bn, bg, c.M(blue, { r: .9, d: 1, n: 'banner' }), 0, -.01, -.005);
-  c.add(bn, c.G.box(.28, .02, .014), gold, .14, -.015, 0); c.add(bn, c.G.box(.22, .2, .012), c.M(cream, { r: .9, d: 1 }), .14, -.14, 0, {});
-  emblem(c, bn, 'lion', .2, c.M(blue, { r: .6 }), .14, -.15, .01, 0); emblem(c, bn, 'lion', .2, c.M(blue, { r: .6 }), .14, -.15, -.01, PI);
-  emblem(c, bn, 'fleur', .1, gold, .14, -.38, .008, 0); emblem(c, bn, 'fleur', .1, gold, .14, -.38, -.008, PI);
-  for (const x of [.02, .14, .26]) { c.add(bn, c.G.cyl(.012, .012, .1, 5), gold, x, -.62 - (x == .14 ? -.02 : 0), 0, {}); c.add(bn, c.G.cone(.025, .12, 6), c.M(0xd2a43c, { m: .3, r: .6, d: 1 }), x, -.7, 0, { r: [PI, 0, 0] }); }
-  hold(c, h.hips, 'hand_R', sp, 0, -.05, .0, .3, 0, .13);
+  // spear (corrected sheet): ringed shaft, leaf head, gold collar, long cream/blue lion banner with fleur border + tassels
+  const sp = new THREE.Group(), wood = c.M(0x6b4528, { r: .7, n: 'wood' }), steelH = c.M(0xd5dae0, { m: .8, r: .3, n: 'spearhead' });
+  c.add(sp, c.G.cyl(.02, .024, 1.9, 6), wood, 0, .1, 0); c.add(sp, c.G.cone(.022, .09, 5), gold, 0, -.89, 0, { r: [PI, 0, 0] });
+  for (const y of [-.7, -.4, -.1, .2, .5, .8]) c.add(sp, c.G.cyl(.028, .028, .025, 6), gold, 0, y, 0);
+  const hd = new THREE.Shape(); hd.moveTo(0, 0); hd.quadraticCurveTo(.07, .1, .0, .3); hd.quadraticCurveTo(-.07, .1, 0, 0);
+  const hg = new THREE.ExtrudeGeometry(hd, { depth: .016, bevelEnabled: false, curveSegments: 6 }); hg.translate(0, 0, -.008); c.add(sp, hg, steelH, 0, 1.08, 0);
+  c.add(sp, c.G.cyl(.036, .028, .06, 6), gold, 0, 1.05, 0); c.add(sp, c.G.sph(.032, 6, 5), gold, 0, 1.08, 0);
+  const bn = new THREE.Group(); bn.position.set(0, .98, 0); bn.rotation.y = PI; sp.add(bn);
+  c.add(bn, c.G.cyl(.01, .01, .3, 4), gold, .15, 0, 0, { r: [0, 0, PI / 2] }); c.add(bn, c.G.sph(.016, 5, 4), gold, .3, 0, 0);
+  const bs = new THREE.Shape(); bs.moveTo(0, 0); bs.lineTo(.3, 0); bs.lineTo(.3, -.82); bs.lineTo(.15, -.72); bs.lineTo(0, -.82); bs.closePath();
+  const bg = new THREE.ExtrudeGeometry(bs, { depth: .008, bevelEnabled: false }); bg.translate(0, -.012, -.004); c.add(bn, bg, c.M(blue, { r: .9, d: 1, n: 'banner' }));
+  const cs = new THREE.Shape(); cs.moveTo(.035, 0); cs.lineTo(.265, 0); cs.lineTo(.265, -.74); cs.lineTo(.15, -.65); cs.lineTo(.035, -.74); cs.closePath();
+  const cg = new THREE.ExtrudeGeometry(cs, { depth: .008, bevelEnabled: false }); cg.translate(0, -.012, 0); c.add(bn, cg, c.M(cream, { r: .9, d: 1, n: 'bannercream' }), 0, 0, .004); c.add(bn, cg, c.M(cream, { r: .9, d: 1, n: 'bannercream' }), 0, 0, -.012);
+  c.add(bn, c.G.box(.3, .018, .014), gold, .15, -.012, 0);
+  for (const [y, sz] of [[-.14, .1], [-.34, .09], [-.54, .08]]) { emblem(c, bn, 'fleur', sz, c.M(blue, { r: .6 }), .15, y, .012, 0); emblem(c, bn, 'fleur', sz, c.M(blue, { r: .6 }), .15, y, -.016, PI); }
+  for (const x of [.02, .15, .28]) { c.add(bn, c.G.cyl(.012, .012, .08, 5), gold, x, x == .15 ? -.78 : -.84, 0); c.add(bn, c.G.cone(.026, .12, 6), c.M(x == .15 ? 0x1f3f95 : 0xd2a43c, { m: .3, r: .6, d: 1 }), x, x == .15 ? -.86 : -.92, 0, { r: [PI, 0, 0] }); }
+  hold(c, h.hips, 'hand_R', sp, 0, -.05, .0, .12, 0, .06);
   for (const k of [-1, 1]) K.pouch(c, c.bones.hips, 0x5a3720, k * .17, -.06, -.04, .7, gold);
   return finalize(c, h.root, { R: 1 }); } };
 

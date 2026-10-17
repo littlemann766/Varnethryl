@@ -144,7 +144,7 @@ html[data-ctl=stick] .dpad,html[data-ctl=dpad] #stick,html[data-ctl=dpad] #stick
 #mirrorCard[hidden]{display:none}
 </style><link rel="stylesheet" href="hud.css"/><title>Varnethryl • Open-World RPG</title></head><body>
 <div id="app">
-<header class="topbar"><div class="brand"><div class="crest">✦</div><div><strong>VARNETHRYL</strong><small>LEGENDS ARE FORGED · v0.6.0</small></div></div><div class="resources"><span title="Gold">🪙 <b id="goldCount">0</b></span><span title="Forge shards">◆ <b id="shardCount">0</b></span><span title="Account level">✦ <b id="accountLevel">1</b></span></div><div class="pwaTools"><span id="offlineStatus" aria-live="polite">Online</span><button id="openSettings" class="installBtn gearBtn" type="button" data-go="settings" aria-label="Settings">⚙</button><button id="installAppBtn" class="installBtn" type="button">⬇ Install</button><button id="updateAppBtn" class="installBtn" type="button" hidden>↻ Update ready</button></div></header>
+<header class="topbar"><div class="brand"><div class="crest">✦</div><div><strong>VARNETHRYL</strong><small>LEGENDS ARE FORGED · v0.6.1</small></div></div><div class="resources"><span title="Gold">🪙 <b id="goldCount">0</b></span><span title="Forge shards">◆ <b id="shardCount">0</b></span><span title="Account level">✦ <b id="accountLevel">1</b></span></div><div class="pwaTools"><span id="offlineStatus" aria-live="polite">Online</span><button id="openSettings" class="installBtn gearBtn" type="button" data-go="settings" aria-label="Settings">⚙</button><button id="installAppBtn" class="installBtn" type="button">⬇ Install</button><button id="updateAppBtn" class="installBtn" type="button" hidden>↻ Update ready</button></div></header>
 <div id="toast" role="status" aria-live="polite"></div>
 <main>
 <section id="adventure" class="screen active">
@@ -653,7 +653,9 @@ function bind(a) {
 }
 function rebind() { state_ = api.state(); ensure(state_); render(); }
 // ---------- progression ----------
-function mortimerPresent() { const v = state_.veyra; return v.done.includes('V1') && (v.ch >= 3 || v.stage !== 'offer' || v.done.includes('V2')); }
+// Mortimer walks with the party from V2 on. Restored to the 0.4.0-0.6.0 looser rule (V1 done and not merely "offered"): any save that
+// has finished V1 and has moved on shows him, including saves whose chapter bookkeeping is slightly off. A fresh save never shows him.
+function mortimerPresent() { const v = state_ && state_.veyra; if (!v || !Array.isArray(v.done) || !v.done.includes('V1')) return false; return v.ch >= 3 || v.stage !== 'offer' || v.done.includes('V2'); }
 function unlockCheck() {
   const v = state_.veyra;
   if (v.stage === 'locked' && (state_.kills >= 3 || state_.questStep >= 1)) { v.stage = 'offer'; api.log('A bat has delivered a letter to Liongate. Open the story card to read it.'); api.save(); setTimeout(render, 0); }
@@ -924,6 +926,7 @@ function figure(C, x, y, t, cloak, trim, label, crown) {
 }
 // ---------- test hooks (read-only helpers; they ship in the page like window.__vn does) ----------
 const debug = {
+  mortimerPresent: () => mortimerPresent(),
   chapters: () => CHAPTERS.map(c => ({ id: c.id, title: c.title, zone: c.zone, fights: c.fights.length })),
   killQuestEnemies() { const rt = api.runtime; for (const e of rt.enemy.filter(x => x.qid && x.hp > 0 && x.qid !== 'veyra')) { e.hold = 0; e.hp = 1; api.hitEnemy(e, state_.active, 1); } },
   setVeyraHp(frac) { const e = api.runtime.enemy.find(x => x.qid === 'veyra' && x.hp > 0); if (!e) return false; e.hp = Math.max(1, Math.floor(e.maxHp * frac)); api.hitEnemy(e, state_.active, 1e-9); return true; },
@@ -1398,7 +1401,9 @@ function tick(dt){dt=CM.timeScale(dt,runtime.time+dt,Settings.reducedMotion());r
  const spd=Math.hypot(runtime.vx,runtime.vy);if(spd>VM*1.4){runtime.vx*=VM*1.4/spd;runtime.vy*=VM*1.4/spd}
  runtime.moving=spd>.012;runtime.speed=spd;
  if(Math.abs(runtime.vx)>.01)directions[state.active]=runtime.vx<0?-1:1;
- runtime.x=clamp(runtime.x+runtime.vx*dt,35,1820);runtime.y=clamp(runtime.y+runtime.vy*dt,35,1170)}
+ runtime.x=clamp(runtime.x+runtime.vx*dt,35,1820);runtime.y=clamp(runtime.y+runtime.vy*dt,35,1170);
+ if(!(isFinite(runtime.x)&&isFinite(runtime.y)&&isFinite(runtime.vx)&&isFinite(runtime.vy))){runtime.x=isFinite(runtime.x)?runtime.x:330;runtime.y=isFinite(runtime.y)?runtime.y:300;runtime.vx=runtime.vy=0;runtime.speed=0} // self-heal: a NaN position is unrecoverable (blank world, no movement)
+}
  if(runtime.x>1790&&ZONES.find(z=>z.id===state.zone)?.portal?.right){enterZone(ZONES.find(z=>z.id===state.zone).portal.right);runtime.x=160;}if(runtime.x<55&&ZONES.find(z=>z.id===state.zone)?.portal?.left){enterZone(ZONES.find(z=>z.id===state.zone).portal.left);runtime.x=1650;}
  const others=state.party.filter(p=>p!==state.active);for(const k of Object.keys(runtime.companions))if(!others.includes(+k))delete runtime.companions[k];for(let i=1;i<=others.length;i++){let id=others[i-1],anchorX=runtime.x-((i%2===1)?44:-40),anchorY=runtime.y+30+Math.floor(i/2)*27;let c=runtime.companions[id]||{x:anchorX,y:anchorY,attackAt:0};let dist=Math.hypot(anchorX-c.x,anchorY-c.y);if(dist>2){let q=Math.min(dist,dt*.2);c.x+=(anchorX-c.x)/dist*q;c.y+=(anchorY-c.y)/dist*q}c.walking=dist>2;if(dist>3)directions[id]=anchorX-c.x<0?-1:1;runtime.companions[id]=c;let enemy=nearestEnemy(190,c.x,c.y);if(enemy&&runtime.time>c.attackAt){attackPulse[id]=runtime.time;hitEnemy(enemy,id,HEROES[id].style==='heal'?.56:.72);c.attackAt=runtime.time+1350;}if(HEROES[id].style==='heal'&&runtime.time>(c.healAt||0)){let low=state.party.find(id2=>runtime.hp[id2]/heroMax(id2)<.48);if(low!==undefined){let n=Math.round(combinedStats(id).attack*1.5);runtime.hp[low]=Math.min(heroMax(low),runtime.hp[low]+n);logDamage(c.x,c.y-26,`+${fmt(n)}`,'#6fe4bc');c.healAt=runtime.time+8000;}}}
  if(state.zone!=='village'||SHOW_ENEMIES){if(runtime.enemy.length< (state.zone==='boss'?1:state.zone==='forest'?5:4)&&runtime.time>runtime.spawnAt)spawnEnemies();for(const e of runtime.enemy)enemyAttacks(e,dt);runtime.enemy=runtime.enemy.filter(e=>e.hp>0);let active=HEROES[state.active];let range=['mage','heal','ranged','support'].includes(active.style)?205:92;if(nearestEnemy(range)&&runtime.time>=runtime.attackUntil)basicAttack();}
@@ -1518,7 +1523,10 @@ const fast=(el,fn)=>{el.addEventListener('pointerdown',e=>{e.preventDefault();fn
 let motionKeys=new Set(['w','a','s','d','ArrowUp','ArrowLeft','ArrowDown','ArrowRight']);window.addEventListener('keydown',e=>{let k=e.key.length===1?e.key.toLowerCase():e.key;if(motionKeys.has(k)){if(e.target.tagName!=='INPUT'){e.preventDefault();runtime.keys.add(k)}}if(k===' '&&view.tab==='adventure'){e.preventDefault();specialAttack()}if(k==='Escape'&&$('modal').open)$('modal').close()});window.addEventListener('keyup',e=>runtime.keys.delete(e.key.length===1?e.key.toLowerCase():e.key));window.addEventListener('blur',()=>runtime.keys.clear());document.querySelectorAll('[data-dir]').forEach(b=>{let key={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'}[b.dataset.dir];b.addEventListener('pointerdown',e=>{e.preventDefault();runtime.keys.add(key);b.setPointerCapture(e.pointerId)});b.addEventListener('pointerup',()=>runtime.keys.delete(key));b.addEventListener('pointercancel',()=>runtime.keys.delete(key));b.addEventListener('lostpointercapture',()=>runtime.keys.delete(key))});
 const canvas=$('game');canvas.addEventListener('pointerdown',e=>{let r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)+runtime.camera.x,y=(e.clientY-r.top)+runtime.camera.y;let target=nearestEnemy(38,x,y);if(target){runtime.target=target.id;toast(`Target: ${target.name}`)}else runtime.walkingTarget={x,y};});
 if(matchMedia('(pointer:coarse)').matches)document.querySelectorAll('.hudLine')[1].innerHTML='<span>Tap an enemy to target</span><span>Drag/tap ground to move</span>';
-let lastFrame=performance.now(),lastHud=0;function frame(now){let dt=Math.min(55,now-lastFrame);lastFrame=now;if(!document.hidden&&view.tab==='adventure')tick(dt);if(view.tab==='adventure'){drawWorld();Controls.refresh();if(now-lastHud>400){lastHud=now;renderParty();renderTarget();$('enemyCount').textContent=state.zone==='village'?'Safe territory':`${runtime.enemy.length} enemies`;}}requestAnimationFrame(frame)}
+let lastFrame=performance.now(),lastHud=0;function frame(now){requestAnimationFrame(frame); // schedule first: an exception below must never stop the render loop (0.6.0 freeze)
+ try{let dt=Math.max(0,Math.min(55,(now-lastFrame)||0)); // the first rAF timestamp can precede performance.now() taken at module start: never feed tick() a negative dt
+ lastFrame=now;if(!document.hidden&&view.tab==='adventure')tick(dt);if(view.tab==='adventure'){drawWorld();Controls.refresh();if(now-lastHud>400){lastHud=now;renderParty();renderTarget();$('enemyCount').textContent=state.zone==='village'?'Safe territory':`${runtime.enemy.length} enemies`;}}}
+ catch(e){if((frame.errs=(frame.errs||0)+1)<=5)console.error('frame error',e)}}
 resetHP();renderAll();if(state.zone==='boss')spawnEnemies();requestAnimationFrame(frame);document.addEventListener('visibilitychange',()=>{if(document.hidden){save();runtime.keys.clear()}});
 // Service worker installation and updates are managed by pwa.js.
 Hud.init({get state(){return state},runtime,HEROES,ZONES,heroMax,fmt,esc,toast,switchTab,modal,level:nLevel,log,Controls,renderAdventure});

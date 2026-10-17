@@ -103,3 +103,7 @@ html.ts-xlarge .screen:not(#adventure),html.ts-xlarge .adventureTop,html.ts-xlar
 .stChoices{display:flex;flex-direction:column;gap:8px;margin-top:8px}.stChoice{min-height:48px;font-size:15px;text-align:left}
 .stBtns{display:flex;gap:10px;margin-top:10px}.stBtns button{flex:1;min-height:48px;font-size:15px}.stBtns .stSkip{flex:none;min-width:96px}
 .stNext[hidden]{display:none}
+
+/* 0.5.0 quest: Mirrored Flame */
+.sc-forge{background:linear-gradient(160deg,#4a3a7a,#0e1226)}
+#mirrorCard[hidden]{display:none}

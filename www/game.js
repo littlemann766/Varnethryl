@@ -81,7 +81,7 @@ function tick(dt){dt=CM.timeScale(dt,runtime.time+dt,Settings.reducedMotion());r
  const spd=Math.hypot(runtime.vx,runtime.vy);if(spd>VM*1.4){runtime.vx*=VM*1.4/spd;runtime.vy*=VM*1.4/spd}
  runtime.moving=spd>.012;runtime.speed=spd;
  if(Math.abs(runtime.vx)>.01)directions[state.active]=runtime.vx<0?-1:1;
- runtime.x=clamp(runtime.x+runtime.vx*dt,35,1820);runtime.y=clamp(runtime.y+runtime.vy*dt,35,1170);
+ runtime.x=clamp(runtime.x+runtime.vx*dt,35,1820);runtime.y=clamp(runtime.y+runtime.vy*dt,World.active(state.zone)&&runtime.canvas?World.minY(state.zone,runtime.canvas.clientHeight||720):35,1170);
  if(!(isFinite(runtime.x)&&isFinite(runtime.y)&&isFinite(runtime.vx)&&isFinite(runtime.vy))){runtime.x=isFinite(runtime.x)?runtime.x:330;runtime.y=isFinite(runtime.y)?runtime.y:300;runtime.vx=runtime.vy=0;runtime.speed=0} // self-heal: a NaN position is unrecoverable (blank world, no movement)
 }
  if(runtime.x>1790&&ZONES.find(z=>z.id===state.zone)?.portal?.right){enterZone(ZONES.find(z=>z.id===state.zone).portal.right);runtime.x=160;}if(runtime.x<55&&ZONES.find(z=>z.id===state.zone)?.portal?.left){enterZone(ZONES.find(z=>z.id===state.zone).portal.left);runtime.x=1650;}

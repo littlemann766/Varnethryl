@@ -82,3 +82,24 @@ html.ts-xlarge .screen:not(#adventure),html.ts-xlarge .adventureTop,html.ts-xlar
 .bottomNav{overflow-x:auto}
 .touchControls{inset:0!important;padding:10px}
 @media(orientation:landscape) and (max-height:520px){.worldFrame{aspect-ratio:auto;min-height:0;height:calc(100dvh - 150px);scroll-margin:74px 0 70px;max-height:none}.adventureTop{display:none}}
+
+/* 0.4.0 quest: storyboard panels */
+.storyBanner{grid-column:1/-1}.storyBanner[hidden]{display:none}
+.storyBannerBtn{width:100%;min-height:52px;font-size:15px;background:linear-gradient(130deg,#4a2f6e,#7b4aa8);border:1px solid #d3b4ff;color:#fff;border-radius:11px}
+.vqCard[hidden]{display:none}.vqBtn{min-height:44px;font-size:14px;flex:1}.vqBtn.small{min-height:44px;padding:6px 10px;flex:none}
+.storyDlg{width:min(560px,96vw);max-width:96vw;padding:12px;background:#10182a;border:2px solid #b992f0}
+.storyDlg::backdrop{background:#000c}
+.stFrame{position:relative;aspect-ratio:16/9;border-radius:10px;border:3px solid #e8d9b5;box-shadow:inset 0 0 40px #0009;display:grid;place-items:center;overflow:hidden;background:linear-gradient(160deg,#2b3550,#141a2c)}
+.stArt{font-size:clamp(46px,16vw,84px);letter-spacing:6px;filter:drop-shadow(0 4px 6px #000a)}
+.stNum{position:absolute;left:8px;top:6px;font-size:10px;letter-spacing:2px;color:#e8d9b5;background:#0008;padding:2px 6px;border-radius:4px}
+.sc-library{background:linear-gradient(160deg,#7a4a1e,#2a1a14)}.sc-court{background:linear-gradient(160deg,#6a2f3e,#241326)}
+.sc-fire{background:linear-gradient(160deg,#a8341e,#3a1458)}.sc-wilds{background:linear-gradient(160deg,#2f6b4a,#13261e)}
+.sc-bridge{background:linear-gradient(160deg,#5a6a4a,#1e2a2a)}.sc-shrine{background:linear-gradient(160deg,#4a3a4a,#16121a)}
+.sc-coast{background:linear-gradient(160deg,#2f8f9a,#122a3a)}.sc-snow{background:linear-gradient(160deg,#c3d8ee,#41607f)}
+.sc-manor{background:linear-gradient(160deg,#3a2f52,#12101c)}.sc-ballroom{background:linear-gradient(160deg,#3a3f7a,#0e0f1e)}
+.sc-dawn{background:linear-gradient(160deg,#f1c36a,#8a4f7a)}
+.stBox{margin-top:10px;background:#18223a;border:1px solid #4a5a82;border-radius:10px;padding:10px 12px;min-height:110px}
+.stWho{color:#f0d6a8;font-family:Georgia,serif;font-size:15px}.stText{color:#eae6d9;font-size:15px;line-height:1.5;margin:6px 0 4px}
+.stChoices{display:flex;flex-direction:column;gap:8px;margin-top:8px}.stChoice{min-height:48px;font-size:15px;text-align:left}
+.stBtns{display:flex;gap:10px;margin-top:10px}.stBtns button{flex:1;min-height:48px;font-size:15px}.stBtns .stSkip{flex:none;min-width:96px}
+.stNext[hidden]{display:none}

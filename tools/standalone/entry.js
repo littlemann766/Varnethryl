@@ -29,7 +29,7 @@ async function load(id){
   if(cur) scene.remove(cur);
   // fresh instance each time so skeleton state is clean
   const THREEclone = (await import_clone())(g.scene);
-  cur = THREEclone; cur.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}}); scene.add(cur);
+  cur = THREEclone; cur.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}}); scene.add(cur); { const bb=new THREE.Box3().setFromObject(cur); state.h=Math.max(1.9,bb.max.y); }
   clips = g.animations; mixer = new THREE.AnimationMixer(cur); state.id=id; play(state.anim);
   status.textContent=LABEL[id]; mark();
 }
@@ -50,6 +50,6 @@ const up=e=>{ptrs.delete(e.pointerId);pd=0;}; cv.addEventListener('pointerup',up
 cv.addEventListener('wheel',e=>{e.preventDefault();state.dist=Math.max(2,Math.min(11,state.dist*(1+e.deltaY*.0015)));},{passive:false});
 addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
 function frame(){const dt=clock.getDelta(); if(mixer)mixer.update(qs.get('t')?0:dt); if(state.spin)state.yaw+=dt*.6;
-  const d=state.dist*(cam.aspect<1?Math.min(1.7,.95/Math.max(.5,cam.aspect)):1),p=state.pitch; cam.position.set(Math.sin(state.yaw)*Math.cos(p)*d,1.05+Math.sin(p)*d,Math.cos(state.yaw)*Math.cos(p)*d); cam.lookAt(0,1.05+(cam.aspect<1?.35:0),0); R.render(scene,cam); requestAnimationFrame(frame);}
+  const fit=Math.max(1,(state.h||1.9)/1.75),d=fit*state.dist*(cam.aspect<1?Math.min(1.7,.95/Math.max(.5,cam.aspect)):1),p=state.pitch; cam.position.set(Math.sin(state.yaw)*Math.cos(p)*d,1.05+Math.sin(p)*d,Math.cos(state.yaw)*Math.cos(p)*d); cam.lookAt(0,(1.05+(cam.aspect<1?.35:0))*Math.max(1,fit*.95),0); R.render(scene,cam); requestAnimationFrame(frame);}
 window.__state=state; window.__load=load; window.__play=play;
 window.__ready=load(state.id).then(frame).catch(e=>{status.textContent='Error: '+e;});

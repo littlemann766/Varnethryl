@@ -56,11 +56,19 @@ function drawFallShimmer(C,l,x,y,dw,dh,now){const f=FX[quality()];if(!f.shimmer|
  C.restore()}
 // ---------- world-space props (called inside the camera transform) ----------
 export function drawProps(C,zone,camX,camY,cw,ch,playerY,pass){const c=cfgOf(zone);if(!c)return;C.imageSmoothingEnabled=true;const ps=clamp(Math.min(ch/720,cw/1100)+.2,.55,1);
- for(const p of c.props||[]){const im=ok(p.src);if(!im)continue;const front=p.y>playerY;if((pass==='front')!==front)continue;
-  const w=p.w*ps,h=w*im.naturalHeight/im.naturalWidth,x=p.x-w/2,y=p.y-h;if(x+w<camX-20||x>camX+cw+20||y+h<camY-20||y>camY+ch+20)continue;
-  if(!p.noShadow)C.drawImage(shadowSpr(),p.x-w*.45,p.y-h*.04,w*.9,Math.max(8,h*.12));
+ for(const p of c.props||[]){const im=ok(p.src);if(!im)continue;
+  // 'ground' anchored props (buildings, banners): the painted ground is screen-fixed, so their base follows the ground line
+  // (vp.gt + gy) instead of a fixed world y; otherwise buildings drift up off the grass as the hero walks (floating bug, 0.6.1).
+  const py=p.anchor==='ground'?vp.gt+camY+(p.gy||0):p.y;
+  const front=py>playerY;if((pass==='front')!==front)continue;
+  const w=p.w*ps,h=w*im.naturalHeight/im.naturalWidth,x=p.x-w/2,y=py-h;if(x+w<camX-20||x>camX+cw+20||y+h<camY-20||y>camY+ch+20)continue;
+  if(p.anchor==='ground')C.drawImage(shadowSpr(),p.x-w*.48,py-Math.max(6,h*.03),w*.96,Math.max(14,h*.1));
+  else if(!p.noShadow)C.drawImage(shadowSpr(),p.x-w*.45,py-h*.04,w*.9,Math.max(8,h*.12));
   let sway=0;if(p.sway&&FX[quality()].sway&&!Settings.reducedMotion())sway=Math.sin(performance.now()*.0012+p.x)*.012;
-  if(sway){C.save();C.translate(p.x,p.y);C.rotate(sway);C.drawImage(im,-w/2,-h,w,h);C.restore()}else C.drawImage(im,x,y,w,h)}}
+  if(sway){C.save();C.translate(p.x,py);C.rotate(sway);C.drawImage(im,-w/2,-h,w,h);C.restore()}else C.drawImage(im,x,y,w,h)}}
+// Walkable floor: the hero may not stand above the painted ground line (they would walk on the hills behind the buildings).
+// Returns the minimum world y for the current viewport height. Camera: camY=max(y-.6ch,-.45ch) => hero screen y=min(.6ch,y+.45ch).
+export function minY(zone,ch){return cfgOf(zone)?Math.max(35,Math.ceil(ch*((cfgOf(zone).groundTop||.7)-.45)+10)):35}
 export function shadow(C,x,y,r=24){C.drawImage(shadowSpr(),x-r*1.15,y+3,r*2.3,r*.85)}
 // ---------- screen-space effects ----------
 const parts={leaves:[],motes:[],seed:1};

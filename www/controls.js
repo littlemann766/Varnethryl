@@ -39,6 +39,7 @@ const heroSkills=()=>{const h=api.HEROES[api.state.active];return resolve(h.id,h
 function cdOf(id){return cd[id]||(cd[id]={})}
 function ch(id){return charge[id]??0}
 export function addCharge(id,n){charge[id]=clamp(ch(id)+n,0,100)}
+export const chargeOf=id=>ch(id);
 const ring=(b,p,ready)=>{b.style.setProperty('--p',clamp(p,0,1).toFixed(3));b.classList.toggle('ready',!!ready)};
 function inRange(range){const e=api.runtime.enemy.find(x=>x.id===api.runtime.target&&x.hp>0)||api.nearestEnemy(range);
  if(!e||Math.hypot(e.x-api.runtime.x,e.y-api.runtime.y)>range)return null;return e}
@@ -78,7 +79,7 @@ export function refresh(){if(!api)return;const rt=api.runtime,id=api.state.activ
   else{const rem=Math.max(0,(c[s]||0)-rt.time),p=k.cd?rem/(k.cd||1):0;ring(b,p,false);b.classList.toggle('cooling',rem>0);b.dataset.cd=rem>0?Math.ceil(rem/1000):''}}
  const a=$('touchAttack');if(a){const rem=Math.max(0,rt.attackUntil-rt.time);ring(a,rem/1020,false);a.classList.toggle('cooling',rem>60)}}
 // ---------- keyboard (desktop) ----------
-const KEYS={j:()=>basic(),k:()=>useSkill('minor'),l:()=>useSkill('heavy'),u:()=>useSkill('superHeavy'),i:()=>useSkill('ultimate')};
+const KEYS={j:()=>basic(),k:()=>useSkill('minor'),l:()=>useSkill('heavy'),u:()=>useSkill('superHeavy'),i:()=>useSkill('ultimate'),'1':()=>basic(),'2':()=>useSkill('minor'),'3':()=>useSkill('heavy'),'4':()=>useSkill('superHeavy'),'5':()=>useSkill('ultimate')};
 export function init(a){api=a;
  const fast=(el,fn)=>el&&el.addEventListener('pointerdown',e=>{if(document.querySelector('.worldFrame.editing'))return;e.preventDefault();fn();a.renderTarget()});
  fast($('touchAttack'),basic);for(const s of SLOTS)fast($(slotBtn[s]),()=>useSkill(s));

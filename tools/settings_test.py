@@ -10,7 +10,7 @@ with sync_playwright() as p:
     pg=ctx.new_page();errs=[];pg.on('pageerror',lambda e:errs.append(str(e)));pg.on('console',lambda m:errs.append(m.text) if m.type=='error' else None)
     pg.goto('http://localhost:8099/index.html');pg.wait_for_timeout(800)
     pg.screenshot(path=D+f'{name}-1-default-adventure.png')
-    pg.click('#openSettings');pg.wait_for_timeout(300)
+    pg.click('#hudMain');pg.click('#openSettings');pg.wait_for_timeout(300)
     pg.screenshot(path=D+f'{name}-2-settings.png',full_page=True)
     # change settings
     pg.fill('#setMusic','30');pg.dispatch_event('#setMusic','change')
@@ -52,7 +52,7 @@ with sync_playwright() as p:
     # game still works: tap attack not in edit
     pg.screenshot(path=D+f'{name}-7-after-reload.png')
     # reset
-    pg.click('#openSettings');pg.click('#setResetLayout');pg.click('.bottomNav [data-go=adventure]');pg.wait_for_timeout(500)
+    pg.click('#hudMain');pg.click('#openSettings');pg.click('#setResetLayout');pg.click('.bottomNav [data-go=adventure]');pg.wait_for_timeout(500)
     s3=box('#touchSkill');f3=box('.worldFrame');print('rel',rel0,(s3['x']-f3['x'],s3['y']-f3['y']));ok(name+' reset restores default',abs(s3['x']-f3['x']-rel0[0])<4 and abs(s3['y']-f3['y']-rel0[1])<4)
     pg.screenshot(path=D+f'{name}-8-after-reset.png')
     ok(name+' no js errors',not errs);print(errs[:3])
@@ -62,6 +62,6 @@ with sync_playwright() as p:
   pg.evaluate("""()=>{const s=JSON.parse(localStorage.getItem('guildbound_rpg_save_v1')||'null')||window.__vn.state;s.settings={textSize:'xlarge',musicVolume:.1,updatedAt:5};localStorage.setItem('guildbound_rpg_save_v1',JSON.stringify(s));localStorage.removeItem('varnethryl_settings_v1')}""")
   pg.reload();pg.wait_for_timeout(600)
   ok('synced settings from save envelope',pg.evaluate("window.__vn.Settings.get().textSize==='xlarge'"))
-  pg.click('#openSettings');pg.wait_for_timeout(200);pg.screenshot(path=D+'portrait-9-xlarge-from-sync.png',full_page=True)
+  pg.click('#hudMain');pg.click('#openSettings');pg.wait_for_timeout(200);pg.screenshot(path=D+'portrait-9-xlarge-from-sync.png',full_page=True)
   b.close()
 print(sum(1 for _,c in res if not c),'failures')

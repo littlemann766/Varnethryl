@@ -1,4 +1,4 @@
-# Varnethryl RPG — v0.4.0
+# Varnethryl RPG — v0.6.0
 
 This is a **separate game project** from PayAviator. It includes the same 20 original hero portraits and sprite cutouts, the playable single-player prototype, quest and boss systems, equipment RNG, Mystic Forge, and local progress backups.
 

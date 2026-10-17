@@ -1,0 +1,259 @@
+VARNETHRYL - CLASS SKILL POOLS & PLACEHOLDER ULTIMATES
+============================================================
+
+For team review. Source of truth: www/skills.js (CLASS_SKILLS, ULTIMATES). Motion/VFX: www/classmotion.js.
+Skill resolution: hero override > class pool > default. Each hero uses their class pool for Minor / Heavy / Super Heavy,
+and has ONE unique Ultimate (all ultimates below are PLACEHOLDERS for the team to replace).
+
+Fields: cd = cooldown (s), x = damage/heal multiplier, rng = range (px), splash = splash radius (px), effect, anim = attack animation family, vfx = effect id.
+
+PART 1 - CLASS POOLS (20 classes)
+------------------------------------------------------------
+
+KNIGHT   (heroes: Sir Aldric)
+  motion: speed x0.88, weight 0.95, attack family slash, idle breath
+  Minor       Shield Bash          cd  4.2s  x1.5  rng 105  splash 0    control  anim bash     vfx ring_bash
+  Heavy       Guardian Slam        cd  8.5s  x2.5  rng 120  splash 70   damage   anim overhead vfx ring_gold
+  Super Heavy Bulwark Charge       cd 15.0s  x4.2  rng 200  splash 120  dash     anim bash     vfx ring_quake
+
+RANGER   (heroes: Lady Elira)
+  motion: speed x1.08, weight 0.25, attack family draw, idle sway
+  Minor       Aimed Shot           cd  3.6s  x1.5  rng 300  splash 0    damage   anim draw     vfx arrow_green
+  Heavy       Piercing Arrow       cd  8.0s  x2.6  rng 340  splash 60   damage   anim draw     vfx arrow_volley
+  Super Heavy Rain of Arrows       cd 15.0s  x4.2  rng 320  splash 170  damage   anim draw     vfx arrow_volley
+
+CLERIC   (heroes: Brother Thorne)
+  motion: speed x0.92, weight 0.35, attack family cast, idle sway
+  Minor       Mend                 cd  3.8s  x1.5  rng 260  splash 0    heal     anim cast     vfx rays_heal
+  Heavy       Radiant Smite        cd  8.3s  x2.4  rng 280  splash 80   damage   anim cast     vfx rays_holy
+  Super Heavy Sanctuary            cd 15.5s  x3.8  rng 260  splash 170  heal     anim cast     vfx rays_big
+
+ROGUE   (heroes: Nyx Varrin)
+  motion: speed x1.2, weight 0.2, attack family flurry, idle ready
+  Minor       Backstab             cd  3.2s  x1.6  rng 105  splash 0    damage   anim flurry   vfx flurry_shadow
+  Heavy       Shadow Fan           cd  7.5s  x2.3  rng 150  splash 90   damage   anim flurry   vfx flurry_shadow
+  Super Heavy Death Blossom        cd 13.5s  x4    rng 140  splash 130  damage   anim flurry   vfx flurry_big_shadow
+
+MAGE   (heroes: Rowan Firebrand)
+  motion: speed x0.98, weight 0.2, attack family cast, idle float
+  Minor       Firebolt             cd  3.6s  x1.6  rng 300  splash 0    damage   anim cast     vfx orb_fire
+  Heavy       Flame Burst          cd  8.2s  x2.5  rng 280  splash 110  damage   anim cast     vfx orb_fire_big
+  Super Heavy Meteor               cd 15.5s  x4.5  rng 320  splash 160  damage   anim cast     vfx orb_meteor
+
+PALADIN   (heroes: Dame Seraphine)
+  motion: speed x0.92, weight 0.85, attack family bash, idle breath
+  Minor       Smiting Strike       cd  4.0s  x1.5  rng 110  splash 0    damage   anim slash    vfx arc_gold
+  Heavy       Consecrated Hammer   cd  8.5s  x2.4  rng 120  splash 80   damage   anim overhead vfx ring_gold
+  Super Heavy Judgment Nova        cd 15.5s  x4    rng 160  splash 170  damage   anim bash     vfx burst_holy
+
+BERSERKER   (heroes: Garruk Stonefist)
+  motion: speed x0.95, weight 0.95, attack family overhead, idle ready
+  Minor       Rending Cleave       cd  3.8s  x1.6  rng 110  splash 0    damage   anim slash    vfx arc_blood
+  Heavy       Skullsplitter        cd  8.0s  x2.8  rng 115  splash 0    damage   anim overhead vfx arc_big_blood
+  Super Heavy Earthshaker Roar     cd 14.5s  x4.4  rng 150  splash 150  damage   anim overhead vfx ring_blood
+
+DRUID   (heroes: Mirelle Thornroot)
+  motion: speed x0.98, weight 0.3, attack family cast, idle sway
+  Minor       Thorn Lash           cd  3.6s  x1.4  rng 280  splash 0    damage   anim cast     vfx orb_leaf
+  Heavy       Rejuvenate           cd  8.5s  x2.2  rng 260  splash 0    heal     anim cast     vfx rays_heal
+  Super Heavy Entangling Grove     cd 15.0s  x3.9  rng 300  splash 170  control  anim cast     vfx burst_leaf
+
+BARD   (heroes: Cedric Vale)
+  motion: speed x1.05, weight 0.3, attack family strum, idle strum
+  Minor       Rousing Chord        cd  4.0s  x1.3  rng 260  splash 0    buff     anim strum    vfx notes_bard
+  Heavy       Discordant Note      cd  8.2s  x2.3  rng 280  splash 100  damage   anim strum    vfx notes_big
+  Super Heavy Crescendo            cd 15.0s  x3.8  rng 280  splash 170  buff     anim strum    vfx notes_big
+
+NECROMANCER   (heroes: Morwen Blackveil)
+  motion: speed x0.9, weight 0.2, attack family cast, idle float
+  Minor       Hex Bolt             cd  3.8s  x1.5  rng 290  splash 0    damage   anim cast     vfx wisp_shadow
+  Heavy       Wither               cd  8.5s  x2.4  rng 270  splash 100  control  anim cast     vfx wisp_big
+  Super Heavy Grave Surge          cd 15.5s  x4.2  rng 300  splash 170  damage   anim cast     vfx wisp_big
+
+RUNEMASTER   (heroes: Kael Runebinder)
+  motion: speed x0.96, weight 0.25, attack family cast, idle float
+  Minor       Arc Rune             cd  3.6s  x1.5  rng 290  splash 0    damage   anim cast     vfx glyph_rune
+  Heavy       Rune Lattice         cd  8.3s  x2.4  rng 270  splash 110  control  anim cast     vfx glyph_big
+  Super Heavy Runic Detonation     cd 15.5s  x4.3  rng 300  splash 170  damage   anim cast     vfx glyph_big
+
+WITCH HUNTER   (heroes: Vesper Crowe)
+  motion: speed x1.02, weight 0.45, attack family draw, idle ready
+  Minor       Silver Bolt          cd  3.8s  x1.5  rng 290  splash 0    damage   anim draw     vfx bolt_blood
+  Heavy       Hexbreaker           cd  8.2s  x2.6  rng 260  splash 0    control  anim draw     vfx bolt_big_blood
+  Super Heavy Purging Volley       cd 15.0s  x4.2  rng 300  splash 130  damage   anim draw     vfx bolt_big_blood
+
+SHAMAN   (heroes: Talia Stormcall)
+  motion: speed x1, weight 0.3, attack family cast, idle sway
+  Minor       Spark                cd  3.4s  x1.4  rng 290  splash 0    damage   anim cast     vfx bolt_storm
+  Heavy       Spirit Ward          cd  8.5s  x2.2  rng 260  splash 0    buff     anim cast     vfx glyph_ward
+  Super Heavy Chain Lightning      cd 15.0s  x4.1  rng 310  splash 170  damage   anim cast     vfx burst_storm
+
+SPEARMAN   (heroes: Orin Ashlance)
+  motion: speed x0.97, weight 0.7, attack family thrust, idle ready
+  Minor       Piercing Jab         cd  3.6s  x1.4  rng 150  splash 0    damage   anim thrust   vfx line_steel
+  Heavy       Sweeping Haft        cd  8.0s  x2.3  rng 140  splash 100  damage   anim slash    vfx arc_steel
+  Super Heavy Impaling Lunge       cd 14.5s  x4.2  rng 220  splash 60   dash     anim thrust   vfx line_big
+
+CRYOMANCER   (heroes: Selene Frostveil)
+  motion: speed x0.98, weight 0.15, attack family cast, idle float
+  Minor       Frost Lance          cd  3.6s  x1.5  rng 300  splash 0    control  anim cast     vfx shard_frost
+  Heavy       Glacial Burst        cd  8.5s  x2.4  rng 280  splash 120  control  anim cast     vfx shard_big
+  Super Heavy Blizzard             cd 15.5s  x4    rng 320  splash 190  control  anim cast     vfx shards_ring
+
+DARK KNIGHT   (heroes: Darius Umbral)
+  motion: speed x0.85, weight 1, attack family overhead, idle breath
+  Minor       Umbral Cut           cd  4.2s  x1.5  rng 115  splash 0    damage   anim slash    vfx arc_umbral
+  Heavy       Soul Cleave          cd  8.8s  x2.6  rng 125  splash 90   damage   anim overhead vfx arc_big_umbral
+  Super Heavy Abyssal Quake        cd 15.5s  x4.3  rng 160  splash 150  damage   anim overhead vfx ring_umbral
+
+DUELIST   (heroes: Finn Valecourt)
+  motion: speed x1.12, weight 0.3, attack family thrust, idle ready
+  Minor       Quick Lunge          cd  3.2s  x1.5  rng 150  splash 0    damage   anim thrust   vfx line_silver
+  Heavy       Riposte              cd  7.5s  x2.4  rng 125  splash 0    damage   anim thrust   vfx line_big
+  Super Heavy Flèche               cd 13.5s  x4    rng 230  splash 0    dash     anim thrust   vfx line_big
+
+ENGINEER   (heroes: Brynn Cogwright)
+  motion: speed x0.97, weight 0.5, attack family draw, idle sway
+  Minor       Rivet Shot           cd  3.6s  x1.4  rng 290  splash 0    damage   anim draw     vfx bolt_brass
+  Heavy       Snare Trap           cd  8.5s  x2.2  rng 240  splash 90   control  anim draw     vfx bolt_net
+  Super Heavy Clockwork Barrage    cd 15.5s  x4.3  rng 300  splash 150  damage   anim draw     vfx bolt_brass
+
+MONK   (heroes: Asha Ironfist)
+  motion: speed x1.22, weight 0.3, attack family flurry, idle ready
+  Minor       Palm Strike          cd  3.2s  x1.5  rng 100  splash 0    damage   anim flurry   vfx flurry_gold
+  Heavy       Dragon Kick          cd  7.5s  x2.4  rng 120  splash 0    damage   anim thrust   vfx flurry_big_gold
+  Super Heavy Thousand Palms       cd 14.0s  x4.1  rng 130  splash 120  damage   anim flurry   vfx flurry_big_gold
+
+BEASTMASTER   (heroes: Rook Wildbane)
+  motion: speed x1.08, weight 0.4, attack family thrust, idle ready
+  Minor       Hunting Thrust       cd  3.6s  x1.4  rng 140  splash 0    damage   anim thrust   vfx line_wild
+  Heavy       Call the Pack        cd  8.5s  x2.4  rng 200  splash 90   summon   anim thrust   vfx line_big_wild
+  Super Heavy Alpha Rampage        cd 15.0s  x4.1  rng 210  splash 130  summon   anim thrust   vfx line_big_wild
+
+
+PART 2 - PLACEHOLDER ULTIMATES (one per hero) -- *** PLACEHOLDER: TEAM TO REPLACE ***
+------------------------------------------------------------
+
+[ 0] Sir Aldric (Knight)
+     Ultimate: Lionheart Bulwark  [PLACEHOLDER]  effect buff  x7  rng 230  splash 160  vfx ring_gold
+     Placeholder: golden shockwave that staggers nearby foes and fortifies the party.
+
+[ 1] Lady Elira (Ranger)
+     Ultimate: Eagle-Eye Barrage  [PLACEHOLDER]  effect damage  x8  rng 330  splash 200  vfx arrow_volley
+     Placeholder: rapid volley of piercing arrows.
+
+[ 2] Brother Thorne (Cleric)
+     Ultimate: Divine Renewal  [PLACEHOLDER]  effect heal  x7  rng 260  splash 200  vfx rays_big
+     Placeholder: mass heal and cleanse.
+
+[ 3] Nyx Varrin (Rogue)
+     Ultimate: Shadow Flurry  [PLACEHOLDER]  effect damage  x8.5  rng 170  splash 140  vfx flurry_big_shadow
+     Placeholder: teleporting dagger flurry.
+
+[ 4] Rowan Firebrand (Mage)
+     Ultimate: Meteor Burst  [PLACEHOLDER]  effect damage  x9  rng 330  splash 220  vfx orb_meteor
+     Placeholder: giant meteor impact.
+
+[ 5] Dame Seraphine (Paladin)
+     Ultimate: Radiant Aegis  [PLACEHOLDER]  effect buff  x6.5  rng 240  splash 180  vfx burst_holy
+     Placeholder: holy aegis shielding the party.
+
+[ 6] Garruk Stonefist (Berserker)
+     Ultimate: Bloodstorm  [PLACEHOLDER]  effect damage  x9  rng 180  splash 190  vfx ring_blood
+     Placeholder: whirling axe storm.
+
+[ 7] Mirelle Thornroot (Druid)
+     Ultimate: Wildgrowth  [PLACEHOLDER]  effect heal  x6.5  rng 280  splash 210  vfx burst_leaf
+     Placeholder: bloom that heals allies and roots foes.
+
+[ 8] Cedric Vale (Bard)
+     Ultimate: Battle Hymn  [PLACEHOLDER]  effect buff  x6  rng 280  splash 220  vfx notes_big
+     Placeholder: party-wide damage and energy buff.
+
+[ 9] Morwen Blackveil (Necromancer)
+     Ultimate: Soul Reap  [PLACEHOLDER]  effect damage  x8.5  rng 300  splash 200  vfx wisp_big
+     Placeholder: drains souls from all nearby foes.
+
+[10] Kael Runebinder (Runemaster)
+     Ultimate: Runic Cascade  [PLACEHOLDER]  effect damage  x8.5  rng 300  splash 210  vfx glyph_big
+     Placeholder: chain of detonating runes.
+
+[11] Vesper Crowe (Witch Hunter)
+     Ultimate: Witchbane Volley  [PLACEHOLDER]  effect damage  x8  rng 320  splash 180  vfx bolt_big_blood
+     Placeholder: silver bolts that silence casters.
+
+[12] Talia Stormcall (Shaman)
+     Ultimate: Thunder Totem  [PLACEHOLDER]  effect damage  x8  rng 310  splash 210  vfx burst_storm
+     Placeholder: totem calling repeated lightning.
+
+[13] Orin Ashlance (Spearman)
+     Ultimate: Impaling Charge  [PLACEHOLDER]  effect damage  x8.5  rng 260  splash 100  vfx line_big
+     Placeholder: long charge through a line of foes.
+
+[14] Selene Frostveil (Cryomancer)
+     Ultimate: Frozen Tempest  [PLACEHOLDER]  effect control  x8  rng 320  splash 230  vfx shards_ring
+     Placeholder: blizzard that freezes foes.
+
+[15] Darius Umbral (Dark Knight)
+     Ultimate: Abyssal Cleave  [PLACEHOLDER]  effect damage  x9  rng 200  splash 170  vfx arc_big_umbral
+     Placeholder: giant dark greatsword cleave.
+
+[16] Finn Valecourt (Duelist)
+     Ultimate: Perfect Riposte  [PLACEHOLDER]  effect damage  x8.5  rng 200  splash 0  vfx line_big
+     Placeholder: counter-strike combo on a single foe.
+
+[17] Brynn Cogwright (Engineer)
+     Ultimate: Clockwork Blast  [PLACEHOLDER]  effect damage  x8.5  rng 320  splash 200  vfx bolt_brass
+     Placeholder: deployed turret barrage.
+
+[18] Asha Ironfist (Monk)
+     Ultimate: Hundred Fists  [PLACEHOLDER]  effect damage  x9  rng 150  splash 150  vfx flurry_big_gold
+     Placeholder: hundred-hit fist barrage.
+
+[19] Rook Wildbane (Beastmaster)
+     Ultimate: Wolfpack Rush  [PLACEHOLDER]  effect summon  x8  rng 260  splash 190  vfx line_big_wild
+     Placeholder: pack of spectral wolves charges.
+
+
+PART 3 - PER-HERO MOTION TWEAKS (on top of class; www/classmotion.js HERO_TWEAKS)
+------------------------------------------------------------
+[ 0] Sir Aldric         Full plate + tower shield; steady, disciplined
+     spd x0.97, acc x0.95, bob x0.9, lean x0.95, turn x0.95, weight x1, atk x1.03
+[ 1] Lady Elira         Light hooded cloak, longbow; quiet, quick on her feet
+     spd x1, cape x1.3, lean x1.05, atk x0.96
+[ 2] Brother Thorne     Long white robes, tall staff; serene, unhurried
+     spd x0.97, acc x0.95, cad x1.05, sway x1.1, hover x1, atk x1.08, cape x1.2
+[ 3] Nyx Varrin         Slim, tattered cloak, twin daggers; predatory
+     spd x1.05, acc x1.1, bob x0.85, lean x1.1, turn x1.15, atk x0.94, cape x1.5
+[ 4] Rowan Firebrand    Flame-red cape, fiery hands; impulsive, showy
+     spd x1.03, acc x1.05, bob x1.1, hover x1.1, atk x0.93, cape x1.4
+[ 5] Dame Seraphine     Plate, big sun shield and mace; graceful but guarded
+     spd x1, acc x1, bob x0.95, lean x1, weight x0.9, atk x1, cape x1
+[ 6] Garruk Stonefist   Huge fur-clad bruiser, greataxe; wild, momentum-driven
+     spd x0.98, acc x0.9, cad x1.05, bob x1.15, lean x1.15, turn x0.9, weight x1, atk x1.12, lunge x1.15, cape x1.2
+[ 7] Mirelle Thornroot  Flowing leaf-green robes and vines; gentle, swaying
+     spd x1, sway x1.2, bob x0.9, hover x0.7, atk x1, cape x1.5
+[ 8] Cedric Vale        Feathered hat, dandy coat, lute; jaunty showman
+     spd x1.03, bob x1.15, sway x1.2, lean x1.1, atk x0.97, cape x1.3
+[ 9] Morwen Blackveil   Hooded dark robes, skull staff; slow, deliberate, floats
+     spd x0.96, acc x0.9, cad x1.05, hover x1.3, atk x1.08, cape x1.5
+[10] Kael Runebinder    Caped scholar, orbiting runes; poised
+     spd x0.99, hover x1.1, sway x0.9, atk x1, cape x1.2
+[11] Vesper Crowe       Long coat, crossbow and blade; wary, efficient
+     spd x1, lean x1.05, turn x1.05, atk x0.95, cape x1.2
+[12] Talia Stormcall    Wind-whipped spirit robes and charms; restless
+     spd x1.03, sway x1.25, hover x1, atk x0.97, cape x1.8
+[13] Orin Ashlance      Plate and banner-spear; disciplined reach fighter
+     spd x0.99, acc x1, cad x1.03, bob x0.95, lunge x1.1, weight x0.85, atk x0.98, cape x1.3
+[14] Selene Frostveil   Ethereal ice gown, glides rather than steps
+     spd x1.02, bob x0.6, hover x1.35, sway x0.9, atk x1.03, cape x1.7
+[15] Darius Umbral      Colossal dark plate and greatsword; slow, crushing
+     spd x0.96, acc x0.95, cad x1.1, bob x0.9, weight x1, atk x1.12, lunge x1.1, cape x1.1
+[16] Finn Valecourt     Long coat and rapier; flamboyant, precise
+     spd x1, acc x1, bob x1.05, lean x1.05, atk x0.96, lunge x1.1, cape x1.4
+[17] Brynn Cogwright    Tool-laden leathers, big backpack, crossbow; tinkerer
+     spd x1, cad x0.98, bob x1.05, weight x0.55, atk x1, cape x0.8
+[18] Asha Ironfist      Lithe martial artist in wraps; fastest, lowest stance
+     spd x1.04, acc x1.05, bob x1.05, lean x1.1, turn x1.1, atk x0.96, cape x1.2
+[19] Rook Wildbane      Spear-hunter with wolf at heel; rugged, alert
+     spd x1, lean x1.05, bob x1, atk x0.98, cape x1.3

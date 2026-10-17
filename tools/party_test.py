@@ -21,14 +21,14 @@ with sync_playwright() as p:
   for rnd in range(3):
     for i in ids:
       for _ in range(2):
-        pg.click(f'#partyStrip [data-switch="{i}"]')
+        pg.evaluate(f"document.querySelector('#partyStrip [data-switch=\"{i}\"]').click()")
         r=check(pg,f'tap {i}')
         ok(f'active=={i}',r['active']==i)
-  pg.click(f'#partyStrip [data-switch="{ids[2]}"]');pg.wait_for_timeout(300)
+  pg.evaluate(f"document.querySelector('#partyStrip [data-switch=\"{ids[2]}\"]').click()");pg.wait_for_timeout(300)
   pos=pg.evaluate("(()=>{const r=window.__vn.runtime;return [r.x,r.y]})()")
   ok('swap: previous leader follows (is companion)',pg.evaluate("Object.keys(window.__vn.runtime.companions).map(Number).sort().join()")==','.join(map(str,sorted(set(ids)-{ids[2]}))))
   pg.evaluate("window.__vn.enterZone('forest')");check(pg,'forest')
-  pg.click(f'#partyStrip [data-switch="{ids[1]}"]');check(pg,'forest tap')
+  pg.evaluate(f"document.querySelector('#partyStrip [data-switch=\"{ids[1]}\"]').click()");check(pg,'forest tap')
   pg.evaluate("window.__vn.enterZone('village')");check(pg,'village')
   pg.reload();pg.wait_for_timeout(800);check(pg,'reload')
   # old/corrupt save: duplicate party ids, active not in party

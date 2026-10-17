@@ -20,6 +20,11 @@ jobs:
       - uses: android-actions/setup-android@v3
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Check game assets
+        run: python3 tools/check_assets.py
+      - name: Check JavaScript syntax
+        run: |
+          for file in www/*.js; do node --check "$file"; done
       - name: Add Android project
         run: npx cap add android
       - name: Copy web assets

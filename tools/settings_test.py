@@ -33,7 +33,7 @@ with sync_playwright() as p:
     pg.mouse.move(cx,cy);pg.mouse.down();pg.mouse.move((cx+tx)/2,(cy+ty)/2,steps=5);pg.mouse.move(tx,ty,steps=5);pg.mouse.up();pg.wait_for_timeout(200)
     after=box('#touchSkill');ok(name+' skill moved',abs(after['x']-before['x'])>30 or abs(after['y']-before['y'])>30)
     # drag dpad
-    d=box('.dpad');pg.mouse.move(d['x']+d['width']/2,d['y']+d['height']/2);pg.mouse.down();pg.mouse.move(fb['x']+fb['width']*.15,fb['y']+fb['height']*.3,steps=8);pg.mouse.up()
+    d=box('#stick');pg.mouse.move(d['x']+d['width']/2,d['y']+d['height']/2);pg.mouse.down();pg.mouse.move(fb['x']+fb['width']*.15,fb['y']+fb['height']*.3,steps=8);pg.mouse.up()
     # drag attack way out of bounds (to off-screen bottom-right)
     a=box('#touchAttack');pg.mouse.move(a['x']+a['width']/2,a['y']+a['height']/2);pg.mouse.down();pg.mouse.move(w-2,h-2,steps=8);pg.mouse.up();pg.wait_for_timeout(200)
     a2=box('#touchAttack');fb=box('.worldFrame')
@@ -42,10 +42,10 @@ with sync_playwright() as p:
     pg.screenshot(path=D+f'{name}-5-edit-dragged.png')
     pg.click('#layoutDone');pg.wait_for_timeout(300)
     lay=json.loads(pg.evaluate("localStorage.getItem('varnethryl_settings_v1')"))['layout']
-    ok(name+' layout saved ls',set(lay)=={'dpad','touchSkill','touchAttack'})
+    ok(name+' layout saved ls',{'stick','touchSkill','touchAttack'}<=set(lay))
     pg.wait_for_timeout(400)
     sv=json.loads(pg.evaluate("localStorage.getItem('guildbound_rpg_save_v1')"))
-    ok(name+' save envelope settings',sv['settings'].get('layout',{}).get('dpad') is not None and sv['version']==1)
+    ok(name+' save envelope settings',sv['settings'].get('layout',{}).get('stick') is not None and sv['version']==1)
     pg.screenshot(path=D+f'{name}-6-custom-layout-play.png')
     pg.reload();pg.wait_for_timeout(800)
     s2=box('#touchSkill');ok(name+' layout persists reload',abs(s2['x']-after['x'])<3 and abs(s2['y']-after['y'])<3)

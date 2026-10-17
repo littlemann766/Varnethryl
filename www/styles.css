@@ -82,3 +82,39 @@ html.ts-xlarge .screen:not(#adventure),html.ts-xlarge .adventureTop,html.ts-xlar
 .bottomNav{overflow-x:auto}
 .touchControls{inset:0!important;padding:10px}
 @media(orientation:landscape) and (max-height:520px){.worldFrame{aspect-ratio:auto;min-height:0;height:calc(100dvh - 150px);scroll-margin:74px 0 70px;max-height:none}.adventureTop{display:none}}
+
+/* controls: analog stick + skill cluster (default positions; the layout editor overrides with left/top) */
+.touchControls{display:block}
+.touchControls>*{position:absolute}
+html[data-ctl=stick] .dpad,html[data-ctl=dpad] #stick,html[data-ctl=dpad] #stickZone{display:none!important}
+.dpad{left:12px;bottom:12px}
+#stick{left:14px;bottom:14px;width:128px;height:128px;border-radius:50%;pointer-events:auto;touch-action:none;user-select:none;
+ background:radial-gradient(circle at 50% 45%,#1a2f48aa 0,#0d1b2baa 62%,#0a1520cc 100%);border:2px solid #c9af7d90;box-shadow:inset 0 0 18px #000a,0 4px 14px #0008}
+#stick::before{content:'';position:absolute;inset:14px;border-radius:50%;border:1px dashed #c9af7d40}
+#stick.floating:not(.active){opacity:.55}
+#stickKnob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;pointer-events:none;
+ background:radial-gradient(circle at 38% 32%,#f6dea9,#c79a4f 55%,#7a5a28);border:1px solid #ffe3b0;box-shadow:0 3px 8px #000b;transition:transform .08s ease-out}
+#stick.active #stickKnob{transition:none}
+#stickZone{left:0;top:40px;width:55%;bottom:0;pointer-events:auto;touch-action:none;display:none}
+.skillBtn{border-radius:50%;width:58px;height:58px;min-height:0!important;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:0;font-size:11px;color:#f2dca8;line-height:1;overflow:visible;position:absolute}
+.skillBtn .ico{display:grid;place-items:center;pointer-events:none}.skillBtn .ico img{width:26px;height:26px}
+.skillBtn small{font-size:8px;letter-spacing:.3px;color:#edce95;pointer-events:none;max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.skillBtn.atk{width:76px;height:76px;right:12px;bottom:12px;background:#3a2412dd!important;border-color:#e5bd74!important}
+#touchSkill{right:98px;bottom:12px}
+#skillHeavy{right:88px;bottom:80px}
+#skillSuper{right:22px;bottom:100px}
+#skillUlt{right:150px;bottom:62px;width:52px;height:52px}
+/* cooldown ring: conic sweep of remaining time; ultimate ring fills with charge */
+.skillBtn .ring{position:absolute;inset:-4px;border-radius:50%;pointer-events:none;
+ background:conic-gradient(#fbbf24 calc(var(--p,0)*360deg),#ffffff22 0);-webkit-mask:radial-gradient(circle,#0000 calc(50% - 4px),#000 calc(50% - 3px));mask:radial-gradient(circle,#0000 calc(50% - 4px),#000 calc(50% - 3px));opacity:var(--ro,0)}
+.skillBtn.cooling{opacity:1;filter:none;color:#8895a8}.skillBtn.cooling .ring{opacity:1}
+.skillBtn.cooling::after{content:attr(data-cd);position:absolute;font-size:15px;font-weight:800;color:#fff;text-shadow:0 1px 3px #000}
+#skillUlt .ring{background:conic-gradient(#8de9ff calc(var(--c,0)*360deg),#ffffff22 0);opacity:1}
+#skillUlt.ready{border-color:#8de9ff!important;box-shadow:0 0 14px #5fd6ffcc;color:#e8fbff;animation:ultPulse 1.2s ease-in-out infinite}
+@keyframes ultPulse{50%{box-shadow:0 0 24px #9be8ffff}}
+.worldFrame.editing #stick.movable{pointer-events:auto}
+.worldFrame.editing #stickZone{display:none!important}
+.worldFrame.editing .skillBtn.movable{pointer-events:auto}
+.worldFrame.editing .skillBtn .ring{opacity:0}
+@media(orientation:landscape) and (max-height:520px){#stick{width:112px;height:112px}}
+.skillBtn.cooling small{visibility:hidden}.skillBtn.cooling .ico{opacity:.45}

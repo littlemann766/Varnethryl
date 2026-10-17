@@ -3,6 +3,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { makeEnterable } from './interiors.js';
+import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -234,6 +235,36 @@ let hero = HEROES[0];
 HEROES.forEach((h, i) => { h.position.set(0, 0, 14); h.visible = i === 0; scene.add(h); });
 function setHero(i) { hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach((b, k) => b.classList.toggle('on', k === i)); }
 { const bar = document.getElementById('heroes'); HERO_NAMES.forEach((n, i) => { const b = document.createElement('button'); b.textContent = n.split(' ').pop(); b.title = n; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => { e.stopPropagation(); setHero(i); }); bar.appendChild(b); }); const q = new URLSearchParams(location.search).get('hero'); if (q != null && HEROES[+q]) setHero(+q); }
+// ---------- Beth's GLB heroes (fallback: procedural heroes above) ----------
+const GLB_IDS = ['aldric', 'darius', 'selene', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne'];
+const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne'];
+const glbInfo = { loaded: [], failed: [] };
+const useGLB = new URLSearchParams(location.search).get('procedural') == null;
+function wrapGLB(g) {
+  const root = new THREE.Group(); const m = g.scene; root.add(m);
+  m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
+  const box = new THREE.Box3().setFromObject(m), hgt = box.max.y - box.min.y;
+  if (hgt > 0.01) { const sc = 1.8 / hgt; m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
+  const mixer = new THREE.AnimationMixer(m), act = {};
+  for (const c of g.animations) act[c.name] = mixer.clipAction(c);
+  if (act.idle) act.idle.play(); if (act.walk) act.walk.play();
+  root.userData = { glb: true, mixer, act, capeUpdate() {} };
+  return root;
+}
+if (useGLB) {
+  const gl = new GLTFLoader();
+  await Promise.all(GLB_IDS.map((id, gi) => new Promise(res => {
+    gl.load('proto3d/models/' + id + '.glb', g => {
+      try {
+        const w = wrapGLB(g); w.visible = false; scene.add(w);
+        if (gi < 3) { const old = HEROES[gi]; w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); scene.remove(old); if (hero === old) hero = w; HEROES[gi] = w; }
+        else { HEROES.push(w); HERO_NAMES.push(GLB_NAMES[gi]); const i = HEROES.length - 1; const bar = document.getElementById('heroes'), b = document.createElement('button'); b.textContent = GLB_NAMES[gi].split(' ').pop(); b.title = GLB_NAMES[gi]; b.addEventListener('pointerdown', e => { e.stopPropagation(); setHero(i); }); bar.appendChild(b); }
+        glbInfo.loaded.push(id);
+      } catch (e) { console.warn('GLB wrap failed', id, e); glbInfo.failed.push(id); }
+      res();
+    }, undefined, err => { console.warn('GLB load failed, using procedural fallback', id); glbInfo.failed.push(id); res(); });
+  })));
+}
 // blob shadow is the real shadow map; no extra.
 const marker = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.55, 20), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: 0.9, depthWrite: false }));
 marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = false; scene.add(marker);
@@ -353,6 +384,7 @@ function updateHero(dt) {
 let walkT = 0, idleT = 0, prevYaw = 0;
 function animateHero(dt) {
   const u = hero.userData, w = Math.min(1, state.speed / SPEED);
+  if (u.glb) { const wk = u.act.walk, id = u.act.idle; if (wk && id) { wk.setEffectiveWeight(w); id.setEffectiveWeight(1 - w); wk.timeScale = 0.6 + state.speed * 0.25; } u.mixer.update(dt); return; }
   walkT += dt * (4 + state.speed * 1.9); idleT += dt;
   const s = Math.sin(walkT) * 0.85 * w;
   u.legL.rotation.x = s; u.legR.rotation.x = -s;
@@ -411,7 +443,7 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 window.__p3d = {
-  state, colliders, get hero() { return hero; }, THREE, renderer, enterables,
+  state, glbInfo, colliders, get hero() { return hero; }, THREE, renderer, enterables,
   get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   teleport(x, z) { state.heroX = x; state.heroZ = z; state.target = null; },

@@ -12,123 +12,123 @@ PART 1 - CLASS POOLS (20 classes)
 
 KNIGHT   (heroes: Sir Aldric)
   motion: speed x0.88, weight 0.95, attack family slash, idle breath
-  Minor      Shield Bash          cd  4.2s  x1.5  rng 105  splash 0    control  anim bash     vfx ring_bash
-  Heavy      Guardian Slam        cd  8.5s  x2.5  rng 120  splash 70   damage   anim overhead vfx ring_gold
-  Super HeavyBulwark Charge       cd 15.0s  x4.2  rng 200  splash 120  dash     anim bash     vfx ring_quake
+  Minor       Shield Bash          cd  4.2s  x1.5  rng 105  splash 0    control  anim bash     vfx ring_bash
+  Heavy       Guardian Slam        cd  8.5s  x2.5  rng 120  splash 70   damage   anim overhead vfx ring_gold
+  Super Heavy Bulwark Charge       cd 15.0s  x4.2  rng 200  splash 120  dash     anim bash     vfx ring_quake
 
 RANGER   (heroes: Lady Elira)
   motion: speed x1.08, weight 0.25, attack family draw, idle sway
-  Minor      Aimed Shot           cd  3.6s  x1.5  rng 300  splash 0    damage   anim draw     vfx arrow_green
-  Heavy      Piercing Arrow       cd  8.0s  x2.6  rng 340  splash 60   damage   anim draw     vfx arrow_volley
-  Super HeavyRain of Arrows       cd 15.0s  x4.2  rng 320  splash 170  damage   anim draw     vfx arrow_volley
+  Minor       Aimed Shot           cd  3.6s  x1.5  rng 300  splash 0    damage   anim draw     vfx arrow_green
+  Heavy       Piercing Arrow       cd  8.0s  x2.6  rng 340  splash 60   damage   anim draw     vfx arrow_volley
+  Super Heavy Rain of Arrows       cd 15.0s  x4.2  rng 320  splash 170  damage   anim draw     vfx arrow_volley
 
 CLERIC   (heroes: Brother Thorne)
   motion: speed x0.92, weight 0.35, attack family cast, idle sway
-  Minor      Mend                 cd  3.8s  x1.5  rng 260  splash 0    heal     anim cast     vfx rays_heal
-  Heavy      Radiant Smite        cd  8.3s  x2.4  rng 280  splash 80   damage   anim cast     vfx rays_holy
-  Super HeavySanctuary            cd 15.5s  x3.8  rng 260  splash 170  heal     anim cast     vfx rays_big
+  Minor       Mend                 cd  3.8s  x1.5  rng 260  splash 0    heal     anim cast     vfx rays_heal
+  Heavy       Radiant Smite        cd  8.3s  x2.4  rng 280  splash 80   damage   anim cast     vfx rays_holy
+  Super Heavy Sanctuary            cd 15.5s  x3.8  rng 260  splash 170  heal     anim cast     vfx rays_big
 
 ROGUE   (heroes: Nyx Varrin)
   motion: speed x1.2, weight 0.2, attack family flurry, idle ready
-  Minor      Backstab             cd  3.2s  x1.6  rng 105  splash 0    damage   anim flurry   vfx flurry_shadow
-  Heavy      Shadow Fan           cd  7.5s  x2.3  rng 150  splash 90   damage   anim flurry   vfx flurry_shadow
-  Super HeavyDeath Blossom        cd 13.5s  x4    rng 140  splash 130  damage   anim flurry   vfx flurry_big_shadow
+  Minor       Backstab             cd  3.2s  x1.6  rng 105  splash 0    damage   anim flurry   vfx flurry_shadow
+  Heavy       Shadow Fan           cd  7.5s  x2.3  rng 150  splash 90   damage   anim flurry   vfx flurry_shadow
+  Super Heavy Death Blossom        cd 13.5s  x4    rng 140  splash 130  damage   anim flurry   vfx flurry_big_shadow
 
 MAGE   (heroes: Rowan Firebrand)
   motion: speed x0.98, weight 0.2, attack family cast, idle float
-  Minor      Firebolt             cd  3.6s  x1.6  rng 300  splash 0    damage   anim cast     vfx orb_fire
-  Heavy      Flame Burst          cd  8.2s  x2.5  rng 280  splash 110  damage   anim cast     vfx orb_fire_big
-  Super HeavyMeteor               cd 15.5s  x4.5  rng 320  splash 160  damage   anim cast     vfx orb_meteor
+  Minor       Firebolt             cd  3.6s  x1.6  rng 300  splash 0    damage   anim cast     vfx orb_fire
+  Heavy       Flame Burst          cd  8.2s  x2.5  rng 280  splash 110  damage   anim cast     vfx orb_fire_big
+  Super Heavy Meteor               cd 15.5s  x4.5  rng 320  splash 160  damage   anim cast     vfx orb_meteor
 
 PALADIN   (heroes: Dame Seraphine)
   motion: speed x0.92, weight 0.85, attack family bash, idle breath
-  Minor      Smiting Strike       cd  4.0s  x1.5  rng 110  splash 0    damage   anim slash    vfx arc_gold
-  Heavy      Consecrated Hammer   cd  8.5s  x2.4  rng 120  splash 80   damage   anim overhead vfx ring_gold
-  Super HeavyJudgment Nova        cd 15.5s  x4    rng 160  splash 170  damage   anim bash     vfx burst_holy
+  Minor       Smiting Strike       cd  4.0s  x1.5  rng 110  splash 0    damage   anim slash    vfx arc_gold
+  Heavy       Consecrated Hammer   cd  8.5s  x2.4  rng 120  splash 80   damage   anim overhead vfx ring_gold
+  Super Heavy Judgment Nova        cd 15.5s  x4    rng 160  splash 170  damage   anim bash     vfx burst_holy
 
 BERSERKER   (heroes: Garruk Stonefist)
   motion: speed x0.95, weight 0.95, attack family overhead, idle ready
-  Minor      Rending Cleave       cd  3.8s  x1.6  rng 110  splash 0    damage   anim slash    vfx arc_blood
-  Heavy      Skullsplitter        cd  8.0s  x2.8  rng 115  splash 0    damage   anim overhead vfx arc_big_blood
-  Super HeavyEarthshaker Roar     cd 14.5s  x4.4  rng 150  splash 150  damage   anim overhead vfx ring_blood
+  Minor       Rending Cleave       cd  3.8s  x1.6  rng 110  splash 0    damage   anim slash    vfx arc_blood
+  Heavy       Skullsplitter        cd  8.0s  x2.8  rng 115  splash 0    damage   anim overhead vfx arc_big_blood
+  Super Heavy Earthshaker Roar     cd 14.5s  x4.4  rng 150  splash 150  damage   anim overhead vfx ring_blood
 
 DRUID   (heroes: Mirelle Thornroot)
   motion: speed x0.98, weight 0.3, attack family cast, idle sway
-  Minor      Thorn Lash           cd  3.6s  x1.4  rng 280  splash 0    damage   anim cast     vfx orb_leaf
-  Heavy      Rejuvenate           cd  8.5s  x2.2  rng 260  splash 0    heal     anim cast     vfx rays_heal
-  Super HeavyEntangling Grove     cd 15.0s  x3.9  rng 300  splash 170  control  anim cast     vfx burst_leaf
+  Minor       Thorn Lash           cd  3.6s  x1.4  rng 280  splash 0    damage   anim cast     vfx orb_leaf
+  Heavy       Rejuvenate           cd  8.5s  x2.2  rng 260  splash 0    heal     anim cast     vfx rays_heal
+  Super Heavy Entangling Grove     cd 15.0s  x3.9  rng 300  splash 170  control  anim cast     vfx burst_leaf
 
 BARD   (heroes: Cedric Vale)
   motion: speed x1.05, weight 0.3, attack family strum, idle strum
-  Minor      Rousing Chord        cd  4.0s  x1.3  rng 260  splash 0    buff     anim strum    vfx notes_bard
-  Heavy      Discordant Note      cd  8.2s  x2.3  rng 280  splash 100  damage   anim strum    vfx notes_big
-  Super HeavyCrescendo            cd 15.0s  x3.8  rng 280  splash 170  buff     anim strum    vfx notes_big
+  Minor       Rousing Chord        cd  4.0s  x1.3  rng 260  splash 0    buff     anim strum    vfx notes_bard
+  Heavy       Discordant Note      cd  8.2s  x2.3  rng 280  splash 100  damage   anim strum    vfx notes_big
+  Super Heavy Crescendo            cd 15.0s  x3.8  rng 280  splash 170  buff     anim strum    vfx notes_big
 
 NECROMANCER   (heroes: Morwen Blackveil)
   motion: speed x0.9, weight 0.2, attack family cast, idle float
-  Minor      Hex Bolt             cd  3.8s  x1.5  rng 290  splash 0    damage   anim cast     vfx wisp_shadow
-  Heavy      Wither               cd  8.5s  x2.4  rng 270  splash 100  control  anim cast     vfx wisp_big
-  Super HeavyGrave Surge          cd 15.5s  x4.2  rng 300  splash 170  damage   anim cast     vfx wisp_big
+  Minor       Hex Bolt             cd  3.8s  x1.5  rng 290  splash 0    damage   anim cast     vfx wisp_shadow
+  Heavy       Wither               cd  8.5s  x2.4  rng 270  splash 100  control  anim cast     vfx wisp_big
+  Super Heavy Grave Surge          cd 15.5s  x4.2  rng 300  splash 170  damage   anim cast     vfx wisp_big
 
 RUNEMASTER   (heroes: Kael Runebinder)
   motion: speed x0.96, weight 0.25, attack family cast, idle float
-  Minor      Arc Rune             cd  3.6s  x1.5  rng 290  splash 0    damage   anim cast     vfx glyph_rune
-  Heavy      Rune Lattice         cd  8.3s  x2.4  rng 270  splash 110  control  anim cast     vfx glyph_big
-  Super HeavyRunic Detonation     cd 15.5s  x4.3  rng 300  splash 170  damage   anim cast     vfx glyph_big
+  Minor       Arc Rune             cd  3.6s  x1.5  rng 290  splash 0    damage   anim cast     vfx glyph_rune
+  Heavy       Rune Lattice         cd  8.3s  x2.4  rng 270  splash 110  control  anim cast     vfx glyph_big
+  Super Heavy Runic Detonation     cd 15.5s  x4.3  rng 300  splash 170  damage   anim cast     vfx glyph_big
 
 WITCH HUNTER   (heroes: Vesper Crowe)
   motion: speed x1.02, weight 0.45, attack family draw, idle ready
-  Minor      Silver Bolt          cd  3.8s  x1.5  rng 290  splash 0    damage   anim draw     vfx bolt_blood
-  Heavy      Hexbreaker           cd  8.2s  x2.6  rng 260  splash 0    control  anim draw     vfx bolt_big_blood
-  Super HeavyPurging Volley       cd 15.0s  x4.2  rng 300  splash 130  damage   anim draw     vfx bolt_big_blood
+  Minor       Silver Bolt          cd  3.8s  x1.5  rng 290  splash 0    damage   anim draw     vfx bolt_blood
+  Heavy       Hexbreaker           cd  8.2s  x2.6  rng 260  splash 0    control  anim draw     vfx bolt_big_blood
+  Super Heavy Purging Volley       cd 15.0s  x4.2  rng 300  splash 130  damage   anim draw     vfx bolt_big_blood
 
 SHAMAN   (heroes: Talia Stormcall)
   motion: speed x1, weight 0.3, attack family cast, idle sway
-  Minor      Spark                cd  3.4s  x1.4  rng 290  splash 0    damage   anim cast     vfx bolt_storm
-  Heavy      Spirit Ward          cd  8.5s  x2.2  rng 260  splash 0    buff     anim cast     vfx glyph_ward
-  Super HeavyChain Lightning      cd 15.0s  x4.1  rng 310  splash 170  damage   anim cast     vfx burst_storm
+  Minor       Spark                cd  3.4s  x1.4  rng 290  splash 0    damage   anim cast     vfx bolt_storm
+  Heavy       Spirit Ward          cd  8.5s  x2.2  rng 260  splash 0    buff     anim cast     vfx glyph_ward
+  Super Heavy Chain Lightning      cd 15.0s  x4.1  rng 310  splash 170  damage   anim cast     vfx burst_storm
 
 SPEARMAN   (heroes: Orin Ashlance)
   motion: speed x0.97, weight 0.7, attack family thrust, idle ready
-  Minor      Piercing Jab         cd  3.6s  x1.4  rng 150  splash 0    damage   anim thrust   vfx line_steel
-  Heavy      Sweeping Haft        cd  8.0s  x2.3  rng 140  splash 100  damage   anim slash    vfx arc_steel
-  Super HeavyImpaling Lunge       cd 14.5s  x4.2  rng 220  splash 60   dash     anim thrust   vfx line_big
+  Minor       Piercing Jab         cd  3.6s  x1.4  rng 150  splash 0    damage   anim thrust   vfx line_steel
+  Heavy       Sweeping Haft        cd  8.0s  x2.3  rng 140  splash 100  damage   anim slash    vfx arc_steel
+  Super Heavy Impaling Lunge       cd 14.5s  x4.2  rng 220  splash 60   dash     anim thrust   vfx line_big
 
 CRYOMANCER   (heroes: Selene Frostveil)
   motion: speed x0.98, weight 0.15, attack family cast, idle float
-  Minor      Frost Lance          cd  3.6s  x1.5  rng 300  splash 0    control  anim cast     vfx shard_frost
-  Heavy      Glacial Burst        cd  8.5s  x2.4  rng 280  splash 120  control  anim cast     vfx shard_big
-  Super HeavyBlizzard             cd 15.5s  x4    rng 320  splash 190  control  anim cast     vfx shards_ring
+  Minor       Frost Lance          cd  3.6s  x1.5  rng 300  splash 0    control  anim cast     vfx shard_frost
+  Heavy       Glacial Burst        cd  8.5s  x2.4  rng 280  splash 120  control  anim cast     vfx shard_big
+  Super Heavy Blizzard             cd 15.5s  x4    rng 320  splash 190  control  anim cast     vfx shards_ring
 
 DARK KNIGHT   (heroes: Darius Umbral)
   motion: speed x0.85, weight 1, attack family overhead, idle breath
-  Minor      Umbral Cut           cd  4.2s  x1.5  rng 115  splash 0    damage   anim slash    vfx arc_umbral
-  Heavy      Soul Cleave          cd  8.8s  x2.6  rng 125  splash 90   damage   anim overhead vfx arc_big_umbral
-  Super HeavyAbyssal Quake        cd 15.5s  x4.3  rng 160  splash 150  damage   anim overhead vfx ring_umbral
+  Minor       Umbral Cut           cd  4.2s  x1.5  rng 115  splash 0    damage   anim slash    vfx arc_umbral
+  Heavy       Soul Cleave          cd  8.8s  x2.6  rng 125  splash 90   damage   anim overhead vfx arc_big_umbral
+  Super Heavy Abyssal Quake        cd 15.5s  x4.3  rng 160  splash 150  damage   anim overhead vfx ring_umbral
 
 DUELIST   (heroes: Finn Valecourt)
   motion: speed x1.12, weight 0.3, attack family thrust, idle ready
-  Minor      Quick Lunge          cd  3.2s  x1.5  rng 150  splash 0    damage   anim thrust   vfx line_silver
-  Heavy      Riposte              cd  7.5s  x2.4  rng 125  splash 0    damage   anim thrust   vfx line_big
-  Super HeavyFlèche               cd 13.5s  x4    rng 230  splash 0    dash     anim thrust   vfx line_big
+  Minor       Quick Lunge          cd  3.2s  x1.5  rng 150  splash 0    damage   anim thrust   vfx line_silver
+  Heavy       Riposte              cd  7.5s  x2.4  rng 125  splash 0    damage   anim thrust   vfx line_big
+  Super Heavy Flèche               cd 13.5s  x4    rng 230  splash 0    dash     anim thrust   vfx line_big
 
 ENGINEER   (heroes: Brynn Cogwright)
   motion: speed x0.97, weight 0.5, attack family draw, idle sway
-  Minor      Rivet Shot           cd  3.6s  x1.4  rng 290  splash 0    damage   anim draw     vfx bolt_brass
-  Heavy      Snare Trap           cd  8.5s  x2.2  rng 240  splash 90   control  anim draw     vfx bolt_net
-  Super HeavyClockwork Barrage    cd 15.5s  x4.3  rng 300  splash 150  damage   anim draw     vfx bolt_brass
+  Minor       Rivet Shot           cd  3.6s  x1.4  rng 290  splash 0    damage   anim draw     vfx bolt_brass
+  Heavy       Snare Trap           cd  8.5s  x2.2  rng 240  splash 90   control  anim draw     vfx bolt_net
+  Super Heavy Clockwork Barrage    cd 15.5s  x4.3  rng 300  splash 150  damage   anim draw     vfx bolt_brass
 
 MONK   (heroes: Asha Ironfist)
   motion: speed x1.22, weight 0.3, attack family flurry, idle ready
-  Minor      Palm Strike          cd  3.2s  x1.5  rng 100  splash 0    damage   anim flurry   vfx flurry_gold
-  Heavy      Dragon Kick          cd  7.5s  x2.4  rng 120  splash 0    damage   anim thrust   vfx flurry_big_gold
-  Super HeavyThousand Palms       cd 14.0s  x4.1  rng 130  splash 120  damage   anim flurry   vfx flurry_big_gold
+  Minor       Palm Strike          cd  3.2s  x1.5  rng 100  splash 0    damage   anim flurry   vfx flurry_gold
+  Heavy       Dragon Kick          cd  7.5s  x2.4  rng 120  splash 0    damage   anim thrust   vfx flurry_big_gold
+  Super Heavy Thousand Palms       cd 14.0s  x4.1  rng 130  splash 120  damage   anim flurry   vfx flurry_big_gold
 
 BEASTMASTER   (heroes: Rook Wildbane)
   motion: speed x1.08, weight 0.4, attack family thrust, idle ready
-  Minor      Hunting Thrust       cd  3.6s  x1.4  rng 140  splash 0    damage   anim thrust   vfx line_wild
-  Heavy      Call the Pack        cd  8.5s  x2.4  rng 200  splash 90   summon   anim thrust   vfx line_big_wild
-  Super HeavyAlpha Rampage        cd 15.0s  x4.1  rng 210  splash 130  summon   anim thrust   vfx line_big_wild
+  Minor       Hunting Thrust       cd  3.6s  x1.4  rng 140  splash 0    damage   anim thrust   vfx line_wild
+  Heavy       Call the Pack        cd  8.5s  x2.4  rng 200  splash 90   summon   anim thrust   vfx line_big_wild
+  Super Heavy Alpha Rampage        cd 15.0s  x4.1  rng 210  splash 130  summon   anim thrust   vfx line_big_wild
 
 
 PART 2 - PLACEHOLDER ULTIMATES (one per hero) -- *** PLACEHOLDER: TEAM TO REPLACE ***

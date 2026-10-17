@@ -368,13 +368,13 @@ export function furMantle(c, fur, dark, r = .27, t = .1) {
   for (let i = 0; i < 9; i++) { const a = i / 9 * PI * 2; add(B.chest, G.cone(.045, .1, 4), i % 2 ? dark : fur, Math.sin(a) * r * 1.02, .15, Math.cos(a) * r * 1.0 * .8, { r: [PI + Math.cos(a) * .5, 0, -Math.sin(a) * .5], s: [1, 1, .6] }); }
 }
 export function furCuff(c, bone, fur, r, y, t = .035) { c.add(bone, c.G.tor(r, t, 5, 10), fur, 0, y, 0, { r: [PI / 2, 0, 0] }); }
-export function quiver(c, wood, gold, n = 5) {
+export function quiver2(c, wood, gold, n = 5) {
   const { add, G, M, bones: B } = c; const g = new THREE.Group(); g.position.set(.08, .12, -.17); g.rotation.set(.15, 0, -.35); B.chest.add(g);
   add(g, G.cyl(.055, .045, .5, 8), wood, 0, 0, 0); add(g, G.cyl(.06, .06, .03, 8), gold, 0, .22, 0); add(g, G.cyl(.05, .05, .03, 8), gold, 0, -.2, 0);
   for (let i = 0; i < n; i++) { const a = i / n * PI * 2; const x = Math.sin(a) * .025, z = Math.cos(a) * .025;
     add(g, G.cyl(.004, .004, .22, 4), M(0x8a6a3a), x, .36, z, { r: [0, 0, -x * 2] }); add(g, G.cone(.02, .07, 3), M(i % 2 ? 0xf0ead8 : 0x3a7a42, { d: 1 }), x * 1.2, .46, z * 1.2, { s: [1, 1, .3] }); }
   return g; }
-export function bow(c, o) {
+export function bow2(c, o) {
   const { add, G, M } = c, g = new THREE.Group(), r = o.r ?? .62, arc = o.arc ?? 1.9; const wood = o.wood, gold = o.gold;
   add(g, new THREE.TorusGeometry(r, .016, 5, 22, arc), wood, -r, 0, 0, { r: [0, 0, -arc / 2] });
   for (const k of [-1, 1]) { const a = k * arc / 2; add(g, G.cone(.018, .07, 4), gold, -r + Math.cos(a) * r, Math.sin(a) * r, 0, { r: [0, 0, a - PI / 2 * k + (k > 0 ? 0 : PI)] }); }
@@ -424,20 +424,24 @@ export function hat(c, col, trim, o = {}) { // soft bard cap with brim and plume
 // wolf (own quadruped rig; clips baked like the heroes)
 export function wolfRig() {
   const c = makeCtx({ name: 'Wolf' }); const { M, bone, add, G, bones: B } = c;
-  const fur = M(0x8d8882, { r: 1, n: 'fur' }), dk = M(0x4a4642, { r: 1, n: 'furdark' }), lt = M(0xd2ccbc, { r: 1, n: 'furlight' }), gold = M(0xd2a43c, { m: .4, r: .4, n: 'gold' });
-  const root = bone('root', null), hips = bone('hips', root, 0, .55, -.3), spine = bone('spine', hips, 0, .02, .32), chest = bone('chest', spine, 0, .03, .3), neck = bone('neck', chest, 0, .08, .22), head = bone('head', neck, 0, .08, .12), jaw = bone('jaw', head, 0, -.04, .05);
+  const fur = M(0x9a8d78, { r: 1, n: 'fur', t: 'fur' }), dk = M(0x57493b, { r: 1, n: 'furdark', t: 'fur' }), lt = M(0xe0d4ba, { r: 1, n: 'furlight', t: 'fur' }), gold = M(0xd2a43c, { m: .4, r: .4, n: 'gold' });
+  const root = bone('root', null), hips = bone('hips', root, 0, .47, -.3), spine = bone('spine', hips, 0, .02, .32), chest = bone('chest', spine, 0, .03, .3), neck = bone('neck', chest, 0, .08, .22), head = bone('head', neck, 0, .08, .12), jaw = bone('jaw', head, 0, -.04, .05);
   add(hips, G.sph(.2, 9, 7), fur, 0, 0, 0, { s: [.95, 1, 1.25] }); add(spine, G.sph(.19, 9, 7), fur, 0, .0, 0, { s: [.95, .95, 1.5] }); add(chest, G.sph(.23, 9, 7), fur, 0, .0, 0, { s: [.95, 1.15, 1.2] });
   add(spine, G.sph(.17, 8, 6), dk, 0, .08, 0, { s: [.9, .6, 1.5] }); add(chest, G.sph(.2, 8, 6), lt, 0, -.1, .08, { s: [.8, .8, 1.1] });
   add(neck, G.sph(.15, 8, 6), fur, 0, .02, .06, { s: [.9, 1, 1.4], r: [-.5, 0, 0] }); for (let i = 0; i < 6; i++) add(neck, G.cone(.05, .1, 4), lt, (i - 2.5) * .045, -.06, .14 + (i % 2) * .02, { r: [PI + .3, 0, 0] });
   add(head, G.sph(.1, 8, 6), fur, 0, 0, .0, { s: [.95, .9, 1.1] }); add(head, G.box(.08, .065, .17), fur, 0, -.02, .14); add(head, G.sph(.03, 5, 4), M(0x15100a), 0, .0, .235);
   add(head, G.box(.075, .02, .15), lt, 0, -.055, .13); add(jaw, G.box(.065, .025, .15), lt, 0, -.01, .1);
   for (const k of [-1, 1]) { add(head, G.cone(.04, .11, 4), dk, k * .065, .12, -.02, { s: [1, 1, .55], r: [0, 0, -k * .15] }); add(head, G.sph(.012, 4, 3), M(0xe8b030, { e: 0xe8b030, ei: .4 }), k * .05, .03, .105); add(jaw, G.cone(.008, .035, 4), M(0xf6f2e6), k * .028, .012, .16, { r: [PI, 0, 0] }); }
+  for (const k of [-1, 1]) { add(head, G.cone(.05, .12, 5), lt, k * .085, -.03, .05, { r: [PI / 2 + .3, 0, -k * .9], s: [1, 1, .6] }); add(head, G.cone(.04, .1, 4), fur, k * .07, .09, .02, { r: [PI / 2 - .3, 0, -k * .5], s: [1, 1, .5] }); }
+  for (let i = 0; i < 9; i++) { const a = i / 9 * PI * 2; add(neck, G.cone(.045, .13, 4), i % 3 ? fur : lt, Math.sin(a) * .13, Math.cos(a) * .1 + .0, .03 + (Math.cos(a) < 0 ? .0 : .02), { r: [PI / 2 + Math.cos(a) * .5, 0, -Math.sin(a) * .9] }); }
+  add(chest, G.sph(.2, 7, 5), fur, 0, .12, .0, { s: [1.05, .5, 1.3] });
+  for (let i = 0; i < 6; i++) add(hips, G.cone(.035, .11, 4), fur, (i - 2.5) * .06, -.1, 0 - .12 - (i % 2) * .03, { r: [PI, 0, 0] });
   const t1 = bone('tail_1', hips, 0, .02, -.2), t2 = bone('tail_2', t1, 0, 0, -.2); t1.rotation.x = -.5;
-  add(t1, G.cone(.07, .3, 6), fur, 0, 0, -.1, { r: [-PI / 2, 0, 0] }); add(t2, G.cone(.06, .25, 6), dk, 0, 0, -.08, { r: [-PI / 2, 0, 0], s: [1, 1, 1] });
+  add(t1, G.sph(.085, 7, 5), fur, 0, 0, -.1, { s: [1, 1, 2.2] }); add(t2, G.sph(.085, 7, 5), dk, 0, 0, -.1, { s: [1, 1, 2.4] }); add(t2, G.cone(.05, .12, 5), lt, 0, 0, -.27, { r: [-PI / 2, 0, 0] });
   for (const [fb, par, zz] of [['F', chest, .08], ['B', hips, -.02]]) for (const k of [-1, 1]) { const S = fb + (k > 0 ? 'L' : 'R');
-    const th = bone('thigh_' + S, par, k * .14, -.1, zz), sn = bone('shin_' + S, th, 0, -.27, 0), pw = bone('paw_' + S, sn, 0, -.27, 0);
+    const th = bone('thigh_' + S, par, k * .14, -.1, zz), sn = bone('shin_' + S, th, 0, -.22, 0), pw = bone('paw_' + S, sn, 0, -.22, 0);
     const l = (p, len, r0, r1, m) => { const g = G.cyl(r0, r1, len, 7); g.translate(0, -len / 2, 0); add(p, g, m); };
-    l(th, .27, fb === 'B' ? .085 : .07, .05, fur); add(th, G.sph(.085, 6, 5), fur, 0, 0, 0); l(sn, .27, .045, .035, fb === 'B' ? dk : fur); add(pw, G.box(.07, .04, .12), lt, 0, -.015, .035);
+    l(th, .22, fb === 'B' ? .085 : .07, .05, fur); add(th, G.sph(.085, 6, 5), fur, 0, 0, 0); l(sn, .22, .05, .035, fb === 'B' ? dk : fur); add(pw, G.box(.07, .04, .12), lt, 0, -.015, .035);
     if (fb === 'B') { th.rotation.x = .25; sn.rotation.x = -.4; } }
   // collar
   add(neck, G.tor(.12, .018, 4, 12), M(0x5a3720, { r: .85 }), 0, .03, .12, { r: [PI / 2 - .5, 0, 0] }); add(neck, G.cyl(.032, .032, .012, 8), gold, 0, -.07, .2, { r: [PI / 2 - .5, 0, 0] });

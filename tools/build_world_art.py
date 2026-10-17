@@ -9,9 +9,9 @@ def ld(n):
     for e in('png','jpg'):
         p=os.path.join(R,n+'.'+e)
         if os.path.exists(p):return Image.open(p).convert('RGB')
-def key(im):
+def key(im,kc=None):
     a=np.asarray(im).astype(float);r,g,b=a[...,0],a[...,1],a[...,2]
-    bd=np.concatenate([a[:6].reshape(-1,3),a[-6:].reshape(-1,3),a[:,:6].reshape(-1,3),a[:,-6:].reshape(-1,3)]);kc=np.median(bd,0)
+    bd=np.concatenate([a[:6].reshape(-1,3),a[-6:].reshape(-1,3),a[:,:6].reshape(-1,3),a[:,-6:].reshape(-1,3)]);kc=np.median(bd,0) if kc is None else np.array(kc,float)
     d=np.sqrt((r-kc[0])**2+(g-kc[1])**2+(b-kc[2])**2)
     al=np.clip((d-90)/80,0,1)
     # despill: pull magenta fringe toward neutral
@@ -40,7 +40,7 @@ far=ld('far').convert('RGBA').crop((0,37,1280,650));far=fade(far,top=.10,bottom=
 # midground clumps from keyed mid
 mid=key(ld('mid'))
 save(fade(trim(mid.crop((12,37,525,650))),bottom=.12),'mid-left.webp',700,78)
-fore=key(ld('fore'));fore=trim(fore);save(fore,'fore.webp',1600,78)
+_f=ld('fore');fore=key(_f,np.asarray(_f)[int(_f.height*.3),int(_f.width*.5)]);fore=trim(fore.crop((0,int(fore.height*.32),fore.width,fore.height)));save(fore,'fore.webp',1600,78)
 g=ld('ground').convert('RGBA');g=fade(g,top=.38);save(g,'ground.webp',1600,74)
 # prop sprites by connected components
 def comps(sheet,names,minarea=4000):

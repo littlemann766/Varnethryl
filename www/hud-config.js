@@ -7,9 +7,9 @@ export const HUD_CONFIG={
   logo:'assets/hud/wordmark.png',
   background:{layers:[]},
   // Painted parallax zones (see www/world.js). speed: fraction of pan; focus: initial horizontal anchor (0..1).
-  zones:{village:{groundTop:.72,
+  zones:{village:{groundTop:.56,
     layers:[{kind:'sky',src:'assets/world/sky.webp',speed:.05},
-            {kind:'far',src:'assets/world/far.webp',speed:.12,focus:.62,top:.0,zoom:1.12,minH:.7,
+            {kind:'far',src:'assets/world/far.webp',speed:.12,focus:.36,top:.0,zoom:1.12,minH:.7,
              shimmer:[[.50,.52,.80],[.60,.58,.82],[.73,.66,.85]]}],
     clumps:[{src:'assets/world/mid-left.webp',x:-.02,h:.5,base:.12,speed:.35},{src:'assets/world/mid-left.webp',x:.98,h:.34,base:.1,speed:.5,flip:true}],
     ground:{src:'assets/world/ground.webp',speed:.9},

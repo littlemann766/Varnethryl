@@ -23,7 +23,7 @@ function sprite(key,w,h,fn){if(!cache[key]){const c=document.createElement('canv
 const glow=()=>sprite('glow',32,32,(c,w,h)=>{const g=c.createRadialGradient(16,16,0,16,16,16);g.addColorStop(0,'rgba(255,240,170,1)');g.addColorStop(.25,'rgba(255,214,120,.55)');g.addColorStop(1,'rgba(255,200,90,0)');c.fillStyle=g;c.fillRect(0,0,w,h)});
 const mistSpr=()=>sprite('mist',320,110,(c,w,h)=>{c.translate(w/2,h/2);c.scale(1,h/w);const g=c.createRadialGradient(0,0,0,0,0,w/2);g.addColorStop(0,'rgba(255,236,206,.55)');g.addColorStop(.6,'rgba(235,222,214,.22)');g.addColorStop(1,'rgba(235,225,220,0)');c.fillStyle=g;c.fillRect(-w/2,-w/2,w,w)});
 const shadowSpr=()=>sprite('shadow',64,24,(c,w,h)=>{c.translate(w/2,h/2);c.scale(1,h/w);const g=c.createRadialGradient(0,0,0,0,0,w/2);g.addColorStop(0,'rgba(8,16,10,.55)');g.addColorStop(.6,'rgba(8,16,10,.28)');g.addColorStop(1,'rgba(8,16,10,0)');c.fillStyle=g;c.fillRect(-w/2,-w/2,w,w)});
-function raysSpr(){return sprite('rays',640,360,(c,w,h)=>{c.translate(w*.88,-h*.08);for(let i=0;i<9;i++){const a=Math.PI*(.58+i*.062)+Math.sin(i*7.1)*.02,wd=.018+((i*37)%5)*.006,L=h*1.5;const g=c.createLinearGradient(0,0,Math.cos(a)*L,Math.sin(a)*L);g.addColorStop(0,'rgba(255,224,150,.9)');g.addColorStop(1,'rgba(255,210,130,0)');c.fillStyle=g;c.beginPath();c.moveTo(0,0);c.lineTo(Math.cos(a-wd)*L,Math.sin(a-wd)*L);c.lineTo(Math.cos(a+wd)*L,Math.sin(a+wd)*L);c.closePath();c.fill()}})}
+function raysSpr(){return sprite('rays',640,360,(c,w,h)=>{c.filter='blur(5px)';c.translate(w*.88,-h*.08);for(let i=0;i<9;i++){const a=Math.PI*(.58+i*.062)+Math.sin(i*7.1)*.02,wd=.018+((i*37)%5)*.006,L=h*1.5;const g=c.createLinearGradient(0,0,Math.cos(a)*L,Math.sin(a)*L);g.addColorStop(0,'rgba(255,224,150,.9)');g.addColorStop(1,'rgba(255,210,130,0)');c.fillStyle=g;c.beginPath();c.moveTo(0,0);c.lineTo(Math.cos(a-wd)*L,Math.sin(a-wd)*L);c.lineTo(Math.cos(a+wd)*L,Math.sin(a+wd)*L);c.closePath();c.fill()}})}
 let gradeCv=null,gradeKey='';
 function gradeSpr(cw,ch,withWarm){const k=cw+'x'+ch+withWarm;if(gradeKey!==k){gradeKey=k;gradeCv=document.createElement('canvas');gradeCv.width=Math.ceil(cw/2);gradeCv.height=Math.ceil(ch/2);const c=gradeCv.getContext('2d'),w=gradeCv.width,h=gradeCv.height;
  if(withWarm){const g=c.createLinearGradient(0,0,w,h);g.addColorStop(0,'rgba(255,196,120,.10)');g.addColorStop(1,'rgba(255,150,80,.14)');c.fillStyle=g;c.fillRect(0,0,w,h)}
@@ -47,7 +47,7 @@ export function drawBackdrop(C,cw,ch,camX,camY,zone,now){const c=cfgOf(zone);if(
   if(l.shimmer)drawFallShimmer(C,l,x,y,dw,dh,now)}
  for(const m of c.clumps||[]){const im=ok(m.src);if(!im)continue;const h=ch*m.h,w=h*im.naturalWidth/im.naturalHeight,x=m.x*cw-(px-.5)*cw*m.speed-(m.flip?w:0),y=gt+ch*m.base-h;
   if(m.flip){C.save();C.translate(x+w,0);C.scale(-1,1);C.drawImage(im,0,y,w,h);C.restore()}else C.drawImage(im,x,y,w,h)}
- const g=ok(c.ground.src);if(g){const asp=g.naturalWidth/g.naturalHeight,dh=Math.max((ch-gt)/.75,cw*1.3/asp),dw=dh*asp,xoff=-(dw-cw)*clamp(.5+(px-.5)*c.ground.speed,0,1);
+ const g=ok(c.ground.src);if(g){const asp=g.naturalWidth/g.naturalHeight,dh=(ch-gt)/.75,dw=Math.max(cw*1.3,dh*asp),xoff=-(dw-cw)*clamp(.5+(px-.5)*c.ground.speed,0,1);
   C.drawImage(g,xoff,ch-dh,dw,dh)}
  return true}
 function drawFallShimmer(C,l,x,y,dw,dh,now){const f=FX[quality()];if(!f.shimmer||Settings.reducedMotion())return;
@@ -55,9 +55,9 @@ function drawFallShimmer(C,l,x,y,dw,dh,now){const f=FX[quality()];if(!f.shimmer|
  for(const [fx,fy0,fy1] of l.shimmer){const X=x+fx*dw,Y0=y+fy0*dh,Y1=y+fy1*dh;for(let i=0;i<7;i++){const t=(now*.0006*(1+i*.13)+i*.37)%1,Y=Y0+(Y1-Y0)*t,a=Math.sin(t*Math.PI)*.35;C.fillStyle=`rgba(255,255,255,${a})`;C.fillRect(X-1.5+Math.sin(now*.003+i)*1.5,Y,2.5,Math.max(8,(Y1-Y0)*.12))}}
  C.restore()}
 // ---------- world-space props (called inside the camera transform) ----------
-export function drawProps(C,zone,camX,camY,cw,ch,playerY,pass){const c=cfgOf(zone);if(!c)return;C.imageSmoothingEnabled=true;
+export function drawProps(C,zone,camX,camY,cw,ch,playerY,pass){const c=cfgOf(zone);if(!c)return;C.imageSmoothingEnabled=true;const ps=clamp(Math.min(ch/720,cw/1100)+.2,.55,1);
  for(const p of c.props||[]){const im=ok(p.src);if(!im)continue;const front=p.y>playerY;if((pass==='front')!==front)continue;
-  const w=p.w,h=w*im.naturalHeight/im.naturalWidth,x=p.x-w/2,y=p.y-h;if(x+w<camX-20||x>camX+cw+20||y+h<camY-20||y>camY+ch+20)continue;
+  const w=p.w*ps,h=w*im.naturalHeight/im.naturalWidth,x=p.x-w/2,y=p.y-h;if(x+w<camX-20||x>camX+cw+20||y+h<camY-20||y>camY+ch+20)continue;
   if(!p.noShadow)C.drawImage(shadowSpr(),p.x-w*.45,p.y-h*.04,w*.9,Math.max(8,h*.12));
   let sway=0;if(p.sway&&FX[quality()].sway&&!Settings.reducedMotion())sway=Math.sin(performance.now()*.0012+p.x)*.012;
   if(sway){C.save();C.translate(p.x,p.y);C.rotate(sway);C.drawImage(im,-w/2,-h,w,h);C.restore()}else C.drawImage(im,x,y,w,h)}}
@@ -71,7 +71,7 @@ let lastT=0;
 export function drawFx(C,zone,cw,ch,camX,camY,now){const c=cfgOf(zone);if(!c)return;const q=quality(),f=FX[q],rm=Settings.reducedMotion();
  const dt=Math.min(50,now-lastT||16)/1000;lastT=now;
  C.save();
- if(f.rays){C.globalCompositeOperation='lighter';const sway=rm?0:Math.sin(now*.00035)*.04;C.globalAlpha=.30+sway;C.drawImage(raysSpr(),0,0,cw,ch*.9);if(f.sway&&!rm){C.globalAlpha=.16-sway;C.save();C.translate(cw,0);C.scale(-.6,1);C.drawImage(raysSpr(),cw*.6,0,cw*.75,ch*.8);C.restore()}C.globalAlpha=1;C.globalCompositeOperation='source-over'}
+ if(f.rays){C.globalCompositeOperation='lighter';const sway=rm?0:Math.sin(now*.00035)*.04;C.globalAlpha=.17+sway;C.drawImage(raysSpr(),0,0,cw,ch*.9);if(f.sway&&!rm){C.globalAlpha=.09-sway;C.save();C.translate(cw,0);C.scale(-.6,1);C.drawImage(raysSpr(),cw*.6,0,cw*.75,ch*.8);C.restore()}C.globalAlpha=1;C.globalCompositeOperation='source-over'}
  const gt=vp.gt||ch*.7;
  if(f.mist){const m=mistSpr();for(let i=0;i<f.mist;i++){const w=cw*(.5+((i*37)%7)/12),h=w*.34,sp=rm?0:(6+i*3.5),x=((i*cw*.31+now*.001*sp)%(cw+w))-w*.6-(camX*.05%cw);C.globalAlpha=.55-(i%3)*.08;C.drawImage(m,x,gt-h*.55+((i*53)%40)-20,w,h)}C.globalAlpha=1}
  else{const g=C.createLinearGradient(0,gt-ch*.08,0,gt+ch*.05);g.addColorStop(0,'rgba(240,225,205,0)');g.addColorStop(.5,'rgba(240,225,205,.22)');g.addColorStop(1,'rgba(240,225,205,0)');C.fillStyle=g;C.fillRect(0,gt-ch*.08,cw,ch*.13)}

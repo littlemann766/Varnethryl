@@ -193,7 +193,9 @@ export function bind(a) {
 }
 export function rebind() { state_ = api.state(); ensure(state_); render(); }
 // ---------- progression ----------
-function mortimerPresent() { const v = state_.veyra; return v.done.includes('V1') && (v.ch >= 3 || v.stage !== 'offer' || v.done.includes('V2')); }
+// Mortimer walks with the party only once V2 has begun (V1 done and V2 active) or is complete. Progress that is inconsistent
+// (e.g. a hand-edited/imported save with V1 done but later chapters not) must not spawn him.
+function mortimerPresent() { const v = state_ && state_.veyra; if (!v || !Array.isArray(v.done) || !v.done.includes('V1')) return false; return v.done.includes('V2') || (v.ch === 2 && v.stage === 'active'); }
 function unlockCheck() {
   const v = state_.veyra;
   if (v.stage === 'locked' && (state_.kills >= 3 || state_.questStep >= 1)) { v.stage = 'offer'; api.log('A bat has delivered a letter to Liongate. Open the story card to read it.'); api.save(); setTimeout(render, 0); }
@@ -464,6 +466,7 @@ function figure(C, x, y, t, cloak, trim, label, crown) {
 }
 // ---------- test hooks (read-only helpers; they ship in the page like window.__vn does) ----------
 export const debug = {
+  mortimerPresent: () => mortimerPresent(),
   chapters: () => CHAPTERS.map(c => ({ id: c.id, title: c.title, zone: c.zone, fights: c.fights.length })),
   killQuestEnemies() { const rt = api.runtime; for (const e of rt.enemy.filter(x => x.qid && x.hp > 0 && x.qid !== 'veyra')) { e.hold = 0; e.hp = 1; api.hitEnemy(e, state_.active, 1); } },
   setVeyraHp(frac) { const e = api.runtime.enemy.find(x => x.qid === 'veyra' && x.hp > 0); if (!e) return false; e.hp = Math.max(1, Math.floor(e.maxHp * frac)); api.hitEnemy(e, state_.active, 1e-9); return true; },

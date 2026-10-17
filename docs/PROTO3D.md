@@ -11,6 +11,11 @@ It does not touch the 2D game. Open `proto3d.html` (or `/proto3d/`) on the deplo
 - Collision: hero is a circle against axis-aligned boxes (buildings, walls, crates) and circles (fountain, towers, trees). Hero slides along walls.
 - Third-person follow camera, different distance/FOV in portrait and landscape.
 
+## Update: three hero models and walk-in buildings
+- Heroes (switch with the buttons at bottom right, or `?hero=0|1|2`): Sir Aldric, Darius Umbral, Selene Frostveil. Each is a detailed low-poly build (about 100 primitives, 8k to 10k triangles) made in code to match the boss's character sheets. Gold lion/fleur-de-lis (Aldric) comes from the sheet itself (colour-keyed from a crop, `tex/shield.jpg`); cloth tiles for the purple and blue/white fabric and fur are crops from the Umbral and Selene sheets (`tex/u-purple.jpg`, `s-fur.jpg`, `s-blue.jpg`). Umbral's cross and Selene's snowflakes are drawn procedurally. All animated: idle breathing/head turn, walk cycle, cape sway (CPU-deformed cloth), Selene's hair sway, Umbral's pulsing sword glow.
+- Buildings: inn, smithy, guild hall and one house now have a real open door, hollow walls, furniture (bar, tables, hearth, forge, anvil, long table, bed, shelves) and collision. When the hero is inside, the roof and door frame hide and the walls turn see-through (cutaway). The other three houses are still solid.
+- Sheet-vs-model fidelity: silhouettes, colour palette, main gear (shield, sword, staff, cloaks, spiked pauldrons, fur collar) are recognisable. Painted detail (filigree, chainmail, weathering, faces, flowing wavy hair) is only approximated. Think "toy version of the concept art", not a match.
+
 ## Files
 - `www/proto3d.html`: page and touch UI. `www/proto3d/main.js`: whole prototype (~450 lines). `www/proto3d/index.html`: redirect.
 - `www/proto3d/vendor/three.module.js`, `three.core.js`: Three.js r186, vendored unmodified (MIT, `THREE-LICENSE.txt`). No CDN.

@@ -234,11 +234,10 @@ const HERO_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil'];
 let hero = HEROES[0];
 HEROES.forEach((h, i) => { h.position.set(0, 0, 14); h.visible = i === 0; scene.add(h); });
 function setHero(i) { hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach((b, k) => b.classList.toggle('on', k === i)); }
-{ const bar = document.getElementById('heroes'); HERO_NAMES.forEach((n, i) => { const b = document.createElement('button'); b.textContent = n.split(' ').pop(); b.title = n; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => { e.stopPropagation(); setHero(i); }); bar.appendChild(b); }); const q = new URLSearchParams(location.search).get('hero'); if (q != null && HEROES[+q]) setHero(+q); }
-// ---------- Beth's GLB heroes (fallback: procedural heroes above) ----------
-const GLB_IDS = ['aldric', 'darius', 'selene', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne'];
-const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne'];
-const glbInfo = { loaded: [], failed: [] };
+// ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
+const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
+const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
+const glbInfo = { loaded: [], failed: [], pending: [] };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;
 function wrapGLB(g) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
@@ -251,20 +250,32 @@ function wrapGLB(g) {
   root.userData = { glb: true, mixer, act, capeUpdate() {} };
   return root;
 }
-if (useGLB) {
-  const gl = new GLTFLoader();
-  await Promise.all(GLB_IDS.map((id, gi) => new Promise(res => {
+const gl = new GLTFLoader();
+const glbPromise = {};
+// slot gi: models 0-2 replace the procedural hero; others get a placeholder group until the GLB arrives
+function loadHero(gi) {
+  const id = GLB_IDS[gi];
+  if (!useGLB || HEROES[gi] && HEROES[gi].userData.glb) return Promise.resolve(HEROES[gi]);
+  if (glbPromise[gi]) return glbPromise[gi];
+  glbInfo.pending.push(id);
+  return glbPromise[gi] = new Promise(res => {
     gl.load('proto3d/models/' + id + '.glb', g => {
       try {
-        const w = wrapGLB(g); w.visible = false; scene.add(w);
-        if (gi < 3) { const old = HEROES[gi]; w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); scene.remove(old); if (hero === old) hero = w; HEROES[gi] = w; }
-        else { HEROES.push(w); HERO_NAMES.push(GLB_NAMES[gi]); const i = HEROES.length - 1; const bar = document.getElementById('heroes'), b = document.createElement('button'); b.textContent = GLB_NAMES[gi].split(' ').pop(); b.title = GLB_NAMES[gi]; b.addEventListener('pointerdown', e => { e.stopPropagation(); setHero(i); }); bar.appendChild(b); }
-        glbInfo.loaded.push(id);
+        const w = wrapGLB(g), old = HEROES[gi];
+        w.visible = false; scene.add(w);
+        if (old) { w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); scene.remove(old); if (hero === old) hero = w; }
+        HEROES[gi] = w; glbInfo.loaded.push(id);
       } catch (e) { console.warn('GLB wrap failed', id, e); glbInfo.failed.push(id); }
-      res();
-    }, undefined, err => { console.warn('GLB load failed, using procedural fallback', id); glbInfo.failed.push(id); res(); });
-  })));
+      glbInfo.pending = glbInfo.pending.filter(x => x !== id); res(HEROES[gi]);
+    }, undefined, err => { console.warn('GLB load failed', id); glbInfo.failed.push(id); glbInfo.pending = glbInfo.pending.filter(x => x !== id); res(HEROES[gi]); });
+  });
 }
+for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(GLB_NAMES[i]); }
+async function selectHero(i) { if (!HEROES[i].userData.glb && useGLB) await loadHero(i); setHero(i); }
+{ const bar = document.getElementById('heroes'); HERO_NAMES.forEach((n, i) => { const b = document.createElement('button'); b.textContent = n.split(' ').pop(); b.title = n; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => { e.stopPropagation(); selectHero(i); }); bar.appendChild(b); }); }
+{ const q = new URLSearchParams(location.search).get('hero'); const qi = q != null && HEROES[+q] ? +q : 0; await loadHero(qi); if (qi) setHero(qi); }
+// preload the first three quietly after first paint (they replace the procedural stand-ins)
+setTimeout(() => { for (const gi of [0, 1, 2]) loadHero(gi); }, 1500);
 // blob shadow is the real shadow map; no extra.
 const marker = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.55, 20), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: 0.9, depthWrite: false }));
 marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = false; scene.add(marker);

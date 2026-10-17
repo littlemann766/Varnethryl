@@ -53,3 +53,32 @@ canvas{will-change:transform}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .combatHud{top:68px}
 @media(max-width:600px){.partyAvatar img{height:46px}.partyAvatar{min-height:0}.worldFrame{aspect-ratio:1}}
+
+/* settings + movable controls */
+.gearBtn{font-size:18px!important;min-width:44px;padding:4px 10px!important}
+.settingsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.setRow{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0;font-size:14px;flex-wrap:wrap}
+.setRow>span{display:flex;flex-direction:column;gap:2px;font-weight:650;color:#eadfc5}
+.setRow small{font-weight:400;color:var(--muted);font-size:12px}
+.setRow b{color:var(--gold);margin-left:6px}
+.setRow input[type=range]{width:100%;min-height:44px;accent-color:#d5a65c}
+label.setRow{flex-direction:column;align-items:stretch;gap:4px}
+.switch{width:58px;height:32px;min-height:44px;border-radius:20px;background:#22344a;border:1px solid #536077;position:relative;padding:0;flex:none}
+.switch i{position:absolute;top:50%;left:5px;width:22px;height:22px;margin-top:-11px;border-radius:50%;background:#a0afc0;transition:left .15s,background .15s}
+.switch[aria-checked=true]{background:#7e5a28;border-color:#e5bd74}.switch[aria-checked=true] i{left:30px;background:#ffe3b0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{padding:8px 12px;font-size:13px}
+.worldFrame.editing{outline:2px dashed #e9c17c;outline-offset:-6px}
+#layoutBar{position:absolute;left:8px;right:8px;top:6px;z-index:5;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#0a1823ee;border:1px solid #e5bd74;border-radius:9px;padding:4px 8px;font-size:12px;color:#ffe3b0}
+#layoutBar span{flex:1;color:#a4bdd2;min-width:100px}#layoutBar button{min-height:36px;padding:4px 12px;font-size:12px}
+.touchControls{pointer-events:none}
+.worldFrame.editing .movable{outline:2px dashed #3ddc97;outline-offset:3px;cursor:grab;touch-action:none;animation:none}
+.worldFrame.editing .movable.dragging{outline-color:#fbbf24;cursor:grabbing;opacity:.85;z-index:6}
+.worldFrame.editing .dpad.movable{pointer-events:auto;touch-action:none}
+.worldFrame.editing .dpad button{pointer-events:none}
+.worldFrame.editing .combatHud,.worldFrame.editing .worldHud{opacity:.35}
+html.reduce-motion *,html.reduce-motion *::before,html.reduce-motion *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+html.ts-large .screen:not(#adventure),html.ts-large .adventureTop,html.ts-large .adventureSide,html.ts-large .partyPanel,html.ts-large .topbar,html.ts-large .bottomNav{zoom:1.15}
+html.ts-xlarge .screen:not(#adventure),html.ts-xlarge .adventureTop,html.ts-xlarge .adventureSide,html.ts-xlarge .partyPanel,html.ts-xlarge .topbar,html.ts-xlarge .bottomNav{zoom:1.3}
+.bottomNav{overflow-x:auto}
+.touchControls{inset:0!important;padding:10px}
+@media(orientation:landscape) and (max-height:520px){.worldFrame{aspect-ratio:auto;min-height:0;height:calc(100dvh - 150px);scroll-margin:74px 0 70px;max-height:none}.adventureTop{display:none}}

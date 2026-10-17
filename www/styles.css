@@ -22,3 +22,34 @@
 #pwaHelp p{font-size:14px;color:#c8d5e3}
 @media(max-width:720px){.topbar{flex-wrap:wrap;gap:6px}.topbar .brand{flex:1}.topbar .resources{order:3;flex-basis:100%;justify-content:flex-start}.topbar .pwaTools{margin-left:auto}}
 @media(max-width:390px){.pwaTools #offlineStatus{font-size:10px;padding:4px}.pwaTools .installBtn{font-size:10px;padding:6px}.brand strong{font-size:14px}}
+
+/* polish-1: smoothness, touch targets, combat HUD */
+button,select,.partyAvatar,.heroTile,.itemTile{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{transition:transform .08s ease-out,background-color .15s,border-color .15s,opacity .15s;min-height:44px}
+button:active:not(:disabled){transform:scale(.95);filter:brightness(1.15)}
+.small,.linkBtn,.pwaTools .installBtn,.filters button{min-height:44px}
+.pwaTools .installBtn{padding:7px 12px}
+.dpad button{width:50px;height:48px;font-size:18px}
+.skillPad button{width:66px;height:66px;border-radius:50%}
+.skillPad small{font-size:9px}
+.skillPad button.cooling{opacity:.6;filter:grayscale(.5)}
+.zoneButtons button{min-height:44px}
+#bossDifficulty{min-height:44px}
+.pwaTools #offlineStatus:not(.offline){display:none}
+.screen.active{animation:fadeIn .18s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.meter>div{transition:width .25s ease-out}
+#toast{transform:translate(-50%,-8px);transition:opacity .2s,transform .2s;font-size:14px}
+#toast.show{transform:translate(-50%,0)}
+.combatHud{position:absolute;left:8px;right:8px;top:46px;max-width:300px;margin:auto;background:#0a1823cc;border:1px solid #ffffff30;border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;color:#ffe3b0;pointer-events:none}
+.combatHud .meter{height:8px;margin-top:4px}
+.partyAvatar{min-height:120px;contain:layout}
+.partyAvatar small{font-size:11px}
+.worldHud{font-size:11px}
+.micro{font-size:12px}
+canvas{will-change:transform}
+.bottomNav button{min-height:52px}
+@media(max-width:600px){.worldFrame{aspect-ratio:.95}.brand small{display:none}.topbar{padding:6px 8px}.crest{width:36px;height:36px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.combatHud{top:68px}
+@media(max-width:600px){.partyAvatar img{height:46px}.partyAvatar{min-height:0}.worldFrame{aspect-ratio:1}}

@@ -25,8 +25,9 @@ export const HEROES = [
 export const ZONES = [
  {id:'village',name:'Liongate Village',subtitle:'Guild headquarters · Safe haven',level:1,kind:'safe',portal:{right:'forest'},color:'#3c7054'},
  {id:'forest',name:'Whispering Wilds',subtitle:'Wolves, thieves and forgotten trails',level:1,kind:'wild',portal:{left:'village',right:'ruins'},color:'#244b3c'},
- {id:'ruins',name:'Ashen Ruins',subtitle:'Ancient soldiers and forbidden magic',level:6,kind:'ruins',portal:{left:'forest',right:'boss'},color:'#55505a'},
- {id:'boss',name:'The Titan Vault',subtitle:'Dungeon boss encounter · High-level challenge',level:20,kind:'boss',portal:{left:'ruins'},color:'#4b3543'}
+ {id:'ruins',name:'Ashen Ruins',subtitle:'Ancient soldiers and forbidden magic',level:6,kind:'ruins',portal:{left:'forest',right:'frost'},color:'#55505a'},
+ {id:'frost',name:'Frostbite Pass',subtitle:'Icy winds and hungry hounds · Between the ruins and the vault',level:12,kind:'frost',portal:{left:'ruins',right:'boss'},color:'#2f4a5e'},
+ {id:'boss',name:'The Titan Vault',subtitle:'Dungeon boss encounter · High-level challenge',level:20,kind:'boss',portal:{left:'frost'},color:'#4b3543'}
 ];
 export const TIERS=[
  {at:0,name:'Uncommon',color:'#a8b2be',slots:0},
@@ -60,7 +61,8 @@ export const ABILITIES=[
 ];
 export const WEAPON_ART={0:0,1:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:13,11:3,12:10,13:11,14:10,15:6,16:12,17:1,18:3,19:11};
 export const ENEMIES={
- forest:[{name:'Wild Wolf',hp:1050,attack:54,xp:60,gold:36,color:'#ad9987'},{name:'Forest Raider',hp:1450,attack:74,xp:90,gold:60,color:'#d59066'},{name:'Vine Wraith',hp:1700,attack:86,xp:120,gold:78,color:'#75bca1'}],
- ruins:[{name:'Ash Skeleton',hp:8400,attack:340,xp:230,gold:240,color:'#b8c6b6'},{name:'Rune Sentinel',hp:15500,attack:540,xp:380,gold:390,color:'#829db6'}],
+ forest:[{name:'Wild Wolf',hp:1050,attack:42,xp:60,gold:36,color:'#ad9987'},{name:'Forest Raider',hp:1450,attack:56,xp:90,gold:60,color:'#d59066'},{name:'Vine Wraith',hp:1700,attack:66,xp:120,gold:78,color:'#75bca1'}],
+ ruins:[{name:'Ash Skeleton',hp:5600,attack:270,xp:230,gold:240,color:'#b8c6b6'},{name:'Rune Sentinel',hp:10500,attack:430,xp:380,gold:390,color:'#829db6'}],
+ frost:[{name:'Frost Hound',hp:14000,attack:560,xp:520,gold:480,color:'#a9d3e8'},{name:'Ice Wraith',hp:19000,attack:700,xp:700,gold:650,color:'#8fb4ff'},{name:'Glacier Brute',hp:27000,attack:820,xp:950,gold:900,color:'#7fd0d8'}],
  boss:[{name:'The Ashen Titan',hp:250000,attack:2100,xp:2400,gold:5200,color:'#d9787d',boss:true}]
 };

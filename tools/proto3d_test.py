@@ -34,20 +34,36 @@ try:
         # tap to move
         s0 = st(); page.mouse.click(100, 300) if False else page.touchscreen.tap(250, 420); page.wait_for_timeout(2500); s2 = st()
         check('tap-to-move moves hero', abs(s2['x'] - s0['x']) + abs(s2['z'] - s0['z']) > 1.5, f"({s0['x']:.1f},{s0['z']:.1f}) -> ({s2['x']:.1f},{s2['z']:.1f})")
-        # collision: guild hall at (0,-19) w13 d7.5 -> front face z=-15.15 (+0.15 plinth). start at z=-8 and walk north.
-        page.evaluate('__p3d.teleport(0,-9); __p3d.setCamYaw(0)'); 
+        # collision: guild hall at (0,-19) w13 d7.5 -> solid front wall face z=-15.25 (door gap is only x in [-1,1]); walk north at x=4.5.
+        page.evaluate('__p3d.teleport(4.5,-9); __p3d.setCamYaw(0)'); 
         page.wait_for_timeout(300)
         page.evaluate("window.__jf('pointerdown',%f,%f); window.__jf('pointermove',%f,%f)" % (cx, cy, cx, cy - 50))
         page.wait_for_timeout(3500); s3 = st()
         page.screenshot(path=str(shots / '03-portrait-blocked-by-guildhall.png'))
         page.evaluate(f"window.__jf('pointerup',{cx},{cy})")
-        limit = -19 + 7.65 / 2 + 0.5
+        limit = -19 + 7.5 / 2 + 0.5
         check('building blocks hero', s3['z'] >= limit - 0.05 and s3['col'] > 0, f"z={s3['z']:.2f} (wall face limit {limit:.2f}) collisions={s3['col']}")
         # fountain collision (circle r 3.5 + 0.5): from (0,9) walk north along x=0
         page.evaluate('__p3d.teleport(0,10)'); page.wait_for_timeout(200)
         page.evaluate("window.__jf('pointerdown',%f,%f); window.__jf('pointermove',%f,%f)" % (cx, cy, cx, cy - 50)); page.wait_for_timeout(3000)
         s4 = st(); page.evaluate(f"window.__jf('pointerup',{cx},{cy})")
         check('fountain blocks hero', s4['z'] > 3.0 or abs(s4['x']) > 0.5, f"({s4['x']:.2f},{s4['z']:.2f})")
+        # --- walk-in door: inn at (-13,-9) w9 d7 -> door at z=-5.5, x=-13
+        page.evaluate('__p3d.teleport(-13,-1); __p3d.setCamYaw(0)'); page.wait_for_timeout(300)
+        page.evaluate("window.__jf('pointerdown',%f,%f); window.__jf('pointermove',%f,%f)" % (cx, cy, cx, cy - 50))
+        page.wait_for_timeout(2600); s5 = page.evaluate('({z:__p3d.state.heroZ,x:__p3d.state.heroX,inside:__p3d.state.inside})')
+        page.screenshot(path=str(shots / '07-inn-interior-walked-in.png'))
+        page.evaluate(f"window.__jf('pointerup',{cx},{cy})")
+        check('hero walks through inn door and is inside', s5['inside'] == 'inn' and s5['z'] < -6.0, json.dumps(s5))
+        # side wall of the inn still blocks (outside, x=-13 -> walk west into wall at x=-17.5)
+        page.evaluate('__p3d.teleport(-21,-9); __p3d.setCamYaw(0)'); page.wait_for_timeout(200)
+        page.evaluate("window.__jf('pointerdown',%f,%f); window.__jf('pointermove',%f,%f)" % (cx, cy, cx + 50, cy)); page.wait_for_timeout(2500)
+        s6 = st(); page.evaluate(f"window.__jf('pointerup',{cx},{cy})")
+        check('inn side wall blocks hero', s6['x'] <= -17.5 - 0.4 - 0.05 + 0.0 or s6['x'] < -17.4, f"x={s6['x']:.2f}")
+        for i, nm in enumerate(['aldric', 'umbral', 'selene']):
+            page.evaluate(f'__p3d.setHero({i}); __p3d.teleport(0,14); __p3d.setCamYaw(0)'); page.wait_for_timeout(900)
+            page.screenshot(path=str(shots / f'08-gameplay-{nm}-390x844.png'))
+        page.evaluate('__p3d.setHero(0)')
         # views
         page.evaluate('__p3d.teleport(-3,12); __p3d.setCamYaw(0.5)'); page.wait_for_timeout(1500)
         page.screenshot(path=str(shots / '04-portrait-plaza-fountain.png'))

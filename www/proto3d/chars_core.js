@@ -1,13 +1,20 @@
 // VARNETHRYL 3D prototype kit: procedural low-poly humanoid + props, named bone rig (rigid-parted nodes), idle/walk.
 import * as THREE from 'three';
+import { surface, decal, faceTex } from './texgen.js';
 const PI = Math.PI;
 export function makeCtx(spec) {
   const mats = new Map();
   const M = (color, o = {}) => {
     const k = color + JSON.stringify(o);
-    if (!mats.has(k)) mats.set(k, Object.assign(new THREE.MeshStandardMaterial({
-      color, roughness: o.r ?? 0.7, metalness: o.m ?? 0, flatShading: true, side: o.d ? THREE.DoubleSide : THREE.FrontSide,
-      emissive: o.e ?? 0x000000, emissiveIntensity: o.ei ?? 1, transparent: o.a !== undefined, opacity: o.a ?? 1 }), { name: o.n || ('m' + mats.size) }));
+    if (!mats.has(k)) {
+      const emis = o.e !== undefined, plain = !emis && o.a === undefined, met = (o.m ?? 0) >= .3, ro = o.r ?? .7;
+      const t = o.t ?? (plain && met ? 'steel' : plain && !met && ro >= .85 && (!o.n || /^(under|pants|cape|lining|tabard|skirt|blue|hood|fur|magic)/.test(o.n)) ? 'cloth' : null);
+      const mt = Object.assign(new THREE.MeshStandardMaterial({
+        color, roughness: ro, metalness: o.m ?? 0, flatShading: !!o.f, side: o.d ? THREE.DoubleSide : THREE.FrontSide,
+        emissive: o.e ?? 0x000000, emissiveIntensity: o.ei ?? 1, transparent: o.a !== undefined, opacity: o.a ?? 1 }), { name: o.n || ('m' + mats.size) });
+      if (t) mt.map = surface(t);
+      mats.set(k, mt);
+    }
     return mats.get(k);
   };
   const bones = {};
@@ -15,13 +22,14 @@ export function makeCtx(spec) {
   const add = (parent, geo, mat, x = 0, y = 0, z = 0, o = {}) => {
     const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z);
     if (o.r) m.rotation.set(...o.r); if (o.s) m.scale.set(...o.s); if (o.n) m.name = o.n; parent.add(m); return m; };
+  const sm = n => n === 8 ? 16 : n === 7 ? 12 : n === 6 ? 8 : n;
   const G = {
     box: (x, y, z) => new THREE.BoxGeometry(x, y, z),
-    cyl: (a, b, h, s = 8, open = false) => new THREE.CylinderGeometry(a, b, h, s, 1, open),
-    sph: (r, w = 8, h = 6) => new THREE.SphereGeometry(r, w, h),
-    dome: (r, w = 8, h = 4) => new THREE.SphereGeometry(r, w, h, 0, PI * 2, 0, PI / 2),
+    cyl: (a, b, h, s = 8, open = false) => new THREE.CylinderGeometry(a, b, h, sm(s), 1, open),
+    sph: (r, w = 8, h = 6) => new THREE.SphereGeometry(r, Math.round(w * 1.7), Math.round(h * 1.7)),
+    dome: (r, w = 8, h = 4) => new THREE.SphereGeometry(r, sm(w), h * 2, 0, PI * 2, 0, PI / 2),
     cone: (r, h, s = 6) => new THREE.ConeGeometry(r, h, s),
-    tor: (r, t, a = 6, b = 12) => new THREE.TorusGeometry(r, t, a, b),
+    tor: (r, t, a = 6, b = 12) => new THREE.TorusGeometry(r, t, Math.max(a, 6), b * 2),
     oct: r => new THREE.OctahedronGeometry(r),
   };
   return { spec, M, bones, bone, add, G };
@@ -29,26 +37,13 @@ export function makeCtx(spec) {
 
 // ---------- emblems (thin gold geometry, face +z) ----------
 export function emblem(c, parent, type, size, mat, x = 0, y = 0, z = 0, ry = 0) {
-  const { add, G } = c; const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; parent.add(g); const s = size, d = 0.012;
-  const bar = (w, h, px, py, r = 0) => add(g, G.box(w, h, d), mat, px, py, 0, { r: [0, 0, r] });
-  const dia = (r, px, py) => add(g, G.cyl(r, r, d, 4), mat, px, py, 0, { r: [PI / 2, PI / 4, 0] });
-  if (type === 'fleur') { bar(s * .13, s * .8, 0, 0); dia(s * .2, 0, s * .3); dia(s * .13, 0, -s * .38);
-    for (const k of [-1, 1]) { add(g, G.cone(s * .1, s * .45, 4), mat, k * s * .24, -s * .02, 0, { r: [0, 0, -k * 0.5 + PI] , s: [1, 1, .15] }); add(g, G.sph(s * .08, 6, 4), mat, k * s * .31, -s * .22, 0, { s: [1, 1, .2] }); }
-    bar(s * .6, s * .09, 0, -s * .12); }
-  else if (type === 'cross') { bar(s * .1, s, 0, 0); bar(s * .6, s * .09, 0, s * .15); for (const [px, py] of [[0, .5], [0, -.5], [-.3, .15], [.3, .15]]) dia(s * .08, px * s, py * s); dia(s * .13, 0, s * .15); }
-  else if (type === 'ornate') { bar(s * .12, s, 0, 0); bar(s * .7, s * .1, 0, s * .12); bar(s * .4, s * .08, 0, s * .36); for (const [px, py] of [[0, .52], [0, -.52], [-.37, .12], [.37, .12], [-.2, .36], [.2, .36]]) dia(s * .075, px * s, py * s); }
-  else if (type === 'sun') { add(g, G.cyl(s * .26, s * .26, d, 12), mat, 0, 0, 0, { r: [PI / 2, 0, 0] }); for (let i = 0; i < 12; i++) { const a = i / 12 * PI * 2; add(g, G.cone(s * .06, s * .3, 4), mat, Math.sin(a) * s * .42, Math.cos(a) * s * .42, 0, { r: [0, 0, -a], s: [1, 1, .25] }); }
-    add(g, G.box(s * .07, s * .34, d * 1.6), c.M(0x20306a), 0, 0, d * .5); add(g, G.box(s * .24, s * .06, d * 1.6), c.M(0x20306a), 0, s * .06, d * .5); }
-  else if (type === 'snow') { for (let i = 0; i < 3; i++) add(g, G.box(s * .06, s * .95, d), mat, 0, 0, 0, { r: [0, 0, i * PI / 3] }); for (let i = 0; i < 6; i++) { const a = i * PI / 3; dia(s * .08, Math.sin(a) * s * .47, Math.cos(a) * s * .47); } add(g, G.cyl(s * .12, s * .12, d, 6), mat, 0, 0, 0, { r: [PI / 2, 0, 0] }); }
-  else if (type === 'spiral') { add(g, G.tor(s * .3, s * .05, 5, 14), mat); add(g, G.tor(s * .16, s * .045, 5, 10), mat); add(g, G.cyl(s * .06, s * .06, d, 6), mat, 0, 0, 0, { r: [PI / 2, 0, 0] }); for (let i = 0; i < 8; i++) { const a = i / 8 * PI * 2; add(g, G.box(s * .05, s * .14, d), mat, Math.sin(a) * s * .42, Math.cos(a) * s * .42, 0, { r: [0, 0, -a] }); } }
-  else if (type === 'gear') { add(g, G.tor(s * .28, s * .07, 5, 12), mat); add(g, G.cyl(s * .08, s * .08, d, 6), mat, 0, 0, 0, { r: [PI / 2, 0, 0] }); for (let i = 0; i < 8; i++) { const a = i / 8 * PI * 2; add(g, G.box(s * .12, s * .16, d), mat, Math.sin(a) * s * .4, Math.cos(a) * s * .4, 0, { r: [0, 0, -a] }); } for (let i = 0; i < 4; i++) bar(s * .05, s * .5, 0, 0, i * PI / 4); }
-  else if (type === 'sprig') { bar(s * .05, s, 0, 0); for (let i = 0; i < 5; i++) for (const k of [-1, 1]) add(g, G.cone(s * .1, s * .28, 4), mat, k * s * .14, -s * .3 + i * s * .17, 0, { r: [0, 0, -k * 1.0], s: [1, 1, .2] }); add(g, G.cone(s * .1, s * .28, 4), mat, 0, s * .52, 0, { s: [1, 1, .2] }); }
-  else if (type === 'lion') { // crude rampant lion
-    add(g, G.sph(s * .2, 6, 5), mat, 0, 0, 0, { s: [.8, 1.3, .2] }); add(g, G.sph(s * .14, 6, 5), mat, s * .06, s * .3, 0, { s: [1, 1, .25] });
-    add(g, G.tor(s * .14, s * .05, 4, 8), mat, s * .06, s * .3, 0, { s: [1, 1, .3] });
-    for (const [px, py, r] of [[.22, .12, -.9], [.2, -.18, -.5], [-.16, -.28, .4], [.1, -.32, -.2]]) add(g, G.box(s * .07, s * .3, d), mat, px * s, py * s, 0, { r: [0, 0, r] });
-    add(g, G.tor(s * .15, s * .035, 4, 8, PI), mat, -s * .26, -s * .12, 0, { s: [.8, 1.3, .3] }); }
-  return g;
+  const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; parent.add(g);
+  const m = decalMat(c, type, mat); const pl = new THREE.Mesh(new THREE.PlaneGeometry(size, size), m); pl.position.z = .004; pl.name = 'emblem_' + type; g.add(pl); return g;
+}
+const dmCache = new Map();
+function decalMat(c, type, mat) {
+  const col = mat && mat.color ? mat.color.getHex() : 0xd2a43c, k = type + col; if (!dmCache.has(k)) dmCache.set(k, new THREE.MeshStandardMaterial({ map: decal(type), color: col, metalness: .45, roughness: .4, alphaTest: .5, name: 'emb_' + type + col.toString(16), polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, side: THREE.DoubleSide }));
+  return dmCache.get(k);
 }
 export function skull(c, parent, mat, size, x, y, z) {
   const g = new THREE.Group(); g.position.set(x, y, z); parent.add(g); const { add, G, M } = c;
@@ -62,7 +57,7 @@ export function humanoid(c) {
   const sp = c.spec, { M, bone, add, G } = c; const b = sp.bulk ?? 1, sw = sp.sw ?? 1, fem = !!sp.fem;
   const skin = M(sp.skin ?? 0xe3b68f, { r: .8, n: 'skin' });
   const root = bone('root', null); const hips = bone('hips', root, 0, .95, 0), spine = bone('spine', hips, 0, .1, 0), chest = bone('chest', spine, 0, .17, 0);
-  const neck = bone('neck', chest, 0, .26, 0), head = bone('head', neck, 0, .04, 0);
+  const neck = bone('neck', chest, 0, .26, 0), head = bone('head', neck, 0, .03, 0);
   const B = c.bones, cloth = M(sp.under ?? 0x3a2f2a, { r: .9, n: 'under' }), pants = M(sp.pants ?? 0x2e2824, { r: .9, n: 'pants' });
   const waistR = (fem ? .105 : .125) * b, hipR = (fem ? .16 : .14) * b;
   add(hips, G.cyl(hipR, hipR * .92, .17, 8), pants, 0, 0, 0, { s: [1, 1, .72] });
@@ -71,10 +66,12 @@ export function humanoid(c) {
   add(chest, G.cyl(chR, waistR * 1.25, .31, 8), cloth, 0, .08, 0, { s: [1, 1, .66] });
   if (fem && !sp.nobust) for (const k of [-1, 1]) add(chest, G.sph(.065 * b, 6, 5), cloth, k * .06, .06, .09);
   add(neck, G.cyl(.045, .05, .1, 6), skin, 0, .03, 0);
-  // head
-  add(head, G.sph(.105, 10, 8), skin, 0, .1, 0, { s: [.98, 1.15, 1.06], n: 'head' }); add(head, G.box(.085, .07, .08), skin, 0, .03, .03);
-  for (const k of [-1, 1]) { add(head, G.sph(.012, 4, 3), M(0x120c08), k * .036, .115, .097); add(head, G.box(.04, .008, .01), M(sp.hair ?? 0x3a2a1a), k * .036, .14, .098, { r: [0, 0, k * -.12] }); }
-  add(head, G.box(.016, .03, .02), skin, 0, .09, .104);
+  // head: smooth sphere with painted face, chin, nose, ears
+  const faceMat = new THREE.MeshStandardMaterial({ map: faceTex({ skin: sp.skin ?? 0xe3b68f, hair: sp.hair ?? 0x3a2a1a, eye: sp.eye ?? 0x4a78b8, fem, brow: sp.brow, scar: sp.scar, beard: sp.beard }), roughness: .75, name: 'face' });
+  add(head, G.sph(.105, 14, 10), faceMat, 0, .1, 0, { s: [.95, 1.14, 1.04], n: 'head' });
+  add(head, G.sph(.06, 8, 6), skin, 0, .045, .03, { s: [fem ? .95 : 1.15, .8, .95], n: 'jaw' });
+  add(head, G.sph(.011, 5, 4), skin, 0, .09, .104, { s: [.9, 1.2, 1] }); // nose
+  for (const k of [-1, 1]) { if (sp.elf) add(head, G.cone(.026, .13, 6), skin, k * .105, .12, -.005, { r: [0, 0, -k * 1.15], s: [1, 1, .35] }); else add(head, G.sph(.02, 5, 4), skin, k * .098, .098, -.005, { s: [.45, 1, .75] }); }
   for (const k of [-1, 1]) {
     const S = k > 0 ? 'L' : 'R', sh = bone('shoulder_' + S, chest, k * .19 * sw * (fem ? .9 : 1), .22, 0), ua = bone('upperArm_' + S, sh, k * .05, 0, 0), fa = bone('foreArm_' + S, ua, 0, -.29, 0), hd = bone('hand_' + S, fa, 0, -.27, 0);
     const ar = .05 * b * (fem ? .88 : 1), slv = M(sp.sleeve ?? sp.under ?? 0x3a2f2a, { r: .9 });
@@ -85,7 +82,7 @@ export function humanoid(c) {
     const tr = .08 * b * (fem ? .95 : 1);
     const l2 = (par, len, r0, r1, mat) => { const g = G.cyl(r0, r1, len, 8); g.translate(0, -len / 2, 0); add(par, g, mat); };
     l2(th, .45, tr, tr * .74, pants); add(th, G.sph(tr * 1.0, 6, 5), pants); l2(sn, .44, tr * .74, tr * .55, pants);
-    add(ft, G.box(.11, .07, .27), M(sp.boot ?? 0x3b2a1c, { r: .85, n: 'boot' }), 0, -.012, .05); add(sn, G.cyl(.065 * b, .06 * b, .26, 8), M(sp.boot ?? 0x3b2a1c, { r: .85, n: 'boot' }), 0, -.3, 0);
+    add(ft, G.sph(.065, 8, 6), M(sp.boot ?? 0x3b2a1c, { r: .85, n: 'boot', t: 'leather' }), 0, -.015, .07, { s: [.95, .62, 2.1] }); add(sn, G.cyl(.065 * b, .06 * b, .26, 8), M(sp.boot ?? 0x3b2a1c, { r: .85, n: 'boot' }), 0, -.3, 0);
   }
   return { root, hips, spine, chest, neck, head, skin };
 }
@@ -113,6 +110,19 @@ export function platePack(c, o) { // o: steel, trim, pauld ('plate'|'spike'), cu
     add(sn, G.cyl(.064 * b, .064 * b, .02, 8), trim, 0, -.4, 0);
     add(ft, G.box(.11, .045, .21), steel, 0, .0, .07, { r: [-.1, 0, 0] });
   }
+  { // layered fauld, breastplate ridge, gorget, gold bands (extra detail pass)
+    const hipR = (fem ? .16 : .14) * b;
+    for (let i = 0; i < 3; i++) add(B.hips, G.cyl(hipR * (1.12 + i * .03), hipR * (1.06 + i * .03), .06, 8, true), steel, 0, .0 - i * .045, 0, { s: [1, 1, .74] });
+    add(B.hips, G.cyl(hipR * 1.14, hipR * 1.14, .014, 8), trim, 0, .03, 0, { s: [1, 1, .74] });
+    add(B.chest, G.box(.022, .26, .03), trim, 0, .1, chR * .72 + .012, { r: [-.05, 0, 0] }); add(B.chest, G.cyl(chR * 1.12, chR * 1.1, .018, 8), trim, 0, -.02, 0, { s: [1, 1, .72] });
+    add(B.chest, G.cyl(chR * .86, chR * 1.0, .035, 8), trim, 0, .23, 0, { s: [1, 1, .7] });
+    add(B.neck, G.cyl(.082, .082, .018, 10), trim, 0, .045, 0);
+    for (const k of [-1, 1]) { const S = k > 0 ? 'L' : 'R', sn = B['shin_' + S], ft = B['foot_' + S], th = B['thigh_' + S], hd = B['hand_' + S];
+      add(sn, G.sph(.07 * b, 7, 5), steel, 0, 0, .035, { s: [1, .8, .8] }); add(sn, G.tor(.062 * b, .009, 4, 8), trim, 0, .02, 0, { r: [PI / 2, 0, 0] }); add(sn, G.tor(.05 * b, .009, 4, 8), trim, 0, -.3, 0, { r: [PI / 2, 0, 0] });
+      add(ft, G.cone(.055, .13, 8), steel, 0, -.005, .2, { r: [PI / 2, 0, 0], s: [1.1, 1, .55] });
+      add(th, G.tor(.082 * b, .009, 4, 8), trim, 0, -.31, 0, { r: [PI / 2, 0, 0] });
+      for (let i = 0; i < 4; i++) add(hd, G.box(.012, .05, .016), steel, (i - 1.5) * .017, -.1, .02 - Math.abs(i - 1.5) * .006); }
+  }
   if (o.tassets !== false) for (let i = -1; i <= 1; i++) add(B.hips, G.box(.1, .17, .02), steel, i * .105, -.14, .14 - Math.abs(i) * .035, { r: [-.18, -i * .35, 0] });
 }
 export function belt(c, mat, buckle, y = 0, z = .15) {
@@ -124,28 +134,46 @@ export function strapX(c, mat, buckle) { // chest baldric
   const { add, G, bones: B } = c;
   add(B.chest, G.box(.05, .42, .02), mat, -.02, .1, .125, { r: [0, 0, .6] }); add(B.chest, G.box(.04, .04, .025), buckle, -.04, .0, .132);
 }
+// tapered tube along points (pts = array of [x,y,z]); radius r0->r1; flat = z-squash
+export function taper(pts, r0, r1, seg = 10, rad = 7, flat = .55) {
+  const cur = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p))), pos = [], idx = [], fr = cur.computeFrenetFrames(seg, false);
+  for (let i = 0; i <= seg; i++) { const t = i / seg, p = cur.getPoint(t), r = r0 + (r1 - r0) * Math.pow(t, .8); for (let j = 0; j < rad; j++) { const a = j / rad * PI * 2, n = fr.normals[i], b = fr.binormals[i];
+      pos.push(p.x + (n.x * Math.cos(a) * r + b.x * Math.sin(a) * r * flat), p.y + (n.y * Math.cos(a) * r + b.y * Math.sin(a) * r * flat), p.z + (n.z * Math.cos(a) * r + b.z * Math.sin(a) * r * flat)); } }
+  for (let i = 0; i < seg; i++) for (let j = 0; j < rad; j++) { const a = i * rad + j, b = i * rad + (j + 1) % rad, c2 = a + rad, d = b + rad; idx.push(a, b, c2, b, d, c2); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  const uv = []; for (let i = 0; i <= seg; i++) for (let j = 0; j < rad; j++) uv.push(j / rad, i / seg); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); return g;
+}
+function hairCap(r, front, back, rise = 0) { // hair cap with hairline: leaves the face open
+  const g = new THREE.SphereGeometry(r, 28, 16, 0, PI * 2, 0, PI * .75), p = g.attributes.position, sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), th = Math.acos(y / r), ph = Math.atan2(z, -x), fd = Math.abs(ph - PI / 2) / (PI * .46), lim = front + (back - front) * sm(.25, 1, fd), t = th / (PI * .75);
+    const th2 = t * lim, rr = r; p.setXYZ(i, -Math.cos(ph) * Math.sin(th2) * rr, Math.cos(th2) * rr, Math.sin(ph) * Math.sin(th2) * rr); }
+  g.computeVertexNormals(); return g;
+}
 export function hair(c, style, col, o = {}) {
-  const { add, G, M, bones: B } = c, h = M(col, { r: .85, n: 'hair' }), hd = B.head;
-  add(hd, new THREE.SphereGeometry(.113, 10, 8, 0, PI * 2, 0, PI * .56), h, 0, .105, -.005, { s: [.95, 1.1, 1.05] });
-  const tuft = (x, y, z, rx, rz, s = 1) => add(hd, G.cone(.03 * s, .09 * s, 4), h, x, y, z, { r: [rx, 0, rz] });
-  if (style === 'short' || style === 'swept') { tuft(.04, .2, .06, .9, -.3); tuft(-.02, .205, .07, .9, .2); tuft(.075, .17, .03, .6, -.8); tuft(-.07, .18, .05, .7, .7); if (style === 'swept') { tuft(0, .22, .02, .3, 0, 1.3); } }
-  if (style === 'messy') { for (let i = 0; i < 7; i++) tuft(Math.sin(i * 1.3) * .07, .19 + (i % 3) * .01, Math.cos(i * 1.3) * .06, Math.sin(i) * .8, Math.cos(i * 2) * .8, 1.1); }
+  const { add, G, M, bones: B } = c, h = M(col, { r: .8, n: 'hair', t: 'hair', m: .08 }), hd = B.head;
+  const cap = add(hd, hairCap(.112, PI * .385, PI * .64), h, 0, .1, -.004, { s: [.97, 1.17, 1.07], n: 'hair_cap' });
+  const lock = (pts, r0, r1, seg = 9, flat = .55) => add(hd, taper(pts, r0, r1, seg, 7, flat), h);
+  const tuft = (x, y, z, rx, rz, s = 1) => add(hd, G.cone(.03 * s, .1 * s, 6), h, x, y, z, { r: [rx, 0, rz], s: [1, 1, .6] });
+  const front = (sweep = 1) => { for (const k of [-1, 1]) lock([[k * .02, .205, .075], [k * .06 * sweep, .205, .1], [k * .098, .165, .09], [k * .108, .13, .055]], .022, .006, 7, .5); lock([[0, .21, .06], [.03 * sweep, .222, .105], [.065 * sweep, .19, .115], [.08 * sweep, .16, .095]], .026, .006, 7, .5); };
+  if (style === 'short') { front(.7); for (let i = 0; i < 6; i++) { const a = -.5 + i * .2; lock([[Math.sin(a) * .06, .225, Math.cos(a) * .02 - .03], [Math.sin(a) * .1, .235, -.01], [Math.sin(a) * .12, .19, -.06]], .02, .005, 6); } }
+  if (style === 'swept') { front(1.6); lock([[-.02, .21, .07], [.0, .245, .09], [.05, .26, .07], [.09, .235, .03]], .03, .008, 8); lock([[-.05, .205, .07], [-.03, .24, .08], [.02, .255, .05]], .024, .006, 7); for (let i = 0; i < 5; i++) { const a = -.6 + i * .3; lock([[Math.sin(a) * .06, .22, -.03], [Math.sin(a) * .11, .215, -.06], [Math.sin(a) * .105, .15, -.1]], .024, .005, 6); } }
+  if (style === 'messy') { front(.8); for (let i = 0; i < 9; i++) { const a = i / 9 * PI * 2, sa = Math.sin(a), ca = Math.cos(a); lock([[sa * .045, .222, ca * .05], [sa * .095, .232 + (i % 3) * .008, ca * .085], [sa * .13, .195 + (i % 2) * .02, ca * .1 - (ca < 0 ? .04 : 0)]], .03, .006, 6, .7); } }
   if (style === 'long' || style === 'wavy') {
-    const L = o.len ?? .5;
-    add(hd, G.box(.2, L, .09), h, 0, .1 - L / 2 + .02, -.085, { s: [1, 1, 1] });
-    for (let i = 0; i < 4; i++) for (const k of [-1, 1]) add(hd, G.sph(.045 + (style === 'wavy' ? .015 : 0), 6, 5), h, k * (.085 + (i % 2) * .02 * (style === 'wavy' ? 1 : 0)), .0 - i * L * .26, -.07, { s: [1, 2.4, 1] });
-    for (const k of [-1, 1]) add(hd, G.box(.04, L * .7, .06), h, k * .1, .03 - L * .35, .005);
-    tuft(0, .21, .08, 1.1, 0, 1.2); tuft(.07, .18, .08, .9, -.7); tuft(-.07, .18, .08, .9, .7);
+    const L = o.len ?? .5, w = style === 'wavy' ? 1 : .3;
+    for (let i = 0; i < 9; i++) { const a = -1.1 + i * .275, sa = Math.sin(a), ca = Math.cos(a), ph = i * 1.3;
+      lock([[sa * .08, .2, -ca * .06 - .02], [sa * .115, .1, -ca * .095 - .02], [sa * .13 + Math.sin(ph) * .02 * w, .1 - L * .35, -.12 - ca * .02], [sa * .12 - Math.sin(ph) * .035 * w, .1 - L * .7, -.125], [sa * .1 + Math.sin(ph + 1) * .03 * w, .1 - L, -.12 - Math.abs(sa) * .02]], .034, .006, 12, .5); }
+    for (const k of [-1, 1]) { lock([[k * .09, .17, .02], [k * .115, .07, .02], [k * .125 + k * .01 * w, .0 - L * .15, .045], [k * .13 - k * .02 * w, -.09 - L * .22, .08], [k * .11 + k * .02 * w, -.12 - L * .4, .09]], .028, .006, 12, .55); lock([[k * .1, .18, .0], [k * .122, .08, -.04], [k * .14, -.04 - L * .15, -.06], [k * .15 - k * .02 * w, -.1 - L * .4, -.05]], .026, .005, 10, .55); }
+    front(1.1);
   }
-  if (style === 'bun') { tuft(.04, .2, .06, .9, -.3); tuft(-.04, .2, .06, .9, .3); add(hd, G.sph(.06, 7, 5), h, 0, .24, -.08); add(hd, G.sph(.045, 6, 5), h, .045, .21, -.1); }
-  if (style === 'curly') { for (let i = 0; i < 9; i++) add(hd, G.sph(.045, 5, 4), h, Math.sin(i * 0.7) * .1, .19 + (i % 3) * .01, Math.cos(i * .7) * .08 - .01); }
+  if (style === 'bun') { front(.8); lock([[-.09, .2, .0], [-.1, .13, -.07], [-.06, .1, -.12], [.0, .12, -.12]], .02, .006, 7); lock([[.09, .2, .0], [.1, .13, -.07], [.06, .1, -.12], [.0, .12, -.12]], .02, .006, 7); add(hd, G.sph(.065, 8, 6), h, 0, .245, -.1); add(hd, G.tor(.062, .014, 5, 10), h, 0, .245, -.1, { r: [.4, 0, 0] }); lock([[.0, .15, -.115], [.0, .08, -.15], [.01, .0, -.14]], .03, .01, 8); }
+  if (style === 'curly') { front(.7); for (let i = 0; i < 16; i++) { const a = i / 16 * PI * 2 * 1.4 + .3, sa = Math.sin(a), ca = Math.cos(a); add(hd, G.sph(.04 + (i % 3) * .004, 6, 5), h, sa * .1, .17 + (i % 4) * .018, ca * .09 - .015 - (ca < 0 ? .03 : 0)); } for (let i = 0; i < 6; i++) { const k = i % 2 ? 1 : -1; add(hd, G.sph(.05, 6, 5), h, k * (.1 + (i > 3 ? .015 : 0)), .1 - (i >> 1) * .055, -.045, { s: [.8, 1.2, .9] }); } }
 }
 export function hood(c, mat, open = .7) {
   const { add, G, bones: B } = c;
   add(B.head, new THREE.SphereGeometry(.14, 10, 8, PI / 2 + open, PI * 2 - open * 2, 0, PI * .78), mat, 0, .08, -.015, { s: [1.02, 1.12, 1.15] });
   add(B.neck, G.cyl(.14, .19, .16, 8, true), mat, 0, -.02, -.01, { s: [1, 1, 1.05] });
 }
-export function furCollar(c, mat, r = .19, t = .065) { const { add, G, bones: B } = c; add(B.chest, G.tor(r * .88, t, 6, 12), mat, 0, .2, 0, { r: [PI / 2 - .12, 0, 0], s: [1, 1.15, 1] }); }
+export function furCollar(c, mat, r = .19, t = .065) { const { add, G, bones: B } = c; add(B.chest, G.tor(r * .88, t * .8, 6, 12), mat, 0, .2, 0, { r: [PI / 2 - .12, 0, 0], s: [1, 1.15, 1] }); }
 
 // cape / cloak from curved patches (top pivot at chest bone 'cape')
 export function cape(c, o) {
@@ -168,13 +196,18 @@ export function cape(c, o) {
   if (o.trim) { const tm = M(o.trim, { r: .5, m: .5, d: 1, n: 'capetrim' }); if (o.ragged) { patch(.86, 1, -.5, .5, CW, 1, tm, .004); } else patch(.9, 1, -.5, .5, CW, 1, tm, .004);
     patch(0, 1, -.5, -.47, 1, 7, tm, .004); patch(0, 1, .47, .5, 1, 7, tm, .004); }
   if (o.lining) { /* inner lining visible through double side; second slightly offset patch */ patch(0, 1, -.5, .5, CW, 7, M(o.lining, { r: .95, d: 1, n: 'lining' }), -.006); }
-  return { cb, backPos: (f) => pos(0, f), z: (f) => pos(0, f)[2] };
+  const decalOn = (type, size, mtl, f, uc = 0) => { // decal conforming to the cape surface (outer/back side)
+    const w = o.topW + (o.botW - o.topW) * f, du = size / w, df = size / o.len, nu = 8, nv = 8, v = [], uv = [], idx = [], m = decalMat(c, type, mtl);
+    for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) { const a = i / nu, b = j / nv, p = pos(uc / w + (a - .5) * du, f + (b - .5) * df); v.push(p[0], p[1], p[2] - .008); uv.push(1 - a, 1 - b); }
+    for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) { const a = j * (nu + 1) + i, b2 = a + 1, c2 = a + nu + 1, d = c2 + 1; idx.push(a, b2, c2, b2, d, c2); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); const me = add(cb, g, m); me.name = 'cape_' + type; return me; };
+  return { cb, backPos: (f) => pos(0, f), z: (f) => pos(0, f)[2], decal: decalOn };
 }
 export function tabard(c, o) { // flat pointed panel front/back
   const { add, M, bones: B } = c, W = o.w, L = o.len;
   const sh = new THREE.Shape(); sh.moveTo(-W / 2, 0); sh.lineTo(W / 2, 0); sh.lineTo(W / 2, -L); if (o.point) { sh.lineTo(0, -L - o.point); } sh.lineTo(-W / 2, -L); sh.closePath();
   const ex = { depth: .01, bevelEnabled: false }, mk = (mat, w = 1) => new THREE.ExtrudeGeometry(sh, ex);
-  const mat = M(o.col, { r: .9, n: 'tabard' }), tm = M(o.trim, { r: .45, m: .4, n: 'tabardtrim' });
+  const mat = M(o.col, { r: .9, n: 'tabard' }), tm = o.trim.isMaterial ? o.trim : M(o.trim, { r: .45, m: .4, n: 'tabardtrim' });
   const g = new THREE.Group(); g.position.set(0, o.y ?? .05, o.z ?? .145); g.rotation.x = o.tilt ?? -.06; B.hips.add(g);
   add(g, mk(mat), mat, 0, 0, 0);
   for (const k of [-1, 1]) add(g, new THREE.BoxGeometry(.016, L + (o.point ?? 0) * .3, .014), tm, k * (W / 2 - .008), -L / 2 - (o.point ?? 0) * .15 + .01, .006);
@@ -183,13 +216,17 @@ export function tabard(c, o) { // flat pointed panel front/back
   if (o.emblem2) emblem(c, g, o.emblem2, W * .38, tm, 0, -L * .74, .017);
   return g;
 }
-export function skirt(c, o) {
-  const { add, M, bones: B, G } = c; const mat = M(o.col, { r: .9, d: 1, n: 'skirt' });
-  const g = G.cyl(o.top ?? .17, o.bot ?? .34, o.len, o.segs ?? 14, true); g.translate(0, -o.len / 2, 0);
-  if (o.ragged) { const p = g.attributes.position; for (let i = 0; i < p.count; i++) if (p.getY(i) < -o.len + .01) p.setY(i, p.getY(i) - Math.abs(Math.sin(i * 2.7)) * o.ragged); g.computeVertexNormals(); }
-  const m = add(B.hips, g, mat, 0, o.y ?? -.02, 0, { s: [1, 1, o.zs ?? .92] });
-  if (o.trim) add(B.hips, G.cyl((o.bot ?? .34) * 1.0, (o.bot ?? .34) * 1.0, .035, o.segs ?? 14, true), M(o.trim, { r: .5, m: .5, d: 1, n: 'skirttrim' }), 0, (o.y ?? -.02) - o.len + .02, 0, { s: [1, 1, o.zs ?? .92] });
-  return m;
+let skirtN = 0;
+export function skirt(c, o) { // front & back panels on their own bones that follow the legs (no more legs through robes)
+  const { add, M, bones: B, G, bone } = c; const mat = M(o.col, { r: .9, d: 1, n: 'skirt' }), n = skirtN++, segs = o.segs ?? 16, top = o.top ?? .17, bot = (o.bot ?? .34) * 1.08;
+  const panel = (name, ts) => {
+    const pv = bone('skirt' + name + n, B.hips, 0, o.y ?? -.02, 0); const g = new THREE.CylinderGeometry(top, bot, o.len, segs, 3, true, ts, PI); g.translate(0, -o.len / 2, 0);
+    const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const yy = p.getY(i), f = -yy / o.len, th = Math.atan2(p.getX(i), p.getZ(i)); if (o.ragged && f > .99) p.setY(i, yy - Math.abs(Math.sin(i * 2.7 + th * 5)) * o.ragged); const w = Math.sin(th * 5 + f * 3) * .012 * f; p.setX(i, p.getX(i) * (1 + w / bot)); p.setZ(i, p.getZ(i) * (1 + w / bot)); }
+    g.computeVertexNormals(); add(pv, g, mat, 0, 0, 0, { s: [1, 1, o.zs ?? .92] });
+    if (o.trim) add(pv, new THREE.CylinderGeometry(bot * 1.005, bot * 1.005, .04, segs, 1, true, ts, PI), M(o.trim, { r: .5, m: .5, d: 1, n: 'skirttrim' }), 0, -o.len + .015, 0, { s: [1, 1, o.zs ?? .92] });
+    return pv; };
+  panel('F', -PI / 2); panel('B', PI / 2); c.skirts = (c.skirts || 0) + 1;
+  return B['skirtF' + n];
 }
 export function pouch(c, par, col, x, y, z, s = 1, gold) { const { add, G, M } = c; add(par, G.box(.09 * s, .1 * s, .045 * s), M(col, { r: .85 }), x, y, z); add(par, G.box(.095 * s, .035 * s, .05 * s), M(col, { r: .85 }), x, y + .045 * s, z); if (gold) add(par, G.box(.02 * s, .03 * s, .01), gold, x, y + .01 * s, z + .026 * s); }
 
@@ -253,6 +290,19 @@ export function staff(c, type, o) {
   add(g, G.cyl(.032, .032, .1, 6), o.gold, 0, -.0, 0); add(g, G.cone(.02, .08, 5), o.gold, 0, -.17 - L / 2 - .02, 0, { r: [PI, 0, 0] });
   const h = staffHead(c, type, o); h.position.y = top - .17 + .0; g.add(h); return { g, top: h };
 }
+export function bow(c, o) { // grip at origin, limbs along +-y, tips curve toward the archer (-z)
+  const { add, G, M } = c, g = new THREE.Group(), wood = M(o.wood ?? 0x5a3520, { r: .6, t: 'leather', n: 'bowwood' }), gold = o.gold, L = o.len ?? .74, pts = [];
+  for (let i = -5; i <= 5; i++) { const t = i / 5; pts.push([0, t * L, -.2 * t * t * t * t - .12 * t * t]); }
+  add(g, taper(pts.slice(5), .016, .008, 12, 6, 1), wood); add(g, taper(pts.slice(0, 6).reverse(), .016, .008, 12, 6, 1), wood);
+  add(g, G.cyl(.02, .02, .13, 8), M(0x3a2415, { r: .9, n: 'grip' }), 0, 0, 0);
+  for (const k of [-1, 1]) { const t = k * .55, y = t * L, z = -.2 * t * t * t * t - .12 * t * t; add(g, G.tor(.022, .005, 4, 8), gold, 0, y, z, { r: [PI / 2, 0, 0] }); add(g, G.sph(.018, 5, 4), M(0x3fbf5a, { e: 0x2f9f45, ei: .4, n: 'gem' }), 0, y * .8, z * .78 + .01, { s: [1, 1.5, 1] }); add(g, G.sph(.012, 4, 3), gold, 0, k * L, -.32 * 0 + (-.2 - .12)); }
+  const tz = -.32, sg = G.cyl(.0025, .0025, L * 2, 4); add(g, sg, M(0xe8e0c8, { n: 'string' }), 0, 0, tz); return g; }
+export function quiver(c, o) { // tilted back quiver with arrows; origin at its centre
+  const { add, G, M } = c, g = new THREE.Group(), lea = M(0x6a4326, { r: .8, t: 'leather', n: 'leather' }), gold = o.gold;
+  add(g, G.cyl(.065, .055, .5, 10), lea, 0, 0, 0); add(g, G.tor(.066, .01, 4, 10), gold, 0, .2, 0, { r: [PI / 2, 0, 0] }); add(g, G.tor(.058, .01, 4, 10), gold, 0, -.2, 0, { r: [PI / 2, 0, 0] }); add(g, G.cone(.055, .06, 10), lea, 0, -.28, 0, { r: [PI, 0, 0] });
+  add(g, G.cyl(.05, .05, .02, 10), M(0x2a1a10), 0, .25, 0);
+  for (let i = 0; i < 7; i++) { const a = i / 7 * PI * 2, rx = Math.sin(a) * .03, rz = Math.cos(a) * .03, tilt = [Math.cos(a) * .08, 0, -Math.sin(a) * .08]; add(g, G.cyl(.005, .005, .3, 4), M(0x8a6a40, { n: 'arrow' }), rx, .33, rz, { r: tilt }); for (let f = 0; f < 3; f++) add(g, G.cone(.014, .08, 4), M(i % 2 ? 0xf2eee0 : 0x3f8f50, { d: 1, n: 'fletch' }), rx, .42 + f * .005, rz, { r: [tilt[0], f * 2.1, tilt[2]], s: [1, 1, .25] }); }
+  return g; }
 export function book(c, cover, gold, w = .17, h = .23) {
   const { M, add, G } = c, g = new THREE.Group(); add(g, G.box(w, h, .05), M(cover, { r: .8 }), 0, 0, 0); add(g, G.box(w * .9, h * .96, .045), M(0xe9ddbc), .01, 0, 0); add(g, G.box(.025, h, .056), M(0x3a2415), -w / 2, 0, 0);
   add(g, G.box(w * 1.0, h * 1.0, .052), M(cover, { r: .8 }), 0, 0, 0, { s: [1, 1, .2] }); for (const [px, py] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) add(g, G.box(.03, .03, .056), gold, px * w * .46, py * h * .46, 0);
@@ -278,6 +328,8 @@ export function finalize(c, root, hold = {}, poseFn) {
   const update = (t, mode) => {
     for (const n of names) { const b = B[n], r = b.userData.rest; b.rotation.copy(r.r); b.position.copy(r.p); }
     const R = (n, x = 0, y = 0, z = 0) => { const b = B[n]; if (!b) return; b.rotation.x += x; b.rotation.y += y; b.rotation.z += z; };
+    const skirtDrive = () => { const tl = B.thigh_L.rotation.x, tr = B.thigh_R.rotation.x, fw = Math.min(0, tl, tr), bk = Math.max(0, tl, tr), ky = Math.max(0, B.shin_L.rotation.x, B.shin_R.rotation.x);
+      for (const n in B) { if (n.startsWith('skirtF')) B[n].rotation.x += fw * .95 - ky * .0; else if (n.startsWith('skirtB')) B[n].rotation.x += bk * .95; } };
     if (mode === 'walk') {
       const ph = t * PI * 2;
       for (const [S, s] of [['L', 0], ['R', PI]]) {
@@ -286,7 +338,7 @@ export function finalize(c, root, hold = {}, poseFn) {
         else R('upperArm_' + S, Math.sin(p) * .05);
       }
       B.hips.position.y += Math.cos(ph * 2) * .02; R('hips', 0, Math.sin(ph) * .12, 0); R('spine', 0, -Math.sin(ph) * .1, Math.sin(ph) * .02); R('chest', .03, -Math.sin(ph) * .06, 0); R('head', 0, Math.sin(ph) * .05);
-      R('cape', .12 + Math.sin(ph * 2 - 1) * .07, Math.sin(ph) * .03, Math.sin(ph) * .03);
+      R('cape', .12 + Math.sin(ph * 2 - 1) * .07, Math.sin(ph) * .03, Math.sin(ph) * .03); skirtDrive();
       for (const n of ['tabard']) { }
     } else {
       const ph = t * PI * 2;

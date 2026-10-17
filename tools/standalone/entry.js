@@ -1,7 +1,7 @@
 import * as THREE from '../../www/proto3d/vendor/three.module.js';
 import { GLTFLoader } from '../../www/proto3d/vendor/jsm/loaders/GLTFLoader.js';
-const ORDER = ['aldric','darius','selene','seraphine','talia','finn','brynn','mirelle','nyx','vesper','thorne','orin'];
-const LABEL = {aldric:'Sir Aldric',darius:'Darius Umbral',selene:'Selene Frostveil',seraphine:'Dame Seraphine',talia:'Talia Stormcall',finn:'Finn Valecourt',brynn:'Brynn Cogwright',mirelle:'Mirelle Thornroot',nyx:'Nyx Varrin',vesper:'Vesper Crowe',thorne:'Brother Thorne',orin:'Orin Ashlance'};
+const ORDER = ['aldric','darius','selene','seraphine','talia','finn','brynn','mirelle','nyx','vesper','thorne','orin','elira'];
+const LABEL = {aldric:'Sir Aldric',darius:'Darius Umbral',selene:'Selene Frostveil',seraphine:'Dame Seraphine',talia:'Talia Stormcall',finn:'Finn Valecourt',brynn:'Brynn Cogwright',mirelle:'Mirelle Thornroot',nyx:'Nyx Varrin',vesper:'Vesper Crowe',thorne:'Brother Thorne',orin:'Orin Ashlance', elira: 'Lady Elira'};
 const qs = new URLSearchParams(location.search);
 const R = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true});
 R.setPixelRatio(Math.min(devicePixelRatio,2)); R.setSize(innerWidth,innerHeight);

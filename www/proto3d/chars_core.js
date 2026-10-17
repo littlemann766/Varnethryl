@@ -357,3 +357,101 @@ export function finalize(c, root, hold = {}, poseFn) {
     return new THREE.AnimationClip(mode, dur, tracks); };
   return { root: grp, bones: B, update, clips: () => [clip('idle', 3, 12), clip('walk', 1, 16)], hold };
 }
+
+// ---------- batch 2 kit (bows, axes, lutes, fur, glyphs, wolf helpers) ----------
+export function furMantle(c, fur, dark, r = .27, t = .1) {
+  const { add, G, bones: B } = c; const b = c.spec.bulk ?? 1;
+  add(B.chest, G.tor(r * .88, t, 6, 12), fur, 0, .2, 0, { r: [PI / 2 - .12, 0, 0], s: [1, 1.15, 1] });
+  for (const k of [-1, 1]) { const sh = B['shoulder_' + (k > 0 ? 'L' : 'R')];
+    add(sh, G.dome(.15 * b, 8, 4), fur, k * .05, .03, 0, { s: [1.25, .9, 1.25], r: [0, 0, -k * .25] });
+    for (let i = 0; i < 7; i++) { const a = i / 7 * PI * 2; add(sh, G.cone(.04 * b, .1, 4), i % 2 ? dark : fur, k * .05 + Math.sin(a) * .15 * b, -.03, Math.cos(a) * .15 * b, { r: [Math.cos(a) * 2.5, 0, -Math.sin(a) * 2.5 + k * .3], s: [1, 1, .6] }); } }
+  for (let i = 0; i < 9; i++) { const a = i / 9 * PI * 2; add(B.chest, G.cone(.045, .1, 4), i % 2 ? dark : fur, Math.sin(a) * r * 1.02, .15, Math.cos(a) * r * 1.0 * .8, { r: [PI + Math.cos(a) * .5, 0, -Math.sin(a) * .5], s: [1, 1, .6] }); }
+}
+export function furCuff(c, bone, fur, r, y, t = .035) { c.add(bone, c.G.tor(r, t, 5, 10), fur, 0, y, 0, { r: [PI / 2, 0, 0] }); }
+export function quiver(c, wood, gold, n = 5) {
+  const { add, G, M, bones: B } = c; const g = new THREE.Group(); g.position.set(.08, .12, -.17); g.rotation.set(.15, 0, -.35); B.chest.add(g);
+  add(g, G.cyl(.055, .045, .5, 8), wood, 0, 0, 0); add(g, G.cyl(.06, .06, .03, 8), gold, 0, .22, 0); add(g, G.cyl(.05, .05, .03, 8), gold, 0, -.2, 0);
+  for (let i = 0; i < n; i++) { const a = i / n * PI * 2; const x = Math.sin(a) * .025, z = Math.cos(a) * .025;
+    add(g, G.cyl(.004, .004, .22, 4), M(0x8a6a3a), x, .36, z, { r: [0, 0, -x * 2] }); add(g, G.cone(.02, .07, 3), M(i % 2 ? 0xf0ead8 : 0x3a7a42, { d: 1 }), x * 1.2, .46, z * 1.2, { s: [1, 1, .3] }); }
+  return g; }
+export function bow(c, o) {
+  const { add, G, M } = c, g = new THREE.Group(), r = o.r ?? .62, arc = o.arc ?? 1.9; const wood = o.wood, gold = o.gold;
+  add(g, new THREE.TorusGeometry(r, .016, 5, 22, arc), wood, -r, 0, 0, { r: [0, 0, -arc / 2] });
+  for (const k of [-1, 1]) { const a = k * arc / 2; add(g, G.cone(.018, .07, 4), gold, -r + Math.cos(a) * r, Math.sin(a) * r, 0, { r: [0, 0, a - PI / 2 * k + (k > 0 ? 0 : PI)] }); }
+  const sy = Math.sin(arc / 2) * r, sx = -r + Math.cos(arc / 2) * r; add(g, G.cyl(.003, .003, sy * 2, 3), M(0xeee6d0), sx, 0, 0);
+  add(g, G.cyl(.022, .022, .13, 6), M(0x3a2415), 0, 0, 0); add(g, G.cyl(.026, .026, .02, 6), gold, 0, .075, 0); add(g, G.cyl(.026, .026, .02, 6), gold, 0, -.075, 0);
+  return g; }
+export function axeHead(c, o) { // double-bit battle axe; origin at haft centre
+  const { add, G, M } = c, g = new THREE.Group(); const iron = o.iron, gold = o.gold;
+  const blade = k => { const s = new THREE.Shape(); s.moveTo(0, .1); s.quadraticCurveTo(k * .12, .32, k * .34, .36); s.quadraticCurveTo(k * .26, .1, k * .36, -.12); s.quadraticCurveTo(k * .14, -.18, 0, -.1); s.closePath(); return new THREE.ExtrudeGeometry(s, { depth: .028, bevelEnabled: false, curveSegments: 6 }); };
+  for (const k of [-1, 1]) { const bg = blade(k); bg.translate(0, 0, -.014); add(g, bg, iron, k * .04, 0, 0); add(g, G.box(.18, .03, .034), M(0xcfd6dd, { m: .6, r: .3 }), k * .24, .03, 0, { r: [0, 0, 0] });
+    add(g, G.box(.1, .02, .034), M(o.rune ?? 0xb02828, { e: o.rune ?? 0xb02828, ei: .5 }), k * .2, .12, 0, { r: [0, 0, -k * .5] }); }
+  add(g, G.cyl(.075, .075, .07, 10), gold, 0, 0, 0, { r: [PI / 2, 0, 0] }); add(g, G.cyl(.04, .04, .09, 8), iron, 0, 0, 0, { r: [PI / 2, 0, 0] }); add(g, G.cone(.03, .12, 4), iron, 0, .24, 0);
+  return g; }
+export function lute(c, o) {
+  const { add, G, M } = c, g = new THREE.Group(), wood = o.wood, dark = M(0x3a2415, { r: .8 }), gold = o.gold;
+  add(g, G.sph(.17, 10, 8), wood, 0, 0, 0, { s: [1, 1.2, .55] }); add(g, G.cyl(.05, .05, .02, 8), dark, 0, .02, .09, { r: [PI / 2, 0, 0] });
+  add(g, G.cyl(.052, .052, .012, 8), gold, 0, .02, .088, { r: [PI / 2, 0, 0] }); add(g, G.box(.1, .015, .02), dark, 0, -.1, .1);
+  add(g, G.box(.05, .5, .03), M(0x5a3a22, { r: .7 }), 0, .5, 0); add(g, G.box(.058, .015, .036), gold, 0, .27, .0);
+  const ph = new THREE.Group(); ph.position.set(0, .78, 0); ph.rotation.x = -.5; g.add(ph); add(ph, G.box(.06, .17, .03), M(0x5a3a22), 0, .06, 0);
+  for (const k of [-1, 1]) for (let i = 0; i < 2; i++) add(ph, G.cyl(.01, .01, .05, 5), gold, k * .035, .02 + i * .06, 0, { r: [0, 0, PI / 2] });
+  add(g, G.cyl(.002, .002, .9, 3), M(0xeee6d0), 0, .45, .02); add(g, G.cyl(.002, .002, .9, 3), M(0xeee6d0), .012, .45, .02);
+  add(g, G.tor(.18, .012, 4, 14), gold, 0, 0, -.001, { s: [1, 1.2, .5] });
+  return g; }
+export function glyph(c, col, size = .09) { // floating square-rune plaque
+  const { add, G, M } = c, g = new THREE.Group(), m = M(col, { e: col, ei: 1.5, d: 1 });
+  add(g, new THREE.TorusGeometry(size, .008, 3, 4), m, 0, 0, 0, { r: [0, 0, PI / 4] });
+  add(g, G.box(size * .09, size * 1.1, .008), m, 0, 0, 0); add(g, G.box(size * .8, size * .08, .008), m, 0, size * .15, 0);
+  add(g, G.box(size * .5, size * .08, .008), m, 0, -size * .3, 0, { r: [0, 0, .4] });
+  add(g, G.sph(size * .5, 6, 5), M(col, { e: col, ei: .5, a: .12 }), 0, 0, 0, { s: [1, 1, .1] });
+  return g; }
+export function flame(c, col1 = 0xff7a1a, col2 = 0xffd23a, s = 1) {
+  const { add, G, M } = c, g = new THREE.Group(), a = M(col1, { e: col1, ei: 1.6, d: 1, n: 'flame' }), b = M(col2, { e: col2, ei: 1.8, d: 1, n: 'flame2' });
+  add(g, G.sph(.06 * s, 7, 5), b, 0, 0, 0, { s: [1, 1.1, 1] }); add(g, G.sph(.09 * s, 7, 5), M(col1, { e: col1, ei: .6, a: .25 }), 0, 0, 0);
+  for (let i = 0; i < 7; i++) { const an = i / 7 * PI * 2, rr = .05 * s; add(g, G.cone(.035 * s, (.16 + (i % 3) * .06) * s, 5), i % 2 ? a : b, Math.sin(an) * rr, .08 * s + (i % 3) * .01, Math.cos(an) * rr, { r: [Math.cos(an) * .5, 0, -Math.sin(an) * .5], s: [1, 1, .6] }); }
+  return g; }
+export function kiRing(c, hand, col = 0xffc84a, y = -.05) {
+  const { add, G, M } = c, m = M(col, { e: col, ei: 1.6, a: .75, d: 1, n: 'ki' });
+  for (let i = 0; i < 3; i++) add(hand, G.tor(.1 + i * .035, .008 + (i == 0) * .004, 4, 18), m, 0, y + (i - 1) * .02, 0, { r: [PI / 2 + i * .45 - .4, i * .6, 0] });
+  add(hand, G.sph(.1, 8, 6), M(col, { e: col, ei: .5, a: .22, n: 'kiglow' }), 0, y, 0);
+  for (let i = 0; i < 5; i++) { const an = i / 5 * PI * 2; add(hand, G.cone(.012, .07, 4), m, Math.sin(an) * .13, y + (i % 2) * .05, Math.cos(an) * .13, { r: [Math.cos(an) * 1.4, 0, -Math.sin(an) * 1.4] }); }
+}
+export function hat(c, col, trim, o = {}) { // soft bard cap with brim and plume mount
+  const { add, G, M, bones: B } = c, m = M(col, { r: .9, n: 'hat' });
+  add(B.head, G.cyl(.2, .2, .02, 12), m, 0, .205, 0, { r: [.12, 0, .06], s: [1, 1, 1.05] }); add(B.head, G.dome(.125, 10, 5), m, 0, .205, 0, { r: [.12, 0, .06], s: [1, .9, 1.1] });
+  add(B.head, G.tor(.125, .012, 4, 14), M(trim, { m: .4, r: .4 }), 0, .215, 0, { r: [PI / 2 + .12, 0, .06] });
+  add(B.head, G.cyl(.205, .205, .012, 12), M(trim, { m: .4, r: .4 }), 0, .205, 0, { r: [.12, 0, .06], s: [1.01, 1, 1.06] }); }
+// wolf (own quadruped rig; clips baked like the heroes)
+export function wolfRig() {
+  const c = makeCtx({ name: 'Wolf' }); const { M, bone, add, G, bones: B } = c;
+  const fur = M(0x8d8882, { r: 1, n: 'fur' }), dk = M(0x4a4642, { r: 1, n: 'furdark' }), lt = M(0xd2ccbc, { r: 1, n: 'furlight' }), gold = M(0xd2a43c, { m: .4, r: .4, n: 'gold' });
+  const root = bone('root', null), hips = bone('hips', root, 0, .55, -.3), spine = bone('spine', hips, 0, .02, .32), chest = bone('chest', spine, 0, .03, .3), neck = bone('neck', chest, 0, .08, .22), head = bone('head', neck, 0, .08, .12), jaw = bone('jaw', head, 0, -.04, .05);
+  add(hips, G.sph(.2, 9, 7), fur, 0, 0, 0, { s: [.95, 1, 1.25] }); add(spine, G.sph(.19, 9, 7), fur, 0, .0, 0, { s: [.95, .95, 1.5] }); add(chest, G.sph(.23, 9, 7), fur, 0, .0, 0, { s: [.95, 1.15, 1.2] });
+  add(spine, G.sph(.17, 8, 6), dk, 0, .08, 0, { s: [.9, .6, 1.5] }); add(chest, G.sph(.2, 8, 6), lt, 0, -.1, .08, { s: [.8, .8, 1.1] });
+  add(neck, G.sph(.15, 8, 6), fur, 0, .02, .06, { s: [.9, 1, 1.4], r: [-.5, 0, 0] }); for (let i = 0; i < 6; i++) add(neck, G.cone(.05, .1, 4), lt, (i - 2.5) * .045, -.06, .14 + (i % 2) * .02, { r: [PI + .3, 0, 0] });
+  add(head, G.sph(.1, 8, 6), fur, 0, 0, .0, { s: [.95, .9, 1.1] }); add(head, G.box(.08, .065, .17), fur, 0, -.02, .14); add(head, G.sph(.03, 5, 4), M(0x15100a), 0, .0, .235);
+  add(head, G.box(.075, .02, .15), lt, 0, -.055, .13); add(jaw, G.box(.065, .025, .15), lt, 0, -.01, .1);
+  for (const k of [-1, 1]) { add(head, G.cone(.04, .11, 4), dk, k * .065, .12, -.02, { s: [1, 1, .55], r: [0, 0, -k * .15] }); add(head, G.sph(.012, 4, 3), M(0xe8b030, { e: 0xe8b030, ei: .4 }), k * .05, .03, .105); add(jaw, G.cone(.008, .035, 4), M(0xf6f2e6), k * .028, .012, .16, { r: [PI, 0, 0] }); }
+  const t1 = bone('tail_1', hips, 0, .02, -.2), t2 = bone('tail_2', t1, 0, 0, -.2); t1.rotation.x = -.5;
+  add(t1, G.cone(.07, .3, 6), fur, 0, 0, -.1, { r: [-PI / 2, 0, 0] }); add(t2, G.cone(.06, .25, 6), dk, 0, 0, -.08, { r: [-PI / 2, 0, 0], s: [1, 1, 1] });
+  for (const [fb, par, zz] of [['F', chest, .08], ['B', hips, -.02]]) for (const k of [-1, 1]) { const S = fb + (k > 0 ? 'L' : 'R');
+    const th = bone('thigh_' + S, par, k * .14, -.1, zz), sn = bone('shin_' + S, th, 0, -.27, 0), pw = bone('paw_' + S, sn, 0, -.27, 0);
+    const l = (p, len, r0, r1, m) => { const g = G.cyl(r0, r1, len, 7); g.translate(0, -len / 2, 0); add(p, g, m); };
+    l(th, .27, fb === 'B' ? .085 : .07, .05, fur); add(th, G.sph(.085, 6, 5), fur, 0, 0, 0); l(sn, .27, .045, .035, fb === 'B' ? dk : fur); add(pw, G.box(.07, .04, .12), lt, 0, -.015, .035);
+    if (fb === 'B') { th.rotation.x = .25; sn.rotation.x = -.4; } }
+  // collar
+  add(neck, G.tor(.12, .018, 4, 12), M(0x5a3720, { r: .85 }), 0, .03, .12, { r: [PI / 2 - .5, 0, 0] }); add(neck, G.cyl(.032, .032, .012, 8), gold, 0, -.07, .2, { r: [PI / 2 - .5, 0, 0] });
+  add(neck, G.cone(.03, .08, 4), M(0x3f8f3a, { d: 1 }), 0, -.13, .22, { r: [PI, 0, 0], s: [1, 1, .3] });
+  const names = Object.keys(B); for (const k in B) B[k].userData.rest = { r: B[k].rotation.clone(), p: B[k].position.clone() };
+  const update = (t, mode) => {
+    for (const n of names) { const b = B[n], r = b.userData.rest; b.rotation.copy(r.r); b.position.copy(r.p); }
+    const R = (n, x = 0, y = 0, z = 0) => { const b = B[n]; b.rotation.x += x; b.rotation.y += y; b.rotation.z += z; }; const ph = t * PI * 2;
+    if (mode === 'walk') { for (const [S, o] of [['FL', 0], ['BR', 0], ['FR', PI], ['BL', PI]]) { const p = ph + o; R('thigh_' + S, Math.sin(p) * .5); R('shin_' + S, Math.max(0, Math.cos(p)) * .7); R('paw_' + S, -Math.sin(p) * .2); }
+      B.hips.position.y += Math.abs(Math.sin(ph)) * .015; R('spine', Math.sin(ph) * .02, Math.sin(ph) * .04); R('head', 0, -Math.sin(ph) * .04); R('tail_1', 0, Math.sin(ph) * .2); R('tail_2', 0, Math.sin(ph - 1) * .3); }
+    else { R('chest', Math.sin(ph) * .01); R('head', Math.sin(ph * .5) * .03, Math.sin(ph * .5) * .1); R('jaw', Math.max(0, Math.sin(ph * 2)) * .05); R('tail_1', 0, Math.sin(ph) * .12); R('tail_2', 0, Math.sin(ph - 1) * .2); B.hips.position.y += Math.sin(ph) * .004; } };
+  update(0, 'idle'); const grp = new THREE.Group(); grp.name = 'Wolf'; grp.add(root);
+  const clip = (mode, dur, N) => { const times = [...Array(N)].map((_, i) => i * dur / N), rec = {}, hp = []; times.forEach(t => { update(t / dur, mode); for (const n of names) (rec[n] ??= []).push(...B[n].quaternion.toArray()); hp.push(...B.hips.position.toArray()); });
+    const tracks = []; for (const n of names) { const q0 = new THREE.Quaternion().setFromEuler(B[n].userData.rest.r), a = rec[n]; let mv = false; for (let i = 0; i < N && !mv; i++) mv = Math.abs(a[i * 4] - q0.x) + Math.abs(a[i * 4 + 1] - q0.y) + Math.abs(a[i * 4 + 2] - q0.z) + Math.abs(a[i * 4 + 3] - q0.w) > 1e-4; if (mv) tracks.push(new THREE.QuaternionKeyframeTrack(n + '.quaternion', times, a)); }
+    tracks.push(new THREE.VectorKeyframeTrack('hips.position', times, hp)); update(0, 'idle'); return new THREE.AnimationClip(mode, dur, tracks); };
+  return { root: grp, bones: B, update, clips: () => [clip('idle', 3, 12), clip('walk', 1, 16)], hold: {} };
+}

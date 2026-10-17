@@ -30,6 +30,7 @@ def safe(pg): pg.evaluate("window.__vn.Quest.debug.playerSafe()")
 def run(p, ending_pick, label):
     b = p.chromium.launch()
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True, service_workers='block')
+    ctx.add_init_script("document.addEventListener('DOMContentLoaded',()=>{const s=document.createElement('style');s.textContent='body.hud-on .adventureSide{display:block!important;position:fixed!important;left:0;top:0;width:100%;z-index:9999!important;background:#000}';document.head.appendChild(s)})")  # tests: HUD covers the story card
     pg = ctx.new_page(); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
     # 1. Legacy save with no quest data must still load.
@@ -119,7 +120,7 @@ with sync_playwright() as p:
     b.close()
     # "Not yet" branch: leave the drawings, Veyra retreats, quest reopens, redo succeeds.
     b = p.chromium.launch()
-    ctx = b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True, service_workers='block'); pg = ctx.new_page()
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True, service_workers='block'); ctx.add_init_script("document.addEventListener('DOMContentLoaded',()=>{const s=document.createElement('style');s.textContent='body.hud-on .adventureSide{display:block!important;position:fixed!important;left:0;top:0;width:100%;z-index:9999!important;background:#000}';document.head.appendChild(s)})"); pg = ctx.new_page()
     pg.goto(URL); pg.wait_for_timeout(500)
     pg.evaluate("""(()=>{const s=window.__vn.state;s.kills=3;s.questStep=1;Object.assign(s.veyra,{stage:'offer',ch:7,done:['V1','V2','V3','V4','V5','V6'],zones:['coast','hollow'],drawings:[],items:["Brother's Oath"],recruits:['Brother Thorne'],allies:['pip']})})()""")
     pg.evaluate('window.__vn.Quest.render()'); pg.click('#vqRead'); walk_panels(pg)

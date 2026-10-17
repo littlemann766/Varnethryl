@@ -233,12 +233,12 @@ const HEROES = [buildAldric(ALDRIC_TEX), buildUmbral(HT), buildSelene(HT)];
 const HERO_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil'];
 let hero = HEROES[0];
 HEROES.forEach((h, i) => { h.position.set(0, 0, 14); h.visible = i === 0; scene.add(h); });
-function setHero(i) { hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach((b, k) => b.classList.toggle('on', k === i)); }
+let setHero = function (i) { hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach((b, k) => b.classList.toggle('on', k === i)); };
 { const bar = document.getElementById('heroes'); HERO_NAMES.forEach((n, i) => { const b = document.createElement('button'); b.textContent = n.split(' ').pop(); b.title = n; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => { e.stopPropagation(); setHero(i); }); bar.appendChild(b); }); const q = new URLSearchParams(location.search).get('hero'); if (q != null && HEROES[+q]) setHero(+q); }
-// ---------- Beth's GLB heroes (fallback: procedural heroes above) ----------
-const GLB_IDS = ['aldric', 'darius', 'selene', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne'];
-const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne'];
-const glbInfo = { loaded: [], failed: [] };
+// ---------- GLB heroes (fallback: procedural heroes above). First 3 load eagerly, the rest lazily on first tap. ----------
+const GLB_IDS = ['aldric', 'darius', 'selene', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'orin', 'elira', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
+const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Orin Ashlance', 'Lady Elira', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
+const glbInfo = { loaded: [], failed: [], pending: [] };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;
 function wrapGLB(g) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
@@ -251,20 +251,33 @@ function wrapGLB(g) {
   root.userData = { glb: true, mixer, act, capeUpdate() {} };
   return root;
 }
-if (useGLB) {
-  const gl = new GLTFLoader();
-  await Promise.all(GLB_IDS.map((id, gi) => new Promise(res => {
-    gl.load('proto3d/models/' + id + '.glb', g => {
-      try {
-        const w = wrapGLB(g); w.visible = false; scene.add(w);
-        if (gi < 3) { const old = HEROES[gi]; w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); scene.remove(old); if (hero === old) hero = w; HEROES[gi] = w; }
-        else { HEROES.push(w); HERO_NAMES.push(GLB_NAMES[gi]); const i = HEROES.length - 1; const bar = document.getElementById('heroes'), b = document.createElement('button'); b.textContent = GLB_NAMES[gi].split(' ').pop(); b.title = GLB_NAMES[gi]; b.addEventListener('pointerdown', e => { e.stopPropagation(); setHero(i); }); bar.appendChild(b); }
-        glbInfo.loaded.push(id);
-      } catch (e) { console.warn('GLB wrap failed', id, e); glbInfo.failed.push(id); }
-      res();
-    }, undefined, err => { console.warn('GLB load failed, using procedural fallback', id); glbInfo.failed.push(id); res(); });
-  })));
+const glbLoader = new GLTFLoader();
+const glbLoading = {};
+function loadGLB(id) { return glbLoading[id] || (glbLoading[id] = new Promise(res => glbLoader.load('proto3d/models/' + id + '.glb', g => { try { res(wrapGLB(g)); } catch (e) { console.warn('GLB wrap failed', id, e); res(null); } }, undefined, () => { console.warn('GLB load failed, using procedural fallback', id); res(null); }))); }
+// Rook's wolf companion: loaded when Rook is selected, trails behind the hero.
+let wolf = null;
+async function ensureWolf() { if (wolf || !useGLB) return; const w = await loadGLB('wolf'); if (!w) return; w.scale.setScalar(0.5); w.position.set(state.heroX + 1.2, 0, state.heroZ + 1.2); scene.add(w); wolf = w; }
+const bar0 = document.getElementById('heroes');
+GLB_IDS.forEach((id, gi) => {
+  if (gi >= 3) {
+    const ph = new THREE.Group(); ph.visible = false; ph.userData = { pending: id }; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(GLB_NAMES[gi]); glbInfo.pending.push(id);
+    const i = HEROES.length - 1, b = document.createElement('button'); b.textContent = GLB_NAMES[gi].split(' ').pop(); b.title = GLB_NAMES[gi]; b.addEventListener('pointerdown', e => { e.stopPropagation(); setHero(i); }); bar0.appendChild(b);
+  }
+});
+async function resolveHero(i) {
+  const gi = i, id = GLB_IDS[gi]; if (!useGLB || !id) return;
+  const old = HEROES[i]; if (old.userData.glb) return;
+  const w = await loadGLB(id);
+  if (!w) { glbInfo.failed.push(id); if (old.userData.pending) { old.userData = {}; } return; }   // procedural kept for 0-2; empty placeholder otherwise
+  const cur = HEROES[i]; if (cur.userData.glb) return;
+  w.visible = cur.visible; w.position.copy(cur.position); w.rotation.copy(cur.rotation); scene.add(w); scene.remove(cur);
+  if (hero === cur) hero = w; HEROES[i] = w; glbInfo.loaded.push(id);
+  const k = glbInfo.pending.indexOf(id); if (k >= 0) glbInfo.pending.splice(k, 1);
 }
+const _setHero = setHero;
+setHero = function (i) { _setHero(i); resolveHero(i); if (GLB_IDS[i] === 'rook') ensureWolf(); if (wolf) wolf.visible = GLB_IDS[i] === 'rook'; };
+await Promise.all([0, 1, 2].map(resolveHero));
+{ const q = new URLSearchParams(location.search).get('hero'); if (q != null && HEROES[+q]) setHero(+q); }
 // blob shadow is the real shadow map; no extra.
 const marker = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.55, 20), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: 0.9, depthWrite: false }));
 marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = false; scene.add(marker);
@@ -383,8 +396,10 @@ function updateHero(dt) {
 
 let walkT = 0, idleT = 0, prevYaw = 0;
 function animateHero(dt) {
+  if (wolf && wolf.visible) { const dx = state.heroX - wolf.position.x, dz = state.heroZ - wolf.position.z, d = Math.hypot(dx, dz), mv = d > 1.8; if (mv) { const k = Math.min(1, 4.5 * dt / d) * (d - 1.6) / d * d; wolf.position.x += dx * Math.min(1, 4 * dt) * (d - 1.6) / d; wolf.position.z += dz * Math.min(1, 4 * dt) * (d - 1.6) / d; wolf.rotation.y = Math.atan2(dx, dz); } const a = wolf.userData.act; if (a.walk && a.idle) { a.walk.setEffectiveWeight(mv ? 1 : 0); a.idle.setEffectiveWeight(mv ? 0 : 1); } wolf.userData.mixer.update(dt); }
   const u = hero.userData, w = Math.min(1, state.speed / SPEED);
   if (u.glb) { const wk = u.act.walk, id = u.act.idle; if (wk && id) { wk.setEffectiveWeight(w); id.setEffectiveWeight(1 - w); wk.timeScale = 0.6 + state.speed * 0.25; } u.mixer.update(dt); return; }
+  if (!u.legL) return;   // placeholder while a lazy GLB loads
   walkT += dt * (4 + state.speed * 1.9); idleT += dt;
   const s = Math.sin(walkT) * 0.85 * w;
   u.legL.rotation.x = s; u.legR.rotation.x = -s;

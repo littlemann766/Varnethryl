@@ -27,6 +27,7 @@ def safe(pg): pg.evaluate("window.__vn.Mirror.debug.playerSafe()")
 def newpage(p):
     b = p.chromium.launch()
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True, service_workers='block')
+    ctx.add_init_script("document.addEventListener('DOMContentLoaded',()=>{const s=document.createElement('style');s.textContent='body.hud-on .adventureSide{display:block!important;position:fixed!important;left:0;top:0;width:100%;z-index:9999!important;background:#000}';document.head.appendChild(s)})")  # tests: HUD covers the story card
     pg = ctx.new_page(); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
     return b, pg, errs

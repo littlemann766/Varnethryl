@@ -10,17 +10,17 @@ class Q(http.server.SimpleHTTPRequestHandler):
 srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Q, directory=ROOT)); port = srv.server_address[1]
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 SH = '/workspace/sheets/'
-SHEETS = dict(aldric='aldric', darius='darius', selene='selene', seraphine='x0', talia='x1', finn='x2', brynn='x3', mirelle='x6', nyx='x7', vesper='x8', thorne='x9')
-NAMES = dict(aldric='Sir Aldric', darius='Darius Umbral', selene='Selene Frostveil', seraphine='Dame Seraphine', talia='Talia Stormcall', finn='Finn Valecourt', brynn='Brynn Cogwright', mirelle='Mirelle Thornroot', nyx='Nyx Varrin', vesper='Vesper Crowe', thorne='Brother Thorne')
+SHEETS = dict(aldric='aldric', darius='darius', selene='selene', seraphine='x0', talia='x1', finn='x2', brynn='x3', mirelle='x6', nyx='x7', vesper='x8', thorne='x9', orin='orin')
+NAMES = dict(aldric='Sir Aldric', darius='Darius Umbral', selene='Selene Frostveil', seraphine='Dame Seraphine', talia='Talia Stormcall', finn='Finn Valecourt', brynn='Brynn Cogwright', mirelle='Mirelle Thornroot', nyx='Nyx Varrin', vesper='Vesper Crowe', thorne='Brother Thorne', orin='Orin Ashlance')
 only = os.environ.get('ONLY', '').split(',') if os.environ.get('ONLY') else list(SHEETS)
 W, H = 520, 760
 def front_crop(k):  # front view crop from sheet (first of four turnarounds)
-    im = Image.open(SH + SHEETS[k] + '.jpg').convert('RGB'); w, h = im.size
+    im = Image.open(SH + SHEETS[k] + ('.png' if k == 'orin' else '.jpg')).convert('RGB'); w, h = im.size
     # figure row: locate by sheet; front view = leftmost quarter of the top block
     top = {'aldric': (.0, .09, .27, .5), 'darius': (.0, .1, .31, .49)}.get(k)
-    y0 = {'aldric': .08, 'darius': .1, 'selene': .11, 'x0': .12, 'x1': .1, 'x2': .1, 'x3': .1, 'x6': .09, 'x7': .1, 'x8': .1, 'x9': .1}[SHEETS[k]]
-    y1 = {'aldric': .5, 'darius': .5, 'selene': .5, 'x0': .5, 'x1': .5, 'x2': .5, 'x3': .52, 'x6': .5, 'x7': .5, 'x8': .5, 'x9': .5}[SHEETS[k]]
-    return im.crop((0, int(h * y0), int(w * .27), int(h * y1)))
+    y0 = {'aldric': .08, 'darius': .1, 'selene': .11, 'x0': .12, 'x1': .1, 'x2': .1, 'x3': .1, 'x6': .09, 'x7': .1, 'x8': .1, 'x9': .1, 'orin': .1}[SHEETS[k]]
+    y1 = {'aldric': .5, 'darius': .5, 'selene': .5, 'x0': .5, 'x1': .5, 'x2': .5, 'x3': .52, 'x6': .5, 'x7': .5, 'x8': .5, 'x9': .5, 'orin': .52}[SHEETS[k]]
+    return im.crop((0, int(h * (0.11 if k == 'orin' else y0)), int(w * (0.25 if k == 'orin' else .27)), int(h * (0.46 if k == 'orin' else y1))))
 with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']); pg = b.new_page(viewport={'width': W, 'height': H})
     pg.on('pageerror', lambda e: print('PAGEERR', e)); pg.on('console', lambda m: print('c:', m.text) if m.type == 'error' else None)

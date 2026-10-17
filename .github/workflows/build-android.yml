@@ -28,6 +28,8 @@ jobs:
         run: npx cap add android
       - name: Copy web assets
         run: npx cap sync android
+      - name: Apply Varnethryl launcher icon and splash
+        run: python3 tools/apply_android_icons.py
       - name: Configure stable signing and versionCode
         env:
           VARNETHRYL_KEYSTORE_B64: ${{ secrets.VARNETHRYL_KEYSTORE_B64 }}

@@ -2,6 +2,7 @@
 (() => {
   const L=document.getElementById('brandLoader'),T=document.getElementById('brandTitle'),img=document.getElementById('brandLoaderImg'),go=document.getElementById('brandStart');
   if(!L||!T) return;
+  if(navigator.webdriver||/[?&]nobrand\b/.test(location.search)){L.hidden=T.hidden=true;L.style.display=T.style.display='none';return} // automated tests / ?nobrand skip splash
   const native=!!(window.Capacitor?.isNativePlatform?.());
   const phone=native||(matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<700);
   const wide=!phone; L.classList.toggle('wide',wide);

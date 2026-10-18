@@ -80,7 +80,8 @@ export class Builder {
     return m;
   }
   banner(x, y, z, ry = 0, w = 1, h = 2.2, grp) { const m = M('#ffffff', { map: bannerTexture(), side: THREE.DoubleSide }); const p = this.add(new THREE.PlaneGeometry(w, h), m, x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry; return p; }
-  win(x, y, z, ry = 0, w = .9, h = 1.2, key = 'glass', grp) { const p = this.add(new THREE.PlaneGeometry(w, h), M('#ffffff', { map: tex(key), emissive: key === 'glass' ? new THREE.Color(0x70480f) : new THREE.Color(0x0a1840), side: THREE.DoubleSide }), x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
+  win(x, y, z, ry = 0, w = .9, h = 1.2, key = 'glass', grp, shut = key === 'glass' && w < 1.4 && !this.noShutters) {
+    if (shut) for (const s of [-1, 1]) { const sh = this.bx(w * .42, h, .06, 'darkWood', x + Math.cos(ry) * s * (w * .72), y, z - Math.sin(ry) * s * (w * .72) + Math.cos(ry) * .03, grp || this.G.ext); sh.rotation.y = ry; } const p = this.add(new THREE.PlaneGeometry(w, h), M('#ffffff', { map: tex(key), emissive: key === 'glass' ? new THREE.Color(0x70480f) : new THREE.Color(0x0a1840), side: THREE.DoubleSide }), x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
     const f = this.bx(w + .2, .12, .2, 'darkWood', x + Math.sin(ry) * .02, y - h / 2 - .04, z + Math.cos(ry) * .02, grp || this.G.ext); f.rotation.y = ry; return p; }
   sign(text, emblem, x, y, z, ry = 0) { // hanging shop sign on an iron bracket
     const t = signTexture(text, emblem), s = this.add(new THREE.PlaneGeometry(1.5, .75), new THREE.MeshLambertMaterial({ map: t, side: THREE.DoubleSide }), x, y, z, this.G.ext, { shadow: false, keep: true }); s.rotation.y = ry;
@@ -92,6 +93,7 @@ export class Builder {
     this.ring(r * 1.18, .5, 'stoneD', x, h + .25, z, this.G.ext, 14);
     for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283; this.bx(.5, .5, .5, key, x + Math.cos(a) * r * 1.12, h + .75, z + Math.sin(a) * r * 1.12, this.G.ext); }
     if (o.cone !== false) this.cone(r * 1.3, o.coneH || r * 2.2, o.roofKey || 'slate', x, h + .5, z, o.roofGroup || this.G.ext, 14);
+    if (o.flag !== false && o.cone !== false) this.flag(x, h + .5 + (o.coneH || r * 2.2) - .1, z, .9, o.roofGroup || this.G.ext);
     if (o.collide !== false) this.ccol(x, z, r * 1.08);
     if (o.windows) for (let i = 0; i < o.windows; i++) { const a = i / o.windows * 6.283 + (o.wa || .8); this.win(x + Math.cos(a) * (r * 1.05), h * .62, z + Math.sin(a) * (r * 1.05), Math.PI / 2 - a, .35, .8, 'glass'); }
   }
@@ -209,3 +211,19 @@ Builder.prototype.roundShell = function (o) {
   this.bx(DW + .8, .14, 1.1, 'stoneD', 0, .07, r + .3, this.G.ext);
   this.insideTest = (lx, lz) => Math.hypot(lx, lz) < r - T * .6;
 };
+
+// ---- quality-pass props ----
+Builder.prototype.apron = function (w, d, zOff = 2) { this.bx(w + 3.4, .08, d + 3.4 + zOff, 'cobble', 0, .04, zOff / 2, this.G.ext, { shadow: false }); };
+Builder.prototype.bush = function (x, z, s = .7, c = '#3f7a3a') { const m = this.add(new THREE.IcosahedronGeometry(s, 0), M(c), x, s * .6, z, this.G.ext); m.scale.y = .8; return m; };
+Builder.prototype.flowers = function (x, y, z, w, ry = 0) { // window flower box
+  const f = this.bx(w, .22, .3, 'darkWood', x, y, z, this.G.ext); f.rotation.y = ry; const g = this.bx(w * .95, .12, .26, '#3f7a3a', x, y + .14, z, this.G.ext, { shadow: false }); g.rotation.y = ry;
+  for (let i = 0; i < 5; i++) { const t = (i / 4 - .5) * w * .8; this.add(new THREE.SphereGeometry(.07, 5, 4), M(['#d84a5a', '#f0d040', '#e88adf', '#fff0f0'][i % 4]), x + Math.cos(ry) * t, y + .25, z - Math.sin(ry) * t + Math.cos(ry) * .05, this.G.ext, { shadow: false }); } };
+Builder.prototype.lanternPost = function (x, z, h = 2.8) { this.cyl(.07, .1, h, 'iron', x, h / 2, z, this.G.ext, 6); this.bx(.5, .06, .06, 'iron', x + .2, h - .1, z, this.G.ext); this.add(new THREE.SphereGeometry(.17, 6, 5), GLOW('ffc060', 1.7), x + .4, h - .3, z, this.G.ext, { shadow: false }); this.ccol(x, z, .2); };
+Builder.prototype.flag = function (x, y, z, s = 1, grp) { this.bx(.06, 1.6 * s, .06, 'iron', x, y + .8 * s, z, grp || this.G.ext, { shadow: false }); const f = this.add(new THREE.PlaneGeometry(1.0 * s, .6 * s), M('#1f4a9a', { side: THREE.DoubleSide }), x + .5 * s, y + 1.3 * s, z, grp || this.G.ext, { shadow: false }); f.rotation.y = .25; this.add(new THREE.CircleGeometry(.14 * s, 8), M('gold', { side: THREE.DoubleSide }), x + .45 * s, y + 1.3 * s, z + .01, grp || this.G.ext, { shadow: false }); };
+Builder.prototype.guard = function (x, z, ry = 0) { const g = this.G.ext; this.cyl(.22, .26, .9, '#2f56a8', x, 1.0, z, g, 6); this.cyl(.1, .1, .45, '#444a58', x - .1, .3, z, g, 5); this.cyl(.1, .1, .45, '#444a58', x + .1, .3, z, g, 5);
+  this.add(new THREE.SphereGeometry(.17, 6, 5), M('#e8c09a'), x, 1.65, z, g); this.add(new THREE.ConeGeometry(.2, .26, 6), M('#8a9099'), x, 1.85, z, g); this.bx(.05, 2.3, .05, 'darkWood', x + .35, 1.2, z, g, { shadow: false }); this.add(new THREE.ConeGeometry(.07, .3, 4), M('#b6bcc8'), x + .35, 2.45, z, g, { shadow: false }); this.ccol(x, z, .3); };
+Builder.prototype.rocks = function (pts, key = 'rock') { for (const [x, z, s, sy] of pts) { const m = this.add(new THREE.DodecahedronGeometry(s, 0), M(key), x, s * .4, z, this.G.ext); m.scale.y = sy || .75; m.rotation.y = x * 3.1 + z; } };
+Builder.prototype.crossGable = function (x, W, rh, depth, key = 'slate', endKey = 'timber', y) { // front-facing cross gable over the facade
+  const y0 = y === undefined ? this.h : y, d2 = this.d / 2;
+  this.gable(W, depth, rh, x, y0, d2 - depth / 2, key, this.G.roof, false, 0, endKey); this.win(x, y0 + rh * .38, d2 + .02, 0, .6, .8, 'glass', this.G.roof, false); };
+Builder.prototype.statue = function (x, z, s = 1, grp) { const g = grp || this.G.ext; this.bx(.7 * s, .6 * s, .7 * s, 'stoneL', x, .3 * s, z, g); this.cyl(.18 * s, .28 * s, 1.3 * s, 'stoneL', x, 1.25 * s, z, g, 6); this.add(new THREE.SphereGeometry(.2 * s, 6, 5), M('stoneL'), x, 2.05 * s, z, g); this.bx(.06 * s, 1.2 * s, .06 * s, 'iron', x + .35 * s, 1.5 * s, z, g, { shadow: false }); this.ccol(x, z, .45 * s); };

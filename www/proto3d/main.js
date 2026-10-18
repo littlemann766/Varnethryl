@@ -431,7 +431,7 @@ function surfaceAt(x, z, level) {
 }
 function updateLevel() {
   let s = surfaceAt(state.heroX, state.heroZ, state.level);
-  if (s && s.ramp) { const m = s.ramp; if (state.level === m.l0 && s.t > (m.flipUp || 0.93)) state.level = m.l1; else if (state.level === m.l1 && s.t < Math.min(0.88, (m.flipUp || 0.93) - 0.05)) state.level = m.l0; s = surfaceAt(state.heroX, state.heroZ, state.level) || s; }
+  if (s && s.ramp) { const m = s.ramp; if (state.level === m.l0 && s.t > (m.flipUp || 0.93)) state.level = m.l1; else if (state.level === m.l1 && s.t < 0.25) state.level = m.l0; s = surfaceAt(state.heroX, state.heroZ, state.level) || s; }
   state.heroY = s ? s.y : 0;
 }
 // ---------- bump / stumble (bump.js): no blocking collisions between characters; walls still stop everyone ----------

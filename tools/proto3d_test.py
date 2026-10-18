@@ -37,10 +37,10 @@ try:
         # collision: guild hall at (0,-19) w13 d7.5 -> solid front wall face z=-15.25 (door gap is only x in [-1,1]); walk north at x=4.5.
         BI = lambda i: page.evaluate("(id)=>{const b=__p3d.multi.find(x=>x.id===id);return {cx:b.cx,cz:b.cz,w:b.footprint.w,d:b.footprint.d,K:b.K,rot:b.rot}}", i)
         g = BI('guildhall'); inn = BI('inn')
-        page.evaluate('([x,z])=>{__p3d.teleport(x,z); __p3d.setCamYaw(0)}', [g['cx'] + 6.0 * g['K'], g['cz'] + g['d'] / 2 * g['K'] + 7.0]); 
+        page.evaluate('([x,z])=>{__p3d.teleport(x,z); __p3d.setCamYaw(0)}', [g['cx'] + 6.0 * g['K'], g['cz'] + g['d'] / 2 * g['K'] + 4.0]); 
         page.wait_for_timeout(300)
         page.evaluate("window.__jf('pointerdown',%f,%f); window.__jf('pointermove',%f,%f)" % (cx, cy, cx, cy - 50))
-        page.wait_for_timeout(3500); s3 = st()
+        page.wait_for_timeout(7000); s3 = st()
         page.screenshot(path=str(shots / '03-portrait-blocked-by-guildhall.png'))
         page.evaluate(f"window.__jf('pointerup',{cx},{cy})")
         limit = g['cz'] + g['d'] / 2 * g['K'] + 0.75
@@ -50,18 +50,20 @@ try:
         page.evaluate("window.__jf('pointerdown',%f,%f); window.__jf('pointermove',%f,%f)" % (cx, cy, cx, cy - 50)); page.wait_for_timeout(3000)
         s4 = st(); page.evaluate(f"window.__jf('pointerup',{cx},{cy})")
         check('fountain blocks hero', s4['z'] > 0.5 or abs(s4['x']) > 0.5, f"({s4['x']:.2f},{s4['z']:.2f})")
-        # --- walk-in door: inn at (-13,-9) w9 d7 -> door at z=-5.5, x=-13
-        page.evaluate('([x,z])=>{__p3d.teleport(x,z); __p3d.setCamYaw(0)}', [inn['cx'], inn['cz'] + inn['d'] / 2 * inn['K'] + 4.0]); page.wait_for_timeout(300)
+        # --- walk-in door: inn is rotated -pi/2, door faces world -x; walk east (camYaw -pi/2 makes 'up' = +x)
+        xd = inn['cx'] - inn['d'] / 2 * inn['K']
+        page.evaluate('([x,z])=>{__p3d.teleport(x,z); __p3d.setCamYaw(-Math.PI/2)}', [xd - 4.0, inn['cz']]); page.wait_for_timeout(300)
         page.evaluate("window.__jf('pointerdown',%f,%f); window.__jf('pointermove',%f,%f)" % (cx, cy, cx, cy - 50))
-        page.wait_for_timeout(2200); s5 = page.evaluate('({z:__p3d.state.heroZ,x:__p3d.state.heroX,inside:__p3d.state.inside})')
+        page.wait_for_timeout(3500); s5 = page.evaluate('({z:__p3d.state.heroZ,x:__p3d.state.heroX,inside:__p3d.state.inside})')
         page.screenshot(path=str(shots / '07-inn-interior-walked-in.png'))
         page.evaluate(f"window.__jf('pointerup',{cx},{cy})")
-        check('hero walks through inn door and is inside', s5['inside'] == 'inn' and s5['z'] < inn['cz'] + inn['d'] / 2 * inn['K'] - 0.5, json.dumps(s5))
-        # side wall of the inn still blocks (outside, x=-13 -> walk west into wall at x=-17.5)
-        page.evaluate('([x,z])=>{__p3d.teleport(x,z); __p3d.setCamYaw(0)}', [inn['cx'] - inn['w'] / 2 * inn['K'] - 5.0, inn['cz']]); page.wait_for_timeout(200)
-        page.evaluate("window.__jf('pointerdown',%f,%f); window.__jf('pointermove',%f,%f)" % (cx, cy, cx + 50, cy)); page.wait_for_timeout(2500)
-        s6 = st(); page.evaluate(f"window.__jf('pointerup',{cx},{cy})")
-        check('inn side wall blocks hero', s6['x'] <= inn['cx'] - inn['w'] / 2 * inn['K'] - 0.75 + 0.05, f"x={s6['x']:.2f}")
+        check('hero walks through inn door and is inside', s5['inside'] == 'inn' and s5['x'] > xd + 0.5, json.dumps(s5))
+        # side wall of the inn still blocks: from the north (z smaller) walk south (+z, joystick down) into the wall
+        zw = inn['cz'] - inn['w'] / 2 * inn['K']
+        page.evaluate('([x,z])=>{__p3d.teleport(x,z); __p3d.setCamYaw(0)}', [inn['cx'], zw - 5.0]); page.wait_for_timeout(200)
+        page.evaluate("window.__jf('pointerdown',%f,%f); window.__jf('pointermove',%f,%f)" % (cx, cy, cx, cy + 50)); page.wait_for_timeout(4000)
+        s6 = page.evaluate('({z:__p3d.state.heroZ})'); page.evaluate(f"window.__jf('pointerup',{cx},{cy})")
+        check('inn side wall blocks hero', s6['z'] <= zw - 0.75 + 0.05, f"z={s6['z']:.2f} limit={zw - 0.7:.2f}")
         for i, nm in enumerate(['aldric', 'umbral', 'selene']):
             page.evaluate(f'__p3d.setHero({i}); __p3d.teleport(0,14); __p3d.setCamYaw(0)'); page.wait_for_timeout(900)
             page.screenshot(path=str(shots / f'08-gameplay-{nm}-390x844.png'))

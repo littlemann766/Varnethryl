@@ -47,6 +47,7 @@ export function mergeGroup(grp) {
   for (const o of rm) { grp.remove(o); o.geometry.dispose(); }
 }
 
+const DOOR_MAXW = 2.2, DOOR_MAXH = 1.95;   // local units; x K = world: doors ~1.2x hero height (3.3 vs 2.7)
 export class Builder {
   constructor(ctx, spec) {
     this.ctx = ctx; this.spec = spec; const { scene, colliders } = ctx; this.colliders = colliders;
@@ -100,7 +101,7 @@ export class Builder {
   // ---- standard rectangular shell: stone base + upper storey, hollow, door gap at +z ----
   rectShell(o) { const _lv = this.lvTag; this.lvTag = undefined; try { return this._rectShell(o); } finally { this.lvTag = _lv; } }
   _rectShell(o) {
-    const { w, d, h } = o, T = this.T, DW = o.DW || 2.2, DH = o.DH || 2.6, hs = o.hs === undefined ? h * .42 : o.hs;
+    const { w, d, h } = o, T = this.T, DW = Math.min(o.DW || 2.2, DOOR_MAXW), DH = Math.min(o.DH || 2.6, DOOR_MAXH), hs = o.hs === undefined ? h * .42 : o.hs;
     const lo = o.lower || 'stone', up = o.upper || 'timber'; this.w = w; this.d = d; this.h = h; this.DW = DW;
     const seg = (bw, bh, bd, x, y, z) => { // stacked: stone base to hs, upper above
       if (hs > 0 && hs < y + bh / 2 + .01 && y - bh / 2 < hs - .01 && bh > .01) { /* split below */ }
@@ -289,7 +290,7 @@ Builder.prototype.gallery = function (o = {}) {
 // round hollow shell (towers, colosseum, windmill, lighthouse, observatory): N wall segments with a door gap at local +z
 Builder.prototype.roundShell = function (o) { const _lv = this.lvTag; this.lvTag = undefined; try { return this._roundShell(o); } finally { this.lvTag = _lv; } };
 Builder.prototype._roundShell = function (o) {
-  const { r, h } = o, T = o.T || this.T, N = o.N || Math.max(12, Math.round(r * 2.6)), DW = o.DW || 2.2, DH = o.DH || 2.6, key = o.key || 'stone', seg = 2 * Math.PI * r / N;
+  const { r, h } = o, T = o.T || this.T, N = o.N || Math.max(12, Math.round(r * 2.6)), DW = Math.min(o.DW || 2.2, DOOR_MAXW), DH = Math.min(o.DH || 2.6, DOOR_MAXH), key = o.key || 'stone', seg = 2 * Math.PI * r / N;
   this.radius = r; this.w = this.d = r * 2; this.h = h; this.DW = DW; this.iw = r - T; this.id_ = r - T;
   const doorA = Math.asin(Math.min(.95, (DW / 2 + seg * .35) / r));
   for (let i = 0; i < N; i++) {

@@ -301,7 +301,12 @@ Builder.prototype.fullUpper = function (o) {
   const level = o.level || 1, l0 = o.l0 === undefined ? level - 1 : o.l0, y0 = o.y0 || 0, y = o.y, round = !this.footprint;
   const rect = o.rect || (round ? [-(this.radius - this.T - .1), this.radius - this.T - .1, -(this.radius - this.T - .1), this.radius - this.T - .1] : [-this.iw, this.iw, -this.id_, this.id_]);
   let rects = [rect], hole = null;
-  if (o.stair) { const st = o.stair, ang = { '-z': Math.PI, '+z': 0, '-x': -Math.PI / 2, '+x': Math.PI / 2 }[st.dir || '-z'], len = st.len || 3.6, w = st.w || 1.7, ax = Math.abs(Math.sin(ang)) > .5;
+  if (o.stair) { const st0 = o.stair, ang = { '-z': Math.PI, '+z': 0, '-x': -Math.PI / 2, '+x': Math.PI / 2 }[st0.dir || '-z'], w = st0.w || 1.7, ax = Math.abs(Math.sin(ang)) > .5;
+    // the foot of every flight needs a free approach: keep >= FOOT m of open floor behind it (shift the flight into the room, shorten only if the room is too small)
+    const st = Object.assign({}, st0); let len = st0.len || 3.6;
+    if (!round) { const k = ax ? 'cx' : 'cz', sg = (ax ? Math.sin(ang) : Math.cos(ang)) > 0 ? 1 : -1, lo = ax ? rect[0] : rect[2], hi = ax ? rect[1] : rect[3], FOOT = o.foot || 1.7;
+      const foot = st[k] - sg * len / 2, gap = sg > 0 ? foot - lo : hi - foot;
+      if (gap < FOOT) { const nf = sg > 0 ? lo + FOOT : hi - FOOT, far = sg > 0 ? hi - .5 : lo + .5; let nl = Math.min(len, Math.abs(far - nf)); st[k] = nf + sg * nl / 2; len = nl; } }
     hole = ax ? [st.cx - len / 2, st.cx + len / 2, st.cz - w / 2, st.cz + w / 2] : [st.cx - w / 2, st.cx + w / 2, st.cz - len / 2, st.cz + len / 2];
     rects = subRect(rect, hole); this.stairs({ cx: st.cx, cz: st.cz, ang, len, w, l0, y0, l1: level, y1: y });
     // low end of the opening: block + rail so an upstairs hero cannot step off the slab into the stairwell

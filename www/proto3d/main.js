@@ -174,6 +174,7 @@ if (BLD_ON) {
   const pts = [];
   const blocked = (x, z) => {
     if (Math.hypot(x, z) < 12 * PK) return true;
+    for (const bd of BUILDING_DEFS) if (Math.hypot(x - bd.cx * PK, z - bd.cz * PK) < (bd.id === 'temple' ? 30 : 16)) return true;   // keep building fronts clear of trees
     if (Math.abs(x) < 3.5 * KB) return true;                   // main road
     if (Math.abs(z) < 3 * KB) return true;
     for (const c of colliders) {

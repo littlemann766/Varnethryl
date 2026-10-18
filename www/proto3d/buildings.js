@@ -50,8 +50,20 @@ const hearthRight = B => B.hearth(B.iw - .5, 0, -Math.PI / 2), hearthLeft = B =>
 function flagBanners(B, xs, y = null, z = null) { for (const x of xs) B.banner(x, y || B.h * .62, z === null ? -B.id_ + .3 : z, 0, 1, 2.2); }
 
 // ---------- 1. Inn ----------
-const inn = (spec, ctx) => std(spec, ctx, { name: 'Inn of Varnethryl', w: 11, d: 8, h: 6.6, hs: 3, upper: 'timber', rh: 3.4, ridge: 'z', over: .7, post: true, wn: 1, ww: .95,
-  chimneys: [[-3.2, -1.5]], dormers: [-2.2, 2.2], dormZ: 1.2, banners: [[-4.2, 4.3, .8, 1.8]], sign: ['The Gilded Hearth', '🛏', 5.9, 3.7],
+let _ivy; const ivyMat = () => _ivy || (_ivy = (() => { const t = new THREE.TextureLoader().load(new URL('./tex/b_ivy.jpg', import.meta.url).href); t.colorSpace = THREE.SRGBColorSpace; return new THREE.MeshLambertMaterial({ map: t }); })());
+const inn = (spec, ctx) => std(spec, ctx, { name: 'Inn of Varnethryl', w: 12.5, d: 9.5, h: 6.6, hs: 3, floor: 'floorPlank', upper: 'timber', rh: 3.4, ridge: 'z', over: .7, post: true, wn: 1, ww: .95,
+  chimneys: [[-3.8, -1.8]], dormers: [], dormZ: 1.2, banners: [[-4.6, 4.3, .8, 1.8]], sign: ['The Gilded Hearth', '🛏', 6.6, 3.7],
+  extra(B) { const { w, d, h } = B, g = B.G.ext;
+    B.crossGable(-w / 2 + 3.4, 4.8, 3.8, 3.8, 'slate', 'timber', h - .3);                                   // front-left cross gable
+    B.gable(4.4, 4.6, 2.9, w / 2 - 1.2, h - .5, d / 2 - 3.6, 'slate', B.G.roof, true, .5, 'timber');       // right wing gable (ridge across x), end faces the side
+    B.chimney(3.6, h + .6, -1.6, 3.2); B.chimney(w / 2 - 1.4, h + .4, d / 2 - 4.6, 2.6);
+    for (let i = 0; i < 3; i++) B.bx(2.6 - i * .1, .1, .5, 'stoneL', 0, .05 + i * .1, d / 2 + .3 + (2 - i) * .45, g, { shadow: false });     // stone steps
+    B.bx(.25, 5.2, .25, 'darkWood', -w / 2 - .9, 2.6, d / 2 + 1.0, g); B.bx(2.2, .18, .18, 'iron', -w / 2 + .15, 4.9, d / 2 + 1.0, g);          // sign post + arm
+    const sg = B.sign('The Gilded Hearth', '🍺', -w / 2 - .3, 4.2, d / 2 + 1.0, Math.PI / 2); sg.scale.set(1.5, 1.5, 1.5);
+    B.bx(.3, .45, .3, 'gold', -w / 2 - .9, 3.4, d / 2 + 1.35, g, { shadow: false });
+    for (const [x, z, hh] of [[-w / 2 + 1.0, d / 2 + .1, 4.2], [w / 2 - 2.0, d / 2 + .1, 3.0], [-w / 2 + 3.0, d / 2 + .1, 2.6]]) { B.add(new THREE.PlaneGeometry(hh * .5, hh), ivyMat(), x, hh / 2 + .1, z + .03, g, { shadow: false }); B.bush(x + .4, z + .4, .6, '#4a8a3a'); }
+    B.bush(w / 2 - .5, d / 2 + .6, .8); B.bush(-w / 2 + .3, -d / 2 + 1, .7);
+    B.banner(w / 2 - 3.2, 4.4, d / 2 + .08, 0, 1.0, 2.6); },
   interior(B) { const iw = B.iw, id_ = B.id_;
     B.counter(2.2, -id_ + 1.1, 4, .8); B.shelf(2.2, -id_ + .35, 3.4); for (let i = 0; i < 3; i++) B.cyl(.1, .1, .2, 'iron', 1.0 + i * .8, 1.2, -id_ + 1.1, B.G.int, 8);
     B.table(-1.8, .4); B.table(-.2, 2.2); B.table(-3.4, 2.4); B.barrel(iw - .5, -.2); B.barrel(iw - .5, .8); B.barrel(iw - .5, 1.8); hearthLeft(B);

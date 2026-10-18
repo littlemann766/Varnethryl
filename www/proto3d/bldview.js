@@ -21,7 +21,7 @@ window.__show = (bid, o = {}) => {
   const b = find(bid), s = sub(b), cx = s.cx, cz = s.cz, rot = s.rot || 0, r = s.radius || Math.max(s.w || 10, s.d || 10);
   list.forEach(x => (x.parts || [x]).forEach(p => { p.root.visible = (p === s) || (x === b); }));
   const inside = !!o.inside; const lp = o.at || [0, 0]; const [wx, wz] = s.toW(lp[0], lp[1]);
-  const [ox, oz] = s.toW(0, r + 8); (b.parts || [b]).forEach(p => p.update(inside ? wx : ox, inside ? wz : oz, .016));
+  const [ox, oz] = s.toW(0, r + 8); (b.parts || [b]).forEach(p => p.update(inside ? wx : ox, inside ? wz : oz, .016, o.level || 0));
   if (o.tick) for (let i = 0; i < o.tick; i++) (b.parts || [b]).forEach(p => p.tick && p.tick(.1));
   const yaw = (o.yaw || 0) + rot, pitch = o.pitch === undefined ? .35 : o.pitch, dist = (o.dist || Math.max(r * 2.9, (s.vh || s.h || 6) * 2.5));
   const tx = o.target ? s.toW(o.target[0], o.target[1]) : [cx, cz], ty = o.ty === undefined ? (s.h || 6) * .45 : o.ty;
@@ -35,3 +35,4 @@ window.__dbg = () => ({ cam: camera.position.toArray(), ch: scene.children.map(c
 window.__root = bid => sub(find(bid)).root;
 window.__rinfo = () => ({ tri: renderer.info.render.triangles, calls: renderer.info.render.calls, rv: __list.map(i => __root(i).visible), pos: __root('inn').getWorldPosition(new THREE.Vector3()).toArray() });
 window.__ready = true;
+window.__sub=bid=>sub(find(bid));

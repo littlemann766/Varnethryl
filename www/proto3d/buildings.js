@@ -39,7 +39,15 @@ const inn = (spec, ctx) => std(spec, ctx, { name: 'Inn of Varnethryl', w: 11, d:
   interior(B) { const iw = B.iw, id_ = B.id_;
     B.counter(2.2, -id_ + 1.1, 4, .8); B.shelf(2.2, -id_ + .35, 3.4); for (let i = 0; i < 3; i++) B.cyl(.1, .1, .2, 'iron', 1.0 + i * .8, 1.2, -id_ + 1.1, B.G.int, 8);
     B.table(-1.8, .4); B.table(-.2, 2.2); B.table(-3.4, 2.4); B.barrel(iw - .5, -.2); B.barrel(iw - .5, .8); B.barrel(iw - .5, 1.8); hearthLeft(B);
-    B.rugAt(-1.5, 1.2, 4, 3.2); B.lamp(-1.8, 3.6, .4); B.lamp(1.5, 3.6, 1.5); B.gallery({ stairX: iw - 1.2 }); B.banner(-.6, 2.3, -id_ + .3, 0, .9, 1.8);
+    B.rugAt(-1.5, 1.2, 4, 3.2); B.lamp(-1.8, 3.6, .4); B.lamp(1.5, 3.6, 1.5); B.banner(-.6, 2.3, -id_ + .3, 0, .9, 1.8);
+    // upper floor (sheet: stairs, hallway, bedrooms A/B, private sitting room)
+    B.fullUpper({ y: 3.0, stair: { cx: iw - 1.1, cz: id_ - 2.0, dir: '-z', len: 3.6, w: 1.7 }, rooms(U) { const Z = -1.6;
+      U.partition(0, Z, iw * 2, 'x', [[-3.4, 1.2], [0, 1.2], [3.4, 1.2]]); U.partition(-1.7, (Z - id_) / 2, id_ + Z, 'z', null); U.partition(1.7, (Z - id_) / 2, id_ + Z, 'z', null);
+      U.bed(-iw + 1.6, -id_ + 1.0, 1); U.box(.5, .6, .5, -iw + .5, -id_ + .5); U.chest(-1.0 - 1.0, -id_ + .6, .8); U.rugAt(-3.4, -2.2, 2.2, 2.2); U.lamp(-3.4, 2.4, -2.2);
+      U.bed(-.1, -id_ + 1.0, 1); U.box(.5, .6, .5, .8, -id_ + .5); U.chest(-1.2, -id_ + .6, .7); U.rugAt(0, -2.2, 2, 2); U.lamp(0, 2.4, -2.2);
+      U.tableR(3.4, -2.5, 1.6, 1.0); U.pew(3.4, -1.9, 1.6); U.shelf(iw - .3, -2.4, 2.0, -1, false); U.rugAt(3.4, -2.4, 2.4, 2.0); U.lamp(3.4, 2.4, -2.4);
+      U.table(-3.4, 1.8, .55); U.banner(-iw + .3, 1.5, 1.0, Math.PI / 2, .9, 1.8); U.lamp(-2.2, 2.5, .4);
+    } });
   } });
 
 // ---------- 2. Blacksmith ----------
@@ -425,7 +433,7 @@ function port(spec, ctx) {
   for (const [x, z] of [[-9, Z0 + 9.8], [9, Z0 + 9.8]]) { B.cyl(.35, .5, 2.4, 'stone', x, 1.2, z, B.G.ext, 8); B.add(new THREE.SphereGeometry(.28, 6, 5), GLOW('ffc060', 1.5), x, 2.6, z, B.G.ext, { shadow: false }); }
   for (const x of [-8, 8]) B.banner(x, 2.4, -1.1, 0, .8, 1.8);
   B.finish(); parts.push(B);
-  return { id: 'port', parts, update(hx, hz, dt) { let ins = false; for (const p of parts) if (p.update(hx, hz, dt)) ins = true; return ins; }, name: 'Port of Varnethryl' };
+  return { id: 'port', parts, update(hx, hz, dt, lv) { let ins = false; for (const p of parts) if (p.update(hx, hz, dt, lv)) ins = true; return ins; }, name: 'Port of Varnethryl' };
 }
 import { signTexture } from './bldtex.js';
 const signTex = () => signTexture('PORT OF VARNETHRYL', '⚓');
@@ -477,7 +485,7 @@ export function buildWalls(ctx, WORLD, GATE_W) {
   const E = WORLD - 4;
   tw(-E, -E, true); tw(E, -E, true); tw(-E, E, true); tw(E, E, true);
   for (const [x, z] of [[0, -WORLD], [-30, -WORLD], [30, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, 30], [WORLD, 30], [-WORLD, -30], [WORLD, -30], [-30, WORLD], [30, WORLD]]) tw(x, z, false);
-  B.finish(); return { id: 'walls', parts: [B, ...towers], update(hx, hz, dt) { let ins = null; for (const p of towers) if (p.update(hx, hz, dt)) ins = p.id; return ins; } };
+  B.finish(); return { id: 'walls', parts: [B, ...towers], update(hx, hz, dt, lv) { let ins = null; for (const p of towers) if (p.update(hx, hz, dt, lv)) ins = p.id; return ins; } };
 }
 
 // ---------- registry + village layout ----------

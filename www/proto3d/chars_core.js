@@ -235,7 +235,7 @@ export function sword(c, o) {
   const { M, add, G } = c, g = new THREE.Group(), bl = M(o.blade ?? 0xcfd6dd, { r: .3, m: .4, e: o.glow ?? 0, ei: o.glow ? 1.4 : 1, n: 'blade' }), gold = o.gold;
   const L = o.len ?? .85; add(g, G.cyl(.016, .016, .13, 6), M(o.grip ?? 0x4a2b18), 0, -.02, 0); add(g, G.box(o.guard ?? .22, .028, .03), gold, 0, .055, 0);
   add(g, G.sph(.026, 6, 5), gold, 0, -.095, 0); add(g, G.sph(.015, 5, 4), M(o.gem ?? 0x2c6dff, { e: o.gem ?? 0x2c6dff, ei: .6 }), 0, .055, .02);
-  const sh = new THREE.Shape(); sh.moveTo(-.03, 0); sh.lineTo(.03, 0); sh.lineTo(.026, L); sh.lineTo(0, L + .08); sh.lineTo(-.026, L); sh.closePath();
+  const sh = new THREE.Shape(); const W = o.wide ?? 1; sh.moveTo(-.03 * W, 0); sh.lineTo(.03 * W, 0); sh.lineTo(.026 * W, L); sh.lineTo(0, L + .08); sh.lineTo(-.026 * W, L); sh.closePath();
   const bg = new THREE.ExtrudeGeometry(sh, { depth: .012, bevelEnabled: false }); bg.translate(0, .07, -.006); add(g, bg, bl);
   return g; }
 export function rapier(c, gold, len = 1.0) {

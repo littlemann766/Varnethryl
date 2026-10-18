@@ -8,35 +8,30 @@ import * as World from './world.js';
 import * as Quest from './quest.js';
 import * as Mirror from './mirror.js';
 import {HEROES,ZONES,TIERS,SUBSTAT_POOL,ABILITIES,WEAPON_ART,ENEMIES} from './data.js';
-const $=id=>document.getElementById(id); const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)); const rand=(a,b)=>a+Math.random()*(b-a); const sample=a=>a[Math.floor(Math.random()*a.length)];const fmt=n=>Math.round(n).toLocaleString('en-US');const money=n=>`${fmt(n)} gold`;const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const key='guildbound_rpg_save_v1';let nextId=1;let state;
-const baseItem=(kind,heroId,lv=0)=>{
- const h=HEROES[heroId],names={weapon:h.weapon,armor:`${h.className} Battle Armor`,charm:`${h.className} Sigil`};
- const it={id:`gear-${Date.now().toString(36)}-${nextId++}`,type:kind,heroId,level:0,name:names[kind],base:kind==='weapon'?90:kind==='armor'?55:28,substats:[],ability:null,lock:null};
- while(it.level<lv)advanceItem(it);return it;
-};
-function tier(it){return TIERS[Math.floor(it.level/3)]||TIERS[0]}
-function makeRoll(exclude=[]){let pool=SUBSTAT_POOL.filter(s=>!exclude.includes(s.id));if(!pool.length)return null;let p=sample(pool);return {id:p.id,value:Math.round(rand(p.min,p.max)*100)/100,boost:0}}
-function advanceItem(it){it.level++;let t=tier(it);while(it.substats.length<t.slots){let r=makeRoll(it.substats.map(s=>s.id));if(r)it.substats.push(r);else break;} if(it.level>=3&&!it.ability)it.ability=sample(ABILITIES).id;if(it.level===15)it.mastered=true}
-function freshState(){let inv=[baseItem('weapon',0),baseItem('armor',0),baseItem('charm',0),baseItem('weapon',1),baseItem('weapon',2)];return {version:1,gold:1250,shards:55,accountLevel:1,accountXp:0,unlocked:[0,1,2],party:[0,1,2],partyCap:3,active:0,heroLevels:{0:1,1:1,2:1},heroXp:{},relicLevels:{},gear:inv,loadouts:{0:{weapon:inv[0].id,armor:inv[1].id,charm:inv[2].id},1:{weapon:inv[3].id},2:{weapon:inv[4].id}},guildLevel:1,forgeLevel:1,bossDifficulty:'standard',zone:'village',kills:0,zoneKills:{},bossKills:0,questStep:0,secondsPlayed:0,settings:{},veyra:Quest.defaults(),mirror:Mirror.defaults(),logs:['Welcome to Liongate. Your guild adventure begins!']}}
-function sanitizeParty(s){let seen=new Set();s.party=(s.party||[]).map(Number).filter(id=>Number.isFinite(id)&&HEROES[id]&&!seen.has(id)&&seen.add(id));if(!s.party.length)s.party=[0];s.active=+s.active;if(!s.party.includes(s.active))s.active=s.party[0];Quest.ensure(s);Mirror.ensure(s);return s}
-function loadState(){try{let s=JSON.parse(localStorage.getItem(key));if(s && s.version===1 && Array.isArray(s.gear)&&Array.isArray(s.party)&&Array.isArray(s.unlocked))return sanitizeParty({...freshState(),...s});}catch(e){console.warn('Could not read save',e)}return freshState()}
-state=loadState();let saveHandle;function save(){clearTimeout(saveHandle);saveHandle=setTimeout(()=>{try{localStorage.setItem(key,JSON.stringify(state))}catch(e){toast('Could not save. Device storage may be full.')}},120)}
+import {clamp,rand,sample} from './core/util.js';
+import {tier,advanceItem,baseItem} from './core/items.js';
+import * as CoreParty from './core/party.js';
+import * as CoreSave from './core/save.js';
+import * as CoreCombat from './core/combat.js';
+const $=id=>document.getElementById(id); const fmt=n=>Math.round(n).toLocaleString('en-US');const money=n=>`${fmt(n)} gold`;const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const key=CoreSave.SAVE_KEY;let state;
+/* Quest/Mirror stay in the 2D layer; the core gets them as hooks/mods. */
+const HOOKS={defaults:()=>({veyra:Quest.defaults(),mirror:Mirror.defaults()}),ensure:s=>{Quest.ensure(s);Mirror.ensure(s)}};const MODS={atk:[Quest.atk,Mirror.atk],def:[Quest.def,Mirror.def]};
+const freshState=()=>CoreSave.freshState(HOOKS);
+const sanitizeParty=s=>CoreParty.sanitizeParty(s,HOOKS);
+const loadState=()=>CoreSave.loadState(localStorage,HOOKS);
+state=loadState();let saveHandle;function save(){clearTimeout(saveHandle);saveHandle=setTimeout(()=>{try{CoreSave.writeState(localStorage,state)}catch(e){toast('Could not save. Device storage may be full.')}},120)}
 Settings.adopt(state,()=>save());Settings.armAudio();
 const view={tab:'adventure',hero:0,item:null,forge:null,filter:'all'};let toastTimer;
 function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),2700)}
 function log(msg){state.logs.unshift(msg);state.logs=state.logs.slice(0,9);$('log').innerHTML=state.logs.map(s=>`<p>${esc(s)}</p>`).join('');save()}
 const tierCSS=it=>tier(it).color;
-function nLevel(id){return state.heroLevels[id]||1}
-function hpTarget(hero){let x=hero.style;let base=x==='tank'?65000:x==='heal'?34000:x==='melee'?34500:x==='ranged'?29500:x==='support'?31500:28500;if(hero.className==='Rogue')base=26000;if(hero.className==='Paladin')base=51000;if(hero.className==='Dark Knight')base=53000;if(hero.className==='Knight')base=64000;return base}
-function baseHP(hero){return Math.round(420+Math.pow(nLevel(hero.id)/80,1.7)*(hpTarget(hero)-420))}
-function getLoadout(heroId){return state.loadouts[heroId]||{}}
-function equipped(heroId){let l=getLoadout(heroId);return Object.values(l).map(id=>state.gear.find(it=>it.id===id)).filter(Boolean)}
-function combinedStats(heroId){let h=HEROES[heroId],l=nLevel(heroId);let hpPct=0,atkPct=0,defPct=0,crit=0,speed=0,leech=0,critDamage=0;let gear=equipped(heroId);for(let item of gear){if(item.type==='armor')defPct+=item.level*.02;else if(item.type==='weapon')atkPct+=item.level*.02;else {atkPct+=item.level*.008;defPct+=item.level*.008}for(let s of item.substats){let p=SUBSTAT_POOL.find(x=>x.id===s.id),v=Math.min(p.cap,s.value+s.boost*p.step);if(s.id==='hp')hpPct+=v;if(s.id==='crit')crit+=v;if(s.id==='speed')speed+=v;if(s.id==='lifesteal')leech+=v;if(s.id==='critDmg')critDamage+=v;}}
- hpPct=clamp(hpPct,0,28);crit=clamp(crit,0,35);speed=clamp(speed,0,35);leech=clamp(leech,0,12);
- let relic=state.relicLevels[heroId]||0;let attackBase=Math.round(95+Math.pow(l,1.72)*3.45+h.str*16+h.mag*7);
- return {hp:Math.round(baseHP(h)*(1+hpPct/100)),baseHp:baseHP(h),hpPct,attack:Math.round(attackBase*(1+atkPct)*(1+relic*.005)*Quest.atk()*Mirror.atk()),def:Math.round((55+Math.pow(l,1.48)*4.3+h.def*12)*(1+defPct)*Quest.def()*Mirror.def()),crit,speed,leech,critDamage,abilities:gear.map(i=>i.ability).filter(Boolean)};
-}
+function nLevel(id){return CoreParty.nLevel(state,id)}
+const hpTarget=CoreCombat.hpTarget;
+function baseHP(hero){return CoreCombat.baseHP(state,hero)}
+function getLoadout(heroId){return CoreCombat.getLoadout(state,heroId)}
+function equipped(heroId){return CoreCombat.equipped(state,heroId)}
+function combinedStats(heroId){return CoreCombat.combinedStats(state,heroId,MODS)}
 const runtime={x:330,y:300,companions:{},enemy:[],target:null,effects:[],particles:[],keys:new Set(),attackUntil:0,abilityUntil:0,last:0,spawnAt:0,lastSave:0,time:0,walkingTarget:null,canvas:$('game'),ctx:$('game').getContext('2d'),w:900,h:580,hp:{},enemyIds:0,logsAt:0};
 function heroMax(id){return combinedStats(id).hp}
 function resetHP(){for(const id of state.party){runtime.hp[id]=Math.min(runtime.hp[id]??heroMax(id),heroMax(id));}runtime.hp[state.active]??=heroMax(state.active)}
@@ -48,11 +43,11 @@ function spawnEnemies(){let types=ENEMIES[state.zone]||(SHOW_ENEMIES?[...ENEMIES
 }
 function logDamage(x,y,n,color){runtime.effects.push({x,y,n,color,birth:runtime.time});if(runtime.effects.length>45)runtime.effects.shift()}
 function nearestEnemy(maxDist=1e5,x=runtime.x,y=runtime.y){let arr=runtime.enemy.filter(e=>e.hp>0);if(!arr.length)return null;arr.sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y));return Math.hypot(arr[0].x-x,arr[0].y-y)<=maxDist?arr[0]:null}
-function hitEnemy(enemy,heroId,mult=1){if(!enemy||enemy.hp<=0)return;let stats=combinedStats(heroId),hero=HEROES[heroId];let dmg=stats.attack*(.8+Math.random()*.4)*mult*(runtime.time<(runtime.buffUntil||0)?1.25:1);if(Math.random()<.06+stats.crit/100)dmg*=1.55+stats.critDamage/100;
- let ability=sample(stats.abilities.length?stats.abilities:[null]);if(ability==='lucky'&&Math.random()<.10)dmg*=1.3;if(ability==='flame'&&Math.random()<.12)enemy.burn+=Math.round(dmg*.16);if(ability==='frost'&&Math.random()<.11)enemy.slowUntil=runtime.time+2600;if(ability==='vampiric'&&Math.random()<.16)runtime.hp[heroId]=Math.min(stats.hp,(runtime.hp[heroId]||0)+Math.round(dmg*.07));
+function hitEnemy(enemy,heroId,mult=1){if(!enemy||enemy.hp<=0)return;let stats=combinedStats(heroId),hero=HEROES[heroId];let {dmg,ability}=CoreCombat.rollHit(stats,mult,runtime.time<(runtime.buffUntil||0));
+ if(ability==='flame'&&Math.random()<.12)enemy.burn+=Math.round(dmg*.16);if(ability==='frost'&&Math.random()<.11)enemy.slowUntil=runtime.time+2600;if(ability==='vampiric'&&Math.random()<.16)runtime.hp[heroId]=Math.min(stats.hp,(runtime.hp[heroId]||0)+Math.round(dmg*.07));
  dmg=Math.round(dmg);enemy.hp=Math.max(0,enemy.hp-dmg);if(enemy.hold)enemy.hp=Math.max(enemy.hp,enemy.hold);enemy.flash=runtime.time;logDamage(enemy.x,enemy.y,dmg,hero.style==='mage'?'#e7b1ff':'#ffe0aa');if(stats.leech)runtime.hp[heroId]=Math.min(stats.hp,(runtime.hp[heroId]||0)+Math.round(dmg*stats.leech/100));if(enemy.hp<=0)enemyDefeated(enemy,heroId);runtime.target=enemy.hp>0?enemy.id:null;}
-function grantExperience(amount){state.accountXp+=amount;for(const id of state.party)state.heroXp[id]=(state.heroXp[id]||0)+amount;let lvlups=0;while(state.accountXp>=xpNeed(state.accountLevel)){state.accountXp-=xpNeed(state.accountLevel);state.accountLevel++;lvlups++;}for(const id of state.party){let n=nLevel(id),x=state.heroXp[id]||0;while(x>=xpNeed(n)){x-=xpNeed(n);n++;}state.heroXp[id]=x;state.heroLevels[id]=n;}if(lvlups){resetHP();for(const id of state.party)runtime.hp[id]=heroMax(id);log(`Account level ${state.accountLevel}! Party members grow stronger.`);if(state.accountLevel===11)toast('Account level 11! Multiplayer eligibility unlocked. Online servers are planned.');}}
-function xpNeed(level){return Math.round(82+level*28+Math.pow(level,1.35)*15)}
+function grantExperience(amount){let lvlups=CoreParty.applyExperience(state,amount);if(lvlups){resetHP();for(const id of state.party)runtime.hp[id]=heroMax(id);log(`Account level ${state.accountLevel}! Party members grow stronger.`);if(state.accountLevel===11)toast('Account level 11! Multiplayer eligibility unlocked. Online servers are planned.');}}
+const xpNeed=CoreParty.xpNeed;
 function enemyDefeated(enemy,who){state.kills++;state.zoneKills[state.zone]=(state.zoneKills[state.zone]||0)+1;let gold=enemy.gold,shards=enemy.boss?25:Math.round(rand(0,3));state.gold+=gold;state.shards+=shards;grantExperience(enemy.xp);
  if(enemy.boss)state.bossKills++;Hud.grantPotion(enemy.boss?1:.12);
  if(enemy.boss||Math.random()<(state.zone==='ruins'?.5:.28)){let t=enemy.boss?9:state.zone==='ruins'&&Math.random()<.3?3:0;let kind=sample(['weapon','weapon','armor','charm']);let heroId=sample(state.party);let item=baseItem(kind,heroId,t);item.base+=Math.round(rand(0,70));state.gear.push(item);log(`Loot acquired: ${item.name} +${item.level} (${tier(item).name})!`)}
@@ -62,7 +57,7 @@ function basicAttack(force=false){let hero=HEROES[state.active],range=['mage','h
 function specialAttack(){if(runtime.time<runtime.abilityUntil){toast(`Skill recharging (${Math.ceil((runtime.abilityUntil-runtime.time)/1000)}s).`);return}let hero=HEROES[state.active],stats=combinedStats(hero.id);if(hero.style==='heal'||hero.style==='support'){for(let p of state.party){let heal=Math.round(stats.attack*(hero.style==='heal'?2.4:1.2));runtime.hp[p]=Math.min(heroMax(p),(runtime.hp[p]||0)+heal);logDamage(runtime.x, runtime.y-50,`+${fmt(heal)}`,'#75efd1')}log(`${hero.name} used ${hero.skill}!`);runtime.abilityUntil=runtime.time+12000;return}
  let target=runtime.enemy.find(e=>e.id===runtime.target&&e.hp>0)||nearestEnemy(290);if(!target || Math.hypot(target.x-runtime.x,target.y-runtime.y)>290){toast('Move within skill range of an enemy.');return;}hitEnemy(target,hero.id,2.7);if(hero.style==='mage')for(let e of runtime.enemy){if(e!==target&&e.hp>0&&Math.hypot(e.x-target.x,e.y-target.y)<115)hitEnemy(e,hero.id,1.1)}runtime.abilityUntil=runtime.time+9000;log(`${hero.name} cast ${hero.skill}!`)}
 function enemyAttacks(enemy,dt){if(enemy.hp<=0)return;let options=state.party.map((id,index)=>({id,x:id===state.active?runtime.x:runtime.companions[id]?.x??runtime.x,y:id===state.active?runtime.y:runtime.companions[id]?.y??runtime.y}));options.sort((a,b)=>Math.hypot(a.x-enemy.x,a.y-enemy.y)-Math.hypot(b.x-enemy.x,b.y-enemy.y));let target=options[0],dist=Math.hypot(target.x-enemy.x,target.y-enemy.y);if(dist>64&&dist<340){let factor=enemy.slowUntil>runtime.time?.25:1;enemy.x+=(target.x-enemy.x)/dist*dt*.053*factor;enemy.y+=(target.y-enemy.y)/dist*dt*.053*factor;}
- if(dist<=70&&runtime.time>enemy.attackAt){let defense=combinedStats(target.id).def;let hurt=Math.max(12,Math.round(enemy.attack*1000/(1000+defense)));let dodge=HEROES[target.id].agi*.005;if(Math.random()<dodge)hurt=0;runtime.hp[target.id]=Math.max(0,(runtime.hp[target.id]||0)-hurt);logDamage(target.x,target.y-15,hurt?`-${fmt(hurt)}`:'DODGE',hurt?'#ff6979':'#bfffea');enemy.attackAt=runtime.time+((enemy.boss||enemy.qboss)?2300:1750);if(runtime.hp[target.id]<=0){runtime.hp[target.id]=heroMax(target.id);state.gold=Math.max(0,state.gold-25);log(`${HEROES[target.id].name} fell and returned to the guild infirmary (-25 gold).`);for(const pid of state.party)runtime.hp[pid]=heroMax(pid);enterZone('village');toast('Party recovered at Liongate Village.');}}
+ if(dist<=70&&runtime.time>enemy.attackAt){let defense=combinedStats(target.id).def;let hurt=CoreCombat.enemyHurt(enemy.attack,defense,HEROES[target.id].agi);runtime.hp[target.id]=Math.max(0,(runtime.hp[target.id]||0)-hurt);logDamage(target.x,target.y-15,hurt?`-${fmt(hurt)}`:'DODGE',hurt?'#ff6979':'#bfffea');enemy.attackAt=runtime.time+((enemy.boss||enemy.qboss)?2300:1750);if(runtime.hp[target.id]<=0){runtime.hp[target.id]=heroMax(target.id);state.gold=Math.max(0,state.gold-25);log(`${HEROES[target.id].name} fell and returned to the guild infirmary (-25 gold).`);for(const pid of state.party)runtime.hp[pid]=heroMax(pid);enterZone('village');toast('Party recovered at Liongate Village.');}}
  if(enemy.burn>0&&!enemy.qid&&Math.floor(runtime.time/1000)!==Math.floor((runtime.time-dt)/1000)){let n=Math.round(enemy.burn*.22);enemy.hp-=n;enemy.burn-=n;logDamage(enemy.x,enemy.y,n,'#ff9255');if(enemy.hp<=0)enemyDefeated(enemy,state.active)}
 }
 function tick(dt){dt=CM.timeScale(dt,runtime.time+dt,Settings.reducedMotion());runtime.time+=dt;state.secondsPlayed+=(dt/1000);Controls.tick();{

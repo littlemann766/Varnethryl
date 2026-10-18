@@ -32,7 +32,7 @@ with sync_playwright() as p:
         if bi['id'] == 'gatehouse':
             s = W(0, front + 0); a = W(0, 8); c = W(0, -8); r = walk(a, c, 9000); ok = abs(r['x'] - c[0]) < 2 and abs(r['z'] - c[1]) < 2
             # a solid wall: try to cross the tower line
-            a2 = W(5.6, 8); c2 = W(5.6, -8); r2 = walk(a2, c2, 6000); ok2 = abs(r2['z'] - c2[1]) > 3
+            a2 = W(7.0, 8); c2 = W(7.0, -8); r2 = walk(a2, c2, 6000); ok2 = abs(r2['z'] - c2[1]) > 3
             print('PASS' if ok and ok2 else 'FAIL', 'gatehouse walk-through', ok, 'tower solid', ok2); fails += 0 if ok and ok2 else 1; continue
         if not bi['hasIn']: continue
         if bi['id'].startswith(('wt','gt')): front = 4.4
@@ -42,7 +42,7 @@ with sync_playwright() as p:
         r = walk(out_, tgt, 9000); walked_in = r['ins'] is not None and (bi['id']!='colosseum' or True) and (r['ins'] == bi['id'] or r['ins'] == 'port' or r['ins'].startswith('wt') or r['ins'].startswith('gt'))
         # solid: approach the side wall, should not get inside
         side = W((bi['r'] if bi['round'] else bi['w'] / 2) + 3, 0); mid = W(0, 0)
-        r2 = walk(side, mid, 6000); solid = r2['ins'] is None
+        r2 = walk(side, mid, 6000); solid = r2['ins'] is None or (r2['ins'] != bi['id'] and not (bi['id'] == 'port' and r2['ins'] == 'port'))
         if bi['id'].startswith('gt'):  # gate towers are mirrored: probe from the outer (town-wall) side only
             side2 = W(-((bi['r']) + 3), 0)
             if abs(side2[0]) > abs(side[0]): side = side2

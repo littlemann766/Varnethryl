@@ -762,7 +762,7 @@ async function prewarm() {
   addSkin(GHOST_MAT);
   const blob = new THREE.Mesh(BLOB_GEO, BLOB_MAT); grp.add(blob);
   scene.add(grp);
-  try { await renderer.compileAsync(scene, camera); } catch (e) { diag('prewarm: ' + (e && e.message || e)); }
+  try { if (renderer.extensions.has('KHR_parallel_shader_compile')) await renderer.compileAsync(scene, camera); else renderer.compile(scene, camera); } catch (e) { diag('prewarm: ' + (e && e.message || e)); }
   scene.remove(grp); for (const m of made) if (m !== GHOST_MAT) m.dispose(); g.dispose(); tx.dispose();
 }
 requestAnimationFrame(frame);

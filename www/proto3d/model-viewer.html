@@ -13,9 +13,14 @@ button.on{background:#6a5a3a;color:#fff}
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
+import { SpringBones } from './spring_bones.js';
 const MAIN=['aldric','asha','brynn','cedric','darius','elira','finn','garruk','kael','mirelle','morwen','nyx','orin','rook','rowan','selene','seraphine','talia','thorne','vesper','wolf'];
 const BETH=["briar", "cinder", "coral", "ember", "frosttroll", "hawk", "hearth", "hobgoblin", "hydrella", "kestrel", "lorian", "lunara", "marella", "mortimer", "mossgut", "neris", "pip", "snowy", "ssylthar", "stonetroll", "thrain", "vaelthryx", "valen", "wren", "wyvern", "zephyr"];
-const items=[...MAIN.map(n=>({n,set:'Main',url:`models/${n}.glb`})),...BETH.map(n=>({n,set:'Beth',url:`models-beth/${n}.glb`}))];
+const NEW=[['darius','models/darius.glb'],['selene','models/selene.glb'],['mortimer_new'],['player_pikachu'],['lunara_new'],['marella_new'],['vaelthryx_straight_rig'],['vaelthryx_new'],['ssylthar_new'],['ashentitan_new'],['coral_new'],['cinder_new'],['snowy_new3'],['zephyr_new2']];
+const PH=["aldric","asha","briar","brynn","cedric","elira","ember","finn","frosttroll","garruk","hearth","hobgoblin","hydrella","kael","kestrel","lorian","lunara","marella","mirelle","morwen","mossgut","neris","nyx","orin","pip","rook","rowan","seraphine","snowy","stonetroll","talia","thorne","thrain","valen","vesper","wren","wyvern","zephyr"];
+const items=[...NEW.map(([n,u])=>({n,set:'NEW (Beth)',url:u||`models-new/${n}.glb`})),...PH.map(n=>({n:n+'_new',set:'PLACEHOLDER',url:`models-placeholder/${n}_new.glb`,ph:true})),...MAIN.map(n=>({n,set:'Old main',url:`models/${n}.glb`})),...BETH.map(n=>({n,set:'Old Beth',url:`models-beth/${n}.glb`}))];
+const HEIGHT={stonetroll_new:3.0,frosttroll_new:3.0,thrain_new:1.35};   // humanoids are normalised to 1.9 m; trolls/dwarf scaled here, Snowy shown at native size with scale buttons
+const NOTES={snowy_new3:'Snowy: walk 0.55 u/s, run 1.5 u/s. snowy_new4 coming.',zephyr_new2:'Zephyr: hind-foot sliding in walk is a known issue.',vaelthryx_straight_rig:'Straight rig: slither / coil / strike clips.',vaelthryx_new:'Coiled version.'};
 const canvas=document.getElementById('c');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
@@ -41,17 +46,19 @@ function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);c
 addEventListener('resize',resize);resize();
 // ui
 const list=document.getElementById('list'),ctl=document.getElementById('ctl'),info=document.getElementById('info');
-items.forEach((it,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`${it.set}: ${it.n}`;list.appendChild(o);});
-let cur=null,mixer=null,actions={},active=null,idx=0,tris=0,loadId=0;
+items.forEach((it,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(it.ph?'PLACEHOLDER: ':it.set+': ')+it.n;list.appendChild(o);});
+let sb=null,scale=1,cur=null,mixer=null,actions={},active=null,idx=0,tris=0,loadId=0;
 const loader=new GLTFLoader();
 function setClip(name){if(!mixer)return;const a=actions[name];if(!a)return;if(active&&active!==a)active.fadeOut(0.2);a.reset().fadeIn(0.2).play();active=a;
  [...ctl.querySelectorAll('button[data-clip]')].forEach(b=>b.classList.toggle('on',b.dataset.clip===name));}
 async function load(i){idx=i;list.value=i;const my=++loadId;const it=items[i];info.textContent='loading '+it.n+'…';
  window.__viewer.loaded=null;
- loader.load(it.url,g=>{if(my!==loadId)return;
-  if(cur)scene.remove(cur);cur=g.scene;scene.add(cur);
+ let kb=0;try{const r=await fetch(it.url);if(!r.ok)throw new Error('HTTP '+r.status);const buf=await r.arrayBuffer();kb=Math.round(buf.byteLength/1024);loader.parse(buf,'',onLoad,onErr);}catch(e){onErr(e);}
+ function onErr(err){info.textContent='failed to load '+it.url+' : '+(err&&err.message||err);window.__viewer.loaded={name:it.n,error:String(err)};}
+ function onLoad(g){if(my!==loadId)return;
+  if(cur)scene.remove(cur);cur=g.scene;scene.add(cur);scale=HEIGHT[it.n]?0:1;sb=null;try{sb=new SpringBones(cur,{clips:g.animations})}catch(e){}
   tris=0;cur.traverse(o=>{if(o.isMesh){o.castShadow=true;const gm=o.geometry;tris+=(gm.index?gm.index.count:gm.attributes.position.count)/3;}});
-  const box=new THREE.Box3().setFromObject(cur);const size=box.getSize(new THREE.Vector3());const c=box.getCenter(new THREE.Vector3());
+  const box0=new THREE.Box3().setFromObject(cur);if(HEIGHT[it.n]){cur.scale.setScalar(HEIGHT[it.n]/Math.max(.01,box0.max.y-box0.min.y));cur.updateMatrixWorld(true)}const box=new THREE.Box3().setFromObject(cur);const size=box.getSize(new THREE.Vector3());const c=box.getCenter(new THREE.Vector3());
   cur.position.y-=box.min.y;target.set(0,size.y/2,0);dist=Math.max(size.y,size.x,size.z)*2.2;minD=dist*0.15;maxD=dist*5;
   mixer=new THREE.AnimationMixer(cur);actions={};ctl.innerHTML='';active=null;
   const clips=g.animations;
@@ -59,15 +66,15 @@ async function load(i){idx=i;list.value=i;const my=++loadId;const it=items[i];in
   const rb=document.createElement('button');rb.textContent='⏸';rb.onclick=()=>{mixer.timeScale=mixer.timeScale?0:1;rb.classList.toggle('on',!mixer.timeScale)};ctl.appendChild(rb);
   const names=clips.map(c=>c.name);
   const pick=names.find(n=>/idle/i.test(n))||names[0];if(pick)setClip(pick);
-  info.textContent=`${it.set}: ${it.n} · ${Math.round(tris).toLocaleString()} tris · `+(names.length?`clips: ${names.join(', ')}`:'no animation clips in this model (static pose)');
-  window.__viewer.loaded={name:it.n,set:it.set,tris:Math.round(tris),clips:names};
- },undefined,err=>{info.textContent='failed to load '+it.url;window.__viewer.loaded={name:it.n,error:String(err)};});}
+  info.textContent=`${it.ph?'PLACEHOLDER (old generated model)':it.set}: ${it.n} · ${kb} KB · ${(box.max.y-box.min.y).toFixed(2)} m · ${Math.round(tris).toLocaleString()} tris · `+(names.length?`clips: ${names.join(', ')}`:'no animation clips in this model (static pose)');
+  if(NOTES[it.n])info.textContent+=' · '+NOTES[it.n];window.__viewer.loaded={name:it.n,set:it.set,kb,tris:Math.round(tris),clips:names};
+ }}
 list.onchange=()=>load(+list.value);
 document.getElementById('prev').onclick=()=>load((idx+items.length-1)%items.length);
 document.getElementById('next').onclick=()=>load((idx+1)%items.length);
 const clock=new THREE.Clock();
 window.__viewer={items,load,setClip,get time(){return active?active.time:null},sample(){if(!cur)return null;let s=0;cur.traverse(o=>{if(o.isMesh||o.isObject3D){s+=o.position.x*3+o.position.y*5+o.position.z*7+o.rotation.x*11+o.rotation.y*13+o.rotation.z*17+o.quaternion.x+o.quaternion.y*2+o.quaternion.z*3;}});return s;},loaded:null};
-renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),0.1);if(mixer)mixer.update(dt);
+renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),0.1);if(mixer)mixer.update(dt);if(sb)sb.update(dt);
  cam.position.set(target.x+dist*Math.cos(el)*Math.sin(az),target.y+dist*Math.sin(el),target.z+dist*Math.cos(el)*Math.cos(az));cam.lookAt(target);renderer.render(scene,cam);});
 load(0);
 </script></body></html>

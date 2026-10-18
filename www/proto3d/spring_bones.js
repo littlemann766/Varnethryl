@@ -30,7 +30,7 @@ export class SpringBones {
     const bones=[]; root.traverse(o=>{ if (o.isBone) bones.push(o); });
     // serpents (body1..N + tail1..N chain): the baked S-wave already carries the whole body head->tail; spring physics on the
     // tail only adds lag/whip ("happy tail" wag), so the tail family is skipped for them.
-    const serpent = bones.some(b=>/^body\d+$/.test(b.name)) && bones.some(b=>/^neck\d+$/.test(b.name));
+    const serpent = bones.some(b=>/^body\d+$/.test(b.name));   // body1..N chain = serpent/hydra (neckN optional: Hydrella has multiple heads, no neckN)
     const match = b => { const f=this.families.find(f=>f.re.test(b.name)); return (serpent && f && f.re.source.startsWith('^tail')) ? null : f; };
     root.updateMatrixWorld(true);
     for (const b of bones) {

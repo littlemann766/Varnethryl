@@ -162,18 +162,27 @@ export class Builder {
   rugAt(x, z, w, d, key = 'rug') { this.add(boxG(w, .02, d, TILE[key] || 3), M(key), x, .08, z, this.G.int, { shadow: false }); }
   // ---- finish ----
   finish() {
-    for (const k of Object.keys(this.G)) mergeGroup(this.G[k]);
+    for (const c of [...this.G.frame.children]) this.G.roof.add(c);   // frame + roof always toggle together: one merged group
+    for (const k of Object.keys(this.G)) {
+      const interior = k === 'int' || k.startsWith('up');
+      if (interior) this.G[k].children.forEach(o => { if (o.isMesh) o.castShadow = false; });   // interior casters only switched on while the hero is inside (setInside)
+      mergeGroup(this.G[k]);
+      if (interior) this.G[k].traverse(o => { if (o.isMesh) o.userData.interior = true; });
+    }
     this.root.userData.bid = this.id; return this;
   }
   setInside(v) {
     this.inside = v; this.G.roof.visible = !v; this.G.frame.visible = !v;
+    if (this.wallRanges) { this.G.walls.visible = v; for (const r of this.wallRanges) { const at = r.mesh.geometry.attributes.position, a = at.array; if (v) a.fill(0, r.start * 3, (r.start + r.count) * 3); else a.set(r.orig, r.start * 3); at.needsUpdate = true; } }   // walls: opaque copy lives in one world mesh per material; the cutaway (see-through) copy is only drawn while inside
+    if (this.roofRanges) for (const r of this.roofRanges) { const at = r.mesh.geometry.attributes.position, a = at.array; if (v) a.fill(0, r.start * 3, (r.start + r.count) * 3); else a.set(r.orig, r.start * 3); at.needsUpdate = true; }   // roofs live in one world mesh per material: collapse/restore this building's slice
+    for (const k of Object.keys(this.G)) if (k === 'int' || k.startsWith('up')) this.G[k].traverse(o => { if (o.isMesh && o.userData.interior) o.castShadow = v && !!o.material.map; });
     for (const m of this.cut) { m.transparent = v; m.opacity = v ? .2 : 1; m.depthWrite = !v; m.needsUpdate = true; }
     for (const m of this.G.walls.children) m.castShadow = !v;
   }
   update(hx, hz, dt, level = 0) {
     const [lx, lz] = this.toL(hx, hz), dist = Math.hypot(hx - this.cx, hz - this.cz), R = (this.radius || Math.max(this.w || 10, this.d || 10)) + 22;
     const vis = dist < R + 20; if (this.root.visible !== vis) this.root.visible = vis;
-    const nearInt = dist < (this.radius || 12) + 22; if (this.G.int.visible !== nearInt) this.G.int.visible = nearInt;   // interiors only drawn when close (fewer draw calls)
+    const nearInt = this.inside || dist < (this.radius || 12) + 9; if (this.G.int.visible !== nearInt) this.G.int.visible = nearInt;   // interiors only drawn when close (fewer draw calls)
     const v = this.insideTest ? this.insideTest(lx, lz) : false; if (v !== this.inside) this.setInside(v);
     if (this.lvGroups) for (const l in this.lvGroups) { const g = this.lvGroups[l], sv = v && level >= +l; if (g.visible !== sv) g.visible = sv; }
     if (this.tick && vis) this.tick(dt || 0.016);
@@ -307,3 +316,58 @@ Builder.prototype.fullUpper = function (o) {
   if (o.rooms) this.onFloor(level, y, o.rooms);
   return rects;
 };
+
+// Cross-building static merge: bake every building's merged exterior meshes (world space) into per-zone meshes, one per material.
+// Fewer draw calls (and fewer shadow-pass calls); frustum culling then works per zone chunk. Cutaway clone materials and animated parts stay put.
+export function chunkStatics(builders, scene, cell = 40) {
+  const zones = new Map(); let before = 0;
+  for (const B of builders) { if (!B || !B.G || !B.G.ext) continue; B.root.updateMatrixWorld(true); const zk = Math.floor(B.cx / cell) + ',' + Math.floor(B.cz / cell); const cut = new Set(B.cut || []);
+    for (const m of [...B.G.ext.children]) { if (!m.isMesh || !m.userData.merged || cut.has(m.material)) continue; m.updateMatrixWorld(true); before++;
+      const k = zk + '|' + m.material.uuid + (m.castShadow ? 'c' : '') + (m.receiveShadow ? 'r' : ''); let z = zones.get(k); if (!z) zones.set(k, z = { mat: m.material, c: m.castShadow, r: m.receiveShadow, list: [] });
+      const g = m.geometry.clone(); g.applyMatrix4(m.matrixWorld); z.list.push(g); B.G.ext.remove(m); m.geometry.dispose(); } }
+  for (const z of zones.values()) { let n = 0; for (const g of z.list) n += g.attributes.position.count; const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2); let a = 0, c = 0;
+    for (const g of z.list) { pos.set(g.attributes.position.array, a); nor.set(g.attributes.normal.array, a); uv.set(g.attributes.uv.array, c); a += g.attributes.position.count * 3; c += g.attributes.position.count * 2; g.dispose(); }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    const m = new THREE.Mesh(geo, z.mat); m.castShadow = z.c; m.receiveShadow = z.r; m.userData.chunk = true; scene.add(m); }
+  return { before, after: zones.size };
+}
+
+// Roofs: one world mesh per material (all buildings). A building's slice is collapsed to zero-area triangles while the hero is inside it (cutaway).
+export function mergeRoofs(builders, scene) {
+  const buckets = new Map(); let before = 0;
+  for (const B of builders) { if (!B || !B.G || !B.G.roof) continue; B.root.updateMatrixWorld(true); B.roofRanges = [];
+    for (const m of [...B.G.roof.children]) { if (!m.isMesh || !m.userData.merged) continue; m.updateMatrixWorld(true); before++;
+      const cl = matClass(m.material), zk = zoneKey(B.cx, B.cz) + '|' + cl.key; let b = buckets.get(zk); if (!b) buckets.set(zk, b = { cl, list: [], n: 0, cv: 0 });
+      const g = m.geometry.clone(); g.applyMatrix4(m.matrixWorld); const cnt = g.attributes.position.count; b.list.push({ g, B, color: m.material.color }); b.n += cnt; if (m.castShadow) b.cv += cnt; B.G.roof.remove(m); m.geometry.dispose(); } }
+  for (const b of buckets.values()) { const pos = new Float32Array(b.n * 3), nor = new Float32Array(b.n * 3), uv = new Float32Array(b.n * 2), col = b.cl.vc ? new Float32Array(b.n * 3) : null; let a = 0, c = 0, vi = 0; const rec = [];
+    for (const { g, B, color } of b.list) { const cnt = g.attributes.position.count; pos.set(g.attributes.position.array, a); nor.set(g.attributes.normal.array, a); uv.set(g.attributes.uv.array, c); if (col) colorFill(col, cnt, a, color); rec.push({ B, start: vi, count: cnt, orig: g.attributes.position.array.slice() }); a += cnt * 3; c += cnt * 2; vi += cnt; g.dispose(); }
+    const geo = new THREE.BufferGeometry(); const pa = new THREE.BufferAttribute(pos, 3); pa.setUsage(THREE.DynamicDrawUsage); geo.setAttribute('position', pa); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); if (col) geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    const m = new THREE.Mesh(geo, b.cl.mat); m.castShadow = b.cv * 2 > b.n; m.receiveShadow = true; m.userData.keep = true; m.userData.roofWorld = true; scene.add(m);
+    for (const r of rec) r.B.roofRanges.push({ mesh: m, start: r.start, count: r.count, orig: r.orig }); }
+  return { before, after: buckets.size };
+}
+
+// Draw-call budget helpers: flat-colour lit materials share ONE vertex-coloured material; cast/receive flags are unified per material by majority.
+export const VCMAT = new THREE.MeshLambertMaterial({ vertexColors: true });
+export function matClass(m) { const flat = !m.map && !m.transparent && !m.alphaTest && m.side === THREE.FrontSide && m.isMeshLambertMaterial && m.emissive && m.emissive.getHex() === 0 && !m.userData.noVC; return flat ? { key: 'VC', mat: VCMAT, vc: true } : { key: m.uuid, mat: m, vc: false }; }
+export function colorFill(arr, count, off, c) { for (let i = 0; i < count; i++) { arr[off + i * 3] = c.r; arr[off + i * 3 + 1] = c.g; arr[off + i * 3 + 2] = c.b; } }
+
+// Walls: an opaque world-space copy per material (all buildings) replaces each building's own wall meshes, which are only shown while the hero is inside (cutaway).
+export function mergeWalls(builders, scene) {
+  const buckets = new Map(); let before = 0;
+  for (const B of builders) { if (!B || !B.G || !B.G.walls) continue; B.root.updateMatrixWorld(true); B.wallRanges = [];
+    for (const m of B.G.walls.children) { if (!m.isMesh || !m.userData.merged) continue; m.updateMatrixWorld(true); before++; const mt = m.material;
+      const sig = mt.map ? 'M' + mt.map.uuid + mt.color.getHex() + mt.side + mt.opacity : 'C' + mt.color.getHex() + mt.side + mt.emissive.getHex(); let b = buckets.get(zoneKey(B.cx, B.cz) + sig);
+      if (!b) { const cl = matClass(mt); buckets.set(zoneKey(B.cx, B.cz) + sig, b = { cl: cl.vc ? cl : { key: sig, mat: Object.assign(mt.clone(), { transparent: false, opacity: 1, depthWrite: true }), vc: false }, list: [], n: 0, cv: 0 }); }
+      const g = m.geometry.clone(); g.applyMatrix4(m.matrixWorld); const cnt = g.attributes.position.count; b.list.push({ g, B, color: mt.color }); b.n += cnt; if (m.userData.castWas !== false) b.cv += cnt; } }
+  for (const b of buckets.values()) { const pos = new Float32Array(b.n * 3), nor = new Float32Array(b.n * 3), uv = new Float32Array(b.n * 2), col = b.cl.vc ? new Float32Array(b.n * 3) : null; let a = 0, c = 0, vi = 0; const rec = [];
+    for (const { g, B, color } of b.list) { const cnt = g.attributes.position.count; pos.set(g.attributes.position.array, a); nor.set(g.attributes.normal.array, a); uv.set(g.attributes.uv.array, c); if (col) colorFill(col, cnt, a, color); rec.push({ B, start: vi, count: cnt, orig: g.attributes.position.array.slice() }); a += cnt * 3; c += cnt * 2; vi += cnt; g.dispose(); }
+    const geo = new THREE.BufferGeometry(); const pa = new THREE.BufferAttribute(pos, 3); pa.setUsage(THREE.DynamicDrawUsage); geo.setAttribute('position', pa); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); if (col) geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    const m = new THREE.Mesh(geo, b.cl.mat); m.castShadow = true; m.receiveShadow = true; m.userData.keep = true; m.userData.wallWorld = true; scene.add(m);
+    for (const r of rec) r.B.wallRanges.push({ mesh: m, start: r.start, count: r.count, orig: r.orig }); }
+  for (const B of builders) if (B && B.wallRanges) B.G.walls.visible = false;
+  return { before, after: buckets.size };
+}
+
+export const ZONE = 1e5;   // one world zone: more zones cost more draw calls in the wide camera than they save by culling
+export const zoneKey = (x, z) => Math.floor((x + 200) / ZONE) + ',' + Math.floor((z + 200) / ZONE);

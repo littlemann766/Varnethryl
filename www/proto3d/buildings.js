@@ -100,7 +100,7 @@ function robedFig(B, x, z, s = 1) {
 function templeFront(B, w, d, h) {
   const g = B.G.ext, zf = d / 2;
   for (const sx of [-1, 1]) {
-    const X = sx * (w / 2 + .1), Z = zf - .4, T = 4.4, H1 = h + 4, H2 = h + 8;
+    const X = sx * (w / 2 + 1.4), Z = zf + .6, T = 4.4, H1 = h + 4, H2 = h + 8;
     B.bx(T, H1, T, 'stoneL', X, H1 / 2, Z, g); B.col(X, Z, T, T);
     B.bx(T - .9, H2 - H1, T - .9, 'stoneL', X, (H1 + H2) / 2, Z, g);                       // slimmer belfry stage
     B.bx(T + .5, .35, T + .5, 'gold', X, H1, Z, g); B.bx(T - .3, .3, T - .3, 'stoneL', X, H2 + .15, Z, g);
@@ -148,15 +148,15 @@ function temple(spec, ctx) {
   B.gable(6.2, 2.4, 3.4, 0, h + .2, d / 2 - 1.2, 'slate', B.G.roof, false, 0, 'stoneL'); B.banner(0, h + 1.4, d / 2 + .06, 0, 1.2, 1.8, B.G.roof);
   const iw = B.iw, id_ = B.id_;
   B.rugAt(0, 0, 3, d - 4, 'carpet'); B.add(boxG(3, .02, d - 4, 3), M('carpet'), 0, .09, 0, B.G.int, { shadow: false });
-  for (let i = 0; i < 5; i++) for (const s of [-1, 1]) B.pew(s * 3, -2.5 + i * 1.7 + 2.5, 2.8);
-  for (const z of [-6, -1.5, 3, 7.5]) for (const s of [-1, 1]) B.pillar(s * 4.8, z, .45, h - .6, 'stoneL');
+  for (let i = 0; i < 5; i++) for (const s of [-1, 1]) B.pew(s * 3, -3.4 + i * 1.7, 2.8);
+  for (const z of [-8.5, -5.5]) for (const s of [-1, 1]) B.pillar(s * 4.2, z, .4, h - .6, 'stoneL');
   B.bx(5, .5, 2.4, 'stoneL', 0, .25, -id_ + 1.4, B.G.int); B.bx(3.2, 1.1, 1, 'gold', 0, 1.0, -id_ + 1.3, B.G.int); B.col(0, -id_ + 1.4, 5, 2.4); B.banner(0, 4.2, -id_ + .3, 0, 2.2, 4.4); B.win(-2.8, 5, -id_ + .1, 0, 1.2, 3, 'stained'); B.win(2.8, 5, -id_ + .1, 0, 1.2, 3, 'stained');
   B.crystal(-5.6, -id_ + 1.6, 1.5, '6aa8ff', .35); B.crystal(5.6, -id_ + 1.6, 1.5, '6aa8ff', .35);
   B.cyl(1.1, 1.3, .5, 'stoneL', 0, .25, 4.5, B.G.int, 16); B.add(new THREE.CylinderGeometry(.9, .9, .06, 16), M('water'), 0, .55, 4.5, B.G.int, { shadow: false }); B.cyl(.12, .12, 1.2, 'stoneL', 0, 1.1, 4.5, B.G.int, 8); B.ccol(0, 4.5, 1.35);
   // real upper galleries: side balconies over the aisles + choir loft across the back, reached by a flight on each side of the entrance
-  { const GY = 4.4, gx = 4.0; const S = s => ({ cx: s * (iw - .9), cz: 8.4 - 2.3, ang: Math.PI, len: 4.6, w: 1.5, l0: 0, y0: 0, l1: 1, y1: GY });
+  { const GY = 4.0, gx = 4.0, GL = GY / Math.tan(26 * Math.PI / 180); const S = s => ({ cx: s * (iw - .75), cz: -.4 + GL / 2, ang: Math.PI, len: GL, w: 1.5, l0: 0, y0: 0, l1: 1, y1: GY });
     B.stairs(S(-1)); B.stairs(S(1));
-    B.upperFloor(1, GY, [[-iw, -gx, -id_, 3.9], [gx, iw, -id_, 3.9], [-iw, iw, -id_, -id_ + 2.4]], { key: 'floorPlank' });
+    B.upperFloor(1, GY, [[-iw, -gx, -id_, 0.0], [gx, iw, -id_, 0.0], [-iw, iw, -id_, -id_ + 2.4]], { key: 'floorPlank' });
     B.onFloor(1, GY, U => { for (const s of [-1, 1]) { U.pew(s * 5.4, -4, 1.8); U.pew(s * 5.4, -1.5, 1.8); U.lamp(s * 4.6, 2.6, 2.0); } U.banner(0, 1.8, -id_ + .4, 0, 2.0, 2.4); U.chest(0, -id_ + 1.0, .9); }); }
   B.radius = 20; return B.finish();
 }
@@ -202,7 +202,7 @@ function treasury(spec, ctx) {
 
 // ---------- 8. Town Hall ----------
 function townhall(spec, ctx) {
-  const B = new Builder(ctx, spec); B.name = 'Town Hall of Varnethryl'; B.rectShell({ w: 14, d: 10, h: 7.6, hs: 0, upper: 'stoneL', lower: 'stoneL', DW: 2.8, DH: 3.6, floor: 'floorTile', posts: false });
+  const B = new Builder(ctx, spec); B.name = 'Town Hall of Varnethryl'; B.rectShell({ w: 14, d: 13, h: 7.6, hs: 0, upper: 'stoneL', lower: 'stoneL', DW: 2.8, DH: 3.6, floor: 'floorTile', posts: false });
   const { w, d, h } = B; B.roofGable({ rh: 3.8, key: 'slate', ridge: 'x', over: .6, endKey: 'stoneL' });
   for (const s of [-1, 1]) { const x = s * (w / 2 - .4); B.tower(x, d / 2 - .4, 1.5, h + 1.4, { key: 'stoneL', coneH: 5.6, windows: 3, wa: 1.2 }); B.banner(s * 3.6, 4.6, d / 2 + .08, 0, 1, 2.6); }
   B.gable(6, 2.6, 3.4, 0, h - .6, d / 2 - 1.3, 'slate', B.G.roof, false, 0, 'stoneL'); B.add(new THREE.CircleGeometry(.95, 14), M('gold', { side: THREE.DoubleSide }), 0, h + .9, d / 2 + .04, B.G.roof, { shadow: false }); B.banner(0, h + .9, d / 2 + .06, 0, 1.1, 1.3, B.G.roof);
@@ -352,7 +352,7 @@ function keep(spec, ctx) {
   B.rocks([[-w / 2 - 2.6, d / 2 - 1, 2.0], [w / 2 + 2.8, d / 2 - 2, 2.3], [-w / 2 - 3.2, -2, 2.8, .9], [w / 2 + 3.4, -3, 2.6, .9], [-6, -d / 2 - 2.2, 2.4], [5, -d / 2 - 2.6, 2.8], [0, -d / 2 - 3.4, 3.0, 1], [-w / 2 - 1.6, d / 2 + 2.4, 1.3], [w / 2 + 1.8, d / 2 + 2.6, 1.5]]);
   B.guard(-2.6, d / 2 + 2.6); B.guard(2.6, d / 2 + 2.6); B.apron(w * .5, d * .4, 4);
   { // ornate gold double door (cropped from the reference), swung open, under a big pointed-arch surround with a tracery tympanum
-    const gm = new THREE.MeshStandardMaterial({ map: goldDoorTexture(), metalness: .35, roughness: .5, side: THREE.DoubleSide, emissive: 0x5a3c0c }); const DHk = 5.2, zf = d / 2 + .06, hw = B.DW / 2;
+    const gm = new THREE.MeshStandardMaterial({ map: goldDoorTexture(), metalness: .35, roughness: .5, side: THREE.DoubleSide, emissive: 0x5a3c0c }); const DHk = 1.95, zf = d / 2 + .06, hw = B.DW / 2;
     for (const s of [-1, 1]) { const dx = s * .72, dz = .69, th = -Math.atan2(dz, dx); const m = B.add(new THREE.PlaneGeometry(hw * .98, DHk * .98), gm, s * hw + dx * hw * .5, DHk * .49, zf + dz * hw * .5, B.G.ext, { shadow: false }); m.rotation.y = th; m.scale.x = 1; }
     const R1 = hw + .9, R0 = hw + .1, cy = DHk + .2; const ring = new THREE.Shape(); ring.moveTo(-R1, 0); ring.lineTo(-R1, cy); ring.absarc(0, cy, R1, Math.PI, 0, true); ring.lineTo(R1, 0); ring.lineTo(R0, 0); ring.lineTo(R0, cy); ring.absarc(0, cy, R0, 0, Math.PI, false); ring.lineTo(-R0, 0); ring.lineTo(-R1, 0);
     B.add(new THREE.ExtrudeGeometry(ring, { depth: .5, bevelEnabled: false, curveSegments: 14 }), B.cm('stoneD'), 0, 0, d / 2 - .05, B.G.ext);

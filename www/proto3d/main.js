@@ -285,6 +285,7 @@ function wrapGLB(g) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
   m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
   if (new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
+  m.traverse(o => { if (o.isSkinnedMesh && o.name !== 'merged') { o.frustumCulled = false; if (!SKINS.includes(o)) SKINS.push(o); } });
   const box = new THREE.Box3().setFromObject(m), hgt = box.max.y - box.min.y;
   if (hgt > 0.01) { const sc = 1.8 * HS / hgt; m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
   const mixer = new THREE.AnimationMixer(m), act = {};

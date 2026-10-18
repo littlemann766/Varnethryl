@@ -55,7 +55,7 @@ const inn = (spec, ctx) => std(spec, ctx, { name: 'Inn of Varnethryl', w: 11, d:
   interior(B) { const iw = B.iw, id_ = B.id_;
     B.counter(2.2, -id_ + 1.1, 4, .8); B.shelf(2.2, -id_ + .35, 3.4); for (let i = 0; i < 3; i++) B.cyl(.1, .1, .2, 'iron', 1.0 + i * .8, 1.2, -id_ + 1.1, B.G.int, 8);
     B.table(-1.8, .4); B.table(-.2, 2.2); B.table(-3.4, 2.4); B.barrel(iw - .5, -.2); B.barrel(iw - .5, .8); B.barrel(iw - .5, 1.8); hearthLeft(B);
-    B.rugAt(-1.5, 1.2, 4, 3.2); B.lamp(-1.8, 3.6, .4); B.lamp(1.5, 3.6, 1.5); B.banner(-.6, 2.3, -id_ + .3, 0, .9, 1.8);
+    B.rugAt(-1.5, 1.2, 4, 3.2); B.lamp(-1.8, 3.6, .4); B.lamp(1.5, 3.6, 1.5); B.banner(-.6, 2.3, -id_ + .3, 0, .9, 1.8); B.dress('tavern');
     // upper floor (sheet: stairs, hallway, bedrooms A/B, private sitting room)
     B.fullUpper({ y: 3.0, stair: { cx: iw - 1.1, cz: id_ - 2.0, dir: '-z', len: 3.6, w: 1.7 }, rooms(U) { const Z = -2.6;
       U.partition(0, Z, iw * 2, 'x', [[-3.4, 1.2], [0, 1.2], [3.4, 1.2]]); U.partition(-1.7, (Z - id_) / 2, id_ + Z, 'z', null); U.partition(1.7, (Z - id_) / 2, id_ + Z, 'z', null);
@@ -307,11 +307,11 @@ function colosseum(spec, ctx) {
 
 // ---------- 16. Castle Keep (simplified: keep + 4 corner towers + throne room) ----------
 function keep(spec, ctx) {
-  const B = new Builder(ctx, spec); B.name = 'Castle Keep of Varnethryl'; B.rectShell({ w: 22, d: 16, h: 10, hs: 10, upper: 'stone', lower: 'stone', DW: 4.4, DH: 5.2, floor: 'floorStone', posts: false, T: .8 });
+  const B = new Builder(ctx, spec); B.name = 'Castle Keep of Varnethryl'; B.rectShell({ w: 22, d: 16, h: 10, hs: 10, upper: 'stoneL', lower: 'stoneL', DW: 4.4, DH: 5.2, floor: 'floorStone', posts: false, T: .8 });
   const { w, d, h } = B; B.bx(w, .6, d, 'stoneD', 0, h + .3, 0, B.G.roof);
   for (let i = 0; i < 12; i++) { const x = -w / 2 + .6 + i * (w - 1.2) / 11; B.bx(.8, .8, .8, 'stone', x, h + 1, d / 2 - .4, B.G.roof); B.bx(.8, .8, .8, 'stone', x, h + 1, -d / 2 + .4, B.G.roof); }
   B.bx(10, 5, 8, 'stone', 0, h + 2.9, -1, B.G.roof); B.cone(6.4, 8, 'slate', 0, h + 5.4, -1, B.G.roof, 4).rotation.y = .78;
-  for (const [sx, sz, r] of [[-1, 1, 3.3], [1, 1, 3.3], [-1, -1, 3.0], [1, -1, 3.0]]) B.tower(sx * (w / 2 + r * .8 - .2), sz * (d / 2 + r * .8 - .2), r, h + 4, { coneH: 8, windows: 3, wa: sx * 1.3 + sz });
+  for (const [sx, sz, r] of [[-1, 1, 3.3], [1, 1, 3.3], [-1, -1, 3.0], [1, -1, 3.0]]) B.tower(sx * (w / 2 + r * .8 - .2), sz * (d / 2 + r * .8 - .2), r, h + 4, { coneH: 8, windows: 3, key: 'stoneL', wa: sx * 1.3 + sz });
   for (const s of [-1, 1]) B.banner(s * 4.6, 6, d / 2 + .08, 0, 1.5, 4.2);
   for (const [x, z, r, up] of [[-5, -3, 2.5, 8], [5, -4, 2.2, 10], [0, -6.2, 2.7, 6]]) B.tower(x, z, r, h + up, { coneH: 8 + up * .3, windows: 3, collide: false, wa: x });
   B.rocks([[-w / 2 - 2.6, d / 2 - 1, 2.0], [w / 2 + 2.8, d / 2 - 2, 2.3], [-w / 2 - 3.2, -2, 2.8, .9], [w / 2 + 3.4, -3, 2.6, .9], [-6, -d / 2 - 2.2, 2.4], [5, -d / 2 - 2.6, 2.8], [0, -d / 2 - 3.4, 3.0, 1], [-w / 2 - 1.6, d / 2 + 2.4, 1.3], [w / 2 + 1.8, d / 2 + 2.6, 1.5]]);
@@ -333,6 +333,7 @@ function keep(spec, ctx) {
   B.tableR(-iw + 2.6, 1.5, 1.6, 7, 'darkWood'); B.tableR(iw - 2.6, 1.5, 1.6, 7, 'darkWood'); for (const s of [-1, 1]) B.hearth(s * (iw - .5), -3.6, -s * Math.PI / 2, 2.2);
   for (let i = 0; i < 3; i++) for (const s of [-1, 1]) B.banner(s * (iw - .4), 5, -2 + i * 3.6, -s * Math.PI / 2, 1, 2.6);
   for (const z of [-2, 2.5]) for (const x of [-2.6, 2.6]) B.lamp(x, 6.2, z);
+  B.dress('hall');
   B.fullUpper({ level: 1, y: 5.0, stair: { cx: iw - .9, cz: 1.4, dir: '-z', len: 4.5, w: 1.6 }, rooms(U) { const Z = -3.2;
     U.partition(0, Z, iw * 2, 'x', [[-5.5, 1.4], [0, 1.6], [5.5, 1.4], [iw - .9, 2.6], [-(iw - .9), 2.6]]); U.partition(-3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7); U.partition(3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7);
     U.bed(-iw + 1.6, -id_ + 1.2, 1); U.chest(-4.5, -id_ + .6, .9); U.rugAt(-6.8, -4.9, 3, 2.4); U.lamp(-6.8, 2.4, -4.9);

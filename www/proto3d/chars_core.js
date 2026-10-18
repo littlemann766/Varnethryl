@@ -145,7 +145,7 @@ export function taper(pts, r0, r1, seg = 10, rad = 7, flat = .55) {
 }
 function hairCap(r, front, back, rise = 0) { // hair cap with hairline: leaves the face open
   const g = new THREE.SphereGeometry(r, 28, 16, 0, PI * 2, 0, PI * .75), p = g.attributes.position, sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-  for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), th = Math.acos(y / r), ph = Math.atan2(z, -x), fd = Math.abs(ph - PI / 2) / (PI * .46), lim = front + (back - front) * sm(.25, 1, fd), t = th / (PI * .75);
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), th = Math.acos(Math.max(-1, Math.min(1, y / r))), ph = Math.atan2(z, -x), fd = Math.abs(ph - PI / 2) / (PI * .46), lim = front + (back - front) * sm(.25, 1, fd), t = th / (PI * .75);
     const th2 = t * lim, rr = r; p.setXYZ(i, -Math.cos(ph) * Math.sin(th2) * rr, Math.cos(th2) * rr, Math.sin(ph) * Math.sin(th2) * rr); }
   g.computeVertexNormals(); return g;
 }

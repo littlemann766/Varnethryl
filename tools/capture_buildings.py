@@ -30,5 +30,5 @@ with sync_playwright() as p:
             fy = pg.evaluate(f"(()=>{{const s=__sub('{i}');return s.floors.find(f=>f.level=={l}).y}})()")
             call = f"__show('{i}',{{inside:true,level:{l},pitch:1.05,dist:__r('{i}')*1.3,ty:{fy}}})"
             shot(i, call, f'{OUT}/{i}_up{l}.png')
-        print(i, 'done levels', lv, pg.evaluate("__rinfo().calls"))
+        print(i, 'done levels', lv, flush=True)
     b.close()

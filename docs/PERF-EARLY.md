@@ -36,3 +36,17 @@ node --check all proto3d js: ok. core_test, save3d_test, bump_test, owner_cheats
 - Roughness/metalness snapping (max 0.05 change) and merged materials: visually identical in screenshots but not bit-exact.
 - fix061 expects the procedural Aldric stand-in at start; it no longer exists by default (that test already failed on main).
 - Not tested on a real phone/GPU.
+
+## Round 2 (v0.7.7, commit c6f2710): time-sliced world generation
+Walls, each of the 29 buildings, chunk merges, trees and static merge now run as separate tasks with yields (load % shown on the loading screen); nothing is drawn until the world is complete, so no pop-in. Longest startup task about 3.2-6.4 s -> about 0.4-1.0 s (remaining big task is the wall builder, one call). Box was noisier/slower during this run, so absolute times are not comparable with round 1. Before -> after:
+
+| viewport | thr | party/npc | first frame ms | TTI ms | long-task total ms | longest task ms | draw calls |
+|---|---|---|---|---|---|---|---|
+| 412x915 | 4x | on | 6095→6202 | 8084→8093 | 7252→5272 | 4106→790 | 223→159 |
+| 412x915 | 4x | off | 5170→4629 | 6277→5915 | 5705→4062 | 3698→772 | 125→107 |
+| 412x915 | 6x | on | 7441→6506 | 10763→8829 | 9527→7336 | 5339→1014 | 223→159 |
+| 412x915 | 6x | off | 8845→5800 | 10502→6848 | 9025→5613 | 6352→969 | 125→107 |
+| 1920x1080 | 4x | on | 6156→3336 | 8654→4732 | 6866→2681 | 4070→509 | 235→171 |
+| 1920x1080 | 4x | off | 7046→2768 | 8075→3587 | 5858→2123 | 4433→415 | 136→118 |
+| 1920x1080 | 6x | on | 9477→5100 | 13005→7287 | 11128→5639 | 6851→983 | 235→171 |
+| 1920x1080 | 6x | off | 7062→6016 | None→7295 | 6728→4980 | 5203→1000 | 136→118 |

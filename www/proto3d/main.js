@@ -301,7 +301,7 @@ function wrapGLB(g) {
   root.userData = { glb: true, mixer, act, capeUpdate() {} }; try { root.userData.sb = new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '0.7.9';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '0.7.10';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).

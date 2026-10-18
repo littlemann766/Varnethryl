@@ -18,13 +18,29 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
 #heroes button{background:#0008;color:#fff;border:1px solid #fff5;border-radius:14px;padding:8px 12px;font-size:12px;touch-action:manipulation}
 #heroes button.on{background:#c9a24acc;color:#1b2433;font-weight:700}
 #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1b2433;font-size:14px;transition:opacity .4s}
+#diag{position:fixed;left:8px;right:8px;bottom:max(180px,env(safe-area-inset-bottom));font:11px/1.35 ui-monospace,monospace;color:#cfe;background:#000a;border-radius:8px;padding:6px 8px;max-height:30vh;overflow:auto;display:none;z-index:30;pointer-events:auto;white-space:pre-wrap}#diag .bad{color:#ffb4a8}#diagBtn{position:fixed;left:8px;bottom:6px;z-index:31;font:11px system-ui;color:#fff;background:#0008;border:1px solid #fff4;border-radius:10px;padding:3px 8px;pointer-events:auto}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="hud"><div><b>VARNETHRYL 3D</b><br><span>Liongate prototype</span><br><span id="fps">-- fps</span></div><a href="index.html">&larr; Game</a></div>
 <div id="stick"><div id="knob"></div></div>
 <div id="heroes"></div>
 <div id="hint">Joystick or tap the ground to move &middot; drag to rotate camera</div>
-<div id="load">Loading Liongate...</div>
+<div id="load"><span id="loadMsg">Loading Liongate...</span></div><button id="diagBtn" type="button">3D status</button><div id="diag"></div>
+<script>
+(function(){var lines=[],box=document.getElementById('diag'),btn=document.getElementById('diagBtn'),shown=false;
+function render(){box.innerHTML=lines.map(function(l){return '<div class="'+(l.bad?'bad':'')+'">'+l.t.replace(/</g,'&lt;')+'</div>'}).join('');box.scrollTop=1e9}
+window.__p3dDiag=function(t,bad){lines.push({t:t,bad:!!bad});if(lines.length>40)lines.shift();render();if(bad){box.style.display='block';shown=true}};
+btn.addEventListener('click',function(){shown=!shown;box.style.display=shown?'block':'none'});
+var ua=navigator.userAgent,m=/Chrome\/(\d+)/.exec(ua);
+window.__p3dDiag('UA: '+ua.slice(0,110)+(window.Capacitor?' [Capacitor app]':' [browser]'));
+var okImport=window.HTMLScriptElement&&HTMLScriptElement.supports&&HTMLScriptElement.supports('importmap');
+if(!okImport&&m&&+m[1]<89)window.__p3dDiag('This browser engine (Chrome '+m[1]+') is too old for 3D (needs 89+). Update Android System WebView.',true);
+function fatal(msg){window.__p3dDiag('ERROR: '+msg,true);var l=document.getElementById('loadMsg');if(l&&document.getElementById('load'))l.textContent='3D failed to start: '+msg}
+addEventListener('error',function(e){fatal((e.message||'script error')+(e.filename?' @'+e.filename.split('/').slice(-2).join('/')+':'+e.lineno:''))});
+addEventListener('unhandledrejection',function(e){fatal(String(e.reason&&e.reason.message||e.reason))});
+setTimeout(function(){if(!window.__p3d)window.__p3dDiag('Still loading after 12s (slow device or blocked script).',true)},12000);
+})();
+</script>
 <script type="importmap">{"imports":{"three":"./proto3d/vendor/three.module.js","three/addons/":"./proto3d/vendor/jsm/"}}</script>
-<script type="module" src="proto3d/main.js"></script>
+<script type="module" src="proto3d/main.js" onerror="__p3dDiag('Could not load proto3d/main.js or one of its imports (three.js). Check connection / update the app.',true)"></script>
 </body></html>

@@ -6,7 +6,12 @@ import { makeEnterable } from './interiors.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: (window.devicePixelRatio || 1) < 1.5, powerPreference: 'high-performance' });
+const diag = (msg, bad) => { try { (window.__p3dDiag || (() => {}))(msg, bad); } catch (_) {} };
+const COARSE = matchMedia('(pointer:coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: !COARSE && (window.devicePixelRatio || 1) < 1.5, powerPreference: 'high-performance' }); }
+catch (e) { diag('WebGL failed to start: ' + (e && e.message || e), true); throw e; }
+diag('WebGL ok · ' + (renderer.capabilities.isWebGL2 ? 'WebGL2' : 'WebGL1') + ' · max tex ' + renderer.capabilities.maxTextureSize);
 const DPR_CAP = 1.5;                       // cap pixel ratio: biggest single mobile perf lever
 let prCeil = Math.min(window.devicePixelRatio || 1, DPR_CAP), pr = prCeil;   // pr adapts down (never above prCeil) if the GPU can't hold ~45 fps
 renderer.setPixelRatio(pr);
@@ -294,30 +299,47 @@ function wrapGLB(g) {
 }
 const gl = new GLTFLoader();
 const glbPromise = {};
+// Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
+async function fetchGLB(id) {
+  let lastErr = '';
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const url = 'proto3d/models/' + id + '.glb' + (attempt ? '?r=' + Date.now() : '');
+    try {
+      const r = await fetch(url, attempt ? { cache: 'reload' } : undefined);
+      if (!r.ok) { lastErr = 'HTTP ' + r.status; continue; }
+      const buf = await r.arrayBuffer();
+      const magic = new TextDecoder().decode(new Uint8Array(buf, 0, Math.min(4, buf.byteLength)));
+      if (magic !== 'glTF') { lastErr = 'not a GLB (type ' + r.headers.get('content-type') + ', ' + buf.byteLength + ' bytes, starts "' + magic.replace(/[^\x20-\x7e]/g, '?') + '")'; continue; }
+      return buf;
+    } catch (e) { lastErr = 'fetch error: ' + (e && e.message || e); }
+  }
+  throw new Error(lastErr);
+}
 // slot gi: models 0-2 replace the procedural hero; others get a placeholder group until the GLB arrives
 function loadHero(gi) {
   const id = GLB_IDS[gi];
   if (!useGLB || HEROES[gi] && HEROES[gi].userData.glb) return Promise.resolve(HEROES[gi]);
   if (glbPromise[gi]) return glbPromise[gi];
-  glbInfo.pending.push(id);
-  return glbPromise[gi] = new Promise(res => {
-    gl.load('proto3d/models/' + id + '.glb', g => {
+  glbInfo.pending.push(id); diag('loading ' + id + '.glb ...');
+  const fail = (why) => { console.warn('GLB failed', id, why); glbInfo.failed.push(id); glbInfo.pending = glbInfo.pending.filter(x => x !== id); glbInfo.errors = glbInfo.errors || {}; glbInfo.errors[id] = String(why); diag('3D model "' + id + '" failed: ' + why + (HEROES[gi] && HEROES[gi].children.length ? ' - showing simple stand-in' : ''), true); delete glbPromise[gi]; return HEROES[gi]; };
+  return glbPromise[gi] = fetchGLB(id).then(buf => new Promise(res => {
+    gl.parse(buf, '', g => {
       try {
         const w = wrapGLB(g), old = HEROES[gi];
         w.visible = false; scene.add(w);
         if (old) { w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); scene.remove(old); if (hero === old) hero = w; }
         HEROES[gi] = w; glbInfo.loaded.push(id);
-      } catch (e) { console.warn('GLB wrap failed', id, e); glbInfo.failed.push(id); }
-      glbInfo.pending = glbInfo.pending.filter(x => x !== id); res(HEROES[gi]);
-    }, undefined, err => { console.warn('GLB load failed', id); glbInfo.failed.push(id); glbInfo.pending = glbInfo.pending.filter(x => x !== id); res(HEROES[gi]); });
-  });
+        glbInfo.pending = glbInfo.pending.filter(x => x !== id); diag('3D model "' + id + '" loaded (' + Math.round(buf.byteLength / 1024) + ' KB)'); res(HEROES[gi]);
+      } catch (e) { res(fail('wrap: ' + (e && e.message || e))); }
+    }, err => res(fail('parse: ' + (err && err.message || err))));
+  }), e => fail(e && e.message || e));
 }
 for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(GLB_NAMES[i]); }
-async function selectHero(i) { if (!HEROES[i].userData.glb && useGLB) await loadHero(i); setHero(i); }
+async function selectHero(i) { if (!HEROES[i].userData.glb && useGLB) await loadHero(i); if (!HEROES[i].children.length) return; setHero(i); }
 { const bar = document.getElementById('heroes'); HERO_NAMES.forEach((n, i) => { const b = document.createElement('button'); b.textContent = n.split(' ').pop(); b.title = n; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => { e.stopPropagation(); selectHero(i); }); bar.appendChild(b); }); }
-{ const q = new URLSearchParams(location.search).get('hero'); const qi = q != null && HEROES[+q] ? +q : 0; await loadHero(qi); if (qi) setHero(qi); }
+{ const q = new URLSearchParams(location.search).get('hero'); const qi = q != null && HEROES[+q] ? +q : 0; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); }); }
 // preload the first three quietly after first paint (they replace the procedural stand-ins)
-setTimeout(() => { for (const gi of [0, 1, 2]) loadHero(gi); }, 1500);
+
 // blob shadow is the real shadow map; no extra.
 const marker = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.55, 20), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: 0.9, depthWrite: false }));
 marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = false; scene.add(marker);

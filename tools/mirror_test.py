@@ -1,10 +1,10 @@
 """Playwright walk-through of "The Mirrored Flame" quest line (Kael Runebinder and Rowan Firebrand).
-Usage: serve www/ (python3 -m http.server 8111 -d www) then VN_URL=http://localhost:8111/index.html python3 tools/mirror_test.py
+Usage: serve www/ (python3 -m http.server 8111 -d www) then VN_URL=http://localhost:8111/index2d.html python3 tools/mirror_test.py
 Story panels, travel, swapping heroes, trading staves, the Mirror Trial and cracking the glass use real taps;
 window.__vn.Mirror.debug only shortens fights."""
 import os, json, sys
 from playwright.sync_api import sync_playwright
-URL = os.environ.get('VN_URL', 'http://localhost:8111/index.html')
+URL = os.environ.get('VN_URL', 'http://localhost:8111/index2d.html')
 res = []
 def ok(n, c):
     res.append(bool(c)); print(('PASS' if c else 'FAIL'), n)

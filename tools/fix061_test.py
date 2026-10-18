@@ -29,7 +29,7 @@ with sync_playwright() as p:
     # 3. 2D buildings grounded + solid, portrait and landscape
     for w, h in [(844, 390), (390, 844), (1366, 768)]:
         pg = b.new_context(viewport={'width': w, 'height': h}, is_mobile=w < 900, has_touch=w < 900, service_workers='block').new_page()
-        pg.goto(B + 'index.html?nobrand'); pg.wait_for_timeout(2000)
+        pg.goto(B + "index2d.html?nobrand"); pg.wait_for_timeout(2000)
         pg.evaluate('__vn.runtime.x=300;__vn.runtime.y=330'); pg.keyboard.down('ArrowUp'); pg.wait_for_timeout(2500); pg.keyboard.up('ArrowUp')
         y = pg.evaluate('__vn.runtime.y'); ch = h
         # hero screen y must be below the ground line (.56ch) so buildings, anchored to it, are always behind

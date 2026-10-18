@@ -15,7 +15,7 @@ with sync_playwright() as p:
   b=p.chromium.launch()
   ctx=b.new_context(viewport={'width':390,'height':844},has_touch=True,service_workers='block')
   pg=ctx.new_page();errs=[];pg.on('pageerror',lambda e:errs.append(str(e)))
-  pg.goto('http://localhost:8099/index.html');pg.wait_for_timeout(800)
+  pg.goto('http://localhost:8099/index2d.html');pg.wait_for_timeout(800)
   check(pg,'initial')
   ids=pg.evaluate("window.__vn.state.party")
   for rnd in range(3):

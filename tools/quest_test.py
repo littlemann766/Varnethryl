@@ -1,9 +1,9 @@
 """Playwright walk-through of the "A Light in Dusk Hollow" quest line (Count Veyra and Mortimer).
-Usage: serve www/ (python3 -m http.server 8111 -d www) then VN_URL=http://localhost:8111/index.html python3 tools/quest_test.py
+Usage: serve www/ (python3 -m http.server 8111 -d www) then VN_URL=http://localhost:8111/index2d.html python3 tools/quest_test.py
 Uses window.__vn.Quest.debug only to skip the long fights; story panels, travel, candles and the Dawn Spell go through the real UI."""
 import os, json, sys
 from playwright.sync_api import sync_playwright
-URL = os.environ.get('VN_URL', 'http://localhost:8111/index.html')
+URL = os.environ.get('VN_URL', 'http://localhost:8111/index2d.html')
 res = []
 def ok(n, c):
     res.append(bool(c)); print(('PASS' if c else 'FAIL'), n)

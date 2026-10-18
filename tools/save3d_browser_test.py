@@ -59,7 +59,7 @@ with sync_playwright() as p:
         pg.close()
         # 4. real 2D game loads the 3D-written save and re-saves it
         pg = ctx.new_page(); e2 = []; pg.on('console', lambda m: e2.append(m.text) if m.type == 'error' else None); pg.on('pageerror', lambda e: e2.append(str(e)))
-        pg.goto(BASE + '/index.html'); pg.wait_for_timeout(2500)
+        pg.goto(BASE + '/index2d.html'); pg.wait_for_timeout(2500)
         ok(tag + ' 2D loads 3D-written save without errors', not e2, '; '.join(e2[:3]))
         pg.screenshot(path=f'/tmp/s2d-{tag}.png'); ok(tag + ' 2D pixels not blank', colors(f'/tmp/s2d-{tag}.png') > 20)
         hide(pg); pg.wait_for_timeout(400)

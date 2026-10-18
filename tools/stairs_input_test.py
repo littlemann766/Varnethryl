@@ -20,13 +20,18 @@ with sync_playwright() as p:
     info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.map(b=>({id:b.id,ramps:b.ramps})))"))
     def W(bid, lx, lz): return pg.evaluate("([id,lx,lz])=>__p3d.multi.find(b=>b.id===id).toW(lx,lz)", [bid, lx, lz])
     box = pg.evaluate("(()=>{const r=document.getElementById('stick').getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2,r.width/2]})()")
-    def drive(tx, tz, mode, lg, yg, secs=11):
-        held = set(); joy = False
+    def drive(tx, tz, mode, lg, yg, secs=14, E=None):
+        held = set(); joy = False; reached = False
         try:
             t = 0
             while t < secs * 1000:
                 st = pg.evaluate("({x:__p3d.state.heroX,z:__p3d.state.heroZ,lv:__p3d.state.level,y:__p3d.state.heroY,cy:__p3d.state.camYaw})")
-                if st['lv'] == lg and abs(st['y'] - yg) < .2: return st, t
+                if st['lv'] == lg and abs(st['y'] - yg) < .2:
+                    reached = True
+                if reached and E is not None:
+                    ux, uz = tx - E[0], tz - E[1]; ul = math.hypot(ux, uz) or 1; ext = ((st['x'] - E[0]) * ux + (st['z'] - E[1]) * uz) / ul
+                    if ext >= 1.0 and st['lv'] == lg: return st, t
+                elif reached: return st, t
                 dx, dz = tx - st['x'], tz - st['z']; d = math.hypot(dx, dz) or 1; dx /= d; dz /= d
                 sy, cy = math.sin(st['cy']), math.cos(st['cy']); ix = dx * cy - dz * sy; iy = -dx * sy - dz * cy
                 if mode == 'key':
@@ -64,7 +69,9 @@ with sync_playwright() as p:
                 for mode in (['key', 'joy'] if MODE == 'both' else [MODE]):
                     for yw in YAWS:
                         pg.evaluate("([s,l,y])=>{__p3d.teleport(s[0],s[1],l);__p3d.state.target=null;__p3d.state.camYaw=y}", [W(bi['id'], *a), lv0, yw]); pg.wait_for_timeout(300)
-                        wt = W(bi['id'], *t); r, ms = drive(wt[0], wt[1], mode, lg, yg)
+                        wt = W(bi['id'], *t); EE = W(bi['id'], m['cx'] + (s if dr == 'up' else -s) * h, m['cz'] + (c if dr == 'up' else -c) * h); r, ms = drive(wt[0], wt[1], mode, lg, yg, E=EE)
+                        if not (r['lv'] == lg and abs(r['y'] - yg) < .2) and os.environ.get('DIAG', '1') == '1':
+                            print('    stuck near:', pg.evaluate("([x,z,l])=>__p3d.colliders.filter(c=>(c.lv===undefined||(Array.isArray(c.lv)?c.lv.includes(l):c.lv===l))&&(c.type==='box'?(Math.hypot(Math.max(c.minX,Math.min(x,c.maxX))-x,Math.max(c.minZ,Math.min(z,c.maxZ))-z)<1.0):(Math.hypot(c.x-x,c.z-z)<1.0+c.r))).map(c=>[c.type,c.b,c.minX,c.maxX,c.minZ,c.maxZ,c.x,c.z,c.r,c.lv,c.stair].map(v=>typeof v==='number'?+v.toFixed(2):v))", [r['x'], r['z'], r['lv']]))
                         ok = r['lv'] == lg and abs(r['y'] - yg) < .2; total += 1; fails += 0 if ok else 1; res.append(f"{mode}@{yw:+.1f}:" + ('OK' if ok else 'FAIL(lv%s y%.1f @%.1f,%.1f)' % (r['lv'], r['y'], r['x'], r['z'])))
                 print('PASS' if all('FAIL' not in x for x in res) else 'FAIL', bi['id'], f"{m['l0']}->{m['l1']} {dr}", ' '.join(res), flush=True)
     b.close()

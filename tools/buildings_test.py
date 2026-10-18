@@ -15,7 +15,7 @@ fails = 0
 with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']); pg = b.new_page(viewport={'width': 390, 'height': 844})
     errs = []; pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
-    pg.goto(f'http://127.0.0.1:{port}/proto3d.html'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=90000); pg.wait_for_timeout(800)
+    pg.goto(f'http://127.0.0.1:{port}/proto3d.html?party=0&npcs=0'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=90000); pg.wait_for_timeout(800)
     infos = json.loads(pg.evaluate(JS_INFO))
     ONLY = os.environ.get('ONLY', '').split(',') if os.environ.get('ONLY') else None
     for bi in infos:
@@ -43,6 +43,10 @@ with sync_playwright() as p:
         # solid: approach the side wall, should not get inside
         side = W((bi['r'] if bi['round'] else bi['w'] / 2) + 3, 0); mid = W(0, 0)
         r2 = walk(side, mid, 6000); solid = r2['ins'] is None
+        if bi['id'].startswith('gt'):  # gate towers are mirrored: probe from the outer (town-wall) side only
+            side2 = W(-((bi['r']) + 3), 0)
+            if abs(side2[0]) > abs(side[0]): side = side2
+            r2 = walk(side, mid, 6000); solid = r2['ins'] is None
         if os.environ.get('DBG'): print('  dbg', bi['id'], r, 'target', tgt, 'start', out_)
         ok = walked_in and solid; fails += 0 if ok else 1
         print('PASS' if ok else 'FAIL', f"{bi['id']:12s} walk-in={walked_in} walls-solid={solid} ({bi['name']})")

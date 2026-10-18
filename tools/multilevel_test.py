@@ -13,7 +13,7 @@ fails = 0
 with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']); pg = b.new_page(viewport={'width': 390, 'height': 844})
     errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
-    pg.goto(f'http://127.0.0.1:{port}/proto3d.html'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=90000); pg.wait_for_timeout(800)
+    pg.goto(f'http://127.0.0.1:{port}/proto3d.html?party=0&npcs=0'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=90000); pg.wait_for_timeout(800)
     info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.map(b=>({id:b.id,ramps:b.ramps,floors:b.floors.map(f=>({level:f.level,y:f.y})),cx:b.cx,cz:b.cz,rot:b.rot})))"))
     def W(bid, lx, lz): return pg.evaluate("([id,lx,lz])=>__p3d.multi.find(b=>b.id===id).toW(lx,lz)", [bid, lx, lz])
     def walk(src, lv, dst, ms=9000):

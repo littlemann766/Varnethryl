@@ -4,6 +4,7 @@ import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { makeEnterable } from './interiors.js';
 import { buildVillage, buildWalls } from './buildings.js';
+import { zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -137,11 +138,13 @@ function building(cx, cz, w, d, h, opt = {}) {
 const enterables = [];
 const ectx = { scene, mats, colliders, multi: [] };
 // 26 sheet-based 3D buildings (guild, inn, smithy, temple, colosseum, keep ... see docs/proto3d-buildings/README.md). ?oldvillage keeps the original blocky village.
+const SKINS = [];
 const BLD_ON = new URLSearchParams(location.search).get('oldvillage') == null;
 const drops = []; let dropMade = 0;
 if (BLD_ON) {
   enterables.push(buildWalls(ectx, WORLD, GATE_W));
   for (const b of buildVillage(ectx)) enterables.push(b);
+  if (new URLSearchParams(location.search).get('nochunk') == null) { try { const r = chunkStatics(enterables.flatMap(e => e.parts || [e]), scene, 64); diag('static chunks: ' + r.before + ' -> ' + r.after); const rr = mergeRoofs(enterables.flatMap(e => e.parts || [e]), scene); diag('roofs: ' + rr.before + ' -> ' + rr.after); const rw = mergeWalls(enterables.flatMap(e => e.parts || [e]), scene); diag('walls: ' + rw.before + ' -> ' + rw.after); } catch (e) { console.error('chunkStatics', e.message, e.stack); } }
 } else {
   wallSeg(-WORLD, -WORLD, WORLD, -WORLD); wallSeg(-WORLD, -WORLD, -WORLD, WORLD); wallSeg(WORLD, -WORLD, WORLD, WORLD); wallSeg(-WORLD, WORLD, -GATE_W - 3, WORLD); wallSeg(GATE_W + 3, WORLD, WORLD, WORLD);
   tower(-GATE_W - 3, WORLD, 2.6); tower(GATE_W + 3, WORLD, 2.6);
@@ -201,22 +204,22 @@ function mergeStatic() {
   scene.updateMatrixWorld(true);
   const buckets = new Map(), remove = [];
   scene.traverse(o => {
-    if (!o.isMesh || o.isInstancedMesh || o.userData.keep) return;
-    const key = o.material.uuid + (o.castShadow ? 'c' : '') + (o.receiveShadow ? 'r' : '');
-    if (!buckets.has(key)) buckets.set(key, { mat: o.material, c: o.castShadow, r: o.receiveShadow, list: [] });
-    buckets.get(key).list.push(o); remove.push(o);
+    if (!o.isMesh || o.isInstancedMesh || o.isSkinnedMesh || o.userData.keep) return;
+    const cl = matClass(o.material); if (!o.geometry.boundingBox) o.geometry.computeBoundingBox(); const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld), zk = zoneKey((bb.min.x + bb.max.x) / 2, (bb.min.z + bb.max.z) / 2) + '|' + cl.key;
+    if (!buckets.has(zk)) buckets.set(zk, { cl, list: [], n: 0, cv: 0 });
+    const b = buckets.get(zk); b.list.push(o); remove.push(o);
   });
   for (const b of buckets.values()) {
     const parts = b.list.map(o => { const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()); g.applyMatrix4(o.matrixWorld); return g; });
-    let n = 0; for (const g of parts) n += g.attributes.position.count;
-    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2); let o3 = 0, o2 = 0;
-    for (const g of parts) {
-      pos.set(g.attributes.position.array, o3); nor.set(g.attributes.normal.array, o3); uv.set(g.attributes.uv.array, o2);
-      o3 += g.attributes.position.count * 3; o2 += g.attributes.position.count * 2; g.dispose();
-    }
+    let n = 0, cv = 0; parts.forEach((g, i) => { const c = g.attributes.position.count; n += c; if (b.list[i].castShadow) cv += c; });
+    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2), col = b.cl.vc ? new Float32Array(n * 3) : null; let o3 = 0, o2 = 0;
+    parts.forEach((g, i) => {
+      const cnt = g.attributes.position.count; pos.set(g.attributes.position.array, o3); nor.set(g.attributes.normal.array, o3); if (g.attributes.uv) uv.set(g.attributes.uv.array, o2); if (col) colorFill(col, cnt, o3, b.list[i].material.color);
+      o3 += cnt * 3; o2 += cnt * 2; g.dispose();
+    });
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-    const m = new THREE.Mesh(geo, b.mat); m.castShadow = b.c; m.receiveShadow = b.r; scene.add(m);
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); if (col) geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    const m = new THREE.Mesh(geo, b.cl.mat); m.castShadow = cv * 2 > n; m.receiveShadow = true; scene.add(m);
   }
   for (const o of remove) { o.parent.remove(o); o.geometry.dispose(); }
 }
@@ -269,7 +272,7 @@ function mergeRigidParts(root) {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     geo.setAttribute('skinIndex', new THREE.BufferAttribute(si, 4)); geo.setAttribute('skinWeight', new THREE.BufferAttribute(sw, 4));
-    const sm = new THREE.SkinnedMesh(geo, mat); sm.castShadow = true; sm.receiveShadow = false; sm.frustumCulled = false; sm.name = 'merged';
+    const sm = new THREE.SkinnedMesh(geo, mat); sm.castShadow = true; sm.receiveShadow = false; sm.frustumCulled = false; sm.name = 'merged'; SKINS.push(sm);
     root.add(sm); sm.updateMatrixWorld(true); sm.bind(skeleton, sm.matrixWorld);
     for (const o of list) { o.parent.remove(o); o.geometry.dispose(); removed++; }
   }
@@ -462,9 +465,14 @@ function updateHero(dt) {
   let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
   if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
     try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }
-  animateHero(dt);
+  animateHero(dt); cullSkins();
 }
 
+const _sp = new THREE.Vector3();
+function cullSkins() { // characters: skinned meshes skip frustum culling, so cull by distance + only the near ones cast shadows (shadow box is ~15 m)
+  for (const sm of SKINS) { if (!sm.parent) continue; const root = sm.parent; root.getWorldPosition(_sp); const d = Math.hypot(_sp.x - state.heroX, _sp.z - state.heroZ);
+    const v = d < 75 || sm === hero; if (sm.visible !== v) sm.visible = v; const c = d < 26; if (sm.castShadow !== c) sm.castShadow = c; }
+}
 let walkT = 0, idleT = 0, prevYaw = 0;
 function animateHero(dt) {
   const u = hero.userData, w = Math.min(1, state.speed / SPEED);

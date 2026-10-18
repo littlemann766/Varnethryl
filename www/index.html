@@ -6,7 +6,8 @@
 (function(){
   var q=new URLSearchParams(location.search);
   function go2d(why){try{sessionStorage.setItem('vn_fallback',why)}catch(e){}location.replace('index2d.html'+location.hash)}
-  if(q.get('mode')==='2d')return go2d('requested');
+  if(q.get('mode')==='3d'){try{localStorage.removeItem('vn_mode')}catch(e){}}
+  else if(q.get('mode')==='2d'||(function(){try{return localStorage.getItem('vn_mode')==='2d'}catch(e){return false}})())return go2d('requested');
   try{var c=document.createElement('canvas');if(!(c.getContext('webgl2')||c.getContext('webgl')))return go2d('no-webgl')}catch(e){return go2d('no-webgl')}
   if(!(window.HTMLScriptElement&&HTMLScriptElement.supports&&HTMLScriptElement.supports('importmap')))return go2d('no-importmap');
   import('./proto3d/vendor/three.module.js').then(function(){

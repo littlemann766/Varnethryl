@@ -23,7 +23,7 @@ window.__show = (bid, o = {}) => {
   const inside = !!o.inside; const lp = o.at || [0, 0]; const [wx, wz] = s.toW(lp[0], lp[1]);
   const [ox, oz] = s.toW(0, r + 8); (b.parts || [b]).forEach(p => p.update(inside ? wx : ox, inside ? wz : oz, .016));
   if (o.tick) for (let i = 0; i < o.tick; i++) (b.parts || [b]).forEach(p => p.tick && p.tick(.1));
-  const yaw = (o.yaw || 0) + rot, pitch = o.pitch === undefined ? .35 : o.pitch, dist = (o.dist || Math.max(r * 2.9, (s.h || 6) * 2.0));
+  const yaw = (o.yaw || 0) + rot, pitch = o.pitch === undefined ? .35 : o.pitch, dist = (o.dist || Math.max(r * 2.9, (s.vh || s.h || 6) * 2.5));
   const tx = o.target ? s.toW(o.target[0], o.target[1]) : [cx, cz], ty = o.ty === undefined ? (s.h || 6) * .45 : o.ty;
   camera.position.set(tx[0] + Math.sin(yaw) * Math.cos(pitch) * dist, ty + Math.sin(pitch) * dist, tx[1] + Math.cos(yaw) * Math.cos(pitch) * dist); camera.lookAt(tx[0], ty, tx[1]);
   sun.position.set(cx - 18, 30, cz + 14); sun.target.position.set(cx, 0, cz); Object.assign(sun.shadow.camera, { left: -r - 8, right: r + 8, top: r + 8, bottom: -r - 8 }); sun.shadow.camera.updateProjectionMatrix();

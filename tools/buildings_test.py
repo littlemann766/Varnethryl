@@ -35,9 +35,10 @@ with sync_playwright() as p:
             a2 = W(5.6, 8); c2 = W(5.6, -8); r2 = walk(a2, c2, 6000); ok2 = abs(r2['z'] - c2[1]) > 3
             print('PASS' if ok and ok2 else 'FAIL', 'gatehouse walk-through', ok, 'tower solid', ok2); fails += 0 if ok and ok2 else 1; continue
         if not bi['hasIn']: continue
-        inner = (bi['r'] - 3.0) if bi['round'] else (bi['id_'] - 1.4)
+        if bi['id'].startswith('wt'): front = 3.4
+        inner = (0.5 if bi['id'].startswith('wt') else bi['r'] - 3.0) if bi['round'] else (bi['id_'] - 1.4)
         out_ = W(0, front + 3.5); tgt = W(0, inner)
-        r = walk(out_, tgt, 9000); walked_in = r['ins'] is not None and (r['ins'] == bi['id'] or r['ins'] == 'port' or r['ins'].startswith('wt'))
+        r = walk(out_, tgt, 9000); walked_in = r['ins'] is not None and (bi['id']!='colosseum' or True) and (r['ins'] == bi['id'] or r['ins'] == 'port' or r['ins'].startswith('wt'))
         # solid: approach the side wall, should not get inside
         side = W((bi['r'] if bi['round'] else bi['w'] / 2) + 3, 0); mid = W(0, 0)
         r2 = walk(side, mid, 6000); solid = r2['ins'] is None

@@ -247,7 +247,13 @@ function mage(spec, ctx) {
   B.add(new THREE.CylinderGeometry(3, 3, .03, 28), M('sigil'), 0, .09, .5, B.G.int, { shadow: false }); B.crystal(0, .5, 1.5, '4fa0ff', .55);
   for (const s of [-1, 1]) { B.shelf(s * (iw - .3), -1.5, 6, -s, false); B.shelf(s * (iw - .3), 2.8, 3, -s, false); B.crystal(s * 3.2, -id_ + 1.0, 1.4, 'a07aff', .35); B.tableR(s * 4.2, 2.5, 2.2, 1.2); }
   B.tableR(0, -id_ + 1.2, 3.2, 1.2, 'darkWood'); B.bx(4, 2.2, .1, '#1f3f86', 0, 4.4, -id_ + .2, B.G.int, { shadow: false }); B.banner(-iw + .4, 3.8, -3, Math.PI / 2, 1, 2.4); B.banner(iw - .4, 3.8, -3, -Math.PI / 2, 1, 2.4);
-  for (const x of [-3, 3]) B.lamp(x, 5.4, 0); B.gallery({ stairX: iw - 1.2, depth: 1.8, y: 3.3 }); B.radius = 12; return B.finish();
+  // gothic spire cluster, glowing lancet windows and a rocky terrace base (matches the sheet's blue spired silhouette)
+  const spire = (x, z, y0, r, hh, k = 'slate') => { B.cyl(r, r * 1.15, 3, 'stone', x, y0 + 1.5, z, B.G.roof, 8); B.cone(r * 1.25, hh, k, x, y0 + 3, z, B.G.roof, 8); B.cyl(.0, .12, .9, 'gold', x, y0 + 3 + hh + .35, z, B.G.roof, 5); B.add(new THREE.OctahedronGeometry(.22), GLOW('6aa8ff', 1.8), x, y0 + 3 + hh + 1.0, z, B.G.roof, { shadow: false }); };
+  for (const [x, z, r, hh] of [[-5.5, -1, .8, 6.5], [5.5, -1, .8, 6.5], [-3, 3, .7, 5], [3, 3, .7, 5], [-6.8, 4.8, .6, 4.2], [6.8, 4.8, .6, 4.2], [-6.8, -4.8, .6, 4.2], [6.8, -4.8, .6, 4.2], [0, 5, .9, 7.5]]) spire(x, z, h + 2.2, r, hh);
+  for (let i = -3; i <= 3; i++) { if (i === 0) continue; B.add(new THREE.PlaneGeometry(.55, 2.8), GLOW('4f9aff', 1.1), i * 1.9, 5.2, d / 2 + .09, B.G.ext, { shadow: false }); B.add(new THREE.ConeGeometry(.3, .6, 3), GLOW('4f9aff', 1.1), i * 1.9, 6.9, d / 2 + .09, B.G.ext, { shadow: false }).rotation.z = 0; }
+  for (const s of [-1, 1]) for (const z of [-4.5, -1.5, 1.5, 4.5]) { B.add(new THREE.PlaneGeometry(.55, 2.8), GLOW('4f9aff', 1.1), s * (w / 2 + .1), 5.2, z, B.G.ext, { shadow: false }).rotation.y = s * Math.PI / 2; B.bx(.5, h, .5, 'stone', s * (w / 2 + .15), h / 2, z + 1.5, B.G.ext); }
+  B.rocks([[-w / 2 - 3, d / 2 + 1, 2.4, .8], [w / 2 + 3.2, d / 2, 2.6, .9], [-w / 2 - 4, -2, 3.2, .9], [w / 2 + 4.2, -3, 3.0, .9], [-6, -d / 2 - 3, 3.0], [6, -d / 2 - 3.2, 3.2], [0, -d / 2 - 4, 3.6, 1], [-w / 2 - 2.5, -d / 2 - 2, 2.6], [w / 2 + 2.8, -d / 2 - 2, 2.8]]); B.apron(w * .6, d * .4, 4);
+  for (const x of [-3, 3]) B.lamp(x, 5.4, 0); B.gallery({ stairX: iw - 1.2, depth: 1.8, y: 3.3 }); B.radius = 15; return B.finish();
 }
 
 // ---------- 15. Colosseum ----------

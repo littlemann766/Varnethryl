@@ -5,6 +5,7 @@ import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { makeEnterable } from './interiors.js';
 import { readSave, planFromState, createSaver } from './save3d.js';
 import { createBump, makeActor, styleFor, findNodes, restoreNodes, applyPose } from './bump.js';
+import { scatterWorld, makeDetailTexture, makeMaterials } from './scenery.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -171,8 +172,17 @@ let dropMade = 0;
 for (let i = 0; i < 6; i++) { const m = mesh(new THREE.SphereGeometry(0.1, 6, 5), mats.water, 0, 3, 0, fountain, false); m.userData.keep = true; drops.push(m); }
 addCircCol(0, 0, 3.5);
 
+/* scenery: ?scenery=new swaps in the detailed kit (scenery.js); default stays the original simple trees */
+const NEWSC = new URLSearchParams(location.search).get('scenery') === 'new';
+if (NEWSC) {
+  let sd = 4242; const srnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  const sc = scatterWorld({ world: WORLD, colliders, rnd: srnd, trees: 56, bushes: 40, rocks: 30, flowers: 40, grass: 300, forest: 60 });
+  const SM = makeMaterials(makeDetailTexture());
+  for (const [g, m, cast] of [[sc.cast, SM.solid, true], [sc.plain, SM.solid, false], [sc.glow, SM.glow, false]]) if (g) { const me = new THREE.Mesh(g, m); me.castShadow = cast; me.receiveShadow = true; me.userData.keep = true; me.frustumCulled = false; scene.add(me); }
+  window.__treeCount = sc.trees; window.__sceneryStats = { tris: sc.tris, variants: sc.variants, stats: sc.stats };
+}
 // trees (instanced: 2 draw calls for ~60 trees)
-{
+if (!NEWSC) {
   const pts = [];
   const blocked = (x, z) => {
     if (Math.hypot(x, z) < 12) return true;
@@ -203,7 +213,7 @@ addCircCol(0, 0, 3.5);
   window.__treeCount = pts.length;
 }
 // a few crates/barrels (solid props)
-for (const [x, z] of [[-8.2, -4.2], [-8.6, -3.2], [9.2, -5.8], [8.4, 6.6]]) {
+for (const [x, z] of NEWSC ? [] : [[-8.2, -4.2], [-8.6, -3.2], [9.2, -5.8], [8.4, 6.6]]) {
   mesh(new THREE.BoxGeometry(1, 1, 1), mats.wood, x, 0.5, z); addBoxCol(x, z, 1, 1);
 }
 
@@ -561,6 +571,7 @@ function animateHero(dt) {
 const camPos = new THREE.Vector3(0, 8, 24), camLook = new THREE.Vector3(0, 1.5, 14);
 const _want = new THREE.Vector3(), _look = new THREE.Vector3();
 function updateCamera(dt, snap) {
+  if (window.__p3d && window.__p3d.freeCam) { sun.position.set(state.heroX + SUN_OFF.x, SUN_OFF.y, state.heroZ + SUN_OFF.z); sun.target.position.set(state.heroX, 0, state.heroZ); return; }
   const portrait = innerHeight > innerWidth;
   const z = state.zoom || 1, close = z < 1, dist = close ? (portrait ? 7.0 : 6.0) * (z / 0.3) : (portrait ? 10.5 : 9), height = close ? 2.2 : (portrait ? 7.2 : 6.2);
   const want = _want.set(state.heroX + Math.sin(state.camYaw) * dist, height, state.heroZ + Math.cos(state.camYaw) * dist);
@@ -634,6 +645,7 @@ window.__p3d = {
   setCamYaw(y) { state.camYaw = y; },
   setZoom(z) { state.zoom = z; },
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },
+  camera, freeCam: false,
   setHero, get heroIndex() { return HEROES.indexOf(hero); },
   tapAt: tapMoveTo,
 };

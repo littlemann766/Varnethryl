@@ -4,7 +4,7 @@ import { reg, heavyArmor, flaps, furRing, gunmetal, longCoat } from './chars7.js
 const PI = Math.PI, S = Math.sin, C = Math.cos;
 const gold = c => c.M(0xd2a43c, { m: .5, r: .32, n: 'gold' });
 // Sir Aldric: gunmetal plate w/ gold edge, long blue tabard + cloak, brown belt
-reg('Sir_Aldric', c => { const g = gold(c), st = gunmetal(c, 0xc4ccd8); heavyArmor(c, { steel: st, steel2: gunmetal(c, 0x9aa2b0), trim: g });
+reg('Sir_Aldric', c => { const g = gold(c), st = gunmetal(c, 0xa4acbc); heavyArmor(c, { steel: st, steel2: gunmetal(c, 0x7e8696), trim: g });
   longCoat(c, 0x1f3f95, .46, .24, { trim: 0xd2a43c, ragged: .03, y: -.1 }); });
 reg('Darius_Umbral', c => { const g = c.M(0xb08d4a, { m: .5, r: .35, n: 'bronze' }), st = gunmetal(c, 0x34363f), st2 = gunmetal(c, 0x24262d); heavyArmor(c, { steel: st, steel2: st2, trim: g, spikes: true });
   longCoat(c, 0x3a1a62, .85, .34, { ragged: .22, y: -.1 }); flaps(c, c.bones.hips, c.M(0x4a2278, { r: .9, d: 1 }), 9, .18, -.1, .5, .09, { jag: .5, flare: .3, seed: 9 }); });

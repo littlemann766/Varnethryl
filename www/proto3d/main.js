@@ -300,7 +300,8 @@ function wrapGLB(g, id, blocky) {
   if (new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
   m.traverse(o => { if (o.isSkinnedMesh && o.name !== 'merged') { o.frustumCulled = false; if (!SKINS.includes(o)) SKINS.push(o); } });
   const hgt = box.max.y - box.min.y;
-  if (hgt > 0.01) { const sc = EXTRA_URL[id] ? 0.947 * HS : 1.8 * HS / hgt;   // extra models are authored in metres (hero 1.9 m = 1.8 HS); the old 20 heroes are height-normalised
+  if (hgt > 0.01) { const BK_H = { 'o:vaelthryx': 5.1 };   // blocky builders authored smaller than their GLB: match the GLB's in-game height so swapping doesn't jump
+    const sc = (blocky && BK_H[id]) ? BK_H[id] / hgt : EXTRA_URL[id] ? 0.947 * HS : 1.8 * HS / hgt;   // extra models are authored in metres (hero 1.9 m = 1.8 HS); the old 20 heroes are height-normalised
     m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
   const mixer = new THREE.AnimationMixer(m), act = {};
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
@@ -308,7 +309,7 @@ function wrapGLB(g, id, blocky) {
   root.userData = { glb: true, mixer, act, capeUpdate() {} }; try { root.userData.sb = new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.4';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.5';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).

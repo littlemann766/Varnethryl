@@ -301,13 +301,14 @@ function wrapGLB(g) {
   root.userData = { glb: true, mixer, act, capeUpdate() {} }; try { root.userData.sb = new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
+const ASSET_V = '0.7.9';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
 async function fetchGLB(id) {
   let lastErr = '';
   for (let attempt = 0; attempt < 2; attempt++) {
-    const url = 'proto3d/models/' + id + '.glb' + (attempt ? '?r=' + Date.now() : '');
+    const url = 'proto3d/models/' + id + '.glb?v=' + ASSET_V + (attempt ? '&r=' + Date.now() : '');
     try {
       const r = await fetch(url, attempt ? { cache: 'reload' } : undefined);
       if (!r.ok) { lastErr = 'HTTP ' + r.status; continue; }
@@ -333,7 +334,7 @@ function loadHero(gi) {
         w.visible = false; scene.add(w);
         if (old) { w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); scene.remove(old); if (hero === old) hero = w; }
         HEROES[gi] = w; glbInfo.loaded.push(id);
-        glbInfo.pending = glbInfo.pending.filter(x => x !== id); diag('3D model "' + id + '" loaded (' + Math.round(buf.byteLength / 1024) + ' KB)'); res(HEROES[gi]);
+        glbInfo.pending = glbInfo.pending.filter(x => x !== id); diag('3D model "' + id + '" loaded (' + Math.round(buf.byteLength / 1024) + ' KB, build ' + ASSET_V + ')'); res(HEROES[gi]);
       } catch (e) { res(fail('wrap: ' + (e && e.message || e))); }
     }, err => res(fail('parse: ' + (err && err.message || err))));
   }), e => fail(e && e.message || e));

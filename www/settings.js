@@ -115,8 +115,8 @@ export function render(host,{toastFn,switchTab,resetAdventure}){toast=toastFn;co
   <div class="setRow"><span>Text size</span><div class="seg" id="setText" role="group" aria-label="Text size">${[['normal','Normal'],['large','Large'],['xlarge','Extra large']].map(([v,l])=>`<button type="button" data-ts="${v}" class="${S.textSize===v?'selected':''}">${l}</button>`).join('')}</div></div></article>
  <article class="panel"><span class="eyebrow">CONTROLS</span><div class="setRow toggle"><span>Floating stick<small>${MODE==='stick'?'The stick appears wherever you touch on the left side.':'Phone/app only — the web app uses the D-pad and keyboard.'}</small></span><button type="button" class="switch" id="setFloat" role="switch" aria-checked="${S.floatingStick}" aria-label="Floating stick"><i></i></button></div><h2>Button layout</h2><p class="micro">Move the analog stick (or D-pad on the web app) and every skill button wherever your thumbs reach. They snap to a grid and stay inside the safe screen area.</p>
   <div class="quickButtons"><button class="gold" id="setEditLayout" type="button">✥ Edit button layout</button><button id="setResetLayout" type="button">Reset layout</button></div></article>
- <article class="panel"><span class="eyebrow">EXPERIMENTAL</span><h2>3D prototype</h2><p class="micro">A small 3D village with a 3D knight, to test how a 3D Varnethryl would run on your phone. Separate from the game; use the Game link to come back.</p>
-  <div class="quickButtons"><a class="gold" href="proto3d.html" style="display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none">Open 3D prototype</a></div></article>
+ <article class="panel"><span class="eyebrow">GRAPHICS</span><h2>Game view</h2><p class="micro">Varnethryl opens in 3D by default. Prefer the classic top-down 2D game? Switch here; you can switch back any time (or open with ?mode=3d).</p>
+  <div class="quickButtons"><a class="gold" href="index.html?mode=3d" style="display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none">Play in 3D (default)</a><button type="button" id="setStay2d">Stay in 2D</button></div></article>
  <article class="panel"><span class="eyebrow">HUD</span><h2>Heads-up display</h2>
   <label class="setRow" for="setHudOp"><span>HUD opacity <b id="setHudOpV">${pct(S.hudOpacity)}%</b></span><input type="range" id="setHudOp" min="40" max="100" value="${pct(S.hudOpacity)}"></label>
   <label class="setRow" for="setHudSc"><span>HUD size <b id="setHudScV">${pct(S.hudScale)}%</b></span><input type="range" id="setHudSc" min="80" max="130" value="${pct(S.hudScale)}"></label>
@@ -136,6 +136,7 @@ export function render(host,{toastFn,switchTab,resetAdventure}){toast=toastFn;co
  for(const [k,i] of [['showQuest','setShowQuest'],['showParty','setShowParty'],['showChat','setShowChat']])$(i).onclick=()=>{S[k]=!S[k];persist();rerender();window.dispatchEvent(new Event('vn-hud'))};
  $('setEditLayout').onclick=()=>enterEditLayout(switchTab);
  $('setResetLayout').onclick=()=>{S.layout={};persist();applyLayout();toast('Button layout reset to default.')};
+ { const b=$('setStay2d'); if(b)b.onclick=()=>{try{localStorage.setItem('vn_mode','2d')}catch(e){}toast('Staying in classic 2D. Use Play in 3D to switch back.')}; }
  $('setResetAll').onclick=()=>{S={...DEFAULTS,layout:{}};persist();apply();rerender();toast('Settings reset to defaults.')}}
 window.addEventListener('resize',()=>{if(!editing)applyLayout();else for(const id of vis())if(S.layout[id])place(id,S.layout[id])});
 window.addEventListener('orientationchange',()=>setTimeout(applyLayout,250));

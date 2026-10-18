@@ -460,7 +460,8 @@ function updateHero(dt) {
   state.moving = state.speed > 0.5;
   updateLevel(); hero.position.set(state.heroX, state.heroY, state.heroZ); hero.rotation.y = state.yaw;
   let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
-  if (ins !== state.inside) { state.inside = ins; try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins } })); } catch (_) {} }
+  if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
+    try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }
   animateHero(dt);
 }
 

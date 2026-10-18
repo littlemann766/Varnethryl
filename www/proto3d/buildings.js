@@ -84,33 +84,68 @@ const apothecary = (spec, ctx) => std(spec, ctx, { name: 'Apothecary of Varnethr
   } });
 
 // ---------- 4. Temple ----------
+// Temple front: tall staged twin towers with spires, outer turrets, wide low grand stair, balustrades, lions and robed statues on plinths
+function lionFig(B, x, z, s = 1) {
+  const g = B.G.ext, k = 'stoneL';
+  B.bx(.9 * s, .8 * s, 1.5 * s, k, x, 2.7 * s + .0, z, g); B.bx(.7 * s, .9 * s, .5 * s, k, x, 3.0 * s, z + .6 * s, g);      // haunch/body + chest
+  for (const dx of [-.22, .22]) B.bx(.22 * s, 1.0 * s, .22 * s, k, x + dx * s, 2.3 * s, z + .85 * s, g);                       // forelegs
+  B.add(new THREE.SphereGeometry(.5 * s, 8, 6), B.cm(k), x, 3.75 * s, z + .78 * s, g); B.add(new THREE.SphereGeometry(.34 * s, 8, 6), B.cm(k), x, 3.7 * s, z + 1.12 * s, g);   // mane + head
+  B.bx(.32 * s, .22 * s, .3 * s, k, x, 3.55 * s, z + 1.4 * s, g);
+}
+function robedFig(B, x, z, s = 1) {
+  const g = B.G.ext, k = 'stoneL';
+  B.cyl(.5 * s, .8 * s, 3.0 * s, k, x, 1.5 * s, z, g, 8); B.add(new THREE.SphereGeometry(.36 * s, 8, 6), B.cm(k), x, 3.35 * s, z, g);
+  B.bx(.28 * s, 1.1 * s, .28 * s, k, x - .62 * s, 2.3 * s, z + .1 * s, g); B.bx(.28 * s, 1.0 * s, .28 * s, k, x + .62 * s, 2.5 * s, z + .35 * s, g); B.bx(.12 * s, 2.2 * s, .12 * s, 'gold', x + .7 * s, 2.0 * s, z + .6 * s, g);
+}
+function templeFront(B, w, d, h) {
+  const g = B.G.ext, zf = d / 2;
+  for (const sx of [-1, 1]) {
+    const X = sx * (w / 2 + .1), Z = zf - .4, T = 4.4, H1 = h + 4, H2 = h + 8;
+    B.bx(T, H1, T, 'stoneL', X, H1 / 2, Z, g); B.col(X, Z, T, T);
+    B.bx(T - .9, H2 - H1, T - .9, 'stoneL', X, (H1 + H2) / 2, Z, g);                       // slimmer belfry stage
+    B.bx(T + .5, .35, T + .5, 'gold', X, H1, Z, g); B.bx(T - .3, .3, T - .3, 'stoneL', X, H2 + .15, Z, g);
+    for (const dx of [-1, 1]) for (const dz of [-1, 1]) { const px = X + dx * (T - .3) / 2, pz = Z + dz * (T - .3) / 2; B.bx(.7, 1.6, .7, 'stoneL', px, H2 + 1.0, pz, g); B.cone(.62, 2.6, 'slate', px, H2 + 1.8, pz, g, 4); }
+    B.cone(2.3, 11, 'slate', X, H2 + .3, Z, g, 4); B.bx(.12, 1.8, .12, 'gold', X, H2 + 12.2, Z, g);
+    for (const [wy, wh] of [[3.2, 2.0], [h - 1.6, 2.6], [h + 5.6, 1.8]]) { B.win(X, wy + wh / 2, Z + T / 2 + .05, 0, .9, wh, 'stained'); B.win(X - sx * (T / 2 + .0) * 0 + sx * (T / 2 + .05), wy + wh / 2, Z, sx * Math.PI / 2, .9, wh, 'stained'); }
+    B.banner(X, 4.0, Z + T / 2 + .1, 0, 1.2, 3.4);
+    const OX = sx * (w / 2 + 3.3), OZ = zf - 1.2;                                            // outer turret
+    B.bx(1.7, h + 1.8, 1.7, 'stoneL', OX, (h + 1.8) / 2, OZ, g); B.col(OX, OZ, 1.7, 1.7); B.cone(1.35, 5.2, 'slate', OX, h + 1.8, OZ, g, 4); B.bx(.1, 1.0, .1, 'gold', OX, h + 7.5, OZ, g);
+    B.win(OX, h - 2.2, OZ + .88, 0, .6, 2, 'stained');
+    B.bx(1.6, 1.8, 1.6, 'stoneL', sx * (w / 2 + 6.0), .9, zf + 3.4, g);                       // statue plinth
+  }
+  // grand stair: broad, low-rise (decorative, flush with the walkable apron) with cheek walls
+  for (let i = 0; i < 7; i++) B.bx(11.6 - i * .55 + 2.4, .08, .85, 'stoneL', 0, .04 + i * .08, zf + 5.2 - i * .85 + .4, g, { shadow: false });
+  for (const s of [-1, 1]) {
+    B.bx(.5, .9, 5.4, 'stoneL', s * 6.0, .45, zf + 2.9, g);                                   // cheek wall
+    for (let i = 0; i < 7; i++) B.bx(.16, .5, .16, 'stoneL', s * 6.0, 1.15, zf + .5 + i * .8, g);   // balusters
+    B.bx(.3, .12, 5.6, 'stoneL', s * 6.0, 1.45, zf + 2.9, g);
+    const lx = s * 4.6, lz = zf + 1.6;                                                       // lion plinths at the stair head
+    B.bx(2.0, 2.0, 1.9, 'stoneL', lx, 1.0, lz, g); B.bx(1.3, .8, .08, 'gold', lx, 1.1, lz + .98, g); B.ccol(lx, lz, 1.2); lionFig(B, lx, lz - .3, 1.35);
+    B.bx(.6, 1.4, .6, 'stoneL', s * 2.9, .7, zf + 1.2, g); B.bx(.35, .6, .35, 'gold', s * 2.9, 1.7, zf + 1.2, g);   // gilded finials by the portal
+    const px = s * (w / 2 + 6.0), pz = zf + 3.4; B.ccol(px, pz, 1.2); robedFig(B, px, pz, 1.1); B.bx(.2, 1.0, .06, 'gold', px, 1.0, pz + .82, g);
+  }
+  // portal piers either side of the door
+  for (const s of [-1, 1]) { B.bx(.8, 6.4, .8, 'stoneL', s * 2.6, 3.2, zf + .35, g); B.cone(.5, 1.8, 'slate', s * 2.6, 7.3, zf + .35, g, 4); }
+  B.bx(5.6, .5, .9, 'gold', 0, 6.5, zf + .4, g);
+}
 function temple(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Temple of Varnethryl'; B.rectShell({ w: 14, d: 22, h: 9, hs: 0, upper: 'stoneL', lower: 'stoneL', DW: 3.2, DH: 4.2, floor: 'marbleInlay', posts: false });
   const { w, d, h } = B; B.roofGable({ rh: 4.4, key: 'slate', ridge: 'z', over: .5, endKey: 'stoneL' });
-  for (const sx of [-1, 1]) { // twin front towers with blue spires
-    B.bx(3, h + 3, 3, 'stoneL', sx * (w / 2 - .2), (h + 3) / 2, d / 2 - .2, B.G.ext); B.col(sx * (w / 2 - .2), d / 2 - .2, 3, 3);
-    B.cone(2.4, 8.4, 'slate', sx * (w / 2 - .2), h + 3, d / 2 - .2, B.G.ext, 4); B.bx(.12, 1.4, .12, 'gold', sx * (w / 2 - .2), h + 11.5, d / 2 - .2, B.G.ext);
-    B.win(sx * (w / 2 - .2), h - .5, d / 2 + 1.35, 0, .8, 2.4, 'stained'); B.banner(sx * (w / 2 - .2), 4.2, d / 2 + 1.35, 0, 1.0, 2.8);
-    B.bx(.8, 6.2, .8, 'stoneL', sx * (w / 2 + .3), 3.1, -d / 4, B.G.ext); B.bx(.8, 6.2, .8, 'stoneL', sx * (w / 2 + .3), 3.1, d / 4 - 2, B.G.ext);
-  }
+  templeFront(B, w, d, h);
   B.win(0, 6.7, d / 2 + .06, 0, 3.2, 3.8, 'stained'); B.bx(3.6, .3, .3, 'gold', 0, 4.7, d / 2 + .1, B.G.ext);    // rose window frame
   for (const z of [-5, 0, 5]) for (const s of [-1, 1]) B.win(s * (w / 2 + .06), 5.2, z, s * Math.PI / 2, 1.1, 3.2, 'stained');
-  for (let i = 0; i < 5; i++) B.bx(w * .5 + i * .8, .3, 1, 'stoneL', 0, .15 + i * 0 - 0.0, d / 2 + 2.2 - i * 0 + i * .5, B.G.ext); // steps
-  for (const s of [-1, 1]) { B.bx(.7, 1.8, .7, 'stoneL', s * 2.6, 1.2, d / 2 + 2.6, B.G.ext); B.bx(.5, .7, .5, 'gold', s * 2.6, 2.4, d / 2 + 2.6, B.G.ext); }
   B.bx(.5, 3.6, .1, 'carpet', 0, 2.4, d / 2 + .08, B.G.ext);
   { // cathedral flourishes (see Temple reference): steep central gable with glowing arched window, ridge pinnacles, lions + statues on pedestals, tall banners
     const zf = d / 2; const gs = new THREE.Shape(); gs.moveTo(-4.2, 0); gs.lineTo(0, 7.2); gs.lineTo(4.2, 0); gs.lineTo(-4.2, 0); const gg = new THREE.ExtrudeGeometry(gs, { depth: .9, bevelEnabled: false });
     B.add(gg, B.cm('stoneL'), 0, h - .2, zf - .2, B.G.ext); B.add(archRingGeo(0, 1.9, 1.5, 4.2, .5), M('gold'), 0, h + .1, zf + .7, B.G.ext); B.add(archFillGeo(0, 1.5, 4.2, 0), GLOW('2a62d8', .8), 0, h + .1, zf + .72, B.G.ext, { shadow: false });
     B.cone(.55, 3.2, 'slate', 0, h + 7.1, zf + .2, B.G.ext, 4); B.bx(.1, 1.2, .1, 'gold', 0, h + 10.9, zf + .2, B.G.ext);
     for (let i = 0; i < 5; i++) { const z = -d / 2 + 2.5 + i * (d - 5) / 4; for (const s of [-1, 1]) B.cone(.42, 2.6, 'slate', s * (w / 2 - .4), h + 3.1, z, B.G.ext, 4); }
-    for (const s of [-1, 1]) { const x = s * 3.4, z = zf + 3.2; B.bx(1.4, 1.3, 1.4, 'stoneL', x, .65, z, B.G.ext); B.bx(.9, .6, 1.5, 'stoneL', x, 1.6, z, B.G.ext); B.add(new THREE.SphereGeometry(.42, 8, 6), B.cm('stoneL'), x, 2.0, z + .7, B.G.ext); B.bx(.35, .12, .6, 'stoneL', x, 1.35, z + .5, B.G.ext);
-      const sx = s * (w / 2 + 3.2), sz = zf + 2.6; B.bx(1.4, 1.6, 1.4, 'stoneL', sx, .8, sz, B.G.ext); B.bx(.7, 2.6, .5, 'stoneL', sx, 2.9, sz, B.G.ext); B.add(new THREE.SphereGeometry(.34, 8, 6), B.cm('stoneL'), sx, 4.4, sz, B.G.ext);
-      B.banner(s * 5.0, 4.8, zf + .08, 0, 1.2, 3.8); B.banner(s * 2.9, 4.8, zf + .08, 0, 1.0, 3.2); B.ccol(x, z, .9); B.ccol(sx, sz, .9); }
-    for (let i = 0; i < 5; i++) B.bx(w * .7 + i * 1.2, .1, 1.1, 'stoneL', 0, .35, zf + 4.6 + i * .6, B.G.ext, { shadow: false });
+    for (const s of [-1, 1]) {
+      B.banner(s * 5.0, 4.8, zf + .08, 0, 1.2, 3.8); B.banner(s * 2.9, 4.8, zf + .08, 0, 1.0, 3.2); }
+
   }
   for (const z of [-8, -3.5, 1, 5.5]) for (const s of [-1, 1]) { const x = s * (w / 2 + .5); B.bx(.9, h + 1.4, .9, 'stoneL', x, (h + 1.4) / 2, z, B.G.ext); B.cone(.62, 2.6, 'slate', x, h + 1.4, z, B.G.ext, 4); B.bx(.7, .22, 1.6, 'stoneL', s * (w / 2 + .1), h - 1.2, z + 2.2, B.G.ext).rotation.z = s * .5; }
-  for (const s of [-1, 1]) for (const [dx, dz] of [[-.9, -.9], [.9, -.9], [-.9, .9], [.9, .9]]) B.cone(.34, 1.5, 'slate', s * (w / 2 - .2) + dx, h + 3, d / 2 - .2 + dz, B.G.ext, 4);
-  B.statue(-4.2, d / 2 + 2.6, 1); B.statue(4.2, d / 2 + 2.6, 1); B.gable(6.2, 2.4, 3.4, 0, h + .2, d / 2 - 1.2, 'slate', B.G.roof, false, 0, 'stoneL'); B.banner(0, h + 1.4, d / 2 + .06, 0, 1.2, 1.8, B.G.roof);
+  B.gable(6.2, 2.4, 3.4, 0, h + .2, d / 2 - 1.2, 'slate', B.G.roof, false, 0, 'stoneL'); B.banner(0, h + 1.4, d / 2 + .06, 0, 1.2, 1.8, B.G.roof);
   const iw = B.iw, id_ = B.id_;
   B.rugAt(0, 0, 3, d - 4, 'carpet'); B.add(boxG(3, .02, d - 4, 3), M('carpet'), 0, .09, 0, B.G.int, { shadow: false });
   for (let i = 0; i < 5; i++) for (const s of [-1, 1]) B.pew(s * 3, -2.5 + i * 1.7 + 2.5, 2.8);
@@ -123,7 +158,7 @@ function temple(spec, ctx) {
     B.stairs(S(-1)); B.stairs(S(1));
     B.upperFloor(1, GY, [[-iw, -gx, -id_, 3.9], [gx, iw, -id_, 3.9], [-iw, iw, -id_, -id_ + 2.4]], { key: 'floorPlank' });
     B.onFloor(1, GY, U => { for (const s of [-1, 1]) { U.pew(s * 5.4, -4, 1.8); U.pew(s * 5.4, -1.5, 1.8); U.lamp(s * 4.6, 2.6, 2.0); } U.banner(0, 1.8, -id_ + .4, 0, 2.0, 2.4); U.chest(0, -id_ + 1.0, .9); }); }
-  B.radius = 15; return B.finish();
+  B.radius = 20; return B.finish();
 }
 
 // ---------- 5. Training Hall ----------
@@ -267,7 +302,7 @@ function mage(spec, ctx) {
   for (let i = -3; i <= 3; i++) { if (i === 0) continue; B.add(new THREE.PlaneGeometry(.55, 2.8), GLOW('4f9aff', 1.1), i * 1.9, 5.2, d / 2 + .09, B.G.ext, { shadow: false }); B.add(new THREE.ConeGeometry(.3, .6, 3), GLOW('4f9aff', 1.1), i * 1.9, 6.9, d / 2 + .09, B.G.ext, { shadow: false }).rotation.z = 0; }
   for (const s of [-1, 1]) for (const z of [-4.5, -1.5, 1.5, 4.5]) { B.add(new THREE.PlaneGeometry(.55, 2.8), GLOW('4f9aff', 1.1), s * (w / 2 + .1), 5.2, z, B.G.ext, { shadow: false }).rotation.y = s * Math.PI / 2; B.bx(.5, h, .5, 'stone', s * (w / 2 + .15), h / 2, z + 1.5, B.G.ext); }
   B.rocks([[-w / 2 - 3, d / 2 + 1, 2.4, .8], [w / 2 + 3.2, d / 2, 2.6, .9], [-w / 2 - 4, -2, 3.2, .9], [w / 2 + 4.2, -3, 3.0, .9], [-6, -d / 2 - 3, 3.0], [6, -d / 2 - 3.2, 3.2], [0, -d / 2 - 4, 3.6, 1], [-w / 2 - 2.5, -d / 2 - 2, 2.6], [w / 2 + 2.8, -d / 2 - 2, 2.8]]); B.apron(w * .6, d * .4, 4);
-  for (const x of [-3, 3]) B.lamp(x, 5.4, 0); B.gallery({ stairX: iw - 1.2, depth: 1.8, y: 3.3 }); B.radius = 15; return B.finish();
+  for (const x of [-3, 3]) B.lamp(x, 5.4, 0); B.gallery({ stairX: iw - 1.2, depth: 1.8, y: 3.3 }); B.radius = 20; return B.finish();
 }
 
 // ---------- 15. Colosseum ----------

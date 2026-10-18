@@ -65,7 +65,7 @@ export class Builder {
   }
   ccol(lx, lz, r) { const [x, z] = this.toW(lx, lz); this.colliders.push({ type: 'circle', x, z, r, b: this.id, lv: this.lvTag }); }
   // ---- mesh helpers ----
-  add(geo, mat, x, y, z, grp, o = {}) { if (this.curUp && grp === this.G.int) { grp = this.curUp.group; y += this.curUp.y; } const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = o.shadow !== false; m.receiveShadow = o.recv !== false; if (o.keep) m.userData.keep = true; (grp || this.G.ext).add(m); return m; }
+  add(geo, mat, x, y, z, grp, o = {}) { if (this.curUp && grp === this.G.int) { grp = this.curUp.group; y += this.curUp.y; } const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = o.shadow !== false; m.receiveShadow = o.recv !== false; if (o.keep) m.userData.keep = true; if (this._st) m.userData.stairPart = true; (grp || this.G.ext).add(m); return m; }
   bx(w, h, d, key, x, y, z, grp, o) { return this.add(boxG(w, h, d, TILE[key] || 2), M(key, o && o.mat), x, y, z, grp, o); }
   cm(key) { return this.cutCache[key] || (this.cutCache[key] = (() => { const m = M(key).clone(); this.cut.push(m); return m; })()); } // per-building cutaway material
   wallBox(w, h, d, key, x, y, z, grp) { return this.add(boxG(w, h, d, TILE[key] || 2), this.cm(key), x, y, z, grp || this.G.walls); }
@@ -162,6 +162,7 @@ export class Builder {
   rugAt(x, z, w, d, key = 'rug') { this.add(boxG(w, .02, d, TILE[key] || 3), M(key), x, .08, z, this.G.int, { shadow: false }); }
   // ---- finish ----
   finish() {
+    for (const z of this.stairZones || []) this.clearZone(z.m, z.level, z.du0, z.du1, z.fy);
     for (const c of [...this.G.frame.children]) this.G.roof.add(c);   // frame + roof always toggle together: one merged group
     for (const k of Object.keys(this.G)) {
       const interior = k === 'int' || k.startsWith('up');
@@ -215,8 +216,21 @@ Builder.prototype.autoRails = function (level, y, rects, o = {}) {
 };
 Builder.prototype.rampUV = function (m, lx, lz) { const dx = lx - m.cx, dz = lz - m.cz, s = Math.sin(m.ang), c = Math.cos(m.ang); return [dx * s + dz * c, dx * c - dz * s]; };
 // straight flight: centre (cx,cz), direction angle ang (0 climbs toward +z), length, width, from level l0 (height y0) to level l1 (height y1)
+// remove loose props (meshes + colliders) that sit in a stair's footprint / foot approach / top landing, so a flight can never be blocked by furniture
+Builder.prototype.clearZone = function (m, level, du0, du1, floorY) {
+  const s = Math.sin(m.ang), c = Math.cos(m.ang), hv = m.w / 2 + .5, inZ = (x, z, mg = 0) => { const dx = x - m.cx, dz = z - m.cz, du = dx * s + dz * c, dv = dx * c - dz * s; return du > du0 - mg && du < du1 + mg && Math.abs(dv) < hv + mg; };
+  const grps = level ? [this.levelGroup(level)] : [this.G.int, this.G.ext];
+  for (const g of grps) for (const ch of [...g.children]) { if (!ch.isMesh || ch.userData.merged || ch.userData.stairPart) continue; const gp = ch.geometry && ch.geometry.parameters; const hgt = gp && gp.height !== undefined ? gp.height : 1;
+    const ry = ch.position.y - (level ? floorY : 0); if (ry < .12 || ry > 2.1 || hgt >= 2.4 || (gp && gp.depth !== undefined && Math.min(gp.width, gp.depth) < .13)) continue; if (inZ(ch.position.x, ch.position.z)) { g.remove(ch); ch.geometry.dispose(); } }
+  const keepLv = c0 => c0.lv === undefined || c0.lv === level || (Array.isArray(c0.lv) && c0.lv.includes(level));
+  this.colliders = this.colliders; for (let i = this.colliders.length - 1; i >= 0; i--) { const q = this.colliders[i]; if (q.b !== this.id || q.stair || !keepLv(q)) continue;
+    let lx, lz, big; if (q.type === 'box') { [lx, lz] = this.toL((q.minX + q.maxX) / 2, (q.minZ + q.maxZ) / 2); const W = q.maxX - q.minX, D = q.maxZ - q.minZ; big = Math.max(W, D) > 4.2 || Math.min(W, D) < .5 && Math.max(W, D) > 2.4; } else { [lx, lz] = this.toL(q.x, q.z); big = false; }
+    if (!big && inZ(lx, lz, q.type === 'circle' ? q.r * .5 : .3)) this.colliders.splice(i, 1); }
+};
 Builder.prototype.stairs = function (o) {
-  const { cx, cz, ang = 0, len, w = 1.8, l0 = 0, y0 = 0, l1, y1 } = o; const m = { cx, cz, ang, len, w, l0, y0, l1, y1, flipUp: o.flipUp }; this.ramps.push(m); this.levelGroup(l1);
+  const { cx, cz, ang = 0, len, w = 1.8, l0 = 0, y0 = 0, l1, y1 } = o;
+  { const mm = { cx, cz, ang, len, w }; (this.stairZones = this.stairZones || []).push({ m: mm, level: l0, du0: -len / 2 - 1.5, du1: len / 2, fy: y0 }, { m: mm, level: l1, du0: len / 2 - .3, du1: len / 2 + 1.5, fy: y1 }); for (const z of this.stairZones.slice(-2)) this.clearZone(z.m, z.level, z.du0, z.du1, z.fy); } const m = { cx, cz, ang, len, w, l0, y0, l1, y1, flipUp: o.flipUp }; this.ramps.push(m); this.levelGroup(l1);
+  this._st = true;
   const n = Math.max(3, Math.round((y1 - y0) / .3)), s = Math.sin(ang), c = Math.cos(ang), grp = l0 ? this.levelGroup(l0) : this.G.int, key = o.key || 'wood';
   for (let i = 0; i < n; i++) { const u = -len / 2 + (i + .5) * len / n, top = y0 + (i + 1) * (y1 - y0) / n, hh = top - y0 + (l0 ? 0 : 0); const b = this.bx(w, hh, len / n + .01, key, 0, 0, 0, grp); b.position.set(cx + s * u, y0 + hh / 2, cz + c * u); b.rotation.y = ang; }
   for (const sd of [-1, 1]) { const px = cx + c * sd * (w / 2 + .05), pz = cz - s * sd * (w / 2 + .05); const b = this.bx(.1, .12, len + .3, 'darkWood', px, (y0 + y1) / 2 + .95, pz, grp); b.position.set(px + s * 0, (y0 + y1) / 2 + .95, pz); b.rotation.y = ang; b.rotation.x = 0;
@@ -226,7 +240,7 @@ Builder.prototype.stairs = function (o) {
     const ln = Math.max(.5, len - .9), nn = Math.ceil(ln / .3); for (let q = 0; q <= nn; q++) { const u = -len / 2 + q * ln / nn, lx = cx + s * u + c * sd * (w / 2 + .22), lz = cz + c * u - s * sd * (w / 2 + .22); const [wx, wz] = this.toW(lx, lz); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: [l0, l1], stair: 1 }); } }
   // keep ground-level walkers from slipping past the top end underneath the slab
   { const lx = cx + s * (len / 2 + 1.1), lz = cz + c * (len / 2 + 1.1); const nn = Math.ceil(w / .35); for (let q = 0; q <= nn; q++) { const t = -w / 2 + q * w / nn; const [wx, wz] = this.toW(lx + c * t, lz - s * t); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: l0, stair: 1 }); } }
-  return m;
+  this._st = false; return m;
 };
 // query: surface height for a local-frame hero position at the given level -> {y, ramp, t} or null if there is no floor there
 Builder.prototype.surface = function (wx, wz, level) {
@@ -312,8 +326,8 @@ Builder.prototype.fullUpper = function (o) {
     // low end of the opening: block + rail so an upstairs hero cannot step off the slab into the stairwell
     const s = Math.sin(ang), c = Math.cos(ang), lx = st.cx - s * (len / 2 + .15), lz = st.cz - c * (len / 2 + .15), nn = Math.ceil(w / .35);
     for (let q = 0; q <= nn; q++) { const t = -w / 2 + q * w / nn; const [wx, wz] = this.toW(lx + c * t, lz - s * t); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: level, stair: 1 }); }
-    const g = this.levelGroup(level), rl = this.bx(ax ? .07 : w, .07, ax ? w : .07, 'darkWood', st.cx - s * (len / 2 + .02), y + .95, st.cz - c * (len / 2 + .02), g);
-    for (let q = 0; q <= 3; q++) { const t = -w / 2 + q * w / 3; this.bx(.08, .95, .08, 'darkWood', st.cx - s * (len / 2 + .02) + c * t, y + .48, st.cz - c * (len / 2 + .02) - s * t, g); } }
+    this._st = true; const g = this.levelGroup(level), rl = this.bx(ax ? .07 : w, .07, ax ? w : .07, 'darkWood', st.cx - s * (len / 2 + .02), y + .95, st.cz - c * (len / 2 + .02), g);
+    for (let q = 0; q <= 3; q++) { const t = -w / 2 + q * w / 3; this.bx(.08, .95, .08, 'darkWood', st.cx - s * (len / 2 + .02) + c * t, y + .48, st.cz - c * (len / 2 + .02) - s * t, g); } this._st = false; }
   if (o.disc) { const g = this.levelGroup(level), r = o.disc, sh = new THREE.Shape(); sh.absarc(0, 0, r, 0, Math.PI * 2, false); if (hole) { const hp = new THREE.Path(); hp.moveTo(hole[0], -hole[2]); hp.lineTo(hole[1], -hole[2]); hp.lineTo(hole[1], -hole[3]); hp.lineTo(hole[0], -hole[3]); hp.closePath(); sh.holes.push(hp); }
     const eg = new THREE.ExtrudeGeometry(sh, { depth: .22, bevelEnabled: false, curveSegments: 20 }); eg.rotateX(-Math.PI / 2); uvScale(eg, 1 / (TILE[o.key || 'floorPlank'] || 3), 1 / (TILE[o.key || 'floorPlank'] || 3));
     const m = this.add(eg, M(o.key || 'floorPlank'), 0, y - .22, 0, g); this.floors.push({ level, y, disc: r, holes: hole ? [hole] : [] }); }

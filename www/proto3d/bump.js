@@ -3,7 +3,9 @@
    separation for non-fixed actors plus a shove + stumble when someone runs into someone else.
    Caller each frame: set a.x a.z a.vx a.vz a.yaw (world units, m/s), call sys.update(dt), then apply a.dx/a.dz
    (through its own wall collision), multiply the runner's speed by a.slowMul, and call applyPose() after the mixer. */
-export const COOLDOWN = 1.5, CONTACT_R = 0.45, RUN_SPEED = 1.2, MAX_ACTORS = 12;
+/* 1.1.7: bumps were far too frequent. Now: only a real head-on sprint (>= RUN_SPEED and within ~37 deg of the contact normal), never inside a group
+   (player + party followers share group 'party'), 8 s per pair, 5 s of quiet for both actors afterwards, and a much softer/shorter reaction (SOFT). */
+export const COOLDOWN = 8, QUIET = 5, CONTACT_R = 0.45, RUN_SPEED = 4.5, HEAD_ON = 0.8, SOFT = 0.25, DUR_K = 0.6, MAX_ACTORS = 12;
 const DEG = Math.PI / 180, TAU = Math.PI * 2, SHOVE_K = 8;
 const fin = (v, d) => (typeof v === 'number' && isFinite(v)) ? v : d;
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
@@ -39,7 +41,7 @@ export function styleFor(id) { return STYLES[id] || DEFAULT_STYLE; }
 export function makeActor(id, opts) {
   const o = opts || {}, st = styleFor(id);
   return {
-    id, style: st, str: fin(o.str, st.str), fixed: !!o.fixed,
+    id, style: st, group: o.group || null, quiet: 0, str: fin(o.str, st.str), fixed: !!o.fixed,
     x: 0, z: 0, vx: 0, vz: 0, yaw: 0,
     dx: 0, dz: 0, slowMul: 1,
     svx: 0, svz: 0,
@@ -51,10 +53,10 @@ export function makeActor(id, opts) {
 }
 
 export function createBump(opts) {
-  const o = opts || {}, cd = fin(o.cooldown, COOLDOWN), cr = fin(o.contactR, CONTACT_R);
+  const o = opts || {}, cd = fin(o.cooldown, COOLDOWN), cr = fin(o.contactR, CONTACT_R), runSpeed = fin(o.runSpeed, RUN_SPEED);
   const actors = [], timers = new Float32Array(MAX_ACTORS * MAX_ACTORS);
   const sys = {
-    actors, cooldown: cd, events: 0, bumpOn: true,
+    actors, cooldown: cd, runSpeed, events: 0, bumpOn: true,
     add(a) { if (actors.length >= MAX_ACTORS) return null; a.idx = actors.length; actors.push(a); return a; },
     remove(a) { const i = actors.indexOf(a); if (i < 0) return; actors.splice(i, 1); actors.forEach((x, k) => { x.idx = k; }); timers.fill(0); },
     pairTimer(a, b) { return timers[Math.min(a.idx, b.idx) * MAX_ACTORS + Math.max(a.idx, b.idx)]; },
@@ -66,7 +68,7 @@ export function createBump(opts) {
         const a = actors[i];
         a.x = fin(a.x, 0); a.z = fin(a.z, 0); a.vx = fin(a.vx, 0); a.vz = fin(a.vz, 0); a.yaw = fin(a.yaw, 0);
         a.dx = 0; a.dz = 0;
-        a.bT = Math.max(0, a.bT - dt); a.rT = Math.max(0, a.rT - dt); a.slowT = Math.max(0, a.slowT - dt);
+        a.quiet = Math.max(0, a.quiet - dt); a.bT = Math.max(0, a.bT - dt); a.rT = Math.max(0, a.rT - dt); a.slowT = Math.max(0, a.slowT - dt);
       }
       for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
         const a = actors[i], b = actors[j];
@@ -83,10 +85,14 @@ export function createBump(opts) {
         if (!sys.bumpOn) continue;
         const ti = Math.min(a.idx, b.idx) * MAX_ACTORS + Math.max(a.idx, b.idx);
         if (timers[ti] > 0) continue;
+        if (a.group && a.group === b.group) continue;      // party members never bump each other
+        if (a.quiet > 0 || b.quiet > 0) continue;          // nobody gets bumped repeatedly
         const ra = Math.max(0, a.vx * nx + a.vz * nz), rb = Math.max(0, -(b.vx * nx + b.vz * nz));
-        if (ra < RUN_SPEED && rb < RUN_SPEED) continue;
-        if (ra >= rb) bump(a, b, nx, nz, ra); else bump(b, a, -nx, -nz, rb);
-        timers[ti] = cd; sys.events++;
+        const ma = Math.hypot(a.vx, a.vz), mb = Math.hypot(b.vx, b.vz);
+        const oa = ra >= runSpeed && ra >= HEAD_ON * ma, ob = rb >= runSpeed && rb >= HEAD_ON * mb;   // sprint + head-on only
+        if (!oa && !ob) continue;
+        if (oa && (!ob || ra >= rb)) bump(a, b, nx, nz, ra); else bump(b, a, -nx, -nz, rb);
+        timers[ti] = cd; a.quiet = b.quiet = QUIET; sys.events++;
       }
       for (let i = 0; i < n; i++) {
         const a = actors[i], k = Math.exp(-SHOVE_K * dt);
@@ -97,7 +103,7 @@ export function createBump(opts) {
         pose(a);
       }
     },
-    reset() { timers.fill(0); for (const a of actors) { a.bT = a.rT = a.slowT = 0; a.svx = a.svz = 0; a.slowMul = 1; pose(a); } },
+    reset() { timers.fill(0); for (const a of actors) a.quiet = 0; for (const a of actors) { a.bT = a.rT = a.slowT = 0; a.svx = a.svz = 0; a.slowMul = 1; pose(a); } },
   };
   return sys;
 }
@@ -110,10 +116,10 @@ export function bump(a, b, nx, nz, speed) {
   let sx = nx * 0.6 + (-nz) * side * 0.4, sz = nz * 0.6 + nx * side * 0.4;
   const sl = Math.hypot(sx, sz) || 1; sx /= sl; sz /= sl;
   const power = 0.5 + rs / 10, resist = 0.8 + bs / 20;
-  const push = clamp(0.4 * power / resist * bst.pm * rst.shove * clamp(speed / 5, 0.5, 1.2), 0.1, 1.2);
+  const push = clamp(0.5 * 0.4 * power / resist * bst.pm * rst.shove * clamp(speed / 5, 0.5, 1.2), 0.1, 1.2);
   b.svx += sx * push * SHOVE_K; b.svz += sz * push * SHOVE_K;
-  b.bT = b.bDur = bst.dur; b.bTilt = bst.tilt * clamp(0.6 + rs / 10 * 0.8, 0.5, 1.6); b.bdx = sx; b.bdz = sz; b.bStr = clamp(0.6 + rs / 10 * 0.8, 0.5, 1.6); b.bumped++;
-  a.rT = a.rDur = rst.dur; a.slowT = a.slowDur = rst.slowDur; a.slowAmt = clamp(rst.slow, 0, 0.8); a.bumps++;
+  b.bT = b.bDur = bst.dur * DUR_K; b.bTilt = bst.tilt * clamp(0.6 + rs / 10 * 0.8, 0.5, 1.6); b.bdx = sx; b.bdz = sz; b.bStr = clamp(0.6 + rs / 10 * 0.8, 0.5, 1.6); b.bumped++;
+  a.rT = a.rDur = rst.dur * DUR_K; a.slowT = a.slowDur = rst.slowDur * DUR_K; a.slowAmt = clamp(rst.slow * 0.4, 0, 0.8); a.bumps++;
 }
 
 /* pose in the actor's local frame: ptx pitch (+ = forward), ptz roll, pyaw yaw offset, phop y offset, pfl/pfr arm swing (rad), phead head yaw (rad) */
@@ -136,7 +142,7 @@ function pose(a) {
     const f = Math.sin(TAU * 2 * p) * (1 - p) * s.flail * DEG; fl += f; fr += f * 0.7; head += s.head * DEG * env;
     tz += Math.sin(TAU * 2 * p) * (1 - p) * 6 * DEG;
   }
-  a.ptx = fin(tx, 0); a.ptz = fin(tz, 0); a.pyaw = fin(yaw, 0); a.phop = fin(hop, 0); a.pfl = fin(fl, 0); a.pfr = fin(fr, 0); a.phead = fin(head, 0); 
+  a.ptx = fin(tx * SOFT, 0); a.ptz = fin(tz * SOFT, 0); a.pyaw = fin(yaw * SOFT, 0); a.phop = fin(hop * SOFT, 0); a.pfl = fin(fl * SOFT, 0); a.pfr = fin(fr * SOFT, 0); a.phead = fin(head * SOFT, 0);
 }
 
 /* ---- applying to a model (works with mergeRigidParts: the nodes are the skeleton bones, so offsets show on the skinned mesh) ---- */

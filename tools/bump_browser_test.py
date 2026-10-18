@@ -32,12 +32,12 @@ with sync_playwright() as p:
         ok(f'{w}x{h} canvas not blank (screenshot colour count)', px > 20, f'{px} distinct colours')
         if not mob:
             # bump: put player just behind the first follower, running at it
-            pg.evaluate("(()=>{const f=__p3d.bump.crowd[0].a;__p3d.teleport(f.x,f.z+3);__p3d.setCamYaw(0)})()")
+            pg.evaluate("(()=>{const f=__p3d.bump.crowd[0].a;f.group=null;__p3d.teleport(f.x,f.z+3);__p3d.setCamYaw(0)})()")
             pg.wait_for_timeout(300)
             pg.keyboard.down('w')
             seen = pg.evaluate("""new Promise(res=>{let ev=0,tb=0,slow=0,pk=0,t0=performance.now();const sys=__p3d.bump.sys;(function f(){ev=Math.max(ev,sys.events);slow=Math.min(slow||1,__p3d.bump.player.slowMul||1);for(const r of __p3d.bump.crowd)pk=Math.max(pk,Math.abs(r.a.ptx)+Math.abs(r.a.ptz)+Math.abs(r.a.phop));if(ev>0&&!tb)tb=performance.now();if(performance.now()-t0>9000||tb&&performance.now()-tb>450)res({ev,slow,pk,bumped:__p3d.bump.crowd.map(r=>r.a.bumped),runs:__p3d.bump.player.bumps});else requestAnimationFrame(f)})()})""")
             pg.keyboard.up('w')
-            ok('running into a follower triggers a bump', seen['ev'] >= 1 and seen['runs'] >= 1 and sum(seen['bumped']) >= 1, json.dumps(seen))
+            ok('running into a non-party character triggers a bump (followers no longer bump)', seen['ev'] >= 1 and seen['runs'] >= 1 and sum(seen['bumped']) >= 1, json.dumps(seen))
             ok('runner slows briefly (<1) and bumped poses', seen['slow'] < 1 and seen['pk'] > 0.02)
             pg.screenshot(path=f'{shots}/bump-hit-{w}x{h}.png')
             pg.wait_for_timeout(3000)

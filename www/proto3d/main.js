@@ -11,8 +11,34 @@ import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
 import { initCheatBoot } from './cheatboot.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
+/* startup timing marks (ms since navigation start), read by tools/perf_measure.py */
+const mark = n => { try { (window.__p3dMarks || (window.__p3dMarks = {}))[n] = Math.round(performance.now()); } catch (_) {} };
+mark('mainStart');
+/* resolves once the shader prewarm (after the first frame) is done, so GLB heroes are not wrapped/uploaded in the middle of it */
+let prewarmDone; const prewarmP = new Promise(r => { prewarmDone = r; }); setTimeout(() => prewarmDone(), 2500);
 const canvas = document.getElementById('c');
 const diag = (msg, bad) => { try { (window.__p3dDiag || (() => {}))(msg, bad); } catch (_) {} };
+const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
+const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
+const qp0 = new URLSearchParams(location.search);
+let savedPlan = null;
+try { if (qp0.get('nosave') == null) { const r = readSave(localStorage); if (r.status === 'ok') savedPlan = planFromState(r.state, GLB_NAMES, 60); } } catch (e) { diag('save read failed: ' + (e && e.message || e)); }
+const savedOn = qp0.get('nosave') == null;
+if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
+/* perf: resolve the saved party first and start downloading the hero + party GLBs now, so the network overlaps the (CPU-bound) village build below */
+const glbBufP = {};
+{
+  const q = qp0, bump = q.get('nobump') == null, gid = i => GLB_IDS[i] || 'aldric';
+  if (q.get('procedural') == null) {
+    const hi = q.get('hero') != null ? +q.get('hero') || 0 : savedPlan ? savedPlan.hero : 0, want = [gid(hi)];
+    const nP = !bump ? 0 : savedPlan && q.get('hero') == null && q.get('party') == null ? Math.min(3, savedPlan.followers.length) : Math.max(0, Math.min(3, q.get('party') != null ? +q.get('party') || 0 : 2));
+    const fol = savedPlan && q.get('hero') == null ? savedPlan.followers.map(gid) : ['elira', 'orin', 'seraphine', 'finn', 'brynn'];
+    for (const id of fol.filter(x => x !== want[0]).slice(0, nP)) want.push(id);
+    const nN = !bump ? 0 : q.get('npcs') != null ? Math.max(0, Math.min(2, +q.get('npcs') || 0)) : 1;
+    for (let i = 0; i < nN; i++) want.push(['thorne', 'rook'][i]);
+    for (const id of want) fetchGLB(id).catch(() => {});
+  }
+}
 const COARSE = matchMedia('(pointer:coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
 let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas, antialias: !COARSE && (window.devicePixelRatio || 1) < 1.5, powerPreference: 'high-performance' }); }
@@ -141,6 +167,7 @@ function building(cx, cz, w, d, h, opt = {}) {
   addBoxCol(cx, cz, w + 0.3, d + 0.3);
   return g;
 }
+mark('worldStart');
 const enterables = [];
 const ectx = { scene, mats, colliders, multi: [] };
 // 26 sheet-based 3D buildings (guild, inn, smithy, temple, colosseum, keep ... see docs/proto3d-buildings/README.md). ?oldvillage keeps the original blocky village.
@@ -229,12 +256,22 @@ function mergeStatic() {
   }
   for (const o of remove) { o.parent.remove(o); o.geometry.dispose(); }
 }
+mark('villageBuilt');
 mergeStatic();
+mark('merged');
 
 // ---------- hero: Sir Aldric (see aldric.js) ----------
-const ALDRIC_TEX = await makeAldricTextures();
-const HT = await makeHeroTextures();
-const HEROES = [buildAldric(ALDRIC_TEX), buildUmbral(HT), buildSelene(HT)];
+/* perf: the procedural stand-ins (and their canvas textures, ~1 s on a phone) are only built when the GLB is off (?procedural) or fails to load; otherwise empty placeholders are swapped for the GLB as soon as it parses */
+const useGLB = new URLSearchParams(location.search).get('procedural') == null;
+let standInTex = null;
+async function makeStandIn(i) {
+  if (i > 2) return null;
+  if (!standInTex) standInTex = { a: await makeAldricTextures(), h: await makeHeroTextures() };
+  return i === 0 ? buildAldric(standInTex.a) : i === 1 ? buildUmbral(standInTex.h) : buildSelene(standInTex.h);
+}
+const HEROES = [];
+for (let i = 0; i < 3; i++) HEROES.push(useGLB ? new THREE.Group() : await makeStandIn(i));
+mark('heroBuilt');
 const HERO_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil'];
 let hero = HEROES[0];
 let startHero = 0;
@@ -242,19 +279,30 @@ let saver;
 HEROES.forEach((h, i) => { h.position.set(0, 0, START_Z); h.visible = i === 0; scene.add(h); });
 function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach(b => b.classList.toggle('on', +b.dataset.i === i)); if (typeof saver !== 'undefined') saver.mark(); }
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
-const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
-const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
 const glbInfo = { loaded: [], failed: [], pending: [] };
-const useGLB = new URLSearchParams(location.search).get('procedural') == null;
 // perf: GLB heroes are ~130 rigid mesh parts glued to animated nodes = ~130 draw calls per pass (x2 with the shadow map).
 // Bake all rigid parts into one SkinnedMesh per material (each part rigidly weighted to its parent node), so animation is unchanged.
+/* perf: GLB materials that differ only by flat base colour are merged into one shared vertex-coloured material (colour moved into a vertex attribute), so a hero draws in ~10 calls instead of ~30.
+   Roughness and metalness are snapped to 0.1 steps; textured materials merge only when they share the same image and uv transform. */
+const charMatCache = new Map();
+function charMatKey(m) {
+  if (!m.isMeshStandardMaterial || m.isMeshPhysicalMaterial || m.normalMap || m.roughnessMap || m.metalnessMap || m.aoMap || m.emissiveMap || m.alphaMap || m.vertexColors || m.flatShading || m.transparent || m.emissive.getHex() !== 0 || m.userData.keepMat) return null;
+  const p = m.map, mk = p ? p.source.uuid + '|' + [p.repeat.x, p.repeat.y, p.offset.x, p.offset.y, p.rotation, p.wrapS, p.wrapT, p.flipY, p.channel].join(',') : '-';
+  return mk + '|' + Math.round(m.roughness * 10) + '|' + Math.round(m.metalness * 10) + '|' + m.side + '|' + m.alphaTest;
+}
+function charMatFor(key, m) {
+  let c = charMatCache.get(key);
+  if (!c) { c = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, map: m.map, roughness: Math.round(m.roughness * 10) / 10, metalness: Math.round(m.metalness * 10) / 10, side: m.side, alphaTest: m.alphaTest }); c.name = 'shared:' + (m.name || key.length); charMatCache.set(key, c); }
+  return c;
+}
 function mergeRigidParts(root) {
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), buckets = new Map(), bones = [], boneIdx = new Map();
   root.traverse(o => {
     if (!o.isMesh || o.isSkinnedMesh || o.isInstancedMesh || !o.parent || o.geometry.morphAttributes.position || Array.isArray(o.material) || !o.geometry.attributes.normal) return;
-    if (!buckets.has(o.material)) buckets.set(o.material, []);
-    buckets.get(o.material).push(o);
+    const bk = charMatKey(o.material) || o.material;
+    if (!buckets.has(bk)) buckets.set(bk, []);
+    buckets.get(bk).push(o);
   });
   if (!buckets.size) return 0;
   for (const list of buckets.values()) for (const o of list) if (!boneIdx.has(o.parent)) { boneIdx.set(o.parent, bones.length); bones.push(o.parent); }
@@ -262,23 +310,26 @@ function mergeRigidParts(root) {
   const skeleton = new THREE.Skeleton(bones); // inverses computed from the rest pose (root.matrixWorld is current)
   skeleton.calculateInverses();
   let removed = 0;
-  for (const [mat, list] of buckets) {
+  for (const [bk, list] of buckets) {
+    const shared = typeof bk === 'string', mat = shared ? charMatFor(bk, list[0].material) : bk;
     let n = 0; for (const o of list) n += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count);
-    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2), si = new Uint16Array(n * 4), sw = new Float32Array(n * 4);
+    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2), si = new Uint16Array(n * 4), sw = new Float32Array(n * 4), col = shared ? new Float32Array(n * 3) : null;
     let k = 0; const tmp = new THREE.Vector3(), nm = new THREE.Matrix3();
     for (const o of list) {
       const g = o.geometry, ix = g.index, cnt = ix ? ix.count : g.attributes.position.count, P = g.attributes.position, N = g.attributes.normal, U = g.attributes.uv;
-      const mtx = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld); nm.getNormalMatrix(mtx); const bi = boneIdx.get(o.parent);
+      const mtx = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld); nm.getNormalMatrix(mtx); const bi = boneIdx.get(o.parent), mc = o.material.color;
       for (let i = 0; i < cnt; i++, k++) {
         const v = ix ? ix.getX(i) : i;
         tmp.fromBufferAttribute(P, v).applyMatrix4(mtx); pos[k * 3] = tmp.x; pos[k * 3 + 1] = tmp.y; pos[k * 3 + 2] = tmp.z;
         tmp.fromBufferAttribute(N, v).applyMatrix3(nm).normalize(); nor[k * 3] = tmp.x; nor[k * 3 + 1] = tmp.y; nor[k * 3 + 2] = tmp.z;
         if (U) { uv[k * 2] = U.getX(v); uv[k * 2 + 1] = U.getY(v); }
         si[k * 4] = bi; sw[k * 4] = 1;
+        if (col) { col[k * 3] = mc.r; col[k * 3 + 1] = mc.g; col[k * 3 + 2] = mc.b; }
       }
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    if (col) geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
     geo.setAttribute('skinIndex', new THREE.BufferAttribute(si, 4)); geo.setAttribute('skinWeight', new THREE.BufferAttribute(sw, 4));
     const sm = new THREE.SkinnedMesh(geo, mat); sm.castShadow = true; sm.receiveShadow = false; sm.frustumCulled = false; sm.name = 'merged'; SKINS.push(sm);
     root.add(sm); sm.updateMatrixWorld(true); sm.bind(skeleton, sm.matrixWorld);
@@ -289,10 +340,12 @@ function mergeRigidParts(root) {
 function wrapGLB(g) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
   m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
-  if (new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
+  /* rigid parts are baked into skinned meshes below. The old code then measured Box3.setFromObject on those skinned meshes, which came out NaN (so merged heroes were never rescaled, they ship at their native size) and cost ~100 ms per hero on a phone; skip that, and only rescale (as before) when nothing was merged */
+  m.updateMatrixWorld(true);
+  const merged = new URLSearchParams(location.search).get('nomerge') == null ? mergeRigidParts(m) : 0;
   m.traverse(o => { if (o.isSkinnedMesh && o.name !== 'merged') { o.frustumCulled = false; if (!SKINS.includes(o)) SKINS.push(o); } });
-  const box = new THREE.Box3().setFromObject(m), hgt = box.max.y - box.min.y;
-  if (hgt > 0.01) { const sc = 1.8 * HS / hgt; m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
+  if (!merged) { const box = new THREE.Box3().setFromObject(m), hgt = box.max.y - box.min.y;
+    if (hgt > 0.01) { const sc = 1.8 * HS / hgt; m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; } }
   const mixer = new THREE.AnimationMixer(m), act = {};
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
   if (act.idle) act.idle.play(); if (act.walk) act.walk.play();
@@ -302,7 +355,11 @@ function wrapGLB(g) {
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
-async function fetchGLB(id) {
+function fetchGLB(id) { /* memoised: the early prefetch and the later loadHero/spawnCrowd share one download; a failure is not cached */
+  if (!glbBufP[id]) glbBufP[id] = fetchGLBNow(id).catch(e => { delete glbBufP[id]; throw e; });
+  return glbBufP[id].then(b => b.slice(0));
+}
+async function fetchGLBNow(id) {
   let lastErr = '';
   for (let attempt = 0; attempt < 2; attempt++) {
     const url = 'proto3d/models/' + id + '.glb' + (attempt ? '?r=' + Date.now() : '');
@@ -323,26 +380,23 @@ function loadHero(gi) {
   if (!useGLB || HEROES[gi] && HEROES[gi].userData.glb) return Promise.resolve(HEROES[gi]);
   if (glbPromise[gi]) return glbPromise[gi];
   glbInfo.pending.push(id); diag('loading ' + id + '.glb ...');
-  const fail = (why) => { console.warn('GLB failed', id, why); glbInfo.failed.push(id); glbInfo.pending = glbInfo.pending.filter(x => x !== id); glbInfo.errors = glbInfo.errors || {}; glbInfo.errors[id] = String(why); diag('3D model "' + id + '" failed: ' + why + (HEROES[gi] && HEROES[gi].children.length ? ' - showing simple stand-in' : ''), true); delete glbPromise[gi]; return HEROES[gi]; };
-  return glbPromise[gi] = fetchGLB(id).then(buf => new Promise(res => {
+  const fail = (why) => { console.warn('GLB failed', id, why); glbInfo.failed.push(id); glbInfo.pending = glbInfo.pending.filter(x => x !== id); glbInfo.errors = glbInfo.errors || {}; glbInfo.errors[id] = String(why); diag('3D model "' + id + '" failed: ' + why + (HEROES[gi] && HEROES[gi].children.length ? ' - showing simple stand-in' : ''), true); delete glbPromise[gi]; if (gi < 3 && !HEROES[gi].children.length) makeStandIn(gi).then(h => { const old = HEROES[gi]; if (!h || old.children.length) return; h.visible = old.visible; h.position.copy(old.position); h.rotation.copy(old.rotation); scene.remove(old); scene.add(h); if (hero === old) hero = h; HEROES[gi] = h; }); return HEROES[gi]; };
+  return glbPromise[gi] = fetchGLB(id).then(buf => prewarmP.then(() => new Promise(res => {
+    mark('fetched:' + id);
     gl.parse(buf, '', g => {
       try {
+        mark('parsed:' + id);
         const w = wrapGLB(g), old = HEROES[gi];
         w.visible = false; scene.add(w);
         if (old) { w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); scene.remove(old); if (hero === old) hero = w; }
-        HEROES[gi] = w; glbInfo.loaded.push(id);
+        HEROES[gi] = w; glbInfo.loaded.push(id); mark('hero:' + id);
         glbInfo.pending = glbInfo.pending.filter(x => x !== id); diag('3D model "' + id + '" loaded (' + Math.round(buf.byteLength / 1024) + ' KB)'); res(HEROES[gi]);
       } catch (e) { res(fail('wrap: ' + (e && e.message || e))); }
     }, err => res(fail('parse: ' + (err && err.message || err))));
-  }), e => fail(e && e.message || e));
+  })), e => fail(e && e.message || e));
 }
 for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(GLB_NAMES[i]); }
 async function selectHero(i) { if (!HEROES[i].userData.glb && useGLB) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
-const qp0 = new URLSearchParams(location.search);
-let savedPlan = null;
-try { if (qp0.get('nosave') == null) { const r = readSave(localStorage); if (r.status === 'ok') savedPlan = planFromState(r.state, GLB_NAMES, 60); } } catch (e) { diag('save read failed: ' + (e && e.message || e)); }
-const savedOn = qp0.get('nosave') == null;
-if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
 { const bar = document.getElementById('heroes'); const list = savedPlan && qp0.get('all') == null ? savedPlan.party : HERO_NAMES.map((n, i) => i); list.forEach(i => { const n = HERO_NAMES[i]; const b = document.createElement('button'); b.textContent = n.split(' ').pop(); b.title = n; b.dataset.i = i; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => { e.stopPropagation(); selectHero(i); }); bar.appendChild(b); }); }
 { const q = qp0.get('hero'); const qi = q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; startHero = qi; if (qi) HEROES[0].visible = false; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); else HEROES[0].visible = true; }); }
 // preload the first three quietly after first paint (they replace the procedural stand-ins)
@@ -453,14 +507,14 @@ const tmp2 = { x: 0, z: 0 };
 const BLOB_GEO = new THREE.CircleGeometry(0.55 * HS, 14), BLOB_MAT = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false });
 const HERO_GLB_ID = i => GLB_IDS[i] || 'aldric';
 async function loadActorModel(id) {
-  try { const buf = await fetchGLB(id); return await new Promise(res => gl.parse(buf, '', g => { try { res(wrapGLB(g)); } catch (e) { res(null); } }, () => res(null))); }
+  try { const buf = await fetchGLB(id); await prewarmP; return await new Promise(res => gl.parse(buf, '', g => { try { res(wrapGLB(g)); } catch (e) { res(null); } }, () => res(null))); }
   catch (e) { return null; }
 }
 function spawnCrowd(id, kind, x, z, leash, yaw) {
   const a = makeActor(id, { str: undefined }); a.x = x; a.z = z; a.yaw = yaw || 0;
   const rec = { a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0 };
   crowd.push(rec); bumpSys.add(a);
-  loadActorModel(id).then(w => { if (!w) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, 0, a.z); w.rotation.y = a.yaw; scene.add(w); });
+  loadActorModel(id).then(w => { mark('crowd:' + id); if (!w) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, 0, a.z); w.rotation.y = a.yaw; scene.add(w); });
   return rec;
 }
 {
@@ -606,6 +660,7 @@ function heroGhost() {
 let walkT = 0, idleT = 0, prevYaw = 0;
 function animateHero(dt) {
   const u = hero.userData, w = Math.min(1, state.speed / SPEED);
+  if (!u.glb && !u.legL) return;   /* empty placeholder while the GLB loads */
   if (u.glb) { restoreNodes(u.bumpNodes); const wk = u.act.walk, id = u.act.idle; if (wk && id) { wk.setEffectiveWeight(w); id.setEffectiveWeight(1 - w); wk.timeScale = 0.6 + state.speed * 0.25; } u.mixer.update(dt); return; }
   walkT += dt * (4 + state.speed * 1.9); idleT += dt;
   const s = Math.sin(walkT) * 0.85 * w;
@@ -685,10 +740,30 @@ function frame(now) {
   updateCrowd(dt); updateHero(dt); updateCamera(dt, totalFrames === 0);
   simTime += dt; if (SMOKE) SMOKE.update(simTime);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
+  const _r0 = totalFrames < 40 ? performance.now() : 0;
   renderer.render(scene, camera);
+  if (_r0) { const M = window.__p3dMarks || (window.__p3dMarks = {}); (M.renderMs || (M.renderMs = [])).push(Math.round(performance.now() - _r0)); }
   totalFrames++; fpsAcc += dt; fpsFrames++;
   if (fpsAcc >= 0.5) { fps = fpsFrames / fpsAcc; fpsAcc = 0; fpsFrames = 0; fpsEl.textContent = fps.toFixed(0) + ' fps · ' + renderer.info.render.calls + ' calls'; }
+  if (totalFrames === 1) { mark('firstFrame'); setTimeout(() => prewarm().then(() => mark('prewarmed')).catch(() => {}).then(() => prewarmDone()), 0); }
   if (totalFrames === 2) { const l = document.getElementById('load'); l.style.opacity = 0; setTimeout(() => l.remove(), 500); setTimeout(() => { const h = document.getElementById('hint'); if (h) h.style.opacity = 0; }, 6000); }
+}
+/* perf: compile every shader program the first seconds need (world + the character material variants) behind the loading screen, in parallel where the browser supports it (KHR_parallel_shader_compile), instead of stalling frames one by one as the GLB heroes arrive */
+async function prewarm() {
+  if (new URLSearchParams(location.search).get('noprewarm') != null) return;
+  const bone = new THREE.Bone(), g = new THREE.BufferGeometry(), z = (n, v) => new Array(n).fill(v);
+  g.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 0.1, 0, 0, 0, 0.1, 0], 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1], 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(z(6, 0), 2));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(z(9, 1), 3)); g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(z(12, 0), 4)); g.setAttribute('skinWeight', new THREE.Float32BufferAttribute([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], 4));
+  const tx = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1); tx.colorSpace = THREE.SRGBColorSpace; tx.needsUpdate = true;
+  const DS = THREE.DoubleSide, variants = [{}, { map: tx }, { map: tx, side: DS }, { side: DS }, { map: tx, alphaTest: 0.5, side: DS }];
+  const grp = new THREE.Group(), made = [];
+  const addSkin = mat => { const m = new THREE.SkinnedMesh(g, mat); m.add(bone); m.frustumCulled = false; m.castShadow = true; m.bind(new THREE.Skeleton([bone]), new THREE.Matrix4()); grp.add(m); made.push(mat); };
+  for (const v of variants) addSkin(new THREE.MeshStandardMaterial(Object.assign({ vertexColors: true }, v)));
+  addSkin(GHOST_MAT);
+  const blob = new THREE.Mesh(BLOB_GEO, BLOB_MAT); grp.add(blob);
+  scene.add(grp);
+  try { await renderer.compileAsync(scene, camera); } catch (e) { diag('prewarm: ' + (e && e.message || e)); }
+  scene.remove(grp); for (const m of made) if (m !== GHOST_MAT) m.dispose(); g.dispose(); tx.dispose();
 }
 requestAnimationFrame(frame);
 

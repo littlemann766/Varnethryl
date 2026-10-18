@@ -6,8 +6,10 @@ import { tex, bannerTexture, signTexture } from './bldtex.js';
 
 export const TILE = { stone: 3, stoneD: 3, stoneL: 3.2, rock: 4, plaster: 3, timber: 2.4, darkWood: 2, wood: 1.6, slate: 2.2, slateG: 2.2, hay: 2, floorPlank: 3, floorStone: 3, floorTile: 2, sand: 4, cobble: 3, pave: 3, carpet: 2, rug: 3, sigil: 6, marbleInlay: 3, awning: 1.6, glass: 1, stained: 1, door: 1, iron: 1, water: 4, parchment: 1, gold: 1, books: 1.2, grass: 4 };
 const matCache = {};
+/* cache key for material options: textures by uuid, colours by hex (JSON.stringify would call Texture.toJSON, which encodes the whole image to a PNG data URL: seconds of main-thread time on phones) */
+function extraKey(e) { let s = ''; for (const k of Object.keys(e).sort()) { const v = e[k]; s += k + '=' + (v && v.isTexture ? 'T' + v.uuid : v && v.isColor ? v.getHex() : String(v)) + ';'; } return s; }
 export function M(key, extra) { // shared lit material by texture key (or flat colour with '#rrggbb')
-  const id = key + (extra ? JSON.stringify(extra) : ''); if (matCache[id]) return matCache[id];
+  const id = key + (extra ? extraKey(extra) : ''); if (matCache[id]) return matCache[id];
   const o = Object.assign({}, extra); if (key[0] === '#') o.color = new THREE.Color(key); else o.map = tex(key);
   return matCache[id] = new THREE.MeshLambertMaterial(o);
 }

@@ -17,8 +17,8 @@ with sync_playwright() as p:
     ids = pg.evaluate("__p3d.modelStatus().models.map(m=>[m.id,m.mode])"); bad=[]; n=0
     for i,(id,mode) in enumerate(ids):
         if mode!='blocky': continue
-        n+=1; a=pg.evaluate(H,i); pg.evaluate(f"document.querySelector('#heroes button[data-m=\"{i}\"]').click()"); pg.wait_for_timeout(2500); g=pg.evaluate(H,i)
-        pg.evaluate(f"document.querySelector('#heroes button[data-m=\"{i}\"]').click()"); pg.wait_for_timeout(500); c=pg.evaluate(H,i)
+        n+=1; a=pg.evaluate(H,i); pg.evaluate(f"__p3d.toggleModel({i})"); pg.wait_for_timeout(2500); g=pg.evaluate(H,i)
+        pg.evaluate(f"__p3d.toggleModel({i})"); pg.wait_for_timeout(500); c=pg.evaluate(H,i)
         ok = a['blocky'] and g['glb'] and not g['blocky'] and c['blocky'] and abs(a['h']-g['h'])/max(a['h'],.1)<0.35
         print(('ok ' if ok else 'BAD'), id, 'blocky', a, 'glb', g)
         if not ok: bad.append(id)

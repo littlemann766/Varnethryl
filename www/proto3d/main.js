@@ -245,7 +245,7 @@ let hero = HEROES[0];
 let startHero = 0;
 let saver;
 HEROES.forEach((h, i) => { h.position.set(0, 0, START_Z); h.visible = i === 0; scene.add(h); });
-function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach(b => b.classList.toggle('on', +b.dataset.i === i)); if (typeof saver !== 'undefined') saver.mark(); }
+function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; if (typeof refreshSel === 'function') refreshSel(i); if (typeof saver !== 'undefined') saver.mark(); }
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
 const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
@@ -309,7 +309,7 @@ function wrapGLB(g, id, blocky) {
   root.userData = { glb: true, mixer, act, capeUpdate() {} }; try { root.userData.sb = new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.5';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.6';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -386,23 +386,63 @@ const savedOn = qp0.get('nosave') == null;
 if (!savedPlan) savedPlan = { party: [1, 2, 0], hero: 1, followers: [2, 0], pos: null };
 { const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (!savedPlan.hero) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
-{ const bar = document.getElementById('heroes'); const first = [1, 2, ...(savedPlan && qp0.get('all') == null ? savedPlan.party.filter(i => i > 2) : [])], list = [...new Set([...first, ...HERO_NAMES.map((n, i) => i)])];
-  list.forEach(i => { const n = HERO_NAMES[i]; const row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.textContent = n; b.title = n; b.dataset.i = i; b.className = (i === 0 ? 'on ' : '') + (/PLACEHOLDER/.test(n) ? 'ph' : '');
-    b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); selectHero(i); });
-    const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = i; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); toggleFollower(i); });
-    if (bk(GLB_IDS[i])) { const t = document.createElement('button'); t.className = 'mdl'; t.dataset.m = i; const lab = () => { t.textContent = modeFor(GLB_IDS[i]) === 'blocky' ? 'B' : 'M'; t.title = 'model: ' + (t.textContent === 'B' ? 'blocky (tap for GLB model)' : 'GLB model (tap for blocky)'); }; lab();
-      t.addEventListener('pointerdown', e => e.stopPropagation()); t.addEventListener('click', e => { e.stopPropagation(); toggleModel(i).then(lab); }); row.appendChild(t); }
-    row.appendChild(b); row.appendChild(f); bar.appendChild(row); }); }
+// ---------- character selector: ONE entry per character (all variants grouped), compact dropdown + variant switches ----------
+const gkey = id => id.replace(/^[a-z]:/, '').replace(/_straight_rig$/, '').replace(/_new\d*$/, '').replace(/^player_/, '');
+const GROUPS = new Map(), SLOT_G = [], VRANK = { Blocky: 0, Old: 1, New: 2, 'New (straight)': 3, Placeholder: 4 };
+GLB_IDS.forEach((id, i) => { const k = gkey(id); let g = GROUPS.get(k); if (!g) GROUPS.set(k, g = { key: k, name: '', nameRank: 9, vars: [], slots: [] }); g.slots.push(i); SLOT_G[i] = g;
+  const px = id[1] === ':' ? id[0] : '', rank = px === '' ? 0 : px === 'o' ? 1 : px === 'n' ? 2 : 3;
+  if (rank < g.nameRank) { g.nameRank = rank; g.name = HERO_NAMES[i].replace(/\s*(\(NEW\)|\[PLACEHOLDER\]|\(OLD\))\s*$/i, '').replace(/ Straight Rig$/, ''); }
+  if (px === 'n') g.vars.push({ slot: i, mode: 'glb', label: /straight/.test(id) ? 'New (straight)' : 'New' });
+  else if (px === 'p') g.vars.push({ slot: i, mode: 'glb', label: 'Placeholder' });
+  else { if (bk(id)) g.vars.push({ slot: i, mode: 'blocky', label: 'Blocky' }); g.vars.push({ slot: i, mode: 'glb', label: 'Old' }); } });
+GROUPS.forEach(g => g.vars.sort((a, b) => VRANK[a.label] - VRANK[b.label]));
+const selV = {};   // group key -> chosen variant
+function curVar(g) {
+  if (selV[g.key]) return selV[g.key];
+  let v = null; try { const r = localStorage.getItem('vn_var_' + g.key); if (r) v = g.vars.find(x => x.slot + '|' + x.mode === r); } catch (_) {}
+  if (!v) { v = g.vars[0]; if (v.mode === 'blocky' && modeFor(GLB_IDS[v.slot]) === 'glb') v = g.vars.find(x => x.slot === v.slot && x.mode === 'glb') || v; }
+  return selV[g.key] = v;
+}
+const fbtn = i => document.querySelector('#heroes button.fol[data-g="' + SLOT_G[i].key + '"]');
+let selUI = null;
+function refreshSel(i) {
+  if (!selUI) return; const g = SLOT_G[i];
+  if (i !== undefined) { const v = g.vars.find(x => x.slot === i && x.mode === modeFor(GLB_IDS[i])) || g.vars.find(x => x.slot === i); if (v) { selV[g.key] = v; try { localStorage.setItem('vn_var_' + g.key, v.slot + '|' + v.mode); } catch (_) {} } }
+  const cur = curVar(g); selUI.cur.firstChild.textContent = g.name + ' '; 
+  selUI.vars.textContent = ''; selUI.vars.style.display = g.vars.length > 1 ? 'flex' : 'none';
+  g.vars.forEach(v => { const c = document.createElement('button'); c.className = 'vr' + (v === cur ? ' on' : ''); c.textContent = v.label; c.dataset.i = v.slot; c.dataset.m = v.mode; c.title = g.name + ': ' + v.label + ' version';
+    c.addEventListener('pointerdown', e => e.stopPropagation()); c.addEventListener('click', e => { e.stopPropagation(); selectVariant(g, v); }); selUI.vars.appendChild(c); });
+  selUI.rows.forEach((r, k) => { const gg = r.g, v = curVar(gg); r.b.dataset.i = v.slot; r.b.classList.toggle('on', gg === g); });
+}
+async function selectVariant(g, v) {
+  selV[g.key] = v; try { localStorage.setItem('vn_var_' + g.key, v.slot + '|' + v.mode); } catch (_) {}
+  const id = GLB_IDS[v.slot]; if (bk(id) && modeFor(id) !== v.mode) await toggleModel(v.slot);
+  await selectHero(v.slot); refreshSel(v.slot);
+}
+{ const bar = document.getElementById('heroes'); const first = [1, 2, ...(savedPlan && qp0.get('all') == null ? savedPlan.party.filter(i => i > 2) : [])], order = [...new Set([...first, ...HERO_NAMES.map((n, i) => i)])], seen = new Set(), gl = [];
+  order.forEach(i => { const g = SLOT_G[i]; if (!seen.has(g)) { seen.add(g); gl.push(g); } });
+  const cur = document.createElement('button'); cur.id = 'hcur'; cur.className = 'cur'; cur.appendChild(document.createTextNode('')); const car = document.createElement('span'); car.textContent = '\u25be'; cur.appendChild(car); cur.title = 'choose character';
+  const vars = document.createElement('div'); vars.id = 'hvars'; const list = document.createElement('div'); list.id = 'hlist';
+  const rows = [];
+  const close = () => bar.classList.remove('open');
+  cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation(); bar.classList.toggle('open'); });
+  document.addEventListener('pointerdown', e => { if (!bar.contains(e.target)) close(); }, true);
+  gl.forEach(g => { const n = g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = curVar(g).slot;
+    if (g.vars.length > 1) { const sp = document.createElement('small'); sp.textContent = ' \u00b7' + g.vars.length; b.appendChild(sp); }
+    b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); close(); selectVariant(g, curVar(g)); });
+    const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = curVar(g).slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = curVar(g).slot; toggleFollower(+f.dataset.f); });
+    row.appendChild(b); row.appendChild(f); list.appendChild(row); rows.push({ g, b }); });
+  bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; })()); }
 async function toggleModel(i) {
   const id = GLB_IDS[i], next = modeFor(id) === 'blocky' ? 'glb' : 'blocky'; try { localStorage.setItem('vn_model_' + id, next); } catch (_) {}
   if (HEROES.indexOf(hero) === i) { await loadHero(i); }
   for (const r of crowd) if (r.a.id === id) { if (r.root) { scene.remove(r.root); r.root = null; r.nd = null; } loadActorModel(id).then(w => { if (!w || r.root) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); r.root = w; r.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(r.a.x, 0, r.a.z); w.rotation.y = r.a.yaw; scene.add(w); }); }
 }
 function toggleFollower(i) {
-  const id = GLB_IDS[i], cur = crowd.find(c => c.kind === 'party' && c.a.id === id), btn = document.querySelector('#heroes button[data-f="' + i + '"]');
+  const id = GLB_IDS[i], cur = crowd.find(c => c.kind === 'party' && SLOT_G[GLB_IDS.indexOf(c.a.id)] === SLOT_G[i]), btn = fbtn(i);
   if (cur) { crowd.splice(crowd.indexOf(cur), 1); bumpSys.remove(cur.a); if (cur.root) scene.remove(cur.root); if (btn) btn.classList.remove('on'); return; }
-  if (HEROES.indexOf(hero) === i) return;
-  const pm = crowd.filter(c => c.kind === 'party'); if (pm.length >= 3) { const o = pm[0], oi = GLB_IDS.indexOf(o.a.id); crowd.splice(crowd.indexOf(o), 1); bumpSys.remove(o.a); if (o.root) scene.remove(o.root); const ob = document.querySelector('#heroes button[data-f="' + oi + '"]'); if (ob) ob.classList.remove('on'); }
+  if (SLOT_G[HEROES.indexOf(hero)] === SLOT_G[i]) return;
+  const pm = crowd.filter(c => c.kind === 'party'); if (pm.length >= 3) { const o = pm[0], oi = GLB_IDS.indexOf(o.a.id); crowd.splice(crowd.indexOf(o), 1); bumpSys.remove(o.a); if (o.root) scene.remove(o.root); const ob = fbtn(oi); if (ob) ob.classList.remove('on'); }
   spawnCrowd(id, 'party', state.heroX + (Math.random() - 0.5) * 2 * HS, state.heroZ + 2.2 * HS, (2.6 + pm.length * 0.5) * HS, 0); if (btn) btn.classList.add('on');
 }
 { const q = qp0.get('hero'); const qi = q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; startHero = qi; if (qi) HEROES[0].visible = false; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); else HEROES[0].visible = true; }); }
@@ -787,6 +827,7 @@ initCheatBoot(cheatEnv);
 window.__p3d = { selectHero,
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat,
+  toggleModel: i => toggleModel(i), groups: () => [...GROUPS.values()].map(g => ({ key: g.key, name: g.name, vars: g.vars.map(v => v.label) })),
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,
   state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, enterables,
   enterables, get fps() { return fps; }, get frames() { return totalFrames; },

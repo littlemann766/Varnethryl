@@ -98,16 +98,23 @@ const apothecary = (spec, ctx) => std(spec, ctx, { name: 'Apothecary of Varnethr
 // ---------- 4. Temple ----------
 // Temple front: tall staged twin towers with spires, outer turrets, wide low grand stair, balustrades, lions and robed statues on plinths
 function lionFig(B, x, z, s = 1) {
-  const g = B.G.ext, k = 'stoneL';
-  B.bx(.9 * s, .8 * s, 1.5 * s, k, x, 2.7 * s + .0, z, g); B.bx(.7 * s, .9 * s, .5 * s, k, x, 3.0 * s, z + .6 * s, g);      // haunch/body + chest
-  for (const dx of [-.22, .22]) B.bx(.22 * s, 1.0 * s, .22 * s, k, x + dx * s, 2.3 * s, z + .85 * s, g);                       // forelegs
-  B.add(new THREE.SphereGeometry(.5 * s, 8, 6), B.cm(k), x, 3.75 * s, z + .78 * s, g); B.add(new THREE.SphereGeometry(.34 * s, 8, 6), B.cm(k), x, 3.7 * s, z + 1.12 * s, g);   // mane + head
-  B.bx(.32 * s, .22 * s, .3 * s, k, x, 3.55 * s, z + 1.4 * s, g);
+  const g = B.G.ext, k = 'stoneL', sp = (r, X, Y, Z, sx = 1, sy = 1, sz = 1) => { const m = B.add(new THREE.SphereGeometry(r * s, 10, 8), B.cm(k), x + X * s, Y * s, z + Z * s, g); m.scale.set(sx, sy, sz); return m; };
+  sp(.55, 0, 2.55, -.5, 1, .9, 1.5);                         // haunches / flank
+  sp(.5, 0, 2.95, .35, 1, 1.15, 1.0);                         // chest
+  for (const dx of [-.24, .24]) { B.bx(.22 * s, 1.0 * s, .26 * s, k, x + dx * s, 2.3 * s, z + .75 * s, g); B.bx(.26 * s, .12 * s, .5 * s, k, x + dx * s, 1.78 * s, z + .95 * s, g); }   // forelegs + paws
+  for (const dx of [-.4, .4]) B.bx(.3 * s, .55 * s, .8 * s, k, x + dx * s, 1.9 * s, z - .55 * s, g);   // hind paws
+  sp(.52, 0, 3.75, .55);                                      // mane
+  sp(.34, 0, 3.65, .95);                                      // face
+  B.bx(.3 * s, .22 * s, .34 * s, k, x, 3.52 * s, z + 1.3 * s, g); B.bx(.4 * s, .1 * s, .12 * s, k, x, 3.9 * s, z + 1.15 * s, g);   // muzzle + brow
+  for (const dx of [-.28, .28]) sp(.12, dx, 4.15, .55);       // ears
+  B.bx(.12 * s, .12 * s, 1.0 * s, k, x + .5 * s, 2.0 * s, z - 1.2 * s, g);   // tail
 }
 function robedFig(B, x, z, s = 1) {
   const g = B.G.ext, k = 'stoneL';
-  B.cyl(.5 * s, .8 * s, 3.0 * s, k, x, 1.5 * s, z, g, 8); B.add(new THREE.SphereGeometry(.36 * s, 8, 6), B.cm(k), x, 3.35 * s, z, g);
-  B.bx(.28 * s, 1.1 * s, .28 * s, k, x - .62 * s, 2.3 * s, z + .1 * s, g); B.bx(.28 * s, 1.0 * s, .28 * s, k, x + .62 * s, 2.5 * s, z + .35 * s, g); B.bx(.12 * s, 2.2 * s, .12 * s, 'gold', x + .7 * s, 2.0 * s, z + .6 * s, g);
+  B.cyl(.45 * s, .85 * s, 2.7 * s, k, x, 1.35 * s, z, g, 10); B.cyl(.5 * s, .5 * s, .5 * s, k, x, 2.9 * s, z, g, 10);   // robe + shoulders
+  B.add(new THREE.SphereGeometry(.34 * s, 10, 8), B.cm(k), x, 3.45 * s, z, g); B.cyl(.4 * s, .38 * s, .15 * s, k, x, 3.65 * s, z, g, 10);   // head + hair cap
+  B.bx(.26 * s, 1.0 * s, .26 * s, k, x - .62 * s, 2.35 * s, z + .15 * s, g).rotation.z = .25; B.bx(.26 * s, .9 * s, .26 * s, k, x + .62 * s, 2.6 * s, z + .4 * s, g).rotation.x = -.5;
+  B.bx(.1 * s, 2.4 * s, .1 * s, 'gold', x + .72 * s, 2.0 * s, z + .75 * s, g); B.bx(.08 * s, .08 * s, .5 * s, k, x - .6 * s, 2.05 * s, z + .4 * s, g);   // staff + book
 }
 function templeFront(B, w, d, h) {
   const g = B.G.ext, zf = d / 2;
@@ -139,6 +146,9 @@ function templeFront(B, w, d, h) {
   // portal piers either side of the door
   for (const s of [-1, 1]) { B.bx(.8, 6.4, .8, 'stoneL', s * 2.6, 3.2, zf + .35, g); B.cone(.5, 1.8, 'slate', s * 2.6, 7.3, zf + .35, g, 4); }
   B.bx(5.6, .5, .9, 'gold', 0, 6.5, zf + .4, g);
+  B.add(archRingGeo(0, 1.95, 1.6, 2.6, .55), M('gold'), 0, 0, zf + .3, g);                                             // pointed-arch portal surround
+  B.add(archFillGeo(0, 1.6, 2.6, 1.95), GLOW('2a62d8', .9), 0, 0, zf + .45, g, { shadow: false });                      // stained-glass tympanum
+  for (const s of [-1, 1]) for (let k = 0; k < 3; k++) B.bx(.16, 2.2 - k * .3, .16, 'gold', s * (1.2 + k * .8) * .0 + s * (3.4 + k * .7), 3.8 - k * .1, zf + .5, g);   // gilded tracery shafts
 }
 function temple(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Temple of Varnethryl'; B.rectShell({ w: 14, d: 22, h: 9, hs: 0, upper: 'stoneL', lower: 'stoneL', DW: 3.2, DH: 4.2, floor: 'marbleInlay', posts: false });

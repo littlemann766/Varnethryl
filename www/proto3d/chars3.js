@@ -91,7 +91,7 @@ CHARS3.hawk = { name: 'Hawk (Lorian companion)', sheetKey: 'lorian', build() { r
 
 // ====================================== SNOWY (yeti) ======================================
 CHARS3.snowy = { name: 'Snowy', sheetKey: 'snowy', build() {
-  const fur = 0xf4ecd8;
+  const fur = 0xfbf7ec;
   const c = makeCtx({ name: 'Snowy', bulk: 1.65, sw: 1.22, skin: fur, hair: fur, under: fur, pants: fur, sleeve: fur, glove: 0xe8def4, boot: fur });
   const h = humanoid(c), { gold, leather, dleather } = pal(c), F = c.M(fur, { r: 1, n: 'fur' }), F2 = c.M(0xe2d6bc, { r: 1, n: 'fur2' }), blue = c.M(0x2c4a9a, { r: .9, d: 1, n: 'scarf' }), claw = c.M(0x2f4590, { r: .6, n: 'claw' });
   noHead(c); const hd = c.bones.head, { add, G } = c;
@@ -112,11 +112,10 @@ CHARS3.snowy = { name: 'Snowy', sheetKey: 'snowy', build() {
   add(c.bones.chest, G.cyl(.05, .05, .015, 10), gold, 0, .2, .2, { r: [PI / 2, 0, 0] }); emblem(c, c.bones.chest, 'sun', .07, c.M(0xf2d27a, { m: .4 }), 0, .2, .21);
   add(c.bones.chest, G.cone(.04, .06, 8), gold, -.12, -.04, .2, { r: [PI, 0, 0] }); add(c.bones.chest, G.sph(.012, 4, 3), gold, -.12, -.09, .2);
   // backpack + bedroll
-  const bp = c.bones.chest; add(bp, G.box(.3, .32, .14), leather, 0, .06, -.2); add(bp, G.box(.3, .12, .16), dleather, 0, -.06, -.2); add(bp, G.cyl(.075, .075, .38, 10), c.M(0x2c4a9a, { r: .9, n: 'rollblue' }), 0, .27, -.2, { r: [0, 0, PI / 2] });
+  const bp = c.bones.chest; add(bp, G.box(.4, .42, .2), leather, 0, .08, -.24); add(bp, G.box(.4, .16, .22), dleather, 0, -.08, -.24); add(bp, G.cyl(.075, .075, .38, 10), c.M(0x2c4a9a, { r: .9, n: 'rollblue' }), 0, .27, -.2, { r: [0, 0, PI / 2] });
   for (const k of [-1, 1]) { add(bp, G.cyl(.06, .06, .02, 10), F2, k * .2, .27, -.2, { r: [0, 0, PI / 2] }); add(bp, G.box(.04, .3, .02), dleather, k * .1, .12, -.14); add(bp, G.box(.045, .04, .025), gold, k * .1, .26, -.285); }
   emblem(c, bp, 'snow', .16, c.M(0xf2d27a, { m: .3 }), 0, .27, -.27, PI);
   K.pouch(c, c.bones.hips, 0x5a3720, -.3, -.04, .0, 1.2, gold);
-  const cp = cape(c, { topW: .3, botW: .56, len: .5, col: 0x2c4a9a, trim: 0xd2a43c, waves: 7, segs: 10, seed: 9, back: .26 }); cp.len = .5;
   const rig = finalize(c, h.root, {}); rig.root.scale.setScalar(.8); return rig; } };
 
 

@@ -58,8 +58,8 @@ CHARS4.cinder = { name: 'Cinder (phoenix hatchling)', sheetKey: 'cinder', build(
 CHARS4.pip = { name: 'Pip (fox companion)', sheetKey: 'pip', build() {
   const c = makeCtx({ name: 'Pip' }), { M, bone, add, G, bones: B } = c, { gold } = pal(c);
   const fur = M(0xe0702a, { r: 1, n: 'foxfur' }), lt = M(0xf6eee0, { r: 1, n: 'foxwhite' }), dk = M(0x3a2418, { r: 1, n: 'foxdark' }), navy = M(0x2a3a78, { r: .9, d: 1, n: 'scarf' }), leather = M(0x6a3a1c, { r: .85, n: 'bag' }), dl = M(0x3c2616, { r: .85, n: 'dbag' });
-  const root = bone('root', null), hips = bone('hips', root, 0, .5, -.22), spine = bone('spine', hips, 0, .03, .26), chest = bone('chest', spine, 0, .04, .24), neck = bone('neck', chest, 0, .17, .15), head = bone('head', neck, 0, .13, .1), jaw = bone('jaw', head, 0, -.05, .06);
-  add(hips, G.sph(.17, 9, 7), fur, 0, 0, 0, { s: [.9, 1, 1.15] }); add(spine, G.sph(.16, 9, 7), fur, 0, 0, 0, { s: [.9, .95, 1.4] }); add(chest, G.sph(.19, 9, 7), fur, 0, 0, 0, { s: [.9, 1.12, 1.1] });
+  const root = bone('root', null), hips = bone('hips', root, 0, .8, -.22), spine = bone('spine', hips, 0, .03, .26), chest = bone('chest', spine, 0, .04, .24), neck = bone('neck', chest, 0, .17, .15), head = bone('head', neck, 0, .13, .1), jaw = bone('jaw', head, 0, -.05, .06);
+  add(hips, G.sph(.2, 9, 7), fur, 0, 0, 0, { s: [.95, 1, 1.15] }); add(spine, G.sph(.2, 9, 7), fur, 0, 0, 0, { s: [.95, .95, 1.4] }); add(chest, G.sph(.23, 9, 7), fur, 0, 0, 0, { s: [.95, 1.12, 1.1] });
   add(chest, G.sph(.15, 8, 6), lt, 0, -.04, .09, { s: [.8, 1, .9] }); add(spine, G.sph(.12, 8, 6), lt, 0, -.07, .03, { s: [.8, .7, 1.2] });
   add(neck, G.sph(.12, 8, 6), fur, 0, .0, .04, { s: [.9, 1.1, 1.1] }); for (let i = 0; i < 7; i++) add(neck, G.cone(.04, .1, 4), lt, (i - 3) * .035, -.07, .1 + (i % 2) * .02, { r: [PI + .35, 0, 0], s: [1, 1, .6] });
   add(head, G.sph(.1, 8, 6), fur, 0, .0, 0, { s: [1.08, .92, 1] }); add(head, G.cone(.06, .17, 5), fur, 0, -.02, .13, { r: [PI / 2, 0, 0], s: [1, 1, .85] }); add(head, G.sph(.026, 5, 4), M(0x15100a, { r: .4 }), 0, -.01, .22); add(head, G.box(.1, .03, .1), lt, 0, -.055, .1);
@@ -68,11 +68,11 @@ CHARS4.pip = { name: 'Pip (fox companion)', sheetKey: 'pip', build() {
   add(jaw, G.box(.055, .02, .12), lt, 0, -.005, .075);
   for (const k of [-1, 1]) { const S = k > 0 ? 'L' : 'R', e = bone('ear_' + S, head, k * .06, .08, -.02); e.rotation.z = -k * .12; add(e, G.cone(.085, .26, 4), fur, 0, .1, 0, { s: [1, 1, .4] }); add(e, G.cone(.045, .17, 4), lt, 0, .09, .012, { s: [1, 1, .3] }); add(e, G.cone(.07, .09, 4), dk, 0, .21, 0, { s: [1, 1, .38] }); }
   // bushy tail: 3 chained fluffs, white tip
-  { let par = hips, y = .0, z = -.14; for (let i = 1; i <= 3; i++) { const t = bone('tail_' + i, par, 0, y, z); t.rotation.x = i === 1 ? -.9 : -.15; const L = [.3, .28, .22][i - 1], r = [.13, .16, .12][i - 1];
+  { let par = hips, y = .0, z = -.14; for (let i = 1; i <= 3; i++) { const t = bone('tail_' + i, par, 0, y, z); t.rotation.x = i === 1 ? -.55 : -.3; const L = [.3, .3, .24][i - 1], r = [.075, .1, .08][i - 1];
       add(t, G.sph(r, 8, 6), i === 3 ? lt : fur, 0, 0, -L * .5, { s: [1, 1, 1.9] }); if (i < 3) add(t, G.sph(r * .8, 7, 5), lt, 0, -r * .35, -L * .5, { s: [.9, .7, 1.5] });
-      if (i === 3) add(t, G.cone(.1, .2, 6), lt, 0, 0, -L - .1, { r: [-PI / 2, 0, 0] }); par = t; y = 0; z = -L; } }
-  for (const [fb, par, zz] of [['F', chest, .06], ['B', hips, -.02]]) for (const k of [-1, 1]) { const S = fb + (k > 0 ? 'L' : 'R'), th = bone('thigh_' + S, par, k * .11, -.1, zz), sn = bone('shin_' + S, th, 0, -.24, 0), pw = bone('paw_' + S, sn, 0, -.25, 0);
-    limb(c, th, .24, fb === 'B' ? .08 : .065, .045, fur, 7); add(th, G.sph(.08, 6, 5), fur, 0, 0, 0); limb(c, sn, .25, .04, .03, dk, 6); add(pw, G.box(.065, .04, .11), dk, 0, -.012, .03); add(pw, G.box(.05, .02, .03), lt, 0, -.01, .09);
+      if (i === 3) add(t, G.cone(.07, .16, 6), lt, 0, 0, -L - .08, { r: [-PI / 2, 0, 0] }); par = t; y = 0; z = -L; } }
+  for (const [fb, par, zz] of [['F', chest, .06], ['B', hips, -.02]]) for (const k of [-1, 1]) { const S = fb + (k > 0 ? 'L' : 'R'), th = bone('thigh_' + S, par, k * .11, -.1, zz), sn = bone('shin_' + S, th, 0, -.33, 0), pw = bone('paw_' + S, sn, 0, -.34, 0);
+    limb(c, th, .33, fb === 'B' ? .08 : .065, .045, fur, 7); add(th, G.sph(.08, 6, 5), fur, 0, 0, 0); limb(c, sn, .34, .04, .03, dk, 6); add(pw, G.box(.065, .04, .11), dk, 0, -.012, .03); add(pw, G.box(.05, .02, .03), lt, 0, -.01, .09);
     if (fb === 'B') { th.rotation.x = .3; sn.rotation.x = -.5; } }
   // navy fleur scarf, medallion, tassels, saddlebag
   add(neck, G.tor(.12, .03, 5, 12), navy, 0, .0, .05, { r: [PI / 2 - .4, 0, 0] });

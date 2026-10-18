@@ -6,6 +6,7 @@ import { makeEnterable } from './interiors.js';
 import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
 import { zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { readSave, planFromState, createSaver } from './save3d.js';
+import { SpringBones } from './spring_bones.js';
 import { createBump, makeActor, styleFor, findNodes, restoreNodes, applyPose } from './bump.js';
 import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
 import { initCheatBoot } from './cheatboot.js';
@@ -296,7 +297,7 @@ function wrapGLB(g) {
   const mixer = new THREE.AnimationMixer(m), act = {};
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
   if (act.idle) act.idle.play(); if (act.walk) act.walk.play();
-  root.userData = { glb: true, mixer, act, capeUpdate() {} };
+  root.userData = { glb: true, mixer, act, capeUpdate() {} }; try { root.userData.sb = new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
 const gl = new GLTFLoader();
@@ -504,7 +505,7 @@ function updateCrowd(dt) {
     const w = r.root; if (!w) continue;
     w.position.set(a.x, 0, a.z); const u = w.userData, ww = Math.min(1, sp / SPEED);
     restoreNodes(r.nd);
-    if (u.glb) { const wk = u.act.walk, id = u.act.idle; if (wk && id) { wk.setEffectiveWeight(ww); id.setEffectiveWeight(1 - ww); wk.timeScale = 0.6 + sp * 0.25; } u.mixer.update(dt); }
+    if (u.glb) { const wk = u.act.walk, id = u.act.idle; if (wk && id) { wk.setEffectiveWeight(ww); id.setEffectiveWeight(1 - ww); wk.timeScale = 0.6 + sp * 0.25; } u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
     applyPose(a, w, r.nd, a.yaw);
   }
 }
@@ -606,7 +607,7 @@ function heroGhost() {
 let walkT = 0, idleT = 0, prevYaw = 0;
 function animateHero(dt) {
   const u = hero.userData, w = Math.min(1, state.speed / SPEED);
-  if (u.glb) { restoreNodes(u.bumpNodes); const wk = u.act.walk, id = u.act.idle; if (wk && id) { wk.setEffectiveWeight(w); id.setEffectiveWeight(1 - w); wk.timeScale = 0.6 + state.speed * 0.25; } u.mixer.update(dt); return; }
+  if (u.glb) { restoreNodes(u.bumpNodes); const wk = u.act.walk, id = u.act.idle; if (wk && id) { wk.setEffectiveWeight(w); id.setEffectiveWeight(1 - w); wk.timeScale = 0.6 + state.speed * 0.25; } u.mixer.update(dt); if (u.sb) u.sb.update(dt); return; }
   walkT += dt * (4 + state.speed * 1.9); idleT += dt;
   const s = Math.sin(walkT) * 0.85 * w;
   u.legL.rotation.x = s; u.legR.rotation.x = -s;
@@ -722,7 +723,7 @@ const cheatEnv = {
   onReady: (c) => { window.__p3d.cheats = c; },
 };
 initCheatBoot(cheatEnv);
-window.__p3d = {
+window.__p3d = { selectHero,
   cheat,
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,
   state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, enterables,

@@ -74,6 +74,32 @@ export function makeEnterable(ctx, c) {
     bed(-iw + 1.0, -id_ + 1.3); table(1.0, 0.2, 0.55); hearth(0, -id_ + 0.4, 0); shelf(iw - 0.5, 0.3, 1.8);
   }
 
+  // perf: bake all static furniture/fixtures (everything except walls, roof and door frame, which change at runtime)
+  // into one mesh per material, and only draw/shadow them while the hero is near (the interior is only visible through the door).
+  const furnG = new THREE.Group(); group.add(furnG);
+  {
+    group.updateMatrixWorld(true);
+    const inv = new THREE.Matrix4().copy(group.matrixWorld).invert(), skip = new Set([walls, roofG, frameG, furnG]);
+    const buckets = new Map(), old = [];
+    group.traverse(o => {
+      if (!o.isMesh) return;
+      for (let q = o.parent; q && q !== group; q = q.parent) if (skip.has(q)) return;
+      if (ms.includes(o)) return;
+      const k = o.material.uuid + (o.castShadow ? 'c' : ''); if (!buckets.has(k)) buckets.set(k, { m: o.material, c: o.castShadow, l: [] });
+      buckets.get(k).l.push(o); old.push(o);
+    });
+    for (const b of buckets.values()) {
+      const parts = b.l.map(o => { const g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone(); g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld)); return g; });
+      let n = 0; for (const g of parts) n += g.attributes.position.count;
+      const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2); let a3 = 0, a2 = 0;
+      for (const g of parts) { pos.set(g.attributes.position.array, a3); nor.set(g.attributes.normal.array, a3); if (g.attributes.uv) uv.set(g.attributes.uv.array, a2); a3 += g.attributes.position.count * 3; a2 += g.attributes.position.count * 2; g.dispose(); }
+      const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+      const me = new THREE.Mesh(geo, b.m); me.castShadow = b.c; me.receiveShadow = true; me.userData.keep = true; me.userData.merged = true; furnG.add(me);
+    }
+    for (const o of old) { o.parent.remove(o); o.geometry.dispose(); }
+  }
+  const NEAR = Math.max(w, d) / 2 + 22;
+
   // cutaway: roof off + walls see-through + walls stop casting shadows while the hero is inside
   let inside = false;
   const setInside = v => {
@@ -82,7 +108,7 @@ export function makeEnterable(ctx, c) {
   };
   return {
     id, group, get inside() { return inside; },
-    update(hx, hz) { const v = Math.abs(hx - cx) < w / 2 - T * 0.5 && Math.abs(hz - cz) < d / 2 - T * 0.5; if (v !== inside) setInside(v); return v; },
+    update(hx, hz) { const nr = Math.abs(hx - cx) < NEAR && Math.abs(hz - cz) < NEAR; if (furnG.visible !== nr) furnG.visible = nr; const v = Math.abs(hx - cx) < w / 2 - T * 0.5 && Math.abs(hz - cz) < d / 2 - T * 0.5; if (v !== inside) setInside(v); return v; },
     door: { x: cx, z: cz + d / 2 },
   };
 }

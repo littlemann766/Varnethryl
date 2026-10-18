@@ -29,6 +29,7 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
   if (o.flowers !== false && B.h - hs > 1.8) for (const x of frontWinXs(B, o.wn || 1)) B.flowers(x, gy - .65, B.d / 2 + .2, 1.0);
   if (o.post) { B.lanternPost(B.w / 2 + 1.0, B.d / 2 + 1.2); B.lanternPost(-B.w / 2 - 1.0, B.d / 2 + 1.2); }
   if (o.extra) o.extra(B);
+  if (o.details !== false) B.shutY = gy + .1, B.details();
   if (o.interior) o.interior(B);
   B.radius = Math.hypot(B.w, B.d) / 2; return B.finish();
 }

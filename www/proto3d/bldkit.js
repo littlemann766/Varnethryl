@@ -86,7 +86,7 @@ export class Builder {
   sign(text, emblem, x, y, z, ry = 0) { // hanging shop sign on an iron bracket
     const t = signTexture(text, emblem), s = this.add(new THREE.PlaneGeometry(1.5, .75), new THREE.MeshLambertMaterial({ map: t, side: THREE.DoubleSide }), x, y, z, this.G.ext, { shadow: false, keep: true }); s.rotation.y = ry;
     const br = this.bx(.08, .08, 1.0, 'iron', x, y + .5, z - Math.cos(ry) * .5 * 0, this.G.ext); br.rotation.y = ry; return s; }
-  chimney(x, y, z, h = 2.4, key = 'stoneD', w = .9) { this.bx(w, h, w, key, x, y + h / 2, z, this.G.roof); this.bx(w + .25, .18, w + .25, key, x, y + h, z, this.G.roof); }
+  chimney(x, y, z, h = 2.4, key = 'stoneD', w = .9) { { const [wx, wz] = this.toW(x, z); (this.ctx.smoke || (this.ctx.smoke = [])).push([wx, y + h + .25, wz]); } this.bx(w, h, w, key, x, y + h / 2, z, this.G.roof); this.bx(w + .25, .18, w + .25, key, x, y + h, z, this.G.roof); }
   dormer(x, y, z, w = 1.4, h = 1.2) { this.bx(w, h, 1, 'timber', x, y + h / 2, z, this.G.roof); this.gable(w, 1.0, .8, x, y + h, z, 'slate', this.G.roof, false, .2); this.win(x, y + h / 2, z + .52, 0, .6, .7, 'glass', this.G.roof); }
   tower(x, z, r, h, o = {}) { // round stone tower with corbelled crenel ring and conical slate roof (roof in G.roof when o.roofGroup)
     const key = o.key || 'stone'; this.cyl(r, r * 1.06, h, key, x, h / 2, z, this.G.ext, 14);
@@ -216,6 +216,22 @@ Builder.prototype.autoRails = function (level, y, rects, o = {}) {
 };
 Builder.prototype.rampUV = function (m, lx, lz) { const dx = lx - m.cx, dz = lz - m.cz, s = Math.sin(m.ang), c = Math.cos(m.ang); return [dx * s + dz * c, dx * c - dz * s]; };
 // straight flight: centre (cx,cz), direction angle ang (0 climbs toward +z), length, width, from level l0 (height y0) to level l1 (height y1)
+
+// ---- exterior detail pass for the standard buildings: wall lanterns, door clutter, window shutters, hanging planters (all merged into ext) ----
+Builder.prototype.details = function (o = {}) {
+  const w = this.w, d = this.d, DW = this.DW || 2.2, g = this.G.ext, T = this.T; let hsh = 0; for (const ch of String(this.id)) hsh = (hsh * 31 + ch.charCodeAt(0)) | 0; const side = hsh & 1 ? 1 : -1, v = (hsh >> 1) & 3;
+  for (const sx of [-1, 1]) { const x = sx * (DW / 2 + .85), z = d / 2 + .12; this.bx(.3, .06, .06, 'iron', x - sx * .12, 2.45, z, g, { shadow: false }); this.add(new THREE.SphereGeometry(.13, 6, 5), GLOW('ffc060', 1.7), x, 2.25, z + .08, g, { shadow: false }); this.bx(.05, .3, .05, 'iron', x, 2.35, z, g, { shadow: false }); }
+  // clutter beside the door (collides lightly): barrels / crates / sacks
+  const cx = side * (DW / 2 + 1.7), cz = d / 2 + .75;
+  if (w > 7) { if (v === 0 || v === 3) { this.cyl(.38, .38, .85, 'wood', cx, .43, cz, g, 10); this.cyl(.4, .4, .06, 'iron', cx, .25, cz, g, 10); this.cyl(.4, .4, .06, 'iron', cx, .62, cz, g, 10); this.cyl(.38, .38, .85, 'wood', cx + side * .8, .43, cz + .1, g, 10); this.ccol(cx, cz, .42); this.ccol(cx + side * .8, cz + .1, .42); }
+    if (v === 1 || v === 3) { this.bx(.8, .8, .8, 'wood', cx + side * .1, .4, cz + .1, g); this.bx(.6, .6, .6, 'wood', cx + side * .2, 1.1, cz + .1, g); this.col(cx + side * .1, cz + .1, .8, .8); }
+    if (v === 2) { this.bx(1.6, .5, .5, 'darkWood', cx, .25, cz, g); this.bx(1.6, .08, .6, 'wood', cx, .52, cz, g); this.col(cx, cz, 1.6, .5); for (let i = 0; i < 4; i++) this.add(new THREE.SphereGeometry(.16, 5, 4), M(['#c8452d', '#e3b341', '#6fae45', '#c8452d'][i]), cx - .6 + i * .4, .72, cz, g, { shadow: false }); } }
+  // shutters beside the front windows (lower storey)
+  for (const x of frontXs(this)) for (const sx of [-1, 1]) this.bx(.34, 1.05, .06, 'darkWood', x + sx * .78, this.shutY || 1.7, d / 2 + .05, g, { shadow: false });
+  // corner stone quoins every ~1.2 m on the front corners
+  for (const sx of [-1, 1]) for (let i = 0; i < 3; i++) this.bx(i % 2 ? .46 : .6, .38, .46, 'stoneD', sx * (w / 2 - .02), .55 + i * .9, d / 2 - .02, g, { shadow: false });
+};
+function frontXs(B) { const n = Math.max(1, Math.round((B.w - 4) / 4)); const out = []; for (let i = 0; i < n; i++) out.push(((i + .5) / n - .5) * (B.w - 3.2)); return out.filter(x => Math.abs(x) > B.DW / 2 + 1.1); }
 // remove loose props (meshes + colliders) that sit in a stair's footprint / foot approach / top landing, so a flight can never be blocked by furniture
 Builder.prototype.clearZone = function (m, level, du0, du1, floorY) {
   const s = Math.sin(m.ang), c = Math.cos(m.ang), hv = m.w / 2 + .5, inZ = (x, z, mg = 0) => { const dx = x - m.cx, dz = z - m.cz, du = dx * s + dz * c, dv = dx * c - dz * s; return du > du0 - mg && du < du1 + mg && Math.abs(dv) < hv + mg; };

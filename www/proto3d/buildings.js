@@ -443,7 +443,7 @@ function crypt(spec, ctx) {
 
 // ---------- 21. Windmill ----------
 function windmill(spec, ctx) {
-  const B = new Builder(ctx, spec); B.name = 'Windmill of Varnethryl'; const R = 3.4, H = 4.6;
+  const B = new Builder(ctx, spec); B.name = 'Windmill of Varnethryl'; const R = 5.2, H = 5.4;
   B.roundShell({ r: R, h: H, key: 'stone', N: 14, DW: 2.0, DH: 2.6, floor: 'floorStone', T: .55 });
   B.cyl(R - .2, R - .7, 4.6, 'stone', 0, H + 2.3, 0, B.G.roof, 12); B.cyl(R, R, .2, 'darkWood', 0, H + .1, 0, B.G.roof, 12);
   B.cone(R, 3.0, 'slate', 0, H + 4.6, 0, B.G.roof, 12, { shadow: true }); B.cyl(R - .55, R - .55, .16, 'darkWood', 0, H + 4.6, 0, B.G.roof, 12);
@@ -466,7 +466,7 @@ function windmill(spec, ctx) {
   for (const [x, z] of [[iw - .8, 1.4], [iw - .6, 0.4]]) B.sack(x, z); B.crate(iw - 1.0, -1.4, .8);
   B.add(new THREE.TorusGeometry(.7, .09, 5, 12), M('gold'), 1.0, 3.0, -iw + .4, B.G.int, { shadow: false }); B.add(new THREE.TorusGeometry(.5, .09, 5, 12), M('iron'), -1.0, 3.0, -iw + .4, B.G.int, { shadow: false });
   B.bx(.1, 3.2, .5, 'darkWood', 0, 3.0, -iw + .5, B.G.int); B.lamp(1.4, 2.2, 1.0); B.banner(-iw + .1, 2.0, 0, Math.PI / 2, .7, 1.6);
-  B.fullUpper({ y: 2.9, disc: iw - .05, stair: { cx: -1.1, cz: 0, dir: '-z', len: 3.2, w: 1.4 }, rooms(U) { U.sack(1.2, 0); U.sack(1.2, .9); U.crate(.6, -1.4, .8); U.barrel(1.5, -1.0); U.lamp(.6, 2.0, 0.3); U.cyl(.35, .35, .5, 'wood', 1.2, .25, 1.6, U.G.int, 8); } });
+  B.fullUpper({ y: 2.9, disc: iw - .05, stair: { cx: -1.7, cz: 0, dir: '-z', len: 6.0, w: 1.8 }, rooms(U) { U.sack(1.2, 0); U.sack(1.2, .9); U.crate(.6, -1.4, .8); U.barrel(1.5, -1.0); U.lamp(.6, 2.0, 0.3); U.cyl(.35, .35, .5, 'wood', 1.2, .25, 1.6, U.G.int, 8); } });
   return B.finish();
 }
 

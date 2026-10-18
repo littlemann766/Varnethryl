@@ -278,8 +278,8 @@ Builder.prototype.partition = function (x, z, len, axis, gap, h = 2.7, key = 'pl
 };
 // mezzanine / gallery along the back wall with a real stair run
 Builder.prototype.gallery = function (o = {}) {
-  const y = o.y || 3.1, iw = this.iw, id_ = this.id_, dp = o.depth || 2.2, rects = [[-iw, iw, -id_, -id_ + dp]]; if (o.side) rects.push(o.side > 0 ? [iw - dp, iw, -id_ + dp, id_ - 2.5] : [-iw, -iw + dp, -id_ + dp, id_ - 2.5]);
-  const sx = o.stairX === undefined ? iw - 1.0 : o.stairX, len = Math.min(o.run || 3.6, id_ * 2 - dp - .7);
+  const y = o.y || 3.1, iw = this.iw, id_ = this.id_, dp = Math.max(o.depth || 2.2, 3.0), rects = [[-iw, iw, -id_, -id_ + dp]]; if (o.side) rects.push(o.side > 0 ? [iw - dp, iw, -id_ + dp, id_ - 2.5] : [-iw, -iw + dp, -id_ + dp, id_ - 2.5]);
+  const sx = o.stairX === undefined ? iw - 1.0 : o.stairX, len = Math.min(Math.max(o.run || 3.6, y / Math.tan((o.maxSlope || 26) * Math.PI / 180)), Math.max(3.6, id_ * 2 - dp - 3.0));
   this.stairs({ cx: sx, cz: -id_ + dp + len / 2, ang: Math.PI, len, w: 1.7, l0: 0, y0: 0, l1: 1, y1: y });
   this.upperFloor(1, y, rects, o);
   if (o.rooms) this.onFloor(1, y, o.rooms);

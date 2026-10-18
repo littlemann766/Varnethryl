@@ -8,7 +8,7 @@ with sync_playwright() as p:
   for name,w,h in [('portrait',390,844),('landscape',844,390)]:
     ctx=b.new_context(viewport={'width':w,'height':h},has_touch=True,is_mobile=True,device_scale_factor=2,service_workers='block')
     pg=ctx.new_page();errs=[];pg.on('pageerror',lambda e:errs.append(str(e)));pg.on('console',lambda m:errs.append(m.text) if m.type=='error' else None)
-    pg.goto('http://localhost:8099/index.html');pg.wait_for_timeout(800)
+    pg.goto('http://localhost:8099/index2d.html');pg.wait_for_timeout(800)
     pg.screenshot(path=D+f'{name}-1-default-adventure.png')
     pg.click('#hudMain');pg.click('#openSettings');pg.wait_for_timeout(300)
     pg.screenshot(path=D+f'{name}-2-settings.png',full_page=True)
@@ -58,7 +58,7 @@ with sync_playwright() as p:
     ok(name+' no js errors',not errs);print(errs[:3])
     ctx.close()
   # save-envelope-only sync (simulate Lucian): clear ls settings, set only in save
-  ctx=b.new_context(viewport={'width':390,'height':844},service_workers='block');pg=ctx.new_page();pg.goto('http://localhost:8099/index.html');pg.wait_for_timeout(500)
+  ctx=b.new_context(viewport={'width':390,'height':844},service_workers='block');pg=ctx.new_page();pg.goto('http://localhost:8099/index2d.html');pg.wait_for_timeout(500)
   pg.evaluate("""()=>{const s=JSON.parse(localStorage.getItem('guildbound_rpg_save_v1')||'null')||window.__vn.state;s.settings={textSize:'xlarge',musicVolume:.1,updatedAt:5};localStorage.setItem('guildbound_rpg_save_v1',JSON.stringify(s));localStorage.removeItem('varnethryl_settings_v1')}""")
   pg.reload();pg.wait_for_timeout(600)
   ok('synced settings from save envelope',pg.evaluate("window.__vn.Settings.get().textSize==='xlarge'"))

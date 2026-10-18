@@ -407,3 +407,29 @@ export function mergeWalls(builders, scene) {
 
 export const ZONE = 1e5;   // one world zone: more zones cost more draw calls in the wide camera than they save by culling
 export const zoneKey = (x, z) => Math.floor((x + 200) / ZONE) + ',' + Math.floor((z + 200) / ZONE);
+
+// ---- room dressing: fill empty floor / walls of a ground-floor room so big (scaled) rooms read as lived-in, never blocking existing props
+Builder.prototype.spotFree = function (lx, lz, r) {
+  const [wx, wz] = this.toW(lx, lz), rr = r * this.K;
+  for (const c of this.colliders) { if (c.b !== this.id) continue; if (c.lv !== undefined && c.lv !== 0 && !(Array.isArray(c.lv) && c.lv.includes(0))) continue;
+    if (c.type === 'box') { if (wx > c.minX - rr && wx < c.maxX + rr && wz > c.minZ - rr && wz < c.maxZ + rr) return false; } else if (Math.hypot(wx - c.x, wz - c.z) < c.r + rr) return false; }
+  return true;
+};
+Builder.prototype.dress = function (theme = 'tavern', o = {}) {
+  const iw = this.iw, id_ = this.id_, hs = Math.min(this.hs || 3, 4.7), F = (x, z, r) => Math.abs(x) < iw - .3 && Math.abs(z) < id_ - .3 && this.spotFree(x, z, r);
+  const lane = (x, z) => Math.abs(x) < (this.DW || 2.2) / 2 + 1.2 && z > id_ - 4.2;   // keep the door lane clear
+  const wallL = [[-iw + .45, Math.PI / 2], [iw - .45, -Math.PI / 2]];
+  if (theme === 'tavern') {
+    for (const [wx] of wallL) for (let z = -id_ + 2.4; z < id_ - 3.2; z += 1.9) { if (!F(wx, z, .6) || lane(wx, z)) continue; (Math.round(z * 3) % 2 ? this.barrel(wx, z) : this.crate(wx, z, .8)); }
+    for (let x = -iw + 2.6; x < iw - 2; x += 3.6) if (F(x, -id_ + .4, 1.3)) this.shelf(x, -id_ + .35, 2.8);
+    for (let x = -iw + 3; x < iw - 2.4; x += 4.4) for (let z = -id_ + 4.2; z < id_ - 3.2; z += 3.8) { if (!F(x, z, 1.7) || lane(x, z)) continue; this.table(x, z, .75); this.rugAt(x, z, 2.8, 2.8); this.lamp(x, hs - .5, z); }
+    for (let z = -id_ + 3; z < id_ - 3.4; z += 3.6) for (const [wx, ry] of wallL) if (!lane(wx, z)) this.banner(wx + (wx < 0 ? .1 : -.1), 2.0, z, ry, .9, 1.8);
+  } else if (theme === 'hall') {
+    const len = Math.max(4, id_ * 1.2);
+    for (const sx of [-1, 1]) { const x = sx * Math.min(iw - 3, 5.2); if (F(x, -id_ * .1, 1.6) && this.spotFree(x, -id_ * .1 - len / 2, 1) !== false) { this.tableR(x, -id_ * .15, 1.2, len, 'darkWood'); this.col(x, -id_ * .15, 1.2, len); for (let z = -id_ * .15 - len / 2 + .8; z < -id_ * .15 + len / 2; z += 1.4) { this.bx(.4, .45, .4, 'wood', x - sx * 1.0, .23, z, this.G.int); this.bx(.4, .45, .4, 'wood', x + sx * 1.0, .23, z, this.G.int); } } }
+    for (const [wx, ry] of wallL) for (let z = -id_ + 2.4; z < id_ - 3.2; z += 3.0) { if (lane(wx, z)) continue; this.banner(wx + (wx < 0 ? .1 : -.1), 3.2, z, ry, 1.1, 2.6); if (F(wx, z + 1.5, .8)) this.rack(wx + (wx < 0 ? .3 : -.3), z + 1.5, 4, 1); }
+    for (let x = -iw + 2; x < iw - 1.5; x += 3.3) if (F(x, -id_ + .6, 1)) this.chest(x, -id_ + .6, 1.1);
+    for (const sx of [-1, 1]) if (F(sx * (iw - 1.2), id_ - 3.6, .8)) { this.cyl(.35, .45, 1.1, 'iron', sx * (iw - 1.2), .55, id_ - 3.6, this.G.int, 8); this.ccol(sx * (iw - 1.2), id_ - 3.6, .5); this.add(new THREE.SphereGeometry(.28, 8, 6), GLOW('ff9a3c', 1.6), sx * (iw - 1.2), 1.3, id_ - 3.6, this.G.int, { shadow: false }); }
+    for (let z = -id_ + 2; z < id_ - 3.5; z += 4) this.lamp(0, hs - .6, z);
+  }
+};

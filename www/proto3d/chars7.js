@@ -9,7 +9,7 @@ const rnd = s => () => (s = (s * 16807) % 2147483647) / 2147483647;
 export function flaps(c, par, mat, n, rad, y, len, w, o = {}) { const { add, G } = c, r = rnd(o.seed ?? 7);
   for (let i = 0; i < n; i++) { const a = i / n * PI * 2 + (o.a0 ?? 0), L = len * (1 - (o.jag ?? 0) * r()), zs = o.zs ?? .78;
     add(par, G.box(w, L, o.t ?? .018), mat, S(a) * rad, y - L / 2, C(a) * rad * zs, { r: [-C(a) * (o.flare ?? .2), a, S(a) * (o.flare ?? .2)] }); } }
-export function gunmetal(c, col = 0x6a7280) { return c.M(col, { m: .65, r: .42, n: 'gunmetal' }); }
+export function gunmetal(c, col = 0x6a7280) { return c.M(col, { m: .3, r: .45, n: 'gunmetal', t: 'steel', e: col, ei: .32 }); }
 // the standard "heavy armour" upgrade
 export function heavyArmor(c, o) { const { add, G, M, bones: B } = c, b = c.spec.bulk ?? 1, st = o.steel, tr = o.trim, st2 = o.steel2 ?? st, fem = !!c.spec.fem;
   // layered skirt of plates (two rows) + belt plates

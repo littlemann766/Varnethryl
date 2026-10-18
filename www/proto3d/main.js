@@ -594,6 +594,20 @@ function adaptRes(raw) {
   if (avg > 22 && pr > 0.6) { prCeil = Math.max(0.6, pr * 0.98); pr = Math.max(0.6, pr * 0.82); renderer.setPixelRatio(pr); resize(); adaptSkip = 20; }
 }
 let lastDraw = 0;
+// chimney smoke: one Points draw call for the whole village (sources registered by Builder.chimney)
+const SMOKE = (() => {
+  const src = ectx.smoke || [], K = 7, n = src.length * K; if (!n) return null;
+  const pos = new Float32Array(n * 3), ph = new Float32Array(n), geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('phase', new THREE.BufferAttribute(ph, 1)); geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e5);
+  const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uS: { value: 400 } },
+    vertexShader: 'attribute float phase; varying float vA; uniform float uS; void main(){ vec4 mv = modelViewMatrix * vec4(position,1.0); gl_Position = projectionMatrix * mv; gl_PointSize = (0.55 + phase * 1.5) * uS / -mv.z; vA = (1.0 - phase) * smoothstep(0.0, 0.12, phase) * 0.42; }',
+    fragmentShader: 'varying float vA; void main(){ vec2 c = gl_PointCoord - 0.5; float r = length(c) * 2.0; if (r > 1.0) discard; gl_FragColor = vec4(vec3(0.82,0.82,0.84), vA * (1.0 - r * r)); }' });
+  const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 5; scene.add(pts);
+  return { update(t) { mat.uniforms.uS.value = innerHeight * 0.9;
+    for (let i = 0; i < src.length; i++) for (let k = 0; k < K; k++) { const j = i * K + k, p = (t * 0.16 + k / K + i * 0.37) % 1, wob = Math.sin(t * .7 + j) * .25;
+      pos[j * 3] = src[i][0] + p * p * 2.2 + wob * p; pos[j * 3 + 1] = src[i][1] + p * 4.6; pos[j * 3 + 2] = src[i][2] + p * 0.6 + wob * .5 * p; ph[j] = p; }
+    geo.attributes.position.needsUpdate = true; geo.attributes.phase.needsUpdate = true; } };
+})();
 function frame(now) {
   requestAnimationFrame(frame);
   if (!running) return;
@@ -601,7 +615,7 @@ function frame(now) {
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   updateCrowd(dt); updateHero(dt); updateCamera(dt, totalFrames === 0);
-  simTime += dt;
+  simTime += dt; if (SMOKE) SMOKE.update(simTime);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
   totalFrames++; fpsAcc += dt; fpsFrames++;

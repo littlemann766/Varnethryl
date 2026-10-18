@@ -55,7 +55,12 @@ const makers = {
   grass(g, S) { g.fillStyle = '#5c9a45'; g.fillRect(0, 0, S, S); for (let i = 0; i < 1800; i++) { g.fillStyle = hsl(88 + rnd() * 30, 40 + rnd() * 20, 28 + rnd() * 18); g.fillRect(rnd() * S, rnd() * S, 2, 3); } },
 };
 const cache = {};
-export function tex(name) { if (cache[name]) return cache[name]; seed = 11 + name.length * 31; const cv = mk(256), g = cv.getContext('2d'); makers[name](g, 256); return cache[name] = T(cv); }
+// real-render texture patches cropped from the boss's beauty renders (tex/b_*.jpg, seamless mirrored tiles) blended over the procedural ones
+const REAL = { stone: ['b_stone.jpg', .75, 'overlay'], stoneD: ['b_stoneD.jpg', .7, 'overlay'], slate: ['b_slate.jpg', .95, 'overlay'], slateG: ['b_slate.jpg', .7, 'overlay'], door: ['b_door.jpg', 1] };
+const USE_REAL = typeof location === 'undefined' || new URLSearchParams(location.search).get('procedural') == null;
+export function tex(name) { if (cache[name]) return cache[name]; seed = 11 + name.length * 31; const cv = mk(256), g = cv.getContext('2d'); makers[name](g, 256); const t = cache[name] = T(cv);
+  if (USE_REAL && REAL[name]) { const im = new Image(); im.onload = () => { g.save(); g.globalAlpha = REAL[name][1]; if (REAL[name][2]) g.globalCompositeOperation = REAL[name][2]; g.drawImage(im, 0, 0, 256, 256); g.restore(); if (name === 'slateG') { g.globalCompositeOperation = 'saturation'; g.fillStyle = '#777'; g.fillRect(0, 0, 256, 256); g.globalCompositeOperation = 'source-over'; } t.needsUpdate = true; }; im.src = new URL('./tex/' + REAL[name][0], import.meta.url).href; }
+  return t; }
 export const TEX_NAMES = Object.keys(makers);
 let bannerTex;
 export function bannerTexture() { // deep-blue silk, gold trim, lion crest cut from Sir Aldric's sheet
@@ -63,6 +68,7 @@ export function bannerTexture() { // deep-blue silk, gold trim, lion crest cut f
   g.fillStyle = '#1f3f86'; g.fillRect(0, 0, 128, 256); g.fillStyle = 'rgba(255,255,255,.06)'; for (let x = 0; x < 128; x += 6) g.fillRect(x, 0, 2, 256);
   g.strokeStyle = '#d4af37'; g.lineWidth = 6; g.strokeRect(5, 5, 118, 236); g.fillStyle = '#d4af37'; g.beginPath(); g.moveTo(0, 246); g.lineTo(128, 246); g.lineTo(128, 256); g.lineTo(64, 238); g.lineTo(0, 256); g.fill();
   bannerTex = new THREE.CanvasTexture(cv); bannerTex.colorSpace = THREE.SRGBColorSpace; bannerTex.anisotropy = 4;
+  if (USE_REAL) { const rb = new Image(); rb.onload = () => { g.clearRect(0, 0, 128, 256); g.drawImage(rb, 0, 0, 128, 256); bannerTex.needsUpdate = true; }; rb.src = new URL('./tex/b_banner.png', import.meta.url).href; return bannerTex; }
   const im = new Image(); im.onload = () => { const a = Math.min(100 / im.width, 150 / im.height); const w = im.width * a, h = im.height * a; g.save(); g.fillStyle = '#d9b448'; g.drawImage(im, 64 - w / 2, 100 - h / 2, w, h); g.restore(); bannerTex.needsUpdate = true; }; im.src = new URL('./tex/emb_lion.png', import.meta.url).href;
   return bannerTex;
 }

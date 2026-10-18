@@ -479,6 +479,31 @@ function updateCrowd(dt) {
     applyPose(a, w, r.nd, a.yaw);
   }
 }
+// stair assist: touching a flight from the side or at an angle steers the hero toward its mouth (foot when on the lower floor, top end when on the upper floor)
+// instead of grinding along the handrail; the mouth also gently centres the hero on the flight
+const _g = { x: 0, z: 0 };
+function stairGuide(vx, vz) {
+  _g.x = vx; _g.z = vz; if (!vx && !vz) return _g;
+  for (const b of ectx.multi) {
+    const rc = b.reach || 40; if (Math.abs(state.heroX - b.cx) > rc || Math.abs(state.heroZ - b.cz) > rc) continue;
+    for (const m of b.ramps) {
+      const low = state.level === m.l0, up = state.level === m.l1; if (!low && !up) continue;
+      const [lx, lz] = b.toL(state.heroX, state.heroZ), [u, v] = b.rampUV(m, lx, lz), hw = m.w / 2; if (Math.abs(v) > hw + 2.6) continue;
+      const uEnd = low ? -m.len / 2 - 0.15 : m.len / 2 + 0.15, lo = low ? uEnd - 2.2 : -m.len / 2 + 0.3, hi = low ? m.len / 2 - 0.4 : uEnd + 2.2; if (u < lo || u > hi) continue;
+      if (low && Math.abs(v) <= hw - 0.05 && u > -m.len / 2 + 0.2) continue;                      // already on the flight
+      const sn = Math.sin(m.ang), cs = Math.cos(m.ang), dxl = vx * b.cs - vz * b.sn, dzl = vx * b.sn + vz * b.cs, du = dxl * sn + dzl * cs, dv = dxl * cs - dzl * sn;
+      const toward = -Math.sign(v || 1) * dv, towardEnd = (uEnd - u) * du > 0;
+      let gu = 0, gv = 0; const side = Math.abs(v) > hw - 0.1, pastEnd = low ? u < uEnd - 0.2 : u > uEnd + 0.2, near = Math.abs(u - uEnd) <= 2.0;
+      if (side && toward > 0.15 && !pastEnd) { gu = Math.sign(uEnd - u) || -1; gv = 0; }                      // pressed against the side: slide along it to past the end of the flight
+      else if (pastEnd && near && Math.abs(v) <= hw + 2.4) { gu = 0; gv = -Math.sign(v || 1) * Math.min(1, Math.abs(v) * 1.2 + 0.2); if (Math.abs(v) < 0.1) continue; }   // lined up with the mouth: centre on the axis
+      else continue;
+      const k = (gu || gv) ? Math.min(1, Math.hypot(gu, gv)) : 0; if (!k) continue;
+      const nu = du * 0.45 + gu * 0.9, nv = dv * 0.45 + gv * 0.9, nl = Math.hypot(nu, nv) || 1, xl = (nu / nl) * sn + (nv / nl) * cs, zl = (nu / nl) * cs - (nv / nl) * sn;
+      _g.x = xl * b.cs + zl * b.sn; _g.z = -xl * b.sn + zl * b.cs; return _g;
+    }
+  }
+  return _g;
+}
 function updateHero(dt) {
   // input vector in screen space (x right, y up)
   let ix = joy.x, iy = -joy.y;
@@ -499,6 +524,7 @@ function updateHero(dt) {
     if (d < 0.25 || state.blockedFrames > 25) { state.target = null; marker.visible = false; state.blockedFrames = 0; }
     else { vx = dx / d; vz = dz / d; mag = Math.min(1, d / 1.2 + 0.4); }
   }
+  { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
   const moving = (vx || vz);
   if (moving) {
     const step = SPEED * mag * playerAct.slowMul * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
@@ -522,7 +548,7 @@ function updateHero(dt) {
   state.vx = moving ? vx * SPEED * mag * playerAct.slowMul : 0; state.vz = moving ? vz * SPEED * mag * playerAct.slowMul : 0;
   if (playerAct.dx || playerAct.dz) { tmp.x = state.heroX + playerAct.dx; tmp.z = state.heroZ + playerAct.dz; resolve(tmp); state.heroX = tmp.x; state.heroZ = tmp.z; }
   state.moving = state.speed > 0.5;
-  updateLevel(); hero.position.set(state.heroX, state.heroY, state.heroZ); hero.rotation.y = state.yaw;
+  updateLevel(); state.dispY = state.dispY === undefined || Math.abs(state.heroY - state.dispY) > 3 ? state.heroY : state.dispY + (state.heroY - state.dispY) * Math.min(1, dt * 16); hero.position.set(state.heroX, state.dispY, state.heroZ); hero.rotation.y = state.yaw;
   let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
   if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
     try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }

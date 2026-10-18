@@ -498,7 +498,7 @@ function stairGuide(vx, vz) {
       const toward = -Math.sign(v || 1) * dv, towardEnd = (uEnd - u) * du > 0;
       let gu = 0, gv = 0; const side = Math.abs(v) > hw - 0.1, pastEnd = low ? u < uEnd - 0.2 : u > uEnd + 0.2, near = Math.abs(u - uEnd) <= 2.0;
       if (side && toward > 0.15 && !pastEnd) { gu = Math.sign(uEnd - u) || -1; gv = 0; }                      // pressed against the side: slide along it to past the end of the flight
-      else if (pastEnd && near && Math.abs(v) <= hw + 2.4) { gu = 0; gv = -Math.sign(v || 1) * Math.min(1, Math.abs(v) * 1.2 + 0.2); if (Math.abs(v) < 0.1) continue; }   // lined up with the mouth: centre on the axis
+      else if (pastEnd && near && Math.abs(v) <= hw + 2.4 && (low ? du : -du) > 0.25 * (Math.hypot(du, dv) || 1)) { gu = 0; gv = -Math.sign(v || 1) * Math.min(1, Math.abs(v) * 1.2 + 0.2); if (Math.abs(v) < 0.1) continue; }   // lined up with the mouth: centre on the axis
       else continue;
       const k = (gu || gv) ? Math.min(1, Math.hypot(gu, gv)) : 0; if (!k) continue;
       const nu = du * 0.45 + gu * 0.9, nv = dv * 0.45 + gv * 0.9, nl = Math.hypot(nu, nv) || 1, xl = (nu / nl) * sn + (nv / nl) * cs, zl = (nu / nl) * cs - (nv / nl) * sn;

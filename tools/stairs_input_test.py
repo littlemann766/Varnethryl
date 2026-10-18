@@ -17,7 +17,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']); pg = b.new_page(viewport={'width': 390, 'height': 844}, has_touch=True)
     errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
     pg.goto(f'http://127.0.0.1:{port}/proto3d.html?party={PARTY}&npcs={1 if PARTY != "0" else 0}'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=90000); pg.wait_for_timeout(2500)
-    info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.map(b=>({id:b.id,ramps:b.ramps})))"))
+    info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.map(b=>({id:b.id,K:b.K,ramps:b.ramps})))"))
     def W(bid, lx, lz): return pg.evaluate("([id,lx,lz])=>__p3d.multi.find(b=>b.id===id).toW(lx,lz)", [bid, lx, lz])
     box = pg.evaluate("(()=>{const r=document.getElementById('stick').getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2,r.width/2]})()")
     def drive(tx, tz, mode, lg, yg, secs=14, E=None):
@@ -64,7 +64,7 @@ with sync_playwright() as p:
                         if pg.evaluate("([p,l])=>__p3d.free(p[0],p[1],l)", [W(bi['id'], *q), lv_]): return q
                     return q
                 if dr == 'up': a = pick(-1, True); t = [m['cx'] + s * (h + 1.4), m['cz'] + c * (h + 1.4)]; lv0, lg, yg = m['l0'], m['l1'], m['y1']
-                else: a = pick(1, False); t = [m['cx'] - s * (h + 1.4), m['cz'] - c * (h + 1.4)]; lv0, lg, yg = m['l1'], m['l0'], m['y0']
+                else: a = pick(1, False); t = [m['cx'] - s * (h + 1.4), m['cz'] - c * (h + 1.4)]; lv0, lg, yg = m['l1'], m['l0'], m['y0']*bi['K']
                 res = []
                 for mode in (['key', 'joy'] if MODE == 'both' else [MODE]):
                     for yw in YAWS:

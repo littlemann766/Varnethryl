@@ -163,7 +163,7 @@ export class Builder {
   // ---- finish ----
   finish() {
     if (this.K !== 1 && !this._rs) { this._rs = 1; if (this.radius) this.radius *= this.K; }
-    if (this.footprint && !this.noDoorLane) this.clearZone({ cx: 0, cz: this.d / 2 - 1.7, ang: 0, len: 3.4, w: (this.DW || 2.2) + .4 }, 0, -1.7, 1.7, 0);   // keep the entrance lane free of props
+    if (this.footprint && !this.noDoorLane) this.clearZone({ cx: 0, cz: this.d / 2 - 2.6, ang: 0, len: 5.2, w: (this.DW || 2.2) + .8 }, 0, -2.6, 2.6, 0);   // keep the entrance lane free of props
     for (const z of this.stairZones || []) this.clearZone(z.m, z.level, z.du0, z.du1, z.fy);
     for (const c of [...this.G.frame.children]) this.G.roof.add(c);   // frame + roof always toggle together: one merged group
     for (const k of Object.keys(this.G)) {
@@ -242,8 +242,8 @@ Builder.prototype.clearZone = function (m, level, du0, du1, floorY) {
     const ry = ch.position.y - (level ? floorY : 0); if (ry < .12 || ry > 2.1 || hgt >= 2.4 || (gp && gp.depth !== undefined && Math.min(gp.width, gp.depth) < .13)) continue; if (inZ(ch.position.x, ch.position.z, gp && gp.width ? Math.min(.9, Math.max(gp.width, gp.depth || 0) * .45) : 0)) { g.remove(ch); ch.geometry.dispose(); } }
   const keepLv = c0 => c0.lv === undefined || c0.lv === level || (Array.isArray(c0.lv) && c0.lv.includes(level));
   this.colliders = this.colliders; for (let i = this.colliders.length - 1; i >= 0; i--) { const q = this.colliders[i]; if (q.b !== this.id || q.stair || !keepLv(q)) continue;
-    let lx, lz, big; if (q.type === 'box') { [lx, lz] = this.toL((q.minX + q.maxX) / 2, (q.minZ + q.maxZ) / 2); const W = q.maxX - q.minX, D = q.maxZ - q.minZ; big = Math.max(W, D) > 4.2 || Math.min(W, D) < .5 && Math.max(W, D) > 2.4; } else { [lx, lz] = this.toL(q.x, q.z); big = false; }
-    if (!big && inZ(lx, lz, q.type === 'circle' ? q.r * .5 : Math.min(1.1, Math.max(q.maxX - q.minX, q.maxZ - q.minZ) * .45))) this.colliders.splice(i, 1); }
+    let lx, lz, big; if (q.type === 'box') { [lx, lz] = this.toL((q.minX + q.maxX) / 2, (q.minZ + q.maxZ) / 2); const W = (q.maxX - q.minX) / this.K, D = (q.maxZ - q.minZ) / this.K; big = Math.max(W, D) > 4.2 || Math.min(W, D) < .5 && Math.max(W, D) > 2.4; } else { [lx, lz] = this.toL(q.x, q.z); big = false; }
+    if (!big && inZ(lx, lz, q.type === 'circle' ? q.r / this.K * .5 : Math.min(1.1, Math.max(q.maxX - q.minX, q.maxZ - q.minZ) / this.K * .45))) this.colliders.splice(i, 1); }
 };
 Builder.prototype.stairs = function (o) {
   const { cx, cz, ang = 0, len, w = 1.8, l0 = 0, y0 = 0, l1, y1 } = o;

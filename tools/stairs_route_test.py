@@ -9,6 +9,13 @@ class Q(http.server.SimpleHTTPRequestHandler):
 srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Q, directory=ROOT)); port = srv.server_address[1]
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 ONLY = os.environ.get('ONLY', '').split(',') if os.environ.get('ONLY') else None
+BFS = """([a,g,lv])=>{const S=.3,x0=Math.min(a[0],g[0])-8,z0=Math.min(a[1],g[1])-8,W=Math.ceil((Math.abs(a[0]-g[0])+16)/S),H=Math.ceil((Math.abs(a[1]-g[1])+16)/S);
+const ok=(i,j)=>i>=0&&j>=0&&i<W&&j<H&&__p3d.free(x0+i*S,z0+j*S,lv);const idx=(i,j)=>j*W+i;
+const near=(p)=>{let best=null,bd=1e9;for(let i=0;i<W;i++)for(let j=0;j<H;j++){const d=Math.hypot(x0+i*S-p[0],z0+j*S-p[1]);if(d<bd&&d<4&&ok(i,j)){bd=d;best=[i,j];}}return best};
+const s=near(a),e=near(g);if(!s||!e)return null;const prev=new Map([[idx(...s),-1]]);const q=[s];
+for(let h=0;h<q.length;h++){const [i,j]=q[h];if(i===e[0]&&j===e[1])break;for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const ni=i+di,nj=j+dj;if(!prev.has(idx(ni,nj))&&ok(ni,nj)){prev.set(idx(ni,nj),idx(i,j));q.push([ni,nj]);}}}
+if(!prev.has(idx(...e)))return null;const path=[];let c=idx(...e);while(c!==-1){path.push([x0+(c%W)*S,z0+Math.floor(c/W)*S]);c=prev.get(c);}path.reverse();
+const out=[];for(let k=4;k<path.length;k+=4)out.push(path[k]);out.push(path[path.length-1]);return out}"""
 MODES = os.environ.get('MODE', 'key,joy').split(','); PARTY = os.environ.get('PARTY', '2'); BASE = os.environ.get('BASE')
 YAWS = [float(v) for v in os.environ.get('YAWS', '0').split(',')]; SHOTS = os.environ.get('SHOTS')
 THROTTLE = float(os.environ.get('THROTTLE', '0'))   # CPU throttle factor via CDP (4 = 4x slower) to emulate a laggy phone
@@ -19,7 +26,7 @@ with sync_playwright() as p:
     cdp = pg.context.new_cdp_session(pg)
     if THROTTLE > 1: cdp.send('Emulation.setCPUThrottlingRate', {'rate': THROTTLE})
     pg.goto(f'{BASE or "http://127.0.0.1:%d" % port}/proto3d.html?party={PARTY}&npcs={1 if PARTY != "0" else 0}'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=120000); pg.wait_for_timeout(2500)
-    info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.filter(b=>b.id!=='walls'&&!/^(wt|gt)/.test(b.id)).map(b=>({id:b.id,ramps:b.ramps,d:b.footprint?b.footprint.d:2*(b.radius||4),round:!b.footprint,r:b.radius})))"))
+    info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.filter(b=>b.id!=='walls'&&!/^(wt|gt)/.test(b.id)).map(b=>({id:b.id,K:b.K,ramps:b.ramps,d:b.footprint?b.footprint.d:2*(b.radius||4)/b.K,round:!b.footprint,r:b.radius/b.K})))"))
     def W(bid, lx, lz): return pg.evaluate("([id,lx,lz])=>__p3d.multi.find(b=>b.id===id).toW(lx,lz)", [bid, lx, lz])
     box = pg.evaluate("(()=>{const r=document.getElementById('stick').getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2,r.width/2]})()")
     def drive(via, top, mode, l1, y1, secs=22, tag=''):
@@ -68,7 +75,13 @@ with sync_playwright() as p:
             for mode in MODES:
                 for yw in YAWS:
                     pg.evaluate("([s,y])=>{__p3d.teleport(s[0],s[1],0);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw]); pg.wait_for_timeout(300)
-                    r, ms, ok = drive([list(v) for v in via], top, mode, m['l1'], m['y1']); total += 1; fails += 0 if ok else 1
+                    r, ms, ok = drive([list(v) for v in via], top, mode, m['l1'], m['y1']*bi['K']); total += 1
+                    if not ok and os.environ.get('PATHFIND', '1') == '1':   # a real player walks around furniture: BFS a free path door -> stair and retry
+                        wp = pg.evaluate(BFS, [door, via[-1], 0]); print('    bfs', door, via[-1], wp and [[round(a,1),round(b,1)] for a,b in wp], flush=True)
+                        if wp:
+                            pg.evaluate("([s,y])=>{__p3d.teleport(s[0],s[1],0);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw]); pg.wait_for_timeout(300)
+                            r, ms, ok = drive([list(door)] + [list(q) for q in wp], top, mode, m['l1'], m['y1']*bi['K'])
+                    fails += 0 if ok else 1
                     if not ok: print('    stuck near:', pg.evaluate("([x,z,l])=>__p3d.colliders.filter(c=>(c.lv===undefined||(Array.isArray(c.lv)?c.lv.includes(l):c.lv===l))&&(c.type==='box'?(Math.hypot(Math.max(c.minX,Math.min(x,c.maxX))-x,Math.max(c.minZ,Math.min(z,c.maxZ))-z)<1.1):(Math.hypot(c.x-x,c.z-z)<1.1+c.r))).map(c=>[c.type,c.b,c.minX,c.maxX,c.minZ,c.maxZ,c.x,c.z,c.r,c.lv,c.stair].map(v=>typeof v==='number'?+v.toFixed(2):v))", [r['x'], r['z'], r['lv']]))
                     if SHOTS: pg.screenshot(path=f"{SHOTS}/{bi['id']}_{mode}_{'ok' if ok else 'FAIL'}.png")
                     res.append(f"{mode}@{yw:+.1f}:" + (f'OK {ms/1000:.1f}s' if ok else 'FAIL(lv%s y%.1f @%.1f,%.1f)' % (r['lv'], r['y'], r['x'], r['z'])))

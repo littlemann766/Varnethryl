@@ -311,7 +311,7 @@ function keep(spec, ctx) {
   const { w, d, h } = B; B.bx(w, .6, d, 'stoneD', 0, h + .3, 0, B.G.roof);
   for (let i = 0; i < 12; i++) { const x = -w / 2 + .6 + i * (w - 1.2) / 11; B.bx(.8, .8, .8, 'stone', x, h + 1, d / 2 - .4, B.G.roof); B.bx(.8, .8, .8, 'stone', x, h + 1, -d / 2 + .4, B.G.roof); }
   B.bx(10, 5, 8, 'stone', 0, h + 2.9, -1, B.G.roof); B.cone(6.4, 8, 'slate', 0, h + 5.4, -1, B.G.roof, 4).rotation.y = .78;
-  for (const [sx, sz, r] of [[-1, 1, 3.3], [1, 1, 3.3], [-1, -1, 3.0], [1, -1, 3.0]]) B.tower(sx * (w / 2 - .2), sz * (d / 2 - .2), r, h + 4, { coneH: 8, windows: 3, wa: sx * 1.3 + sz });
+  for (const [sx, sz, r] of [[-1, 1, 3.3], [1, 1, 3.3], [-1, -1, 3.0], [1, -1, 3.0]]) B.tower(sx * (w / 2 + r * .8 - .2), sz * (d / 2 + r * .8 - .2), r, h + 4, { coneH: 8, windows: 3, wa: sx * 1.3 + sz });
   for (const s of [-1, 1]) B.banner(s * 4.6, 6, d / 2 + .08, 0, 1.5, 4.2);
   for (const [x, z, r, up] of [[-5, -3, 2.5, 8], [5, -4, 2.2, 10], [0, -6.2, 2.7, 6]]) B.tower(x, z, r, h + up, { coneH: 8 + up * .3, windows: 3, collide: false, wa: x });
   B.rocks([[-w / 2 - 2.6, d / 2 - 1, 2.0], [w / 2 + 2.8, d / 2 - 2, 2.3], [-w / 2 - 3.2, -2, 2.8, .9], [w / 2 + 3.4, -3, 2.6, .9], [-6, -d / 2 - 2.2, 2.4], [5, -d / 2 - 2.6, 2.8], [0, -d / 2 - 3.4, 3.0, 1], [-w / 2 - 1.6, d / 2 + 2.4, 1.3], [w / 2 + 1.8, d / 2 + 2.6, 1.5]]);
@@ -388,7 +388,7 @@ function fountain(spec, ctx) {
 
 // ---------- 19. Observatory ----------
 function observatory(spec, ctx) {
-  const B = new Builder(ctx, spec); B.name = 'Observatory of Varnethryl'; const R = 4.6, H = 11;
+  const B = new Builder(ctx, spec); B.name = 'Observatory of Varnethryl'; const R = 6.4, H = 11;
   B.roundShell({ r: R, h: H, key: 'stone', N: 16, DW: 2.4, DH: 3.2, floor: 'marbleInlay', T: .6 });
   for (const y of [3.4, 7.2, H - .3]) B.ring(R + .12, .3, 'gold', 0, y, 0, B.G.ext, 16);
   for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283 + .4; if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < .5) continue; for (const y of [5.4, 9.2]) B.win(Math.sin(a) * (R + .02), y, Math.cos(a) * (R + .02), a, .8, 1.8, 'stained'); }
@@ -406,7 +406,7 @@ function observatory(spec, ctx) {
   B.cyl(.25, .35, 1.2, 'gold', 2.2, .6, -1.6, B.G.int, 8); B.add(new THREE.CylinderGeometry(.2, .24, 2.2, 8), M('#b8902c'), 2.6, 1.9, -1.9, B.G.int).rotation.z = -.9; B.ccol(2.2, -1.6, .5);
   const iw = B.iw; for (let i = 0; i < 5; i++) { const a = Math.PI + (i - 2) * .55; const x = Math.sin(a) * (iw - .4), z = Math.cos(a) * (iw - .4); const s = B.bx(1.9, 2.4, .5, 'books', x, 1.2, z, B.G.int); s.rotation.y = a; B.ccol(x, z, .9); }
   B.tableR(2.0, 1.4, 1.8, 1.0, 'darkWood'); for (const [x, z] of [[2.4, 1.6]]) B.chest(x, z, .8); B.banner(0, 5.2, -iw + .1, 0, 1, 2.4); B.lamp(1.5, 3.4, 0); B.lamp(-1.5, 3.4, 0);
-  { const S1 = { cx: -1.8, cz: .6, dir: '-z', len: 4.4, w: 1.5 }, S2 = { cx: 1.8, cz: .6, dir: '+z', len: 4.4, w: 1.5 };
+  { const S1 = { cx: -2.3, cz: .2, dir: '-z', len: 7.2, w: 2.0 }, S2 = { cx: 2.3, cz: -.2, dir: '+z', len: 7.2, w: 2.0 };
     B.fullUpper({ level: 1, y: 3.7, disc: B.iw - .05, stair: S1, rooms(U) { U.lamp(0, 2.8, 0); U.lamp(0, 2.8, -2.4); } });
     B.fullUpper({ level: 2, y: 7.4, y0: 3.7, l0: 1, disc: B.iw - .05, stair: S2, rooms(U) { U.lamp(0, 2.8, 0); U.lamp(0, 2.8, 2.4); } });
     B.fullUpper({ level: 3, y: 10.9, y0: 7.4, l0: 2, disc: B.iw - .05, stair: S1, rooms(U) { U.add(new THREE.CylinderGeometry(.12, .18, 2.2, 8), M('#b8902c'), 1.8, 1.2, -.4, U.G.int).rotation.z = -.9; U.crystal(2.2, 1.4, .8, '5fa8ff', .3); U.lamp(0, 2.4, 0); } }); }

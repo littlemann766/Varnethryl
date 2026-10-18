@@ -16,14 +16,15 @@ with sync_playwright() as p:
     pg.on('pageerror', lambda e: print('PAGEERR', e)); pg.on('console', lambda m: print('c:', m.text) if m.type == 'error' else None)
     pg.goto(f'http://127.0.0.1:{port}/proto3d/bldview.html' + ('?b=' + ','.join(IDS) if IDS else '')); pg.wait_for_function('window.__ready', timeout=180000)
     pg.evaluate(f'__size({W},{H})'); pg.wait_for_timeout(1500)
+    DISTS = {'port': 48}
     def shot(i, call, path):
         for _ in range(4): pg.evaluate(call); pg.wait_for_timeout(350)     # settle: shadow map + textures + materials compiled
         pg.screenshot(path=path)
     for i in pg.evaluate('window.__list'):
         if IDS and i not in IDS: continue
-        shots = [('ext', '{yaw:0.55,pitch:0.28}'), ('side', '{yaw:-1.05,pitch:0.22}'), ('back', '{yaw:2.6,pitch:0.3}'), ('int', '{inside:true,pitch:1.0}')]
+        shots = [('front', '{yaw:0.0,pitch:0.12}'), ('ext', '{yaw:0.55,pitch:0.28}'), ('side', '{yaw:-1.05,pitch:0.22}'), ('back', '{yaw:2.6,pitch:0.3}'), ('int', '{inside:true,pitch:1.0}')]
         for n, a in shots:
-            call = f"(()=>{{const a={a}; if(a.inside) a.dist=__r('{i}')*1.35; return __show('{i}',a)}})()"
+            call = f"(()=>{{const a={a}; if(a.inside) a.dist=__r('{i}')*1.35; else if({DISTS.get(i,0)}) a.dist={DISTS.get(i,0)}; return __show('{i}',a)}})()"
             shot(i, call, f'{OUT}/{i}_{n}.png')
         lv = pg.evaluate(f"(()=>{{const s=__sub('{i}');return Array.from(new Set((s.floors||[]).map(f=>f.level)))}})()")
         for l in lv:

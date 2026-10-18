@@ -2,7 +2,7 @@
 // timber + stone). Everything is generated in code (see bldkit.js / bldtex.js). Each builder returns a Builder with .update(hx,hz,dt).
 import * as THREE from 'three';
 import { Builder, M, GLOW, boxG, cylG, uvScale, TILE, mergeGroup } from './bldkit.js';
-import { tex } from './bldtex.js';
+import { tex, goldDoorTexture } from './bldtex.js';
 
 // ---------- shared decor ----------
 function wins(B, o) { // facade windows: front [[x,y]], side [[z,y]] (both sides), back [[x,y]]
@@ -94,6 +94,16 @@ function temple(spec, ctx) {
   for (let i = 0; i < 5; i++) B.bx(w * .5 + i * .8, .3, 1, 'stoneL', 0, .15 + i * 0 - 0.0, d / 2 + 2.2 - i * 0 + i * .5, B.G.ext); // steps
   for (const s of [-1, 1]) { B.bx(.7, 1.8, .7, 'stoneL', s * 2.6, 1.2, d / 2 + 2.6, B.G.ext); B.bx(.5, .7, .5, 'gold', s * 2.6, 2.4, d / 2 + 2.6, B.G.ext); }
   B.bx(.5, 3.6, .1, 'carpet', 0, 2.4, d / 2 + .08, B.G.ext);
+  { // cathedral flourishes (see Temple reference): steep central gable with glowing arched window, ridge pinnacles, lions + statues on pedestals, tall banners
+    const zf = d / 2; const gs = new THREE.Shape(); gs.moveTo(-4.2, 0); gs.lineTo(0, 7.2); gs.lineTo(4.2, 0); gs.lineTo(-4.2, 0); const gg = new THREE.ExtrudeGeometry(gs, { depth: .9, bevelEnabled: false });
+    B.add(gg, B.cm('stoneL'), 0, h - .2, zf - .2, B.G.ext); B.add(archRingGeo(0, 1.9, 1.5, 4.2, .5), M('gold'), 0, h + .1, zf + .7, B.G.ext); B.add(archFillGeo(0, 1.5, 4.2, 0), GLOW('2a62d8', .8), 0, h + .1, zf + .72, B.G.ext, { shadow: false });
+    B.cone(.55, 3.2, 'slate', 0, h + 7.1, zf + .2, B.G.ext, 4); B.bx(.1, 1.2, .1, 'gold', 0, h + 10.9, zf + .2, B.G.ext);
+    for (let i = 0; i < 5; i++) { const z = -d / 2 + 2.5 + i * (d - 5) / 4; for (const s of [-1, 1]) B.cone(.42, 2.6, 'slate', s * (w / 2 - .4), h + 3.1, z, B.G.ext, 4); }
+    for (const s of [-1, 1]) { const x = s * 3.4, z = zf + 3.2; B.bx(1.4, 1.3, 1.4, 'stoneL', x, .65, z, B.G.ext); B.bx(.9, .6, 1.5, 'stoneL', x, 1.6, z, B.G.ext); B.add(new THREE.SphereGeometry(.42, 8, 6), B.cm('stoneL'), x, 2.0, z + .7, B.G.ext); B.bx(.35, .12, .6, 'stoneL', x, 1.35, z + .5, B.G.ext);
+      const sx = s * (w / 2 + 3.2), sz = zf + 2.6; B.bx(1.4, 1.6, 1.4, 'stoneL', sx, .8, sz, B.G.ext); B.bx(.7, 2.6, .5, 'stoneL', sx, 2.9, sz, B.G.ext); B.add(new THREE.SphereGeometry(.34, 8, 6), B.cm('stoneL'), sx, 4.4, sz, B.G.ext);
+      B.banner(s * 5.0, 4.8, zf + .08, 0, 1.2, 3.8); B.banner(s * 2.9, 4.8, zf + .08, 0, 1.0, 3.2); B.ccol(x, z, .9); B.ccol(sx, sz, .9); }
+    for (let i = 0; i < 5; i++) B.bx(w * .7 + i * 1.2, .1, 1.1, 'stoneL', 0, .35, zf + 4.6 + i * .6, B.G.ext, { shadow: false });
+  }
   for (const z of [-8, -3.5, 1, 5.5]) for (const s of [-1, 1]) { const x = s * (w / 2 + .5); B.bx(.9, h + 1.4, .9, 'stoneL', x, (h + 1.4) / 2, z, B.G.ext); B.cone(.62, 2.6, 'slate', x, h + 1.4, z, B.G.ext, 4); B.bx(.7, .22, 1.6, 'stoneL', s * (w / 2 + .1), h - 1.2, z + 2.2, B.G.ext).rotation.z = s * .5; }
   for (const s of [-1, 1]) for (const [dx, dz] of [[-.9, -.9], [.9, -.9], [-.9, .9], [.9, .9]]) B.cone(.34, 1.5, 'slate', s * (w / 2 - .2) + dx, h + 3, d / 2 - .2 + dz, B.G.ext, 4);
   B.statue(-4.2, d / 2 + 2.6, 1); B.statue(4.2, d / 2 + 2.6, 1); B.gable(6.2, 2.4, 3.4, 0, h + .2, d / 2 - 1.2, 'slate', B.G.roof, false, 0, 'stoneL'); B.banner(0, h + 1.4, d / 2 + .06, 0, 1.2, 1.8, B.G.roof);
@@ -259,26 +269,33 @@ function mage(spec, ctx) {
 // ---------- 15. Colosseum ----------
 function colosseum(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Colosseum of Varnethryl'; const R = 12.4, H = 7.6, PIT = 7.6;
-  B.roundShell({ r: R, h: H, key: 'stoneL', N: 30, DW: 4.4, DH: 4.6, T: .9, floor: 'sand' });
+  B.roundShell({ r: R, h: H, key: 'stone', N: 30, DW: 4.4, DH: 4.6, T: .9, floor: 'sand' });
   B.G.int.children.forEach(m => { if (m.material === M('sand')) { m.material = M('sand'); } });
   // seating bowl as a stepped lathe (gap at the gate tunnel)
   const pts = [new THREE.Vector2(PIT, 0), new THREE.Vector2(PIT, 1.3)]; for (let k = 0; k < 5; k++) { pts.push(new THREE.Vector2(PIT + .2 + k * .85, 1.3 + k * .95)); pts.push(new THREE.Vector2(PIT + 1.05 + k * .85, 1.3 + k * .95)); } pts.push(new THREE.Vector2(R - .9, 6.2)); pts.push(new THREE.Vector2(R - .9, 0));
   const gap = .33, lg = new THREE.LatheGeometry(pts, 40, gap, Math.PI * 2 - gap * 2); uvScale(lg, 6, 2);
   B.add(lg, B.cm('stone'), 0, 0, 0, B.G.walls); B.G.walls.children[B.G.walls.children.length - 1].material.side = THREE.DoubleSide;
-  for (const s of [-1, 1]) { B.wallBox(.8, 5.4, R - PIT, 'stoneL', s * 2.6, 2.7, (R + PIT) / 2); B.col(s * 2.75, (R + PIT) / 2, .8, R - PIT); }
-  for (let i = 0; i < 26; i++) { const a = (i + .5) / 26 * 6.283; if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < .45) continue; const x = Math.sin(a) * (R + .02), z = Math.cos(a) * (R + .02);
-    for (const [y, hh] of [[1.9, 2.2], [5.1, 1.8]]) { const m = B.bx(1.1, hh, .3, '#17171c', x, y, z, B.G.ext); m.rotation.y = a; } if (i % 2) { const bn = B.banner(Math.sin(a) * (R + .08), 3.6, Math.cos(a) * (R + .08), a, 1, 2.6); } }
+  for (const s of [-1, 1]) { B.wallBox(.8, 5.4, R - PIT, 'stone', s * 2.6, 2.7, (R + PIT) / 2); B.col(s * 2.75, (R + PIT) / 2, .8, R - PIT); }
+  // three tiers of dark round arches framed by pilasters + cornices (matches the arcaded facade of the reference)
+  const archShape = (w, h) => { const s = new THREE.Shape(); const r = w / 2; s.moveTo(-r, 0); s.lineTo(-r, h - r); s.absarc(0, h - r, r, Math.PI, 0, true); s.lineTo(r, 0); s.lineTo(-r, 0); return new THREE.ShapeGeometry(s, 8); };
+  const archG = archShape(1.15, 2.1), archG2 = archShape(.95, 1.7), NA = 26;
+  const darkM = new THREE.MeshStandardMaterial({ color: 0x0c0c10, roughness: 1, side: THREE.DoubleSide });
+  for (let i = 0; i < NA; i++) { const a = (i + .5) / NA * 6.283; if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < .5) continue; const sx = Math.sin(a), cz = Math.cos(a);
+    for (const [y, g] of [[.5, archG], [3.1, archG], [5.5, archG2]]) { const m = B.add(g, darkM, sx * (R + .05), y, cz * (R + .05), B.G.ext, { shadow: false }); m.rotation.y = a; }
+    const pa = i / NA * 6.283; const pm = B.bx(.55, H, .55, 'stoneD', Math.sin(pa) * (R + .18), H / 2, Math.cos(pa) * (R + .18), B.G.ext); pm.rotation.y = pa;
+    if (i % 2) B.banner(sx * (R + .1), 4.3, cz * (R + .1), a, 1.25, 3.4); }
+  for (const y of [2.9, 5.3, H - .1]) { const c = B.add(new THREE.CylinderGeometry(R + .35, R + .3, .28, 40, 1, true), B.cm('stoneD'), 0, y, 0, B.G.ext); c.material.side = THREE.DoubleSide; }
   for (let i = 0; i < 4; i++) { const a = 0; } 
-  for (let i = 0; i < 30; i++) { const a = i / 30 * 6.283; B.bx(.9, .6, .6, 'stoneL', Math.sin(a) * (R - .45), H + .3, Math.cos(a) * (R - .45), B.G.ext).rotation.y = a; }
-  for (const k of [-1, 1]) { const x = k * 3.2; B.bx(.9, 5.4, .9, 'stoneL', x * 1, 2.7, R - .3, B.G.ext); }
-  B.bx(7, .8, .9, 'stoneL', 0, 5.4, R - .3, B.G.ext); B.banner(0, 3.2, R + .12, 0, 2, 3.4);
+  for (let i = 0; i < 30; i++) { const a = i / 30 * 6.283; B.bx(.9, .6, .6, 'stone', Math.sin(a) * (R - .45), H + .3, Math.cos(a) * (R - .45), B.G.ext).rotation.y = a; }
+  for (const k of [-1, 1]) { const x = k * 3.2; B.bx(.9, 5.4, .9, 'stone', x * 1, 2.7, R - .3, B.G.ext); }
+  B.bx(7, .8, .9, 'stone', 0, 5.4, R - .3, B.G.ext); B.banner(0, 3.2, R + .12, 0, 2, 3.4);
   // seating collision (rings of circles leave the tunnel open)
   for (let i = 0; i < 24; i++) { let a = i / 24 * 6.283; if (a > Math.PI) a -= 6.283; if (Math.abs(a) < .55) continue; B.ccol(Math.sin(a) * 10.0, Math.cos(a) * 10.0, 2.3); }
   B.radius = R + 3;
   const iw = B.iw; B.add(new THREE.RingGeometry(1.8, 2.0, 32), M('gold'), 0, .1, 0, B.G.int, { shadow: false }).rotation.x = -Math.PI / 2;
   for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + .7, x = Math.sin(a) * 5.2, z = Math.cos(a) * 5.2; B.bx(.2, 1.5, .2, 'wood', x, .75, z, B.G.int); B.bx(.8, .9, .35, 'hay', x, 1.3, z, B.G.int); B.ccol(x, z, .45); }
   for (const s of [-1, 1]) B.rack(s * 5.8, 3.8, 5, 1);
-  B.bx(3, .5, 1.6, 'stoneL', 0, 4.4, -PIT - 2.4, B.G.int); for (const s of [-1, 1]) B.banner(s * 2.2, 5.6, -PIT - 3, 0, 1, 2.2);   // royal box
+  B.bx(3, .5, 1.6, 'stone', 0, 4.4, -PIT - 2.4, B.G.int); for (const s of [-1, 1]) B.banner(s * 2.2, 5.6, -PIT - 3, 0, 1, 2.2);   // royal box
   B.add(boxG(1.8, 2.2, .12, 1), M('iron', { side: THREE.DoubleSide }), 0, 3.9, PIT + 1.0, B.G.frame, { shadow: false });     // raised arena gate grille
   const lam = 6; for (let i = 0; i < lam; i++) { const a = i / lam * 6.283 + .3; B.lamp(Math.sin(a) * (PIT - .4), 1.6, Math.cos(a) * (PIT - .4)); }
   return B.finish();
@@ -286,16 +303,24 @@ function colosseum(spec, ctx) {
 
 // ---------- 16. Castle Keep (simplified: keep + 4 corner towers + throne room) ----------
 function keep(spec, ctx) {
-  const B = new Builder(ctx, spec); B.name = 'Castle Keep of Varnethryl'; B.rectShell({ w: 22, d: 16, h: 10, hs: 10, upper: 'stone', lower: 'stone', DW: 3.2, DH: 4, floor: 'floorStone', posts: false, T: .8 });
+  const B = new Builder(ctx, spec); B.name = 'Castle Keep of Varnethryl'; B.rectShell({ w: 22, d: 16, h: 10, hs: 10, upper: 'stone', lower: 'stone', DW: 4.4, DH: 5.2, floor: 'floorStone', posts: false, T: .8 });
   const { w, d, h } = B; B.bx(w, .6, d, 'stoneD', 0, h + .3, 0, B.G.roof);
   for (let i = 0; i < 12; i++) { const x = -w / 2 + .6 + i * (w - 1.2) / 11; B.bx(.8, .8, .8, 'stone', x, h + 1, d / 2 - .4, B.G.roof); B.bx(.8, .8, .8, 'stone', x, h + 1, -d / 2 + .4, B.G.roof); }
   B.bx(10, 5, 8, 'stone', 0, h + 2.9, -1, B.G.roof); B.cone(6.4, 8, 'slate', 0, h + 5.4, -1, B.G.roof, 4).rotation.y = .78;
   for (const [sx, sz, r] of [[-1, 1, 3.3], [1, 1, 3.3], [-1, -1, 3.0], [1, -1, 3.0]]) B.tower(sx * (w / 2 - .2), sz * (d / 2 - .2), r, h + 4, { coneH: 8, windows: 3, wa: sx * 1.3 + sz });
-  for (const s of [-1, 1]) B.banner(s * 3.6, 6, d / 2 + .08, 0, 1.4, 3.8); B.banner(0, 7.5, d / 2 + .08, 0, 2, 4.2);
+  for (const s of [-1, 1]) B.banner(s * 4.6, 6, d / 2 + .08, 0, 1.5, 4.2);
   for (const [x, z, r, up] of [[-5, -3, 2.5, 8], [5, -4, 2.2, 10], [0, -6.2, 2.7, 6]]) B.tower(x, z, r, h + up, { coneH: 8 + up * .3, windows: 3, collide: false, wa: x });
   B.rocks([[-w / 2 - 2.6, d / 2 - 1, 2.0], [w / 2 + 2.8, d / 2 - 2, 2.3], [-w / 2 - 3.2, -2, 2.8, .9], [w / 2 + 3.4, -3, 2.6, .9], [-6, -d / 2 - 2.2, 2.4], [5, -d / 2 - 2.6, 2.8], [0, -d / 2 - 3.4, 3.0, 1], [-w / 2 - 1.6, d / 2 + 2.4, 1.3], [w / 2 + 1.8, d / 2 + 2.6, 1.5]]);
   B.guard(-2.6, d / 2 + 2.6); B.guard(2.6, d / 2 + 2.6); B.apron(w * .5, d * .4, 4);
-  for (const x of [0]) for (const dx of [-1, 1]) B.bx(.6, 3.9, .6, 'stoneD', dx * 2.0, 2, d / 2 + .3, B.G.ext);
+  { // ornate gold double door (cropped from the reference), swung open, under a big pointed-arch surround with a tracery tympanum
+    const gm = new THREE.MeshStandardMaterial({ map: goldDoorTexture(), metalness: .35, roughness: .5, side: THREE.DoubleSide, emissive: 0x5a3c0c }); const DHk = 5.2, zf = d / 2 + .06, hw = B.DW / 2;
+    for (const s of [-1, 1]) { const dx = s * .72, dz = .69, th = -Math.atan2(dz, dx); const m = B.add(new THREE.PlaneGeometry(hw * .98, DHk * .98), gm, s * hw + dx * hw * .5, DHk * .49, zf + dz * hw * .5, B.G.ext, { shadow: false }); m.rotation.y = th; m.scale.x = 1; }
+    const R1 = hw + .9, R0 = hw + .1, cy = DHk + .2; const ring = new THREE.Shape(); ring.moveTo(-R1, 0); ring.lineTo(-R1, cy); ring.absarc(0, cy, R1, Math.PI, 0, true); ring.lineTo(R1, 0); ring.lineTo(R0, 0); ring.lineTo(R0, cy); ring.absarc(0, cy, R0, 0, Math.PI, false); ring.lineTo(-R0, 0); ring.lineTo(-R1, 0);
+    B.add(new THREE.ExtrudeGeometry(ring, { depth: .5, bevelEnabled: false, curveSegments: 14 }), B.cm('stoneD'), 0, 0, d / 2 - .05, B.G.ext);
+    const tym = new THREE.Shape(); tym.moveTo(-R0, DHk); tym.lineTo(-R0, cy); tym.absarc(0, cy, R0, Math.PI, 0, true); tym.lineTo(R0, DHk); tym.lineTo(-R0, DHk); const tg = new THREE.ShapeGeometry(tym, 14); const uv = tg.attributes.uv, ps = tg.attributes.position; for (let i = 0; i < uv.count; i++) uv.setXY(i, (ps.getX(i) + R0) / (2 * R0), .45 + (ps.getY(i) - DHk) / (R0 + .2) * .55);
+    B.add(tg, gm, 0, 0, d / 2 + .04, B.G.ext, { shadow: false }); B.add(new THREE.PlaneGeometry(1.4, .5), M('gold'), 0, 5.2 + R0 + .6, d / 2 + .5, B.G.ext, { shadow: false });
+  }
+  for (const x of [0]) 
   for (let i = 0; i < 4; i++) B.bx(B.DW + 2, .22, .8, 'stoneD', 0, .11, d / 2 + .8 + i * .4, B.G.ext);
   wins(B, { front: [[-6, 5], [6, 5], [-9, 5.5], [9, 5.5]], side: [[-4, 5], [0, 5], [4, 5]], back: [[-6, 5], [0, 5], [6, 5]], w: .6, h: 1.8 });
   const iw = B.iw, id_ = B.id_;
@@ -360,14 +385,17 @@ function fountain(spec, ctx) {
 // ---------- 19. Observatory ----------
 function observatory(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Observatory of Varnethryl'; const R = 4.6, H = 11;
-  B.roundShell({ r: R, h: H, key: 'stoneL', N: 16, DW: 2.4, DH: 3.2, floor: 'marbleInlay', T: .6 });
+  B.roundShell({ r: R, h: H, key: 'stone', N: 16, DW: 2.4, DH: 3.2, floor: 'marbleInlay', T: .6 });
   for (const y of [3.4, 7.2, H - .3]) B.ring(R + .12, .3, 'gold', 0, y, 0, B.G.ext, 16);
   for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283 + .4; if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < .5) continue; for (const y of [5.4, 9.2]) B.win(Math.sin(a) * (R + .02), y, Math.cos(a) * (R + .02), a, .8, 1.8, 'stained'); }
   const dm = new THREE.SphereGeometry(R + .2, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2); uvScale(dm, 1, 1);
   B.add(dm, M('#16306e', { side: THREE.DoubleSide }), 0, H, 0, B.G.roof); for (let i = 0; i < 6; i++) { const t = B.add(new THREE.TorusGeometry(R + .22, .07, 5, 16, Math.PI), M('gold'), 0, H, 0, B.G.roof, { shadow: false }); t.rotation.y = i / 6 * Math.PI; }
   B.add(new THREE.CylinderGeometry(.14, .2, 1.8, 6), M('gold'), 3.3, H + 3.0, 0, B.G.roof).rotation.z = -.7; B.cyl(.0, .3, .8, 'gold', 0, H + R + .3, 0, B.G.roof, 6);
   B.banner(2.6, 6.5, R + .02 - .15, 0, .8, 2.2);
-  for (let i = 0; i < 7; i++) { const a = i * 1.1; B.add(new THREE.DodecahedronGeometry(1.2 + (i % 3) * .5, 0), M('rock'), Math.sin(a) * (R + 1.6) * (Math.abs(a % 6.28 - 0) < .6 ? 0 : 1), .3, Math.cos(a) * (R + 1.8) * (i < 1 ? 0 : 1) - (i < 1 ? -R - 2 : 0) * 0, B.G.ext); }
+  { // craggy mountain-top base (reference), warm arched windows, rocky steps
+    const rm = '#5d6068'; for (let i = 0; i < 11; i++) { const a = 1.0 + i * (Math.PI * 2 - 2.0) / 10 + .3, rr = R + 2.4 + (i % 3) * .6, s = 1.8 + (i % 4) * .6; const m = B.add(new THREE.DodecahedronGeometry(s, 0), M(rm), Math.sin(a) * rr, s * .55, Math.cos(a) * rr, B.G.ext); m.scale.y = 1.3 + (i % 2) * .5; m.rotation.y = a * 2; B.ccol(Math.sin(a) * rr, Math.cos(a) * rr, s * .8); }
+    for (let i = 0; i < 6; i++) B.bx(3.2 + i * .1, .24, .7, 'stoneD', 0, .12 + i * .01, R + .6 + i * .4, B.G.ext);
+    for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283 + .15; if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < .5) continue; B.add(new THREE.PlaneGeometry(.55, 1.5), GLOW('ffb347', 1.3), Math.sin(a) * (R + .06), 5.4, Math.cos(a) * (R + .06), B.G.ext, { shadow: false }).rotation.y = a; B.add(new THREE.PlaneGeometry(.55, 1.5), GLOW('6aa8ff', 1.2), Math.sin(a + .31) * (R + .06), 9.2, Math.cos(a + .31) * (R + .06), B.G.ext, { shadow: false }).rotation.y = a + .31; } }
   B.add(new THREE.CylinderGeometry(1.7, 1.9, .06, 20), M('sigil'), 0, .1, -.2, B.G.int, { shadow: false });
   B.cyl(.7, .9, 1.0, 'darkWood', 0, .5, -.2, B.G.int, 10); B.ccol(0, -.2, 1.0); B.add(new THREE.SphereGeometry(.55, 12, 10), GLOW('5fa8ff', 1.4), 0, 1.7, -.2, B.G.int, { shadow: false });
   for (const a of [.8, 2.4, 3.9, 5.5]) B.add(new THREE.TorusGeometry(.8 + a * .02, .03, 4, 20), GLOW('9fd0ff', 1.2), 0, 1.7, -.2, B.G.int, { shadow: false }).rotation.set(a, a * 1.7, 0);
@@ -382,14 +410,24 @@ function observatory(spec, ctx) {
 }
 
 // ---------- 20. Crypt (links to the Dusk Hollow / Veyra quest) ----------
+function archRingGeo(x0, R1, R0, cy, depth) { const s = new THREE.Shape(); s.moveTo(x0 - R1, 0); s.lineTo(x0 - R1, cy); s.absarc(x0, cy, R1, Math.PI, 0, true); s.lineTo(x0 + R1, 0); s.lineTo(x0 + R0, 0); s.lineTo(x0 + R0, cy); s.absarc(x0, cy, R0, 0, Math.PI, false); s.lineTo(x0 - R0, 0); s.lineTo(x0 - R1, 0); return new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false, curveSegments: 12 }); }
+function archFillGeo(x0, R, cy, y0 = 0) { const s = new THREE.Shape(); s.moveTo(x0 - R, y0); s.lineTo(x0 - R, cy); s.absarc(x0, cy, R, Math.PI, 0, true); s.lineTo(x0 + R, y0); s.lineTo(x0 - R, y0); return new THREE.ShapeGeometry(s, 12); }
 function crypt(spec, ctx) {
-  const B = new Builder(ctx, spec); B.name = 'Crypt of Varnethryl'; B.quest = 'veyra'; B.rectShell({ w: 10, d: 14, h: 5.4, hs: 5.4, upper: 'stoneD', lower: 'stoneD', DW: 2.4, DH: 3.4, floor: 'floorStone', posts: false });
+  const B = new Builder(ctx, spec); B.name = 'Crypt of Varnethryl'; B.quest = 'veyra'; B.DH = 3.4; B.rectShell({ w: 10, d: 14, h: 5.4, hs: 5.4, upper: 'stoneD', lower: 'stoneD', DW: 2.4, DH: 3.4, floor: 'floorStone', posts: false });
   const { w, d, h } = B; B.roofGable({ rh: 2.4, key: 'slate', ridge: 'z', over: .5, endKey: 'stoneD' });
   for (const [x, z, s] of [[-w / 2 - 1.8, 0, 2.4], [w / 2 + 1.8, 0, 2.4], [-w / 2 - 1.2, -4.6, 2.0], [w / 2 + 1.2, -4.6, 2.0], [0, -d / 2 - 2.0, 3.2], [-3, -d / 2 - 1.2, 2.2], [3, -d / 2 - 1.2, 2.2]]) { const m = B.add(new THREE.DodecahedronGeometry(s, 0), M('rock'), x, s * .45, z, B.G.roof); m.scale.set(1.3, .9, 1.2); }
   for (const s of [-1, 1]) { B.bx(.9, h + .6, .9, 'stoneD', s * (B.DW / 2 + 1.3), (h + .6) / 2, d / 2 + .1, B.G.ext); B.cone(.65, 1.6, 'slate', s * (B.DW / 2 + 1.3), h + .6, d / 2 + .1, B.G.ext, 4); B.add(new THREE.SphereGeometry(.2, 6, 5), GLOW('4fa0ff', 2), s * (B.DW / 2 + .75), 2.6, d / 2 + .55, B.G.ext, { shadow: false }); }
   B.add(new THREE.CylinderGeometry(1.8, 1.8, .12, 3, 1, false, 0, 6.283), M('#142a5a', { side: THREE.DoubleSide }), 0, 4.2, d / 2 + .03, B.G.ext).scale.set(1, 1, .1);
   B.win(0, 4.3, d / 2 + .08, 0, 1.4, 2.2, 'stained'); B.bx(2.9, .25, .3, 'stoneD', 0, 3.55, d / 2 + .12, B.G.ext);
   for (let i = 0; i < 4; i++) B.bx(B.DW + 1.4 + i * .3, .22, .8, 'stone', 0, .11, d / 2 + 1 + i * .45, B.G.ext);
+  { // gothic frontispiece: tall pointed-arch rings (door + two glowing blind arches), pinnacles, cliff rocks, blue lanterns (see Crypt reference)
+    const zf = d / 2 + .02, rockM = '#4d5058';
+    B.add(archRingGeo(0, 2.3, 1.45, B.DH + .3, .55), B.cm('stoneD'), 0, 0, zf, B.G.ext); B.add(archRingGeo(0, 1.45, 1.25, B.DH + .3, .35), B.cm('stone'), 0, 0, zf + .1, B.G.ext);
+    B.add(archFillGeo(0, 1.4, B.DH + .3, B.DH), GLOW('2a6cff', .45), 0, 0, zf + .06, B.G.ext, { shadow: false });
+    for (const s of [-1, 1]) { const x = s * 4.0; B.add(archRingGeo(x, 1.55, 1.15, 3.8, .45), B.cm('stoneD'), 0, 0, zf, B.G.ext); B.add(archFillGeo(x, 1.15, 3.8, .5), GLOW('1d4fcf', .5), 0, 0, zf + .04, B.G.ext, { shadow: false }); B.bx(.5, .4, .5, 'stoneD', s * 2.6, 6.0, d / 2 + .2, B.G.ext); B.cone(.45, 2.0, 'slate', s * 2.65, 6.6, d / 2 + .2, B.G.ext, 4);
+      B.bx(.9, 1.0, .9, 'stoneD', s * 3.0, .5, d / 2 + 2.2, B.G.ext); B.add(new THREE.SphereGeometry(.28, 8, 6), GLOW('4fa0ff', 2.2), s * 3.0, 1.35, d / 2 + 2.2, B.G.ext, { shadow: false }); }
+    for (const [x, z, r, sy] of [[-7, -2, 4.0, 1.5], [7, -2, 4.0, 1.5], [-4, -7, 4.6, 1.7], [4, -7, 4.6, 1.7], [0, -10, 5.2, 1.9], [-7.5, 4, 3.0, 1.3], [7.5, 4, 3.0, 1.3], [-9, -8, 3.2, 1.2], [9, -8, 3.2, 1.2], [0, 1, 3.4, 1.1]]) { const m = B.add(new THREE.DodecahedronGeometry(r, 0), M(rockM), x, r * .75 + (z > 1 ? 2.6 : 3.4), z, B.G.roof); m.scale.y = sy; m.rotation.y = x + z; }
+  }
   const iw = B.iw, id_ = B.id_;
   B.add(new THREE.CylinderGeometry(3.0, 3.0, .04, 28), M('sigil'), 0, .09, -id_ + 3.6, B.G.int, { shadow: false });
   for (const z of [-3, 1, 4.5]) for (const s of [-1, 1]) B.pillar(s * 2.6, z, .38, h - .5, 'stoneD');
@@ -458,7 +496,7 @@ function port(spec, ctx) {
   B.bx(PW + 1.6, .6, .8, 'stoneD', 0, .2, Z0 + PD + .4, B.G.ext);
   B.bx(2.6, .22, PD + .8, 'wood', 0, .45, Z0 + PD / 2 + .3, B.G.ext); for (let i = 0; i < 6; i++) { B.cyl(.2, .22, 1.5, 'darkWood', -1.3, .2, Z0 + .8 + i * 1.5, B.G.ext, 6); B.cyl(.2, .22, 1.5, 'darkWood', 1.3, .2, Z0 + .8 + i * 1.5, B.G.ext, 6); }
   for (const s of [-1, 1]) B.col(s * (PW / 4 + .7), Z0 + PD / 2, PW / 2 - 1.4, PD + 1);
-  B.col(0, Z0 + PD + .6, PW, 1);
+  for (const s of [-1, 1]) B.col(s * 6.2, Z0 + PD + .6, 9, 1);
   const boatMats = [M('darkWood'), M('wood')]; const boats = [];
   for (const [bx_, bz, s] of [[-5.5, Z0 + 4, 1], [5.8, Z0 + 6.2, .8]]) {
     const g = new THREE.Group(); g.position.set(bx_, .2, bz); B.root.add(g);
@@ -471,6 +509,23 @@ function port(spec, ctx) {
   B.barrel; B.bx(.25, 3.2, .25, 'darkWood', -4, 1.6, -1.0, B.G.ext); B.add(new THREE.PlaneGeometry(2.4, 1.1), new THREE.MeshLambertMaterial({ map: signTex() , side: THREE.DoubleSide }), -4, 3.0, -.85, B.G.ext, { shadow: false, keep: true });
   for (const [x, z] of [[-9, Z0 + 9.8], [9, Z0 + 9.8]]) { B.cyl(.35, .5, 2.4, 'stone', x, 1.2, z, B.G.ext, 8); B.add(new THREE.SphereGeometry(.28, 6, 5), GLOW('ffc060', 1.5), x, 2.6, z, B.G.ext, { shadow: false }); }
   for (const x of [-8, 8]) B.banner(x, 2.4, -1.1, 0, .8, 1.8);
+  // ---- harbour town backdrop: open sea beyond the quay, long pier, galleon, terraced timber houses and a rocky cliff (see Port reference)
+  const wm = M('water', { transparent: true, opacity: .95 }); B.add(new THREE.PlaneGeometry(44, 18), wm, 0, .02, Z0 + PD + 9.4, B.G.ext, { shadow: false }).rotation.x = -Math.PI / 2;
+  B.bx(2.6, .22, 15, 'wood', 0, .45, Z0 + PD + 8, B.G.ext); for (let i = 0; i < 8; i++) for (const s of [-1, 1]) { B.cyl(.2, .22, 1.3, 'darkWood', s * 1.4, .1, Z0 + PD + 1 + i * 1.9, B.G.ext, 6); if (i % 3 === 2) B.add(new THREE.SphereGeometry(.2, 6, 5), GLOW('ffc060', 1.6), s * 1.4, 1.5, Z0 + PD + 1 + i * 1.9, B.G.ext, { shadow: false }); }
+  for (const [px, pz, pl] of [[-4, Z0 + PD + 8, 7], [4.5, Z0 + PD + 13, 6]]) { B.bx(1.8, .2, pl, 'wood', px, .42, pz, B.G.ext); for (let i = 0; i < 4; i++) for (const s of [-1, 1]) B.cyl(.16, .18, 1.1, 'darkWood', px + s * .9, .1, pz - pl / 2 + .5 + i * (pl - 1) / 3, B.G.ext, 6); }
+  { // galleon: dark hull, 3 masts, cream sails, gold stern lanterns
+    const g = new THREE.Group(); g.position.set(7.5, .2, Z0 + PD + 10); g.rotation.y = .12; B.root.add(g); const wd = M('darkWood'), sailM = M('#d8cba4', { side: THREE.DoubleSide });
+    const hull = new THREE.Mesh(boxG(3.2, 1.3, 9, 1.4), wd); hull.position.y = .5; g.add(hull); const bow = new THREE.Mesh(new THREE.ConeGeometry(1.6, 3, 4), wd); bow.rotation.x = Math.PI / 2; bow.rotation.y = Math.PI / 4; bow.scale.set(1, 1, .8); bow.position.set(0, .5, 5.8); g.add(bow);
+    const cast = new THREE.Mesh(boxG(3.0, 1.2, 2.6, 1.4), wd); cast.position.set(0, 1.7, -3.2); g.add(cast);
+    for (const [mz, mh, sw] of [[2.6, 7.5, 3.4], [0, 9, 4.2], [-2.8, 6.5, 3]]) { const m = new THREE.Mesh(boxG(.2, mh, .2, 1), wd); m.position.set(0, mh / 2 + .8, mz); g.add(m); for (const [sy, sh] of [[mh * .55, mh * .38], [mh * .88, mh * .26]]) { const s = new THREE.Mesh(new THREE.PlaneGeometry(sw * (sh / (mh * .38) > .8 ? 1 : .75), sh), sailM); s.position.set(0, sy + .8, mz + .15); g.add(s); const y = new THREE.Mesh(boxG(sw + .4, .12, .12, 1), wd); y.position.set(0, sy + sh / 2 + .8, mz); g.add(y); } }
+    const fl = new THREE.Mesh(new THREE.PlaneGeometry(1, .6), M('#1f3f86', { side: THREE.DoubleSide })); fl.position.set(.5, 10.1, 0); g.add(fl);
+    for (const sx of [-.8, .8]) { const l = new THREE.Mesh(new THREE.SphereGeometry(.18, 6, 5), GLOW('ffc060', 1.8)); l.position.set(sx, 2.5, -4.6); g.add(l); }
+    for (const m of g.children) m.castShadow = true; boats.push(g); B.col(7.5, Z0 + PD + 10, 3.4, 9.5); }
+  const TERR = [[-13, -8, 6, 5.5, 0, 3.2], [15.5, -7, 6, 5, 0, 3.4], [-9, -17, 6.5, 5, 2.2, 3.4], [2, -19, 7, 5.5, 3.4, 3.8], [12, -18, 6, 5, 2.6, 3.4], [-17, -16, 5.5, 5, 1.6, 3.2], [20, -15, 5.5, 5, 1.5, 3.2]];
+  for (const [hx, hz, hw, hd, hy, hh] of TERR) { if (hy) { B.bx(hw + 1.4, hy, hd + 1.4, 'stoneD', hx, hy / 2, hz, B.G.ext); } B.bx(hw, hh, hd, 'darkWood', hx, hy + hh / 2, hz, B.G.ext); B.gable(hw, hd, 2.4 + (hw > 6 ? .4 : 0), hx, hy + hh, hz, 'slate', B.G.ext, true, .6, 'timber'); B.bx(1, 1, .3, 'stoneD', hx + 1.6, hy + hh + 2.3, hz, B.G.ext);
+    for (let k = -1; k <= 1; k += 2) for (const wy of [1.2, 2.5]) if (hy + wy < hy + hh) B.add(new THREE.PlaneGeometry(.7, .9), GLOW('ffb347', 1.4), hx + k * hw * .27, hy + wy, hz + hd / 2 + .02, B.G.ext, { shadow: false });
+    B.bx(hw * .9, .15, 1.0, 'wood', hx, hy + 2.3, hz + hd / 2 + .5, B.G.ext); B.col(hx, hz, hw + .5, hd + .5); }
+  B.rocks([[-22, -3, 4.6, 1.1], [-24, -10, 5, 1.3], [-23, -19, 5, 1.4], [24, -2, 4.4, 1.2], [26, -10, 5, 1.3], [-14, -25, 5.5, 1.6], [-4, -26, 6, 1.8], [7, -26, 6, 1.7], [17, -25, 5.5, 1.5], [26, -20, 5, 1.4], [-20, 6, 3.6, .8], [22, 5, 3.4, .8], [-11, Z0 - 3, 1.8, .6], [11, Z0 - 3, 1.8, .6]], '#585b61');
   B.finish(); parts.push(B);
   return { id: 'port', parts, update(hx, hz, dt, lv) { let ins = false; for (const p of parts) if (p.update(hx, hz, dt, lv)) ins = true; return ins; }, name: 'Port of Varnethryl' };
 }
@@ -539,7 +594,7 @@ export const BUILDING_DEFS = [
   { id: 'treasury', f: treasury, cx: 41, cz: -27, rot: 0, name: 'Treasury' },
   { id: 'keep', f: keep, cx: 0, cz: -48, rot: 0, name: 'Castle Keep' },
   { id: 'observatory', f: observatory, cx: -45, cz: -50, rot: 0, name: 'Observatory' },
-  { id: 'crypt', f: crypt, cx: 48, cz: -49, rot: 0, name: 'Crypt' },
+  { id: 'crypt', f: crypt, cx: 43, cz: -45, rot: 0, name: 'Crypt' },
   { id: 'market', f: market, cx: -24, cz: -6, rot: Math.PI / 2, name: 'Market Provisioner' },
   { id: 'apothecary', f: apothecary, cx: -24, cz: 8, rot: Math.PI / 2, name: 'Apothecary' },
   { id: 'bakery', f: bakery, cx: -24, cz: 20, rot: Math.PI / 2, name: 'Bakery' },

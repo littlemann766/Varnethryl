@@ -94,7 +94,7 @@ with sync_playwright() as p:
                                 if not ok3: break
                         if not ok3: print('    exit-warn: cannot follow a walk path from the top landing into the upper room', bool(wp), pg.evaluate("[__p3d.state.heroX,__p3d.state.heroZ]"), flush=True)
                         if not ok3 and os.environ.get('EXITSTRICT'): fails += 1; ok = False
-                        if ok3: pg.evaluate("([x,z,l])=>__p3d.teleport(x,z,l)", [cur[0], cur[1], m['l1']]); pg.wait_for_timeout(200)
+                        if True: pg.evaluate("([x,z,l])=>__p3d.teleport(x,z,l)", [cur[0], cur[1], m['l1']]); pg.wait_for_timeout(200)
                     if ok and os.environ.get('DOWN', '1') == '1':   # now turn around at the top and walk back down to the street
                         foot = W(bi['id'], m['cx'] - s * (h + 2.0), m['cz'] - c * (h + 2.0)); total += 1
                         r2, ms2, ok2 = drive([], foot, mode, m['l0'], m['y0']*bi['K']); fails += 0 if ok2 else 1

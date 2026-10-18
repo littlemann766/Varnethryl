@@ -22,4 +22,4 @@ with sync_playwright() as p:
         ok = a['blocky'] and g['glb'] and not g['blocky'] and c['blocky'] and abs(a['h']-g['h'])/max(a['h'],.1)<0.35
         print(('ok ' if ok else 'BAD'), id, 'blocky', a, 'glb', g)
         if not ok: bad.append(id)
-    print('blocky chars', n, 'bad', bad, 'errs', errs[:3]); print('PASS' if n>=20 and not bad and not errs else 'FAIL'); b.close()
+    print('blocky chars', n, 'bad', bad, 'errs', errs[:3]); print('PASS' if n>=40 and not bad and not errs else 'FAIL'); b.close()

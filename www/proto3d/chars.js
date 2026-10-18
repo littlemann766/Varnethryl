@@ -394,3 +394,20 @@ CHARS.garruk = { name: 'Garruk Stonefist', sheetKey: 'garruk', build() {
   return finalize(c, h.root, { R: 1 }); } };
 
 export const ORDER = ['aldric', 'darius', 'selene', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'orin', 'elira', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk', 'wolf'];
+import { CHARS3, ORDER3 } from './chars3.js';
+Object.assign(CHARS, CHARS3); ORDER.push(...ORDER3);
+import { CHARS4, ORDER4 } from './chars4.js';
+Object.assign(CHARS, CHARS4); ORDER.push(...ORDER4);
+import { CHARS5, ORDER5 } from './chars5.js';
+Object.assign(CHARS, CHARS5); ORDER.push(...ORDER5);
+import { CHARS6, ORDER6 } from './chars6.js';
+Object.assign(CHARS, CHARS6); ORDER.push(...ORDER6);
+
+import './chars7.js';
+import './rework1.js';
+import './rework2.js';
+import './rework3.js';
+import './rework4.js';
+import './rework5.js';
+import './rework6.js';
+import './rework7.js';

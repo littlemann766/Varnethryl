@@ -318,7 +318,9 @@ export function leafCluster(c, par, n, rad, col, y0, z0 = 0, spread = 1) { const
 
 // ---------- animation (procedural; also baked into GLB clips) ----------
 export const HELD = { }; // per-rig flags in rig.hold
+export const REG = {}; // per-character rework hooks (chars7.js): REG[spec.name] = c => add extra geometry before rig bake
 export function finalize(c, root, hold = {}, poseFn) {
+  if (REG[c.spec.name]) REG[c.spec.name](c);
   const grp = new THREE.Group(); grp.name = c.spec.name; grp.add(root);
   // rest pose
   const B = c.bones, a = (n, x, y, z) => B[n] && B[n].rotation.set(x, y, z);

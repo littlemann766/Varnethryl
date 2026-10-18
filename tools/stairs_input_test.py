@@ -42,6 +42,7 @@ with sync_playwright() as p:
                     x, y = box[0] + ix * box[2] * .8, box[1] - iy * box[2] * .8
                     if not joy: pg.mouse.move(box[0], box[1]); pg.mouse.down(); joy = True
                     pg.mouse.move(x, y)
+                if os.environ.get('TRACE'): print('   ', round(st['x'],2), round(st['z'],2), st['lv'], round(st['y'],2), sorted(held))
                 pg.wait_for_timeout(120); t += 120
             return pg.evaluate("({x:__p3d.state.heroX,z:__p3d.state.heroZ,lv:__p3d.state.level,y:__p3d.state.heroY})"), t
         finally:

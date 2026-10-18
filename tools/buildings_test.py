@@ -37,11 +37,13 @@ with sync_playwright() as p:
         if not bi['hasIn']: continue
         if bi['id'].startswith('wt'): front = 3.4
         inner = (0.5 if bi['id'].startswith('wt') else bi['r'] - 3.0) if bi['round'] else (bi['id_'] - 1.4)
+        if bi['id']=='colosseum': inner = 0
         out_ = W(0, front + 3.5); tgt = W(0, inner)
         r = walk(out_, tgt, 9000); walked_in = r['ins'] is not None and (bi['id']!='colosseum' or True) and (r['ins'] == bi['id'] or r['ins'] == 'port' or r['ins'].startswith('wt'))
         # solid: approach the side wall, should not get inside
         side = W((bi['r'] if bi['round'] else bi['w'] / 2) + 3, 0); mid = W(0, 0)
         r2 = walk(side, mid, 6000); solid = r2['ins'] is None
+        if os.environ.get('DBG'): print('  dbg', bi['id'], r, 'target', tgt, 'start', out_)
         ok = walked_in and solid; fails += 0 if ok else 1
         print('PASS' if ok else 'FAIL', f"{bi['id']:12s} walk-in={walked_in} walls-solid={solid} ({bi['name']})")
     b.close()

@@ -521,11 +521,11 @@ function port(spec, ctx) {
     const fl = new THREE.Mesh(new THREE.PlaneGeometry(1, .6), M('#1f3f86', { side: THREE.DoubleSide })); fl.position.set(.5, 10.1, 0); g.add(fl);
     for (const sx of [-.8, .8]) { const l = new THREE.Mesh(new THREE.SphereGeometry(.18, 6, 5), GLOW('ffc060', 1.8)); l.position.set(sx, 2.5, -4.6); g.add(l); }
     for (const m of g.children) m.castShadow = true; boats.push(g); B.col(7.5, Z0 + PD + 10, 3.4, 9.5); }
-  const TERR = [[-13, -8, 6, 5.5, 0, 3.2], [15.5, -7, 6, 5, 0, 3.4], [-9, -17, 6.5, 5, 2.2, 3.4], [2, -19, 7, 5.5, 3.4, 3.8], [12, -18, 6, 5, 2.6, 3.4], [-17, -16, 5.5, 5, 1.6, 3.2], [20, -15, 5.5, 5, 1.5, 3.2]];
+  const TERR = [[-13, -8, 6, 5.5, 0, 3.2], [15.5, -7, 6, 5, 0, 3.4], [19, -23, 5.5, 5, 3.4, 3.2], [20, -15, 5.5, 5, 1.5, 3.2]];
   for (const [hx, hz, hw, hd, hy, hh] of TERR) { if (hy) { B.bx(hw + 1.4, hy, hd + 1.4, 'stoneD', hx, hy / 2, hz, B.G.ext); } B.bx(hw, hh, hd, 'darkWood', hx, hy + hh / 2, hz, B.G.ext); B.gable(hw, hd, 2.4 + (hw > 6 ? .4 : 0), hx, hy + hh, hz, 'slate', B.G.ext, true, .6, 'timber'); B.bx(1, 1, .3, 'stoneD', hx + 1.6, hy + hh + 2.3, hz, B.G.ext);
     for (let k = -1; k <= 1; k += 2) for (const wy of [1.2, 2.5]) if (hy + wy < hy + hh) B.add(new THREE.PlaneGeometry(.7, .9), GLOW('ffb347', 1.4), hx + k * hw * .27, hy + wy, hz + hd / 2 + .02, B.G.ext, { shadow: false });
     B.bx(hw * .9, .15, 1.0, 'wood', hx, hy + 2.3, hz + hd / 2 + .5, B.G.ext); B.col(hx, hz, hw + .5, hd + .5); }
-  B.rocks([[-22, -3, 4.6, 1.1], [-24, -10, 5, 1.3], [-23, -19, 5, 1.4], [24, -2, 4.4, 1.2], [26, -10, 5, 1.3], [-14, -25, 5.5, 1.6], [-4, -26, 6, 1.8], [7, -26, 6, 1.7], [17, -25, 5.5, 1.5], [26, -20, 5, 1.4], [-20, 6, 3.6, .8], [22, 5, 3.4, .8], [-11, Z0 - 3, 1.8, .6], [11, Z0 - 3, 1.8, .6]], '#585b61');
+  B.rocks([[-22, -3, 4.6, 1.1], [24, -2, 4.4, 1.2], [26, -10, 5, 1.3], [-14, -2, 3.0, 1.0], [-4, -26, 6, 1.8], [7, -26, 6, 1.7], [17, -25, 5.5, 1.5], [26, -20, 5, 1.4], [-20, 6, 3.6, .8], [22, 5, 3.4, .8], [-11, Z0 - 3, 1.8, .6], [11, Z0 - 3, 1.8, .6]], '#585b61');
   B.finish(); parts.push(B);
   return { id: 'port', parts, update(hx, hz, dt, lv) { let ins = false; for (const p of parts) if (p.update(hx, hz, dt, lv)) ins = true; return ins; }, name: 'Port of Varnethryl' };
 }
@@ -593,7 +593,7 @@ export const BUILDING_DEFS = [
   { id: 'mage', f: mage, cx: -44, cz: -31, rot: 0, name: 'Mage Academy' },
   { id: 'treasury', f: treasury, cx: 41, cz: -27, rot: 0, name: 'Treasury' },
   { id: 'keep', f: keep, cx: 0, cz: -48, rot: 0, name: 'Castle Keep' },
-  { id: 'observatory', f: observatory, cx: -45, cz: -50, rot: 0, name: 'Observatory' },
+  { id: 'observatory', f: observatory, cx: -41, cz: -46, rot: 0, name: 'Observatory' },
   { id: 'crypt', f: crypt, cx: 43, cz: -45, rot: 0, name: 'Crypt' },
   { id: 'market', f: market, cx: -24, cz: -6, rot: Math.PI / 2, name: 'Market Provisioner' },
   { id: 'apothecary', f: apothecary, cx: -24, cz: 8, rot: Math.PI / 2, name: 'Apothecary' },

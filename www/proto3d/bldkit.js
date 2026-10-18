@@ -47,6 +47,7 @@ export function mergeGroup(grp) {
   for (const o of rm) { grp.remove(o); o.geometry.dispose(); }
 }
 
+const DOOR_MAXW = 2.2, DOOR_MAXH = 1.95;   // local units; x K = world: doors ~1.2x hero height (3.3 vs 2.7)
 export class Builder {
   constructor(ctx, spec) {
     this.ctx = ctx; this.spec = spec; const { scene, colliders } = ctx; this.colliders = colliders;
@@ -100,7 +101,7 @@ export class Builder {
   // ---- standard rectangular shell: stone base + upper storey, hollow, door gap at +z ----
   rectShell(o) { const _lv = this.lvTag; this.lvTag = undefined; try { return this._rectShell(o); } finally { this.lvTag = _lv; } }
   _rectShell(o) {
-    const { w, d, h } = o, T = this.T, DW = o.DW || 2.2, DH = o.DH || 2.6, hs = o.hs === undefined ? h * .42 : o.hs;
+    const { w, d, h } = o, T = this.T, DW = Math.min(o.DW || 2.2, DOOR_MAXW), DH = Math.min(o.DH || 2.6, DOOR_MAXH), hs = o.hs === undefined ? h * .42 : o.hs;
     const lo = o.lower || 'stone', up = o.upper || 'timber'; this.w = w; this.d = d; this.h = h; this.DW = DW;
     const seg = (bw, bh, bd, x, y, z) => { // stacked: stone base to hs, upper above
       if (hs > 0 && hs < y + bh / 2 + .01 && y - bh / 2 < hs - .01 && bh > .01) { /* split below */ }
@@ -247,6 +248,7 @@ Builder.prototype.clearZone = function (m, level, du0, du1, floorY) {
 };
 Builder.prototype.stairs = function (o) {
   const { cx, cz, ang = 0, len, w = 1.8, l0 = 0, y0 = 0, l1, y1 } = o;
+  (globalThis.__stairLog = globalThis.__stairLog || []).push({ n: this.name, len, w, rise: y1 - y0, deg: Math.round(Math.atan2(y1 - y0, len) * 180 / Math.PI) });
   { const mm = { cx, cz, ang, len, w }; (this.stairZones = this.stairZones || []).push({ m: mm, level: l0, du0: -len / 2 - 1.5, du1: len / 2, fy: y0 }, { m: mm, level: l1, du0: len / 2 - .3, du1: len / 2 + 1.5, fy: y1 }); for (const z of this.stairZones.slice(-2)) this.clearZone(z.m, z.level, z.du0, z.du1, z.fy); } const m = { cx, cz, ang, len, w, l0, y0, l1, y1, flipUp: o.flipUp }; this.ramps.push(m); this.levelGroup(l1);
   this._st = true;
   const n = Math.max(3, Math.round((y1 - y0) / .3)), s = Math.sin(ang), c = Math.cos(ang), grp = l0 ? this.levelGroup(l0) : this.G.int, key = o.key || 'wood';
@@ -289,7 +291,7 @@ Builder.prototype.gallery = function (o = {}) {
 // round hollow shell (towers, colosseum, windmill, lighthouse, observatory): N wall segments with a door gap at local +z
 Builder.prototype.roundShell = function (o) { const _lv = this.lvTag; this.lvTag = undefined; try { return this._roundShell(o); } finally { this.lvTag = _lv; } };
 Builder.prototype._roundShell = function (o) {
-  const { r, h } = o, T = o.T || this.T, N = o.N || Math.max(12, Math.round(r * 2.6)), DW = o.DW || 2.2, DH = o.DH || 2.6, key = o.key || 'stone', seg = 2 * Math.PI * r / N;
+  const { r, h } = o, T = o.T || this.T, N = o.N || Math.max(12, Math.round(r * 2.6)), DW = Math.min(o.DW || 2.2, DOOR_MAXW), DH = Math.min(o.DH || 2.6, DOOR_MAXH), key = o.key || 'stone', seg = 2 * Math.PI * r / N;
   this.radius = r; this.w = this.d = r * 2; this.h = h; this.DW = DW; this.iw = r - T; this.id_ = r - T;
   const doorA = Math.asin(Math.min(.95, (DW / 2 + seg * .35) / r));
   for (let i = 0; i < N; i++) {

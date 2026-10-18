@@ -3,7 +3,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { makeEnterable } from './interiors.js';
-import { buildVillage, buildWalls } from './buildings.js';
+import { buildVillage, buildWalls, WORLD_B, PK, KB } from './buildings.js';
 import { zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { createBump, makeActor, styleFor, findNodes, restoreNodes, applyPose } from './bump.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
@@ -31,19 +31,19 @@ const SKY_TOP = '#7fb2e6', SKY_HORIZON = '#f4e3c3';
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
   scene.background = t;
 }
-scene.fog = new THREE.Fog(0xdde8ee, 38, 90);
+scene.fog = new THREE.Fog(0xdde8ee, 70, 180);
 
-const camera = new THREE.PerspectiveCamera(50, 1, 0.5, 140);
+const camera = new THREE.PerspectiveCamera(50, 1, 0.5, 320);
 
 // Lights: hemisphere fill + one shadow-casting sun that follows the hero
 scene.add(new THREE.HemisphereLight(0xcfe6ff, 0x6a7a4a, 1.25));
 const sun = new THREE.DirectionalLight(0xfff0d0, 2.2);
-const SHADOW_SIZE = 1024, SHADOW_R = 15;
+const SHADOW_SIZE = 1024, SHADOW_R = 24;
 sun.castShadow = true;
 sun.shadow.mapSize.set(SHADOW_SIZE, SHADOW_SIZE);
-Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 70 });
+Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 110 });
 sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.03;
-const SUN_OFF = new THREE.Vector3(-18, 30, 14);
+const SUN_OFF = new THREE.Vector3(-27, 45, 21);
 scene.add(sun, sun.target);
 
 // ---------- helpers ----------
@@ -75,7 +75,9 @@ function mesh(geo, mat, x, y, z, parent, shadow = true) {
 }
 
 // ---------- world ----------
-const WORLD = 60; // half extent (village grew for the 3D buildings)
+const HS = 1.5;                 // character scale (hero, party, NPCs) so people are in proportion with the grand doors
+const WORLD = WORLD_B; // half extent (village grew for the 3D buildings)
+const START_Z = 14 * PK;
 const grass = canvasTex(256, (g, s) => {
   g.fillStyle = '#5c9a45'; g.fillRect(0, 0, s, s);
   for (let i = 0; i < 2600; i++) { g.fillStyle = `hsl(${88 + rnd() * 30},${40 + rnd() * 20}%,${30 + rnd() * 18}%)`; g.fillRect(rnd() * s, rnd() * s, 2, 3); }
@@ -91,11 +93,11 @@ const ground = mesh(new THREE.PlaneGeometry(WORLD * 4, WORLD * 4), new THREE.Mes
 ground.rotation.x = -Math.PI / 2;
 { // plaza + paths (cobble)
   const cm = new THREE.MeshLambertMaterial({ map: cobble.clone() });
-  cm.map.repeat.set(11, 11); cm.map.needsUpdate = true;
-  const plaza = mesh(new THREE.CircleGeometry(13, 48), cm, 0, 0.02, 0, null, false); plaza.rotation.x = -Math.PI / 2;
-  const pm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); pm.map.repeat.set(1, 22); pm.map.needsUpdate = true;
-  const p1 = mesh(new THREE.PlaneGeometry(5, 120), pm, 0, 0.03, 0, null, false); p1.rotation.x = -Math.PI / 2;
-  const p2 = mesh(new THREE.PlaneGeometry(120, 4), pm, 0, 0.031, 0, null, false); p2.rotation.x = -Math.PI / 2; p2.material.map.repeat.set(24, 0.8);
+  cm.map.repeat.set(11 * PK, 11 * PK); cm.map.needsUpdate = true;
+  const plaza = mesh(new THREE.CircleGeometry(13 * PK, 64), cm, 0, 0.02, 0, null, false); plaza.rotation.x = -Math.PI / 2;
+  const pm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); pm.map.repeat.set(1, 22 * PK * 2); pm.map.needsUpdate = true;
+  const p1 = mesh(new THREE.PlaneGeometry(5 * KB, WORLD * 2), pm, 0, 0.03, 0, null, false); p1.rotation.x = -Math.PI / 2;
+  const p2 = mesh(new THREE.PlaneGeometry(WORLD * 2, 4 * KB), pm, 0, 0.031, 0, null, false); p2.rotation.x = -Math.PI / 2; p2.material.map.repeat.set(24 * PK, 0.8 * KB);
 }
 
 function wallSeg(x1, z1, x2, z2) {
@@ -167,19 +169,19 @@ if (BLD_ON) {
 {
   const pts = [];
   const blocked = (x, z) => {
-    if (Math.hypot(x, z) < 12) return true;
-    if (Math.abs(x) < 3.5) return true;                   // main road
-    if (Math.abs(z) < 3) return true;
+    if (Math.hypot(x, z) < 12 * PK) return true;
+    if (Math.abs(x) < 3.5 * KB) return true;                   // main road
+    if (Math.abs(z) < 3 * KB) return true;
     for (const c of colliders) {
-      if (c.type === 'box' && x > c.minX - 2.5 && x < c.maxX + 2.5 && z > c.minZ - 2.5 && z < c.maxZ + 2.5) return true;
-      if (c.type === 'circle' && Math.hypot(x - c.x, z - c.z) < c.r + 2.5) return true;
+      if (c.type === 'box' && x > c.minX - 4 && x < c.maxX + 4 && z > c.minZ - 4 && z < c.maxZ + 4) return true;
+      if (c.type === 'circle' && Math.hypot(x - c.x, z - c.z) < c.r + 4) return true;
     }
     return false;
   };
   let guard = 0;
-  while (pts.length < (BLD_ON ? 110 : 56) && guard++ < 6000) {
+  while (pts.length < (BLD_ON ? 230 : 56) && guard++ < 6000) {
     const x = (rnd() * 2 - 1) * (WORLD - 3), z = (rnd() * 2 - 1) * (WORLD - 3);
-    if (!blocked(x, z) && !pts.some(p => Math.hypot(p.x - x, p.z - z) < 3)) pts.push({ x, z, s: 0.8 + rnd() * 0.7 });
+    if (!blocked(x, z) && !pts.some(p => Math.hypot(p.x - x, p.z - z) < 5)) pts.push({ x, z, s: (0.8 + rnd() * 0.7) * 1.6 });
   }
   const trunkG = new THREE.CylinderGeometry(0.22, 0.32, 1.8, 6), leafG = new THREE.ConeGeometry(1.5, 3.4, 7), leaf2G = new THREE.ConeGeometry(1.1, 2.6, 7);
   const IT = new THREE.InstancedMesh(trunkG, mats.trunk, pts.length), IL = new THREE.InstancedMesh(leafG, mats.leaf, pts.length), IL2 = new THREE.InstancedMesh(leaf2G, mats.leaf2, pts.length);
@@ -232,7 +234,7 @@ const HT = await makeHeroTextures();
 const HEROES = [buildAldric(ALDRIC_TEX), buildUmbral(HT), buildSelene(HT)];
 const HERO_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil'];
 let hero = HEROES[0];
-HEROES.forEach((h, i) => { h.position.set(0, 0, 14); h.visible = i === 0; scene.add(h); });
+HEROES.forEach((h, i) => { h.position.set(0, 0, START_Z); h.visible = i === 0; scene.add(h); });
 function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach((b, k) => b.classList.toggle('on', k === i)); }
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
@@ -284,7 +286,7 @@ function wrapGLB(g) {
   m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
   if (new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
   const box = new THREE.Box3().setFromObject(m), hgt = box.max.y - box.min.y;
-  if (hgt > 0.01) { const sc = 1.8 / hgt; m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
+  if (hgt > 0.01) { const sc = 1.8 * HS / hgt; m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
   const mixer = new THREE.AnimationMixer(m), act = {};
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
   if (act.idle) act.idle.play(); if (act.walk) act.walk.play();
@@ -339,7 +341,7 @@ const marker = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.55, 20), new THREE.
 marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = false; scene.add(marker);
 
 // ---------- input ----------
-const state = { level: 0, heroY: 0, inside: null, zoom: 1, heroX: 0, heroZ: 14, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0, vx: 0, vz: 0 };
+const state = { level: 0, heroY: 0, inside: null, zoom: 1, heroX: 0, heroZ: START_Z, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0, vx: 0, vz: 0 };
 const keys = new Set();
 addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
@@ -383,7 +385,7 @@ canvas.addEventListener('pointerup', canvasUp); canvas.addEventListener('pointer
 addEventListener('contextmenu', e => e.preventDefault());
 
 // ---------- movement + collision ----------
-const HERO_R = 0.5, SPEED = 5.2;
+const HERO_R = 0.5 * HS, SPEED = 5.2 * HS;
 function resolve(p) {
   let hitAny = false;
   const LV = state.level;
@@ -413,7 +415,7 @@ function resolve(p) {
 const tmp = { x: 0, z: 0 };
 // multi-level floors (buildings.js): the hero has a level + y; upper floors only walkable where a floor/stair exists
 function surfaceAt(x, z, level) {
-  for (const b of ectx.multi) { { const rc = b.reach || 40; if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
+  for (const b of ectx.multi) { { const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
   return level === 0 ? { y: 0 } : null;
 }
 function updateLevel() {
@@ -426,12 +428,12 @@ const qp = new URLSearchParams(location.search);
 const BUMP_ON = qp.get('nobump') == null;
 const PARTY_N = BUMP_ON ? Math.max(0, Math.min(3, qp.get('party') != null ? +qp.get('party') || 0 : 2)) : 0;
 const NPC_N = BUMP_ON ? (qp.get('npcs') != null ? Math.max(0, Math.min(2, +qp.get('npcs') || 0)) : 1) : 0;
-const bumpSys = createBump();
+const bumpSys = createBump({ contactR: 0.45 * HS });
 const playerAct = makeActor('aldric', { fixed: true }); bumpSys.add(playerAct);
 const crowd = []; // followers + NPCs: { a, root, kind, leash, home }
 const tmp2 = { x: 0, z: 0 };
 /* crowd members skip the shadow-map pass (halves their draw calls); one shared blob decal each instead */
-const BLOB_GEO = new THREE.CircleGeometry(0.55, 14), BLOB_MAT = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false });
+const BLOB_GEO = new THREE.CircleGeometry(0.55 * HS, 14), BLOB_MAT = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false });
 const HERO_GLB_ID = i => GLB_IDS[i] || 'aldric';
 async function loadActorModel(id) {
   try { const buf = await fetchGLB(id); return await new Promise(res => gl.parse(buf, '', g => { try { res(wrapGLB(g)); } catch (e) { res(null); } }, () => res(null))); }
@@ -447,8 +449,8 @@ function spawnCrowd(id, kind, x, z, leash, yaw) {
 {
   const used = new Set([HERO_GLB_ID(+(qp.get('hero') || 0))]);
   const pick = ['elira', 'orin', 'seraphine', 'finn', 'brynn'].filter(x => !used.has(x));
-  for (let i = 0; i < PARTY_N; i++) spawnCrowd(pick[i], 'party', (i - (PARTY_N - 1) / 2) * 1.6, 16.8 + i * 0.3, 2.6 + i * 0.5, 0);
-  for (let i = 0; i < NPC_N; i++) spawnCrowd(['thorne', 'rook'][i], 'npc', 4.5 + i * 2.5, 15.5 - i * 1.5, 0, Math.PI * 0.75);
+  for (let i = 0; i < PARTY_N; i++) spawnCrowd(pick[i], 'party', (i - (PARTY_N - 1) / 2) * 1.6 * HS, START_Z + (2.8 + i * 0.3) * HS, (2.6 + i * 0.5) * HS, 0);
+  for (let i = 0; i < NPC_N; i++) spawnCrowd(['thorne', 'rook'][i], 'npc', (4.5 + i * 2.5) * HS, START_Z + (1.5 - i * 1.5) * HS, 0, Math.PI * 0.75);
 }
 function updateCrowd(dt) {
   const pa = playerAct;
@@ -485,7 +487,7 @@ const _g = { x: 0, z: 0 };
 function stairGuide(vx, vz) {
   _g.x = vx; _g.z = vz; if (!vx && !vz) return _g;
   for (const b of ectx.multi) {
-    const rc = b.reach || 40; if (Math.abs(state.heroX - b.cx) > rc || Math.abs(state.heroZ - b.cz) > rc) continue;
+    const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(state.heroX - b.cx) > rc || Math.abs(state.heroZ - b.cz) > rc) continue;
     for (const m of b.ramps) {
       const low = state.level === m.l0, up = state.level === m.l1; if (!low && !up) continue;
       const [lx, lz] = b.toL(state.heroX, state.heroZ), [u, v] = b.rampUV(m, lx, lz), hw = m.w / 2; if (Math.abs(v) > hw + 2.6) continue;
@@ -559,7 +561,7 @@ function updateHero(dt) {
 const _sp = new THREE.Vector3();
 function cullSkins() { // characters: skinned meshes skip frustum culling, so cull by distance + only the near ones cast shadows (shadow box is ~15 m)
   for (const sm of SKINS) { if (!sm.parent) continue; const root = sm.parent; root.getWorldPosition(_sp); const d = Math.hypot(_sp.x - state.heroX, _sp.z - state.heroZ);
-    const v = d < 75 || sm === hero; if (sm.visible !== v) sm.visible = v; }
+    const v = d < 115 || sm === hero; if (sm.visible !== v) sm.visible = v; }
 }
 let walkT = 0, idleT = 0, prevYaw = 0;
 function animateHero(dt) {
@@ -582,13 +584,13 @@ function animateHero(dt) {
 }
 
 // ---------- camera ----------
-const camPos = new THREE.Vector3(0, 8, 24), camLook = new THREE.Vector3(0, 1.5, 14);
+const camPos = new THREE.Vector3(0, 8 * HS, START_Z + 10 * HS), camLook = new THREE.Vector3(0, 1.5 * HS, START_Z);
 const _want = new THREE.Vector3(), _look = new THREE.Vector3();
 function updateCamera(dt, snap) {
   const portrait = innerHeight > innerWidth;
-  const z = state.zoom || 1, close = z < 1, dist = close ? (portrait ? 7.0 : 6.0) * (z / 0.3) : (portrait ? 10.5 : 9), height = close ? 2.2 : (portrait ? 7.2 : 6.2);
+  const z = state.zoom || 1, close = z < 1, dist = HS * (close ? (portrait ? 7.0 : 6.0) * (z / 0.3) : (portrait ? 10.5 : 9)), height = HS * (close ? 2.2 : (portrait ? 7.2 : 6.2));
   const hy = state.heroY || 0, want = _want.set(state.heroX + Math.sin(state.camYaw) * dist, height + hy, state.heroZ + Math.cos(state.camYaw) * dist);
-  const look = _look.set(state.heroX, (close ? 1.05 : 1.6) + hy, state.heroZ);
+  const look = _look.set(state.heroX, HS * (close ? 1.05 : 1.6) + hy, state.heroZ);
   const k = snap ? 1 : 1 - Math.pow(0.0015, dt);
   camPos.lerp(want, k); camLook.lerp(look, k);
   camera.position.copy(camPos); camera.lookAt(camLook);

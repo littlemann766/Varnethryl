@@ -12,7 +12,8 @@ function wins(B, o) { // facade windows: front [[x,y]], side [[z,y]] (both sides
   for (const [x, y] of o.back || []) B.win(x, y, -d / 2 - .04, Math.PI, ww, hh, key);
 }
 const frontWinXs = (B, n = 1) => { const fw = (B.w - B.DW) / 2, out = []; for (const s of [-1, 1]) for (let i = 0; i < n; i++) out.push(s * (B.DW / 2 + fw * (i + .5) / n)); return out; };
-export const PLAN = 1.3;   // plan (footprint) scale for the standard buildings: roomier interiors, gentler stairs; heights unchanged (doors stay ~1.4x hero height)
+export const KB = 1.7, PK = 2.5, WORLD_B = 60 * PK;   // building uniform scale, village spacing scale, world half extent
+export const PLAN = 1.5;   // plan (footprint) scale for the standard buildings: roomier interiors, gentler stairs; heights unchanged (doors stay ~1.4x hero height)
 function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + banners + sign
   if (!o.noScale) o = Object.assign({}, o, { w: o.w * PLAN, d: o.d * PLAN });
   const B = new Builder(ctx, spec); B.name = o.name; B.rectShell(o);
@@ -346,7 +347,7 @@ function keep(spec, ctx) {
 function gatehouse(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Gatehouse of Varnethryl'; const TW = 2.4, H = 8;
   B.w = 14; B.d = 6; B.h = H; B.radius = 9;
-  const gts = []; for (const s of [-1, 1]) { const [wx, wz] = B.toW(s * 7.0, 0); gts.push(hollowTower(ctx, 'gt' + (s < 0 ? 0 : 1), wx, wz, Math.PI + (spec.rot || 0), 4.4));   // hollow, climbable gate towers (door toward the town)
+  const gts = []; for (const s of [-1, 1]) { const [wx, wz] = B.toW(s * 7.0, 0); gts.push(hollowTower(ctx, 'gt' + (s < 0 ? 0 : 1), wx, wz, Math.PI + (spec.rot || 0), 4.4, spec.K || 1));   // hollow, climbable gate towers (door toward the town)
     B.bx(5.6 - 2.5 - TW + 0, H, 5, 'stone', s * ((TW + 5.6 - 2.5) / 2 + 0), H / 2, 0, B.G.ext); }
   B.bx(TW * 2 + .02, H - 4.6, 5, 'stone', 0, 4.6 + (H - 4.6) / 2, 0, B.G.ext);
   for (let i = 0; i < 6; i++) { const x = -3 + i * 1.2; B.bx(.7, .7, .7, 'stone', x, H + .35, 2.2, B.G.ext); B.bx(.7, .7, .7, 'stone', x, H + .35, -2.2, B.G.ext); }
@@ -493,12 +494,12 @@ function lighthouse(spec, ctx) {
 // ---------- 23. Port of Varnethryl (simplified: harbour pond, pier, boats, dock warehouse/tavern, harbour sign) ----------
 function port(spec, ctx) {
   const parts = []; const mk = (s, f) => { const b = f({ ...s }, ctx); parts.push(b); return b; };
-  const warehouse = mk({ id: 'port', cx: spec.cx + 3, cz: spec.cz - 7.6, rot: 0 }, (s, c) => std(s, c, { name: 'Port Tavern & Dockmaster', w: 11, d: 8, h: 6, hs: 2.6, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 3.2, ridge: 'x', over: .8, endKey: 'darkWood', sign: ['Port Tavern', '⚓', 5.9, 3.6], banners: [[-4, 4.4, .8, 1.8], [4, 4.4, .8, 1.8]], chimneys: [[-3, -2]], floor: 'floorPlank', wn: 2,
+  const KK = spec.K || 1, warehouse = mk({ id: 'port', cx: spec.cx + 3 * KK, cz: spec.cz - 7.6 * KK, rot: 0, K: KK }, (s, c) => std(s, c, { name: 'Port Tavern & Dockmaster', w: 11, d: 8, h: 6, hs: 2.6, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 3.2, ridge: 'x', over: .8, endKey: 'darkWood', sign: ['Port Tavern', '⚓', 5.9, 3.6], banners: [[-4, 4.4, .8, 1.8], [4, 4.4, .8, 1.8]], chimneys: [[-3, -2]], floor: 'floorPlank', wn: 2,
     interior(B) { const iw = B.iw, id_ = B.id_;
       B.counter(1.5, -id_ + 1.1, 4, .8); B.shelf(1.5, -id_ + .35, 3.2); B.table(-2.0, .2); B.table(-.6, 2.0); B.table(-2.4, 2.6); B.barrel(iw - .5, 0); B.barrel(iw - .5, 1); B.crate(iw - 1.2, 2.2, .9); B.tableR(-iw + 1.6, -id_ + 1.3, 2.4, 1.2, 'darkWood'); B.bx(2.6, 1.7, .1, 'parchment', -iw + 1.7, 2.3, -id_ + .2, B.G.int, { shadow: false });
       B.banner(-.4, 3.0, -id_ + .3, 0, .9, 1.8); B.lamp(-2, 3.6, 1); B.lamp(2, 3.6, 1); B.rugAt(-1.4, 1.4, 3.2, 2.8); B.hay(iw - 1.2, -id_ + .8, 1.4, 1, .8); upperStd(B, { theme: 'bed', y: 3.0, side: 'L' });
     } }));
-  const B = new Builder(ctx, { id: 'port_dock', cx: spec.cx, cz: spec.cz, rot: 0 }); B.insideTest = null; B.radius = 16; B.name = 'Port of Varnethryl';
+  const B = new Builder(ctx, { id: 'port_dock', cx: spec.cx, cz: spec.cz, rot: 0, K: KK }); B.insideTest = null; B.radius = 16; B.name = 'Port of Varnethryl';
   const PW = 20, PD = 9, Z0 = 0;           // water basin local: x -10..10, z 0..9 (z grows toward the sea)
   B.add(new THREE.PlaneGeometry(PW, PD), M('water', { transparent: true, opacity: .95 }), 0, .02, Z0 + PD / 2 + .0, B.G.ext, { shadow: false }).rotation.x = -Math.PI / 2;
   B.bx(PW + 1.6, .6, .8, 'stoneD', 0, .2, Z0 - .3, B.G.ext); B.bx(.8, .6, PD + .6, 'stoneD', -PW / 2 - .4, .2, Z0 + PD / 2, B.G.ext); B.bx(.8, .6, PD + .6, 'stoneD', PW / 2 + .4, .2, Z0 + PD / 2, B.G.ext);
@@ -569,8 +570,8 @@ const house = n => (spec, ctx) => { const p = houseSpecs[n % 4];
     } }); };
 
 // ---------- town walls & watchtowers ----------
-function hollowTower(ctx, id, x, z, rot, R = 4.4) { // climbable round tower (2 levels + battlement roof), door faces local +z
-  const t = new Builder(ctx, { id, cx: x, cz: z, rot }); t.name = 'Watchtower'; t.roundShell({ r: R, h: 8.2, key: 'stone', N: 16, T: .6, floor: 'floorStone' });
+function hollowTower(ctx, id, x, z, rot, R = 4.4, K = 1) { // climbable round tower (2 levels + battlement roof), door faces local +z
+  const t = new Builder(ctx, { id, cx: x, cz: z, rot, K }); t.name = 'Watchtower'; t.roundShell({ r: R, h: 8.2, key: 'stone', N: 16, T: .6, floor: 'floorStone' });
   t.ring(R + .3, .5, 'stoneD', 0, 8.45, 0, t.G.ext, 16); for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283; t.bx(.7, .7, .7, 'stone', Math.sin(a) * (R + .15), 9.05, Math.cos(a) * (R + .15), t.G.ext); }
   t.cone(R + .8, 6.2, 'slate', 0, 8.7, 0, t.G.roof, 16); t.banner(0, 4.6, R + .05, 0, 1, 2.4);
   for (let i = 0; i < 3; i++) { const a = 2.2 + i * 1.3; t.win(Math.sin(a) * (R + .05), 5, Math.cos(a) * (R + .05), a, .4, .9, 'glass'); }
@@ -580,10 +581,11 @@ function hollowTower(ctx, id, x, z, rot, R = 4.4) { // climbable round tower (2 
     t.fullUpper({ level: 2, y: 8.2, y0: 4.2, l0: 1, disc: iw - .05, stair: S2, rooms(U) { U.barrel(-1.6, -1.5); U.crate(-1.7, 1.5, .7); U.lamp(0, 1.6, 0); } }); }
   t.radius = 8; t.finish(); return t;
 }
-export function buildWalls(ctx, WORLD, GATE_W) {
-  const tmpl = { id: 'walls', cx: 0, cz: 0, rot: 0 }; const B = new Builder(ctx, tmpl); B.name = 'Town Walls & Watchtowers'; B.insideTest = null; B.radius = 9999;
+export function buildWalls(ctx, WORLD_W, GATE_W) {
+  const KW = KB, WORLD = WORLD_W / KW;   // the wall builder works in local units (uniformly scaled by KW like every building)
+  const tmpl = { id: 'walls', cx: 0, cz: 0, rot: 0, K: KW }; const B = new Builder(ctx, tmpl); B.name = 'Town Walls & Watchtowers'; B.insideTest = null; B.radius = 9999;
   B.reach = 9999; const WH = 4.2, WT = 2.6;   // wall height / thickness (wide enough for a wall walk)
-  const DECO = [[0, -WORLD], [-30, -WORLD], [30, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, 30], [WORLD, 30], [-WORLD, -30], [WORLD, -30], [-30, WORLD], [30, WORLD]];
+  const Q = 30 * PK / KW, DECO = [[0, -WORLD], [-Q, -WORLD], [Q, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, Q], [WORLD, Q], [-WORLD, -Q], [WORLD, -Q], [-Q, WORLD], [Q, WORLD]];
   const run = (x1, z1, x2, z2) => { const len = Math.hypot(x2 - x1, z2 - z1), horiz = Math.abs(z2 - z1) < .01, h = WH, t = WT, cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
     const nx = horiz ? 0 : (x1 < 0 ? 1 : -1), nz = horiz ? (z1 < 0 ? 1 : -1) : 0;   // inward normal
     B.bx(horiz ? len : t, h, horiz ? t : len, 'stone', cx, h / 2, cz, B.G.ext);
@@ -599,18 +601,18 @@ export function buildWalls(ctx, WORLD, GATE_W) {
     for (let [sa, sb] of segs) { if (sb - sa < 5) continue;
       const rect = horiz ? [sa, sb, cz - t / 2 + .05, cz + t / 2 - .55] : [cx - t / 2 + .05, cx + t / 2 - .55, sa, sb]; if (!horiz) { const o = nx > 0 ? [cx - t / 2 + .55, cx + t / 2 + .12] : [cx - t / 2 - .12, cx + t / 2 - .55]; rect[0] = o[0]; rect[1] = o[1]; } else { const o = nz > 0 ? [cz - t / 2 + .55, cz + t / 2 + .12] : [cz - t / 2 - .12, cz + t / 2 - .55]; rect[2] = o[0]; rect[3] = o[1]; }
       B.floors.push({ level: 1, y: h, rects: [rect] }); B.levelGroup(1);
-      let mid = (sa + sb) / 2; if (!horiz && cx < 0 && mid > 38 && mid < 52) mid = sa + 1.9;   // keep clear of the port basin
+      let mid = (sa + sb) / 2; if (!horiz && cx < 0 && mid > 70 / KW && mid < 135 / KW) mid = Math.max(sa + 1.9, mid);   // keep clear of the port basin
       for (let d = 0; d < 6; d += .25) { let ok = false; for (const s of [mid + d, mid - d]) if (s - 1.4 > sa && s + 1.4 < sb && bu.every(b => Math.abs(b - s) > 1.7)) { mid = s; ok = true; break; } if (ok) break; }
-      const LEN = 5.2, cxs = horiz ? mid : cx + nx * (t / 2 + LEN / 2), czs = horiz ? cz + nz * (t / 2 + LEN / 2) : mid;
+      const LEN = h / Math.tan(26 * Math.PI / 180), cxs = horiz ? mid : cx + nx * (t / 2 + LEN / 2), czs = horiz ? cz + nz * (t / 2 + LEN / 2) : mid;
       const ang = horiz ? (nz > 0 ? Math.PI : 0) : (nx > 0 ? -Math.PI / 2 : Math.PI / 2);   // climbs toward the wall
       B.stairs({ cx: cxs, cz: czs, ang, len: LEN, w: 1.7, l0: 0, y0: 0, l1: 1, y1: h, key: 'stoneD', flipUp: .7 }); } };
   const g = GATE_W;
   run(-WORLD, -WORLD, WORLD, -WORLD); run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -10.4, WORLD); run(10.4, WORLD, WORLD, WORLD);
   const towers = []; const tw = (x, z, enter) => { if (!enter) { B.tower(x, z, 2.4, 7.6, { coneH: 5.4, windows: 3, wa: x + z }); B.banner(x, 4.2, z + (z < 0 ? 2.5 : -2.5), z < 0 ? 0 : Math.PI, 1, 2.2); return; }
-    const th = Math.atan2(-x, -z), t = hollowTower(ctx, 'wt' + towers.length, x, z, th); towers.push(t); };
+    const th = Math.atan2(-x, -z), t = hollowTower(ctx, 'wt' + towers.length, x * KW, z * KW, th, 4.4, KW); towers.push(t); };
   const E = WORLD - 6;
   tw(-E, -E, true); tw(E, -E, true); tw(-E, E, true); tw(E, E, true);
-  for (const [x, z] of [[0, -WORLD], [-30, -WORLD], [30, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, 30], [WORLD, 30], [-WORLD, -30], [WORLD, -30], [-30, WORLD], [30, WORLD]]) tw(x, z, false);
+  for (const [x, z] of DECO) tw(x, z, false);
   B.finish(); return { id: 'walls', parts: [B, ...towers], update(hx, hz, dt, lv) { let ins = null; for (const p of towers) if (p.update(hx, hz, dt, lv)) ins = p.id; return ins; } };
 }
 
@@ -647,5 +649,6 @@ export const BUILDING_DEFS = [
   { id: 'fountain', f: fountain, cx: 0, cz: 0, rot: 0, name: 'Fountain Monument' },
 ];
 export function buildVillage(ctx, only) {
-  const out = []; for (const d of BUILDING_DEFS) { if (only && !only.includes(d.id)) continue; const b = d.f({ id: d.id, cx: d.cx, cz: d.cz, rot: d.rot }, ctx); b.defName = d.name; b.def = d; out.push(b); } return out;
+  const out = []; for (const d of BUILDING_DEFS) { if (only && !only.includes(d.id)) continue; const cz = d.id === 'gatehouse' ? WORLD_B - 1.2 : d.cz * PK;
+    const b = d.f({ id: d.id, cx: d.cx * PK, cz, rot: d.rot, K: KB }, ctx); b.defName = d.name; b.def = d; out.push(b); } return out;
 }

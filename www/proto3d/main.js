@@ -541,7 +541,7 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 window.__p3d = {
-  state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, enterables,
+  state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, enterables,
   enterables, get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; updateLevel(); },

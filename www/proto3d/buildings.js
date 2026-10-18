@@ -441,8 +441,14 @@ function crypt(spec, ctx) {
 function windmill(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Windmill of Varnethryl'; const R = 3.4, H = 4.6;
   B.roundShell({ r: R, h: H, key: 'stone', N: 14, DW: 2.0, DH: 2.6, floor: 'floorStone', T: .55 });
-  B.cyl(R - .2, R - .7, 4.6, 'timber', 0, H + 2.3, 0, B.G.roof, 12); B.cyl(R, R, .2, 'darkWood', 0, H + .1, 0, B.G.roof, 12);
+  B.cyl(R - .2, R - .7, 4.6, 'stone', 0, H + 2.3, 0, B.G.roof, 12); B.cyl(R, R, .2, 'darkWood', 0, H + .1, 0, B.G.roof, 12);
   B.cone(R, 3.0, 'slate', 0, H + 4.6, 0, B.G.roof, 12, { shadow: true }); B.cyl(R - .55, R - .55, .16, 'darkWood', 0, H + 4.6, 0, B.G.roof, 12);
+  { // four lattice sails on a hub (rotate slowly), as in the reference
+    const sg = new THREE.Group(); sg.position.set(0, H + 3.4, R + .1); B.root.add(sg); const wm = M('darkWood'), cl = M('#d9cfae', { side: THREE.DoubleSide });
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(.3, .3, .6, 8), wm); hub.rotation.x = Math.PI / 2; sg.add(hub);
+    for (let k = 0; k < 4; k++) { const arm = new THREE.Group(); arm.rotation.z = k * Math.PI / 2 + .35; sg.add(arm); const sp = new THREE.Mesh(boxG(.14, 8, .12, 1), wm); sp.position.y = 4.2; arm.add(sp);
+      const sl = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 5.6), cl); sl.position.set(.85, 4.8, .02); arm.add(sl); for (let q = 0; q < 6; q++) { const cb = new THREE.Mesh(boxG(1.5, .07, .07, 1), wm); cb.position.set(.85, 2.2 + q * .9, .05); arm.add(cb); } const edge = new THREE.Mesh(boxG(.08, 5.6, .08, 1), wm); edge.position.set(1.55, 4.8, .04); arm.add(edge); }
+    for (const m of sg.children) m.castShadow = true; let rt = 0; const prev = B.tick; B.tick = dt => { rt += dt * .25; sg.rotation.z = rt; if (prev) prev(dt); }; }
   for (let i = 0; i < 3; i++) { const a = i * 2.1 + .4; B.win(Math.sin(a) * (R - .3), H + 2.4, Math.cos(a) * (R - .3), a, .5, .8, 'glass', B.G.roof); }
   const hub = new THREE.Group(); hub.position.set(0, H + 4.0, R + .5); B.root.add(hub);
   const sailMat = M('#e6dcc0', { side: THREE.DoubleSide }), frame = M('darkWood');
@@ -463,7 +469,7 @@ function windmill(spec, ctx) {
 // ---------- 22. Lighthouse of Tidewrack Coast ----------
 function lighthouse(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Lighthouse of Tidewrack Coast'; const R = 3.4, H = 12;
-  B.roundShell({ r: R, h: H, key: 'stoneL', N: 18, DW: 1.9, DH: 2.5, floor: 'floorStone', T: .55 });
+  B.roundShell({ r: R, h: H, key: 'stone', N: 18, DW: 1.9, DH: 2.5, floor: 'floorStone', T: .55 });
   for (const y of [4.2, 8]) B.ring(R + .1, .5, 'stone', 0, y, 0, B.G.ext, 14); B.ring(R + .5, .5, 'stoneD', 0, H + .2, 0, B.G.ext, 14);
   for (let i = 0; i < 20; i++) { const a = i / 20 * 6.283; B.bx(.12, 1.0, .12, 'iron', Math.sin(a) * (R + .4), H + .9, Math.cos(a) * (R + .4), B.G.ext, { shadow: false }); }
   B.add(new THREE.CylinderGeometry(1.45, 1.55, 2.2, 12, 1, true), M('#ffe49a', { emissive: new THREE.Color(0xc89a30), side: THREE.DoubleSide, transparent: true, opacity: .85 }), 0, H + 1.5, 0, B.G.ext, { shadow: false });

@@ -77,14 +77,19 @@ with sync_playwright() as p:
                     pg.evaluate("([s,y])=>{__p3d.teleport(s[0],s[1],0);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw]); pg.wait_for_timeout(300)
                     r, ms, ok = drive([list(v) for v in via], top, mode, m['l1'], m['y1']*bi['K']); total += 1
                     if not ok and os.environ.get('PATHFIND', '1') == '1':   # a real player walks around furniture: BFS a free path door -> stair and retry
-                        wp = pg.evaluate(BFS, [door, via[-1], 0]); print('    bfs', door, via[-1], wp and [[round(a,1),round(b,1)] for a,b in wp], flush=True)
+                        wp = pg.evaluate(BFS, [start, via[-1], 0]); print('    bfs', door, via[-1], wp and [[round(a,1),round(b,1)] for a,b in wp], flush=True)
                         if wp:
                             pg.evaluate("([s,y])=>{__p3d.teleport(s[0],s[1],0);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw]); pg.wait_for_timeout(300)
-                            r, ms, ok = drive([list(door)] + [list(q) for q in wp], top, mode, m['l1'], m['y1']*bi['K'])
+                            r, ms, ok = drive([list(q) for q in wp], top, mode, m['l1'], m['y1']*bi['K'])
                     fails += 0 if ok else 1
+                    if ok and os.environ.get('DOWN', '1') == '1':   # now turn around at the top and walk back down to the street
+                        foot = W(bi['id'], m['cx'] - s * (h + 2.0), m['cz'] - c * (h + 2.0)); total += 1
+                        r2, ms2, ok2 = drive([], foot, mode, m['l0'], 0.0); fails += 0 if ok2 else 1
+                        if not ok2: print('    descent stuck at', {k: round(v, 1) if isinstance(v, float) else v for k, v in r2.items()}, flush=True)
+                        ok = ok and ok2; ms = (ms, ms2)
                     if not ok: print('    stuck near:', pg.evaluate("([x,z,l])=>__p3d.colliders.filter(c=>(c.lv===undefined||(Array.isArray(c.lv)?c.lv.includes(l):c.lv===l))&&(c.type==='box'?(Math.hypot(Math.max(c.minX,Math.min(x,c.maxX))-x,Math.max(c.minZ,Math.min(z,c.maxZ))-z)<1.1):(Math.hypot(c.x-x,c.z-z)<1.1+c.r))).map(c=>[c.type,c.b,c.minX,c.maxX,c.minZ,c.maxZ,c.x,c.z,c.r,c.lv,c.stair].map(v=>typeof v==='number'?+v.toFixed(2):v))", [r['x'], r['z'], r['lv']]))
                     if SHOTS: pg.screenshot(path=f"{SHOTS}/{bi['id']}_{mode}_{'ok' if ok else 'FAIL'}.png")
-                    res.append(f"{mode}@{yw:+.1f}:" + (f'OK {ms/1000:.1f}s' if ok else 'FAIL(lv%s y%.1f @%.1f,%.1f)' % (r['lv'], r['y'], r['x'], r['z'])))
+                    res.append(f"{mode}@{yw:+.1f}:" + (('OK ' + (('%.1f+%.1fs' % (ms[0]/1000, ms[1]/1000)) if isinstance(ms, tuple) else '%.1fs' % (ms/1000))) if ok else 'FAIL(lv%s y%.1f @%.1f,%.1f)' % (r['lv'], r['y'], r['x'], r['z'])))
             print('PASS' if all('FAIL' not in x for x in res) else 'FAIL', bi['id'], f"{m['l0']}->{m['l1']}", ' '.join(res), flush=True)
     b.close()
 print('page errors:', errs[:5]); print(f'FAILS {fails}/{total}'); sys.exit(1 if fails else 0)

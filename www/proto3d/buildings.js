@@ -317,7 +317,7 @@ function keep(spec, ctx) {
   B.rocks([[-w / 2 - 2.6, d / 2 - 1, 2.0], [w / 2 + 2.8, d / 2 - 2, 2.3], [-w / 2 - 3.2, -2, 2.8, .9], [w / 2 + 3.4, -3, 2.6, .9], [-6, -d / 2 - 2.2, 2.4], [5, -d / 2 - 2.6, 2.8], [0, -d / 2 - 3.4, 3.0, 1], [-w / 2 - 1.6, d / 2 + 2.4, 1.3], [w / 2 + 1.8, d / 2 + 2.6, 1.5]]);
   B.guard(-2.6, d / 2 + 2.6); B.guard(2.6, d / 2 + 2.6); B.apron(w * .5, d * .4, 4);
   { // ornate gold double door (cropped from the reference), swung open, under a big pointed-arch surround with a tracery tympanum
-    const gm = new THREE.MeshStandardMaterial({ map: goldDoorTexture(), metalness: .35, roughness: .5, side: THREE.DoubleSide, emissive: 0x5a3c0c }); const DHk = 5.2, zf = d / 2 + .06, hw = B.DW / 2;
+    const gm = new THREE.MeshStandardMaterial({ map: goldDoorTexture(), metalness: .35, roughness: .5, side: THREE.DoubleSide, emissive: 0x5a3c0c }); const DHk = 1.95, zf = d / 2 + .06, hw = B.DW / 2;
     for (const s of [-1, 1]) { const dx = s * .72, dz = .69, th = -Math.atan2(dz, dx); const m = B.add(new THREE.PlaneGeometry(hw * .98, DHk * .98), gm, s * hw + dx * hw * .5, DHk * .49, zf + dz * hw * .5, B.G.ext, { shadow: false }); m.rotation.y = th; m.scale.x = 1; }
     const R1 = hw + .9, R0 = hw + .1, cy = DHk + .2; const ring = new THREE.Shape(); ring.moveTo(-R1, 0); ring.lineTo(-R1, cy); ring.absarc(0, cy, R1, Math.PI, 0, true); ring.lineTo(R1, 0); ring.lineTo(R0, 0); ring.lineTo(R0, cy); ring.absarc(0, cy, R0, 0, Math.PI, false); ring.lineTo(-R0, 0); ring.lineTo(-R1, 0);
     B.add(new THREE.ExtrudeGeometry(ring, { depth: .5, bevelEnabled: false, curveSegments: 14 }), B.cm('stoneD'), 0, 0, d / 2 - .05, B.G.ext);

@@ -3,6 +3,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { makeEnterable } from './interiors.js';
+import { createBump, makeActor, styleFor, findNodes, restoreNodes, applyPose } from './bump.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -239,7 +240,7 @@ const HEROES = [buildAldric(ALDRIC_TEX), buildUmbral(HT), buildSelene(HT)];
 const HERO_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil'];
 let hero = HEROES[0];
 HEROES.forEach((h, i) => { h.position.set(0, 0, 14); h.visible = i === 0; scene.add(h); });
-function setHero(i) { hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach((b, k) => b.classList.toggle('on', k === i)); }
+function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach((b, k) => b.classList.toggle('on', k === i)); }
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
 const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
@@ -345,7 +346,7 @@ const marker = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.55, 20), new THREE.
 marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = false; scene.add(marker);
 
 // ---------- input ----------
-const state = { inside: null, zoom: 1, heroX: 0, heroZ: 14, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0 };
+const state = { inside: null, zoom: 1, heroX: 0, heroZ: 14, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0, vx: 0, vz: 0 };
 const keys = new Set();
 addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
@@ -415,6 +416,64 @@ function resolve(p) {
 }
 
 const tmp = { x: 0, z: 0 };
+// ---------- bump / stumble (bump.js): no blocking collisions between characters; walls still stop everyone ----------
+const qp = new URLSearchParams(location.search);
+const BUMP_ON = qp.get('nobump') == null;
+const PARTY_N = BUMP_ON ? Math.max(0, Math.min(3, qp.get('party') != null ? +qp.get('party') || 0 : 2)) : 0;
+const NPC_N = BUMP_ON ? (qp.get('npcs') != null ? Math.max(0, Math.min(2, +qp.get('npcs') || 0)) : 1) : 0;
+const bumpSys = createBump();
+const playerAct = makeActor('aldric', { fixed: true }); bumpSys.add(playerAct);
+const crowd = []; // followers + NPCs: { a, root, kind, leash, home }
+const tmp2 = { x: 0, z: 0 };
+/* crowd members skip the shadow-map pass (halves their draw calls); one shared blob decal each instead */
+const BLOB_GEO = new THREE.CircleGeometry(0.55, 14), BLOB_MAT = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false });
+const HERO_GLB_ID = i => GLB_IDS[i] || 'aldric';
+async function loadActorModel(id) {
+  try { const buf = await fetchGLB(id); return await new Promise(res => gl.parse(buf, '', g => { try { res(wrapGLB(g)); } catch (e) { res(null); } }, () => res(null))); }
+  catch (e) { return null; }
+}
+function spawnCrowd(id, kind, x, z, leash, yaw) {
+  const a = makeActor(id, { str: undefined }); a.x = x; a.z = z; a.yaw = yaw || 0;
+  const rec = { a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0 };
+  crowd.push(rec); bumpSys.add(a);
+  loadActorModel(id).then(w => { if (!w) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, 0, a.z); w.rotation.y = a.yaw; scene.add(w); });
+  return rec;
+}
+{
+  const used = new Set([HERO_GLB_ID(+(qp.get('hero') || 0))]);
+  const pick = ['elira', 'orin', 'seraphine', 'finn', 'brynn'].filter(x => !used.has(x));
+  for (let i = 0; i < PARTY_N; i++) spawnCrowd(pick[i], 'party', (i - (PARTY_N - 1) / 2) * 1.6, 16.8 + i * 0.3, 2.6 + i * 0.5, 0);
+  for (let i = 0; i < NPC_N; i++) spawnCrowd(['thorne', 'rook'][i], 'npc', 4.5 + i * 2.5, 15.5 - i * 1.5, 0, Math.PI * 0.75);
+}
+function updateCrowd(dt) {
+  const pa = playerAct;
+  pa.x = state.heroX; pa.z = state.heroZ; pa.yaw = state.yaw; pa.vx = state.vx; pa.vz = state.vz;
+  for (let i = 0; i < crowd.length; i++) {
+    const r = crowd[i], a = r.a;
+    let tvx = 0, tvz = 0;
+    if (r.kind === 'party') {
+      const dx = state.heroX - a.x, dz = state.heroZ - a.z, d = Math.hypot(dx, dz);
+      if (d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * 1.05, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
+    }
+    const k = Math.min(1, dt * 8); r.vxs += (tvx - r.vxs) * k; r.vzs += (tvz - r.vzs) * k;
+    a.vx = r.vxs; a.vz = r.vzs;
+  }
+  bumpSys.update(dt);
+  for (let i = 0; i < crowd.length; i++) {
+    const r = crowd[i], a = r.a;
+    let mx = r.vxs * a.slowMul * dt + a.dx, mz = r.vzs * a.slowMul * dt + a.dz;
+    if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
+    tmp2.x = a.x + mx; tmp2.z = a.z + mz; resolve(tmp2);
+    const moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z;
+    const sp = Math.hypot(r.vxs, r.vzs);
+    if (sp > 0.3) { let da = Math.atan2(r.vxs, r.vzs) - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }
+    const w = r.root; if (!w) continue;
+    w.position.set(a.x, 0, a.z); const u = w.userData, ww = Math.min(1, sp / SPEED);
+    restoreNodes(r.nd);
+    if (u.glb) { const wk = u.act.walk, id = u.act.idle; if (wk && id) { wk.setEffectiveWeight(ww); id.setEffectiveWeight(1 - ww); wk.timeScale = 0.6 + sp * 0.25; } u.mixer.update(dt); }
+    applyPose(a, w, r.nd, a.yaw);
+  }
+}
 function updateHero(dt) {
   // input vector in screen space (x right, y up)
   let ix = joy.x, iy = -joy.y;
@@ -437,7 +496,7 @@ function updateHero(dt) {
   }
   const moving = (vx || vz);
   if (moving) {
-    const step = SPEED * mag * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
+    const step = SPEED * mag * playerAct.slowMul * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
     tmp.x = state.heroX; tmp.z = state.heroZ; let blocked = false;
     for (let i = 0; i < n; i++) { tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp)) blocked = true; }
     state.heroX = tmp.x; state.heroZ = tmp.z;
@@ -450,16 +509,19 @@ function updateHero(dt) {
     state.yaw += da * Math.min(1, dt * 12);
     state.speed = moved / dt;
   } else state.speed *= 0.8;
+  state.vx = moving ? vx * SPEED * mag * playerAct.slowMul : 0; state.vz = moving ? vz * SPEED * mag * playerAct.slowMul : 0;
+  if (playerAct.dx || playerAct.dz) { tmp.x = state.heroX + playerAct.dx; tmp.z = state.heroZ + playerAct.dz; resolve(tmp); state.heroX = tmp.x; state.heroZ = tmp.z; }
   state.moving = state.speed > 0.5;
   hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw;
   let ins = null; for (const e of enterables) if (e.update(state.heroX, state.heroZ)) ins = e.id; state.inside = ins;
   animateHero(dt);
+  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); }
 }
 
 let walkT = 0, idleT = 0, prevYaw = 0;
 function animateHero(dt) {
   const u = hero.userData, w = Math.min(1, state.speed / SPEED);
-  if (u.glb) { const wk = u.act.walk, id = u.act.idle; if (wk && id) { wk.setEffectiveWeight(w); id.setEffectiveWeight(1 - w); wk.timeScale = 0.6 + state.speed * 0.25; } u.mixer.update(dt); return; }
+  if (u.glb) { restoreNodes(u.bumpNodes); const wk = u.act.walk, id = u.act.idle; if (wk && id) { wk.setEffectiveWeight(w); id.setEffectiveWeight(1 - w); wk.timeScale = 0.6 + state.speed * 0.25; } u.mixer.update(dt); return; }
   walkT += dt * (4 + state.speed * 1.9); idleT += dt;
   const s = Math.sin(walkT) * 0.85 * w;
   u.legL.rotation.x = s; u.legR.rotation.x = -s;
@@ -521,7 +583,7 @@ function frame(now) {
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  updateHero(dt); updateCamera(dt, totalFrames === 0);
+  updateCrowd(dt); updateHero(dt); updateCamera(dt, totalFrames === 0);
   simTime += dt;
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
@@ -538,6 +600,7 @@ window.__p3d = {
   teleport(x, z) { state.heroX = x; state.heroZ = z; state.target = null; },
   setCamYaw(y) { state.camYaw = y; },
   setZoom(z) { state.zoom = z; },
+  bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },
   setHero, get heroIndex() { return HEROES.indexOf(hero); },
   tapAt: tapMoveTo,
 };

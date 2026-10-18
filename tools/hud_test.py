@@ -1,7 +1,7 @@
 from playwright.sync_api import sync_playwright
 import json
 D='/workspace/shots/varnethryl-hud-build/'
-U='http://localhost:8099/index.html'
+U='http://localhost:8099/index2d.html'
 res=[]
 def ok(n,c):res.append((n,bool(c)));print(('PASS' if c else 'FAIL'),n)
 def box(pg,s):return pg.locator(s).bounding_box()

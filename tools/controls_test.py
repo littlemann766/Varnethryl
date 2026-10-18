@@ -3,7 +3,7 @@ import json,math
 D='/workspace/shots/varnethryl-controls/'
 res=[]
 def ok(n,c):res.append((n,bool(c)));print(('PASS' if c else 'FAIL'),n)
-U='http://localhost:8099/index.html'
+U='http://localhost:8099/index2d.html'
 def drag_stick(pg,dx,dy,hold=700,shot=None):
   s=pg.locator('#stick').bounding_box();cx,cy=s['x']+s['width']/2,s['y']+s['height']/2
   pg.mouse.move(cx,cy);pg.mouse.down();pg.mouse.move(cx+dx,cy+dy,steps=4);pg.wait_for_timeout(hold)

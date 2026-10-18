@@ -412,12 +412,12 @@ function resolve(p) {
 const tmp = { x: 0, z: 0 };
 // multi-level floors (buildings.js): the hero has a level + y; upper floors only walkable where a floor/stair exists
 function surfaceAt(x, z, level) {
-  for (const b of ectx.multi) { if (Math.abs(x - b.cx) > 40 || Math.abs(z - b.cz) > 40) continue; const s = b.surface(x, z, level); if (s) return s; }
+  for (const b of ectx.multi) { { const rc = b.reach || 40; if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
   return level === 0 ? { y: 0 } : null;
 }
 function updateLevel() {
   let s = surfaceAt(state.heroX, state.heroZ, state.level);
-  if (s && s.ramp) { const m = s.ramp; if (state.level === m.l0 && s.t > 0.93) state.level = m.l1; else if (state.level === m.l1 && s.t < 0.25) state.level = m.l0; s = surfaceAt(state.heroX, state.heroZ, state.level) || s; }
+  if (s && s.ramp) { const m = s.ramp; if (state.level === m.l0 && s.t > (m.flipUp || 0.93)) state.level = m.l1; else if (state.level === m.l1 && s.t < 0.25) state.level = m.l0; s = surfaceAt(state.heroX, state.heroZ, state.level) || s; }
   state.heroY = s ? s.y : 0;
 }
 function updateHero(dt) {

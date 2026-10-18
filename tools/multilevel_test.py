@@ -30,7 +30,13 @@ with sync_playwright() as p:
             a = [m['cx'] + s * (-m['len'] / 2 + .25), m['cz'] + c * (-m['len'] / 2 + .25)]; t = [m['cx'] + s * (m['len'] / 2 + .5), m['cz'] + c * (m['len'] / 2 + .5)]
             r = walk(W(bi['id'], *a), m['l0'], W(bi['id'], *t))
             up = r['lv'] == m['l1'] and abs(r['y'] - m['y1']) < .15
-            a2 = [m['cx'] + s * (-m['len'] / 2 - .9), m['cz'] + c * (-m['len'] / 2 - .9)]; r2 = walk(W(bi['id'], *t), m['l1'], W(bi['id'], *a2))
+            if bi['id'] == 'walls' and up:   # wall walk: stroll 7 m along the top, must stay on level 1 at wall-top height
+                oks = []
+                for sgn in (1, -1):
+                    tw = [t[0] + c * 7 * sgn, t[1] - s * 7 * sgn]; rw = walk(W(bi['id'], *t), 1, W(bi['id'], *tw), 6000); okw = rw['lv'] == 1 and abs(rw['y'] - m['y1']) < .15 and math.hypot(rw['x'] - W(bi['id'], *t)[0], rw['z'] - W(bi['id'], *t)[1]) > 4.5
+                    oks.append(okw); msgs.append(f"walk{'+' if sgn > 0 else '-'}={okw}")
+                up = up and any(oks)   # a short segment may only have room one way
+            a2 = [m['cx'] + s * (-m['len'] / 2 - .9), m['cz'] + c * (-m['len'] / 2 - .9)]; t2 = [m['cx'] + s * (m['len'] / 2 + (1.4 if bi['id'] == 'walls' else .5)), m['cz'] + c * (m['len'] / 2 + (1.4 if bi['id'] == 'walls' else .5))]; r2 = walk(W(bi['id'], *t2), m['l1'], W(bi['id'], *a2))
             down = r2['lv'] == m['l0'] and r2['y'] < m['y0'] + 1.0
             ok &= up and down; msgs.append(f"ramp {m['l0']}->{m['l1']} up={up}({r['lv']},{r['y']:.2f}) down={down}({r2['lv']},{r2['y']:.2f})")
         print('PASS' if ok else 'FAIL', bi['id'], '; '.join(msgs)); fails += 0 if ok else 1

@@ -55,7 +55,7 @@ const inn = (spec, ctx) => std(spec, ctx, { name: 'Inn of Varnethryl', w: 11, d:
     B.table(-1.8, .4); B.table(-.2, 2.2); B.table(-3.4, 2.4); B.barrel(iw - .5, -.2); B.barrel(iw - .5, .8); B.barrel(iw - .5, 1.8); hearthLeft(B);
     B.rugAt(-1.5, 1.2, 4, 3.2); B.lamp(-1.8, 3.6, .4); B.lamp(1.5, 3.6, 1.5); B.banner(-.6, 2.3, -id_ + .3, 0, .9, 1.8);
     // upper floor (sheet: stairs, hallway, bedrooms A/B, private sitting room)
-    B.fullUpper({ y: 3.0, stair: { cx: iw - 1.1, cz: id_ - 2.0, dir: '-z', len: 3.6, w: 1.7 }, rooms(U) { const Z = -1.6;
+    B.fullUpper({ y: 3.0, stair: { cx: iw - 1.1, cz: id_ - 2.0, dir: '-z', len: 3.6, w: 1.7 }, rooms(U) { const Z = -2.6;
       U.partition(0, Z, iw * 2, 'x', [[-3.4, 1.2], [0, 1.2], [3.4, 1.2]]); U.partition(-1.7, (Z - id_) / 2, id_ + Z, 'z', null); U.partition(1.7, (Z - id_) / 2, id_ + Z, 'z', null);
       U.bed(-iw + 1.6, -id_ + 1.0, 1); U.box(.5, .6, .5, -iw + .5, -id_ + .5); U.chest(-1.0 - 1.0, -id_ + .6, .8); U.rugAt(-3.4, -2.2, 2.2, 2.2); U.lamp(-3.4, 2.4, -2.2);
       U.bed(-.1, -id_ + 1.0, 1); U.box(.5, .6, .5, .8, -id_ + .5); U.chest(-1.2, -id_ + .6, .7); U.rugAt(0, -2.2, 2, 2); U.lamp(0, 2.4, -2.2);
@@ -546,7 +546,7 @@ const farmhouse = (spec, ctx) => std(spec, ctx, { name: 'Farmhouse of Varnethryl
     B.hearth(0, -id_ + .45, 0, 2.2); B.tableR(-2.4, .8, 2.6, 1.2); B.table(.4, 1.9, .6); B.shelf(-iw + .3, -1.8, 2.6, 1, false); B.barrel(-iw + .5, id_ - .5); B.sack(-iw + 1.2, id_ - .6); B.chest(2.0, -id_ + .7, .9);
     B.rugAt(-1, 1, 3.4, 2.6); B.lamp(-2, 3.5, 0); B.lamp(2, 3.5, 1); B.banner(-3.6, 3.6, -id_ + .3, 0, .8, 1.6); B.fullUpper({ y: 2.9, stair: { cx: iw - .9, cz: id_ - .45 - 1.7, dir: '-z', len: 3.4, w: 1.5 }, rooms(U) { U.bed(iw - 1.2, -id_ + 1.3); U.bed(-iw + 1.1, -id_ + 1.3); U.bed(-iw + 2.5, -id_ + 1.3); U.chest(0, -id_ + .6, .9); U.tableR(-1.8, .4, 1.4, .9); U.shelf(-iw + .3, .8, 2.0, 1, false); U.rugAt(-1.8, .4, 2.4, 1.8); U.lamp(0, 2.2, 0); U.hay(1.5, 0.2, 1.3, 1, .6); } });
   } });
-const barn = (spec, ctx) => std(spec, ctx, { name: 'Barn of Varnethryl', w: 10, d: 12, h: 4.8, hs: 1.2, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 4.4, ridge: 'z', over: .8, endKey: 'darkWood', DW: 3.4, DH: 3.6, floor: 'floorStone', windows: false,
+const barn = (spec, ctx) => std(spec, ctx, { name: 'Barn of Varnethryl', noScale: true, w: 10, d: 12, h: 4.8, hs: 1.2, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 4.4, ridge: 'z', over: .8, endKey: 'darkWood', DW: 3.4, DH: 3.6, floor: 'floorStone', windows: false,
   extra(B) { B.bx(2.0, 1.8, .1, '#241608', 0, B.h + 1.8, B.d / 2 + .06, B.G.roof, { shadow: false }); for (let i = 0; i < 3; i++) B.bx(.9, .6, .6, 'hay', -.5 + i * .5, B.h + 1.1 + i * .0, B.d / 2 - .2, B.G.roof); B.banner(-3.6, 3, B.d / 2 + .06, 0, .8, 1.6); },
   interior(B) { const iw = B.iw, id_ = B.id_;
     for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) B.hay(-iw + 1.3 + j * 1.6, -id_ + 1 + i * 1.3, 1.4, 1.1, .9 + (i % 2) * .5); B.hay(-iw + 1.3, -id_ + 1 + 4 * 1.3, 1.4, 1.1, 1.3);
@@ -604,7 +604,7 @@ export function buildWalls(ctx, WORLD, GATE_W) {
       const ang = horiz ? (nz > 0 ? Math.PI : 0) : (nx > 0 ? -Math.PI / 2 : Math.PI / 2);   // climbs toward the wall
       B.stairs({ cx: cxs, cz: czs, ang, len: LEN, w: 1.7, l0: 0, y0: 0, l1: 1, y1: h, key: 'stoneD', flipUp: .7 }); } };
   const g = GATE_W;
-  run(-WORLD, -WORLD, WORLD, -WORLD); run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -7.4, WORLD); run(7.4, WORLD, WORLD, WORLD);
+  run(-WORLD, -WORLD, WORLD, -WORLD); run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -10.4, WORLD); run(10.4, WORLD, WORLD, WORLD);
   const towers = []; const tw = (x, z, enter) => { if (!enter) { B.tower(x, z, 2.4, 7.6, { coneH: 5.4, windows: 3, wa: x + z }); B.banner(x, 4.2, z + (z < 0 ? 2.5 : -2.5), z < 0 ? 0 : Math.PI, 1, 2.2); return; }
     const th = Math.atan2(-x, -z), t = hollowTower(ctx, 'wt' + towers.length, x, z, th); towers.push(t); };
   const E = WORLD - 6;
@@ -633,8 +633,8 @@ export const BUILDING_DEFS = [
   { id: 'colosseum', f: colosseum, cx: 42, cz: 38, rot: 0, name: 'Colosseum' },
   { id: 'thieves', f: thieves, cx: -36.5, cz: 8, rot: 0, name: "Thieves' Den" },
   { id: 'farmhouse', f: farmhouse, cx: -42, cz: -9, rot: 0, name: 'Farmhouse' },
-  { id: 'barn', f: barn, cx: -51, cz: 20, rot: Math.PI / 2, name: 'Barn' },
-  { id: 'stables', f: stables, cx: -24, cz: 36, rot: 0, name: 'Stables' },
+  { id: 'barn', f: barn, cx: -51, cz: 22, rot: Math.PI / 2, name: 'Barn' },
+  { id: 'stables', f: stables, cx: -24, cz: 42, rot: 0, name: 'Stables' },
   { id: 'windmill', f: windmill, cx: 20, cz: 46, rot: 0, name: 'Windmill' },
   { id: 'house1', f: house(0), cx: -9, cz: 19, rot: Math.PI, name: 'Village House' },
   { id: 'house2', f: house(1), cx: 9, cz: 19, rot: Math.PI, name: 'Village House' },

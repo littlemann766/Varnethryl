@@ -3,15 +3,15 @@ import * as K from './chars_core.js';
 import { reg, flaps, furRing } from './chars7.js';
 const PI = Math.PI, S = Math.sin, C = Math.cos;
 reg('Snowy', c => { const B = c.bones, fur = c.M(0xf2eadc, { r: 1, d: 1, n: 'snowfur' }), fur2 = c.M(0xdcd2c0, { r: 1, d: 1, n: 'snowfur2' }), bl = c.M(0x24429a, { r: .9, d: 1, n: 'scarf' }), gd = c.M(0xd2a43c, { m: .5, r: .35, n: 'bell' });
-  for (const k of [-1, 1]) { const Sd = k > 0 ? 'L' : 'R'; B['thigh_' + Sd].scale.set(1.15, .72, 1.15); B['upperArm_' + Sd].scale.set(1.15, .85, 1.15); B['foreArm_' + Sd].scale.set(1.2, .85, 1.2); }
+  for (const k of [-1, 1]) { const Sd = k > 0 ? 'L' : 'R'; B['thigh_' + Sd].scale.set(1.3, .5, 1.3); B['upperArm_' + Sd].scale.set(1.15, .85, 1.15); B['foreArm_' + Sd].scale.set(1.35, .85, 1.35); }
   B.hips.position.y -= .2;
   furRing(c, B.hips, fur, 18, .22, -.05, .14, { seed: 3 }); furRing(c, B.chest, fur, 18, .26, .2, .16, { seed: 4, down: true }); furRing(c, B.head, fur, 16, .13, .12, .12, { seed: 5, down: false, w: .04 });
   for (const k of [-1, 1]) { const Sd = k > 0 ? 'L' : 'R'; furRing(c, B['foreArm_' + Sd], fur2, 9, .09, -.08, .1, { seed: 6 }); furRing(c, B['shin_' + Sd], fur2, 9, .1, -.05, .12, { seed: 7 }); furRing(c, B['upperArm_' + Sd], fur, 9, .1, -.1, .1, { seed: 8 }); c.add(B['shoulder_' + Sd], c.G.sph(.11, 7, 5), fur, k * .05, 0, 0, { s: [1.2, 1, 1.1] }); }
-  c.add(B.chest, c.G.sph(.3, 8, 6), fur, 0, -.05, .06, { s: [1.1, 1.2, .9] });
+  c.add(B.chest, c.G.sph(.29, 9, 7), fur, 0, -.12, .06, { s: [1.25, 1.1, 1.1] }); c.add(B.hips, c.G.sph(.25, 9, 7), fur, 0, .0, 0, { s: [1.3, .9, 1.1] });
   for (let i = 0; i < 4; i++) { c.add(B.chest, c.G.cyl(.012, .012, .1, 4), gd, -.12 + i * .08, .02 - (i % 2) * .05, .24, {}); c.add(B.chest, c.G.sph(.03, 6, 5), gd, -.12 + i * .08, -.04 - (i % 2) * .05, .24); c.add(B.chest, c.G.cone(.025, .08, 4), bl, -.12 + i * .08, -.12 - (i % 2) * .05, .24, { r: [PI, 0, 0] }); }
   c.add(B.chest, c.G.tor(.2, .05, 5, 10), bl, 0, .22, .02, { r: [PI / 2, 0, 0] }); });
 reg('Pip', c => { const B = c.bones, fl = c.M(0xf2e6d0, { r: 1, d: 1, n: 'foxwhite' }), or = c.M(0xe8782a, { r: 1, d: 1, n: 'foxorange' }), dk = c.M(0x3a2a1e, { r: 1, n: 'foxdark' });
-  for (const k of ['L', 'R']) if (B['ear_' + k]) B['ear_' + k].scale.setScalar(1.5); for (const n of ['tail_1', 'tail_2', 'tail_3', 'tail_4']) if (B[n]) B[n].scale.set(1.55, 1.55, 1.1);
+  for (const k of ['L', 'R']) if (B['ear_' + k]) B['ear_' + k].scale.setScalar(1.5); for (const n of ['tail_1', 'tail_2', 'tail_3', 'tail_4']) if (B[n]) B[n].scale.set(1.15, 1.15, 1.05);
   for (let i = 0; i < 12; i++) { const a = i / 12 * PI * 2; c.add(B.chest, c.G.cone(.045, .16, 4), i % 2 ? fl : or, S(a) * .17, -.05 + C(a) * .1, .1 + C(a) * .08, { r: [PI + .3 * C(a), 0, -.4 * S(a)] }); }
   for (const k of [-1, 1]) for (let i = 0; i < 4; i++) c.add(B.head, c.G.cone(.03, .11, 4), i % 2 ? fl : or, k * .09, -.03 - i * .012, .01 + i * .03, { r: [0, 0, -k * (1.3 + i * .15)] });
   for (const n of ['shin_FL', 'shin_FR', 'shin_BL', 'shin_BR']) if (B[n]) c.add(B[n], c.G.cyl(.05, .045, .22, 6), dk, 0, -.14, 0); });

@@ -176,7 +176,7 @@ if (BLD_ON) {
     if (Math.abs(x) < 3.5 * KB) return true;                   // main road
     if (Math.abs(z) < 3 * KB) return true;
     for (const c of colliders) {
-      if (c.type === 'box' && x > c.minX - 4 && x < c.maxX + 4 && z > c.minZ - 4 && z < c.maxZ + 4) return true;
+      if (c.type === 'box' && x > c.minX - 9 && x < c.maxX + 9 && z > c.minZ - 9 && z < c.maxZ + 9) return true;
       if (c.type === 'circle' && Math.hypot(x - c.x, z - c.z) < c.r + 4) return true;
     }
     return false;

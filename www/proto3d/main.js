@@ -135,7 +135,7 @@ function building(cx, cz, w, d, h, opt = {}) {
   return g;
 }
 const enterables = [];
-const ectx = { scene, mats, colliders };
+const ectx = { scene, mats, colliders, multi: [] };
 // 26 sheet-based 3D buildings (guild, inn, smithy, temple, colosseum, keep ... see docs/proto3d-buildings/README.md). ?oldvillage keeps the original blocky village.
 const BLD_ON = new URLSearchParams(location.search).get('oldvillage') == null;
 const drops = []; let dropMade = 0;
@@ -335,7 +335,7 @@ const marker = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.55, 20), new THREE.
 marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = false; scene.add(marker);
 
 // ---------- input ----------
-const state = { inside: null, zoom: 1, heroX: 0, heroZ: 14, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0 };
+const state = { level: 0, heroY: 0, inside: null, zoom: 1, heroX: 0, heroZ: 14, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0 };
 const keys = new Set();
 addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
@@ -382,7 +382,9 @@ addEventListener('contextmenu', e => e.preventDefault());
 const HERO_R = 0.5, SPEED = 5.2;
 function resolve(p) {
   let hitAny = false;
+  const LV = state.level;
   for (const c of colliders) {
+    if (c.lv !== undefined && c.lv !== LV) continue;
     if (c.type === 'box') {
       const qx = THREE.MathUtils.clamp(p.x, c.minX, c.maxX), qz = THREE.MathUtils.clamp(p.z, c.minZ, c.maxZ);
       let dx = p.x - qx, dz = p.z - qz, d2 = dx * dx + dz * dz;
@@ -405,6 +407,16 @@ function resolve(p) {
 }
 
 const tmp = { x: 0, z: 0 };
+// multi-level floors (buildings.js): the hero has a level + y; upper floors only walkable where a floor/stair exists
+function surfaceAt(x, z, level) {
+  for (const b of ectx.multi) { if (Math.abs(x - b.cx) > 40 || Math.abs(z - b.cz) > 40) continue; const s = b.surface(x, z, level); if (s) return s; }
+  return level === 0 ? { y: 0 } : null;
+}
+function updateLevel() {
+  let s = surfaceAt(state.heroX, state.heroZ, state.level);
+  if (s && s.ramp) { const m = s.ramp; if (state.level === m.l0 && s.t > 0.93) state.level = m.l1; else if (state.level === m.l1 && s.t < 0.25) state.level = m.l0; s = surfaceAt(state.heroX, state.heroZ, state.level) || s; }
+  state.heroY = s ? s.y : 0;
+}
 function updateHero(dt) {
   // input vector in screen space (x right, y up)
   let ix = joy.x, iy = -joy.y;
@@ -429,7 +441,12 @@ function updateHero(dt) {
   if (moving) {
     const step = SPEED * mag * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
     tmp.x = state.heroX; tmp.z = state.heroZ; let blocked = false;
-    for (let i = 0; i < n; i++) { tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp)) blocked = true; }
+    for (let i = 0; i < n; i++) {
+      const ox = tmp.x, oz = tmp.z; tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp)) blocked = true;
+      if (state.level > 0 && !surfaceAt(tmp.x, tmp.z, state.level)) { // edge of an upper floor: slide or stop
+        if (surfaceAt(tmp.x, oz, state.level)) tmp.z = oz; else if (surfaceAt(ox, tmp.z, state.level)) tmp.x = ox; else { tmp.x = ox; tmp.z = oz; } blocked = true; }
+      state.heroX = tmp.x; state.heroZ = tmp.z; updateLevel();
+    }
     state.heroX = tmp.x; state.heroZ = tmp.z;
     if (blocked) { state.collisions++; }
     const moved = Math.hypot(state.heroX - px, state.heroZ - pz);
@@ -441,8 +458,8 @@ function updateHero(dt) {
     state.speed = moved / dt;
   } else state.speed *= 0.8;
   state.moving = state.speed > 0.5;
-  hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw;
-  let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt); if (r) ins = typeof r === 'string' ? r : e.id; }
+  updateLevel(); hero.position.set(state.heroX, state.heroY, state.heroZ); hero.rotation.y = state.yaw;
+  let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
   if (ins !== state.inside) { state.inside = ins; try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins } })); } catch (_) {} }
   animateHero(dt);
 }
@@ -473,8 +490,8 @@ const _want = new THREE.Vector3(), _look = new THREE.Vector3();
 function updateCamera(dt, snap) {
   const portrait = innerHeight > innerWidth;
   const z = state.zoom || 1, close = z < 1, dist = close ? (portrait ? 7.0 : 6.0) * (z / 0.3) : (portrait ? 10.5 : 9), height = close ? 2.2 : (portrait ? 7.2 : 6.2);
-  const want = _want.set(state.heroX + Math.sin(state.camYaw) * dist, height, state.heroZ + Math.cos(state.camYaw) * dist);
-  const look = _look.set(state.heroX, close ? 1.05 : 1.6, state.heroZ);
+  const hy = state.heroY || 0, want = _want.set(state.heroX + Math.sin(state.camYaw) * dist, height + hy, state.heroZ + Math.cos(state.camYaw) * dist);
+  const look = _look.set(state.heroX, (close ? 1.05 : 1.6) + hy, state.heroZ);
   const k = snap ? 1 : 1 - Math.pow(0.0015, dt);
   camPos.lerp(want, k); camLook.lerp(look, k);
   camera.position.copy(camPos); camera.lookAt(camLook);
@@ -523,10 +540,10 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 window.__p3d = {
-  state, glbInfo, colliders, get hero() { return hero; }, THREE, renderer, enterables,
+  state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, enterables,
   enterables, get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
-  teleport(x, z) { state.heroX = x; state.heroZ = z; state.target = null; },
+  teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; updateLevel(); },
   setCamYaw(y) { state.camYaw = y; },
   setZoom(z) { state.zoom = z; },
   setHero, get heroIndex() { return HEROES.indexOf(hero); },

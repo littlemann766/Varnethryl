@@ -67,16 +67,18 @@ with sync_playwright() as p:
     for bi in info:
         if ONLY and bi['id'] not in ONLY: continue
         for m in bi['ramps']:
-            if m['l0'] != 0: continue
+            if m['l0'] != 0 and not os.environ.get('UPPER'): continue
             s, c = math.sin(m['ang']), math.cos(m['ang']); h = m['len'] / 2
             front = bi['r'] + 2.5 if bi['round'] else bi['d'] / 2 + 2.8
             start = W(bi['id'], 0, front); door = W(bi['id'], 0, (bi['r'] - 2.2) if bi['round'] else bi['d'] / 2 - 1.9); via = [door, W(bi['id'], m['cx'], m['cz'])] if os.environ.get('VIA', 'centre') == 'centre' else [door, W(bi['id'], m['cx'] - s * (h + 1.0), m['cz'] - c * (h + 1.0))]; top = W(bi['id'], m['cx'] + s * (h + 1.4), m['cz'] + c * (h + 1.4))
+            if m['l0'] != 0:   # upper flights: start on the floor below the foot, walk up, then back down
+                start = W(bi['id'], m['cx'] - s * (h - 0.5), m['cz'] - c * (h - 0.5)); via = []
             res = []
             for mode in MODES:
                 for yw in YAWS:
-                    pg.evaluate("([s,y])=>{__p3d.teleport(s[0],s[1],0);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw]); pg.wait_for_timeout(300)
+                    pg.evaluate("([s,y,l])=>{__p3d.teleport(s[0],s[1],l);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw, m['l0']]); pg.wait_for_timeout(300)
                     r, ms, ok = drive([list(v) for v in via], top, mode, m['l1'], m['y1']*bi['K']); total += 1
-                    if not ok and os.environ.get('PATHFIND', '1') == '1':   # a real player walks around furniture: BFS a free path door -> stair and retry
+                    if not ok and m['l0'] == 0 and os.environ.get('PATHFIND', '1') == '1':   # a real player walks around furniture: BFS a free path door -> stair and retry
                         wp = pg.evaluate(BFS, [start, via[-1], 0]); print('    bfs', door, via[-1], wp and [[round(a,1),round(b,1)] for a,b in wp], flush=True)
                         if wp:
                             pg.evaluate("([s,y])=>{__p3d.teleport(s[0],s[1],0);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw]); pg.wait_for_timeout(300)
@@ -84,7 +86,7 @@ with sync_playwright() as p:
                     fails += 0 if ok else 1
                     if ok and os.environ.get('DOWN', '1') == '1':   # now turn around at the top and walk back down to the street
                         foot = W(bi['id'], m['cx'] - s * (h + 2.0), m['cz'] - c * (h + 2.0)); total += 1
-                        r2, ms2, ok2 = drive([], foot, mode, m['l0'], 0.0); fails += 0 if ok2 else 1
+                        r2, ms2, ok2 = drive([], foot, mode, m['l0'], m['y0']*bi['K']); fails += 0 if ok2 else 1
                         if not ok2: print('    descent stuck at', {k: round(v, 1) if isinstance(v, float) else v for k, v in r2.items()}, flush=True)
                         ok = ok and ok2; ms = (ms, ms2)
                     if not ok: print('    stuck near:', pg.evaluate("([x,z,l])=>__p3d.colliders.filter(c=>(c.lv===undefined||(Array.isArray(c.lv)?c.lv.includes(l):c.lv===l))&&(c.type==='box'?(Math.hypot(Math.max(c.minX,Math.min(x,c.maxX))-x,Math.max(c.minZ,Math.min(z,c.maxZ))-z)<1.1):(Math.hypot(c.x-x,c.z-z)<1.1+c.r))).map(c=>[c.type,c.b,c.minX,c.maxX,c.minZ,c.maxZ,c.x,c.z,c.r,c.lv,c.stair].map(v=>typeof v==='number'?+v.toFixed(2):v))", [r['x'], r['z'], r['lv']]))

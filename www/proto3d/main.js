@@ -3,6 +3,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { makeEnterable } from './interiors.js';
+import { buildVillage, buildWalls } from './buildings.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -72,11 +73,11 @@ function mesh(geo, mat, x, y, z, parent, shadow = true) {
 }
 
 // ---------- world ----------
-const WORLD = 32; // half extent
+const WORLD = 60; // half extent (village grew for the 3D buildings)
 const grass = canvasTex(256, (g, s) => {
   g.fillStyle = '#5c9a45'; g.fillRect(0, 0, s, s);
   for (let i = 0; i < 2600; i++) { g.fillStyle = `hsl(${88 + rnd() * 30},${40 + rnd() * 20}%,${30 + rnd() * 18}%)`; g.fillRect(rnd() * s, rnd() * s, 2, 3); }
-}, 22);
+}, 41);
 const cobble = canvasTex(256, (g, s) => {
   g.fillStyle = '#8d8579'; g.fillRect(0, 0, s, s);
   for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
@@ -88,45 +89,32 @@ const ground = mesh(new THREE.PlaneGeometry(WORLD * 4, WORLD * 4), new THREE.Mes
 ground.rotation.x = -Math.PI / 2;
 { // plaza + paths (cobble)
   const cm = new THREE.MeshLambertMaterial({ map: cobble.clone() });
-  cm.map.repeat.set(8, 8); cm.map.needsUpdate = true;
-  const plaza = mesh(new THREE.CircleGeometry(9.5, 40), cm, 0, 0.02, 0, null, false); plaza.rotation.x = -Math.PI / 2;
-  const pm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); pm.map.repeat.set(1, 11); pm.map.needsUpdate = true;
-  const p1 = mesh(new THREE.PlaneGeometry(5, 56), pm, 0, 0.03, 4, null, false); p1.rotation.x = -Math.PI / 2;
-  const p2 = mesh(new THREE.PlaneGeometry(40, 4), pm, 0, 0.031, 0, null, false); p2.rotation.x = -Math.PI / 2; p2.material.map.repeat.set(8, 0.8);
+  cm.map.repeat.set(11, 11); cm.map.needsUpdate = true;
+  const plaza = mesh(new THREE.CircleGeometry(13, 48), cm, 0, 0.02, 0, null, false); plaza.rotation.x = -Math.PI / 2;
+  const pm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); pm.map.repeat.set(1, 22); pm.map.needsUpdate = true;
+  const p1 = mesh(new THREE.PlaneGeometry(5, 120), pm, 0, 0.03, 0, null, false); p1.rotation.x = -Math.PI / 2;
+  const p2 = mesh(new THREE.PlaneGeometry(120, 4), pm, 0, 0.031, 0, null, false); p2.rotation.x = -Math.PI / 2; p2.material.map.repeat.set(24, 0.8);
 }
 
-// border: low stone wall around village with gate gap at south (z = +WORLD)
 function wallSeg(x1, z1, x2, z2) {
   const len = Math.hypot(x2 - x1, z2 - z1), h = 2.2, t = 1.2;
   const horiz = Math.abs(z2 - z1) < 0.01;
-  const m = mesh(new THREE.BoxGeometry(horiz ? len : t, h, horiz ? t : len), mats.stone, (x1 + x2) / 2, h / 2, (z1 + z2) / 2);
+  mesh(new THREE.BoxGeometry(horiz ? len : t, h, horiz ? t : len), mats.stone, (x1 + x2) / 2, h / 2, (z1 + z2) / 2);
   addBoxCol((x1 + x2) / 2, (z1 + z2) / 2, horiz ? len : t, horiz ? t : len);
-  // crenellations
   const n = Math.floor(len / 1.6);
   for (let i = 0; i < n; i++) {
     const f = (i + 0.5) / n, px = x1 + (x2 - x1) * f, pz = z1 + (z2 - z1) * f;
     mesh(new THREE.BoxGeometry(horiz ? 0.8 : t, 0.5, horiz ? t : 0.8), mats.stone, px, h + 0.25, pz);
   }
 }
+// border: textured stone walls + watchtowers (see buildings.js); the south gate is the 3D Gatehouse (walkable tunnel)
 const GATE_W = 4;
-wallSeg(-WORLD, -WORLD, WORLD, -WORLD);          // north
-wallSeg(-WORLD, -WORLD, -WORLD, WORLD);          // west
-wallSeg(WORLD, -WORLD, WORLD, WORLD);            // east
-wallSeg(-WORLD, WORLD, -GATE_W - 3, WORLD);      // south left
-wallSeg(GATE_W + 3, WORLD, WORLD, WORLD);        // south right
-
 function tower(x, z, r = 2.6, h = 9) {
   mesh(new THREE.CylinderGeometry(r, r * 1.08, h, 12), mats.stone, x, h / 2, z);
   mesh(new THREE.CylinderGeometry(r * 1.2, r * 1.2, 0.6, 12), mats.stoneD, x, h + 0.3, z);
   mesh(new THREE.ConeGeometry(r * 1.3, 3.2, 12), mats.roofB, x, h + 2.2, z);
   addCircCol(x, z, r * 1.08);
 }
-tower(-GATE_W - 3, WORLD, 2.6); tower(GATE_W + 3, WORLD, 2.6);
-// gate lintel + lion banner
-mesh(new THREE.BoxGeometry(GATE_W * 2 + 2, 1.4, 1.6), mats.stone, 0, 7, WORLD);
-mesh(new THREE.BoxGeometry(1.4, 2.6, 0.2), mats.plume, 0, 5.2, WORLD - 0.9);
-mesh(new THREE.SphereGeometry(0.5, 10, 8), mats.gold, 0, 5.4, WORLD - 1.05);
-
 // buildings
 function building(cx, cz, w, d, h, opt = {}) {
   const g = new THREE.Group(); g.position.set(cx, 0, cz); scene.add(g);
@@ -148,26 +136,28 @@ function building(cx, cz, w, d, h, opt = {}) {
 }
 const enterables = [];
 const ectx = { scene, mats, colliders };
-enterables.push(makeEnterable(ectx, { id: 'inn', cx: -13, cz: -9, w: 9, d: 7, h: 4.6, sign: true, interior: 'inn' }));
-enterables.push(makeEnterable(ectx, { id: 'smithy', cx: 13, cz: -10, w: 7.5, d: 6.5, h: 4.2, roof: mats.roofB, wall: mats.wallB, interior: 'smith', rug2: true }));
-enterables.push(makeEnterable(ectx, { id: 'guildhall', cx: 0, cz: -19, w: 13, d: 7.5, h: 5.4, roof: mats.roofG, roofH: 4.2, sign: true, interior: 'hall' }));
-enterables.push(makeEnterable(ectx, { id: 'house', cx: -15, cz: 9, w: 6.4, d: 6.4, h: 3.8, roof: mats.roofR, interior: 'house' }));
-building(15, 10, 6, 5.5, 3.8, { roof: mats.roofB, wall: mats.wallB });
-building(-21, -18, 5.5, 5.5, 3.6, { roof: mats.roofG });
-building(21, -2, 5.5, 6, 3.6, { roof: mats.roofR, wall: mats.wallB });
-tower(0, -26.5, 2.3, 7);                                              // keep tower behind guild hall
-
-// fountain
-const fountain = new THREE.Group(); scene.add(fountain);
-mesh(new THREE.CylinderGeometry(3.2, 3.4, 0.9, 24), mats.stone, 0, 0.45, 0, fountain);
-mesh(new THREE.CylinderGeometry(2.8, 2.8, 0.3, 24), mats.water, 0, 0.82, 0, fountain, false);
-mesh(new THREE.CylinderGeometry(0.4, 0.55, 2.4, 10), mats.stone, 0, 1.6, 0, fountain);
-mesh(new THREE.CylinderGeometry(1.3, 0.8, 0.4, 16), mats.stone, 0, 2.7, 0, fountain);
-mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.12, 16), mats.water, 0, 2.95, 0, fountain, false);
-const drops = [];
-let dropMade = 0;
-for (let i = 0; i < 6; i++) { const m = mesh(new THREE.SphereGeometry(0.1, 6, 5), mats.water, 0, 3, 0, fountain, false); m.userData.keep = true; drops.push(m); }
-addCircCol(0, 0, 3.5);
+// 26 sheet-based 3D buildings (guild, inn, smithy, temple, colosseum, keep ... see docs/proto3d-buildings/README.md). ?oldvillage keeps the original blocky village.
+const BLD_ON = new URLSearchParams(location.search).get('oldvillage') == null;
+const drops = []; let dropMade = 0;
+if (BLD_ON) {
+  enterables.push(buildWalls(ectx, WORLD, GATE_W));
+  for (const b of buildVillage(ectx)) enterables.push(b);
+} else {
+  wallSeg(-WORLD, -WORLD, WORLD, -WORLD); wallSeg(-WORLD, -WORLD, -WORLD, WORLD); wallSeg(WORLD, -WORLD, WORLD, WORLD); wallSeg(-WORLD, WORLD, -GATE_W - 3, WORLD); wallSeg(GATE_W + 3, WORLD, WORLD, WORLD);
+  tower(-GATE_W - 3, WORLD, 2.6); tower(GATE_W + 3, WORLD, 2.6);
+  enterables.push(makeEnterable(ectx, { id: 'inn', cx: -13, cz: -9, w: 9, d: 7, h: 4.6, sign: true, interior: 'inn' }));
+  enterables.push(makeEnterable(ectx, { id: 'smithy', cx: 13, cz: -10, w: 7.5, d: 6.5, h: 4.2, roof: mats.roofB, wall: mats.wallB, interior: 'smith', rug2: true }));
+  enterables.push(makeEnterable(ectx, { id: 'guildhall', cx: 0, cz: -19, w: 13, d: 7.5, h: 5.4, roof: mats.roofG, roofH: 4.2, sign: true, interior: 'hall' }));
+  enterables.push(makeEnterable(ectx, { id: 'house', cx: -15, cz: 9, w: 6.4, d: 6.4, h: 3.8, roof: mats.roofR, interior: 'house' }));
+  const fountain = new THREE.Group(); scene.add(fountain);
+  mesh(new THREE.CylinderGeometry(3.2, 3.4, 0.9, 24), mats.stone, 0, 0.45, 0, fountain);
+  mesh(new THREE.CylinderGeometry(2.8, 2.8, 0.3, 24), mats.water, 0, 0.82, 0, fountain, false);
+  mesh(new THREE.CylinderGeometry(0.4, 0.55, 2.4, 10), mats.stone, 0, 1.6, 0, fountain);
+  mesh(new THREE.CylinderGeometry(1.3, 0.8, 0.4, 16), mats.stone, 0, 2.7, 0, fountain);
+  mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.12, 16), mats.water, 0, 2.95, 0, fountain, false);
+  for (let i = 0; i < 6; i++) { const m = mesh(new THREE.SphereGeometry(0.1, 6, 5), mats.water, 0, 3, 0, fountain, false); m.userData.keep = true; drops.push(m); }
+  addCircCol(0, 0, 3.5);
+}
 
 // trees (instanced: 2 draw calls for ~60 trees)
 {
@@ -183,7 +173,7 @@ addCircCol(0, 0, 3.5);
     return false;
   };
   let guard = 0;
-  while (pts.length < 56 && guard++ < 4000) {
+  while (pts.length < (BLD_ON ? 110 : 56) && guard++ < 6000) {
     const x = (rnd() * 2 - 1) * (WORLD - 3), z = (rnd() * 2 - 1) * (WORLD - 3);
     if (!blocked(x, z) && !pts.some(p => Math.hypot(p.x - x, p.z - z) < 3)) pts.push({ x, z, s: 0.8 + rnd() * 0.7 });
   }
@@ -201,7 +191,7 @@ addCircCol(0, 0, 3.5);
   window.__treeCount = pts.length;
 }
 // a few crates/barrels (solid props)
-for (const [x, z] of [[-8.2, -4.2], [-8.6, -3.2], [9.2, -5.8], [8.4, 6.6]]) {
+for (const [x, z] of (BLD_ON ? [] : [[-8.2, -4.2], [-8.6, -3.2], [9.2, -5.8], [8.4, 6.6]])) {
   mesh(new THREE.BoxGeometry(1, 1, 1), mats.wood, x, 0.5, z); addBoxCol(x, z, 1, 1);
 }
 
@@ -452,7 +442,8 @@ function updateHero(dt) {
   } else state.speed *= 0.8;
   state.moving = state.speed > 0.5;
   hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw;
-  let ins = null; for (const e of enterables) if (e.update(state.heroX, state.heroZ)) ins = e.id; state.inside = ins;
+  let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt); if (r) ins = typeof r === 'string' ? r : e.id; }
+  if (ins !== state.inside) { state.inside = ins; try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins } })); } catch (_) {} }
   animateHero(dt);
 }
 
@@ -533,7 +524,7 @@ requestAnimationFrame(frame);
 
 window.__p3d = {
   state, glbInfo, colliders, get hero() { return hero; }, THREE, renderer, enterables,
-  get fps() { return fps; }, get frames() { return totalFrames; },
+  enterables, get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   teleport(x, z) { state.heroX = x; state.heroZ = z; state.target = null; },
   setCamYaw(y) { state.camYaw = y; },

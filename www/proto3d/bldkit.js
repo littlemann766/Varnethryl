@@ -79,7 +79,7 @@ export class Builder {
     this.add(ridgeX ? boxG(L + over * 2 + .2, .16, .18, 1) : boxG(.18, .16, L + over * 2 + .2, 1), M('#2a2420'), x, y + rh, z, grp);   // ridge beam
     return m;
   }
-  banner(x, y, z, ry = 0, w = 1, h = 2.2, grp) { const m = M('#ffffff', { map: bannerTexture(), side: THREE.DoubleSide }); const p = this.add(new THREE.PlaneGeometry(w, h), m, x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry; return p; }
+  banner(x, y, z, ry = 0, w = 1, h = 2.2, grp) { const m = M('#ffffff', { map: bannerTexture(), side: THREE.DoubleSide, alphaTest: .5 }); const p = this.add(new THREE.PlaneGeometry(w, h), m, x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry; return p; }
   win(x, y, z, ry = 0, w = .9, h = 1.2, key = 'glass', grp, shut = key === 'glass' && w < 1.4 && !this.noShutters) {
     if (shut) for (const s of [-1, 1]) { const sh = this.bx(w * .42, h, .06, 'darkWood', x + Math.cos(ry) * s * (w * .72), y, z - Math.sin(ry) * s * (w * .72) + Math.cos(ry) * .03, grp || this.G.ext); sh.rotation.y = ry; } const p = this.add(new THREE.PlaneGeometry(w, h), M('#ffffff', { map: tex(key), emissive: key === 'glass' ? new THREE.Color(0x70480f) : new THREE.Color(0x0a1840), side: THREE.DoubleSide }), x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
     const f = this.bx(w + .2, .12, .2, 'darkWood', x + Math.sin(ry) * .02, y - h / 2 - .04, z + Math.cos(ry) * .02, grp || this.G.ext); f.rotation.y = ry; return p; }

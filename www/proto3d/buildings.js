@@ -343,8 +343,8 @@ function keep(spec, ctx) {
 function gatehouse(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Gatehouse of Varnethryl'; const TW = 2.4, H = 8;
   B.w = 14; B.d = 6; B.h = H; B.radius = 9;
-  for (const s of [-1, 1]) { B.tower(s * 5.6, 0, 2.9, H + 1.5, { coneH: 6.4, windows: 4, wa: 1 + s }); const x = s * ((TW + 5.6 - 2.6) / 2 + .0);
-    B.bx(5.6 - 2.6 - TW + 0, H, 5, 'stone', s * ((TW + 5.6 - 2.5) / 2 + 0), H / 2, 0, B.G.ext); B.col(s * ((TW + 5.6 - 2.5) / 2), 0, 5.6 - 2.5 - TW, 5); }
+  const gts = []; for (const s of [-1, 1]) { const [wx, wz] = B.toW(s * 5.8, 0); gts.push(hollowTower(ctx, 'gt' + (s < 0 ? 0 : 1), wx, wz, Math.PI + (spec.rot || 0), 3.4));   // hollow, climbable gate towers (door toward the town)
+    B.bx(5.6 - 2.5 - TW + 0, H, 5, 'stone', s * ((TW + 5.6 - 2.5) / 2 + 0), H / 2, 0, B.G.ext); }
   B.bx(TW * 2 + .02, H - 4.6, 5, 'stone', 0, 4.6 + (H - 4.6) / 2, 0, B.G.ext);
   for (let i = 0; i < 6; i++) { const x = -3 + i * 1.2; B.bx(.7, .7, .7, 'stone', x, H + .35, 2.2, B.G.ext); B.bx(.7, .7, .7, 'stone', x, H + .35, -2.2, B.G.ext); }
   B.bx(TW * 2, .8, .9, 'stoneD', 0, 4.6, 2.4, B.G.ext);
@@ -360,7 +360,8 @@ function gatehouse(spec, ctx) {
   for (const s of [-1, 1]) for (const z of [-2.65, 2.65]) for (const y of [2.6, 5.6]) B.bx(.16, 1.0, .14, '#0e0f12', s * 5.6 * .55 + s * 0, y, z, B.G.ext, { shadow: false });
   B.guard(-3.2, 4.6); B.guard(3.2, 4.6); B.guard(-3.2, -4.6); B.apron(14, 4, 5); B.bx(TW * 2 + 1, .08, 12, 'cobble', 0, .05, 0, B.G.ext, { shadow: false });
   B.rocks([[-9.5, 2.5, 1.6], [9.8, 2.2, 1.9], [-10.5, -2, 1.3], [10.4, -2.4, 1.5]]);
-  B.insideTest = null; return B.finish();
+  B.insideTest = null; B.finish();
+  return { id: spec.id, parts: [B, ...gts], name: B.name, update(hx, hz, dt, lv) { let ins = null; B.update(hx, hz, dt, lv); for (const g of gts) if (g.update(hx, hz, dt, lv)) ins = g.id; return ins; } };
 }
 
 // ---------- 18. Fountain Monument ----------
@@ -393,7 +394,7 @@ function observatory(spec, ctx) {
   B.add(new THREE.CylinderGeometry(.14, .2, 1.8, 6), M('gold'), 3.3, H + 3.0, 0, B.G.roof).rotation.z = -.7; B.cyl(.0, .3, .8, 'gold', 0, H + R + .3, 0, B.G.roof, 6);
   B.banner(2.6, 6.5, R + .02 - .15, 0, .8, 2.2);
   { // craggy mountain-top base (reference), warm arched windows, rocky steps
-    const rm = '#5d6068'; for (let i = 0; i < 11; i++) { const a = 1.0 + i * (Math.PI * 2 - 2.0) / 10 + .3, rr = R + 2.4 + (i % 3) * .6, s = 1.8 + (i % 4) * .6; const m = B.add(new THREE.DodecahedronGeometry(s, 0), M(rm), Math.sin(a) * rr, s * .55, Math.cos(a) * rr, B.G.ext); m.scale.y = 1.3 + (i % 2) * .5; m.rotation.y = a * 2; B.ccol(Math.sin(a) * rr, Math.cos(a) * rr, s * .8); }
+    const rm = '#5d6068'; for (let i = 0; i < 11; i++) { const a = 1.0 + i * (Math.PI * 2 - 2.0) / 10 + .3, rr = R + 2.4 + (i % 3) * .6, s = 1.8 + (i % 4) * .6; if (Math.cos(a) * rr < -3 || Math.sin(a) * rr < -3) continue; const m = B.add(new THREE.DodecahedronGeometry(s, 0), M(rm), Math.sin(a) * rr, s * .55, Math.cos(a) * rr, B.G.ext); m.scale.y = 1.3 + (i % 2) * .5; m.rotation.y = a * 2; B.ccol(Math.sin(a) * rr, Math.cos(a) * rr, s * .8); }
     for (let i = 0; i < 6; i++) B.bx(3.2 + i * .1, .24, .7, 'stoneD', 0, .12 + i * .01, R + .6 + i * .4, B.G.ext);
     for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283 + .15; if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < .5) continue; B.add(new THREE.PlaneGeometry(.55, 1.5), GLOW('ffb347', 1.3), Math.sin(a) * (R + .06), 5.4, Math.cos(a) * (R + .06), B.G.ext, { shadow: false }).rotation.y = a; B.add(new THREE.PlaneGeometry(.55, 1.5), GLOW('6aa8ff', 1.2), Math.sin(a + .31) * (R + .06), 9.2, Math.cos(a + .31) * (R + .06), B.G.ext, { shadow: false }).rotation.y = a + .31; } }
   B.add(new THREE.CylinderGeometry(1.7, 1.9, .06, 20), M('sigil'), 0, .1, -.2, B.G.int, { shadow: false });
@@ -527,7 +528,7 @@ function port(spec, ctx) {
     const fl = new THREE.Mesh(new THREE.PlaneGeometry(1, .6), M('#1f3f86', { side: THREE.DoubleSide })); fl.position.set(.5, 10.1, 0); g.add(fl);
     for (const sx of [-.8, .8]) { const l = new THREE.Mesh(new THREE.SphereGeometry(.18, 6, 5), GLOW('ffc060', 1.8)); l.position.set(sx, 2.5, -4.6); g.add(l); }
     for (const m of g.children) m.castShadow = true; boats.push(g); B.col(7.5, Z0 + PD + 10, 3.4, 9.5); }
-  const TERR = [[-13, -8, 6, 5.5, 0, 3.2], [15.5, -7, 6, 5, 0, 3.4]];
+  const TERR = [[15.5, -7, 6, 5, 0, 3.4]];
   for (const [hx, hz, hw, hd, hy, hh] of TERR) { if (hy) { B.bx(hw + 1.4, hy, hd + 1.4, 'stoneD', hx, hy / 2, hz, B.G.ext); } B.bx(hw, hh, hd, 'darkWood', hx, hy + hh / 2, hz, B.G.ext); B.gable(hw, hd, 2.4 + (hw > 6 ? .4 : 0), hx, hy + hh, hz, 'slate', B.G.ext, true, .6, 'timber'); B.bx(1, 1, .3, 'stoneD', hx + 1.6, hy + hh + 2.3, hz, B.G.ext);
     for (let k = -1; k <= 1; k += 2) for (const wy of [1.2, 2.5]) if (hy + wy < hy + hh) B.add(new THREE.PlaneGeometry(.7, .9), GLOW('ffb347', 1.4), hx + k * hw * .27, hy + wy, hz + hd / 2 + .02, B.G.ext, { shadow: false });
     B.bx(hw * .9, .15, 1.0, 'wood', hx, hy + 2.3, hz + hd / 2 + .5, B.G.ext); B.col(hx, hz, hw + .5, hd + .5); }
@@ -566,25 +567,45 @@ const house = n => (spec, ctx) => { const p = houseSpecs[n % 4];
     } }); };
 
 // ---------- town walls & watchtowers ----------
+function hollowTower(ctx, id, x, z, rot, R = 3.4) { // climbable round tower (2 levels + battlement roof), door faces local +z
+  const t = new Builder(ctx, { id, cx: x, cz: z, rot }); t.name = 'Watchtower'; t.roundShell({ r: R, h: 8.2, key: 'stone', N: 16, T: .6, floor: 'floorStone' });
+  t.ring(R + .3, .5, 'stoneD', 0, 8.45, 0, t.G.ext, 16); for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283; t.bx(.7, .7, .7, 'stone', Math.sin(a) * (R + .15), 9.05, Math.cos(a) * (R + .15), t.G.ext); }
+  t.cone(R + .8, 6.2, 'slate', 0, 8.7, 0, t.G.roof, 16); t.banner(0, 4.6, R + .05, 0, 1, 2.4);
+  for (let i = 0; i < 3; i++) { const a = 2.2 + i * 1.3; t.win(Math.sin(a) * (R + .05), 5, Math.cos(a) * (R + .05), a, .4, .9, 'glass'); }
+  const iw = t.iw; t.table(0, -.6, .7); t.rack(-iw + .5, -.5, 4, 1); t.bed(iw - 1.0, -1.0, 1); t.barrel(iw - 1, 1.6); t.crate(-iw + 1, 1.6, .8); t.lamp(0, 3.4, 0);
+  { const S1 = { cx: -1.2, cz: 0, dir: '-z', len: 3.6, w: 1.4 }, S2 = { cx: 1.2, cz: 0, dir: '+z', len: 3.6, w: 1.4 };
+    t.fullUpper({ level: 1, y: 4.2, disc: iw - .05, stair: S1, rooms(U) { U.lamp(0, 2.6, 0); } });
+    t.fullUpper({ level: 2, y: 8.2, y0: 4.2, l0: 1, disc: iw - .05, stair: S2, rooms(U) { U.barrel(-1.6, -1.5); U.crate(-1.7, 1.5, .7); U.lamp(0, 1.6, 0); } }); }
+  t.radius = 8; t.finish(); return t;
+}
 export function buildWalls(ctx, WORLD, GATE_W) {
   const tmpl = { id: 'walls', cx: 0, cz: 0, rot: 0 }; const B = new Builder(ctx, tmpl); B.name = 'Town Walls & Watchtowers'; B.insideTest = null; B.radius = 9999;
-  const run = (x1, z1, x2, z2) => { const len = Math.hypot(x2 - x1, z2 - z1), horiz = Math.abs(z2 - z1) < .01, h = 4.2, t = 1.4, cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
-    B.bx(horiz ? len : t, h, horiz ? t : len, 'stone', cx, h / 2, cz, B.G.ext); B.bx(horiz ? len : t * .5, .5, horiz ? t * .5 : len, 'stoneD', cx, h + .25, cz + (horiz ? (z1 < 0 ? .4 : -.4) : 0) + 0, B.G.ext) ; B.bx(horiz ? len : .4, .3, horiz ? .4 : len, 'stoneD', cx + (horiz ? 0 : (x1 < 0 ? .5 : -.5)), h + .15, cz + (horiz ? (z1 < 0 ? .5 : -.5) : 0), B.G.ext);
-    const n = Math.floor(len / 1.8); for (let i = 0; i < n; i++) { const f = (i + .5) / n, px = x1 + (x2 - x1) * f, pz = z1 + (z2 - z1) * f; B.bx(horiz ? .9 : t, .8, horiz ? t : .9, 'stone', px, h + .4 + .3, pz, B.G.ext); }
-    const nb = Math.floor(len / 9); for (let i = 1; i < nb; i++) { const f = i / nb, px = x1 + (x2 - x1) * f, pz = z1 + (z2 - z1) * f, sx = horiz ? 0 : (x1 < 0 ? 1 : -1), sz = horiz ? (z1 < 0 ? 1 : -1) : 0; B.bx(1.1, 4.8, 1.1, 'stoneD', px + sx * (t / 2 + .3), 2.4, pz + sz * (t / 2 + .3), B.G.ext); if (i % 2) B.banner(px + sx * (t / 2 + .02), 2.6, pz + sz * (t / 2 + .02), horiz ? (z1 < 0 ? 0 : Math.PI) : (x1 < 0 ? Math.PI / 2 : -Math.PI / 2), 1.1, 2.6); }
-    B.col(cx, cz, horiz ? len : t, horiz ? t : len); };
+  B.reach = 9999; const WH = 4.2, WT = 2.6;   // wall height / thickness (wide enough for a wall walk)
+  const DECO = [[0, -WORLD], [-30, -WORLD], [30, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, 30], [WORLD, 30], [-WORLD, -30], [WORLD, -30], [-30, WORLD], [30, WORLD]];
+  const run = (x1, z1, x2, z2) => { const len = Math.hypot(x2 - x1, z2 - z1), horiz = Math.abs(z2 - z1) < .01, h = WH, t = WT, cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
+    const nx = horiz ? 0 : (x1 < 0 ? 1 : -1), nz = horiz ? (z1 < 0 ? 1 : -1) : 0;   // inward normal
+    B.bx(horiz ? len : t, h, horiz ? t : len, 'stone', cx, h / 2, cz, B.G.ext);
+    // outer parapet (merlons) so the top is a clear walkway; inner edge has a low kerb
+    const n = Math.floor(len / 1.8); for (let i = 0; i < n; i++) { const f = (i + .5) / n, px = x1 + (x2 - x1) * f, pz = z1 + (z2 - z1) * f; B.bx(horiz ? .9 : .5, .8, horiz ? .5 : .9, 'stone', px - nx * (t / 2 - .25), h + .4, pz - nz * (t / 2 - .25), B.G.ext); }
+    B.bx(horiz ? len : .3, .12, horiz ? .3 : len, 'stoneD', cx + nx * (t / 2 - .15), h + .06, cz + nz * (t / 2 - .15), B.G.ext);
+    const bu = []; const nb = Math.floor(len / 9); for (let i = 1; i < nb; i++) { const f = i / nb, px = x1 + (x2 - x1) * f, pz = z1 + (z2 - z1) * f; bu.push(horiz ? px : pz); B.bx(1.1, 4.8, 1.1, 'stoneD', px + nx * (t / 2 + .3), 2.4, pz + nz * (t / 2 + .3), B.G.ext); if (i % 2) B.banner(px + nx * (t / 2 + .02), 2.6, pz + nz * (t / 2 + .02), horiz ? (z1 < 0 ? 0 : Math.PI) : (x1 < 0 ? Math.PI / 2 : -Math.PI / 2), 1.1, 2.6); }
+    const lt = B.lvTag; B.lvTag = 0; B.col(cx, cz, horiz ? len : t, horiz ? t : len); B.lvTag = lt;   // solid at street level only; the wall top is walkable
+    // wall walk: split into segments between the decorative towers / corner towers / gate, each with its own stair
+    const u0 = horiz ? Math.min(x1, x2) : Math.min(z1, z2), u1 = horiz ? Math.max(x1, x2) : Math.max(z1, z2), ax = horiz ? 'x' : 'z', wl = horiz ? cz : cx;
+    const cuts = DECO.filter(([x, z]) => horiz ? Math.abs(z - cz) < .01 : Math.abs(x - cx) < .01).map(([x, z]) => horiz ? x : z).filter(c => c > u0 + 1 && c < u1 - 1); const segs = []; let a = u0 + 4.6;
+    for (const c of cuts.sort((p, q) => p - q)) { if (c - 3.4 > a) segs.push([a, c - 3.4]); a = Math.max(a, c + 3.4); } if (u1 - 4.6 > a) segs.push([a, u1 - 4.6]);
+    for (let [sa, sb] of segs) { if (sb - sa < 5) continue;
+      const rect = horiz ? [sa, sb, cz - t / 2 + .05, cz + t / 2 - .55] : [cx - t / 2 + .05, cx + t / 2 - .55, sa, sb]; if (!horiz) { const o = nx > 0 ? [cx - t / 2 + .55, cx + t / 2 + .12] : [cx - t / 2 - .12, cx + t / 2 - .55]; rect[0] = o[0]; rect[1] = o[1]; } else { const o = nz > 0 ? [cz - t / 2 + .55, cz + t / 2 + .12] : [cz - t / 2 - .12, cz + t / 2 - .55]; rect[2] = o[0]; rect[3] = o[1]; }
+      B.floors.push({ level: 1, y: h, rects: [rect] }); B.levelGroup(1);
+      let mid = (sa + sb) / 2; if (!horiz && cx < 0 && mid > 38 && mid < 52) mid = sa + 1.9;   // keep clear of the port basin
+      for (let d = 0; d < 6; d += .25) { let ok = false; for (const s of [mid + d, mid - d]) if (s - 1.4 > sa && s + 1.4 < sb && bu.every(b => Math.abs(b - s) > 1.7)) { mid = s; ok = true; break; } if (ok) break; }
+      const LEN = 5.2, cxs = horiz ? mid : cx + nx * (t / 2 + LEN / 2), czs = horiz ? cz + nz * (t / 2 + LEN / 2) : mid;
+      const ang = horiz ? (nz > 0 ? Math.PI : 0) : (nx > 0 ? -Math.PI / 2 : Math.PI / 2);   // climbs toward the wall
+      B.stairs({ cx: cxs, cz: czs, ang, len: LEN, w: 1.7, l0: 0, y0: 0, l1: 1, y1: h, key: 'stoneD', flipUp: .7 }); } };
   const g = GATE_W;
   run(-WORLD, -WORLD, WORLD, -WORLD); run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -7.4, WORLD); run(7.4, WORLD, WORLD, WORLD);
   const towers = []; const tw = (x, z, enter) => { if (!enter) { B.tower(x, z, 2.4, 7.6, { coneH: 5.4, windows: 3, wa: x + z }); B.banner(x, 4.2, z + (z < 0 ? 2.5 : -2.5), z < 0 ? 0 : Math.PI, 1, 2.2); return; }
-    const th = Math.atan2(-x, -z), t = new Builder(ctx, { id: 'wt' + towers.length, cx: x, cz: z, rot: th }); t.name = 'Watchtower'; t.roundShell({ r: 3.4, h: 8, key: 'stone', N: 16, T: .6, floor: 'floorStone' });
-    t.ring(3.7, .5, 'stoneD', 0, 8.25, 0, t.G.ext, 16); for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283; t.bx(.7, .7, .7, 'stone', Math.sin(a) * 3.55, 8.85, Math.cos(a) * 3.55, t.G.ext); }
-    t.cone(4.2, 6.2, 'slate', 0, 8.5, 0, t.G.roof, 16); t.banner(0, 4.6, 3.4 + .05, 0, 1, 2.4);
-    for (let i = 0; i < 3; i++) { const a = 2.2 + i * 1.3; t.win(Math.sin(a) * 3.45, 5, Math.cos(a) * 3.45, a, .4, .9, 'glass'); }
-    const iw = t.iw; t.table(0, -.6, .7); t.rack(-iw + .5, -.5, 4, 1); t.bed(iw - 1.0, -1.0, 1); t.barrel(iw - 1, 1.6); t.crate(-iw + 1, 1.6, .8); t.lamp(0, 3.4, 0);
-    { const S1 = { cx: -1.2, cz: 0, dir: '-z', len: 3.6, w: 1.4 }, S2 = { cx: 1.2, cz: 0, dir: '+z', len: 3.6, w: 1.4 };
-      t.fullUpper({ level: 1, y: 4.0, disc: iw - .05, stair: S1, rooms(U) { U.lamp(0, 2.6, 0); } });
-      t.fullUpper({ level: 2, y: 8.0, y0: 4.0, l0: 1, disc: iw - .05, stair: S2, rooms(U) { U.barrel(-1.6, -1.5); U.crate(-1.7, 1.5, .7); U.lamp(0, 1.6, 0); } }); }
-    t.radius = 8; t.finish(); towers.push(t); };
+    const th = Math.atan2(-x, -z), t = hollowTower(ctx, 'wt' + towers.length, x, z, th); towers.push(t); };
   const E = WORLD - 4;
   tw(-E, -E, true); tw(E, -E, true); tw(-E, E, true); tw(E, E, true);
   for (const [x, z] of [[0, -WORLD], [-30, -WORLD], [30, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, 30], [WORLD, 30], [-WORLD, -30], [WORLD, -30], [-30, WORLD], [30, WORLD]]) tw(x, z, false);

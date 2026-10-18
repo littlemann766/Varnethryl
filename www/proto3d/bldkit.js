@@ -216,7 +216,7 @@ Builder.prototype.autoRails = function (level, y, rects, o = {}) {
 Builder.prototype.rampUV = function (m, lx, lz) { const dx = lx - m.cx, dz = lz - m.cz, s = Math.sin(m.ang), c = Math.cos(m.ang); return [dx * s + dz * c, dx * c - dz * s]; };
 // straight flight: centre (cx,cz), direction angle ang (0 climbs toward +z), length, width, from level l0 (height y0) to level l1 (height y1)
 Builder.prototype.stairs = function (o) {
-  const { cx, cz, ang = 0, len, w = 1.8, l0 = 0, y0 = 0, l1, y1 } = o; const m = { cx, cz, ang, len, w, l0, y0, l1, y1 }; this.ramps.push(m); this.levelGroup(l1);
+  const { cx, cz, ang = 0, len, w = 1.8, l0 = 0, y0 = 0, l1, y1 } = o; const m = { cx, cz, ang, len, w, l0, y0, l1, y1, flipUp: o.flipUp }; this.ramps.push(m); this.levelGroup(l1);
   const n = Math.max(3, Math.round((y1 - y0) / .3)), s = Math.sin(ang), c = Math.cos(ang), grp = l0 ? this.levelGroup(l0) : this.G.int, key = o.key || 'wood';
   for (let i = 0; i < n; i++) { const u = -len / 2 + (i + .5) * len / n, top = y0 + (i + 1) * (y1 - y0) / n, hh = top - y0 + (l0 ? 0 : 0); const b = this.bx(w, hh, len / n + .01, key, 0, 0, 0, grp); b.position.set(cx + s * u, y0 + hh / 2, cz + c * u); b.rotation.y = ang; }
   for (const sd of [-1, 1]) { const px = cx + c * sd * (w / 2 + .05), pz = cz - s * sd * (w / 2 + .05); const b = this.bx(.1, .12, len + .3, 'darkWood', px, (y0 + y1) / 2 + .95, pz, grp); b.position.set(px + s * 0, (y0 + y1) / 2 + .95, pz); b.rotation.y = ang; b.rotation.x = 0;

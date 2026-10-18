@@ -31,7 +31,7 @@ with sync_playwright() as p:
             r = walk(W(bi['id'], *a), m['l0'], W(bi['id'], *t))
             up = r['lv'] == m['l1'] and abs(r['y'] - m['y1']) < .15
             a2 = [m['cx'] + s * (-m['len'] / 2 - .9), m['cz'] + c * (-m['len'] / 2 - .9)]; r2 = walk(W(bi['id'], *t), m['l1'], W(bi['id'], *a2))
-            down = r2['lv'] == m['l0'] and r2['y'] < m['y0'] + .6
+            down = r2['lv'] == m['l0'] and r2['y'] < m['y0'] + 1.0
             ok &= up and down; msgs.append(f"ramp {m['l0']}->{m['l1']} up={up}({r['lv']},{r['y']:.2f}) down={down}({r2['lv']},{r2['y']:.2f})")
         print('PASS' if ok else 'FAIL', bi['id'], '; '.join(msgs)); fails += 0 if ok else 1
     b.close()

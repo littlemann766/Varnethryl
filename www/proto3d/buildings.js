@@ -30,6 +30,18 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
   if (o.interior) o.interior(B);
   B.radius = Math.hypot(B.w, B.d) / 2; return B.finish();
 }
+
+// themed full upper storey with a real flight on one side (free column), furniture on the back strip and opposite wall
+function upperStd(B, o) {
+  const iw = B.iw, id_ = B.id_, len = Math.min(o.len || 3.4, id_ * 2 - 1.3), sd = o.side === 'L' ? -1 : 1, th = o.theme || 'bed', y = o.y || 3.0;
+  B.fullUpper({ y, stair: { cx: sd * (iw - .9), cz: id_ - .45 - len / 2, dir: '-z', len, w: 1.5 }, rooms(U) {
+    const x0 = -sd * (iw - 1.1), span = iw * 2 - 2.2;
+    if (th === 'bed') { U.bed(x0, -id_ + 1.3); U.bed(x0 + sd * 1.5, -id_ + 1.3); U.chest(0, -id_ + .6, .8); U.tableR(-sd * 1.0, .2, 1.4, .9); U.rugAt(-sd * 1.0, .2, 2.2, 1.8); U.lamp(0, 2.2, 0); }
+    if (th === 'lab') { U.shelf(0, -id_ + .3, Math.min(span, 4.4), 0); U.tableR(-sd * 1.2, -.3, 2.2, 1.0); U.crystal(-sd * 1.2 + 1.0, -.3, 1.2, 'a07aff', .25); U.cyl(.5, .4, .6, 'iron', -sd * (iw - 1.2), .3, -id_ + 1.2, U.G.int, 10); U.ccol(-sd * (iw - 1.2), -id_ + 1.2, .6); U.lamp(0, 2.2, 0); U.barrel(-sd * (iw - .5), id_ - .6); }
+    if (th === 'store') { for (let i = 0; i < 3; i++) U.crate(x0 + i * (-sd) * .0 - sd * 0 + (i - 1) * 1.1, -id_ + .7, .8); U.barrel(-sd * (iw - .5), 0); U.barrel(-sd * (iw - .5), 1.0); U.sack(-sd * (iw - 1.2), id_ - 1.0); U.sack(-sd * (iw - 1.2), id_ - 1.8); U.hay(0, 0.4, 1.6, 1.2, .8); U.lamp(0, 2.2, 0); }
+    if (th === 'hall') { U.tableR(-sd * .8, -.2, 2.6, 1.1); U.shelf(0, -id_ + .3, Math.min(span, 4), 0); U.chest(-sd * (iw - 1.0), -id_ + .9, .9); U.rugAt(-sd * .8, -.2, 3.2, 2.2); U.lamp(0, 2.2, 0); U.lamp(-sd * 2.2, 2.2, 0); }
+  } });
+}
 const hearthRight = B => B.hearth(B.iw - .5, 0, -Math.PI / 2), hearthLeft = B => B.hearth(-B.iw + .5, 0, Math.PI / 2);
 function flagBanners(B, xs, y = null, z = null) { for (const x of xs) B.banner(x, y || B.h * .62, z === null ? -B.id_ + .3 : z, 0, 1, 2.2); }
 
@@ -54,18 +66,17 @@ const inn = (spec, ctx) => std(spec, ctx, { name: 'Inn of Varnethryl', w: 11, d:
 const smithy = (spec, ctx) => std(spec, ctx, { name: 'Blacksmith of Varnethryl', w: 9, d: 8, h: 5.2, hs: 3.6, upper: 'stone', lower: 'stone', rh: 3.2, ridge: 'z', endKey: 'timber', over: .6, flowers: false, extra(B) { B.anvil(-B.w / 2 - 1.0, B.d / 2 + 1.2); B.cyl(.5, .55, .5, 'wood', -B.w / 2 - 1.0, .25, B.d / 2 + 1.2, B.G.ext, 8); B.rack(B.w / 2 + 1.3, B.d / 2 - 1.5, 4, 1); B.barrel; for (let i = 0; i < 3; i++) B.bx(.9, .22, .25, 'wood', B.w / 2 + 1.0, .12 + i * .22, B.d / 2 + 1.6 + (i % 2) * .05, B.G.ext); B.lanternPost(-1.9, B.d / 2 + 1.0); B.add(new THREE.PlaneGeometry(1.8, 2.2), GLOW('ff8a2a', 1.4), 0, 1.3, B.d / 2 - .55, B.G.ext, { shadow: false }); }, chimneys: [[3.2, -2.5, 4.2]], banners: [[3.8, 2.8, .7, 1.6]],
   interior(B) { const iw = B.iw, id_ = B.id_;
     B.box(1.8, 1.0, 1.4, iw - 1.2, -id_ + .9, 'stoneD'); B.add(boxG(1.2, .14, .9, 1), GLOW('ff7a1a', 1.5), iw - 1.2, 1.02, -id_ + .9, B.G.int, { shadow: false }); B.bx(.7, 2.2, .6, 'stoneD', iw - 1.2, 2.1, -id_ + .55, B.G.int);
-    B.anvil(-.3, .2); B.rack(-iw + 1.7, -id_ + .35, 6); B.box(2.4, .9, .8, -1.5, -id_ + .6, 'darkWood'); B.barrel(-iw + .5, 1.4); B.barrel(-iw + 1.1, 1.9); B.barrel(iw - .5, 1.9);
-    B.bx(.5, .7, .5, 'iron', 1.5, .35, 1.0, B.G.int); B.ccol(1.5, 1.0, .5); B.banner(0, 2.4, -id_ + .3, 0, .9, 1.8); B.lamp(-1, 3.6, 1); B.lamp(2.2, 3.6, -1);
-    for (let i = 0; i < 2; i++) B.bx(.45, 1.7, .08, 'iron', -iw + .25 + i * .6, 1.8, id_ - .1, B.G.int, { shadow: false }); B.rugAt(-.5, 1.5, 3, 2.2, 'rug');
+    B.anvil(-.3, .2); B.rack(-iw + 1.7, -id_ + .35, 6); B.box(2.4, .9, .8, -1.5, -id_ + .6, 'darkWood'); B.barrel(-iw + .5, 1.4); B.barrel(-iw + 1.1, 1.9); B.bx(.5, .7, .5, 'iron', 1.5, .35, 1.0, B.G.int); B.ccol(1.5, 1.0, .5); B.banner(0, 2.4, -id_ + .3, 0, .9, 1.8); B.lamp(-1, 3.6, 1); B.lamp(2.2, 3.6, -1);
+    for (let i = 0; i < 2; i++) B.bx(.45, 1.7, .08, 'iron', -iw + .25 + i * .6, 1.8, id_ - .1, B.G.int, { shadow: false }); B.rugAt(-.5, 1.5, 3, 2.2, 'rug'); upperStd(B, { theme: 'store', y: 3.4 });
   } });
 
 // ---------- 3. Apothecary ----------
 const apothecary = (spec, ctx) => std(spec, ctx, { name: 'Apothecary of Varnethryl', w: 8, d: 7, h: 6.0, hs: 2.6, upper: 'timber', rh: 3.2, ridge: 'z', over: .7, chimneys: [[-2.4, -1.5], [2.4, -1.5]], dormers: [0], dormY: 1.2, dormZ: 1.5, sign: ['Apothecary', '⚗', 4.3, 3.3],
   interior(B) { const iw = B.iw, id_ = B.id_;
-    B.shelf(0, -id_ + .3, 5, 0); B.shelf(-iw + .3, -.5, 3.2, 1); B.shelf(iw - .3, -.5, 3.2, -1); B.tableR(0, .6, 2.2, 1.1); for (let i = 0; i < 4; i++) B.cyl(.09, .09, .22, ['#4a9a6a', '#b5452f', '#6a4aa8', '#d8aa3a'][i], -.7 + i * .45, 1.06, .6, B.G.int, 6, { shadow: false });
-    B.counter(iw - 1.4, id_ - 1.0, 2, .7); B.barrel(-iw + .5, id_ - .5); B.crate(-iw + 1.3, id_ - .5, .7);
+    B.shelf(0, -id_ + .3, 5, 0); B.shelf(-iw + .3, -.5, 3.2, 1); B.shelf(iw - .3, -1.9, 2.0, -1); B.tableR(0, .6, 2.2, 1.1); for (let i = 0; i < 4; i++) B.cyl(.09, .09, .22, ['#4a9a6a', '#b5452f', '#6a4aa8', '#d8aa3a'][i], -.7 + i * .45, 1.06, .6, B.G.int, 6, { shadow: false });
+    B.counter(-iw + 1.4, id_ - 1.0, 2, .7); B.barrel(-iw + .5, 1.8);
     for (let i = 0; i < 6; i++) B.add(new THREE.ConeGeometry(.18, .7, 5), M('#5a8a3a'), -2.4 + i * .95, 3.7, -.5 + (i % 2) * 1.5, B.G.int, { shadow: false });
-    B.lamp(-1.5, 3.5, 1); B.lamp(1.5, 3.5, 1); B.rugAt(0, 1.8, 3, 2, 'rug');
+    B.lamp(-1.5, 3.5, 1); B.lamp(1.5, 3.5, 1); B.rugAt(0, 1.8, 3, 2, 'rug'); upperStd(B, { theme: 'lab', y: 3.0 });
   } });
 
 // ---------- 4. Temple ----------
@@ -113,9 +124,9 @@ const stables = (spec, ctx) => std(spec, ctx, { name: 'Stables of Varnethryl', w
   interior(B) { const iw = B.iw, id_ = B.id_;
     for (const s of [-1, 1]) for (let i = 0; i < 4; i++) { const x = -iw + 2.4 + i * 3.6; B.bx(.1, 1.6, 2.6, 'darkWood', x + 1.8, .8, -id_ + 1.5 + (s > 0 ? 0 : 0), B.G.int); B.col(x + 1.8, -id_ + 1.5, .15, 2.6); }
     for (let i = 0; i < 4; i++) { const x = -iw + 1.3 + i * 3.6; B.hay(x, -id_ + 1.0, 1.4, 1.2, .5); const hz = B.add(new THREE.SphereGeometry(.4, 8, 6), M('#6a4a2a'), x + .5, 1.1, -id_ + 1.6, B.G.int); hz.scale.set(1.5, 1, .8); B.bx(.12, 1.1, .12, 'darkWood', x + .5, .45, -id_ + 1.6, B.G.int, { shadow: false }); }
-    B.tableR(iw - 2.0, id_ - 1.4, 2.2, 1, 'darkWood'); B.hay(-iw + 1, id_ - 1.2, 1.6, 1.2, 1.2); B.hay(-iw + 1, id_ - 2.6, 1.6, 1.2, .9); B.barrel(iw - .5, id_ - .4); B.barrel(iw - .5, id_ - 3.6);
+    B.tableR(iw - 2.0, id_ - 1.4, 2.2, 1, 'darkWood');  B.barrel(iw - .5, id_ - .4); B.barrel(iw - .5, id_ - 3.6);
     B.rack(0, id_ - .3, 5); for (let i = 0; i < 5; i++) B.banner(-6 + i * 3, 2.9, id_ - .1, Math.PI, .6, 1.2);
-    B.bx(iw * 2 - 2, .16, 2, 'floorPlank', 0, 3.1, -id_ + 3.4, B.G.int);
+    upperStd(B, { theme: 'store', y: 3.0, side: 'L', len: 3.4 });
     for (const x of [-5, 0, 5]) B.lamp(x, 3.6, 0);
   } });
 
@@ -130,10 +141,10 @@ function treasury(spec, ctx) {
   const iw = B.iw, id_ = B.id_; B.add(new THREE.CylinderGeometry(2.2, 2.2, .04, 24), M('sigil'), 0, .09, -.6, B.G.int, { shadow: false });
   for (let i = 0; i < 5; i++) for (let j = 0; j < 3 - (i > 2 ? 1 : 0); j++) { B.bx(.8, .3, .4, 'gold', -.8 + j * .8 + (i % 2) * .4, .15 + i * .3 * 0 + .15 + 0, -.6 - i * .0, B.G.int); }
   B.add(new THREE.ConeGeometry(1.6, 1.1, 4), M('gold'), 0, .65, -.6, B.G.int).rotation.y = .78; B.ccol(0, -.6, 1.5);
-  for (const s of [-1, 1]) { B.shelf(s * (iw - .3), -1, 4.5, -s, false); B.chest(s * (iw - 1.3), id_ - 1.2); }
+  for (const s of [-1, 1]) { B.shelf(s * (iw - .3), -2, 4.5, -s, false); if (s < 0) B.chest(s * (iw - 1.3), id_ - 1.2); }
   B.tableR(-2.5, -id_ + 1.2, 2.4, 1.2, 'darkWood'); B.bx(3.4, 2.3, .3, 'parchment', 0, 3.2, -id_ + .2, B.G.int, { shadow: false });
   B.cyl(.9, .9, .3, 'iron', 3.5, 1.2, -id_ + 1.2, B.G.int, 14).rotation.x = Math.PI / 2; B.banner(-iw + .4, 3.6, -id_ + .3, 0, 1, 2.4); B.banner(iw - .4, 3.6, -id_ + .3, 0, 1, 2.4);
-  B.lamp(-3, 4.4, 0); B.lamp(3, 4.4, 0); B.radius = 9; return B.finish();
+  B.lamp(-3, 4.4, 0); B.lamp(3, 4.4, 0); upperStd(B, { theme: 'hall', y: 3.6 }); B.radius = 9; return B.finish();
 }
 
 // ---------- 8. Town Hall ----------
@@ -154,7 +165,7 @@ function townhall(spec, ctx) {
   B.shelf(iw - 1.4, -id_ + .3, 3, 0); B.tableR(iw - 1.8, 1, 2.4, 1.2); B.table(-3.5, 1.5, .9);
   for (const s of [-1, 1]) for (const z of [-2, 1.2]) B.pillar(s * 2.4, z, .35, h - 1.4, 'stoneL');
   for (let i = 0; i < 3; i++) B.banner(-iw + .3, 3.4, -2 + i * 2.6, Math.PI / 2, 1, 2.4); B.lamp(-3, 4.8, 0); B.lamp(3, 4.8, 0);
-  B.gallery({ stairX: -iw + 1.0, depth: 1.6 }); B.radius = 10; return B.finish();
+  B.gallery({ stairX: iw - 1.0, depth: 1.6 }); B.radius = 10; return B.finish();
 }
 const DWf = B => B.DW;
 
@@ -204,16 +215,17 @@ const bakery = (spec, ctx) => std(spec, ctx, { name: 'Bakery of Varnethryl', w: 
   interior(B) { const iw = B.iw, id_ = B.id_;
     B.add(boxG(B.w - 1, .02, B.d - 1, 2), M('floorTile'), 0, .09, 0, B.G.int, { shadow: false }); B.counter(-iw + 1.3, 1.0, 2.4, .8, 1); B.shelf(-iw + .3, -1.8, 2.6, 1, false); for (let i = 0; i < 6; i++) B.add(new THREE.SphereGeometry(.2, 6, 5), M('#c88a3a'), -iw + .45, 1.0 + (i % 3) * .55, -1.0 - i * .35 - 0.2, B.G.int, { shadow: false });
     B.box(1.9, 1.1, 1.5, iw - 1.0, -id_ + .9, 'stone'); B.add(boxG(1.0, .8, .4, 1), GLOW('ff7a1a', 1.4), iw - 1.0, .8, -id_ + 1.6, B.G.int, { shadow: false }); B.bx(.6, 2.2, .6, 'stoneD', iw - 1.0, 2.1, -id_ + .7, B.G.int);
-    B.tableR(0, -.4, 2.4, 1.3, 'wood'); B.table(1.6, 2.0, .6); B.barrel(-iw + .5, id_ - .5); B.sack(-iw + 1.3, id_ - .6); B.sack(-iw + 1.9, id_ - .7); for (let i = 0; i < 5; i++) B.cyl(.14, .14, .3, 'iron', -1.2 + i * .6, 3.2, -id_ + .3, B.G.int, 8, { shadow: false });
-    B.lamp(-1.5, 3.8, 0); B.lamp(1.5, 3.8, 0);
+    B.tableR(0, -.4, 2.4, 1.3, 'wood'); B.table(.7, 2.0, .6); B.barrel(-iw + .5, id_ - .5); B.sack(-iw + 1.3, id_ - .6); B.sack(-iw + 1.9, id_ - .7); for (let i = 0; i < 5; i++) B.cyl(.14, .14, .3, 'iron', -1.2 + i * .6, 3.2, -id_ + .3, B.G.int, 8, { shadow: false });
+    B.lamp(-1.5, 3.8, 0); B.lamp(1.5, 3.8, 0); upperStd(B, { theme: 'bed', y: 2.9 });
   } });
 
 // ---------- 13. Thieves' Den ----------
 const thieves = (spec, ctx) => std(spec, ctx, { name: "Thieves' Den of Varnethryl", w: 8, d: 7, h: 6.2, hs: 2.4, upper: 'darkWood', lower: 'stoneD', postKey: 'darkWood', rh: 3.2, ridge: 'z', over: .8, endKey: 'darkWood', roofKey: 'slateG', chimneys: [[-2.4, -1.6]], banners: [[-2.6, 4.2, .7, 1.8], [2.6, 4.2, .7, 1.8]], sign: ["Varnethryl", '', 4.4, 3.4], floor: 'floorStone',
   interior(B) { const iw = B.iw, id_ = B.id_;
-    B.counter(0, 0.6, 3.2, .9); B.shelf(0, -id_ + .3, 4.6); B.shelf(-iw + .3, 1.6, 2.6, 1); B.shelf(iw - .3, 1.6, 2.6, -1); B.barrel(iw - .6, id_ - .6); B.crate(iw - 1.4, id_ - .6, .8); B.crate(-iw + .6, id_ - .6, .9); B.chest(-iw + 1.7, id_ - .6, .8);
+    B.counter(0, 0.6, 3.2, .9); B.shelf(0, -id_ + .3, 4.6); B.shelf(-iw + .3, 1.6, 2.6, 1); B.shelf(iw - .3, -1.6, 2.0, -1); B.crate(-iw + .6, id_ - .6, .9); B.chest(-iw + 1.7, id_ - .6, .8);
     B.table(-1.9, -.2, .6); B.bx(.1, 2.3, 1.2, 'door', 2.3, 1.15, -id_ + .5, B.G.int); B.banner(-iw + .4, 3.4, -id_ + .3, 0, 1, 2); B.lamp(-1.5, 3.4, 1); B.lamp(1.5, 3.4, 1); B.lamp(-2.6, 1.4, -2.2);
     B.bx(.12, 3, 3, 'darkWood', 0.9, 1.5, -1.8, B.G.int); B.col(.9, -1.8, .2, 3);   // partition to the secret back room (door gap at the front)
+    upperStd(B, { theme: 'hall', y: 2.9 });
   } });
 
 // ---------- 14. Mage Academy (simplified: hall + six spires) ----------
@@ -389,8 +401,8 @@ function windmill(spec, ctx) {
 
 // ---------- 22. Lighthouse of Tidewrack Coast ----------
 function lighthouse(spec, ctx) {
-  const B = new Builder(ctx, spec); B.name = 'Lighthouse of Tidewrack Coast'; const R = 2.9, H = 12;
-  B.roundShell({ r: R, h: H, key: 'stoneL', N: 14, DW: 1.9, DH: 2.5, floor: 'floorStone', T: .55 });
+  const B = new Builder(ctx, spec); B.name = 'Lighthouse of Tidewrack Coast'; const R = 3.4, H = 12;
+  B.roundShell({ r: R, h: H, key: 'stoneL', N: 18, DW: 1.9, DH: 2.5, floor: 'floorStone', T: .55 });
   for (const y of [4.2, 8]) B.ring(R + .1, .5, 'stone', 0, y, 0, B.G.ext, 14); B.ring(R + .5, .5, 'stoneD', 0, H + .2, 0, B.G.ext, 14);
   for (let i = 0; i < 20; i++) { const a = i / 20 * 6.283; B.bx(.12, 1.0, .12, 'iron', Math.sin(a) * (R + .4), H + .9, Math.cos(a) * (R + .4), B.G.ext, { shadow: false }); }
   B.add(new THREE.CylinderGeometry(1.45, 1.55, 2.2, 12, 1, true), M('#ffe49a', { emissive: new THREE.Color(0xc89a30), side: THREE.DoubleSide, transparent: true, opacity: .85 }), 0, H + 1.5, 0, B.G.ext, { shadow: false });
@@ -399,9 +411,13 @@ function lighthouse(spec, ctx) {
   B.banner(0, 4.8, R + .04, 0, .8, 1.8);
   for (let i = 0; i < 9; i++) { const a = i * .9 + 2.2; const s = 1.5 + (i % 3) * .8; const m = B.add(new THREE.DodecahedronGeometry(s, 0), M('rock'), Math.sin(a) * (R + 2.0 + (i % 2)), s * .35, Math.cos(a) * (R + 2.4 + (i % 2)) - (Math.abs(a - 0) < 1 ? 0 : 0), B.G.ext); m.scale.y = .8; }
   for (let i = 0; i < 6; i++) B.bx(2.0, .3, .5, 'stone', 0, .15 + i * 0, R + 1 + i * .45, B.G.ext);
-  const iw = B.iw; B.bed(-iw + 1.0, 1.0, 1.5707); B.tableR(.8, .4, 1.4, 1.0); B.box(.9, .9, .7, iw - .6, -iw + .8, 'stoneD'); B.add(boxG(.5, .12, .4, 1), GLOW('ff7a1a', 1.4), iw - .6, .95, -iw + .8, B.G.int, { shadow: false }); B.barrel(iw - .5, .8); B.barrel(iw - .5, 1.5); B.chest(-.4, -iw + .6, .8);
-  for (let i = 0; i < 24; i++) { const a = i / 24 * 5.5 + .8, y = .2 + i * .5; B.bx(.9, .14, .36, 'wood', Math.sin(a) * (iw - .9), y, Math.cos(a) * (iw - .9), B.G.int).rotation.y = a; }
-  B.lamp(0, 3.2, 0); B.add(new THREE.SphereGeometry(.5, 8, 6), GLOW('ffe49a', 1.8), 0, 9, 0, B.G.int, { shadow: false }); return B.finish();
+  const iw = B.iw;   // ground: hearth + table + barrels; stair flight 1 climbs the west side (stacked switchback: west, east, west)
+  B.box(.9, .9, .7, iw - .8, -iw + .9, 'stoneD'); B.add(boxG(.5, .12, .4, 1), GLOW('ff7a1a', 1.4), iw - .8, .95, -iw + .9, B.G.int, { shadow: false }); B.barrel(iw - .6, .4); B.barrel(iw - .6, 1.1); B.crate(.9, 1.5, .8); B.table(1.0, -.2, .5); B.lamp(0, 3.2, 0);
+  const S1 = { cx: -1.0, cz: 0, dir: '-z', len: 3.2, w: 1.4 }, S2 = { cx: 1.0, cz: 0, dir: '+z', len: 3.2, w: 1.4 };
+  B.fullUpper({ level: 1, y: 4.1, disc: iw - .05, stair: S1, rooms(U) { U.chest(0, 1.65, .6); U.lamp(0, 2.6, 1.0); U.lamp(0, 2.6, -1.0); } });
+  B.fullUpper({ level: 2, y: 8.2, y0: 4.1, l0: 1, disc: iw - .05, stair: S2, rooms(U) { U.chest(0, -1.65, .6); U.lamp(0, 2.6, 1.0); U.lamp(0, 2.6, -1.0); } });
+  B.fullUpper({ level: 3, y: 12, y0: 8.2, l0: 2, disc: iw - .05, stair: S1, rooms(U) { U.add(new THREE.SphereGeometry(.45, 10, 8), GLOW('fff0b0', 2.2), 1.0, 1.2, 0, U.G.int, { shadow: false }); U.cyl(.5, .6, .7, 'iron', 1.0, .35, 0, U.G.int, 10); U.ccol(1.0, 0, .75); U.rugAt(1.0, 0, 1.6, 1.6, 'rug'); } });
+  return B.finish();
 }
 
 // ---------- 23. Port of Varnethryl (simplified: harbour pond, pier, boats, dock warehouse/tavern, harbour sign) ----------
@@ -409,8 +425,8 @@ function port(spec, ctx) {
   const parts = []; const mk = (s, f) => { const b = f({ ...s }, ctx); parts.push(b); return b; };
   const warehouse = mk({ id: 'port', cx: spec.cx + 3, cz: spec.cz - 6, rot: 0 }, (s, c) => std(s, c, { name: 'Port Tavern & Dockmaster', w: 11, d: 8, h: 6, hs: 2.6, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 3.2, ridge: 'x', over: .8, endKey: 'darkWood', sign: ['Port Tavern', '⚓', 5.9, 3.6], banners: [[-4, 4.4, .8, 1.8], [4, 4.4, .8, 1.8]], chimneys: [[-3, -2]], floor: 'floorPlank', wn: 2,
     interior(B) { const iw = B.iw, id_ = B.id_;
-      B.counter(1.5, -id_ + 1.1, 4, .8); B.shelf(1.5, -id_ + .35, 3.2); B.table(-2.6, .2); B.table(-.6, 2.0); B.table(-3.6, 2.4); B.barrel(iw - .5, 0); B.barrel(iw - .5, 1); B.crate(iw - 1.2, 2.2, .9); B.tableR(-iw + 1.6, -id_ + 1.3, 2.4, 1.2, 'darkWood'); B.bx(2.6, 1.7, .1, 'parchment', -iw + 1.7, 2.3, -id_ + .2, B.G.int, { shadow: false });
-      B.banner(-.4, 3.0, -id_ + .3, 0, .9, 1.8); B.lamp(-2, 3.6, 1); B.lamp(2, 3.6, 1); B.rugAt(-1.8, 1.4, 3.6, 2.8); B.hay(iw - 1.2, -id_ + .8, 1.4, 1, .8);
+      B.counter(1.5, -id_ + 1.1, 4, .8); B.shelf(1.5, -id_ + .35, 3.2); B.table(-2.0, .2); B.table(-.6, 2.0); B.table(-2.4, 2.6); B.barrel(iw - .5, 0); B.barrel(iw - .5, 1); B.crate(iw - 1.2, 2.2, .9); B.tableR(-iw + 1.6, -id_ + 1.3, 2.4, 1.2, 'darkWood'); B.bx(2.6, 1.7, .1, 'parchment', -iw + 1.7, 2.3, -id_ + .2, B.G.int, { shadow: false });
+      B.banner(-.4, 3.0, -id_ + .3, 0, .9, 1.8); B.lamp(-2, 3.6, 1); B.lamp(2, 3.6, 1); B.rugAt(-1.4, 1.4, 3.2, 2.8); B.hay(iw - 1.2, -id_ + .8, 1.4, 1, .8); upperStd(B, { theme: 'bed', y: 3.0, side: 'L' });
     } }));
   const B = new Builder(ctx, { id: 'port_dock', cx: spec.cx, cz: spec.cz, rot: 0 }); B.insideTest = null; B.radius = 16; B.name = 'Port of Varnethryl';
   const PW = 20, PD = 9, Z0 = 0;           // water basin local: x -10..10, z 0..9 (z grows toward the sea)
@@ -441,8 +457,8 @@ const signTex = () => signTexture('PORT OF VARNETHRYL', '⚓');
 // ---------- 24/25. Farmhouse & Barn ----------
 const farmhouse = (spec, ctx) => std(spec, ctx, { name: 'Farmhouse of Varnethryl', w: 10, d: 8, h: 5.4, hs: 2.6, upper: 'timber', lower: 'stone', rh: 3.2, ridge: 'x', over: .7, cross: { x: -2, w: 4, depth: 4 }, post: true, chimneys: [[-3.2, -1.6, 3.4]], dormers: [-2.6, 2.6], dormY: 1.2, dormZ: .8, wn: 1,
   interior(B) { const iw = B.iw, id_ = B.id_;
-    B.hearth(0, -id_ + .45, 0, 2.2); B.tableR(-2.4, .8, 2.6, 1.2); B.table(2.6, 1.4, .6); B.bed(iw - 1.0, -id_ + 1.3); B.bed(iw - 1.0, 0.4); B.shelf(-iw + .3, -1.8, 2.6, 1, false); B.barrel(-iw + .5, id_ - .5); B.sack(-iw + 1.2, id_ - .6); B.chest(2.0, -id_ + .7, .9);
-    B.rugAt(-1, 1, 3.4, 2.6); B.lamp(-2, 3.5, 0); B.lamp(2, 3.5, 1); B.banner(-3.6, 3.6, -id_ + .3, 0, .8, 1.6); B.gallery({ stairX: -iw + 1.4, depth: 1.6, y: 2.9 });
+    B.hearth(0, -id_ + .45, 0, 2.2); B.tableR(-2.4, .8, 2.6, 1.2); B.table(.4, 1.9, .6); B.shelf(-iw + .3, -1.8, 2.6, 1, false); B.barrel(-iw + .5, id_ - .5); B.sack(-iw + 1.2, id_ - .6); B.chest(2.0, -id_ + .7, .9);
+    B.rugAt(-1, 1, 3.4, 2.6); B.lamp(-2, 3.5, 0); B.lamp(2, 3.5, 1); B.banner(-3.6, 3.6, -id_ + .3, 0, .8, 1.6); B.fullUpper({ y: 2.9, stair: { cx: iw - .9, cz: id_ - .45 - 1.7, dir: '-z', len: 3.4, w: 1.5 }, rooms(U) { U.bed(iw - 1.2, -id_ + 1.3); U.bed(-iw + 1.1, -id_ + 1.3); U.bed(-iw + 2.5, -id_ + 1.3); U.chest(0, -id_ + .6, .9); U.tableR(-1.8, .4, 1.4, .9); U.shelf(-iw + .3, .8, 2.0, 1, false); U.rugAt(-1.8, .4, 2.4, 1.8); U.lamp(0, 2.2, 0); U.hay(1.5, 0.2, 1.3, 1, .6); } });
   } });
 const barn = (spec, ctx) => std(spec, ctx, { name: 'Barn of Varnethryl', w: 10, d: 12, h: 4.8, hs: 1.2, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 4.4, ridge: 'z', over: .8, endKey: 'darkWood', DW: 3.4, DH: 3.6, floor: 'floorStone', windows: false,
   extra(B) { B.bx(2.0, 1.8, .1, '#241608', 0, B.h + 1.8, B.d / 2 + .06, B.G.roof, { shadow: false }); for (let i = 0; i < 3; i++) B.bx(.9, .6, .6, 'hay', -.5 + i * .5, B.h + 1.1 + i * .0, B.d / 2 - .2, B.G.roof); B.banner(-3.6, 3, B.d / 2 + .06, 0, .8, 1.6); },
@@ -450,7 +466,7 @@ const barn = (spec, ctx) => std(spec, ctx, { name: 'Barn of Varnethryl', w: 10, 
     for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) B.hay(-iw + 1.3 + j * 1.6, -id_ + 1 + i * 1.3, 1.4, 1.1, .9 + (i % 2) * .5); B.hay(-iw + 1.3, -id_ + 1 + 4 * 1.3, 1.4, 1.1, 1.3);
     B.bx(1.6, .5, 2.6, 'darkWood', iw - 1.6, .7, 1.2, B.G.int); B.cyl(.5, .5, .1, 'darkWood', iw - 2.3, .7, 2.2, B.G.int, 8).rotation.z = Math.PI / 2; B.col(iw - 1.6, 1.2, 1.8, 2.8);
     B.rack(iw - .3, -id_ + 1.6, 4, 1); B.barrel(iw - .6, -id_ + .6); B.barrel(iw - .6, -id_ + 3.2); B.sack(iw - 1.4, -id_ + 4); B.crate(iw - 1.5, -id_ + .7, .8);
-    B.bx(iw * 2, .16, 4, 'floorPlank', 0, 3.0, -id_ + 2.0, B.G.int); for (let i = 0; i < 5; i++) B.bx(.9, .7, .8, 'hay', -iw + 1 + i * 1.4, 3.5, -id_ + 1.2, B.G.int); B.lamp(0, 3.7, 1); B.lamp(0, 3.7, -2);
+    upperStd(B, { theme: 'store', y: 3.0, side: 'L', len: 3.6 }); B.lamp(0, 3.7, 1); B.lamp(0, 3.7, -2);
   } });
 
 // ---------- 26. Village Houses ----------
@@ -460,8 +476,9 @@ const houseSpecs = [
 const house = n => (spec, ctx) => { const p = houseSpecs[n % 4];
   return std(spec, ctx, { name: 'Village House', w: p.w, d: p.d, h: p.h, hs: p.hs, upper: p.up, lower: 'stone', rh: 3, ridge: p.ridge, over: .7, roofKey: p.roofKey, chimneys: [[p.w * .28, -p.d * .22, 3.2]], dormers: n % 2 ? [0] : [], dormY: 1.2, dormZ: p.d * .1, banners: n === 1 ? [[-p.w * .3, p.h * .6, .6, 1.4]] : [], cross: p.ridge === 'x' ? { x: 0, w: p.w * .42, depth: p.d * .55 } : null, post: n % 2 === 0,
     interior(B) { const iw = B.iw, id_ = B.id_;
-      B.hearth(0, -id_ + .45, 0, 2.0); B.bed(-iw + 1.0, -id_ + 1.5); B.table(1.2, .6, .6); B.shelf(iw - .3, 0, 2.2, -1, false); B.chest(iw - 1.0, -id_ + .6, .8); B.rugAt(0, .8, 2.6, 2.2); B.lamp(0, 3.5, .5); B.barrel(-iw + .5, id_ - .5);
-      B.gallery({ stairX: iw - 1.0, depth: 1.6, y: 2.9 }); B.bed(-iw + 1.0, -id_ + 1.0, 0);
+      B.hearth(0, -id_ + .45, 0, 2.0); B.bed(-iw + 1.0, -id_ + 1.7); B.table(-.6, .5, .55); B.shelf(-iw + .3, id_ - 1.9, 1.8, 1, false); B.rugAt(-.6, .5, 2.2, 2.0); B.lamp(0, 3.0, .5); B.barrel(-iw + .5, id_ - .5);
+      const len = Math.min(3.4, id_ * 2 - 1.3), Y = p.hs + .35;
+      B.fullUpper({ y: Y, stair: { cx: iw - .85, cz: id_ - .45 - len / 2, dir: '-z', len, w: 1.5 }, rooms(U) { U.bed(-iw + 1.0, -id_ + 1.7); U.bed(-iw + 1.0 + 1.3, -id_ + 1.7); U.chest(0, -id_ + .6, .8); U.tableR(-.4, 0, 1.2, .9); U.shelf(-iw + .3, 0.2, 1.8, 1, false); U.rugAt(-.4, 0, 2, 1.8); U.lamp(0, 2.2, 0); } });
     } }); };
 
 // ---------- town walls & watchtowers ----------

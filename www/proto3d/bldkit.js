@@ -214,7 +214,7 @@ Builder.prototype.stairs = function (o) {
     b.rotateX(-Math.atan2(y1 - y0, len)); // sloped handrail
     const k = Math.max(2, Math.round(len / 1.0)); for (let q = 0; q <= k; q++) { const u = -len / 2 + q * len / k, yy = y0 + (y1 - y0) * (q / k); this.bx(.07, .9, .07, 'darkWood', cx + s * u + c * sd * (w / 2 + .05), yy + .45, cz + c * u - s * sd * (w / 2 + .05), grp); }
     // side colliders (row of circles, all levels): hero cannot leave the flight sideways
-    const nn = Math.ceil(len / .3); for (let q = 0; q <= nn; q++) { const u = -len / 2 + q * len / nn, lx = cx + s * u + c * sd * (w / 2 + .22), lz = cz + c * u - s * sd * (w / 2 + .22); const [wx, wz] = this.toW(lx, lz); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: undefined, stair: 1 }); } }
+    const ln = Math.max(.5, len - .9), nn = Math.ceil(ln / .3); for (let q = 0; q <= nn; q++) { const u = -len / 2 + q * ln / nn, lx = cx + s * u + c * sd * (w / 2 + .22), lz = cz + c * u - s * sd * (w / 2 + .22); const [wx, wz] = this.toW(lx, lz); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: [l0, l1], stair: 1 }); } }
   // keep ground-level walkers from slipping past the top end underneath the slab
   { const lx = cx + s * (len / 2 + 1.1), lz = cz + c * (len / 2 + 1.1); const nn = Math.ceil(w / .35); for (let q = 0; q <= nn; q++) { const t = -w / 2 + q * w / nn; const [wx, wz] = this.toW(lx + c * t, lz - s * t); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: l0, stair: 1 }); } }
   return m;
@@ -223,7 +223,8 @@ Builder.prototype.stairs = function (o) {
 Builder.prototype.surface = function (wx, wz, level) {
   const [lx, lz] = this.toL(wx, wz);
   for (const m of this.ramps) { if (m.l0 !== level && m.l1 !== level) continue; const [u, v] = this.rampUV(m, lx, lz); if (Math.abs(u) <= m.len / 2 && Math.abs(v) <= m.w / 2) { const t = (u + m.len / 2) / m.len; return { y: m.y0 + (m.y1 - m.y0) * t, ramp: m, t }; } }
-  for (const f of this.floors) if (f.level === level) for (const r of f.rects) if (lx > r[0] + .05 && lx < r[1] - .05 && lz > r[2] + .05 && lz < r[3] - .05) return { y: f.y };
+  for (const f of this.floors) if (f.level === level && f.disc && Math.hypot(lx, lz) < f.disc - .1 && !f.holes.some(h => lx > h[0] - .02 && lx < h[1] + .02 && lz > h[2] - .02 && lz < h[3] + .02)) return { y: f.y };
+  for (const f of this.floors) if (f.level === level && f.rects) for (const r of f.rects) if (lx > r[0] + .05 && lx < r[1] - .05 && lz > r[2] + .05 && lz < r[3] - .05) return { y: f.y };
   return null;
 };
 // axis-aligned partition wall with a door gap (gap = [centre, width] along the wall) at the current upper level
@@ -253,8 +254,8 @@ Builder.prototype._roundShell = function (o) {
   for (let i = 0; i < N; i++) {
     let a = i / N * 2 * Math.PI; if (a > Math.PI) a -= 2 * Math.PI; if (Math.abs(a) < doorA) continue;
     const x = Math.sin(a) * (r - T / 2), z = Math.cos(a) * (r - T / 2), m = this.wallBox(seg * 1.04, h, T, key, x, h / 2, z); m.rotation.y = a;
-    this.ccol(x, z, seg / 2 + .12);
   }
+  { const cr = Math.max(.25, T / 2 + .02), nC = Math.ceil(2 * Math.PI * (r - T / 2) / (cr * 1.4)); for (let i = 0; i < nC; i++) { let a = i / nC * 2 * Math.PI; if (a > Math.PI) a -= 2 * Math.PI; if (Math.abs(a) < doorA) continue; this.ccol(Math.sin(a) * (r - T / 2), Math.cos(a) * (r - T / 2), cr); } }
   const zd = Math.cos(doorA) * (r - T / 2);
   this.wallBox(DW + .6, h - DH, T, key, 0, DH + (h - DH) / 2, r - T / 2 - .05);
   for (const s of [-1, 1]) this.bx(.3, DH, .6, 'stoneD', s * (DW / 2 + .1), DH / 2, r - T / 2 - .05, this.G.frame);
@@ -290,16 +291,19 @@ function subRect(R, H) { const [x0, x1, z0, z1] = R, [a0, a1, b0, b1] = H, out =
 Builder.prototype.fullUpper = function (o) {
   const level = o.level || 1, l0 = o.l0 === undefined ? level - 1 : o.l0, y0 = o.y0 || 0, y = o.y, round = !this.footprint;
   const rect = o.rect || (round ? [-(this.radius - this.T - .1), this.radius - this.T - .1, -(this.radius - this.T - .1), this.radius - this.T - .1] : [-this.iw, this.iw, -this.id_, this.id_]);
-  let rects = [rect];
+  let rects = [rect], hole = null;
   if (o.stair) { const st = o.stair, ang = { '-z': Math.PI, '+z': 0, '-x': -Math.PI / 2, '+x': Math.PI / 2 }[st.dir || '-z'], len = st.len || 3.6, w = st.w || 1.7, ax = Math.abs(Math.sin(ang)) > .5;
-    const hole = ax ? [st.cx - len / 2, st.cx + len / 2, st.cz - w / 2, st.cz + w / 2] : [st.cx - w / 2, st.cx + w / 2, st.cz - len / 2, st.cz + len / 2];
+    hole = ax ? [st.cx - len / 2, st.cx + len / 2, st.cz - w / 2, st.cz + w / 2] : [st.cx - w / 2, st.cx + w / 2, st.cz - len / 2, st.cz + len / 2];
     rects = subRect(rect, hole); this.stairs({ cx: st.cx, cz: st.cz, ang, len, w, l0, y0, l1: level, y1: y });
     // low end of the opening: block + rail so an upstairs hero cannot step off the slab into the stairwell
     const s = Math.sin(ang), c = Math.cos(ang), lx = st.cx - s * (len / 2 + .15), lz = st.cz - c * (len / 2 + .15), nn = Math.ceil(w / .35);
     for (let q = 0; q <= nn; q++) { const t = -w / 2 + q * w / nn; const [wx, wz] = this.toW(lx + c * t, lz - s * t); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: level, stair: 1 }); }
     const g = this.levelGroup(level), rl = this.bx(ax ? .07 : w, .07, ax ? w : .07, 'darkWood', st.cx - s * (len / 2 + .02), y + .95, st.cz - c * (len / 2 + .02), g);
     for (let q = 0; q <= 3; q++) { const t = -w / 2 + q * w / 3; this.bx(.08, .95, .08, 'darkWood', st.cx - s * (len / 2 + .02) + c * t, y + .48, st.cz - c * (len / 2 + .02) - s * t, g); } }
-  this.upperFloor(level, y, rects, Object.assign({}, o, { rails: o.rails }));
+  if (o.disc) { const g = this.levelGroup(level), r = o.disc, sh = new THREE.Shape(); sh.absarc(0, 0, r, 0, Math.PI * 2, false); if (hole) { const hp = new THREE.Path(); hp.moveTo(hole[0], -hole[2]); hp.lineTo(hole[1], -hole[2]); hp.lineTo(hole[1], -hole[3]); hp.lineTo(hole[0], -hole[3]); hp.closePath(); sh.holes.push(hp); }
+    const eg = new THREE.ExtrudeGeometry(sh, { depth: .22, bevelEnabled: false, curveSegments: 20 }); eg.rotateX(-Math.PI / 2); uvScale(eg, 1 / (TILE[o.key || 'floorPlank'] || 3), 1 / (TILE[o.key || 'floorPlank'] || 3));
+    const m = this.add(eg, M(o.key || 'floorPlank'), 0, y - .22, 0, g); this.floors.push({ level, y, disc: r, holes: hole ? [hole] : [] }); }
+  else this.upperFloor(level, y, rects, Object.assign({}, o, { rails: o.rails }));
   if (o.rooms) this.onFloor(level, y, o.rooms);
   return rects;
 };

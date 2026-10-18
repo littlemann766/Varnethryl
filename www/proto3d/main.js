@@ -384,7 +384,7 @@ function resolve(p) {
   let hitAny = false;
   const LV = state.level;
   for (const c of colliders) {
-    if (c.lv !== undefined && c.lv !== LV) continue;
+    if (c.lv !== undefined && (Array.isArray(c.lv) ? !c.lv.includes(LV) : c.lv !== LV)) continue;
     if (c.type === 'box') {
       const qx = THREE.MathUtils.clamp(p.x, c.minX, c.maxX), qz = THREE.MathUtils.clamp(p.z, c.minZ, c.maxZ);
       let dx = p.x - qx, dz = p.z - qz, d2 = dx * dx + dz * dz;

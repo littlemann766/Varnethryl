@@ -16,7 +16,7 @@ with sync_playwright() as p:
     pg.on('pageerror', lambda e: print('PAGEERR', e)); pg.on('console', lambda m: print('c:', m.text) if m.type == 'error' else None)
     pg.goto(f'http://127.0.0.1:{port}/proto3d/bldview.html' + ('?b=' + ','.join(IDS) if IDS else '')); pg.wait_for_function('window.__ready', timeout=180000)
     pg.evaluate(f'__size({W},{H})'); pg.wait_for_timeout(1500)
-    DISTS = {'port': 48}
+    DISTS = {'port': 48, 'windmill': 38, 'lighthouse': 36, 'colosseum': 46, 'observatory': 34, 'mage': 40, 'keep': 42, 'temple': 46, 'crypt': 30}
     def shot(i, call, path):
         for _ in range(4): pg.evaluate(call); pg.wait_for_timeout(350)     # settle: shadow map + textures + materials compiled
         pg.screenshot(path=path)

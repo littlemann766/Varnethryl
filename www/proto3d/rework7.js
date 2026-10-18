@@ -1,0 +1,23 @@
+import * as THREE from 'three';
+import * as K from './chars_core.js';
+import { reg, flaps, furRing } from './chars7.js';
+const PI = Math.PI, S = Math.sin, C = Math.cos;
+const strap = (c, par, mat, buckle, x, y, z, w, h, rz = 0) => { c.add(par, c.G.box(w, h, .02), mat, x, y, z, { r: [0, 0, rz] }); c.add(par, c.G.box(.03, .03, .025), buckle, x, y, z + .008, { r: [0, 0, rz] }); };
+reg('Briar_Fleetstride', c => { const B = c.bones, gr = c.M(0x2f5d38, { r: .9, d: 1, n: 'leafgreen' }), gr2 = c.M(0x4a8a3a, { r: .9, d: 1, n: 'leafgreen2' }), mane = c.M(0x7a3a1c, { r: 1, d: 1, n: 'mane' }), hair = c.M(0x8a3a1a, { r: 1, d: 1, n: 'redhair' });
+  c.add(B.hSpine, c.G.sph(.36, 9, 7), c.M(0x7a4a2c, { r: .95, n: 'coat' }), 0, -.04, 0, { s: [.95, 1.05, 1.5] });
+  for (let i = 0; i < 10; i++) c.add(i < 4 ? B.hChest : B.hSpine, c.G.cone(.05, .24, 4), mane, 0, .32, .25 - i * .08, { r: [PI / 2 + 1.0, 0, 0], s: [.7, 1, 1] });
+  for (let i = 0; i < 14; i++) c.add(B.head, c.G.cone(.04, .3 + (i % 3) * .1, 4), hair, (i - 6.5) * .028, .0, -.1, { r: [PI + .1, 0, (i - 6.5) * .05], s: [1, 1, .6] });
+  flaps(c, B.waist || B.hips, gr, 12, .18, -.04, .16, .09, { jag: .5, flare: .35, seed: 5, zs: .8 }); flaps(c, B.waist || B.hips, gr2, 10, .19, -.05, .1, .09, { jag: .5, flare: .4, a0: .3, seed: 9, zs: .8 });
+});
+reg('Coral', c => { const B = c.bones, or = c.M(0xf07a24, { r: .5, n: 'cscale1' }), hair = c.M(0xe8601c, { r: .9, d: 1, n: 'orangehair' }), hair2 = c.M(0xff9a40, { r: .9, d: 1, n: 'orangehair2' });
+  if (B.tail_5) B.tail_5.scale.set(1.0, 1.6, 1.0); for (const n of ['tail_3', 'tail_4']) if (B[n]) B[n].scale.set(1.3, 1, 1.3);
+  for (let i = 0; i < 14; i++) c.add(B.head, c.G.cone(.04, .35 + (i % 3) * .12, 4), i % 2 ? hair : hair2, (i - 6.5) * .028, .02, -.1, { r: [PI + .15, 0, (i - 6.5) * .08], s: [1, 1, .6] });
+  for (let i = 0; i < 6; i++) c.add(B.head, c.G.cone(.05, .22, 4), hair, (i % 2 ? 1 : -1) * (.1 + (i >> 1) * .02), .12 - (i >> 1) * .1, .02, { r: [PI, 0, (i % 2 ? -1 : 1) * .3] }); });
+reg('Neris_Wavefist', c => { const B = c.bones, wh = c.M(0xf2f0ea, { r: .9, d: 1, n: 'white' }), bl = c.M(0x2a58b0, { r: .9, d: 1, n: 'blue' }), wat = c.M(0x6ad0ff, { e: 0x3ab0ff, ei: .8, r: .2, a: .6, d: 1, n: 'water' });
+  flaps(c, B.hips, bl, 14, .26, -.05, .8, .12, { jag: .55, flare: .2, seed: 4, zs: .85 }); flaps(c, B.hips, wh, 12, .28, -.08, .65, .12, { jag: .6, flare: .25, a0: .25, seed: 7, zs: .85 });
+  for (let i = 0; i < 3; i++) c.add(B.hips, c.G.tor(.36 + i * .04, .012, 4, 18), wat, 0, -.45 - i * .12, 0, { r: [PI / 2 + i * .15, 0, i * .2] });
+  for (const k of [-1, 1]) { const fa = B['foreArm_' + (k > 0 ? 'L' : 'R')]; for (let i = 0; i < 4; i++) c.add(fa, c.G.cone(.03, .2 + i * .04, 4), i % 2 ? wh : bl, (i - 1.5) * .06, -.34, 0, { r: [PI, 0, 0], s: [1, 1, .4] }); } });
+reg('Mortimer_Archivist', c => { const B = c.bones, lt = c.M(0x2a1c14, { r: .85, n: 'leather' }), gd = c.M(0xd2a43c, { m: .5, r: .35, n: 'gold' }), cr = c.M(0x8a1424, { r: .9, d: 1, n: 'crim' }), bk = c.M(0x1c1a20, { r: .9, d: 1, n: 'blk' }), lace = c.M(0xf2ece0, { r: .9, d: 1, n: 'lace' });
+  for (const k of [-1, 1]) { const sn = B['shin_' + (k > 0 ? 'L' : 'R')], fa = B['foreArm_' + (k > 0 ? 'L' : 'R')]; c.add(sn, c.G.cyl(.07, .082, .36, 8), lt, 0, -.25, 0); for (let i = 0; i < 3; i++) strap(c, sn, lt, gd, 0, -.12 - i * .09, .076, .1, .022); for (let i = 0; i < 5; i++) c.add(fa, c.G.cone(.025, .1, 4), lace, (i - 2) * .025, -.3, 0, { r: [PI, 0, 0], s: [1, 1, .4] }); }
+  flaps(c, B.hips, cr, 14, .24, -.05, .9, .12, { jag: .5, flare: .2, seed: 6, zs: .8 }); flaps(c, B.hips, bk, 14, .27, -.1, .95, .12, { jag: .4, flare: .22, a0: .22, seed: 9, zs: .8 });
+  for (let i = 0; i < 4; i++) strap(c, B.chest, lt, gd, 0, i * .06, .14, .3, .026); });

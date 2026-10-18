@@ -14,8 +14,8 @@ const ok=(i,j)=>i>=0&&j>=0&&i<W&&j<H&&__p3d.free(x0+i*S,z0+j*S,lv);const idx=(i,
 let s=null,bd=1e9;for(let i=0;i<W;i++)for(let j=0;j<H;j++){const d=Math.hypot(x0+i*S-a[0],z0+j*S-a[1]);if(d<bd&&d<4&&ok(i,j)){bd=d;s=[i,j];}}
 if(!s)return null;const prev=new Map([[idx(...s),-1]]);const q=[s];
 for(let h=0;h<q.length;h++){const [i,j]=q[h];for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const ni=i+di,nj=j+dj;if(!prev.has(idx(ni,nj))&&ok(ni,nj)){prev.set(idx(ni,nj),idx(i,j));q.push([ni,nj]);}}}
-let e=null,ed=1e9;for(const [i,j] of q){const d=g.length>2?-Math.min(10,Math.hypot(x0+i*S-a[0],z0+j*S-a[1])):Math.hypot(x0+i*S-g[0],z0+j*S-g[1]);if(d<ed){ed=d;e=[i,j];}}
-const path=[];let c=idx(...e);while(c!==-1){path.push([x0+(c%W)*S,z0+Math.floor(c/W)*S]);c=prev.get(c);}path.reverse();
+let e=null,ed=1e9;for(const [i,j] of q){if(g.length>2&&__p3d.onRamp(x0+i*S,z0+j*S,lv))continue;const d=g.length>2?-Math.min(10,Math.hypot(x0+i*S-a[0],z0+j*S-a[1])):Math.hypot(x0+i*S-g[0],z0+j*S-g[1]);if(d<ed){ed=d;e=[i,j];}}
+if(!e)return [];const path=[];let c=idx(...e);while(c!==-1){path.push([x0+(c%W)*S,z0+Math.floor(c/W)*S]);c=prev.get(c);}path.reverse();
 if(ed>6&&0)return null;const out=[];for(let k=2;k<path.length;k+=2)out.push(path[k]);out.push(path[path.length-1]);return out}"""
 MODES = os.environ.get('MODE', 'key,joy').split(','); PARTY = os.environ.get('PARTY', '2'); BASE = os.environ.get('BASE')
 YAWS = [float(v) for v in os.environ.get('YAWS', '0').split(',')]; SHOTS = os.environ.get('SHOTS')

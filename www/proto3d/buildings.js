@@ -334,7 +334,7 @@ function keep(spec, ctx) {
   for (let i = 0; i < 3; i++) for (const s of [-1, 1]) B.banner(s * (iw - .4), 5, -2 + i * 3.6, -s * Math.PI / 2, 1, 2.6);
   for (const z of [-2, 2.5]) for (const x of [-2.6, 2.6]) B.lamp(x, 6.2, z);
   B.fullUpper({ level: 1, y: 5.0, stair: { cx: iw - .9, cz: 1.4, dir: '-z', len: 4.5, w: 1.6 }, rooms(U) { const Z = -3.2;
-    U.partition(0, Z, iw * 2, 'x', [[-5.5, 1.4], [0, 1.6], [5.5, 1.4], [iw - .9, 2.6]]); U.partition(-3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7); U.partition(3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7);
+    U.partition(0, Z, iw * 2, 'x', [[-5.5, 1.4], [0, 1.6], [5.5, 1.4], [iw - .9, 2.6], [-(iw - .9), 2.6]]); U.partition(-3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7); U.partition(3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7);
     U.bed(-iw + 1.6, -id_ + 1.2, 1); U.chest(-4.5, -id_ + .6, .9); U.rugAt(-6.8, -4.9, 3, 2.4); U.lamp(-6.8, 2.4, -4.9);
     U.tableR(0, -id_ + 1.6, 3.0, 1.2); U.pew(-1.0, -id_ + 2.4, 1.6); U.pew(1.0, -id_ + 2.4, 1.6); U.lamp(0, 2.4, -id_ + 1.6); U.hearth(0, -id_ + .5, 0, 2.4);
     U.bed(iw - 1.6, -id_ + 1.2, 1); U.chest(4.5, -id_ + .6, .9); U.rugAt(6.8, -4.9, 3, 2.4); U.lamp(6.8, 2.4, -4.9);

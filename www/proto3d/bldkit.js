@@ -51,19 +51,19 @@ export class Builder {
   constructor(ctx, spec) {
     this.ctx = ctx; this.spec = spec; const { scene, colliders } = ctx; this.colliders = colliders;
     this.id = spec.id; this.cx = spec.cx; this.cz = spec.cz; this.rot = spec.rot || 0; this.cs = Math.cos(this.rot); this.sn = Math.sin(this.rot);
-    this.root = new THREE.Group(); this.root.position.set(this.cx, 0, this.cz); this.root.rotation.y = this.rot; scene.add(this.root);
+    this.root = new THREE.Group(); this.K = spec.K || 1; this.root.position.set(this.cx, 0, this.cz); this.root.rotation.y = this.rot; this.root.scale.setScalar(this.K); scene.add(this.root);
     this.G = {}; this.lvTag = 0; this.curUp = null; this.floors = []; this.ramps = []; for (const k of ['ext', 'walls', 'roof', 'frame', 'int']) { this.G[k] = new THREE.Group(); this.root.add(this.G[k]); }
     this.cut = []; this.cutCache = {}; this.dyn = []; this.T = 0.45; this.inside = false; this.colInfo = []; this.insideTest = null; this.footprint = null;
   }
   // ---- placement helpers ----
-  toW(lx, lz) { return [this.cx + lx * this.cs + lz * this.sn, this.cz - lx * this.sn + lz * this.cs]; }
-  toL(wx, wz) { const dx = wx - this.cx, dz = wz - this.cz; return [dx * this.cs - dz * this.sn, dx * this.sn + dz * this.cs]; }
+  toW(lx, lz) { const K = this.K; return [this.cx + (lx * this.cs + lz * this.sn) * K, this.cz + (-lx * this.sn + lz * this.cs) * K]; }
+  toL(wx, wz) { const K = this.K, dx = (wx - this.cx) / K, dz = (wz - this.cz) / K; return [dx * this.cs - dz * this.sn, dx * this.sn + dz * this.cs]; }
   col(lx, lz, bw, bd) { // axis-aligned in local; world box when rot is a quarter turn, else a row of circles
     const q = Math.round(this.rot / (Math.PI / 2)); const [wx, wz] = this.toW(lx, lz);
-    if (Math.abs(this.rot - q * Math.PI / 2) < 1e-3) { const odd = ((q % 2) + 2) % 2, W = odd ? bd : bw, D = odd ? bw : bd; this.colliders.push({ type: 'box', minX: wx - W / 2, maxX: wx + W / 2, minZ: wz - D / 2, maxZ: wz + D / 2, b: this.id, lv: this.lvTag }); }
-    else { const n = Math.max(1, Math.ceil(Math.max(bw, bd) / Math.min(bw, bd) / 1)), r = Math.min(bw, bd) / 2 + .05; for (let i = 0; i < n; i++) { const f = n === 1 ? 0 : (i / (n - 1) - .5); const [x, z] = this.toW(lx + (bw >= bd ? f * (bw - bd) : 0), lz + (bw < bd ? f * (bd - bw) : 0)); this.colliders.push({ type: 'circle', x, z, r, b: this.id, lv: this.lvTag }); } }
+    if (Math.abs(this.rot - q * Math.PI / 2) < 1e-3) { const K = this.K, odd = ((q % 2) + 2) % 2, W = (odd ? bd : bw) * K, D = (odd ? bw : bd) * K; this.colliders.push({ type: 'box', minX: wx - W / 2, maxX: wx + W / 2, minZ: wz - D / 2, maxZ: wz + D / 2, b: this.id, lv: this.lvTag }); }
+    else { const n = Math.max(1, Math.ceil(Math.max(bw, bd) / Math.min(bw, bd) / 1)), r = (Math.min(bw, bd) / 2 + .05) * this.K; for (let i = 0; i < n; i++) { const f = n === 1 ? 0 : (i / (n - 1) - .5); const [x, z] = this.toW(lx + (bw >= bd ? f * (bw - bd) : 0), lz + (bw < bd ? f * (bd - bw) : 0)); this.colliders.push({ type: 'circle', x, z, r, b: this.id, lv: this.lvTag }); } }
   }
-  ccol(lx, lz, r) { const [x, z] = this.toW(lx, lz); this.colliders.push({ type: 'circle', x, z, r, b: this.id, lv: this.lvTag }); }
+  ccol(lx, lz, r) { const [x, z] = this.toW(lx, lz); r *= this.K; this.colliders.push({ type: 'circle', x, z, r, b: this.id, lv: this.lvTag }); }
   // ---- mesh helpers ----
   add(geo, mat, x, y, z, grp, o = {}) { if (this.curUp && grp === this.G.int) { grp = this.curUp.group; y += this.curUp.y; } const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = o.shadow !== false; m.receiveShadow = o.recv !== false; if (o.keep) m.userData.keep = true; if (this._st) m.userData.stairPart = true; (grp || this.G.ext).add(m); return m; }
   bx(w, h, d, key, x, y, z, grp, o) { return this.add(boxG(w, h, d, TILE[key] || 2), M(key, o && o.mat), x, y, z, grp, o); }
@@ -162,6 +162,8 @@ export class Builder {
   rugAt(x, z, w, d, key = 'rug') { this.add(boxG(w, .02, d, TILE[key] || 3), M(key), x, .08, z, this.G.int, { shadow: false }); }
   // ---- finish ----
   finish() {
+    if (this.K !== 1 && !this._rs) { this._rs = 1; if (this.radius) this.radius *= this.K; }
+    if (this.footprint && !this.noDoorLane) this.clearZone({ cx: 0, cz: this.d / 2 - 1.7, ang: 0, len: 3.4, w: (this.DW || 2.2) + .4 }, 0, -1.7, 1.7, 0);   // keep the entrance lane free of props
     for (const z of this.stairZones || []) this.clearZone(z.m, z.level, z.du0, z.du1, z.fy);
     for (const c of [...this.G.frame.children]) this.G.roof.add(c);   // frame + roof always toggle together: one merged group
     for (const k of Object.keys(this.G)) {
@@ -261,9 +263,9 @@ Builder.prototype.stairs = function (o) {
 // query: surface height for a local-frame hero position at the given level -> {y, ramp, t} or null if there is no floor there
 Builder.prototype.surface = function (wx, wz, level) {
   const [lx, lz] = this.toL(wx, wz);
-  for (const m of this.ramps) { if (m.l0 !== level && m.l1 !== level) continue; const [u, v] = this.rampUV(m, lx, lz); if (Math.abs(u) <= m.len / 2 && Math.abs(v) <= m.w / 2) { const t = (u + m.len / 2) / m.len; return { y: m.y0 + (m.y1 - m.y0) * t, ramp: m, t }; } }
-  for (const f of this.floors) if (f.level === level && f.disc && Math.hypot(lx, lz) < f.disc - .1 && !f.holes.some(h => lx > h[0] - .02 && lx < h[1] + .02 && lz > h[2] - .02 && lz < h[3] + .02)) return { y: f.y };
-  for (const f of this.floors) if (f.level === level && f.rects) for (const r of f.rects) if (lx > r[0] + .05 && lx < r[1] - .05 && lz > r[2] + .05 && lz < r[3] - .05) return { y: f.y };
+  for (const m of this.ramps) { if (m.l0 !== level && m.l1 !== level) continue; const [u, v] = this.rampUV(m, lx, lz); if (Math.abs(u) <= m.len / 2 && Math.abs(v) <= m.w / 2) { const t = (u + m.len / 2) / m.len; return { y: (m.y0 + (m.y1 - m.y0) * t) * this.K, ramp: m, t }; } }
+  for (const f of this.floors) if (f.level === level && f.disc && Math.hypot(lx, lz) < f.disc - .1 && !f.holes.some(h => lx > h[0] - .02 && lx < h[1] + .02 && lz > h[2] - .02 && lz < h[3] + .02)) return { y: f.y * this.K };
+  for (const f of this.floors) if (f.level === level && f.rects) for (const r of f.rects) if (lx > r[0] + .05 && lx < r[1] - .05 && lz > r[2] + .05 && lz < r[3] - .05) return { y: f.y * this.K };
   return null;
 };
 // axis-aligned partition wall with a door gap (gap = [centre, width] along the wall) at the current upper level
@@ -333,10 +335,9 @@ Builder.prototype.fullUpper = function (o) {
   let rects = [rect], hole = null;
   if (o.stair) { const st0 = o.stair, ang = { '-z': Math.PI, '+z': 0, '-x': -Math.PI / 2, '+x': Math.PI / 2 }[st0.dir || '-z'], w = st0.w || 1.7, ax = Math.abs(Math.sin(ang)) > .5;
     // the foot of every flight needs a free approach: keep >= FOOT m of open floor behind it (shift the flight into the room, shorten only if the room is too small)
-    const st = Object.assign({}, st0); let len = st0.len || 3.6;
+    const st = Object.assign({}, st0); const len0 = st0.len || 3.6; let len = round ? len0 : Math.max(len0, (y - y0) / Math.tan((o.maxSlope || 26) * Math.PI / 180));   // gentle: <= ~26 degrees where the room allows
     if (!round) { const k = ax ? 'cx' : 'cz', sg = (ax ? Math.sin(ang) : Math.cos(ang)) > 0 ? 1 : -1, lo = ax ? rect[0] : rect[2], hi = ax ? rect[1] : rect[3], FOOT = o.foot || 1.7;
-      const foot = st[k] - sg * len / 2, gap = sg > 0 ? foot - lo : hi - foot;
-      if (gap < FOOT) { const nf = sg > 0 ? lo + FOOT : hi - FOOT, far = sg > 0 ? hi - .5 : lo + .5; let nl = Math.min(len, Math.abs(far - nf)); st[k] = nf + sg * nl / 2; len = nl; } }
+      const foot0 = st[k] - sg * len0 / 2, nf = sg > 0 ? Math.max(foot0, lo + FOOT) : Math.min(foot0, hi - FOOT), far = sg > 0 ? hi - .5 : lo + .5; const nl = Math.min(len, Math.abs(far - nf)); st[k] = nf + sg * nl / 2; len = Math.max(nl, Math.min(len0, Math.abs(far - nf))); st[k] = nf + sg * len / 2; }
     hole = ax ? [st.cx - len / 2, st.cx + len / 2, st.cz - w / 2, st.cz + w / 2] : [st.cx - w / 2, st.cx + w / 2, st.cz - len / 2, st.cz + len / 2];
     rects = subRect(rect, hole); this.stairs({ cx: st.cx, cz: st.cz, ang, len, w, l0, y0, l1: level, y1: y });
     // low end of the opening: block + rail so an upstairs hero cannot step off the slab into the stairwell

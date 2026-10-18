@@ -63,7 +63,7 @@ with sync_playwright() as p:
             if m['l0'] != 0: continue
             s, c = math.sin(m['ang']), math.cos(m['ang']); h = m['len'] / 2
             front = bi['r'] + 2.5 if bi['round'] else bi['d'] / 2 + 2.8
-            start = W(bi['id'], 0, front); door = W(bi['id'], 0, (bi['r'] - 2.2) if bi['round'] else bi['d'] / 2 - 1.9); via = [door, W(bi['id'], m['cx'], m['cz'])]; top = W(bi['id'], m['cx'] + s * (h + 1.4), m['cz'] + c * (h + 1.4))
+            start = W(bi['id'], 0, front); door = W(bi['id'], 0, (bi['r'] - 2.2) if bi['round'] else bi['d'] / 2 - 1.9); via = [door, W(bi['id'], m['cx'], m['cz'])] if os.environ.get('VIA', 'centre') == 'centre' else [door, W(bi['id'], m['cx'] - s * (h + 1.0), m['cz'] - c * (h + 1.0))]; top = W(bi['id'], m['cx'] + s * (h + 1.4), m['cz'] + c * (h + 1.4))
             res = []
             for mode in MODES:
                 for yw in YAWS:

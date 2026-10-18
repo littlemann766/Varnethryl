@@ -1,0 +1,141 @@
+{
+ "version": 2,
+ "model": "snowy",
+ "H": 1.5057,
+ "groups": [
+  {
+   "name": "cape",
+   "kind": "cape",
+   "match": "^cape\\d*$",
+   "stiffness": 0.5,
+   "damping": 0.8,
+   "gravity": 0.0004,
+   "inertia": 0.45,
+   "maxSwing": [
+    0.057,
+    0.079,
+    0.107,
+    0.143,
+    0.143,
+    0.143,
+    0.143
+   ],
+   "maxChain": 0.143,
+   "maxVel": 0.0045,
+   "smooth": 0.4,
+   "collide": true,
+   "margin": 0.008,
+   "hemLen": 0.316
+  },
+  {
+   "name": "coat",
+   "kind": "gown",
+   "match": "^coat\\d*_[LR]$",
+   "stiffness": 0.5,
+   "damping": 0.78,
+   "gravity": 0.00035,
+   "inertia": 0.55,
+   "maxSwing": [
+    0.0015
+   ],
+   "maxChain": 0.0015,
+   "maxVel": 0.0045,
+   "smooth": 0.4,
+   "collide": true,
+   "margin": 0.01,
+   "hemLen": 0.572
+  },
+  {
+   "name": "ears",
+   "kind": "ear",
+   "match": "^ear\\d?_[LR]$",
+   "stiffness": 0.45,
+   "damping": 0.78,
+   "gravity": 0.00015,
+   "inertia": 0.6,
+   "maxSwing": [
+    0.072,
+    0.099,
+    0.136,
+    0.181,
+    0.181,
+    0.181,
+    0.181
+   ],
+   "maxChain": 0.181,
+   "maxVel": 0.004,
+   "smooth": 0.45,
+   "collide": false,
+   "margin": 0,
+   "hemLen": 0.25
+  }
+ ],
+ "colliders": [
+  {
+   "name": "thigh_L",
+   "a": "thigh_L",
+   "b": "shin_L",
+   "ra": 0.0218,
+   "rb": 0.0194
+  },
+  {
+   "name": "shin_L",
+   "a": "shin_L",
+   "b": "foot_L",
+   "ra": 0.0275,
+   "rb": 0.0275
+  },
+  {
+   "name": "upperArm_L",
+   "a": "upperArm_L",
+   "b": "foreArm_L",
+   "ra": 0.0512,
+   "rb": 0.0422
+  },
+  {
+   "name": "foreArm_L",
+   "a": "foreArm_L",
+   "b": "hand_L",
+   "ra": 0.0422,
+   "rb": 0.0331
+  },
+  {
+   "name": "thigh_R",
+   "a": "thigh_R",
+   "b": "shin_R",
+   "ra": 0.0743,
+   "rb": 0.0602
+  },
+  {
+   "name": "shin_R",
+   "a": "shin_R",
+   "b": "foot_R",
+   "ra": 0.0602,
+   "rb": 0.0391
+  },
+  {
+   "name": "upperArm_R",
+   "a": "upperArm_R",
+   "b": "foreArm_R",
+   "ra": 0.0512,
+   "rb": 0.0422
+  },
+  {
+   "name": "foreArm_R",
+   "a": "foreArm_R",
+   "b": "hand_R",
+   "ra": 0.0422,
+   "rb": 0.0331
+  },
+  {
+   "name": "torso",
+   "a": "hips",
+   "b": "upperChest",
+   "ra": 0.143,
+   "rb": 0.1506
+  }
+ ],
+ "global": {
+  "note": "step 1/60; capsules are between bone heads (world space)"
+ }
+}

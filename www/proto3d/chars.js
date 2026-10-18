@@ -4,7 +4,7 @@ import * as K from './chars_core.js';
 const { makeCtx, humanoid, platePack, belt, strapX, hair, hood, furCollar, cape, tabard, skirt, emblem, skull, finalize } = K;
 const PI = Math.PI;
 const pal = c => ({
-  steel: c.M(0xb4bac2, { m: .4, r: .38, n: 'steel' }), gold: c.M(0xd2a43c, { m: .4, r: .35, n: 'gold' }), leather: c.M(0x5a3720, { r: .85, n: 'leather' }),
+  steel: c.M(0xc9d0d8, { m: .18, r: .5, n: 'steel', t: 'steel', e: 0x4a4e56 }), gold: c.M(0xdcae44, { m: .22, r: .4, n: 'gold' }), leather: c.M(0x5a3720, { r: .85, n: 'leather' }),
   dleather: c.M(0x3c2616, { r: .85, n: 'dleather' }), brass: c.M(0xb07a34, { m: .4, r: .4, n: 'brass' }) });
 const hold = (c, b, n, g, px = 0, py = -.05, pz = 0, rx = 0, ry = 0, rz = 0) => { g.position.set(px, py, pz); g.rotation.set(rx, ry, rz); c.bones[n].add(g); return g; };
 const bell = (c, S, col, trim, len = .3, r1 = .12) => { const { add, G, M, bones: B } = c; add(B['foreArm_' + S], G.cyl(.06, r1, len, 8, true), M(col, { r: .9, d: 1 }), 0, -.15, 0); add(B['foreArm_' + S], G.cyl(r1, r1, .03, 8, true), M(trim, { m: .35, r: .55, d: 1 }), 0, -.15 - len / 2, 0); };
@@ -26,14 +26,15 @@ CHARS.aldric = { name: 'Sir Aldric', sheetKey: 'aldric', build() {
 
 CHARS.darius = { name: 'Darius Umbral', sheetKey: 'darius', build() {
   const c = makeCtx({ name: 'Darius_Umbral', eye: 0x5a3a2a, brow: 1.5, scar: true, bulk: 1.2, sw: 1.15, skin: 0xd9ab88, hair: 0x2a1c14, under: 0x1e1c24, pants: 0x1e1c22, sleeve: 0x2c2c34, glove: 0x202024, boot: 0x2c2c32 });
-  const h = humanoid(c), { gold, leather, brass } = pal(c), steel = c.M(0x5a5d6b, { m: .4, r: .45, n: 'darksteel' }), bronze = c.M(0xb08d4a, { m: .4, r: .4, n: 'bronze' });
+  const h = humanoid(c), { gold, leather, brass } = pal(c), steel = c.M(0x6c7080, { m: .2, r: .55, n: 'darksteel', t: 'steel', e: 0x22242c }), bronze = c.M(0xdcae44, { m: .22, r: .4, n: 'bronze' });
   platePack(c, { steel, trim: bronze, pauld: 'spike', bigPauld: true }); hair(c, 'messy', 0x2a1c14); belt(c, leather, bronze);
   tabard(c, { w: .2, len: .6, col: 0x4a2278, trim: bronze, emblem: 'ornate', point: .08, z: .17 });
-  const cp = cape(c, { topW: .58, botW: 1.15, len: 1.0, col: 0x4a2278, trim: bronze.color.getHex(), lining: 0x321a52, ragged: .16, segs: 18, seed: 5, waves: 10 }); cp.len = 1.0;
+  const cp = cape(c, { topW: .58, botW: 1.15, len: 1.15, col: 0x4a2278, trim: bronze.color.getHex(), lining: 0x321a52, ragged: .24, segs: 22, seed: 5, waves: 10 }); cp.len = 1.15;
   backEmblem(c, cp, 'ornate', .55, c.M(0xbfa878, { r: .6, m: .3 }), .42);
   skull(c, c.bones.hips, bronze, .045, 0, -.06, .2); chain(c, c.bones.hips, bronze, 0, -.09, .21, 5);
-  for (const k of [-1, 1]) { skull(c, c.bones['shoulder_' + (k > 0 ? 'L' : 'R')], bronze, .03, k * .05, .12, .08); chain(c, c.bones.chest, bronze, k * .05, .25, .1, 4, -.045); }
-  const sw = K.sword(c, { gold: bronze, blade: 0x1c1626, len: 1.0, guard: .3, glow: 0x7a22d8, gem: 0xb040ff, grip: 0x2a1a10 });
+  for (const k of [-1, 1]) { skull(c, c.bones['shoulder_' + (k > 0 ? 'L' : 'R')], bronze, k < 0 ? .055 : .03, k * .05, .12, .08); chain(c, c.bones.chest, bronze, k * .05, .25, .1, 4, -.045); }
+  const sw = K.sword(c, { gold: bronze, blade: 0x2a2236, len: 1.15, guard: .38, wide: 2.3, glow: 0x7a22d8, gem: 0xb040ff, grip: 0x2a1a10 });
+  c.add(sw, c.G.box(.016, 1.0, .02), c.M(0xb060ff, { e: 0xb060ff, ei: 1.6 }), 0, .62, .008);
   for (let i = 0; i < 3; i++) c.add(sw, c.G.cone(.02, .14, 4), c.M(0x7a22d8, { e: 0x9a40ff, ei: 1.2 }), (i - 1) * .1, .07, 0, { r: [0, 0, (i - 1) * -.6] });
   hold(c, h.hips, 'hand_R', sw, 0, -.05, 0, 2.4);
   return finalize(c, h.root, { R: 1 }); } };
@@ -44,11 +45,11 @@ CHARS.selene = { name: 'Selene Frostveil', sheetKey: 'selene', build() {
   c.add(c.bones.chest, c.G.cyl(.17, .12, .22, 8), steel, 0, .1, .005, { s: [1, 1, .72] }); belt(c, leather, gold);
   c.add(c.bones.chest, c.G.box(.09, .09, .02), c.M(0x6ec8ff, { e: 0x3a9cff, ei: .7 }), 0, .2, .105, { r: [0, 0, PI / 4] });
   furCollar(c, cream, .21, .09);
-  skirt(c, { col: 0x2b4fa8, trim: 0xf2eee4, len: .52, top: .17, bot: .3, y: -.04 }); skirt(c, { col: 0xf2eee4, trim: 0xd2a43c, len: .62, top: .15, bot: .26, y: -.06, zs: .8 });
+  skirt(c, { col: 0x2b4fa8, trim: 0xf2eee4, len: .7, top: .17, bot: .34, y: -.04 }); skirt(c, { col: 0xf6f2ea, trim: 0x2b4fa8, len: .86, top: .15, bot: .3, y: -.06, zs: .8 });
   tabard(c, { w: .2, len: .45, col: 0xf2eee4, trim: gold, emblem: 'snow', point: .08, z: .2, tilt: -.02, y: -.06 });
-  for (const S of ['L', 'R']) bell(c, S, 0x2b4fa8, 0xf2eee4, .34, .13);
-  hair(c, 'wavy', 0xe6cf9c, { len: .75 }); c.add(c.bones.head, c.G.oct(.03), c.M(0x6ec8ff, { e: 0x3a9cff, ei: .9 }), 0, .26, .09, { s: [.7, 1.8, .7] });
-  const cp = cape(c, { topW: .6, botW: 1.2, len: 1.05, col: 0x2b4fa8, trim: 0xf2eee4, lining: 0xf2eee4, waves: 7, wrap: .15 }); cp.len = 1.05;
+  for (const S of ['L', 'R']) bell(c, S, 0xf2eee4, 0x2b4fa8, .38, .15);
+  hair(c, 'wavy', 0xeadcb4, { len: 1.0 }); c.add(c.bones.head, c.G.oct(.03), c.M(0x6ec8ff, { e: 0x3a9cff, ei: .9 }), 0, .26, .09, { s: [.7, 1.8, .7] });
+  const cp = cape(c, { topW: .6, botW: 1.2, len: 1.05, col: 0xe9eef7, trim: 0x2b4fa8, lining: 0x2b4fa8, waves: 7, wrap: .15 }); cp.len = 1.05;
   backEmblem(c, cp, 'snow', .6, c.M(0xdbe9ff, { r: .5 }), .55); for (const k of [-1, 1]) cp.decal('snow', .16, c.M(0xdbe9ff, { r: .5 }), .92 / cp.len, k * .3);
   const st = K.staff(c, 'crystal', { gold, wood: c.M(0x6b5a3a, { r: .6, m: .4 }), len: 1.85 }); hold(c, h.hips, 'hand_R', st.g, 0, -.05, 0, .3);
   const bk = K.book(c, 0x24409a, gold, .15, .2); bk.position.set(.22, -.12, .04); bk.rotation.set(0, PI / 2, .1); c.bones.hips.add(bk); emblem(c, bk, 'snow', .12, gold, 0, 0, .03);

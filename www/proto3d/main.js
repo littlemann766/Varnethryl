@@ -3,10 +3,12 @@ import * as THREE from './vendor/three.module.js';
 import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { makeEnterable } from './interiors.js';
-import { buildVillage, buildWalls } from './buildings.js';
+import { buildVillage, buildWalls, BUILDING_DEFS } from './buildings.js';
 import { zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { readSave, planFromState, createSaver } from './save3d.js';
 import { createBump, makeActor, styleFor, findNodes, restoreNodes, applyPose } from './bump.js';
+import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
+import { initCheatBoot } from './cheatboot.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -350,6 +352,8 @@ marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = fal
 const state = { level: 0, heroY: 0, inside: null, zoom: 1, heroX: 0, heroZ: 14, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0, vx: 0, vz: 0 };
 if (savedPlan && savedPlan.pos && qp0.get('hero') == null) { state.heroX = savedPlan.pos.x; state.heroZ = savedPlan.pos.z; state.yaw = savedPlan.pos.yaw; }
 const keys = new Set();
+/* owner cheat flags (cheatflags.js): all defaults are no-ops; only the owner-gated panel ever changes them */
+const cheat = createFlags();
 addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 
@@ -393,10 +397,11 @@ addEventListener('contextmenu', e => e.preventDefault());
 
 // ---------- movement + collision ----------
 const HERO_R = 0.5, SPEED = 5.2;
-function resolve(p) {
+function resolve(p, ghost) {
   let hitAny = false;
   const LV = state.level;
   for (const c of colliders) {
+    if (ghost) break;
     if (c.lv !== undefined && (Array.isArray(c.lv) ? !c.lv.includes(LV) : c.lv !== LV)) continue;
     if (c.type === 'box') {
       const qx = THREE.MathUtils.clamp(p.x, c.minX, c.maxX), qz = THREE.MathUtils.clamp(p.z, c.minZ, c.maxZ);
@@ -427,6 +432,7 @@ function surfaceAt(x, z, level) {
 }
 function updateLevel() {
   let s = surfaceAt(state.heroX, state.heroZ, state.level);
+  if (!s && cheat.noclip) { state.level = 0; s = surfaceAt(state.heroX, state.heroZ, 0); }
   if (s && s.ramp) { const m = s.ramp; if (state.level === m.l0 && s.t > (m.flipUp || 0.93)) state.level = m.l1; else if (state.level === m.l1 && s.t < 0.25) state.level = m.l0; s = surfaceAt(state.heroX, state.heroZ, state.level) || s; }
   state.heroY = s ? s.y : 0;
 }
@@ -477,7 +483,7 @@ function updateCrowd(dt) {
     let tvx = 0, tvz = 0;
     if (r.kind === 'party') {
       const dx = state.heroX - a.x, dz = state.heroZ - a.z, d = Math.hypot(dx, dz);
-      if (d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * 1.05, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
+      if (d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * Math.max(1, cheat.speedMul) * 1.05, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
     }
     const k = Math.min(1, dt * 8); r.vxs += (tvx - r.vxs) * k; r.vzs += (tvz - r.vzs) * k;
     a.vx = r.vxs; a.vz = r.vzs;
@@ -520,11 +526,11 @@ function updateHero(dt) {
   }
   const moving = (vx || vz);
   if (moving) {
-    const step = SPEED * mag * playerAct.slowMul * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
+    const ghost = passesWalls(cheat), step = SPEED * cheat.speedMul * mag * playerAct.slowMul * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
     tmp.x = state.heroX; tmp.z = state.heroZ; let blocked = false;
     for (let i = 0; i < n; i++) {
-      const ox = tmp.x, oz = tmp.z; tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp)) blocked = true;
-      if (state.level > 0 && !surfaceAt(tmp.x, tmp.z, state.level)) { // edge of an upper floor: slide or stop
+      const ox = tmp.x, oz = tmp.z; tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp, ghost)) blocked = true;
+      if (!cheat.noclip && state.level > 0 && !surfaceAt(tmp.x, tmp.z, state.level)) { // edge of an upper floor: slide or stop
         if (surfaceAt(tmp.x, oz, state.level)) tmp.z = oz; else if (surfaceAt(ox, tmp.z, state.level)) tmp.x = ox; else { tmp.x = ox; tmp.z = oz; } blocked = true; }
       state.heroX = tmp.x; state.heroZ = tmp.z; updateLevel();
     }
@@ -538,15 +544,17 @@ function updateHero(dt) {
     state.yaw += da * Math.min(1, dt * 12);
     state.speed = moved / dt;
   } else state.speed *= 0.8;
-  state.vx = moving ? vx * SPEED * mag * playerAct.slowMul : 0; state.vz = moving ? vz * SPEED * mag * playerAct.slowMul : 0;
-  if (playerAct.dx || playerAct.dz) { tmp.x = state.heroX + playerAct.dx; tmp.z = state.heroZ + playerAct.dz; resolve(tmp); state.heroX = tmp.x; state.heroZ = tmp.z; }
+  state.vx = moving ? vx * SPEED * cheat.speedMul * mag * playerAct.slowMul : 0; state.vz = moving ? vz * SPEED * cheat.speedMul * mag * playerAct.slowMul : 0;
+  if (playerAct.dx || playerAct.dz) { tmp.x = state.heroX + playerAct.dx; tmp.z = state.heroZ + playerAct.dz; resolve(tmp, passesWalls(cheat)); state.heroX = tmp.x; state.heroZ = tmp.z; }
   state.moving = state.speed > 0.5;
-  updateLevel(); hero.position.set(state.heroX, state.heroY, state.heroZ); hero.rotation.y = state.yaw;
+  updateLevel();
+  if (cheat.fly || cheat.alt > 0) stepAltitude(cheat, ((cheat.up || keys.has(' ') || keys.has('e')) ? 1 : 0) - ((cheat.down || keys.has('q') || keys.has('c') || keys.has('shift')) ? 1 : 0), dt);
+  hero.position.set(state.heroX, state.heroY + cheat.alt, state.heroZ); hero.rotation.y = state.yaw;
   let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
   if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
     try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }
   animateHero(dt); cullSkins();
-  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); }
+  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); hero.position.y = state.heroY + cheat.alt + playerAct.phop; /* applyPose resets y to the bump hop; re-add floor height + fly altitude */ }
 }
 
 const _sp = new THREE.Vector3();
@@ -580,7 +588,7 @@ const _want = new THREE.Vector3(), _look = new THREE.Vector3();
 function updateCamera(dt, snap) {
   const portrait = innerHeight > innerWidth;
   const z = state.zoom || 1, close = z < 1, dist = close ? (portrait ? 7.0 : 6.0) * (z / 0.3) : (portrait ? 10.5 : 9), height = close ? 2.2 : (portrait ? 7.2 : 6.2);
-  const hy = state.heroY || 0, want = _want.set(state.heroX + Math.sin(state.camYaw) * dist, height + hy, state.heroZ + Math.cos(state.camYaw) * dist);
+  const hy = (state.heroY || 0) + cheat.alt, want = _want.set(state.heroX + Math.sin(state.camYaw) * dist, height + hy, state.heroZ + Math.cos(state.camYaw) * dist);
   const look = _look.set(state.heroX, (close ? 1.05 : 1.6) + hy, state.heroZ);
   const k = snap ? 1 : 1 - Math.pow(0.0015, dt);
   camPos.lerp(want, k); camLook.lerp(look, k);
@@ -656,7 +664,25 @@ if (savedOn) {
     document.addEventListener('visibilitychange', () => { if (document.hidden) saver.flush(); });
   }
 }
+/* ---------- owner cheat panel (hidden gesture; loads cheatpanel.js lazily; owner-gated, see ownergate.js and README) ---------- */
+function entrySpot(d) {
+  const lim = WORLD - 2, ok = (x, z) => Math.abs(x) < lim && Math.abs(z) < lim && window.__p3d.free(x, z, 0);
+  const fx = d.cx + Math.sin(d.rot || 0) * 8, fz = d.cz + Math.cos(d.rot || 0) * 8;
+  if (ok(fx, fz)) return { x: fx, z: fz };
+  for (let r = 5; r <= 26; r += 1.5) for (let k = 0; k < 16; k++) { const a = k / 16 * 6.2832, x = d.cx + Math.cos(a) * r, z = d.cz + Math.sin(a) * r; if (ok(x, z)) return { x, z }; }
+  return { x: THREE.MathUtils.clamp(d.cx, -lim, lim), z: THREE.MathUtils.clamp(d.cz, -lim, lim) };
+}
+let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
+const cheatEnv = {
+  flags: cheat, bumpSys, storage: cheatStore, zones: ['village'],
+  hooks: {}, /* TODO(combat/quests): hooks.healParty / killEnemies / skipQuest / godMode attach here when those systems land */
+  places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
+  teleport: (x, z) => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); },
+  onReady: (c) => { window.__p3d.cheats = c; },
+};
+initCheatBoot(cheatEnv);
 window.__p3d = {
+  cheat,
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,
   state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, enterables,
   enterables, get fps() { return fps; }, get frames() { return totalFrames; },

@@ -19,7 +19,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
 #heroes button{background:#0008;color:#fff;border:1px solid #fff5;border-radius:14px;padding:8px 12px;font-size:12px;touch-action:manipulation}
 #heroes button.on{background:#c9a24acc;color:#1b2433;font-weight:700}
 #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1b2433;font-size:14px;transition:opacity .4s}
-#diag{position:fixed;left:8px;right:8px;bottom:max(180px,env(safe-area-inset-bottom));font:11px/1.35 ui-monospace,monospace;color:#cfe;background:#000a;border-radius:8px;padding:6px 8px;max-height:30vh;overflow:auto;display:none;z-index:30;pointer-events:auto;white-space:pre-wrap}#diag .bad{color:#ffb4a8}#diagBtn{position:fixed;left:8px;bottom:6px;z-index:31;font:11px system-ui;color:#fff;background:#0008;border:1px solid #fff4;border-radius:10px;padding:3px 8px;pointer-events:auto}
+#diag{position:fixed;left:8px;right:8px;top:10vh;bottom:64px;font:13px/1.45 ui-monospace,monospace;color:#dff;background:#000d;border:1px solid #fff4;border-radius:10px;padding:10px 12px;overflow:auto;display:none;z-index:2000;pointer-events:auto;white-space:pre-wrap;-webkit-overflow-scrolling:touch}#diag h4{margin:6px 0 4px;color:#ffd979;font:700 13px system-ui}#diag .ok{color:#9ff2b0}#diag .pend{color:#ffd979}#diagX{position:sticky;top:0;float:right;font:700 14px system-ui;color:#fff;background:#a33;border:0;border-radius:8px;padding:8px 14px}#diag .bad{color:#ffb4a8}#diagBtn{position:fixed;left:8px;bottom:max(14px,env(safe-area-inset-bottom));min-height:40px;min-width:92px;touch-action:manipulation;z-index:2001;font:13px system-ui;color:#fff;background:#0008;border:1px solid #fff4;border-radius:10px;padding:3px 8px;pointer-events:auto}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="hud"><div><b>VARNETHRYL 3D</b><br><span>Liongate prototype</span> <span id="ver">v0.7.9</span><br><span id="fps">-- fps</span></div><a href="index2d.html" onclick="try{localStorage.setItem('vn_mode','2d')}catch(e){}">&larr; Classic 2D</a></div>
@@ -28,10 +28,14 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
 <div id="hint">Joystick or tap the ground to move &middot; drag to rotate camera</div>
 <div id="load"><span id="loadMsg">Loading Liongate...</span></div><button id="diagBtn" type="button">3D status</button><div id="diag"></div>
 <script>
-(function(){var lines=[],box=document.getElementById('diag'),btn=document.getElementById('diagBtn'),shown=false;
-function render(){box.innerHTML=lines.map(function(l){return '<div class="'+(l.bad?'bad':'')+'">'+l.t.replace(/</g,'&lt;')+'</div>'}).join('');box.scrollTop=1e9}
-window.__p3dDiag=function(t,bad){lines.push({t:t,bad:!!bad});if(lines.length>40)lines.shift();render();if(bad){box.style.display='block';shown=true}};
-btn.addEventListener('click',function(){shown=!shown;box.style.display=shown?'block':'none'});
+(function(){var lines=[],box=document.getElementById('diag'),btn=document.getElementById('diagBtn'),shown=false,lastT=0;
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function models(){var out='';try{var st=window.__p3d&&window.__p3d.modelStatus&&window.__p3d.modelStatus();if(st){out+='<h4>3D models (build '+esc(st.build)+', '+st.loaded+' loaded, '+st.failed+' failed)</h4>';st.models.forEach(function(m){out+='<div class="'+(m.state==='loaded'?'ok':m.state==='failed'?'bad':'pend')+'">'+esc(m.id)+': '+esc(m.state)+(m.kb?' - '+m.kb+' KB':'')+(m.error?' - '+esc(m.error):'')+'</div>'});}else out+='<h4>3D models</h4><div class="pend">engine still starting...</div>'}catch(e){out+='<div class="bad">status error: '+esc(e.message||e)+'</div>'}return out}
+function render(){box.innerHTML='<button id="diagX" type="button">Close</button>'+models()+'<h4>Log</h4>'+lines.map(function(l){return '<div class="'+(l.bad?'bad':'')+'">'+esc(l.t)+'</div>'}).join('');var x=document.getElementById('diagX');if(x)bind(x,function(){set(false)});box.scrollTop=0}
+function set(v){shown=v;box.style.display=v?'block':'none';if(v)render()}
+function bind(el,fn){function h(e){var n=Date.now();if(n-lastT<350){e.preventDefault&&e.preventDefault();return}lastT=n;e.preventDefault&&e.preventDefault();e.stopPropagation&&e.stopPropagation();fn()}el.addEventListener('pointerup',h);el.addEventListener('touchend',h,{passive:false});el.addEventListener('click',h)}
+window.__p3dDiag=function(t,bad){lines.push({t:t,bad:!!bad});if(lines.length>60)lines.shift();if(shown)render();if(bad&&!shown){set(true)}};
+bind(btn,function(){set(!shown)});
 var ua=navigator.userAgent,m=/Chrome\/(\d+)/.exec(ua);
 window.__p3dDiag('UA: '+ua.slice(0,110)+(window.Capacitor?' [Capacitor app]':' [browser]'));
 var okImport=window.HTMLScriptElement&&HTMLScriptElement.supports&&HTMLScriptElement.supports('importmap');

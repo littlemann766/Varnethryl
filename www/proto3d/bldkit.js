@@ -257,7 +257,7 @@ Builder.prototype.stairs = function (o) {
     b.rotateX(-Math.atan2(y1 - y0, len)); // sloped handrail
     const k = Math.max(2, Math.round(len / 1.0)); for (let q = 0; q <= k; q++) { const u = -len / 2 + q * len / k, yy = y0 + (y1 - y0) * (q / k); this.bx(.07, .9, .07, 'darkWood', cx + s * u + c * sd * (w / 2 + .05), yy + .45, cz + c * u - s * sd * (w / 2 + .05), grp); }
     // side colliders (row of circles, all levels): hero cannot leave the flight sideways
-    const ln = Math.max(.5, len - .9), nn = Math.ceil(ln / .3); for (let q = 0; q <= nn; q++) { const u = -len / 2 + q * ln / nn, lx = cx + s * u + c * sd * (w / 2 + .22), lz = cz + c * u - s * sd * (w / 2 + .22); const [wx, wz] = this.toW(lx, lz); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: [l0, l1], stair: 1 }); } }
+    const ln = Math.max(.5, len - .9), nn = Math.ceil(ln / .3); for (let q = 0; q <= nn; q++) { const u = -len / 2 + q * ln / nn, lx = cx + s * u + c * sd * (w / 2 + .22), lz = cz + c * u - s * sd * (w / 2 + .22); const [wx, wz] = this.toW(lx, lz); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: u > len / 2 - 2.6 ? [l0] : [l0, l1], stair: 1 }); } }  // top 2.6 m: open to the upper floor (no rail barrier when stepping off/onto the flight sideways)
   // keep ground-level walkers from slipping past the top end underneath the slab
   { const lx = cx + s * (len / 2 + 1.1), lz = cz + c * (len / 2 + 1.1); const nn = Math.ceil(w / .35); for (let q = 0; q <= nn; q++) { const t = -w / 2 + q * w / nn; const [wx, wz] = this.toW(lx + c * t, lz - s * t); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: l0, stair: 1 }); } }
   this._st = false; return m;

@@ -246,7 +246,7 @@ function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; p
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
 const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
-const glbInfo = { loaded: [], failed: [], pending: [] };
+const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;
 // perf: GLB heroes are ~130 rigid mesh parts glued to animated nodes = ~130 draw calls per pass (x2 with the shadow map).
 // Bake all rigid parts into one SkinnedMesh per material (each part rigidly weighted to its parent node), so animation is unchanged.
@@ -333,7 +333,7 @@ function loadHero(gi) {
         const w = wrapGLB(g), old = HEROES[gi];
         w.visible = false; scene.add(w);
         if (old) { w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); scene.remove(old); if (hero === old) hero = w; }
-        HEROES[gi] = w; glbInfo.loaded.push(id);
+        HEROES[gi] = w; glbInfo.loaded.push(id); glbInfo.kb[id] = Math.round(buf.byteLength / 1024);
         glbInfo.pending = glbInfo.pending.filter(x => x !== id); diag('3D model "' + id + '" loaded (' + Math.round(buf.byteLength / 1024) + ' KB, build ' + ASSET_V + ')'); res(HEROES[gi]);
       } catch (e) { res(fail('wrap: ' + (e && e.message || e))); }
     }, err => res(fail('parse: ' + (err && err.message || err))));
@@ -345,6 +345,8 @@ const qp0 = new URLSearchParams(location.search);
 let savedPlan = null;
 try { if (qp0.get('nosave') == null) { const r = readSave(localStorage); if (r.status === 'ok') savedPlan = planFromState(r.state, GLB_NAMES, 60); } } catch (e) { diag('save read failed: ' + (e && e.message || e)); }
 const savedOn = qp0.get('nosave') == null;
+if (!savedPlan) savedPlan = { party: [1, 2, 0], hero: 1, followers: [2, 0], pos: null };
+{ const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (!savedPlan.hero) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
 { const bar = document.getElementById('heroes'); const list = savedPlan && qp0.get('all') == null ? savedPlan.party : HERO_NAMES.map((n, i) => i); list.forEach(i => { const n = HERO_NAMES[i]; const b = document.createElement('button'); b.textContent = n.split(' ').pop(); b.title = n; b.dataset.i = i; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => { e.stopPropagation(); selectHero(i); }); bar.appendChild(b); }); }
 { const q = qp0.get('hero'); const qi = q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; startHero = qi; if (qi) HEROES[0].visible = false; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); else HEROES[0].visible = true; }); }
@@ -726,6 +728,7 @@ const cheatEnv = {
 };
 initCheatBoot(cheatEnv);
 window.__p3d = { selectHero,
+  modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, error: e[id] || '' })) }; },
   cheat,
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,
   state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, enterables,

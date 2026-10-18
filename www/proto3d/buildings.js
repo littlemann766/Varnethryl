@@ -527,7 +527,7 @@ function port(spec, ctx) {
     const fl = new THREE.Mesh(new THREE.PlaneGeometry(1, .6), M('#1f3f86', { side: THREE.DoubleSide })); fl.position.set(.5, 10.1, 0); g.add(fl);
     for (const sx of [-.8, .8]) { const l = new THREE.Mesh(new THREE.SphereGeometry(.18, 6, 5), GLOW('ffc060', 1.8)); l.position.set(sx, 2.5, -4.6); g.add(l); }
     for (const m of g.children) m.castShadow = true; boats.push(g); B.col(7.5, Z0 + PD + 10, 3.4, 9.5); }
-  const TERR = [[-13, -8, 6, 5.5, 0, 3.2], [15.5, -7, 6, 5, 0, 3.4], [19, -23, 5.5, 5, 3.4, 3.2], [20, -15, 5.5, 5, 1.5, 3.2]];
+  const TERR = [[-13, -8, 6, 5.5, 0, 3.2], [15.5, -7, 6, 5, 0, 3.4]];
   for (const [hx, hz, hw, hd, hy, hh] of TERR) { if (hy) { B.bx(hw + 1.4, hy, hd + 1.4, 'stoneD', hx, hy / 2, hz, B.G.ext); } B.bx(hw, hh, hd, 'darkWood', hx, hy + hh / 2, hz, B.G.ext); B.gable(hw, hd, 2.4 + (hw > 6 ? .4 : 0), hx, hy + hh, hz, 'slate', B.G.ext, true, .6, 'timber'); B.bx(1, 1, .3, 'stoneD', hx + 1.6, hy + hh + 2.3, hz, B.G.ext);
     for (let k = -1; k <= 1; k += 2) for (const wy of [1.2, 2.5]) if (hy + wy < hy + hh) B.add(new THREE.PlaneGeometry(.7, .9), GLOW('ffb347', 1.4), hx + k * hw * .27, hy + wy, hz + hd / 2 + .02, B.G.ext, { shadow: false });
     B.bx(hw * .9, .15, 1.0, 'wood', hx, hy + 2.3, hz + hd / 2 + .5, B.G.ext); B.col(hx, hz, hw + .5, hd + .5); }

@@ -54,7 +54,7 @@ export function createBump(opts) {
   const o = opts || {}, cd = fin(o.cooldown, COOLDOWN), cr = fin(o.contactR, CONTACT_R);
   const actors = [], timers = new Float32Array(MAX_ACTORS * MAX_ACTORS);
   const sys = {
-    actors, cooldown: cd, events: 0,
+    actors, cooldown: cd, events: 0, bumpOn: true,
     add(a) { if (actors.length >= MAX_ACTORS) return null; a.idx = actors.length; actors.push(a); return a; },
     remove(a) { const i = actors.indexOf(a); if (i < 0) return; actors.splice(i, 1); actors.forEach((x, k) => { x.idx = k; }); timers.fill(0); },
     pairTimer(a, b) { return timers[Math.min(a.idx, b.idx) * MAX_ACTORS + Math.max(a.idx, b.idx)]; },
@@ -80,6 +80,7 @@ export function createBump(opts) {
         else if (a.fixed) { b.dx += nx * step; b.dz += nz * step; }
         else if (b.fixed) { a.dx -= nx * step; a.dz -= nz * step; }
         else { a.dx -= nx * step * 0.5; a.dz -= nz * step * 0.5; b.dx += nx * step * 0.5; b.dz += nz * step * 0.5; }
+        if (!sys.bumpOn) continue;
         const ti = Math.min(a.idx, b.idx) * MAX_ACTORS + Math.max(a.idx, b.idx);
         if (timers[ti] > 0) continue;
         const ra = Math.max(0, a.vx * nx + a.vz * nz), rb = Math.max(0, -(b.vx * nx + b.vz * nz));

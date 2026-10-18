@@ -1,0 +1,102 @@
+{
+ "version": 2,
+ "model": "marella",
+ "H": 1.9131,
+ "groups": [
+  {
+   "name": "hair",
+   "kind": "hair",
+   "match": "^hair[LRC]?\\d*(_|$)",
+   "stiffness": 0.28,
+   "damping": 0.82,
+   "gravity": 0.00035,
+   "inertia": 0.6,
+   "maxSwing": [
+    0.091,
+    0.126,
+    0.171,
+    0.228,
+    0.228,
+    0.228,
+    0.228
+   ],
+   "maxChain": 0.228,
+   "maxVel": 0.005,
+   "smooth": 0.4,
+   "collide": false,
+   "margin": 0,
+   "hemLen": 0.838
+  },
+  {
+   "name": "fins",
+   "kind": "fin",
+   "match": "^(finHip\\d?|fluke\\d?)_[LR]$",
+   "stiffness": 0.3,
+   "damping": 0.82,
+   "gravity": 5e-05,
+   "inertia": 0.6,
+   "maxSwing": [
+    0.036,
+    0.05,
+    0.068,
+    0.091,
+    0.091,
+    0.091,
+    0.091
+   ],
+   "maxChain": 0.091,
+   "maxVel": 0.004,
+   "smooth": 0.4,
+   "collide": false,
+   "margin": 0,
+   "hemLen": 1.263
+  },
+  {
+   "name": "tail",
+   "kind": "rigid",
+   "match": "^tail\\d*$",
+   "enabled": false,
+   "reason": "body tail / fur tail: baked motion only (spring made it wag)"
+  }
+ ],
+ "colliders": [
+  {
+   "name": "upperArm_L",
+   "a": "upperArm_L",
+   "b": "foreArm_L",
+   "ra": 0.065,
+   "rb": 0.0536
+  },
+  {
+   "name": "foreArm_L",
+   "a": "foreArm_L",
+   "b": "hand_L",
+   "ra": 0.0536,
+   "rb": 0.0421
+  },
+  {
+   "name": "upperArm_R",
+   "a": "upperArm_R",
+   "b": "foreArm_R",
+   "ra": 0.065,
+   "rb": 0.0536
+  },
+  {
+   "name": "foreArm_R",
+   "a": "foreArm_R",
+   "b": "hand_R",
+   "ra": 0.0536,
+   "rb": 0.0421
+  },
+  {
+   "name": "torso",
+   "a": "hips",
+   "b": "upperChest",
+   "ra": 0.1568,
+   "rb": 0.1568
+  }
+ ],
+ "global": {
+  "note": "step 1/60; capsules are between bone heads (world space)"
+ }
+}

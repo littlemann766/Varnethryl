@@ -23,8 +23,20 @@ function runInto(runnerId, bumpedId, dist) {
   const { sys, r, b } = runInto('nyx', 'finn');
   let ev = sys.events; for (let i = 0; i < 60; i++) { r.vz = 5; b.x = 0; b.z = 0.8; r.x = 0; r.z = 0; sys.update(1 / 60); }
   ok('no re-bump inside cooldown', sys.events === ev, 'events ' + sys.events);
-  for (let i = 0; i < 60; i++) { r.vz = 5; b.x = 0; b.z = 0.8; r.x = 0; r.z = 0; sys.update(1 / 60); }
+  for (let i = 0; i < Math.round((COOLDOWN + 0.2) * 60); i++) { r.vz = 5; b.x = 0; b.z = 0.8; r.x = 0; r.z = 0; sys.update(1 / 60); }
   ok('re-bump after cooldown', sys.events === ev + 1, 'events ' + sys.events + ' cd ' + COOLDOWN);
+}
+{ /* 1.1.7 rarity: party members, glancing hits, normal-speed walking and repeats never bump */
+  const mkp = (g1, g2, vz, vx) => { const sys = createBump(), r = mk('aldric', 0, 0, { fixed: true, group: g1 }), b = mk('rowan', 0, 0.8, { group: g2 }); sys.add(r); sys.add(b); r.vz = vz; r.vx = vx || 0; sys.update(1 / 60); return sys; };
+  ok('same group (party) never bumps', mkp('party', 'party', 6).events === 0);
+  ok('different groups still bump on a sprint', mkp('party', null, 6).events === 1);
+  ok('glancing (>37deg) contact does not bump', mkp(null, null, 3.6, 4.4).events === 0);
+  ok('4.4 m/s walk/jog does not bump', mkp(null, null, 4.4).events === 0);
+  const sys = createBump(), r = mk('aldric', 0, 0, { fixed: true }), b = mk('rowan', 0, 0.8), c = mk('finn', 0, -0.8); sys.add(r); sys.add(b); sys.add(c);
+  r.vz = 6; sys.update(1 / 60); const e1 = sys.events; r.vz = -6; for (let i = 0; i < 120; i++) sys.update(1 / 60);
+  ok('quiet period: a bumped/bumping actor is not bumped again by a third', e1 === 1 && sys.events === 1, 'events ' + sys.events);
+  const q = runInto('aldric', 'rowan'); let mx = 0; for (let i = 0; i < 60; i++) { q.sys.update(1 / 60); mx = Math.max(mx, Math.abs(q.b.ptx) + Math.abs(q.b.ptz), Math.abs(q.r.ptx)); }
+  ok('soft reaction: tilt under 12 deg and over within 0.5 s', mx * 180 / Math.PI < 12 && q.b.bT === 0 && q.r.rT === 0, (mx * 180 / Math.PI).toFixed(1) + ' deg');
 }
 { /* STR scaling */
   const a1 = runInto('garruk', 'finn'), a2 = runInto('rowan', 'finn');

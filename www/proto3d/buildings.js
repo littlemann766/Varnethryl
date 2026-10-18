@@ -12,7 +12,9 @@ function wins(B, o) { // facade windows: front [[x,y]], side [[z,y]] (both sides
   for (const [x, y] of o.back || []) B.win(x, y, -d / 2 - .04, Math.PI, ww, hh, key);
 }
 const frontWinXs = (B, n = 1) => { const fw = (B.w - B.DW) / 2, out = []; for (const s of [-1, 1]) for (let i = 0; i < n; i++) out.push(s * (B.DW / 2 + fw * (i + .5) / n)); return out; };
+export const PLAN = 1.3;   // plan (footprint) scale for the standard buildings: roomier interiors, gentler stairs; heights unchanged (doors stay ~1.4x hero height)
 function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + banners + sign
+  if (!o.noScale) o = Object.assign({}, o, { w: o.w * PLAN, d: o.d * PLAN });
   const B = new Builder(ctx, spec); B.name = o.name; B.rectShell(o);
   const rh = o.roof === false ? 0 : B.roofGable({ rh: o.rh || 3, key: o.roofKey || 'slate', ridge: o.ridge || 'x', over: o.over, endKey: o.endKey || (o.upper === 'stone' || o.upper === 'stoneL' ? o.upper : 'timber') });
   B.rh = rh; const hs = o.hs === undefined ? B.h * .42 : o.hs, up = hs + (B.h - hs) / 2;
@@ -134,7 +136,7 @@ const training = (spec, ctx) => std(spec, ctx, { name: 'Training Hall of Varneth
   } });
 
 // ---------- 6. Stables ----------
-const stables = (spec, ctx) => std(spec, ctx, { name: 'Stables of Varnethryl', w: 18, d: 9, h: 4.6, hs: 1.4, upper: 'timber', lower: 'stone', rh: 3.6, ridge: 'x', over: .9, DW: 3.2, DH: 3.4, floor: 'floorStone', wn: 2, banners: [[-4, 3, .8, 1.8], [4, 3, .8, 1.8]], dormers: [-4, 4], dormY: 1.6, dormZ: 0, windows: false,
+const stables = (spec, ctx) => std(spec, ctx, { name: 'Stables of Varnethryl', noScale: true, w: 18, d: 9, h: 4.6, hs: 1.4, upper: 'timber', lower: 'stone', rh: 3.6, ridge: 'x', over: .9, DW: 3.2, DH: 3.4, floor: 'floorStone', wn: 2, banners: [[-4, 3, .8, 1.8], [4, 3, .8, 1.8]], dormers: [-4, 4], dormY: 1.6, dormZ: 0, windows: false,
   interior(B) { const iw = B.iw, id_ = B.id_;
     for (const s of [-1, 1]) for (let i = 0; i < 4; i++) { const x = -iw + 2.4 + i * 3.6; B.bx(.1, 1.6, 2.6, 'darkWood', x + 1.8, .8, -id_ + 1.5 + (s > 0 ? 0 : 0), B.G.int); B.col(x + 1.8, -id_ + 1.5, .15, 2.6); }
     for (let i = 0; i < 4; i++) { const x = -iw + 1.3 + i * 3.6; B.hay(x, -id_ + 1.0, 1.4, 1.2, .5); const hz = B.add(new THREE.SphereGeometry(.4, 8, 6), M('#6a4a2a'), x + .5, 1.1, -id_ + 1.6, B.G.int); hz.scale.set(1.5, 1, .8); B.bx(.12, 1.1, .12, 'darkWood', x + .5, .45, -id_ + 1.6, B.G.int, { shadow: false }); }
@@ -591,8 +593,8 @@ export function buildWalls(ctx, WORLD, GATE_W) {
     const lt = B.lvTag; B.lvTag = 0; B.col(cx, cz, horiz ? len : t, horiz ? t : len); B.lvTag = lt;   // solid at street level only; the wall top is walkable
     // wall walk: split into segments between the decorative towers / corner towers / gate, each with its own stair
     const u0 = horiz ? Math.min(x1, x2) : Math.min(z1, z2), u1 = horiz ? Math.max(x1, x2) : Math.max(z1, z2), ax = horiz ? 'x' : 'z', wl = horiz ? cz : cx;
-    const cuts = DECO.filter(([x, z]) => horiz ? Math.abs(z - cz) < .01 : Math.abs(x - cx) < .01).map(([x, z]) => horiz ? x : z).filter(c => c > u0 + 1 && c < u1 - 1); const segs = []; let a = u0 + 4.6;
-    for (const c of cuts.sort((p, q) => p - q)) { if (c - 3.4 > a) segs.push([a, c - 3.4]); a = Math.max(a, c + 3.4); } if (u1 - 4.6 > a) segs.push([a, u1 - 4.6]);
+    const cuts = DECO.filter(([x, z]) => horiz ? Math.abs(z - cz) < .01 : Math.abs(x - cx) < .01).map(([x, z]) => horiz ? x : z).filter(c => c > u0 + 1 && c < u1 - 1); const segs = []; let a = u0 + 6.6;
+    for (const c of cuts.sort((p, q) => p - q)) { if (c - 3.4 > a) segs.push([a, c - 3.4]); a = Math.max(a, c + 3.4); } if (u1 - 6.6 > a) segs.push([a, u1 - 6.6]);
     for (let [sa, sb] of segs) { if (sb - sa < 5) continue;
       const rect = horiz ? [sa, sb, cz - t / 2 + .05, cz + t / 2 - .55] : [cx - t / 2 + .05, cx + t / 2 - .55, sa, sb]; if (!horiz) { const o = nx > 0 ? [cx - t / 2 + .55, cx + t / 2 + .12] : [cx - t / 2 - .12, cx + t / 2 - .55]; rect[0] = o[0]; rect[1] = o[1]; } else { const o = nz > 0 ? [cz - t / 2 + .55, cz + t / 2 + .12] : [cz - t / 2 - .12, cz + t / 2 - .55]; rect[2] = o[0]; rect[3] = o[1]; }
       B.floors.push({ level: 1, y: h, rects: [rect] }); B.levelGroup(1);
@@ -605,7 +607,7 @@ export function buildWalls(ctx, WORLD, GATE_W) {
   run(-WORLD, -WORLD, WORLD, -WORLD); run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -7.4, WORLD); run(7.4, WORLD, WORLD, WORLD);
   const towers = []; const tw = (x, z, enter) => { if (!enter) { B.tower(x, z, 2.4, 7.6, { coneH: 5.4, windows: 3, wa: x + z }); B.banner(x, 4.2, z + (z < 0 ? 2.5 : -2.5), z < 0 ? 0 : Math.PI, 1, 2.2); return; }
     const th = Math.atan2(-x, -z), t = hollowTower(ctx, 'wt' + towers.length, x, z, th); towers.push(t); };
-  const E = WORLD - 4;
+  const E = WORLD - 6;
   tw(-E, -E, true); tw(E, -E, true); tw(-E, E, true); tw(E, E, true);
   for (const [x, z] of [[0, -WORLD], [-30, -WORLD], [30, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, 30], [WORLD, 30], [-WORLD, -30], [WORLD, -30], [-30, WORLD], [30, WORLD]]) tw(x, z, false);
   B.finish(); return { id: 'walls', parts: [B, ...towers], update(hx, hz, dt, lv) { let ins = null; for (const p of towers) if (p.update(hx, hz, dt, lv)) ins = p.id; return ins; } };
@@ -622,17 +624,17 @@ export const BUILDING_DEFS = [
   { id: 'observatory', f: observatory, cx: -41, cz: -46, rot: 0, name: 'Observatory' },
   { id: 'crypt', f: crypt, cx: 43, cz: -45, rot: 0, name: 'Crypt' },
   { id: 'market', f: market, cx: -24, cz: -6, rot: Math.PI / 2, name: 'Market Provisioner' },
-  { id: 'apothecary', f: apothecary, cx: -24, cz: 8, rot: Math.PI / 2, name: 'Apothecary' },
-  { id: 'bakery', f: bakery, cx: -24, cz: 20, rot: Math.PI / 2, name: 'Bakery' },
+  { id: 'apothecary', f: apothecary, cx: -24, cz: 9, rot: Math.PI / 2, name: 'Apothecary' },
+  { id: 'bakery', f: bakery, cx: -24, cz: 21.5, rot: Math.PI / 2, name: 'Bakery' },
   { id: 'inn', f: inn, cx: 24, cz: -8, rot: -Math.PI / 2, name: 'Inn' },
-  { id: 'smithy', f: smithy, cx: 24, cz: 6, rot: -Math.PI / 2, name: 'Blacksmith' },
+  { id: 'smithy', f: smithy, cx: 24, cz: 7, rot: -Math.PI / 2, name: 'Blacksmith' },
   { id: 'temple', f: temple, cx: 46, cz: -8, rot: -Math.PI / 2, name: 'Temple' },
-  { id: 'training', f: training, cx: 45, cz: 10, rot: -Math.PI / 2, name: 'Training Hall' },
+  { id: 'training', f: training, cx: 45, cz: 11, rot: -Math.PI / 2, name: 'Training Hall' },
   { id: 'colosseum', f: colosseum, cx: 42, cz: 38, rot: 0, name: 'Colosseum' },
-  { id: 'thieves', f: thieves, cx: -40, cz: 8, rot: 0, name: "Thieves' Den" },
+  { id: 'thieves', f: thieves, cx: -36.5, cz: 8, rot: 0, name: "Thieves' Den" },
   { id: 'farmhouse', f: farmhouse, cx: -42, cz: -9, rot: 0, name: 'Farmhouse' },
-  { id: 'barn', f: barn, cx: -51, cz: 22, rot: Math.PI / 2, name: 'Barn' },
-  { id: 'stables', f: stables, cx: -22, cz: 36, rot: 0, name: 'Stables' },
+  { id: 'barn', f: barn, cx: -51, cz: 20, rot: Math.PI / 2, name: 'Barn' },
+  { id: 'stables', f: stables, cx: -24, cz: 36, rot: 0, name: 'Stables' },
   { id: 'windmill', f: windmill, cx: 20, cz: 46, rot: 0, name: 'Windmill' },
   { id: 'house1', f: house(0), cx: -9, cz: 19, rot: Math.PI, name: 'Village House' },
   { id: 'house2', f: house(1), cx: 9, cz: 19, rot: Math.PI, name: 'Village House' },

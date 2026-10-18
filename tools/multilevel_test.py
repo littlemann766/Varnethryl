@@ -14,7 +14,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']); pg = b.new_page(viewport={'width': 390, 'height': 844})
     errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
     pg.goto(f'http://127.0.0.1:{port}/proto3d.html?party=0&npcs=0'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=90000); pg.wait_for_timeout(800)
-    info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.map(b=>({id:b.id,ramps:b.ramps,floors:b.floors.map(f=>({level:f.level,y:f.y})),cx:b.cx,cz:b.cz,rot:b.rot})))"))
+    info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.map(b=>({id:b.id,K:b.K,ramps:b.ramps,floors:b.floors.map(f=>({level:f.level,y:f.y})),cx:b.cx,cz:b.cz,rot:b.rot})))"))
     def W(bid, lx, lz): return pg.evaluate("([id,lx,lz])=>__p3d.multi.find(b=>b.id===id).toW(lx,lz)", [bid, lx, lz])
     def walk(src, lv, dst, ms=9000):
         pg.evaluate("([s,l,t])=>{__p3d.teleport(s[0],s[1],l);__p3d.state.target={x:t[0],z:t[1]};}", [src, lv, dst])
@@ -29,15 +29,15 @@ with sync_playwright() as p:
             s, c = math.sin(m['ang']), math.cos(m['ang'])
             a = [m['cx'] + s * (-m['len'] / 2 + .25), m['cz'] + c * (-m['len'] / 2 + .25)]; t = [m['cx'] + s * (m['len'] / 2 + .5), m['cz'] + c * (m['len'] / 2 + .5)]
             r = walk(W(bi['id'], *a), m['l0'], W(bi['id'], *t))
-            up = r['lv'] == m['l1'] and abs(r['y'] - m['y1']) < .15
+            up = r['lv'] == m['l1'] and abs(r['y'] - m['y1']*bi['K']) < .15
             if bi['id'] == 'walls' and up:   # wall walk: stroll 7 m along the top, must stay on level 1 at wall-top height
                 oks = []
                 for sgn in (1, -1):
-                    tw = [t[0] + c * 7 * sgn, t[1] - s * 7 * sgn]; rw = walk(W(bi['id'], *t), 1, W(bi['id'], *tw), 6000); okw = rw['lv'] == 1 and abs(rw['y'] - m['y1']) < .15 and math.hypot(rw['x'] - W(bi['id'], *t)[0], rw['z'] - W(bi['id'], *t)[1]) > 4.5
+                    tw = [t[0] + c * 7 * sgn, t[1] - s * 7 * sgn]; rw = walk(W(bi['id'], *t), 1, W(bi['id'], *tw), 6000); okw = rw['lv'] == 1 and abs(rw['y'] - m['y1']*bi['K']) < .15 and math.hypot(rw['x'] - W(bi['id'], *t)[0], rw['z'] - W(bi['id'], *t)[1]) > 4.5
                     oks.append(okw); msgs.append(f"walk{'+' if sgn > 0 else '-'}={okw}")
                 up = up and any(oks)   # a short segment may only have room one way
             a2 = [m['cx'] + s * (-m['len'] / 2 - .9), m['cz'] + c * (-m['len'] / 2 - .9)]; t2 = [m['cx'] + s * (m['len'] / 2 + (1.4 if bi['id'] == 'walls' else .5)), m['cz'] + c * (m['len'] / 2 + (1.4 if bi['id'] == 'walls' else .5))]; r2 = walk(W(bi['id'], *t2), m['l1'], W(bi['id'], *a2))
-            down = r2['lv'] == m['l0'] and r2['y'] < m['y0'] + 1.0
+            down = r2['lv'] == m['l0'] and r2['y'] < m['y0']*bi['K'] + 1.0
             ok &= up and down; msgs.append(f"ramp {m['l0']}->{m['l1']} up={up}({r['lv']},{r['y']:.2f}) down={down}({r2['lv']},{r2['y']:.2f})")
         print('PASS' if ok else 'FAIL', bi['id'], '; '.join(msgs)); fails += 0 if ok else 1
     b.close()

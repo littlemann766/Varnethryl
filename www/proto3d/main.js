@@ -3,6 +3,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { makeEnterable } from './interiors.js';
+import { readSave, planFromState, createSaver } from './save3d.js';
 import { createBump, makeActor, styleFor, findNodes, restoreNodes, applyPose } from './bump.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
@@ -239,8 +240,10 @@ const HT = await makeHeroTextures();
 const HEROES = [buildAldric(ALDRIC_TEX), buildUmbral(HT), buildSelene(HT)];
 const HERO_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil'];
 let hero = HEROES[0];
+let startHero = 0;
+let saver;
 HEROES.forEach((h, i) => { h.position.set(0, 0, 14); h.visible = i === 0; scene.add(h); });
-function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach((b, k) => b.classList.toggle('on', k === i)); }
+function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; document.querySelectorAll('#heroes button').forEach(b => b.classList.toggle('on', +b.dataset.i === i)); if (typeof saver !== 'undefined') saver.mark(); }
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
 const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
@@ -336,9 +339,14 @@ function loadHero(gi) {
   }), e => fail(e && e.message || e));
 }
 for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(GLB_NAMES[i]); }
-async function selectHero(i) { if (!HEROES[i].userData.glb && useGLB) await loadHero(i); if (!HEROES[i].children.length) return; setHero(i); }
-{ const bar = document.getElementById('heroes'); HERO_NAMES.forEach((n, i) => { const b = document.createElement('button'); b.textContent = n.split(' ').pop(); b.title = n; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => { e.stopPropagation(); selectHero(i); }); bar.appendChild(b); }); }
-{ const q = new URLSearchParams(location.search).get('hero'); const qi = q != null && HEROES[+q] ? +q : 0; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); }); }
+async function selectHero(i) { if (!HEROES[i].userData.glb && useGLB) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
+const qp0 = new URLSearchParams(location.search);
+let savedPlan = null;
+try { if (qp0.get('nosave') == null) { const r = readSave(localStorage); if (r.status === 'ok') savedPlan = planFromState(r.state, GLB_NAMES, 60); } } catch (e) { diag('save read failed: ' + (e && e.message || e)); }
+const savedOn = qp0.get('nosave') == null;
+if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
+{ const bar = document.getElementById('heroes'); const list = savedPlan && qp0.get('all') == null ? savedPlan.party : HERO_NAMES.map((n, i) => i); list.forEach(i => { const n = HERO_NAMES[i]; const b = document.createElement('button'); b.textContent = n.split(' ').pop(); b.title = n; b.dataset.i = i; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => { e.stopPropagation(); selectHero(i); }); bar.appendChild(b); }); }
+{ const q = qp0.get('hero'); const qi = q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; startHero = qi; if (qi) HEROES[0].visible = false; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); else HEROES[0].visible = true; }); }
 // preload the first three quietly after first paint (they replace the procedural stand-ins)
 
 // blob shadow is the real shadow map; no extra.
@@ -347,6 +355,7 @@ marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = fal
 
 // ---------- input ----------
 const state = { inside: null, zoom: 1, heroX: 0, heroZ: 14, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0, vx: 0, vz: 0 };
+if (savedPlan && savedPlan.pos && qp0.get('hero') == null) { state.heroX = savedPlan.pos.x; state.heroZ = savedPlan.pos.z; state.yaw = savedPlan.pos.yaw; }
 const keys = new Set();
 addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
@@ -440,10 +449,20 @@ function spawnCrowd(id, kind, x, z, leash, yaw) {
   return rec;
 }
 {
-  const used = new Set([HERO_GLB_ID(+(qp.get('hero') || 0))]);
-  const pick = ['elira', 'orin', 'seraphine', 'finn', 'brynn'].filter(x => !used.has(x));
-  for (let i = 0; i < PARTY_N; i++) spawnCrowd(pick[i], 'party', (i - (PARTY_N - 1) / 2) * 1.6, 16.8 + i * 0.3, 2.6 + i * 0.5, 0);
+  const startId = qp.get('hero') != null ? +qp.get('hero') || 0 : savedPlan ? savedPlan.hero : 0;
+  const used = new Set([HERO_GLB_ID(startId)]);
+  const fromSave = savedPlan && qp.get('hero') == null;
+  const pick = fromSave ? savedPlan.followers.map(HERO_GLB_ID).filter(x => !used.has(x)) : ['elira', 'orin', 'seraphine', 'finn', 'brynn'].filter(x => !used.has(x));
+  const nFol = !BUMP_ON ? 0 : fromSave && qp.get('party') == null ? Math.min(3, pick.length) : Math.min(PARTY_N, pick.length);
+  const bx = state.heroX, bz = state.heroZ + 2.8;
+  for (let i = 0; i < nFol; i++) spawnCrowd(pick[i], 'party', bx + (i - (nFol - 1) / 2) * 1.6, bz + i * 0.3, 2.6 + i * 0.5, 0);
   for (let i = 0; i < NPC_N; i++) spawnCrowd(['thorne', 'rook'][i], 'npc', 4.5 + i * 2.5, 15.5 - i * 1.5, 0, Math.PI * 0.75);
+}
+function swapFollower(prevId, newId) {
+  const r = crowd.find(c => c.kind === 'party' && c.a.id === newId); if (!r || !prevId || prevId === newId) return;
+  r.a.id = prevId; r.a.style = styleFor(prevId); r.a.str = r.a.style.str;
+  if (r.root) { scene.remove(r.root); r.root = null; r.nd = null; }
+  loadActorModel(prevId).then(w => { if (!w || r.a.id !== prevId) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); r.root = w; r.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(r.a.x, 0, r.a.z); w.rotation.y = r.a.yaw; scene.add(w); });
 }
 function updateCrowd(dt) {
   const pa = playerAct;
@@ -593,7 +612,21 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 
+// ---------- save bridge (save3d.js): shared guildbound_rpg_save_v1; only state.active and the p3d field are written ----------
+const lastSave = { x: NaN, z: NaN, hero: -1 };
+function snapNow() { return { x: state.heroX, z: state.heroZ, yaw: state.yaw, heroGlb: HEROES.indexOf(hero) }; }
+if (savedOn) {
+  let store = null; try { store = localStorage; } catch (e) {}
+  if (store) {
+    saver = createSaver(store, GLB_NAMES, snapNow);
+    const watch = () => { if (state.inside) return; const dx = state.heroX - lastSave.x, dz = state.heroZ - lastSave.z; if (!(Math.abs(dx) < 0.5 && Math.abs(dz) < 0.5)) { lastSave.x = state.heroX; lastSave.z = state.heroZ; saver.mark(); } };
+    setInterval(watch, 700);
+    addEventListener('pagehide', () => saver.flush());
+    document.addEventListener('visibilitychange', () => { if (document.hidden) saver.flush(); });
+  }
+}
 window.__p3d = {
+  saver, flushSave: () => saver ? saver.flush() : false, savedPlan,
   state, glbInfo, colliders, get hero() { return hero; }, THREE, renderer, enterables,
   get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),

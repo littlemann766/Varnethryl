@@ -6,9 +6,12 @@
 select,button{background:#2a2433;color:#e8dcc0;border:1px solid #6a5a3a;border-radius:8px;padding:10px 12px;font-size:15px;min-height:44px}
 button.on{background:#6a5a3a;color:#fff}
 #info{font-size:13px;opacity:.9}
-#nav{display:flex;gap:6px}</style></head><body>
-<canvas id="c"></canvas>
-<div id="ui"><div id="sel"><select id="list"></select><div id="nav"><button id="prev">◀</button><button id="next">▶</button></div></div><div id="ctl"></div><div id="info">loading…</div></div>
+#nav{display:flex;gap:6px}
+#all{position:fixed;left:0;top:0;bottom:0;width:min(78vw,320px);background:#000d;z-index:5;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;display:none;padding:8px 6px}
+#all div{padding:10px 10px;border-bottom:1px solid #fff2;font-size:15px;min-height:24px}#all div.on{background:#6a5a3a}#all div.hd{background:#241f2e;font-weight:700;position:sticky;top:0}
+#all small{opacity:.7;margin-left:6px}.tagp{color:#ffb060}</style></head><body>
+<canvas id="c"></canvas><div id="all"></div>
+<div id="ui"><div id="sel"><select id="list"></select><div id="nav"><button id="prev">◀</button><button id="next">▶</button></div></div><div id="ctl"></div><button id="showall">☰ All models (<span id="cnt"></span>)</button><div id="info">loading…</div></div>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
 <script type="module">
 import * as THREE from 'three';
@@ -17,7 +20,7 @@ import { SpringBones } from './spring_bones.js';
 const MAIN=['aldric','asha','brynn','cedric','darius','elira','finn','garruk','kael','mirelle','morwen','nyx','orin','rook','rowan','selene','seraphine','talia','thorne','vesper','wolf'];
 const BETH=["briar", "cinder", "coral", "ember", "frosttroll", "hawk", "hearth", "hobgoblin", "hydrella", "kestrel", "lorian", "lunara", "marella", "mortimer", "mossgut", "neris", "pip", "snowy", "ssylthar", "stonetroll", "thrain", "vaelthryx", "valen", "wren", "wyvern", "zephyr"];
 const NEW=[['darius','models/darius.glb'],['selene','models/selene.glb'],['mortimer_new'],['player_pikachu'],['lunara_new'],['marella_new'],['vaelthryx_straight_rig'],['vaelthryx_new'],['ssylthar_new'],['ashentitan_new'],['coral_new'],['cinder_new'],['snowy_new3'],['zephyr_new2']];
-const PH=["aldric","asha","briar","brynn","cedric","elira","ember","finn","frosttroll","garruk","hearth","hobgoblin","hydrella","kael","kestrel","lorian","lunara","marella","mirelle","morwen","mossgut","neris","nyx","orin","pip","rook","rowan","seraphine","snowy","stonetroll","talia","thorne","thrain","valen","vesper","wren","wyvern","zephyr"];
+const PH=["aldric", "asha", "briar", "brynn", "cedric", "elira", "ember", "finn", "frosttroll", "garruk", "hearth", "hobgoblin", "hydrella", "kael", "kestrel", "lorian", "lunara", "marella", "mirelle", "morwen", "mossgut", "neris", "nyx", "orin", "pip", "rook", "rowan", "seraphine", "snowy", "stonetroll", "talia", "thorne", "thrain", "valen", "vesper", "wren", "wyvern", "zephyr"];
 const items=[...NEW.map(([n,u])=>({n,set:'NEW (Beth)',url:u||`models-new/${n}.glb`})),...PH.map(n=>({n:n+'_new',set:'PLACEHOLDER',url:`models-placeholder/${n}_new.glb`,ph:true})),...MAIN.map(n=>({n,set:'Old main',url:`models/${n}.glb`})),...BETH.map(n=>({n,set:'Old Beth',url:`models-beth/${n}.glb`}))];
 const HEIGHT={stonetroll_new:3.0,frosttroll_new:3.0,thrain_new:1.35};   // humanoids are normalised to 1.9 m; trolls/dwarf scaled here, Snowy shown at native size with scale buttons
 const NOTES={snowy_new3:'Snowy: walk 0.55 u/s, run 1.5 u/s. snowy_new4 coming.',zephyr_new2:'Zephyr: hind-foot sliding in walk is a known issue.',vaelthryx_straight_rig:'Straight rig: slither / coil / strike clips.',vaelthryx_new:'Coiled version.'};
@@ -69,6 +72,10 @@ async function load(i){idx=i;list.value=i;const my=++loadId;const it=items[i];in
   info.textContent=`${it.ph?'PLACEHOLDER (old generated model)':it.set}: ${it.n} · ${kb} KB · ${(box.max.y-box.min.y).toFixed(2)} m · ${Math.round(tris).toLocaleString()} tris · `+(names.length?`clips: ${names.join(', ')}`:'no animation clips in this model (static pose)');
   if(NOTES[it.n])info.textContent+=' · '+NOTES[it.n];window.__viewer.loaded={name:it.n,set:it.set,kb,tris:Math.round(tris),clips:names};
  }}
+const allEl=document.getElementById('all');document.getElementById('cnt').textContent=items.length;
+{let last='';items.forEach((it,i)=>{if(it.set!==last){last=it.set;const h=document.createElement('div');h.className='hd';h.textContent=(it.ph?'PLACEHOLDER (old generated, to be replaced)':it.set==='NEW (Beth)'?'NEW (Beth) - real models':it.set==='Old main'?'Old main set (playable + wolf)':'Old Beth set (NPCs/monsters/bosses)');allEl.appendChild(h);}
+ const d=document.createElement('div');d.dataset.i=i;d.innerHTML=it.n+(it.ph?'<small class="tagp">PLACEHOLDER</small>':'');d.addEventListener('click',()=>{allEl.style.display='none';load(i);});allEl.appendChild(d);});}
+document.getElementById('showall').onclick=()=>{allEl.style.display=allEl.style.display==='block'?'none':'block';[...allEl.querySelectorAll('div[data-i]')].forEach(d=>d.classList.toggle('on',+d.dataset.i===idx));const o=allEl.querySelector('.on');if(o)o.scrollIntoView({block:'center'});};
 list.onchange=()=>load(+list.value);
 document.getElementById('prev').onclick=()=>load((idx+items.length-1)%items.length);
 document.getElementById('next').onclick=()=>load((idx+1)%items.length);

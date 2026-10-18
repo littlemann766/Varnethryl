@@ -10,7 +10,7 @@ import json
 
 root=Path(__file__).resolve().parents[1]
 w=root/'www'
-html=(w/'index.html').read_text(encoding='utf-8')
+html=(w/'index2d.html').read_text(encoding='utf-8')
 import re
 html=re.sub(r'<div id="brandLoader".*?</div><div id="brandTitle".*?</button></div>','',html,flags=re.S).replace('<link rel="stylesheet" href="brand.css"/>','').replace('<script src="brand.js"></script>','')  # brand screens need external art; skip in standalone
 html=html.replace('<link rel="manifest" href="manifest.webmanifest"/>','').replace('<link rel="apple-touch-icon" href="apple-touch-icon.png"/>','').replace('<script defer src="pwa.js"></script>','<script>'+ (w/'pwa.js').read_text(encoding='utf-8') +'</script>')

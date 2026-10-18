@@ -1,12 +1,12 @@
 """Regression tests for the 0.6.0 phone freeze and the Mortimer spawn condition.
-Usage: (cd www && python3 -m http.server 8977) then VN_URL=http://localhost:8977/index.html python3 tools/fix060_test.py
+Usage: (cd www && python3 -m http.server 8977) then VN_URL=http://localhost:8977/index2d.html python3 tools/fix060_test.py
 1. Negative first-frame dt (rAF timestamp earlier than performance.now() at module start, common on slow phones)
    used to make runtime.x/y/vx/vy NaN: blank world, no movement. Simulated by shifting rAF timestamps back.
 2. An exception inside a frame must not stop the render loop.
 3. Mortimer needs V1 done (never on a fresh save); with V1 done he shows unless V2 is merely offered (pre-e7aab0b rule restored)."""
 import os, sys
 from playwright.sync_api import sync_playwright
-URL = os.environ.get('VN_URL', 'http://localhost:8977/index.html')
+URL = os.environ.get('VN_URL', 'http://localhost:8977/index2d.html')
 res = []
 def ok(n, c): res.append(bool(c)); print(('PASS' if c else 'FAIL'), n)
 SHIFT = "const o=window.requestAnimationFrame.bind(window);let n=0;window.requestAnimationFrame=cb=>o(t=>cb(n++<3?t-120:t));"

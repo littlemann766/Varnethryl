@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 from PIL import Image,ImageDraw
 import json,io,os,time
 D='/workspace/shots/varnethryl-class/';os.makedirs(D,exist_ok=True)
-U='http://localhost:8099/index.html'
+U='http://localhost:8099/index2d.html'
 res=[]
 def ok(n,c,extra=''):res.append((n,bool(c)));print(('PASS' if c else 'FAIL'),n,extra)
 CLASSES="Knight Ranger Cleric Rogue Mage Paladin Berserker Druid Bard Necromancer Runemaster|Witch Hunter|Shaman Spearman Cryomancer|Dark Knight|Duelist Engineer Monk Beastmaster"

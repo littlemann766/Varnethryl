@@ -293,7 +293,15 @@ function keep(spec, ctx) {
   for (const s of [-1, 1]) for (const z of [-4, 0, 4]) B.pillar(s * 4.2, z, .5, h - .6, 'stone');
   B.tableR(-iw + 2.6, 1.5, 1.6, 7, 'darkWood'); B.tableR(iw - 2.6, 1.5, 1.6, 7, 'darkWood'); for (const s of [-1, 1]) B.hearth(s * (iw - .5), -3.6, -s * Math.PI / 2, 2.2);
   for (let i = 0; i < 3; i++) for (const s of [-1, 1]) B.banner(s * (iw - .4), 5, -2 + i * 3.6, -s * Math.PI / 2, 1, 2.6);
-  for (const z of [-2, 2.5]) for (const x of [-2.6, 2.6]) B.lamp(x, 6.2, z); B.radius = 14; return B.finish();
+  for (const z of [-2, 2.5]) for (const x of [-2.6, 2.6]) B.lamp(x, 6.2, z);
+  B.fullUpper({ level: 1, y: 5.0, stair: { cx: iw - .9, cz: .95, dir: '-z', len: 4.5, w: 1.6 }, rooms(U) { const Z = -3.2;
+    U.partition(0, Z, iw * 2, 'x', [[-5.5, 1.4], [0, 1.6], [5.5, 1.4]]); U.partition(-3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7); U.partition(3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7);
+    U.bed(-iw + 1.6, -id_ + 1.2, 1); U.chest(-4.5, -id_ + .6, .9); U.rugAt(-6.8, -4.9, 3, 2.4); U.lamp(-6.8, 2.4, -4.9);
+    U.tableR(0, -id_ + 1.6, 3.0, 1.2); U.pew(-1.0, -id_ + 2.4, 1.6); U.pew(1.0, -id_ + 2.4, 1.6); U.lamp(0, 2.4, -id_ + 1.6); U.hearth(0, -id_ + .5, 0, 2.4);
+    U.bed(iw - 1.6, -id_ + 1.2, 1); U.chest(4.5, -id_ + .6, .9); U.rugAt(6.8, -4.9, 3, 2.4); U.lamp(6.8, 2.4, -4.9);
+    U.tableR(-5.5, 1.5, 2.6, 1.2); U.banner(-iw + .4, 1.8, -2, Math.PI / 2, 1, 2.2); U.lamp(-5.5, 2.4, 1.5); U.lamp(0, 2.4, 1.0); } });
+  B.fullUpper({ level: 2, y: 10.2, y0: 5.0, l0: 1, stair: { cx: -(iw - .9), cz: .7, dir: '-z', len: 5.0, w: 1.6 }, rails: true, rooms(U) { U.bx(1.2, .5, 1.2, 'stone', 6, .25, -3, U.G.int); U.ccol(6, -3, .8); U.lamp(0, 1.6, 0); U.banner(0, 1.2, -id_ + .6, 0, 1.4, 2.2); } });
+  B.radius = 14; return B.finish();
 }
 
 // ---------- 17. Gatehouse (walkable tunnel gate) ----------
@@ -353,10 +361,13 @@ function observatory(spec, ctx) {
   B.add(new THREE.CylinderGeometry(1.7, 1.9, .06, 20), M('sigil'), 0, .1, -.2, B.G.int, { shadow: false });
   B.cyl(.7, .9, 1.0, 'darkWood', 0, .5, -.2, B.G.int, 10); B.ccol(0, -.2, 1.0); B.add(new THREE.SphereGeometry(.55, 12, 10), GLOW('5fa8ff', 1.4), 0, 1.7, -.2, B.G.int, { shadow: false });
   for (const a of [.8, 2.4, 3.9, 5.5]) B.add(new THREE.TorusGeometry(.8 + a * .02, .03, 4, 20), GLOW('9fd0ff', 1.2), 0, 1.7, -.2, B.G.int, { shadow: false }).rotation.set(a, a * 1.7, 0);
-  B.cyl(.25, .35, 1.2, 'gold', -2.2, .6, -1.6, B.G.int, 8); B.add(new THREE.CylinderGeometry(.2, .24, 2.2, 8), M('#b8902c'), -2.6, 1.9, -1.9, B.G.int).rotation.z = -.9; B.ccol(-2.2, -1.6, .5);
+  B.cyl(.25, .35, 1.2, 'gold', 2.2, .6, -1.6, B.G.int, 8); B.add(new THREE.CylinderGeometry(.2, .24, 2.2, 8), M('#b8902c'), 2.6, 1.9, -1.9, B.G.int).rotation.z = -.9; B.ccol(2.2, -1.6, .5);
   const iw = B.iw; for (let i = 0; i < 5; i++) { const a = Math.PI + (i - 2) * .55; const x = Math.sin(a) * (iw - .4), z = Math.cos(a) * (iw - .4); const s = B.bx(1.9, 2.4, .5, 'books', x, 1.2, z, B.G.int); s.rotation.y = a; B.ccol(x, z, .9); }
-  B.tableR(2.0, 1.4, 1.8, 1.0, 'darkWood'); for (const [x, z] of [[-2.4, 1.6]]) B.chest(x, z, .8); B.banner(0, 5.2, -iw + .1, 0, 1, 2.4); B.lamp(1.5, 3.4, 0); B.lamp(-1.5, 3.4, 0);
-  for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283; B.bx(.35, .1, 1.4, 'darkWood', Math.sin(a) * 3.1, 4.4, Math.cos(a) * 3.1, B.G.int).rotation.y = a; }   // upper deck ring (visual)
+  B.tableR(2.0, 1.4, 1.8, 1.0, 'darkWood'); for (const [x, z] of [[2.4, 1.6]]) B.chest(x, z, .8); B.banner(0, 5.2, -iw + .1, 0, 1, 2.4); B.lamp(1.5, 3.4, 0); B.lamp(-1.5, 3.4, 0);
+  { const S1 = { cx: -1.8, cz: .6, dir: '-z', len: 4.4, w: 1.5 }, S2 = { cx: 1.8, cz: .6, dir: '+z', len: 4.4, w: 1.5 };
+    B.fullUpper({ level: 1, y: 3.7, disc: B.iw - .05, stair: S1, rooms(U) { U.lamp(0, 2.8, 0); U.lamp(0, 2.8, -2.4); } });
+    B.fullUpper({ level: 2, y: 7.4, y0: 3.7, l0: 1, disc: B.iw - .05, stair: S2, rooms(U) { U.lamp(0, 2.8, 0); U.lamp(0, 2.8, 2.4); } });
+    B.fullUpper({ level: 3, y: 10.9, y0: 7.4, l0: 2, disc: B.iw - .05, stair: S1, rooms(U) { U.add(new THREE.CylinderGeometry(.12, .18, 2.2, 8), M('#b8902c'), 1.8, 1.2, -.4, U.G.int).rotation.z = -.9; U.crystal(2.2, 1.4, .8, '5fa8ff', .3); U.lamp(0, 2.4, 0); } }); }
   return B.finish();
 }
 
@@ -393,10 +404,12 @@ function windmill(spec, ctx) {
   const hb = new THREE.Mesh(new THREE.SphereGeometry(.4, 8, 6), M('gold')); hub.add(hb); B.tick = dt => { hub.rotation.z += dt * .5; };
   B.add(new THREE.CylinderGeometry(.18, .22, 1, 6), M('iron'), 0, H + 4.0, R - .2, B.G.roof).rotation.x = Math.PI / 2;
   for (let i = 0; i < 4; i++) B.bx(B.DW + 1.2 - i * .0, .22, .7, 'stone', 0, .11 + i * .0, R + .9 + i * .35, B.G.ext);
-  const iw = B.iw; B.cyl(1.2, 1.3, .6, 'stone', 0, .3, -.4, B.G.int, 14); B.cyl(1.0, 1.0, .25, 'stoneD', 0, .72, -.4, B.G.int, 14); B.cone(.5, 1.2, 'stoneD', 0, .8, -.4, B.G.int, 8).rotation.x = Math.PI; B.ccol(0, -.4, 1.35);
-  for (const [x, z] of [[-iw + .7, 1.3], [-iw + 1.5, 1.7], [iw - .8, 1.4], [iw - .6, 0.4]]) B.sack(x, z); B.barrel(-iw + .6, -.8); B.crate(iw - 1.0, -1.4, .8);
+  const iw = B.iw; B.cyl(.85, .95, .6, 'stone', 1.0, .3, -.3, B.G.int, 14); B.cyl(.7, .7, .25, 'stoneD', 1.0, .72, -.3, B.G.int, 14); B.cone(.4, 1.0, 'stoneD', 1.0, .8, -.3, B.G.int, 8).rotation.x = Math.PI; B.ccol(1.0, -.3, 1.0);
+  for (const [x, z] of [[iw - .8, 1.4], [iw - .6, 0.4]]) B.sack(x, z); B.crate(iw - 1.0, -1.4, .8);
   B.add(new THREE.TorusGeometry(.7, .09, 5, 12), M('gold'), 1.0, 3.0, -iw + .4, B.G.int, { shadow: false }); B.add(new THREE.TorusGeometry(.5, .09, 5, 12), M('iron'), -1.0, 3.0, -iw + .4, B.G.int, { shadow: false });
-  B.bx(.1, 3.2, .5, 'darkWood', 0, 3.0, -iw + .5, B.G.int); B.lamp(1.4, 2.2, 1.0); B.banner(-iw + .1, 2.0, 0, Math.PI / 2, .7, 1.6); return B.finish();
+  B.bx(.1, 3.2, .5, 'darkWood', 0, 3.0, -iw + .5, B.G.int); B.lamp(1.4, 2.2, 1.0); B.banner(-iw + .1, 2.0, 0, Math.PI / 2, .7, 1.6);
+  B.fullUpper({ y: 2.9, disc: iw - .05, stair: { cx: -1.1, cz: 0, dir: '-z', len: 3.2, w: 1.4 }, rooms(U) { U.sack(1.2, 0); U.sack(1.2, .9); U.crate(.6, -1.4, .8); U.barrel(1.5, -1.0); U.lamp(.6, 2.0, 0.3); U.cyl(.35, .35, .5, 'wood', 1.2, .25, 1.6, U.G.int, 8); } });
+  return B.finish();
 }
 
 // ---------- 22. Lighthouse of Tidewrack Coast ----------
@@ -497,7 +510,9 @@ export function buildWalls(ctx, WORLD, GATE_W) {
     t.cone(4.2, 6.2, 'slate', 0, 8.5, 0, t.G.roof, 16); t.banner(0, 4.6, 3.4 + .05, 0, 1, 2.4);
     for (let i = 0; i < 3; i++) { const a = 2.2 + i * 1.3; t.win(Math.sin(a) * 3.45, 5, Math.cos(a) * 3.45, a, .4, .9, 'glass'); }
     const iw = t.iw; t.table(0, -.6, .7); t.rack(-iw + .5, -.5, 4, 1); t.bed(iw - 1.0, -1.0, 1); t.barrel(iw - 1, 1.6); t.crate(-iw + 1, 1.6, .8); t.lamp(0, 3.4, 0);
-    for (let i = 0; i < 18; i++) { const a = -2.4 + i * .3, y = .2 + i * .42; t.bx(.9, .14, .36, 'wood', Math.sin(a + 3) * (iw - .9), y, Math.cos(a + 3) * (iw - .9), t.G.int).rotation.y = a + 3; }
+    { const S1 = { cx: -1.2, cz: 0, dir: '-z', len: 3.6, w: 1.4 }, S2 = { cx: 1.2, cz: 0, dir: '+z', len: 3.6, w: 1.4 };
+      t.fullUpper({ level: 1, y: 4.0, disc: iw - .05, stair: S1, rooms(U) { U.lamp(0, 2.6, 0); } });
+      t.fullUpper({ level: 2, y: 8.0, y0: 4.0, l0: 1, disc: iw - .05, stair: S2, rooms(U) { U.barrel(-1.6, -1.5); U.crate(-1.7, 1.5, .7); U.lamp(0, 1.6, 0); } }); }
     t.radius = 8; t.finish(); towers.push(t); };
   const E = WORLD - 4;
   tw(-E, -E, true); tw(E, -E, true); tw(-E, E, true); tw(E, E, true);
@@ -532,7 +547,7 @@ export const BUILDING_DEFS = [
   { id: 'house2', f: house(1), cx: 9, cz: 19, rot: Math.PI, name: 'Village House' },
   { id: 'house3', f: house(2), cx: -9, cz: 31, rot: Math.PI, name: 'Village House' },
   { id: 'house4', f: house(3), cx: 9, cz: 31, rot: Math.PI, name: 'Village House' },
-  { id: 'lighthouse', f: lighthouse, cx: -53, cz: 52, rot: 0, name: 'Lighthouse' },
+  { id: 'lighthouse', f: lighthouse, cx: -33, cz: 51, rot: 0, name: 'Lighthouse' },
   { id: 'port', f: port, cx: -45, cz: 40, rot: 0, name: 'Port' },
   { id: 'gatehouse', f: gatehouse, cx: 0, cz: 59, rot: 0, name: 'Gatehouse' },
   { id: 'fountain', f: fountain, cx: 0, cz: 0, rot: 0, name: 'Fountain Monument' },

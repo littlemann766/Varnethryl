@@ -104,7 +104,11 @@ function temple(spec, ctx) {
   B.bx(5, .5, 2.4, 'stoneL', 0, .25, -id_ + 1.4, B.G.int); B.bx(3.2, 1.1, 1, 'gold', 0, 1.0, -id_ + 1.3, B.G.int); B.col(0, -id_ + 1.4, 5, 2.4); B.banner(0, 4.2, -id_ + .3, 0, 2.2, 4.4); B.win(-2.8, 5, -id_ + .1, 0, 1.2, 3, 'stained'); B.win(2.8, 5, -id_ + .1, 0, 1.2, 3, 'stained');
   B.crystal(-5.6, -id_ + 1.6, 1.5, '6aa8ff', .35); B.crystal(5.6, -id_ + 1.6, 1.5, '6aa8ff', .35);
   B.cyl(1.1, 1.3, .5, 'stoneL', 0, .25, 4.5, B.G.int, 16); B.add(new THREE.CylinderGeometry(.9, .9, .06, 16), M('water'), 0, .55, 4.5, B.G.int, { shadow: false }); B.cyl(.12, .12, 1.2, 'stoneL', 0, 1.1, 4.5, B.G.int, 8); B.ccol(0, 4.5, 1.35);
-  for (const s of [-1, 1]) { B.bx(1.2, .16, d - 6, 'floorPlank', s * (iw - .6), 4.4, 0, B.G.int); B.bx(.1, .9, d - 6, 'darkWood', s * (iw - 1.2), 4.9, 0, B.G.int); }  // upper galleries (visual)
+  // real upper galleries: side balconies over the aisles + choir loft across the back, reached by a flight on each side of the entrance
+  { const GY = 4.4, gx = 4.0; const S = s => ({ cx: s * (iw - .9), cz: 8.4 - 2.3, ang: Math.PI, len: 4.6, w: 1.5, l0: 0, y0: 0, l1: 1, y1: GY });
+    B.stairs(S(-1)); B.stairs(S(1));
+    B.upperFloor(1, GY, [[-iw, -gx, -id_, 3.9], [gx, iw, -id_, 3.9], [-iw, iw, -id_, -id_ + 2.4]], { key: 'floorPlank' });
+    B.onFloor(1, GY, U => { for (const s of [-1, 1]) { U.pew(s * 5.4, -4, 1.8); U.pew(s * 5.4, -1.5, 1.8); U.lamp(s * 4.6, 2.6, 2.0); } U.banner(0, 1.8, -id_ + .4, 0, 2.0, 2.4); U.chest(0, -id_ + 1.0, .9); }); }
   B.radius = 15; return B.finish();
 }
 

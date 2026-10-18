@@ -1,4 +1,4 @@
-# Varnethryl RPG — v0.6.1
+# Varnethryl RPG — v0.7.4
 
 This is a **separate game project** from PayAviator. It includes the same 20 original hero portraits and sprite cutouts, the playable single-player prototype, quest and boss systems, equipment RNG, Mystic Forge, and local progress backups.
 
@@ -34,3 +34,6 @@ To publish the website: open **Settings → Pages → Build and deployment → S
 To install a test Android APK: open **Actions → Build Varnethryl Android APK**, run the workflow if necessary, then download the `Varnethryl-RPG-debug-APK` artifact. This is a debug build for testing, not a production-signed Play Store release.
 
 If Actions instead says **Get started with GitHub Actions**, the `.github/workflows/` files are still missing or are in the wrong directory. If the workflows appear but don't run, check **Settings → Actions → General** for repository Actions settings.
+
+## Owner cheat panel (0.7.4)
+Owner-only cheats for the 3D game (god, fly, noclip, speed, gold, XP/level, items, teleport, bump toggle), opened by a hidden gesture and gated by `www/proto3d/ownergate.js`. See [docs/OWNER-CHEATS.md](docs/OWNER-CHEATS.md). **Client-side gating cannot stop a determined hacker**: once the backend exists it must verify the owner claim server-side and reject/flag any save with `cheated: true` (cheat use sets that sticky flag in the save; the 2D/3D save schema is otherwise unchanged).

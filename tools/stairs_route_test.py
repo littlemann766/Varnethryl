@@ -11,11 +11,12 @@ threading.Thread(target=srv.serve_forever, daemon=True).start()
 ONLY = os.environ.get('ONLY', '').split(',') if os.environ.get('ONLY') else None
 BFS = """([a,g,lv])=>{const S=.3,x0=Math.min(a[0],g[0])-8,z0=Math.min(a[1],g[1])-8,W=Math.ceil((Math.abs(a[0]-g[0])+16)/S),H=Math.ceil((Math.abs(a[1]-g[1])+16)/S);
 const ok=(i,j)=>i>=0&&j>=0&&i<W&&j<H&&__p3d.free(x0+i*S,z0+j*S,lv);const idx=(i,j)=>j*W+i;
-const near=(p)=>{let best=null,bd=1e9;for(let i=0;i<W;i++)for(let j=0;j<H;j++){const d=Math.hypot(x0+i*S-p[0],z0+j*S-p[1]);if(d<bd&&d<4&&ok(i,j)){bd=d;best=[i,j];}}return best};
-const s=near(a),e=near(g);if(!s||!e)return null;const prev=new Map([[idx(...s),-1]]);const q=[s];
-for(let h=0;h<q.length;h++){const [i,j]=q[h];if(i===e[0]&&j===e[1])break;for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const ni=i+di,nj=j+dj;if(!prev.has(idx(ni,nj))&&ok(ni,nj)){prev.set(idx(ni,nj),idx(i,j));q.push([ni,nj]);}}}
-if(!prev.has(idx(...e)))return null;const path=[];let c=idx(...e);while(c!==-1){path.push([x0+(c%W)*S,z0+Math.floor(c/W)*S]);c=prev.get(c);}path.reverse();
-const out=[];for(let k=4;k<path.length;k+=4)out.push(path[k]);out.push(path[path.length-1]);return out}"""
+let s=null,bd=1e9;for(let i=0;i<W;i++)for(let j=0;j<H;j++){const d=Math.hypot(x0+i*S-a[0],z0+j*S-a[1]);if(d<bd&&d<4&&ok(i,j)){bd=d;s=[i,j];}}
+if(!s)return null;const prev=new Map([[idx(...s),-1]]);const q=[s];
+for(let h=0;h<q.length;h++){const [i,j]=q[h];for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const ni=i+di,nj=j+dj;if(!prev.has(idx(ni,nj))&&ok(ni,nj)){prev.set(idx(ni,nj),idx(i,j));q.push([ni,nj]);}}}
+let e=null,ed=1e9;for(const [i,j] of q){const d=Math.hypot(x0+i*S-g[0],z0+j*S-g[1]);if(d<ed){ed=d;e=[i,j];}}
+const path=[];let c=idx(...e);while(c!==-1){path.push([x0+(c%W)*S,z0+Math.floor(c/W)*S]);c=prev.get(c);}path.reverse();
+if(ed>6&&0)return null;const out=[];for(let k=2;k<path.length;k+=2)out.push(path[k]);out.push(path[path.length-1]);return out}"""
 MODES = os.environ.get('MODE', 'key,joy').split(','); PARTY = os.environ.get('PARTY', '2'); BASE = os.environ.get('BASE')
 YAWS = [float(v) for v in os.environ.get('YAWS', '0').split(',')]; SHOTS = os.environ.get('SHOTS')
 THROTTLE = float(os.environ.get('THROTTLE', '0'))   # CPU throttle factor via CDP (4 = 4x slower) to emulate a laggy phone
@@ -29,12 +30,12 @@ with sync_playwright() as p:
     info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.filter(b=>b.id!=='walls'&&!/^(wt|gt)/.test(b.id)).map(b=>({id:b.id,K:b.K,ramps:b.ramps,d:b.footprint?b.footprint.d:2*(b.radius||4)/b.K,round:!b.footprint,r:b.radius/b.K})))"))
     def W(bid, lx, lz): return pg.evaluate("([id,lx,lz])=>__p3d.multi.find(b=>b.id===id).toW(lx,lz)", [bid, lx, lz])
     box = pg.evaluate("(()=>{const r=document.getElementById('stick').getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2,r.width/2]})()")
-    def drive(via, top, mode, l1, y1, secs=22, tag=''):
+    def drive(via, top, mode, l1, y1, secs=22, tag='', near=None):
         held = set(); joy = False; t = 0; trace = []
         try:
             while t < secs * 1000:
                 st = pg.evaluate("({x:__p3d.state.heroX,z:__p3d.state.heroZ,lv:__p3d.state.level,y:__p3d.state.heroY,cy:__p3d.state.camYaw})")
-                if st['lv'] == l1 and abs(st['y'] - y1) < .2: return st, t, True
+                if st['lv'] == l1 and (y1 is None or abs(st['y'] - y1) < .2) and (near is None or math.hypot(st['x'] - near[0], st['z'] - near[1]) < 1.0): return st, t, True
                 while via and (math.hypot(via[0][0] - st['x'], via[0][1] - st['z']) < 1.1 or st['lv'] != 0): via = via[1:]
                 gx, gz = via[0] if via else top
                 dx, dz = gx - st['x'], gz - st['z']; d = math.hypot(dx, dz) or 1; dx /= d; dz /= d
@@ -84,6 +85,16 @@ with sync_playwright() as p:
                             pg.evaluate("([s,y])=>{__p3d.teleport(s[0],s[1],0);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw]); pg.wait_for_timeout(300)
                             r, ms, ok = drive([list(q) for q in wp], top, mode, m['l1'], m['y1']*bi['K'])
                     fails += 0 if ok else 1
+                    if ok and os.environ.get('EXIT', '1') == '1':   # and actually walk off the top into the upper room (BFS over the upper floor to the room centre), not stuck on the last step
+                        cur = pg.evaluate("[__p3d.state.heroX,__p3d.state.heroZ]"); goal = W(bi['id'], 0, 0); total += 1
+                        wp = pg.evaluate(BFS, [cur, goal, m['l1']]); ok3 = bool(wp) and (len(wp) > 0)
+                        if ok3:
+                            for q in wp:
+                                r3, ms3, ok3 = drive([], list(q), mode, m['l1'], None, secs=8, near=list(q))
+                                if not ok3: break
+                        fails += 0 if ok3 else 1
+                        if not ok3: print('    exit stuck', bool(wp), 'at', pg.evaluate("[__p3d.state.heroX,__p3d.state.heroZ]"), flush=True); ok = False
+                        if ok3: pg.evaluate("([x,z,l])=>__p3d.teleport(x,z,l)", [cur[0], cur[1], m['l1']]); pg.wait_for_timeout(200)
                     if ok and os.environ.get('DOWN', '1') == '1':   # now turn around at the top and walk back down to the street
                         foot = W(bi['id'], m['cx'] - s * (h + 2.0), m['cz'] - c * (h + 2.0)); total += 1
                         r2, ms2, ok2 = drive([], foot, mode, m['l0'], m['y0']*bi['K']); fails += 0 if ok2 else 1

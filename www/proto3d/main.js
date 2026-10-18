@@ -6,9 +6,10 @@ import { makeEnterable } from './interiors.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: (window.devicePixelRatio || 1) < 1.5, powerPreference: 'high-performance' });
 const DPR_CAP = 1.5;                       // cap pixel ratio: biggest single mobile perf lever
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, DPR_CAP));
+let prCeil = Math.min(window.devicePixelRatio || 1, DPR_CAP), pr = prCeil;   // pr adapts down (never above prCeil) if the GPU can't hold ~45 fps
+renderer.setPixelRatio(pr);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 
@@ -239,9 +240,50 @@ const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'ta
 const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
 const glbInfo = { loaded: [], failed: [], pending: [] };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;
+// perf: GLB heroes are ~130 rigid mesh parts glued to animated nodes = ~130 draw calls per pass (x2 with the shadow map).
+// Bake all rigid parts into one SkinnedMesh per material (each part rigidly weighted to its parent node), so animation is unchanged.
+function mergeRigidParts(root) {
+  root.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), buckets = new Map(), bones = [], boneIdx = new Map();
+  root.traverse(o => {
+    if (!o.isMesh || o.isSkinnedMesh || o.isInstancedMesh || !o.parent || o.geometry.morphAttributes.position || Array.isArray(o.material) || !o.geometry.attributes.normal) return;
+    if (!buckets.has(o.material)) buckets.set(o.material, []);
+    buckets.get(o.material).push(o);
+  });
+  if (!buckets.size) return 0;
+  for (const list of buckets.values()) for (const o of list) if (!boneIdx.has(o.parent)) { boneIdx.set(o.parent, bones.length); bones.push(o.parent); }
+  if (bones.length > 120) return 0;
+  const skeleton = new THREE.Skeleton(bones); // inverses computed from the rest pose (root.matrixWorld is current)
+  skeleton.calculateInverses();
+  let removed = 0;
+  for (const [mat, list] of buckets) {
+    let n = 0; for (const o of list) n += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count);
+    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2), si = new Uint16Array(n * 4), sw = new Float32Array(n * 4);
+    let k = 0; const tmp = new THREE.Vector3(), nm = new THREE.Matrix3();
+    for (const o of list) {
+      const g = o.geometry, ix = g.index, cnt = ix ? ix.count : g.attributes.position.count, P = g.attributes.position, N = g.attributes.normal, U = g.attributes.uv;
+      const mtx = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld); nm.getNormalMatrix(mtx); const bi = boneIdx.get(o.parent);
+      for (let i = 0; i < cnt; i++, k++) {
+        const v = ix ? ix.getX(i) : i;
+        tmp.fromBufferAttribute(P, v).applyMatrix4(mtx); pos[k * 3] = tmp.x; pos[k * 3 + 1] = tmp.y; pos[k * 3 + 2] = tmp.z;
+        tmp.fromBufferAttribute(N, v).applyMatrix3(nm).normalize(); nor[k * 3] = tmp.x; nor[k * 3 + 1] = tmp.y; nor[k * 3 + 2] = tmp.z;
+        if (U) { uv[k * 2] = U.getX(v); uv[k * 2 + 1] = U.getY(v); }
+        si[k * 4] = bi; sw[k * 4] = 1;
+      }
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    geo.setAttribute('skinIndex', new THREE.BufferAttribute(si, 4)); geo.setAttribute('skinWeight', new THREE.BufferAttribute(sw, 4));
+    const sm = new THREE.SkinnedMesh(geo, mat); sm.castShadow = true; sm.receiveShadow = false; sm.frustumCulled = false; sm.name = 'merged';
+    root.add(sm); sm.updateMatrixWorld(true); sm.bind(skeleton, sm.matrixWorld);
+    for (const o of list) { o.parent.remove(o); o.geometry.dispose(); removed++; }
+  }
+  return removed;
+}
 function wrapGLB(g) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
   m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
+  if (new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
   const box = new THREE.Box3().setFromObject(m), hgt = box.max.y - box.min.y;
   if (hgt > 0.01) { const sc = 1.8 / hgt; m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
   const mixer = new THREE.AnimationMixer(m), act = {};
@@ -414,11 +456,12 @@ function animateHero(dt) {
 
 // ---------- camera ----------
 const camPos = new THREE.Vector3(0, 8, 24), camLook = new THREE.Vector3(0, 1.5, 14);
+const _want = new THREE.Vector3(), _look = new THREE.Vector3();
 function updateCamera(dt, snap) {
   const portrait = innerHeight > innerWidth;
   const z = state.zoom || 1, close = z < 1, dist = close ? (portrait ? 7.0 : 6.0) * (z / 0.3) : (portrait ? 10.5 : 9), height = close ? 2.2 : (portrait ? 7.2 : 6.2);
-  const want = new THREE.Vector3(state.heroX + Math.sin(state.camYaw) * dist, height, state.heroZ + Math.cos(state.camYaw) * dist);
-  const look = new THREE.Vector3(state.heroX, close ? 1.05 : 1.6, state.heroZ);
+  const want = _want.set(state.heroX + Math.sin(state.camYaw) * dist, height, state.heroZ + Math.cos(state.camYaw) * dist);
+  const look = _look.set(state.heroX, close ? 1.05 : 1.6, state.heroZ);
   const k = snap ? 1 : 1 - Math.pow(0.0015, dt);
   camPos.lerp(want, k); camLook.lerp(look, k);
   camera.position.copy(camPos); camera.lookAt(camLook);
@@ -438,10 +481,23 @@ resize();
 const fpsEl = document.getElementById('fps');
 let last = performance.now(), fpsAcc = 0, fpsFrames = 0, fps = 0, totalFrames = 0, simTime = 0;
 let running = true;
-document.addEventListener('visibilitychange', () => { running = !document.hidden; last = performance.now(); });
+document.addEventListener('visibilitychange', () => { running = !document.hidden; last = performance.now(); lastDraw = 0; adaptSkip = Math.max(adaptSkip, 30); });
+// adaptive resolution: if frames average > 22 ms for ~1 s, shrink the render resolution (min 0.6x); never climb back above a level that failed.
+let adaptT = 0, adaptN = 0, adaptSkip = 90;
+function adaptRes(raw) {
+  if (adaptSkip > 0) { adaptSkip--; return; }
+  if (raw > 250) return;                       // tab switch / hitch, not load
+  adaptT += raw; adaptN++;
+  if (adaptT < 1000) return;
+  const avg = adaptT / adaptN; adaptT = 0; adaptN = 0;
+  if (avg > 22 && pr > 0.6) { prCeil = Math.max(0.6, pr * 0.98); pr = Math.max(0.6, pr * 0.82); renderer.setPixelRatio(pr); resize(); adaptSkip = 20; }
+}
+let lastDraw = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   if (!running) return;
+  if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
+  adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   updateHero(dt); updateCamera(dt, totalFrames === 0);
   simTime += dt;

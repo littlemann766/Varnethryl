@@ -36,7 +36,9 @@ const makers = {
   cobble(g, S) { g.fillStyle = '#6e675d'; g.fillRect(0, 0, S, S); for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { g.fillStyle = hsl(35, 8, 44 + rnd() * 18); g.beginPath(); g.roundRect(x * 32 + (y % 2) * 16 + 1, y * 32 + 1, 29, 29, 6); g.fill(); } },
   pave(g, S) { g.fillStyle = '#8a8478'; g.fillRect(0, 0, S, S); for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) { g.fillStyle = hsl(40, 8, 66 + rnd() * 10); g.fillRect(x * 64 + 2, y * 64 + 2, 60, 60); } noise(g, S, 600, .08); },
   carpet(g, S) { g.fillStyle = '#1f3d7a'; g.fillRect(0, 0, S, S); g.fillStyle = '#c9a240'; g.fillRect(S * .08, 0, S * .04, S); g.fillRect(S * .88, 0, S * .04, S); g.fillStyle = '#e0bd5a'; for (let y = 0; y < S; y += 32) { g.beginPath(); g.moveTo(S / 2, y + 4); g.lineTo(S / 2 + 12, y + 16); g.lineTo(S / 2, y + 28); g.lineTo(S / 2 - 12, y + 16); g.fill(); } noise(g, S, 500, .08); },
-  rug(g, S) { g.fillStyle = '#7a2a2a'; g.fillRect(0, 0, S, S); g.strokeStyle = '#d0a040'; g.lineWidth = 6; g.strokeRect(10, 10, S - 20, S - 20); g.strokeStyle = '#e8d8a8'; g.lineWidth = 2; g.strokeRect(22, 22, S - 44, S - 44); g.fillStyle = '#2a4a8a'; g.beginPath(); g.moveTo(S / 2, 40); g.lineTo(S - 40, S / 2); g.lineTo(S / 2, S - 40); g.lineTo(40, S / 2); g.fill(); noise(g, S, 600, .08); },
+  rug(g, S) { g.fillStyle = '#7a2428'; g.fillRect(0, 0, S, S); for (let y = 0; y < S; y += 4) { g.fillStyle = y % 8 ? 'rgba(0,0,0,.07)' : 'rgba(255,255,255,.05)'; g.fillRect(0, y, S, 2); }
+    g.strokeStyle = '#c9a240'; g.lineWidth = 8; g.strokeRect(8, 8, S - 16, S - 16); g.strokeStyle = '#1f3d7a'; g.lineWidth = 14; g.strokeRect(26, 26, S - 52, S - 52); g.strokeStyle = '#e8d8a8'; g.lineWidth = 3; g.strokeRect(40, 40, S - 80, S - 80);
+    g.fillStyle = '#1f3d7a'; g.beginPath(); g.moveTo(S / 2, 58); g.lineTo(S - 58, S / 2); g.lineTo(S / 2, S - 58); g.lineTo(58, S / 2); g.fill(); g.fillStyle = '#c9a240'; g.beginPath(); g.moveTo(S / 2, 88); g.lineTo(S - 88, S / 2); g.lineTo(S / 2, S - 88); g.lineTo(88, S / 2); g.fill(); g.fillStyle = '#7a2428'; g.beginPath(); g.arc(S / 2, S / 2, 26, 0, 7); g.fill(); g.fillStyle = '#e8d8a8'; g.beginPath(); g.arc(S / 2, S / 2, 10, 0, 7); g.fill(); },
   sigil(g, S) { // blue ritual / arcane floor circle
     g.fillStyle = '#10182c'; g.fillRect(0, 0, S, S); g.strokeStyle = '#4fa0ff'; g.shadowColor = '#4fa0ff'; g.shadowBlur = 6; g.lineWidth = 3;
     for (const r of [.46, .4, .26]) { g.beginPath(); g.arc(S / 2, S / 2, S * r, 0, 7); g.stroke(); }
@@ -56,7 +58,7 @@ const makers = {
 };
 const cache = {};
 // real-render texture patches cropped from the boss's beauty renders (tex/b_*.jpg, seamless mirrored tiles) blended over the procedural ones
-const REAL = { stone: ['b_stone.jpg', .75, 'overlay'], stoneD: ['b_stoneD.jpg', .7, 'overlay'], slate: ['b_slate.jpg', .95, 'overlay'], slateG: ['b_slate.jpg', .7, 'overlay'], door: ['b_door.jpg', 1] };
+const REAL = { stone: ['b_stone.jpg', .75, 'overlay'], stoneD: ['b_stoneD.jpg', .7, 'overlay'], slate: ['b_slate.jpg', .95, 'overlay'], slateG: ['b_slate.jpg', .7, 'overlay'], door: ['b_door.jpg', 1], plaster: ['b_plaster.jpg', .6, 'overlay'] };
 const USE_REAL = typeof location === 'undefined' || new URLSearchParams(location.search).get('procedural') == null;
 export function tex(name) { if (cache[name]) return cache[name]; seed = 11 + name.length * 31; const cv = mk(256), g = cv.getContext('2d'); makers[name](g, 256); const t = cache[name] = T(cv);
   if (USE_REAL && REAL[name]) { const im = new Image(); im.onload = () => { g.save(); g.globalAlpha = REAL[name][1]; if (REAL[name][2]) g.globalCompositeOperation = REAL[name][2]; g.drawImage(im, 0, 0, 256, 256); g.restore(); if (name === 'slateG') { g.globalCompositeOperation = 'saturation'; g.fillStyle = '#777'; g.fillRect(0, 0, 256, 256); g.globalCompositeOperation = 'source-over'; } t.needsUpdate = true; }; im.src = new URL('./tex/' + REAL[name][0], import.meta.url).href; }

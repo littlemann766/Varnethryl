@@ -160,7 +160,7 @@ export class Builder {
   throne(x, z, ry = 0) { this.bx(2.4, .35, 2.0, 'stoneL', x, .18, z, this.G.int); this.bx(1.2, .5, .9, 'gold', x, .6, z, this.G.int); this.bx(1.2, 2.4, .25, 'gold', x, 1.8, z - .4, this.G.int); this.bx(1.4, .3, .3, 'carpet', x, 1.0, z - .1, this.G.int); this.col(x, z, 2.4, 2.0); }
   crystal(x, z, y = 1.3, c = '4fa0ff', s = .5) { const g = new THREE.OctahedronGeometry(s, 0); const m = this.add(g, GLOW(c, 1.6), x, y, z, this.G.int, { shadow: false }); m.scale.y = 1.6; this.bx(.5, .9, .5, 'stoneD', x, .45, z, this.G.int); this.ccol(x, z, .45); }
   lamp(x, y, z, grp) { this.add(new THREE.SphereGeometry(.14, 6, 5), GLOW('ffc060', 1.6), x, y, z, grp || this.G.int, { shadow: false }); this.bx(.03, .5, .03, 'iron', x, y + .3, z, grp || this.G.int, { shadow: false }); }
-  rugAt(x, z, w, d, key = 'rug') { this.add(boxG(w, .02, d, TILE[key] || 3), M(key), x, .08, z, this.G.int, { shadow: false }); }
+  rugAt(x, z, w, d, key = 'rug') { if (key === 'rug') { const R = this._rugs || (this._rugs = []); if (R.some(r => Math.abs(r[0] - x) < (r[2] + w) / 2 - .2 && Math.abs(r[1] - z) < (r[3] + d) / 2 - .2)) return; R.push([x, z, w, d]); } this.add(boxG(w, .02, d, TILE[key] || 3), M(key), x, .08, z, this.G.int, { shadow: false }); }
   // ---- finish ----
   finish() {
     if (this.K !== 1 && !this._rs) { this._rs = 1; if (this.radius) this.radius *= this.K; }
@@ -312,7 +312,7 @@ Builder.prototype._roundShell = function (o) {
 };
 
 // ---- quality-pass props ----
-Builder.prototype.apron = function (w, d, zOff = 2) { this.bx(w + 3.4, .08, d + 3.4 + zOff, 'cobble', 0, .04, zOff / 2, this.G.ext, { shadow: false }); };
+Builder.prototype.apron = function (w, d, zOff = 2) { this.bx(w + 3.4, .04, d + 3.4 + zOff, 'cobble', 0, .02, zOff / 2, this.G.ext, { shadow: false }); };
 Builder.prototype.bush = function (x, z, s = .7, c = '#3f7a3a') { const m = this.add(new THREE.IcosahedronGeometry(s, 0), M(c), x, s * .6, z, this.G.ext); m.scale.y = .8; return m; };
 Builder.prototype.flowers = function (x, y, z, w, ry = 0) { // window flower box
   const f = this.bx(w, .22, .3, 'darkWood', x, y, z, this.G.ext); f.rotation.y = ry; const g = this.bx(w * .95, .12, .26, '#3f7a3a', x, y + .14, z, this.G.ext, { shadow: false }); g.rotation.y = ry;

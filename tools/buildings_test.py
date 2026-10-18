@@ -9,7 +9,7 @@ srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Q, dir
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 JS_INFO = """(()=>{const out=[];for(const e of __p3d.enterables){const ps=e.parts?e.parts:[e];for(const b of ps){if(!b.toW||b.id==='walls'||b.id==='port_dock')continue;
  const r=b.radius&&!b.footprint?b.radius:0;const d=b.footprint?b.footprint.d:b.d,w=b.footprint?b.footprint.w:b.w;
- out.push({id:b.id,round:!b.footprint,w:w,d:d,r:b.radius,hasIn:!!b.insideTest,iw:b.iw,id_:b.id_,rot:b.rot,cx:b.cx,cz:b.cz,name:b.name})}}return JSON.stringify(out)})()"""
+ out.push({id:b.id,round:!b.footprint,w:w,d:d,r:b.radius/b.K,hasIn:!!b.insideTest,iw:b.iw,id_:b.id_,rot:b.rot,cx:b.cx,cz:b.cz,name:b.name})}}return JSON.stringify(out)})()"""
 def run(pg, fn, args): return pg.evaluate(fn, args)
 fails = 0
 with sync_playwright() as p:

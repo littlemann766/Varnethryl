@@ -171,7 +171,7 @@ export class Builder {
     for (const m of this.G.walls.children) m.castShadow = !v;
   }
   update(hx, hz, dt, level = 0) {
-    const [lx, lz] = this.toL(hx, hz), dist = Math.hypot(hx - this.cx, hz - this.cz), R = (this.radius || Math.max(this.w || 10, this.d || 10)) + 40;
+    const [lx, lz] = this.toL(hx, hz), dist = Math.hypot(hx - this.cx, hz - this.cz), R = (this.radius || Math.max(this.w || 10, this.d || 10)) + 22;
     const vis = dist < R + 20; if (this.root.visible !== vis) this.root.visible = vis;
     const nearInt = dist < (this.radius || 12) + 22; if (this.G.int.visible !== nearInt) this.G.int.visible = nearInt;   // interiors only drawn when close (fewer draw calls)
     const v = this.insideTest ? this.insideTest(lx, lz) : false; if (v !== this.inside) this.setInside(v);

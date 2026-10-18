@@ -79,3 +79,10 @@ export function signTexture(text, emblem) { // hanging shop sign: dark wood boar
   if (emblem) { g.fillStyle = '#d4af37'; g.font = '40px serif'; g.fillText(emblem, 128, 40); }
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
 }
+
+let goldDoorTex = null;
+export function goldDoorTexture() { // ornate gold double door, cropped from the Castle Keep render
+  if (goldDoorTex) return goldDoorTex; const cv = document.createElement('canvas'); cv.width = 175; cv.height = 275; const g = cv.getContext('2d'); g.fillStyle = '#8a6a22'; g.fillRect(0, 0, 175, 275);
+  goldDoorTex = new THREE.CanvasTexture(cv); goldDoorTex.colorSpace = THREE.SRGBColorSpace; goldDoorTex.anisotropy = 4;
+  const im = new Image(); im.onload = () => { g.drawImage(im, 0, 0); goldDoorTex.needsUpdate = true; }; im.src = new URL('./tex/b_goldDoor.jpg', import.meta.url).href; return goldDoorTex;
+}

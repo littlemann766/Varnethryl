@@ -343,7 +343,7 @@ function keep(spec, ctx) {
 function gatehouse(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Gatehouse of Varnethryl'; const TW = 2.4, H = 8;
   B.w = 14; B.d = 6; B.h = H; B.radius = 9;
-  const gts = []; for (const s of [-1, 1]) { const [wx, wz] = B.toW(s * 5.8, 0); gts.push(hollowTower(ctx, 'gt' + (s < 0 ? 0 : 1), wx, wz, Math.PI + (spec.rot || 0), 3.4));   // hollow, climbable gate towers (door toward the town)
+  const gts = []; for (const s of [-1, 1]) { const [wx, wz] = B.toW(s * 7.0, 0); gts.push(hollowTower(ctx, 'gt' + (s < 0 ? 0 : 1), wx, wz, Math.PI + (spec.rot || 0), 4.4));   // hollow, climbable gate towers (door toward the town)
     B.bx(5.6 - 2.5 - TW + 0, H, 5, 'stone', s * ((TW + 5.6 - 2.5) / 2 + 0), H / 2, 0, B.G.ext); }
   B.bx(TW * 2 + .02, H - 4.6, 5, 'stone', 0, 4.6 + (H - 4.6) / 2, 0, B.G.ext);
   for (let i = 0; i < 6; i++) { const x = -3 + i * 1.2; B.bx(.7, .7, .7, 'stone', x, H + .35, 2.2, B.G.ext); B.bx(.7, .7, .7, 'stone', x, H + .35, -2.2, B.G.ext); }
@@ -359,7 +359,6 @@ function gatehouse(spec, ctx) {
   B.add(new THREE.TorusGeometry(TW, .25, 4, 12, Math.PI), M('stoneD'), 0, 3.6, 2.4, B.G.ext);
   for (const s of [-1, 1]) for (const z of [-2.65, 2.65]) for (const y of [2.6, 5.6]) B.bx(.16, 1.0, .14, '#0e0f12', s * 5.6 * .55 + s * 0, y, z, B.G.ext, { shadow: false });
   B.guard(-3.2, 4.6); B.guard(3.2, 4.6); B.guard(-3.2, -4.6); B.apron(14, 4, 5); B.bx(TW * 2 + 1, .08, 12, 'cobble', 0, .05, 0, B.G.ext, { shadow: false });
-  B.rocks([[-9.5, 2.5, 1.6], [9.8, 2.2, 1.9], [-10.5, -2, 1.3], [10.4, -2.4, 1.5]]);
   B.insideTest = null; B.finish();
   return { id: spec.id, parts: [B, ...gts], name: B.name, update(hx, hz, dt, lv) { let ins = null; B.update(hx, hz, dt, lv); for (const g of gts) if (g.update(hx, hz, dt, lv)) ins = g.id; return ins; } };
 }
@@ -567,13 +566,13 @@ const house = n => (spec, ctx) => { const p = houseSpecs[n % 4];
     } }); };
 
 // ---------- town walls & watchtowers ----------
-function hollowTower(ctx, id, x, z, rot, R = 3.4) { // climbable round tower (2 levels + battlement roof), door faces local +z
+function hollowTower(ctx, id, x, z, rot, R = 4.4) { // climbable round tower (2 levels + battlement roof), door faces local +z
   const t = new Builder(ctx, { id, cx: x, cz: z, rot }); t.name = 'Watchtower'; t.roundShell({ r: R, h: 8.2, key: 'stone', N: 16, T: .6, floor: 'floorStone' });
   t.ring(R + .3, .5, 'stoneD', 0, 8.45, 0, t.G.ext, 16); for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283; t.bx(.7, .7, .7, 'stone', Math.sin(a) * (R + .15), 9.05, Math.cos(a) * (R + .15), t.G.ext); }
   t.cone(R + .8, 6.2, 'slate', 0, 8.7, 0, t.G.roof, 16); t.banner(0, 4.6, R + .05, 0, 1, 2.4);
   for (let i = 0; i < 3; i++) { const a = 2.2 + i * 1.3; t.win(Math.sin(a) * (R + .05), 5, Math.cos(a) * (R + .05), a, .4, .9, 'glass'); }
   const iw = t.iw; t.table(0, -.6, .7); t.rack(-iw + .5, -.5, 4, 1); t.bed(iw - 1.0, -1.0, 1); t.barrel(iw - 1, 1.6); t.crate(-iw + 1, 1.6, .8); t.lamp(0, 3.4, 0);
-  { const S1 = { cx: -1.2, cz: 0, dir: '-z', len: 3.6, w: 1.4 }, S2 = { cx: 1.2, cz: 0, dir: '+z', len: 3.6, w: 1.4 };
+  { const cxs = 1.3, zf = Math.sqrt(Math.max(1, (iw - .55) ** 2 - cxs * cxs)) - .75, L = Math.min(5.2, 2 * zf), S1 = { cx: -cxs, cz: 0, dir: '-z', len: L, w: 1.5 }, S2 = { cx: cxs, cz: 0, dir: '+z', len: L, w: 1.5 };
     t.fullUpper({ level: 1, y: 4.2, disc: iw - .05, stair: S1, rooms(U) { U.lamp(0, 2.6, 0); } });
     t.fullUpper({ level: 2, y: 8.2, y0: 4.2, l0: 1, disc: iw - .05, stair: S2, rooms(U) { U.barrel(-1.6, -1.5); U.crate(-1.7, 1.5, .7); U.lamp(0, 1.6, 0); } }); }
   t.radius = 8; t.finish(); return t;

@@ -35,7 +35,7 @@ with sync_playwright() as p:
             a2 = W(5.6, 8); c2 = W(5.6, -8); r2 = walk(a2, c2, 6000); ok2 = abs(r2['z'] - c2[1]) > 3
             print('PASS' if ok and ok2 else 'FAIL', 'gatehouse walk-through', ok, 'tower solid', ok2); fails += 0 if ok and ok2 else 1; continue
         if not bi['hasIn']: continue
-        if bi['id'].startswith(('wt','gt')): front = 3.4
+        if bi['id'].startswith(('wt','gt')): front = 4.4
         inner = (0.5 if bi['id'].startswith(('wt','gt')) else bi['r'] - 3.0) if bi['round'] else (bi['id_'] - 1.4)
         if bi['id']=='colosseum': inner = 0
         out_ = W(0, front + 3.5); tgt = W(0, inner)

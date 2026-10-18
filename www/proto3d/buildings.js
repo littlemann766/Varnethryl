@@ -493,7 +493,7 @@ function lighthouse(spec, ctx) {
 // ---------- 23. Port of Varnethryl (simplified: harbour pond, pier, boats, dock warehouse/tavern, harbour sign) ----------
 function port(spec, ctx) {
   const parts = []; const mk = (s, f) => { const b = f({ ...s }, ctx); parts.push(b); return b; };
-  const warehouse = mk({ id: 'port', cx: spec.cx + 3, cz: spec.cz - 6, rot: 0 }, (s, c) => std(s, c, { name: 'Port Tavern & Dockmaster', w: 11, d: 8, h: 6, hs: 2.6, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 3.2, ridge: 'x', over: .8, endKey: 'darkWood', sign: ['Port Tavern', '⚓', 5.9, 3.6], banners: [[-4, 4.4, .8, 1.8], [4, 4.4, .8, 1.8]], chimneys: [[-3, -2]], floor: 'floorPlank', wn: 2,
+  const warehouse = mk({ id: 'port', cx: spec.cx + 3, cz: spec.cz - 7.6, rot: 0 }, (s, c) => std(s, c, { name: 'Port Tavern & Dockmaster', w: 11, d: 8, h: 6, hs: 2.6, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 3.2, ridge: 'x', over: .8, endKey: 'darkWood', sign: ['Port Tavern', '⚓', 5.9, 3.6], banners: [[-4, 4.4, .8, 1.8], [4, 4.4, .8, 1.8]], chimneys: [[-3, -2]], floor: 'floorPlank', wn: 2,
     interior(B) { const iw = B.iw, id_ = B.id_;
       B.counter(1.5, -id_ + 1.1, 4, .8); B.shelf(1.5, -id_ + .35, 3.2); B.table(-2.0, .2); B.table(-.6, 2.0); B.table(-2.4, 2.6); B.barrel(iw - .5, 0); B.barrel(iw - .5, 1); B.crate(iw - 1.2, 2.2, .9); B.tableR(-iw + 1.6, -id_ + 1.3, 2.4, 1.2, 'darkWood'); B.bx(2.6, 1.7, .1, 'parchment', -iw + 1.7, 2.3, -id_ + .2, B.G.int, { shadow: false });
       B.banner(-.4, 3.0, -id_ + .3, 0, .9, 1.8); B.lamp(-2, 3.6, 1); B.lamp(2, 3.6, 1); B.rugAt(-1.4, 1.4, 3.2, 2.8); B.hay(iw - 1.2, -id_ + .8, 1.4, 1, .8); upperStd(B, { theme: 'bed', y: 3.0, side: 'L' });
@@ -634,7 +634,7 @@ export const BUILDING_DEFS = [
   { id: 'colosseum', f: colosseum, cx: 42, cz: 38, rot: 0, name: 'Colosseum' },
   { id: 'thieves', f: thieves, cx: -36.5, cz: 8, rot: 0, name: "Thieves' Den" },
   { id: 'farmhouse', f: farmhouse, cx: -42, cz: -9, rot: 0, name: 'Farmhouse' },
-  { id: 'barn', f: barn, cx: -51, cz: 22, rot: Math.PI / 2, name: 'Barn' },
+  { id: 'barn', f: barn, cx: -51, cz: 21, rot: Math.PI / 2, name: 'Barn' },
   { id: 'stables', f: stables, cx: -24, cz: 42, rot: 0, name: 'Stables' },
   { id: 'windmill', f: windmill, cx: 20, cz: 46, rot: 0, name: 'Windmill' },
   { id: 'house1', f: house(0), cx: -9, cz: 19, rot: Math.PI, name: 'Village House' },

@@ -22,6 +22,10 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
   if (o.sign) { const s = o.sign; B.sign(s[0], s[1], s[2] || B.w / 2 + .1, s[3] || B.h * .62, B.d / 2 + .5, 0); }
   for (const c of o.chimneys || []) B.chimney(c[0], B.h + 1, c[1], c[2] || 2.6, o.chimKey || 'stoneD');
   for (const x of o.dormers || []) B.dormer(x, B.h + (o.dormY || 1.4), o.dormZ === undefined ? B.d * .1 : o.dormZ);
+  if (o.cross) B.crossGable(o.cross.x || 0, o.cross.w || B.w * .42, o.cross.rh || rh * .8, o.cross.depth || B.d * .5, o.roofKey || 'slate', o.endKey || 'timber', B.h);
+  if (!o.noApron) { B.apron(B.w, B.d); B.bush(-B.w / 2 - .2, B.d / 2 + .5, .6); B.bush(B.w / 2 + .3, B.d / 2 + .6, .7); B.bush(-B.w / 2 - .4, -B.d / 4, .8); B.bush(B.w / 2 + .5, -B.d / 5, .6, '#4b8a3e'); }
+  if (o.flowers !== false && B.h - hs > 1.8) for (const x of frontWinXs(B, o.wn || 1)) B.flowers(x, gy - .65, B.d / 2 + .2, 1.0);
+  if (o.post) { B.lanternPost(B.w / 2 + 1.0, B.d / 2 + 1.2); B.lanternPost(-B.w / 2 - 1.0, B.d / 2 + 1.2); }
   if (o.extra) o.extra(B);
   if (o.interior) o.interior(B);
   B.radius = Math.hypot(B.w, B.d) / 2; return B.finish();
@@ -30,7 +34,7 @@ const hearthRight = B => B.hearth(B.iw - .5, 0, -Math.PI / 2), hearthLeft = B =>
 function flagBanners(B, xs, y = null, z = null) { for (const x of xs) B.banner(x, y || B.h * .62, z === null ? -B.id_ + .3 : z, 0, 1, 2.2); }
 
 // ---------- 1. Inn ----------
-const inn = (spec, ctx) => std(spec, ctx, { name: 'Inn of Varnethryl', w: 11, d: 8, h: 6.6, hs: 3, upper: 'timber', rh: 3.4, ridge: 'z', over: .7, wn: 1, ww: .95,
+const inn = (spec, ctx) => std(spec, ctx, { name: 'Inn of Varnethryl', w: 11, d: 8, h: 6.6, hs: 3, upper: 'timber', rh: 3.4, ridge: 'z', over: .7, post: true, wn: 1, ww: .95,
   chimneys: [[-3.2, -1.5]], dormers: [-2.2, 2.2], dormZ: 1.2, banners: [[-4.2, 4.3, .8, 1.8]], sign: ['The Gilded Hearth', '🛏', 5.9, 3.7],
   interior(B) { const iw = B.iw, id_ = B.id_;
     B.counter(2.2, -id_ + 1.1, 4, .8); B.shelf(2.2, -id_ + .35, 3.4); for (let i = 0; i < 3; i++) B.cyl(.1, .1, .2, 'iron', 1.0 + i * .8, 1.2, -id_ + 1.1, B.G.int, 8);
@@ -39,7 +43,7 @@ const inn = (spec, ctx) => std(spec, ctx, { name: 'Inn of Varnethryl', w: 11, d:
   } });
 
 // ---------- 2. Blacksmith ----------
-const smithy = (spec, ctx) => std(spec, ctx, { name: 'Blacksmith of Varnethryl', w: 9, d: 8, h: 5.2, hs: 3.6, upper: 'stone', lower: 'stone', rh: 3.2, ridge: 'z', endKey: 'timber', over: .6, chimneys: [[3.2, -2.5, 4.2]], banners: [[3.8, 2.8, .7, 1.6]],
+const smithy = (spec, ctx) => std(spec, ctx, { name: 'Blacksmith of Varnethryl', w: 9, d: 8, h: 5.2, hs: 3.6, upper: 'stone', lower: 'stone', rh: 3.2, ridge: 'z', endKey: 'timber', over: .6, flowers: false, extra(B) { B.anvil(-B.w / 2 - 1.0, B.d / 2 + 1.2); B.cyl(.5, .55, .5, 'wood', -B.w / 2 - 1.0, .25, B.d / 2 + 1.2, B.G.ext, 8); B.rack(B.w / 2 + 1.3, B.d / 2 - 1.5, 4, 1); B.barrel; for (let i = 0; i < 3; i++) B.bx(.9, .22, .25, 'wood', B.w / 2 + 1.0, .12 + i * .22, B.d / 2 + 1.6 + (i % 2) * .05, B.G.ext); B.lanternPost(-1.9, B.d / 2 + 1.0); B.add(new THREE.PlaneGeometry(1.8, 2.2), GLOW('ff8a2a', 1.4), 0, 1.3, B.d / 2 - .55, B.G.ext, { shadow: false }); }, chimneys: [[3.2, -2.5, 4.2]], banners: [[3.8, 2.8, .7, 1.6]],
   interior(B) { const iw = B.iw, id_ = B.id_;
     B.box(1.8, 1.0, 1.4, iw - 1.2, -id_ + .9, 'stoneD'); B.add(boxG(1.2, .14, .9, 1), GLOW('ff7a1a', 1.5), iw - 1.2, 1.02, -id_ + .9, B.G.int, { shadow: false }); B.bx(.7, 2.2, .6, 'stoneD', iw - 1.2, 2.1, -id_ + .55, B.G.int);
     B.anvil(-.3, .2); B.rack(-iw + 1.7, -id_ + .35, 6); B.box(2.4, .9, .8, -1.5, -id_ + .6, 'darkWood'); B.barrel(-iw + .5, 1.4); B.barrel(-iw + 1.1, 1.9); B.barrel(iw - .5, 1.9);
@@ -62,7 +66,7 @@ function temple(spec, ctx) {
   const { w, d, h } = B; B.roofGable({ rh: 4.4, key: 'slate', ridge: 'z', over: .5, endKey: 'stoneL' });
   for (const sx of [-1, 1]) { // twin front towers with blue spires
     B.bx(3, h + 3, 3, 'stoneL', sx * (w / 2 - .2), (h + 3) / 2, d / 2 - .2, B.G.ext); B.col(sx * (w / 2 - .2), d / 2 - .2, 3, 3);
-    B.cone(2.4, 6.2, 'slate', sx * (w / 2 - .2), h + 3, d / 2 - .2, B.G.ext, 4); B.bx(.12, 1.2, .12, 'gold', sx * (w / 2 - .2), h + 9.4, d / 2 - .2, B.G.ext);
+    B.cone(2.4, 8.4, 'slate', sx * (w / 2 - .2), h + 3, d / 2 - .2, B.G.ext, 4); B.bx(.12, 1.4, .12, 'gold', sx * (w / 2 - .2), h + 11.5, d / 2 - .2, B.G.ext);
     B.win(sx * (w / 2 - .2), h - .5, d / 2 + 1.35, 0, .8, 2.4, 'stained'); B.banner(sx * (w / 2 - .2), 4.2, d / 2 + 1.35, 0, 1.0, 2.8);
     B.bx(.8, 6.2, .8, 'stoneL', sx * (w / 2 + .3), 3.1, -d / 4, B.G.ext); B.bx(.8, 6.2, .8, 'stoneL', sx * (w / 2 + .3), 3.1, d / 4 - 2, B.G.ext);
   }
@@ -71,6 +75,9 @@ function temple(spec, ctx) {
   for (let i = 0; i < 5; i++) B.bx(w * .5 + i * .8, .3, 1, 'stoneL', 0, .15 + i * 0 - 0.0, d / 2 + 2.2 - i * 0 + i * .5, B.G.ext); // steps
   for (const s of [-1, 1]) { B.bx(.7, 1.8, .7, 'stoneL', s * 2.6, 1.2, d / 2 + 2.6, B.G.ext); B.bx(.5, .7, .5, 'gold', s * 2.6, 2.4, d / 2 + 2.6, B.G.ext); }
   B.bx(.5, 3.6, .1, 'carpet', 0, 2.4, d / 2 + .08, B.G.ext);
+  for (const z of [-8, -3.5, 1, 5.5]) for (const s of [-1, 1]) { const x = s * (w / 2 + .5); B.bx(.9, h + 1.4, .9, 'stoneL', x, (h + 1.4) / 2, z, B.G.ext); B.cone(.62, 2.6, 'slate', x, h + 1.4, z, B.G.ext, 4); B.bx(.7, .22, 1.6, 'stoneL', s * (w / 2 + .1), h - 1.2, z + 2.2, B.G.ext).rotation.z = s * .5; }
+  for (const s of [-1, 1]) for (const [dx, dz] of [[-.9, -.9], [.9, -.9], [-.9, .9], [.9, .9]]) B.cone(.34, 1.5, 'slate', s * (w / 2 - .2) + dx, h + 3, d / 2 - .2 + dz, B.G.ext, 4);
+  B.statue(-4.2, d / 2 + 2.6, 1); B.statue(4.2, d / 2 + 2.6, 1); B.gable(6.2, 2.4, 3.4, 0, h + .2, d / 2 - 1.2, 'slate', B.G.roof, false, 0, 'stoneL'); B.banner(0, h + 1.4, d / 2 + .06, 0, 1.2, 1.8, B.G.roof);
   const iw = B.iw, id_ = B.id_;
   B.rugAt(0, 0, 3, d - 4, 'carpet'); B.add(boxG(3, .02, d - 4, 3), M('carpet'), 0, .09, 0, B.G.int, { shadow: false });
   for (let i = 0; i < 5; i++) for (const s of [-1, 1]) B.pew(s * 3, -2.5 + i * 1.7 + 2.5, 2.8);
@@ -126,6 +133,9 @@ function townhall(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Town Hall of Varnethryl'; B.rectShell({ w: 14, d: 10, h: 7.6, hs: 0, upper: 'stoneL', lower: 'stoneL', DW: 2.8, DH: 3.6, floor: 'floorTile', posts: false });
   const { w, d, h } = B; B.roofGable({ rh: 3.8, key: 'slate', ridge: 'x', over: .6, endKey: 'stoneL' });
   for (const s of [-1, 1]) { const x = s * (w / 2 - .4); B.tower(x, d / 2 - .4, 1.5, h + 1.4, { key: 'stoneL', coneH: 5.6, windows: 3, wa: 1.2 }); B.banner(s * 3.6, 4.6, d / 2 + .08, 0, 1, 2.6); }
+  B.gable(6, 2.6, 3.4, 0, h - .6, d / 2 - 1.3, 'slate', B.G.roof, false, 0, 'stoneL'); B.add(new THREE.CircleGeometry(.95, 14), M('gold', { side: THREE.DoubleSide }), 0, h + .9, d / 2 + .04, B.G.roof, { shadow: false }); B.banner(0, h + .9, d / 2 + .06, 0, 1.1, 1.3, B.G.roof);
+  for (const s of [-1, 1]) { B.dormer(s * 4.2, h + 2.0, 1); B.dormer(s * 4.2, h + 2.0, -2.2); B.bx(.5, 1.0, 4.4, 'stoneL', s * 1.8, .5, d / 2 + 1.5, B.G.ext); B.cone(.2, .9, 'gold', s * 3.9, 1.0, d / 2 + 2.9, B.G.ext, 5); }
+  B.statue(-4.6, d / 2 + 2.2, .9); B.statue(4.6, d / 2 + 2.2, .9); B.apron(w * .6, d * .5, 4);
   B.win(0, h - 1.4, d / 2 + .05, 0, 1.4, 1.8, 'stained'); B.add(new THREE.CircleGeometry(.9, 16), M('#1f3f86'), 0, h - .1 - 2.4 + 1.6, d / 2 + .06, B.G.ext, { shadow: false });
   wins(B, { front: [[-2.8, 1.9], [2.8, 1.9], [-2.8, 5.2], [2.8, 5.2]], side: [[-2.5, 2.0], [2.5, 2.0], [-2.5, 5.2], [2.5, 5.2]], back: [[-3, 2], [3, 2], [-3, 5.2], [3, 5.2]], h: 1.6 });
   for (let i = 0; i < 4; i++) B.bx(DWf(B) + 1 - i * .0 + 1.6 - 0, .22, .7, 'stoneL', 0, .11 + i * 0, d / 2 + .9 + i * .35 - .0, B.G.ext);
@@ -252,6 +262,9 @@ function keep(spec, ctx) {
   B.bx(10, 5, 8, 'stone', 0, h + 2.9, -1, B.G.roof); B.cone(6.4, 8, 'slate', 0, h + 5.4, -1, B.G.roof, 4).rotation.y = .78;
   for (const [sx, sz, r] of [[-1, 1, 3.3], [1, 1, 3.3], [-1, -1, 3.0], [1, -1, 3.0]]) B.tower(sx * (w / 2 - .2), sz * (d / 2 - .2), r, h + 4, { coneH: 8, windows: 3, wa: sx * 1.3 + sz });
   for (const s of [-1, 1]) B.banner(s * 3.6, 6, d / 2 + .08, 0, 1.4, 3.8); B.banner(0, 7.5, d / 2 + .08, 0, 2, 4.2);
+  for (const [x, z, r, up] of [[-5, -3, 2.5, 8], [5, -4, 2.2, 10], [0, -6.2, 2.7, 6]]) B.tower(x, z, r, h + up, { coneH: 8 + up * .3, windows: 3, collide: false, wa: x });
+  B.rocks([[-w / 2 - 2.6, d / 2 - 1, 2.0], [w / 2 + 2.8, d / 2 - 2, 2.3], [-w / 2 - 3.2, -2, 2.8, .9], [w / 2 + 3.4, -3, 2.6, .9], [-6, -d / 2 - 2.2, 2.4], [5, -d / 2 - 2.6, 2.8], [0, -d / 2 - 3.4, 3.0, 1], [-w / 2 - 1.6, d / 2 + 2.4, 1.3], [w / 2 + 1.8, d / 2 + 2.6, 1.5]]);
+  B.guard(-2.6, d / 2 + 2.6); B.guard(2.6, d / 2 + 2.6); B.apron(w * .5, d * .4, 4);
   for (const x of [0]) for (const dx of [-1, 1]) B.bx(.6, 3.9, .6, 'stoneD', dx * 2.0, 2, d / 2 + .3, B.G.ext);
   for (let i = 0; i < 4; i++) B.bx(B.DW + 2, .22, .8, 'stoneD', 0, .11, d / 2 + .8 + i * .4, B.G.ext);
   wins(B, { front: [[-6, 5], [6, 5], [-9, 5.5], [9, 5.5]], side: [[-4, 5], [0, 5], [4, 5]], back: [[-6, 5], [0, 5], [6, 5]], w: .6, h: 1.8 });
@@ -281,6 +294,9 @@ function gatehouse(spec, ctx) {
   B.add(boxG(TW * 2, .06, 5, 3), M('floorStone'), 0, .03, 0, B.G.int, { shadow: false });
   B.rack(-TW + .4, -.8, 3, 1); B.rack(TW - .4, .8, 3, -1); B.lamp(-TW + .3, 3.2, 0); B.lamp(TW - .3, 3.2, 0);
   B.add(new THREE.TorusGeometry(TW, .25, 4, 12, Math.PI), M('stoneD'), 0, 3.6, 2.4, B.G.ext);
+  for (const s of [-1, 1]) for (const z of [-2.65, 2.65]) for (const y of [2.6, 5.6]) B.bx(.16, 1.0, .14, '#0e0f12', s * 5.6 * .55 + s * 0, y, z, B.G.ext, { shadow: false });
+  B.guard(-3.2, 4.6); B.guard(3.2, 4.6); B.guard(-3.2, -4.6); B.apron(14, 4, 5); B.bx(TW * 2 + 1, .08, 12, 'cobble', 0, .05, 0, B.G.ext, { shadow: false });
+  B.rocks([[-9.5, 2.5, 1.6], [9.8, 2.2, 1.9], [-10.5, -2, 1.3], [10.4, -2.4, 1.5]]);
   B.insideTest = null; return B.finish();
 }
 
@@ -415,7 +431,7 @@ import { signTexture } from './bldtex.js';
 const signTex = () => signTexture('PORT OF VARNETHRYL', '⚓');
 
 // ---------- 24/25. Farmhouse & Barn ----------
-const farmhouse = (spec, ctx) => std(spec, ctx, { name: 'Farmhouse of Varnethryl', w: 10, d: 8, h: 5.4, hs: 2.6, upper: 'timber', lower: 'stone', rh: 3.2, ridge: 'x', over: .7, chimneys: [[-3.2, -1.6, 3.4]], dormers: [-2.6, 2.6], dormY: 1.2, dormZ: .8, wn: 1,
+const farmhouse = (spec, ctx) => std(spec, ctx, { name: 'Farmhouse of Varnethryl', w: 10, d: 8, h: 5.4, hs: 2.6, upper: 'timber', lower: 'stone', rh: 3.2, ridge: 'x', over: .7, cross: { x: -2, w: 4, depth: 4 }, post: true, chimneys: [[-3.2, -1.6, 3.4]], dormers: [-2.6, 2.6], dormY: 1.2, dormZ: .8, wn: 1,
   interior(B) { const iw = B.iw, id_ = B.id_;
     B.hearth(0, -id_ + .45, 0, 2.2); B.tableR(-2.4, .8, 2.6, 1.2); B.table(2.6, 1.4, .6); B.bed(iw - 1.0, -id_ + 1.3); B.bed(iw - 1.0, 0.4); B.shelf(-iw + .3, -1.8, 2.6, 1, false); B.barrel(-iw + .5, id_ - .5); B.sack(-iw + 1.2, id_ - .6); B.chest(2.0, -id_ + .7, .9);
     B.rugAt(-1, 1, 3.4, 2.6); B.lamp(-2, 3.5, 0); B.lamp(2, 3.5, 1); B.banner(-3.6, 3.6, -id_ + .3, 0, .8, 1.6); B.gallery({ stairX: -iw + 1.4, depth: 1.6, y: 2.9 });
@@ -434,7 +450,7 @@ const houseSpecs = [
   { w: 7, d: 6, h: 5.6, hs: 2.6, ridge: 'z', roofKey: 'slate', up: 'timber' }, { w: 7.5, d: 6.4, h: 5.8, hs: 2.7, ridge: 'x', roofKey: 'slate', up: 'timber' },
   { w: 6.5, d: 6, h: 5.4, hs: 2.5, ridge: 'z', roofKey: 'slateG', up: 'timber' }, { w: 7, d: 7, h: 6, hs: 2.8, ridge: 'x', roofKey: 'slate', up: 'timber' } ];
 const house = n => (spec, ctx) => { const p = houseSpecs[n % 4];
-  return std(spec, ctx, { name: 'Village House', w: p.w, d: p.d, h: p.h, hs: p.hs, upper: p.up, lower: 'stone', rh: 3, ridge: p.ridge, over: .7, roofKey: p.roofKey, chimneys: [[p.w * .28, -p.d * .22, 3.2]], dormers: n % 2 ? [0] : [], dormY: 1.2, dormZ: p.d * .1, banners: n === 1 ? [[-p.w * .3, p.h * .6, .6, 1.4]] : [],
+  return std(spec, ctx, { name: 'Village House', w: p.w, d: p.d, h: p.h, hs: p.hs, upper: p.up, lower: 'stone', rh: 3, ridge: p.ridge, over: .7, roofKey: p.roofKey, chimneys: [[p.w * .28, -p.d * .22, 3.2]], dormers: n % 2 ? [0] : [], dormY: 1.2, dormZ: p.d * .1, banners: n === 1 ? [[-p.w * .3, p.h * .6, .6, 1.4]] : [], cross: p.ridge === 'x' ? { x: 0, w: p.w * .42, depth: p.d * .55 } : null, post: n % 2 === 0,
     interior(B) { const iw = B.iw, id_ = B.id_;
       B.hearth(0, -id_ + .45, 0, 2.0); B.bed(-iw + 1.0, -id_ + 1.5); B.table(1.2, .6, .6); B.shelf(iw - .3, 0, 2.2, -1, false); B.chest(iw - 1.0, -id_ + .6, .8); B.rugAt(0, .8, 2.6, 2.2); B.lamp(0, 3.5, .5); B.barrel(-iw + .5, id_ - .5);
       B.gallery({ stairX: iw - 1.0, depth: 1.6, y: 2.9 }); B.bed(-iw + 1.0, -id_ + 1.0, 0);
@@ -446,6 +462,7 @@ export function buildWalls(ctx, WORLD, GATE_W) {
   const run = (x1, z1, x2, z2) => { const len = Math.hypot(x2 - x1, z2 - z1), horiz = Math.abs(z2 - z1) < .01, h = 4.2, t = 1.4, cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
     B.bx(horiz ? len : t, h, horiz ? t : len, 'stone', cx, h / 2, cz, B.G.ext); B.bx(horiz ? len : t * .5, .5, horiz ? t * .5 : len, 'stoneD', cx, h + .25, cz + (horiz ? (z1 < 0 ? .4 : -.4) : 0) + 0, B.G.ext) ; B.bx(horiz ? len : .4, .3, horiz ? .4 : len, 'stoneD', cx + (horiz ? 0 : (x1 < 0 ? .5 : -.5)), h + .15, cz + (horiz ? (z1 < 0 ? .5 : -.5) : 0), B.G.ext);
     const n = Math.floor(len / 1.8); for (let i = 0; i < n; i++) { const f = (i + .5) / n, px = x1 + (x2 - x1) * f, pz = z1 + (z2 - z1) * f; B.bx(horiz ? .9 : t, .8, horiz ? t : .9, 'stone', px, h + .4 + .3, pz, B.G.ext); }
+    const nb = Math.floor(len / 9); for (let i = 1; i < nb; i++) { const f = i / nb, px = x1 + (x2 - x1) * f, pz = z1 + (z2 - z1) * f, sx = horiz ? 0 : (x1 < 0 ? 1 : -1), sz = horiz ? (z1 < 0 ? 1 : -1) : 0; B.bx(1.1, 4.8, 1.1, 'stoneD', px + sx * (t / 2 + .3), 2.4, pz + sz * (t / 2 + .3), B.G.ext); if (i % 2) B.banner(px + sx * (t / 2 + .02), 2.6, pz + sz * (t / 2 + .02), horiz ? (z1 < 0 ? 0 : Math.PI) : (x1 < 0 ? Math.PI / 2 : -Math.PI / 2), 1.1, 2.6); }
     B.col(cx, cz, horiz ? len : t, horiz ? t : len); };
   const g = GATE_W;
   run(-WORLD, -WORLD, WORLD, -WORLD); run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -7.4, WORLD); run(7.4, WORLD, WORLD, WORLD);

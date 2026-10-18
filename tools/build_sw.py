@@ -5,7 +5,7 @@ from pathlib import Path
 import json,re
 root=Path(__file__).resolve().parents[1]; w=root/'www'
 ver=json.loads((root/'package.json').read_text())['version']
-files=sorted('./'+p.relative_to(w).as_posix() for p in w.rglob('*') if p.is_file() and p.name!='sw.js' and not p.name.startswith('.') and not (p.suffix=='.glb' or p.name in ('viewer.html','viewer.js','export.html','model-viewer.html')))
+files=sorted('./'+p.relative_to(w).as_posix() for p in w.rglob('*') if p.is_file() and p.name!='sw.js' and not p.name.startswith('.') and not (p.suffix=='.glb' or p.name in ('viewer.html','viewer.js','export.html','model-viewer.html','scenery-viewer.html','scenery-viewer.js','scenery.js')))
 s=(w/'sw.js').read_text(encoding='utf-8')
 s=re.sub(r'^/\* Varnethryl v[^\n]*\*/',f'/* Varnethryl v{ver}: complete offline asset precache for installation. */',s,count=1)
 s=re.sub(r"const CACHE = PREFIX \+ '[^']*';",f"const CACHE = PREFIX + '{ver}';",s)

@@ -246,6 +246,8 @@ function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; p
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
 const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
+const EXTRA = [["n:mortimer_new", "Mortimer (NEW)", "proto3d/models-new/mortimer_new.glb"], ["n:player_pikachu", "Player Pikachu (NEW)", "proto3d/models-new/player_pikachu.glb"], ["n:lunara_new", "Lunara (NEW)", "proto3d/models-new/lunara_new.glb"], ["n:marella_new", "Marella (NEW)", "proto3d/models-new/marella_new.glb"], ["n:vaelthryx_straight_rig", "Vaelthryx Straight Rig (NEW)", "proto3d/models-new/vaelthryx_straight_rig.glb"], ["n:vaelthryx_new", "Vaelthryx (NEW)", "proto3d/models-new/vaelthryx_new.glb"], ["n:ssylthar_new", "Ssylthar (NEW)", "proto3d/models-new/ssylthar_new.glb"], ["n:ashentitan_new", "Ashentitan (NEW)", "proto3d/models-new/ashentitan_new.glb"], ["n:coral_new", "Coral (NEW)", "proto3d/models-new/coral_new.glb"], ["n:cinder_new", "Cinder (NEW)", "proto3d/models-new/cinder_new.glb"], ["n:snowy_new3", "Snowy (NEW)", "proto3d/models-new/snowy_new3.glb"], ["n:zephyr_new2", "Zephyr (NEW)", "proto3d/models-new/zephyr_new2.glb"], ["p:aldric", "Aldric [PLACEHOLDER]", "proto3d/models-placeholder/aldric_new.glb"], ["p:asha", "Asha [PLACEHOLDER]", "proto3d/models-placeholder/asha_new.glb"], ["p:briar", "Briar [PLACEHOLDER]", "proto3d/models-placeholder/briar_new.glb"], ["p:brynn", "Brynn [PLACEHOLDER]", "proto3d/models-placeholder/brynn_new.glb"], ["p:cedric", "Cedric [PLACEHOLDER]", "proto3d/models-placeholder/cedric_new.glb"], ["p:elira", "Elira [PLACEHOLDER]", "proto3d/models-placeholder/elira_new.glb"], ["p:ember", "Ember [PLACEHOLDER]", "proto3d/models-placeholder/ember_new.glb"], ["p:finn", "Finn [PLACEHOLDER]", "proto3d/models-placeholder/finn_new.glb"], ["p:frosttroll", "Frosttroll [PLACEHOLDER]", "proto3d/models-placeholder/frosttroll_new.glb"], ["p:garruk", "Garruk [PLACEHOLDER]", "proto3d/models-placeholder/garruk_new.glb"], ["p:hearth", "Hearth [PLACEHOLDER]", "proto3d/models-placeholder/hearth_new.glb"], ["p:hobgoblin", "Hobgoblin [PLACEHOLDER]", "proto3d/models-placeholder/hobgoblin_new.glb"], ["p:hydrella", "Hydrella [PLACEHOLDER]", "proto3d/models-placeholder/hydrella_new.glb"], ["p:kael", "Kael [PLACEHOLDER]", "proto3d/models-placeholder/kael_new.glb"], ["p:kestrel", "Kestrel [PLACEHOLDER]", "proto3d/models-placeholder/kestrel_new.glb"], ["p:lorian", "Lorian [PLACEHOLDER]", "proto3d/models-placeholder/lorian_new.glb"], ["p:lunara", "Lunara [PLACEHOLDER]", "proto3d/models-placeholder/lunara_new.glb"], ["p:marella", "Marella [PLACEHOLDER]", "proto3d/models-placeholder/marella_new.glb"], ["p:mirelle", "Mirelle [PLACEHOLDER]", "proto3d/models-placeholder/mirelle_new.glb"], ["p:morwen", "Morwen [PLACEHOLDER]", "proto3d/models-placeholder/morwen_new.glb"], ["p:mossgut", "Mossgut [PLACEHOLDER]", "proto3d/models-placeholder/mossgut_new.glb"], ["p:neris", "Neris [PLACEHOLDER]", "proto3d/models-placeholder/neris_new.glb"], ["p:nyx", "Nyx [PLACEHOLDER]", "proto3d/models-placeholder/nyx_new.glb"], ["p:orin", "Orin [PLACEHOLDER]", "proto3d/models-placeholder/orin_new.glb"], ["p:pip", "Pip [PLACEHOLDER]", "proto3d/models-placeholder/pip_new.glb"], ["p:rook", "Rook [PLACEHOLDER]", "proto3d/models-placeholder/rook_new.glb"], ["p:rowan", "Rowan [PLACEHOLDER]", "proto3d/models-placeholder/rowan_new.glb"], ["p:seraphine", "Seraphine [PLACEHOLDER]", "proto3d/models-placeholder/seraphine_new.glb"], ["p:snowy", "Snowy [PLACEHOLDER]", "proto3d/models-placeholder/snowy_new.glb"], ["p:stonetroll", "Stonetroll [PLACEHOLDER]", "proto3d/models-placeholder/stonetroll_new.glb"], ["p:talia", "Talia [PLACEHOLDER]", "proto3d/models-placeholder/talia_new.glb"], ["p:thorne", "Thorne [PLACEHOLDER]", "proto3d/models-placeholder/thorne_new.glb"], ["p:thrain", "Thrain [PLACEHOLDER]", "proto3d/models-placeholder/thrain_new.glb"], ["p:valen", "Valen [PLACEHOLDER]", "proto3d/models-placeholder/valen_new.glb"], ["p:vesper", "Vesper [PLACEHOLDER]", "proto3d/models-placeholder/vesper_new.glb"], ["p:wren", "Wren [PLACEHOLDER]", "proto3d/models-placeholder/wren_new.glb"], ["p:wyvern", "Wyvern [PLACEHOLDER]", "proto3d/models-placeholder/wyvern_new.glb"], ["p:zephyr", "Zephyr [PLACEHOLDER]", "proto3d/models-placeholder/zephyr_new.glb"], ["o:briar", "Briar (old)", "proto3d/models-beth/briar.glb"], ["o:cinder", "Cinder (old)", "proto3d/models-beth/cinder.glb"], ["o:coral", "Coral (old)", "proto3d/models-beth/coral.glb"], ["o:ember", "Ember (old)", "proto3d/models-beth/ember.glb"], ["o:frosttroll", "Frosttroll (old)", "proto3d/models-beth/frosttroll.glb"], ["o:hawk", "Hawk (old)", "proto3d/models-beth/hawk.glb"], ["o:hearth", "Hearth (old)", "proto3d/models-beth/hearth.glb"], ["o:hobgoblin", "Hobgoblin (old)", "proto3d/models-beth/hobgoblin.glb"], ["o:hydrella", "Hydrella (old)", "proto3d/models-beth/hydrella.glb"], ["o:kestrel", "Kestrel (old)", "proto3d/models-beth/kestrel.glb"], ["o:lorian", "Lorian (old)", "proto3d/models-beth/lorian.glb"], ["o:lunara", "Lunara (old)", "proto3d/models-beth/lunara.glb"], ["o:marella", "Marella (old)", "proto3d/models-beth/marella.glb"], ["o:mortimer", "Mortimer (old)", "proto3d/models-beth/mortimer.glb"], ["o:mossgut", "Mossgut (old)", "proto3d/models-beth/mossgut.glb"], ["o:neris", "Neris (old)", "proto3d/models-beth/neris.glb"], ["o:pip", "Pip (old)", "proto3d/models-beth/pip.glb"], ["o:snowy", "Snowy (old)", "proto3d/models-beth/snowy.glb"], ["o:ssylthar", "Ssylthar (old)", "proto3d/models-beth/ssylthar.glb"], ["o:stonetroll", "Stonetroll (old)", "proto3d/models-beth/stonetroll.glb"], ["o:thrain", "Thrain (old)", "proto3d/models-beth/thrain.glb"], ["o:vaelthryx", "Vaelthryx (old)", "proto3d/models-beth/vaelthryx.glb"], ["o:valen", "Valen (old)", "proto3d/models-beth/valen.glb"], ["o:wren", "Wren (old)", "proto3d/models-beth/wren.glb"], ["o:wyvern", "Wyvern (old)", "proto3d/models-beth/wyvern.glb"], ["o:zephyr", "Zephyr (old)", "proto3d/models-beth/zephyr.glb"], ["wolf", "Wolf (old)", "proto3d/models/wolf.glb"]];   // [id, label, url]: every other model we have, playable as a hero via the selector (native metre scale)
+const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
 const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;
 // perf: GLB heroes are ~130 rigid mesh parts glued to animated nodes = ~130 draw calls per pass (x2 with the shadow map).
@@ -288,27 +290,28 @@ function mergeRigidParts(root) {
   }
   return removed;
 }
-function wrapGLB(g) {
+function wrapGLB(g, id) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
   m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
   if (new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
   m.traverse(o => { if (o.isSkinnedMesh && o.name !== 'merged') { o.frustumCulled = false; if (!SKINS.includes(o)) SKINS.push(o); } });
   const box = new THREE.Box3().setFromObject(m), hgt = box.max.y - box.min.y;
-  if (hgt > 0.01) { const sc = 1.8 * HS / hgt; m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
+  if (hgt > 0.01) { const sc = EXTRA_URL[id] ? 0.947 * HS * (hgt > 0 ? 1 : 1) : 1.8 * HS / hgt;   // extra models are authored in metres (hero 1.9 m = 1.8 HS); the old 20 heroes are height-normalised
+    m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
   const mixer = new THREE.AnimationMixer(m), act = {};
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
   if (act.idle) act.idle.play(); if (act.walk) act.walk.play();
   root.userData = { glb: true, mixer, act, capeUpdate() {} }; try { root.userData.sb = new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.1';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.2';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
 async function fetchGLB(id) {
   let lastErr = '';
   for (let attempt = 0; attempt < 2; attempt++) {
-    const url = 'proto3d/models/' + id + '.glb?v=' + ASSET_V + (attempt ? '&r=' + Date.now() : '');
+    const url = (EXTRA_URL[id] || 'proto3d/models/' + id + '.glb') + '?v=' + ASSET_V + (attempt ? '&r=' + Date.now() : '');
     try {
       const r = await fetch(url, attempt ? { cache: 'reload' } : undefined);
       if (!r.ok) { lastErr = 'HTTP ' + r.status; continue; }
@@ -330,7 +333,7 @@ function loadHero(gi) {
   return glbPromise[gi] = fetchGLB(id).then(buf => new Promise(res => {
     gl.parse(buf, '', g => {
       try {
-        const w = wrapGLB(g), old = HEROES[gi];
+        const w = wrapGLB(g, id), old = HEROES[gi];
         w.visible = false; scene.add(w);
         if (old) { w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); scene.remove(old); if (hero === old) hero = w; }
         HEROES[gi] = w; glbInfo.loaded.push(id); glbInfo.kb[id] = Math.round(buf.byteLength / 1024);
@@ -339,7 +342,7 @@ function loadHero(gi) {
     }, err => res(fail('parse: ' + (err && err.message || err))));
   }), e => fail(e && e.message || e));
 }
-for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(GLB_NAMES[i]); }
+for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(i < GLB_NAMES.length ? GLB_NAMES[i] : EXTRA[i - GLB_NAMES.length][1]); }
 async function selectHero(i) { if (!HEROES[i].userData.glb && useGLB) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
 const qp0 = new URLSearchParams(location.search);
 let savedPlan = null;
@@ -348,7 +351,18 @@ const savedOn = qp0.get('nosave') == null;
 if (!savedPlan) savedPlan = { party: [1, 2, 0], hero: 1, followers: [2, 0], pos: null };
 { const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (!savedPlan.hero) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
-{ const bar = document.getElementById('heroes'); const list = savedPlan && qp0.get('all') == null ? savedPlan.party : HERO_NAMES.map((n, i) => i); list.forEach(i => { const n = HERO_NAMES[i]; const b = document.createElement('button'); b.textContent = n; b.title = n; b.dataset.i = i; b.className = i === 0 ? 'on' : ''; b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); selectHero(i); }); bar.appendChild(b); }); }
+{ const bar = document.getElementById('heroes'); const first = savedPlan && qp0.get('all') == null ? savedPlan.party : [], list = [...new Set([...first, ...HERO_NAMES.map((n, i) => i)])];
+  list.forEach(i => { const n = HERO_NAMES[i]; const row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.textContent = n; b.title = n; b.dataset.i = i; b.className = (i === 0 ? 'on ' : '') + (/PLACEHOLDER/.test(n) ? 'ph' : '');
+    b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); selectHero(i); });
+    const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = i; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); toggleFollower(i); });
+    row.appendChild(b); row.appendChild(f); bar.appendChild(row); }); }
+function toggleFollower(i) {
+  const id = GLB_IDS[i], cur = crowd.find(c => c.kind === 'party' && c.a.id === id), btn = document.querySelector('#heroes button[data-f="' + i + '"]');
+  if (cur) { crowd.splice(crowd.indexOf(cur), 1); bumpSys.remove(cur.a); if (cur.root) scene.remove(cur.root); if (btn) btn.classList.remove('on'); return; }
+  if (HEROES.indexOf(hero) === i) return;
+  const pm = crowd.filter(c => c.kind === 'party'); if (pm.length >= 3) { const o = pm[0], oi = GLB_IDS.indexOf(o.a.id); crowd.splice(crowd.indexOf(o), 1); bumpSys.remove(o.a); if (o.root) scene.remove(o.root); const ob = document.querySelector('#heroes button[data-f="' + oi + '"]'); if (ob) ob.classList.remove('on'); }
+  spawnCrowd(id, 'party', state.heroX + (Math.random() - 0.5) * 2 * HS, state.heroZ + 2.2 * HS, (2.6 + pm.length * 0.5) * HS, 0); if (btn) btn.classList.add('on');
+}
 { const q = qp0.get('hero'); const qi = q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; startHero = qi; if (qi) HEROES[0].visible = false; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); else HEROES[0].visible = true; }); }
 // preload the first three quietly after first paint (they replace the procedural stand-ins)
 
@@ -458,7 +472,7 @@ const tmp2 = { x: 0, z: 0 };
 const BLOB_GEO = new THREE.CircleGeometry(0.55 * HS, 14), BLOB_MAT = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false });
 const HERO_GLB_ID = i => GLB_IDS[i] || 'aldric';
 async function loadActorModel(id) {
-  try { const buf = await fetchGLB(id); return await new Promise(res => gl.parse(buf, '', g => { try { res(wrapGLB(g)); } catch (e) { res(null); } }, () => res(null))); }
+  try { const buf = await fetchGLB(id); return await new Promise(res => gl.parse(buf, '', g => { try { res(wrapGLB(g, id)); } catch (e) { res(null); } }, () => res(null))); }
   catch (e) { return null; }
 }
 function spawnCrowd(id, kind, x, z, leash, yaw) {

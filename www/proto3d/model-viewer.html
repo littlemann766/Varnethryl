@@ -70,7 +70,7 @@ async function load(i){idx=i;list.value=i;const my=++loadId;const it=items[i];in
   const names=clips.map(c=>c.name);
   const pick=names.find(n=>/idle/i.test(n))||names[0];if(pick)setClip(pick);
   info.textContent=`${it.ph?'PLACEHOLDER (old generated model)':it.set}: ${it.n} · ${kb} KB · ${(box.max.y-box.min.y).toFixed(2)} m · ${Math.round(tris).toLocaleString()} tris · `+(names.length?`clips: ${names.join(', ')}`:'no animation clips in this model (static pose)');
-  if(NOTES[it.n])info.textContent+=' · '+NOTES[it.n];window.__viewer.loaded={name:it.n,set:it.set,kb,tris:Math.round(tris),clips:names};
+  if(NOTES[it.n])info.textContent+=' · '+NOTES[it.n];window.__viewer.loaded={name:it.n,set:it.set,kb,dim:[size.x,size.y,size.z].map(v=>+v.toFixed(2)),tris:Math.round(tris),clips:names};
  }}
 const allEl=document.getElementById('all');document.getElementById('cnt').textContent=items.length;
 {let last='';items.forEach((it,i)=>{if(it.set!==last){last=it.set;const h=document.createElement('div');h.className='hd';h.textContent=(it.ph?'PLACEHOLDER (old generated, to be replaced)':it.set==='NEW (Beth)'?'NEW (Beth) - real models':it.set==='Old main'?'Old main set (playable + wolf)':'Old Beth set (NPCs/monsters/bosses)');allEl.appendChild(h);}

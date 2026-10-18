@@ -11,7 +11,7 @@ M = float(os.environ.get('MARGIN', '1.0'))
 with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']); pg = b.new_page()
     pg.goto(f'http://127.0.0.1:{port}/proto3d.html?party=0&npcs=0'); pg.wait_for_function('window.__p3d&&window.__p3d.frames>3', timeout=90000)
-    bs = json.loads(pg.evaluate("JSON.stringify(__p3d.enterables.flatMap(e=>e.parts||[e]).filter(b=>b.footprint||b.radius).filter(b=>!/^(walls|wt|gt)/.test(b.id)).map(b=>({id:b.id,cx:b.cx,cz:b.cz,rot:b.rot,w:b.footprint?b.footprint.w:2*(b.radius||4),d:b.footprint?b.footprint.d:2*(b.radius||4),round:!b.footprint})))"))
+    bs = json.loads(pg.evaluate("JSON.stringify(__p3d.enterables.flatMap(e=>e.parts||[e]).filter(b=>b.footprint||b.radius).filter(b=>!/^(walls|wt|gt)/.test(b.id)).map(b=>({id:b.id,cx:b.cx,cz:b.cz,rot:b.rot,w:b.footprint?b.footprint.w*b.K:2*(b.radius||4),d:b.footprint?b.footprint.d*b.K:2*(b.radius||4),round:!b.footprint})))"))
     b.close()
 def poly(o):
     c, s = math.cos(o['rot']), math.sin(o['rot']); hw, hd = o['w'] / 2 + M / 2, o['d'] / 2 + M / 2

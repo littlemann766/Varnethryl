@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Headless check of the owner cheat panel at 1920x1080 and 412x915.
 Usage: (cd www && python3 -m http.server PORT) ; P3D_URL=http://localhost:PORT/proto3d.html [MAIN_URL=<baseline server of main>] python3 tools/owner_cheats_browser_test.py
-The owner passphrase is read from OWNER_PASS_FILE (default /workspace/secrets/varnethryl-owner-passphrase.txt) and is only typed into the page, never printed."""
+The owner passphrase is read from env VARNETHRYL_OWNER_PASSPHRASE and is only typed into the page, never printed."""
 import os, sys, json
 from playwright.sync_api import sync_playwright
 BASE = os.environ.get('P3D_URL', 'http://localhost:9511/proto3d.html')
 MAIN = os.environ.get('MAIN_URL')
-PASS = open(os.environ.get('OWNER_PASS_FILE', '/workspace/secrets/varnethryl-owner-passphrase.txt')).read().strip()
+PASS = os.environ['VARNETHRYL_OWNER_PASSPHRASE'].strip()
 bad = 0
 def ok(n, c, d=''):
     global bad; print(('PASS' if c else 'FAIL'), n, ('' if c else str(d).replace(PASS, '***'))[:300])

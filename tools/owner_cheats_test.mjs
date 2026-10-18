@@ -1,6 +1,6 @@
 /* Unit tests for the owner gate and every cheat's state effect. Run: node tools/owner_cheats_test.mjs
- * Needs the owner passphrase file only for the right-passphrase checks (default /workspace/secrets/varnethryl-owner-passphrase.txt,
- * override with OWNER_PASS_FILE). The passphrase is never printed. Without the file those checks are SKIPPED, not passed. */
+ * The right-passphrase checks read the owner passphrase from env VARNETHRYL_OWNER_PASSPHRASE (never printed, never embedded).
+ * Without it those checks are SKIPPED, not passed. */
 import fs from 'fs';
 import { execSync } from 'child_process';
 import { GATE, createGate, derive, ownerFromClaims, UNLOCK_KEY, THROTTLE_KEY, FREE_TRIES, LOCK_BASE_MS, LOCK_MAX_MS } from '../www/proto3d/ownergate.js';
@@ -12,8 +12,7 @@ import { createBump, makeActor } from '../www/proto3d/bump.js';
 let bad = 0, skipped = 0;
 const ok = (n, c, d = '') => { console.log(c ? 'PASS' : 'FAIL', n, c ? '' : d); if (!c) bad++; };
 const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), m }; };
-const PASSFILE = process.env.OWNER_PASS_FILE || '/workspace/secrets/varnethryl-owner-passphrase.txt';
-let PASS = null; try { PASS = fs.readFileSync(PASSFILE, 'utf8').trim(); } catch (e) { PASS = null; }
+let PASS = (process.env.VARNETHRYL_OWNER_PASSPHRASE || '').trim() || null;
 
 /* capture console so we can prove nothing logs the passphrase */
 const logged = []; const oc = { log: console.log, warn: console.warn, error: console.error };
@@ -31,7 +30,7 @@ ok('gate object has no plaintext field', !('pass' in GATE) && !('passphrase' in 
   r = await g.unlock('x'.repeat(500)); ok('oversize passphrase rejected (not hashed)', !r.ok);
   ok('after 3 fails the gate is throttled', g.status().locked && g.status().fails === 3 && g.status().retryMs === LOCK_BASE_MS, JSON.stringify(g.status()));
   r = await g.unlock('another-wrong'); ok('throttled attempt is refused without checking', !r.ok && r.reason === 'throttled' && g.status().fails === 3);
-  if (PASS) { r = await g.unlock(PASS); ok('right passphrase is refused while throttled', !r.ok && r.reason === 'throttled'); } else { skipped++; console.log('SKIP throttled-right check (no passphrase file)'); }
+  if (PASS) { r = await g.unlock(PASS); ok('right passphrase is refused while throttled', !r.ok && r.reason === 'throttled'); } else { skipped++; console.log('SKIP throttled-right check (VARNETHRYL_OWNER_PASSPHRASE not set)'); }
   t += LOCK_BASE_MS + 1;
   r = await g.unlock('wrong-4'); ok('lock doubles on next failure', !r.ok && r.retryMs === LOCK_BASE_MS * 2, JSON.stringify(r));
   for (let i = 0; i < 20; i++) { t += LOCK_MAX_MS + 1; await g.unlock('nope' + i); }
@@ -57,7 +56,7 @@ ok('gate object has no plaintext field', !('pass' in GATE) && !('passphrase' in 
     const wf = ['sw.js', 'proto3d/ownergate.js'].map((f) => fs.readFileSync(new URL('../www/' + f, import.meta.url), 'utf8')).join('');
     ok('no reversible encoding of plaintext shipped (base64/hex)', !wf.includes(Buffer.from(PASS).toString('base64')) && !wf.includes(Buffer.from(PASS).toString('hex')));
     ok('derive() reproduces the shipped hash only for the real passphrase', (await derive(PASS, GATE.salt, GATE.iter)) === GATE.hash && (await derive(PASS + 'x', GATE.salt, GATE.iter)) !== GATE.hash);
-  } else { skipped += 8; console.log('SKIP right-passphrase checks (no passphrase file at configured path)'); }
+  } else { skipped += 8; console.log('SKIP right-passphrase checks (VARNETHRYL_OWNER_PASSPHRASE not set)'); }
 }
 {
   /* forged token from the wrong hash is rejected */

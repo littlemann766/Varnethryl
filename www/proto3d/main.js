@@ -16,6 +16,15 @@ const mark = n => { try { (window.__p3dMarks || (window.__p3dMarks = {}))[n] = M
 mark('mainStart');
 /* resolves once the shader prewarm (after the first frame) is done, so GLB heroes are not wrapped/uploaded in the middle of it */
 let prewarmDone; const prewarmP = new Promise(r => { prewarmDone = r; }); setTimeout(() => prewarmDone(), 2500);
+/* time-slicing: yield to the browser so the loading screen can paint/animate and GLB downloads and decodes can progress, instead of one multi-second main-thread task. paint=true waits for a frame (with a timer fallback for hidden tabs). */
+const _mc = new MessageChannel(); let _mcRes = null; _mc.port1.onmessage = () => { const r = _mcRes; _mcRes = null; if (r) r(); };
+let _lastPaint = 0;
+function yieldMain() {
+  const now = performance.now();
+  if (now - _lastPaint > 150) { _lastPaint = now; return new Promise(r => { let done = false; const f = () => { if (!done) { done = true; r(); } }; requestAnimationFrame(f); setTimeout(f, 60); }); }
+  return new Promise(r => { _mcRes = r; _mc.port2.postMessage(0); });
+}
+function loadProgress(p) { const l = document.getElementById('loadMsg'); if (l) l.textContent = 'Loading Liongate... ' + Math.round(p * 100) + '%'; }
 const canvas = document.getElementById('c');
 const diag = (msg, bad) => { try { (window.__p3dDiag || (() => {}))(msg, bad); } catch (_) {} };
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
@@ -175,9 +184,9 @@ const SKINS = [];
 const BLD_ON = new URLSearchParams(location.search).get('oldvillage') == null;
 const drops = []; let dropMade = 0;
 if (BLD_ON) {
-  enterables.push(buildWalls(ectx, WORLD, GATE_W));
-  for (const b of buildVillage(ectx)) enterables.push(b);
-  if (new URLSearchParams(location.search).get('nochunk') == null) { try { const r = chunkStatics(enterables.flatMap(e => e.parts || [e]), scene, 64); diag('static chunks: ' + r.before + ' -> ' + r.after); const rr = mergeRoofs(enterables.flatMap(e => e.parts || [e]), scene); diag('roofs: ' + rr.before + ' -> ' + rr.after); const rw = mergeWalls(enterables.flatMap(e => e.parts || [e]), scene); diag('walls: ' + rw.before + ' -> ' + rw.after); } catch (e) { console.error('chunkStatics', e.message, e.stack); } }
+  enterables.push(buildWalls(ectx, WORLD, GATE_W)); loadProgress(0.15); await yieldMain();
+  for (let i = 0; i < BUILDING_DEFS.length; i++) { for (const b of buildVillage(ectx, [BUILDING_DEFS[i].id])) enterables.push(b); loadProgress(0.15 + 0.6 * (i + 1) / BUILDING_DEFS.length); await yieldMain(); }
+  if (new URLSearchParams(location.search).get('nochunk') == null) { try { const r = chunkStatics(enterables.flatMap(e => e.parts || [e]), scene, 64); diag('static chunks: ' + r.before + ' -> ' + r.after); loadProgress(0.8); await yieldMain(); const rr = mergeRoofs(enterables.flatMap(e => e.parts || [e]), scene); diag('roofs: ' + rr.before + ' -> ' + rr.after); await yieldMain(); const rw = mergeWalls(enterables.flatMap(e => e.parts || [e]), scene); diag('walls: ' + rw.before + ' -> ' + rw.after); } catch (e) { console.error('chunkStatics', e.message, e.stack); } }
 } else {
   wallSeg(-WORLD, -WORLD, WORLD, -WORLD); wallSeg(-WORLD, -WORLD, -WORLD, WORLD); wallSeg(WORLD, -WORLD, WORLD, WORLD); wallSeg(-WORLD, WORLD, -GATE_W - 3, WORLD); wallSeg(GATE_W + 3, WORLD, WORLD, WORLD);
   tower(-GATE_W - 3, WORLD, 2.6); tower(GATE_W + 3, WORLD, 2.6);
@@ -195,6 +204,7 @@ if (BLD_ON) {
   addCircCol(0, 0, 3.5);
 }
 
+loadProgress(0.85); await yieldMain();
 // trees (instanced: 2 draw calls for ~60 trees)
 {
   const pts = [];
@@ -257,7 +267,9 @@ function mergeStatic() {
   for (const o of remove) { o.parent.remove(o); o.geometry.dispose(); }
 }
 mark('villageBuilt');
+loadProgress(0.92); await yieldMain();
 mergeStatic();
+loadProgress(1);
 mark('merged');
 
 // ---------- hero: Sir Aldric (see aldric.js) ----------

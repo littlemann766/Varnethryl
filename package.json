@@ -1,6 +1,6 @@
 {
   "name": "varnethryl-rpg",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "private": true,
   "description": "Varnethryl installable offline-first fantasy RPG PWA with twenty playable heroes.",
   "scripts": {

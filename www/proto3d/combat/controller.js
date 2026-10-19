@@ -11,7 +11,7 @@ export class CombatController {
     this.enemies = []; this.ls = {}; this.p = { x: 0, z: 0, yaw: 0, dead: false };
     this.hero = { id: '', name: 'Hero', level: 40, className: 'Adventurer', saber: false };
     this.act = null; this.blocking = false; this.blockT = 0; this.iframes = 0; this.shield = 0; this.potions = this.P.potion.charges; this.dead = 0;
-    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this._mk = ''; this.ownerUnlocked = false; this.meteors = []; this.ultSel = (() => { try { const v = typeof localStorage !== 'undefined' && localStorage.getItem('varn.ultsel'); return v === 'unholy' ? 'unholy' : 'holy'; } catch (e) { return 'holy'; } })(); this.bystanders = null;
+    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this._mk = ''; this.ownerUnlocked = false; this.meteors = []; this.bamboo = false; this.ultSel = (() => { try { const v = typeof localStorage !== 'undefined' && localStorage.getItem('varn.ultsel'); return v === 'unholy' ? 'unholy' : 'holy'; } catch (e) { return 'holy'; } })(); this.bystanders = null;
     this.env = { HS: this.HS, move: o.move || ((e, dx, dz) => { e.x += dx; e.z += dz; }) };
   }
   on(t, f) { (this.ls[t] || (this.ls[t] = [])).push(f); return this; }
@@ -29,7 +29,9 @@ export class CombatController {
   perkHero() { return !!(this.hero.owner || (TUNING.perks.saberHolderResources && this.ownerOk())); }   // unlimited MP/SP + no-cooldowns recipient
   slotUsable(i) { const a = typeof i === 'string' ? OWNER_SKILLS[i] : ABILITIES[i]; if (!a) return false; if (a.owner && !this.ownerOk()) return false; return a.owner || !a.saber || !!this.hero.saber; }
   furyReady() { return this.res.unlimited || this.fury >= TUNING.ult.fury; }
-  weapon() { return this.hero.saber ? 'saber' : 'unarmed'; }
+  /* Bamboo Stick (test weapon): owner account only; while held it replaces the saber, so owner skills use the non-saber 99,999 x skillMul rule. */
+  bambooOn() { return !!(this.bamboo && this.ownerUnlocked); }
+  weapon() { return this.bambooOn() ? 'bamboo' : (this.hero.saber ? 'saber' : 'unarmed'); }
   addEnemy(key, x, z, extra) {
     const def = ENEMIES[key]; const e = Object.assign({ id: this.nextId++, key, def, x, z, yaw: 0, hp: def.hp, max: def.hp, state: 'idle', tStateT: 0, atkCd: 0.8 + this.rng(), flash: 0, knockT: 0, kx: 0, kz: 0, staggerFor: 0, rewarded: false, deadT: 0 }, extra);
     this.enemies.push(e); this.emit('spawn', e); return e;
@@ -97,6 +99,7 @@ export class CombatController {
     /* Owner skills (Royal/Chains/Wrath) = 99,999 x skillMul with ANY weapon except the lightsaber; while the saber is held the saber rule (x current HP) applies. */
     const skm = a && a.id && TUNING.skillMul && TUNING.skillMul[a.id];
     if (skm > 0 && this.weapon() !== 'saber' && this.ownerOk()) r.dmg = Math.round(99999 * skm);
+    else if (TUNING.ownerWeaponBase > 0 && this.weapon() !== 'saber' && this.ownerOk()) r.dmg = Math.round(TUNING.ownerWeaponBase);
     else {
     const sm = Math.max(0, Math.min(50, Math.floor(+TUNING.perks.saberMul || 0)));   // 0 = flat 99,999 (old behavior); 1-50 = x target current HP
     if (sm > 0 && this.weapon() === 'saber' && this.ownerOk() && e.hp > 0 && (!e.def.boss || TUNING.perks.saberBossesX12)) r.dmg = Math.max(1, Math.round(e.hp)) * sm; }

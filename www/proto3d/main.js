@@ -261,6 +261,9 @@ const EXTRA = [["n:mortimer_new", "Mortimer (NEW)", "proto3d/models-new/mortimer
 const CLOTH = new Set(["n:ember_new3", "n:owner", "n:owner_pika1", "n:asha_new3", "n:ashentitan_new", "n:coral_new", "n:darius_new6", "n:lunara_new", "n:marella_new", "n:mortimer_new", "n:player_pikachu", "n:snowy_new4", "n:thrain_new4", "n:wren_new3"]);   // models shipped with <name>.cloth.json (runtime/spring_bones_v2.js)
 const EXTRA_SCALE = { 'n:frosttroll_b': 0.5 };   // frost trolls are authored 11.4 m; the boss wants 3x the player (5.7 m). The Ashen Titan stays unscaled (6x).
 const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28 }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 4.5, run: 10.5 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
+/* Beth's smoothed blocky models (_smooth.glb): extra 'Smooth' variant for characters that already exist; originals stay the default. Loaded on demand (only when picked). */
+const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'hawk', 'hearth', 'hobgoblin', 'hydrella', 'kael', 'kestrel', 'lorian', 'mirelle', 'morwen', 'mossgut', 'neris', 'nyx', 'orin', 'rook', 'rowan', 'seraphine', 'stonetroll', 'talia', 'thorne', 'valen', 'vesper', 'wolf', 'wyvern'];   // frosttroll_smooth intentionally not used (old 1.8 m base): frosttroll_a4 is the troll
+{ const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
 const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
 const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;
@@ -423,16 +426,16 @@ const IS_OWNER_TOKEN = (() => { try { return !!localStorage.getItem('vn_owner_un
 { const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (!savedPlan.hero) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
 // ---------- character selector: ONE entry per character (all variants grouped), compact dropdown + variant switches ----------
-const gkey = id => id.replace(/^[a-z]:/, '').replace(/_straight_rig$/, '').replace(/_new\d*$/, '').replace(/^owner_pika\d*$/, 'owner').replace(/^player_/, '');
+const gkey = id => id.replace(/^[a-z]:/, '').replace(/_straight_rig$/, '').replace(/_smooth$/, '').replace(/_new\d*$/, '').replace(/^owner_pika\d*$/, 'owner').replace(/^player_/, '');
 const GROUPS = new Map(), SLOT_G = [], VRANK = { Blocky: 0, Old: 1, New: 2, 'New (straight)': 3, Placeholder: 4 };
 GLB_IDS.forEach((id, i) => { const k = gkey(id); let g = GROUPS.get(k); if (!g) GROUPS.set(k, g = { key: k, name: '', nameRank: 9, vars: [], slots: [] }); g.slots.push(i); SLOT_G[i] = g;
   const px = id[1] === ':' ? id[0] : '', rank = px === '' ? 0 : px === 'o' ? 1 : px === 'n' ? 2 : 3;
-  if (rank < g.nameRank) { g.nameRank = rank; g.name = HERO_NAMES[i].replace(/\s*(\(NEW\)|\[PLACEHOLDER\]|\(OLD\))\s*$/i, '').replace(/ Straight Rig$/, ''); }
-  if (px === 'n') g.vars.push({ slot: i, mode: 'glb', label: /pika/.test(id) ? 'Pikachu' : /straight/.test(id) ? 'New (straight)' : 'New' });
+  if (rank < g.nameRank) { g.nameRank = rank; g.name = HERO_NAMES[i].replace(/\s*(\(NEW\)|\(SMOOTH\)|\[PLACEHOLDER\]|\(OLD\))\s*$/i, '').replace(/ Straight Rig$/, ''); }
+  if (px === 'n') g.vars.push({ slot: i, mode: 'glb', label: /_smooth$/.test(id) ? 'Smooth' : /pika/.test(id) ? 'Pikachu' : /straight/.test(id) ? 'New (straight)' : 'New' });
   else if (px === 'p') g.vars.push({ slot: i, mode: 'glb', label: 'Placeholder' });
   else { if (bk(id)) g.vars.push({ slot: i, mode: 'blocky', label: 'Blocky' }); g.vars.push({ slot: i, mode: 'glb', label: 'Old' }); } });
 GROUPS.forEach(g => { const nv = g.vars.filter(v => v.label === 'New'); if (nv.length > 1) nv.forEach(v => { v.label = ('New ' + ((GLB_IDS[v.slot].match(/_new(\d+)/) || [0, ''])[1])).trim(); }); });
-const vrank = l => l === 'Pikachu' ? 3 : l === 'Blocky' ? 0 : l === 'Old' ? 1 : l === 'Placeholder' ? 9 : 2 + (parseInt(l.replace(/\D/g, '')) || 0) / 100 + (/straight/.test(l) ? .5 : 0);
+const vrank = l => l === 'Smooth' ? 3.5 : l === 'Pikachu' ? 3 : l === 'Blocky' ? 0 : l === 'Old' ? 1 : l === 'Placeholder' ? 9 : 2 + (parseInt(l.replace(/\D/g, '')) || 0) / 100 + (/straight/.test(l) ? .5 : 0);
 GROUPS.forEach(g => g.vars.sort((a, b) => vrank(a.label) - vrank(b.label)));
 const selV = {};   // group key -> chosen variant
 function curVar(g) {

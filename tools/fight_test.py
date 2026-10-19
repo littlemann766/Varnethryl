@@ -20,7 +20,7 @@ with sync_playwright() as p:
     vis = pg.evaluate("(()=>{const q=s=>{const e=document.querySelector('#cb '+s);return !!e&&e.offsetParent!==null||(!!e&&getComputedStyle(e).display!=='none')};return {root:getComputedStyle(document.getElementById('cb')).display,slots:document.querySelectorAll('#cb .sl').length,cl:document.querySelectorAll('#cb .cl button').length,vit:q('.vit'),ab:q('.ab')}})()"); print('hud', vis)
     if SH: pg.screenshot(path=f'{SH}/c_start.png')
     # keep the hero alive for ability checks
-    pg.evaluate("__p3d.fight.cc.god=true")
+    pg.evaluate("__p3d.cheat.god=true;__p3d.fight.cc.god=true")   # fight.js re-syncs cc.god from the owner cheat flag every frame (merge-all), so set the flag, not just cc.god
     def tap(sel):
         b = pg.evaluate("(s=>{const r=document.querySelector(s).getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2]})", sel); pg.touchscreen.tap(b[0], b[1])
     # basic attack via ability slot 1 until a kill (99,999 flat)
@@ -35,7 +35,11 @@ with sync_playwright() as p:
     dm = pg.evaluate("document.querySelectorAll('#cb .fn').length"); print('number elements (pooled)', dm)
     # other slots
     pg.evaluate("__p3d.fight.cc.res.mp=100;__p3d.fight.cc.res.sp=100")
-    for s in (1,2,3,4): tap(f'#cb .sl[data-s="{s}"]'); pg.wait_for_timeout(900)
+    for s in (1,2,3,4):   # a skill tapped while the previous one is still animating is ignored: retry until its cooldown starts
+        for _ in range(4):
+            tap(f'#cb .sl[data-s="{s}"]'); pg.wait_for_timeout(900)
+            if s == 4 or pg.evaluate("k=>__p3d.fight.cc.cd.left(k)>0", ['royal','chains','wrath'][s-1]): break
+        pg.evaluate("__p3d.fight.cc.res.mp=100;__p3d.fight.cc.res.sp=100")
     cds = pg.evaluate("['royal','chains','wrath'].map(k=>__p3d.fight.cc.cd.left(k)>0)"); print('cooldowns started', cds)   # new HUD: slots 1-3 = Owner skills (OWNER_CLUSTER), 4 = ultimate (needs Fury)
     tap('#cb [data-a=dodge]'); pg.wait_for_timeout(100); ifr = pg.evaluate("__p3d.fight.cc.iframes>0"); print('dodge iframes', ifr)
     pg.evaluate("__p3d.fight.spawn('wolf',8)"); pg.wait_for_function("__p3d.fight.monsters.some(m=>m.state!=='defeated')", timeout=60000)
@@ -48,7 +52,7 @@ with sync_playwright() as p:
     print('boss', bi)
     pg.evaluate("(()=>{const m=__p3d.fight.monsters.find(m=>m.def.boss);const s=__p3d.state;s.heroX=m.x;s.heroZ=m.z-14})()"); pg.wait_for_timeout(2500)
     if SH: pg.screenshot(path=f'{SH}/c_boss.png')
-    pg.evaluate("__p3d.fight.cc.god=false;__p3d.fight.cc.res.hp=__p3d.fight.cc.res.max.hp"); pg.wait_for_timeout(300)
+    pg.evaluate("__p3d.cheat.god=false;__p3d.fight.cc.god=false;__p3d.fight.cc.res.hp=__p3d.fight.cc.res.max.hp"); pg.wait_for_timeout(300)
     pg.evaluate("(()=>{const m=__p3d.fight.monsters.find(m=>m.def.boss);const s=__p3d.state;s.heroX=m.x;s.heroZ=m.z-6})()")
     try: pg.wait_for_function("__p3d.fight.monsters.some(m=>m.def.boss&&m.state==='telegraph')", timeout=60000); pg.wait_for_timeout(400)
     except Exception: pass

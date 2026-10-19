@@ -669,10 +669,10 @@ function updateCrowd(dt) {
       if (r.level !== state.level) {
         r.lvT += dt; const t = trailTarget(r, a);
         if (t) { gx = t.x; gz = t.z; far = true; }
-        if (r.lvT > 12 || t === null) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; }
+        if ((r.lvT > 12 || t === null) && state.level === 0) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; }
       } else {
         r.ti = null;   // same floor number but a long way off (other building / stuck behind walls): catch up after a few seconds instead of pushing straight into a wall
-        if (Math.hypot(gx - a.x, gz - a.z) > 22) { r.lvT += dt; if (r.lvT > 6) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.lvT = 0; } } else r.lvT = 0;
+        if (Math.hypot(gx - a.x, gz - a.z) > 22) { r.lvT += dt; if (r.lvT > 6 && state.level === 0) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.lvT = 0; } } else r.lvT = 0;
       }
       const dx = gx - a.x, dz = gz - a.z, d = Math.hypot(dx, dz);
       if (far && d > 0.3) { const sp = SPEED * Math.max(1, cheat.speedMul) * 1.05; tvx = dx / d * sp; tvz = dz / d * sp; }

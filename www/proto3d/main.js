@@ -644,7 +644,7 @@ function trailTarget(r, a) {
   if (r.ti < trailBase) r.ti = trailBase;
   for (let g = 0; g < 8; g++) {
     const i = r.ti - trailBase; if (i >= TRAIL.length) { r.level = state.level; r.ti = null; return undefined; }
-    const p = TRAIL[i]; if (p.l !== r.level && Math.hypot(p.x - a.x, p.z - a.z) < 1.6) r.level = p.l;
+    const p = TRAIL[i]; if (p.l !== r.level && (p.l >= 10 || r.level >= 10) && Math.hypot(p.x - a.x, p.z - a.z) < 1.6) r.level = p.l;   // stairs flip the level via the ramp surface (crowdSurface); only ladders adopt it from the trail
     if (Math.hypot(p.x - a.x, p.z - a.z) < 0.7) { r.ti++; continue; }
     return p;
   }
@@ -669,8 +669,11 @@ function updateCrowd(dt) {
       if (r.level !== state.level) {
         r.lvT += dt; const t = trailTarget(r, a);
         if (t) { gx = t.x; gz = t.z; far = true; }
-        if (r.lvT > 12 || t === null) { a.x = state.heroX + (Math.random() - 0.5) * 2; a.z = state.heroZ + 1.5; r.level = state.level; r.ti = null; r.lvT = 0; }
-      } else { r.lvT = 0; r.ti = null; }
+        if (r.lvT > 12 || t === null) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; }
+      } else {
+        r.ti = null;   // same floor number but a long way off (other building / stuck behind walls): catch up after a few seconds instead of pushing straight into a wall
+        if (Math.hypot(gx - a.x, gz - a.z) > 22) { r.lvT += dt; if (r.lvT > 6) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.lvT = 0; } } else r.lvT = 0;
+      }
       const dx = gx - a.x, dz = gz - a.z, d = Math.hypot(dx, dz);
       if (far && d > 0.3) { const sp = SPEED * Math.max(1, cheat.speedMul) * 1.05; tvx = dx / d * sp; tvz = dz / d * sp; }
       else if (!far && d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * Math.max(1, cheat.speedMul) * 1.05, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }

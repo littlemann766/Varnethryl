@@ -187,6 +187,17 @@ function temple(spec, ctx) {
     B.stairs(S(-1)); B.stairs(S(1));
     B.upperFloor(1, GY, [[-iw, -gx, -id_, 0.0], [gx, iw, -id_, 0.0], [-iw, iw, -id_, -id_ + 2.4]], { key: 'floorPlank' });
     B.onFloor(1, GY, U => { for (const s of [-1, 1]) { U.pew(s * 5.4, -4, 1.8); U.pew(s * 5.4, -1.5, 1.8); U.lamp(s * 4.6, 2.6, 2.0); } U.banner(0, 1.8, -id_ + .4, 0, 2.0, 2.4); U.chest(0, -id_ + 1.0, .9); }); }
+  { // card temple (pass 5): rose-window tracery, healing chamber around the font, crypt-adjacent candle shrine, reliquary
+    const G = B.G.int, g = B.G.ext;
+    for (let i = 0; i < 8; i++) { const a = i * Math.PI / 8, m = B.bx(.07, 3.0, .05, 'gold', 0, 6.7, d / 2 + .12, g, { shadow: false, lite: true }); m.rotation.z = a; }
+    B.add(new THREE.TorusGeometry(.55, .05, 4, 12), M('gold'), 0, 6.7, d / 2 + .13, g, { shadow: false });
+    B.add(new THREE.RingGeometry(1.55, 1.75, 24), M('gold', { side: THREE.DoubleSide }), 0, .1, 4.5, G, { shadow: false }).rotation.x = -Math.PI / 2;
+    for (let i = 0; i < 3; i++) { const a = i * 2.094 + .5, x = Math.sin(a) * 1.1, z = 4.5 + Math.cos(a) * 1.1; B.bx(.02, 1.6, .02, 'iron', x, 4.0, z, G, { shadow: false, lite: true }); B.add(new THREE.OctahedronGeometry(.16, 0), GLOW('6aa8ff', 1.6), x, 3.1, z, G, { shadow: false }); }
+    { const x = -iw + .7, z = -3.0; B.bx(1.0, .8, .45, 'darkWood', x, .4, z, G); B.bx(1.0, .04, .5, 'gold', x, .82, z, G, { shadow: false, lite: true }); B.col(x, z, 1.0, .5);
+      for (let i = 0; i < 8; i++) { const cx = x - .38 + (i % 4) * .25, cz = z - .1 + Math.floor(i / 4) * .2, hh = .1 + (i % 3) * .05; B.cyl(.03, .03, hh, '#e8dcc0', cx, .84 + hh / 2, cz, G, 4, { shadow: false }); B.add(new THREE.ConeGeometry(.03, .08, 4), GLOW('ffb040', 2.0), cx, .9 + hh, cz, G, { shadow: false }); }
+      B.bx(.9, .2, .4, 'carpet', x + .9, .1, z, G, { shadow: false, lite: true }); B.statue(-iw + .45, z - 1.3, .7, G); B.banner(-iw + .1, 3.0, z - .6, Math.PI / 2, .8, 1.6, G); }
+    { const x = iw - .7, z = -3.0; B.chest(x, z, .9); B.bx(.7, .5, .45, 'gold', x, 1.1, z, G, { lite: true }); B.add(new THREE.ConeGeometry(.3, .3, 4), M('gold'), x, 1.5, z, G, { shadow: false }); }
+  }
   B.props2('hall'); B.radius = 20; return B.finish();
 }
 

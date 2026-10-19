@@ -3,6 +3,9 @@
 export const TUNING = {
   normal: { dmg: [28, 48], basicCdMul: 0.6, windupMul: 1.5, basicSp: 3, hp: 700, staggerFrac: 0.2 },   // dmg per basic hit, cooldown/wind-up multipliers, stamina per swing, max HP, enemy staggers after this fraction of its HP in damage
   owner: { hp: 999999, saber: 99999 },
+  /* Unholy Destruction (Owner ultimate). ONE config block: bossesInstantKill=false => bosses (Ashen Titan...) take the normal owner saber hit instead of dying. */
+  perks: { saberHolderResources: false, holderMul: 3 },   // holderMul: max HP/MP/SP multiplier for a non-Owner hero holding the Owner saber (owner account only)   // false: unlimited MP/SP + no cooldowns only for the Owner skin; true: any hero holding the Owner saber gets them too
+  ult: { radius: 25, delay: 1.5, cooldown: 35, fury: 100, bossesInstantKill: false, furyPerBasic: 8, furyPerSkill: 5 },
 };
 export const UNARMED = { min: TUNING.normal.dmg[0], max: TUNING.normal.dmg[1] };                 // everybody else (no weapon in the fight test)
 export const SABER = { min: 99999, max: 99999 };   // = TUNING.owner.saber                     // Owner lightsaber: 99,999 flat per hit (boss decision), NOT combinedStats; Owner gate only
@@ -31,3 +34,12 @@ export const ENEMIES = {
   titan:    E('Ashen Titan', 60, 'Boss', 5000000, 2100, 600, 7.3, { model: 'n:ashentitan_new', atkMs: 2300, tele: 1.1, reach: 8.4, r: 5, scale: 6, aggro: 60, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
 };
 export const WAVE_TABLE = ['wolf', 'raider', 'wraith', 'skeleton'];
+
+/* Owner-only skills (cluster buttons 1-3 + ultimate 4). Rules run in the controller: Owner skin AND owner gate required, never trusted from the UI. Damage is the normal owner saber rule (calc.js). */
+export const OWNER_SKILLS = {
+  royal:  { id: 'royal', name: 'Royal Slash', icon: 'slash', owner: true, saber: true, cd: 4, cost: { mp: 12 }, kind: 'melee', mult: 2.2, windup: 0.18, T: 0.5, range: 7, arc: 0.45, stagger: 0 },
+  chains: { id: 'chains', name: 'Shadow Chains', icon: 'chains', owner: true, saber: true, cd: 8, cost: { mp: 20 }, kind: 'melee', mult: 1.2, windup: 0.22, T: 0.55, range: 12, arc: 0.3, stagger: 1 },
+  wrath:  { id: 'wrath', name: "Sovereign's Wrath", icon: 'bolt', owner: true, saber: true, cd: 12, cost: { mp: 25 }, kind: 'aoe', mult: 1.5, windup: 0.2, T: 0.6, range: 9, arc: -1, stagger: 1, knock: 5 },
+  unholy: { id: 'unholy', name: 'Unholy Destruction', icon: 'meteor', owner: true, saber: true, cd: TUNING.ult.cooldown, cost: {}, fury: TUNING.ult.fury, kind: 'meteor', mult: 0, windup: 0.25, T: 0.7, stagger: 0 },
+};
+export const OWNER_CLUSTER = ['royal', 'chains', 'wrath', 'unholy'];

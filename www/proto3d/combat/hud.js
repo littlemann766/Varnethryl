@@ -1,6 +1,6 @@
 /* CombatHUD: presentation only. Subscribes to CombatController events and reads its state; never computes damage.
    Perf: all nodes are built once; per frame we only write a style/text when the displayed value changed. Floating numbers come from a fixed pool. */
-import { ABILITIES } from './data.js';
+import { ABILITIES, OWNER_SKILLS, OWNER_CLUSTER, TUNING } from './data.js';
 const CSS = `
 #cb{position:fixed;inset:0;z-index:40;display:none;pointer-events:none;font:700 12px system-ui,sans-serif;color:#fff;user-select:none;-webkit-user-select:none}
 #cb *{box-sizing:border-box}#cb button{pointer-events:auto;touch-action:none;font:inherit;color:#fff;cursor:pointer}
@@ -15,15 +15,18 @@ const CSS = `
 #cb .por{flex:none;width:42px;height:42px;border-radius:50%;border:2px solid #fff;background:radial-gradient(#4a6ea8,#1b2a48);display:flex;align-items:center;justify-content:center;font:900 18px system-ui;position:relative}
 #cb .por small{position:absolute;bottom:-5px;right:-5px;background:#000c;border:1px solid #fff8;border-radius:8px;font:700 9px system-ui;padding:0 3px}
 #cb .bars{flex:1;display:flex;flex-direction:column;gap:3px}
-#cb .ab{position:absolute;left:50%;bottom:max(4px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:4px}
-#cb .sl{position:relative;width:46px;height:46px;border-radius:9px;border:2px solid #fffa;background:#102034dd;padding:0;overflow:hidden}
-#cb .sl .ic{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 22px system-ui;padding-bottom:6px}
-#cb .sl .k{position:absolute;left:2px;top:0;font-size:9px;color:#ffe9a8}#cb .sl .c{position:absolute;right:2px;top:0;font-size:9px}#cb .sl .c.mp{color:#8cf}#cb .sl .c.sp{color:#9f9}
-#cb .sl .n{position:absolute;left:0;right:0;bottom:0;font:700 8px system-ui;background:#000a;text-align:center;line-height:11px;white-space:nowrap;overflow:hidden}
-#cb .sl .cdv{position:absolute;left:0;right:0;bottom:0;height:0;background:#000c;transform-origin:bottom}#cb .sl .ct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 15px system-ui;text-shadow:0 1px 2px #000}
-#cb .sl.off{filter:grayscale(1) brightness(.55)}#cb .sl.nores{border-color:#f66}#cb .sl:active:not(.off){background:#2a6fb0}
-#cb .cl{position:absolute;right:max(8px,env(safe-area-inset-right));bottom:max(56px,calc(env(safe-area-inset-bottom) + 52px));display:grid;grid-template-columns:repeat(2,50px);gap:6px}
-#cb .cl button{position:relative;width:50px;height:50px;border-radius:50%;border:2px solid #fffb;background:#0c2438dd;font-size:9px;line-height:1.05;padding:0;overflow:hidden}
+#cb .fy i{background:linear-gradient(#ffd27a,#c9741a)}#cb .fy{display:none}#cb.own .fy{display:block}
+#cb .cx{position:absolute;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));width:clamp(200px,min(46vw,62vh),260px);aspect-ratio:1}
+#cb .sl{position:absolute;aspect-ratio:1;border-radius:50%;border:2px solid #bd9451;background:radial-gradient(circle at 45% 30%,#29344b,#101521 58%,#080c15);box-shadow:inset 0 0 0 2px #141010,0 3px 10px #000b;padding:0;overflow:hidden;color:#f2d3a0}
+#cb .sl.b0{width:36%;right:1%;bottom:0;border-width:3px}#cb .sl.b1{width:24%;right:39%;bottom:4%}#cb .sl.b2{width:24%;right:57%;bottom:33%}#cb .sl.b3{width:24%;right:31%;bottom:44%}
+#cb .sl.b4{width:30%;right:1%;bottom:57%;border:3px solid #ffd56e;background:radial-gradient(circle,#852723,#321224 54%,#110c19)}
+#cb .sl .ic{position:absolute;inset:18%;display:flex;align-items:center;justify-content:center}#cb .sl svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#cb .sl .k{position:absolute;left:0;right:0;bottom:5%;text-align:center;font-size:9px;color:#ffe9a8;text-shadow:0 1px 2px #000}
+#cb .sl .rg{position:absolute;inset:0;border-radius:50%;background:conic-gradient(#000d var(--p,0%),transparent 0)}#cb .sl .ct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 16px system-ui;text-shadow:0 1px 2px #000}
+#cb .sl.fr .rg{background:conic-gradient(#e8a02c66 var(--p,0%),transparent 0)}#cb .sl.rdy{box-shadow:inset 0 0 0 2px #141010,0 0 16px #ff8a3c}
+#cb .sl.off{filter:grayscale(1) brightness(.55)}#cb .sl.nores{border-color:#f66}#cb .sl:active:not(.off){transform:scale(.93)}
+#cb .cl{position:absolute;right:calc(max(10px,env(safe-area-inset-right)) + clamp(200px,min(46vw,62vh),260px) + 8px);bottom:max(10px,env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(3,46px);gap:5px}
+#cb .cl button{position:relative;width:46px;height:46px;border-radius:50%;border:2px solid #fffb;background:#0c2438dd;font-size:9px;line-height:1.05;padding:0;overflow:hidden}
 #cb .cl button .g{display:block;font:400 19px system-ui;line-height:20px}#cb .cl button.on{background:#2aa;border-color:#9ff}
 #cb .cl button .cdv{position:absolute;left:0;right:0;bottom:0;height:0;background:#000b}#cb .cl button .q{position:absolute;right:3px;top:2px;font-size:9px;color:#ffe9a8}
 #cb .fn{position:absolute;transform:translate3d(-50px,-50px,0);font:900 20px system-ui;color:#ffe066;text-shadow:0 0 3px #000,0 2px 2px #000;white-space:nowrap;display:none;will-change:transform,opacity}
@@ -35,8 +38,16 @@ const CSS = `
 #cb .top{position:absolute;right:max(10px,env(safe-area-inset-right));top:max(78px,calc(env(safe-area-inset-top) + 72px));display:flex;flex-direction:column;gap:4px;align-items:flex-end;text-shadow:0 1px 2px #000}
 #cb .top button{min-height:26px;padding:3px 9px;border-radius:10px;border:1px solid #fff7;background:#000a;font-size:11px}
 #cb .stat{position:absolute;left:max(10px,env(safe-area-inset-left));top:max(76px,calc(env(safe-area-inset-top) + 70px));font-size:11px;text-shadow:0 1px 2px #000;line-height:1.35}
-@media (orientation:landscape) and (max-height:520px){#cb .cl{grid-template-columns:repeat(3,48px);bottom:max(10px,env(safe-area-inset-bottom))}#cb .cl button{width:48px;height:48px}#cb .ab{bottom:max(4px,env(safe-area-inset-bottom))}#cb .sl{width:44px;height:44px}#cb .vit{bottom:max(184px,calc(env(safe-area-inset-bottom) + 178px))}}
+@media (orientation:portrait){#cb .cl{grid-template-columns:repeat(2,46px);right:max(10px,env(safe-area-inset-right));bottom:calc(max(10px,env(safe-area-inset-bottom)) + clamp(200px,min(46vw,62vh),260px) + 6px)}#cb .vit{bottom:calc(max(10px,env(safe-area-inset-bottom)) + 150px)}}
 `;
+/* simple SVG icons (no emoji): 24x24 stroke paths */
+const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';
+const ICONS = {
+  basic: SV('<path d="M5 19L17 7M14 4l6 0 0 6M5 19l-1 1M7 15l2 2"/>'), slash: SV('<path d="M4 18C8 8 14 5 20 5M8 20C11 13 15 10 20 9"/>'), chains: SV('<ellipse cx="9" cy="9" rx="4" ry="2.6" transform="rotate(-35 9 9)"/><ellipse cx="15" cy="15" rx="4" ry="2.6" transform="rotate(-35 15 15)"/>'),
+  bolt: SV('<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>'), meteor: SV('<circle cx="15" cy="15" r="5"/><path d="M11 11L3 3M9 15L3 12M15 9L12 3"/>'), lock: SV('<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>'),
+  heavy: SV('<path d="M6 20L18 8M13 3l8 8-3 3-8-8z"/>'), push: SV('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>'), throw: SV('<path d="M4 20L16 8M14 4l6 0 0 6"/>'), shield: SV('<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/>'), storm: SV('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 018 8"/>'),
+};
+const LEGACY_ICON = ['basic', 'heavy', 'push', 'throw', 'shield', 'storm'];
 const NUM_POOL = 24, OH_POOL = 10;
 export class CombatHUD {
   /* api: {use(i), dodge(), block(on), jump(), lock(), switchTarget(), potion(), swap(), exit(), summon()} - plain callbacks into the host.
@@ -47,24 +58,24 @@ export class CombatHUD {
     const r = this.root = document.createElement('div'); r.id = 'cb';
     r.innerHTML = '<div class="flash"></div><div class="tp"><div class="nm"></div><div class="sub"></div><div class="bar hp"><i></i><b></b></div></div>' +
       '<div class="stat"></div><div class="top"><button type="button" data-a="summon">Summon Titan</button><button type="button" data-a="exit">Exit fight</button></div>' +
-      '<div class="vit"><div class="por"><span>?</span><small>1</small></div><div class="bars"><div class="bar hp"><i></i><b></b></div><div class="bar mp"><i></i><b></b></div><div class="bar sp"><i></i><b></b></div></div></div>' +
-      '<div class="ab">' + ABILITIES.map((a, i) => '<button type="button" class="sl" data-s="' + i + '"><span class="ic">' + a.icon + '</span><span class="k">' + (i + 1) + '</span><span class="c ' + (a.cost.mp ? 'mp' : 'sp') + '">' + (a.cost.mp || a.cost.sp || '') + '</span><span class="n">' + a.name + '</span><span class="cdv"></span><span class="ct"></span></button>').join('') + '</div>' +
+      '<div class="vit"><div class="por"><span>?</span><small>1</small></div><div class="bars"><div class="bar hp"><i></i><b></b></div><div class="bar mp"><i></i><b></b></div><div class="bar sp"><i></i><b></b></div><div class="bar fy"><i></i><b></b></div></div></div>' +
+      '<div class="cx">' + [0, 1, 2, 3, 4].map(i => '<button type="button" class="sl b' + i + '" data-s="' + i + '"><span class="ic"></span><span class="k">' + (i ? (i === 4 ? 'ULT' : i) : '') + '</span><span class="rg"></span><span class="ct"></span></button>').join('') + '</div>' +
       '<div class="cl"><button type="button" data-a="dodge"><span class="g">\u21BA</span>Dodge<span class="q">Spc</span><span class="cdv"></span></button><button type="button" data-a="block"><span class="g">\u26E8</span>Block<span class="q">RMB</span></button>' +
       '<button type="button" data-a="jump"><span class="g">\u2191</span>Jump<span class="q">J</span></button><button type="button" data-a="lock"><span class="g">\u25CE</span>Lock<span class="q">Q</span></button>' +
       '<button type="button" data-a="potion"><span class="g">\u2697</span>Potion<span class="q">R</span><span class="cdv"></span></button><button type="button" data-a="swap"><span class="g">\u2694</span>Weapon<span class="q">E</span></button></div><div class="msg"></div>';
     document.body.appendChild(r);
     const $ = s => r.querySelector(s), $$ = s => Array.from(r.querySelectorAll(s));
     this.tp = $('.tp'); this.tpNm = $('.tp .nm'); this.tpSub = $('.tp .sub'); this.tpBar = $('.tp .bar i'); this.tpTxt = $('.tp .bar b');
-    const vb = n => ({ i: $('.vit .' + n + ' i'), b: $('.vit .' + n + ' b') }); this.vhp = vb('hp'); this.vmp = vb('mp'); this.vsp = vb('sp');
+    const vb = n => ({ i: $('.vit .' + n + ' i'), b: $('.vit .' + n + ' b') }); this.vhp = vb('hp'); this.vmp = vb('mp'); this.vsp = vb('sp'); this.vfy = vb('fy');
     this.por = $('.por span'); this.lvl = $('.por small'); this.stat = $('.stat'); this.msg = $('.msg'); this.flash = $('.flash'); this.sumBtn = $('[data-a=summon]');
-    this.slots = $$('.sl').map(b => ({ b, cdv: b.querySelector('.cdv'), ct: b.querySelector('.ct'), cd: -1, st: '' }));
+    this.slots = $$('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), cd: -1, st: '', key: '' }));
     this.btn = {}; $$('.cl button').forEach(b => { this.btn[b.dataset.a] = { b, cdv: b.querySelector('.cdv'), cd: -1 }; });
     for (let i = 0; i < NUM_POOL; i++) { const e = document.createElement('div'); e.className = 'fn'; r.appendChild(e); this.nums.push({ e, t: 9 }); }
     for (let i = 0; i < OH_POOL; i++) { const e = document.createElement('div'); e.className = 'oh'; e.innerHTML = '<i></i>'; r.appendChild(e); this.ohs.push({ e, f: e.firstChild, on: false, last: -1 }); }
     const stop = e => { e.preventDefault(); e.stopPropagation(); };
     r.addEventListener('pointerdown', e => {
       const b = e.target.closest('button'); if (!b) return; stop(e);
-      if (b.dataset.s !== undefined) api.use(+b.dataset.s); else { const a = b.dataset.a; if (a === 'block') { this.blockPtr = e.pointerId; api.block(true); } else api[a] && api[a](); }
+      if (b.dataset.s !== undefined) { const k = this.slotAbility(+b.dataset.s); if (k !== null) api.use(k); } else { const a = b.dataset.a; if (a === 'block') { this.blockPtr = e.pointerId; api.block(true); } else api[a] && api[a](); }
     });
     const up = e => { if (this.blockPtr === e.pointerId) { this.blockPtr = null; api.block(false); } };
     addEventListener('pointerup', up); addEventListener('pointercancel', up);
@@ -73,6 +84,8 @@ export class CombatHUD {
       .on('denied', d => this.say(d.why, 900)).on('playerDown', () => this.say('You fell...', 2200)).on('reward', rw => this.say('+' + rw.xp + ' XP   +' + rw.gold + ' gold', 1300));
     this.heroInfo();
   }
+  /* cluster slot (0 basic,1-3 skills,4 ult) -> ability key for the controller (index into ABILITIES, or an OWNER_SKILLS id). The controller re-validates everything. */
+  slotAbility(i) { if (i === 0) return 0; if (this.cc.ownerOk()) return OWNER_CLUSTER[i - 1]; return i === 4 ? 5 : i; }
   show(v) { this.root.style.display = v ? 'block' : 'none'; const d = document.getElementById('diagBtn'); if (d) { if (v) { this._dd = d.style.display; d.style.display = 'none'; } else if (this._dd !== undefined) d.style.display = this._dd; } }   /* #diagBtn sits under the first ability slot */
   heroInfo() { const h = this.cc.hero; this.por.textContent = (h.name || '?')[0]; this.lvl.textContent = h.level; this.cache.k = ''; }
   say(t, ms) { this.msg.textContent = t; this.msg.style.display = 'block'; clearTimeout(this._mt); this._mt = setTimeout(() => { this.msg.style.display = 'none'; }, ms || 1500); }
@@ -98,12 +111,16 @@ export class CombatHUD {
       this.setv(null, 'tlk', cc.tgt.locked, () => { this.tpSub.textContent = 'Lv ' + t.def.level + ' \u2022 ' + t.def.cls + (cc.tgt.locked ? ' \u2022 LOCKED' : ''); });
       const f = Math.round(t.hp / t.max * 400) / 400; this.setv(null, 'tf' + t.id, f, v => { this.tpBar.style.transform = 'scaleX(' + v + ')'; }); this.setv(null, 'tt' + t.id, Math.ceil(t.hp), v => { this.tpTxt.textContent = v + ' / ' + t.max; });
     } else if (this.cache.tid) { this.cache.tid = 0; this.tp.style.display = 'none'; }
-    // ability bar
-    for (let i = 0; i < 6; i++) {
-      const a = ABILITIES[i], s = this.slots[i], left = cc.cd.left(a.id), use = cc.slotUsable(i), noRes = !R.can(a.cost);
-      const q = Math.round(left * 10) / 10; if (q !== s.cd) { s.cd = q; s.cdv.style.height = left > 0 ? Math.round(cc.cd.frac(a.id) * 100) + '%' : '0'; s.ct.textContent = left > 0.05 ? (left >= 10 ? Math.ceil(left) : left.toFixed(1)) : ''; }
-      const st = (use ? '' : 'off ') + (use && noRes && left <= 0 ? 'nores' : ''); if (st !== s.st) { s.st = st; s.b.className = 'sl ' + st; }
+    // ability cluster (basic + 3 skills + ultimate); owner skills only while the controller says Owner-gated
+    const own = cc.ownerOk(); this.setv(null, 'own', own, v => { this.root.classList.toggle('own', v); });
+    for (let i = 0; i < 5; i++) {
+      const s = this.slots[i], key = this.slotAbility(i), a = typeof key === 'string' ? OWNER_SKILLS[key] : ABILITIES[key];
+      const kk = String(key) + (own ? 'o' : ''); if (kk !== s.key) { s.key = kk; s.ic.innerHTML = ICONS[a.owner ? a.icon : LEGACY_ICON[key]] || ''; s.b.title = a.name; s.b.setAttribute('aria-label', a.name); s.cd = -1; }
+      const left = cc.cd.left(a.id), use = cc.slotUsable(key), noRes = !R.can(a.cost), isUlt = a.fury, fr = isUlt && use && left <= 0 && !cc.furyReady();
+      const q = Math.round(left * 10) / 10 + (fr ? Math.round(cc.fury) / 1000 : 0); if (q !== s.cd) { s.cd = q; const p = left > 0 ? Math.round(cc.cd.frac(a.id) * 100) : fr ? Math.round(cc.fury) : 0; s.rg.style.setProperty('--p', p + '%'); s.ct.textContent = left > 0.05 ? (left >= 10 ? Math.ceil(left) : left.toFixed(1)) : ''; }
+      const lock = !use && i === 4, st = (use ? '' : 'off ') + (fr && left <= 0 ? 'fr ' : '') + (use && noRes && left <= 0 ? 'nores ' : '') + (isUlt && use && left <= 0 && !fr ? 'rdy' : ''); if (st !== s.st) { s.st = st; s.b.className = 'sl b' + i + ' ' + st; if (lock) s.ic.innerHTML = ICONS.lock; else if (!use || true) s.ic.innerHTML = ICONS[a.owner ? a.icon : LEGACY_ICON[key]] || ''; }
     }
+    this.bar(this.vfy, 'fy', cc.fury, TUNING.ult.fury);
     for (const k of ['dodge', 'potion']) { const o = this.btn[k], l = Math.round(cc.cd.left(k) * 5) / 5; if (l !== o.cd) { o.cd = l; o.cdv.style.height = l > 0 ? Math.round(cc.cd.frac(k) * 100) + '%' : '0'; } }
     this.setv(null, 'lockon', cc.tgt.locked, v => { this.btn.lock.b.classList.toggle('on', v); });
     this.setv(null, 'blk', cc.blocking, v => { this.btn.block.b.classList.toggle('on', v); });

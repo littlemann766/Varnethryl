@@ -13,7 +13,7 @@ with sync_playwright() as p:
     pg = b.new_context(viewport={'width':390,'height':844}, has_touch=True, is_mobile=True).new_page(); errs=[]
     pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text[:150]) if m.type == 'error' else 0)
     pg.goto(f'http://127.0.0.1:{port}/proto3d.html?nosave=1&party=0&npcs=0', wait_until='commit', timeout=120000); pg.wait_for_function('window.__p3d&&__p3d.frames>5', timeout=120000); pg.wait_for_timeout(1500)
-    pg.evaluate("__p3d.fightToggle()"); pg.wait_for_function("__p3d.fight&&__p3d.fight.on&&__p3d.fight.hasSaber", timeout=60000)
+    pg.evaluate("window.__p3d.owner=true; window.__p3d.cheats=window.__p3d.cheats||{}"); pg.evaluate("__p3d.fightToggle()"); pg.wait_for_function("__p3d.fight&&__p3d.fight.on&&__p3d.fight.hasSaber", timeout=60000)
     hid = pg.evaluate("__p3d.modelStatus().models[__p3d.heroIndex].id"); print('hero', hid, 'saber', pg.evaluate("__p3d.fight.hasSaber"))
     pg.wait_for_function("__p3d.fight.monsters.length>=1", timeout=60000); pg.wait_for_timeout(1500)
     pg.wait_for_timeout(1500)

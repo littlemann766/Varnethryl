@@ -1,24 +1,34 @@
 /* CombatController: owns all combat state and rules. No THREE, no DOM. Reads only player position/facing (setPlayer) - never the camera.
    Talks to the outside through events: on(type, fn). The HUD listens; the host (fight.js) turns events into visuals/movement. */
-import { PLAYER, ABILITIES, ENEMIES, TUNING } from './data.js';
+import { PLAYER, ABILITIES, ENEMIES, TUNING, OWNER_SKILLS } from './data.js';
 import { DamageCalculator } from './calc.js';
 import { CooldownManager, ResourceManager, TargetingSystem } from './systems.js';
 import { EnemyAIController } from './ai.js';
 export class CombatController {
   constructor(o = {}) {
     this.rng = o.rng || Math.random; this.HS = o.HS || 1.5; this.P = Object.assign({}, PLAYER, o.player || {});
-    this.cd = new CooldownManager(); this.noCooldown = false; this.cd.off = () => this.noCooldown && !!this.hero.owner; this.res = new ResourceManager(this.P); this.tgt = new TargetingSystem(this.P); this.ai = new EnemyAIController();
+    this.cd = new CooldownManager(); this.noCooldown = false; this.cd.off = () => this.noCooldown && this.perkHero(); this.res = new ResourceManager(this.P); this.tgt = new TargetingSystem(this.P); this.ai = new EnemyAIController();
     this.enemies = []; this.ls = {}; this.p = { x: 0, z: 0, yaw: 0, dead: false };
     this.hero = { id: '', name: 'Hero', level: 40, className: 'Adventurer', saber: false };
     this.act = null; this.blocking = false; this.blockT = 0; this.iframes = 0; this.shield = 0; this.potions = this.P.potion.charges; this.dead = 0;
-    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1;
+    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this._mk = ''; this.ownerUnlocked = false; this.meteors = [];
     this.env = { HS: this.HS, move: o.move || ((e, dx, dz) => { e.x += dx; e.z += dz; }) };
   }
   on(t, f) { (this.ls[t] || (this.ls[t] = [])).push(f); return this; }
   emit(t, a) { const l = this.ls[t]; if (l) for (let i = 0; i < l.length; i++) l[i](a); }
-  setHero(h) { Object.assign(this.hero, h); this.hero.owner = /(^|:)owner/.test(this.hero.id || '');  /* Owner gate: only the Owner has 999,999 max HP */ const mx = this.hero.owner ? this.P.ownerHp : this.P.hp; if (this.res.max.hp !== mx) { this.res.max.hp = mx; this.res.hp = mx; } this.emit('hero', this.hero); }
+  setHero(h) { Object.assign(this.hero, h); this.hero.owner = /(^|:)owner/.test(this.hero.id || '');  /* Owner gate: only the Owner has 999,999 max HP */ this.applyMax(true); this.emit('hero', this.hero); }
+  /* max HP/MP/SP: Owner skin = ownerHp; non-Owner hero holding the Owner saber on the owner account = x TUNING.perks.holderMul (not invincible); everyone else normal. Current values keep their fraction; reverts when the saber goes away. */
+  applyMax(force) {
+    const own = !!this.hero.owner, hold = !own && this.ownerOk(), m = hold ? TUNING.perks.holderMul : 1, key = (own ? 'o' : '') + m; if (!force && key === this._mk) return; this._mk = key;
+    const nx = { hp: own ? this.P.ownerHp : Math.round(this.P.hp * m), mp: Math.round(this.P.mp * m), sp: Math.round(this.P.sp * m) }, R = this.res;
+    for (const k of ['hp', 'mp', 'sp']) { if (R.max[k] === nx[k]) continue; R[k] = own && k === 'hp' ? nx[k] : Math.min(nx[k], Math.max(0, R[k] * nx[k] / R.max[k])); R.max[k] = nx[k]; }
+  }
   setPlayer(x, z, yaw) { this.p.x = x; this.p.z = z; this.p.yaw = yaw; }   // the only world inputs
-  slotUsable(i) { const a = ABILITIES[i]; return !a.saber || this.hero.saber; }
+  /* Owner gate: Owner skin AND the host-confirmed owner unlock (fight.js sets ownerUnlocked from the owner gate; the HUD can never set it). */
+  ownerOk() { return !!(this.ownerUnlocked && (this.hero.owner || this.hero.saber)); }   // owner account AND (Owner skin OR active hero wields the Owner saber)
+  perkHero() { return !!(this.hero.owner || (TUNING.perks.saberHolderResources && this.ownerOk())); }   // unlimited MP/SP + no-cooldowns recipient
+  slotUsable(i) { const a = typeof i === 'string' ? OWNER_SKILLS[i] : ABILITIES[i]; if (!a) return false; if (a.owner && !this.ownerOk()) return false; return !a.saber || !!this.hero.saber; }
+  furyReady() { return this.res.unlimited || this.fury >= TUNING.ult.fury; }
   weapon() { return this.hero.saber ? 'saber' : 'unarmed'; }
   addEnemy(key, x, z, extra) {
     const def = ENEMIES[key]; const e = Object.assign({ id: this.nextId++, key, def, x, z, yaw: 0, hp: def.hp, max: def.hp, state: 'idle', tStateT: 0, atkCd: 0.8 + this.rng(), flash: 0, knockT: 0, kx: 0, kz: 0, staggerFor: 0, rewarded: false, deadT: 0 }, extra);
@@ -30,19 +40,34 @@ export class CombatController {
   /* ---- player inputs ---- */
   busy() { return this.dead > 0 || !!this.act; }
   use(i) {
-    const a = ABILITIES[i]; if (!a || this.busy()) return false;
-    if (!this.slotUsable(i)) { this.emit('denied', { slot: i, why: 'Owner only' }); return false; }
+    const a = typeof i === 'string' ? OWNER_SKILLS[i] : ABILITIES[i]; if (!a || this.busy()) return false;
+    if (a.owner && !this.ownerOk()) { this.emit('denied', { slot: i, why: 'Owner only' }); return false; }
+    if (!this.slotUsable(i)) { this.emit('denied', { slot: i, why: a.owner ? 'Draw the saber' : 'Owner only' }); return false; }
     if (!this.cd.ok(a.id)) return false;
+    if (a.fury && !this.furyReady()) { this.emit('denied', { slot: i, why: 'Fury not full' }); return false; }
     if (!this.res.can(a.cost)) { this.emit('denied', { slot: i, why: a.cost.mp && this.res.mp < a.cost.mp ? 'Not enough mana' : 'Not enough stamina' }); return false; }
-    const nrm = !this.hero.owner, tn = TUNING.normal; let ab = a;
+    const nrm = !(this.hero.owner || this.ownerOk()), tn = TUNING.normal; let ab = a;
     if (nrm) ab = Object.assign({}, a, { cd: a.cd * (a.id === 'basic' ? tn.basicCdMul : 1), windup: a.windup * (a.id === 'basic' ? 1 : tn.windupMul), T: a.T * (a.id === 'basic' ? 0.8 : tn.windupMul), cost: a.id === 'basic' ? { sp: tn.basicSp } : a.cost });
     if (!this.res.can(ab.cost)) { this.emit('denied', { slot: i, why: 'Not enough stamina' }); return false; }
     this.res.spend(ab.cost); this.cd.start(a.id, ab.cd); this.act = { a: ab, slot: i, t: 0, done: false };
+    if (a.fury && !this.res.unlimited) this.fury = 0;
+    if (a.kind === 'meteor') { const U = TUNING.ult; this.meteors.push({ t: U.delay, x: this.p.x, z: this.p.z, r: U.radius }); this.emit('meteorCast', { x: this.p.x, z: this.p.z, radius: U.radius, delay: U.delay }); }
     const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, 8 * this.HS);
     this.emit('action', { slot: i, a: ab, T: ab.T, aim: t });
     return true;
   }
-  dodge(dx, dz) {
+  /* Unholy Destruction impact. Eligible = hostile, living, non-boss monsters inside the radius (friendlies/protected/props are never in cc.enemies and are skipped if flagged).
+     Each gets the normal death handler (defeat) exactly once. Bosses take the normal owner saber hit unless TUNING.ult.bossesInstantKill. The Owner/party are never touched. */
+  meteorImpact(m) {
+    const U = TUNING.ult, hit = [];
+    for (const e of this.enemies.slice()) {
+      if (e.state === 'defeated' || e.friendly || e.protected || e.prop || e.npc) continue;
+      if (Math.hypot(e.x - m.x, e.z - m.z) > m.r) continue;
+      if (e.def.boss && !U.bossesInstantKill) { this.hitEnemy(e, 1, { stagger: 0, ult: true }); hit.push({ e, kill: false }); continue; }
+      const dmg = Math.ceil(e.hp); e.hp = 0; this.emit('damage', { e, dmg, crit: false, toPlayer: false }); this.defeat(e); hit.push({ e, kill: true });
+    }
+    this.emit('meteorImpact', { x: m.x, z: m.z, radius: m.r, hits: hit });
+  }  dodge(dx, dz) {
     const D = this.P.dodge; if (this.dead > 0 || !this.cd.ok('dodge') || !this.res.spend({ sp: D.sp })) { if (this.dead <= 0 && this.cd.ok('dodge')) this.emit('denied', { why: 'Not enough stamina' }); return false; }
     this.cd.start('dodge', D.cd); this.iframes = D.iframes; this.act = null;
     let l = Math.hypot(dx || 0, dz || 0); if (l < 0.01) { dx = -Math.sin(this.p.yaw); dz = -Math.cos(this.p.yaw); l = 1; }   // no input: step back
@@ -64,8 +89,9 @@ export class CombatController {
     const r = DamageCalculator.playerHit(this.weapon(), mult, this.rng); e.hp = Math.max(0, e.hp - r.dmg); e.flash = 0.2; this.lastTarget = e; this.lastHitT = this.cd.t;
     const dx = e.x - this.p.x, dz = e.z - this.p.z, d = Math.hypot(dx, dz) || 1; e.kx = dx / d; e.kz = dz / d; e.knockT = (a && a.knock ? 0.35 : 0.12);
     this.emit('damage', { e, dmg: r.dmg, crit: r.crit, toPlayer: false });
+    if (this.ownerOk() && !(a && a.ult)) this.fury = Math.min(TUNING.ult.fury, this.fury + (a && a.id !== 'basic' ? TUNING.ult.furyPerSkill : TUNING.ult.furyPerBasic));
     if (e.hp <= 0) { this.defeat(e); return; }
-    e.poiseDmg = (e.poiseDmg || 0) + r.dmg; const big = e.poiseDmg >= e.def.hp * TUNING.normal.staggerFrac && !this.hero.owner;
+    e.poiseDmg = (e.poiseDmg || 0) + r.dmg; const big = e.poiseDmg >= e.def.hp * TUNING.normal.staggerFrac && !(this.hero.owner || this.ownerOk());
     if (big) { e.poiseDmg = 0; this.ai.stagger(e, e.def.stagger); }
     else if (a && a.stagger) this.ai.stagger(e, e.def.stagger);
     else if (e.state === 'idle') this.ai.set(e, 'chase');
@@ -81,6 +107,7 @@ export class CombatController {
   }
   resolveAction(act) {
     const a = act.a, HS = this.HS;
+    if (a.kind === 'meteor') return;   // lands later via this.meteors
     if (a.kind === 'shield') { this.shield = a.dur; this.emit('shield', a); return; }
     if (a.kind === 'ranged') { const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * HS); if (t && Math.hypot(t.x - this.p.x, t.z - this.p.z) <= a.range * HS + t.def.r) { this.emit('throw', { e: t }); this.hitEnemy(t, a.mult, a); } return; }
     if (a.kind === 'storm') { act.storm = 3; act.stormT = 0; this.stormHit(act); return; }
@@ -102,10 +129,12 @@ export class CombatController {
     this.emit('enemyAttack', { e, result: res, dmg: h }); if (h > 0) this.emit('damage', { e, dmg: h, crit: false, toPlayer: true });
     if (this.res.hp <= 0) { this.dead = this.P.respawn; this.act = null; this.block(false); this.emit('playerDown'); }
   }
-  respawn() { this.res.full(); this.dead = 0; this.potions = this.P.potion.charges; this.cd.reset(); this.iframes = 0; this.shield = 0; this.act = null; this.clearEnemies(); this.tgt.target = null; this.tgt.locked = false; this.emit('respawn'); }
+  respawn() { this.res.full(); this.dead = 0; this.potions = this.P.potion.charges; this.cd.reset(); this.iframes = 0; this.shield = 0; this.act = null; this.meteors.length = 0; this.clearEnemies(); this.tgt.target = null; this.tgt.locked = false; this.emit('respawn'); }
   /* ---- frame ---- */
   update(dt) {
-    this.cd.tick(dt); this.res.tick(dt, this.blocking);
+    this.applyMax(false); this.cd.tick(dt); this.res.tick(dt, this.blocking);
+    if (this.res.unlimited && this.ownerOk()) this.fury = TUNING.ult.fury;
+    if (this.meteors.length) for (const m of this.meteors.slice()) { m.t -= dt; if (m.t <= 0) { this.meteors.splice(this.meteors.indexOf(m), 1); if (this.dead <= 0) this.meteorImpact(m); } }
     this.iframes = Math.max(0, this.iframes - dt); this.shield = Math.max(0, this.shield - dt);
     if (this.blocking) { this.blockT += dt; if (!this.res.unlimited) this.res.sp = Math.max(0, this.res.sp - this.P.block.drain * dt); if (this.res.sp <= 0) this.block(false); }
     if (this.dead > 0) { this.dead -= dt; if (this.dead <= 0) this.respawn(); }

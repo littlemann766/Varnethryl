@@ -129,14 +129,20 @@ export function createFight(env) {
     for (const o of [rock, shadow, zone, burst]) { o.visible = false; scene.add(o); }
     return (MET = { rock, shadow, zone, burst, pos, vel, N, st: 'off', t: 0, x: 0, z: 0, r: 25, delay: 1.5 });
   }
+  /* Unholy lightning storm: 14 pooled zig-zag line bolts (additive purple), struck at random spots in the zone. */
+  let LT = null;
+  function ltBuild() { if (LT) return LT; const bolts = []; for (let i = 0; i < 14; i++) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(10 * 3), 3)); const l = new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0xb04bff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })); l.frustumCulled = false; l.visible = false; scene.add(l); bolts.push({ l, t: 9 }); } return (LT = { bolts, next: 0, acc: 0 }); }
+  function ltStrike(x, z) { const L = ltBuild(), b = L.bolts[L.next++ % L.bolts.length], a = b.l.geometry.attributes.position.array, top = 85; for (let i = 0; i < 10; i++) { const u = i / 9, j = (i === 0 || i === 9) ? 0 : 4 * (1 - u * 0.5); a[i * 3] = x + (Math.random() - 0.5) * j + (1 - u) * 6; a[i * 3 + 1] = top * (1 - u); a[i * 3 + 2] = z + (Math.random() - 0.5) * j; } b.l.geometry.attributes.position.needsUpdate = true; b.t = 0; b.l.visible = true; b.l.material.color.setHex(Math.random() < 0.35 ? 0xe9d6ff : 0xa23cff); }
+  function ltUpdate(dt, active, m) { if (!LT) return; if (active && m) { LT.acc += dt; const gap = m.st === 'burst' ? 0.03 : 0.09; while (LT.acc > gap) { LT.acc -= gap; const a = Math.random() * 6.283, d = Math.sqrt(Math.random()) * m.r; ltStrike(m.x + Math.cos(a) * d, m.z + Math.sin(a) * d); } } for (const b of LT.bolts) { if (!b.l.visible) continue; b.t += dt; const k = 1 - b.t / 0.2; if (k <= 0) { b.l.visible = false; continue; } b.l.material.opacity = k > 0.6 ? 1 : k; } }
+  function ltDispose() { if (!LT) return; for (const b of LT.bolts) { scene.remove(b.l); b.l.geometry.dispose(); b.l.material.dispose(); } LT = null; }
   const metHide = () => { if (MET) { MET.st = 'off'; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) o.visible = false; } };
-  function metDispose() { if (!MET) return; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) { scene.remove(o); o.geometry.dispose(); o.material.dispose(); } MET = null; }
+  function metDispose() { ltDispose(); if (!MET) return; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) { scene.remove(o); o.geometry.dispose(); o.material.dispose(); } MET = null; }
   const ROCK_R = 11, FALL_H = 75;
-  function metStart(ev) { const m = metBuild(); m.st = 'fall'; m.t = 0; m.x = ev.x; m.z = ev.z; m.r = ev.radius; m.delay = ev.delay; m.zone.material.color.setHex(0xff3a1a); m.rock.visible = m.shadow.visible = m.zone.visible = true; m.rock.scale.setScalar(ROCK_R); shakeA = 0.25; shakeT = 0.25; }
+  function metStart(ev) { const m = metBuild(); m.st = 'fall'; m.t = 0; m.x = ev.x; m.z = ev.z; m.r = ev.radius; m.delay = ev.delay; m.mode = ev.mode; const uh = ev.mode === 'all'; m.zone.material.color.setHex(uh ? 0x8a2be2 : 0xffe9a0); m.burst.material.color.setHex(uh ? 0xb04bff : 0xfff0b0); m.rock.material.emissive.setHex(uh ? 0x000000 : 0xffd27a); m.rock.visible = !uh; m.shadow.visible = m.zone.visible = true; m.rock.scale.setScalar(ROCK_R); shakeA = 0.25; shakeT = 0.25; }
   function metImpact() { const m = MET; if (!m) return; m.st = 'burst'; m.t = 0; m.rock.visible = false; m.shadow.visible = false; m.burst.visible = true; m.burst.position.set(m.x, 1, m.z);
     for (let i = 0; i < m.N; i++) { const a = Math.random() * 6.283, sp = 20 + Math.random() * 40, up = 15 + Math.random() * 30; m.vel.set([Math.cos(a) * sp, up, Math.sin(a) * sp], i * 3); m.pos.set([0, 0, 0], i * 3); } m.burst.geometry.attributes.position.needsUpdate = true; shakeA = 1.6; shakeT = 0.7; }
   function metUpdate(dt) {
-    const m = MET; if (!m || m.st === 'off') return; m.t += dt;
+    const m = MET; if (!m || m.st === 'off') { ltUpdate(dt, false); return; } m.t += dt; ltUpdate(dt, m.mode === 'all', m);
     if (m.st === 'fall') {
       const u = Math.min(1, m.t / m.delay), e = u * u;
       m.rock.position.set(m.x, ROCK_R * 0.6 + (1 - e) * FALL_H, m.z); m.rock.rotation.x += dt * 1.2; m.rock.rotation.z += dt * 0.7; m.rock.material.emissiveIntensity = 0.6 + u;
@@ -146,14 +152,14 @@ export function createFight(env) {
       const u = m.t / 0.9; if (u >= 1) { metHide(); return; }
       const p = m.pos, v = m.vel; for (let i = 0; i < m.N; i++) { const k = i * 3; v[k + 1] -= 60 * dt; p[k] += v[k] * dt; p[k + 1] = Math.max(0, p[k + 1] + v[k + 1] * dt); p[k + 2] += v[k + 2] * dt; }
       m.burst.geometry.attributes.position.needsUpdate = true; m.burst.material.opacity = 1 - u;
-      m.zone.visible = true; m.zone.scale.setScalar(Math.max(0.1, m.r * Math.min(1, u * 2.2))); m.zone.material.opacity = 0.8 * (1 - u); m.zone.material.color.setHex(0xffb13e);
+      m.zone.visible = true; m.zone.scale.setScalar(Math.max(0.1, m.r * Math.min(1, u * 2.2))); m.zone.material.opacity = 0.8 * (1 - u); m.zone.material.color.setHex(m.mode === 'all' ? 0xb04bff : 0xffe9a0);
     }
   }
   function shake(cam) { if (shakeT <= 0) return; const k = shakeA * Math.min(1, shakeT / 0.3); cam.position.x += (Math.random() - 0.5) * k; cam.position.y += (Math.random() - 0.5) * k; cam.position.z += (Math.random() - 0.5) * k; }
   let fxT = -1, fxMax = 1, orbT = -1, orbFrom = null, orbTo = null;
 
   /* ---- controller events -> world ---- */
-  cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact(); if (MET) MET.zone.material.color.setHex(0xffb13e); hud.say('UNHOLY DESTRUCTION', 1400); });
+  cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact();  hud.say(ev.name ? ev.name.toUpperCase() : 'DESTRUCTION', 1400); });
   cc.on('action', ev => {
     A.swing = { t: 0, T: ev.T, big: ev.a.id === 'heavy' ? 1.5 : 1, kind: ev.a.kind };
     { const h = env.hero(), u = h.userData, drawn = slashA && saber && saber.parent && saber.parent.name === 'weapon_R';

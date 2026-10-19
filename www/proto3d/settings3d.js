@@ -16,6 +16,18 @@ const CSS = '#settingsPanel{position:fixed;z-index:70;top:calc(max(8px,env(safe-
  + '#settingsPanel input[type=range]{flex:1 1 150px;min-height:40px;accent-color:#7fb2e6}'
  + '#settingsPanel small{opacity:.7;font-size:11px;display:block}';
 
+const CSS2 = '#settingsPanel{background:linear-gradient(180deg,#171127f2,#0d0b17f5)!important;border:1px solid #c9a24a88!important;border-radius:16px!important;color:#efe8ff;width:min(400px,calc(100vw - 16px))!important;box-shadow:0 8px 30px #000a,0 0 0 1px #6b3fd433}'
+ + '#settingsPanel h3{font-size:18px;color:#f1d98a;letter-spacing:.04em}'
+ + '#settingsPanel .card{background:#1d1632cc;border:1px solid #6b3fd466;border-radius:14px;padding:10px 12px 12px;margin:10px 0}'
+ + '#settingsPanel .card>.sec{margin:0 0 2px;font-size:13px;font-weight:700;color:#f1d98a;letter-spacing:.1em}'
+ + '#settingsPanel .card>.desc{opacity:.7;font-size:12px;margin:0 0 8px}'
+ + '#settingsPanel .card.own{border-color:#c9a24a99;background:#241a35cc}'
+ + '#settingsPanel button,#settingsPanel select{min-height:48px!important;background:#2b2147!important;border:1px solid #8a5cf655!important;border-radius:12px!important}'
+ + '#settingsPanel button.on{background:linear-gradient(180deg,#e2bd5c,#b8892f)!important;color:#1a1224!important}'
+ + '#settingsPanel .own button.on{background:linear-gradient(180deg,#e2bd5c,#b8892f)!important}'
+ + '#settingsPanel input[type=range]{accent-color:#c9a24a!important;min-height:48px!important}'
+ + '#settingsPanel .stp{min-width:48px!important;font-size:20px;font-weight:700}';
+const DESCS = { 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Display': 'On-screen info.', 'Owner (save is marked cheated)': 'Owner-account tools and power settings.', 'Owner damage': 'Saber and Unholy Destruction damage. Owner account only.' };
 let root = null, body = null, timer = 0, E = null;
 function el(tag, props, kids) { const e = document.createElement(tag); if (props) Object.assign(e, props); if (kids) for (const k of kids) e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); return e; }
 const isOpen = () => !!root && root.style.display === 'block';
@@ -92,17 +104,45 @@ function build() {
     const tt = el('button', { type: 'button', textContent: 'Spawn Ashen Titan' }); tt.dataset.set = 'owner-titan';
     tt.addEventListener('click', () => { msg.textContent = ch.spawnTitan() ? 'The Ashen Titan awakens.' : 'A Titan is already alive.'; });
     box.appendChild(row(mx, full, tt)); box.appendChild(msg); body.appendChild(box);
+    const dm = el('div', { className: 'own' }); dm.appendChild(sec('Owner damage'));
+    const sd = () => import('./combat/data.js');
+    const stepper = (key, label, lo, hi, get, set, fmt) => {
+      const out = el('span', { className: 'val', style: 'min-width:64px;text-align:center;font-weight:700;color:#f1d98a' });
+      const mk2 = (t, d, k) => { const b = el('button', { type: 'button', textContent: t, className: 'stp' }); b.dataset.set = key + '-' + k; b.addEventListener('click', () => { set(Math.max(lo, Math.min(hi, get() + d))); sy(); }); return b; };
+      const rg = el('input', { type: 'range', min: lo, max: hi, step: 1, value: get() }); rg.dataset.set = key; rg.addEventListener('input', () => { set(+rg.value); sy(); });
+      const sy = () => { out.textContent = fmt(get()); if (document.activeElement !== rg) rg.value = get(); }; sy(); syncs.push(sy);
+      return [el('div', { className: 'row' }, [el('span', { className: 'lab', textContent: label })]), el('div', { className: 'row' }, [mk2('−', -1, 'dec'), rg, mk2('+', 1, 'inc'), out])];
+    };
+    sd().then((D) => {
+      const P = D.TUNING.perks, U = D.TUNING.ult, sv = () => D.saveSaberPrefs();
+      const [l1, r1] = stepper('saberMul', 'Saber damage multiplier (× target current health; 0 = flat 99,999)', 0, 50, () => P.saberMul, (v) => { P.saberMul = v; sv(); }, (v) => v === 0 ? 'Flat' : '×' + v);
+      const bt = toggleBtn('Saber multiplier also hits bosses', () => P.saberBossesX12, (v) => { P.saberBossesX12 = v; sv(); }, 'saberBossesX12'); syncs.push(bt._sync);
+      const [l2, r2] = stepper('ultMul', 'Ultimate damage multiplier (Unholy Destruction)', 1, 100, () => U.dmgMul, (v) => { U.dmgMul = v; sv(); }, (v) => '×' + v);
+      dm.append(l1, r1, row(bt), l2, r2, el('small', { textContent: 'Bosses take the normal 99,999 hit from the ultimate unless instant-kill is enabled. Never affects you, your party, NPCs or props.' }));
+      regroup();
+    });
+    body.appendChild(dm);
   }
   const reset = el('button', { type: 'button', textContent: 'Reset camera & settings' }); reset.dataset.set = 'reset';
   reset.addEventListener('click', () => { Object.assign(prefs, DEFAULT_PREFS); rig.setView('third'); rig.setZoom(1); applyPrefs(E); save(); build(); });
   body.appendChild(el('div', { className: 'sec', textContent: ' ' })); body.appendChild(reset);
-  build.syncs = syncs;
+  build.syncs = syncs; regroup();
+  function regroup() {   // wrap each section header + its controls into a card
+    const kids = [...body.childNodes]; let card = null;
+    for (const k of kids) {
+      if (k.classList && k.classList.contains('card')) { card = null; continue; }
+      const isSec = k.classList && k.classList.contains('sec'), box = k.classList && k.classList.contains('own');
+      if (box) { const h = k.querySelector('.sec'); if (h) { k.className = 'card own'; const d = el('div', { className: 'desc', textContent: DESCS[h.textContent] || '' }); h.after(d); } card = null; continue; }
+      if (isSec && k.textContent.trim()) { card = el('div', { className: 'card' }); body.insertBefore(card, k); card.appendChild(k); const d = DESCS[k.textContent]; if (d) card.appendChild(el('div', { className: 'desc', textContent: d })); continue; }
+      if (card) card.appendChild(k);
+    }
+  }
 }
 
 export function toggleSettings(env) {
   E = env;
   if (!root) {
-    document.head.appendChild(el('style', { textContent: CSS }));
+    document.head.appendChild(el('style', { textContent: CSS + CSS2 }));
     root = el('div', { id: 'settingsPanel', role: 'dialog', 'aria-label': 'Settings' }); body = el('div');
     const close = el('button', { type: 'button', textContent: '✕', style: 'min-height:40px', id: 'setClose' }); close.addEventListener('click', hide);
     root.append(el('h3', null, [el('span', { textContent: 'Settings' }), close]), body);

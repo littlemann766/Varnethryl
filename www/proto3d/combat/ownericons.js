@@ -32,3 +32,4 @@ export const OWNER_ICON = {
     '<g filter="url(#oug)"><path d="M64 36 79 41 84 56 76 70 60 73 47 64 46 48 54 38Z" fill="url(#oum)" stroke="#ffd27a" stroke-width="1.6" stroke-linejoin="round"/><path d="M58 44l9 8-3 9M72 48l-4 5M52 56l8 2" stroke="#ffe9a0" stroke-width="1.4" stroke-linecap="round" fill="none"/></g>' +
     '<path d="M30 70l-5 8M40 78l-3 9M82 28l6-5M88 40l7-2" stroke="#ffb347" stroke-width="2" stroke-linecap="round"/></svg>',
 };
+OWNER_ICON.holy = OWNER_ICON.unholy;   // tinted gold/white by CSS (Unholy is tinted purple/black)

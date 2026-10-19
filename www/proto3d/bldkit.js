@@ -407,7 +407,9 @@ Builder.prototype.fullUpper = function (o) {
     if (!round) { const k = ax ? 'cx' : 'cz', sg = (ax ? Math.sin(ang) : Math.cos(ang)) > 0 ? 1 : -1, lo = ax ? rect[0] : rect[2], hi = ax ? rect[1] : rect[3], FOOT = o.foot || 1.7;
       const foot0 = st[k] - sg * len0 / 2, nf = sg > 0 ? Math.max(foot0, lo + FOOT) : Math.min(foot0, hi - FOOT), far = sg > 0 ? hi - .5 : lo + .5; const nl = Math.min(len, Math.abs(far - nf)); st[k] = nf + sg * nl / 2; len = Math.max(nl, Math.min(len0, Math.abs(far - nf))); st[k] = nf + sg * len / 2; }
     hole = ax ? [st.cx - len / 2, st.cx + len / 2, st.cz - w / 2, st.cz + w / 2] : [st.cx - w / 2, st.cx + w / 2, st.cz - len / 2, st.cz + len / 2];
-    rects = subRect(rect, hole); this.stairs({ cx: st.cx, cz: st.cz, ang, len, w, l0, y0, l1: level, y1: y });
+    { const sgn = (ax ? Math.sin(ang) : Math.cos(ang)) > 0 ? 1 : -1, ov = o.topOverlap === undefined ? .12 : o.topOverlap, hf = hole.slice();   // top end of the flight: the slab reaches .12 m into the ramp so there is never a gap between ramp and floor
+      if (ax) { if (sgn > 0) hf[1] -= ov; else hf[0] += ov; } else { if (sgn > 0) hf[3] -= ov; else hf[2] += ov; } rects = subRect(rect, hf); }
+    this.stairs({ cx: st.cx, cz: st.cz, ang, len, w, l0, y0, l1: level, y1: y });
     // low end of the opening: block + rail so an upstairs hero cannot step off the slab into the stairwell
     const s = Math.sin(ang), c = Math.cos(ang), lx = st.cx - s * (len / 2 + .15), lz = st.cz - c * (len / 2 + .15), nn = Math.ceil(w / .35);
     for (let q = 0; q <= nn; q++) { const t = -w / 2 + q * w / nn; const [wx, wz] = this.toW(lx + c * t, lz - s * t); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: level, stair: 1 }); }

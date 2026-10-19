@@ -1,0 +1,57 @@
+{
+ "version": 2,
+ "model": "ember_new4",
+ "H": 1.3045,
+ "groups": [
+  {
+   "name": "misc_cloth",
+   "kind": "scarf",
+   "match": "^(scarf|sleeve|skirt[a-z]|tabard|cloth_|tassel)\\w*$",
+   "stiffness": 0.3,
+   "damping": 0.8,
+   "gravity": 0.0004,
+   "inertia": 0.6,
+   "maxSwing": [
+    0.164,
+    0.226,
+    0.308,
+    0.411,
+    0.411,
+    0.411,
+    0.411
+   ],
+   "maxChain": 0.411,
+   "maxVel": 0.005,
+   "smooth": 0.4,
+   "collide": false,
+   "margin": 0,
+   "hemLen": 0.222
+  },
+  {
+   "name": "tail",
+   "kind": "rigid",
+   "match": "^tail\\d*$",
+   "enabled": false,
+   "reason": "body tail: baked heavy S-wave only (no spring: springs made it wag)"
+  },
+  {
+   "name": "mane",
+   "kind": "rigid",
+   "match": "^mane\\d*$",
+   "enabled": false,
+   "reason": "fur"
+  }
+ ],
+ "colliders": [
+  {
+   "name": "torso",
+   "a": "hips",
+   "b": "spine2",
+   "ra": 0.1239,
+   "rb": 0.1305
+  }
+ ],
+ "global": {
+  "note": "step 1/60; capsules are between bone heads (world space)"
+ }
+}

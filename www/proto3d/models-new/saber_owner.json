@@ -1,0 +1,213 @@
+{
+ "_readme": "Owner-only lightsaber. Weapon is a separate prop GLB parented at runtime to a bone of owner_new5.glb. Nothing here applies to any other character.",
+ "character": {
+  "file": "owner_new5.glb",
+  "supersedes": "owner_new4.glb (same mesh/skin, finger weights on the RIGHT hand re-fit, +2 attach joints, +5 clips; idle/walk/run unchanged)",
+  "height_m": 1.9,
+  "skinJointCount": 86,
+  "newJoints": [
+   "weapon_R",
+   "weapon_back"
+  ],
+  "clothConfig": "owner_new5.cloth.json (identical to owner_new4)",
+  "combinedFile": "owner_new5_saber.glb (same, with saber already parented under weapon_R)"
+ },
+ "saberProp": {
+  "file": "saber_owner.glb",
+  "sizeBytes": 425572,
+  "rootNode": "saber",
+  "originAtGripCentre": true,
+  "bladeAxis": "+Y",
+  "buttonSide": "+Z",
+  "scale": 1,
+  "unitsMeters": true,
+  "nodes": {
+   "hilt": "saber_hilt (textured PBR, metalness<=0.7, no env-map needed)",
+   "blade": "saber_blade (opaque, emissive; recolour via material emissive)",
+   "glow": "saber_glow (BLEND halo, optional - hide on low-end)",
+   "tip": "saber_tip (empty at blade tip, for trails/light)"
+  },
+  "lengthsM": {
+   "total": 1.146,
+   "hiltBelowGrip": 0.23,
+   "hiltAboveGrip": 0.12,
+   "blade": 0.8,
+   "bladeStartsAtY": 0.116,
+   "bladeEndsAtY": 0.916
+  }
+ },
+ "attach": {
+  "hand": {
+   "bone": "weapon_R",
+   "parent": "hand_R",
+   "local": {
+    "translation": [
+     0.02985,
+     0.00078,
+     -0.0436
+    ],
+    "rotation_xyzw": [
+     -0.52837,
+     0.14908,
+     0.82679,
+     -0.12259
+    ]
+   },
+   "note": "Reparent node 'saber' under weapon_R with identity local transform. Grip is baked into this bone: the blade leaves the curled right fist pointing forward/up."
+  },
+  "belt": {
+   "bone": "weapon_back",
+   "parent": "hips",
+   "local": {
+    "translation": [
+     0.17,
+     -0.23012,
+     0.162
+    ],
+    "rotation_xyzw": [
+     0.70447,
+     0.07977,
+     0.28143,
+     0.64666
+    ]
+   },
+   "note": "hips has a -90deg X rest rotation in this rig, so these values are in that rotated frame. World at rest: pos (0.17,1.15,0.18), left-front belt, hilt hangs vertically, button faces outward. Sheathed = blade retracted."
+  }
+ },
+ "toggle": {
+  "draw": "saber.parent = weapon_R; saber_blade.visible = saber_glow.visible = true; play idle_saber/walk_saber/run_saber/saber_ready/saber_slash instead of idle/walk/run",
+  "sheathe": "saber.parent = weapon_back (identity local); saber_blade.visible = saber_glow.visible = false; play plain idle/walk/run",
+  "ignite": "scale saber_blade and saber_glow along local Y from 0.001 to 1 over ~0.25 s (origin of both is the emitter, so scaling grows the blade out of the hilt)",
+  "ownerOnly": "only load/attach this prop when the active character is the Owner"
+ },
+ "clips": {
+  "withoutSaber": {
+   "idle": "idle",
+   "walk": "walk",
+   "run": "run"
+  },
+  "withSaber": {
+   "idle": "idle_saber",
+   "walk": "walk_saber",
+   "run": "run_saber",
+   "ready": "saber_ready",
+   "attack": "saber_slash"
+  },
+  "durationsSec": {
+   "idle": 3,
+   "walk": 0.942,
+   "run": 0.674,
+   "idle_saber": 3,
+   "walk_saber": 0.942,
+   "run_saber": 0.674,
+   "saber_ready": 3,
+   "saber_slash": 1.3
+  },
+  "loops": {
+   "idle_saber": true,
+   "walk_saber": true,
+   "run_saber": true,
+   "saber_ready": true,
+   "saber_slash": false
+  },
+  "speeds_mps": {
+   "walk_saber": 1.486,
+   "run_saber": 2.282,
+   "note": "same legs/gait as walk/run (only the right arm, fingers and, in slash/ready, the torso differ)"
+  },
+  "slashNote": "saber_slash is a one-shot (1.3 s); starts and ends on the idle_saber pose, so crossfade idle_saber -> saber_slash -> idle_saber.",
+  "crossfade": "0.12-0.2 s between any saber clip and idle_saber is clean; do not crossfade saber_* <-> plain idle/walk/run while the saber is in hand (swap clips, they share leg timing)"
+ },
+ "verifiedClearance_cm": {
+  "idle_saber": {
+   "frames": 25,
+   "dur": 3,
+   "keysAdjusted": 0,
+   "maxArmIntoTorso_cm": 0.61,
+   "maxArmIntoCape_cm": 0.59,
+   "maxBladeIntoBody_cm": 0,
+   "maxBladeIntoCape_cm": 0,
+   "maxHiltIntoBody_cm": 0.55,
+   "maxWristBend_deg": 25,
+   "minTipHeight_m": 1.788
+  },
+  "walk_saber": {
+   "frames": 37,
+   "dur": 0.942,
+   "keysAdjusted": 37,
+   "maxArmIntoTorso_cm": 0.53,
+   "maxArmIntoCape_cm": 1.42,
+   "maxBladeIntoBody_cm": 0,
+   "maxBladeIntoCape_cm": 0,
+   "maxHiltIntoBody_cm": 0.58,
+   "maxWristBend_deg": 26.5,
+   "minTipHeight_m": 1.662
+  },
+  "run_saber": {
+   "frames": 37,
+   "dur": 0.674,
+   "keysAdjusted": 34,
+   "maxArmIntoTorso_cm": 0,
+   "maxArmIntoCape_cm": 0.76,
+   "maxBladeIntoBody_cm": 0,
+   "maxBladeIntoCape_cm": 0,
+   "maxHiltIntoBody_cm": 0.68,
+   "maxWristBend_deg": 48.3,
+   "minTipHeight_m": 1.56
+  },
+  "saber_ready": {
+   "frames": 31,
+   "dur": 3,
+   "keysAdjusted": 30,
+   "maxArmIntoTorso_cm": 0,
+   "maxArmIntoCape_cm": 0,
+   "maxBladeIntoBody_cm": 0,
+   "maxBladeIntoCape_cm": 0,
+   "maxHiltIntoBody_cm": 0,
+   "maxWristBend_deg": null,
+   "minTipHeight_m": null
+  },
+  "saber_slash": {
+   "frames": 40,
+   "dur": 1.3,
+   "keysAdjusted": 35,
+   "maxArmIntoTorso_cm": 1.1,
+   "maxArmIntoCape_cm": 0.79,
+   "maxBladeIntoBody_cm": 0,
+   "maxBladeIntoCape_cm": 0,
+   "maxHiltIntoBody_cm": 0.1,
+   "maxWristBend_deg": 25,
+   "minTipHeight_m": 1.09
+  }
+ },
+ "rig": {
+  "rightHandWeights": "index/middle/ring/pinky/thumb bones now carry real skin weights (fist wraps the hilt). Left hand unchanged.",
+  "fingerCurlGripDeg": {
+   "index": [
+    74.9,
+    100,
+    45
+   ],
+   "middle": [
+    78.8,
+    100,
+    45
+   ],
+   "ring": [
+    78.8,
+    100,
+    45
+   ],
+   "pinky": [
+    86.7,
+    100,
+    45
+   ],
+   "thumb": [
+    46.2,
+    0,
+    35
+   ]
+  }
+ }
+}

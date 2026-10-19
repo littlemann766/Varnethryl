@@ -147,6 +147,7 @@ function building(cx, cz, w, d, h, opt = {}) {
 }
 const enterables = [];
 const ectx = { scene, mats, colliders, multi: [] };
+let LAD = null;   // ladders (ladders.js), created after the key set exists
 // 26 sheet-based 3D buildings (guild, inn, smithy, temple, colosseum, keep ... see docs/proto3d-buildings/README.md). ?oldvillage keeps the original blocky village.
 const SKINS = [];
 const BLD_ON = new URLSearchParams(location.search).get('oldvillage') == null;
@@ -250,10 +251,10 @@ function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; p
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
 const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
-const EXTRA = [["n:mortimer_new", "Mortimer (NEW)", "proto3d/models-new/mortimer_cl_arms.glb"], ["n:player_pikachu", "Player Pikachu (NEW)", "proto3d/models-new/player_pikachu_cl_arms.glb"], ["n:lunara_new", "Lunara (NEW)", "proto3d/models-new/lunara_cl_arms.glb"], ["n:marella_new", "Marella (NEW)", "proto3d/models-new/marella_cl_arms.glb"], ["n:vaelthryx_straight_rig", "Vaelthryx Straight Rig (NEW)", "proto3d/models-new/vaelthryx_straight_rig.glb"], ["n:vaelthryx_new", "Vaelthryx (NEW)", "proto3d/models-new/vaelthryx_new.glb"], ["n:ssylthar_new", "Ssylthar (NEW)", "proto3d/models-new/ssylthar_new.glb"], ["n:ashentitan_new", "Ashentitan (NEW)", "proto3d/models-new/ashentitan_cl_arms.glb"], ["n:coral_new", "Coral (NEW)", "proto3d/models-new/coral_cl_arms.glb"], ["n:cinder_new", "Cinder (NEW)", "proto3d/models-new/cinder_new.glb"], ["n:snowy_new4", "Snowy (NEW)", "proto3d/models-new/snowy_cl_arms.glb"], ["n:zephyr_new2", "Zephyr (NEW)", "proto3d/models-new/zephyr_new2.glb"], ["n:garruk_new4", "Garruk (NEW)", "proto3d/models-new/garruk_new4.glb"], ["n:garruk_new5", "Garruk (NEW 5)", "proto3d/models-new/garruk_new5_arms.glb"], ["n:darius_new6", "Darius (NEW 6)", "proto3d/models-new/darius_new6_arms.glb"], ["n:pip_new2", "Pip (NEW 2)", "proto3d/models-new/pip_new2.glb"], ["n:owner", "Owner (NEW)", "proto3d/models-new/owner.glb"], ["n:asha_new3", "Asha (NEW)", "proto3d/models-new/asha_cl_arms.glb"], ["n:thrain_new4", "Thrain (NEW)", "proto3d/models-new/thrain_cl_arms.glb"], ["n:wren_new3", "Wren (NEW)", "proto3d/models-new/wren_cl_arms.glb"], ["n:ember_new3", "Ember (NEW)", "proto3d/models-new/ember_new3.glb"], ["p:aldric", "Aldric [PLACEHOLDER]", "proto3d/models-placeholder/aldric_new.glb"], ["p:briar", "Briar [PLACEHOLDER]", "proto3d/models-placeholder/briar_new.glb"], ["p:brynn", "Brynn [PLACEHOLDER]", "proto3d/models-placeholder/brynn_new.glb"], ["p:cedric", "Cedric [PLACEHOLDER]", "proto3d/models-placeholder/cedric_new.glb"], ["p:elira", "Elira [PLACEHOLDER]", "proto3d/models-placeholder/elira_new.glb"], ["p:finn", "Finn [PLACEHOLDER]", "proto3d/models-placeholder/finn_new.glb"], ["p:frosttroll", "Frosttroll [PLACEHOLDER]", "proto3d/models-placeholder/frosttroll_new.glb"], ["p:hearth", "Hearth [PLACEHOLDER]", "proto3d/models-placeholder/hearth_new.glb"], ["p:hobgoblin", "Hobgoblin [PLACEHOLDER]", "proto3d/models-placeholder/hobgoblin_new.glb"], ["p:hydrella", "Hydrella [PLACEHOLDER]", "proto3d/models-placeholder/hydrella_new.glb"], ["p:kael", "Kael [PLACEHOLDER]", "proto3d/models-placeholder/kael_new.glb"], ["p:kestrel", "Kestrel [PLACEHOLDER]", "proto3d/models-placeholder/kestrel_new.glb"], ["p:lorian", "Lorian [PLACEHOLDER]", "proto3d/models-placeholder/lorian_new.glb"], ["p:lunara", "Lunara [PLACEHOLDER]", "proto3d/models-placeholder/lunara_new.glb"], ["p:marella", "Marella [PLACEHOLDER]", "proto3d/models-placeholder/marella_new.glb"], ["p:mirelle", "Mirelle [PLACEHOLDER]", "proto3d/models-placeholder/mirelle_new.glb"], ["p:morwen", "Morwen [PLACEHOLDER]", "proto3d/models-placeholder/morwen_new.glb"], ["p:mossgut", "Mossgut [PLACEHOLDER]", "proto3d/models-placeholder/mossgut_new.glb"], ["p:neris", "Neris [PLACEHOLDER]", "proto3d/models-placeholder/neris_new.glb"], ["p:nyx", "Nyx [PLACEHOLDER]", "proto3d/models-placeholder/nyx_new.glb"], ["p:orin", "Orin [PLACEHOLDER]", "proto3d/models-placeholder/orin_new.glb"], ["p:pip", "Pip [PLACEHOLDER]", "proto3d/models-placeholder/pip_new.glb"], ["p:rook", "Rook [PLACEHOLDER]", "proto3d/models-placeholder/rook_new.glb"], ["p:rowan", "Rowan [PLACEHOLDER]", "proto3d/models-placeholder/rowan_new.glb"], ["p:seraphine", "Seraphine [PLACEHOLDER]", "proto3d/models-placeholder/seraphine_new.glb"], ["p:stonetroll", "Stonetroll [PLACEHOLDER]", "proto3d/models-placeholder/stonetroll_new.glb"], ["p:talia", "Talia [PLACEHOLDER]", "proto3d/models-placeholder/talia_new.glb"], ["p:thorne", "Thorne [PLACEHOLDER]", "proto3d/models-placeholder/thorne_new.glb"], ["p:valen", "Valen [PLACEHOLDER]", "proto3d/models-placeholder/valen_new.glb"], ["p:vesper", "Vesper [PLACEHOLDER]", "proto3d/models-placeholder/vesper_new.glb"], ["p:wyvern", "Wyvern [PLACEHOLDER]", "proto3d/models-placeholder/wyvern_new.glb"], ["p:zephyr", "Zephyr [PLACEHOLDER]", "proto3d/models-placeholder/zephyr_new.glb"], ["o:briar", "Briar", "proto3d/models-beth/briar.glb"], ["o:cinder", "Cinder", "proto3d/models-beth/cinder.glb"], ["o:coral", "Coral", "proto3d/models-beth/coral.glb"], ["o:ember", "Ember", "proto3d/models-beth/ember.glb"], ["o:frosttroll", "Frosttroll", "proto3d/models-beth/frosttroll.glb"], ["o:hawk", "Hawk", "proto3d/models-beth/hawk.glb"], ["o:hearth", "Hearth", "proto3d/models-beth/hearth.glb"], ["o:hobgoblin", "Hobgoblin", "proto3d/models-beth/hobgoblin.glb"], ["o:hydrella", "Hydrella", "proto3d/models-beth/hydrella.glb"], ["o:kestrel", "Kestrel", "proto3d/models-beth/kestrel.glb"], ["o:lorian", "Lorian", "proto3d/models-beth/lorian.glb"], ["o:lunara", "Lunara", "proto3d/models-beth/lunara.glb"], ["o:marella", "Marella", "proto3d/models-beth/marella.glb"], ["o:mortimer", "Mortimer", "proto3d/models-beth/mortimer.glb"], ["o:mossgut", "Mossgut", "proto3d/models-beth/mossgut.glb"], ["o:neris", "Neris", "proto3d/models-beth/neris.glb"], ["o:pip", "Pip", "proto3d/models-beth/pip.glb"], ["o:snowy", "Snowy", "proto3d/models-beth/snowy.glb"], ["o:ssylthar", "Ssylthar", "proto3d/models-beth/ssylthar.glb"], ["o:stonetroll", "Stonetroll", "proto3d/models-beth/stonetroll.glb"], ["o:thrain", "Thrain", "proto3d/models-beth/thrain.glb"], ["o:vaelthryx", "Vaelthryx", "proto3d/models-beth/vaelthryx.glb"], ["o:valen", "Valen", "proto3d/models-beth/valen.glb"], ["o:wren", "Wren", "proto3d/models-beth/wren.glb"], ["o:wyvern", "Wyvern", "proto3d/models-beth/wyvern.glb"], ["o:zephyr", "Zephyr", "proto3d/models-beth/zephyr.glb"], ["wolf", "Wolf", "proto3d/models/wolf.glb"]];   // [id, label, url]: every other model we have, playable as a hero via the selector (native metre scale)
-// Owner: ONE stable file name. To swap in a newer rig (owner_new4...): tools/swap_owner.sh /workspace/rigged/owner_new4 (copies <name>.glb + <name>.cloth.json over models-new/owner.*)
-const CLOTH = new Set(["n:owner", "n:asha_new3", "n:ashentitan_new", "n:coral_new", "n:darius_new6", "n:lunara_new", "n:marella_new", "n:mortimer_new", "n:player_pikachu", "n:snowy_new4", "n:thrain_new4", "n:wren_new3"]);   // models shipped with <name>.cloth.json (runtime/spring_bones_v2.js)
-const SPEEDS = { 'n:owner': { walk: 1.49, run: 2.28 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
+const EXTRA = [["n:mortimer_new", "Mortimer (NEW)", "proto3d/models-new/mortimer_cl_arms.glb"], ["n:player_pikachu", "Player Pikachu (NEW)", "proto3d/models-new/player_pikachu_cl_arms.glb"], ["n:lunara_new", "Lunara (NEW)", "proto3d/models-new/lunara_cl_arms.glb"], ["n:marella_new", "Marella (NEW)", "proto3d/models-new/marella_cl_arms.glb"], ["n:vaelthryx_straight_rig", "Vaelthryx Straight Rig (NEW)", "proto3d/models-new/vaelthryx_straight_rig.glb"], ["n:vaelthryx_new", "Vaelthryx (NEW)", "proto3d/models-new/vaelthryx_new.glb"], ["n:vaelthryx_new5", "Vaelthryx (NEW 5)", "proto3d/models-new/vaelthryx_new5.glb"], ["n:vaelthryx_new5_long", "Vaelthryx (NEW 5 long)", "proto3d/models-new/vaelthryx_new5_long.glb"], ["n:ssylthar_new", "Ssylthar (NEW)", "proto3d/models-new/ssylthar_new.glb"], ["n:ashentitan_new", "Ashentitan (NEW)", "proto3d/models-new/ashentitan_cl_arms.glb"], ["n:coral_new", "Coral (NEW)", "proto3d/models-new/coral_cl_arms.glb"], ["n:cinder_new", "Cinder (NEW)", "proto3d/models-new/cinder_new.glb"], ["n:snowy_new4", "Snowy (NEW)", "proto3d/models-new/snowy_cl_arms.glb"], ["n:zephyr_new2", "Zephyr (NEW)", "proto3d/models-new/zephyr_new2.glb"], ["n:garruk_new4", "Garruk (NEW)", "proto3d/models-new/garruk_new4.glb"], ["n:garruk_new5", "Garruk (NEW 5)", "proto3d/models-new/garruk_new5_arms.glb"], ["n:darius_new6", "Darius (NEW 6)", "proto3d/models-new/darius_new6_arms.glb"], ["n:pip_new2", "Pip (NEW 2)", "proto3d/models-new/pip_new2.glb"], ["n:owner", "Owner (NEW)", "proto3d/models-new/owner.glb"], ["n:asha_new3", "Asha (NEW)", "proto3d/models-new/asha_cl_arms.glb"], ["n:thrain_new4", "Thrain (NEW)", "proto3d/models-new/thrain_cl_arms.glb"], ["n:wren_new3", "Wren (NEW)", "proto3d/models-new/wren_cl_arms.glb"], ["n:ember_new3", "Ember (NEW)", "proto3d/models-new/ember_new3.glb"], ["p:aldric", "Aldric [PLACEHOLDER]", "proto3d/models-placeholder/aldric_new.glb"], ["p:briar", "Briar [PLACEHOLDER]", "proto3d/models-placeholder/briar_new.glb"], ["p:brynn", "Brynn [PLACEHOLDER]", "proto3d/models-placeholder/brynn_new.glb"], ["p:cedric", "Cedric [PLACEHOLDER]", "proto3d/models-placeholder/cedric_new.glb"], ["p:elira", "Elira [PLACEHOLDER]", "proto3d/models-placeholder/elira_new.glb"], ["p:finn", "Finn [PLACEHOLDER]", "proto3d/models-placeholder/finn_new.glb"], ["p:frosttroll", "Frosttroll [PLACEHOLDER]", "proto3d/models-placeholder/frosttroll_new.glb"], ["p:hearth", "Hearth [PLACEHOLDER]", "proto3d/models-placeholder/hearth_new.glb"], ["p:hobgoblin", "Hobgoblin [PLACEHOLDER]", "proto3d/models-placeholder/hobgoblin_new.glb"], ["p:hydrella", "Hydrella [PLACEHOLDER]", "proto3d/models-placeholder/hydrella_new.glb"], ["p:kael", "Kael [PLACEHOLDER]", "proto3d/models-placeholder/kael_new.glb"], ["p:kestrel", "Kestrel [PLACEHOLDER]", "proto3d/models-placeholder/kestrel_new.glb"], ["p:lorian", "Lorian [PLACEHOLDER]", "proto3d/models-placeholder/lorian_new.glb"], ["p:lunara", "Lunara [PLACEHOLDER]", "proto3d/models-placeholder/lunara_new.glb"], ["p:marella", "Marella [PLACEHOLDER]", "proto3d/models-placeholder/marella_new.glb"], ["p:mirelle", "Mirelle [PLACEHOLDER]", "proto3d/models-placeholder/mirelle_new.glb"], ["p:morwen", "Morwen [PLACEHOLDER]", "proto3d/models-placeholder/morwen_new.glb"], ["p:mossgut", "Mossgut [PLACEHOLDER]", "proto3d/models-placeholder/mossgut_new.glb"], ["p:neris", "Neris [PLACEHOLDER]", "proto3d/models-placeholder/neris_new.glb"], ["p:nyx", "Nyx [PLACEHOLDER]", "proto3d/models-placeholder/nyx_new.glb"], ["p:orin", "Orin [PLACEHOLDER]", "proto3d/models-placeholder/orin_new.glb"], ["p:pip", "Pip [PLACEHOLDER]", "proto3d/models-placeholder/pip_new.glb"], ["p:rook", "Rook [PLACEHOLDER]", "proto3d/models-placeholder/rook_new.glb"], ["p:rowan", "Rowan [PLACEHOLDER]", "proto3d/models-placeholder/rowan_new.glb"], ["p:seraphine", "Seraphine [PLACEHOLDER]", "proto3d/models-placeholder/seraphine_new.glb"], ["p:stonetroll", "Stonetroll [PLACEHOLDER]", "proto3d/models-placeholder/stonetroll_new.glb"], ["p:talia", "Talia [PLACEHOLDER]", "proto3d/models-placeholder/talia_new.glb"], ["p:thorne", "Thorne [PLACEHOLDER]", "proto3d/models-placeholder/thorne_new.glb"], ["p:valen", "Valen [PLACEHOLDER]", "proto3d/models-placeholder/valen_new.glb"], ["p:vesper", "Vesper [PLACEHOLDER]", "proto3d/models-placeholder/vesper_new.glb"], ["p:wyvern", "Wyvern [PLACEHOLDER]", "proto3d/models-placeholder/wyvern_new.glb"], ["p:zephyr", "Zephyr [PLACEHOLDER]", "proto3d/models-placeholder/zephyr_new.glb"], ["o:briar", "Briar", "proto3d/models-beth/briar.glb"], ["o:cinder", "Cinder", "proto3d/models-beth/cinder.glb"], ["o:coral", "Coral", "proto3d/models-beth/coral.glb"], ["o:ember", "Ember", "proto3d/models-beth/ember.glb"], ["o:frosttroll", "Frosttroll", "proto3d/models-beth/frosttroll.glb"], ["o:hawk", "Hawk", "proto3d/models-beth/hawk.glb"], ["o:hearth", "Hearth", "proto3d/models-beth/hearth.glb"], ["o:hobgoblin", "Hobgoblin", "proto3d/models-beth/hobgoblin.glb"], ["o:hydrella", "Hydrella", "proto3d/models-beth/hydrella.glb"], ["o:kestrel", "Kestrel", "proto3d/models-beth/kestrel.glb"], ["o:lorian", "Lorian", "proto3d/models-beth/lorian.glb"], ["o:lunara", "Lunara", "proto3d/models-beth/lunara.glb"], ["o:marella", "Marella", "proto3d/models-beth/marella.glb"], ["o:mortimer", "Mortimer", "proto3d/models-beth/mortimer.glb"], ["o:mossgut", "Mossgut", "proto3d/models-beth/mossgut.glb"], ["o:neris", "Neris", "proto3d/models-beth/neris.glb"], ["o:pip", "Pip", "proto3d/models-beth/pip.glb"], ["o:snowy", "Snowy", "proto3d/models-beth/snowy.glb"], ["o:ssylthar", "Ssylthar", "proto3d/models-beth/ssylthar.glb"], ["o:stonetroll", "Stonetroll", "proto3d/models-beth/stonetroll.glb"], ["o:thrain", "Thrain", "proto3d/models-beth/thrain.glb"], ["o:vaelthryx", "Vaelthryx", "proto3d/models-beth/vaelthryx.glb"], ["o:valen", "Valen", "proto3d/models-beth/valen.glb"], ["o:wren", "Wren", "proto3d/models-beth/wren.glb"], ["o:wyvern", "Wyvern", "proto3d/models-beth/wyvern.glb"], ["o:zephyr", "Zephyr", "proto3d/models-beth/zephyr.glb"], ["wolf", "Wolf", "proto3d/models/wolf.glb"]];   // [id, label, url]: every other model we have, playable as a hero via the selector (native metre scale)
+// Owner: ONE stable file name. To swap in a newer rig (owner_new4...): tools/swap_owner.sh /workspace/rigged/owner_new5 (copies <name>.glb + <name>.cloth.json over models-new/owner.*)
+const CLOTH = new Set(["n:ember_new3", "n:owner", "n:asha_new3", "n:ashentitan_new", "n:coral_new", "n:darius_new6", "n:lunara_new", "n:marella_new", "n:mortimer_new", "n:player_pikachu", "n:snowy_new4", "n:thrain_new4", "n:wren_new3"]);   // models shipped with <name>.cloth.json (runtime/spring_bones_v2.js)
+const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:vaelthryx_new5': { walk: 9.6, run: 14.8, map: { walk: 'slither', run: 'slither_fast' } }, 'n:vaelthryx_new5_long': { walk: 8.2, run: 12.6, map: { walk: 'slither', run: 'slither_fast' } }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
 const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
 const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;
@@ -307,11 +308,11 @@ function locoAnim(u, sp) {
     const wt = { idle: 0 }; for (const [k] of L) wt[k] = 0;
     if (v <= L[0][1]) { wt[L[0][0]] = v / L[0][1]; wt.idle = 1 - wt[L[0][0]]; }
     else { let i = 0; while (i < L.length - 1 && v > L[i + 1][1]) i++; if (i >= L.length - 1) wt[L[L.length - 1][0]] = 1; else { const t = (v - L[i][1]) / (L[i + 1][1] - L[i][1]); wt[L[i][0]] = 1 - t; wt[L[i + 1][0]] = t; } }
-    A.idle.setEffectiveWeight(wt.idle);
-    for (const [k, c] of L) { A[k].setEffectiveWeight(wt[k]); A[k].timeScale = Math.max(0.5, Math.min(2.4, v / c)); }
+    const ov = 1 - (u.ovr || 0); A.idle.setEffectiveWeight(wt.idle * ov);
+    for (const [k, c] of L) { A[k].setEffectiveWeight(wt[k] * ov); A[k].timeScale = Math.max(0.5, Math.min(2.4, v / c)); }
     return;
   }
-  const wk = A.walk, id = A.idle; if (wk && id) { const w = Math.min(1, sp / SPEED); wk.setEffectiveWeight(w); id.setEffectiveWeight(1 - w); wk.timeScale = 0.6 + sp * 0.25; }
+  const wk = A.walk, id = A.idle; if (wk && id) { const w = Math.min(1, sp / SPEED); { const ov = 1 - (u.ovr || 0); wk.setEffectiveWeight(w * ov); id.setEffectiveWeight((1 - w) * ov); } wk.timeScale = 0.6 + sp * 0.25; }
 }
 function wrapGLB(g, id, blocky) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
@@ -326,12 +327,13 @@ function wrapGLB(g, id, blocky) {
   m.traverse(o => { if (o.isMesh) for (const mt of [].concat(o.material)) if (mt && mt.alphaTest > 0) { mt.transparent = false; mt.depthWrite = true; mt.needsUpdate = true; } });   // glTF alphaMode MASK (e.g. Garruk's cape): cut-out, sorted by depth, casts a cut-out shadow
   const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947 * HS : 1.8 * HS / hgt) : 1;
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
+  if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];   // e.g. serpent: walk/run = slither/slither_fast
   if (act.idle) act.idle.play(); if (act.walk) act.walk.play(); if (spd) for (const k of ['trot', 'run']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
-  root.userData = { glb: true, mixer, act, capeUpdate() {}, speeds: spd, mscale };
+  root.userData = { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 };
   try { const cfg = CLOTHCFG[id]; root.userData.sb = cfg ? new SpringBonesV2(m, { clips: g.animations, config: cfg }) : new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.7';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.8';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -482,6 +484,8 @@ const state = { level: 0, heroY: 0, inside: null, zoom: 1, heroX: 0, heroZ: STAR
 const posOk = (x, z) => { const r = 0.5 * HS + 0.3; for (const c of colliders) { if (c.type === 'box' ? (x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r) : Math.hypot(x - c.x, z - c.z) < c.r + r) return false; } return Math.abs(x) < WORLD - 3 && Math.abs(z) < WORLD - 3; };   // a save from the smaller village may sit inside a (now bigger) building
 if (savedPlan && savedPlan.pos && qp0.get('hero') == null && posOk(savedPlan.pos.x, savedPlan.pos.z)) { state.heroX = savedPlan.pos.x; state.heroZ = savedPlan.pos.z; state.yaw = savedPlan.pos.yaw; }
 const keys = new Set();
+import('./ladders.js').then(m => { LAD = m.createLadders({ THREE, scene, colliders, state, keys, HS }); for (const d of LADDER_SITES) LAD.add(d); });
+const LADDER_SITES = [{ id: 'watchtower', x: -18, z: 32, half: 1.8, H: 5.0 }, { id: 'lookout', x: -30, z: 14, half: 1.5, H: 3.2, roofed: false }, { id: 'belltower', x: -24, z: -16, half: 2.0, H: 7.0 }];
 /* owner cheat flags (cheatflags.js): all defaults are no-ops; only the owner-gated panel ever changes them */
 const cheat = createFlags();
 addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
@@ -558,9 +562,11 @@ const tmp = { x: 0, z: 0 };
 // multi-level floors (buildings.js): the hero has a level + y; upper floors only walkable where a floor/stair exists
 function surfaceAt(x, z, level) {
   for (const b of ectx.multi) { { const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
+  if (LAD && level >= 10) { const ls = LAD.surface(x, z, level); if (ls) return ls; }
   return level === 0 ? { y: 0 } : null;
 }
 function updateLevel() {
+  if (state.climbing) return;
   let s = surfaceAt(state.heroX, state.heroZ, state.level);
   if (!s && cheat.noclip) { state.level = 0; s = surfaceAt(state.heroX, state.heroZ, 0); }
   if (s && s.ramp) { const m = s.ramp; if (state.level === m.l0 && s.t > (m.flipUp || 0.93)) state.level = m.l1; else if (state.level === m.l1 && s.t < 0.25) state.level = m.l0; s = surfaceAt(state.heroX, state.heroZ, state.level) || s; }
@@ -585,7 +591,7 @@ async function loadActorModel(id) {
 }
 function spawnCrowd(id, kind, x, z, leash, yaw) {
   const a = makeActor(id, { str: undefined, group: kind === 'party' ? 'party' : null }); a.x = x; a.z = z; a.yaw = yaw || 0;
-  const rec = { a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0 };
+  const rec = { a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0, level: state.level, y: state.heroY || 0, ti: null, lvT: 0 };
   crowd.push(rec); bumpSys.add(a);
   loadActorModel(id).then(w => { if (!w) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, 0, a.z); w.rotation.y = a.yaw; scene.add(w); });
   return rec;
@@ -606,15 +612,50 @@ function swapFollower(prevId, newId) {
   if (r.root) { scene.remove(r.root); r.root = null; r.nd = null; }
   loadActorModel(prevId).then(w => { if (!w || r.a.id !== prevId) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); r.root = w; r.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(r.a.x, 0, r.a.z); w.rotation.y = r.a.yaw; scene.add(w); });
 }
+/* Followers on stairs: the hero leaves a breadcrumb trail (x, z, level). A follower on another floor walks that trail (which runs up/down the flight),
+   adopting each point's level as it passes it, and once it reaches the end of the trail it is on the hero's floor. Fallback: teleport to the hero after 12 s. */
+const TRAIL = []; let trailBase = 0;
+function recordTrail() {
+  const n = TRAIL.length, l = n ? TRAIL[n - 1] : null;
+  if (!l || l.l !== state.level || Math.hypot(state.heroX - l.x, state.heroZ - l.z) > 0.5) { TRAIL.push({ x: state.heroX, z: state.heroZ, l: state.level }); if (TRAIL.length > 500) { TRAIL.shift(); trailBase++; } }
+}
+function trailTarget(r, a) {
+  if (r.ti === null) {
+    let best = -1, bd = 1e9; for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01) { bd = d; best = i; } }
+    if (best < 0) return null; r.ti = best + trailBase;
+  }
+  if (r.ti < trailBase) r.ti = trailBase;
+  for (let g = 0; g < 8; g++) {
+    const i = r.ti - trailBase; if (i >= TRAIL.length) { r.level = state.level; r.ti = null; return undefined; }
+    const p = TRAIL[i]; if (p.l !== r.level && Math.hypot(p.x - a.x, p.z - a.z) < 1.6) r.level = p.l;
+    if (Math.hypot(p.x - a.x, p.z - a.z) < 0.7) { r.ti++; continue; }
+    return p;
+  }
+  return null;
+}
+function crowdSurface(r, a, dt) {
+  let s = surfaceAt(a.x, a.z, r.level);
+  if (s && s.ramp) { const m = s.ramp; if (r.level === m.l0 && s.t > (m.flipUp || 0.93)) r.level = m.l1; else if (r.level === m.l1 && s.t < 0.25) r.level = m.l0; s = surfaceAt(a.x, a.z, r.level) || s; }
+  const ty = s ? s.y : (r.level >= 10 && LAD ? LAD.heightOf(r.level) : 0);
+  r.y = Math.abs(ty - r.y) < 0.02 ? ty : r.y + Math.max(-4 * dt, Math.min(4 * dt, ty - r.y)) * (Math.abs(ty - r.y) > 1.3 ? 1 : 1);
+}
 function updateCrowd(dt) {
+  recordTrail();
   const pa = playerAct;
   pa.x = state.heroX; pa.z = state.heroZ; pa.yaw = state.yaw; pa.vx = state.vx; pa.vz = state.vz;
   for (let i = 0; i < crowd.length; i++) {
     const r = crowd[i], a = r.a;
     let tvx = 0, tvz = 0;
     if (r.kind === 'party') {
-      const dx = state.heroX - a.x, dz = state.heroZ - a.z, d = Math.hypot(dx, dz);
-      if (d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * Math.max(1, cheat.speedMul) * 1.05, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
+      let gx = state.heroX, gz = state.heroZ, far = false;
+      if (r.level !== state.level) {
+        r.lvT += dt; const t = trailTarget(r, a);
+        if (t) { gx = t.x; gz = t.z; far = true; }
+        if (r.lvT > 12 || t === null) { a.x = state.heroX + (Math.random() - 0.5) * 2; a.z = state.heroZ + 1.5; r.level = state.level; r.ti = null; r.lvT = 0; }
+      } else { r.lvT = 0; r.ti = null; }
+      const dx = gx - a.x, dz = gz - a.z, d = Math.hypot(dx, dz);
+      if (far && d > 0.3) { const sp = SPEED * Math.max(1, cheat.speedMul) * 1.05; tvx = dx / d * sp; tvz = dz / d * sp; }
+      else if (!far && d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * Math.max(1, cheat.speedMul) * 1.05, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
     }
     const k = Math.min(1, dt * 8); r.vxs += (tvx - r.vxs) * k; r.vzs += (tvz - r.vzs) * k;
     a.vx = r.vxs; a.vz = r.vzs;
@@ -624,12 +665,12 @@ function updateCrowd(dt) {
     const r = crowd[i], a = r.a;
     let mx = r.vxs * a.slowMul * dt + a.dx, mz = r.vzs * a.slowMul * dt + a.dz;
     if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
-    tmp2.x = a.x + mx; tmp2.z = a.z + mz; resolve(tmp2);
-    const moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z;
+    tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2); state.level = l0; }
+    const moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; if (r.kind === 'party') crowdSurface(r, a, dt);
     const sp = Math.hypot(r.vxs, r.vzs);
     if (sp > 0.3) { let da = Math.atan2(r.vxs, r.vzs) - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }
     const w = r.root; if (!w) continue;
-    w.position.set(a.x, 0, a.z); const u = w.userData, ww = Math.min(1, sp / SPEED);
+    w.position.set(a.x, r.kind === 'party' ? r.y : 0, a.z); const u = w.userData, ww = Math.min(1, sp / SPEED);
     restoreNodes(r.nd);
     if (u.glb) { locoAnim(u, sp); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
     applyPose(a, w, r.nd, a.yaw);
@@ -650,8 +691,8 @@ function stairGuide(vx, vz) {
       const sn = Math.sin(m.ang), cs = Math.cos(m.ang), dxl = vx * b.cs - vz * b.sn, dzl = vx * b.sn + vz * b.cs, du = dxl * sn + dzl * cs, dv = dxl * cs - dzl * sn;
       const toward = -Math.sign(v || 1) * dv, towardEnd = (uEnd - u) * du > 0;
       let gu = 0, gv = 0; const side = Math.abs(v) > hw - 0.1, pastEnd = low ? u < uEnd - 0.2 : u > uEnd + 0.2, near = Math.abs(u - uEnd) <= 2.0;
-      if (side && toward > 0.15 && !pastEnd) { gu = Math.sign(uEnd - u) || -1; gv = 0; }                      // pressed against the side: slide along it to past the end of the flight
-      else if (pastEnd && near && Math.abs(v) <= hw + 2.4 && (low ? du : -du) > 0.25 * (Math.hypot(du, dv) || 1)) { gu = 0; gv = -Math.sign(v || 1) * Math.min(1, Math.abs(v) * 1.2 + 0.2); if (Math.abs(v) < 0.1) continue; if (Math.abs(v) > hw - 0.05 && Math.abs(u - uEnd) < 0.9) gu = low ? -0.8 : 0.8; }   // beside the rail end: back off from the flight while sliding to the axis   // lined up with the mouth: centre on the axis
+      if (side && toward > 0.15 && !pastEnd && (low ? du : -du) > 0.35 * (Math.hypot(du, dv) || 1)) { gu = Math.sign(uEnd - u) || -1; gv = 0; }                      // pressed against the side: slide along it to past the end of the flight
+      else if (pastEnd && near && Math.abs(v) <= hw + 2.4 && (low ? du : -du) > 0.5 * (Math.hypot(du, dv) || 1)) { gu = 0; gv = -Math.sign(v || 1) * Math.min(1, Math.abs(v) * 1.2 + 0.2); if (Math.abs(v) < 0.1) continue; if (Math.abs(v) > hw - 0.05 && Math.abs(u - uEnd) < 0.9) gu = low ? -0.8 : 0.8; }   // beside the rail end: back off from the flight while sliding to the axis   // lined up with the mouth: centre on the axis
       else continue;
       const k = (gu || gv) ? Math.min(1, Math.hypot(gu, gv)) : 0; if (!k) continue;
       const nu = du * 0.45 + gu * 0.9, nv = dv * 0.45 + gv * 0.9, nl = Math.hypot(nu, nv) || 1, xl = (nu / nl) * sn + (nv / nl) * cs, zl = (nu / nl) * cs - (nv / nl) * sn;
@@ -680,7 +721,8 @@ function updateHero(dt) {
     if (d < 0.25 || state.blockedFrames > 25) { state.target = null; marker.visible = false; state.blockedFrames = 0; }
     else { vx = dx / d; vz = dz / d; mag = Math.min(1, d / 1.2 + 0.4); }
   }
-  { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
+  if (LAD && LAD.update(dt, vx, vz)) { vx = 0; vz = 0; mag = 0; }
+  if (!state.climbing) { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
   const moving = (vx || vz);
   if (moving) {
     const ghost = passesWalls(cheat), step = SPEED * cheat.speedMul * mag * playerAct.slowMul * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
@@ -809,7 +851,7 @@ function frame(now) {
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  updateCrowd(dt); updateHero(dt); updateCamera(dt, totalFrames === 0);
+  updateCrowd(dt); updateHero(dt); if (FIGHT) FIGHT.update(dt); updateCamera(dt, totalFrames === 0);
   simTime += dt; if (SMOKE) SMOKE.update(simTime);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
@@ -840,18 +882,32 @@ function entrySpot(d) {
   for (let r = 5; r <= 26; r += 1.5) for (let k = 0; k < 16; k++) { const a = k / 16 * 6.2832, x = d.cx + Math.cos(a) * r, z = d.cz + Math.sin(a) * r; if (ok(x, z)) return { x, z }; }
   return { x: THREE.MathUtils.clamp(d.cx, -lim, lim), z: THREE.MathUtils.clamp(d.cz, -lim, lim) };
 }
+/* ---------- fight test mode (1.1.8): lazy-loaded, owner-gated start (owner panel / HUD button it reveals) ---------- */
+let FIGHT = null;
+async function fightToggle() {
+  if (!FIGHT) {
+    const mod = await import('./fight.js');
+    FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
+      selectOwner: async () => { const i = GLB_IDS.indexOf('n:owner'); if (i >= 0 && GLB_IDS[HEROES.indexOf(hero)] !== 'n:owner') await selectVariant(SLOT_G[i], curVar(SLOT_G[i])); },
+      makeModel: async id => { try { return modeFor(id) === 'blocky' ? makeBlocky(id) : await loadActorModel(id); } catch (e) { return null; } },
+      loco: locoAnim, resolve: p => resolve(p), free: (x, z) => window.__p3d.free(x, z, 0),
+      loadGLTF: url => new Promise((res, rej) => gl.load(url, res, undefined, rej)) });
+  }
+  FIGHT.toggle(); return FIGHT;
+}
+{ const fb = document.getElementById('fightBtn'); if (fb) fb.addEventListener('click', e => { e.preventDefault(); fightToggle(); }); }
 let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
 const cheatEnv = {
   flags: cheat, bumpSys, storage: cheatStore, zones: ['village'],
-  hooks: {}, /* TODO(combat/quests): hooks.healParty / killEnemies / skipQuest / godMode attach here when those systems land */
+  hooks: { fightTest: () => fightToggle(), onOwner: () => { const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
   teleport: (x, z) => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); },
   onReady: (c) => { window.__p3d.cheats = c; },
 };
 initCheatBoot(cheatEnv);
-window.__p3d = { selectHero,
+window.__p3d = { THREE, selectHero, get ladders() { return LAD; },
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
-  cheat,
+  cheat, fightToggle, get fight() { return FIGHT; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },
   toggleModel: i => toggleModel(i), groups: () => [...GROUPS.values()].map(g => ({ key: g.key, name: g.name, vars: g.vars.map(v => v.label) })),
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,

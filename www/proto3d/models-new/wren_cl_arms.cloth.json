@@ -1,6 +1,6 @@
 {
  "version": 2,
- "model": "wren",
+ "model": "wren_new4",
  "H": 1.3546,
  "groups": [
   {
@@ -74,6 +74,58 @@
    "collide": false,
    "margin": 0,
    "hemLen": 0.25
+  },
+  {
+   "name": "wing_L",
+   "kind": "wing",
+   "match": "^wing\\d*_L$",
+   "stiffness": 0.28,
+   "damping": 0.84,
+   "gravity": 0.00025,
+   "inertia": 0.5,
+   "maxSwing": [
+    0.14,
+    0.18,
+    0.22,
+    0.26
+   ],
+   "maxChain": 0.55,
+   "maxVel": 0.004,
+   "smooth": 0.45,
+   "collide": true,
+   "margin": 0.008,
+   "pushRate": 0.7,
+   "exclude": [
+    "upperArm_L",
+    "foreArm_L"
+   ],
+   "hemLen": 0.28
+  },
+  {
+   "name": "wing_R",
+   "kind": "wing",
+   "match": "^wing\\d*_R$",
+   "stiffness": 0.28,
+   "damping": 0.84,
+   "gravity": 0.00025,
+   "inertia": 0.5,
+   "maxSwing": [
+    0.14,
+    0.18,
+    0.22,
+    0.26
+   ],
+   "maxChain": 0.55,
+   "maxVel": 0.004,
+   "smooth": 0.45,
+   "collide": true,
+   "margin": 0.008,
+   "pushRate": 0.7,
+   "exclude": [
+    "upperArm_R",
+    "foreArm_R"
+   ],
+   "hemLen": 0.28
   }
  ],
  "colliders": [
@@ -142,6 +194,6 @@
   }
  ],
  "global": {
-  "note": "step 1/60; capsules are between bone heads (world space)"
+  "note": "step 1/60; capsules are between bone heads (world space). wing_L/R = 4-bone spring chain per side (elbow->wrist->past feather hand) carrying bell sleeve + feather hand; excludes own arm capsules, collides with torso/legs/other arm. Baked sway tracks exist in idle/walk/run so it still moves with physics off."
  }
 }

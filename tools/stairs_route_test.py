@@ -65,6 +65,15 @@ with sync_playwright() as p:
             if joy:
                 if mode == 'touch': cdp.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
                 else: pg.mouse.up()
+    FOLL = "(()=>{const f=__p3d.bump.crowd.filter(c=>c.kind==='party');return f.length>0&&f.every(c=>c.level===__p3d.state.level&&Math.abs(c.y-__p3d.state.heroY)<3.2)})()"
+    def followers_arrive(tag):
+        global fails, total
+        if PARTY == '0': return True
+        total += 1
+        try: pg.wait_for_function(FOLL, timeout=45000); return True
+        except Exception:
+            print('    followers did NOT reach the hero floor (%s):' % tag, pg.evaluate("__p3d.bump.crowd.filter(c=>c.kind==='party').map(c=>[c.level,+c.y.toFixed(1),+c.a.x.toFixed(1),+c.a.z.toFixed(1)])"), 'hero', pg.evaluate("[__p3d.state.level,__p3d.state.heroY]"), flush=True); fails += 1; return False
+    print('buildings', len(info), flush=True)
     for bi in info:
         if ONLY and bi['id'] not in ONLY: continue
         for m in bi['ramps']:
@@ -85,6 +94,7 @@ with sync_playwright() as p:
                             pg.evaluate("([s,y])=>{__p3d.teleport(s[0],s[1],0);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw]); pg.wait_for_timeout(300)
                             r, ms, ok = drive([list(q) for q in wp], top, mode, m['l1'], m['y1']*bi['K'])
                     fails += 0 if ok else 1
+                    if ok and os.environ.get('FOLLOW', '1') == '1' and not followers_arrive('up'): ok = False
                     if ok and os.environ.get('EXIT', '1') == '1':   # and actually walk off the top into the upper room (BFS over the upper floor to the room centre), not stuck on the last step
                         cur = pg.evaluate("[__p3d.state.heroX,__p3d.state.heroZ]"); goal = W(bi['id'], 0, 0); total += 1
                         wp = pg.evaluate(BFS, [cur, goal + [1], m['l1']]); ok3 = bool(wp) and (len(wp) > 0)
@@ -99,6 +109,7 @@ with sync_playwright() as p:
                         foot = W(bi['id'], m['cx'] - s * (h + 2.0), m['cz'] - c * (h + 2.0)); total += 1
                         r2, ms2, ok2 = drive([], foot, mode, m['l0'], m['y0']*bi['K']); fails += 0 if ok2 else 1
                         if not ok2: print('    descent stuck at', {k: round(v, 1) if isinstance(v, float) else v for k, v in r2.items()}, flush=True)
+                        if ok2 and os.environ.get('FOLLOW', '1') == '1' and not followers_arrive('down'): ok2 = False
                         ok = ok and ok2; ms = (ms, ms2)
                     if not ok: print('    stuck near:', pg.evaluate("([x,z,l])=>__p3d.colliders.filter(c=>(c.lv===undefined||(Array.isArray(c.lv)?c.lv.includes(l):c.lv===l))&&(c.type==='box'?(Math.hypot(Math.max(c.minX,Math.min(x,c.maxX))-x,Math.max(c.minZ,Math.min(z,c.maxZ))-z)<1.1):(Math.hypot(c.x-x,c.z-z)<1.1+c.r))).map(c=>[c.type,c.b,c.minX,c.maxX,c.minZ,c.maxZ,c.x,c.z,c.r,c.lv,c.stair].map(v=>typeof v==='number'?+v.toFixed(2):v))", [r['x'], r['z'], r['lv']]))
                     if SHOTS: pg.screenshot(path=f"{SHOTS}/{bi['id']}_{mode}_{'ok' if ok else 'FAIL'}.png")

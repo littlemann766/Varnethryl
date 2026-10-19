@@ -645,6 +645,24 @@ function recordTrail() {
   const n = TRAIL.length, l = n ? TRAIL[n - 1] : null;
   if (!l || l.l !== state.level || Math.hypot(state.heroX - l.x, state.heroZ - l.z) > 0.5) { TRAIL.push({ x: state.heroX, z: state.heroZ, l: state.level }); if (TRAIL.length > 500) { TRAIL.shift(); trailBase++; } }
 }
+/* companions changing floor by a stair: when the trail leads onto a ramp and the companion is beside it (not on it), steer to the ramp's entry end first
+   (foot going up, top going down) so it walks round the side rail instead of pressing into it. No allocation (one shared result object). */
+const SE = { x: 0, z: 0 };
+function stairEntry(r, a, t) {
+  for (const b of ectx.multi) {
+    if (!b.ramps || !b.ramps.length || !b.toL) continue; const [fx, fz] = b.toL(a.x, a.z); if (Math.abs(fx) > 40 || Math.abs(fz) > 40) continue;
+    const [tx, tz] = b.toL(t.x, t.z);
+    for (const m of b.ramps) {
+      const up = m.l0 === r.level && state.level > r.level, dn = m.l1 === r.level && state.level < r.level; if (!up && !dn) continue;
+      const [tu, tv] = b.rampUV(m, tx, tz); if (Math.abs(tu) > m.len / 2 + 1.2 || Math.abs(tv) > m.w / 2 + 0.8) continue;   // trail point is not on this ramp
+      const [fu, fv] = b.rampUV(m, fx, fz); if (Math.abs(fu) <= m.len / 2 + 0.05 && Math.abs(fv) <= m.w / 2) return null;       // already on the ramp: follow the trail
+      const ue = up ? -m.len / 2 - 0.6 : m.len / 2 + 0.6; if (Math.hypot(fu - ue, fv) < 0.6) return null;                     // at the entry: let the trail take over
+      if (Math.abs(fu - ue) + Math.abs(fv) > 12) continue;
+      const lx = m.cx + Math.sin(m.ang) * ue, lz = m.cz + Math.cos(m.ang) * ue, w = b.toW(lx, lz); SE.x = w[0]; SE.z = w[1]; r.ti = null; return SE;
+    }
+  }
+  return null;
+}
 function trailTarget(r, a) {
   if (r.ti === null) {
     let best = -1, bd = 1e9; for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01) { bd = d; best = i; } }
@@ -690,7 +708,7 @@ function updateCrowd(dt) {
       if (rw) { gx = rw.x; gz = rw.z; r.lvT = 0; }   // hero is inside a playable-characters-only building: companions wait by its door
       else if (r.level !== state.level) {
         r.lvT += dt; const t = trailTarget(r, a);
-        if (t) { gx = t.x; gz = t.z; far = true; }
+        if (t) { gx = t.x; gz = t.z; far = true; const se = stairEntry(r, a, t); if (se) { gx = se.x; gz = se.z; } }   // walk to the stair foot (or top) first, then up/down the ramp
         if ((r.lvT > 12 || t === null) && state.level === 0) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; }
       } else {
         r.ti = null;   // same floor number but a long way off (other building / stuck behind walls): catch up after a few seconds instead of pushing straight into a wall

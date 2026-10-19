@@ -176,6 +176,11 @@ function temple(spec, ctx) {
   for (const z of [-8.5, -5.5]) for (const s of [-1, 1]) B.pillar(s * 4.2, z, .4, h - .6, 'stoneL');
   B.bx(5, .5, 2.4, 'stoneL', 0, .25, -id_ + 1.4, B.G.int); B.bx(3.2, 1.1, 1, 'gold', 0, 1.0, -id_ + 1.3, B.G.int); B.col(0, -id_ + 1.4, 5, 2.4); B.banner(0, 4.2, -id_ + .3, 0, 2.2, 4.4); B.win(-2.8, 5, -id_ + .1, 0, 1.2, 3, 'stained'); B.win(2.8, 5, -id_ + .1, 0, 1.2, 3, 'stained');
   B.crystal(-5.6, -id_ + 1.6, 1.5, '6aa8ff', .35); B.crystal(5.6, -id_ + 1.6, 1.5, '6aa8ff', .35);
+  { const G = B.G.int, z0 = -id_ + 1.3;   // card temple (pass 4): high altar dressing - altar cloth, candles, gold reredos frame, candelabra, communion rail
+    B.bx(3.3, .04, 1.06, 'carpet', 0, 1.57, z0, G, { shadow: false, lite: true }); for (let i = 0; i < 6; i++) { const x = -1.25 + i * .5; B.cyl(.04, .04, .22, '#e8dcc0', x, 1.7, z0 - .3, G, 4, { shadow: false }); B.add(new THREE.ConeGeometry(.04, .1, 4), GLOW('ffb040', 2.0), x, 1.86, z0 - .3, G, { shadow: false }); }
+    for (const [x, y, w, hh] of [[0, 6.95, 5.0, .18], [-2.45, 4.95, .18, 4.1], [2.45, 4.95, .18, 4.1]]) B.bx(w, hh, .12, 'gold', x, y, -id_ + .2, G, { shadow: false, lite: true });
+    for (const s of [-1, 1]) { const x = s * 3.2, z = -id_ + 2.0; B.cyl(.05, .09, 1.6, 'gold', x, .8, z, G, 6, { shadow: false }); B.bx(.7, .04, .04, 'gold', x, 1.6, z, G, { shadow: false, lite: true }); for (const dx of [-.33, 0, .33]) B.add(new THREE.ConeGeometry(.04, .1, 4), GLOW('ffb040', 2.0), x + dx, 1.72, z, G, { shadow: false }); B.ccol(x, z, .25); }
+    B.bx(4.2, .1, .1, 'gold', 0, .75, -id_ + 3.1, G, { shadow: false, lite: true }); for (const x of [-2, -1, 1, 2]) B.bx(.06, .7, .06, 'gold', x, .37, -id_ + 3.1, G, { shadow: false, lite: true }); }
   B.cyl(1.1, 1.3, .5, 'stoneL', 0, .25, 4.5, B.G.int, 16); B.add(new THREE.CylinderGeometry(.9, .9, .06, 16), M('water'), 0, .55, 4.5, B.G.int, { shadow: false }); B.cyl(.12, .12, 1.2, 'stoneL', 0, 1.1, 4.5, B.G.int, 8); B.ccol(0, 4.5, 1.35);
   // real upper galleries: side balconies over the aisles + choir loft across the back, reached by a flight on each side of the entrance
   { const GY = 4.0, gx = 4.0, GL = GY / Math.tan(26 * Math.PI / 180); const S = s => ({ cx: s * (iw - .75), cz: -.4 + GL / 2, ang: Math.PI, len: GL, w: 1.5, l0: 0, y0: 0, l1: 1, y1: GY });

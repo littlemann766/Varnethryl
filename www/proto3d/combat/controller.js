@@ -27,7 +27,7 @@ export class CombatController {
   /* Owner gate: Owner skin AND the host-confirmed owner unlock (fight.js sets ownerUnlocked from the owner gate; the HUD can never set it). */
   ownerOk() { return !!(this.ownerUnlocked && (this.hero.owner || this.hero.saber)); }   // owner account AND (Owner skin OR active hero wields the Owner saber)
   perkHero() { return !!(this.hero.owner || (TUNING.perks.saberHolderResources && this.ownerOk())); }   // unlimited MP/SP + no-cooldowns recipient
-  slotUsable(i) { const a = typeof i === 'string' ? OWNER_SKILLS[i] : ABILITIES[i]; if (!a) return false; if (a.owner && !this.ownerOk()) return false; return !a.saber || !!this.hero.saber; }
+  slotUsable(i) { const a = typeof i === 'string' ? OWNER_SKILLS[i] : ABILITIES[i]; if (!a) return false; if (a.owner && !this.ownerOk()) return false; return a.owner || !a.saber || !!this.hero.saber; }
   furyReady() { return this.res.unlimited || this.fury >= TUNING.ult.fury; }
   weapon() { return this.hero.saber ? 'saber' : 'unarmed'; }
   addEnemy(key, x, z, extra) {
@@ -94,8 +94,9 @@ export class CombatController {
     if (e.state === 'defeated') return;
     const r = DamageCalculator.playerHit(this.weapon(), mult, this.rng);
     /* Owner saber: regular hostile monsters take current HP x12 per hit (always lethal). Bosses keep flat 99,999 unless TUNING.perks.saberBossesX12. Owner gate enforced here, never from the UI. */
+    /* Owner skills (Royal/Chains/Wrath) = 99,999 x skillMul with ANY weapon except the lightsaber; while the saber is held the saber rule (x current HP) applies. */
     const skm = a && a.id && TUNING.skillMul && TUNING.skillMul[a.id];
-    if (skm > 0 && this.weapon() === 'saber' && this.ownerOk()) r.dmg = Math.round(99999 * skm);
+    if (skm > 0 && this.weapon() !== 'saber' && this.ownerOk()) r.dmg = Math.round(99999 * skm);
     else {
     const sm = Math.max(0, Math.min(50, Math.floor(+TUNING.perks.saberMul || 0)));   // 0 = flat 99,999 (old behavior); 1-50 = x target current HP
     if (sm > 0 && this.weapon() === 'saber' && this.ownerOk() && e.hp > 0 && (!e.def.boss || TUNING.perks.saberBossesX12)) r.dmg = Math.max(1, Math.round(e.hp)) * sm; }

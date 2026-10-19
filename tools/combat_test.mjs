@@ -81,8 +81,8 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   k = ow(); const e1 = k.addEnemy('wolf', 0, 5); e1.friendly = true; const e2 = k.addEnemy('wolf', 0, 6); e2.protected = true; const e3 = k.addEnemy('wolf', 0, 7); k.use('holy'); go(k, 2); T('ult: friendly/protected entities untouched', e1.state !== 'defeated' && e2.state !== 'defeated' && e3.state === 'defeated');
   const keep = TUNING.ult.bossesInstantKill; TUNING.ult.bossesInstantKill = true; k = ow(); const b2 = k.addEnemy('titan', 0, 15); let bd = 0; k.on('defeat', () => bd++); k.use('unholy'); go(k, 2); T('ult: bossesInstantKill flag true => boss defeated once', b2.state === 'defeated' && bd === 1); TUNING.ult.bossesInstantKill = keep;
   k = ow(); const s1 = k.addEnemy('wolf', 0, 5); k.use('royal'); go(k, 0.5); T('royal slash: cone hit, 99,999 saber rule', s1.state === 'defeated');
-  k = ow(); const s2 = k.addEnemy('titan', 0, 10); k.use('chains'); go(k, 0.5); T('chains: 99,999 x600% on boss', s2.max - s2.hp === 99999 * 6);
-  k = ow(); const s3 = k.addEnemy('titan', 0, 6), s4 = k.addEnemy('wolf', 0, -4); k.use('wrath'); go(k, 0.5); T('wrath: area burst hits all around, 99,999 x1200% on boss', s4.state === 'defeated' && s3.max - s3.hp === 99999 * 12);
+  k = ow(); const s2 = k.addEnemy('titan', 0, 10); k.use('chains'); go(k, 0.5); T('chains (saber held): flat 99,999 on boss', s2.max - s2.hp === 99999);
+  k = ow(); const s3 = k.addEnemy('titan', 0, 6), s4 = k.addEnemy('wolf', 0, -4); k.use('wrath'); go(k, 0.5); T('wrath: area burst hits all around, 99,999 x1200% on boss', s4.state === 'defeated' && s3.max - s3.hp === 99999);
   k = ow(); k.fury = 0; const w9 = k.addEnemy('wolf', 0, 3); k.use(0); go(k, 0.5); T('fury builds from owner hits', k.fury === TUNING.ult.furyPerBasic);
   k = ow(); k.use('unholy'); go(k, 0.5); k.res.hp = 0; k.enemyStrike({ def: { reach: 99, r: 1, atk: 9e9 }, x: 0, z: 0 }); go(k, 0.2); T('meteor cancelled if owner dies before landing', k.meteors.length === 0 || k.dead > 0);
 }
@@ -91,7 +91,7 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   const hero = (id, saber, unlocked) => { const k = mk(); k.setHero({ id, saber }); k.ownerUnlocked = unlocked; k.fury = 100; return k; };
   let k = hero('n:darius', true, true); k.addEnemy('wolf', 0, 5); T('holder: other hero WITH saber (owner account) gets owner ability set', k.ownerOk() && k.slotUsable('royal') && k.slotUsable('chains') && k.slotUsable('wrath') && k.slotUsable('unholy'));
   const m1 = k.addEnemy('raider', 0, 8), m2 = k.addEnemy('wolf', 0, 12); k.use('unholy'); go(k, 2); T('holder: Unholy Destruction works for saber holder', m1.state === 'defeated' && m2.state === 'defeated');
-  k = hero('n:darius', true, true); const tt = k.addEnemy('titan', 0, 8); k.use('royal'); go(k, 0.5); T('holder: Royal Slash 99,999 x300%', tt.max - tt.hp === 99999 * 3);
+  k = hero('n:darius', true, true); const tt = k.addEnemy('titan', 0, 8); k.use('royal'); go(k, 0.5); T('holder: saber rule, flat 99,999 on boss', tt.max - tt.hp === 99999);
   k = hero('n:darius', false, true); T('holder: other hero WITHOUT saber has no owner abilities', !k.ownerOk() && !k.use('royal') && !k.use('unholy') && !k.slotUsable('wrath'));
   k = hero('n:darius', true, false); T('holder: non-owner account never (even if hero.saber were set)', !k.ownerOk() && !k.use('royal') && !k.use('unholy') && k.meteors.length === 0);
   k = hero('o:owner', true, false); T('holder: Owner skin on non-unlocked account gets no owner skills', !k.use('royal') && !k.use('unholy'));
@@ -120,7 +120,7 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   k = o(); const ev2 = []; k.on('damage', d => !d.toPlayer && ev2.push(d)); let r = k.addEnemy('raider', 0, 3); const full = r.hp; k.use(0); go(k, 0.5); T('x12: full-health monster shows hp*12', ev2[0].dmg === full * 12 && r.state === 'defeated');
   k = o(); let tt = k.addEnemy('titan', 0, 8); const e3 = []; k.on('damage', d => !d.toPlayer && e3.push(d)); k.use(0); go(k, 0.6); T('x12: boss (Ashen Titan) stays flat 99,999 by default', tt.max - tt.hp === 99999 && e3.every(d => d.dmg === 99999) && TUNING.perks.saberBossesX12 === false);
   TUNING.perks.saberBossesX12 = true; k = o(); tt = k.addEnemy('titan', 0, 8); const e4 = []; k.on('damage', d => !d.toPlayer && e4.push(d)); k.use(0); go(k, 0.6); T('x12: flag flips bosses to current HP x12', e4[0] && e4[0].dmg === 5000000 * 12 && tt.state === 'defeated'); TUNING.perks.saberBossesX12 = false;
-  k = o('n:darius', true, true); m = k.addEnemy('wolf', 0, 3); m.hp = 50; const e5 = []; k.on('damage', d => !d.toPlayer && e5.push(d)); k.use('royal'); go(k, 0.6); T('skill mult: any hero holding the saber gets Royal x300%', e5.some(d => d.dmg === 99999 * 3) && m.state === 'defeated');
+  k = o('n:darius', true, true); m = k.addEnemy('wolf', 0, 3); m.hp = 50; const e5 = []; k.on('damage', d => !d.toPlayer && e5.push(d)); k.use('royal'); go(k, 0.6); T('any hero holding the saber: skills use the saber rule (x12 current HP)', e5.some(d => d.dmg === 600) && m.state === 'defeated');
   k = o('n:darius', true, false); m = k.addEnemy('wolf', 0, 3); m.hp = 50; const e6 = []; k.on('damage', d => !d.toPlayer && e6.push(d)); k.use(0); go(k, 0.6); T('x12: non-owner account never gets x12', !e6.some(d => d.dmg === 600));
   k = o('n:darius', false, true); m = k.addEnemy('wolf', 0, 3); m.hp = 1000; const e7 = []; k.on('damage', d => !d.toPlayer && e7.push(d)); k.use(0); go(k, 0.6); T('x12: other weapons unchanged (unarmed 28-48)', e7.length > 0 && e7.every(d => d.dmg < 200));
   k = o(); const hp0 = k.res.hp; k.use(0); go(k, 0.5); T('x12: never touches the owner', k.res.hp === hp0);
@@ -159,11 +159,12 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   k = o(); const bb = k.addEnemy('titan', 0, 10); k.use('holy'); go(k, 2.5); T('HOLY: boss follows bossesInstantKill=false', bb.state !== 'defeated');
 }
 { const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
-  const o = () => { const k = mk(); k.ownerUnlocked = true; k.res.unlimited = true; return k; };
-  const dm = (id, ex) => { const k = o(); const t = k.addEnemy('titan', 0, 6); const ev = []; k.on('damage', d => !d.toPlayer && ev.push(d)); k.use(id); go(k, 0.6); return ev[0] && ev[0].dmg; };
+  const o = (sab = false) => { const k = mk(sab); k.ownerUnlocked = true; k.res.unlimited = true; return k; };
+  const dm = (id, sab = false) => { const k = o(sab); const t = k.addEnemy('titan', 0, 6); const ev = []; k.on('damage', d => !d.toPlayer && ev.push(d)); k.use(id); go(k, 0.6); return ev[0] && ev[0].dmg; };
   T('skills: Royal 300% / Chains 600% / Wrath 1200% of 99,999', dm('royal') === 299997 && dm('chains') === 599994 && dm('wrath') === 1199988);
   const sv = { ...TUNING.skillMul }; TUNING.skillMul.royal = 10; T('skills: multipliers live in one config block', dm('royal') === 999990); Object.assign(TUNING.skillMul, sv);
-  let k = o(); const w = k.addEnemy('wolf', 0, 3); w.hp = 30; const ev = []; k.on('damage', d => !d.toPlayer && ev.push(d)); k.use(0); go(k, 0.5); T('basic saber hit stays x12 current HP', ev[0].dmg === 360);
-  k = o(); k.setHero({ id: 'n:darius', saber: false }); k.ownerUnlocked = false; const t2 = k.addEnemy('wolf', 0, 3); T('skills: no owner skill without gate', !k.use('royal') && !k.use('chains') && !k.use('wrath'));
+  let k = o(true); const w = k.addEnemy('wolf', 0, 3); w.hp = 30; const ev = []; k.on('damage', d => !d.toPlayer && ev.push(d)); k.use(0); go(k, 0.5); T('basic saber hit stays x12 current HP', ev[0].dmg === 360);
+  k = o(); k.setHero({ id: 'n:darius', saber: false }); k.ownerUnlocked = false; const t2 = k.addEnemy('wolf', 0, 3); { const k2 = o(true); const w2 = k2.addEnemy('wolf', 0, 4); w2.hp = 25; const e2 = []; k2.on('damage', d => !d.toPlayer && e2.push(d)); k2.use('royal'); go(k2, 0.6); T('skills WITH saber held: saber rule (x12 current HP), not the skill multiplier', e2[0] && e2[0].dmg === 300); const t3 = o(true); const tt3 = t3.addEnemy('titan', 0, 6); const e3 = []; t3.on('damage', d => !d.toPlayer && e3.push(d)); t3.use('wrath'); go(t3, 0.6); T('saber held + boss: flat 99,999 (no x1200)', e3[0].dmg === 99999); }
+  T('skills: no owner skill without gate', !k.use('royal') && !k.use('chains') && !k.use('wrath'));
 }
 console.log(ok + ' pass, ' + bad + ' fail'); process.exit(bad ? 1 : 0);

@@ -14,6 +14,10 @@ export const COLLIDE_RADIUS_CAP = 2.1;                        // metres: the PLA
 export const DEFAULT = Object.freeze({ height: HERO_M, radius: 0.53, speed: 1, step: 0.35, reach: 1, camDist: 1, camHeight: 1, camMin: 0.4, camMax: 1.7 });
 export const CHARS = {
   'n:ashentitan_new': { height: 11.4, radius: 3.2, speed: 1.4, step: 2.0, reach: 3.2, camDist: 3.4, camHeight: 3.2, camMin: 0.55, camMax: 1.6 },          // Beth native 11.4 m (6x hero)
+  // Same 11.4 m GLB, three test scale profiles. No GLB edits or duplicated assets.
+  'n:ashentitan_20x': { height: 20 * HERO_M, native: 11.4, radius: 6, speed: 1.5, step: 5, reach: 5, camDist: 4.8, camHeight: 4.8, camMin: 0.55, camMax: 1.7 },
+  'n:ashentitan_40x': { height: 40 * HERO_M, native: 11.4, radius: 9, speed: 1.55, step: 7, reach: 6.5, camDist: 6.4, camHeight: 6.5, camMin: 0.55, camMax: 1.7 },
+  'n:ashentitan_60x': { height: 60 * HERO_M, native: 11.4, radius: 12, speed: 1.6, step: 8, reach: 8, camDist: 7.8, camHeight: 7.8, camMin: 0.55, camMax: 1.7 },
   // Vaelthryx variants are baked at DIFFERENT native sizes (measured in-game): _new6 14.3 m tall (79 m long), _new 2.0 m, _straight_rig 0.65 m. Boss quote ~18.7 m coiled; edit height here once confirmed.
   'n:vaelthryx_new': { height: 2.0, radius: 0.6, speed: 1.0, step: 0.4, reach: 1.1, camDist: 1.05, camHeight: 1.05, camMin: 0.5, camMax: 1.7 },
   'n:vaelthryx_new6': { height: 14.3, radius: 4.0, speed: 1.5, step: 2.6, reach: 4.0, camDist: 3.8, camHeight: 3.7, camMin: 0.6, camMax: 1.7 },
@@ -26,11 +30,11 @@ export const CHARS = {
 const clampN = (v, lo, hi, d) => { v = +v; return Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d; };
 /* profile in METRES with every field filled + clamped (safe even if the config is edited badly) */
 /* load-time model scale for models whose authored size differs from the config height (1 = use the normal fit) */
-export const loadScale = (id) => { const c = CHARS[id]; return c && c.native > 0 ? clampN(c.height, 0.3, 60, DEFAULT.height) / c.native : 1; };
+export const loadScale = (id) => { const c = CHARS[id]; return c && c.native > 0 ? clampN(c.height, 0.3, 125, DEFAULT.height) / c.native : 1; };
 export function profileFor(id) {
   const c = Object.assign({}, DEFAULT, CHARS[id] || {});
-  return { id: id || '', height: clampN(c.height, 0.3, 60, DEFAULT.height), radius: clampN(c.radius, 0.1, 20, DEFAULT.radius), speed: clampN(c.speed, 0.3, SPEED_CAP, 1), step: clampN(c.step, 0.05, 8, DEFAULT.step), reach: clampN(c.reach, 0.5, 8, 1),
-    camDist: clampN(c.camDist, 0.5, 8, 1), camHeight: clampN(c.camHeight, 0.5, 8, 1), camMin: clampN(c.camMin, 0.2, 1.7, 0.4), camMax: clampN(c.camMax, 0.4, 2.5, 1.7), scale: clampN(c.height, 0.3, 60, DEFAULT.height) / HERO_M, custom: !!CHARS[id] };
+  return { id: id || '', height: clampN(c.height, 0.3, 125, DEFAULT.height), radius: clampN(c.radius, 0.1, 20, DEFAULT.radius), speed: clampN(c.speed, 0.3, SPEED_CAP, 1), step: clampN(c.step, 0.05, 8, DEFAULT.step), reach: clampN(c.reach, 0.5, 8, 1),
+    camDist: clampN(c.camDist, 0.5, 8, 1), camHeight: clampN(c.camHeight, 0.5, 8, 1), camMin: clampN(c.camMin, 0.2, 1.7, 0.4), camMax: clampN(c.camMax, 0.4, 2.5, 1.7), scale: clampN(c.height, 0.3, 125, DEFAULT.height) / HERO_M, custom: !!CHARS[id] };
 }
 /* same profile in WORLD units (height/radius/step) for the engine */
 export function worldProfile(id, HS = 1.5) { const p = profileFor(id), k = WORLD_PER_M(HS); return Object.assign({}, p, { heightW: p.height * k, radiusW: Math.min(p.radius, COLLIDE_RADIUS_CAP) * k, stepW: p.step * k }); }

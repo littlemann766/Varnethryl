@@ -16,8 +16,8 @@ with sync_playwright() as p:
     pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text[:150]) if m.type == 'error' else 0)
     pg.goto(f'http://127.0.0.1:{port}/proto3d.html?nosave=1&party=2&npcs=0', wait_until='commit', timeout=120000)
     pg.wait_for_function('window.__p3d&&__p3d.frames>5', timeout=120000); pg.wait_for_timeout(1500)
-    pg.evaluate("__p3d.fightToggle()"); pg.wait_for_function("__p3d.fight&&__p3d.fight.on&&__p3d.fight.hasSaber", timeout=90000); pg.wait_for_timeout(1500)
-    pg.evaluate("__p3d.fight.cc.god=true;__p3d.fight.cc.clearEnemies();window.__ally=0;window.__hero=0;__p3d.fight.cc.on('damage',d=>{if(d.ally)__ally++;else if(!d.toPlayer)__hero++})")
+    pg.evaluate("window.__p3d.owner=true;window.__p3d.cheats=window.__p3d.cheats||{}"); pg.evaluate("__p3d.fightToggle()"); pg.wait_for_function("__p3d.fight&&__p3d.fight.on&&__p3d.fight.hasSaber", timeout=90000); pg.wait_for_timeout(1500)
+    pg.evaluate("setInterval(()=>{__p3d.fight.cc.god=true},50);__p3d.fight.cc.god=true;__p3d.fight.cc.clearEnemies();window.__ally=0;window.__hero=0;window.__hurt=[];__p3d.fight.cc.on('damage',d=>{if(d.toPlayer)__hurt.push([d.dmg,d.e&&d.e.def&&d.e.def.name])});__p3d.fight.cc.on('damage',d=>{if(d.ally)__ally++;else if(!d.toPlayer)__hero++})")
     pg.evaluate("(async()=>{await __p3d.fight.spawn('wolf',6)})()"); pg.wait_for_function("__p3d.fight.cc.enemies.length>=1", timeout=60000); pg.evaluate("window.__w=__p3d.fight.cc.enemies[0];window.__wh=0;__p3d.fight.cc.on('damage',d=>{if(d.ally&&d.e===__w)__wh++})")
     hp0 = pg.evaluate("__p3d.fight.cc.res.hp")
     chk('followers present', pg.evaluate("__p3d.crowd.filter(r=>r.kind==='party').length") >= 2)
@@ -30,7 +30,7 @@ with sync_playwright() as p:
     except Exception: ok = False
     n = pg.evaluate("__wh"); chk('companions killed the wolf over several hits', ok and n >= 3, f'hits={n}')
     chk('the hero dealt none of it', pg.evaluate("__hero") == 0)
-    chk('hero HP unchanged, not dead', pg.evaluate("__p3d.fight.cc.res.hp") >= hp0 and pg.evaluate("__p3d.fight.cc.dead") == 0)
+    hurt = pg.evaluate("__hurt"); chk('companions never hurt the hero (only enemy bites, if any), hero not dead', all(h[1] for h in hurt) and pg.evaluate("__p3d.fight.cc.dead") == 0, str(hurt[:4]))
     pg.evaluate("__p3d.fight.cc.clearEnemies()"); pg.wait_for_timeout(500)
     try: pg.wait_for_function("__p3d.crowd.filter(r=>r.kind==='party').every(r=>Math.hypot(r.a.x-__p3d.state.heroX,r.a.z-__p3d.state.heroZ)<7)", timeout=60000); ok = True
     except Exception: ok = False

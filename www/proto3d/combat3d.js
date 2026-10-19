@@ -5,6 +5,7 @@ import { CombatController } from './combat/controller.js';
 import { createCombatHud } from './combathud.js';
 import { createFoe } from './foes.js';
 import { ENEMIES, SABER } from './combat/data.js';
+import { SKIN_SLOTS } from './foes.js';
 import { loadLucian } from './combat/calc.js';
 
 export const MAX_ENEMIES = 6, TARGET_ALIVE = 3, RESPAWN_S = 6, SPAWN_MIN = 14, SPAWN_MAX = 26, SOFT_RANGE = 8;
@@ -30,6 +31,21 @@ export function createCombat(env) {
   const A = { vx: 0, vz: 0, lx: 0, lz: 0, dash: null, swing: null, slash: -1 };
   const pool = []; const freeFoes = [];
   const getFoe = () => { let f = freeFoes.pop(); if (!f) { f = createFoe(scene, HS); pool.push(f); } return f; };
+  /* ---- model skins (GLB) via env.loadSkin(id): enemy skin slots (SKIN_SLOTS) and the owner saber. Failure = placeholder shapes stay. ---- */
+  const skinCache = {}; let titanSkinFoe = null, saberSkin = false;
+  const heroHeight = () => { const h = env.hero(); h.updateMatrixWorld(true); const b = new THREE.Box3().setFromObject(h); return Math.max(0.5, b.max.y - b.min.y); };
+  function attachSkin(f, key) {
+    const id = SKIN_SLOTS[key]; if (!id || !env.loadSkin || titanSkinFoe) return; titanSkinFoe = f;   /* one skinned boss at a time: the GLB root is shared */
+    const p = skinCache[id] || (skinCache[id] = env.loadSkin(id));
+    p.then((root) => {
+      if (!root || f.kind !== key || !f.mesh.visible) { if (titanSkinFoe === f) titanSkinFoe = null; return; }
+      if (!root.userData.skinBase) root.userData.skinBase = { s: root.scale.clone(), y: root.position.y }; root.scale.copy(root.userData.skinBase.s); root.position.y = root.userData.skinBase.y;   /* re-attach safe */
+      root.updateMatrixWorld(true); const b = new THREE.Box3().setFromObject(root), h = b.max.y - b.min.y;
+      if (!(h > 0.01)) { if (titanSkinFoe === f) titanSkinFoe = null; return; }
+      const mul = ENEMIES[key].scale || 1, k = (heroHeight() * mul) / h; root.scale.multiplyScalar(k); root.position.y -= b.min.y * k;   /* feet on the ground, exactly mul x the hero's height */
+      f.setSkin(root);
+    }).catch(() => { if (titanSkinFoe === f) titanSkinFoe = null; });
+  }
 
   /* ---- fx: slash arc, soft/lock target ring, owner saber ---- */
   const arcGeo = new THREE.RingGeometry(0.55, 1, 28, 1, -1.1, 2.2);
@@ -47,6 +63,16 @@ export function createCombat(env) {
   let ignite = 0, kS = 1, hKey = null, hH = 0;
   const heroH = () => { const h = env.hero(), key = h && h.scale.y; if (h !== hKey || key !== hH) { hKey = h; hH = key; h.updateMatrixWorld(true); const b = new THREE.Box3().setFromObject(h); kS = saberScaleFor(b.max.y - b.min.y, HS); saber.scale.setScalar(kS); } return kS; };
   const isOwner = () => !!env.isOwner();
+  /* Owner saber model (saber_owner.glb): fetched ONLY once the owner gate says owner and fight mode runs; replaces the placeholder blade/hilt, same length and grip. */
+  let saberTried = false;
+  function trySaberSkin() {
+    if (saberTried || !env.loadSkin || !isOwner()) return; saberTried = true;
+    env.loadSkin('s:saber_owner', { raw: true }).then((root) => {
+      if (!root) return; root.updateMatrixWorld(true); const b = new THREE.Box3().setFromObject(root), len = b.max.y - b.min.y; if (!(len > 0.01)) return;
+      const L = 0.32 * HS + SAB_LEN, k = L / len; root.scale.multiplyScalar(k); root.position.y = -b.min.y * k; root.traverse((o) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; } });
+      hilt.visible = blade.visible = glow.visible = false; saber.add(root); saberSkin = true;
+    }).catch(() => {});
+  }
   const saberOn = () => on && isOwner() && cc.dead <= 0 && !env.camRig.fp;   /* first person: the held model would fill the screen */
 
   const syncHero = () => { const own = isOwner(), want = own, id = own ? 'owner' : 'hero'; if (cc.hero.id !== id || cc.hero.saber !== want) cc.setHero({ id, saber: want, name: own ? 'Owner' : 'Hero' }); };
@@ -66,7 +92,7 @@ export function createCombat(env) {
     .on('defeat', (e) => { kills++; if (e.key === 'titan') { victoryT = performance.now(); hud.say('VICTORY! The Ashen Titan has fallen.', 4500); } else if (performance.now() - victoryT > 4500) hud.say(e.def.name + ' defeated', 1100); })
     .on('playerDown', () => { hud.say('You fell...', 2500); env.hero().rotation.x = -1.3; })
     .on('respawn', () => { state.heroX = env.start.x; state.heroZ = env.start.z; state.target = null; env.hero().rotation.x = 0; spawnT = 1; })
-    .on('remove', (e) => { if (e.foe) { e.foe.hide(); freeFoes.push(e.foe); e.foe = null; } });
+    .on('remove', (e) => { if (e.foe) { if (titanSkinFoe === e.foe) titanSkinFoe = null; e.foe.hide(); freeFoes.push(e.foe); e.foe = null; } });
 
   function spawn(key, dist) {
     if (cc.enemies.length >= MAX_ENEMIES + (key === 'titan' ? 1 : 0)) return null;
@@ -74,7 +100,8 @@ export function createCombat(env) {
     for (let k = 0; k < 24 && !ok; k++) { const a = key === 'titan' ? Math.atan2(-Math.cos(state.camYaw), -Math.sin(state.camYaw)) + (Math.random() - 0.5) * (k < 12 ? 0.9 : 6.28) : Math.random() * 6.283, r = (dist || (SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN))) * HS / 1.5, px = state.heroX + Math.cos(a) * r, pz = state.heroZ + Math.sin(a) * r; if (Math.abs(px) < env.WORLD - 8 && Math.abs(pz) < env.WORLD - 8 && env.free(px, pz)) { x = px; z = pz; ok = true; } }
     if (!ok) return null;
     const f = getFoe(); f.setKind(key === 'wolf' ? 'wolf' : key === 'wraith' ? 'wraith' : key === 'titan' ? 'titan' : 'raider');
-    f.mesh.visible = true; f.mesh.rotation.set(0, 0, 0); f.mesh.position.set(x, 0, z); f.mat.emissive.setHex(0);
+    f.mesh.visible = true; f.mesh.rotation.set(0, 0, 0); f.mesh.position.set(x, 0, z); f.setEmissive(0);
+    attachSkin(f, key);
     return cc.addEnemy(key, x, z, { foe: f, top: f.top, px: x, pz: z, flashOn: false });
   }
 
@@ -87,7 +114,7 @@ export function createCombat(env) {
   };
 
   function update(dt) {
-    if (!on) return; dt = Math.min(dt, 0.1); syncHero(); cc.god = !!flags.god;
+    if (!on) return; dt = Math.min(dt, 0.1); syncHero(); cc.god = !!flags.god; trySaberSkin();
     { const dx = state.heroX - A.lx, dz = state.heroZ - A.lz; A.lx = state.heroX; A.lz = state.heroZ; const l = Math.hypot(dx, dz); if (l > 0.005 && !A.dash) { A.vx = dx / l; A.vz = dz / l; } else if (l <= 0.005) { A.vx = 0; A.vz = 0; } }
     const safe = state.level > 0 || !!state.inside;
     const fp = !!env.camRig.fp;
@@ -112,10 +139,11 @@ export function createCombat(env) {
     for (const e of cc.enemies) {
       const f = e.foe; if (!f) continue; const m = f.mesh;
       if (e.state === 'defeated') { m.rotation.x = -Math.min(1.4, e.deadT * 4); m.position.y = -Math.max(0, e.deadT - 1.2) * 1.2; f.tele.visible = false; if (e.deadT > 2.4) { cc.removeEnemy(e); } continue; }
+      if (f.skin) { const u = f.skin.userData, w = e.state === 'chase' ? 1 : 0; if (u.act) { if (u.act.walk) { u.act.walk.setEffectiveWeight(w); u.act.walk.timeScale = 0.5; } if (u.act.idle) u.act.idle.setEffectiveWeight(1 - w); } if (u.mixer) u.mixer.update(dt); }
       m.position.x = e.x; m.position.z = e.z; m.rotation.y = yawLerp(m.rotation.y, e.yaw, Math.min(1, dt * 10));
       const lean = e.state === 'telegraph' ? -0.3 * Math.min(1, e.tStateT / e.def.tele) : e.state === 'attack' ? 0.4 : e.state === 'stagger' ? -0.5 : 0; m.rotation.x += (lean - m.rotation.x) * Math.min(1, dt * 14);
       if (e.state === 'telegraph') { const reach = (e.def.reach * HS + e.def.r) * 1.1, p = Math.min(1, e.tStateT / e.def.tele); f.tele.visible = true; f.tele.position.set(e.x, 0.12, e.z); f.tele.scale.setScalar(reach); f.tele.material.opacity = 0.35 + 0.6 * p; } else if (f.tele.visible) f.tele.visible = false;
-      const fl = e.flash > 0 || e.state === 'telegraph'; if (fl !== e.flashOn) { e.flashOn = fl; f.mat.emissive.setHex(e.flash > 0 ? 0xff2020 : fl ? 0x551100 : 0); }
+      const fl = e.flash > 0 || e.state === 'telegraph'; if (fl !== e.flashOn) { e.flashOn = fl; f.setEmissive(e.flash > 0 ? 0xff2020 : fl ? 0x551100 : 0); }
     }
     /* slash arc + saber */
     if (A.slash >= 0) { A.slash += dt; const u = A.slash / 0.22; if (u >= 1) { A.slash = -1; arc.visible = false; } else { arc.visible = true; arc.position.set(state.heroX, 0.9 * HS, state.heroZ); arc.rotation.z = state.yaw + Math.PI / 2 + (u - 0.5) * 1.2; arc.scale.setScalar((cc.act && cc.act.a.range ? cc.act.a.range : 4.6) * HS * 0.45 * (0.8 + u * 0.3)); arc.material.opacity = 0.8 * (1 - u); } }
@@ -136,5 +164,14 @@ export function createCombat(env) {
   function stop() {
     if (!on) return; on = false; hud.show(false); cc.clearEnemies(); titanT = 1.5; arc.visible = reticle.visible = saber.visible = false; A.dash = null; A.swing = null; env.hero().rotation.x = 0; removeEventListener('keydown', onKey);
   }
-  return { start, stop, update, spawn, cc, hud, api, get on() { return on; }, get kills() { return kills; }, get enemies() { return cc.enemies; }, get saberVisible() { return saber.visible; }, get saberScale() { return kS; }, saber, saberParts: { hilt, blade, glow }, pool, SABER_DAMAGE: SABER.max };
+  /* ---- owner cheat hooks (cheats.js -> main.js hooks) ---- */
+  const cheatHeal = () => { cc.res.full(); cc.potions = cc.P.potion.charges; if (cc.dead > 0) { cc.dead = 0; cc.act = null; env.hero().rotation.x = 0; } hud.say('Party healed', 1200); return true; };
+  const cheatKill = () => { let n = 0; for (const e of cc.enemies.slice()) if (e.state !== 'defeated') { e.hp = 0; cc.defeat(e); n++; } if (n) hud.say(n + ' enem' + (n > 1 ? 'ies' : 'y') + ' slain', 1200); return n > 0; };
+  function cheatSpawn(key) {
+    if (!ENEMIES[key]) return false;
+    if (key === 'titan') { if (cc.enemies.some((e) => e.key === 'titan' && e.state !== 'defeated')) return false; for (const e of cc.enemies.slice()) if (e.state === 'defeated' || (e.key !== 'titan' && cc.enemies.length > MAX_ENEMIES - 1)) cc.removeEnemy(e); titanT = TITAN_RESPAWN_S; const e = spawn('titan', TITAN_DIST); if (e) hud.say('The Ashen Titan awakens!', 2200); return !!e; }
+    for (const e of cc.enemies.slice()) if (e.state === 'defeated' && e.key !== 'titan') cc.removeEnemy(e);
+    return !!spawn(key, 10);
+  }
+  return { start, stop, update, spawn, cheatHeal, cheatKill, cheatSpawn, cc, hud, api, get on() { return on; }, get kills() { return kills; }, get enemies() { return cc.enemies; }, get saberSkin() { return saberSkin; }, get saberVisible() { return saber.visible; }, get saberScale() { return kS; }, saber, saberParts: { hilt, blade, glow }, pool, SABER_DAMAGE: SABER.max };
 }

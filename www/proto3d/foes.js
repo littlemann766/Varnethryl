@@ -16,6 +16,8 @@ const KINDS = {
 KINDS.skeleton = KINDS.raider;
 /* Ashen Titan (placeholder primitives until Beth's model): raider-shaped but 3x scale, plus horns, shoulder plates and glowing eyes. */
 KINDS.titan = { scale: 6.7, top: 2.5, parts: KINDS.raider.parts.concat([box(.9, .22, .5, 0, 1.58, 0, 0x6a5560), box(.28, .5, .28, -.2, 2.15, 0, 0xd9d0c4), box(.28, .5, .28, .2, 2.15, 0, 0xd9d0c4), box(.7, .2, .5, 0, .08, 0, 0x2a2228)]).map((q) => (q.col === 0x7a9a4a ? box(q.w, q.h, q.d, q.x, q.y, q.z, 0x9a4a4a) : q.col === 0xd59066 ? box(q.w, q.h, q.d, q.x, q.y, q.z, 0x7a4a58) : q)) };
+/* SKIN SLOTS: enemy key -> model id registered in main.js EXTRA (file in proto3d/models-new/<name>.glb). Drop a GLB in by name here; no GLB / fetch failure = the placeholder blocks stay. */
+export const SKIN_SLOTS = { titan: 'n:ashentitan_new' };
 export const kindFor = (key) => (KINDS[key] ? key : 'raider');
 const geoCache = {};
 function buildGeo(kind, S) {
@@ -47,6 +49,10 @@ export function createFoe(scene, HS) {
   const mesh = new THREE.Mesh(buildGeo('wolf', HS / 1.5), mat); mesh.visible = false; mesh.castShadow = false; scene.add(mesh);
   const tele = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({ map: telegraphTexture(), transparent: true, depthWrite: false, opacity: 0.6 }));
   tele.rotation.x = -Math.PI / 2; tele.visible = false; tele.renderOrder = 6; scene.add(tele);
-  return { mesh, mat, tele, kind: '', top: 2, busy: false,
-    setKind(k) { const kind = kindFor(k); if (kind !== this.kind) { this.kind = kind; mesh.geometry = buildGeo(kind, HS / 1.5); this.top = KINDS[kind].top * (KINDS[kind].scale || 1) * HS / 1.5; } }, hide() { mesh.visible = false; tele.visible = false; } };
+  const skinMats = [];
+  return { mesh, mat, tele, kind: '', top: 2, busy: false, skin: null, skinReady: false,
+    setSkin(root) { this.clearSkin(); this.skin = root; this.skinReady = true; mesh.add(root); mat.visible = false; skinMats.length = 0; root.traverse((o) => { if (o.isMesh) for (const m of (Array.isArray(o.material) ? o.material : [o.material])) if (m && m.emissive && !skinMats.includes(m)) skinMats.push(m); }); },
+    clearSkin() { if (this.skin) { mesh.remove(this.skin); this.skin = null; } this.skinReady = false; mat.visible = true; skinMats.length = 0; },
+    setEmissive(hex) { mat.emissive.setHex(hex); for (const m of skinMats) m.emissive.setHex(hex); },
+    setKind(k) { const kind = kindFor(k); if (kind !== this.kind) { this.clearSkin(); this.kind = kind; mesh.geometry = buildGeo(kind, HS / 1.5); this.top = KINDS[kind].top * (KINDS[kind].scale || 1) * HS / 1.5; } }, hide() { mesh.visible = false; tele.visible = false; this.clearSkin(); } };
 }

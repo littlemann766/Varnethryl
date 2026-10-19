@@ -45,7 +45,7 @@ function buildPanel(c, gate, env) {
   const panel = el('div', { id: 'ownerPanel' }), msg = el('div', { id: 'ownerMsg' }), btns = {};
   const say = (t) => { msg.textContent = t; };
   const toggle = (key, label, fn, get) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.cheat = key; b.addEventListener('click', () => { fn(!get()); sync(); }); btns[key] = { b, get }; return b; };
-  const act = (key, label, fn) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.cheat = key; b.addEventListener('click', () => { const r = fn(); say(label + (r === false ? ': nothing to do / not available yet' : ': done')); sync(); }); return b; };
+  const act = (key, label, fn, noMsg) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.cheat = key; b.addEventListener('click', () => { const r = fn(); say(label + (r === false ? ': ' + (noMsg || 'nothing to do (is Fight mode on?)') : ': done')); sync(); }); return b; };
   const sec = (t) => el('div', { className: 'sec', textContent: t });
   const row = (...k) => el('div', { className: 'row' }, k);
   const f = c.flags;
@@ -67,7 +67,9 @@ function buildPanel(c, gate, env) {
   const il = el('select', { id: 'ownerItemLv' }); for (let i = 0; i <= MAX_ITEM_LEVEL; i++) il.appendChild(el('option', { value: i, textContent: 'Lv ' + i, selected: i === MAX_ITEM_LEVEL })); isolateKeys(il);
   panel.appendChild(row(kind, il, act('item', 'Spawn', () => c.spawnItem(kind.value, +il.value))));
   panel.appendChild(sec('Party / enemies / quests'));
-  panel.appendChild(row(act('heal', 'Heal party', c.healParty), act('kill', 'Kill enemies', c.killEnemies), act('skipq', 'Skip quest', c.skipQuest)));
+  panel.appendChild(row(act('heal', 'Heal party', c.healParty), act('kill', 'Kill enemies', c.killEnemies, 'no live enemies'), act('skipq', 'Skip quest', c.skipQuest, 'there are no quests in the 3D game yet, nothing changed')));
+  const foe = el('select', { id: 'ownerFoe' }); for (const k of ['wolf', 'raider', 'wraith', 'skeleton']) foe.appendChild(el('option', { value: k, textContent: k })); isolateKeys(foe);
+  panel.appendChild(row(foe, act('spawn', 'Spawn enemy', () => c.spawnEnemy(foe.value), 'fight mode is full'), act('spawn-titan', 'Spawn Ashen Titan', () => c.spawnTitan(), 'a Titan is already alive')));
   panel.appendChild(sec('Teleport'));
   const zone = el('select', { id: 'ownerZone' }); for (const z of c.zones()) zone.appendChild(el('option', { value: z, textContent: z })); isolateKeys(zone);
   panel.appendChild(row(zone, act('tpz', 'Go zone', () => c.teleportZone(zone.value))));

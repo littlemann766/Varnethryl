@@ -307,7 +307,7 @@ function wrapGLB(g, id) {
   root.userData = { glb: true, mixer, act, capeUpdate() {} }; try { root.userData.sb = new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.7';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.7.1';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -346,7 +346,7 @@ function loadHero(gi) {
   }), e => fail(e && e.message || e));
 }
 for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(i < GLB_NAMES.length ? GLB_NAMES[i] : EXTRA[i - GLB_NAMES.length][1]); }
-async function selectHero(i) { if (!HEROES[i].userData.glb && useGLB) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
+async function selectHero(i) { try { localStorage.setItem('vn_owner_skin_v1', i === ownerSkinIdx ? 'owner' : 'other'); } catch (e) { /* ignore */ }  if (!HEROES[i].userData.glb && useGLB) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
 const qp0 = new URLSearchParams(location.search);
 let savedPlan = null;
 try { if (qp0.get('nosave') == null) { const r = readSave(localStorage); if (r.status === 'ok') savedPlan = planFromState(r.state, GLB_NAMES, 60); } } catch (e) { diag('save read failed: ' + (e && e.message || e)); }
@@ -355,10 +355,11 @@ if (!savedPlan) savedPlan = { party: [1, 2, 0], hero: 1, followers: [2, 0], pos:
 { const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (!savedPlan.hero) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
 { const bar = document.getElementById('heroes'); const first = savedPlan && qp0.get('all') == null ? savedPlan.party : [], list = [...new Set([...first, ...HERO_NAMES.map((n, i) => i)])];
-  list.forEach(i => { const n = HERO_NAMES[i]; const row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.textContent = n; b.title = n; b.dataset.i = i; b.className = (i === 0 ? 'on ' : '') + (/PLACEHOLDER/.test(n) ? 'ph' : '');
+  const addRow = (i, first) => { const n = HERO_NAMES[i]; const row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.textContent = n; b.title = n; b.dataset.i = i; b.className = (i === 0 ? 'on ' : '') + (/PLACEHOLDER/.test(n) ? 'ph' : '');
     b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); selectHero(i); });
     const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = i; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); toggleFollower(i); });
-    row.appendChild(b); row.appendChild(f); bar.appendChild(row); }); }
+    row.appendChild(b); row.appendChild(f); if (first) bar.insertBefore(row, bar.firstChild); else bar.appendChild(row); };
+  window.__rosterAdd = addRow; list.forEach(i => addRow(i)); }
 function toggleFollower(i) {
   const id = GLB_IDS[i], cur = crowd.find(c => c.kind === 'party' && c.a.id === id), btn = document.querySelector('#heroes button[data-f="' + i + '"]');
   if (cur) { crowd.splice(crowd.indexOf(cur), 1); bumpSys.remove(cur.a); if (cur.root) scene.remove(cur.root); if (btn) btn.classList.remove('on'); return; }
@@ -479,6 +480,20 @@ const HERO_GLB_ID = i => GLB_IDS[i] || 'aldric';
 async function loadActorModel(id) {
   try { const buf = await fetchGLB(id); return await new Promise(res => gl.parse(buf, '', g => { try { res(wrapGLB(g, id)); } catch (e) { res(null); } }, () => res(null))); }
   catch (e) { return null; }
+}
+/* Skin loader for combat3d (enemy skin slots + owner saber). opts.raw -> the bare glTF scene (props); otherwise the hero-style wrapped, animated model. null on failure. */
+async function loadSkin(id, opts) {
+  try { const buf = await fetchGLB(id); return await new Promise((res) => gl.parse(buf, '', (g) => { try { res(opts && opts.raw ? g.scene : wrapGLB(g, id)); } catch (e) { res(null); } }, () => res(null))); } catch (e) { return null; }
+}
+/* ---- Owner skin: first/default skin for the owner-unlocked account ONLY. Nothing here exists or is fetched until the owner gate says yes. ---- */
+let ownerSkinIdx = -1; const OWNER_SKIN_KEY = 'vn_owner_skin_v1';
+function installOwnerSkin() {
+  if (ownerSkinIdx >= 0 || !useGLB) return;
+  const id = 'n:owner'; EXTRA_URL[id] = 'proto3d/models-new/owner.glb'; EXTRA_URL['s:saber_owner'] = 'proto3d/models-new/saber_owner.glb';
+  const i = GLB_IDS.length; GLB_IDS.push(id); const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push('Owner'); ownerSkinIdx = i;
+  if (window.__rosterAdd) window.__rosterAdd(i, true);
+  let pref = null; try { pref = localStorage.getItem(OWNER_SKIN_KEY); } catch (e) { /* ignore */ }
+  if (pref === null || pref === 'owner') selectHero(i);
 }
 function spawnCrowd(id, kind, x, z, leash, yaw) {
   const a = makeActor(id, { str: undefined }); a.x = x; a.z = z; a.yaw = yaw || 0;
@@ -740,17 +755,24 @@ function entrySpot(d) {
 let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
 const cheatEnv = {
   flags: cheat, bumpSys, storage: cheatStore, zones: ['village'],
-  hooks: { godMode: (on) => { try { cheatStore.setItem('vn_owner_god_v1', on ? '1' : '0'); } catch (e) { /* storage blocked */ } return true; } }, /* TODO(combat/quests): hooks.healParty / killEnemies / skipQuest / godMode attach here when those systems land */
+  hooks: {
+    godMode: (on) => { try { cheatStore.setItem('vn_owner_god_v1', on ? '1' : '0'); } catch (e) { /* storage blocked */ } return true; },
+    godPref: () => { try { return cheatStore.getItem('vn_owner_god_v1') !== '0'; } catch (e) { return true; } },
+    healParty: () => !!(combat && combat.on && combat.cheatHeal()),
+    killEnemies: () => !!(combat && combat.on && combat.cheatKill()),
+    spawnEnemy: (key) => { if (combat && combat.on) return combat.cheatSpawn(key); setCombat(true).then(() => combat && combat.on && combat.cheatSpawn(key)); return true; },
+    /* skipQuest: there are no quests in the 3D game yet (quest.js is 2D-only) -> intentionally a stub, the panel says so */
+  },
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
   teleport: (x, z) => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); },
-  onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; settingsApi.ownerInit(); },
-  onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; },
+  onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; installOwnerSkin(); settingsApi.ownerInit(); },
+  onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; installOwnerSkin(); },
 };
 let ownerFlag = false;
 let combat = null, combatLoading = null;
 async function setCombat(on) {
   camRig.prefs.combat = !!on; camRig.prefs.combatSet = true; if (prefStore) savePrefs(prefStore, camRig.prefs);
-  if (on) { if (!combat) { combatLoading = combatLoading || import('./combat3d.js').then((m) => { combat = m.createCombat({ THREE, scene, camera, state, HS, WORLD, flags: cheat, resolve: (p) => resolve(p, false), free: (x, z) => window.__p3d.free(x, z, 0), hero: () => hero, getCheats: () => window.__p3d.cheats, isOwner: () => ownerFlag, camRig, start: { x: 0, z: START_Z } }); }); await combatLoading; } if (camRig.prefs.combat) combat.start(); }
+  if (on) { if (!combat) { combatLoading = combatLoading || import('./combat3d.js').then((m) => { combat = m.createCombat({ THREE, scene, camera, state, HS, WORLD, flags: cheat, resolve: (p) => resolve(p, false), free: (x, z) => window.__p3d.free(x, z, 0), hero: () => hero, loadSkin, getCheats: () => window.__p3d.cheats, isOwner: () => ownerFlag, camRig, start: { x: 0, z: START_Z } }); }); await combatLoading; } if (camRig.prefs.combat) combat.start(); }
   else if (combat) combat.stop();
   return !!(combat && combat.on);
 }

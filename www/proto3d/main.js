@@ -659,6 +659,15 @@ function crowdSurface(r, a, dt) {
   const ty = s ? s.y : (r.level >= 10 && LAD ? LAD.heightOf(r.level) : 0);
   r.y = Math.abs(ty - r.y) < 0.02 ? ty : r.y + Math.max(-4 * dt, Math.min(4 * dt, ty - r.y)) * (Math.abs(ty - r.y) > 1.3 ? 1 : 1);
 }
+/* Downed state (Thunderstorm): companions/townsfolk can be killed but it never touches the hero (HP, death, respawn). Companions revive at the hero's side after a short delay, townsfolk back home. */
+const REVIVE_PARTY = 4, REVIVE_NPC = 8;
+function downAllies() { for (const r of crowd) { if (r.down > 0) continue; r.down = r.kind === 'party' ? REVIVE_PARTY : REVIVE_NPC; if (r.root) r.root.visible = false; r.vxs = r.vzs = 0; } }
+function tickDown(r, dt) {
+  r.down -= dt; if (r.down > 0) return; r.down = 0; const a = r.a;
+  if (r.kind === 'party') { a.x = state.heroX + (Math.random() - 0.5) * 1.6; a.z = state.heroZ + (Math.random() - 0.5) * 1.6; r.level = state.level; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; }
+  else { a.x = r.hx; a.z = r.hz; r.level = 0; r.y = 0; }
+  r.vxs = r.vzs = 0; if (r.root) r.root.visible = true;
+}
 function updateCrowd(dt) {
   recordTrail();
   const pa = playerAct;
@@ -666,6 +675,7 @@ function updateCrowd(dt) {
   for (let i = 0; i < crowd.length; i++) {
     const r = crowd[i], a = r.a;
     if (r.kind === 'npc' && ZONE.name !== 'town') continue;   // townsfolk wait in town while the hero is in the Wilds
+    if (r.down > 0) { tickDown(r, dt); if (r.down > 0) { r.vxs = r.vzs = 0; a.vx = a.vz = 0; continue; } }
     let tvx = 0, tvz = 0;
     if (r.kind === 'party') {
       let gx = state.heroX, gz = state.heroZ, far = false;
@@ -688,6 +698,7 @@ function updateCrowd(dt) {
   for (let i = 0; i < crowd.length; i++) {
     const r = crowd[i], a = r.a;
     if (r.kind === 'npc' && ZONE.name !== 'town') continue;
+    if (r.down > 0) continue;
     let mx = r.vxs * a.slowMul * dt + a.dx, mz = r.vzs * a.slowMul * dt + a.dz;
     if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
     tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2); state.level = l0; }
@@ -958,7 +969,7 @@ let FIGHT = null;
 async function fightToggle(createOnly) {
   if (!FIGHT) {
     const mod = await import('./fight.js');
-    FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
+    FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, downAllies, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
       selectOwner: async () => { const i = GLB_IDS.indexOf('n:owner'); if (i >= 0 && GLB_IDS[HEROES.indexOf(hero)] !== 'n:owner') await selectVariant(SLOT_G[i], curVar(SLOT_G[i])); },
       makeModel: async id => { try { return modeFor(id) === 'blocky' ? makeBlocky(id) : await loadActorModel(id); } catch (e) { return null; } },
       loco: locoAnim, resolve: p => resolve(p), free: (x, z) => window.__p3d.free(x, z, 0),
@@ -993,7 +1004,7 @@ const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
 const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
-window.__p3d = { camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
+window.__p3d = { downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },

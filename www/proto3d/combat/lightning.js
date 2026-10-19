@@ -57,6 +57,7 @@ export class LightningFX {
     const HS = this.HS, path = ev.path || []; if (!path.length) return; this.group.visible = true; let prev = null, d = 0;
     for (let i = 0; i < path.length; i++) {
       const p = path[i], f = p.falloff === undefined ? 1 : p.falloff, y = p.y === undefined ? 1.1 * HS : p.y;
+      if (p.flash) { this.queue.push({ t: this.clock + 0.05 + (i % 12) * 0.012, x: p.x, z: p.z, y, f: 0.7 }); prev = p; continue; }   // beyond the drawn-bolt cap: cheap impact flash only
       if (i === 0) {
         this.spawnBolt([p.x + this.r(3 * HS), 26 * HS, p.z + this.r(3 * HS)], p.x, y, p.z, 0.42, 1.25, 0.55, 0, 1);
         this.spawnBolt([p.x + this.r(2 * HS), 24 * HS, p.z + this.r(2 * HS)], p.x, y, p.z, 0.3, 1.0, 0.35, 0.03, 0.8);   // twin, staggered re-strike

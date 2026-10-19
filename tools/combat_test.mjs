@@ -178,4 +178,14 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   { const kk = mk(false); kk.setHero({ id: 'n:darius', saber: false }); kk.ownerUnlocked = true; kk.addEnemy('wolf', 0, 3); const e8 = []; kk.on('damage', d => !d.toPlayer && e8.push(d)); kk.use(0); go(kk, 0.5); T('non-owner hero unaffected (normal unarmed damage)', e8[0] && e8[0].dmg < 200); }
   k = o(); k.bamboo = false; const e2 = []; const w2 = k.addEnemy('wolf', 0, 3); w2.hp = 25; k.on('damage', d => !d.toPlayer && e2.push(d)); k.use(0); go(k, 0.5); T('bamboo off: saber rule returns (x12)', e2[0].dmg === 300);
 }
+// ---- Thunderstorm (Lucky ULTIMATE2) x boss rule ----
+{ const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
+  const o = (unl = true) => { const k = mk(true); k.ownerUnlocked = unl; k.res.unlimited = true; return k; };
+  let k = o(); const a = k.addEnemy('wolf', 0, 8), b = k.addEnemy('raider', 30, 40), t = k.addEnemy('titan', 0, 20); k.useUltimate2(); go(k, 2);
+  T('Thunderstorm kills every regular enemy in range', a.state === 'defeated' && b.state === 'defeated');
+  T('Thunderstorm does NOT bypass bossesInstantKill=false (Titan survives, normal hit)', t.state !== 'defeated' && t.hp < t.max && t.hp > 0);
+  const keep = TUNING.ult.bossesInstantKill; TUNING.ult.bossesInstantKill = true; k = o(); const t2 = k.addEnemy('titan', 0, 20); k.useUltimate2(); go(k, 2); T('...but kills the boss when bossesInstantKill=true', t2.state === 'defeated'); TUNING.ult.bossesInstantKill = keep;
+  k = o(false); const w = k.addEnemy('wolf', 0, 8); T('Thunderstorm is owner-only (denied without owner gate)', !k.useUltimate2() && w.state !== 'defeated');
+  k = o(); k.setHero({ id: 'aldric', saber: false }); k.addEnemy('wolf', 0, 8); T('Thunderstorm denied for a normal hero', !k.useUltimate2());
+}
 console.log(ok + ' pass, ' + bad + ' fail'); process.exit(bad ? 1 : 0);

@@ -72,9 +72,9 @@ function boot() {
     const hp = owner ? PLAYER.ownerHp : PLAYER.hp, atk = owner ? SABER : 120;
     $('#fe-name').textContent = r.name; $('#fe-tag').textContent = r.name;
     $('#fe-stats').innerHTML = stat('Health', Math.log10(hp), 6, fmt(hp)) + stat('Power', Math.log10(atk + 1), 5, fmt(atk)) + stat('Defense', PLAYER.def, 1000, String(PLAYER.def)) + stat('Agility', PLAYER.agi, 40, String(PLAYER.agi));
-    let h = 1.8; try { h = (P().charScale?.().heroH ?? 2.7) / 1.5; } catch {}
-    const px = (m) => Math.max(6, Math.min(80, m / Math.max(h, 1.8) * 80));
-    $('#fe-size').innerHTML = `<div class="fig ref" style="height:${px(1.8)}px"></div><small>Human<br>1.8 m</small><div class="fig" style="height:${px(h)}px"></div><small><b style="color:var(--vn-gold-hi)">${h.toFixed(2)} m</b><br>${(h / 1.8).toFixed(2)}× human</small>`;
+    let h = 1.905; try { h = (P().charScale?.().heroH ?? 2.7) / (0.947 * 1.5); } catch {}
+    const px = (m) => Math.max(4, Math.min(80, m / Math.max(h, 1.905) * 80));
+    $('#fe-size').innerHTML = `<div class="fig ref" style="height:${px(1.905)}px"></div><small>Human<br>1.905 m</small><div class="fig" style="height:${px(h)}px"></div><small><b style="color:var(--vn-gold-hi)">${h.toFixed(2)} m</b><br>${(h / 1.905).toFixed(2)}× human</small>`;
     $('#fe-skills').innerHTML = (ABILITIES || []).map(a => `<div class="${a.saber && !owner ? 'lock' : ''}"><i>◆</i>${a.name || a.id}</div>`).join('');
   }
   // ---- character-select model preview: one small dedicated renderer, real GLB at its in-game (charscale) size on a pedestal
@@ -90,7 +90,11 @@ function boot() {
     const c1 = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.4, .28, 40), stone); c1.position.y = -.14; ped.add(c1);
     const c2 = new THREE.Mesh(new THREE.TorusGeometry(1.26, .035, 8, 48), gold); c2.rotation.x = Math.PI / 2; ped.add(c2); sc.add(ped);
     const turn = new THREE.Group(); sc.add(turn);
-    Object.assign(PV, { r, sc, cam, ped, turn, yaw: Math.PI + .45, vel: 0, zoom: 1, drag: null, lastT: 0, idleT: 0, model: null, mixer: null, req: 0, h: 1, token: 0, clock: performance.now() });
+    const HU = 1.905 * 0.947 * 1.5;   // a 1.905 m human in world units (charscale HERO_M * WORLD_PER_M)
+    const ref = new THREE.Group(), refM = new THREE.MeshBasicMaterial({ color: 0xd4ae5a, transparent: true, opacity: .28, depthWrite: false });
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(HU * .1, HU * .56, 4, 10), refM); body.position.y = HU * .38; ref.add(body);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(HU * .085, 12, 8), refM); head.position.y = HU * .9; ref.add(head); sc.add(ref);
+    Object.assign(PV, { r, sc, cam, ped, turn, ref, HU, w: 1, yaw: Math.PI + .45, vel: 0, zoom: 1, drag: null, lastT: 0, idleT: 0, model: null, mixer: null, req: 0, h: 1, token: 0, clock: performance.now() });
     const el = r.domElement, pts = new Map();
     el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); PV.idleT = 0; });
     el.addEventListener('pointermove', e => { const p = pts.get(e.pointerId); if (!p) return;
@@ -107,25 +111,42 @@ function boot() {
     const cv = PV.r.domElement; if (cv.width !== Math.round(w * PV.r.getPixelRatio()) || cv.height !== Math.round(h * PV.r.getPixelRatio())) { PV.r.setSize(w, h); PV.cam.aspect = w / h; PV.cam.updateProjectionMatrix(); }
     PV.vel *= Math.pow(.05, dt); if (PV.idleT > 2.5) PV.yaw += dt * .45; else PV.yaw += PV.vel * dt * 4;
     PV.turn.rotation.y = PV.yaw; if (PV.mixer) PV.mixer.update(dt);
-    const fit = Math.max(PV.h, 2.0) * PV.zoom, t = Math.tan(PV.cam.fov * Math.PI / 360), dist = (fit * .66) / t / Math.min(1, PV.cam.aspect * 1.3);
-    PV.cam.position.set(0, fit * .5, dist); PV.cam.lookAt(0, fit * .42, 0); PV.r.render(PV.sc, PV.cam);
+    // frame the model AND the human reference: tiny heroes stay readable next to a human, giants fit whole
+    const H = Math.max(PV.h, PV.HU) * 1.12 * PV.zoom, W = (PV.wx || PV.HU) * 1.15 * PV.zoom, t = Math.tan(PV.cam.fov * Math.PI / 360);
+    const dist = Math.max(H / 2 / t, W / 2 / (t * PV.cam.aspect)) * 1.05, cy = H * .45, cx = PV.cx || 0;
+    PV.cam.position.set(cx, cy + H * .06, dist); PV.cam.lookAt(cx, cy, 0); PV.cam.near = dist / 200; PV.cam.far = dist * 6; PV.cam.updateProjectionMatrix(); PV.r.render(PV.sc, PV.cam); if (PV.fitN > 0 && --PV.fitN === 0) { pvFit(); PV.fitted = true; }
   }
-  async function pvShow(i) {
-    if (!pvInit()) return; const tok = ++PV.token; if (!PV.req) { PV.clock = performance.now(); pvFrame(); }
-    const res = await P()?.previewModel?.(i); if (!res || tok !== PV.token || !PV.r) return;
-    if (PV.model) { PV.turn.remove(PV.model); PV.mixer?.stopAllAction(); }
-    const m = res.model, u = m.userData || {}; m.position.set(0, 0, 0); m.rotation.set(0, 0, 0);
-    const b = new THREE.Box3().setFromObject(m); const hh = Math.max(.5, b.max.y - b.min.y); m.position.y = -b.min.y;
+  function pvFree(m) {   // free a preview model (fresh GLB parse, not shared with the game); blocky builders may share materials, so leave those
+    if (!m || !m.userData?.glb) return; m.traverse(o => { if (!o.isMesh) return; o.geometry?.dispose(); for (const mt of [].concat(o.material)) { if (!mt) continue; for (const k in mt) if (mt[k]?.isTexture) mt[k].dispose(); mt.dispose(); } });
+  }
+  function pvFit() { const m = PV.model; if (!m) return;
+    const ry = PV.turn.rotation.y; PV.turn.rotation.y = 0; m.position.set(0, 0, 0); PV.turn.updateMatrixWorld(true); const b = new THREE.Box3().setFromObject(m, true); PV.turn.rotation.y = ry; const hh = Math.max(.5, b.max.y - b.min.y); m.position.y = -b.min.y;
     // pedestal sized to the model's footprint; the camera frames at least a human's height so relative size (charscale) reads true
-    const fw = Math.max(b.max.x - b.min.x, b.max.z - b.min.z); PV.ped.scale.setScalar(Math.max(.9, fw * .55));
-    PV.h = Math.max(hh, PV.ped.scale.x * 1.1); PV.model = m; PV.mixer = u.mixer || null;
-    if (u.act) { for (const k in u.act) { try { u.act[k].stop(); } catch {} } if (u.act.idle) { u.act.idle.reset().setEffectiveWeight(1).play(); } }
-    PV.turn.add(m); PV.cur = { id: res.id, name: res.name, h: +hh.toFixed(2), idle: !!(u.act && u.act.idle) };
+    m.position.x = -(b.min.x + b.max.x) / 2; m.position.z = -(b.min.z + b.max.z) / 2;   // centre the footprint on the pedestal
+    const fw = Math.max(b.max.x - b.min.x, b.max.z - b.min.z), pr = Math.max(.3, fw * .54); PV.ped.scale.set(pr / 1.25, Math.min(1, pr / 1.25), pr / 1.25);
+    // human reference stands just right of the pedestal; framing spans pedestal-left .. reference-right, centred between
+    const rx = pr + PV.HU * .25; PV.ref.position.set(rx, 0, 0); const left = -Math.max(pr, fw / 2), right = rx + PV.HU * .12;
+    PV.wx = right - left; PV.cx = (left + right) / 2; PV.h = hh; PV.hM = +(hh / (0.947 * 1.5)).toFixed(2); if (PV.cur) { PV.cur.hM = PV.hM; PV.cur.h = +hh.toFixed(2); }
+  }
+  function pvFrameInfo() {   // screen-space box of the model (0..1), for tests
+    if (!PV.model) return null; const b = new THREE.Box3().setFromObject(PV.model, true), r = { x0: 1e9, x1: -1e9, y0: 1e9, y1: -1e9 }, v = new THREE.Vector3();
+    for (let k = 0; k < 8; k++) { v.set(k & 1 ? b.max.x : b.min.x, k & 2 ? b.max.y : b.min.y, k & 4 ? b.max.z : b.min.z).project(PV.cam); r.x0 = Math.min(r.x0, v.x); r.x1 = Math.max(r.x1, v.x); r.y0 = Math.min(r.y0, v.y); r.y1 = Math.max(r.y1, v.y); }
+    v.set(PV.ref.position.x, PV.HU, 0).project(PV.cam); return { x0: (r.x0 + 1) / 2, x1: (r.x1 + 1) / 2, y0: (1 - r.y1) / 2, y1: (1 - r.y0) / 2, refTop: (1 - v.y) / 2, refX: (v.x + 1) / 2, hM: PV.cur.hM };
+  }
+  async function pvShow(i, byId) {
+    if (!pvInit()) return; const tok = ++PV.token; if (!PV.req) { PV.clock = performance.now(); pvFrame(); }
+    const res = await (byId ? P()?.previewById?.(byId) : P()?.previewModel?.(i)); if (!res || tok !== PV.token || !PV.r) return;
+    if (PV.model) { PV.turn.remove(PV.model); PV.mixer?.stopAllAction(); pvFree(PV.model); }
+    const m = res.model, u = m.userData || {}; m.position.set(0, 0, 0); m.rotation.set(0, 0, 0);
+    if (u.act) { for (const k in u.act) { try { u.act[k].stop(); } catch {} } if (u.act.idle) u.act.idle.reset().setEffectiveWeight(1).play(); }
+    u.mixer?.update(0.016); m.updateMatrixWorld(true); m.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });   // posed bone matrices, so the box is the idle pose (a lying serpent), not the bind pose
+    PV.model = m; PV.mixer = u.mixer || null; pvFit(); PV.fitN = 3;   // fit now, then refit once the renderer has posed the skeleton
+    PV.turn.add(m); if (byId) $('#fe-tag').textContent = res.name; PV.fitted = false; PV.cur = { hM: PV.hM, id: res.id, name: res.name, h: +PV.h.toFixed(2), idle: !!(u.act && u.act.idle) };
   }
   function pvDispose() {
     if (!PV.r) return; cancelAnimationFrame(PV.req); PV.req = 0; PV.token++;
     PV.ped.traverse(o => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
-    PV.mixer?.stopAllAction(); PV.r.dispose(); PV.r.forceContextLoss?.(); PV.r.domElement.remove(); PV.r = null; PV.model = null; PV.mixer = null; PV.cur = null;
+    PV.mixer?.stopAllAction(); pvFree(PV.model); PV.r.dispose(); PV.r.forceContextLoss?.(); PV.r.domElement.remove(); PV.r = null; PV.model = null; PV.mixer = null; PV.cur = null;
   }
   function enterGame() { pvDispose(); P()?.dropTitleExtras?.(); cancelAnimationFrame(drift); P()?.setRunning?.(true); show('game'); }
   function pause() { if (cur !== 'game') return; P()?.setRunning?.(false); show('pause'); }
@@ -155,5 +176,5 @@ function boot() {
   const mount = () => { document.body.append(root, pbtn); for (const k in opts) { const c = $('#fe-o-' + k); if (c) c.checked = !!opts[k]; }
     show('load'); loading(1800, title); };
   document.body ? mount() : addEventListener('DOMContentLoaded', mount);
-  window.__fe = { get preview() { return PV.r ? { on: true, ...PV.cur, canvas: !!document.getElementById('fe-pv'), yaw: PV.yaw } : { on: false, canvas: !!document.getElementById('fe-pv') }; }, show: (s) => act(s), get screen() { return cur; }, hist, pause, title };
+  window.__fe = { previewId: (id) => pvShow(0, id), get frame() { return pvFrameInfo(); }, get preview() { return PV.r ? { on: true, fitted: !!PV.fitted, ...PV.cur, canvas: !!document.getElementById('fe-pv'), yaw: PV.yaw } : { on: false, canvas: !!document.getElementById('fe-pv') }; }, show: (s) => act(s), get screen() { return cur; }, hist, pause, title };
 }

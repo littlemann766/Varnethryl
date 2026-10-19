@@ -5,7 +5,7 @@ let ok = 0, bad = 0; const T = (n, c) => { c ? ok++ : bad++; console.log(c ? 'PA
 let seed = 99; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
 const mk = () => { const c = new CombatController({ HS: 1.5, rng: rnd }); c.setHero({ id: 'aldric', saber: false }); c.setPlayer(0, 0, 0); return c; };
 const go = (k, s) => { for (let i = 0; i < s * 60; i++) k.update(1 / 60); };
-T('vaelthryx enemy def is a boss with the 10x rig', ENEMIES.vaelthryx && ENEMIES.vaelthryx.boss && ENEMIES.vaelthryx.model === 'n:vaelthryx_straight_rig' && ENEMIES.vaelthryx.scale === 10);
+T('vaelthryx enemy def is a boss with the 10x rig', ENEMIES.vaelthryx && ENEMIES.vaelthryx.boss && ENEMIES.vaelthryx.model === 'n:vaelthryx_new7' && ENEMIES.vaelthryx.scale === 10);
 T('frost troll stays an elite (not a boss) but has patterns', !ENEMIES.frosttroll.boss && ENEMIES.frosttroll.patterns && BOSS_PATTERNS.frosttroll.length >= 3);
 for (const key of ['frosttroll', 'vaelthryx', 'titan']) {
   const c = mk(); c.god = true; const e = c.addEnemy(key, 0, 3); const seen = new Set(); c.on('bossAttack', a => seen.add(a.pat.id));

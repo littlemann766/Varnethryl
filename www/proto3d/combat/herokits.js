@@ -129,7 +129,7 @@ export const LOADOUT = {
   asha: { weapon: { name: 'Hand Wraps + Knuckles', glb: 'asha_knuckles', model: 'weapons/asha_knuckles.glb', dmgPct: 0.07 }, armor: { name: 'Saffron Gi', hpPct: 0.09, mpPct: 0.04, spPct: 0.1, defPct: 0.05 } },
   rowan: { weapon: { name: 'Fire Staff', glb: null, model: 'none yet', dmgPct: 0.05 }, armor: { name: 'Emberweave Robes', hpPct: 0.06, mpPct: 0.32, spPct: 0, defPct: 0.05 } },
   kael: { weapon: { name: 'Rune Staff', glb: null, model: 'none yet', dmgPct: 0.05 }, armor: { name: 'Runebound Coat', hpPct: 0.08, mpPct: 0.24, spPct: 0, defPct: 0.07 } },
-  cedric: { weapon: { name: 'Lute', glb: null, model: 'none yet', dmgPct: 0.05 }, armor: { name: 'Minstrel Finery', hpPct: 0.09, mpPct: 0.14, spPct: 0.11, defPct: 0.06 } },
+  cedric: { weapon: { name: 'Lute', glb: 'lute', model: 'weapons/lute.glb (test-bundle-1019)', dmgPct: 0.05 }, armor: { name: 'Minstrel Finery', hpPct: 0.09, mpPct: 0.14, spPct: 0.11, defPct: 0.06 } },
   morwen: { weapon: { name: 'Bone Scythe', glb: 'morwen_scythe', model: 'weapons/morwen_scythe.glb', dmgPct: 0.06 }, armor: { name: 'Blackveil Shroud', hpPct: 0.07, mpPct: 0.19, spPct: 0, defPct: 0.07 } },
   garruk: { weapon: { name: 'Stonefist Greataxe', glb: 'garruk_greataxe', model: 'weapons/garruk_greataxe.glb', dmgPct: 0.08 }, armor: { name: 'Stonefist Harness', hpPct: 0.16, mpPct: 0, spPct: 0.04, defPct: 0.11 } },
 };

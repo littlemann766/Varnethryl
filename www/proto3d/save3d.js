@@ -31,5 +31,5 @@ export function writeSnapshot(storage,snap,glbNames){
  try{writeState(storage,s);return true}catch(e){return false}}
 /* Debounced saver. getSnap() returns the current snapshot; call mark() on change, flush() on pagehide/hidden. */
 export function createSaver(storage,glbNames,getSnap,delay=900,timers=globalThis){let h=null,dirty=false;
- const flush=()=>{if(h!==null){timers.clearTimeout(h);h=null}if(!dirty)return false;dirty=false;return writeSnapshot(storage,getSnap(),glbNames)};
+ const flush=()=>{if(h!==null){timers.clearTimeout(h);h=null}if(!dirty)return false;const ok=writeSnapshot(storage,getSnap(),glbNames);if(ok)dirty=false;return ok};
  return {mark(){dirty=true;if(h===null)h=timers.setTimeout(()=>{h=null;flush()},delay)},flush,get dirty(){return dirty}}}

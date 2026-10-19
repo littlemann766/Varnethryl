@@ -86,7 +86,9 @@ function build() {
     mx.addEventListener('click', async () => { const m = await import('./ownermax.js'); const r = m.maxOwnerHero(E.storage); msg.textContent = r ? (r.changed ? 'Active hero maxed.' : 'Already maxed.') : 'Could not read the save.'; });
     const full = el('button', { type: 'button', textContent: 'Full cheat panel' }); full.dataset.set = 'owner-panel';
     full.addEventListener('click', () => { hide(); if (E.openCheatPanel) E.openCheatPanel(); });
-    box.appendChild(row(mx, full)); box.appendChild(msg); body.appendChild(box);
+    const tt = el('button', { type: 'button', textContent: 'Spawn Ashen Titan' }); tt.dataset.set = 'owner-titan';
+    tt.addEventListener('click', () => { msg.textContent = ch.spawnTitan() ? 'The Ashen Titan awakens.' : 'A Titan is already alive.'; });
+    box.appendChild(row(mx, full, tt)); box.appendChild(msg); body.appendChild(box);
   }
   const reset = el('button', { type: 'button', textContent: 'Reset camera & settings' }); reset.dataset.set = 'reset';
   reset.addEventListener('click', () => { Object.assign(prefs, DEFAULT_PREFS); rig.setView('third'); rig.setZoom(1); applyPrefs(E); save(); build(); });

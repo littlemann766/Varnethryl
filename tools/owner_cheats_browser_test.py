@@ -64,7 +64,7 @@ with sync_playwright() as p:
         pg.screenshot(path=f'/tmp/ownershots/panel-{tag}.png') if os.path.isdir('/tmp/ownershots') else None
         ok(f'{tag} draw calls unchanged while panel is OPEN', avg_calls(pg) == c0, f'{avg_calls(pg)} vs {c0}')
         # ---- god
-        click(pg, '[data-cheat=god]'); ok(f'{tag} god mode: damage becomes 0', pg.evaluate("__p3d.cheats.mitigate(5000)===0 && __p3d.cheats.flags.god===true"))
+        ok(f'{tag} god is ON by default for the unlocked owner', pg.evaluate("__p3d.cheat.god===true")); click(pg, '[data-cheat=god]'); click(pg, '[data-cheat=god]'); ok(f'{tag} god mode: damage becomes 0', pg.evaluate("__p3d.cheats.mitigate(5000)===0 && __p3d.cheats.flags.god===true"))
         ok(f'{tag} badge shows when cheats are active', vis(pg, '#ownerBadge'))
         ok(f'{tag} save marked cheated', pg.evaluate("JSON.parse(localStorage.getItem('guildbound_rpg_save_v1')).cheated===true"))
         # ---- fly
@@ -122,13 +122,13 @@ with sync_playwright() as p:
         n = pg.evaluate("document.querySelectorAll('#ownerPlace option').length"); ok(f'{tag} every building listed for teleport', n >= 28, n)
         click(pg, '[data-cheat=bump]'); ok(f'{tag} bump toggle off reaches the bump system', pg.evaluate("__p3d.bump.sys.bumpOn===false"))
         click(pg, '[data-cheat=reset]'); click(pg, '#ownerPanel h3 button')
-        ok(f'{tag} reset restores flags', pg.evaluate("(()=>{const c=__p3d.cheat;return !c.god&&!c.fly&&!c.noclip&&c.speedMul===1&&c.bump&&c.alt===0&&__p3d.bump.sys.bumpOn})()"))
+        ok(f'{tag} reset restores flags (god returns to the owner default: ON)', pg.evaluate("(()=>{const c=__p3d.cheat;return c.god&&!c.fly&&!c.noclip&&c.speedMul===1&&c.bump&&c.alt===0&&__p3d.bump.sys.bumpOn})()"))
         pg.evaluate('__p3d.teleport(0,14);__p3d.setCamYaw(0)'); pg.wait_for_timeout(2500)
         c1 = avg_calls(pg); ok(f'{tag} draw calls unchanged after using every cheat (panel closed)', c1 == c0, f'{c1} vs {c0}')
         ok(f'{tag} no console errors/warnings', not errs2, '; '.join(errs2[:3]))
         # ---- persistence: reload keeps owner unlocked, cheats start off, cheated flag stays
         pg.close(); pg = load(ctx, BASE + '?party=0&npcs=0', errs2)
-        ok(f'{tag} after reload: cheats are off, flag persists, UI hidden', pg.evaluate("(()=>{const c=__p3d.cheat;return !c.god&&!c.fly&&!c.noclip&&c.speedMul===1&&!document.getElementById('ownerPanel')&&JSON.parse(localStorage.getItem('guildbound_rpg_save_v1')).cheated===true})()"))
+        ok(f'{tag} after reload: cheats are off, flag persists, UI hidden', pg.evaluate("(()=>{const c=__p3d.cheat;return c.god&&!c.fly&&!c.noclip&&c.speedMul===1&&!document.getElementById('ownerPanel')&&JSON.parse(localStorage.getItem('guildbound_rpg_save_v1')).cheated===true})()"))
         gesture(pg, mob); pg.wait_for_selector('#ownerPanel', state='visible', timeout=15000)
         ok(f'{tag} owner stays unlocked across reloads (no prompt)', not vis(pg, '#ownerLogin'))
         click(pg, '[data-cheat=lock]'); gesture(pg, mob); pg.wait_for_selector('#ownerLogin', state='visible', timeout=10000)

@@ -149,6 +149,16 @@ const saved = (st) => JSON.parse(st.getItem(SAVE_KEY));
   ok('reset restores defaults', (c.setGod(true), c.setFly(true), c.setSpeed(4), c.reset(), !c.flags.god && !c.flags.fly && c.flags.speedMul === 1));
   ok('reset does not clear the cheated flag', saved(st).cheated === true);
 }
+{ /* 1.1.7.1: combat hooks, spawn hooks, god-on owner default survives reset */
+  const st = mem(), flags = createFlags(), seen = [];
+  const c = createCheats({ storage: st, flags, hooks: { godPref: () => true, healParty: () => { seen.push('heal'); return true; }, killEnemies: () => { seen.push('kill'); return true; }, spawnEnemy: (k) => { seen.push('spawn:' + k); return k !== 'dup'; } } });
+  ok('heal/kill hooks are called and report handled', c.healParty() === true && c.killEnemies() === true && seen.join() === 'heal,kill');
+  ok('spawnEnemy / spawnTitan reach the hook', c.spawnEnemy('wolf') === true && c.spawnTitan() === true && seen.includes('spawn:wolf') && seen.includes('spawn:titan'));
+  ok('spawn hook refusal is reported (false)', c.spawnEnemy('dup') === false);
+  ok('skipQuest with no hook is a clearly-false stub', c.skipQuest() === false && c.stubCalls.skipQuest === 1);
+  ok('spawn without hook is false, not a crash', createCheats({ storage: mem(), flags: createFlags() }).spawnEnemy('wolf') === false);
+  c.setGod(false); c.reset(); ok('reset returns god to the owner default (ON)', c.flags.god === true);
+}
 {
   const src = fs.readFileSync(new URL('../www/proto3d/cheats.js', import.meta.url), 'utf8') + fs.readFileSync(new URL('../www/proto3d/cheatflags.js', import.meta.url), 'utf8');
   const hot = src.slice(src.indexOf('export function stepAltitude'));

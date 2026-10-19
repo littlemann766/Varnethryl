@@ -82,6 +82,9 @@ function build() {
   const ldSync = () => { const F = window.__p3d && window.__p3d.fight, kit = F && F.cc && F.cc.kit; if (!kit || !kit.weapon) { ld.textContent = F && F.on ? 'This hero uses the generic kit.' : 'Start Fight mode to see the active hero\u2019s weapon, armor and skills.'; return; }
     const w = kit.weapon, a = kit.armor, pc = (v) => '+' + Math.round(v * 100) + '%', st = [a.hpPct && 'HP ' + pc(a.hpPct), a.mpPct && 'MP ' + pc(a.mpPct), a.spPct && 'SP ' + pc(a.spPct), a.defPct && 'DEF ' + pc(a.defPct)].filter(Boolean).join(' \u00b7 ');
     ld.innerHTML = ''; for (const [h, t] of [['Weapon', w.name + ' (damage ' + pc(w.dmgPct) + ')'], ['Armor', a.name + ' \u2014 ' + st], ['Skills', kit.skills.map((x) => x.name).join(' \u00b7 ')]]) ld.appendChild(el('div', null, [el('b', { textContent: h + ': ', style: 'color:#f1d98a' }), t])); };
+  const ab = el('button', { type: 'button', className: 'ctl', id: 'openArmory', textContent: 'Open Armory (12 slots, inventory, compare, presets)' }); ab.style.cssText = 'width:100%;min-height:48px;margin-top:8px;border:1px solid #c9a24d;background:linear-gradient(180deg,#3a2a5c,#1d1533);color:#f3d9a0;border-radius:12px;font-weight:700';
+  ab.addEventListener('click', async () => { const F = window.__p3d && window.__p3d.fight; if (!F || !F.armory) { ld.textContent = 'Start Fight mode first to open the Armory.'; return; } const m = await import('./armoryui.js'); m.openArmory(F.armory); });
+  body.appendChild(ab);
   ldSync(); syncs.push(ldSync);
   body.appendChild(sec('Graphics'));
   const q = el('select', { id: 'setQuality' }); q.dataset.set = 'quality';

@@ -15,7 +15,7 @@ const KINDS = {
 };
 KINDS.skeleton = KINDS.raider;
 /* Ashen Titan (placeholder primitives until Beth's model): raider-shaped but 3x scale, plus horns, shoulder plates and glowing eyes. */
-KINDS.titan = { scale: 3, top: 2.5, parts: KINDS.raider.parts.concat([box(.9, .22, .5, 0, 1.58, 0, 0x6a5560), box(.28, .5, .28, -.2, 2.15, 0, 0xd9d0c4), box(.28, .5, .28, .2, 2.15, 0, 0xd9d0c4), box(.7, .2, .5, 0, .08, 0, 0x2a2228)]).map((q) => (q.col === 0x7a9a4a ? box(q.w, q.h, q.d, q.x, q.y, q.z, 0x9a4a4a) : q.col === 0xd59066 ? box(q.w, q.h, q.d, q.x, q.y, q.z, 0x7a4a58) : q)) };
+KINDS.titan = { scale: 3.1, top: 2.5, parts: KINDS.raider.parts.concat([box(.9, .22, .5, 0, 1.58, 0, 0x6a5560), box(.28, .5, .28, -.2, 2.15, 0, 0xd9d0c4), box(.28, .5, .28, .2, 2.15, 0, 0xd9d0c4), box(.7, .2, .5, 0, .08, 0, 0x2a2228)]).map((q) => (q.col === 0x7a9a4a ? box(q.w, q.h, q.d, q.x, q.y, q.z, 0x9a4a4a) : q.col === 0xd59066 ? box(q.w, q.h, q.d, q.x, q.y, q.z, 0x7a4a58) : q)) };
 export const kindFor = (key) => (KINDS[key] ? key : 'raider');
 const geoCache = {};
 function buildGeo(kind, S) {

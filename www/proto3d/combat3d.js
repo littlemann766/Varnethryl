@@ -8,14 +8,14 @@ import { ENEMIES, SABER } from './combat/data.js';
 import { loadLucian } from './combat/calc.js';
 
 export const MAX_ENEMIES = 6, TARGET_ALIVE = 3, RESPAWN_S = 6, SPAWN_MIN = 14, SPAWN_MAX = 26, SOFT_RANGE = 8;
-export const TITAN_DIST = 24, TITAN_RESPAWN_S = 45;
+export const TITAN_DIST = 18, TITAN_RESPAWN_S = 45;
 export const SPAWN_TABLE = ['wolf', 'wolf', 'raider', 'wraith'];
 const yawLerp = (cur, to, k) => cur + (((to - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * k;
 
 /* env: {THREE, scene, camera, state, HS, WORLD, resolve(p), free(x,z), hero(), flags, getCheats(), isOwner(), camRig, start:{x,z}} */
 export function createCombat(env) {
   const { THREE, scene, camera, state, HS, flags } = env;
-  let on = false, spawnT = 0, kills = 0, seq = 0, titanT = 1.5;
+  let victoryT = -1e9, on = false, spawnT = 0, kills = 0, seq = 0, titanT = 1.5;
   const tmp = { x: 0, z: 0 }, v3 = new THREE.Vector3(), sc = [0, 0];
   const project = (x, y, z, out) => { v3.set(x, y, z).project(camera); if (v3.z > 1 || Math.abs(v3.x) > 1.3 || Math.abs(v3.y) > 1.3) return false; out[0] = (v3.x * 0.5 + 0.5) * innerWidth; out[1] = (-v3.y * 0.5 + 0.5) * innerHeight; return true; };
   const cc = new CombatController({ HS, move: (e, dx, dz) => { tmp.x = e.x + dx; tmp.z = e.z + dz; env.resolve(tmp); e.x = tmp.x; e.z = tmp.z; } });
@@ -59,7 +59,7 @@ export function createCombat(env) {
       if (kept > 0) { hud.floatAt(state.heroX, 2.6 * HS, state.heroZ, '-' + Math.round(kept), 'pl'); hud.hurtFlash(); }
     })
     .on('enemyAttack', (a) => { if (a.result === 'dodged' || (a.result === 'hit' && flags.god)) hud.floatAt(state.heroX, 2.8 * HS, state.heroZ, flags.god ? 'GOD' : 'DODGE', 'heal'); else if (a.result === 'missed') hud.floatAt(a.e.x, a.e.top || 2.5, a.e.z, 'MISS', 'heal'); })
-    .on('defeat', (e) => { kills++; hud.say(e.def.name + ' defeated', 1100); })
+    .on('defeat', (e) => { kills++; if (e.key === 'titan') { victoryT = performance.now(); hud.say('VICTORY! The Ashen Titan has fallen.', 4500); } else if (performance.now() - victoryT > 4500) hud.say(e.def.name + ' defeated', 1100); })
     .on('playerDown', () => { hud.say('You fell...', 2500); env.hero().rotation.x = -1.3; })
     .on('respawn', () => { state.heroX = env.start.x; state.heroZ = env.start.z; state.target = null; env.hero().rotation.x = 0; spawnT = 1; })
     .on('remove', (e) => { if (e.foe) { e.foe.hide(); freeFoes.push(e.foe); e.foe = null; } });
@@ -67,7 +67,7 @@ export function createCombat(env) {
   function spawn(key, dist) {
     if (cc.enemies.length >= MAX_ENEMIES + (key === 'titan' ? 1 : 0)) return null;
     let x = state.heroX + 12, z = state.heroZ, ok = false;
-    for (let k = 0; k < 24 && !ok; k++) { const a = Math.random() * 6.283, r = (dist || (SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN))) * HS / 1.5, px = state.heroX + Math.cos(a) * r, pz = state.heroZ + Math.sin(a) * r; if (Math.abs(px) < env.WORLD - 8 && Math.abs(pz) < env.WORLD - 8 && env.free(px, pz)) { x = px; z = pz; ok = true; } }
+    for (let k = 0; k < 24 && !ok; k++) { const a = key === 'titan' ? Math.atan2(-Math.cos(state.camYaw), -Math.sin(state.camYaw)) + (Math.random() - 0.5) * (k < 12 ? 0.9 : 6.28) : Math.random() * 6.283, r = (dist || (SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN))) * HS / 1.5, px = state.heroX + Math.cos(a) * r, pz = state.heroZ + Math.sin(a) * r; if (Math.abs(px) < env.WORLD - 8 && Math.abs(pz) < env.WORLD - 8 && env.free(px, pz)) { x = px; z = pz; ok = true; } }
     if (!ok) return null;
     const f = getFoe(); f.setKind(key === 'wolf' ? 'wolf' : key === 'wraith' ? 'wraith' : key === 'titan' ? 'titan' : 'raider');
     f.mesh.visible = true; f.mesh.rotation.set(0, 0, 0); f.mesh.position.set(x, 0, z); f.mat.emissive.setHex(0);

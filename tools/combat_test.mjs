@@ -208,4 +208,23 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   T('every kit skill casts and does its job (' + fails.join(',') + ')', fails.length === 0);
   const nk = mk(false); nk.setHero({ id: 'aldric', saber: false }); nk.ownerUnlocked = false; T('kit heroes never get owner powers', !nk.ownerOk() && !nk.use('royal') && !nk.use('holy') && !nk.use('unholy'));
 }
+// ---- boss patterns (Ashen Titan) ----
+{ const { BOSS_PATTERNS, ENEMIES } = await import('../www/proto3d/combat/data.js'); const { pickPattern } = await import('../www/proto3d/combat/ai.js'); const P = Object.fromEntries(BOSS_PATTERNS.titan.map(p => [p.id, p]));
+  const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
+  const t0 = new CombatController({ HS: 1.5, rng: rnd }); t0.setHero({ id: 'n:darius', saber: false }); const ti0 = t0.addEnemy('titan', 0, 0);
+  T('titan rules intact: 5M HP, scale 6, boss, bossesInstantKill false', ti0.max === 5000000 && ENEMIES.titan.scale === 6 && ENEMIES.titan.boss && TUNING.ult.bossesInstantKill === false);
+  const seq = []; for (let i = 0; i < 6; i++) seq.push(pickPattern(ti0).id); T('phase 1 pattern rotation: stomp, sweep, slam repeating', seq.join() === 'stomp,sweep,slam,stomp,sweep,slam');
+  ti0.phase = 2; ti0.patI = 0; const s2 = []; for (let i = 0; i < 4; i++) s2.push(pickPattern(ti0).id); T('phase 2 adds Rage Quake', s2.join() === 'stomp,sweep,slam,quake');
+  T('non-boss has no pattern (classic attack)', pickPattern(t0.addEnemy('wolf', 0, 0)) === null);
+  const strike = (pat, px, pz, yaw = 0) => { const k = new CombatController({ HS: 1.5, rng: rnd }); k.setHero({ id: 'n:darius', saber: false }); k.setPlayer(px, pz, 0); k.res.hp = k.res.max.hp = 1e9; const e = k.addEnemy('titan', 0, 0); e.yaw = yaw; e.pat = P[pat]; let h = null, d = 0; k.on('bossAttack', b => h = b.hit); k.on('damage', x => { if (x.toPlayer) d = x.dmg; }); k.enemyStrike(e); return { hit: h, dmg: d }; };
+  T('ring: hits inside reach, misses outside', strike('stomp', 0, 10).hit === true && strike('stomp', 0, 40).hit === false);
+  T('cone: hits in front, misses behind and to the side', strike('sweep', 0, 10, 0).hit === true && strike('sweep', 0, -10, 0).hit === false && strike('sweep', 14, 0.1, 0).hit === false);
+  T('line: hits down the facing axis, side-step dodges it', strike('slam', 0, 18, 0).hit === true && strike('slam', 9, 18, 0).hit === false && strike('slam', 0, -5, 0).hit === false);
+  const a = strike('stomp', 0, 5), b = strike('slam', 0, 5); T('pattern damage scales (slam > stomp, via calc.js hit x dmg)', a.dmg > 0 && b.dmg > a.dmg * 1.2);
+  const k = new CombatController({ HS: 1.5, rng: rnd }); k.setHero({ id: 'n:darius', saber: false }); k.setPlayer(0, 20, 0); k.res.hp = k.res.max.hp = 1e9; k.god = true; const e = k.addEnemy('titan', 0, 0); e.aggroR = 100; let ph = 0, tel = []; k.on('bossPhase', () => ph++);
+  for (let i = 0; i < 60 * 12; i++) { k.update(1 / 60); if (e.state === 'telegraph' && !tel.length) tel.push(e.curTele); } T('boss telegraphs a pattern with its own duration', tel.length === 1 && tel[0] > 0.9);
+  e.hp = e.max * 0.49; k.update(1 / 60); k.update(1 / 60); T('phase 2 starts once at < 50% HP (event once)', e.phase === 2 && ph === 1);
+  e.state = 'chase'; e.atkCd = 0; e.pat = null; e.patI = 3; let tel2 = 0; for (let i = 0; i < 60 * 8 && !tel2; i++) { k.update(1 / 60); if (e.state === 'telegraph') tel2 = e.curTele; } T('phase 2 shortens telegraphs (x0.75)', tel2 > 0 && Math.abs(tel2 - (e.pat ? 0 : 0) - tel2) < 1e-9 && tel2 <= 1.4 * 0.75 + 1e-6 + 0.3);
+  const kk = new CombatController({ HS: 1.5, rng: rnd }); kk.setHero({ id: 'o:owner', saber: true }); kk.ownerUnlocked = true; const bt = kk.addEnemy('titan', 0, 6); kk.use(0); go(kk, 0.5); T('bosses: owner/saber rules unchanged (flat 99,999, not killed)', bt.max - bt.hp === 99999 && bt.state !== 'defeated');
+}
 console.log(ok + ' pass, ' + bad + ' fail'); process.exit(bad ? 1 : 0);

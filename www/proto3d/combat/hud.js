@@ -8,7 +8,7 @@ const CSS = `
 #cb .tp{position:absolute;left:50%;top:max(52px,calc(env(safe-area-inset-top) + 46px));transform:translateX(-50%);width:min(210px,52vw);padding:4px 8px 6px;border:1px solid #fff6;border-radius:8px;background:#000b;display:none;text-align:center}
 #cb .tp .nm{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#cb .tp .sub{font-size:10px;color:#ccd;margin-bottom:3px}
 #cb .tp.boss{top:max(4px,env(safe-area-inset-top));width:min(560px,92vw);padding:3px 10px 5px}#cb .tp.boss .nm{font-size:15px;letter-spacing:.12em;color:#ffb070}
-#cb .bar{position:relative;height:12px;border:1px solid #000;border-radius:6px;background:#2a2a2a;overflow:hidden}#cb .tp.boss .bar{height:16px}
+#cb .bar{position:relative;height:12px;border:1px solid #000;border-radius:6px;background:#2a2a2a;overflow:hidden}#cb .tp.boss .bar{height:16px}#cb .tp.boss .bar:after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:#ffd56e;opacity:.8;z-index:2}#cb .tp.boss.enr .nm{color:#ff6a3a;text-shadow:0 0 8px #ff3a1a}#cb .tp.boss.enr .bar>i{filter:hue-rotate(-20deg) saturate(1.6)}#cb .tp.boss.tel .nm:after{content:' \u26A0';color:#ffd56e}
 #cb .bar i{position:absolute;left:0;top:0;bottom:0;width:100%;transform-origin:left;will-change:transform}
 #cb .bar b{position:absolute;inset:0;text-align:center;font-size:9px;line-height:11px;text-shadow:0 1px 1px #000}#cb .tp.boss .bar b{line-height:15px;font-size:11px}
 #cb .hp i{background:linear-gradient(#ff6b6b,#c21f1f)}#cb .mp i{background:linear-gradient(#6bb8ff,#1f5fd0)}#cb .sp i{background:linear-gradient(#7dff8a,#1fa83a)}
@@ -124,6 +124,8 @@ export class CombatHUD {
     if (t) {
       this.setv(null, 'tid', t.id + (t.def.boss ? 'b' : ''), () => { this.tp.className = 'tp' + (t.def.boss ? ' boss' : ''); this.tpNm.textContent = t.def.name; this.tpSub.textContent = 'Lv ' + t.def.level + ' \u2022 ' + t.def.cls + (cc.tgt.locked ? ' \u2022 LOCKED' : ''); this.tp.style.display = 'block'; });
       this.setv(null, 'tlk', cc.tgt.locked, () => { this.tpSub.textContent = 'Lv ' + t.def.level + ' \u2022 ' + t.def.cls + (cc.tgt.locked ? ' \u2022 LOCKED' : ''); });
+      if (t.def.boss) { const st = (t.phase === 2 ? 'E' : '') + (t.state === 'telegraph' && t.pat ? t.pat.id : '');   // boss bar: ENRAGED tint (phase 2), current attack name while telegraphing, 50% marker
+        this.setv(null, 'bph', st + t.id, () => { this.tp.classList.toggle('enr', t.phase === 2); this.tp.classList.toggle('tel', !!(t.state === 'telegraph' && t.pat)); this.tpSub.textContent = 'Lv ' + t.def.level + ' \u2022 ' + t.def.cls + (t.phase === 2 ? ' \u2022 ENRAGED' : '') + (t.state === 'telegraph' && t.pat ? ' \u2022 ' + t.pat.name.toUpperCase() : ''); }); }
       const f = Math.round(t.hp / t.max * 400) / 400; this.setv(null, 'tf' + t.id, f, v => { this.tpBar.style.transform = 'scaleX(' + v + ')'; }); this.setv(null, 'tt' + t.id, Math.ceil(t.hp), v => { this.tpTxt.textContent = v + ' / ' + t.max; });
     } else if (this.cache.tid) { this.cache.tid = 0; this.tp.style.display = 'none'; }
     // ability cluster (basic + 3 skills + ultimate); owner skills only while the controller says Owner-gated

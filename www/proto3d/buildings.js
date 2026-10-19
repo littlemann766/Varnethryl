@@ -199,11 +199,17 @@ const training = (spec, ctx) => std(spec, ctx, { name: 'Training Hall of Varneth
 
 // ---------- 6. Stables ----------
 const stables = (spec, ctx) => std(spec, ctx, { name: 'Stables of Varnethryl', noScale: true, w: 18, d: 9, h: 4.6, hs: 1.4, upper: 'timber', lower: 'stone', rh: 3.6, ridge: 'x', over: .9, DW: 3.2, DH: 3.4, floor: 'floorStone', wn: 2, banners: [[-4, 3, .8, 1.8], [4, 3, .8, 1.8]], dormers: [-4, 4], dormY: 1.6, dormZ: 0, windows: false,
+  extra(B) { const { w, d, h } = B, top = h + 3.6, g = B.G.roof;   // card b: ridge cupola with louvres + weather vane, hay bales and a cart wheel by the doors
+    B.bx(1.5, 1.2, 1.5, 'timber', 0, top + .45, 0, g); for (let i = 0; i < 3; i++) for (const z of [-.76, .76]) B.bx(1.1, .07, .05, 'darkWood', 0, top + .2 + i * .3, z, g, { shadow: false, lite: true });
+    B.gable(1.9, 1.9, 1.0, 0, top + 1.05, 0, 'slate', g, true, .15); B.cyl(.03, .03, 1.0, 'iron', 0, top + 2.4, 0, g, 4, { shadow: false }); B.bx(.7, .12, .02, 'gold', .15, top + 2.7, 0, g, { shadow: false, lite: true }); B.cone(.07, .2, 'gold', 0, top + 2.95, 0, g, 4, { shadow: false });
+    for (const [x, z, k] of [[-w / 2 + 1.2, d / 2 + 1.2, 1], [-w / 2 + 2.6, d / 2 + 1.0, 1], [w / 2 - 1.4, d / 2 + 1.2, 0]]) { B.bx(1.1, .7, .8, 'hay', x, .35, z, B.G.ext); if (k) B.bx(.9, .6, .7, 'hay', x + .1, 1.0, z, B.G.ext, { lite: true }); B.col(x, z, 1.1, .8); }
+    { const wh = B.add(new THREE.TorusGeometry(.55, .06, 4, 10), M('darkWood'), w / 2 - 2.8, .6, d / 2 + .25, B.G.ext, { shadow: false }); for (let i = 0; i < 3; i++) B.bx(.04, 1.05, .04, 'darkWood', w / 2 - 2.8, .6, d / 2 + .25, B.G.ext, { shadow: false, lite: true }).rotation.z = i * 1.05; } },
   interior(B) { const iw = B.iw, id_ = B.id_;
     for (const s of [-1, 1]) for (let i = 0; i < 4; i++) { const x = -iw + 2.4 + i * 3.6; B.bx(.1, 1.6, 2.6, 'darkWood', x + 1.8, .8, -id_ + 1.5 + (s > 0 ? 0 : 0), B.G.int); B.col(x + 1.8, -id_ + 1.5, .15, 2.6); }
     for (let i = 0; i < 4; i++) { const x = -iw + 1.3 + i * 3.6; B.hay(x, -id_ + 1.0, 1.4, 1.2, .5); const hz = B.add(new THREE.SphereGeometry(.4, 8, 6), M('#6a4a2a'), x + .5, 1.1, -id_ + 1.6, B.G.int); hz.scale.set(1.5, 1, .8); B.bx(.12, 1.1, .12, 'darkWood', x + .5, .45, -id_ + 1.6, B.G.int, { shadow: false }); }
     B.tableR(iw - 2.0, id_ - 1.4, 2.2, 1, 'darkWood');  B.barrel(iw - .5, id_ - .4); B.barrel(iw - .5, id_ - 3.6);
     B.rack(0, id_ - .3, 5); for (let i = 0; i < 5; i++) B.banner(-6 + i * 3, 2.9, id_ - .1, Math.PI, .6, 1.2);
+    for (let i = 0; i < 4; i++) { const x = -iw + 3.0 + i * 3.6; B.bx(.5, .05, .05, 'iron', x, 1.35, -id_ + .2, B.G.int, { shadow: false, lite: true }); const sd = B.add(new THREE.SphereGeometry(.28, 6, 4, 0, 6.3, 0, 1.4), M('#6a3a1e'), x, 1.3, -id_ + .32, B.G.int, { shadow: false }); sd.scale.set(1, .7, 1.3); B.banner(x - 1.8, 2.5, -id_ + 2.85, 0, .5, .9); }   // tack: saddles on wall pegs, blue stall pennants
     upperStd(B, { theme: 'store', y: 3.0, side: 'L', len: 3.4 });
     for (const x of [-5, 0, 5]) B.lamp(x, 3.6, 0);
   } });

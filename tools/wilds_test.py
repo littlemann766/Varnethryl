@@ -45,8 +45,8 @@ with sync_playwright() as p:
         if SH: pg.screenshot(path=f'{SH}/wilds_{nm}.png')
     chk('draw calls bounded (<450, SwiftShader count incl. shadow pass)', mx < 450, str(mx))
     # bounds clamp
-    pg.evaluate("__p3d.state.heroX=1000+400"); pg.wait_for_timeout(600); x = pg.evaluate("__p3d.state.heroX")
-    pg.keyboard.down('d'); pg.wait_for_timeout(500); pg.keyboard.up('d'); x = pg.evaluate("__p3d.state.heroX"); chk('walkable area is clamped', x < 1000 + 175, str(x))
+    H = pg.evaluate("__p3d.ZONE.half"); pg.evaluate("h=>__p3d.state.heroX=1000+h+230", H); pg.wait_for_timeout(600); x = pg.evaluate("__p3d.state.heroX")
+    pg.keyboard.down('d'); pg.wait_for_timeout(500); pg.keyboard.up('d'); x = pg.evaluate("__p3d.state.heroX"); chk('walkable area is clamped (half %d from WILDS.half)' % H, x < 1000 + H + 5, str(x))
     # portal back
     pg.evaluate("__p3d.state.heroX=994;__p3d.state.heroZ=6;__p3d.state.camYaw=0"); pg.wait_for_timeout(500); pg.keyboard.down('w')
     try: pg.wait_for_function("__p3d.zone==='town'", timeout=120000); ok = True

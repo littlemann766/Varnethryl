@@ -1,5 +1,6 @@
 import { CombatController } from '../www/proto3d/combat/controller.js';
 import { loadLucian, usingLucian } from '../www/proto3d/combat/calc.js';
+import { ABILITIES } from '../www/proto3d/combat/data.js';
 let ok = 0, bad = 0; const T = (n, c) => { if (c) { ok++; console.log('PASS', n); } else { bad++; console.log('FAIL', n); } };
 const lu = await loadLucian(); console.log('lucian combat.js loaded:', lu);
 let seed = 12345; const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -39,4 +40,20 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   const fl = createFlags(); T('non-owner flags: unlimited off by default (no cheats object)', fl.unlimited === false);
   const ch = createCheats({ flags: fl, storage, hooks: { unlimMode: on => storage.setItem('vn_owner_unlim_v1', on ? '1' : '0'), unlimPref: () => storage.getItem('vn_owner_unlim_v1') !== '0' } });
   ch.setUnlimited(true); T('owner toggle sets flag', fl.unlimited === true); ch.setUnlimited(false); T('toggle off persists', fl.unlimited === false && storage.getItem('vn_owner_unlim_v1') === '0'); ch.reset(); T('reset respects saved off pref', fl.unlimited === false); }
+// No cooldowns: Owner skin only (gate = cheat flag AND hero.owner)
+{ const nc = (id, flag) => { const k = mk(); k.setHero({ id, saber: id.includes('owner') }); k.noCooldown = flag; return k; };
+  let k = nc('o:owner', true); k.res.unlimited = true;
+  T('nocd owner: basic spam (no cooldown)', k.use(0) && (k.act = null, k.cd.left('basic') === 0 && k.use(0)));
+  k = nc('o:owner', true); k.res.unlimited = true; T('nocd owner: ability reusable at once', k.use(2) && (k.act = null, k.use(2)));
+  k = nc('o:owner', true); T('nocd owner: dodge twice', k.dodge(1, 0) && k.dodge(1, 0));
+  k = nc('o:owner', true); k.res.hp = 1; T('nocd owner: potion twice', k.potion() && (k.res.hp = 1, k.potion()));
+  k = nc('o:owner', true); k.jump(); T('nocd owner: jump no cooldown', k.cd.left('jump') === 0);
+  k = nc('n:darius', true); k.use(0); T('other hero as owner: basic cooldown applies', k.cd.left('basic') > 0);
+  k = nc('n:darius', true); k.dodge(1, 0); T('other hero as owner: dodge cooldown applies', k.cd.left('dodge') > 0 && !k.dodge(1, 0));
+  k = nc('o:owner', false); k.dodge(1, 0); T('non-owner/off (owner skin, flag off): dodge cooldown applies', k.cd.left('dodge') > 0 && !k.dodge(1, 0));
+  k = nc('o:owner', false); k.use(2); T('non-owner/off: ability cooldown applies', k.cd.left(ABILITIES[2].id) > 0);
+  const { createFlags } = await import('../www/proto3d/cheatflags.js'); const { createCheats } = await import('../www/proto3d/cheats.js'); const st = new Map(); const storage = { getItem: q => st.has(q) ? st.get(q) : null, setItem: (q, v) => st.set(q, String(v)) };
+  const fl = createFlags(); T('non-owner flags: noCooldown off (no cheats object)', fl.noCooldown === false);
+  const ch = createCheats({ flags: fl, storage, hooks: { nocdMode: on => storage.setItem('vn_owner_nocd_v1', on ? '1' : '0'), nocdPref: () => storage.getItem('vn_owner_nocd_v1') !== '0' } });
+  ch.setNoCooldown(true); T('nocd toggle sets flag', fl.noCooldown === true); ch.setNoCooldown(false); T('nocd off persists', fl.noCooldown === false && storage.getItem('vn_owner_nocd_v1') === '0'); ch.reset(); T('reset respects saved off pref', fl.noCooldown === false); st.clear(); ch.reset(); T('default ON when no pref', fl.noCooldown === true); }
 console.log(ok + ' pass, ' + bad + ' fail'); process.exit(bad ? 1 : 0);

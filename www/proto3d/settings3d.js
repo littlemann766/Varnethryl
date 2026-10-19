@@ -78,7 +78,7 @@ function build() {
     const own = (key, label, fn, get) => { const b = toggleBtn(label, get, (v) => { fn(v); syncs.forEach((s) => s()); }, 'owner-' + key); syncs.push(b._sync); return b; };
     box.appendChild(sec('Owner (save is marked cheated)'));
     box.appendChild(row(own('god', 'God mode', (v) => ch.setGod(v), () => f.god), own('fly', 'Fly', (v) => ch.setFly(v), () => f.fly), own('noclip', 'Noclip', (v) => ch.setNoclip(v), () => f.noclip), own('bump', 'Bumps', (v) => ch.setBump(v), () => f.bump)));
-    box.appendChild(row(own('unlimited', 'Unlimited MP/SP', (v) => ch.setUnlimited(v), () => f.unlimited)));
+    box.appendChild(row(own('unlimited', 'Unlimited MP/SP', (v) => ch.setUnlimited(v), () => f.unlimited), own('nocd', 'No cooldowns (Owner skin)', (v) => ch.setNoCooldown(v), () => f.noCooldown)));
     const spd = el('select', { id: 'setSpeed' }); for (const m of [0.5, 1, 2, 4, 8]) spd.appendChild(el('option', { value: m, textContent: m + '×', selected: m === f.speedMul }));
     spd.addEventListener('change', () => ch.setSpeed(+spd.value));
     box.appendChild(row(el('span', { className: 'lab', textContent: 'Speed' }), spd));

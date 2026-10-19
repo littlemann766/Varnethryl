@@ -7,7 +7,7 @@ import { EnemyAIController } from './ai.js';
 export class CombatController {
   constructor(o = {}) {
     this.rng = o.rng || Math.random; this.HS = o.HS || 1.5; this.P = Object.assign({}, PLAYER, o.player || {});
-    this.cd = new CooldownManager(); this.res = new ResourceManager(this.P); this.tgt = new TargetingSystem(this.P); this.ai = new EnemyAIController();
+    this.cd = new CooldownManager(); this.noCooldown = false; this.cd.off = () => this.noCooldown && !!this.hero.owner; this.res = new ResourceManager(this.P); this.tgt = new TargetingSystem(this.P); this.ai = new EnemyAIController();
     this.enemies = []; this.ls = {}; this.p = { x: 0, z: 0, yaw: 0, dead: false };
     this.hero = { id: '', name: 'Hero', level: 40, className: 'Adventurer', saber: false };
     this.act = null; this.blocking = false; this.blockT = 0; this.iframes = 0; this.shield = 0; this.potions = this.P.potion.charges; this.dead = 0;

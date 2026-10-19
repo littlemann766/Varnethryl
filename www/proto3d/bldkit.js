@@ -102,7 +102,7 @@ export class Builder {
     const P = (geo, mat, ox, oy, oz, rz = 0) => { const m = this.add(geo, mat, x + (ridgeX ? oz : ox), y + oy, z + (ridgeX ? -ox : oz), g, { shadow: false }); m.rotation.order = 'YXZ'; m.rotation.y = ridgeX ? Math.PI / 2 : 0; m.rotation.z = rz; return m; };
     const boxG = boxL, dk = M('darkWood'), n = Math.max(2, Math.round(2 * hl / 2.4)) * 2;
     for (const sd of [-1, 1]) { P(boxG(.1, .22, 2 * hl, 1.6), dk, sd * hw, -.09, 0);
-      for (let i = 0; i <= n; i += 2) P(boxG(.1, .1, .22, 1), dk, sd * (hw - .05), -.24, -hl + .15 + i * (2 * hl - .3) / n); }
+}
     for (const e of [-1, 1]) for (const sd of [-1, 1]) P(boxG(sl + .1, .17, .09, 1.6), dk, sd * hw / 2, rh / 2 - .02, e * (hl + .02), -sd * al);
     P(boxG(.42, .1, 2 * hl + .1, 2), M(key === 'slateG' ? 'slateG' : 'slate'), 0, rh + .1, 0);
     for (const e of [-1, 1]) { P(new THREE.ConeGeometry(.13, .55, 4), M('iron'), 0, rh + .42, e * (hl + .08)); P(new THREE.SphereGeometry(.09, 5, 4), M('gold'), 0, rh + .72, e * (hl + .08)); }
@@ -110,7 +110,7 @@ export class Builder {
       P(boxG(.14, rh * .85, .08, 1.6), gk, 0, rh * .42, zz); P(boxG(W * .62, .12, .08, 1.6), gk, 0, rh * .32, zz);
       for (const sd of [-1, 1]) P(boxG(Math.hypot(gw * .3, rh * .3) + .1, .1, .08, 1.6), gk, sd * gw * .32, rh * .5, zz, -sd * Math.atan2(rh * .3, gw * .3)); } }
   }
-  banner(x, y, z, ry = 0, w = 1, h = 2.2, grp) { const m = fx(M('#ffffff', { map: bannerTexture(), side: THREE.DoubleSide, alphaTest: .5 }), 'flag'); const p = this.add(new THREE.PlaneGeometry(w, h, 4, 8), m, x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
+  banner(x, y, z, ry = 0, w = 1, h = 2.2, grp) { const m = fx(M('#ffffff', { map: bannerTexture(), side: THREE.DoubleSide, alphaTest: .5 }), 'flag'); const p = this.add(new THREE.PlaneGeometry(w, h, 2, 6), m, x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
     const rod = this.bx(w + .3, .06, .06, 'iron', x, y + h / 2 + .03, z, grp || this.G.ext, { shadow: false }); rod.rotation.y = ry; for (const s of [-1, 1]) { const k = this.add(new THREE.SphereGeometry(.06, 5, 4), M('gold'), x + Math.cos(ry) * s * (w / 2 + .15), y + h / 2 + .03, z - Math.sin(ry) * s * (w / 2 + .15), grp || this.G.ext, { shadow: false }); }
     return p; }
   win(x, y, z, ry = 0, w = .9, h = 1.2, key = 'glass', grp, shut = key === 'glass' && w < 1.4 && !this.noShutters) {
@@ -119,8 +119,8 @@ export class Builder {
     // frame (jambs + stone lintel with keystone) and glazing bars
     { const g = grp || this.G.ext, cr = Math.cos(ry), sr = Math.sin(ry), at = (bw, bh, bd, key, u, yy, v) => { const b = this.bx(bw, bh, bd, key, x + cr * u + sr * v, y + yy, z - sr * u + cr * v, g, { shadow: false, lite: true }); b.rotation.y = ry; return b; };
       for (const sd of [-1, 1]) at(.07, h + .06, .14, 'darkWood', sd * (w / 2 + .03), 0, .04);
-      at(w + .26, .1, .14, 'darkWood', 0, h / 2 + .05, .04); at(w + .42, .12, .22, 'stoneD', 0, h / 2 + .17, .05); at(.16, .2, .26, 'stoneL', 0, h / 2 + .2, .06);
-      at(.035, h, .05, 'darkWood', 0, 0, .03); at(w, .035, .05, 'darkWood', 0, h * .08, .03); if (shut) for (const sd of [-1, 1]) at(w * .26, h * .8, .03, 'wood', sd * w * .72, 0, .07); }
+      at(w + .42, .16, .22, 'stoneD', 0, h / 2 + .1, .05);
+      at(.035, h, .05, 'darkWood', 0, 0, .03); if (shut) for (const sd of [-1, 1]) at(w * .26, h * .8, .03, 'wood', sd * w * .72, 0, .07); }
     return p; }
   sign(text, emblem, x, y, z, ry = 0) { // hanging shop sign on an iron bracket
     const t = signTexture(text, emblem), s = this.add(new THREE.PlaneGeometry(1.5, .75), new THREE.MeshLambertMaterial({ map: t, side: THREE.DoubleSide }), x, y, z, this.G.ext, { shadow: false, keep: true }); s.rotation.y = ry;
@@ -383,7 +383,7 @@ Builder.prototype.flowers = function (x, y, z, w, ry = 0) { // window flower box
   const f = this.bx(w, .22, .3, 'darkWood', x, y, z, this.G.ext); f.rotation.y = ry; const g = this.bx(w * .95, .12, .26, '#3f7a3a', x, y + .14, z, this.G.ext, { shadow: false }); g.rotation.y = ry;
   for (let i = 0; i < 5; i++) { const t = (i / 4 - .5) * w * .8; this.add(new THREE.SphereGeometry(.07, 5, 4), M(['#d84a5a', '#f0d040', '#e88adf', '#fff0f0'][i % 4]), x + Math.cos(ry) * t, y + .25, z - Math.sin(ry) * t + Math.cos(ry) * .05, this.G.ext, { shadow: false }); } };
 Builder.prototype.lanternPost = function (x, z, h = 2.8) { this.cyl(.07, .1, h, 'iron', x, h / 2, z, this.G.ext, 6); this.bx(.5, .06, .06, 'iron', x + .2, h - .1, z, this.G.ext); this.add(new THREE.SphereGeometry(.17, 6, 5), GLOW('ffc060', 1.7), x + .4, h - .3, z, this.G.ext, { shadow: false }); this.ccol(x, z, .2); };
-Builder.prototype.flag = function (x, y, z, s = 1, grp) { this.bx(.06, 1.6 * s, .06, 'iron', x, y + .8 * s, z, grp || this.G.ext, { shadow: false }); const fg = new THREE.PlaneGeometry(1.0 * s, .6 * s, 8, 3); { const uv = fg.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - uv.getX(i)); }   // pinned at the pole: sway grows toward the free end
+Builder.prototype.flag = function (x, y, z, s = 1, grp) { this.bx(.06, 1.6 * s, .06, 'iron', x, y + .8 * s, z, grp || this.G.ext, { shadow: false }); const fg = new THREE.PlaneGeometry(1.0 * s, .6 * s, 6, 2); { const uv = fg.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - uv.getX(i)); }   // pinned at the pole: sway grows toward the free end
   const f = this.add(fg, fx(M('#1f4a9a', { side: THREE.DoubleSide, name: 'flagcloth' }), 'flag'), x + .5 * s, y + 1.3 * s, z, grp || this.G.ext, { shadow: false }); f.rotation.y = .25; this.add(new THREE.CircleGeometry(.14 * s, 8), M('gold', { side: THREE.DoubleSide }), x + .45 * s, y + 1.3 * s, z + .01, grp || this.G.ext, { shadow: false }); };
 Builder.prototype.guard = function (x, z, ry = 0) { const g = this.G.ext; this.cyl(.22, .26, .9, '#2f56a8', x, 1.0, z, g, 6); this.cyl(.1, .1, .45, '#444a58', x - .1, .3, z, g, 5); this.cyl(.1, .1, .45, '#444a58', x + .1, .3, z, g, 5);
   this.add(new THREE.SphereGeometry(.17, 6, 5), M('#e8c09a'), x, 1.65, z, g); this.add(new THREE.ConeGeometry(.2, .26, 6), M('#8a9099'), x, 1.85, z, g); this.bx(.05, 2.3, .05, 'darkWood', x + .35, 1.2, z, g, { shadow: false }); this.add(new THREE.ConeGeometry(.07, .3, 4), M('#b6bcc8'), x + .35, 2.45, z, g, { shadow: false }); this.ccol(x, z, .3); };

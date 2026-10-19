@@ -13,6 +13,9 @@ import { SpringBones as SpringBonesV2 } from './spring_bones_v2.js';
 import { createBump, makeActor, styleFor, findNodes, restoreNodes, applyPose } from './bump.js';
 import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
 import { initCheatBoot } from './cheatboot.js';
+import { createCamRig } from './camrig.js';
+import { initSettings } from './settingsboot.js';
+import { loadPrefs, savePrefs, qualityPlan } from './camprefs.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -336,7 +339,7 @@ function wrapGLB(g, id, blocky) {
   try { const cfg = CLOTHCFG[id]; root.userData.sb = cfg ? new SpringBonesV2(m, { clips: g.animations, config: cfg }) : new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.8';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.9.1';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -530,12 +533,14 @@ function tapMoveTo(clientX, clientY) {
     marker.position.set(state.target.x, 0.06, state.target.z); marker.visible = true;
   }
 }
-canvas.addEventListener('pointerdown', e => { try { canvas.setPointerCapture(e.pointerId); } catch (_) {} touches.set(e.pointerId, { sx: e.clientX, sy: e.clientY, lx: e.clientX, drag: false }); });
+let prefStore = null; try { prefStore = localStorage; } catch (e) { prefStore = null; }
+const camRig = createCamRig({ camera, canvas, colliders, HS, WORLD, prefs: loadPrefs(prefStore || { getItem() { return null; } }) });
+canvas.addEventListener('pointerdown', e => { try { canvas.setPointerCapture(e.pointerId); } catch (_) {} touches.set(e.pointerId, { sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, drag: false }); });
 canvas.addEventListener('pointermove', e => {
   const t = touches.get(e.pointerId); if (!t) return;
   if (!t.drag && Math.hypot(e.clientX - t.sx, e.clientY - t.sy) > 12) t.drag = true;
-  if (t.drag) { state.camYaw -= (e.clientX - t.lx) * 0.006; }
-  t.lx = e.clientX;
+  if (t.drag && !camRig.pinching) { state.camYaw -= (e.clientX - t.lx) * 0.006 * camRig.prefs.lookSens; if (camRig.fp) camRig.look(0, -(e.clientY - t.ly) * 0.005 * camRig.prefs.lookSens); }
+  t.lx = e.clientX; t.ly = e.clientY;
 });
 const canvasUp = e => { const t = touches.get(e.pointerId); touches.delete(e.pointerId); if (t && !t.drag && e.type === 'pointerup') tapMoveTo(e.clientX, e.clientY); };
 canvas.addEventListener('pointerup', canvasUp); canvas.addEventListener('pointercancel', canvasUp);
@@ -809,14 +814,12 @@ function animateHero(dt) {
 // ---------- camera ----------
 const camPos = new THREE.Vector3(0, 8 * HS, START_Z + 10 * HS), camLook = new THREE.Vector3(0, 1.5 * HS, START_Z);
 const _want = new THREE.Vector3(), _look = new THREE.Vector3();
+const camIn = {};
 function updateCamera(dt, snap) {
-  const portrait = innerHeight > innerWidth;
-  const z = state.zoom || 1, close = z < 1, dist = HS * (close ? (portrait ? 7.0 : 6.0) * (z / 0.3) : (portrait ? 10.5 : 9)), height = HS * (close ? 2.2 : (portrait ? 7.2 : 6.2));
-  const hy = (state.heroY || 0) + cheat.alt, want = _want.set(state.heroX + Math.sin(state.camYaw) * dist, height + hy, state.heroZ + Math.cos(state.camYaw) * dist);
-  const look = _look.set(state.heroX, HS * (close ? 1.05 : 1.6) + hy, state.heroZ);
-  const k = snap ? 1 : 1 - Math.pow(0.0015, dt);
-  camPos.lerp(want, k); camLook.lerp(look, k);
-  camera.position.copy(camPos); camera.lookAt(camLook);
+  const ci = camIn; ci.heroX = state.heroX; ci.heroZ = state.heroZ; ci.hy = (state.heroY || 0) + cheat.alt; ci.dispY = state.dispY === undefined ? state.heroY || 0 : state.dispY; ci.alt = cheat.alt; ci.camYaw = state.camYaw; ci.legacyZoom = state.zoom; ci.portrait = innerHeight > innerWidth; ci.dt = dt; ci.snap = snap;
+  camRig.update(ci);
+  camPos.copy(camRig.pos); camLook.copy(camRig.look);
+  camRig.syncHero(hero);
   sun.position.set(state.heroX + SUN_OFF.x, SUN_OFF.y, state.heroZ + SUN_OFF.z);
   sun.target.position.set(state.heroX, 0, state.heroZ);
 }
@@ -835,8 +838,10 @@ let last = performance.now(), fpsAcc = 0, fpsFrames = 0, fps = 0, totalFrames = 
 let running = true;
 document.addEventListener('visibilitychange', () => { running = !document.hidden; last = performance.now(); lastDraw = 0; adaptSkip = Math.max(adaptSkip, 30); });
 // adaptive resolution: if frames average > 22 ms for ~1 s, shrink the render resolution (min 0.6x); never climb back above a level that failed.
-let adaptT = 0, adaptN = 0, adaptSkip = 90;
+let adaptT = 0, adaptN = 0, adaptSkip = 90, adaptLock = false;
+function setQuality(q) { const plan = qualityPlan(q, window.devicePixelRatio || 1); adaptLock = !plan.adaptive; prCeil = plan.ceil; pr = plan.ceil; renderer.setPixelRatio(pr); resize(); adaptSkip = 60; adaptT = 0; adaptN = 0; }
 function adaptRes(raw) {
+  if (adaptLock) return;
   if (adaptSkip > 0) { adaptSkip--; return; }
   if (raw > 250) return;                       // tab switch / hitch, not load
   adaptT += raw; adaptN++;
@@ -943,6 +948,7 @@ async function fightToggle(createOnly) {
   FIGHT.toggle(); return FIGHT;
 }
 { const fb = document.getElementById('fightBtn'); if (fb) fb.addEventListener('click', e => { e.preventDefault(); fightToggle(); }); }
+let ownerFlag = false;
 let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
 const cheatEnv = {
   flags: cheat, bumpSys, storage: cheatStore, zones: ['village', 'wilds'],
@@ -955,10 +961,14 @@ const cheatEnv = {
     onOwner: () => { if (window.__ownerRoster) window.__ownerRoster(); const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
   teleport: (x, z, zone) => { if (zone === 'wilds') { setZone('wilds'); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
-  onReady: (c) => { window.__p3d.cheats = c; },
+  onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); settingsApi.ownerInit(); },
+  onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); },
 };
-initCheatBoot(cheatEnv);
-window.__p3d = { get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
+const cheatBoot = initCheatBoot(cheatEnv);
+async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
+const fpsEl2 = fpsEl;
+const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
+window.__p3d = { camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },

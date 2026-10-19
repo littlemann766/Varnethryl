@@ -194,6 +194,6 @@ export function createFight(env) {
     if (!on) return; on = false; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
-  return { start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
+  return { cheatHeal, cheatKill, cheatSpawn, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
     get on() { return on; }, get hp() { return cc.res.hp; }, get kills() { return cc.kills; }, get monsters() { return cc.enemies; }, get hasSaber() { return !!saber; }, hurt(n) { cc.res.hp = Math.max(0, cc.res.hp - n); if (cc.res.hp <= 0 && cc.dead <= 0) { cc.dead = cc.P.respawn; cc.emit('playerDown'); } } };
 }

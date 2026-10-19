@@ -70,6 +70,10 @@ with sync_playwright() as p:
         global fails, total
         if PARTY == '0': return True
         total += 1
+        if pg.evaluate("!!(window.__heroOnly && __heroOnly.has(__p3d.state.inside))"):   # playable-characters-only building (guild hall): companions must wait outside instead
+            pg.wait_for_timeout(3000); ok = pg.evaluate("__p3d.bump.crowd.filter(c=>c.kind==='party').every(c=>c.level===0 && !__p3d.enterables.some(e=>e.id===__p3d.state.inside && (e.parts?e.parts[0]:e).insideTest(...(e.parts?e.parts[0]:e).toL(c.a.x,c.a.z))))")
+            if not ok: print('    companions got into a hero-only building (%s)' % tag, flush=True); fails += 1
+            return ok
         try: pg.wait_for_function(FOLL, timeout=45000); return True
         except Exception:
             print('    followers did NOT reach the hero floor (%s):' % tag, pg.evaluate("__p3d.bump.crowd.filter(c=>c.kind==='party').map(c=>[c.level,+c.y.toFixed(1),+c.a.x.toFixed(1),+c.a.z.toFixed(1)])"), 'hero', pg.evaluate("[__p3d.state.level,__p3d.state.heroY]"), flush=True); fails += 1; return False

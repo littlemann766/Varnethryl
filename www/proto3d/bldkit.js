@@ -307,7 +307,7 @@ Builder.prototype.clearZone = function (m, level, du0, du1, floorY) {
   for (const g of grps) for (const ch of [...g.children]) { if (!ch.isMesh || ch.userData.merged || ch.userData.stairPart) continue; const gp = ch.geometry && ch.geometry.parameters; const hgt = gp && gp.height !== undefined ? gp.height : 1;
     const ry = ch.position.y - (level ? floorY : 0); if (ry < .12 || ry > 2.1 || hgt >= 2.4 || (gp && gp.depth !== undefined && Math.min(gp.width, gp.depth) < .13)) continue; if (inZ(ch.position.x, ch.position.z, gp && gp.width ? Math.min(.9, Math.max(gp.width, gp.depth || 0) * .45) : 0)) { g.remove(ch); ch.geometry.dispose(); } }
   const keepLv = c0 => c0.lv === undefined || c0.lv === level || (Array.isArray(c0.lv) && c0.lv.includes(level));
-  this.colliders = this.colliders; for (let i = this.colliders.length - 1; i >= 0; i--) { const q = this.colliders[i]; if (q.b !== this.id || q.stair || !keepLv(q)) continue;
+  this.colliders = this.colliders; for (let i = this.colliders.length - 1; i >= 0; i--) { const q = this.colliders[i]; if (q.b !== this.id || q.stair || q.npcOnly || !keepLv(q)) continue;
     let lx, lz, big; if (q.type === 'box') { [lx, lz] = this.toL((q.minX + q.maxX) / 2, (q.minZ + q.maxZ) / 2); const W = (q.maxX - q.minX) / this.K, D = (q.maxZ - q.minZ) / this.K; big = Math.max(W, D) > 4.2 || Math.min(W, D) < .5 && Math.max(W, D) > 2.4; } else { [lx, lz] = this.toL(q.x, q.z); big = false; }
     if (!big && inZ(lx, lz, q.type === 'circle' ? q.r / this.K * .5 : Math.min(1.1, Math.max(q.maxX - q.minX, q.maxZ - q.minZ) / this.K * .45))) this.colliders.splice(i, 1); }
 };

@@ -112,4 +112,20 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   k = hero('n:darius', true, true); k.res.hp = 10; k.god = false; k.addEnemy('titan', 0, 4); let took = 0; k.on('enemyAttack', a => { if (a.dmg > 0) took++; }); for (let i = 0; i < 60 * 6; i++) k.update(1 / 60); T('holder: NOT invincible (takes hits, goes down)', took >= 1 || k.dead > 0);
   k = hero('n:darius', true, true); k.noCooldown = true; k.use('royal'); T('holder: costs + cooldowns normal (no unlimited/no-cd)', k.res.mp === k.res.max.mp - 12 && k.cd.left('royal') > 0 && !k.perkHero());
 }
+// ---- hero kits (data-driven archetypes) ----
+{ const { KITS, kitFor } = await import('../www/proto3d/combat/herokits.js'); const go = (k, s) => { for (let i = 0; i < s * 60; i++) k.update(1 / 60); };
+  const mkh = id => { const k = mk(false); k.setHero({ id, saber: false }); k.setPlayer(0, 0, 0); k.res.unlimited = true; return k; };
+  T('kits: 5 archetypes, each 3 skills + ultimate, color', ['aldric', 'elira', 'rowan', 'thorne', 'nyx'].every(h => KITS[h] && KITS[h].skills.length === 4 && KITS[h].skills[3].fury === 100 && /^#/.test(KITS[h].color)));
+  T('kits: id lookup handles prefixes/variants', kitFor('n:aldric_smooth') === KITS.aldric && kitFor('aldric') === KITS.aldric && kitFor('darius') === null);
+  let k = mkh('aldric'); let w = k.addEnemy('wolf', 0, 3); k.use('aldric.1'); go(k, 0.6); T('kit melee skill hits (stagger)', w.hp < w.max);
+  k = mkh('aldric'); w = k.addEnemy('wolf', 0, 7); let dashed = 0; k.on('dash', () => dashed++); k.use('aldric.3'); go(k, 0.6); T('dash skill emits dash and hits the corridor', dashed === 1 && w.hp < w.max);
+  k = mkh('elira'); w = k.addEnemy('wolf', 0, 12); const w2 = k.addEnemy('raider', 0, 18); k.use('elira.2'); go(k, 0.6); T('line skill pierces multiple targets', w.hp < w.max && w2.hp < w2.max);
+  k = mkh('thorne'); k.res.hp = 100; let hn = 0; k.on('heal', h => hn += h.n); k.use('thorne.2'); go(k, 0.6); T('heal skill heals self', k.res.hp > 100 && hn > 0);
+  k = mkh('nyx'); w = k.addEnemy('wolf', 0, 10); const x0 = k.p.x, z0 = k.p.z; let bl = 0; k.on('blink', () => bl++); k.use('nyx.2'); go(k, 0.6); T('blink teleports next to target and hits', bl === 1 && Math.hypot(k.p.x - x0, k.p.z - z0) > 3 && w.hp < w.max);
+  k = mkh('rowan'); const far = k.addEnemy('wolf', 0, 8), bos = k.addEnemy('titan', 0, 10); k.fury = 100; k.use('rowan.u'); go(k, 0.5); T('meteor ult: delayed (nothing yet)', far.hp === far.max); go(k, 2); T('kit meteor damages (does not instant kill), boss survives', far.hp < far.max && bos.state !== 'defeated');
+  k = mkh('rowan'); k.res.unlimited = false; k.fury = 50; T('kit ultimate needs full Fury', !k.use('rowan.u'));
+  k = mkh('darius'); T('hero without kit cannot use another hero\'s skills or owner skills', !k.use('aldric.1') && !k.use('rowan.u') && !k.use('royal'));
+  k = mkh('aldric'); T('kit hero cannot use another kit', !k.use('rowan.1'));
+  k = mkh('aldric'); k.res.unlimited = false; k.res.sp = 0; T('kit skill respects cost without unlimited', !k.use('aldric.1'));
+}
 console.log(ok + ' pass, ' + bad + ' fail'); process.exit(bad ? 1 : 0);

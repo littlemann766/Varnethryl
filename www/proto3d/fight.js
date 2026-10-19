@@ -4,6 +4,7 @@
 import { CombatController } from './combat/controller.js';
 import { CombatHUD } from './combat/hud.js';
 import { loadLucian } from './combat/calc.js';
+import { LightningFX } from './combat/lightning.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
 export const SABER_GLB = null;             // URL (or fight.setSaberModel(url)) for Beth's saber: hilt at origin, blade along +Y, ~1 m
@@ -29,7 +30,7 @@ export function createFight(env) {
   const onKey = e => {
     if (!on || e.repeat || /input|textarea/i.test((e.target && e.target.tagName) || '')) return;
     const k = e.key;
-    if (k >= '1' && k <= '4') api.use(hud.slotAbility(+k)); else if (k >= '5' && k <= '8') api.use(+k - 3); else if (k === 'x' || k === 'X') api.use(1); else if (k === 'f' || k === 'F') api.use(0); else if (k === ' ') { e.preventDefault(); api.dodge(); }
+    if (k >= '1' && k <= '4') api.use(hud.slotAbility(+k)); else if (k >= '5' && k <= '8' && k !== '7') api.use(+k - 3); else if (k === '7' || k === 't' || k === 'T') api.use('unholy'); else if (k === 'x' || k === 'X') api.use(1); else if (k === 'f' || k === 'F') api.use(0); else if (k === ' ') { e.preventDefault(); api.dodge(); }
     else if (k === 'q' || k === 'Q') api.lock(); else if (k === 'Tab') { e.preventDefault(); api.switchTarget(); } else if (k === 'r' || k === 'R') api.potion(); else if (k === 'e' || k === 'E') api.swap(); else if (k === 'j' || k === 'J') api.jump();
   };
   const onMd = e => { if (on && e.button === 2) cc.block(true); }, onMu = e => { if (on && e.button === 2) cc.block(false); }, onCtx = e => { if (on) e.preventDefault(); };
@@ -139,8 +140,10 @@ export function createFight(env) {
   /* Unholy lightning storm: 14 pooled zig-zag line bolts (additive purple), struck at random spots in the zone. */
   let LT = null;
   function ltBuild() { if (LT) return LT; const bolts = []; for (let i = 0; i < 14; i++) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(10 * 3), 3)); const l = new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0xb04bff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })); l.frustumCulled = false; l.visible = false; scene.add(l); bolts.push({ l, t: 9 }); } return (LT = { bolts, next: 0, acc: 0 }); }
-  function ltStrike(x, z) { const L = ltBuild(), b = L.bolts[L.next++ % L.bolts.length], a = b.l.geometry.attributes.position.array, top = 85; for (let i = 0; i < 10; i++) { const u = i / 9, j = (i === 0 || i === 9) ? 0 : 4 * (1 - u * 0.5); a[i * 3] = x + (Math.random() - 0.5) * j + (1 - u) * 6; a[i * 3 + 1] = top * (1 - u); a[i * 3 + 2] = z + (Math.random() - 0.5) * j; } b.l.geometry.attributes.position.needsUpdate = true; b.t = 0; b.l.visible = true; b.l.material.color.setHex(Math.random() < 0.35 ? 0xe9d6ff : 0xa23cff); }
-  function ltUpdate(dt, active, m) { if (!LT) return; if (active && m) { LT.acc += dt; const gap = m.st === 'burst' ? 0.03 : 0.09; while (LT.acc > gap) { LT.acc -= gap; const a = Math.random() * 6.283, d = Math.sqrt(Math.random()) * m.r; ltStrike(m.x + Math.cos(a) * d, m.z + Math.sin(a) * d); } } for (const b of LT.bolts) { if (!b.l.visible) continue; b.t += dt; const k = 1 - b.t / 0.2; if (k <= 0) { b.l.visible = false; continue; } b.l.material.opacity = k > 0.6 ? 1 : k; } }
+  function ltStrikeOld(x, z) { const L = ltBuild(), b = L.bolts[L.next++ % L.bolts.length], a = b.l.geometry.attributes.position.array, top = 85; for (let i = 0; i < 10; i++) { const u = i / 9, j = (i === 0 || i === 9) ? 0 : 4 * (1 - u * 0.5); a[i * 3] = x + (Math.random() - 0.5) * j + (1 - u) * 6; a[i * 3 + 1] = top * (1 - u); a[i * 3 + 2] = z + (Math.random() - 0.5) * j; } b.l.geometry.attributes.position.needsUpdate = true; b.t = 0; b.l.visible = true; b.l.material.color.setHex(Math.random() < 0.35 ? 0xe9d6ff : 0xa23cff); }
+  function ltStrike(x, z) { getFx().strike({ path: [{ x, z, y: 1.1 * HS, falloff: 1 }] }); }   // Lucky's LightningFX bolts (pooled)
+  let ltAcc = 0;
+  function ltUpdate(dt, active, m) { if (!(active && m)) return; ltAcc += dt; const gap = m.st === 'burst' ? 0.14 : 0.2; while (ltAcc > gap) { ltAcc -= gap; const a = Math.random() * 6.283, d = Math.sqrt(Math.random()) * m.r; ltStrike(m.x + Math.cos(a) * d, m.z + Math.sin(a) * d); } }
   function ltDispose() { if (!LT) return; for (const b of LT.bolts) { scene.remove(b.l); b.l.geometry.dispose(); b.l.material.dispose(); } LT = null; }
   const metHide = () => { if (MET) { MET.st = 'off'; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) o.visible = false; } };
   function metDispose() { ltDispose(); bambooDispose(); if (!MET) return; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) { scene.remove(o); o.geometry.dispose(); o.material.dispose(); } MET = null; }
@@ -167,6 +170,8 @@ export function createFight(env) {
 
   /* ---- controller events -> world ---- */
   cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact();  hud.say(ev.name ? ev.name.toUpperCase() : 'DESTRUCTION', 1400); });
+  let lfx = null; const getFx = () => lfx || (lfx = new LightningFX({ THREE, scene, HS, canvas: document.querySelector('canvas') }));
+  cc.on('lightning', ev => getFx().strike(ev));
   cc.on('action', ev => {
     A.swing = { t: 0, T: ev.T, big: ev.a.id === 'heavy' ? 1.5 : 1, kind: ev.a.kind };
     { const h = env.hero(), u = h.userData, drawn = slashA && saber && saber.parent && saber.parent.name === 'weapon_R';
@@ -212,7 +217,7 @@ export function createFight(env) {
     const h = env.hero();
     // lock-on: face the target
     if (cc.tgt.locked && cc.tgt.target && cc.dead <= 0) state.yaw = yawLerp(state.yaw, Math.atan2(cc.tgt.target.x - state.heroX, cc.tgt.target.z - state.heroZ), Math.min(1, dt * 9));
-    cc.update(dt);
+    cc.update(dt); if (lfx) lfx.update(dt);
     // spawner (bad guys): small waves of regular enemies
     spawnT -= dt; const reg = cc.enemies.filter(e => !e.def.boss && e.state !== 'defeated').length;
     if (auto) {   // the Wilds: scattered, passive mobs (they stand off until you come within 3 m or hit them first); far ones are recycled
@@ -270,6 +275,6 @@ export function createFight(env) {
     if (!on) return; on = false; metHide(); metDispose(); cc.meteors.length = 0; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
-  return { setBamboo(v) { if (!ownerGate()) { cc.bamboo = false; return false; } cc.bamboo = !!v; bambooSync(); return cc.bamboo; }, bambooOn: () => cc.bambooOn(), cheatHeal, cheatKill, cheatSpawn, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
+  return { setBamboo(v) { if (!ownerGate()) { cc.bamboo = false; return false; } cc.bamboo = !!v; bambooSync(); return cc.bamboo; }, bambooOn: () => cc.bambooOn(), useUltimate2: () => cc.useUltimate2(), get lightning() { return lfx; }, cheatHeal, cheatKill, cheatSpawn, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
     get on() { return on; }, get hp() { return cc.res.hp; }, get kills() { return cc.kills; }, get monsters() { return cc.enemies; }, get hasSaber() { return !!saber; }, hurt(n) { cc.res.hp = Math.max(0, cc.res.hp - n); if (cc.res.hp <= 0 && cc.dead <= 0) { cc.dead = cc.P.respawn; cc.emit('playerDown'); } } };
 }

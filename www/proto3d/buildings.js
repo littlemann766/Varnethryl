@@ -202,7 +202,7 @@ const stables = (spec, ctx) => std(spec, ctx, { name: 'Stables of Varnethryl', n
   extra(B) { const { w, d, h } = B, top = h + 3.6, g = B.G.roof;   // card b: ridge cupola with louvres + weather vane, hay bales and a cart wheel by the doors
     B.bx(1.5, 1.2, 1.5, 'timber', 0, top + .45, 0, g); for (let i = 0; i < 3; i++) for (const z of [-.76, .76]) B.bx(1.1, .07, .05, 'darkWood', 0, top + .2 + i * .3, z, g, { shadow: false, lite: true });
     B.gable(1.9, 1.9, 1.0, 0, top + 1.05, 0, 'slate', g, true, .15); B.cyl(.03, .03, 1.0, 'iron', 0, top + 2.4, 0, g, 4, { shadow: false }); B.bx(.7, .12, .02, 'gold', .15, top + 2.7, 0, g, { shadow: false, lite: true }); B.cone(.07, .2, 'gold', 0, top + 2.95, 0, g, 4, { shadow: false });
-    for (const [x, z, k] of [[-w / 2 + 1.2, d / 2 + 1.2, 1], [-w / 2 + 2.6, d / 2 + 1.0, 1], [w / 2 - 1.4, d / 2 + 1.2, 0]]) { B.bx(1.1, .7, .8, 'hay', x, .35, z, B.G.ext); if (k) B.bx(.9, .6, .7, 'hay', x + .1, 1.0, z, B.G.ext, { lite: true }); B.col(x, z, 1.1, .8); }
+    for (const [x, z, k] of [[-w / 2 + 1.2, d / 2 + 1.2, 1], [-w / 2 + 2.6, d / 2 + 1.0, 1], [w / 2 - 1.4, d / 2 + 1.2, 0]]) { B.bx(1.1, .7, .8, '#c9a65a', x, .35, z, B.G.ext); if (k) B.bx(.9, .6, .7, '#d4b468', x + .1, 1.0, z, B.G.ext, { lite: true }); B.col(x, z, 1.1, .8); }
     { const wh = B.add(new THREE.TorusGeometry(.55, .06, 4, 10), M('darkWood'), w / 2 - 2.8, .6, d / 2 + .25, B.G.ext, { shadow: false }); for (let i = 0; i < 3; i++) B.bx(.04, 1.05, .04, 'darkWood', w / 2 - 2.8, .6, d / 2 + .25, B.G.ext, { shadow: false, lite: true }).rotation.z = i * 1.05; } },
   interior(B) { const iw = B.iw, id_ = B.id_;
     for (const s of [-1, 1]) for (let i = 0; i < 4; i++) { const x = -iw + 2.4 + i * 3.6; B.bx(.1, 1.6, 2.6, 'darkWood', x + 1.8, .8, -id_ + 1.5 + (s > 0 ? 0 : 0), B.G.int); B.col(x + 1.8, -id_ + 1.5, .15, 2.6); }
@@ -385,7 +385,7 @@ function keep(spec, ctx) {
   B.bx(10, 5, 8, 'stone', 0, h + 2.9, -1, B.G.roof); B.cone(6.4, 8, 'slate', 0, h + 5.4, -1, B.G.roof, 4).rotation.y = .78;
   for (const [sx, sz, r] of [[-1, 1, 3.3], [1, 1, 3.3], [-1, -1, 3.0], [1, -1, 3.0]]) B.tower(sx * (w / 2 + r * .8 - .2), sz * (d / 2 + r * .8 - .2), r, h + 4, { coneH: 8, windows: 3, key: 'stoneL', wa: sx * 1.3 + sz });
   for (const s of [-1, 1]) B.banner(s * 4.6, 6, d / 2 + .08, 0, 1.5, 4.2);
-  for (const [x, z, r, up] of [[-5, -3, 2.5, 8], [5, -4, 2.2, 10], [0, -6.2, 2.7, 6]]) B.tower(x, z, r, h + up, { coneH: 8 + up * .3, windows: 3, collide: false, wa: x });
+  for (const [x, z, r, up] of [[-5, -3, 2.5, 8], [5, -4, 2.2, 10], [0, -6.2, 2.7, 6]]) B.tower(x, z, r, h + up, { coneH: 8 + up * .3, windows: 0, collide: false, wa: x, flag: false, y0: h + .6, roofGroup: B.G.ext });
   B.rocks([[-w / 2 - 2.6, d / 2 - 1, 2.0], [w / 2 + 2.8, d / 2 - 2, 2.3], [-w / 2 - 3.2, -2, 2.8, .9], [w / 2 + 3.4, -3, 2.6, .9], [-6, -d / 2 - 2.2, 2.4], [5, -d / 2 - 2.6, 2.8], [0, -d / 2 - 3.4, 3.0, 1], [-w / 2 - 1.6, d / 2 + 2.4, 1.3], [w / 2 + 1.8, d / 2 + 2.6, 1.5]]);
   B.guard(-2.6, d / 2 + 2.6); B.guard(2.6, d / 2 + 2.6); B.apron(w * .5, d * .4, 4);
   { // ornate gold double door (cropped from the reference), swung open, under a big pointed-arch surround with a tracery tympanum
@@ -405,6 +405,13 @@ function keep(spec, ctx) {
   B.tableR(-iw + 2.6, 1.5, 1.6, 7, 'darkWood'); B.tableR(iw - 2.6, 1.5, 1.6, 7, 'darkWood'); for (const s of [-1, 1]) B.hearth(s * (iw - .5), -3.6, -s * Math.PI / 2, 2.2);
   for (let i = 0; i < 3; i++) for (const s of [-1, 1]) B.banner(s * (iw - .4), 5, -2 + i * 3.6, -s * Math.PI / 2, 1, 2.6);
   for (const z of [-2, 2.5]) for (const x of [-2.6, 2.6]) B.lamp(x, 6.2, z);
+  { const G = B.G.int;   // card e (pass 4): great-hall benches + place settings, war-room map table, arrow slits on the curtain walls
+    for (const s of [-1, 1]) { const x = s * (iw - 2.6); for (const dx of [-1.15, 1.15]) { B.bx(.4, .45, 6.2, 'darkWood', x + dx, .23, 1.5, G, { lite: true }); B.col(x + dx, 1.5, .4, 6.2); }
+      for (let i = 0; i < 6; i++) { const z = -1.2 + i * 1.1; for (const dx of [-.5, .5]) { B.cyl(.18, .18, .02, '#d8d0c0', x + dx, .86, z, G, 8, { shadow: false }); B.cyl(.05, .04, .16, 'gold', x + dx * .7, .93, z + .25, G, 5, { shadow: false }); } } }
+    { const x = iw - 3.2, z = id_ - 2.6; B.cyl(1.1, 1.1, .1, 'darkWood', x, .82, z, G, 12); B.cyl(.18, .3, .8, 'darkWood', x, .4, z, G, 6); B.ccol(x, z, 1.15);
+      B.cyl(1.0, 1.0, .01, 'parchment', x, .88, z, G, 12, { shadow: false }); for (let i = 0; i < 5; i++) B.cone(.06, .18, i % 2 ? '#2f56a8' : '#a82f2f', x - .5 + i * .25, .97, z + Math.sin(i * 2.3) * .4, G, 4, { shadow: false }); }
+    for (const z of [-d / 2 - .02, d / 2 + .02]) for (const x of [-9, -3, 3, 9]) { if (z > 0 && Math.abs(x) < 4) continue; B.bx(.16, 1.0, .06, '#0e0f12', x, 8.2, z, B.G.ext, { shadow: false, lite: true }); }
+  }
   B.dress('hall');
   B.fullUpper({ level: 1, y: 5.0, stair: { cx: iw - .9, cz: 1.4, dir: '-z', len: 4.5, w: 1.6 }, rooms(U) { const Z = -3.2;
     U.partition(0, Z, iw * 2, 'x', [[-5.5, 1.4], [0, 1.6], [5.5, 1.4], [iw - .9, 2.6], [-(iw - .9), 2.6]]); U.partition(-3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7); U.partition(3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7);

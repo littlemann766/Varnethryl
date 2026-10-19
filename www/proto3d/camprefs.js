@@ -2,15 +2,15 @@
  * Stored in localStorage under PREF_KEY as one small JSON object; anything missing or out of range falls back to the default. */
 export const PREF_KEY = 'vn_p3d_prefs_v1';
 export const ZOOM_MIN = 0.4, ZOOM_MAX = 1.7, SENS_MIN = 0.4, SENS_MAX = 2.5;
-export const VIEWS = ['third', 'first'], QUALITIES = ['auto', 'high', 'balanced', 'low'];
-export const DEFAULT_PREFS = Object.freeze({ view: 'third', zoom: 1, zoomSens: 1, lookSens: 1, quality: 'auto', shadows: true, showFps: true, combatSet: false, combat: true });
+export const CAM_MODES = ['follow', 'free'], VIEWS = ['third', 'first'], QUALITIES = ['auto', 'high', 'balanced', 'low'];
+export const DEFAULT_PREFS = Object.freeze({ view: 'third', zoom: 1, zoomSens: 1, lookSens: 1, quality: 'auto', shadows: true, showFps: true, combatSet: false, combat: true, camMode: 'follow' });
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 export const clampZoom = (z) => clamp(num(z, 1), ZOOM_MIN, ZOOM_MAX);
 export function sanitizePrefs(p) {
   const o = p && typeof p === 'object' ? p : {}, d = DEFAULT_PREFS;
   return { view: VIEWS.includes(o.view) ? o.view : d.view, zoom: clampZoom(o.zoom), zoomSens: clamp(num(o.zoomSens, 1), SENS_MIN, SENS_MAX), lookSens: clamp(num(o.lookSens, 1), SENS_MIN, SENS_MAX),
-    quality: QUALITIES.includes(o.quality) ? o.quality : d.quality, shadows: o.shadows !== false, showFps: o.showFps !== false, combatSet: o.combatSet === true, combat: o.combatSet === true ? o.combat === true : true };
+    quality: QUALITIES.includes(o.quality) ? o.quality : d.quality, shadows: o.shadows !== false, showFps: o.showFps !== false, combatSet: o.combatSet === true, combat: o.combatSet === true ? o.combat === true : true, camMode: CAM_MODES.includes(o.camMode) ? o.camMode : d.camMode };
 }
 export function loadPrefs(storage) { try { return sanitizePrefs(JSON.parse(storage.getItem(PREF_KEY))); } catch (e) { return sanitizePrefs(null); } }
 export function savePrefs(storage, p) { try { storage.setItem(PREF_KEY, JSON.stringify(sanitizePrefs(p))); return true; } catch (e) { return false; } }
@@ -49,4 +49,13 @@ export function segmentClearT(cols, ax, az, bx, bz, margin) {
     }
   }
   return best;
+}
+
+/* Behind-the-character follow: returns the new camYaw. The camera sits at +(sin,cos)*dist from the hero, so 'behind' the hero's travel (vx,vz) is yaw = atan2(-vx,-vz).
+   Only eases while the hero is moving mostly away from the camera (>0.5 forward component), so strafing / turning in place never spins the view. Exponential damping, rate-capped: no wobble. */
+export function followYaw(cur, vx, vz, dt, rate = 2.4, maxRate = 1.8) {
+  const sp = Math.hypot(vx, vz); if (!(sp > 0.5) || !(dt > 0)) return cur;
+  const fwd = (-vx * Math.sin(cur) - vz * Math.cos(cur)) / sp; if (fwd < 0.5) return cur;
+  let d = Math.atan2(-vx, -vz) - cur; d = Math.atan2(Math.sin(d), Math.cos(d));
+  const step = Math.max(-maxRate * dt, Math.min(maxRate * dt, d * (1 - Math.exp(-rate * dt)))); return cur + step;
 }

@@ -23,7 +23,7 @@ export function M(key, extra) { // shared lit material by texture key (or flat c
   const m = new THREE.MeshLambertMaterial(o); if (key === 'water') fx(m, 'water');
   return matCache[id] = m;
 }
-export const WM = (c, kind = 'grass') => fx(M(c, { name: 'wind_' + kind }), kind);   // wind-swayed flat colour (bushes, tufts, potted plants)
+export const WM = (c, kind = 'grass') => { const v = parseInt(c.slice(1), 16), lum = ((v >> 16) & 255) * .3 + ((v >> 8) & 255) * .59 + (v & 255) * .11; return fx(M(lum > 118 ? '#55993f' : '#3f7a3a', { name: 'wind_' + kind }), kind); };   // two shared shades: fewer draw calls   // wind-swayed flat colour (bushes, tufts, potted plants)
 export const GLOW = (c, k = 1) => { const m = M('#' + c, { emissive: new THREE.Color('#' + c), emissiveIntensity: k }); const r = parseInt(c.slice(0, 2), 16), b = parseInt(c.slice(4, 6), 16); if (r > b + 40) fx(m, 'flicker'); return m; };
 export function uvScale(g, su, sv) { const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * su, uv.getY(i) * sv); return g; }
 export function boxG(w, h, d, tile = 2) {
@@ -567,3 +567,23 @@ Builder.prototype.entry = function (o = {}) { const DW = this.DW || 2.2, round =
     const qx = sx * (DW / 2 + 1.0), qz = wallZ(qx) + .55; this.cyl(.22, .16, .34, '#a8573a', qx, .17, qz, g, 7, { shadow: false }); this.add(new THREE.IcosahedronGeometry(.3, 0), WM('#4f9a3e'), qx, .52, qz, g, { shadow: false }); }
   if (round && this.DHr) { const DH = this.DHr, z = wallZ(DW / 2) + .1; for (const sx of [-1, 1]) this.bx(.3, DH + .1, .3, 'stoneD', sx * (DW / 2 + .15), (DH + .1) / 2, z, this.G.frame, { lite: true }); this.bx(DW + .9, .34, .34, 'stoneD', 0, DH + .2, z, this.G.frame, { lite: true }); this.bx(.34, .42, .4, 'stoneL', 0, DH + .3, z + .04, this.G.frame, { lite: true }); }
   this.bx(DW * .8, .03, .9, 'rug', 0, .03, wallZ(0) + .7, g, { shadow: false, lite: true }); };
+
+// butterflies fluttering over garden spots (pass 3 life): pts [[x,z]], 3 per spot, one draw call, motion in the vertex shader
+export function butterflies(pts) {
+  const pos = [], ctr = [], ph = [], col = []; let sd = 11; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647; const pal = [[1, .85, .2], [.95, .5, .8], [.6, .8, 1], [1, 1, 1]];
+  for (const [x, z] of pts) for (let k = 0; k < 3; k++) { const p0 = r() * 6.283, c = pal[(r() * 4) | 0];
+    for (const v of [[-1, 0], [0, -.2], [0, .25], [1, 0], [0, .25], [0, -.2]]) { pos.push(v[0], 0, v[1]); ctr.push(x + (r() - .5) * 2, .7 + r() * .8, z + (r() - .5) * 2); ph.push(p0, .6 + r() * .9, .5 + r() * .5); col.push(...c); } }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('ctr', new THREE.Float32BufferAttribute(ctr, 3)); g.setAttribute('ph', new THREE.Float32BufferAttribute(ph, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  const m = new THREE.ShaderMaterial({ side: THREE.DoubleSide, uniforms: { uTime: FX.uTime },
+    vertexShader: 'attribute vec3 ctr; attribute vec3 ph; attribute vec3 color; varying vec3 vC; uniform float uTime; void main(){ vC = color; float t = uTime * ph.z + ph.x; vec3 c = ctr + vec3(sin(t) * ph.y + sin(t * 2.3) * .3, sin(t * 3.1) * .25, cos(t * .8) * ph.y);'
+      + ' float fl = abs(sin(uTime * 14.0 + ph.x * 3.0)); vec3 p = c + vec3(position.x * .13 * (0.25 + fl), abs(position.x) * .1 * fl, position.z * .13); gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0); }',
+    fragmentShader: 'varying vec3 vC; void main(){ gl_FragColor = vec4(vC, 1.0); }' });
+  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e4); const mesh = new THREE.Mesh(g, m); mesh.frustumCulled = false; mesh.userData.keep = true; mesh.name = 'butterflies'; return mesh;
+}
+// clothesline with waving laundry (flag shader), beside a house; poles collide only when the spot is free
+Builder.prototype.laundry = function () { const g = this.G.ext, x = (this.w / 2 + 1.4), z0 = -this.d / 4, z1 = this.d / 4;
+  if (!this.spotFree(x, z0, .4) || !this.spotFree(x, z1, .4)) return;
+  for (const z of [z0, z1]) { this.cyl(.05, .06, 2.0, 'darkWood', x, 1.0, z, g, 5, { shadow: false }); this.ccol(x, z, .12); }
+  this.bx(.02, .02, z1 - z0, 'iron', x, 1.92, (z0 + z1) / 2, g, { shadow: false, lite: true });
+  const cols = ['#e8e2d0', '#3f5fa8']; const n = Math.max(2, Math.floor((z1 - z0) / .8));
+  for (let i = 0; i < n; i++) { const z = z0 + (i + .5) * (z1 - z0) / n, p = this.add(new THREE.PlaneGeometry(.55, .7, 2, 4), fx(M(cols[i % 2], { side: THREE.DoubleSide, name: 'laundry' }), 'flag'), x, 1.55, z, g, { shadow: false }); p.rotation.y = Math.PI / 2; } };

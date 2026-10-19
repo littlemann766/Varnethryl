@@ -4,6 +4,7 @@
 import { CombatController } from './combat/controller.js';
 import { CombatHUD } from './combat/hud.js';
 import { loadLucian } from './combat/calc.js';
+import { LightningFX } from './combat/lightning.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES } from './combat/data.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
 export const SABER_GLB = null;             // URL (or fight.setSaberModel(url)) for Beth's saber: hilt at origin, blade along +Y, ~1 m
@@ -25,7 +26,7 @@ export function createFight(env) {
   const onKey = e => {
     if (!on || e.repeat || /input|textarea/i.test((e.target && e.target.tagName) || '')) return;
     const k = e.key;
-    if (k >= '1' && k <= '6') api.use(+k - 1); else if (k === 'f' || k === 'F') api.use(0); else if (k === ' ') { e.preventDefault(); api.dodge(); }
+    if (k >= '1' && k <= '6') api.use(+k - 1); else if (k === '7' || k === 't' || k === 'T') cc.useUltimate2(); else if (k === 'f' || k === 'F') api.use(0); else if (k === ' ') { e.preventDefault(); api.dodge(); }
     else if (k === 'q' || k === 'Q') api.lock(); else if (k === 'Tab') { e.preventDefault(); api.switchTarget(); } else if (k === 'r' || k === 'R') api.potion(); else if (k === 'e' || k === 'E') api.swap(); else if (k === 'j' || k === 'J') api.jump();
   };
   const onMd = e => { if (on && e.button === 2) cc.block(true); }, onMu = e => { if (on && e.button === 2) cc.block(false); }, onCtx = e => { if (on) e.preventDefault(); };
@@ -116,6 +117,8 @@ export function createFight(env) {
   let fxT = -1, fxMax = 1, orbT = -1, orbFrom = null, orbTo = null;
 
   /* ---- controller events -> world ---- */
+  let lfx = null; const getFx = () => lfx || (lfx = new LightningFX({ THREE, scene, HS, canvas: document.querySelector('canvas') }));
+  cc.on('lightning', ev => getFx().strike(ev));
   cc.on('action', ev => {
     A.swing = { t: 0, T: ev.T, big: ev.a.id === 'heavy' ? 1.5 : 1, kind: ev.a.kind };
     { const h = env.hero(), u = h.userData, drawn = slashA && saber && saber.parent && saber.parent.name === 'weapon_R';
@@ -161,7 +164,7 @@ export function createFight(env) {
     const h = env.hero();
     // lock-on: face the target
     if (cc.tgt.locked && cc.tgt.target && cc.dead <= 0) state.yaw = yawLerp(state.yaw, Math.atan2(cc.tgt.target.x - state.heroX, cc.tgt.target.z - state.heroZ), Math.min(1, dt * 9));
-    cc.update(dt);
+    cc.update(dt); if (lfx) lfx.update(dt);
     // spawner (bad guys): small waves of regular enemies
     spawnT -= dt; const reg = cc.enemies.filter(e => !e.def.boss && e.state !== 'defeated').length;
     if (auto) {   // the Wilds: scattered, passive mobs (they stand off until you come within 3 m or hit them first); far ones are recycled
@@ -209,6 +212,6 @@ export function createFight(env) {
     if (!on) return; on = false; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
-  return { start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
+  return { start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), useUltimate2: () => cc.useUltimate2(), get lightning() { return lfx; }, use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
     get on() { return on; }, get hp() { return cc.res.hp; }, get kills() { return cc.kills; }, get monsters() { return cc.enemies; }, get hasSaber() { return !!saber; }, hurt(n) { cc.res.hp = Math.max(0, cc.res.hp - n); if (cc.res.hp <= 0 && cc.dead <= 0) { cc.dead = cc.P.respawn; cc.emit('playerDown'); } } };
 }

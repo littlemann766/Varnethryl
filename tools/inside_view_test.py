@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Inside view: entering a building fades its roof out (and back in on exit), hides upper floors above the hero's floor, and fades only the walls
-between the camera and the hero; draw calls at spawn unchanged; companions still follow. Saves inside screenshots.
+"""Inside view: entering a building fades its roof out (and back in on exit), hides upper floors above the hero's floor, and hides (outline only)
+the walls between the camera and the hero, no see-through walls or hero glow; draw calls at spawn unchanged; companions still follow. Saves inside screenshots.
 usage: python3 tools/inside_view_test.py [outdir]"""
 import http.server, threading, functools, os, sys, json
 from playwright.sync_api import sync_playwright
@@ -25,14 +25,15 @@ with sync_playwright() as p:
         if not info: chk(bid + ' found', False); continue
         def tp(pt, wait):
             pg.evaluate("([p,r])=>{__p3d.teleport(p[0],p[1],0);__p3d.state.camYaw=r}", [pt, info['rot']]); pg.wait_for_timeout(wait)
-            return pg.evaluate("(id)=>{const b=" + B + "(id),v=b.viewState(),c=b.ctx.cam.position,[x,z]=b.toL(c.x,c.z);v.cam=[x,z];v.beyondFront=b.footprint?z>b.id_-.25:Math.hypot(x,z)>b.iw*.7&&Math.abs(Math.atan2(x,z))<1.25;v.ext=b.extRanges?b.extRanges.every(r=>{const a=r.mesh.geometry.attributes.position.array;for(let i=r.start*3;i<(r.start+r.count)*3;i++)if(a[i]!==0)return true;return false}):null;return v}", bid)
+            return pg.evaluate("(id)=>{const b=" + B + "(id),v=b.viewState(),c=b.ctx.cam.position,[x,z]=b.toL(c.x,c.z);v.cam=[x,z];v.beyondFront=b.footprint?z>b.id_-.25:Math.hypot(x,z)>b.iw*.7&&Math.abs(Math.atan2(x,z))<1.25;v.edges=Object.fromEntries(Object.entries(b.edges||{}).map(([k,l])=>[k,l.visible]));v.ghost=(()=>{let n=0;__p3d.hero.traverse(o=>{if(o.userData.isGhost&&o.visible)n++});return n})();v.seeThrough=(b.sideMats||[]).some(m=>m.visible&&m.transparent&&m.opacity<.99);v.ext=b.extRanges?b.extRanges.every(r=>{const a=r.mesh.geometry.attributes.position.array;for(let i=r.start*3;i<(r.start+r.count)*3;i++)if(a[i]!==0)return true;return false}):null;return v}", bid)
         o = tp(info['out'], 1500)
         chk(bid + ' outside: roof shown, not inside', o['roofShown'] is not False and not o['inside'] and o['roofGroupVisible'], str(o))
         v = tp(info['inn'], 2500)
         upHidden = all(not vis for l, vis in v['up'].items() if int(l) > 0)
         chk(bid + ' inside: roof hidden (faded out), upper floors above hero hidden', v['inside'] and v['roofShown'] is not True and not v['roofGroupVisible'] and not v['fading'] and upHidden, str(v))
         s = v['sides']; camSide = 'f'
-        chk(bid + ' inside: wall between camera and hero faded (only if the camera is beyond it), far wall opaque', (s.get(camSide, 1) < .5) == v['beyondFront'] and s.get('b', 1) > .95, str(s) + ' cam ' + str([round(q, 1) for q in v['cam']]))
+        chk(bid + ' inside: wall between camera and hero hidden + outlined (only if the camera is beyond it), far wall solid', (s.get(camSide, 1) < .5) == v['beyondFront'] and (v['edges'].get(camSide, False) == v['beyondFront']) and s.get('b', 1) > .95 and not v['edges'].get('b', False), str(s) + ' edges ' + str(v['edges']) + ' cam ' + str([round(q, 1) for q in v['cam']]))
+        chk(bid + ' inside: no see-through walls, no glowing hero silhouette', not v['seeThrough'] and v['ghost'] == 0, f"seeThrough={v['seeThrough']} ghost={v['ghost']}")
         chk(bid + ' inside: exterior dressing hidden', v['ext'] in (False, None), str(v['ext']))
         if OUT: pg.wait_for_timeout(1500); os.makedirs(OUT, exist_ok=True); pg.screenshot(path=os.path.join(OUT, f'inside_{bid}.png'))
         o2 = tp(info['out'], 2500)

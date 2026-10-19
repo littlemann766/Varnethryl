@@ -22,7 +22,6 @@ export class TownGuards {
       if (this.onStrike) this.onStrike(g, e);
       cc.emit('damage', { e, dmg: r.dmg, crit: false, toPlayer: false, byGuard: true });
       if (e.hp <= 0) { e.byGuard = true; cc.defeat(e); g.target = null; }
-      else if (e.state === 'idle' && cc.ai && cc.ai.set) cc.ai.set(e, 'chase');
     }
   }
 }

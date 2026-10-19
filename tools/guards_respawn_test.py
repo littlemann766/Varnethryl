@@ -25,17 +25,18 @@ with sync_playwright() as p:
     # one wolf 9 m from the guild hall guards, hero 45 m away
     g = pg.evaluate("(()=>{const g=__p3d.guards.posts.find(q=>q.at==='guildhall');return [g.x,g.z]})()")
     pg.evaluate("([g])=>{__p3d.teleport(g[0]+40,g[1]+20,0)}", [g])
+    pg.evaluate("window.__ai0=__p3d.fight.cc.ai.update;__p3d.fight.cc.ai.update=()=>null;window.__gs=[];__p3d.guards.onStrike=(g,e)=>{__gs.push(__p3d.fight.monsters.includes(e))};0")   # freeze monster AI: any hero HP change could only come from the guards
     pg.evaluate("([g])=>__p3d.fight.spawn('wolf',0,{at:[g[0]+6,g[1]+6.5],aggroR:0.01})", [g])
     pg.wait_for_function("__p3d.fight.monsters.length>0", timeout=60000)
-    hp0 = pg.evaluate("__p3d.fight.hp"); pg.evaluate("(()=>{const e=__p3d.fight.monsters[0];e.hp=e.max=120;e.def=Object.assign({},e.def,{aggro:0.01,speed:0})})()")
-    pg.evaluate("window.__gs=[];__p3d.guards.onStrike=(g,e)=>{__gs.push(__p3d.fight.monsters.includes(e))}")
+    hp0 = pg.evaluate("__p3d.fight.hp"); pg.evaluate("(()=>{const e=__p3d.fight.monsters[0];e.hp=e.max=120;0})()")   # freeze monster AI: any hero HP change could only come from the guards
     try: pg.wait_for_function("__p3d.fight.monsters[0].state==='defeated'", timeout=120000); dead = True
     except Exception: dead = False
     st = pg.evaluate("({hits:__p3d.guards.hits,dmg:__p3d.guards.dmgDone,onlyEnemies:__gs.every(x=>x),hp:__p3d.fight.hp,by:__p3d.fight.monsters[0]&&__p3d.fight.monsters[0].byGuard})")
     chk('guards strike a monster within 15 m and defeat it', dead and st['hits'] > 0 and st['by'], json.dumps(st))
     chk('guard damage is modest (22-38 per hit)', st['hits'] > 0 and 22 <= st['dmg'] / st['hits'] <= 38, json.dumps(st))
     chk('guards only target monsters; hero untouched', st['onlyEnemies'] and st['hp'] == hp0, f"{hp0} -> {st['hp']}")
-    pg.evaluate("__p3d.fight.stop()")
+    pg.evaluate("__p3d.fight.cc.ai.update=__ai0;__p3d.fight.stop()")
+    if os.environ.get('GUARDS_ONLY'): print('FAILS', fails); sys.exit(1 if fails else 0)
     # Wilds
     pg.evaluate("__p3d.setZone('wilds')"); pg.wait_for_function("__p3d.zone==='wilds' && __p3d.fight && __p3d.fight.on", timeout=120000)
     pg.evaluate("__p3d.fight.cc.god=true")

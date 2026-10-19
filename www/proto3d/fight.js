@@ -131,7 +131,7 @@ export function createFight(env) {
   /* ---- per frame ---- */
   function update(dt) {
     if (!on) return;
-    dt = Math.min(dt, 0.1); syncHero();
+    dt = Math.min(dt, 0.1); syncHero(); cc.god = !!(env.cheat && env.cheat.god);
     { const dx = state.heroX - A.lx, dz = state.heroZ - A.lz; A.lx = state.heroX; A.lz = state.heroZ; const l = Math.hypot(dx, dz); if (l > 0.005 && !A.dash) { A.vx = dx / l; A.vz = dz / l; } else if (l <= 0.005) { A.vx = 0; A.vz = 0; } }
     cc.setPlayer(state.heroX, state.heroZ, state.yaw);
     const h = env.hero();
@@ -174,6 +174,15 @@ export function createFight(env) {
     hud.update(dt, cc.enemies);
     if (!saber && isOwner() && !sheathed && cc.dead <= 0) equip(); if (saber && (!isOwner() || sheathed)) unequip();
   }
+  /* owner cheat hooks (cheats.js -> main.js) */
+  const cheatHeal = () => { cc.res.full(); cc.potions = cc.P.potion.charges; if (cc.dead > 0) { cc.dead = 0; cc.act = null; env.hero().rotation.x = 0; } hud.say('Party healed', 1200); return true; };
+  const cheatKill = () => { let n = 0; for (const e of cc.enemies.slice()) if (e.state !== 'defeated') { e.hp = 0; cc.defeat(e); n++; } if (n) hud.say(n + ' slain', 1200); return n > 0; };
+  const cheatSpawn = (key) => {
+    if (!ENEMIES[key]) return false;
+    if (key === 'titan') { if (bossOn) return false; spawn('titan', 26); return true; }
+    for (const e of cc.enemies.slice()) if (e.state === 'defeated' && !e.def.boss) cc.removeEnemy(e);
+    spawn(key, 10); return true;
+  };
   let auto = false;
   function start(isAuto) {
     if (on) return; auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);

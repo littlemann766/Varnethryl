@@ -74,11 +74,15 @@ export function createCheats(env) {
   c.killEnemies = () => stub('killEnemies');
   c.skipQuest = () => stub('skipQuest');
 
+  /* Spawn enemies (combat3d): key = wolf|raider|wraith|skeleton|titan. Returns false when fight mode can't take it (e.g. a Titan is already alive). */
+  c.spawnEnemy = (key) => { c.markCheated(); const r = hooks.spawnEnemy ? !!hooks.spawnEnemy(key) : false; changed(); return r; };
+  c.spawnTitan = () => c.spawnEnemy('titan');
+
   c.zones = () => (env.zones || ['village']).slice();
   c.places = () => (env.places ? env.places() : []);
   c.teleportZone = (zone) => { if (!c.zones().includes(zone) || !env.teleport) return false; env.teleport(0, 14, zone); c.markCheated(); changed(); return true; };
   c.teleportPlace = (id) => { const p = c.places().find((q) => q.id === id); if (!p || !env.teleport) return false; env.teleport(p.x, p.z); c.markCheated(); changed(); return true; };
   /* Back to normal play (does not clear the cheated flag; that stays for the life of the save). */
-  c.reset = () => { Object.assign(flags, createFlags()); if (env.bumpSys) env.bumpSys.bumpOn = true; changed(); };
+  c.reset = () => { Object.assign(flags, createFlags()); if (hooks.godPref && hooks.godPref()) flags.god = true; if (env.bumpSys) env.bumpSys.bumpOn = true; changed(); };
   return c;
 }

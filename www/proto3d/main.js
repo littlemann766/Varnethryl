@@ -413,8 +413,10 @@ try { if (qp0.get('nosave') == null) { const r = readSave(localStorage); if (r.s
 const savedOn = qp0.get('nosave') == null;
 if (!savedPlan) savedPlan = { party: [1, 2, 0], hero: 1, followers: [2, 0], pos: null };
 /* test build 1.1.9: the Owner is the default playable character (first launch of this build; the dropdown still lists everyone and later picks are kept). Not applied in nosave test runs. */
+const IS_OWNER_TOKEN = (() => { try { return !!localStorage.getItem('vn_owner_unlock_v1'); } catch (e) { return false; } })();   /* cheap local check; the real gate (ownergate.js) still decides cheats */
 { const oi = GLB_IDS.indexOf('n:owner'); let seen = null; try { seen = localStorage.getItem('p3d_owner_default_v119'); } catch (e) {}
-  if (savedOn && qp0.get('hero') == null && oi > 0 && !seen) { savedPlan.hero = oi; savedPlan.pos = null; try { localStorage.setItem('p3d_owner_default_v119', '1'); } catch (e) {} } }
+  if (savedOn && qp0.get('hero') == null && oi > 0 && IS_OWNER_TOKEN && !seen) { savedPlan.hero = oi; savedPlan.pos = null; try { localStorage.setItem('p3d_owner_default_v119', '1'); } catch (e) {} }
+  if (!IS_OWNER_TOKEN && savedPlan.hero === oi) savedPlan.hero = 1;   /* the Owner skin is for the owner account only */ }
 { const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (!savedPlan.hero) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
 // ---------- character selector: ONE entry per character (all variants grouped), compact dropdown + variant switches ----------
@@ -453,18 +455,22 @@ async function selectVariant(g, v) {
   await selectHero(v.slot); refreshSel(v.slot);
 }
 { const bar = document.getElementById('heroes'); const first = [1, 2, ...(savedPlan && qp0.get('all') == null ? savedPlan.party.filter(i => i > 2) : [])], order = [...new Set([...first, ...HERO_NAMES.map((n, i) => i)])], seen = new Set(), gl = [];
+  const OG = SLOT_G[GLB_IDS.indexOf('n:owner')]; if (OG) seen.add(OG);   /* hidden from everyone but the owner */
   order.forEach(i => { const g = SLOT_G[i]; if (!seen.has(g)) { seen.add(g); gl.push(g); } });
+  if (OG && IS_OWNER_TOKEN) gl.unshift(OG);
   const cur = document.createElement('button'); cur.id = 'hcur'; cur.className = 'cur'; cur.appendChild(document.createTextNode('')); const car = document.createElement('span'); car.textContent = '\u25be'; cur.appendChild(car); cur.title = 'choose character';
   const vars = document.createElement('div'); vars.id = 'hvars'; const list = document.createElement('div'); list.id = 'hlist';
   const rows = [];
   const close = () => bar.classList.remove('open');
   cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation(); bar.classList.toggle('open'); });
   document.addEventListener('pointerdown', e => { if (!bar.contains(e.target)) close(); }, true);
-  gl.forEach(g => { const n = g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = curVar(g).slot;
+  const mkRow = g => { const n = g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = curVar(g).slot;
     if (g.vars.length > 1) { const sp = document.createElement('small'); sp.textContent = ' \u00b7' + g.vars.length; b.appendChild(sp); }
     b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); close(); selectVariant(g, curVar(g)); });
     const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = curVar(g).slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = curVar(g).slot; toggleFollower(+f.dataset.f); });
-    row.appendChild(b); row.appendChild(f); list.appendChild(row); rows.push({ g, b }); });
+    row.appendChild(b); row.appendChild(f); return { row, b }; };
+  gl.forEach(g => { const r = mkRow(g); list.appendChild(r.row); rows.push({ g, b: r.b }); });
+  window.__ownerRoster = () => { if (!OG || rows.some(r => r.g === OG)) return; const r = mkRow(OG); list.insertBefore(r.row, list.firstChild); rows.unshift({ g: OG, b: r.b }); };
   bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; })()); }
 async function toggleModel(i) {
   const id = GLB_IDS[i], next = modeFor(id) === 'blocky' ? 'glb' : 'blocky'; try { localStorage.setItem('vn_model_' + id, next); } catch (_) {}
@@ -940,7 +946,13 @@ async function fightToggle(createOnly) {
 let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
 const cheatEnv = {
   flags: cheat, bumpSys, storage: cheatStore, zones: ['village', 'wilds'],
-  hooks: { fightTest: () => fightToggle(), onOwner: () => { const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
+  hooks: { fightTest: () => fightToggle(),
+    godPref: () => { try { return cheatStore.getItem('vn_owner_god_v1') !== '0'; } catch (e) { return true; } },
+    godMode: (on) => { try { cheatStore.setItem('vn_owner_god_v1', on ? '1' : '0'); } catch (e) { /* ignore */ } return true; },
+    healParty: () => !!(FIGHT && FIGHT.on && FIGHT.cheatHeal()),
+    killEnemies: () => !!(FIGHT && FIGHT.on && FIGHT.cheatKill()),
+    spawnEnemy: (k) => { if (FIGHT && FIGHT.on) return FIGHT.cheatSpawn(k); fightToggle().then(() => setTimeout(() => FIGHT && FIGHT.on && FIGHT.cheatSpawn(k), 900)); return true; },
+    onOwner: () => { if (window.__ownerRoster) window.__ownerRoster(); const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
   teleport: (x, z, zone) => { if (zone === 'wilds') { setZone('wilds'); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
   onReady: (c) => { window.__p3d.cheats = c; },

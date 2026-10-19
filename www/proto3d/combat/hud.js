@@ -50,6 +50,13 @@ const ICONS = {
   heavy: SV('<path d="M6 20L18 8M13 3l8 8-3 3-8-8z"/>'), push: SV('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>'), throw: SV('<path d="M4 20L16 8M14 4l6 0 0 6"/>'), shield: SV('<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/>'), storm: SV('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 018 8"/>'),
 };
 const ownerIconKey = (key, a) => key === 0 ? 'basic' : (a.owner ? a.id : null);
+Object.assign(ICONS, {
+  ring: SV('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/>'), dash: SV('<path d="M3 12h13M12 6l7 6-7 6M3 7h6M3 17h6"/>'), lion: SV('<path d="M5 19V9l3 3 4-6 4 6 3-3v10zM9 15h6"/>'),
+  arrow: SV('<path d="M3 21L19 5M13 5h6v6M5 15l4 4"/>'), line: SV('<path d="M3 12h18M17 8l4 4-4 4M3 8v8"/>'), trap: SV('<path d="M4 18l4-8 4 5 4-9 4 12zM4 21h16"/>'), volley: SV('<path d="M4 20L12 4M10 20L18 4M16 20l4-8"/>'),
+  flame: SV('<path d="M12 3c1 4 5 6 5 11a5 5 0 01-10 0c0-3 2-4 3-7 1 1 2 2 2-4z"/>'), wave: SV('<path d="M3 16c3-8 9-10 18-10-4 3-6 6-7 12M3 20c4-4 8-5 12-5"/>'), sun: SV('<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'),
+  heal: SV('<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>'), heal2: SV('<path d="M12 21C5 15 3 11 3 8a5 5 0 019-3 5 5 0 019 3c0 3-2 7-9 13z"/>'), dagger: SV('<path d="M5 19L15 9M13 5l6 0 0 6M3 13l3 3M8 18l3 3"/>'),
+  blink: SV('<path d="M4 20L12 12M12 12l8-8M14 4h6v6M4 14v6h6"/>'), poison: SV('<path d="M12 3c4 5 6 8 6 11a6 6 0 01-12 0c0-3 2-6 6-11zM10 14h4"/>'),
+});
 const LEGACY_ICON = ['basic', 'heavy', 'push', 'throw', 'shield', 'storm'];
 const NUM_POOL = 24, OH_POOL = 10;
 export class CombatHUD {
@@ -93,7 +100,7 @@ export class CombatHUD {
     this.heroInfo();
   }
   /* cluster slot (0 basic,1-3 skills,4 ult) -> ability key for the controller (index into ABILITIES, or an OWNER_SKILLS id). The controller re-validates everything. */
-  slotAbility(i) { if (i === 0) return 0; if (this.cc.ownerOk()) return i === 4 ? (this.cc.ultSel || 'holy') : OWNER_CLUSTER[i - 1]; return i === 4 ? 5 : i; }
+  slotAbility(i) { if (i === 0) return 0; if (this.cc.ownerOk()) return i === 4 ? (this.cc.ultSel || 'holy') : OWNER_CLUSTER[i - 1]; if (this.cc.kit) return this.cc.kit.skills[i - 1].id; return i === 4 ? 5 : i; }
   show(v) { this.root.style.display = v ? 'block' : 'none'; const d = document.getElementById('diagBtn'); if (d) { if (v) { this._dd = d.style.display; d.style.display = 'none'; } else if (this._dd !== undefined) d.style.display = this._dd; } }   /* #diagBtn sits under the first ability slot */
   heroInfo() { const h = this.cc.hero; this.por.textContent = (h.name || '?')[0]; this.lvl.textContent = h.level; this.cache.k = ''; }
   say(t, ms) { this.msg.textContent = t; this.msg.style.display = 'block'; clearTimeout(this._mt); this._mt = setTimeout(() => { this.msg.style.display = 'none'; }, ms || 1500); }
@@ -122,8 +129,8 @@ export class CombatHUD {
     // ability cluster (basic + 3 skills + ultimate); owner skills only while the controller says Owner-gated
     const own = cc.ownerOk(); this.setv(null, 'own', own, v => { this.root.classList.toggle('own', v); });
     for (let i = 0; i < 5; i++) {
-      const s = this.slots[i], key = this.slotAbility(i), a = typeof key === 'string' ? OWNER_SKILLS[key] : ABILITIES[key];
-      const kk = String(key) + (own ? 'o' : ''); if (kk !== s.key) { s.key = kk; s.ic.innerHTML = own && ownerIconKey(key, a) ? OWNER_ICON[ownerIconKey(key, a)] : (ICONS[a.owner ? a.icon : LEGACY_ICON[key]] || ''); s.b.title = a.name; s.b.setAttribute('aria-label', a.name); s.cd = -1; }
+      const s = this.slots[i], key = this.slotAbility(i), a = cc.skillDef(key);
+      const kk = String(key) + (own ? 'o' : '') + (cc.kit ? 'k' : ''); if (kk !== s.key) { s.key = kk; s.ic.innerHTML = own && ownerIconKey(key, a) ? OWNER_ICON[ownerIconKey(key, a)] : (ICONS[a.kit || a.owner ? a.icon : LEGACY_ICON[key]] || ICONS.basic); s.b.style.borderColor = a.kit && cc.kit ? cc.kit.color : ''; s.b.style.color = a.kit && cc.kit ? cc.kit.color : ''; s.b.title = a.name; s.b.setAttribute('aria-label', a.name); s.cd = -1; }
       const left = cc.cd.left(a.id), use = cc.slotUsable(key), noRes = !R.can(a.cost), isUlt = a.fury, fr = isUlt && use && left <= 0 && !cc.furyReady();
       const q = Math.round(left * 10) / 10 + (fr ? Math.round(cc.fury) / 1000 : 0); if (q !== s.cd) { s.cd = q; const p = left > 0 ? Math.round(cc.cd.frac(a.id) * 100) : fr ? Math.round(cc.fury) : 0; s.rg.style.setProperty('--p', p + '%'); s.ct.textContent = left > 0.05 ? (left >= 10 ? Math.ceil(left) : left.toFixed(1)) : ''; }
       const lock = !use && i === 4, oi = own && ownerIconKey(key, a), st = (i === 4 && own ? 'u-' + key + ' ' : '') + (oi ? 'oi ' : '') + (use ? '' : 'off ') + (fr && left <= 0 ? 'fr ' : '') + (use && noRes && left <= 0 ? 'nores ' : '') + (isUlt && use && left <= 0 && !fr ? 'rdy' : ''); if (st !== s.st) { s.st = st; s.b.className = 'sl b' + i + ' ' + st; if (lock) s.ic.innerHTML = ICONS.lock; }

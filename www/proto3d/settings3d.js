@@ -55,6 +55,14 @@ function build() {
   const csync = () => cb.classList.toggle('on', !!(E.combatOn && E.combatOn())); csync(); syncs.push(csync);
   cb.addEventListener('click', async () => { await E.setCombat(!(E.combatOn && E.combatOn())); csync(); });
   body.appendChild(row(cb)); body.appendChild(el('small', { textContent: 'F attack · G dodge · T lock-on · Tab next target · 1-6 abilities (owner). On phone use the buttons by the stick.' }));
+  const hudEd = () => (window.__p3d && window.__p3d.combat && window.__p3d.combat.hud && window.__p3d.combat.hud.editor) || null;
+  const eb = el('button', { type: 'button', textContent: 'Edit buttons' }); eb.dataset.set = 'editbtns';
+  const rb = el('button', { type: 'button', textContent: 'Reset buttons' }); rb.dataset.set = 'resetbtns';
+  const esync = () => { const e = hudEd(); eb.classList.toggle('on', !!(e && e.editing)); }; syncs.push(esync);
+  eb.addEventListener('click', async () => { if (!(E.combatOn && E.combatOn())) await E.setCombat(true); const e = hudEd(); if (!e) return; e.enable(!e.editing); esync(); if (e.editing) hide(); });
+  rb.addEventListener('click', () => { const e = hudEd(); if (e) { e.reset(); esync(); } });
+  body.appendChild(row(eb, rb));
+  body.appendChild(el('small', { textContent: 'Edit buttons: the menu closes; drag a button to move it, pinch it (two fingers) or use the size slider. Saved on this device. Tap Done when finished.' }));
   body.appendChild(sec('Graphics'));
   const q = el('select', { id: 'setQuality' }); q.dataset.set = 'quality';
   const names = { auto: 'Auto (adapts to your device)', high: 'High (sharpest)', balanced: 'Balanced', low: 'Low (fastest)' };

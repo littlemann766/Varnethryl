@@ -42,6 +42,8 @@ function build() {
   const view = (v, label) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.set = 'view-' + v; const s = () => b.classList.toggle('on', prefs.view === v); b.addEventListener('click', () => { rig.setView(v); save(); syncs.forEach((f) => f()); }); s(); syncs.push(s); return b; };
   body.appendChild(sec('Camera'));
   body.appendChild(row(view('third', 'Third person'), view('first', 'First person')));
+  const cm = (v, label) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.set = 'cam-' + v; const s = () => b.classList.toggle('on', prefs.camMode === v); b.addEventListener('click', () => { prefs.camMode = v; save(); syncs.forEach((f) => f()); }); s(); syncs.push(s); return b; };
+  body.appendChild(row(cm('follow', 'Behind character'), cm('free', 'Free camera')));
   const [zi, zo] = slider('zoom', ZOOM_MIN, ZOOM_MAX, 0.01, () => rig.zoomTarget, (v) => { rig.setZoom(v); save(); }, (v) => v.toFixed(2) + '×');
   syncs.push(zi._sync); body.appendChild(row(el('span', { className: 'lab', textContent: 'Zoom (third person)' }), zi, zo));
   const [si, so] = slider('zoomSens', SENS_MIN, SENS_MAX, 0.05, () => prefs.zoomSens, (v) => { prefs.zoomSens = v; save(); }, (v) => v.toFixed(2) + '×');

@@ -42,7 +42,7 @@ with sync_playwright() as p:
             if SH: pg.screenshot(path=f'{SH}/hud_meteor_fall.png')
             pg.wait_for_timeout(1000)
             if SH: pg.screenshot(path=f'{SH}/hud_meteor_impact.png')
-            pg.wait_for_timeout(1500)
+            pg.wait_for_function("__p3d.fight.cc.meteors.length===0", timeout=90000); pg.wait_for_timeout(800); print('fps', pg.evaluate('__p3d.fps'))
             r = pg.evaluate("(()=>{const c=__p3d.fight.cc;return {st:window.__t.map(e=>e.state),kills:c.kills,fury:c.fury,cd:c.cd.left('unholy')}})()"); print(r)
             T('meteor via UI tap: in-range monsters defeated, far one survives', r['st'][0]=='defeated' and r['st'][1]=='defeated' and r['st'][2]!='defeated')
             T('Fury spent + cooldown running', r['fury'] < 100 and r['cd'] > 20)

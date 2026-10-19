@@ -20,8 +20,8 @@ export class CombatController {
   setHero(h) { Object.assign(this.hero, h); this.hero.owner = /(^|:)owner/.test(this.hero.id || ''); this.kit = kitFor(this.hero.id);  /* Owner gate: only the Owner has 999,999 max HP */ this.applyMax(true); this.emit('hero', this.hero); }
   /* max HP/MP/SP: Owner skin = ownerHp; non-Owner hero holding the Owner saber on the owner account = x TUNING.perks.holderMul (not invincible); everyone else normal. Current values keep their fraction; reverts when the saber goes away. */
   applyMax(force) {
-    const own = !!this.hero.owner, hold = !own && this.ownerOk(), m = hold ? TUNING.perks.holderMul : 1, key = (own ? 'o' : '') + m; if (!force && key === this._mk) return; this._mk = key;
-    const nx = { hp: own ? this.P.ownerHp : Math.round(this.P.hp * m), mp: Math.round(this.P.mp * m), sp: Math.round(this.P.sp * m) }, R = this.res;
+    const own = !!this.hero.owner, hold = !own && this.ownerOk(), m = hold ? TUNING.perks.holderMul : 1, ar = (!own && this.kit && this.kit.armor) || null, key = (own ? 'o' : '') + m + (ar ? ar.name : ''); if (!force && key === this._mk) return; this._mk = key;
+    const nx = { hp: own ? this.P.ownerHp : Math.round(this.P.hp * m * (1 + (ar ? ar.hpPct : 0))), mp: Math.round(this.P.mp * m * (1 + (ar ? ar.mpPct : 0))), sp: Math.round(this.P.sp * m * (1 + (ar ? ar.spPct : 0))) }, R = this.res;
     for (const k of ['hp', 'mp', 'sp']) { if (R.max[k] === nx[k]) continue; R[k] = own && k === 'hp' ? nx[k] : Math.min(nx[k], Math.max(0, R[k] * nx[k] / R.max[k])); R.max[k] = nx[k]; }
   }
   setPlayer(x, z, yaw) { this.p.x = x; this.p.z = z; this.p.yaw = yaw; }   // the only world inputs
@@ -121,6 +121,7 @@ export class CombatController {
   hitEnemy(e, mult, a) {
     if (e.state === 'defeated') return;
     /* Thunderstorm (ULTIMATE2.lethal): kills regular enemies; bosses (Ashen Titan...) only die to it if TUNING.ult.bossesInstantKill (default false) - otherwise a normal hit. */
+    const wp = (!this.ownerOk() && this.kit && this.kit.weapon) ? 1 + this.kit.weapon.dmgPct : 1;   // signature weapon bonus (kit heroes only, never Owner rules)
     const lethal = !!(a && a.lethal && (!e.def.boss || TUNING.ult.bossesInstantKill));
     const r = lethal ? { dmg: Math.max(1, Math.ceil(e.hp)), crit: true } : DamageCalculator.playerHit(this.weapon(), mult, this.rng);
     /* Owner saber: regular hostile monsters take current HP x12 per hit (always lethal). Bosses keep flat 99,999 unless TUNING.perks.saberBossesX12. Owner gate enforced here, never from the UI. */
@@ -132,6 +133,7 @@ export class CombatController {
     else {
     const sm = Math.max(0, Math.min(50, Math.floor(+TUNING.perks.saberMul || 0)));   // 0 = flat 99,999 (old behavior); 1-50 = x target current HP
     if (sm > 0 && this.weapon() === 'saber' && this.ownerOk() && e.hp > 0 && (!e.def.boss || TUNING.perks.saberBossesX12)) r.dmg = Math.max(1, Math.round(e.hp)) * sm; }
+    if (wp !== 1 && !lethal) r.dmg = Math.round(r.dmg * wp);
     e.hp = Math.max(0, e.hp - r.dmg); e.flash = 0.2; this.lastTarget = e; this.lastHitT = this.cd.t;
     const dx = e.x - this.p.x, dz = e.z - this.p.z, d = Math.hypot(dx, dz) || 1; e.kx = dx / d; e.kz = dz / d; e.knockT = (a && a.knock ? 0.35 : 0.12);
     this.emit('damage', { e, dmg: r.dmg, crit: r.crit, toPlayer: false });
@@ -178,7 +180,7 @@ export class CombatController {
     if (!inside) { this.emit('enemyAttack', { e, result: 'missed', dmg: 0 }); return; }
     if (this.iframes > 0 || this.god) { this.emit('enemyAttack', { e, result: 'dodged', dmg: 0 }); this.emit('dodged', e); return; }
     if (this.blocking && this.blockT <= this.P.block.parry) { this.ai.stagger(e, 0.9); e.poiseBreak = true; this.emit('enemyAttack', { e, result: 'parried', dmg: 0 }); return; }
-    let h = DamageCalculator.enemyHit(e.def.atk, this.P.def, this.P.agi, this.rng), res = 'hit'; if (pt && pt.dmg) h = Math.round(h * pt.dmg);
+    let h = DamageCalculator.enemyHit(e.def.atk, this.P.def * (1 + ((!this.hero.owner && this.kit && this.kit.armor) ? this.kit.armor.defPct : 0)), this.P.agi, this.rng), res = 'hit'; if (pt && pt.dmg) h = Math.round(h * pt.dmg);
     if (h === 0) res = 'dodged';
     if (this.blocking) { h = Math.round(h * (1 - this.P.block.reduce)); if (!this.res.unlimited) this.res.sp = Math.max(0, this.res.sp - Math.max(8, h * 0.02)); res = 'blocked'; if (this.res.sp <= 0) this.block(false); }
     if (this.shield > 0) h = Math.round(h * (1 - ABILITIES[4].reduce));

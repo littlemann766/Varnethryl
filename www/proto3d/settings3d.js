@@ -27,7 +27,7 @@ const CSS2 = '#settingsPanel{background:linear-gradient(180deg,#171127f2,#0d0b17
  + '#settingsPanel .own button.on{background:linear-gradient(180deg,#e2bd5c,#b8892f)!important}'
  + '#settingsPanel input[type=range]{accent-color:#c9a24a!important;min-height:48px!important}'
  + '#settingsPanel .stp{min-width:48px!important;font-size:20px;font-weight:700}';
-const DESCS = { 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Display': 'On-screen info.', 'Owner (save is marked cheated)': 'Owner-account tools and power settings.', 'Owner damage': 'Saber and Unholy Destruction damage. Owner account only.' };
+const DESCS = { 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Display': 'On-screen info.', 'Owner (save is marked cheated)': 'Owner-account tools and power settings.', 'Owner damage': 'Saber and Unholy Destruction damage. Owner account only.' };
 let root = null, body = null, timer = 0, E = null;
 function el(tag, props, kids) { const e = document.createElement(tag); if (props) Object.assign(e, props); if (kids) for (const k of kids) e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); return e; }
 const isOpen = () => !!root && root.style.display === 'block';
@@ -77,6 +77,12 @@ function build() {
   rb.addEventListener('click', () => { const e = hudEd(); if (e) { e.reset(); esync(); } });
   body.appendChild(row(eb, rb));
   body.appendChild(el('small', { textContent: 'Edit buttons: the menu closes; drag a button to move it, pinch it (two fingers) or use the size slider. Saved on this device. Tap Done when finished.' }));
+  body.appendChild(sec('Loadout'));
+  const ld = el('div', { className: 'ld', style: 'font-size:13px;line-height:1.5' }); body.appendChild(ld);
+  const ldSync = () => { const F = window.__p3d && window.__p3d.fight, kit = F && F.cc && F.cc.kit; if (!kit || !kit.weapon) { ld.textContent = F && F.on ? 'This hero uses the generic kit.' : 'Start Fight mode to see the active hero\u2019s weapon, armor and skills.'; return; }
+    const w = kit.weapon, a = kit.armor, pc = (v) => '+' + Math.round(v * 100) + '%', st = [a.hpPct && 'HP ' + pc(a.hpPct), a.mpPct && 'MP ' + pc(a.mpPct), a.spPct && 'SP ' + pc(a.spPct), a.defPct && 'DEF ' + pc(a.defPct)].filter(Boolean).join(' \u00b7 ');
+    ld.innerHTML = ''; for (const [h, t] of [['Weapon', w.name + ' (damage ' + pc(w.dmgPct) + ')'], ['Armor', a.name + ' \u2014 ' + st], ['Skills', kit.skills.map((x) => x.name).join(' \u00b7 ')]]) ld.appendChild(el('div', null, [el('b', { textContent: h + ': ', style: 'color:#f1d98a' }), t])); };
+  ldSync(); syncs.push(ldSync);
   body.appendChild(sec('Graphics'));
   const q = el('select', { id: 'setQuality' }); q.dataset.set = 'quality';
   const names = { auto: 'Auto (adapts to your device)', high: 'High (sharpest)', balanced: 'Balanced', low: 'Low (fastest)' };

@@ -8,8 +8,11 @@ import { ENEMIES, SABER } from './combat/data.js';
 import { loadLucian } from './combat/calc.js';
 
 export const MAX_ENEMIES = 6, TARGET_ALIVE = 3, RESPAWN_S = 6, SPAWN_MIN = 14, SPAWN_MAX = 26, SOFT_RANGE = 8;
-export const TITAN_DIST = 18, TITAN_RESPAWN_S = 45;
+export const TITAN_DIST = 32, TITAN_RESPAWN_S = 45;
 export const SPAWN_TABLE = ['wolf', 'wolf', 'raider', 'wraith'];
+/* Saber rule: blade length + hilt scale with the wielder (hero height / reference hero), grip offsets scale too so the hilt stays at the hand. */
+export const REF_H = (HS) => 1.8 * HS;
+export const saberScaleFor = (heroH, HS) => (Number.isFinite(heroH) && heroH > 0.2 ? Math.max(0.5, Math.min(3, heroH / REF_H(HS))) : 1);
 const yawLerp = (cur, to, k) => cur + (((to - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * k;
 
 /* env: {THREE, scene, camera, state, HS, WORLD, resolve(p), free(x,z), hero(), flags, getCheats(), isOwner(), camRig, start:{x,z}} */
@@ -41,7 +44,8 @@ export function createCombat(env) {
   const glow = new THREE.Mesh(new THREE.CylinderGeometry(0.075 * HS, 0.075 * HS, SAB_LEN * 1.03, 10), new THREE.MeshBasicMaterial({ color: 0xa24dff, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }));
   blade.geometry.translate(0, 0.32 * HS + SAB_LEN / 2, 0); glow.geometry.translate(0, 0.32 * HS + SAB_LEN / 2, 0);
   saber.add(hilt, blade, glow); saber.visible = false; scene.add(saber);
-  let ignite = 0;
+  let ignite = 0, kS = 1, hKey = null, hH = 0;
+  const heroH = () => { const h = env.hero(), key = h && h.scale.y; if (h !== hKey || key !== hH) { hKey = h; hH = key; h.updateMatrixWorld(true); const b = new THREE.Box3().setFromObject(h); kS = saberScaleFor(b.max.y - b.min.y, HS); saber.scale.setScalar(kS); } return kS; };
   const isOwner = () => !!env.isOwner();
   const saberOn = () => on && isOwner() && cc.dead <= 0 && !env.camRig.fp;   /* first person: the held model would fill the screen */
 
@@ -53,7 +57,7 @@ export function createCombat(env) {
     if (ev.aim && ev.a.kind !== 'storm' && ev.a.kind !== 'aoe') state.yaw = Math.atan2(ev.aim.x - state.heroX, ev.aim.z - state.heroZ);
   }).on('dash', (d) => { A.dash = { dx: d.dx, dz: d.dz, left: d.dist, spd: d.dist / d.T }; })
     .on('damage', (d) => {
-      if (!d.toPlayer) { hud.floatAt(d.e.x, d.e.top || 2.5, d.e.z, Math.round(d.dmg).toLocaleString('en-US'), d.crit || d.dmg >= 5000 ? 'big' : ''); return; }
+      if (!d.toPlayer) { hud.floatAt(d.e.x, Math.min(d.e.top || 2.5, 6), d.e.z, Math.round(d.dmg).toLocaleString('en-US'), d.crit || d.dmg >= 5000 ? 'big' : ''); return; }
       const ch = env.getCheats(), kept = ch && ch.mitigate ? ch.mitigate(d.dmg) : (flags.god ? 0 : d.dmg);
       if (kept < d.dmg) cc.res.hp = Math.min(cc.res.max.hp, cc.res.hp + (d.dmg - kept));
       if (kept > 0) { hud.floatAt(state.heroX, 2.6 * HS, state.heroZ, '-' + Math.round(kept), 'pl'); hud.hurtFlash(); }
@@ -119,8 +123,8 @@ export function createCombat(env) {
     if (sv) {
       ignite = Math.min(1, ignite + dt * 4); blade.scale.y = glow.scale.y = Math.max(0.001, ignite);
       const sw = A.swing; let sweep = 0, tilt = 0.35; if (sw) { sw.t += dt; const p = Math.min(1, sw.t / sw.T); sweep = (p - 0.5) * 3.0 * sw.big; tilt = 1.3 + Math.sin(p * Math.PI) * 0.25; if (p >= 1) A.swing = null; }
-      const y = state.yaw + sweep, sx = Math.cos(state.yaw), sz = -Math.sin(state.yaw);
-      saber.position.set(state.heroX + sx * 0.42 * HS + Math.sin(state.yaw) * 0.25 * HS, env.hero().position.y + 0.85 * HS, state.heroZ + sz * 0.42 * HS + Math.cos(state.yaw) * 0.25 * HS);
+      const k = heroH(), y = state.yaw + sweep, sx = Math.cos(state.yaw), sz = -Math.sin(state.yaw);
+      saber.position.set(state.heroX + sx * 0.42 * HS * k + Math.sin(state.yaw) * 0.25 * HS * k, env.hero().position.y + 0.85 * HS * k, state.heroZ + sz * 0.42 * HS * k + Math.cos(state.yaw) * 0.25 * HS * k);
       saber.rotation.set(0, y, 0); saber.rotateX(tilt);
     } else ignite = 0;
     hud.update(dt, cc.enemies, isOwner());
@@ -132,5 +136,5 @@ export function createCombat(env) {
   function stop() {
     if (!on) return; on = false; hud.show(false); cc.clearEnemies(); titanT = 1.5; arc.visible = reticle.visible = saber.visible = false; A.dash = null; A.swing = null; env.hero().rotation.x = 0; removeEventListener('keydown', onKey);
   }
-  return { start, stop, update, spawn, cc, hud, api, get on() { return on; }, get kills() { return kills; }, get enemies() { return cc.enemies; }, get saberVisible() { return saber.visible; }, pool, SABER_DAMAGE: SABER.max };
+  return { start, stop, update, spawn, cc, hud, api, get on() { return on; }, get kills() { return kills; }, get enemies() { return cc.enemies; }, get saberVisible() { return saber.visible; }, get saberScale() { return kS; }, saber, saberParts: { hilt, blade, glow }, pool, SABER_DAMAGE: SABER.max };
 }

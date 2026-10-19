@@ -12,6 +12,7 @@ const CSS = '#cmb{position:fixed;inset:0;z-index:45;pointer-events:none;font:700
  + '#cmb .pad{position:absolute;right:max(136px,calc(env(safe-area-inset-right) + 132px));bottom:max(40px,calc(env(safe-area-inset-bottom) + 34px));display:flex;gap:10px;align-items:flex-end}'
  + '#cmb .pad button{pointer-events:auto;touch-action:none;color:#fff;font:700 11px system-ui;border-radius:50%;border:2px solid #fffc;background:#2a0c0cdd;width:54px;height:54px;padding:0;line-height:1.05}#cmb .pad button.atk{width:78px;height:78px;font-size:14px;background:#7a1010e6;border-color:#ffb0b0}#cmb .pad button.on{background:#2aa;border-color:#9ff}#cmb .pad button:active{filter:brightness(1.4)}#cmb .pad .g{display:block;font:400 20px system-ui}#cmb .pad button.own{display:none;position:absolute;bottom:88px;width:46px;height:46px;font-size:9px;background:#3a1060e6}#cmb .pad button[data-a=u1]{right:0}#cmb .pad button[data-a=u5]{right:54px}'
  + '#cmb .flash{position:absolute;inset:0;background:radial-gradient(transparent 45%,#f00a);opacity:0;transition:opacity .25s}';
+import { createButtonEditor } from './btnedit.js';
 const NUMS = 16, OHS = 8;
 
 export function createCombatHud(cc, api, project) {
@@ -29,9 +30,11 @@ export function createCombatHud(cc, api, project) {
   const press = (el, down, up) => { el.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); down(); }); if (up) for (const t of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(t, up); };
   press($('[data-a=atk]'), () => api.use(0)); press($('[data-a=dodge]'), () => api.dodge()); press(h.lock, () => api.lock());
   press($('[data-a=u1]'), () => api.use(2)); press($('[data-a=u5]'), () => api.use(5));
+  let st = null; try { st = localStorage; } catch (e) { st = null; }
+  const editor = createButtonEditor({ root, storage: st || { getItem() { return null; }, setItem() {} } });
   const fmt = (n) => (n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'k' : String(Math.round(n)));
   const hud = {
-    root, show(v) { root.style.display = v ? 'block' : 'none'; },
+    root, editor, show(v) { root.style.display = v ? 'block' : 'none'; },
     say(t, ms) { h.msg.textContent = t; h.msg.style.display = 'block'; msgT = (ms || 1500) / 1000; },
     floatAt(x, y, z, text, cls) { const n = nums[ni++ % NUMS]; n.d.textContent = text; n.d.className = 'fn ' + (cls || ''); n.d.style.display = 'block'; n.t = 0; n.x = x; n.y = y; n.z = z; },
     hurtFlash() { h.flash.style.opacity = 0.9; setTimeout(() => { h.flash.style.opacity = 0; }, 120); },

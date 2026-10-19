@@ -27,6 +27,6 @@ export const ENEMIES = {
   raider:   E('Forest Raider', 12, 'Bandit', 1450, 56, 80, 4.6, { model: 'o:hobgoblin', r: 1.0 }),
   wraith:   E('Vine Wraith', 18, 'Spirit', 1700, 66, 90, 4.2, { model: 'o:mossgut', r: 1.1 }),
   skeleton: E('Ash Skeleton', 30, 'Undead', 5600, 270, 200, 3.6, { model: 'o:stonetroll', atkMs: 2300, tele: 0.8, r: 1.4 }),
-  titan:    E('Ashen Titan', 60, 'Boss', 250000, 2100, 600, 3.2, { model: 'n:ashentitan_new', atkMs: 2300, tele: 1.1, reach: 4.2, r: 2.6, scale: 3, aggro: 60, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
+  titan:    E('Ashen Titan', 60, 'Boss', 5000000, 2100, 600, 3.2, { model: 'n:ashentitan_new', atkMs: 2300, tele: 1.1, reach: 8.4, r: 5.2, scale: 6, aggro: 60, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
 };
 export const WAVE_TABLE = ['wolf', 'raider', 'wraith', 'skeleton'];

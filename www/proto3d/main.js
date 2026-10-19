@@ -702,6 +702,7 @@ function trailTarget(r, a) {
 function crowdSurface(r, a, dt) {
   let s = surfaceAt(a.x, a.z, r.level);
   if (s && s.ramp) { const m = s.ramp; if (r.level === m.l0 && s.t > (m.flipUp || 0.93)) r.level = m.l1; else if (r.level === m.l1 && s.t < 0.25) r.level = m.l0; s = surfaceAt(a.x, a.z, r.level) || s; }
+  if (!s && r.level > 0 && r.level < 10) { r.level = 0; r.ti = null; s = surfaceAt(a.x, a.z, 0); }   // stepped off an upper slab (no floor here): drop to the ground level instead of hovering on 'level 1' at ground height
   const ty = s ? s.y : (r.level >= 10 && LAD ? LAD.heightOf(r.level) : 0);
   r.y = Math.abs(ty - r.y) < 0.02 ? ty : r.y + Math.max(-4 * dt, Math.min(4 * dt, ty - r.y)) * (Math.abs(ty - r.y) > 1.3 ? 1 : 1);
 }

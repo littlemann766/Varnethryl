@@ -89,7 +89,11 @@ function mesh(geo, mat, x, y, z, parent, shadow = true) {
 const HS = 1.5;                 // character scale (hero, party, NPCs) so people are in proportion with the grand doors
 let CH = worldProfile('', HS);   // active character's real-size profile (charscale.js): collision radius, speed, camera, reach
 let HERO_R = CH.radiusW;
-function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
+/* giants see further: fog, camera far plane, shadow frustum and chunk culling scale with the profile's camera distance (capped for phone perf) */
+let VIEWK = 1;
+function applyView() { const kf = Math.max(1, Math.min(5, CH.camDist)), k2 = Math.min(2.2, kf), sk = Math.min(3, kf); VIEWK = k2; scene.fog.near = 70 * k2; scene.fog.far = 180 * k2; camera.far = 320 * k2 * (kf > 2.2 ? 1.5 : 1); camera.updateProjectionMatrix(); const R = 24 * sk; Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, far: 110 * sk }); sun.shadow.camera.updateProjectionMatrix(); SUNK = sk; }
+let SUNK = 1;
+function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; try { applyView(); } catch (e) {} try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
 const ZONE = { name: 'town', cx: 0, cz: 0, half: 0 };   // current walkable zone (town or the Wilds); half is set once WORLD is known
 const WORLD = WORLD_B; // half extent (village grew for the 3D buildings)
 ZONE.half = WORLD;
@@ -846,7 +850,7 @@ function updateCamera(dt, snap) {
   camRig.update(ci);
   camPos.copy(camRig.pos); camLook.copy(camRig.look);
   camRig.syncHero(hero);
-  sun.position.set(state.heroX + SUN_OFF.x, SUN_OFF.y, state.heroZ + SUN_OFF.z);
+  sun.position.set(state.heroX + SUN_OFF.x * SUNK, SUN_OFF.y * SUNK, state.heroZ + SUN_OFF.z * SUNK);
   sun.target.position.set(state.heroX, 0, state.heroZ);
 }
 
@@ -927,11 +931,11 @@ async function setZone(name) {
   return true;
 }
 function updateZone(dt) {
-  if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ);
+  if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ, VIEWK);
   const t = performance.now() / 1000; if (portalT && portalT.userData.update) portalT.userData.update(t); if (WM && WM.portalMesh.userData.update) WM.portalMesh.userData.update(t);
   zoneCd = Math.max(0, zoneCd - dt); if (zoneCd > 0 || state.level !== 0 || state.climbing) { portalDwell = 0; return; }
   const p = ZONE.name === 'town' ? TOWN_PORTAL : (WM ? { x: WM.portal.x, z: WM.portal.z } : null); if (!p) return;
-  if (Math.hypot(state.heroX - p.x, state.heroZ - p.z) < 1.7) { portalDwell += dt; if (portalDwell > 0.35) { portalDwell = -99; setZone(ZONE.name === 'town' ? 'wilds' : 'town'); } } else if (portalDwell > -50) portalDwell = 0;
+  if (Math.hypot(state.heroX - p.x, state.heroZ - p.z) < 1.7 + Math.max(0, HERO_R - 0.75)) { portalDwell += dt; if (portalDwell > 0.35) { portalDwell = -99; setZone(ZONE.name === 'town' ? 'wilds' : 'town'); } } else if (portalDwell > -50) portalDwell = 0;
 }
 
 function frame(now) {

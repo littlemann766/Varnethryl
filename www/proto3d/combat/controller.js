@@ -28,7 +28,7 @@ export class CombatController {
     for (const k of ['hp', 'mp', 'sp']) { if (R.max[k] === nx[k]) continue; R[k] = own && k === 'hp' ? nx[k] : Math.min(nx[k], Math.max(0, R[k] * nx[k] / R.max[k])); R.max[k] = nx[k]; }
   }
   /* real-size play: charscale.js profile (reach = melee/AoE range multiplier); pure data in, no THREE */
-  setScale(p) { this.RM = Math.max(0.5, Math.min(8, +(p && p.reach) || 1)); this.scale = p || null; }
+  setScale(p) { this.RM = Math.max(0.5, Math.min(8, +(p && p.reach) || 1)); this.env.RM = this.RM; this.scale = p || null; }
   setPlayer(x, z, yaw) { this.p.x = x; this.p.z = z; this.p.yaw = yaw; }   // the only world inputs
   /* Owner gate: Owner skin AND the host-confirmed owner unlock (fight.js sets ownerUnlocked from the owner gate; the HUD can never set it). */
   ownerOk() { return !!(this.ownerUnlocked && (this.hero.owner || this.hero.saber)); }   // owner account AND (Owner skin OR active hero wields the Owner saber)

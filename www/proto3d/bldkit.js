@@ -530,3 +530,33 @@ Builder.prototype.dress = function (theme = 'tavern', o = {}) {
     for (let z = -id_ + 2; z < id_ - 3.5; z += 4) this.lamp(0, hs - .6, z);
   }
 };
+
+// ---- pass 2 interior props (per building kind): stools / chairs, bottles, forge tools, ovens, stalls, cauldrons; every spot is checked free (no new stuck spots) ----
+Builder.prototype.props2 = function (kind) {
+  const iw = this.iw, id_ = this.id_, G = this.G.int, DWh = (this.DW || 2.2) / 2 + 1.2, hs = Math.min(this.hs || 3, 4.7);
+  const lane = (x, z) => Math.abs(x) < DWh && z > id_ - 4.4, F = (x, z, r) => Math.abs(x) < iw - .3 && Math.abs(z) < id_ - .3 && !lane(x, z) && this.spotFree(x, z, r);
+  const stool = (x, z, h = .55) => { if (!F(x, z, .4)) return false; this.cyl(.2, .17, h, 'wood', x, h / 2, z, G, 8); this.cyl(.24, .24, .07, 'darkWood', x, h, z, G, 8); this.ccol(x, z, .26); return true; };
+  const chair = (x, z, ry) => { if (!F(x, z, .4)) return; this.bx(.42, .07, .42, 'wood', x, .45, z, G, { lite: true }); for (const a of [-1, 1]) for (const b of [-1, 1]) this.bx(.05, .45, .05, 'darkWood', x + a * .17, .22, z + b * .17, G, { lite: true }); const bk = this.bx(.42, .5, .06, 'darkWood', x + Math.sin(ry) * .2, .75, z + Math.cos(ry) * .2, G, { lite: true }); bk.rotation.y = ry; };
+  const bottles = (x, y, z, n, dx = .2, dz = 0) => { for (let i = 0; i < n; i++) this.cyl(.05, .06, .26, ['#2f6a3a', '#6a2a2a', '#b88a2a', '#2f4a8a'][i % 4], x + dx * i, y + .13, z + dz * i, G, 5, { shadow: false }); };
+  const cauldron = (x, z, glow) => { if (!F(x, z, .8)) return; this.add(new THREE.SphereGeometry(.5, 8, 6, 0, 6.3, 0, 1.7), M('iron', { side: THREE.DoubleSide }), x, .62, z, G); for (const a of [0, 2.1, 4.2]) this.cyl(.05, .05, .25, 'iron', x + Math.cos(a) * .35, .12, z + Math.sin(a) * .35, G, 5, { shadow: false }); this.add(new THREE.CircleGeometry(.42, 8), GLOW(glow, 1.2), x, .85, z, G, { shadow: false }).rotation.x = -Math.PI / 2; this.ccol(x, z, .55); };
+  const hang = (x, z, n) => { this.bx(1.6, .06, .06, 'iron', x, hs - .4, z, G, { shadow: false, lite: true }); for (let i = 0; i < n; i++) { this.cyl(.015, .015, .4, 'iron', x - .6 + i * .4, hs - .6, z, G, 3, { shadow: false }); this.cyl(.14, .1, .16, 'iron', x - .6 + i * .4, hs - .86, z, G, 6, { shadow: false }); } };
+  if (kind === 'inn') { for (let i = 0; i < 4; i++) stool(.5 + i * .85, -id_ + 2.2); bottles(1.0, 1.0, -id_ + 1.1, 6, .5); hang(2.2, -id_ + 1.1, 4);
+    for (const [x, z] of [[-1.8, .4], [-.2, 2.2], [-3.4, 2.4]]) for (const [dx, dz, ry] of [[.95, 0, -Math.PI / 2], [-.95, 0, Math.PI / 2], [0, .95, Math.PI], [0, -.95, 0]]) chair(x + dx, z + dz, ry);
+    this.cyl(.28, .28, .5, 'wood', iw - 1.4, .25, -id_ + 1.2, G, 8); this.ccol(iw - 1.4, -id_ + 1.2, .4); cauldron(-iw + 1.5, -id_ + 1.4, 'ff8a2a'); }
+  if (kind === 'smithy') { const x = iw - 1.2; this.bx(1.2, .5, .9, 'iron', x - 1.6, .25, -id_ + 1.4, G); this.add(boxG(1.0, .3, .7, 1), M('#4a90c0', { name: 'quench' }), x - 1.6, .52, -id_ + 1.4, G, { shadow: false }); this.ccol(x - 1.6, -id_ + 1.4, .7);
+    const bw = this.bx(.5, .3, .7, 'darkWood', x - .1, .9, -id_ + 2.0, G, { lite: true }); this.cone(.18, .6, 'darkWood', x - .1, .98, -id_ + 2.5, G, 6).rotation.x = 1.5;
+    for (let i = 0; i < 5; i++) { this.bx(.08, .5, .08, 'darkWood', -1.0 + i * .5, 2.0, -id_ + .12, G, { shadow: false, lite: true }); this.bx(.3, .12, .12, 'iron', -1.0 + i * .5, 2.28, -id_ + .12, G, { shadow: false, lite: true }); }
+    if (F(-iw + 1.2, -id_ + 1.2, .8)) { this.cyl(.4, .4, .12, 'stone', -iw + 1.2, .9, -id_ + 1.2, G, 10); this.bx(.5, .9, .3, 'darkWood', -iw + 1.2, .45, -id_ + 1.2, G, { lite: true }); this.ccol(-iw + 1.2, -id_ + 1.2, .5); }
+    for (let i = 0; i < 6; i++) this.add(new THREE.DodecahedronGeometry(.16, 0), M('#1c1c20'), iw - .5 + (i % 3) * .12 - .2, .14 + (i > 2 ? .2 : 0), -.6 + (i % 3) * .2, G, { shadow: false }); }
+  if (kind === 'bakery') { bottles(-iw + .5, 1.0, -.8, 0); hang(0, -id_ + .7, 3); for (const [x, z] of [[-.6, -.4], [.8, -.4]]) stool(x, z + 1.2, .5);
+    for (let i = 0; i < 5; i++) this.add(new THREE.SphereGeometry(.17, 6, 5), M('#d8a85a'), -1.2 + i * .45, 1.0, -.4 + (i % 2) * .3, G, { shadow: false }).scale.y = .6;
+    this.bx(.08, 1.6, .08, 'darkWood', iw - 2.6, .8, -id_ + 1.4, G, { lite: true }); this.bx(.7, .06, .12, 'wood', iw - 2.6, 1.6, -id_ + 1.4, G, { lite: true });
+    for (let i = 0; i < 3; i++) this.cyl(.34, .3, .5, '#b89a62', iw - .7, .25 + i * .0, id_ - 1.4 - i * .5, G, 7); }
+  if (kind === 'market') { for (const sx of [-1, 1]) { const x = sx * (iw - 2.6), z = id_ - 2.4; if (!F(x, z, 1.2)) continue; for (const a of [-1, 1]) for (const b of [-1, 1]) this.bx(.08, 2.3, .08, 'darkWood', x + a * .9, 1.15, z + b * .55, G, { lite: true });
+      const aw = this.bx(2.1, .06, 1.4, 'awning', x, 2.35, z, G, { shadow: false }); aw.rotation.x = .12; this.bx(1.8, .7, .9, 'wood', x, .35, z, G); this.col(x, z, 1.8, .9);
+      for (let i = 0; i < 6; i++) this.add(new THREE.SphereGeometry(.12, 6, 5), M(['#c8452d', '#e3b341', '#6fae45'][i % 3]), x - .65 + i * .26, .8, z + (i % 2) * .15 - .08, G, { shadow: false }); }
+    for (let i = 0; i < 6; i++) { this.bx(.04, .6, .04, 'iron', -2.5 + i * 1.0, hs - .7, -.5, G, { shadow: false, lite: true }); this.add(new THREE.SphereGeometry(.14, 5, 4), M('#d8aa3a'), -2.5 + i * 1.0, hs - 1.1, -.5, G, { shadow: false }); } }
+  if (kind === 'apothecary') { cauldron(iw - 1.2, id_ - 1.6, '4fe08a'); bottles(-1.8, 1.0, -id_ + .9, 8, .45); for (let i = 0; i < 6; i++) this.cyl(.015, .015, .5 + (i % 2) * .2, '#5a8a3a', -2.4 + i * .95, hs - .5, .5, G, 3, { shadow: false }); stool(-iw + 1.6, id_ - 2.0, .6); if (F(-.8, .6, .4)) { this.cyl(.12, .09, .1, 'stoneL', -.8, 1.05, .6, G, 8, { shadow: false }); } }
+  if (kind === 'house') { for (const [dx, dz, ry] of [[.8, .5, -Math.PI / 2], [-2.0, .5, Math.PI / 2]]) chair(dx - .6 + (dx < 0 ? .6 : 0), dz, ry); hang(0, -id_ + 1.2, 3); if (F(iw - 1.0, -id_ + 1.0, .6)) { this.cyl(.3, .3, .5, 'wood', iw - 1.0, .25, -id_ + 1.0, G, 8); this.ccol(iw - 1.0, -id_ + 1.0, .4); } }
+  if (kind === 'thieves') { for (let i = 0; i < 3; i++) stool(-2.6 + i * .9, 1.8, .5); bottles(-.8, 1.0, .6, 6, .45); hang(0, -.3, 3); }
+};

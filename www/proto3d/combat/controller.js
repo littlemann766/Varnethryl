@@ -12,7 +12,7 @@ export class CombatController {
     this.enemies = []; this.ls = {}; this.p = { x: 0, z: 0, yaw: 0, dead: false };
     this.hero = { id: '', name: 'Hero', level: 40, className: 'Adventurer', saber: false };
     this.act = null; this.blocking = false; this.blockT = 0; this.iframes = 0; this.shield = 0; this.potions = this.P.potion.charges; this.dead = 0;
-    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this.kit = null; this._mk = ''; this.ownerUnlocked = false; this.meteors = []; this.bamboo = false; this.ultSel = (() => { try { const v = typeof localStorage !== 'undefined' && localStorage.getItem('varn.ultsel'); return v === 'unholy' ? 'unholy' : 'holy'; } catch (e) { return 'holy'; } })(); this.bystanders = null;
+    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this.kit = null; this._mk = ''; this.ownerUnlocked = false; this.meteors = []; this.bamboo = false; this.RM = 1; this.ultSel = (() => { try { const v = typeof localStorage !== 'undefined' && localStorage.getItem('varn.ultsel'); return v === 'unholy' ? 'unholy' : 'holy'; } catch (e) { return 'holy'; } })(); this.bystanders = null;
     this.env = { HS: this.HS, move: o.move || ((e, dx, dz) => { e.x += dx; e.z += dz; }) };
   }
   on(t, f) { (this.ls[t] || (this.ls[t] = [])).push(f); return this; }
@@ -24,6 +24,8 @@ export class CombatController {
     const nx = { hp: own ? this.P.ownerHp : Math.round(this.P.hp * m * (1 + (ar ? ar.hpPct : 0))), mp: Math.round(this.P.mp * m * (1 + (ar ? ar.mpPct : 0))), sp: Math.round(this.P.sp * m * (1 + (ar ? ar.spPct : 0))) }, R = this.res;
     for (const k of ['hp', 'mp', 'sp']) { if (R.max[k] === nx[k]) continue; R[k] = own && k === 'hp' ? nx[k] : Math.min(nx[k], Math.max(0, R[k] * nx[k] / R.max[k])); R.max[k] = nx[k]; }
   }
+  /* real-size play: charscale.js profile (reach = melee/AoE range multiplier); pure data in, no THREE */
+  setScale(p) { this.RM = Math.max(0.5, Math.min(8, +(p && p.reach) || 1)); this.scale = p || null; }
   setPlayer(x, z, yaw) { this.p.x = x; this.p.z = z; this.p.yaw = yaw; }   // the only world inputs
   /* Owner gate: Owner skin AND the host-confirmed owner unlock (fight.js sets ownerUnlocked from the owner gate; the HUD can never set it). */
   ownerOk() { return !!(this.ownerUnlocked && (this.hero.owner || this.hero.saber)); }   // owner account AND (Owner skin OR active hero wields the Owner saber)
@@ -87,19 +89,25 @@ export class CombatController {
     if (!this.cd.ok(a.id)) return false;
     if (!this.res.can(a.cost)) { this.emit('denied', { slot: 6, why: 'Not enough mana' }); return false; }
     this.res.spend(a.cost); this.cd.start(a.id, a.cd); this.act = { a, slot: 6, t: 0, done: false };
-    const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * this.HS);
+    const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * this.HS * this.RM);
     this.emit('action', { slot: 6, a, T: a.T, aim: t }); return true;
   }
   chainStrike(a) {
     /* Thunderstorm kills EVERYTHING in range (no target cap, bosses included): every living enemy takes the full hit via hitEnemy/DamageCalculator.
        The chain is only for visuals: greedy nearest-neighbour order from the player; the host draws the first ~12 as bolts and the rest as cheap impact flashes. */
-    const HS = this.HS, R = a.range * HS, all = this.enemies.filter(e => e.state !== 'defeated' && Math.hypot(e.x - this.p.x, e.z - this.p.z) <= R + (e.def.r || 0));
-    if (!all.length) return; const order = []; let cx = this.p.x, cz = this.p.z, left = all.slice();
+    const HS = this.HS, R = a.range * HS * this.RM, all = this.enemies.filter(e => e.state !== 'defeated' && !e.owner && !e.prop && Math.hypot(e.x - this.p.x, e.z - this.p.z) <= R + (e.def.r || 0));   // every model except the Owner (enemies, bosses, enemy characters, flagged friendlies/NPCs in cc.enemies)
+    const um = Math.max(1, Math.min(100, Math.floor(+TUNING.ult.dmgMul || 1))), bys = [];
+    if (typeof this.bystanders === 'function') for (const b of this.bystanders() || []) {   // host-held models: party/companions/followers/NPCs/townsfolk (never the Owner)
+      if (!b || b.owner || b.isOwner || Math.hypot(b.x - this.p.x, b.z - this.p.z) > R) continue;
+      this.emit('bystanderKill', { b, dmg: Math.max(1, Math.ceil(b.hp || 1)) * um }); bys.push(b);
+    }
+    if (!all.length && !bys.length) return; const order = []; let cx = this.p.x, cz = this.p.z, left = all.slice();
     while (left.length) { let bi = 0, bd = 1e18; for (let i = 0; i < left.length; i++) { const d = (left[i].x - cx) ** 2 + (left[i].z - cz) ** 2; if (d < bd) { bd = d; bi = i; } } const e = left.splice(bi, 1)[0]; order.push(e); cx = e.x; cz = e.z; }
     const path = []; let f = 1;
     order.forEach((e, i) => { path.push({ x: e.x, z: e.z, y: 1.1 * HS * Math.max(1, (e.def.scale || 1) * 0.8), falloff: f, flash: i >= (a.visualBolts || 12) }); f = Math.max(0.45, f * a.falloff); });
     for (const e of order) this.hitEnemy(e, a.mult, a);
-    this.emit('lightning', { from: { x: this.p.x, z: this.p.z }, path, count: order.length });
+    for (const b of bys) path.push({ x: b.x, z: b.z, y: 1.1 * HS, falloff: 0.5, flash: true });
+    this.emit('lightning', { from: { x: this.p.x, z: this.p.z }, path, count: order.length + bys.length });
   }
   dodge(dx, dz) {
     const D = this.P.dodge; if (this.dead > 0 || !this.cd.ok('dodge') || !this.res.spend({ sp: D.sp })) { if (this.dead <= 0 && this.cd.ok('dodge')) this.emit('denied', { why: 'Not enough stamina' }); return false; }
@@ -162,12 +170,12 @@ export class CombatController {
     if (a.kind === 'line') { const fx = Math.sin(this.p.yaw), fz = Math.cos(this.p.yaw); for (const e of this.enemies.slice()) { const dx = e.x - this.p.x, dz = e.z - this.p.z, al = dx * fx + dz * fz; if (al > 0 && al < a.range + e.def.r && Math.abs(dx * fz - dz * fx) < 1.4 + e.def.r) this.hitEnemy(e, a.mult, a); } return; }
     if (a.kind === 'blink') { const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range); if (t) { const dx = t.x - this.p.x, dz = t.z - this.p.z, d = Math.hypot(dx, dz) || 1, bx = t.x + dx / d * (t.def.r + 1.2), bz = t.z + dz / d * (t.def.r + 1.2); this.emit('blink', { x: bx, z: bz, yaw: Math.atan2(-dx, -dz) + Math.PI }); this.p.x = bx; this.p.z = bz; this.hitEnemy(t, a.mult, a); } return; }   // lands later via this.meteors
     if (a.kind === 'shield') { this.shield = a.dur; this.emit('shield', a); return; }
-    if (a.kind === 'ranged') { const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * HS); if (t && Math.hypot(t.x - this.p.x, t.z - this.p.z) <= a.range * HS + t.def.r) { this.emit('throw', { e: t }); this.hitEnemy(t, a.mult, a); } return; }
+    if (a.kind === 'ranged') { const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * HS * this.RM); if (t && Math.hypot(t.x - this.p.x, t.z - this.p.z) <= a.range * HS * this.RM + t.def.r) { this.emit('throw', { e: t }); this.hitEnemy(t, a.mult, a); } return; }
     if (a.kind === 'chain') { this.chainStrike(a); return; }
     if (a.kind === 'storm') { act.storm = 3; act.stormT = 0; this.stormHit(act); return; }
-    for (const e of this.enemies.slice()) if (this.inCone(e, a.range * HS, a.arc)) this.hitEnemy(e, a.mult, a);
+    for (const e of this.enemies.slice()) if (this.inCone(e, a.range * HS * this.RM, a.arc)) this.hitEnemy(e, a.mult, a);
   }
-  stormHit(act) { const a = act.a; for (const e of this.enemies.slice()) if (this.inCone(e, a.range * this.HS, -1)) this.hitEnemy(e, a.mult / 3, a); }
+  stormHit(act) { const a = act.a; for (const e of this.enemies.slice()) if (this.inCone(e, a.range * this.HS * this.RM, -1)) this.hitEnemy(e, a.mult / 3, a); }
   /* ---- damage in ---- */
   enemyStrike(e) {
     const dx = this.p.x - e.x, dz = this.p.z - e.z, d = Math.hypot(dx, dz), pt = e.def.boss ? e.pat : null, reach = (pt ? pt.reach : e.def.reach) * this.HS + e.def.r;

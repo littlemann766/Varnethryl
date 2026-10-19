@@ -659,7 +659,7 @@ function recordTrail() {
 const SE = { x: 0, z: 0 };
 function stairEntry(r, a, t) {
   for (const b of ectx.multi) {
-    if (!b.ramps || !b.ramps.length || !b.toL) continue; const [fx, fz] = b.toL(a.x, a.z); if (Math.abs(fx) > 40 || Math.abs(fz) > 40) continue;
+    if (!b.ramps || !b.ramps.length || !b.toL) continue; const [fx, fz] = b.toL(a.x, a.z); if (Math.abs(fx) > 40 || Math.abs(fz) > 40 || (b.insideTest && !b.insideTest(fx, fz))) continue;   // only inside the building: from outside the trail leads through the door first
     const [tx, tz] = b.toL(t.x, t.z);
     for (const m of b.ramps) {
       const up = m.l0 === r.level && state.level > r.level, dn = m.l1 === r.level && state.level < r.level; if (!up && !dn) continue;
@@ -672,9 +672,12 @@ function stairEntry(r, a, t) {
   }
   return null;
 }
+function lineClear(x0, z0, x1, z1, l) { const d = Math.hypot(x1 - x0, z1 - z0), n = Math.ceil(d / 0.4); if (n > 60) return true; const F = window.__p3d && window.__p3d.free; if (!F) return true;
+  for (let k = 1; k < n; k++) { const t = k / n; if (!F(x0 + (x1 - x0) * t, z0 + (z1 - z0) * t, l)) return false; } return true; }
 function trailTarget(r, a) {
   if (r.ti === null) {
-    let best = -1, bd = 1e9; for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01) { bd = d; best = i; } }
+    let best = -1, bd = 1e9; for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01 && lineClear(a.x, a.z, p.x, p.z, r.level)) { bd = d; best = i; } }   // nearest trail point the companion can actually walk to (not one behind a wall)
+    if (best < 0) for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01) { bd = d; best = i; } }   // nothing in clear sight: plain nearest
     if (best < 0) return null; r.ti = best + trailBase;
   }
   if (r.ti < trailBase) r.ti = trailBase;

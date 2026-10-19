@@ -2,6 +2,7 @@
    Every variant is ONE merged BufferGeometry (position, normal, colour, uv). Detail comes from shape, per-face colour variation,
    height gradients, moss/strata tinting and a small shared grain texture. scatterWorld() merges a whole village mix into 3 meshes. */
 import * as THREE from './vendor/three.module.js';
+import { fx } from './fx.js';
 
 const K = h => { const c = new THREE.Color(h); return [c.r, c.g, c.b]; };
 let seedState = 1, LOD = 0;
@@ -364,7 +365,7 @@ export function makeDetailTexture() {
   for (let i = 0; i < 18; i++) { g.strokeStyle = `rgba(90,90,90,${.1 + r() * .14})`; g.lineWidth = 1; const x = r() * S; g.beginPath(); g.moveTo(x, 0); g.lineTo(x + r() * 3 - 1.5, S); g.stroke(); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 2; return t;
 }
-export function makeMaterials(map) { return { solid: new THREE.MeshLambertMaterial({ vertexColors: true, map }), glow: new THREE.MeshBasicMaterial({ vertexColors: true }) }; }
+export function makeMaterials(map) { return { solid: fx(new THREE.MeshLambertMaterial({ vertexColors: true, map }), 'wild'), glow: new THREE.MeshBasicMaterial({ vertexColors: true }) }; }   // 'wild': wind sway by world height (trees move, rocks and ground stay)
 
 function finish(bld, uv) {
   if (!bld || !bld.p.length) return null;

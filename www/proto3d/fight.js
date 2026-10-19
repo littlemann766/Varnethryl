@@ -72,18 +72,41 @@ export function createFight(env) {
     if (!r && kind === 'attack2') r = clipFor(u, 'attack');
     return (u.cmap[kind] = r);
   }
+  /* Owner-only smooth attack playback: crossfade in/out (~0.12/0.15 s, smoothstep), chained swings overlap (previous clip fades out while the next fades in, no dip to idle),
+     and the clip's own weight fades so it never snaps back to the loco pose. Damage timing is untouched (this only drives the animation mixer). */
+  const sstep = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
+  const FADE_IN = 0.12, FADE_OUT = 0.15;
+  function altAct(u, a) { u.alt = u.alt || new Map(); let b = u.alt.get(a); if (!b) { const c = a.getClip().clone(); c.name = a.getClip().name + '_b'; b = u.mixer.clipAction(c); u.alt.set(a, b); u.alt.set(b, a); } return b; }
   function playAct(root, a, kind, dur, hold) {
-    const u = root.userData; if (!a || !u || !u.mixer) return false; if (u.os && u.os.a !== a) u.os.a.stop();
-    a.reset(); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = !!hold; const d = a.getClip().duration; a.timeScale = dur ? Math.min(3, d / dur) : 1; a.setEffectiveWeight(1); a.play();
-    u.os = { a, t: 0, dur: d / a.timeScale, hold: !!hold, kind }; return true;
+    const u = root.userData; if (!a || !u || !u.mixer) return false;
+    const smooth = root === env.hero() && isOwner() && !hold && (kind === 'atk' || kind === 'attack' || kind === 'attack2');
+    if (smooth && u.os && !u.os.hold && (u.os.kind === 'atk' || u.os.kind === 'attack' || u.os.kind === 'attack2')) {   // chained swing: overlap with the one still playing
+      const prev = u.os; if (u.prev) u.prev.a.stop(); if (a === prev.a) a = altAct(u, a);
+      u.prev = { a: prev.a, w0: prev.a.getEffectiveWeight(), t: 0 };
+      a.reset(); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = false; const d = a.getClip().duration; a.timeScale = dur ? Math.min(3, d / dur) : 1; a.setEffectiveWeight(0.001); a.play();
+      u.os = { a, t: 0, dur: d / a.timeScale, hold: false, kind, smooth: true, chain: true }; return true;
+    }
+    if (u.os && u.os.a !== a) u.os.a.stop(); if (u.prev) { u.prev.a.stop(); u.prev = null; }
+    a.reset(); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = !!hold; const d = a.getClip().duration; a.timeScale = dur ? Math.min(3, d / dur) : 1; a.setEffectiveWeight(smooth ? 0.001 : 1); a.play();
+    u.os = { a, t: 0, dur: d / a.timeScale, hold: !!hold, kind, smooth }; return true;
   }
   const oneShot = (root, kind, dur, hold) => { const u = root.userData; return !!u && playAct(root, clipFor(u, kind), kind, dur, hold); };
   function tickOS(root, dt) {
-    const u = root.userData, o = u && u.os; if (!u) return; if (!o) { u.ovr = 0; return; }
-    o.t += dt; u.ovr = Math.max(0, Math.min(1, o.t / 0.08, o.hold ? 1 : (o.dur - o.t) / 0.15));
+    const u = root.userData, o = u && u.os; if (!u) return; if (!o) { if (u.prev) { u.prev.a.stop(); u.prev = null; } u.ovr = 0; return; }
+    o.t += dt;
+    if (o.smooth) {
+      const k = sstep(o.t / FADE_IN), out = sstep((o.dur - o.t) / FADE_OUT), w = Math.min(k, out);
+      o.a.setEffectiveWeight(Math.max(0.001, w));
+      if (u.prev) { u.prev.t += dt; const pk = sstep(1 - u.prev.t / FADE_IN); u.prev.a.setEffectiveWeight(Math.max(0.001, pk * u.prev.w0)); if (u.prev.t >= FADE_IN) { u.prev.a.stop(); u.prev = null; } }
+      u.ovr = o.chain || u.prev ? Math.max(w, u.prev ? 1 - 0 : w) : w;   // while overlapping, the loco layer stays fully behind the two attack clips
+      if (o.chain && !u.prev) u.ovr = w;
+      if (o.t >= o.dur) { o.a.stop(); if (u.prev) { u.prev.a.stop(); u.prev = null; } u.os = null; u.ovr = 0; }
+      return;
+    }
+    u.ovr = Math.max(0, Math.min(1, o.t / 0.08, o.hold ? 1 : (o.dur - o.t) / 0.15));
     if (o.t >= o.dur && !o.hold) { o.a.stop(); u.os = null; u.ovr = 0; }
   }
-  const clearOS = root => { const u = root.userData; if (u && u.os) { u.os.a.stop(); u.os = null; } if (u) u.ovr = 0; };
+  const clearOS = root => { const u = root.userData; if (u && u.os) { u.os.a.stop(); u.os = null; } if (u && u.prev) { u.prev.a.stop(); u.prev = null; } if (u) u.ovr = 0; };
   /* ---- fx ---- */
   const ring = new THREE.Mesh(new THREE.RingGeometry(0.9, 1, 40), new THREE.MeshBasicMaterial({ color: 0x66e6ff, transparent: true, opacity: 0.7, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
   ring.rotation.x = -Math.PI / 2; ring.visible = false; scene.add(ring);

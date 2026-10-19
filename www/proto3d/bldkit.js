@@ -251,7 +251,7 @@ Builder.prototype.stairs = function (o) {
   (globalThis.__stairLog = globalThis.__stairLog || []).push({ n: this.name, len, w, rise: y1 - y0, deg: Math.round(Math.atan2(y1 - y0, len) * 180 / Math.PI) });
   { const mm = { cx, cz, ang, len, w }; (this.stairZones = this.stairZones || []).push({ m: mm, level: l0, du0: -len / 2 - 1.5, du1: len / 2, fy: y0 }, { m: mm, level: l1, du0: len / 2 - .3, du1: len / 2 + 1.5, fy: y1 }); for (const z of this.stairZones.slice(-2)) this.clearZone(z.m, z.level, z.du0, z.du1, z.fy); } const m = { cx, cz, ang, len, w, l0, y0, l1, y1, flipUp: o.flipUp }; this.ramps.push(m); this.levelGroup(l1);
   this._st = true;
-  const n = Math.max(3, Math.round((y1 - y0) / .3)), s = Math.sin(ang), c = Math.cos(ang), grp = l0 ? this.levelGroup(l0) : this.G.int, key = o.key || 'wood';
+  const n = Math.max(4, Math.ceil((y1 - y0) / .2)), s = Math.sin(ang), c = Math.cos(ang), grp = l0 ? this.levelGroup(l0) : this.G.int, key = o.key || 'wood';
   for (let i = 0; i < n; i++) { const u = -len / 2 + (i + .5) * len / n, top = y0 + (i + 1) * (y1 - y0) / n, hh = top - y0 + (l0 ? 0 : 0); const b = this.bx(w, hh, len / n + .01, key, 0, 0, 0, grp); b.position.set(cx + s * u, y0 + hh / 2, cz + c * u); b.rotation.y = ang; }
   for (const sd of [-1, 1]) { const px = cx + c * sd * (w / 2 + .05), pz = cz - s * sd * (w / 2 + .05); const b = this.bx(.1, .12, len + .3, 'darkWood', px, (y0 + y1) / 2 + .95, pz, grp); b.position.set(px + s * 0, (y0 + y1) / 2 + .95, pz); b.rotation.y = ang; b.rotation.x = 0;
     b.rotateX(-Math.atan2(y1 - y0, len)); // sloped handrail

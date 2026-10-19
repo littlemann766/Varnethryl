@@ -314,7 +314,7 @@ export function createFight(env) {
     spawn(key, 10); return true;
   };
   let auto = false;
-  const RS = new Respawner({ max: AUTO_MAX }), RH = { hero: { x: 0, z: 0 }, zone: () => env.zone ? env.zone() : 'wilds', inWilds: (x, z) => env.inWilds ? env.inWilds(x, z) : true,
+  const RS = new Respawner({ max: AUTO_MAX, maxDist: 60 * (env.wildsScale || 280 / 170) /* enlarged Wilds: biomes are WS x farther apart */ }), RH = { hero: { x: 0, z: 0 }, zone: () => env.zone ? env.zone() : 'wilds', inWilds: (x, z) => env.inWilds ? env.inWilds(x, z) : true,
     biome: (x, z) => env.biome ? env.biome(x, z) : 'meadow', free: (x, z) => env.free(x, z), visible: (x, z) => project(x, 1.2, z, sc),
     alive: b => { let n = 0; for (const e of cc.enemies) if (e.biome === b && e.state !== 'defeated') n++; return n; }, spawn: (key, x, z, b) => spawn(key, 0, { aggroR: AUTO_AGGRO, at: [x, z], biome: b }) };
   cc.on('defeat', e => { if (auto && !e.def.boss) RS.freeSlot(true); });

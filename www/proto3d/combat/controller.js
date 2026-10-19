@@ -1,6 +1,6 @@
 /* CombatController: owns all combat state and rules. No THREE, no DOM. Reads only player position/facing (setPlayer) - never the camera.
    Talks to the outside through events: on(type, fn). The HUD listens; the host (fight.js) turns events into visuals/movement. */
-import { PLAYER, ABILITIES, ENEMIES, TUNING, OWNER_SKILLS } from './data.js';
+import { PLAYER, ABILITIES, ENEMIES, TUNING, OWNER_SKILLS, ULTIMATE2 } from './data.js';
 import { DamageCalculator } from './calc.js';
 import { CooldownManager, ResourceManager, TargetingSystem } from './systems.js';
 import { EnemyAIController } from './ai.js';
@@ -75,7 +75,30 @@ export class CombatController {
       const dmg = Math.max(1, Math.ceil(b.hp || 1)) * um; this.emit('bystanderKill', { b, dmg }); hit.push({ e: b, kill: true, bystander: true });
     }
     this.emit('meteorImpact', { x: m.x, z: m.z, radius: m.r, hits: hit, mode: m.mode, name: m.name });
-  }  dodge(dx, dz) {
+  }
+  /* Owner second ultimate: same gating as use() (cooldown, mana, busy), Owner/saber only */
+  useUltimate2() {
+    const a = ULTIMATE2; if (this.busy()) return false;
+    if (!this.hero.saber) { this.emit('denied', { slot: 6, why: 'Owner only' }); return false; }
+    if (!this.cd.ok(a.id)) return false;
+    if (!this.res.can(a.cost)) { this.emit('denied', { slot: 6, why: 'Not enough mana' }); return false; }
+    this.res.spend(a.cost); this.cd.start(a.id, a.cd); this.act = { a, slot: 6, t: 0, done: false };
+    const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * this.HS);
+    this.emit('action', { slot: 6, a, T: a.T, aim: t }); return true;
+  }
+  chainStrike(a) {
+    const HS = this.HS; let cur = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * HS);
+    if (!cur || cur.state === 'defeated') cur = this.enemies.filter(e => e.state !== 'defeated' && Math.hypot(e.x - this.p.x, e.z - this.p.z) < a.range * HS).sort((u, v) => Math.hypot(u.x - this.p.x, u.z - this.p.z) - Math.hypot(v.x - this.p.x, v.z - this.p.z))[0];
+    if (!cur) return; const hit = new Set(), path = []; let f = 1;
+    for (let i = 0; i < a.chains && cur; i++) {
+      hit.add(cur); path.push({ e: cur, x: cur.x, z: cur.z, y: 1.1 * HS * Math.max(1, (cur.def.scale || 1) * 0.8), falloff: f }); this.hitEnemy(cur, a.mult * f, a);
+      f *= a.falloff; let best = null, bd = a.chainRange * HS;
+      for (const e of this.enemies) { if (e.state === 'defeated' || hit.has(e)) continue; const d = Math.hypot(e.x - cur.x, e.z - cur.z); if (d < bd) { bd = d; best = e; } }
+      cur = best;
+    }
+    this.emit('lightning', { from: { x: this.p.x, z: this.p.z }, path });
+  }
+  dodge(dx, dz) {
     const D = this.P.dodge; if (this.dead > 0 || !this.cd.ok('dodge') || !this.res.spend({ sp: D.sp })) { if (this.dead <= 0 && this.cd.ok('dodge')) this.emit('denied', { why: 'Not enough stamina' }); return false; }
     this.cd.start('dodge', D.cd); this.iframes = D.iframes; this.act = null;
     let l = Math.hypot(dx || 0, dz || 0); if (l < 0.01) { dx = -Math.sin(this.p.yaw); dz = -Math.cos(this.p.yaw); l = 1; }   // no input: step back
@@ -127,6 +150,7 @@ export class CombatController {
     if (a.kind === 'meteor') return;   // lands later via this.meteors
     if (a.kind === 'shield') { this.shield = a.dur; this.emit('shield', a); return; }
     if (a.kind === 'ranged') { const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * HS); if (t && Math.hypot(t.x - this.p.x, t.z - this.p.z) <= a.range * HS + t.def.r) { this.emit('throw', { e: t }); this.hitEnemy(t, a.mult, a); } return; }
+    if (a.kind === 'chain') { this.chainStrike(a); return; }
     if (a.kind === 'storm') { act.storm = 3; act.stormT = 0; this.stormHit(act); return; }
     for (const e of this.enemies.slice()) if (this.inCone(e, a.range * HS, a.arc)) this.hitEnemy(e, a.mult, a);
   }

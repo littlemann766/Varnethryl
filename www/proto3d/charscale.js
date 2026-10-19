@@ -21,7 +21,7 @@ export const CHARS = {
   // PLAYABLE Vaelthryx (boss 1:11 AM): 10x the player. height = 10 * HERO_M (19.05 m), derived from the base constant. `native` = the GLB's authored height (0.65 m); the model is scaled at LOAD by loadScale() = height/native, the file on disk is untouched.
   'n:vaelthryx_straight_rig': { height: 10 * HERO_M, native: 0.65, radius: 5.2, speed: 1.5, step: 3.0, reach: 4.8, camDist: 5.0, camHeight: 4.8, camMin: 0.6, camMax: 1.7 },
   'n:frosttroll_a': { height: 5.7, radius: 1.6, speed: 1.25, step: 1.0, reach: 1.9, camDist: 1.9, camHeight: 1.8, camMin: 0.5, camMax: 1.7 },              // trolls = 3x the hero
-  'n:frosttroll_b': { height: 5.7, radius: 1.6, speed: 1.25, step: 1.0, reach: 1.9, camDist: 1.9, camHeight: 1.8, camMin: 0.5, camMax: 1.7 },
+  'n:frosttroll_b': { height: 5.715, radius: 1.8, speed: 1.25, step: 1.0, reach: 1.9, camDist: 1.9, camHeight: 1.8, camMin: 0.5, camMax: 1.7 },   // frosttrollB_1 (Beth 1019) baked 5.715 m ~ approved 5.7 m troll
   'o:vaelthryx': { height: 3.59, radius: 1.0, speed: 1.1, step: 0.7, reach: 1.4, camDist: 1.5, camHeight: 1.4, camMin: 0.45, camMax: 1.7 },                  // blocky builder (authored 5.1 world units)
   /* ---- test-bundle-1019 (Beth). Boss-approved heights only: everyone 1.905 m, Titan 11.4, frost trolls 5.7, Vaelthryx 19.05, giants 20/40/60x.
      Bundle GLBs are size-baked; where the baked height differs from the approved one, `native` = baked height and the model is scaled at load to the approved height (listed in the v1.1.14 report). ---- */

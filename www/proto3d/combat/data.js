@@ -1,0 +1,32 @@
+/* Combat data (Phase 1). Enemy stats mirror www/data.js ENEMIES (hp / atk) and the 2D game's cadence (attack every 1750 ms, boss 2300 ms). No logic here. */
+/* ---- ONE place for combat feel. Normal characters: ~8-15 s per normal enemy (wolf/raider), elites longer, bosses much longer. Owner is exempt. ---- */
+export const TUNING = {
+  normal: { dmg: [70, 120], basicCdMul: 1.8, windupMul: 1.5, basicSp: 8, hp: 700, staggerFrac: 0.2 },   // dmg per basic hit, cooldown/wind-up multipliers, stamina per swing, max HP, enemy staggers after this fraction of its HP in damage
+  owner: { hp: 999999, saber: 99999 },
+};
+export const UNARMED = { min: TUNING.normal.dmg[0], max: TUNING.normal.dmg[1] };                 // everybody else (no weapon in the fight test)
+export const SABER = { min: 99999, max: 99999 };   // = TUNING.owner.saber                     // Owner lightsaber: 99,999 flat per hit (boss decision), NOT combinedStats; Owner gate only
+export const PLAYER = {
+  hp: TUNING.normal.hp, ownerHp: TUNING.owner.hp, mp: 100, sp: 100, def: 600, agi: 20, mpRegen: 3, spRegen: 24, spDelay: 0.9,
+  crit: 0.06, critMult: 1.55,
+  dodge: { sp: 20, iframes: 0.38, dist: 7, cd: 0.7 }, block: { drain: 8, reduce: 0.75, parry: 0.22, minSp: 5 },
+  jump: { sp: 8, dur: 0.55, height: 1.6 }, potion: { heal: 0.4, cd: 20, charges: 3 }, respawn: 3.2, lockRange: 34, lockBreak: 46,
+};
+/* slot order matches the HUD: Basic, Heavy, Class, Secondary, Defensive, Ultimate. kind: melee | aoe | ranged | shield | storm */
+export const ABILITIES = [
+  { id: 'basic', name: 'Slash', icon: '\u2694', cd: 0.5, cost: {}, kind: 'melee', mult: 1, windup: 0.14, T: 0.38, range: 4.6, arc: 0.2, stagger: 0 },
+  { id: 'heavy', name: 'Heavy', icon: '\u2692', cd: 3, cost: { sp: 25 }, kind: 'melee', mult: 1.8, windup: 0.32, T: 0.7, range: 5.0, arc: 0.1, stagger: 1 },
+  { id: 'class', name: 'Force Push', icon: '\u2735', cd: 6, cost: { mp: 25 }, kind: 'aoe', mult: 0.5, windup: 0.18, T: 0.55, range: 7, arc: -1, stagger: 1, knock: 7, saber: true },
+  { id: 'secondary', name: 'Saber Throw', icon: '\u27B9', cd: 5, cost: { mp: 20 }, kind: 'ranged', mult: 1.2, windup: 0.2, T: 0.5, range: 16, arc: 0.6, stagger: 0, saber: true },
+  { id: 'defensive', name: 'Shield', icon: '\u26E8', cd: 12, cost: { mp: 30 }, kind: 'shield', mult: 0, windup: 0.05, T: 0.4, dur: 3, reduce: 0.8, saber: true },
+  { id: 'ultimate', name: 'Blade Storm', icon: '\u2604', cd: 25, cost: { mp: 60 }, kind: 'storm', mult: 3, windup: 0.3, T: 1.0, range: 6.5, arc: -1, stagger: 1, saber: true },
+];
+const E = (name, level, cls, hp, atk, def, speed, o) => Object.assign({ name, level, cls, hp, atk, def, speed, atkMs: 1750, tele: 0.55, reach: 2.2, aggro: 24, scale: 1, xp: Math.round(hp / 25), gold: Math.round(hp / 90), boss: false, stagger: 0.55, poise: 0 }, o);
+export const ENEMIES = {
+  wolf:     E('Wild Wolf', 5, 'Beast', 1050, 42, 40, 6.4, { model: 'wolf', tele: 0.4, r: 0.9 }),
+  raider:   E('Forest Raider', 12, 'Bandit', 1450, 56, 80, 4.6, { model: 'o:hobgoblin', r: 1.0 }),
+  wraith:   E('Vine Wraith', 18, 'Spirit', 1700, 66, 90, 4.2, { model: 'o:mossgut', r: 1.1 }),
+  skeleton: E('Ash Skeleton', 30, 'Undead', 5600, 270, 200, 3.6, { model: 'o:stonetroll', atkMs: 2300, tele: 0.8, r: 1.4 }),
+  titan:    E('Ashen Titan', 60, 'Boss', 250000, 2100, 600, 3.2, { model: 'n:ashentitan_new', atkMs: 2300, tele: 1.1, reach: 4.2, r: 2.6, scale: 3, aggro: 60, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
+};
+export const WAVE_TABLE = ['wolf', 'raider', 'wraith', 'skeleton'];

@@ -50,6 +50,11 @@ function build() {
   body.appendChild(row(el('span', { className: 'lab', textContent: 'Look sensitivity' }), li, lo));
   body.appendChild(el('small', { textContent: 'Zoom: mouse wheel, pinch, or + / −.  View: V.  The camera never goes through walls.' }));
 
+  body.appendChild(sec('Combat'));
+  const cb = el('button', { type: 'button', textContent: 'Fight mode (spawns a few enemies)' }); cb.dataset.set = 'combat';
+  const csync = () => cb.classList.toggle('on', !!(E.combatOn && E.combatOn())); csync(); syncs.push(csync);
+  cb.addEventListener('click', async () => { await E.setCombat(!(E.combatOn && E.combatOn())); csync(); });
+  body.appendChild(row(cb)); body.appendChild(el('small', { textContent: 'F attack · G dodge · T lock-on · Tab next target · 1-6 abilities (owner). On phone use the buttons by the stick.' }));
   body.appendChild(sec('Graphics'));
   const q = el('select', { id: 'setQuality' }); q.dataset.set = 'quality';
   const names = { auto: 'Auto (adapts to your device)', high: 'High (sharpest)', balanced: 'Balanced', low: 'Low (fastest)' };

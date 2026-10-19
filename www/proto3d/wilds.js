@@ -2,9 +2,9 @@
    merged into spatial chunks (frustum-culled) so the whole map costs only a handful of draw calls: ground 1, water 1, hills 1, portals 2, plus ~2 per visible chunk. */
 import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
-export const WILDS = { ox: 1000, oz: 0, half: 120 };            // centre + half extent of the walkable area (town is ~30 m half extent)
+export const WILDS = { ox: 1000, oz: 0, half: 170 };            // centre + half extent of the walkable area (town is ~30 m half extent)
 export const LAKE = { x: 48, z: -34, r: 21 };                    // relative to the Wilds centre
-const CH = 48;                                                   // chunk size (m)
+const CH = 64;                                                   // chunk size (m)
 function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 /* biome of a point relative to the centre */
 export function biome(x, z) {
@@ -20,10 +20,10 @@ function paintGround(size, span) {
   const blob = (x, z, rad, col, a) => { const gr = g.createRadialGradient(X(x), Z(z), 0, X(x), Z(z), rad * k); gr.addColorStop(0, col + a); gr.addColorStop(1, col + '00'); g.fillStyle = gr; g.fillRect(X(x) - rad * k, Z(z) - rad * k, rad * 2 * k, rad * 2 * k); };
   const hex = n => n.toString(16).padStart(2, '0');
   const reg = (fn, col, cnt, rad, a) => { for (let i = 0; i < cnt; i++) { const x = (r() - .5) * span, z = (r() - .5) * span; if (fn(x, z)) blob(x, z, rad * (.6 + r() * .8), col, hex(a)); } };
-  reg((x, z) => biome(x, z) === 'meadow', '#7fc24f', 120, 14, 150); reg((x, z) => biome(x, z) === 'meadow', '#c2b25a', 40, 10, 90);
-  reg((x, z) => biome(x, z) === 'forest', '#2f7a3c', 160, 12, 190); reg((x, z) => biome(x, z) === 'forest', '#5a4a2a', 60, 6, 110);
-  reg((x, z) => biome(x, z) === 'rock', '#7c7e84', 200, 11, 210); reg((x, z) => biome(x, z) === 'rock', '#5a5c62', 60, 7, 150);
-  reg((x, z) => biome(x, z) === 'snow', '#eef3f7', 200, 12, 230);
+  reg((x, z) => biome(x, z) === 'meadow', '#7fc24f', 240, 14, 150); reg((x, z) => biome(x, z) === 'meadow', '#c2b25a', 40, 10, 90);
+  reg((x, z) => biome(x, z) === 'forest', '#2f7a3c', 300, 12, 190); reg((x, z) => biome(x, z) === 'forest', '#5a4a2a', 60, 6, 110);
+  reg((x, z) => biome(x, z) === 'rock', '#7c7e84', 300, 11, 210); reg((x, z) => biome(x, z) === 'rock', '#5a5c62', 60, 7, 150);
+  reg((x, z) => biome(x, z) === 'snow', '#eef3f7', 300, 12, 230);
   for (let a = 0; a < 6.283; a += .2) for (let rr = LAKE.r - 2; rr < LAKE.r + 9; rr += 3) blob(LAKE.x + Math.cos(a) * rr, LAKE.z + Math.sin(a) * rr, 7, '#d8c690', hex(rr < LAKE.r + 4 ? 235 : 130));
   for (let t = 0; t <= 1; t += .02) { const x = -6 + t * (LAKE.x + 6), z = 4 + t * (LAKE.z - 4) + Math.sin(t * 9) * 5; blob(x, z, 3.2, '#9a7a4a', hex(220)); }       // dirt trail spawn -> lake
   for (let t = 0; t <= 1; t += .02) blob(-6 + Math.sin(t * 6) * 4, 4 + t * 90, 3, '#9a7a4a', hex(200));                                          // dirt trail north to the standing stones
@@ -75,26 +75,26 @@ export function buildWilds(env) {
     return r < .4 ? ['oak', rp(['green', 'lime', 'autumn', 'yellow'])] : r < .65 ? ['birch', rp(['lime', 'yellow', 'green'])] : r < .85 ? ['apple', rp(['green', 'blossom', 'autumn'])] : ['pine', 'green']; };
   const dens = { forest: 1, snow: .55, rock: .22, meadow: .2, shore: .08 };
   let n = 0, guard = 0;
-  while (n < 520 && guard++ < 16000) {
+  while (n < 900 && guard++ < 16000) {
     const [x, z] = rpos(half - 2), b = biome(x, z); if (rnd() > dens[b] || inLake(x, z, 2) || onTrail(x, z)) continue;
     const s = rf(.85, 1.5); if (!clear(x, z, 2.2 * s)) continue; const [sp, pal] = treeFor(b);
     put('trees', sp, pal, x, z, rnd() * 6.283, s, 'cast'); circ(x, z, .4 * s + .12); claim(x, z, 1.4 * s); n++;
   }
   /* bushes, rocks, flowers, grass, reeds at the shore */
   const place = (cnt, fn) => { let k = 0, g = 0; while (k < cnt && g++ < cnt * 40) { const [x, z] = rpos(half - 1); if (inLake(x, z, 0) || onTrail(x, z)) continue; if (fn(x, z, biome(x, z))) k++; } };
-  place(190, (x, z, b) => { if (!clear(x, z, .9) || (b === 'snow' || b === 'rock') && rnd() < .7) return false; const nm = rp(['round', 'round', 'hedge', 'spiky']); put('bushes', nm, rp(['green', 'deep', 'lime']), x, z, rnd() * 6.283, rf(.8, 1.4), 'plain'); claim(x, z, .5); return true; });
-  place(110, (x, z, b) => { if (!clear(x, z, 1)) return false; const hi = b === 'rock' || b === 'snow', r = rnd(), nm = hi ? (r < .35 ? 'boulder' : r < .6 ? 'cluster' : r < .85 ? 'stone' : 'slab') : (r < .15 ? 'boulder' : r < .6 ? 'stone' : 'cluster'), s = rf(.8, hi ? 2 : 1.4);
+  place(300, (x, z, b) => { if (!clear(x, z, .9) || (b === 'snow' || b === 'rock') && rnd() < .7) return false; const nm = rp(['round', 'round', 'hedge', 'spiky']); put('bushes', nm, rp(['green', 'deep', 'lime']), x, z, rnd() * 6.283, rf(.8, 1.4), 'plain'); claim(x, z, .5); return true; });
+  place(190, (x, z, b) => { if (!clear(x, z, 1)) return false; const hi = b === 'rock' || b === 'snow', r = rnd(), nm = hi ? (r < .35 ? 'boulder' : r < .6 ? 'cluster' : r < .85 ? 'stone' : 'slab') : (r < .15 ? 'boulder' : r < .6 ? 'stone' : 'cluster'), s = rf(.8, hi ? 2 : 1.4);
     put('rocks', nm, rp(['grey', 'warm', 'slate', 'mossy']), x, z, rnd() * 6.283, s, 'plain'); if (nm === 'boulder') circ(x, z, .95 * s); else if (nm === 'slab') circ(x, z, .7 * s); claim(x, z, .8); return true; });
-  place(260, (x, z, b) => { if (b !== 'meadow' && b !== 'forest') return false; const nm = rp(['daisy', 'tulip', 'lavender', 'bellflower']); put('flowers', nm, rp(['white', 'yellow', 'pink', 'purple', 'blue', 'red', 'orange']), x, z, rnd() * 6.283, rf(.9, 1.4), 'plain'); return true; });
-  place(900, (x, z, b) => { if (b === 'snow' || b === 'rock' && rnd() < .7) return false; put('flowers', 'grass', rp(['green', 'lush', 'dry']), x, z, rnd() * 6.283, rf(.8, 1.6), 'plain'); return true; });
+  place(420, (x, z, b) => { if (b !== 'meadow' && b !== 'forest') return false; const nm = rp(['daisy', 'tulip', 'lavender', 'bellflower']); put('flowers', nm, rp(['white', 'yellow', 'pink', 'purple', 'blue', 'red', 'orange']), x, z, rnd() * 6.283, rf(.9, 1.4), 'plain'); return true; });
+  place(1500, (x, z, b) => { if (b === 'snow' || b === 'rock' && rnd() < .7) return false; put('flowers', 'grass', rp(['green', 'lush', 'dry']), x, z, rnd() * 6.283, rf(.8, 1.6), 'plain'); return true; });
   for (let i = 0; i < 40; i++) { const a = rnd() * 6.283, rr = LAKE.r + rf(1, 3.5); put('bushes', 'reeds', rp(['green', 'lime']), LAKE.x + Math.cos(a) * rr, LAKE.z + Math.sin(a) * rr, rnd() * 6.283, rf(.9, 1.5), 'plain'); }
   /* lake: collider ring (circles) + water mesh */
   for (let a = 0; a < 6.283; a += .22) circ(LAKE.x + Math.cos(a) * (LAKE.r - 1.5), LAKE.z + Math.sin(a) * (LAKE.r - 1.5), 3.2); circ(LAKE.x, LAKE.z, LAKE.r - 3);
   /* meshes */
   const solid = mats.solid;
-  for (const { layer, acc: A } of chunks.values()) { const geo = A.geo(true); if (!geo) continue; const m = new THREE.Mesh(geo, solid); m.castShadow = layer === 'cast'; m.receiveShadow = true; m.matrixAutoUpdate = false; m.frustumCulled = true; grp.add(m); }
+  const chunkMeshes = []; for (const { layer, acc: A } of chunks.values()) { const geo = A.geo(true); if (!geo) continue; const m = new THREE.Mesh(geo, solid); geo.computeBoundingSphere(); chunkMeshes.push(m); m.castShadow = layer === 'cast'; m.receiveShadow = true; m.matrixAutoUpdate = false; m.frustumCulled = true; grp.add(m); }
   for (const v of cache.values()) { v.geo.dispose(); if (v.glow) v.glow.dispose(); }
-  const span = half * 2 + 100, ground = new THREE.Mesh(new THREE.PlaneGeometry(span, span), new THREE.MeshLambertMaterial({ map: paintGround(1024, span) }));
+  const span = half * 2 + 100, ground = new THREE.Mesh(new THREE.PlaneGeometry(span, span), new THREE.MeshLambertMaterial({ map: paintGround(1536, span) }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(ox, 0, oz); ground.receiveShadow = true; grp.add(ground);
   const water = new THREE.Mesh(new THREE.CircleGeometry(LAKE.r, 40), new THREE.MeshLambertMaterial({ color: 0x3f8fd0, transparent: true, opacity: 0.88 }));
   water.rotation.x = -Math.PI / 2; water.position.set(ox + LAKE.x, 0.06, oz + LAKE.z); grp.add(water);
@@ -108,5 +108,7 @@ export function buildWilds(env) {
     const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
     const hills = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true })); hills.frustumCulled = false; grp.add(hills); }
   grp.visible = false;
-  return { group: grp, colliders: cols, spawn: { x: ox - 6, z: oz + 4 }, portal: { x: ox - 6, z: oz - 2 }, drawCalls: grp.children.length };
+  /* distance culling: only chunks near the hero are drawn (keeps draw calls low on a big map) */
+  const cull = (hx, hz) => { for (const m of chunkMeshes) { const s = m.geometry.boundingSphere, d = Math.hypot(s.center.x - hx, s.center.z - hz) - s.radius; m.visible = d < (m.castShadow ? 105 : 125); } };
+  return { cull, group: grp, colliders: cols, spawn: { x: ox - 6, z: oz + 4 }, portal: { x: ox - 6, z: oz - 2 }, drawCalls: grp.children.length };
 }

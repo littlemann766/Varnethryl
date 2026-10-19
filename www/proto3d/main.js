@@ -617,6 +617,15 @@ const PARTY_N = BUMP_ON ? Math.max(0, Math.min(3, qp.get('party') != null ? +qp.
 const NPC_N = BUMP_ON ? (qp.get('npcs') != null ? Math.max(0, Math.min(2, +qp.get('npcs') || 0)) : 1) : 0;
 const bumpSys = createBump({ contactR: 0.45 * HS, runSpeed: 0.92 * SPEED });   // only a full-speed head-on charge can bump
 const playerAct = makeActor('aldric', { fixed: true, group: 'party' }); bumpSys.add(playerAct);
+let TITLE_WANDER = false;
+/* title backdrop: top the village up to 5 wanderers with extra townsfolk/heroes (kind 'title'), removed when play starts */
+function titleExtras() {
+  if (crowd.some(r => r.kind === 'title')) return;
+  const used = new Set(crowd.map(r => r.id).concat(HERO_GLB_ID(HEROES.indexOf(hero))));
+  const ids = ['finn', 'brynn', 'seraphine', 'orin', 'elira', 'thorne', 'rook'].filter(x => !used.has(x));
+  const n = Math.max(0, 5 - crowd.length);
+  for (let i = 0; i < n && i < ids.length; i++) { const an = i * 2.1 + 0.6, rr = (4 + i * 1.3) * HS; spawnCrowd(ids[i], 'title', state.heroX + Math.cos(an) * rr, state.heroZ + Math.sin(an) * rr, 0, an); }
+}
 const crowd = []; // followers + NPCs: { a, root, kind, leash, home }
 const tmp2 = { x: 0, z: 0 };
 /* crowd members skip the shadow-map pass (halves their draw calls); one shared blob decal each instead */
@@ -631,7 +640,7 @@ function spawnCrowd(id, kind, x, z, leash, yaw) {
   const a = makeActor(id, { str: undefined, group: kind === 'party' ? 'party' : null }); a.x = x; a.z = z; a.yaw = yaw || 0;
   const rec = { id, a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0, level: state.level, y: state.heroY || 0, ti: null, lvT: 0 };
   crowd.push(rec); bumpSys.add(a);
-  loadActorModel(id).then(w => { if (!w) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, 0, a.z); w.rotation.y = a.yaw; scene.add(w); });
+  loadActorModel(id).then(w => { if (!w) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, 0, a.z); w.rotation.y = a.yaw; if (rec.hidden) w.visible = false; scene.add(w); });
   return rec;
 }
 {
@@ -715,6 +724,13 @@ function updateCrowd(dt) {
     if (r.kind === 'npc' && ZONE.name !== 'town') continue;   // townsfolk wait in town while the hero is in the Wilds
     if (r.down > 0) { tickDown(r, dt); if (r.down > 0) { r.vxs = r.vzs = 0; a.vx = a.vz = 0; continue; } }
     let tvx = 0, tvz = 0;
+    if (TITLE_WANDER) {   // title backdrop: slow idle/walk wander around each member's spawn point, no following, no combat
+      if (r.wx === undefined) { r.wx0 = a.x; r.wz0 = a.z; r.wx = a.x; r.wz = a.z; r.wT = Math.random() * 0.6; }
+      const dx = r.wx - a.x, dz = r.wz - a.z, d = Math.hypot(dx, dz);
+      if (d > 0.4) { const sp = SPEED * 0.4; tvx = dx / d * sp; tvz = dz / d * sp; }
+      else if ((r.wT -= dt) <= 0) { const an = Math.random() * 6.283, rr = (2 + Math.random() * 5) * HS; r.wx = r.wx0 + Math.cos(an) * rr; r.wz = r.wz0 + Math.sin(an) * rr; r.wT = 2 + Math.random() * 3; }
+      const k = Math.min(1, dt * 8); r.vxs += (tvx - r.vxs) * k; r.vzs += (tvz - r.vzs) * k; a.vx = r.vxs; a.vz = r.vzs; continue;
+    }
     if (r.kind === 'party') {
       let gx = state.heroX, gz = state.heroZ, far = false; const rw = heroOnlyWait();
       if (rw) { gx = rw.x; gz = rw.z; r.lvT = 0; }   // hero is inside a playable-characters-only building: companions wait by its door
@@ -1051,7 +1067,9 @@ const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
 const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
-window.__p3d = { get roster() { return selUI ? selUI.rows.map(r => ({ name: r.g.name, key: r.g.key, n: r.g.vars.length })) : []; }, pickRoster: i => { const r = selUI && selUI.rows[i]; return r ? selectVariant(r.g, curVar(r.g)) : null; }, setRunning: v => { running = !!v; last = performance.now(); }, killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
+window.__p3d = { get roster() { return selUI ? selUI.rows.map(r => ({ name: r.g.name, key: r.g.key, n: r.g.vars.length })) : []; }, pickRoster: i => { const r = selUI && selUI.rows[i]; return r ? selectVariant(r.g, curVar(r.g)) : null; }, previewModel: async i => { const r = selUI && selUI.rows[i]; if (!r) return null; const v = curVar(r.g), id = GLB_IDS[v.slot]; const w = await loadActorModel(id); if (!w) return null;
+    w.traverse(o => { const k = SKINS.indexOf(o); if (k >= 0) SKINS.splice(k, 1); if (o.isMesh) o.castShadow = false; }); return { model: w, id, name: r.g.name }; },
+  titleWander: v => { TITLE_WANDER = !!v; if (v) titleExtras(); for (const r of crowd) { if (!v) r.wx = undefined; if (r.kind === 'title') { r.hidden = !v; if (r.root) r.root.visible = !!v; } } }, dropTitleExtras: () => { for (let i = crowd.length - 1; i >= 0; i--) { const r = crowd[i]; if (r.kind !== 'title') continue; crowd.splice(i, 1); bumpSys.remove(r.a); if (r.root) scene.remove(r.root); } }, get wanderPos() { return crowd.map(r => [+r.a.x.toFixed(2), +r.a.z.toFixed(2)]); }, get titleExtrasN() { return crowd.filter(r => r.kind === 'title').length; }, get wanderers() { return crowd.filter(r => r.root).length; }, setRunning: v => { running = !!v; last = performance.now(); }, killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; }, get guards() { return GUARDS; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },

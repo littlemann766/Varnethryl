@@ -23,13 +23,13 @@ c = mk(); w = c.addEnemy('titan', 0, 6); let res = []; c.on('enemyAttack', a => 
 c = mk(); w = c.addEnemy('titan', 0, 6); c.iframes = 99; res = []; c.on('enemyAttack', a => res.push(a.result)); run(c, 6); T('i-frames negate strikes', res.length > 0 && res.every(r => r === 'dodged' || r === 'missed') && c.res.hp === c.res.max.hp);
 c = mk(); w = c.addEnemy('titan', 0, 6); res = []; c.on('enemyAttack', a => res.push(a.result)); c.block(true); run(c, 4); T('block reduces / parries', res.some(r => r === 'parried' || r === 'blocked'));
 c = mk(); c.res.hp = 1000; T('potion heals', c.potion() && c.res.hp > 1000 && c.potions === 2 && !c.potion());
-c = mk(); c.setHero({ id: 'n:darius', saber: false }); w = c.addEnemy('titan', 0, 4); w.def = Object.assign({}, w.def, { atk: 99999 }); let down = 0, resp = 0; c.on('playerDown', () => down++); c.on('respawn', () => resp++); run(c, 20); T('death then respawn', down >= 1 && resp >= 1 && c.res.hp === c.res.max.hp);
+c = mk(); c.setHero({ id: 'n:nokit', saber: false }); w = c.addEnemy('titan', 0, 4); w.def = Object.assign({}, w.def, { atk: 99999 }); let down = 0, resp = 0; c.on('playerDown', () => down++); c.on('respawn', () => resp++); run(c, 20); T('death then respawn', down >= 1 && resp >= 1 && c.res.hp === c.res.max.hp);
 c = mk(); const a = c.addEnemy('wolf', 5, 0), b = c.addEnemy('wolf', -5, 0); c.lock(); const f = c.tgt.target; c.switchTarget(); T('lock + switch target', f && c.tgt.target && c.tgt.target !== f && c.tgt.locked);
 c = mk(); w = c.addEnemy('titan', 0, 4); c.cd.reset(); c.use(5); run(c, 1.3); T('Blade Storm hits 3x99999 on the 5M titan', w.max - w.hp === 3 * 99999);
 c = mk(); w = c.addEnemy('titan', 0, 4); let dd = []; c.on('enemyAttack', a => a.dmg > 0 && dd.push(a.dmg)); run(c, 8); T('owner has 999999 max hp, takes normal damage', c.res.max.hp === 999999 && dd.length >= 1 && dd[0] > 1000 && c.res.hp < 999999);
-c = mk(); c.setHero({ id: 'n:darius', saber: false }); w = c.addEnemy('titan', 0, 4); dd = []; c.on('enemyAttack', a => a.dmg > 0 && dd.push(a.dmg)); run(c, 4); T('non-owner takes full damage', dd.length >= 1 && dd[0] > 1000);
-for (const [k, lo, hi] of [['wolf', 8, 15], ['raider', 11, 22]]) { c = mk(false); c.setHero({ id: 'n:darius', saber: false }); c.setPlayer(0, 0, 0); w = c.addEnemy(k, 0, 3); w.def = Object.assign({}, w.def, { atk: 0 }); let tt = 0, st = 0; c.on('enemyAttack', () => {}); const seenS = new Set(); while (w.state !== 'defeated' && tt < 120) { c.use(0); c.update(1 / 60); tt += 1 / 60; seenS.add(w.state); w.x = 0; w.z = 3; } T('normal char kills ' + k + ' in ' + lo + '-' + hi + 's (' + tt.toFixed(1) + 's)', tt >= lo && tt <= hi); if (k === 'wolf') T('normal hits stagger the enemy', seenS.has('stagger')); }
-c = mk(false); c.setHero({ id: 'n:darius', saber: false }); c.setPlayer(0, 0, 0); w = c.addEnemy('skeleton', 0, 3); w.def = Object.assign({}, w.def, { atk: 0 }); let t3 = 0; while (w.state !== 'defeated' && t3 < 300) { c.use(0); c.update(1 / 60); t3 += 1 / 60; w.x = 0; w.z = 3; } T('normal char: elite takes longer (' + t3.toFixed(0) + 's)', t3 > 30);
+c = mk(); c.setHero({ id: 'n:nokit', saber: false }); w = c.addEnemy('titan', 0, 4); dd = []; c.on('enemyAttack', a => a.dmg > 0 && dd.push(a.dmg)); run(c, 4); T('non-owner takes full damage', dd.length >= 1 && dd[0] > 1000);
+for (const [k, lo, hi] of [['wolf', 8, 15], ['raider', 11, 22]]) { c = mk(false); c.setHero({ id: 'n:nokit', saber: false }); c.setPlayer(0, 0, 0); w = c.addEnemy(k, 0, 3); w.def = Object.assign({}, w.def, { atk: 0 }); let tt = 0, st = 0; c.on('enemyAttack', () => {}); const seenS = new Set(); while (w.state !== 'defeated' && tt < 120) { c.use(0); c.update(1 / 60); tt += 1 / 60; seenS.add(w.state); w.x = 0; w.z = 3; } T('normal char kills ' + k + ' in ' + lo + '-' + hi + 's (' + tt.toFixed(1) + 's)', tt >= lo && tt <= hi); if (k === 'wolf') T('normal hits stagger the enemy', seenS.has('stagger')); }
+c = mk(false); c.setHero({ id: 'n:nokit', saber: false }); c.setPlayer(0, 0, 0); w = c.addEnemy('skeleton', 0, 3); w.def = Object.assign({}, w.def, { atk: 0 }); let t3 = 0; while (w.state !== 'defeated' && t3 < 300) { c.use(0); c.update(1 / 60); t3 += 1 / 60; w.x = 0; w.z = 3; } T('normal char: elite takes longer (' + t3.toFixed(0) + 's)', t3 > 30);
 // unlimited MP/SP (owner flag set by fight.js from the gated cheat flag)
 c = mk(); c.res.unlimited = true; c.res.mp = 0; c.res.sp = 0;
 T('unlimited: abilities usable at 0 MP/SP', c.use(2)); run(c, 1); T('unlimited: mp/sp stay full, nothing deducted', c.res.mp === c.res.max.mp && c.res.sp === c.res.max.sp);
@@ -48,8 +48,8 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   k = nc('o:owner', true); T('nocd owner: dodge twice', k.dodge(1, 0) && k.dodge(1, 0));
   k = nc('o:owner', true); k.res.hp = 1; T('nocd owner: potion twice', k.potion() && (k.res.hp = 1, k.potion()));
   k = nc('o:owner', true); k.jump(); T('nocd owner: jump no cooldown', k.cd.left('jump') === 0);
-  k = nc('n:darius', true); k.use(0); T('other hero as owner: basic cooldown applies', k.cd.left('basic') > 0);
-  k = nc('n:darius', true); k.dodge(1, 0); T('other hero as owner: dodge cooldown applies', k.cd.left('dodge') > 0 && !k.dodge(1, 0));
+  k = nc('n:nokit', true); k.use(0); T('other hero as owner: basic cooldown applies', k.cd.left('basic') > 0);
+  k = nc('n:nokit', true); k.dodge(1, 0); T('other hero as owner: dodge cooldown applies', k.cd.left('dodge') > 0 && !k.dodge(1, 0));
   k = nc('o:owner', false); k.dodge(1, 0); T('non-owner/off (owner skin, flag off): dodge cooldown applies', k.cd.left('dodge') > 0 && !k.dodge(1, 0));
   k = nc('o:owner', false); k.use(2); T('non-owner/off: ability cooldown applies', k.cd.left(ABILITIES[2].id) > 0);
   const { createFlags } = await import('../www/proto3d/cheatflags.js'); const { createCheats } = await import('../www/proto3d/cheats.js'); const st = new Map(); const storage = { getItem: q => st.has(q) ? st.get(q) : null, setItem: (q, v) => st.set(q, String(v)) };
@@ -73,8 +73,8 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   go(k, 2); T('ult: Owner hp untouched by meteor', k.res.hp === hp0 && k.p.dead === false);
   k = ow(); k.fury = 50; T('ult: needs full Fury', !k.use('unholy')); k.fury = 100; T('ult: castable at full Fury', k.use('unholy'));
   k = ow(false); T('ult: denied without owner gate (programmatic request)', !k.use('unholy') && k.meteors.length === 0);
-  k = ow(true, 'n:darius'); k.setHero({ id: 'n:darius', saber: false }); T('ult: denied for other hero', !k.use('unholy') && !k.use('royal') && !k.use('chains') && !k.use('wrath') && !k.slotUsable('unholy'));
-  k = ow(); k.hero.id = 'o:owner'; k.setHero({ id: 'n:darius', saber: false }); k.ownerUnlocked = true; T('ult: owner flag gone after swap to other hero (no saber)', !k.ownerOk());
+  k = ow(true, 'n:nokit'); k.setHero({ id: 'n:nokit', saber: false }); T('ult: denied for other hero', !k.use('unholy') && !k.use('royal') && !k.use('chains') && !k.use('wrath') && !k.slotUsable('unholy'));
+  k = ow(); k.hero.id = 'o:owner'; k.setHero({ id: 'n:nokit', saber: false }); k.ownerUnlocked = true; T('ult: owner flag gone after swap to other hero (no saber)', !k.ownerOk());
   k = ow(); k.cd.ready.set('unholy', 99); T('ult: blocked during cooldown', !k.use('unholy'));
   k = ow(); k.noCooldown = true; k.fury = 100; k.use('unholy'); k.act = null; go(k, 2); k.fury = 100; T('ult: no-cooldown toggle respected (recast immediately), Fury still required', k.use('unholy') && (k.act = null, !k.use('unholy')));
   k = ow(); k.res.unlimited = true; k.fury = 0; k.res.mp = 0; T('ult/skills: unlimited MP/SP => Fury treated full + skills cast at 0 MP', k.use('unholy') && (k.act = null, k.use('royal')) );
@@ -89,28 +89,28 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
 // ---- saber-holder rule: owner ACCOUNT + (Owner skin OR hero wielding the Owner saber); perks (unlimited/no-cd) stay Owner-skin only ----
 { const { TUNING } = await import('../www/proto3d/combat/data.js'); const go = (k, s) => { for (let i = 0; i < s * 60; i++) k.update(1 / 60); };
   const hero = (id, saber, unlocked) => { const k = mk(); k.setHero({ id, saber }); k.ownerUnlocked = unlocked; k.fury = 100; return k; };
-  let k = hero('n:darius', true, true); k.addEnemy('wolf', 0, 5); T('holder: other hero WITH saber (owner account) gets owner ability set', k.ownerOk() && k.slotUsable('royal') && k.slotUsable('chains') && k.slotUsable('wrath') && k.slotUsable('unholy'));
+  let k = hero('n:nokit', true, true); k.addEnemy('wolf', 0, 5); T('holder: other hero WITH saber (owner account) gets owner ability set', k.ownerOk() && k.slotUsable('royal') && k.slotUsable('chains') && k.slotUsable('wrath') && k.slotUsable('unholy'));
   const m1 = k.addEnemy('raider', 0, 8), m2 = k.addEnemy('wolf', 0, 12); k.use('unholy'); go(k, 2); T('holder: Unholy Destruction works for saber holder', m1.state === 'defeated' && m2.state === 'defeated');
-  k = hero('n:darius', true, true); const tt = k.addEnemy('titan', 0, 8); k.use('royal'); go(k, 0.5); T('holder: saber rule, flat 99,999 on boss', tt.max - tt.hp === 99999);
-  k = hero('n:darius', false, true); T('holder: other hero WITHOUT saber has no owner abilities', !k.ownerOk() && !k.use('royal') && !k.use('unholy') && !k.slotUsable('wrath'));
-  k = hero('n:darius', true, false); T('holder: non-owner account never (even if hero.saber were set)', !k.ownerOk() && !k.use('royal') && !k.use('unholy') && k.meteors.length === 0);
+  k = hero('n:nokit', true, true); const tt = k.addEnemy('titan', 0, 8); k.use('royal'); go(k, 0.5); T('holder: saber rule, flat 99,999 on boss', tt.max - tt.hp === 99999);
+  k = hero('n:nokit', false, true); T('holder: other hero WITHOUT saber has no owner abilities', !k.ownerOk() && !k.use('royal') && !k.use('unholy') && !k.slotUsable('wrath'));
+  k = hero('n:nokit', true, false); T('holder: non-owner account never (even if hero.saber were set)', !k.ownerOk() && !k.use('royal') && !k.use('unholy') && k.meteors.length === 0);
   k = hero('o:owner', true, false); T('holder: Owner skin on non-unlocked account gets no owner skills', !k.use('royal') && !k.use('unholy'));
-  k = hero('n:darius', true, true); k.noCooldown = true; k.use('royal'); T('perks: holder gets NO cooldown skip by default (Owner skin only)', k.cd.left('royal') > 0 && !k.perkHero());
+  k = hero('n:nokit', true, true); k.noCooldown = true; k.use('royal'); T('perks: holder gets NO cooldown skip by default (Owner skin only)', k.cd.left('royal') > 0 && !k.perkHero());
   k = hero('o:owner', true, true); k.noCooldown = true; k.use('royal'); T('perks: Owner skin keeps no-cooldowns', k.cd.left('royal') === 0 && k.perkHero());
-  TUNING.perks.saberHolderResources = true; k = hero('n:darius', true, true); k.noCooldown = true; T('perks: single flag extends perks to saber holder', k.perkHero() && (k.use('royal'), k.cd.left('royal') === 0)); k = hero('n:darius', true, false); k.noCooldown = true; T('perks flag never helps non-owner account', !k.perkHero()); TUNING.perks.saberHolderResources = false;
+  TUNING.perks.saberHolderResources = true; k = hero('n:nokit', true, true); k.noCooldown = true; T('perks: single flag extends perks to saber holder', k.perkHero() && (k.use('royal'), k.cd.left('royal') === 0)); k = hero('n:nokit', true, false); k.noCooldown = true; T('perks flag never helps non-owner account', !k.perkHero()); TUNING.perks.saberHolderResources = false;
 }
 // ---- saber-holder boost (x holderMul max HP/MP/SP), not invincible ----
 { const { TUNING, PLAYER } = await import('../www/proto3d/combat/data.js'); const M = TUNING.perks.holderMul;
   const hero = (id, saber, unlocked) => { const k = mk(); k.ownerUnlocked = unlocked; k.setHero({ id, saber }); k.applyMax(); return k; };
-  let k = hero('n:darius', true, true); T('boost: holder max HP/MP/SP x' + M, k.res.max.hp === PLAYER.hp * M && k.res.max.mp === PLAYER.mp * M && k.res.max.sp === PLAYER.sp * M && k.res.hp === k.res.max.hp);
-  k.setHero({ id: 'n:darius', saber: false }); k.applyMax(); T('boost off: reverts when saber swapped away', k.res.max.hp === PLAYER.hp && k.res.max.mp === PLAYER.mp && k.res.max.sp === PLAYER.sp && k.res.hp === PLAYER.hp);
-  k.setHero({ id: 'n:darius', saber: true }); k.applyMax(); T('boost on again when saber back', k.res.max.hp === PLAYER.hp * M);
-  k = hero('n:darius', true, false); T('boost: non-owner account never boosted', k.res.max.hp === PLAYER.hp && k.res.max.mp === PLAYER.mp && k.res.max.sp === PLAYER.sp);
-  k = hero('n:darius', false, true); T('boost: other hero without saber not boosted', k.res.max.hp === PLAYER.hp);
-  k = mk(); k.ownerUnlocked = true; k.setHero({ id: 'n:darius', saber: true }); k.applyMax(); k.ownerUnlocked = false; k.update(1 / 60); T('boost: reverts live if owner gate drops', k.res.max.hp === PLAYER.hp);
+  let k = hero('n:nokit', true, true); T('boost: holder max HP/MP/SP x' + M, k.res.max.hp === PLAYER.hp * M && k.res.max.mp === PLAYER.mp * M && k.res.max.sp === PLAYER.sp * M && k.res.hp === k.res.max.hp);
+  k.setHero({ id: 'n:nokit', saber: false }); k.applyMax(); T('boost off: reverts when saber swapped away', k.res.max.hp === PLAYER.hp && k.res.max.mp === PLAYER.mp && k.res.max.sp === PLAYER.sp && k.res.hp === PLAYER.hp);
+  k.setHero({ id: 'n:nokit', saber: true }); k.applyMax(); T('boost on again when saber back', k.res.max.hp === PLAYER.hp * M);
+  k = hero('n:nokit', true, false); T('boost: non-owner account never boosted', k.res.max.hp === PLAYER.hp && k.res.max.mp === PLAYER.mp && k.res.max.sp === PLAYER.sp);
+  k = hero('n:nokit', false, true); T('boost: other hero without saber not boosted', k.res.max.hp === PLAYER.hp);
+  k = mk(); k.ownerUnlocked = true; k.setHero({ id: 'n:nokit', saber: true }); k.applyMax(); k.ownerUnlocked = false; k.update(1 / 60); T('boost: reverts live if owner gate drops', k.res.max.hp === PLAYER.hp);
   k = hero('o:owner', true, true); T('boost: Owner skin keeps 999,999 (no multiplier)', k.res.max.hp === PLAYER.ownerHp && k.res.max.mp === PLAYER.mp);
-  k = hero('n:darius', true, true); k.res.hp = 10; k.god = false; k.addEnemy('titan', 0, 4); let took = 0; k.on('enemyAttack', a => { if (a.dmg > 0) took++; }); for (let i = 0; i < 60 * 6; i++) k.update(1 / 60); T('holder: NOT invincible (takes hits, goes down)', took >= 1 || k.dead > 0);
-  k = hero('n:darius', true, true); k.noCooldown = true; k.use('royal'); T('holder: costs + cooldowns normal (no unlimited/no-cd)', k.res.mp === k.res.max.mp - 12 && k.cd.left('royal') > 0 && !k.perkHero());
+  k = hero('n:nokit', true, true); k.res.hp = 10; k.god = false; k.addEnemy('titan', 0, 4); let took = 0; k.on('enemyAttack', a => { if (a.dmg > 0) took++; }); for (let i = 0; i < 60 * 6; i++) k.update(1 / 60); T('holder: NOT invincible (takes hits, goes down)', took >= 1 || k.dead > 0);
+  k = hero('n:nokit', true, true); k.noCooldown = true; k.use('royal'); T('holder: costs + cooldowns normal (no unlimited/no-cd)', k.res.mp === k.res.max.mp - 12 && k.cd.left('royal') > 0 && !k.perkHero());
 }
 // ---- saber x12 current-HP rule ----
 { const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
@@ -120,9 +120,9 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   k = o(); const ev2 = []; k.on('damage', d => !d.toPlayer && ev2.push(d)); let r = k.addEnemy('raider', 0, 3); const full = r.hp; k.use(0); go(k, 0.5); T('x12: full-health monster shows hp*12', ev2[0].dmg === full * 12 && r.state === 'defeated');
   k = o(); let tt = k.addEnemy('titan', 0, 8); const e3 = []; k.on('damage', d => !d.toPlayer && e3.push(d)); k.use(0); go(k, 0.6); T('x12: boss (Ashen Titan) stays flat 99,999 by default', tt.max - tt.hp === 99999 && e3.every(d => d.dmg === 99999) && TUNING.perks.saberBossesX12 === false);
   TUNING.perks.saberBossesX12 = true; k = o(); tt = k.addEnemy('titan', 0, 8); const e4 = []; k.on('damage', d => !d.toPlayer && e4.push(d)); k.use(0); go(k, 0.6); T('x12: flag flips bosses to current HP x12', e4[0] && e4[0].dmg === 5000000 * 12 && tt.state === 'defeated'); TUNING.perks.saberBossesX12 = false;
-  k = o('n:darius', true, true); m = k.addEnemy('wolf', 0, 3); m.hp = 50; const e5 = []; k.on('damage', d => !d.toPlayer && e5.push(d)); k.use('royal'); go(k, 0.6); T('any hero holding the saber: skills use the saber rule (x12 current HP)', e5.some(d => d.dmg === 600) && m.state === 'defeated');
-  k = o('n:darius', true, false); m = k.addEnemy('wolf', 0, 3); m.hp = 50; const e6 = []; k.on('damage', d => !d.toPlayer && e6.push(d)); k.use(0); go(k, 0.6); T('x12: non-owner account never gets x12', !e6.some(d => d.dmg === 600));
-  k = o('n:darius', false, true); m = k.addEnemy('wolf', 0, 3); m.hp = 1000; const e7 = []; k.on('damage', d => !d.toPlayer && e7.push(d)); k.use(0); go(k, 0.6); T('x12: other weapons unchanged (unarmed 28-48)', e7.length > 0 && e7.every(d => d.dmg < 200));
+  k = o('n:nokit', true, true); m = k.addEnemy('wolf', 0, 3); m.hp = 50; const e5 = []; k.on('damage', d => !d.toPlayer && e5.push(d)); k.use('royal'); go(k, 0.6); T('any hero holding the saber: skills use the saber rule (x12 current HP)', e5.some(d => d.dmg === 600) && m.state === 'defeated');
+  k = o('n:nokit', true, false); m = k.addEnemy('wolf', 0, 3); m.hp = 50; const e6 = []; k.on('damage', d => !d.toPlayer && e6.push(d)); k.use(0); go(k, 0.6); T('x12: non-owner account never gets x12', !e6.some(d => d.dmg === 600));
+  k = o('n:nokit', false, true); m = k.addEnemy('wolf', 0, 3); m.hp = 1000; const e7 = []; k.on('damage', d => !d.toPlayer && e7.push(d)); k.use(0); go(k, 0.6); T('x12: other weapons unchanged (unarmed 28-48)', e7.length > 0 && e7.every(d => d.dmg < 200));
   k = o(); const hp0 = k.res.hp; k.use(0); go(k, 0.5); T('x12: never touches the owner', k.res.hp === hp0);
 }
 { const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
@@ -142,7 +142,7 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   T('ult: hostile characters die; npc/party/friendly skipped by default (unholy variant tested below)', ch.state === 'defeated' && npc.state !== 'defeated' && pty.state !== 'defeated' && fr.state !== 'defeated');
   TUNING.ult.dmgMul = 7; k = o(); const m7 = k.addEnemy('wolf', 0, 8); m7.hp = 20; const e7 = []; k.on('damage', d => !d.toPlayer && e7.push(d)); k.use('unholy'); go(k, 2.5); T('ult: multiplier adjustable', e7[0].dmg === 140); TUNING.ult.dmgMul = 50;
   k = o(); const bo = k.addEnemy('titan', 0, 10); k.use('unholy'); go(k, 2.5); T('ult: boss still follows bossesInstantKill=false', bo.state !== 'defeated' && bo.max - bo.hp === 99999 * 1 || bo.max - bo.hp >= 99999 && bo.state !== 'defeated');
-  k = o(); k.setHero({ id: 'n:darius', saber: false }); k.ownerUnlocked = false; k.fury = 100; T('ult: non-owner cannot cast', !k.use('unholy')); }
+  k = o(); k.setHero({ id: 'n:nokit', saber: false }); k.ownerUnlocked = false; k.fury = 100; T('ult: non-owner cannot cast', !k.use('unholy')); }
 { const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
   const o = () => { const k = mk(); k.ownerUnlocked = true; k.res.unlimited = true; k.fury = 100; return k; };
   const setup = k => { const r = {}; r.mon = k.addEnemy('wolf', 0, 8); r.chr = k.addEnemy('raider', 2, 8); r.npc = k.addEnemy('wolf', 3, 8); r.pty = k.addEnemy('wolf', 4, 8); r.fr = k.addEnemy('wolf', -3, 8); r.own = k.addEnemy('wolf', -4, 8); r.far = k.addEnemy('wolf', 0, 70); r.chr.isCharacter = true; r.npc.npc = true; r.pty.party = true; r.fr.friendly = true; r.own.owner = true; return r; };
@@ -154,7 +154,7 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   T('UNHOLY: kills everything in range incl. npc/party/friendly entities', ['mon', 'chr', 'npc', 'pty', 'fr'].every(n => r[n].state === 'defeated'));
   T('UNHOLY: never the owner (flagged enemy or bystander) and not out of range', r.own.state !== 'defeated' && r.far.state !== 'defeated' && bk.length === 1 && bk[0].b.id === 'party1' && bk[0].dmg === 100 * 50);
   T('UNHOLY: x50 current HP shown', ev.find(d => d.e === r.mon).dmg === r.mon.max * 50);
-  k = o(); k.setHero({ id: 'n:darius', saber: true }); k.ownerUnlocked = true; T('both ultimates work for saber holders (owner account)', k.ownerOk() && k.use('unholy'));
+  k = o(); k.setHero({ id: 'n:nokit', saber: true }); k.ownerUnlocked = true; T('both ultimates work for saber holders (owner account)', k.ownerOk() && k.use('unholy'));
   k = o(); k.ownerUnlocked = false; k.fury = 100; T('both ultimates denied without owner gate', !k.use('holy') && !k.use('unholy'));
   k = o(); const bb = k.addEnemy('titan', 0, 10); k.use('holy'); go(k, 2.5); T('HOLY: boss follows bossesInstantKill=false', bb.state !== 'defeated');
 }
@@ -164,7 +164,7 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   T('skills: Royal 300% / Chains 600% / Wrath 1200% of 99,999', dm('royal') === 299997 && dm('chains') === 599994 && dm('wrath') === 1199988);
   const sv = { ...TUNING.skillMul }; TUNING.skillMul.royal = 10; T('skills: multipliers live in one config block', dm('royal') === 999990); Object.assign(TUNING.skillMul, sv);
   let k = o(true); const w = k.addEnemy('wolf', 0, 3); w.hp = 30; const ev = []; k.on('damage', d => !d.toPlayer && ev.push(d)); k.use(0); go(k, 0.5); T('basic saber hit stays x12 current HP', ev[0].dmg === 360);
-  k = o(); k.setHero({ id: 'n:darius', saber: false }); k.ownerUnlocked = false; const t2 = k.addEnemy('wolf', 0, 3); { const k2 = o(true); const w2 = k2.addEnemy('wolf', 0, 4); w2.hp = 25; const e2 = []; k2.on('damage', d => !d.toPlayer && e2.push(d)); k2.use('royal'); go(k2, 0.6); T('skills WITH saber held: saber rule (x12 current HP), not the skill multiplier', e2[0] && e2[0].dmg === 300); const t3 = o(true); const tt3 = t3.addEnemy('titan', 0, 6); const e3 = []; t3.on('damage', d => !d.toPlayer && e3.push(d)); t3.use('wrath'); go(t3, 0.6); T('saber held + boss: flat 99,999 (no x1200)', e3[0].dmg === 99999); }
+  k = o(); k.setHero({ id: 'n:nokit', saber: false }); k.ownerUnlocked = false; const t2 = k.addEnemy('wolf', 0, 3); { const k2 = o(true); const w2 = k2.addEnemy('wolf', 0, 4); w2.hp = 25; const e2 = []; k2.on('damage', d => !d.toPlayer && e2.push(d)); k2.use('royal'); go(k2, 0.6); T('skills WITH saber held: saber rule (x12 current HP), not the skill multiplier', e2[0] && e2[0].dmg === 300); const t3 = o(true); const tt3 = t3.addEnemy('titan', 0, 6); const e3 = []; t3.on('damage', d => !d.toPlayer && e3.push(d)); t3.use('wrath'); go(t3, 0.6); T('saber held + boss: flat 99,999 (no x1200)', e3[0].dmg === 99999); }
   T('skills: no owner skill without gate', !k.use('royal') && !k.use('chains') && !k.use('wrath'));
 }
 { const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
@@ -175,7 +175,7 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   T('bamboo: owner skills use the 99,999 x300/600/1200% formula', dm('royal') === 299997 && dm('chains') === 599994 && dm('wrath') === 1199988);
   let k = o(); const w = k.addEnemy('wolf', 0, 3); const ev = []; k.on('damage', d => !d.toPlayer && ev.push(d)); k.use(0); go(k, 0.5); T('bamboo (owner): base hit is flat 99,999', ev[0] && ev[0].dmg === 99999);
   { TUNING.ownerWeaponBase = 0; const kk = o(); kk.addEnemy('wolf', 0, 3); const e9 = []; kk.on('damage', d => !d.toPlayer && e9.push(d)); kk.use(0); go(kk, 0.5); T('bamboo config off: low own damage', e9[0] && e9[0].dmg >= 4 && e9[0].dmg <= 20); TUNING.ownerWeaponBase = 99999; }
-  { const kk = mk(false); kk.setHero({ id: 'n:darius', saber: false }); kk.ownerUnlocked = true; kk.addEnemy('wolf', 0, 3); const e8 = []; kk.on('damage', d => !d.toPlayer && e8.push(d)); kk.use(0); go(kk, 0.5); T('non-owner hero unaffected (normal unarmed damage)', e8[0] && e8[0].dmg < 200); }
+  { const kk = mk(false); kk.setHero({ id: 'n:nokit', saber: false }); kk.ownerUnlocked = true; kk.addEnemy('wolf', 0, 3); const e8 = []; kk.on('damage', d => !d.toPlayer && e8.push(d)); kk.use(0); go(kk, 0.5); T('non-owner hero unaffected (normal unarmed damage)', e8[0] && e8[0].dmg < 200); }
   k = o(); k.bamboo = false; const e2 = []; const w2 = k.addEnemy('wolf', 0, 3); w2.hp = 25; k.on('damage', d => !d.toPlayer && e2.push(d)); k.use(0); go(k, 0.5); T('bamboo off: saber rule returns (x12)', e2[0].dmg === 300);
 }
 // ---- hero kits (data-driven archetypes) ----
@@ -211,17 +211,17 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
 // ---- boss patterns (Ashen Titan) ----
 { const { BOSS_PATTERNS, ENEMIES } = await import('../www/proto3d/combat/data.js'); const { pickPattern } = await import('../www/proto3d/combat/ai.js'); const P = Object.fromEntries(BOSS_PATTERNS.titan.map(p => [p.id, p]));
   const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
-  const t0 = new CombatController({ HS: 1.5, rng: rnd }); t0.setHero({ id: 'n:darius', saber: false }); const ti0 = t0.addEnemy('titan', 0, 0);
+  const t0 = new CombatController({ HS: 1.5, rng: rnd }); t0.setHero({ id: 'n:nokit', saber: false }); const ti0 = t0.addEnemy('titan', 0, 0);
   T('titan rules intact: 5M HP, scale 6, boss, bossesInstantKill false', ti0.max === 5000000 && ENEMIES.titan.scale === 6 && ENEMIES.titan.boss && TUNING.ult.bossesInstantKill === false);
   const seq = []; for (let i = 0; i < 6; i++) seq.push(pickPattern(ti0).id); T('phase 1 pattern rotation: stomp, sweep, slam repeating', seq.join() === 'stomp,sweep,slam,stomp,sweep,slam');
   ti0.phase = 2; ti0.patI = 0; const s2 = []; for (let i = 0; i < 4; i++) s2.push(pickPattern(ti0).id); T('phase 2 adds Rage Quake', s2.join() === 'stomp,sweep,slam,quake');
   T('non-boss has no pattern (classic attack)', pickPattern(t0.addEnemy('wolf', 0, 0)) === null);
-  const strike = (pat, px, pz, yaw = 0) => { const k = new CombatController({ HS: 1.5, rng: rnd }); k.setHero({ id: 'n:darius', saber: false }); k.setPlayer(px, pz, 0); k.res.hp = k.res.max.hp = 1e9; const e = k.addEnemy('titan', 0, 0); e.yaw = yaw; e.pat = P[pat]; let h = null, d = 0; k.on('bossAttack', b => h = b.hit); k.on('damage', x => { if (x.toPlayer) d = x.dmg; }); k.enemyStrike(e); return { hit: h, dmg: d }; };
+  const strike = (pat, px, pz, yaw = 0) => { const k = new CombatController({ HS: 1.5, rng: rnd }); k.setHero({ id: 'n:nokit', saber: false }); k.setPlayer(px, pz, 0); k.res.hp = k.res.max.hp = 1e9; const e = k.addEnemy('titan', 0, 0); e.yaw = yaw; e.pat = P[pat]; let h = null, d = 0; k.on('bossAttack', b => h = b.hit); k.on('damage', x => { if (x.toPlayer) d = x.dmg; }); k.enemyStrike(e); return { hit: h, dmg: d }; };
   T('ring: hits inside reach, misses outside', strike('stomp', 0, 10).hit === true && strike('stomp', 0, 40).hit === false);
   T('cone: hits in front, misses behind and to the side', strike('sweep', 0, 10, 0).hit === true && strike('sweep', 0, -10, 0).hit === false && strike('sweep', 14, 0.1, 0).hit === false);
   T('line: hits down the facing axis, side-step dodges it', strike('slam', 0, 18, 0).hit === true && strike('slam', 9, 18, 0).hit === false && strike('slam', 0, -5, 0).hit === false);
   const a = strike('stomp', 0, 5), b = strike('slam', 0, 5); T('pattern damage scales (slam > stomp, via calc.js hit x dmg)', a.dmg > 0 && b.dmg > a.dmg * 1.2);
-  const k = new CombatController({ HS: 1.5, rng: rnd }); k.setHero({ id: 'n:darius', saber: false }); k.setPlayer(0, 20, 0); k.res.hp = k.res.max.hp = 1e9; k.god = true; const e = k.addEnemy('titan', 0, 0); e.aggroR = 100; let ph = 0, tel = []; k.on('bossPhase', () => ph++);
+  const k = new CombatController({ HS: 1.5, rng: rnd }); k.setHero({ id: 'n:nokit', saber: false }); k.setPlayer(0, 20, 0); k.res.hp = k.res.max.hp = 1e9; k.god = true; const e = k.addEnemy('titan', 0, 0); e.aggroR = 100; let ph = 0, tel = []; k.on('bossPhase', () => ph++);
   for (let i = 0; i < 60 * 12; i++) { k.update(1 / 60); if (e.state === 'telegraph' && !tel.length) tel.push(e.curTele); } T('boss telegraphs a pattern with its own duration', tel.length === 1 && tel[0] > 0.9);
   e.hp = e.max * 0.49; k.update(1 / 60); k.update(1 / 60); T('phase 2 starts once at < 50% HP (event once)', e.phase === 2 && ph === 1);
   e.state = 'chase'; e.atkCd = 0; e.pat = null; e.patI = 3; let tel2 = 0; for (let i = 0; i < 60 * 8 && !tel2; i++) { k.update(1 / 60); if (e.state === 'telegraph') tel2 = e.curTele; } T('phase 2 shortens telegraphs (x0.75)', tel2 > 0 && Math.abs(tel2 - (e.pat ? 0 : 0) - tel2) < 1e-9 && tel2 <= 1.4 * 0.75 + 1e-6 + 0.3);
@@ -236,5 +236,17 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   const keep = TUNING.ult.bossesInstantKill; TUNING.ult.bossesInstantKill = true; k = o(); const t2 = k.addEnemy('titan', 0, 20); k.useUltimate2(); go(k, 2); T('...but kills the boss when bossesInstantKill=true', t2.state === 'defeated'); TUNING.ult.bossesInstantKill = keep;
   k = o(false); const w = k.addEnemy('wolf', 0, 8); T('Thunderstorm is owner-only (denied without owner gate)', !k.useUltimate2() && w.state !== 'defeated');
   k = o(); k.setHero({ id: 'aldric', saber: false }); k.addEnemy('wolf', 0, 8); T('Thunderstorm denied for a normal hero', !k.useUltimate2());
+}
+// ---- weapon + armor loadout ----
+{ const { KITS } = await import('../www/proto3d/combat/herokits.js'); const { PLAYER } = await import('../www/proto3d/combat/data.js'); const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
+  T('all 20 heroes have a signature weapon + armor set (data-driven)', Object.values(KITS).every(K => K.weapon && K.weapon.name && typeof K.weapon.dmgPct === 'number' && K.armor && K.armor.name && K.armor.hpPct >= 0 && K.armor.defPct >= 0));
+  const glbs = Object.values(KITS).filter(K => K.weapon.glb).length; T('weapon models referenced for ' + glbs + ' heroes (rest listed as needs)', glbs >= 10);
+  const mkr = id => { const k = new CombatController({ HS: 1.5, rng: () => 0.5 }); k.setHero({ id, saber: false }); k.setPlayer(0, 0, 0); return k; };
+  let k = mkr('aldric'); T('armor: max HP/MP/SP bonuses applied for kit heroes', k.res.max.hp === Math.round(PLAYER.hp * (1 + KITS.aldric.armor.hpPct)) && mkr('selene').res.max.mp === Math.round(PLAYER.mp * (1 + KITS.selene.armor.mpPct)));
+  k = mkr('o:owner'); T('armor never touches the Owner (999,999 HP rule)', k.res.max.hp === k.P.ownerHp);
+  const hit = id => { const c = mkr(id); const w = c.addEnemy('wolf', 0, 3); w.hp = w.max = 1e6; const ev = []; c.on('damage', d => !d.toPlayer && ev.push(d.dmg)); c.use(0); go(c, 0.6); return ev[0]; };
+  const hn = hit('n:nokit'), ha = hit('aldric'); T('weapon dmgPct raises NORMAL damage for kit heroes (aldric +5%)', ha > hn && Math.abs(ha / hn - 1.05) < 0.02);
+  const take = id => { const c = mkr(id); c.res.hp = c.res.max.hp = 1e9; const w = c.addEnemy('wolf', 0, 1); let d = 0; c.on('damage', x => { if (x.toPlayer) d = x.dmg; }); for (let i = 0; i < 20 && !d; i++) { w.atkCd = 0; c.enemyStrike(w); c.iframes = 0; } return d; };
+  T('armor DEF lowers damage taken (garruk < nokit)', take('garruk') <= take('n:nokit'));
 }
 console.log(ok + ' pass, ' + bad + ' fail'); process.exit(bad ? 1 : 0);

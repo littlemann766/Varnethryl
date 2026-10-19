@@ -106,6 +106,31 @@ export const KITS = {
     sk('rook', 3, { name: "Feral Mend", icon: 'heal', cd: 12, cost: { sp: 25 }, kind: 'heal', heal: 0.3 }),
     ult('rook', { name: "Pack Stampede", icon: 'storm', kind: 'line', range: 20, arc: 0.95, mult: 6.5 })] },
 };
+
+/* ---- Weapon + armor loadout per hero (data only; no model changes). weapon.glb = file in /workspace/weapons (Beth) when one fits, else null; dmgPct = bonus to NORMAL damage (non-Owner only). armor = the hero's EXISTING outfit, stat bonuses as fractions of max HP/MP/SP and DEF. ---- */
+export const LOADOUT = {
+  aldric: { weapon: { name: 'Steel Longsword', glb: null, model: 'procedural (aldric.js)', dmgPct: 0.05 }, armor: { name: 'Lionguard Plate', hpPct: 0.2, mpPct: 0, spPct: 0, defPct: 0.15 } },
+  darius: { weapon: { name: 'Shadow Greatsword', glb: null, model: 'procedural (heroes2.js)', dmgPct: 0.08 }, armor: { name: 'Umbral Plate', hpPct: 0.15, mpPct: 0, spPct: 0, defPct: 0.12 } },
+  selene: { weapon: { name: 'Crystal Staff', glb: null, model: 'procedural (heroes2.js)', dmgPct: 0.05 }, armor: { name: 'Frostveil Robes', hpPct: 0.05, mpPct: 0.2, spPct: 0, defPct: 0.04 } },
+  elira: { weapon: { name: 'Longbow', glb: null, model: 'none yet', dmgPct: 0.06 }, armor: { name: 'Ranger Leathers', hpPct: 0.08, mpPct: 0.05, spPct: 0.1, defPct: 0.06 } },
+  orin: { weapon: { name: 'Ashlance Spear', glb: null, model: 'none yet', dmgPct: 0.06 }, armor: { name: 'Ashplate Cuirass', hpPct: 0.15, mpPct: 0, spPct: 0.05, defPct: 0.12 } },
+  seraphine: { weapon: { name: 'Holy Mace', glb: 'seraphine_holymace', model: 'weapons/seraphine_holymace.glb', dmgPct: 0.06 }, armor: { name: 'Sunforged Armor', hpPct: 0.18, mpPct: 0.05, spPct: 0, defPct: 0.14 } },
+  talia: { weapon: { name: 'Storm Staff', glb: null, model: 'none yet', dmgPct: 0.05 }, armor: { name: 'Stormcaller Garb', hpPct: 0.05, mpPct: 0.18, spPct: 0, defPct: 0.04 } },
+  finn: { weapon: { name: 'Duelist Rapier', glb: 'finn_rapier', model: 'weapons/finn_rapier.glb (+ finn_parry_dagger.glb off-hand)', dmgPct: 0.07 }, armor: { name: 'Crimson Doublet', hpPct: 0.06, mpPct: 0, spPct: 0.15, defPct: 0.05 } },
+  brynn: { weapon: { name: 'Repeater Crossbow', glb: 'brynn_repeater_crossbow', model: 'weapons/brynn_repeater_crossbow.glb', dmgPct: 0.06 }, armor: { name: 'Cogwright Apron', hpPct: 0.1, mpPct: 0, spPct: 0.12, defPct: 0.08 } },
+  mirelle: { weapon: { name: 'Thorn Sickle', glb: 'mirelle_sickle', model: 'weapons/mirelle_sickle.glb', dmgPct: 0.05 }, armor: { name: 'Rootweave Vestments', hpPct: 0.08, mpPct: 0.15, spPct: 0, defPct: 0.05 } },
+  nyx: { weapon: { name: 'Twin Daggers', glb: 'nyx_dagger', model: 'weapons/nyx_dagger.glb (R+L)', dmgPct: 0.07 }, armor: { name: 'Shadowsilk Leathers', hpPct: 0.05, mpPct: 0, spPct: 0.18, defPct: 0.05 } },
+  vesper: { weapon: { name: 'Silver Hand Crossbow', glb: 'hand_crossbow', model: 'weapons/hand_crossbow.glb', dmgPct: 0.06 }, armor: { name: 'Hunter Coat', hpPct: 0.1, mpPct: 0, spPct: 0.1, defPct: 0.08 } },
+  thorne: { weapon: { name: 'Radiant Spellbook (off-hand)', glb: 'spellbook', model: 'weapons/spellbook.glb (off-hand)', dmgPct: 0.04 }, armor: { name: 'Vestments of Light', hpPct: 0.06, mpPct: 0.2, spPct: 0, defPct: 0.05 } },
+  rook: { weapon: { name: 'Beastmaster Whip', glb: 'rook_whip', model: 'weapons/rook_whip.glb', dmgPct: 0.05 }, armor: { name: 'Wildbane Hides', hpPct: 0.12, mpPct: 0, spPct: 0.12, defPct: 0.08 } },
+  asha: { weapon: { name: 'Hand Wraps + Knuckles', glb: 'asha_knuckles', model: 'weapons/asha_knuckles.glb', dmgPct: 0.07 }, armor: { name: 'Saffron Gi', hpPct: 0.1, mpPct: 0.05, spPct: 0.12, defPct: 0.06 } },
+  rowan: { weapon: { name: 'Fire Staff', glb: null, model: 'none yet', dmgPct: 0.05 }, armor: { name: 'Emberweave Robes', hpPct: 0.04, mpPct: 0.2, spPct: 0, defPct: 0.03 } },
+  kael: { weapon: { name: 'Rune Staff', glb: null, model: 'none yet', dmgPct: 0.05 }, armor: { name: 'Runebound Coat', hpPct: 0.06, mpPct: 0.18, spPct: 0, defPct: 0.05 } },
+  cedric: { weapon: { name: 'Lute', glb: null, model: 'none yet', dmgPct: 0.04 }, armor: { name: 'Minstrel Finery', hpPct: 0.06, mpPct: 0.1, spPct: 0.08, defPct: 0.04 } },
+  morwen: { weapon: { name: 'Bone Scythe', glb: 'morwen_scythe', model: 'weapons/morwen_scythe.glb', dmgPct: 0.06 }, armor: { name: 'Blackveil Shroud', hpPct: 0.06, mpPct: 0.16, spPct: 0, defPct: 0.06 } },
+  garruk: { weapon: { name: 'Stonefist Greataxe', glb: 'garruk_greataxe', model: 'weapons/garruk_greataxe.glb', dmgPct: 0.08 }, armor: { name: 'Stonefist Harness', hpPct: 0.22, mpPct: 0, spPct: 0.05, defPct: 0.15 } },
+};
+for (const k of Object.keys(KITS)) Object.assign(KITS[k], LOADOUT[k] || {});
 export const heroKey = id => String(id || '').replace(/^[a-z]:/, '').replace(/(_(smooth|new\d*|cl_arms|fight\d*|arms))+$/, '');
 export const kitFor = id => KITS[heroKey(id)] || null;
 export const kitSkill = (kit, id) => (kit && kit.skills.find(s => s.id === id)) || null;

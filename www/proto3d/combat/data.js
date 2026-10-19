@@ -5,9 +5,11 @@ export const TUNING = {
   owner: { hp: 999999, saber: 99999 },
   /* Unholy Destruction (Owner ultimate). ONE config block: bossesInstantKill=false => bosses (Ashen Titan...) take the normal owner saber hit instead of dying. */
   perks: { saberBossesX12: false, saberMul: 12, saberHolderResources: false, holderMul: 3 },   // holderMul: max HP/MP/SP multiplier for a non-Owner hero holding the Owner saber (owner account only)   // false: unlimited MP/SP + no cooldowns only for the Owner skin; true: any hero holding the Owner saber gets them too
+  ownerWeaponBase: 99999,   // OWNER holding ANY weapon except the lightsaber: base damage per hit (0 = off, use the weapon's own damage)
   skillMul: { royal: 3, chains: 6, wrath: 12 },   // OWNER SKILL DAMAGE = flat 99,999 x this (300% / 600% / 1200%); owner gate enforced in the controller
   ult: { dmgMul: 50, radius: 25, delay: 1.5, cooldown: 35, fury: 100, bossesInstantKill: false, furyPerBasic: 8, furyPerSkill: 5 },
 };
+export const BAMBOO = { min: 4, max: 8 };   // Bamboo Stick (test weapon, owner account only): low base damage; owner skills use the 99,999 x skillMul rule with it
 export const UNARMED = { min: TUNING.normal.dmg[0], max: TUNING.normal.dmg[1] };                 // everybody else (no weapon in the fight test)
 export const SABER = { min: 99999, max: 99999 };   // = TUNING.owner.saber                     // Owner lightsaber: 99,999 flat per hit (boss decision), NOT combinedStats; Owner gate only
 export const PLAYER = {

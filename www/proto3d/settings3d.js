@@ -103,6 +103,7 @@ function build() {
     full.addEventListener('click', () => { hide(); if (E.openCheatPanel) E.openCheatPanel(); });
     const tt = el('button', { type: 'button', textContent: 'Spawn Ashen Titan' }); tt.dataset.set = 'owner-titan';
     tt.addEventListener('click', () => { msg.textContent = ch.spawnTitan() ? 'The Ashen Titan awakens.' : 'A Titan is already alive.'; });
+    const bb = toggleBtn('Bamboo Stick (test weapon)', () => { const F = window.__p3d && window.__p3d.fight; return !!(F && F.cc && F.cc.bamboo); }, (v) => { const F = window.__p3d && window.__p3d.fight; if (F && F.setBamboo) F.setBamboo(v); }, 'owner-bamboo'); syncs.push(bb._sync); box.appendChild(row(bb));
     box.appendChild(row(mx, full, tt)); box.appendChild(msg); body.appendChild(box);
     const dm = el('div', { className: 'own' }); dm.appendChild(sec('Owner damage'));
     const sd = () => import('./combat/data.js');

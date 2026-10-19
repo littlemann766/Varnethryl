@@ -54,6 +54,13 @@ export function createFight(env) {
     const h = env.hero(), hb = bone(h, drawn ? 'weapon_R' : 'weapon_back'); if (!saber || !hb) return false;
     hb.add(saber); saber.position.set(0, 0, 0); saber.quaternion.identity(); saber.scale.set(1, 1, 1); setBlade(drawn, drawn ? 0.001 : 0); if (drawn) igniteT = 0; return true;
   }
+  /* Bamboo Stick: procedural low-poly staff (green segments + darker nodes), auto-scaled to the hero (HS) and parented to the right-hand bone. */
+  let BAM = null;
+  function bambooBuild() { const g = new THREE.Group(), seg = new THREE.MeshStandardMaterial({ color: 0x5fae3a, roughness: 0.8, flatShading: true }), nod = new THREE.MeshStandardMaterial({ color: 0x2f6b1c, roughness: 0.9, flatShading: true }); const L = 2.4 * (env.HS ? env.HS / 1.5 : 1), n = 5, sl = L / n;
+    for (let i = 0; i < n; i++) { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.06, sl * 0.92, 6), seg); m.position.y = (i + 0.5) * sl - L * 0.25; g.add(m); const k = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, sl * 0.1, 6), nod); k.position.y = (i + 1) * sl - L * 0.25; g.add(k); }
+    g.name = 'bamboo_stick'; g.traverse(o => { o.frustumCulled = false; }); return g; }
+  function bambooSync() { const want = cc.bambooOn() && cc.dead <= 0; if (want) { if (!BAM) BAM = bambooBuild(); const hb = bone(env.hero(), 'weapon_R') || bone(env.hero(), 'weapon_back'); if (hb && BAM.parent !== hb) { hb.add(BAM); BAM.position.set(0, 0, 0); BAM.quaternion.identity(); } } else if (BAM && BAM.parent) BAM.parent.remove(BAM); }
+  function bambooDispose() { if (BAM) { if (BAM.parent) BAM.parent.remove(BAM); BAM.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); BAM = null; } }
   async function equip() {
     if (!canWield() || sheathed) return false; if (saber && saber.parent && saber.parent.name === 'weapon_R') return true;
     if (!saber) { if (saberLoading) return false; saberLoading = true; try { saberG = await env.loadGLTF(SABER_URL + '?v=1.1.8'); saber = saberG.scene; saber.traverse(o => { o.frustumCulled = false; }); } catch (e) { saberLoading = false; return false; } saberLoading = false; }
@@ -136,7 +143,7 @@ export function createFight(env) {
   function ltUpdate(dt, active, m) { if (!LT) return; if (active && m) { LT.acc += dt; const gap = m.st === 'burst' ? 0.03 : 0.09; while (LT.acc > gap) { LT.acc -= gap; const a = Math.random() * 6.283, d = Math.sqrt(Math.random()) * m.r; ltStrike(m.x + Math.cos(a) * d, m.z + Math.sin(a) * d); } } for (const b of LT.bolts) { if (!b.l.visible) continue; b.t += dt; const k = 1 - b.t / 0.2; if (k <= 0) { b.l.visible = false; continue; } b.l.material.opacity = k > 0.6 ? 1 : k; } }
   function ltDispose() { if (!LT) return; for (const b of LT.bolts) { scene.remove(b.l); b.l.geometry.dispose(); b.l.material.dispose(); } LT = null; }
   const metHide = () => { if (MET) { MET.st = 'off'; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) o.visible = false; } };
-  function metDispose() { ltDispose(); if (!MET) return; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) { scene.remove(o); o.geometry.dispose(); o.material.dispose(); } MET = null; }
+  function metDispose() { ltDispose(); bambooDispose(); if (!MET) return; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) { scene.remove(o); o.geometry.dispose(); o.material.dispose(); } MET = null; }
   const ROCK_R = 11, FALL_H = 75;
   function metStart(ev) { const m = metBuild(); m.st = 'fall'; m.t = 0; m.x = ev.x; m.z = ev.z; m.r = ev.radius; m.delay = ev.delay; m.mode = ev.mode; const uh = ev.mode === 'all'; m.zone.material.color.setHex(uh ? 0x8a2be2 : 0xffe9a0); m.burst.material.color.setHex(uh ? 0xb04bff : 0xfff0b0); m.rock.material.emissive.setHex(uh ? 0x000000 : 0xffd27a); m.rock.visible = !uh; m.shadow.visible = m.zone.visible = true; m.rock.scale.setScalar(ROCK_R); shakeA = 0.25; shakeT = 0.25; }
   function metImpact() { const m = MET; if (!m) return; m.st = 'burst'; m.t = 0; m.rock.visible = false; m.shadow.visible = false; m.burst.visible = true; m.burst.position.set(m.x, 1, m.z);
@@ -241,7 +248,7 @@ export function createFight(env) {
     }
     if (shakeT > 0) shakeT = Math.max(0, shakeT - dt); metUpdate(dt);
     hud.update(dt, cc.enemies);
-    if (!saber && canWield() && !sheathed && cc.dead <= 0) equip(); if (saber && (!canWield() || sheathed)) unequip();
+    bambooSync(); if (!saber && canWield() && !sheathed && cc.dead <= 0 && !cc.bambooOn()) equip(); if (saber && (!canWield() || sheathed)) unequip(); if (saber) saber.visible = !cc.bambooOn();
   }
   /* owner cheat hooks (cheats.js -> main.js) */
   const cheatHeal = () => { cc.res.full(); cc.potions = cc.P.potion.charges; if (cc.dead > 0) { cc.dead = 0; cc.act = null; env.hero().rotation.x = 0; } hud.say('Party healed', 1200); return true; };
@@ -263,6 +270,6 @@ export function createFight(env) {
     if (!on) return; on = false; metHide(); metDispose(); cc.meteors.length = 0; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
-  return { cheatHeal, cheatKill, cheatSpawn, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
+  return { setBamboo(v) { if (!ownerGate()) { cc.bamboo = false; return false; } cc.bamboo = !!v; bambooSync(); return cc.bamboo; }, bambooOn: () => cc.bambooOn(), cheatHeal, cheatKill, cheatSpawn, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
     get on() { return on; }, get hp() { return cc.res.hp; }, get kills() { return cc.kills; }, get monsters() { return cc.enemies; }, get hasSaber() { return !!saber; }, hurt(n) { cc.res.hp = Math.max(0, cc.res.hp - n); if (cc.res.hp <= 0 && cc.dead <= 0) { cc.dead = cc.P.respawn; cc.emit('playerDown'); } } };
 }

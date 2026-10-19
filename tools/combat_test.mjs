@@ -167,4 +167,15 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   k = o(); k.setHero({ id: 'n:darius', saber: false }); k.ownerUnlocked = false; const t2 = k.addEnemy('wolf', 0, 3); { const k2 = o(true); const w2 = k2.addEnemy('wolf', 0, 4); w2.hp = 25; const e2 = []; k2.on('damage', d => !d.toPlayer && e2.push(d)); k2.use('royal'); go(k2, 0.6); T('skills WITH saber held: saber rule (x12 current HP), not the skill multiplier', e2[0] && e2[0].dmg === 300); const t3 = o(true); const tt3 = t3.addEnemy('titan', 0, 6); const e3 = []; t3.on('damage', d => !d.toPlayer && e3.push(d)); t3.use('wrath'); go(t3, 0.6); T('saber held + boss: flat 99,999 (no x1200)', e3[0].dmg === 99999); }
   T('skills: no owner skill without gate', !k.use('royal') && !k.use('chains') && !k.use('wrath'));
 }
+{ const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
+  const o = (unl = true) => { const k = mk(true); k.ownerUnlocked = unl; k.res.unlimited = true; k.bamboo = true; return k; };
+  const dm = (id) => { const k = o(); k.addEnemy('titan', 0, 6); const ev = []; k.on('damage', d => !d.toPlayer && ev.push(d)); k.use(id); go(k, 0.6); return ev[0] && ev[0].dmg; };
+  T('bamboo: held by owner account => weapon is bamboo (replaces saber)', o().weapon() === 'bamboo');
+  T('bamboo: owner-account only (no gate => not equipped)', o(false).weapon() === 'saber' && !o(false).bambooOn());
+  T('bamboo: owner skills use the 99,999 x300/600/1200% formula', dm('royal') === 299997 && dm('chains') === 599994 && dm('wrath') === 1199988);
+  let k = o(); const w = k.addEnemy('wolf', 0, 3); const ev = []; k.on('damage', d => !d.toPlayer && ev.push(d)); k.use(0); go(k, 0.5); T('bamboo (owner): base hit is flat 99,999', ev[0] && ev[0].dmg === 99999);
+  { TUNING.ownerWeaponBase = 0; const kk = o(); kk.addEnemy('wolf', 0, 3); const e9 = []; kk.on('damage', d => !d.toPlayer && e9.push(d)); kk.use(0); go(kk, 0.5); T('bamboo config off: low own damage', e9[0] && e9[0].dmg >= 4 && e9[0].dmg <= 20); TUNING.ownerWeaponBase = 99999; }
+  { const kk = mk(false); kk.setHero({ id: 'n:darius', saber: false }); kk.ownerUnlocked = true; kk.addEnemy('wolf', 0, 3); const e8 = []; kk.on('damage', d => !d.toPlayer && e8.push(d)); kk.use(0); go(kk, 0.5); T('non-owner hero unaffected (normal unarmed damage)', e8[0] && e8[0].dmg < 200); }
+  k = o(); k.bamboo = false; const e2 = []; const w2 = k.addEnemy('wolf', 0, 3); w2.hp = 25; k.on('damage', d => !d.toPlayer && e2.push(d)); k.use(0); go(k, 0.5); T('bamboo off: saber rule returns (x12)', e2[0].dmg === 300);
+}
 console.log(ok + ' pass, ' + bad + ' fail'); process.exit(bad ? 1 : 0);

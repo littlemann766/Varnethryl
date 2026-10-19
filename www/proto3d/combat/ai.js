@@ -11,7 +11,7 @@ export class EnemyAIController {
     if (e.state !== 'telegraph' && e.state !== 'attack') e.yaw = Math.atan2(nx, nz);
     if (e.knockT > 0) { e.knockT = Math.max(0, e.knockT - dt); env.move(e, e.kx * 9 * e.knockT * dt * 4, e.kz * 9 * e.knockT * dt * 4); }
     switch (e.state) {
-      case 'idle': if (!p.dead && d < (e.aggroR !== undefined ? e.aggroR : e.def.aggro * env.HS / 1.5 * 1.4)) this.set(e, 'chase'); break;
+      case 'idle': if (!p.dead && d < (e.aggroR !== undefined ? e.aggroR : e.def.aggro * env.HS / 1.5 * 1.4 * Math.max(1, 0.5 + 0.5 * (env.RM || 1)))) this.set(e, 'chase'); break;
       case 'chase':
         if (p.dead) { this.set(e, 'idle'); break; }
         const spd = e.phase === 2 ? TUNING.boss.enrageSpeed : 1, pt = e.def.boss ? (e.pat || (e.pat = pickPattern(e))) : null, eng = pt ? pt.reach * env.HS + e.def.r : reach;

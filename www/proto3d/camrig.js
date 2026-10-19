@@ -58,7 +58,8 @@ export function createCamRig(env) {
     /* never through walls/buildings/trees: pull the camera in along the line from the hero, every frame, on the final position */
     const t = segmentClearT(colliders, c.heroX, c.heroZ, pos.x, pos.z, 0.55);
     if (t < 1) { const tt = Math.max(MIN_TP_DIST_T, t - 0.01); pos.x = c.heroX + (pos.x - c.heroX) * tt; pos.z = c.heroZ + (pos.z - c.heroZ) * tt; pos.y = look.y + (pos.y - look.y) * tt; }
-    const lim = WORLD - 0.8; pos.x = Math.max(-lim, Math.min(lim, pos.x)); pos.z = Math.max(-lim, Math.min(lim, pos.z));
+    const lim = (c.zh || WORLD) - 0.8, zx = c.zx || 0, zz = c.zz || 0;   /* clamp to the CURRENT map (the Wilds sit at x=1000: clamping to the town's bounds threw the camera 850 m away = empty world) */
+    pos.x = Math.max(zx - lim, Math.min(zx + lim, pos.x)); pos.z = Math.max(zz - lim, Math.min(zz + lim, pos.z));
     if (pos.y < c.hy + 0.6) pos.y = c.hy + 0.6;
     camera.position.copy(pos); camera.lookAt(look);
     r.camDist = Math.hypot(pos.x - c.heroX, pos.z - c.heroZ);

@@ -820,6 +820,7 @@ const _want = new THREE.Vector3(), _look = new THREE.Vector3();
 const camIn = {};
 function updateCamera(dt, snap) {
   const ci = camIn; ci.heroX = state.heroX; ci.heroZ = state.heroZ; ci.hy = (state.heroY || 0) + cheat.alt; ci.dispY = state.dispY === undefined ? state.heroY || 0 : state.dispY; ci.alt = cheat.alt; ci.camYaw = state.camYaw; ci.legacyZoom = state.zoom; ci.portrait = innerHeight > innerWidth; ci.dt = dt; ci.snap = snap;
+  ci.zx = ZONE.cx; ci.zz = ZONE.cz; ci.zh = ZONE.half;
   camRig.update(ci);
   camPos.copy(camRig.pos); camLook.copy(camRig.look);
   camRig.syncHero(hero);

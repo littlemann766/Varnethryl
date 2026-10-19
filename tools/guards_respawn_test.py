@@ -51,7 +51,7 @@ with sync_playwright() as p:
     try: pg.wait_for_function("__p3d.fight.respawner.log.some(l=>l.delayed&&l.used)", timeout=420000); ok = True
     except Exception: ok = False
     lg = pg.evaluate("__p3d.fight.respawner.log.filter(l=>l.delayed).map(l=>({delay:+(l.due-l.freed).toFixed(1),waited:l.used?+(l.at-l.freed).toFixed(1):null,vis:l.vis,d:l.d&&+l.d.toFixed(1),b:l.b}))")
-    e = lg[-1] if lg else {}
+    used = [x for x in lg if x.get('waited') is not None]; e = used[0] if used else {}   # other kills may queue more slots meanwhile: check the first one that came back
     chk('killed monster respawns after 20-40 s', ok and 20 <= e.get('delay', 0) <= 40 and e.get('waited') is not None and e['waited'] >= 20, json.dumps(lg))
     chk('respawn is out of sight and >= 22 m from the hero', ok and e.get('vis') is False and e.get('d', 0) >= 22, json.dumps(e))
     pg.evaluate("__p3d.setZone('town')"); pg.wait_for_timeout(3000)

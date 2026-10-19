@@ -50,14 +50,14 @@ export function createCamRig(env) {
     const sy = Math.sin(c.camYaw), cy = Math.cos(c.camYaw);
     if (fp) {
       const cp = Math.cos(r.pitch), sp = Math.sin(r.pitch);
-      pos.set(c.heroX - sy * 0.12 * HS * prof.camHeight, c.dispY + c.alt + HS * 1.55 * prof.camHeight, c.heroZ - cy * 0.12 * HS * prof.camHeight);
+      pos.set(c.heroX - sy * 0.12 * HS * prof.camHeight, c.dispY + c.alt + Math.max(HS * 1.55 * prof.camHeight, prof.heightW * 0.87), c.heroZ - cy * 0.12 * HS * prof.camHeight);
       look.set(pos.x - sy * cp * 10, pos.y + sp * 10, pos.z - cy * cp * 10);
       camera.position.copy(pos); camera.lookAt(look); r.camDist = 0; r.hideHero = true; return;
     }
     const z = c.legacyZoom || 1, close = z < 1, f = r.zoom;
-    const dist = HS * (close ? (c.portrait ? 7.0 : 6.0) * (z / 0.3) : (c.portrait ? 10.5 : 9)) * f * prof.camDist, height = HS * (close ? 2.2 : (c.portrait ? 7.2 : 6.2)) * f * prof.camHeight;
+    const dist = HS * (close ? (c.portrait ? 7.0 : 6.0) * (z / 0.3) : (c.portrait ? 10.5 : 9)) * f * prof.camDist, height = Math.max(HS * (close ? 2.2 : (c.portrait ? 7.2 : 6.2)) * f * prof.camHeight, prof.heightW > 25 ? prof.heightW * 0.85 : 0);
     want.set(c.heroX + sy * dist, height + c.hy, c.heroZ + cy * dist);
-    lk.set(c.heroX, HS * (close ? 1.05 : 1.6) * prof.camHeight + c.hy, c.heroZ);
+    lk.set(c.heroX, Math.max(HS * (close ? 1.05 : 1.6) * prof.camHeight, prof.heightW > 25 ? prof.heightW * 0.52 : 0) + c.hy, c.heroZ);
     const k = snap ? 1 : 1 - Math.pow(0.0015, dt);
     pos.lerp(want, k); look.lerp(lk, k);
     /* never through walls/buildings/trees: pull the camera in along the line from the hero, every frame, on the final position */

@@ -156,6 +156,15 @@ export class CombatController {
     else if (a && a.stagger) this.ai.stagger(e, e.def.stagger);
     else if (e.state === 'idle') this.ai.set(e, 'chase');
   }
+  /* a companion's blow: modest mitigated damage, never touches the hero (HP/death/lastTarget). Enemies hit while idle wake and act normally. */
+  companionHit(e, dmgRange, fx, fz, rng) {
+    if (e.state === 'defeated') return 0; const base = dmgRange[0] + (dmgRange[1] - dmgRange[0]) * (rng || this.rng)();
+    const dmg = Math.max(5, Math.round(DamageCalculator.mitigate ? DamageCalculator.mitigate(base, e.def.def) : base * 1000 / (1000 + e.def.def * 0.5)));
+    e.hp = Math.max(0, e.hp - dmg); e.flash = 0.15; const dx = e.x - fx, dz = e.z - fz, d = Math.hypot(dx, dz) || 1; e.kx = dx / d; e.kz = dz / d; e.knockT = 0.08;
+    this.emit('damage', { e, dmg, crit: false, toPlayer: false, ally: true });
+    if (e.hp <= 0) { this.defeat(e); return dmg; }
+    if (e.state === 'idle') this.ai.set(e, 'chase'); return dmg;
+  }
   defeat(e) {
     e.state = 'defeated'; e.tStateT = 0; if (this.tgt.target === e) { this.tgt.target = null; this.tgt.locked = false; }
     if (e.rewarded) return; e.rewarded = true; this.kills++; this.xp += e.def.xp; this.gold += e.def.gold;       // once per defeat

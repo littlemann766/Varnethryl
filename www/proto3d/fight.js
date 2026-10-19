@@ -9,6 +9,7 @@ import { LightningFX } from './combat/lightning.js';
 import { Armory } from './combat/armory.js';
 import { gripFor } from './combat/grips.js';
 import { heroKey } from './combat/herokits.js';
+import { CompanionCombat } from './combat/companions.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
 export const SABER_GLB = null;             // URL (or fight.setSaberModel(url)) for Beth's saber: hilt at origin, blade along +Y, ~1 m
@@ -110,16 +111,16 @@ export function createFight(env) {
   function altAct(u, a) { u.alt = u.alt || new Map(); let b = u.alt.get(a); if (!b) { const c = a.getClip().clone(); c.name = a.getClip().name + '_b'; b = u.mixer.clipAction(c); u.alt.set(a, b); u.alt.set(b, a); } return b; }
   function playAct(root, a, kind, dur, hold) {
     const u = root.userData; if (!a || !u || !u.mixer) return false;
-    const smooth = root === env.hero() && !hold && (kind === 'atk' || kind === 'attack' || kind === 'attack2');
+    const smooth = (root === env.hero() || u.cmp) && !hold && (kind === 'atk' || kind === 'attack' || kind === 'attack2');
     if (smooth && u.os && !u.os.hold && (u.os.kind === 'atk' || u.os.kind === 'attack' || u.os.kind === 'attack2')) {   // chained swing: overlap with the one still playing
       const prev = u.os; if (u.prev) u.prev.a.stop(); if (a === prev.a) a = altAct(u, a);
       u.prev = { a: prev.a, w0: prev.a.getEffectiveWeight(), t: 0 };
       a.reset(); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = false; const d = a.getClip().duration; a.timeScale = dur ? Math.min(3, d / dur) : 1; a.setEffectiveWeight(0.001); a.play();
-      { const dd = d / a.timeScale, f = fades(dd, isOwner()); u.os = { a, t: 0, dur: dd, hold: false, kind, smooth: true, chain: true, fi: f[0], fo: f[1] }; } return true;
+      { const dd = d / a.timeScale, f = fades(dd, root === env.hero() && isOwner()); u.os = { a, t: 0, dur: dd, hold: false, kind, smooth: true, chain: true, fi: f[0], fo: f[1] }; } return true;
     }
     if (u.os && u.os.a !== a) u.os.a.stop(); if (u.prev) { u.prev.a.stop(); u.prev = null; }
     a.reset(); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = !!hold; const d = a.getClip().duration; a.timeScale = dur ? Math.min(3, d / dur) : 1; a.setEffectiveWeight(smooth ? 0.001 : 1); a.play();
-    { const dd = d / a.timeScale, f = fades(dd, isOwner()); u.os = { a, t: 0, dur: dd, hold: !!hold, kind, smooth, fi: f[0], fo: f[1] }; } return true;
+    { const dd = d / a.timeScale, f = fades(dd, root === env.hero() && isOwner()); u.os = { a, t: 0, dur: dd, hold: !!hold, kind, smooth, fi: f[0], fo: f[1] }; } return true;
   }
   const oneShot = (root, kind, dur, hold) => { const u = root.userData; return !!u && playAct(root, clipFor(u, kind), kind, dur, hold); };
   function tickOS(root, dt) {
@@ -188,6 +189,13 @@ export function createFight(env) {
 
   /* ---- controller events -> world ---- */
   cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact();  hud.say(ev.name ? ev.name.toUpperCase() : 'DESTRUCTION', 1400); }).on('blink', b => { state.heroX = b.x; state.heroZ = b.z; state.yaw = b.yaw; });
+  /* companions/followers fight too (combat/companions.js): attack clip with the same smoothing, damage via the controller */
+  const companions = new CompanionCombat({ cc, HS, onSwing: (r, e, ranged) => { const w = r.root; if (!w || !w.userData) return; w.userData.cmp = true; oneShot(w, 'attack', 0.55, false); } });
+  const folCache = { n: -1, list: [] }, heroInfo = { x: 0, z: 0, level: 0, dead: false };
+  function updateCompanions(dt) {
+    const L = env.followers ? env.followers() : []; heroInfo.x = state.heroX; heroInfo.z = state.heroZ; heroInfo.level = state.level; heroInfo.dead = cc.dead > 0;
+    if (on) companions.update(dt, L, heroInfo); for (let i = 0; i < L.length; i++) { const w = L[i].root; if (w && w.userData && w.userData.os) tickOS(w, dt); }
+  }
   let lfx = null; const getFx = () => lfx || (lfx = new LightningFX({ THREE, scene, HS, canvas: document.querySelector('canvas') }));
   cc.on('lightning', ev => { getFx().strike(ev); });
   /* summons + buffs visuals (cheap shared geometry, 1-2 meshes each, removed on end) */
@@ -254,7 +262,7 @@ export function createFight(env) {
     const h = env.hero();
     // lock-on: face the target
     if (cc.tgt.locked && cc.tgt.target && cc.dead <= 0) state.yaw = yawLerp(state.yaw, Math.atan2(cc.tgt.target.x - state.heroX, cc.tgt.target.z - state.heroZ), Math.min(1, dt * 9));
-    cc.update(dt); if (lfx) lfx.update(dt);
+    cc.update(dt); if (lfx) lfx.update(dt); updateCompanions(dt);
     // spawner (bad guys): small waves of regular enemies
     spawnT -= dt; const reg = cc.enemies.filter(e => !e.def.boss && e.state !== 'defeated').length;
     if (auto) {   // the Wilds: scattered, passive mobs (they stand off until you come within 3 m or hit them first); far ones are recycled
@@ -316,6 +324,6 @@ export function createFight(env) {
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
   const moveMul = () => (on && cc.chill > 0 && !cc.hero.owner) ? Math.max(0.3, 1 - (cc.chillAmt || 0)) : 1; if (typeof window !== 'undefined') window.__fightMove = moveMul;
-  return { moveMul, armory, get heroWeapon() { return HW; }, setBamboo(v) { if (!ownerGate()) { cc.bamboo = false; return false; } cc.bamboo = !!v; bambooSync(); return cc.bamboo; }, bambooOn: () => cc.bambooOn(), useUltimate2: () => cc.useUltimate2(), get lightning() { return lfx; }, cheatHeal, cheatKill, cheatSpawn, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
+  return { moveMul, armory, get heroWeapon() { return HW; }, setBamboo(v) { if (!ownerGate()) { cc.bamboo = false; return false; } cc.bamboo = !!v; bambooSync(); return cc.bamboo; }, bambooOn: () => cc.bambooOn(), useUltimate2: () => cc.useUltimate2(), get lightning() { return lfx; }, companions, cheatHeal, cheatKill, cheatSpawn, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
     get on() { return on; }, get hp() { return cc.res.hp; }, get kills() { return cc.kills; }, get monsters() { return cc.enemies; }, get hasSaber() { return !!saber; }, hurt(n) { cc.res.hp = Math.max(0, cc.res.hp - n); if (cc.res.hp <= 0 && cc.dead <= 0) { cc.dead = cc.P.respawn; cc.emit('playerDown'); } } };
 }

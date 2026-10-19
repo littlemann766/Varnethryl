@@ -124,8 +124,9 @@ function build() {
       const P = D.TUNING.perks, U = D.TUNING.ult, sv = () => D.saveSaberPrefs();
       const [l1, r1] = stepper('saberMul', 'Saber damage multiplier (× target current health; 0 = flat 99,999)', 0, 50, () => P.saberMul, (v) => { P.saberMul = v; sv(); }, (v) => v === 0 ? 'Flat' : '×' + v);
       const bt = toggleBtn('Saber multiplier also hits bosses', () => P.saberBossesX12, (v) => { P.saberBossesX12 = v; sv(); }, 'saberBossesX12'); syncs.push(bt._sync);
+      const bk = toggleBtn('Ultimates instantly kill bosses (incl. Ashen Titan)', () => U.bossesInstantKill, (v) => { U.bossesInstantKill = v; sv(); }, 'bossesInstantKill'); syncs.push(bk._sync);
       const [l2, r2] = stepper('ultMul', 'Ultimate damage multiplier (Unholy Destruction)', 1, 100, () => U.dmgMul, (v) => { U.dmgMul = v; sv(); }, (v) => '×' + v);
-      dm.append(l1, r1, row(bt), l2, r2, el('small', { textContent: 'Bosses take the normal 99,999 hit from the ultimate unless instant-kill is enabled. Never affects you, your party, NPCs or props.' }));
+      dm.append(l1, r1, row(bt), l2, r2, row(bk), el('small', { textContent: 'Ultimates (incl. Thunderstorm) kill bosses too while instant-kill is on (default); turn it off for a normal 99,999 hit. Never affects you, your party, NPCs or props.' }));
       regroup();
     });
     body.appendChild(dm);

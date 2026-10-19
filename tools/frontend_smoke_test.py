@@ -39,7 +39,7 @@ with sync_playwright() as p:
         pg.wait_for_timeout(2500)
         ok(f'{tag} 5-tap cheats gesture opens the owner gate', pg.evaluate("!!(document.getElementById('ownerLogin')||document.getElementById('ownerPanel'))"))
         if tag == 'desktop': pg.screenshot(path=f'{SH}/3-cheats-gate.png')
-        pg.reload(); pg.wait_for_function("document.body.dataset.fe==='title'", timeout=180000)
+        pg.close(); pg = ctx.new_page(); pg.on('pageerror', lambda e: errs.append(str(e))); pg.goto(BASE); pg.wait_for_function("document.body.dataset.fe==='title'", timeout=180000)
         pg.click('#fe-title [data-a=play]'); pg.wait_for_timeout(1500)
         w0 = pg.evaluate('__p3d.wanderPos'); pg.wait_for_timeout(2000); w1 = pg.evaluate('__p3d.wanderPos')
         ok(f'{tag} wander paused while a menu covers the screen', sum(abs(a[0]-b[0]) + abs(a[1]-b[1]) for a, b in zip(w0, w1)) < 1.0, (w0, w1))
@@ -58,6 +58,16 @@ with sync_playwright() as p:
         ok(f'{tag} drag spins the model', y1 - y0 > 0.8, (y0, y1))
         pg.wait_for_timeout(4000); ok(f'{tag} auto-rotates when idle', pg.evaluate('__fe.preview.yaw') > y1 + 0.2, (y1, pg.evaluate('__fe.preview.yaw')))
         pg.screenshot(path=f'{SH}/4-select-{tag}.png')
+        # framing across real sizes: Pip 0.52 m, Wren 1.35 m, the Owner 1.905 m, playable Vaelthryx ~19 m
+        for mid, exp in (('n:pip_new2', 0.52), ('n:wren_new3', 1.35), ('n:owner', 1.905), ('n:vaelthryx_straight_rig', 19.05)):
+            pg.evaluate(f"__fe.previewId({mid!r})"); pg.wait_for_function(f"__fe.preview.id === {mid!r} && __fe.preview.fitted", timeout=90000); pg.evaluate('__fe.preview'); pg.wait_for_timeout(1200)
+            fr = pg.evaluate('__fe.frame'); hf = fr['y1'] - fr['y0']; cxm = (fr['x0'] + fr['x1']) / 2
+            ok(f'{tag} {mid} true size ~{exp} m', abs(fr['hM'] - exp) / exp < 0.12, fr)
+            ok(f'{tag} {mid} fully in view', fr['x0'] > -0.02 and fr['x1'] < 1.02 and fr['y0'] > -0.02 and fr['y1'] < 1.02, fr)
+            ok(f'{tag} {mid} near centre', 0.2 < cxm < 0.8, fr)
+            ok(f'{tag} {mid} sensible zoom', max(hf, fr['x1'] - fr['x0']) > (0.12 if exp < 1 else 0.3), fr)
+            ok(f'{tag} {mid} human reference in view', 0 < fr['refTop'] < 1 and 0 < fr['refX'] < 1, fr)
+            if tag != 'phone-landscape': pg.screenshot(path=f"{SH}/4-preview-{mid.split(':')[1]}-{tag}.png")
         pg.click('#fe-sel [data-a=begin]'); pg.wait_for_timeout(100)
         ok(f'{tag} no model on loading screen (preview disposed)', not pg.evaluate('__fe.preview.on') and not pg.evaluate('__fe.preview.canvas'), pg.evaluate('__fe.preview')); pg.wait_for_timeout(500); ok(f'{tag} loading with tips', scr(pg) == 'load' and pg.inner_text('#fe-tip') != '')
         pg.wait_for_function("document.body.dataset.fe==='game'", timeout=60000); pg.wait_for_timeout(1500)

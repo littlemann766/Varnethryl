@@ -867,20 +867,33 @@ const SMOKE = (() => {
 /* ---------- the Wilds (1.1.9): second map at x=1000, reached by the portal in town; a portal there leads back. Monsters spawn only there (fight layer, auto mode). ---------- */
 const TOWN_PORTAL = { x: -6, z: 38 };
 let WM = null, wildsP = null, townCols = null, portalT = null, zoneCd = 1.5, portalDwell = 0;
-const wildsMod = import('./wilds.js').then(m => { portalT = m.makePortal(0x9a6bff); portalT.position.set(TOWN_PORTAL.x, 0, TOWN_PORTAL.z); scene.add(portalT);
-  for (const [x, z] of [[-9.2, 37], [-2.8, 37]]) { const b = new THREE.Mesh(new THREE.CylinderGeometry(.18, .22, 2.4, 8), new THREE.MeshLambertMaterial({ color: 0x5a4632 })); b.position.set(x, 1.2, z); scene.add(b); colliders.push({ type: 'circle', x, z, r: .3 }); }
+const wildsMod = import('./wilds.js').then(m => { portalT = m.makeGate(0x9a6bff); portalT.position.set(TOWN_PORTAL.x, 0, TOWN_PORTAL.z); scene.add(portalT);
+  for (const dx of [-1.9, 1.9]) colliders.push({ type: 'circle', x: TOWN_PORTAL.x + dx, z: TOWN_PORTAL.z, r: .75 });   /* gate pillars; the opening between them is walkable */
   return m; });
-async function ensureWilds() { if (WM) return WM; const m = await wildsMod; WM = Object.assign({ mod: m }, m.buildWilds({ scene, HS })); WM.portalMesh = m.makePortal(0x4fd0ff); WM.portalMesh.position.set(WM.portal.x, 0, WM.portal.z); WM.portalMesh.visible = false; scene.add(WM.portalMesh); return WM; }
+async function ensureWilds() { if (WM) return WM; const m = await wildsMod; WM = Object.assign({ mod: m }, m.buildWilds({ scene, HS })); WM.portalMesh = m.makeGate(0x4fd0ff); WM.portalMesh.position.set(WM.portal.x, 0, WM.portal.z); WM.portalMesh.visible = false; scene.add(WM.portalMesh); return WM; }
 function snapFollowers() { TRAIL.length = 0; for (const r of crowd) if (r.kind === 'party') { r.level = 0; r.y = 0; r.ti = null; r.lvT = 0; r.a.x = state.heroX + (Math.random() - 0.5) * 3; r.a.z = state.heroZ + 2.5 * HS; r.vxs = r.vzs = 0; } }
+/* Map unloading. Leaving town hides every static town node (no draw calls / shadow casters while away; geometry stays resident because the village is built once at boot).
+   Leaving the Wilds fully DISPOSES it (geometry, materials, textures, enemies via FIGHT.stop) and it is rebuilt on the next visit. */
+const townHidden = [];
+function hideTown() {
+  const keep = new Set([...HEROES, ...crowd.map(r => r.root), WM && WM.group, WM && WM.portalMesh, marker, sun, sun.target, camera, ...(FIGHT ? [] : [])]);
+  for (const n of scene.children) { if (n.visible && !keep.has(n) && !n.isLight && !n.isCamera && !(FIGHT && n.userData && n.userData.fightFx) && Math.hypot(n.position.x - 1000, n.position.z) > 400 && !(n.userData && n.userData.keepAlways)) { n.visible = false; townHidden.push(n); } }
+}
+function unloadWilds() {
+  if (!WM) return; const g = WM.group, pm = WM.portalMesh; scene.remove(g); scene.remove(pm);
+  const seen = new Set(); const dis = (o) => { if (o.geometry) o.geometry.dispose(); const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : []; for (const m of ms) { for (const k in m) { const v = m[k]; if (v && v.isTexture && !seen.has(v)) { seen.add(v); v.dispose(); } } m.dispose(); } };
+  g.traverse(dis); pm.traverse(dis); window.__unloaded = (window.__unloaded || 0) + 1; WM = null;
+}
 async function setZone(name) {
   if (name === ZONE.name) return true;
   if (name === 'wilds') {
     await ensureWilds(); const W = WM.mod.WILDS; townCols = colliders.slice(); colliders.length = 0; for (const c of WM.colliders) colliders.push(c);
-    ZONE.name = 'wilds'; ZONE.cx = W.ox; ZONE.cz = W.oz; ZONE.half = W.half; WM.group.visible = true; WM.portalMesh.visible = true; if (portalT) portalT.visible = false;
+    ZONE.name = 'wilds'; ZONE.cx = W.ox; ZONE.cz = W.oz; ZONE.half = W.half; WM.group.visible = true; WM.portalMesh.visible = true; hideTown();
     state.heroX = WM.spawn.x; state.heroZ = WM.spawn.z; state.yaw = Math.PI;
   } else {
     colliders.length = 0; for (const c of townCols) colliders.push(c); ZONE.name = 'town'; ZONE.cx = 0; ZONE.cz = 0; ZONE.half = WORLD;
-    if (WM) { WM.group.visible = false; WM.portalMesh.visible = false; } if (portalT) portalT.visible = true;
+    if (FIGHT && FIGHT.auto) FIGHT.stop();   /* enemies are disposed first */
+    unloadWilds(); for (const n of townHidden) n.visible = true; townHidden.length = 0; if (portalT) portalT.visible = true;
     state.heroX = TOWN_PORTAL.x; state.heroZ = TOWN_PORTAL.z + 4; state.yaw = 0;
   }
   state.level = 0; state.target = null; state.climbing = false; updateLevel(); snapFollowers(); zoneCd = 1.5; portalDwell = 0;

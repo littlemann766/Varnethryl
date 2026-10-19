@@ -37,6 +37,15 @@ export function makePortal(color) {
   g.userData.update = t => { disc.rotation.z = t * 1.2; ring.rotation.z = -t * 0.6; disc.material.opacity = 0.35 + 0.12 * Math.sin(t * 3); };
   return g;
 }
+/* Stone gate (replaces the glowing portal): two pillars + lintel + a dark banner; walk through the opening to cross maps. 3 meshes. Same API as makePortal (position/visible/userData.update). */
+export function makeGate(color) {
+  const g = new THREE.Group(), stone = new THREE.MeshLambertMaterial({ color: 0x8a8578 }), cap = new THREE.MeshLambertMaterial({ color: 0x6d685c });
+  const geos = [], put = (w, h, d, x, y, z, m) => { const q = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); q.position.set(x, y, z); return q; };
+  const p1 = put(1.1, 4.4, 1.2, -1.9, 2.2, 0, stone), p2 = put(1.1, 4.4, 1.2, 1.9, 2.2, 0, stone), lin = put(5.2, 0.9, 1.4, 0, 4.85, 0, cap);
+  const flag = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.6), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })); flag.position.set(0, 3.7, 0.05);
+  g.add(p1, p2, lin, flag); g.userData.update = () => {}; g.userData.gate = true; g.userData.dispose = () => { g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); };
+  return g;
+}
 export function buildWilds(env) {
   const { scene, HS } = env, { ox, oz, half } = WILDS, cols = [], rnd = rng(20261018), grp = new THREE.Group(); grp.name = 'wilds'; scene.add(grp);
   const map = makeDetailTexture(), mats = makeMaterials(map), cache = new Map(), chunks = new Map(), taken = [];

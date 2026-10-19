@@ -6,6 +6,7 @@ import { CHARS } from './chars.js';
 import { preload as preloadChars } from './texgen.js';
 import { makeEnterable } from './interiors.js';
 import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
+import { planRoads, nearRoad, roadGeometry } from './roads.js';
 import { fx, zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { readSave, planFromState, createSaver } from './save3d.js';
 import { SpringBones } from './spring_bones.js';
@@ -110,10 +111,11 @@ const cobble = canvasTex(256, (g, s) => {
     g.fillRect(x * 32 + (y % 2) * 16 + 1, y * 32 + 1, 30, 30);
   }
 }, 1);
+let ROADMAT = null, ROADS = [];
 const ground = mesh(new THREE.PlaneGeometry(WORLD * 4, WORLD * 4), new THREE.MeshLambertMaterial({ map: grass }), 0, 0, 0, null, false);
 ground.rotation.x = -Math.PI / 2;
 { // plaza + paths (cobble)
-  const cm = new THREE.MeshLambertMaterial({ map: cobble.clone() });
+  const cm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); ROADMAT = cm;
   cm.map.repeat.set(11 * PK, 11 * PK); cm.map.needsUpdate = true;
   const plaza = mesh(new THREE.CircleGeometry(13 * PK, 64), cm, 0, 0.02, 0, null, false); plaza.rotation.x = -Math.PI / 2;
   const pm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); pm.map.repeat.set(1, 22 * PK * 2); pm.map.needsUpdate = true;
@@ -169,6 +171,13 @@ const drops = []; let dropMade = 0;
 if (BLD_ON) {
   enterables.push(buildWalls(ectx, WORLD, GATE_W));
   for (const b of buildVillage(ectx)) enterables.push(b);
+  { // road/path network: every entrance -> lane -> main street -> gate (one merged mesh, plaza material)
+    ROADS = planRoads(enterables.flatMap(e => e.parts || [e]), { world: WORLD, colliders, gate: [0, WORLD - 3], mainX: 2.5 * KB, mainZ: 2 * KB, plazaR: 13 * PK - 1 });
+    const rg = roadGeometry(ROADS, 26 * PK, 0.024), g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(rg.pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(rg.uv, 2)); g.setIndex(rg.idx); g.computeVertexNormals();
+    const rm = new THREE.Mesh(g, ROADMAT); rm.receiveShadow = true; rm.name = 'roads'; scene.add(rm);
+    const bad = ROADS.filter(r => r.fail).map(r => r.id); diag('roads: ' + ROADS.length + ' lanes gate ' + ROADS.gate + ' blk ' + ROADS.blockedFrac.toFixed(3) + (bad.length ? ' NO ROUTE: ' + bad.join(',') : ''));
+  }
   if (new URLSearchParams(location.search).get('nochunk') == null) { try { const r = chunkStatics(enterables.flatMap(e => e.parts || [e]), scene, 64); diag('static chunks: ' + r.before + ' -> ' + r.after); const rr = mergeRoofs(enterables.flatMap(e => e.parts || [e]), scene); diag('roofs: ' + rr.before + ' -> ' + rr.after); const rw = mergeWalls(enterables.flatMap(e => e.parts || [e]), scene); diag('walls: ' + rw.before + ' -> ' + rw.after); } catch (e) { console.error('chunkStatics', e.message, e.stack); } }
 } else {
   wallSeg(-WORLD, -WORLD, WORLD, -WORLD); wallSeg(-WORLD, -WORLD, -WORLD, WORLD); wallSeg(WORLD, -WORLD, WORLD, WORLD); wallSeg(-WORLD, WORLD, -GATE_W - 3, WORLD); wallSeg(GATE_W + 3, WORLD, WORLD, WORLD);
@@ -194,6 +203,7 @@ if (BLD_ON) {
     if (Math.hypot(x, z) < 12 * PK) return true;
     for (const bd of BUILDING_DEFS) { if (Math.hypot(x - bd.cx * PK, z - bd.cz * PK) < (bd.id === 'temple' ? 30 : 16)) return true; const fr = Math.hypot(x - (bd.cx * PK + Math.sin(bd.rot || 0) * 22), z - (bd.cz * PK + Math.cos(bd.rot || 0) * 22)); if (fr < 22) return true; }   // keep building fronts (and the camera spot behind a hero at the door) clear of trees
     if (Math.abs(x) < 3.5 * KB) return true;                   // main road
+    if (nearRoad(ROADS, x, z, 2.2)) return true;                // side lanes
     if (Math.abs(z) < 3 * KB) return true;
     for (const c of colliders) {
       if (c.type === 'box' && x > c.minX - 9 && x < c.maxX + 9 && z > c.minZ - 9 && z < c.maxZ + 9) return true;
@@ -671,7 +681,7 @@ function recordTrail() {
 const SE = { x: 0, z: 0 };
 function stairEntry(r, a, t) {
   for (const b of ectx.multi) {
-    if (!b.ramps || !b.ramps.length || !b.toL) continue; const [fx, fz] = b.toL(a.x, a.z); if (Math.abs(fx) > 40 || Math.abs(fz) > 40) continue;
+    if (!b.ramps || !b.ramps.length || !b.toL) continue; const [fx, fz] = b.toL(a.x, a.z); if (Math.abs(fx) > 40 || Math.abs(fz) > 40 || (b.insideTest && !b.insideTest(fx, fz))) continue;   // only inside the building: from outside the trail leads through the door first
     const [tx, tz] = b.toL(t.x, t.z);
     for (const m of b.ramps) {
       const up = m.l0 === r.level && state.level > r.level, dn = m.l1 === r.level && state.level < r.level; if (!up && !dn) continue;
@@ -684,9 +694,12 @@ function stairEntry(r, a, t) {
   }
   return null;
 }
+function lineClear(x0, z0, x1, z1, l) { const d = Math.hypot(x1 - x0, z1 - z0), n = Math.ceil(d / 0.4); if (n > 60) return true; const F = window.__p3d && window.__p3d.free; if (!F) return true;
+  for (let k = 1; k < n; k++) { const t = k / n; if (!F(x0 + (x1 - x0) * t, z0 + (z1 - z0) * t, l)) return false; } return true; }
 function trailTarget(r, a) {
   if (r.ti === null) {
-    let best = -1, bd = 1e9; for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01) { bd = d; best = i; } }
+    let best = -1, bd = 1e9; for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01 && lineClear(a.x, a.z, p.x, p.z, r.level)) { bd = d; best = i; } }   // nearest trail point the companion can actually walk to (not one behind a wall)
+    if (best < 0) for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01) { bd = d; best = i; } }   // nothing in clear sight: plain nearest
     if (best < 0) return null; r.ti = best + trailBase;
   }
   if (r.ti < trailBase) r.ti = trailBase;
@@ -701,6 +714,7 @@ function trailTarget(r, a) {
 function crowdSurface(r, a, dt) {
   let s = surfaceAt(a.x, a.z, r.level);
   if (s && s.ramp) { const m = s.ramp; if (r.level === m.l0 && s.t > (m.flipUp || 0.93)) r.level = m.l1; else if (r.level === m.l1 && s.t < 0.25) r.level = m.l0; s = surfaceAt(a.x, a.z, r.level) || s; }
+  if (!s && r.level > 0 && r.level < 10) { r.level = 0; r.ti = null; s = surfaceAt(a.x, a.z, 0); }   // stepped off an upper slab (no floor here): drop to the ground level instead of hovering on 'level 1' at ground height
   const ty = s ? s.y : (r.level >= 10 && LAD ? LAD.heightOf(r.level) : 0);
   r.y = Math.abs(ty - r.y) < 0.02 ? ty : r.y + Math.max(-4 * dt, Math.min(4 * dt, ty - r.y)) * (Math.abs(ty - r.y) > 1.3 ? 1 : 1);
 }
@@ -1076,6 +1090,7 @@ window.__p3d = { get roster() { return selUI ? selUI.rows.map(r => ({ name: r.g.
   toggleModel: i => toggleModel(i), groups: () => [...GROUPS.values()].map(g => ({ key: g.key, name: g.name, vars: g.vars.map(v => v.label) })),
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,
   state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, enterables,
+  get roads() { return ROADS; }, roadInfo: { W: WORLD, KB, PK, ROAD_W: 2.4 },
   enterables, get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   onRamp(x, z, level = 0) { const s = surfaceAt(x, z, level); return !!(s && s.ramp); },

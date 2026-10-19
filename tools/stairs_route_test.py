@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Natural-route stair test: the simulated player starts OUTSIDE the front door, aims straight at the stairs (centre, then the top) with keyboard (8-way) or joystick, like a real player.
 usage: python3 tools/stairs_route_test.py  (ONLY=id,id MODE=key|joy|touch|key,joy,touch YAWS=0 PARTY=2 BASE=<live url>)"""
+# the test teleports the hero between buildings: companions are placed next to the hero at each start (followers never snap up a floor, and after the
+# guild hall they would still be waiting at its door, so a far-away start would only measure the long walk back)
 import http.server, threading, functools, os, sys, json, math
 from playwright.sync_api import sync_playwright
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'www')
@@ -27,6 +29,9 @@ with sync_playwright() as p:
     cdp = pg.context.new_cdp_session(pg)
     if THROTTLE > 1: cdp.send('Emulation.setCPUThrottlingRate', {'rate': THROTTLE})
     pg.goto(f'{BASE or "http://127.0.0.1:%d" % port}/proto3d.html?party={PARTY}&npcs={1 if PARTY != "0" else 0}'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=120000); pg.wait_for_timeout(2500)
+    if PARTY != '0':   # companions load asynchronously: wait until they exist before the first run (a late spawn would start at the town gate)
+        try: pg.wait_for_function("__p3d.bump.crowd.filter(c=>c.kind==='party' && c.root).length>=%d" % int(PARTY), timeout=90000)
+        except Exception: print('    warn: companions not all loaded', flush=True)
     info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.filter(b=>b.id!=='walls'&&!/^(wt|gt)/.test(b.id)).map(b=>({id:b.id,K:b.K,ramps:b.ramps,d:b.footprint?b.footprint.d:2*(b.radius||4)/b.K,round:!b.footprint,r:b.radius/b.K})))"))
     def W(bid, lx, lz): return pg.evaluate("([id,lx,lz])=>__p3d.multi.find(b=>b.id===id).toW(lx,lz)", [bid, lx, lz])
     box = pg.evaluate("(()=>{const r=document.getElementById('stick').getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2,r.width/2]})()")
@@ -90,12 +95,12 @@ with sync_playwright() as p:
             res = []
             for mode in MODES:
                 for yw in YAWS:
-                    pg.evaluate("([s,y,l])=>{__p3d.teleport(s[0],s[1],l);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw, m['l0']]); pg.wait_for_timeout(300)
+                    pg.evaluate("([s,y,l])=>{__p3d.teleport(s[0],s[1],l);__p3d.state.target=null;__p3d.state.camYaw=y;for(const c of __p3d.bump.crowd)if(c.kind==='party'){c.a.x=s[0]+(Math.random()-.5)*1.5;c.a.z=s[1]+(Math.random()-.5)*1.5;c.level=__p3d.state.level;c.y=__p3d.state.heroY||0;c.ti=null;c.lvT=0;c.vxs=c.vzs=0}}", [start, yw, m['l0']]); pg.wait_for_timeout(300)
                     r, ms, ok = drive([list(v) for v in via], top, mode, m['l1'], m['y1']*bi['K']); total += 1
                     if not ok and m['l0'] == 0 and os.environ.get('PATHFIND', '1') == '1':   # a real player walks around furniture: BFS a free path door -> stair and retry
                         wp = pg.evaluate(BFS, [start, via[-1], 0]); print('    bfs', door, via[-1], wp and [[round(a,1),round(b,1)] for a,b in wp], flush=True)
                         if wp:
-                            pg.evaluate("([s,y])=>{__p3d.teleport(s[0],s[1],0);__p3d.state.target=null;__p3d.state.camYaw=y}", [start, yw]); pg.wait_for_timeout(300)
+                            pg.evaluate("([s,y])=>{__p3d.teleport(s[0],s[1],0);__p3d.state.target=null;__p3d.state.camYaw=y;for(const c of __p3d.bump.crowd)if(c.kind==='party'){c.a.x=s[0]+(Math.random()-.5)*1.5;c.a.z=s[1]+(Math.random()-.5)*1.5;c.level=__p3d.state.level;c.y=__p3d.state.heroY||0;c.ti=null;c.lvT=0;c.vxs=c.vzs=0}}", [start, yw]); pg.wait_for_timeout(300)
                             r, ms, ok = drive([list(q) for q in wp], top, mode, m['l1'], m['y1']*bi['K'])
                     fails += 0 if ok else 1
                     if ok and os.environ.get('FOLLOW', '1') == '1' and not followers_arrive('up'): ok = False

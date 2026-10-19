@@ -238,7 +238,8 @@ export class Builder {
     const [lx, lz] = this.toL(hx, hz), dist = Math.hypot(hx - this.cx, hz - this.cz), R = (this.radius || Math.max(this.w || 10, this.d || 10)) + 22;
     const vis = dist < R + 20; if (this.root.visible !== vis) this.root.visible = vis;
     const nearInt = this.inside || dist < (this.radius || 12) + 9; if (this.G.int.visible !== nearInt) this.G.int.visible = nearInt;   // interiors only drawn when close (fewer draw calls)
-    const v = this.insideTest ? this.insideTest(lx, lz) : false; if (v !== this.inside) this.setInside(v);
+    let v = this.insideTest ? this.insideTest(lx, lz) : false; if (v && HERO_FIT.fits && !HERO_FIT.fits(this)) v = false;   // a hero that cannot fit (giant) keeps the outside view: roof/walls stay, no cutaway
+    if (v !== this.inside) this.setInside(v);
     if (this.lvGroups) for (const l in this.lvGroups) { const g = this.lvGroups[l], sv = v && level >= +l; if (g.visible !== sv) g.visible = sv; }
     if (this.inside && this.sideMats) this.viewCut(lx, lz, dt || 0.016);
     if (this.roofFade) this.roofFadeTick(dt || 0.016);
@@ -485,7 +486,7 @@ Builder.prototype.fullUpper = function (o) {
     // the foot of every flight needs a free approach: keep >= FOOT m of open floor behind it (shift the flight into the room, shorten only if the room is too small)
     const st = Object.assign({}, st0); const len0 = st0.len || 3.6; let len = round ? len0 : Math.max(len0, (y - y0) / Math.tan((o.maxSlope || 26) * Math.PI / 180));   // gentle: <= ~26 degrees where the room allows
     if (!round) { const k = ax ? 'cx' : 'cz', sg = (ax ? Math.sin(ang) : Math.cos(ang)) > 0 ? 1 : -1, lo = ax ? rect[0] : rect[2], hi = ax ? rect[1] : rect[3], FOOT = o.foot || 1.7;
-      const foot0 = st[k] - sg * len0 / 2, nf = sg > 0 ? Math.max(foot0, lo + FOOT) : Math.min(foot0, hi - FOOT), far = sg > 0 ? hi - .5 : lo + .5; const nl = Math.min(len, Math.abs(far - nf)); st[k] = nf + sg * nl / 2; len = Math.max(nl, Math.min(len0, Math.abs(far - nf))); st[k] = nf + sg * len / 2; }
+      const foot0 = st[k] - sg * len0 / 2, nf = sg > 0 ? Math.max(foot0, lo + FOOT) : Math.min(foot0, hi - FOOT), TR = o.topRoom === undefined ? .5 : o.topRoom, far = sg > 0 ? hi - TR : lo + TR; const nl = Math.min(len, Math.abs(far - nf)); st[k] = nf + sg * nl / 2; len = Math.max(nl, Math.min(len0, Math.abs(far - nf))); st[k] = nf + sg * len / 2; }
     hole = ax ? [st.cx - len / 2, st.cx + len / 2, st.cz - w / 2, st.cz + w / 2] : [st.cx - w / 2, st.cx + w / 2, st.cz - len / 2, st.cz + len / 2];
     { const sgn = (ax ? Math.sin(ang) : Math.cos(ang)) > 0 ? 1 : -1, ov = o.topOverlap === undefined ? .12 : o.topOverlap, hf = hole.slice();   // top end of the flight: the slab reaches .12 m into the ramp so there is never a gap between ramp and floor
       if (ax) { if (sgn > 0) hf[1] -= ov; else hf[0] += ov; } else { if (sgn > 0) hf[3] -= ov; else hf[2] += ov; } rects = subRect(rect, hf); }
@@ -505,6 +506,8 @@ Builder.prototype.fullUpper = function (o) {
 
 // Cross-building static merge: bake every building's merged exterior meshes (world space) into per-zone meshes, one per material.
 // Fewer draw calls (and fewer shadow-pass calls); frustum culling then works per zone chunk. Cutaway clone materials and animated parts stay put.
+/* main.js sets HERO_FIT.fits = B => bool from the active charscale profile (giant fallback to the outside view) */
+export const HERO_FIT = { fits: null };
 export function chunkStatics(builders, scene, cell = 40) {
   const zones = new Map(); let before = 0;
   for (const B of builders) { if (!B || !B.G || !B.G.ext) continue; B.root.updateMatrixWorld(true); const zk = Math.floor(B.cx / cell) + ',' + Math.floor(B.cz / cell); const cut = new Set(B.cut || []);

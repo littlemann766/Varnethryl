@@ -7,7 +7,7 @@ export const TUNING = {
   perks: { saberBossesX12: false, saberMul: 12, saberHolderResources: false, holderMul: 3 },   // holderMul: max HP/MP/SP multiplier for a non-Owner hero holding the Owner saber (owner account only)   // false: unlimited MP/SP + no cooldowns only for the Owner skin; true: any hero holding the Owner saber gets them too
   ownerWeaponBase: 99999,   // OWNER holding ANY weapon except the lightsaber: base damage per hit (0 = off, use the weapon's own damage)
   skillMul: { royal: 3, chains: 6, wrath: 12 },   // OWNER SKILL DAMAGE = flat 99,999 x this (300% / 600% / 1200%); owner gate enforced in the controller
-  ult: { dmgMul: 50, radius: 25, delay: 1.5, cooldown: 35, fury: 100, bossesInstantKill: false, furyPerBasic: 8, furyPerSkill: 5 },
+  ult: { dmgMul: 50, radius: 25, delay: 1.5, cooldown: 35, fury: 100, bossesInstantKill: true, furyPerBasic: 8, furyPerSkill: 5 },
 };
 export const BAMBOO = { min: 4, max: 8 };   // Bamboo Stick (test weapon, owner account only): low base damage; owner skills use the 99,999 x skillMul rule with it
 export const UNARMED = { min: TUNING.normal.dmg[0], max: TUNING.normal.dmg[1] };                 // everybody else (no weapon in the fight test)
@@ -53,6 +53,6 @@ export const OWNER_CLUSTER = ['royal', 'chains', 'wrath', 'unholy'];
 
 /* Saber damage multiplier prefs (Settings, owner only to edit; the controller still requires the owner gate to apply them). */
 export const SABER_PREF_KEY = 'varn.saberdmg.v1';
-export function applySaberPrefs(o) { const P = TUNING.perks; if (o && typeof o === 'object') { if (Number.isFinite(+o.mul)) P.saberMul = Math.max(0, Math.min(50, Math.floor(+o.mul))); if (typeof o.bosses === 'boolean') P.saberBossesX12 = o.bosses; if (Number.isFinite(+o.ult)) TUNING.ult.dmgMul = Math.max(1, Math.min(100, Math.floor(+o.ult))); } return { mul: P.saberMul, bosses: P.saberBossesX12, ult: TUNING.ult.dmgMul }; }
-export function saveSaberPrefs() { try { localStorage.setItem(SABER_PREF_KEY, JSON.stringify({ mul: TUNING.perks.saberMul, bosses: TUNING.perks.saberBossesX12, ult: TUNING.ult.dmgMul })); } catch (e) {} }
+export function applySaberPrefs(o) { const P = TUNING.perks; if (o && typeof o === 'object') { if (Number.isFinite(+o.mul)) P.saberMul = Math.max(0, Math.min(50, Math.floor(+o.mul))); if (typeof o.bosses === 'boolean') P.saberBossesX12 = o.bosses; if (typeof o.bossKill === 'boolean') TUNING.ult.bossesInstantKill = o.bossKill; if (Number.isFinite(+o.ult)) TUNING.ult.dmgMul = Math.max(1, Math.min(100, Math.floor(+o.ult))); } return { mul: P.saberMul, bosses: P.saberBossesX12, ult: TUNING.ult.dmgMul }; }
+export function saveSaberPrefs() { try { localStorage.setItem(SABER_PREF_KEY, JSON.stringify({ mul: TUNING.perks.saberMul, bosses: TUNING.perks.saberBossesX12, ult: TUNING.ult.dmgMul, bossKill: TUNING.ult.bossesInstantKill })); } catch (e) {} }
 try { if (typeof localStorage !== 'undefined') { const j = localStorage.getItem(SABER_PREF_KEY); if (j) applySaberPrefs(JSON.parse(j)); } } catch (e) {}

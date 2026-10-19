@@ -89,13 +89,19 @@ export class CombatController {
   chainStrike(a) {
     /* Thunderstorm kills EVERYTHING in range (no target cap, bosses included): every living enemy takes the full hit via hitEnemy/DamageCalculator.
        The chain is only for visuals: greedy nearest-neighbour order from the player; the host draws the first ~12 as bolts and the rest as cheap impact flashes. */
-    const HS = this.HS, R = a.range * HS, all = this.enemies.filter(e => e.state !== 'defeated' && Math.hypot(e.x - this.p.x, e.z - this.p.z) <= R + (e.def.r || 0));
-    if (!all.length) return; const order = []; let cx = this.p.x, cz = this.p.z, left = all.slice();
+    const HS = this.HS, R = a.range * HS, all = this.enemies.filter(e => e.state !== 'defeated' && !e.owner && !e.prop && Math.hypot(e.x - this.p.x, e.z - this.p.z) <= R + (e.def.r || 0));   // every model except the Owner
+    const um = Math.max(1, Math.min(100, Math.floor(+TUNING.ult.dmgMul || 1))), bys = [];
+    if (typeof this.bystanders === 'function') for (const b of this.bystanders() || []) {   // host-held models: party/companions/followers/NPCs/townsfolk (never the Owner)
+      if (!b || b.owner || b.isOwner || Math.hypot(b.x - this.p.x, b.z - this.p.z) > R) continue;
+      this.emit('bystanderKill', { b, dmg: Math.max(1, Math.ceil(b.hp || 1)) * um }); bys.push(b);
+    }
+    if (!all.length && !bys.length) return; const order = []; let cx = this.p.x, cz = this.p.z, left = all.slice();
     while (left.length) { let bi = 0, bd = 1e18; for (let i = 0; i < left.length; i++) { const d = (left[i].x - cx) ** 2 + (left[i].z - cz) ** 2; if (d < bd) { bd = d; bi = i; } } const e = left.splice(bi, 1)[0]; order.push(e); cx = e.x; cz = e.z; }
     const path = []; let f = 1;
     order.forEach((e, i) => { path.push({ x: e.x, z: e.z, y: 1.1 * HS * Math.max(1, (e.def.scale || 1) * 0.8), falloff: f, flash: i >= (a.visualBolts || 12) }); f = Math.max(0.45, f * a.falloff); });
     for (const e of order) this.hitEnemy(e, a.mult, a);
-    this.emit('lightning', { from: { x: this.p.x, z: this.p.z }, path, count: order.length });
+    for (const b of bys) path.push({ x: b.x, z: b.z, y: 1.1 * HS, falloff: 0.5, flash: true });
+    this.emit('lightning', { from: { x: this.p.x, z: this.p.z }, path, count: order.length + bys.length });
   }
   dodge(dx, dz) {
     const D = this.P.dodge; if (this.dead > 0 || !this.cd.ok('dodge') || !this.res.spend({ sp: D.sp })) { if (this.dead <= 0 && this.cd.ok('dodge')) this.emit('denied', { why: 'Not enough stamina' }); return false; }

@@ -243,7 +243,7 @@ function townhall(spec, ctx) {
   B.shelf(iw - 1.4, -id_ + .3, 3, 0); B.tableR(iw - 1.8, 1, 2.4, 1.2); B.table(-3.5, 1.5, .9);
   for (const s of [-1, 1]) for (const z of [-2, 1.2]) B.pillar(s * 2.4, z, .35, h - 1.4, 'stoneL');
   for (let i = 0; i < 3; i++) B.banner(-iw + .3, 3.4, -2 + i * 2.6, Math.PI / 2, 1, 2.4); B.lamp(-3, 4.8, 0); B.lamp(3, 4.8, 0);
-  B.gallery({ stairX: iw - 1.0, depth: 1.6 }); B.props2('hall'); B.cardSpires({ s: 1.1 }); B.radius = 10; return B.finish();
+  B.gallery({ stairX: iw - 1.0, depth: 1.6 }); B.props2('hall'); B.cardSpires({ s: 1.1 }); B.guard(-(B.DW / 2 + 1.5), d / 2 + 1.6); B.guard(B.DW / 2 + 1.5, d / 2 + 1.6); B.radius = 10; return B.finish();
 }
 const DWf = B => B.DW;
 
@@ -254,7 +254,8 @@ const guildhall = (spec, ctx) => std(spec, ctx, { name: 'Guild Hall of Varnethry
     B.crossGable(0, 6.0, 3.6, 3.6, 'slate', 'timber', h - .2);
     for (const sx of [-1, 1]) { const X = sx * (w / 2 + .1), Z = d / 2 - .1; B.cyl(1.3, 1.4, h + 2.6, 'stoneL', X, (h + 2.6) / 2, Z, g, 14); B.cone(1.7, 5.6, 'slate', X, h + 2.6, Z, g, 14); B.bx(.1, 1.0, .1, 'gold', X, h + 8.7, Z, g); B.win(X, 3.2, Z + 1.33, 0, .6, 1.4, 'glass'); B.win(X, h + .6, Z + 1.33, 0, .6, 1.2, 'glass'); B.ccol(X, Z, 1.5); }
     B.bx(.1, 1.0, .1, 'gold', 0, h + 4.4 + 1.0, 0, B.G.roof);
-    { const n0 = B.colliders.length; B.col(0, d / 2 - B.T / 2, B.DW + .3, B.T + 1.2); for (let i = n0; i < B.colliders.length; i++) { B.colliders[i].npcOnly = true; B.colliders[i].lv = 0; } } },   // playable characters only: companions / NPCs / monsters cannot pass the door
+    { const n0 = B.colliders.length; B.col(0, d / 2 - B.T / 2, B.DW + .3, B.T + 1.2); for (let i = n0; i < B.colliders.length; i++) { B.colliders[i].npcOnly = true; B.colliders[i].lv = 0; } }
+    B.guard(-(B.DW / 2 + 1.6), d / 2 + 1.5); B.guard(B.DW / 2 + 1.6, d / 2 + 1.5); },   // playable characters only: companions / NPCs / monsters cannot pass the door
   interior(B) { const iw = B.iw, id_ = B.id_;
     B.add(boxG(2.4, .02, B.d - 2, 2), M('carpet'), 0, .09, .4, B.G.int, { shadow: false });
     B.add(new THREE.BoxGeometry(2, .02, 2), M('gold'), 0, .1, -2, B.G.int, { shadow: false });

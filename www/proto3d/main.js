@@ -339,7 +339,7 @@ function wrapGLB(g, id, blocky) {
   try { const cfg = CLOTHCFG[id]; root.userData.sb = cfg ? new SpringBonesV2(m, { clips: g.animations, config: cfg }) : new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.9.2';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.9.3';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -968,6 +968,8 @@ const cheatEnv = {
   hooks: { fightTest: () => fightToggle(),
     godPref: () => { try { return cheatStore.getItem('vn_owner_god_v1') !== '0'; } catch (e) { return true; } },
     unlimPref: () => { try { return cheatStore.getItem('vn_owner_unlim_v1') !== '0'; } catch (e) { return true; } },
+    nocdPref: () => { try { return cheatStore.getItem('vn_owner_nocd_v1') !== '0'; } catch (e) { return true; } },
+    nocdMode: (on) => { try { cheatStore.setItem('vn_owner_nocd_v1', on ? '1' : '0'); } catch (e) { /* ignore */ } return true; },
     unlimMode: (on) => { try { cheatStore.setItem('vn_owner_unlim_v1', on ? '1' : '0'); } catch (e) { /* ignore */ } return true; },
     godMode: (on) => { try { cheatStore.setItem('vn_owner_god_v1', on ? '1' : '0'); } catch (e) { /* ignore */ } return true; },
     healParty: () => !!(FIGHT && FIGHT.on && FIGHT.cheatHeal()),

@@ -7,6 +7,9 @@ let bad=0;const ok=(n,c,d='')=>{console.log(c?'PASS':'FAIL',n,c?'':d);if(!c)bad+
 const src=fs.readFileSync(new URL('../www/proto3d/main.js',import.meta.url),'utf8');
 const GLB_NAMES=eval(src.match(/const GLB_NAMES = (\[.*?\]);/)[1]);
 ok('20 3D names',GLB_NAMES.length===20&&GLB_NAMES.every(n=>HEROES.some(h=>h.name===n)));
+ok('bootstrap preserves hero index zero',src.includes('if (savedPlan.hero == null) savedPlan.hero = 1;')&&!src.includes('if (!savedPlan.hero)'));
+ok('shutdown saves latest position even before interval',src.includes('const flushLatest = () => { if (!state.inside) saver.mark(); saver.flush(); };'));
+
 const mem=(init)=>{const m=new Map(init?[[Save.SAVE_KEY,init]]:[]);return {getItem:k=>m.has(k)?m.get(k):null,setItem:(k,v)=>m.set(k,String(v)),m}};
 const HOOKS={defaults:()=>({veyra:{v:1},mirror:{v:1}}),ensure:s=>{s.veyra={v:1,...(s.veyra||{})};s.mirror={v:1,...(s.mirror||{})}}};
 const idOf=n=>HEROES.findIndex(h=>h.name===n);
@@ -16,6 +19,7 @@ const store=mem();Save.writeState(store,st2d);
 const r=readSave(store);ok('3D reads valid 2D save',r.status==='ok'&&r.state.gold===777);
 const plan=planFromState(r.state,GLB_NAMES,60);
 ok('plan hero = active',GLB_NAMES[plan.hero]==='Nyx Varrin');
+{const s=Save.freshState(HOOKS);const a=idOf('Sir Aldric');s.party=[a,idOf('Nyx Varrin')];s.active=a;const z=planFromState(s,GLB_NAMES,60);ok('selected Sir Aldric survives plan as hero zero',z.hero===0&&z.party.includes(0));}
 ok('plan followers = rest of party',JSON.stringify(plan.followers.map(i=>GLB_NAMES[i]))===JSON.stringify(['Sir Aldric','Rook Wildbane']));
 ok('no p3d field -> pos null',plan.pos===null);
 // 3D writes
@@ -55,4 +59,5 @@ ok('unknown 2D zone does not affect 3D (still village)',planFromState({...Save.f
  cb();ok('debounce: one write after timer',writes===1&&!sv.dirty);
  sv.mark();snap={x:5,z:5,yaw:0,heroGlb:0};ok('flush writes immediately & cancels timer',sv.flush()===true&&writes===2&&JSON.parse(m.getItem(Save.SAVE_KEY)).p3d.x===5&&cleared>=1);
  ok('flush when clean is a no-op',sv.flush()===false&&writes===2)}
+{const m=mk();let fail=true;const oldSet=m.setItem;m.setItem=(k,v)=>{if(fail)throw new Error('quota full');return oldSet(k,v)};const T={setTimeout:()=>1,clearTimeout:()=>{}};const sv=createSaver(m,GLB_NAMES,()=>({x:9,z:8,yaw:0,heroGlb:0}),900,T);sv.mark();ok('failed write leaves save dirty',sv.flush()===false&&sv.dirty);fail=false;ok('retry after storage recovers succeeds',sv.flush()===true&&!sv.dirty&&Save.loadState(m,HOOKS).p3d.x===9);}
 console.log(bad?`${bad} FAILED`:'ALL PASS');process.exit(bad?1:0);

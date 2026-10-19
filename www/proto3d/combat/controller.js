@@ -181,7 +181,7 @@ export class CombatController {
   stormHit(act) { const a = act.a; for (const e of this.enemies.slice()) if (this.inCone(e, a.range * this.HS * this.RM, -1)) this.hitEnemy(e, a.mult / 3, a); }
   /* ---- damage in ---- */
   enemyStrike(e) {
-    const dx = this.p.x - e.x, dz = this.p.z - e.z, d = Math.hypot(dx, dz), pt = e.def.boss ? e.pat : null, reach = (pt ? pt.reach : e.def.reach) * this.HS + e.def.r;
+    const dx = this.p.x - e.x, dz = this.p.z - e.z, d = Math.hypot(dx, dz), pt = (e.def.boss || e.def.patterns) ? e.pat : null, reach = (pt ? pt.reach : e.def.reach) * this.HS + e.def.r;
     if (this.p.dead || this.dead > 0) { e.pat = null; return; }
     /* boss patterns: ring = within reach; cone = within reach and inside the facing arc; line = down the facing axis, inside the width. Facing is frozen during the telegraph, so it can be side-stepped. */
     let inside = d <= reach * 1.25;
@@ -196,12 +196,14 @@ export class CombatController {
     if (this.blocking) { h = Math.round(h * (1 - this.P.block.reduce)); if (!this.res.unlimited) this.res.sp = Math.max(0, this.res.sp - Math.max(8, h * 0.02)); res = 'blocked'; if (this.res.sp <= 0) this.block(false); }
     if (this.shield > 0) h = Math.round(h * (1 - ABILITIES[4].reduce));
     this.res.hp = Math.max(0, this.res.hp - h);
+    if (pt && pt.slow && h > 0) { this.chill = Math.max(this.chill || 0, 2.5); this.chillAmt = pt.slow; this.emit('chilled', { e, amt: pt.slow }); }   // frost patterns chill the player (host scales move speed by 1 - chillAmt)
     this.emit('enemyAttack', { e, result: res, dmg: h }); if (h > 0) this.emit('damage', { e, dmg: h, crit: false, toPlayer: true });
     if (this.res.hp <= 0) { this.dead = this.P.respawn; this.act = null; this.block(false); this.emit('playerDown'); }
   }
   respawn() { this.res.full(); this.dead = 0; this.potions = this.P.potion.charges; this.cd.reset(); this.iframes = 0; this.shield = 0; this.act = null; this.meteors.length = 0; this.clearEnemies(); this.tgt.target = null; this.tgt.locked = false; this.emit('respawn'); }
   /* ---- frame ---- */
   update(dt) {
+    if (this.chill > 0) { this.chill -= dt; if (this.chill <= 0) { this.chill = 0; this.chillAmt = 0; } }
     this.applyMax(false); this.cd.tick(dt); this.res.tick(dt, this.blocking);
     if (this.res.unlimited && this.furyOn()) this.fury = TUNING.ult.fury;
     if (this.meteors.length) for (const m of this.meteors.slice()) { m.t -= dt; if (m.t <= 0) { this.meteors.splice(this.meteors.indexOf(m), 1); if (this.dead <= 0) this.meteorImpact(m); } }
@@ -217,7 +219,7 @@ export class CombatController {
     this.p.dead = this.dead > 0;
     for (const e of this.enemies) {
       if (e.state === 'defeated') { e.deadT += dt; continue; }
-      if (e.def.boss && e.phase !== 2 && e.state !== 'defeated' && e.hp / e.max < TUNING.boss.enrageAt) { e.phase = 2; e.pat = null; this.emit('bossPhase', { e, phase: 2 }); }
+      if ((e.def.boss || e.def.patterns) && e.phase !== 2 && e.state !== 'defeated' && e.hp / e.max < TUNING.boss.enrageAt) { e.phase = 2; e.pat = null; this.emit('bossPhase', { e, phase: 2 }); }
       if (this.ai.update(e, this.p, dt, this.env) === 'attack') this.enemyStrike(e);
     }
     this.tgt.update(this.enemies, this.p.x, this.p.z);

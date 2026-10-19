@@ -1,7 +1,7 @@
 /* EnemyAIController: idle -> chase -> telegraph -> attack -> recover, with stagger and defeated. Pure state machine; the controller applies results. */
 import { BOSS_PATTERNS, TUNING } from './data.js';
 /* Boss pattern pick: ordered rotation over the patterns available in the current phase (deterministic, learnable). Non-bosses return null (classic single attack). */
-export function pickPattern(e) { const L = BOSS_PATTERNS[e.key]; if (!e.def.boss || !L) return null; const ph = e.phase || 1, A = L.filter(p => (p.phase || 1) <= ph); e.patI = (e.patI || 0) + 1; return A[(e.patI - 1) % A.length]; }
+export function pickPattern(e) { const L = BOSS_PATTERNS[e.key]; if (!(e.def.boss || e.def.patterns) || !L) return null; const ph = e.phase || 1, A = L.filter(p => (p.phase || 1) <= ph); e.patI = (e.patI || 0) + 1; return A[(e.patI - 1) % A.length]; }
 export class EnemyAIController {
   /* returns 'attack' on the frame the telegraphed strike lands (controller resolves hit), else null. env.move(e,dx,dz) lets the host do collision. */
   update(e, p, dt, env) {
@@ -14,7 +14,7 @@ export class EnemyAIController {
       case 'idle': if (!p.dead && d < (e.aggroR !== undefined ? e.aggroR : e.def.aggro * env.HS / 1.5 * 1.4 * Math.max(1, 0.5 + 0.5 * (env.RM || 1)))) this.set(e, 'chase'); break;
       case 'chase':
         if (p.dead) { this.set(e, 'idle'); break; }
-        const spd = e.phase === 2 ? TUNING.boss.enrageSpeed : 1, pt = e.def.boss ? (e.pat || (e.pat = pickPattern(e))) : null, eng = pt ? pt.reach * env.HS + e.def.r : reach;
+        const spd = e.phase === 2 ? TUNING.boss.enrageSpeed : 1, pt = (e.def.boss || e.def.patterns) ? (e.pat || (e.pat = pickPattern(e))) : null, eng = pt ? pt.reach * env.HS + e.def.r : reach;
         if (d > eng * 0.8) env.move(e, nx * e.def.speed * spd * env.HS / 1.5 * dt, nz * e.def.speed * spd * env.HS / 1.5 * dt);
         if (d <= eng && e.atkCd <= 0) { e.curTele = pt ? pt.tele * (e.phase === 2 ? TUNING.boss.enrageTele : 1) : e.def.tele; this.set(e, 'telegraph'); }
         break;

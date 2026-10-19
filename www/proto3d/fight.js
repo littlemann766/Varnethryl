@@ -153,14 +153,14 @@ export function createFight(env) {
   let fxT = -1, fxMax = 1, orbT = -1, orbFrom = null, orbTo = null;
 
   /* ---- controller events -> world ---- */
-  cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact(); if (MET) MET.zone.material.color.setHex(0xffb13e); hud.say('UNHOLY DESTRUCTION', 1400); });
+  cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact(); if (MET) MET.zone.material.color.setHex(0xffb13e); hud.say(ev.name || 'UNHOLY DESTRUCTION', 1400); }).on('blink', b => { state.heroX = b.x; state.heroZ = b.z; state.yaw = b.yaw; });
   cc.on('action', ev => {
     A.swing = { t: 0, T: ev.T, big: ev.a.id === 'heavy' ? 1.5 : 1, kind: ev.a.kind };
     { const h = env.hero(), u = h.userData, drawn = slashA && saber && saber.parent && saber.parent.name === 'weapon_R';
       let ok = false; if (ev.a.kind !== 'shield') ok = drawn ? playAct(h, slashA, 'atk', Math.max(0.5, ev.T), false) : oneShot(h, ev.a.id === 'heavy' ? 'attack2' : 'attack', Math.max(0.5, ev.T), false);
       A.clipAtk = ok; }
     if (ev.aim && (ev.a.kind !== 'storm' && ev.a.kind !== 'aoe')) state.yaw = Math.atan2(ev.aim.x - state.heroX, ev.aim.z - state.heroZ);
-    if (ev.a.kind === 'aoe' || ev.a.kind === 'storm') { fxT = 0; fxMax = ev.a.range * HS; ring.material.color.setHex(ev.a.kind === 'storm' ? 0xffd34a : ev.a.owner ? 0xb36bff : 0x66e6ff); }
+    if (ev.a.kind === 'aoe' || ev.a.kind === 'storm' || ev.a.kind === 'line') { fxT = 0; fxMax = ev.a.range * HS; ring.material.color.setHex(ev.a.kit && cc.kit ? parseInt(cc.kit.color.slice(1), 16) : ev.a.kind === 'storm' ? 0xffd34a : ev.a.owner ? 0xb36bff : 0x66e6ff); }
     if (ev.a.kind === 'storm') A.spin = 0.0001;
   }).on('dash', d => { A.dash = { dx: d.dx, dz: d.dz, left: d.dist, spd: d.dist / d.T }; })
     .on('jump', j => { A.jump = 0; }).on('throw', t => { orbT = 0; orbFrom = { x: state.heroX, z: state.heroZ }; orbTo = t.e; })

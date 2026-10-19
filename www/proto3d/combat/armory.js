@@ -31,7 +31,7 @@ const SHARED = [
   I('runestone', 'Ancient Runestone', 'trinket', 'Accessories', 'epic', 'relic', { hp: 3, mp: 2 }, 'Its markings refuse to hold still.'),
   I('traveler-cloak', 'Wanderer’s Cloak', 'cape', 'Armor', 'uncommon', 'cape', { sp: 3, def: 1 }, 'Practical protection on long journeys.')];
 /* ---- Beth's 7 new weapons (/workspace/weapons) as OPTIONAL items; original signature weapons stay the default. dmg from the manifest's suggested tier (1..5 -> 3,4,5,7,9). glb = file under proto3d/models-weapons (data only, not attached to rigs: grips not validated) ---- */
-const TIER = [0, 3, 4, 5, 7, 9];
+const TIER = [0, 3, 4, 5, 6, 8];   // balance: optional weapons never beat the best signature weapon (8%)
 const NEW_W = [
   { id: 'frost_greatsword', name: 'Frost Greatsword', tier: 4, heroes: ['aldric', 'darius', 'thorne', 'cedric'], icon: 'sword' }, { id: 'war_axe', name: 'War Axe', tier: 4, heroes: ['garruk', 'thorne', 'darius', 'orin'], icon: 'sword' },
   { id: 'war_spear', name: 'War Spear', tier: 3, heroes: ['orin', 'aldric', 'rook'], icon: 'sword' }, { id: 'arcane_staff', name: 'Arcane Staff', tier: 3, heroes: ['kael', 'rowan', 'talia', 'selene', 'morwen'], icon: 'staff' },

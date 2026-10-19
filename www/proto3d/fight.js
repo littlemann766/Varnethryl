@@ -79,29 +79,30 @@ export function createFight(env) {
   /* Owner-only smooth attack playback: crossfade in/out (~0.12/0.15 s, smoothstep), chained swings overlap (previous clip fades out while the next fades in, no dip to idle),
      and the clip's own weight fades so it never snaps back to the loco pose. Damage timing is untouched (this only drives the animation mixer). */
   const sstep = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
-  const FADE_IN = 0.12, FADE_OUT = 0.15;
+  const FADE_IN = 0.12, FADE_OUT = 0.15;   // Owner values; other heroes scale with the clip length (fades(d))
+  const fades = (d, own) => own ? [FADE_IN, FADE_OUT] : [Math.max(0.06, Math.min(0.14, d * 0.22)), Math.max(0.08, Math.min(0.18, d * 0.3))];
   function altAct(u, a) { u.alt = u.alt || new Map(); let b = u.alt.get(a); if (!b) { const c = a.getClip().clone(); c.name = a.getClip().name + '_b'; b = u.mixer.clipAction(c); u.alt.set(a, b); u.alt.set(b, a); } return b; }
   function playAct(root, a, kind, dur, hold) {
     const u = root.userData; if (!a || !u || !u.mixer) return false;
-    const smooth = root === env.hero() && isOwner() && !hold && (kind === 'atk' || kind === 'attack' || kind === 'attack2');
+    const smooth = root === env.hero() && !hold && (kind === 'atk' || kind === 'attack' || kind === 'attack2');
     if (smooth && u.os && !u.os.hold && (u.os.kind === 'atk' || u.os.kind === 'attack' || u.os.kind === 'attack2')) {   // chained swing: overlap with the one still playing
       const prev = u.os; if (u.prev) u.prev.a.stop(); if (a === prev.a) a = altAct(u, a);
       u.prev = { a: prev.a, w0: prev.a.getEffectiveWeight(), t: 0 };
       a.reset(); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = false; const d = a.getClip().duration; a.timeScale = dur ? Math.min(3, d / dur) : 1; a.setEffectiveWeight(0.001); a.play();
-      u.os = { a, t: 0, dur: d / a.timeScale, hold: false, kind, smooth: true, chain: true }; return true;
+      { const dd = d / a.timeScale, f = fades(dd, isOwner()); u.os = { a, t: 0, dur: dd, hold: false, kind, smooth: true, chain: true, fi: f[0], fo: f[1] }; } return true;
     }
     if (u.os && u.os.a !== a) u.os.a.stop(); if (u.prev) { u.prev.a.stop(); u.prev = null; }
     a.reset(); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = !!hold; const d = a.getClip().duration; a.timeScale = dur ? Math.min(3, d / dur) : 1; a.setEffectiveWeight(smooth ? 0.001 : 1); a.play();
-    u.os = { a, t: 0, dur: d / a.timeScale, hold: !!hold, kind, smooth }; return true;
+    { const dd = d / a.timeScale, f = fades(dd, isOwner()); u.os = { a, t: 0, dur: dd, hold: !!hold, kind, smooth, fi: f[0], fo: f[1] }; } return true;
   }
   const oneShot = (root, kind, dur, hold) => { const u = root.userData; return !!u && playAct(root, clipFor(u, kind), kind, dur, hold); };
   function tickOS(root, dt) {
     const u = root.userData, o = u && u.os; if (!u) return; if (!o) { if (u.prev) { u.prev.a.stop(); u.prev = null; } u.ovr = 0; return; }
     o.t += dt;
     if (o.smooth) {
-      const k = sstep(o.t / FADE_IN), out = sstep((o.dur - o.t) / FADE_OUT), w = Math.min(k, out);
+      const k = sstep(o.t / o.fi), out = sstep((o.dur - o.t) / o.fo), w = Math.min(k, out);
       o.a.setEffectiveWeight(Math.max(0.001, w));
-      if (u.prev) { u.prev.t += dt; const pk = sstep(1 - u.prev.t / FADE_IN); u.prev.a.setEffectiveWeight(Math.max(0.001, pk * u.prev.w0)); if (u.prev.t >= FADE_IN) { u.prev.a.stop(); u.prev = null; } }
+      if (u.prev) { u.prev.t += dt; const pk = sstep(1 - u.prev.t / o.fi); u.prev.a.setEffectiveWeight(Math.max(0.001, pk * u.prev.w0)); if (u.prev.t >= o.fi) { u.prev.a.stop(); u.prev = null; } }
       u.ovr = o.chain || u.prev ? Math.max(w, u.prev ? 1 - 0 : w) : w;   // while overlapping, the loco layer stays fully behind the two attack clips
       if (o.chain && !u.prev) u.ovr = w;
       if (o.t >= o.dur) { o.a.stop(); if (u.prev) { u.prev.a.stop(); u.prev = null; } u.os = null; u.ovr = 0; }

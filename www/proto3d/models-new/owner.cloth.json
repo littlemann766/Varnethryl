@@ -1,6 +1,6 @@
 {
  "version": 2,
- "model": "owner_new3",
+ "model": "owner_new5",
  "H": 1.9006,
  "groups": [
   {
@@ -24,8 +24,10 @@
    "maxVel": 0.0045,
    "smooth": 0.4,
    "collide": true,
-   "margin": 0.008,
-   "hemLen": 1.028
+   "margin": 0.014,
+   "hemLen": 1.028,
+   "maxCollide": 1.0,
+   "pushRate": 0.85
   },
   {
    "name": "hood",
@@ -58,56 +60,64 @@
    "a": "thigh_L",
    "b": "shin_L",
    "ra": 0.1102,
-   "rb": 0.076
+   "rb": 0.076,
+   "pad": 0.006
   },
   {
    "name": "shin_L",
    "a": "shin_L",
    "b": "foot_L",
    "ra": 0.076,
-   "rb": 0.0494
+   "rb": 0.0494,
+   "pad": 0.006
   },
   {
    "name": "upperArm_L",
    "a": "upperArm_L",
    "b": "foreArm_L",
-   "ra": 0.0646,
-   "rb": 0.0532
+   "ra": 0.0775,
+   "rb": 0.0638,
+   "pad": 0.012
   },
   {
    "name": "foreArm_L",
    "a": "foreArm_L",
    "b": "hand_L",
-   "ra": 0.0532,
-   "rb": 0.0418
+   "ra": 0.0638,
+   "rb": 0.0502,
+   "pad": 0.012
   },
   {
    "name": "thigh_R",
    "a": "thigh_R",
    "b": "shin_R",
    "ra": 0.1102,
-   "rb": 0.076
+   "rb": 0.076,
+   "pad": 0.006
   },
   {
    "name": "shin_R",
    "a": "shin_R",
    "b": "foot_R",
    "ra": 0.076,
-   "rb": 0.0494
+   "rb": 0.0494,
+   "pad": 0.006
   },
   {
    "name": "upperArm_R",
    "a": "upperArm_R",
    "b": "foreArm_R",
-   "ra": 0.0646,
-   "rb": 0.0532
+   "ra": 0.0775,
+   "rb": 0.0638,
+   "pad": 0.012
   },
   {
    "name": "foreArm_R",
    "a": "foreArm_R",
    "b": "hand_R",
-   "ra": 0.0532,
-   "rb": 0.0418
+   "ra": 0.0638,
+   "rb": 0.0502,
+   "pad": 0.012
   },
   {
    "name": "torso",
@@ -115,9 +125,44 @@
    "b": "upperChest",
    "ra": 0.1695,
    "rb": 0.1695
+  },
+  {
+   "name": "shoulder_L",
+   "a": "shoulder_L",
+   "b": "upperArm_L",
+   "ra": 0.085,
+   "rb": 0.085,
+   "pad": 0.012
+  },
+  {
+   "name": "hand_L",
+   "a": "hand_L",
+   "b": "fingers_L",
+   "ra": 0.055,
+   "rb": 0.05,
+   "pad": 0.01
+  },
+  {
+   "name": "shoulder_R",
+   "a": "shoulder_R",
+   "b": "upperArm_R",
+   "ra": 0.085,
+   "rb": 0.085,
+   "pad": 0.012
+  },
+  {
+   "name": "hand_R",
+   "a": "hand_R",
+   "b": "fingers_R",
+   "ra": 0.055,
+   "rb": 0.05,
+   "pad": 0.01
   }
  ],
  "global": {
   "note": "step 1/60; capsules are between bone heads (world space)"
- }
+ },
+ "notes": [
+  "owner_new4: cape bind verts moved 3 cm back (tapered at the neck); arm/shoulder/hand capsule colliders enlarged (+pad) so cape is pushed off swinging arms at runtime; torso capsule unchanged"
+ ]
 }

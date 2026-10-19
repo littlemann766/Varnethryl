@@ -384,7 +384,7 @@ export function makeVariant(kind, name, pal, seed, lod) {
 }
 
 /* ---------- scatter: merge a whole village mix into 3 meshes ---------- */
-class Acc { constructor() { this.p = []; this.n = []; this.c = []; }
+export class Acc { constructor() { this.p = []; this.n = []; this.c = []; }
   add(g, x, y, z, ry, s) {
     const P = g.attributes.position.array, N = g.attributes.normal.array, C = g.attributes.color.array, cs = Math.cos(ry), sn = Math.sin(ry);
     for (let i = 0; i < P.length; i += 3) { const px = P[i] * s, pz = P[i + 2] * s; this.p.push(px * cs + pz * sn + x, P[i + 1] * s + y, -px * sn + pz * cs + z); this.n.push(N[i] * cs + N[i + 2] * sn, N[i + 1], -N[i] * sn + N[i + 2] * cs); this.c.push(C[i], C[i + 1], C[i + 2]); }

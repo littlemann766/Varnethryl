@@ -10,6 +10,9 @@ import { SpringBones } from './spring_bones.js';
 import { createBump, makeActor, styleFor, findNodes, restoreNodes, applyPose } from './bump.js';
 import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
 import { initCheatBoot } from './cheatboot.js';
+import { createCamRig } from './camrig.js';
+import { initSettings } from './settingsboot.js';
+import { loadPrefs, qualityPlan } from './camprefs.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -304,7 +307,7 @@ function wrapGLB(g, id) {
   root.userData = { glb: true, mixer, act, capeUpdate() {} }; try { root.userData.sb = new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.3';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.4';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -377,6 +380,8 @@ if (savedPlan && savedPlan.pos && qp0.get('hero') == null && posOk(savedPlan.pos
 const keys = new Set();
 /* owner cheat flags (cheatflags.js): all defaults are no-ops; only the owner-gated panel ever changes them */
 const cheat = createFlags();
+let prefStore = null; try { prefStore = localStorage; } catch (e) { prefStore = null; }
+const camRig = createCamRig({ camera, canvas, colliders, HS, WORLD, prefs: loadPrefs(prefStore || { getItem() { return null; } }) });
 addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 
@@ -407,12 +412,12 @@ function tapMoveTo(clientX, clientY) {
     marker.position.set(state.target.x, 0.06, state.target.z); marker.visible = true;
   }
 }
-canvas.addEventListener('pointerdown', e => { try { canvas.setPointerCapture(e.pointerId); } catch (_) {} touches.set(e.pointerId, { sx: e.clientX, sy: e.clientY, lx: e.clientX, drag: false }); });
+canvas.addEventListener('pointerdown', e => { try { canvas.setPointerCapture(e.pointerId); } catch (_) {} touches.set(e.pointerId, { sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, drag: false }); });
 canvas.addEventListener('pointermove', e => {
   const t = touches.get(e.pointerId); if (!t) return;
   if (!t.drag && Math.hypot(e.clientX - t.sx, e.clientY - t.sy) > 12) t.drag = true;
-  if (t.drag) { state.camYaw -= (e.clientX - t.lx) * 0.006; }
-  t.lx = e.clientX;
+  if (t.drag && !camRig.pinching) { state.camYaw -= (e.clientX - t.lx) * 0.006 * camRig.prefs.lookSens; if (camRig.fp) camRig.look(0, -(e.clientY - t.ly) * 0.005 * camRig.prefs.lookSens); }
+  t.lx = e.clientX; t.ly = e.clientY;
 });
 const canvasUp = e => { const t = touches.get(e.pointerId); touches.delete(e.pointerId); if (t && !t.drag && e.type === 'pointerup') tapMoveTo(e.clientX, e.clientY); };
 canvas.addEventListener('pointerup', canvasUp); canvas.addEventListener('pointercancel', canvasUp);
@@ -645,14 +650,12 @@ function animateHero(dt) {
 // ---------- camera ----------
 const camPos = new THREE.Vector3(0, 8 * HS, START_Z + 10 * HS), camLook = new THREE.Vector3(0, 1.5 * HS, START_Z);
 const _want = new THREE.Vector3(), _look = new THREE.Vector3();
+const camIn = {};
 function updateCamera(dt, snap) {
-  const portrait = innerHeight > innerWidth;
-  const z = state.zoom || 1, close = z < 1, dist = HS * (close ? (portrait ? 7.0 : 6.0) * (z / 0.3) : (portrait ? 10.5 : 9)), height = HS * (close ? 2.2 : (portrait ? 7.2 : 6.2));
-  const hy = (state.heroY || 0) + cheat.alt, want = _want.set(state.heroX + Math.sin(state.camYaw) * dist, height + hy, state.heroZ + Math.cos(state.camYaw) * dist);
-  const look = _look.set(state.heroX, HS * (close ? 1.05 : 1.6) + hy, state.heroZ);
-  const k = snap ? 1 : 1 - Math.pow(0.0015, dt);
-  camPos.lerp(want, k); camLook.lerp(look, k);
-  camera.position.copy(camPos); camera.lookAt(camLook);
+  const ci = camIn; ci.heroX = state.heroX; ci.heroZ = state.heroZ; ci.hy = (state.heroY || 0) + cheat.alt; ci.dispY = state.dispY === undefined ? state.heroY || 0 : state.dispY; ci.alt = cheat.alt; ci.camYaw = state.camYaw; ci.legacyZoom = state.zoom; ci.portrait = innerHeight > innerWidth; ci.dt = dt; ci.snap = snap;
+  camRig.update(ci);
+  camPos.copy(camRig.pos); camLook.copy(camRig.look);
+  camRig.syncHero(hero);
   sun.position.set(state.heroX + SUN_OFF.x, SUN_OFF.y, state.heroZ + SUN_OFF.z);
   sun.target.position.set(state.heroX, 0, state.heroZ);
 }
@@ -671,8 +674,10 @@ let last = performance.now(), fpsAcc = 0, fpsFrames = 0, fps = 0, totalFrames = 
 let running = true;
 document.addEventListener('visibilitychange', () => { running = !document.hidden; last = performance.now(); lastDraw = 0; adaptSkip = Math.max(adaptSkip, 30); });
 // adaptive resolution: if frames average > 22 ms for ~1 s, shrink the render resolution (min 0.6x); never climb back above a level that failed.
-let adaptT = 0, adaptN = 0, adaptSkip = 90;
+let adaptT = 0, adaptN = 0, adaptSkip = 90, adaptLock = false;
+function setQuality(q) { const plan = qualityPlan(q, window.devicePixelRatio || 1); adaptLock = !plan.adaptive; prCeil = plan.ceil; pr = plan.ceil; renderer.setPixelRatio(pr); resize(); adaptSkip = 60; adaptT = 0; adaptN = 0; }
 function adaptRes(raw) {
+  if (adaptLock) return;
   if (adaptSkip > 0) { adaptSkip--; return; }
   if (raw > 250) return;                       // tab switch / hitch, not load
   adaptT += raw; adaptN++;
@@ -735,12 +740,15 @@ function entrySpot(d) {
 let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
 const cheatEnv = {
   flags: cheat, bumpSys, storage: cheatStore, zones: ['village'],
-  hooks: {}, /* TODO(combat/quests): hooks.healParty / killEnemies / skipQuest / godMode attach here when those systems land */
+  hooks: { godMode: (on) => { try { cheatStore.setItem('vn_owner_god_v1', on ? '1' : '0'); } catch (e) { /* storage blocked */ } return true; } }, /* TODO(combat/quests): hooks.healParty / killEnemies / skipQuest / godMode attach here when those systems land */
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
   teleport: (x, z) => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); },
-  onReady: (c) => { window.__p3d.cheats = c; },
+  onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; settingsApi.ownerInit(); },
+  onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; },
 };
-initCheatBoot(cheatEnv);
+let ownerFlag = false;
+const cheatBoot = initCheatBoot(cheatEnv);
+const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl, cheatEnv, openCheatPanel: () => cheatBoot.open() });
 window.__p3d = { selectHero,
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, error: e[id] || '' })) }; },
   cheat,
@@ -752,6 +760,7 @@ window.__p3d = { selectHero,
   free(x, z, level = 0) { const l0 = state.level; state.level = level; const q = { x, z }; resolve(q); state.level = l0; return !!surfaceAt(x, z, level) && Math.hypot(q.x - x, q.z - z) < 0.02; },
   teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; updateLevel(); },
   setCamYaw(y) { state.camYaw = y; },
+  camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; },
   setZoom(z) { state.zoom = z; },
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },
   setHero, get heroIndex() { return HEROES.indexOf(hero); },

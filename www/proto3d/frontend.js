@@ -1,5 +1,6 @@
 // Front end: loading -> title (live village backdrop, camera drift) -> character select -> game, plus pause/settings/credits.
 // Active only when the URL has no query params, or ?fe=1 (fe=0 disables). The in-game HUD (combat/hud.js) is untouched.
+import * as THREE from 'three';
 import { PLAYER, SABER, ABILITIES } from './combat/data.js';
 const Q = new URLSearchParams(location.search);
 const ON = Q.get('fe') === '1' || (!location.search && Q.get('fe') !== '0');
@@ -24,7 +25,7 @@ function boot() {
     <button class="vn-btn" data-a="set">Settings</button><button class="vn-btn" data-a="cred">Credits</button></div>
     <div class="foot"><span id="fe-ver"></span><span>Tap to begin your legend</span></div></div>
   <div class="scr" id="fe-sel"><div class="list vn-panel"><h2 class="vn-title">Heroes</h2><div id="fe-roster"></div></div>
-    <div class="stage"><div class="tag" id="fe-tag">Preview</div></div>
+    <div class="stage" id="fe-stage"><div class="tag" id="fe-tag">Preview</div></div>
     <div class="info vn-panel"><h2 class="vn-title" id="fe-name"></h2><div class="vn-rule"></div><div id="fe-stats"></div>
       <div style="font-size:12px;color:var(--vn-ink-dim)">Size</div><div id="fe-size"></div><div style="font-size:12px;color:var(--vn-ink-dim)">Skills</div><div id="fe-skills"></div>
       <div class="acts"><button class="vn-btn" data-a="back">Back</button><button class="vn-btn primary" data-a="begin">Begin</button></div></div></div>
@@ -47,27 +48,26 @@ function boot() {
   const P = () => window.__p3d;
 
   let z0 = null; const hist = [];
-  function show(id) { hist.push(id); const Z = P()?.state; if (Z) { if (id === 'sel' && z0 === null) { z0 = Z.zoom; Z.zoom = .75; } else if (id !== 'sel' && z0 !== null) { Z.zoom = z0; z0 = null; } }
-    cur = id; root.querySelectorAll('.scr').forEach(s => s.classList.toggle('on', s.id === 'fe-' + id));
+  function show(id) { hist.push(id); const Z = P()?.state; if (Z) { if (id === 'sel') P().setRunning?.(false); }
+    cur = id; P()?.titleWander?.(id === 'title'); root.querySelectorAll('.scr').forEach(s => s.classList.toggle('on', s.id === 'fe-' + id));
     document.body.classList.toggle('fe-on', id !== 'game'); document.body.classList.toggle('fe-game', id === 'game');
     document.body.dataset.fe = id; }
   function tip() { if (!opts.tips) { $('#fe-tip').textContent = ''; return; } const [h, t] = TIPS[tipI++ % TIPS.length]; $('#fe-tip').innerHTML = `<b>${h}</b><br>${t}`; }
-  function loading(ms, then) { show('load'); tip(); progress = 0; const t0 = performance.now(); const ti = setInterval(tip, 2600);
+  function loading(ms, then) { pvDispose(); show('load'); tip(); progress = 0; const t0 = performance.now(); const ti = setInterval(tip, 2600);
     (function step() { const ready = !!(P() && P().frames > 2); const k = Math.min(1, (performance.now() - t0) / ms); progress = ready ? k : Math.min(k, .85);
       $('#fe-bar').style.width = (progress * 100).toFixed(0) + '%';
       if (progress >= 1) { clearInterval(ti); then(); } else requestAnimationFrame(step); })(); }
   function driftLoop() { cancelAnimationFrame(drift); let last = performance.now();
     const f = (t) => { const dt = Math.min(.1, (t - last) / 1000); last = t;
       if ((cur === 'title' || cur === 'cred' || (cur === 'set' && back === 'title')) && opts.drift && P()?.state) P().state.camYaw += dt * .12;
-      if (cur === 'sel' && P()?.state) P().state.camYaw += dt * .35;
       drift = requestAnimationFrame(f); }; drift = requestAnimationFrame(f); }
-  function title() { P()?.setRunning?.(true); show('title'); $('#fe-ver').textContent = document.getElementById('ver')?.textContent || ''; driftLoop(); }
+  function title() { pvDispose(); if (!P()) root.querySelector('#fe-title').classList.add('static'); P()?.setRunning?.(true); show('title'); $('#fe-ver').textContent = document.getElementById('ver')?.textContent || ''; driftLoop(); }
   const fmt = (n) => n >= 1e6 ? (n / 1e6).toFixed(n % 1e6 ? 2 : 0) + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'k' : String(n);
   function stat(lbl, v, max, txt) { return `<div class="fe-stat"><span>${lbl}</span><div class="vn-bar"><i style="width:${Math.max(4, Math.min(100, v / max * 100))}%"></i></div><b>${txt}</b></div>`; }
   function renderSel() {
     const ro = P()?.roster || []; const box = $('#fe-roster');
     box.innerHTML = ro.map((r, i) => `<button data-i="${i}" class="${i === sel ? 'on' : ''}">${r.name}${r.n > 1 ? ` <small style="opacity:.6">×${r.n}</small>` : ''}</button>`).join('');
-    const r = ro[sel]; if (!r) return; P().pickRoster(sel);
+    const r = ro[sel]; if (!r) return; P().pickRoster(sel); pvShow(sel);
     const owner = /owner/i.test(r.name + r.key) || !!P().owner;
     const hp = owner ? PLAYER.ownerHp : PLAYER.hp, atk = owner ? SABER : 120;
     $('#fe-name').textContent = r.name; $('#fe-tag').textContent = r.name;
@@ -77,7 +77,57 @@ function boot() {
     $('#fe-size').innerHTML = `<div class="fig ref" style="height:${px(1.8)}px"></div><small>Human<br>1.8 m</small><div class="fig" style="height:${px(h)}px"></div><small><b style="color:var(--vn-gold-hi)">${h.toFixed(2)} m</b><br>${(h / 1.8).toFixed(2)}× human</small>`;
     $('#fe-skills').innerHTML = (ABILITIES || []).map(a => `<div class="${a.saber && !owner ? 'lock' : ''}"><i>◆</i>${a.name || a.id}</div>`).join('');
   }
-  function enterGame() { cancelAnimationFrame(drift); P()?.setRunning?.(true); show('game'); }
+  // ---- character-select model preview: one small dedicated renderer, real GLB at its in-game (charscale) size on a pedestal
+  const PV = { r: null };
+  function pvInit() {
+    if (PV.r) return PV; const st = $('#fe-stage');
+    let r; try { r = new THREE.WebGLRenderer({ antialias: !matchMedia('(pointer:coarse)').matches, alpha: true, powerPreference: 'low-power' }); } catch { return null; }
+    r.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); r.outputColorSpace = THREE.SRGBColorSpace; r.domElement.id = 'fe-pv'; st.prepend(r.domElement);
+    const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, 1, 0.05, 200);
+    sc.add(new THREE.HemisphereLight(0xfff1d6, 0x2a2232, 1.4)); const key = new THREE.DirectionalLight(0xffe2b0, 2.2); key.position.set(3, 6, 5); sc.add(key);
+    const rim = new THREE.DirectionalLight(0x8fb4ff, 1.1); rim.position.set(-4, 3, -5); sc.add(rim);
+    const ped = new THREE.Group(); const stone = new THREE.MeshStandardMaterial({ color: 0x2a2f3a, roughness: .85 }), gold = new THREE.MeshStandardMaterial({ color: 0xd4ae5a, metalness: .8, roughness: .35 });
+    const c1 = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.4, .28, 40), stone); c1.position.y = -.14; ped.add(c1);
+    const c2 = new THREE.Mesh(new THREE.TorusGeometry(1.26, .035, 8, 48), gold); c2.rotation.x = Math.PI / 2; ped.add(c2); sc.add(ped);
+    const turn = new THREE.Group(); sc.add(turn);
+    Object.assign(PV, { r, sc, cam, ped, turn, yaw: Math.PI + .45, vel: 0, zoom: 1, drag: null, lastT: 0, idleT: 0, model: null, mixer: null, req: 0, h: 1, token: 0, clock: performance.now() });
+    const el = r.domElement, pts = new Map();
+    el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); PV.idleT = 0; });
+    el.addEventListener('pointermove', e => { const p = pts.get(e.pointerId); if (!p) return;
+      if (pts.size === 2) { const [a, b] = [...pts.values()], d0 = Math.hypot(a[0] - b[0], a[1] - b[1]); pts.set(e.pointerId, [e.clientX, e.clientY]); const [c, d] = [...pts.values()], d1 = Math.hypot(c[0] - d[0], c[1] - d[1]); if (d0 > 0) PV.zoom = Math.min(1.6, Math.max(.6, PV.zoom * d0 / d1)); return; }
+      const dx = e.clientX - p[0]; pts.set(e.pointerId, [e.clientX, e.clientY]); PV.yaw += dx * .012; PV.vel = dx * .012; PV.idleT = 0; });
+    const up = e => pts.delete(e.pointerId); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    el.addEventListener('wheel', e => { e.preventDefault(); PV.zoom = Math.min(1.6, Math.max(.6, PV.zoom * (e.deltaY > 0 ? 1.08 : .93))); }, { passive: false });
+    return PV;
+  }
+  function pvFrame() {
+    if (!PV.r) return; PV.req = requestAnimationFrame(pvFrame);
+    const now = performance.now(), dt = Math.min(.1, (now - PV.clock) / 1000); PV.clock = now; PV.idleT += dt;
+    const st = PV.r.domElement.parentElement, w = st.clientWidth, h = st.clientHeight; if (!w || !h) return;
+    const cv = PV.r.domElement; if (cv.width !== Math.round(w * PV.r.getPixelRatio()) || cv.height !== Math.round(h * PV.r.getPixelRatio())) { PV.r.setSize(w, h); PV.cam.aspect = w / h; PV.cam.updateProjectionMatrix(); }
+    PV.vel *= Math.pow(.05, dt); if (PV.idleT > 2.5) PV.yaw += dt * .45; else PV.yaw += PV.vel * dt * 4;
+    PV.turn.rotation.y = PV.yaw; if (PV.mixer) PV.mixer.update(dt);
+    const fit = Math.max(PV.h, 2.0) * PV.zoom, t = Math.tan(PV.cam.fov * Math.PI / 360), dist = (fit * .66) / t / Math.min(1, PV.cam.aspect * 1.3);
+    PV.cam.position.set(0, fit * .5, dist); PV.cam.lookAt(0, fit * .42, 0); PV.r.render(PV.sc, PV.cam);
+  }
+  async function pvShow(i) {
+    if (!pvInit()) return; const tok = ++PV.token; if (!PV.req) { PV.clock = performance.now(); pvFrame(); }
+    const res = await P()?.previewModel?.(i); if (!res || tok !== PV.token || !PV.r) return;
+    if (PV.model) { PV.turn.remove(PV.model); PV.mixer?.stopAllAction(); }
+    const m = res.model, u = m.userData || {}; m.position.set(0, 0, 0); m.rotation.set(0, 0, 0);
+    const b = new THREE.Box3().setFromObject(m); const hh = Math.max(.5, b.max.y - b.min.y); m.position.y = -b.min.y;
+    // pedestal sized to the model's footprint; the camera frames at least a human's height so relative size (charscale) reads true
+    const fw = Math.max(b.max.x - b.min.x, b.max.z - b.min.z); PV.ped.scale.setScalar(Math.max(.9, fw * .55));
+    PV.h = Math.max(hh, PV.ped.scale.x * 1.1); PV.model = m; PV.mixer = u.mixer || null;
+    if (u.act) { for (const k in u.act) { try { u.act[k].stop(); } catch {} } if (u.act.idle) { u.act.idle.reset().setEffectiveWeight(1).play(); } }
+    PV.turn.add(m); PV.cur = { id: res.id, name: res.name, h: +hh.toFixed(2), idle: !!(u.act && u.act.idle) };
+  }
+  function pvDispose() {
+    if (!PV.r) return; cancelAnimationFrame(PV.req); PV.req = 0; PV.token++;
+    PV.ped.traverse(o => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
+    PV.mixer?.stopAllAction(); PV.r.dispose(); PV.r.forceContextLoss?.(); PV.r.domElement.remove(); PV.r = null; PV.model = null; PV.mixer = null; PV.cur = null;
+  }
+  function enterGame() { pvDispose(); P()?.dropTitleExtras?.(); cancelAnimationFrame(drift); P()?.setRunning?.(true); show('game'); }
   function pause() { if (cur !== 'game') return; P()?.setRunning?.(false); show('pause'); }
   function act(a) {
     switch (a) {
@@ -105,5 +155,5 @@ function boot() {
   const mount = () => { document.body.append(root, pbtn); for (const k in opts) { const c = $('#fe-o-' + k); if (c) c.checked = !!opts[k]; }
     show('load'); loading(1800, title); };
   document.body ? mount() : addEventListener('DOMContentLoaded', mount);
-  window.__fe = { show: (s) => act(s), get screen() { return cur; }, hist, pause, title };
+  window.__fe = { get preview() { return PV.r ? { on: true, ...PV.cur, canvas: !!document.getElementById('fe-pv'), yaw: PV.yaw } : { on: false, canvas: !!document.getElementById('fe-pv') }; }, show: (s) => act(s), get screen() { return cur; }, hist, pause, title };
 }

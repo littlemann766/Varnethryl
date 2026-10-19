@@ -63,7 +63,7 @@ with sync_playwright() as p:
                         q = [m['cx'] + sg * s * (h + dd), m['cz'] + sg * c * (h + dd)]; lv_ = m['l0'] if base else m['l1']
                         if pg.evaluate("([p,l])=>__p3d.free(p[0],p[1],l)", [W(bi['id'], *q), lv_]): return q
                     return q
-                if dr == 'up': a = pick(-1, True); t = [m['cx'] + s * (h + 1.4), m['cz'] + c * (h + 1.4)]; lv0, lg, yg = m['l0'], m['l1'], m['y1']
+                if dr == 'up': a = pick(-1, True); t = [m['cx'] + s * (h + 1.4), m['cz'] + c * (h + 1.4)]; lv0, lg, yg = m['l0'], m['l1'], m['y1'] * bi['K']   # ramp y is local; the hero's y is world (K-scaled), as the 'down' branch already does
                 else: a = pick(1, False); t = [m['cx'] - s * (h + 1.4), m['cz'] - c * (h + 1.4)]; lv0, lg, yg = m['l1'], m['l0'], m['y0']*bi['K']
                 res = []
                 for mode in (['key', 'joy'] if MODE == 'both' else [MODE]):

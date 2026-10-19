@@ -4,6 +4,7 @@
 import { CombatController } from './combat/controller.js';
 import { CombatHUD } from './combat/hud.js';
 import { loadLucian } from './combat/calc.js';
+import { worldProfile } from './charscale.js';
 import { LightningFX } from './combat/lightning.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
@@ -74,7 +75,7 @@ export function createFight(env) {
     if (sheathed) { clipSet(false); if (saber) attach(false); } else { clipSet(true); if (saber) attach(true); else equip(); }
     hud.say(sheathed ? 'Saber sheathed (unarmed)' : 'Lightsaber drawn', 900);
   }
-  function syncHero() { const id = env.heroId(), own = isOwner(), want = canWield() && !sheathed; if (cc.hero.id !== id || cc.hero.saber !== want) cc.setHero({ id, saber: want, name: own ? 'Owner' : (id.split(':').pop().replace(/_.*/, '') || 'Hero').replace(/^./, c => c.toUpperCase()), className: own ? 'Saber Knight' : 'Adventurer' }); }
+  function syncHero() { const id = env.heroId(), own = isOwner(), want = canWield() && !sheathed; if (cc.hero.id !== id || cc.hero.saber !== want) cc.setHero({ id, saber: want, name: own ? 'Owner' : (id.split(':').pop().replace(/_.*/, '') || 'Hero').replace(/^./, c => c.toUpperCase()), className: own ? 'Saber Knight' : 'Adventurer' }); cc.setScale(worldProfile(id, HS)); }
 
   /* ---- action clips (any model): attack, attack2, hit, death. Aliases are matched case-insensitively; missing clip => procedural lunge/flinch/fall ---- */
   const ALIAS = { attack: ['attack', 'attack1', 'slash', 'swing', 'strike', 'melee'], attack2: ['attack2', 'heavy', 'slash2', 'strike2', 'attack_heavy'], hit: ['hit', 'hurt', 'hit_react', 'damage', 'flinch', 'hitreact'], death: ['death', 'die', 'dead', 'defeat', 'defeated', 'fall'] };
@@ -172,7 +173,7 @@ export function createFight(env) {
   cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact();  hud.say(ev.name ? ev.name.toUpperCase() : 'DESTRUCTION', 1400); }).on('blink', b => { state.heroX = b.x; state.heroZ = b.z; state.yaw = b.yaw; });
   let lfx = null; const getFx = () => lfx || (lfx = new LightningFX({ THREE, scene, HS, canvas: document.querySelector('canvas') }));
   cc.on('lightning', ev => { getFx().strike(ev); });
-  if (env.bystanders) cc.bystanders = env.bystanders;
+  if (env.bystanders) cc.bystanders = env.bystanders;   // Owner-gated server-trust: controller only fires these from owner ultimates
   cc.on('bystanderKill', ev => { if (env.killCrowd) env.killCrowd(ev.b); });
   cc.on('action', ev => {
     A.swing = { t: 0, T: ev.T, big: ev.a.id === 'heavy' ? 1.5 : 1, kind: ev.a.kind };
@@ -180,7 +181,7 @@ export function createFight(env) {
       let ok = false; if (ev.a.kind !== 'shield') ok = drawn ? playAct(h, slashA, 'atk', Math.max(0.5, ev.T), false) : oneShot(h, ev.a.id === 'heavy' ? 'attack2' : 'attack', Math.max(0.5, ev.T), false);
       A.clipAtk = ok; }
     if (ev.aim && (ev.a.kind !== 'storm' && ev.a.kind !== 'aoe')) state.yaw = Math.atan2(ev.aim.x - state.heroX, ev.aim.z - state.heroZ);
-    if (ev.a.kind === 'aoe' || ev.a.kind === 'storm' || ev.a.kind === 'line') { fxT = 0; fxMax = ev.a.range * HS; ring.material.color.setHex(ev.a.kit && cc.kit ? parseInt(cc.kit.color.slice(1), 16) : ev.a.kind === 'storm' ? 0xffd34a : ev.a.owner ? 0xb36bff : 0x66e6ff); }
+    if (ev.a.kind === 'aoe' || ev.a.kind === 'storm' || ev.a.kind === 'line') { fxT = 0; fxMax = ev.a.range * HS * cc.RM; ring.material.color.setHex(ev.a.kit && cc.kit ? parseInt(cc.kit.color.slice(1), 16) : ev.a.kind === 'storm' ? 0xffd34a : ev.a.owner ? 0xb36bff : 0x66e6ff); }
     if (ev.a.kind === 'storm') A.spin = 0.0001;
   }).on('dash', d => { A.dash = { dx: d.dx, dz: d.dz, left: d.dist, spd: d.dist / d.T }; })
     .on('jump', j => { A.jump = 0; }).on('throw', t => { orbT = 0; orbFrom = { x: state.heroX, z: state.heroZ }; orbTo = t.e; })

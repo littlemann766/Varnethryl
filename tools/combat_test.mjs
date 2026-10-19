@@ -212,7 +212,7 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
 { const { BOSS_PATTERNS, ENEMIES } = await import('../www/proto3d/combat/data.js'); const { pickPattern } = await import('../www/proto3d/combat/ai.js'); const P = Object.fromEntries(BOSS_PATTERNS.titan.map(p => [p.id, p]));
   const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
   const t0 = new CombatController({ HS: 1.5, rng: rnd }); t0.setHero({ id: 'n:nokit', saber: false }); const ti0 = t0.addEnemy('titan', 0, 0);
-  T('titan rules intact: 5M HP, scale 6, boss, bossesInstantKill false', ti0.max === 5000000 && ENEMIES.titan.scale === 6 && ENEMIES.titan.boss && TUNING.ult.bossesInstantKill === false);
+  T('titan rules intact: 5M HP, scale 6, boss, bossesInstantKill true (default)', ti0.max === 5000000 && ENEMIES.titan.scale === 6 && ENEMIES.titan.boss && TUNING.ult.bossesInstantKill === true);
   const seq = []; for (let i = 0; i < 6; i++) seq.push(pickPattern(ti0).id); T('phase 1 pattern rotation: stomp, sweep, slam repeating', seq.join() === 'stomp,sweep,slam,stomp,sweep,slam');
   ti0.phase = 2; ti0.patI = 0; const s2 = []; for (let i = 0; i < 4; i++) s2.push(pickPattern(ti0).id); T('phase 2 adds Rage Quake', s2.join() === 'stomp,sweep,slam,quake');
   T('non-boss has no pattern (classic attack)', pickPattern(t0.addEnemy('wolf', 0, 0)) === null);

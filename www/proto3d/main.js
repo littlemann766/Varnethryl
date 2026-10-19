@@ -12,6 +12,7 @@ import { SpringBones } from './spring_bones.js';
 import { SpringBones as SpringBonesV2 } from './spring_bones_v2.js';
 import { createBump, makeActor, styleFor, findNodes, restoreNodes, applyPose } from './bump.js';
 import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
+import { createCinderFlight, cinderAnimationWeights } from './cinderflight.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
 import { initSettings } from './settingsboot.js';
@@ -269,7 +270,7 @@ const EXTRA = [["n:mortimer_new", "Mortimer (NEW)", "proto3d/models-new/mortimer
 // Owner: ONE stable file name. To swap in a newer rig (owner_new4...): tools/swap_owner.sh /workspace/rigged/owner_new5 (copies <name>.glb + <name>.cloth.json over models-new/owner.*)
 const CLOTH = new Set(["n:ember_new3", "n:owner", "n:owner_pika1", "n:asha_new3", "n:ashentitan_new", "n:coral_new", "n:darius_new6", "n:lunara_new", "n:marella_new", "n:mortimer_new", "n:player_pikachu", "n:snowy_new4", "n:thrain_new4", "n:wren_new3"]);   // models shipped with <name>.cloth.json (runtime/spring_bones_v2.js)
 const EXTRA_SCALE = { 'n:frosttroll_b': 0.5 };   // frost trolls are authored 11.4 m; the boss wants 3x the player (5.7 m). The Ashen Titan stays unscaled (6x).
-const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28 }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 4.5, run: 10.5 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
+const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28 }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 4.5, run: 10.5 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 }, 'n:cinder_new': { walk: 0.65, run: 1.95 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
 /* Beth's smoothed blocky models (_smooth.glb): extra 'Smooth' variant for characters that already exist; originals stay the default. Loaded on demand (only when picked). */
 const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'hawk', 'hearth', 'hobgoblin', 'hydrella', 'kael', 'kestrel', 'lorian', 'mirelle', 'morwen', 'mossgut', 'neris', 'nyx', 'orin', 'rook', 'rowan', 'seraphine', 'stonetroll', 'talia', 'thorne', 'valen', 'vesper', 'wolf', 'wyvern'];   // frosttroll_smooth intentionally not used (old 1.8 m base): frosttroll_a4 is the troll
 { const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
@@ -332,6 +333,33 @@ function locoAnim(u, sp) {
   }
   const wk = A.walk, id = A.idle; if (wk && id) { const w = Math.min(1, sp / SPEED); { const ov = 1 - (u.ovr || 0); wk.setEffectiveWeight(w * ov); id.setEffectiveWeight((1 - w) * ov); } wk.timeScale = 0.6 + sp * 0.25; }
 }
+// Low-cost phoenix embers follow Cinder's wing tips and tail (one Points draw call).
+// No particles are attached to the bones; the original GLB and skinning remain unchanged.
+function initCinderEmbers(root, model) {
+  const names = ['wing3_L', 'wing3_R', 'tail'];
+  const bones = names.map(name => model.getObjectByName(name));
+  if (bones.some(b => !b)) return;
+  const N = 27, data = new Float32Array(N * 3), colors = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) { colors[i * 3] = 1; colors[i * 3 + 1] = 0.28 + (i % 4) * 0.16; colors[i * 3 + 2] = 0.035; }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(data, 3).setUsage(THREE.DynamicDrawUsage));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const material = new THREE.PointsMaterial({ size: 0.095, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending, vertexColors: true });
+  const embers = new THREE.Points(geometry, material); embers.frustumCulled = false; root.add(embers);
+  const bases = bones.map(() => new THREE.Vector3()), p = new THREE.Vector3(); let t = 0;
+  root.userData.cinderEmbers = { update(dt) {
+    t += dt;
+    root.updateWorldMatrix(true, true);
+    bones.forEach((b, j) => { b.getWorldPosition(p); bases[j].copy(root.worldToLocal(p)); });
+    for (let i = 0; i < N; i++) {
+      const j = i % 3, phase = (t * (0.85 + (i % 5) * .08) + (i / N)) % 1, k = i * 3, q = bases[j];
+      data[k] = q.x + Math.sin(i * 9.7 + t * 4) * phase * .12;
+      data[k + 1] = q.y + phase * .28;
+      data[k + 2] = q.z + Math.cos(i * 6.3 + t * 3) * phase * .10;
+    }
+    geometry.attributes.position.needsUpdate = true;
+  } };
+}
 function wrapGLB(g, id, blocky) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
   m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
@@ -347,11 +375,15 @@ function wrapGLB(g, id, blocky) {
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
   if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];   // e.g. serpent: walk/run = slither/slither_fast
   if (act.idle) act.idle.play(); if (act.walk) act.walk.play(); if (spd) for (const k of ['trot', 'run']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
+  if (id === 'n:cinder_new') for (const k of ['hover', 'flap', 'glide', 'dive', 'land']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
   root.userData = { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 };
-  try { const cfg = CLOTHCFG[id]; root.userData.sb = cfg ? new SpringBonesV2(m, { clips: g.animations, config: cfg }) : new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
+  // Cinder's authored wing and tail clips must NOT be re-aimed by spring physics.
+  // The generic spring-bone family matches wing1/wing2/wing3 and creates rubbery, overlapping wing flaps.
+  if (id !== 'n:cinder_new') try { const cfg = CLOTHCFG[id]; root.userData.sb = cfg ? new SpringBonesV2(m, { clips: g.animations, config: cfg }) : new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
+  if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.1.14';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.15';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -515,6 +547,31 @@ import('./ladders.js').then(m => { LAD = m.createLadders({ THREE, scene, collide
 const LADDER_SITES = [{ id: 'watchtower', x: -18, z: 32, half: 1.8, H: 5.0 }, { id: 'lookout', x: -30, z: 14, half: 1.5, H: 3.2, roofed: false }, { id: 'belltower', x: -24, z: -16, half: 2.0, H: 7.0 }];
 /* owner cheat flags (cheatflags.js): all defaults are no-ops; only the owner-gated panel ever changes them */
 const cheat = createFlags();
+// Separate from owner cheats. Cinder can take off without enabling cheat flight for other heroes.
+const cinderFlight = createCinderFlight();
+const isCinder = () => ['n:cinder_new', 'o:cinder'].includes(GLB_IDS[HEROES.indexOf(hero)]);
+const flyControls = document.getElementById('cinderFlyControls');
+const flyBtn = document.getElementById('cinderFlyBtn');
+const flyUp = document.getElementById('cinderFlyUp'), flyDown = document.getElementById('cinderFlyDown');
+const flyTouch = { up: false, down: false };
+let wasCinder = false;
+function syncCinderControls() {
+  const selected = isCinder();
+  if (wasCinder && !selected) { cinderFlight.reset(); flyTouch.up = flyTouch.down = false; }
+  wasCinder = selected;
+  if (flyControls) flyControls.style.display = selected ? 'flex' : 'none';
+  if (flyBtn) flyBtn.textContent = cinderFlight.active ? 'Land' : 'Take off';
+  if (flyUp) flyUp.style.display = cinderFlight.alt > 0 || cinderFlight.active ? '' : 'none';
+  if (flyDown) flyDown.style.display = cinderFlight.alt > 0 || cinderFlight.active ? '' : 'none';
+}
+if (flyBtn) flyBtn.addEventListener('click', e => { e.stopPropagation(); if (isCinder()) cinderFlight.toggle(); syncCinderControls(); });
+for (const [button, key] of [[flyUp, 'up'], [flyDown, 'down']]) if (button) {
+  const stop = e => { if (e) e.preventDefault(); flyTouch[key] = false; };
+  button.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); flyTouch[key] = true; try { button.setPointerCapture(e.pointerId); } catch (_) {} });
+  button.addEventListener('pointerup', stop); button.addEventListener('pointercancel', stop); button.addEventListener('lostpointercapture', stop);
+}
+addEventListener('keydown', e => { if (e.repeat || !isCinder() || /input|textarea/i.test(e.target?.tagName || '')) return; if (e.key.toLowerCase() === 'f') { cinderFlight.toggle(); syncCinderControls(); } });
+
 addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 
@@ -799,7 +856,7 @@ function updateHero(dt) {
   if (!state.climbing) { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
   const moving = (vx || vz);
   if (moving) {
-    const ghost = passesWalls(cheat), step = SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
+    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
     tmp.x = state.heroX; tmp.z = state.heroZ; let blocked = false;
     for (let i = 0; i < n; i++) {
       const ox = tmp.x, oz = tmp.z; tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp, ghost)) blocked = true;
@@ -822,13 +879,16 @@ function updateHero(dt) {
   state.moving = state.speed > 0.5;
   updateLevel();
   if (cheat.fly || cheat.alt > 0) stepAltitude(cheat, ((cheat.up || keys.has(' ') || keys.has('e')) ? 1 : 0) - ((cheat.down || keys.has('q') || keys.has('c') || keys.has('shift')) ? 1 : 0), dt);
+  if (isCinder()) cinderFlight.step(dt, flyTouch.up || keys.has(' ') || keys.has('e'), flyTouch.down || keys.has('q') || keys.has('c'));
+  else if (cinderFlight.active || cinderFlight.alt) cinderFlight.reset();
+  syncCinderControls();
   state.dispY = state.dispY === undefined || Math.abs(state.heroY - state.dispY) > 3 ? state.heroY : state.dispY + (state.heroY - state.dispY) * Math.min(1, dt * 16);
-  hero.position.set(state.heroX, state.dispY + cheat.alt, state.heroZ); hero.rotation.y = state.yaw;
+  hero.position.set(state.heroX, state.dispY + cheat.alt + cinderFlight.alt, state.heroZ); hero.rotation.y = state.yaw;
   let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
   if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
     try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }
   animateHero(dt); cullSkins(); heroGhost();
-  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); hero.position.y = state.dispY + cheat.alt + playerAct.phop; }
+  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); hero.position.y = state.dispY + cheat.alt + cinderFlight.alt + playerAct.phop + (hero.userData.cinderHop || 0); }
 }
 
 const _sp = new THREE.Vector3();
@@ -849,7 +909,22 @@ function heroGhost() {
 let walkT = 0, idleT = 0, prevYaw = 0;
 function animateHero(dt) {
   const u = hero.userData, w = Math.min(1, state.speed / (SPEED * CH.speed));
-  if (u.glb) { restoreNodes(u.bumpNodes); locoAnim(u, LOCO_FORCE !== null ? LOCO_FORCE : state.speed); u.mixer.update(dt); if (u.sb) u.sb.update(dt); return; }
+  if (u.glb) {
+    restoreNodes(u.bumpNodes);
+    if (isCinder() && u.act.flap) {
+      const targets = cinderAnimationWeights(cinderFlight, LOCO_FORCE !== null ? LOCO_FORCE : state.speed, u.mscale);
+      const blend = Math.min(1, dt * 5);
+      u.cinderWt ||= {};
+      for (const k of ['idle', 'walk', 'run', 'hover', 'flap', 'glide', 'dive', 'land']) if (u.act[k]) {
+        u.cinderWt[k] = (u.cinderWt[k] ?? (k === 'idle' ? 1 : 0)) + (targets[k] - (u.cinderWt[k] ?? (k === 'idle' ? 1 : 0))) * blend;
+        u.act[k].setEffectiveWeight(u.cinderWt[k]);
+      }
+      u.cinderStep = (u.cinderStep || 0) + dt * (6 + state.speed * 0.8);
+      u.cinderHop = cinderFlight.alt < 0.05 ? Math.max(0, Math.sin(u.cinderStep)) * 0.035 * Math.min(1, state.speed / 2) : 0;
+    } else { u.cinderHop = 0; locoAnim(u, LOCO_FORCE !== null ? LOCO_FORCE : state.speed); }
+    u.mixer.update(dt); if (u.sb) u.sb.update(dt); if (u.cinderEmbers) u.cinderEmbers.update(dt);
+    return;
+  }
   walkT += dt * (4 + state.speed * 1.9); idleT += dt;
   const s = Math.sin(walkT) * 0.85 * w;
   u.legL.rotation.x = s; u.legR.rotation.x = -s;
@@ -871,7 +946,7 @@ const camPos = new THREE.Vector3(0, 8 * HS, START_Z + 10 * HS), camLook = new TH
 const _want = new THREE.Vector3(), _look = new THREE.Vector3();
 const camIn = {}; let lastDragT = 0;
 function updateCamera(dt, snap) {
-  const ci = camIn; ci.heroX = state.heroX; ci.heroZ = state.heroZ; ci.hy = (state.heroY || 0) + cheat.alt; ci.dispY = state.dispY === undefined ? state.heroY || 0 : state.dispY; ci.alt = cheat.alt; ci.camYaw = state.camYaw; ci.legacyZoom = state.zoom; ci.portrait = innerHeight > innerWidth; ci.dt = dt; ci.snap = snap;
+  const ci = camIn; ci.heroX = state.heroX; ci.heroZ = state.heroZ; ci.hy = (state.heroY || 0) + cheat.alt + cinderFlight.alt; ci.dispY = state.dispY === undefined ? state.heroY || 0 : state.dispY; ci.alt = cheat.alt + cinderFlight.alt; ci.camYaw = state.camYaw; ci.legacyZoom = state.zoom; ci.portrait = innerHeight > innerWidth; ci.dt = dt; ci.snap = snap;
   if (camRig.prefs.camMode !== 'free' && !camRig.fp && !camRig.pinching && performance.now() - lastDragT > 1500) state.camYaw = followYaw(state.camYaw, state.vx, state.vz, dt);
   ci.zx = ZONE.cx; ci.zz = ZONE.cz; ci.zh = ZONE.half;
   camRig.update(ci);

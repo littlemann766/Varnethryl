@@ -8,7 +8,7 @@ export class EnemyAIController {
     if (e.state !== 'telegraph' && e.state !== 'attack') e.yaw = Math.atan2(nx, nz);
     if (e.knockT > 0) { e.knockT = Math.max(0, e.knockT - dt); env.move(e, e.kx * 9 * e.knockT * dt * 4, e.kz * 9 * e.knockT * dt * 4); }
     switch (e.state) {
-      case 'idle': if (!p.dead && d < e.def.aggro * env.HS / 1.5 * 1.4) this.set(e, 'chase'); break;
+      case 'idle': if (!p.dead && d < (e.aggroR !== undefined ? e.aggroR : e.def.aggro * env.HS / 1.5 * 1.4)) this.set(e, 'chase'); break;
       case 'chase':
         if (p.dead) { this.set(e, 'idle'); break; }
         if (d > reach * 0.8) env.move(e, nx * e.def.speed * env.HS / 1.5 * dt, nz * e.def.speed * env.HS / 1.5 * dt);

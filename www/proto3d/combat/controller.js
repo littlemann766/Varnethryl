@@ -35,7 +35,7 @@ export class CombatController {
     if (!this.cd.ok(a.id)) return false;
     if (!this.res.can(a.cost)) { this.emit('denied', { slot: i, why: a.cost.mp && this.res.mp < a.cost.mp ? 'Not enough mana' : 'Not enough stamina' }); return false; }
     const nrm = !this.hero.owner, tn = TUNING.normal; let ab = a;
-    if (nrm) ab = Object.assign({}, a, { cd: a.cd * (a.id === 'basic' ? tn.basicCdMul : 1), windup: a.windup * tn.windupMul, T: a.T * tn.windupMul, cost: a.id === 'basic' ? { sp: tn.basicSp } : a.cost });
+    if (nrm) ab = Object.assign({}, a, { cd: a.cd * (a.id === 'basic' ? tn.basicCdMul : 1), windup: a.windup * (a.id === 'basic' ? 1 : tn.windupMul), T: a.T * (a.id === 'basic' ? 0.8 : tn.windupMul), cost: a.id === 'basic' ? { sp: tn.basicSp } : a.cost });
     if (!this.res.can(ab.cost)) { this.emit('denied', { slot: i, why: 'Not enough stamina' }); return false; }
     this.res.spend(ab.cost); this.cd.start(a.id, ab.cd); this.act = { a: ab, slot: i, t: 0, done: false };
     const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, 8 * this.HS);

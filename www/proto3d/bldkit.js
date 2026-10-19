@@ -141,7 +141,7 @@ export class Builder {
   rectShell(o) { const _lv = this.lvTag; this.lvTag = undefined; try { return this._rectShell(o); } finally { this.lvTag = _lv; } }
   _rectShell(o) {
     const { w, d, h } = o, T = this.T, DW = Math.min(o.DW || 2.2, DOOR_MAXW), DH = Math.min(o.DH || 2.6, DOOR_MAXH), hs = o.hs === undefined ? h * .42 : o.hs;
-    const lo = o.lower || 'stone', up = o.upper || 'timber'; this.w = w; this.d = d; this.h = h; this.DW = DW;
+    const lo = o.lower || 'stone', up = o.upper || 'timber'; this.w = w; this.d = d; this.h = h; this.DW = DW; this.loKey = lo;
     const seg = (bw, bh, bd, x, y, z) => { // stacked: stone base to hs, upper above
       if (hs > 0 && hs < y + bh / 2 + .01 && y - bh / 2 < hs - .01 && bh > .01) { /* split below */ }
       const yb = y - bh / 2, yt = y + bh / 2; const cuts = hs > yb + .01 && hs < yt - .01;
@@ -278,11 +278,22 @@ Builder.prototype.details = function (o = {}) {
     if (v === 2) { this.bx(1.6, .5, .5, 'darkWood', cx, .25, cz, g); this.bx(1.6, .08, .6, 'wood', cx, .52, cz, g); this.col(cx, cz, 1.6, .5); for (let i = 0; i < 4; i++) this.add(new THREE.SphereGeometry(.16, 5, 4), M(['#c8452d', '#e3b341', '#6fae45', '#c8452d'][i]), cx - .6 + i * .4, .72, cz, g, { shadow: false }); } }
   // shutters beside the front windows (lower storey)
   for (const x of frontXs(this)) for (const sx of [-1, 1]) this.bx(.34, 1.05, .06, this.shutKey, x + sx * .78, this.shutY || 1.7, d / 2 + .05, g, { shadow: false });
-  this.details2(o);
+  this.details2(o); this.details3(o);
   // corner stone quoins every ~1.2 m on the front corners
   for (const sx of [-1, 1]) for (let i = 0; i < 3; i++) this.bx(i % 2 ? .46 : .6, .38, .46, 'stoneD', sx * (w / 2 - .02), .55 + i * .9, d / 2 - .02, g, { shadow: false });
 };
 // second detail layer: storey band + timber studs, door-side bench, potted plants, wall tufts of swaying grass, hanging lantern bracket
+// passes 4-6 on every standard building: (4) corner quoins on stone bases, (5) weathering - grime band along the wall foot,
+// (6) life - firewood stack and crates on one side. Flat colours / shared keys only (no new draw calls), lite boxes (8 tris).
+Builder.prototype.details3 = function (o) {
+  const w = this.w, d = this.d, g = this.G.ext, hs = o.hs || 0, lo = this.loKey || 'stone'; let hh = 0; for (const ch of String(this.id)) hh = (hh * 31 + ch.charCodeAt(0)) | 0; const rnd = k => { const x = Math.sin(hh * 7.13 + k * 41.7) * 24634.6345; return x - Math.floor(x); };
+  if (/stone|rock/.test(lo)) { const qk = lo === 'stoneL' ? 'stoneD' : 'stoneL', top = Math.min(hs > 1.2 ? hs : this.h, 4.2);
+    for (const sx of [-1, 1]) for (let k = 0, y = .2; y < top - .2; k++, y += .5) { const a = k % 2 === 0; this.bx(a ? .5 : .3, .42, a ? .16 : .3, qk, sx * (w / 2 - (a ? .2 : .1)), y + .21, d / 2 + .06, g, { shadow: false, lite: true }); } }
+  { const gm = M('#4f4a3c'); for (const [pw, x, z, ry] of [[w, 0, d / 2 + .035, 0], [d, -w / 2 - .035, 0, -Math.PI / 2], [d, w / 2 + .035, 0, Math.PI / 2]]) { const m = this.add(new THREE.PlaneGeometry(pw, .32), gm, x, .16, z, g, { shadow: false }); m.rotation.y = ry; } }
+  if (w > 6 && w < 16 && rnd(1) < .8) { const sx = rnd(2) < .5 ? -1 : 1, x = sx * (w / 2 + .45), z = -d / 2 + 1.4;
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 3 - r; i++) { const c = this.cyl(.13, .13, 1.1, i % 2 ? 'wood' : 'darkWood', x, .14 + r * .25, z + (i - (2 - r) / 2) * .27, g, 6, { shadow: false }); c.rotation.x = Math.PI / 2; }
+    this.bx(.6, .5, .6, 'wood', x, .25, z + 1.3, g, { lite: true }); if (rnd(3) < .6) this.bx(.45, .4, .45, 'wood', x + .02, .7, z + 1.3, g, { shadow: false, lite: true }); this.col(x, z + .6, .7, 2.2); }
+};
 Builder.prototype.details2 = function (o) {
   const w = this.w, d = this.d, DW = this.DW || 2.2, g = this.G.ext, hs = o.hs || 0, h = this.h, tim = o.upper === 'timber' || o.upper === 'plaster' || o.upper === 'darkWood'; let hh = 0; for (const ch of String(this.id)) hh = (hh * 17 + ch.charCodeAt(0)) | 0; const rnd = k => { const x = Math.sin(hh * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
   if (hs > 1.2 && hs < h - 1) { const key = tim ? 'darkWood' : 'stoneL', th = tim ? .2 : .16;   // storey string course / jetty beam on all four sides

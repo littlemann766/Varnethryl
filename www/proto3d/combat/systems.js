@@ -1,9 +1,9 @@
 /* Cooldown / Resource managers and the TargetingSystem. Pure logic (no THREE, no DOM). */
 export class CooldownManager {
-  constructor() { this.t = 0; this.ready = new Map(); this.dur = new Map(); }
+  constructor() { this.t = 0; this.ready = new Map(); this.dur = new Map(); this.off = null; /* off(): true = no cooldowns (Owner skin gate) */ }
   tick(dt) { this.t += dt; }
-  start(key, d) { this.ready.set(key, this.t + d); this.dur.set(key, d); }
-  left(key) { const r = this.ready.get(key); return r === undefined ? 0 : Math.max(0, r - this.t); }
+  start(key, d) { if (this.off && this.off()) return; this.ready.set(key, this.t + d); this.dur.set(key, d); }
+  left(key) { if (this.off && this.off()) return 0; const r = this.ready.get(key); return r === undefined ? 0 : Math.max(0, r - this.t); }
   frac(key) { const d = this.dur.get(key); return d ? this.left(key) / d : 0; }
   ok(key) { return this.left(key) <= 0; }
   reset() { this.ready.clear(); }

@@ -131,7 +131,7 @@ export function createFight(env) {
   /* ---- per frame ---- */
   function update(dt) {
     if (!on) return;
-    dt = Math.min(dt, 0.1); syncHero(); cc.god = !!(env.cheat && env.cheat.god); cc.res.unlimited = !!(env.cheat && env.cheat.unlimited);
+    dt = Math.min(dt, 0.1); syncHero(); cc.god = !!(env.cheat && env.cheat.god); cc.res.unlimited = !!(env.cheat && env.cheat.unlimited); cc.noCooldown = !!(env.cheat && env.cheat.noCooldown);
     { const dx = state.heroX - A.lx, dz = state.heroZ - A.lz; A.lx = state.heroX; A.lz = state.heroZ; const l = Math.hypot(dx, dz); if (l > 0.005 && !A.dash) { A.vx = dx / l; A.vz = dz / l; } else if (l <= 0.005) { A.vx = 0; A.vz = 0; } }
     cc.setPlayer(state.heroX, state.heroZ, state.yaw);
     const h = env.hero();

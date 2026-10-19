@@ -10,6 +10,9 @@ export const UNLIM_KEY = 'vn_owner_unlim_v1';
 export const unlimPref = (storage) => { try { return storage.getItem(UNLIM_KEY) !== '0'; } catch (e) { return true; } };
 export const saveGodPref = (storage, on) => { try { storage.setItem(GOD_KEY, on ? '1' : '0'); } catch (e) { /* storage blocked: choice lasts this session only */ } };
 
+export const NOCD_KEY = 'vn_owner_nocd_v1';
+export const nocdPref = (storage) => { try { return storage.getItem(NOCD_KEY) !== '0'; } catch (e) { return true; } };
+
 let running = null;
 /* env: the same env main.js gives the cheat panel ({flags, storage, ...}) plus onOwner(cheats). Resolves true if the owner path started. */
 export function initOwner(env) {
@@ -19,6 +22,7 @@ export function initOwner(env) {
     const cheats = createCheats(env); if (env.onOwner) env.onOwner(cheats);
     if (godPref(env.storage)) cheats.setGod(true);
     if (unlimPref(env.storage)) cheats.setUnlimited(true);
+    if (nocdPref(env.storage)) cheats.setNoCooldown(true);
     let last = null;
     const tick = () => {
       let id = null; try { id = JSON.parse(env.storage.getItem('guildbound_rpg_save_v1') || 'null'); } catch (e) { id = null; }

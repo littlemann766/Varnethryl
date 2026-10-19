@@ -351,7 +351,7 @@ function wrapGLB(g, id, blocky) {
   try { const cfg = CLOTHCFG[id]; root.userData.sb = cfg ? new SpringBonesV2(m, { clips: g.animations, config: cfg }) : new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.13';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.14';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -432,7 +432,7 @@ const IS_OWNER_TOKEN = (() => { try { return !!localStorage.getItem('vn_owner_un
 { const oi = GLB_IDS.indexOf('n:owner'); let seen = null; try { seen = localStorage.getItem('p3d_owner_default_v119'); } catch (e) {}
   if (savedOn && qp0.get('hero') == null && oi > 0 && IS_OWNER_TOKEN && !seen) { savedPlan.hero = oi; savedPlan.pos = null; try { localStorage.setItem('p3d_owner_default_v119', '1'); } catch (e) {} }
   if (!IS_OWNER_TOKEN && savedPlan.hero === oi) savedPlan.hero = 1;   /* the Owner skin is for the owner account only */ }
-{ const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (!savedPlan.hero) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
+{ const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (savedPlan.hero == null) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
 // ---------- character selector: ONE entry per character (all variants grouped), compact dropdown + variant switches ----------
 const gkey = id => id.replace(/^[a-z]:/, '').replace(/_straight_rig$/, '').replace(/_smooth$/, '').replace(/_new\d*$/, '').replace(/^owner_pika\d*$/, 'owner').replace(/^player_/, '');
@@ -990,8 +990,10 @@ if (savedOn) {
     saver = createSaver(store, GLB_NAMES, snapNow);
     const watch = () => { if (state.inside) return; const dx = state.heroX - lastSave.x, dz = state.heroZ - lastSave.z; if (!(Math.abs(dx) < 0.5 && Math.abs(dz) < 0.5)) { lastSave.x = state.heroX; lastSave.z = state.heroZ; saver.mark(); } };
     setInterval(watch, 700);
-    addEventListener('pagehide', () => saver.flush());
-    document.addEventListener('visibilitychange', () => { if (document.hidden) saver.flush(); });
+    // Mark at shutdown: the interval may not have noticed the last small movement yet.
+    const flushLatest = () => { if (!state.inside) saver.mark(); saver.flush(); };
+    addEventListener('pagehide', flushLatest);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) flushLatest(); });
   }
 }
 /* ---------- owner cheat panel (hidden gesture; loads cheatpanel.js lazily; owner-gated, see ownergate.js and README) ---------- */

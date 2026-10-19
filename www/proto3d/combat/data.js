@@ -11,6 +11,17 @@ export const TUNING = {
 };
 export const BAMBOO = { min: 4, max: 8 };   // Bamboo Stick (test weapon, owner account only): low base damage; owner skills use the 99,999 x skillMul rule with it
 export const UNARMED = { min: TUNING.normal.dmg[0], max: TUNING.normal.dmg[1] };                 // everybody else (no weapon in the fight test)
+/* ---- Boss attack patterns (data-driven). reach/len/width are in hero-scale units (x HS at runtime, like def.reach). shape: ring | cone | line.
+   Patterns rotate in order (learnable); phase 2 (HP < TUNING.boss.enrageAt) adds the phase-2 moves, shortens telegraphs and speeds the boss up. Damage still goes through calc.js (atk x dmg). ---- */
+export const BOSS_PATTERNS = {
+  titan: [
+    { id: 'stomp', name: 'Titan Stomp', shape: 'ring', reach: 6.5, tele: 1.1, dmg: 1.0 },
+    { id: 'sweep', name: 'Cleaving Sweep', shape: 'cone', reach: 8.4, cos: 0.35, tele: 1.0, dmg: 1.1 },
+    { id: 'slam', name: 'Ashen Slam', shape: 'line', reach: 14, width: 3.6, tele: 1.4, dmg: 1.4 },
+    { id: 'quake', name: 'Rage Quake', shape: 'ring', reach: 12, tele: 1.0, dmg: 1.6, phase: 2 },
+  ],
+};
+TUNING.boss = { enrageAt: 0.5, enrageTele: 0.75, enrageSpeed: 1.25, enrageCd: 0.8 };   // phase-2 tuning (bosses only)
 export const SABER = { min: 99999, max: 99999 };   // = TUNING.owner.saber                     // Owner lightsaber: 99,999 flat per hit (boss decision), NOT combinedStats; Owner gate only
 export const PLAYER = {
   hp: TUNING.normal.hp, ownerHp: TUNING.owner.hp, mp: 100, sp: 100, def: 600, agi: 20, mpRegen: 3, spRegen: 24, spDelay: 0.9,

@@ -1,6 +1,7 @@
 /* CombatController: owns all combat state and rules. No THREE, no DOM. Reads only player position/facing (setPlayer) - never the camera.
    Talks to the outside through events: on(type, fn). The HUD listens; the host (fight.js) turns events into visuals/movement. */
 import { PLAYER, ABILITIES, ENEMIES, TUNING, OWNER_SKILLS, ULTIMATE2 } from './data.js';
+import { kitFor, kitSkill } from './herokits.js';
 import { DamageCalculator } from './calc.js';
 import { CooldownManager, ResourceManager, TargetingSystem } from './systems.js';
 import { EnemyAIController } from './ai.js';
@@ -11,23 +12,25 @@ export class CombatController {
     this.enemies = []; this.ls = {}; this.p = { x: 0, z: 0, yaw: 0, dead: false };
     this.hero = { id: '', name: 'Hero', level: 40, className: 'Adventurer', saber: false };
     this.act = null; this.blocking = false; this.blockT = 0; this.iframes = 0; this.shield = 0; this.potions = this.P.potion.charges; this.dead = 0;
-    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this._mk = ''; this.ownerUnlocked = false; this.meteors = []; this.bamboo = false; this.ultSel = (() => { try { const v = typeof localStorage !== 'undefined' && localStorage.getItem('varn.ultsel'); return v === 'unholy' ? 'unholy' : 'holy'; } catch (e) { return 'holy'; } })(); this.bystanders = null;
+    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this.kit = null; this._mk = ''; this.ownerUnlocked = false; this.meteors = []; this.bamboo = false; this.ultSel = (() => { try { const v = typeof localStorage !== 'undefined' && localStorage.getItem('varn.ultsel'); return v === 'unholy' ? 'unholy' : 'holy'; } catch (e) { return 'holy'; } })(); this.bystanders = null;
     this.env = { HS: this.HS, move: o.move || ((e, dx, dz) => { e.x += dx; e.z += dz; }) };
   }
   on(t, f) { (this.ls[t] || (this.ls[t] = [])).push(f); return this; }
   emit(t, a) { const l = this.ls[t]; if (l) for (let i = 0; i < l.length; i++) l[i](a); }
-  setHero(h) { Object.assign(this.hero, h); this.hero.owner = /(^|:)owner/.test(this.hero.id || '');  /* Owner gate: only the Owner has 999,999 max HP */ this.applyMax(true); this.emit('hero', this.hero); }
+  setHero(h) { Object.assign(this.hero, h); this.hero.owner = /(^|:)owner/.test(this.hero.id || ''); this.kit = kitFor(this.hero.id);  /* Owner gate: only the Owner has 999,999 max HP */ this.applyMax(true); this.emit('hero', this.hero); }
   /* max HP/MP/SP: Owner skin = ownerHp; non-Owner hero holding the Owner saber on the owner account = x TUNING.perks.holderMul (not invincible); everyone else normal. Current values keep their fraction; reverts when the saber goes away. */
   applyMax(force) {
-    const own = !!this.hero.owner, hold = !own && this.ownerOk(), m = hold ? TUNING.perks.holderMul : 1, key = (own ? 'o' : '') + m; if (!force && key === this._mk) return; this._mk = key;
-    const nx = { hp: own ? this.P.ownerHp : Math.round(this.P.hp * m), mp: Math.round(this.P.mp * m), sp: Math.round(this.P.sp * m) }, R = this.res;
+    const own = !!this.hero.owner, hold = !own && this.ownerOk(), m = hold ? TUNING.perks.holderMul : 1, ar = (!own && this.kit && this.kit.armor) || null, key = (own ? 'o' : '') + m + (ar ? ar.name : ''); if (!force && key === this._mk) return; this._mk = key;
+    const nx = { hp: own ? this.P.ownerHp : Math.round(this.P.hp * m * (1 + (ar ? ar.hpPct : 0))), mp: Math.round(this.P.mp * m * (1 + (ar ? ar.mpPct : 0))), sp: Math.round(this.P.sp * m * (1 + (ar ? ar.spPct : 0))) }, R = this.res;
     for (const k of ['hp', 'mp', 'sp']) { if (R.max[k] === nx[k]) continue; R[k] = own && k === 'hp' ? nx[k] : Math.min(nx[k], Math.max(0, R[k] * nx[k] / R.max[k])); R.max[k] = nx[k]; }
   }
   setPlayer(x, z, yaw) { this.p.x = x; this.p.z = z; this.p.yaw = yaw; }   // the only world inputs
   /* Owner gate: Owner skin AND the host-confirmed owner unlock (fight.js sets ownerUnlocked from the owner gate; the HUD can never set it). */
   ownerOk() { return !!(this.ownerUnlocked && (this.hero.owner || this.hero.saber)); }   // owner account AND (Owner skin OR active hero wields the Owner saber)
   perkHero() { return !!(this.hero.owner || (TUNING.perks.saberHolderResources && this.ownerOk())); }   // unlimited MP/SP + no-cooldowns recipient
-  slotUsable(i) { const a = typeof i === 'string' ? OWNER_SKILLS[i] : ABILITIES[i]; if (!a) return false; if (a.owner && !this.ownerOk()) return false; return a.owner || !a.saber || !!this.hero.saber; }
+  skillDef(i) { return typeof i === 'string' ? (OWNER_SKILLS[i] || kitSkill(this.kit, i)) : ABILITIES[i]; }
+  slotUsable(i) { const a = this.skillDef(i); if (!a) return false; if (a.owner && !this.ownerOk()) return false; return a.owner || !a.saber || !!this.hero.saber; }
+  furyOn() { return this.ownerOk() || !!this.kit; }
   furyReady() { return this.res.unlimited || this.fury >= TUNING.ult.fury; }
   /* Bamboo Stick (test weapon): owner account only; while held it replaces the saber, so owner skills use the non-saber 99,999 x skillMul rule. */
   bambooOn() { return !!(this.bamboo && this.ownerUnlocked); }
@@ -42,7 +45,7 @@ export class CombatController {
   /* ---- player inputs ---- */
   busy() { return this.dead > 0 || !!this.act; }
   use(i) {
-    const a = typeof i === 'string' ? OWNER_SKILLS[i] : ABILITIES[i]; if (!a || this.busy()) return false;
+    const a = this.skillDef(i); if (!a || this.busy()) return false;
     if (a.owner && !this.ownerOk()) { this.emit('denied', { slot: i, why: 'Owner only' }); return false; }
     if (!this.slotUsable(i)) { this.emit('denied', { slot: i, why: a.owner ? 'Draw the saber' : 'Owner only' }); return false; }
     if (!this.cd.ok(a.id)) return false;
@@ -53,7 +56,7 @@ export class CombatController {
     if (!this.res.can(ab.cost)) { this.emit('denied', { slot: i, why: 'Not enough stamina' }); return false; }
     this.res.spend(ab.cost); this.cd.start(a.id, ab.cd); this.act = { a: ab, slot: i, t: 0, done: false };
     if (a.fury && !this.res.unlimited) this.fury = 0;
-    if (a.kind === 'meteor') { const U = TUNING.ult; this.meteors.push({ t: U.delay, x: this.p.x, z: this.p.z, r: U.radius, mode: ab.mode || 'hostile', name: ab.name }); this.emit('meteorCast', { x: this.p.x, z: this.p.z, radius: U.radius, delay: U.delay, mode: ab.mode || 'hostile', name: ab.name }); }
+    if (a.kind === 'meteor') { const U = a.kit ? { delay: a.delay, radius: a.radius } : TUNING.ult, tg = a.kit ? (this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, 14 * this.HS)) : null, mx = tg ? tg.x : this.p.x, mz = tg ? tg.z : this.p.z; this.meteors.push({ t: U.delay, x: mx, z: mz, r: U.radius, kit: !!a.kit, mult: a.mult, mode: a.mode || 'hostile', name: a.name }); this.emit('meteorCast', { x: mx, z: mz, radius: U.radius, delay: U.delay, mode: a.mode || 'hostile', name: a.name }); }
     const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, 8 * this.HS);
     this.emit('action', { slot: i, a: ab, T: ab.T, aim: t });
     return true;
@@ -63,6 +66,7 @@ export class CombatController {
   meteorImpact(m) {
     const U = TUNING.ult, hit = [], all = m.mode === 'all';   // 'all' (Unholy): everything in range except the Owner. 'hostile' (Holy): hostile monsters + hostile characters only.
     const um = Math.max(1, Math.min(100, Math.floor(+U.dmgMul || 1)));
+    if (m.kit) { for (const e of this.enemies.slice()) if (e.state !== 'defeated' && Math.hypot(e.x - m.x, e.z - m.z) <= m.r + e.def.r) { this.hitEnemy(e, m.mult, { stagger: 1 }); hit.push({ e, kill: e.state === 'defeated' }); } this.emit('meteorImpact', { x: m.x, z: m.z, radius: m.r, hits: hit, name: m.name, kit: true }); return; }
     for (const e of this.enemies.slice()) {
       if (e.state === 'defeated' || e.owner || e.prop) continue;
       if (!all && (e.friendly || e.protected || e.npc || e.party || e.ally || e.hostile === false)) continue;
@@ -123,6 +127,7 @@ export class CombatController {
   hitEnemy(e, mult, a) {
     if (e.state === 'defeated') return;
     /* Thunderstorm (ULTIMATE2.lethal): kills regular enemies; bosses (Ashen Titan...) only die to it if TUNING.ult.bossesInstantKill (default false) - otherwise a normal hit. */
+    const wp = (!this.ownerOk() && this.kit && this.kit.weapon) ? 1 + this.kit.weapon.dmgPct : 1;   // signature weapon bonus (kit heroes only, never Owner rules)
     const lethal = !!(a && a.lethal && (!e.def.boss || TUNING.ult.bossesInstantKill));
     const r = lethal ? { dmg: Math.max(1, Math.ceil(e.hp)), crit: true } : DamageCalculator.playerHit(this.weapon(), mult, this.rng);
     /* Owner saber: regular hostile monsters take current HP x12 per hit (always lethal). Bosses keep flat 99,999 unless TUNING.perks.saberBossesX12. Owner gate enforced here, never from the UI. */
@@ -134,10 +139,11 @@ export class CombatController {
     else {
     const sm = Math.max(0, Math.min(50, Math.floor(+TUNING.perks.saberMul || 0)));   // 0 = flat 99,999 (old behavior); 1-50 = x target current HP
     if (sm > 0 && this.weapon() === 'saber' && this.ownerOk() && e.hp > 0 && (!e.def.boss || TUNING.perks.saberBossesX12)) r.dmg = Math.max(1, Math.round(e.hp)) * sm; }
+    if (wp !== 1 && !lethal) r.dmg = Math.round(r.dmg * wp);
     e.hp = Math.max(0, e.hp - r.dmg); e.flash = 0.2; this.lastTarget = e; this.lastHitT = this.cd.t;
     const dx = e.x - this.p.x, dz = e.z - this.p.z, d = Math.hypot(dx, dz) || 1; e.kx = dx / d; e.kz = dz / d; e.knockT = (a && a.knock ? 0.35 : 0.12);
     this.emit('damage', { e, dmg: r.dmg, crit: r.crit, toPlayer: false });
-    if (this.ownerOk() && !(a && a.ult)) this.fury = Math.min(TUNING.ult.fury, this.fury + (a && a.id !== 'basic' ? TUNING.ult.furyPerSkill : TUNING.ult.furyPerBasic));
+    if (this.furyOn() && !(a && a.ult)) this.fury = Math.min(TUNING.ult.fury, this.fury + (a && a.id !== 'basic' ? TUNING.ult.furyPerSkill : TUNING.ult.furyPerBasic));
     if (e.hp <= 0) { this.defeat(e); return; }
     e.poiseDmg = (e.poiseDmg || 0) + r.dmg; const big = e.poiseDmg >= e.def.hp * TUNING.normal.staggerFrac && !(this.hero.owner || this.ownerOk());
     if (big) { e.poiseDmg = 0; this.ai.stagger(e, e.def.stagger); }
@@ -155,7 +161,12 @@ export class CombatController {
   }
   resolveAction(act) {
     const a = act.a, HS = this.HS;
-    if (a.kind === 'meteor') return;   // lands later via this.meteors
+    if (a.kind === 'meteor') return;
+    if (a.heal) { const n = this.res.heal(Math.round(this.res.max.hp * a.heal)); this.emit('heal', { n, x: this.p.x, z: this.p.z }); if (a.kind === 'heal') return; }
+    if (a.shield) { this.shield = a.shield; this.emit('shield', a); }
+    if (a.kind === 'dash') { const fx = Math.sin(this.p.yaw), fz = Math.cos(this.p.yaw); this.emit('dash', { dx: fx, dz: fz, dist: a.dist, T: 0.25 }); for (const e of this.enemies.slice()) { const dx = e.x - this.p.x, dz = e.z - this.p.z, d = Math.hypot(dx, dz), al = dx * fx + dz * fz; if (al > -1 && al < a.dist + e.def.r && Math.abs(dx * fz - dz * fx) < 2.2 + e.def.r) this.hitEnemy(e, a.mult, a); } return; }
+    if (a.kind === 'line') { const fx = Math.sin(this.p.yaw), fz = Math.cos(this.p.yaw); for (const e of this.enemies.slice()) { const dx = e.x - this.p.x, dz = e.z - this.p.z, al = dx * fx + dz * fz; if (al > 0 && al < a.range + e.def.r && Math.abs(dx * fz - dz * fx) < 1.4 + e.def.r) this.hitEnemy(e, a.mult, a); } return; }
+    if (a.kind === 'blink') { const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range); if (t) { const dx = t.x - this.p.x, dz = t.z - this.p.z, d = Math.hypot(dx, dz) || 1, bx = t.x + dx / d * (t.def.r + 1.2), bz = t.z + dz / d * (t.def.r + 1.2); this.emit('blink', { x: bx, z: bz, yaw: Math.atan2(-dx, -dz) + Math.PI }); this.p.x = bx; this.p.z = bz; this.hitEnemy(t, a.mult, a); } return; }   // lands later via this.meteors
     if (a.kind === 'shield') { this.shield = a.dur; this.emit('shield', a); return; }
     if (a.kind === 'ranged') { const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * HS); if (t && Math.hypot(t.x - this.p.x, t.z - this.p.z) <= a.range * HS + t.def.r) { this.emit('throw', { e: t }); this.hitEnemy(t, a.mult, a); } return; }
     if (a.kind === 'chain') { this.chainStrike(a); return; }
@@ -165,12 +176,17 @@ export class CombatController {
   stormHit(act) { const a = act.a; for (const e of this.enemies.slice()) if (this.inCone(e, a.range * this.HS, -1)) this.hitEnemy(e, a.mult / 3, a); }
   /* ---- damage in ---- */
   enemyStrike(e) {
-    const dx = this.p.x - e.x, dz = this.p.z - e.z, d = Math.hypot(dx, dz), reach = e.def.reach * this.HS + e.def.r;
-    if (this.p.dead || this.dead > 0) return;
-    if (d > reach * 1.25) { this.emit('enemyAttack', { e, result: 'missed', dmg: 0 }); return; }
+    const dx = this.p.x - e.x, dz = this.p.z - e.z, d = Math.hypot(dx, dz), pt = e.def.boss ? e.pat : null, reach = (pt ? pt.reach : e.def.reach) * this.HS + e.def.r;
+    if (this.p.dead || this.dead > 0) { e.pat = null; return; }
+    /* boss patterns: ring = within reach; cone = within reach and inside the facing arc; line = down the facing axis, inside the width. Facing is frozen during the telegraph, so it can be side-stepped. */
+    let inside = d <= reach * 1.25;
+    if (pt) { const fx = Math.sin(e.yaw), fz = Math.cos(e.yaw), al = dx * fx + dz * fz, pp = Math.abs(dx * fz - dz * fx);
+      inside = pt.shape === 'cone' ? (d <= reach * 1.1 && (d < 1 || al / d >= pt.cos)) : pt.shape === 'line' ? (al >= -1 && al <= reach && pp <= pt.width * this.HS / 2 + 0.6) : d <= reach * 1.1; }
+    if (pt) { e.pat = null; this.emit('bossAttack', { e, pat: pt, hit: inside }); }
+    if (!inside) { this.emit('enemyAttack', { e, result: 'missed', dmg: 0 }); return; }
     if (this.iframes > 0 || this.god) { this.emit('enemyAttack', { e, result: 'dodged', dmg: 0 }); this.emit('dodged', e); return; }
     if (this.blocking && this.blockT <= this.P.block.parry) { this.ai.stagger(e, 0.9); e.poiseBreak = true; this.emit('enemyAttack', { e, result: 'parried', dmg: 0 }); return; }
-    let h = DamageCalculator.enemyHit(e.def.atk, this.P.def, this.P.agi, this.rng), res = 'hit';
+    let h = DamageCalculator.enemyHit(e.def.atk, this.P.def * (1 + ((!this.hero.owner && this.kit && this.kit.armor) ? this.kit.armor.defPct : 0)), this.P.agi, this.rng), res = 'hit'; if (pt && pt.dmg) h = Math.round(h * pt.dmg);
     if (h === 0) res = 'dodged';
     if (this.blocking) { h = Math.round(h * (1 - this.P.block.reduce)); if (!this.res.unlimited) this.res.sp = Math.max(0, this.res.sp - Math.max(8, h * 0.02)); res = 'blocked'; if (this.res.sp <= 0) this.block(false); }
     if (this.shield > 0) h = Math.round(h * (1 - ABILITIES[4].reduce));
@@ -182,7 +198,7 @@ export class CombatController {
   /* ---- frame ---- */
   update(dt) {
     this.applyMax(false); this.cd.tick(dt); this.res.tick(dt, this.blocking);
-    if (this.res.unlimited && this.ownerOk()) this.fury = TUNING.ult.fury;
+    if (this.res.unlimited && this.furyOn()) this.fury = TUNING.ult.fury;
     if (this.meteors.length) for (const m of this.meteors.slice()) { m.t -= dt; if (m.t <= 0) { this.meteors.splice(this.meteors.indexOf(m), 1); if (this.dead <= 0) this.meteorImpact(m); } }
     this.iframes = Math.max(0, this.iframes - dt); this.shield = Math.max(0, this.shield - dt);
     if (this.blocking) { this.blockT += dt; if (!this.res.unlimited) this.res.sp = Math.max(0, this.res.sp - this.P.block.drain * dt); if (this.res.sp <= 0) this.block(false); }
@@ -196,6 +212,7 @@ export class CombatController {
     this.p.dead = this.dead > 0;
     for (const e of this.enemies) {
       if (e.state === 'defeated') { e.deadT += dt; continue; }
+      if (e.def.boss && e.phase !== 2 && e.state !== 'defeated' && e.hp / e.max < TUNING.boss.enrageAt) { e.phase = 2; e.pat = null; this.emit('bossPhase', { e, phase: 2 }); }
       if (this.ai.update(e, this.p, dt, this.env) === 'attack') this.enemyStrike(e);
     }
     this.tgt.update(this.enemies, this.p.x, this.p.z);

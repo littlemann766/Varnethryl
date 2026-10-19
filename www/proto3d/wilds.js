@@ -77,7 +77,7 @@ export function buildWilds(env) {
   claim(-6, 4, 9); claim(0, 85 * WS, 12);
   /* portal back sits at (-6, -2); lamps + signpost beside it */
   for (const [x, z] of [[-12.5, -3], [0.5, -3]]) { put('props', 'lamp', 'oak', x, z, 0, 1, 'cast'); circ(x, z, .25); }
-  put('props', 'signpost', 'oak', -9, 3, .3, 1, 'cast'); circ(-9, 3, .25);
+  put('props', 'signpost', 'oak', -15, 3, .3, 1, 'cast'); circ(-15, 3, .25);   // beside the gate lamps, outside Vaelthryx's spawn radius
   /* camp: logs, stumps, crates, barrels, haybale */
   { const cx = -26 * WS, cz = 22 * WS; for (let i = 0; i < 4; i++) { const a = i * 1.57 + .5; put('props', 'logs', 'oak', cx + Math.cos(a) * 3, cz + Math.sin(a) * 3, a + 1.57, 1, 'cast'); box(cx + Math.cos(a) * 3, cz + Math.sin(a) * 3, 1.4, 1.2); }
     put('props', 'stump', 'oak', cx, cz, 0, 1.3, 'cast'); circ(cx, cz, .7); put('props', 'crate', 'oak', cx + 5, cz + 4, .4, 1, 'cast'); box(cx + 5, cz + 4, 1, 1); put('props', 'barrel', 'oak', cx + 6.4, cz + 3.4, 0, 1, 'cast'); circ(cx + 6.4, cz + 3.4, .45);

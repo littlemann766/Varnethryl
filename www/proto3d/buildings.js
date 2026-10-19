@@ -40,7 +40,7 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
 // themed full upper storey with a real flight on one side (free column), furniture on the back strip and opposite wall
 function upperStd(B, o) {
   const iw = B.iw, id_ = B.id_, len = Math.min(o.len || 3.4, id_ * 2 - 1.3), sd = o.side === 'L' ? -1 : 1, th = o.theme || 'bed', y = o.y || 3.0;
-  B.fullUpper({ y, stair: { cx: sd * (iw - .9), cz: id_ - .45 - len / 2, dir: '-z', len, w: 1.5 }, rooms(U) {
+  B.fullUpper({ y, topRoom: 1.15, stair: { cx: sd * (iw - .9), cz: id_ - .45 - len / 2, dir: '-z', len, w: 1.5 }, rooms(U) {   // topRoom: >= 1.15 m of landing past the top step (any hero radius steps off forward, not into the back wall)
     const x0 = -sd * (iw - 1.1), span = iw * 2 - 2.2;
     if (th === 'bed') { U.bed(x0, -id_ + 1.3); U.bed(x0 + sd * 1.5, -id_ + 1.3); U.chest(0, -id_ + .6, .8); U.tableR(-sd * 1.0, .2, 1.4, .9); U.rugAt(-sd * 1.0, .2, 2.2, 1.8); U.lamp(0, 2.2, 0); }
     if (th === 'lab') { U.shelf(0, -id_ + .3, Math.min(span, 4.4), 0); U.tableR(-sd * 1.2, -.3, 2.2, 1.0); U.crystal(-sd * 1.2 + 1.0, -.3, 1.2, 'a07aff', .25); U.cyl(.5, .4, .6, 'iron', -sd * (iw - 1.2), .3, -id_ + 1.2, U.G.int, 10); U.ccol(-sd * (iw - 1.2), -id_ + 1.2, .6); U.lamp(0, 2.2, 0); U.barrel(-sd * (iw - .5), id_ - .6); }

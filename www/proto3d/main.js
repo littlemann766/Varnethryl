@@ -7,7 +7,7 @@ import { preload as preloadChars } from './texgen.js';
 import { makeEnterable } from './interiors.js';
 import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
 import { planRoads, nearRoad, roadGeometry } from './roads.js';
-import { fx, zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
+import { fx, zoneKey, chunkStatics, HERO_FIT, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { readSave, planFromState, createSaver } from './save3d.js';
 import { SpringBones } from './spring_bones.js';
 import { SpringBones as SpringBonesV2 } from './spring_bones_v2.js';
@@ -95,7 +95,7 @@ let HERO_R = CH.radiusW;
 let VIEWK = 1;
 function applyView() { const kf = Math.max(1, Math.min(5, CH.camDist)), k2 = Math.min(2.2, kf), sk = Math.min(3, kf); VIEWK = k2; scene.fog.near = 70 * k2; scene.fog.far = 180 * k2; camera.far = 320 * k2 * (kf > 2.2 ? 1.5 : 1); camera.updateProjectionMatrix(); const R = 24 * sk; Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, far: 110 * sk }); sun.shadow.camera.updateProjectionMatrix(); SUNK = sk; }
 let SUNK = 1;
-function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; try { applyView(); } catch (e) {} try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
+function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; HERO_FIT.fits = B => !(CH.heightW > (B.h || 6) * (B.K || 1) || 2 * HERO_R > (B.DW || 2.2) * (B.K || 1)); try { applyView(); } catch (e) {} try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
 const ZONE = { name: 'town', cx: 0, cz: 0, half: 0 };   // current walkable zone (town or the Wilds); half is set once WORLD is known
 const WORLD = WORLD_B; // half extent (village grew for the 3D buildings)
 ZONE.half = WORLD;
@@ -1065,7 +1065,7 @@ const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
 const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
-window.__p3d = { killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
+window.__p3d = { applyChar, killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; }, get guards() { return GUARDS; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },

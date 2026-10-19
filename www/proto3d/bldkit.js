@@ -129,13 +129,13 @@ export class Builder {
     for (const sx of [-1, 1]) { this.cyl(.12, .15, .38, 'iron', x + sx * w * .2, y + h + .27, z, this.G.roof, 6); this.cyl(.17, .12, .08, 'iron', x + sx * w * .2, y + h + .5, z, this.G.roof, 6); } }
   dormer(x, y, z, w = 1.4, h = 1.2) { this.bx(w, h, 1, 'timber', x, y + h / 2, z, this.G.roof); this.gable(w, 1.0, .8, x, y + h, z, 'slate', this.G.roof, false, .2); this.win(x, y + h / 2, z + .52, 0, .6, .7, 'glass', this.G.roof); }
   tower(x, z, r, h, o = {}) { // round stone tower with corbelled crenel ring and conical slate roof (roof in G.roof when o.roofGroup)
-    const key = o.key || 'stone'; this.cyl(r, r * 1.06, h, key, x, h / 2, z, this.G.ext, 14);
-    this.ring(r * 1.18, .5, 'stoneD', x, h + .25, z, this.G.ext, 14);
-    for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283; this.bx(.5, .5, .5, key, x + Math.cos(a) * r * 1.12, h + .75, z + Math.sin(a) * r * 1.12, this.G.ext); }
-    if (o.cone !== false) this.cone(r * 1.3, o.coneH || r * 2.2, o.roofKey || 'slate', x, h + .5, z, o.roofGroup || this.G.ext, 14);
-    if (o.flag !== false && o.cone !== false) this.flag(x, h + .5 + (o.coneH || r * 2.2) - .1, z, .9, o.roofGroup || this.G.ext);
+    const key = o.key || 'stone', y0 = o.y0 || 0, sg = y0 ? (o.roofGroup || this.G.roof) : this.G.ext; this.cyl(r, r * 1.06, h - y0, key, x, y0 + (h - y0) / 2, z, sg, 14);   // o.y0: turret standing on a roof (shaft hidden with the roof)
+    this.ring(r * 1.18, .5, 'stoneD', x, h + .25, z, sg, 14);
+    for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283; this.bx(.5, .5, .5, key, x + Math.cos(a) * r * 1.12, h + .75, z + Math.sin(a) * r * 1.12, sg); }
+    if (o.cone !== false) this.cone(r * 1.3, o.coneH || r * 2.2, o.roofKey || 'slate', x, h + .5, z, o.roofGroup || sg, 14);
+    if (o.flag !== false && o.cone !== false) this.flag(x, h + .5 + (o.coneH || r * 2.2) - .1, z, .9, o.roofGroup || sg);
     if (o.collide !== false) this.ccol(x, z, r * 1.08);
-    if (o.windows) for (let i = 0; i < o.windows; i++) { const a = i / o.windows * 6.283 + (o.wa || .8); this.win(x + Math.cos(a) * (r * 1.05), h * .62, z + Math.sin(a) * (r * 1.05), Math.PI / 2 - a, .35, .8, 'glass'); }
+    if (o.windows) for (let i = 0; i < o.windows; i++) { const a = i / o.windows * 6.283 + (o.wa || .8); this.win(x + Math.cos(a) * (r * 1.05), y0 + (h - y0) * .62, z + Math.sin(a) * (r * 1.05), Math.PI / 2 - a, .35, .8, 'glass', y0 ? sg : undefined); }
   }
   // ---- standard rectangular shell: stone base + upper storey, hollow, door gap at +z ----
   rectShell(o) { const _lv = this.lvTag; this.lvTag = undefined; try { return this._rectShell(o); } finally { this.lvTag = _lv; } }
@@ -543,7 +543,7 @@ Builder.prototype.props2 = function (kind) {
   if (kind === 'hall') { const n = Math.max(1, Math.round(id_ / 4)); for (let i = 0; i < n; i++) chand(0, Math.min((this.h || 6) - 1.6, 5.2), -id_ + (i + .5) * (2 * id_) / n - .5, 1.0); }
   if (kind === 'inn') chand(-1.8, 2.45, 1.4, .7);
   if (kind === 'inn') {   // card gaps (pass 4): kitchen corner, bar-side shelving + kegs, private rumor corner
-    { const x = -iw + 1.0, z = -id_ + 2.9; if (F(x, z, .8)) { this.bx(.9, .9, 1.3, 'stone', x, .45, z, G); this.bx(1.0, .08, 1.4, 'stoneD', x, .94, z, G, { lite: true }); this.add(new THREE.PlaneGeometry(.5, .3), GLOW('ff8a2a', 1.6), x + .46, .4, z, G, { shadow: false }).rotation.y = Math.PI / 2;
+    { const x = -iw + 1.0, z = -id_ + 2.9; if (F(x, z, .8)) { this.bx(.9, .9, 1.3, 'stone', x, .45, z, G); this.bx(1.0, .08, 1.4, 'stoneD', x, .94, z, G, { lite: true }); this.add(new THREE.PlaneGeometry(.5, .3), GLOW('ffb040', 2.0), x + .46, .4, z, G, { shadow: false }).rotation.y = Math.PI / 2;
       this.cyl(.16, .13, .2, 'iron', x, 1.08, z - .3, G, 6, { shadow: false }); this.cyl(.2, .2, .08, 'iron', x, 1.02, z + .3, G, 8, { shadow: false }); this.col(x, z, .9, 1.3); } }
     for (const [x, z] of [[-iw + 2.6, -id_ + 1.1], [-iw + 3.0, -id_ + 1.3], [-iw + .9, -id_ + 4.6], [-iw + 4.4, -id_ + 1.1]]) { if (F(x, z, .7)) { this.bx(1.4, .08, .7, 'wood', x, .82, z, G, { lite: true }); for (const a of [-1, 1]) for (const b of [-1, 1]) this.bx(.07, .8, .07, 'darkWood', x + a * .62, .4, z + b * .28, G, { lite: true });
       for (let i = 0; i < 3; i++) this.add(new THREE.SphereGeometry(.13, 6, 4), M('#d8a85a'), x - .4 + i * .3, .92, z, G, { shadow: false }).scale.y = .6; this.bx(.4, .04, .25, 'darkWood', x + .45, .88, z, G, { lite: true }); this.col(x, z, 1.4, .7); hang(x, z, 3); break; } }

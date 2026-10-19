@@ -227,4 +227,14 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   e.state = 'chase'; e.atkCd = 0; e.pat = null; e.patI = 3; let tel2 = 0; for (let i = 0; i < 60 * 8 && !tel2; i++) { k.update(1 / 60); if (e.state === 'telegraph') tel2 = e.curTele; } T('phase 2 shortens telegraphs (x0.75)', tel2 > 0 && Math.abs(tel2 - (e.pat ? 0 : 0) - tel2) < 1e-9 && tel2 <= 1.4 * 0.75 + 1e-6 + 0.3);
   const kk = new CombatController({ HS: 1.5, rng: rnd }); kk.setHero({ id: 'o:owner', saber: true }); kk.ownerUnlocked = true; const bt = kk.addEnemy('titan', 0, 6); kk.use(0); go(kk, 0.5); T('bosses: owner/saber rules unchanged (flat 99,999, not killed)', bt.max - bt.hp === 99999 && bt.state !== 'defeated');
 }
+// ---- Thunderstorm (Lucky ULTIMATE2) x boss rule ----
+{ const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
+  const o = (unl = true) => { const k = mk(true); k.ownerUnlocked = unl; k.res.unlimited = true; return k; };
+  let k = o(); const a = k.addEnemy('wolf', 0, 8), b = k.addEnemy('raider', 30, 40), t = k.addEnemy('titan', 0, 20); k.useUltimate2(); go(k, 2);
+  T('Thunderstorm kills every regular enemy in range', a.state === 'defeated' && b.state === 'defeated');
+  T('Thunderstorm does NOT bypass bossesInstantKill=false (Titan survives, normal hit)', t.state !== 'defeated' && t.hp < t.max && t.hp > 0);
+  const keep = TUNING.ult.bossesInstantKill; TUNING.ult.bossesInstantKill = true; k = o(); const t2 = k.addEnemy('titan', 0, 20); k.useUltimate2(); go(k, 2); T('...but kills the boss when bossesInstantKill=true', t2.state === 'defeated'); TUNING.ult.bossesInstantKill = keep;
+  k = o(false); const w = k.addEnemy('wolf', 0, 8); T('Thunderstorm is owner-only (denied without owner gate)', !k.useUltimate2() && w.state !== 'defeated');
+  k = o(); k.setHero({ id: 'aldric', saber: false }); k.addEnemy('wolf', 0, 8); T('Thunderstorm denied for a normal hero', !k.useUltimate2());
+}
 console.log(ok + ' pass, ' + bad + ' fail'); process.exit(bad ? 1 : 0);

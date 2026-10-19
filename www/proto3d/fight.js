@@ -171,7 +171,7 @@ export function createFight(env) {
   /* ---- controller events -> world ---- */
   cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact();  hud.say(ev.name ? ev.name.toUpperCase() : 'DESTRUCTION', 1400); }).on('blink', b => { state.heroX = b.x; state.heroZ = b.z; state.yaw = b.yaw; });
   let lfx = null; const getFx = () => lfx || (lfx = new LightningFX({ THREE, scene, HS, canvas: document.querySelector('canvas') }));
-  cc.on('lightning', ev => getFx().strike(ev));
+  cc.on('lightning', ev => { getFx().strike(ev); if (env.downAllies) env.downAllies(); });
   cc.on('action', ev => {
     A.swing = { t: 0, T: ev.T, big: ev.a.id === 'heavy' ? 1.5 : 1, kind: ev.a.kind };
     { const h = env.hero(), u = h.userData, drawn = slashA && saber && saber.parent && saber.parent.name === 'weapon_R';

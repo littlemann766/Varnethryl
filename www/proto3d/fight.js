@@ -190,6 +190,15 @@ export function createFight(env) {
   cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact();  hud.say(ev.name ? ev.name.toUpperCase() : 'DESTRUCTION', 1400); }).on('blink', b => { state.heroX = b.x; state.heroZ = b.z; state.yaw = b.yaw; });
   let lfx = null; const getFx = () => lfx || (lfx = new LightningFX({ THREE, scene, HS, canvas: document.querySelector('canvas') }));
   cc.on('lightning', ev => { getFx().strike(ev); });
+  /* summons + buffs visuals (cheap shared geometry, 1-2 meshes each, removed on end) */
+  const SUMG = { thrall: new THREE.CapsuleGeometry(0.45, 1.3, 3, 8), turret: new THREE.CylinderGeometry(0.35, 0.6, 1.1, 8), totem: new THREE.CylinderGeometry(0.22, 0.3, 2.6, 6), ring: new THREE.RingGeometry(0.92, 1, 40) };
+  const SUMM = { thrall: new THREE.MeshLambertMaterial({ color: 0x3b2f4d, emissive: 0x2a0f3a }), turret: new THREE.MeshLambertMaterial({ color: 0x8a6d3b }), totem: new THREE.MeshLambertMaterial({ color: 0x6fae9a, emissive: 0x0d3a2a }) };
+  const sumMesh = new Map(), buffRing = new THREE.Mesh(SUMG.ring, new THREE.MeshBasicMaterial({ color: 0xffd36a, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide })); buffRing.rotation.x = -Math.PI / 2; buffRing.visible = false; scene.add(buffRing);
+  cc.on('summon', s => { const g = new THREE.Group(), m = new THREE.Mesh(SUMG[s.id], SUMM[s.id]); m.position.y = s.id === 'totem' ? 1.3 * HS / 1.5 : 0.9 * HS / 1.5; m.scale.setScalar(HS / 1.5); g.add(m); if (s.id === 'totem') { const r = new THREE.Mesh(SUMG.ring, new THREE.MeshBasicMaterial({ color: 0x9be8d0, transparent: true, opacity: 0.4, depthWrite: false, side: THREE.DoubleSide })); r.rotation.x = -Math.PI / 2; r.position.y = 0.06; r.scale.setScalar(s.radius * HS); g.add(r); } g.position.set(s.x, 0, s.z); scene.add(g); sumMesh.set(s.uid, g); hud.say(s.id.toUpperCase(), 900); })
+    .on('summonEnd', ({ s }) => { const g = sumMesh.get(s.uid); if (g) { scene.remove(g); g.traverse(o => { if (o.material && o.material !== SUMM[s.id]) o.material.dispose(); }); sumMesh.delete(s.uid); } })
+    .on('summonAttack', ({ s, e }) => { if (s.id === 'turret' && getFx) getFx().strike({ from: { x: s.x, z: s.z }, path: [{ x: e.x, z: e.z, y: 1.1 * HS, falloff: 0.6, flash: true }], count: 1 }); })
+    .on('buff', b => { if (b.name) hud.say(b.name.toUpperCase(), 1100); });
+  function sumSync() { for (const s of cc.summons) { const g = sumMesh.get(s.uid); if (g) { g.position.set(s.x, 0, s.z); if (s.yaw !== undefined) g.rotation.y = s.yaw; } } const on2 = cc.buffs.length > 0; buffRing.visible = on2; if (on2) { buffRing.position.set(state.heroX, 0.07, state.heroZ); buffRing.scale.setScalar(1.6 * HS * Math.max(1, cc.RM)); } }
   if (env.bystanders) cc.bystanders = env.bystanders;   // Owner-gated server-trust: controller only fires these from owner ultimates
   cc.on('bystanderKill', ev => { if (env.killCrowd) env.killCrowd(ev.b); });
   cc.on('action', ev => {
@@ -283,7 +292,7 @@ export function createFight(env) {
     }
     if (shakeT > 0) shakeT = Math.max(0, shakeT - dt); metUpdate(dt);
     hud.update(dt, cc.enemies);
-    bambooSync(); heroWeaponSync(); if (!saber && canWield() && !sheathed && cc.dead <= 0 && !cc.bambooOn()) equip(); if (saber && (!canWield() || sheathed)) unequip(); if (saber) saber.visible = !cc.bambooOn();
+    bambooSync(); heroWeaponSync(); sumSync(); if (!saber && canWield() && !sheathed && cc.dead <= 0 && !cc.bambooOn()) equip(); if (saber && (!canWield() || sheathed)) unequip(); if (saber) saber.visible = !cc.bambooOn();
   }
   /* owner cheat hooks (cheats.js -> main.js) */
   const cheatHeal = () => { cc.res.full(); cc.potions = cc.P.potion.charges; if (cc.dead > 0) { cc.dead = 0; cc.act = null; env.hero().rotation.x = 0; } hud.say('Party healed', 1200); return true; };
@@ -301,7 +310,7 @@ export function createFight(env) {
     if (auto) { syncHero(); equip(); hud.say('THE WILDS - monsters about', 1800); return; }
     env.selectOwner().then(() => { syncHero(); equip(); hud.say('FIGHT TEST', 1800); });
   }
-  function stop() { heroWeaponClear();
+  function stop() { heroWeaponClear(); for (const s of cc.summons.slice()) cc.removeSummon(s, 'stop'); cc.buffs.length = 0; sumSync();
     if (!on) return; on = false; metHide(); metDispose(); cc.meteors.length = 0; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }

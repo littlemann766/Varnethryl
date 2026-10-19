@@ -36,7 +36,7 @@ with sync_playwright() as p:
     # other slots
     pg.evaluate("__p3d.fight.cc.res.mp=100;__p3d.fight.cc.res.sp=100")
     for s in (1,2,3,4): tap(f'#cb .sl[data-s="{s}"]'); pg.wait_for_timeout(900)
-    cds = pg.evaluate("[0,1,2,3,4,5].map(i=>__p3d.fight.cc.cd.left(['basic','heavy','class','secondary','defensive','ultimate'][i])>0)"); print('cooldowns started', cds)
+    cds = pg.evaluate("['royal','chains','wrath'].map(k=>__p3d.fight.cc.cd.left(k)>0)"); print('cooldowns started', cds)   # new HUD: slots 1-3 = Owner skills (OWNER_CLUSTER), 4 = ultimate (needs Fury)
     tap('#cb [data-a=dodge]'); pg.wait_for_timeout(100); ifr = pg.evaluate("__p3d.fight.cc.iframes>0"); print('dodge iframes', ifr)
     pg.evaluate("__p3d.fight.spawn('wolf',8)"); pg.wait_for_function("__p3d.fight.monsters.some(m=>m.state!=='defeated')", timeout=60000)
     tap('#cb [data-a=lock]'); pg.wait_for_timeout(300); lk = pg.evaluate("__p3d.fight.cc.tgt.locked"); print('locked', lk)
@@ -61,5 +61,5 @@ with sync_playwright() as p:
     tp = pg.evaluate("document.querySelector('#cb .msg').textContent"); print('msg', tp)
     pg.evaluate("__p3d.fight.stop()"); print('errs', errs[:4])
     gone = pg.evaluate("document.getElementById('cb').style.display")
-    ok = hid == 'n:owner' and vis['slots']==6 and vis['cl']==6 and dealt and ifr and lk and pot == 2 and bi[0]==5000000 and bi[1]==2100 and bi[2]==2300 and dead == 0 and back > 0 and not sab and 'Owner' in tp and gone == 'none' and not errs
+    ok = hid == 'n:owner' and vis['slots']==5 and all(cds) and vis['cl']==6 and dealt and ifr and lk and pot == 2 and bi[0]==5000000 and bi[1]==2100 and bi[2]==2300 and dead == 0 and back > 0 and sab and gone == 'none' and not errs
     print('PASS' if ok else 'FAIL'); b.close()

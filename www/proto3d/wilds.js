@@ -43,7 +43,12 @@ export function makeGate(color) {
   const geos = [], put = (w, h, d, x, y, z, m) => { const q = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); q.position.set(x, y, z); return q; };
   const p1 = put(1.1, 4.4, 1.2, -1.9, 2.2, 0, stone), p2 = put(1.1, 4.4, 1.2, 1.9, 2.2, 0, stone), lin = put(5.2, 0.9, 1.4, 0, 4.85, 0, cap);
   const flag = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.6), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })); flag.position.set(0, 3.7, 0.05);
-  g.add(p1, p2, lin, flag); g.userData.update = () => {}; g.userData.gate = true; g.userData.dispose = () => { g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); };
+  /* glow so the exits can be found from far away: additive light beam + ground ring + pulsing banner (3 extra cheap meshes, no real lights) */
+  const add = (o, op) => new THREE.MeshBasicMaterial({ color: o, transparent: true, opacity: op, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2.2, 90, 14, 1, true), add(color, 0.2)); beam.position.y = 45;
+  const halo = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 90, 10, 1, true), add(0xffffff, 0.12)); halo.position.y = 45;
+  const ring = new THREE.Mesh(new THREE.RingGeometry(1.7, 2.5, 32), add(color, 0.5)); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.08;
+  g.add(p1, p2, lin, flag, beam, halo, ring); g.userData.update = t => { const k = 0.5 + 0.5 * Math.sin(t * 2.2); beam.material.opacity = 0.14 + 0.14 * k; halo.material.opacity = 0.08 + 0.08 * k; ring.material.opacity = 0.3 + 0.4 * k; ring.scale.setScalar(0.9 + 0.2 * k); flag.scale.setScalar(0.95 + 0.1 * k); }; g.userData.gate = true; g.userData.dispose = () => { g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); };
   return g;
 }
 export function buildWilds(env) {

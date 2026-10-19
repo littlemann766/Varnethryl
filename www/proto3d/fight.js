@@ -4,7 +4,7 @@
 import { CombatController } from './combat/controller.js';
 import { CombatHUD } from './combat/hud.js';
 import { loadLucian } from './combat/calc.js';
-import { SABER, ENEMIES, WAVE_TABLE, ABILITIES } from './combat/data.js';
+import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
 export const SABER_GLB = null;             // URL (or fight.setSaberModel(url)) for Beth's saber: hilt at origin, blade along +Y, ~1 m
 const MAX_ALIVE = 5, AUTO_MAX = 9, AUTO_AGGRO = 3;   // Wilds: up to 9 passive mobs, aggro only within 3 m
@@ -15,6 +15,10 @@ export function createFight(env) {
   const project = (x, y, z, out) => { v3.set(x, y, z).project(camera); if (v3.z > 1 || Math.abs(v3.x) > 1.3 || Math.abs(v3.y) > 1.3) return false; out[0] = (v3.x * 0.5 + 0.5) * innerWidth; out[1] = (-v3.y * 0.5 + 0.5) * innerHeight; return true; };
   const cc = new CombatController({ HS, move: (e, dx, dz) => { const p = { x: e.x + dx, z: e.z + dz }; env.resolve(p); e.x = p.x; e.z = p.z; } });
   loadLucian();
+  /* owner gate: Owner skin + the passphrase/owner unlock (window.__p3d.owner + cheats object, set only by the gated owner boot). Never read from UI or demo events. */
+  const ownerGate = () => !!(window.__p3d && window.__p3d.owner && window.__p3d.cheats);
+  /* Saber holder rule: the owner ACCOUNT may put the Owner saber on whichever hero is active; no other account can ever hold it. */
+  const canWield = () => ownerGate();
   const isOwner = () => /(^|:)owner/.test(env.heroId());
   const A = { vx: 0, vz: 0, lx: 0, lz: 0, dash: null, jump: -1, spin: 0, swing: null, fx: null };   // player-side animation state
   const api = {
@@ -25,7 +29,7 @@ export function createFight(env) {
   const onKey = e => {
     if (!on || e.repeat || /input|textarea/i.test((e.target && e.target.tagName) || '')) return;
     const k = e.key;
-    if (k >= '1' && k <= '6') api.use(+k - 1); else if (k === 'f' || k === 'F') api.use(0); else if (k === ' ') { e.preventDefault(); api.dodge(); }
+    if (k >= '1' && k <= '4') api.use(hud.slotAbility(+k)); else if (k >= '5' && k <= '8') api.use(+k - 3); else if (k === 'x' || k === 'X') api.use(1); else if (k === 'f' || k === 'F') api.use(0); else if (k === ' ') { e.preventDefault(); api.dodge(); }
     else if (k === 'q' || k === 'Q') api.lock(); else if (k === 'Tab') { e.preventDefault(); api.switchTarget(); } else if (k === 'r' || k === 'R') api.potion(); else if (k === 'e' || k === 'E') api.swap(); else if (k === 'j' || k === 'J') api.jump();
   };
   const onMd = e => { if (on && e.button === 2) cc.block(true); }, onMu = e => { if (on && e.button === 2) cc.block(false); }, onCtx = e => { if (on) e.preventDefault(); };
@@ -51,18 +55,18 @@ export function createFight(env) {
     hb.add(saber); saber.position.set(0, 0, 0); saber.quaternion.identity(); saber.scale.set(1, 1, 1); setBlade(drawn, drawn ? 0.001 : 0); if (drawn) igniteT = 0; return true;
   }
   async function equip() {
-    if (!isOwner() || sheathed) return false; if (saber && saber.parent && saber.parent.name === 'weapon_R') return true;
+    if (!canWield() || sheathed) return false; if (saber && saber.parent && saber.parent.name === 'weapon_R') return true;
     if (!saber) { if (saberLoading) return false; saberLoading = true; try { saberG = await env.loadGLTF(SABER_URL + '?v=1.1.8'); saber = saberG.scene; saber.traverse(o => { o.frustumCulled = false; }); } catch (e) { saberLoading = false; return false; } saberLoading = false; }
-    if (!isOwner() || sheathed) return false; clipSet(true); return attach(true);
+    if (!canWield() || sheathed) return false; clipSet(true); return attach(true);
   }
   function unequip() { if (saber && saber.parent) saber.parent.remove(saber); saber = null; igniteT = -1; slashA = null; const u = env.hero().userData; if (u && u.plain) clipSet(false); }
   function swapWeapon() {
-    if (!isOwner()) { hud.say('Only the Owner can wield the lightsaber', 1400); return; }
+    if (!canWield()) { hud.say('Only the Owner can wield the lightsaber', 1400); return; }
     sheathed = !sheathed; syncHero();
     if (sheathed) { clipSet(false); if (saber) attach(false); } else { clipSet(true); if (saber) attach(true); else equip(); }
     hud.say(sheathed ? 'Saber sheathed (unarmed)' : 'Lightsaber drawn', 900);
   }
-  function syncHero() { const id = env.heroId(), own = isOwner(), want = own && !sheathed; if (cc.hero.id !== id || cc.hero.saber !== want) cc.setHero({ id, saber: want, name: own ? 'Owner' : (id.split(':').pop().replace(/_.*/, '') || 'Hero').replace(/^./, c => c.toUpperCase()), className: own ? 'Saber Knight' : 'Adventurer' }); }
+  function syncHero() { const id = env.heroId(), own = isOwner(), want = canWield() && !sheathed; if (cc.hero.id !== id || cc.hero.saber !== want) cc.setHero({ id, saber: want, name: own ? 'Owner' : (id.split(':').pop().replace(/_.*/, '') || 'Hero').replace(/^./, c => c.toUpperCase()), className: own ? 'Saber Knight' : 'Adventurer' }); }
 
   /* ---- action clips (any model): attack, attack2, hit, death. Aliases are matched case-insensitively; missing clip => procedural lunge/flinch/fall ---- */
   const ALIAS = { attack: ['attack', 'attack1', 'slash', 'swing', 'strike', 'melee'], attack2: ['attack2', 'heavy', 'slash2', 'strike2', 'attack_heavy'], hit: ['hit', 'hurt', 'hit_react', 'damage', 'flinch', 'hitreact'], death: ['death', 'die', 'dead', 'defeat', 'defeated', 'fall'] };
@@ -89,16 +93,50 @@ export function createFight(env) {
   ring.rotation.x = -Math.PI / 2; ring.visible = false; scene.add(ring);
   const orb = new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 8), new THREE.MeshBasicMaterial({ color: 0x9ff })); orb.visible = false; scene.add(orb);
   const aura = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), new THREE.MeshBasicMaterial({ color: 0x66ccff, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.AdditiveBlending })); aura.visible = false; scene.add(aura);
+  /* ---- Unholy Destruction visuals: one lazily built set (rock, shadow disc, zone ring, 48-point burst), reused per cast, disposed on stop() ---- */
+  let MET = null, shakeT = 0, shakeA = 0;
+  function metBuild() {
+    if (MET) return MET;
+    const rock = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshStandardMaterial({ color: 0x3a2a24, emissive: 0xff4a12, emissiveIntensity: 0.9, flatShading: true, roughness: 1 }));
+    const shadow = new THREE.Mesh(new THREE.CircleGeometry(1, 28), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0, depthWrite: false })); shadow.rotation.x = -Math.PI / 2;
+    const zone = new THREE.Mesh(new THREE.RingGeometry(0.97, 1, 48), new THREE.MeshBasicMaterial({ color: 0xff3a1a, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })); zone.rotation.x = -Math.PI / 2;
+    const N = 48, pos = new Float32Array(N * 3), vel = new Float32Array(N * 3), pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const burst = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0xffa23a, size: 0.7, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending })); burst.frustumCulled = false;
+    for (const o of [rock, shadow, zone, burst]) { o.visible = false; scene.add(o); }
+    return (MET = { rock, shadow, zone, burst, pos, vel, N, st: 'off', t: 0, x: 0, z: 0, r: 25, delay: 1.5 });
+  }
+  const metHide = () => { if (MET) { MET.st = 'off'; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) o.visible = false; } };
+  function metDispose() { if (!MET) return; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) { scene.remove(o); o.geometry.dispose(); o.material.dispose(); } MET = null; }
+  const ROCK_R = 11, FALL_H = 75;
+  function metStart(ev) { const m = metBuild(); m.st = 'fall'; m.t = 0; m.x = ev.x; m.z = ev.z; m.r = ev.radius; m.delay = ev.delay; m.zone.material.color.setHex(0xff3a1a); m.rock.visible = m.shadow.visible = m.zone.visible = true; m.rock.scale.setScalar(ROCK_R); shakeA = 0.25; shakeT = 0.25; }
+  function metImpact() { const m = MET; if (!m) return; m.st = 'burst'; m.t = 0; m.rock.visible = false; m.shadow.visible = false; m.burst.visible = true; m.burst.position.set(m.x, 1, m.z);
+    for (let i = 0; i < m.N; i++) { const a = Math.random() * 6.283, sp = 20 + Math.random() * 40, up = 15 + Math.random() * 30; m.vel.set([Math.cos(a) * sp, up, Math.sin(a) * sp], i * 3); m.pos.set([0, 0, 0], i * 3); } m.burst.geometry.attributes.position.needsUpdate = true; shakeA = 1.6; shakeT = 0.7; }
+  function metUpdate(dt) {
+    const m = MET; if (!m || m.st === 'off') return; m.t += dt;
+    if (m.st === 'fall') {
+      const u = Math.min(1, m.t / m.delay), e = u * u;
+      m.rock.position.set(m.x, ROCK_R * 0.6 + (1 - e) * FALL_H, m.z); m.rock.rotation.x += dt * 1.2; m.rock.rotation.z += dt * 0.7; m.rock.material.emissiveIntensity = 0.6 + u;
+      m.shadow.position.set(m.x, 0.1, m.z); m.shadow.scale.setScalar(Math.max(0.5, ROCK_R * 1.15 * e)); m.shadow.material.opacity = 0.65 * u;
+      m.zone.position.set(m.x, 0.12, m.z); m.zone.scale.setScalar(m.r); m.zone.material.opacity = 0.25 + 0.35 * Math.abs(Math.sin(m.t * 9));
+    } else if (m.st === 'burst') {
+      const u = m.t / 0.9; if (u >= 1) { metHide(); return; }
+      const p = m.pos, v = m.vel; for (let i = 0; i < m.N; i++) { const k = i * 3; v[k + 1] -= 60 * dt; p[k] += v[k] * dt; p[k + 1] = Math.max(0, p[k + 1] + v[k + 1] * dt); p[k + 2] += v[k + 2] * dt; }
+      m.burst.geometry.attributes.position.needsUpdate = true; m.burst.material.opacity = 1 - u;
+      m.zone.visible = true; m.zone.scale.setScalar(Math.max(0.1, m.r * Math.min(1, u * 2.2))); m.zone.material.opacity = 0.8 * (1 - u); m.zone.material.color.setHex(0xffb13e);
+    }
+  }
+  function shake(cam) { if (shakeT <= 0) return; const k = shakeA * Math.min(1, shakeT / 0.3); cam.position.x += (Math.random() - 0.5) * k; cam.position.y += (Math.random() - 0.5) * k; cam.position.z += (Math.random() - 0.5) * k; }
   let fxT = -1, fxMax = 1, orbT = -1, orbFrom = null, orbTo = null;
 
   /* ---- controller events -> world ---- */
+  cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact(); if (MET) MET.zone.material.color.setHex(0xffb13e); hud.say('UNHOLY DESTRUCTION', 1400); });
   cc.on('action', ev => {
     A.swing = { t: 0, T: ev.T, big: ev.a.id === 'heavy' ? 1.5 : 1, kind: ev.a.kind };
     { const h = env.hero(), u = h.userData, drawn = slashA && saber && saber.parent && saber.parent.name === 'weapon_R';
       let ok = false; if (ev.a.kind !== 'shield') ok = drawn ? playAct(h, slashA, 'atk', Math.max(0.5, ev.T), false) : oneShot(h, ev.a.id === 'heavy' ? 'attack2' : 'attack', Math.max(0.5, ev.T), false);
       A.clipAtk = ok; }
     if (ev.aim && (ev.a.kind !== 'storm' && ev.a.kind !== 'aoe')) state.yaw = Math.atan2(ev.aim.x - state.heroX, ev.aim.z - state.heroZ);
-    if (ev.a.kind === 'aoe' || ev.a.kind === 'storm') { fxT = 0; fxMax = ev.a.range * HS; ring.material.color.setHex(ev.a.kind === 'storm' ? 0xffd34a : 0x66e6ff); }
+    if (ev.a.kind === 'aoe' || ev.a.kind === 'storm') { fxT = 0; fxMax = ev.a.range * HS; ring.material.color.setHex(ev.a.kind === 'storm' ? 0xffd34a : ev.a.owner ? 0xb36bff : 0x66e6ff); }
     if (ev.a.kind === 'storm') A.spin = 0.0001;
   }).on('dash', d => { A.dash = { dx: d.dx, dz: d.dz, left: d.dist, spd: d.dist / d.T }; })
     .on('jump', j => { A.jump = 0; }).on('throw', t => { orbT = 0; orbFrom = { x: state.heroX, z: state.heroZ }; orbTo = t.e; })
@@ -131,7 +169,7 @@ export function createFight(env) {
   /* ---- per frame ---- */
   function update(dt) {
     if (!on) return;
-    dt = Math.min(dt, 0.1); syncHero(); cc.god = !!(env.cheat && env.cheat.god); cc.res.unlimited = !!(env.cheat && env.cheat.unlimited); cc.noCooldown = !!(env.cheat && env.cheat.noCooldown);
+    dt = Math.min(dt, 0.1); syncHero(); cc.god = !!(env.cheat && env.cheat.god) && cc.perkHero(); cc.res.unlimited = !!(env.cheat && env.cheat.unlimited) && cc.perkHero(); cc.noCooldown = !!(env.cheat && env.cheat.noCooldown); cc.ownerUnlocked = ownerGate();
     { const dx = state.heroX - A.lx, dz = state.heroZ - A.lz; A.lx = state.heroX; A.lz = state.heroZ; const l = Math.hypot(dx, dz); if (l > 0.005 && !A.dash) { A.vx = dx / l; A.vz = dz / l; } else if (l <= 0.005) { A.vx = 0; A.vz = 0; } }
     cc.setPlayer(state.heroX, state.heroZ, state.yaw);
     const h = env.hero();
@@ -171,8 +209,9 @@ export function createFight(env) {
       if (u.glb && u.act) { env.loco(u, e.state === 'chase' ? mv : 0); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
       const f = e.flash > 0 || e.state === 'telegraph'; if (f !== e.flashOn) { e.flashOn = f; const hx = e.flash > 0 ? 0xff2020 : 0xaa5500; for (const o of e.ems) o.material.emissive.setHex(f ? hx : o.userData.em); }
     }
+    if (shakeT > 0) shakeT = Math.max(0, shakeT - dt); metUpdate(dt);
     hud.update(dt, cc.enemies);
-    if (!saber && isOwner() && !sheathed && cc.dead <= 0) equip(); if (saber && (!isOwner() || sheathed)) unequip();
+    if (!saber && canWield() && !sheathed && cc.dead <= 0) equip(); if (saber && (!canWield() || sheathed)) unequip();
   }
   /* owner cheat hooks (cheats.js -> main.js) */
   const cheatHeal = () => { cc.res.full(); cc.potions = cc.P.potion.charges; if (cc.dead > 0) { cc.dead = 0; cc.act = null; env.hero().rotation.x = 0; } hud.say('Party healed', 1200); return true; };
@@ -191,9 +230,9 @@ export function createFight(env) {
     env.selectOwner().then(() => { syncHero(); equip(); hud.say('FIGHT TEST', 1800); });
   }
   function stop() {
-    if (!on) return; on = false; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
+    if (!on) return; on = false; metHide(); metDispose(); cc.meteors.length = 0; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
-  return { cheatHeal, cheatKill, cheatSpawn, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
+  return { cheatHeal, cheatKill, cheatSpawn, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
     get on() { return on; }, get hp() { return cc.res.hp; }, get kills() { return cc.kills; }, get monsters() { return cc.enemies; }, get hasSaber() { return !!saber; }, hurt(n) { cc.res.hp = Math.max(0, cc.res.hp - n); if (cc.res.hp <= 0 && cc.dead <= 0) { cc.dead = cc.P.respawn; cc.emit('playerDown'); } } };
 }

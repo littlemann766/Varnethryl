@@ -47,6 +47,8 @@ export function createCheats(env) {
   c.setGod = (on) => { flag('god', on); if (hooks.godMode) hooks.godMode(!!on); return flags.god; };
   /* Attach point for combat: damage = c.mitigate(damage). God mode returns 0. */
   c.mitigate = (dmg) => (flags.god ? 0 : dmg);
+  /* Owner-only unlimited MP/SP (combat reads flags.unlimited; the pref persists via hooks.unlimMode). Non-owners never get a cheats object. */
+  c.setUnlimited = (on) => { flag('unlimited', on); if (hooks.unlimMode) hooks.unlimMode(!!on); return flags.unlimited; };
   c.setFly = (on) => { flag('fly', on); if (!on) { flags.up = 0; flags.down = 0; } return flags.fly; };
   c.setNoclip = (on) => flag('noclip', on);
   c.setSpeed = (m) => { flags.speedMul = clamp(fin(+m, 1), SPEED_MIN, SPEED_MAX); c.markCheated(); changed(); return flags.speedMul; };
@@ -83,6 +85,6 @@ export function createCheats(env) {
   c.teleportZone = (zone) => { if (!c.zones().includes(zone) || !env.teleport) return false; env.teleport(0, 14, zone); c.markCheated(); changed(); return true; };
   c.teleportPlace = (id) => { const p = c.places().find((q) => q.id === id); if (!p || !env.teleport) return false; env.teleport(p.x, p.z); c.markCheated(); changed(); return true; };
   /* Back to normal play (does not clear the cheated flag; that stays for the life of the save). */
-  c.reset = () => { Object.assign(flags, createFlags()); if (hooks.godPref && hooks.godPref()) flags.god = true; if (env.bumpSys) env.bumpSys.bumpOn = true; changed(); };
+  c.reset = () => { Object.assign(flags, createFlags()); if (hooks.godPref && hooks.godPref()) flags.god = true; if (hooks.unlimPref && hooks.unlimPref()) flags.unlimited = true; if (env.bumpSys) env.bumpSys.bumpOn = true; changed(); };
   return c;
 }

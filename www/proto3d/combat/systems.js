@@ -10,9 +10,9 @@ export class CooldownManager {
 }
 export class ResourceManager {
   constructor(P) { this.P = P; this.hp = P.hp; this.mp = P.mp; this.sp = P.sp; this.max = { hp: P.hp, mp: P.mp, sp: P.sp }; this.spLock = 0; }
-  can(cost) { return (!cost.mp || this.mp >= cost.mp) && (!cost.sp || this.sp >= cost.sp); }
-  spend(cost) { if (!this.can(cost)) return false; if (cost.mp) this.mp -= cost.mp; if (cost.sp) { this.sp -= cost.sp; this.spLock = this.P.spDelay; } return true; }
-  tick(dt, blocking) { if (this.spLock > 0) this.spLock -= dt; else if (!blocking) this.sp = Math.min(this.max.sp, this.sp + this.P.spRegen * dt); this.mp = Math.min(this.max.mp, this.mp + this.P.mpRegen * dt); }
+  can(cost) { if (this.unlimited) return true; return (!cost.mp || this.mp >= cost.mp) && (!cost.sp || this.sp >= cost.sp); }
+  spend(cost) { if (this.unlimited) { this.mp = this.max.mp; this.sp = this.max.sp; return true; } if (!this.can(cost)) return false; if (cost.mp) this.mp -= cost.mp; if (cost.sp) { this.sp -= cost.sp; this.spLock = this.P.spDelay; } return true; }
+  tick(dt, blocking) { if (this.unlimited) { this.mp = this.max.mp; this.sp = this.max.sp; this.spLock = 0; return; } if (this.spLock > 0) this.spLock -= dt; else if (!blocking) this.sp = Math.min(this.max.sp, this.sp + this.P.spRegen * dt); this.mp = Math.min(this.max.mp, this.mp + this.P.mpRegen * dt); }
   heal(n) { const b = this.hp; this.hp = Math.min(this.max.hp, this.hp + n); return this.hp - b; }
   full() { this.hp = this.max.hp; this.mp = this.max.mp; this.sp = this.max.sp; }
 }

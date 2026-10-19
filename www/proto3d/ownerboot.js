@@ -6,6 +6,8 @@ import { maxOwnerHero } from './ownermax.js';
 
 export const GOD_KEY = 'vn_owner_god_v1', POLL_MS = 1500;
 export const godPref = (storage) => { try { return storage.getItem(GOD_KEY) !== '0'; } catch (e) { return true; } };
+export const UNLIM_KEY = 'vn_owner_unlim_v1';
+export const unlimPref = (storage) => { try { return storage.getItem(UNLIM_KEY) !== '0'; } catch (e) { return true; } };
 export const saveGodPref = (storage, on) => { try { storage.setItem(GOD_KEY, on ? '1' : '0'); } catch (e) { /* storage blocked: choice lasts this session only */ } };
 
 let running = null;
@@ -16,6 +18,7 @@ export function initOwner(env) {
     if (!(await getOwnerGate().isOwner())) return false;
     const cheats = createCheats(env); if (env.onOwner) env.onOwner(cheats);
     if (godPref(env.storage)) cheats.setGod(true);
+    if (unlimPref(env.storage)) cheats.setUnlimited(true);
     let last = null;
     const tick = () => {
       let id = null; try { id = JSON.parse(env.storage.getItem('guildbound_rpg_save_v1') || 'null'); } catch (e) { id = null; }

@@ -48,7 +48,7 @@ export class CombatController {
     let l = Math.hypot(dx || 0, dz || 0); if (l < 0.01) { dx = -Math.sin(this.p.yaw); dz = -Math.cos(this.p.yaw); l = 1; }   // no input: step back
     this.emit('dash', { dx: dx / l, dz: dz / l, dist: D.dist, T: 0.2 }); return true;
   }
-  block(on) { if (on && (this.dead > 0 || this.res.sp < this.P.block.minSp)) on = false; if (on === this.blocking) return; this.blocking = on; this.blockT = 0; this.emit('block', on); }
+  block(on) { if (on && (this.dead > 0 || (!this.res.unlimited && this.res.sp < this.P.block.minSp))) on = false; if (on === this.blocking) return; this.blocking = on; this.blockT = 0; this.emit('block', on); }
   jump() { if (this.dead > 0 || !this.cd.ok('jump') || !this.res.spend({ sp: this.P.jump.sp })) return false; this.cd.start('jump', this.P.jump.dur + 0.1); this.emit('jump', this.P.jump); return true; }
   lock() { const t = this.tgt.lock(this.enemies, this.p.x, this.p.z, this.p.yaw); this.emit('lock', t); return t; }
   switchTarget() { const t = this.tgt.switchNext(this.enemies, this.p.x, this.p.z); this.emit('lock', t); return t; }
@@ -96,7 +96,7 @@ export class CombatController {
     if (this.blocking && this.blockT <= this.P.block.parry) { this.ai.stagger(e, 0.9); e.poiseBreak = true; this.emit('enemyAttack', { e, result: 'parried', dmg: 0 }); return; }
     let h = DamageCalculator.enemyHit(e.def.atk, this.P.def, this.P.agi, this.rng), res = 'hit';
     if (h === 0) res = 'dodged';
-    if (this.blocking) { h = Math.round(h * (1 - this.P.block.reduce)); this.res.sp = Math.max(0, this.res.sp - Math.max(8, h * 0.02)); res = 'blocked'; if (this.res.sp <= 0) this.block(false); }
+    if (this.blocking) { h = Math.round(h * (1 - this.P.block.reduce)); if (!this.res.unlimited) this.res.sp = Math.max(0, this.res.sp - Math.max(8, h * 0.02)); res = 'blocked'; if (this.res.sp <= 0) this.block(false); }
     if (this.shield > 0) h = Math.round(h * (1 - ABILITIES[4].reduce));
     this.res.hp = Math.max(0, this.res.hp - h);
     this.emit('enemyAttack', { e, result: res, dmg: h }); if (h > 0) this.emit('damage', { e, dmg: h, crit: false, toPlayer: true });
@@ -107,7 +107,7 @@ export class CombatController {
   update(dt) {
     this.cd.tick(dt); this.res.tick(dt, this.blocking);
     this.iframes = Math.max(0, this.iframes - dt); this.shield = Math.max(0, this.shield - dt);
-    if (this.blocking) { this.blockT += dt; this.res.sp = Math.max(0, this.res.sp - this.P.block.drain * dt); if (this.res.sp <= 0) this.block(false); }
+    if (this.blocking) { this.blockT += dt; if (!this.res.unlimited) this.res.sp = Math.max(0, this.res.sp - this.P.block.drain * dt); if (this.res.sp <= 0) this.block(false); }
     if (this.dead > 0) { this.dead -= dt; if (this.dead <= 0) this.respawn(); }
     const act = this.act;
     if (act) {

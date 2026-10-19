@@ -7,6 +7,7 @@ import { loadLucian } from './combat/calc.js';
 import { worldProfile } from './charscale.js';
 import { LightningFX } from './combat/lightning.js';
 import { Armory } from './combat/armory.js';
+import { gripFor } from './combat/grips.js';
 import { heroKey } from './combat/herokits.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
@@ -66,6 +67,18 @@ export function createFight(env) {
     g.name = 'bamboo_stick'; g.traverse(o => { o.frustumCulled = false; }); return g; }
   function bambooSync() { const want = cc.bambooOn() && cc.dead <= 0; if (want) { if (!BAM) BAM = bambooBuild(); const hb = bone(env.hero(), 'weapon_R') || bone(env.hero(), 'weapon_back'); if (hb && BAM.parent !== hb) { hb.add(BAM); BAM.position.set(0, 0, 0); BAM.quaternion.identity(); } } else if (BAM && BAM.parent) BAM.parent.remove(BAM); }
   function bambooDispose() { if (BAM) { if (BAM.parent) BAM.parent.remove(BAM); BAM.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); BAM = null; } }
+  /* Hero-kit weapons in hand (non-Owner heroes): the armory's equipped weapon item (signature by default, Beth's optional weapons when chosen) is loaded once
+     and parented to hand_R with the per-hero grip offset (combat/grips.js; refined2 sockets only when enabled). Owner keeps the saber/bamboo path. */
+  const WCACHE = new Map(); let HW = null, hwKey = '', hwLoading = '';
+  function heroWeaponClear() { if (HW) { if (HW.parent) HW.parent.remove(HW); HW = null; } hwKey = ''; }
+  function heroWeaponSync() {
+    const h = env.hero(), it = !cc.hero.owner && cc.dead <= 0 && armory.item(armory.s.equipment.weapon), url = it && it.glb ? it.glb : '', key = url && (h.uuid + '|' + url);
+    if (!key) { if (HW) heroWeaponClear(); return; } if (key === hwKey || hwLoading === key) return;
+    heroWeaponClear(); const hb = bone(h, 'hand_R'); if (!hb) return; hwLoading = key;
+    const done = (g) => { hwLoading = ''; if (!g || env.hero() !== h || cc.hero.owner) return; const o = g.clone(true), G = gripFor(armory.key); o.position.fromArray(G.pos); o.quaternion.fromArray(G.quat); h.updateMatrixWorld(true); const ws = new THREE.Vector3(); hb.getWorldScale(ws); o.scale.setScalar((0.947 * HS) / (ws.x || 1));   /* weapon GLBs are metres: world size = metres * 0.947*HS whatever the rig's own scale */ o.name = 'hero_weapon'; o.userData.grip = G; o.traverse(m => { m.frustumCulled = false; if (m.isMesh) m.castShadow = true; }); hb.add(o); HW = o; hwKey = key; };
+    if (WCACHE.has(url)) return done(WCACHE.get(url));
+    env.loadGLTF(url).then(g => { WCACHE.set(url, g.scene); done(g.scene); }).catch(() => { hwLoading = ''; hwKey = key; });
+  }
   async function equip() {
     if (!canWield() || sheathed) return false; if (saber && saber.parent && saber.parent.name === 'weapon_R') return true;
     if (!saber) { if (saberLoading) return false; saberLoading = true; try { saberG = await env.loadGLTF(SABER_URL + '?v=1.1.8'); saber = saberG.scene; saber.traverse(o => { o.frustumCulled = false; }); } catch (e) { saberLoading = false; return false; } saberLoading = false; }
@@ -270,7 +283,7 @@ export function createFight(env) {
     }
     if (shakeT > 0) shakeT = Math.max(0, shakeT - dt); metUpdate(dt);
     hud.update(dt, cc.enemies);
-    bambooSync(); if (!saber && canWield() && !sheathed && cc.dead <= 0 && !cc.bambooOn()) equip(); if (saber && (!canWield() || sheathed)) unequip(); if (saber) saber.visible = !cc.bambooOn();
+    bambooSync(); heroWeaponSync(); if (!saber && canWield() && !sheathed && cc.dead <= 0 && !cc.bambooOn()) equip(); if (saber && (!canWield() || sheathed)) unequip(); if (saber) saber.visible = !cc.bambooOn();
   }
   /* owner cheat hooks (cheats.js -> main.js) */
   const cheatHeal = () => { cc.res.full(); cc.potions = cc.P.potion.charges; if (cc.dead > 0) { cc.dead = 0; cc.act = null; env.hero().rotation.x = 0; } hud.say('Party healed', 1200); return true; };
@@ -288,10 +301,10 @@ export function createFight(env) {
     if (auto) { syncHero(); equip(); hud.say('THE WILDS - monsters about', 1800); return; }
     env.selectOwner().then(() => { syncHero(); equip(); hud.say('FIGHT TEST', 1800); });
   }
-  function stop() {
+  function stop() { heroWeaponClear();
     if (!on) return; on = false; metHide(); metDispose(); cc.meteors.length = 0; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
-  return { armory, setBamboo(v) { if (!ownerGate()) { cc.bamboo = false; return false; } cc.bamboo = !!v; bambooSync(); return cc.bamboo; }, bambooOn: () => cc.bambooOn(), useUltimate2: () => cc.useUltimate2(), get lightning() { return lfx; }, cheatHeal, cheatKill, cheatSpawn, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
+  return { armory, get heroWeapon() { return HW; }, setBamboo(v) { if (!ownerGate()) { cc.bamboo = false; return false; } cc.bamboo = !!v; bambooSync(); return cc.bamboo; }, bambooOn: () => cc.bambooOn(), useUltimate2: () => cc.useUltimate2(), get lightning() { return lfx; }, cheatHeal, cheatKill, cheatSpawn, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
     get on() { return on; }, get hp() { return cc.res.hp; }, get kills() { return cc.kills; }, get monsters() { return cc.enemies; }, get hasSaber() { return !!saber; }, hurt(n) { cc.res.hp = Math.max(0, cc.res.hp - n); if (cc.res.hp <= 0 && cc.dead <= 0) { cc.dead = cc.P.respawn; cc.emit('playerDown'); } } };
 }

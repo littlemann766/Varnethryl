@@ -53,16 +53,15 @@ export class CombatController {
     this.emit('action', { slot: 6, a, T: a.T, aim: t }); return true;
   }
   chainStrike(a) {
-    const HS = this.HS; let cur = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * HS);
-    if (!cur || cur.state === 'defeated') cur = this.enemies.filter(e => e.state !== 'defeated' && Math.hypot(e.x - this.p.x, e.z - this.p.z) < a.range * HS).sort((u, v) => Math.hypot(u.x - this.p.x, u.z - this.p.z) - Math.hypot(v.x - this.p.x, v.z - this.p.z))[0];
-    if (!cur) return; const hit = new Set(), path = []; let f = 1;
-    for (let i = 0; i < a.chains && cur; i++) {
-      hit.add(cur); path.push({ e: cur, x: cur.x, z: cur.z, y: 1.1 * HS * Math.max(1, (cur.def.scale || 1) * 0.8), falloff: f }); this.hitEnemy(cur, a.mult * f, a);
-      f *= a.falloff; let best = null, bd = a.chainRange * HS;
-      for (const e of this.enemies) { if (e.state === 'defeated' || hit.has(e)) continue; const d = Math.hypot(e.x - cur.x, e.z - cur.z); if (d < bd) { bd = d; best = e; } }
-      cur = best;
-    }
-    this.emit('lightning', { from: { x: this.p.x, z: this.p.z }, path });
+    /* Thunderstorm kills EVERYTHING in range (no target cap, bosses included): every living enemy takes the full hit via hitEnemy/DamageCalculator.
+       The chain is only for visuals: greedy nearest-neighbour order from the player; the host draws the first ~12 as bolts and the rest as cheap impact flashes. */
+    const HS = this.HS, R = a.range * HS, all = this.enemies.filter(e => e.state !== 'defeated' && Math.hypot(e.x - this.p.x, e.z - this.p.z) <= R + (e.def.r || 0));
+    if (!all.length) return; const order = []; let cx = this.p.x, cz = this.p.z, left = all.slice();
+    while (left.length) { let bi = 0, bd = 1e18; for (let i = 0; i < left.length; i++) { const d = (left[i].x - cx) ** 2 + (left[i].z - cz) ** 2; if (d < bd) { bd = d; bi = i; } } const e = left.splice(bi, 1)[0]; order.push(e); cx = e.x; cz = e.z; }
+    const path = []; let f = 1;
+    order.forEach((e, i) => { path.push({ x: e.x, z: e.z, y: 1.1 * HS * Math.max(1, (e.def.scale || 1) * 0.8), falloff: f, flash: i >= (a.visualBolts || 12) }); f = Math.max(0.45, f * a.falloff); });
+    for (const e of order) this.hitEnemy(e, a.mult, a);
+    this.emit('lightning', { from: { x: this.p.x, z: this.p.z }, path, count: order.length });
   }
   dodge(dx, dz) {
     const D = this.P.dodge; if (this.dead > 0 || !this.cd.ok('dodge') || !this.res.spend({ sp: D.sp })) { if (this.dead <= 0 && this.cd.ok('dodge')) this.emit('denied', { why: 'Not enough stamina' }); return false; }
@@ -83,7 +82,7 @@ export class CombatController {
   targetOf(e) { return e; }
   hitEnemy(e, mult, a) {
     if (e.state === 'defeated') return;
-    const r = DamageCalculator.playerHit(this.weapon(), mult, this.rng); e.hp = Math.max(0, e.hp - r.dmg); e.flash = 0.2; this.lastTarget = e; this.lastHitT = this.cd.t;
+    const r = a && a.lethal ? { dmg: Math.max(1, Math.ceil(e.hp)), crit: true } : DamageCalculator.playerHit(this.weapon(), mult, this.rng); e.hp = Math.max(0, e.hp - r.dmg); e.flash = 0.2; this.lastTarget = e; this.lastHitT = this.cd.t;
     const dx = e.x - this.p.x, dz = e.z - this.p.z, d = Math.hypot(dx, dz) || 1; e.kx = dx / d; e.kz = dz / d; e.knockT = (a && a.knock ? 0.35 : 0.12);
     this.emit('damage', { e, dmg: r.dmg, crit: r.crit, toPlayer: false });
     if (e.hp <= 0) { this.defeat(e); return; }

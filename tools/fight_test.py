@@ -61,5 +61,5 @@ with sync_playwright() as p:
     tp = pg.evaluate("document.querySelector('#cb .msg').textContent"); print('msg', tp)
     pg.evaluate("__p3d.fight.stop()"); print('errs', errs[:4])
     gone = pg.evaluate("document.getElementById('cb').style.display")
-    ok = hid == 'n:owner' and vis['slots']==6 and vis['cl']==6 and dealt and ifr and lk and pot == 2 and bi[0]==250000 and bi[1]==2100 and bi[2]==2300 and dead == 0 and back > 0 and not sab and 'Owner' in tp and gone == 'none' and not errs
+    ok = hid == 'n:owner' and vis['slots']==6 and vis['cl']==6 and dealt and ifr and lk and pot == 2 and bi[0]==5000000 and bi[1]==2100 and bi[2]==2300 and dead == 0 and back > 0 and not sab and 'Owner' in tp and gone == 'none' and not errs
     print('PASS' if ok else 'FAIL'); b.close()

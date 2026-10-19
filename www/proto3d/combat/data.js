@@ -63,6 +63,7 @@ export const ENEMIES = {
   wraith:   E('Vine Wraith', 18, 'Spirit', 1700, 66, 90, 4.2, { model: 'o:mossgut', r: 1.1 }),
   skeleton: E('Ash Skeleton', 30, 'Undead', 5600, 270, 200, 3.6, { model: 'o:stonetroll', atkMs: 2300, tele: 0.8, r: 1.4 }),
   frosttroll: E('Frost Troll', 45, 'Elite', 60000, 900, 400, 4.2, { model: 'n:frosttroll_a', atkMs: 2300, tele: 0.9, reach: 4.2, r: 2.6, scale: 3, aggro: 40, patterns: true, stagger: 0.4, poise: 0.5, xp: 4000, gold: 900 }),
+  frosttroll_b: E('Frost Troll B', 45, 'Elite', 60000, 900, 400, 4.2, { model: 'n:frosttroll_b', windupAt: 1.0, atkMs: 2300, tele: 0.9, reach: 4.2, r: 2.6, scale: 3, aggro: 40, patterns: true, stagger: 0.4, poise: 0.5, xp: 4000, gold: 900 }),
   titan:    E('Ashen Titan', 60, 'Boss', 5000000, 2100, 600, 7.3, { model: 'n:ashentitan_new', atkMs: 2300, tele: 1.1, reach: 8.4, r: 5, scale: 6, aggro: 60, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
   vaelthryx: E('Vaelthryx the Crystal Sovereign', 70, 'Boss', 8000000, 2600, 700, 7.0, { model: 'n:vaelthryx_new7', atkMs: 2400, tele: 1.1, reach: 9.5, r: 5.2, scale: 10, aggro: 70, boss: true, stagger: 0.25, poise: 0.9, xp: 30000, gold: 6000 }),
   titan_g20: E('Giant Titan 20x', 70, 'World Boss', 20000000, 2100, 600, 7.3, { model: 'n:titan_giant_20x', atkMs: 2600, tele: 1.4, reach: 28.0, r: 16.7, scale: 20, aggro: 200, boss: true, giant: true, ownerTest: true, stagger: 0.2, poise: 0.95, xp: 20000, gold: 4000 }),   // OWNER-ONLY test spawn, never in waves; Ashen Titan stays the normal boss
@@ -91,4 +92,5 @@ try { if (typeof localStorage !== 'undefined') { const j = localStorage.getItem(
 /* giant titans: Titan patterns with reach scaled to their size (k/6 x the 11.4 m Titan) */
 for (const k of [20, 40, 60]) BOSS_PATTERNS['titan_g' + k] = BOSS_PATTERNS.titan.map(p => Object.assign({}, p, { reach: +(p.reach * k / 6).toFixed(1), width: p.width ? +(p.width * k / 6).toFixed(1) : undefined }));
 /* enemy weapons (Beth weapons/enemy, metres, no sockets on these rigs; Vaelthryx new7 is a serpent with no hand bone, so no weapon): attached to hand_R in fight.js with an identity transform */
-export const ENEMY_WEAPONS = { titan: 'ashentitan_magma_greatsword', titan_g20: 'ashentitan_magma_greatsword', titan_g40: 'ashentitan_magma_greatsword', titan_g60: 'ashentitan_magma_greatsword', frosttroll: 'troll_ice_club' };
+export const ENEMY_WEAPONS = { titan: 'ashentitan_magma_greatsword', titan_g20: 'ashentitan_magma_greatsword', titan_g40: 'ashentitan_magma_greatsword', titan_g60: 'ashentitan_magma_greatsword', frosttroll: 'troll_ice_club', frosttroll_b: 'troll_ice_club' };
+BOSS_PATTERNS.frosttroll_b = BOSS_PATTERNS.frosttroll;   // Troll B shares the troll moves; its windup clip drives the telegraph

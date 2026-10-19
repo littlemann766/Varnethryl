@@ -2,7 +2,7 @@
    (respawns soon). New monsters are placed out of the hero's sight (outside the camera view and >= minDist away), never outside the Wilds, and
    never above the per-biome cap. Pure logic (no THREE / DOM): the host passes zone, biome, free-space and visibility callbacks. */
 export const RESPAWN = { max: 9, delay: [20, 40], refill: 1.6, minDist: 22, maxDist: 60, caps: { meadow: 4, forest: 3, rock: 2, snow: 2, shore: 2 },
-  kinds: { meadow: ['wolf', 'raider', 'raider'], forest: ['wolf', 'wraith', 'raider'], rock: ['skeleton', 'raider'], snow: ['frosttroll', 'wolf', 'wolf'], shore: ['wraith', 'wolf'] } };
+  kinds: { meadow: ['wolf', 'raider', 'raider'], forest: ['wolf', 'wraith', 'raider'], rock: ['skeleton', 'raider'], snow: ['frosttroll', 'frosttroll_b', 'wolf', 'wolf'], shore: ['wraith', 'wolf'] } };
 export class Respawner {
   constructor(o = {}) { this.C = Object.assign({}, RESPAWN, o); this.t = 0; this.ready = []; for (let i = 0; i < this.C.max; i++) this.ready.push(0); this.cool = 0; this.log = []; this.rng = o.rng || Math.random; this.pending = 0; }
   /* host: { zone() -> 'wilds'|'town', inWilds(x,z), biome(x,z), free(x,z), visible(x,z), hero:{x,z}, alive(biome) -> count, spawn(key, x, z, biome) } */

@@ -100,6 +100,7 @@ export function createFight(env) {
   const ALIAS = { attack: ['attack', 'attack1', 'slash', 'swing', 'strike', 'melee'], attack2: ['attack2', 'heavy', 'slash2', 'strike2', 'attack_heavy'], hit: ['hit', 'hurt', 'hit_react', 'damage', 'flinch', 'hitreact'], death: ['death', 'die', 'dead', 'defeat', 'defeated', 'fall'] };
   function clipFor(u, kind) {
     if (!u || !u.all) return null; u.cmap = u.cmap || {}; if (kind in u.cmap) return u.cmap[kind]; let r = null; const keys = Object.keys(u.all);
+    if (!ALIAS[kind]) return (u.cmap[kind] = u.all[kind] || null);   // model-specific clips (CLIPMAP 'telegraph' = coil_windup / coil)
     for (const n of ALIAS[kind]) { const k = keys.find(x => x.toLowerCase() === n); if (k) { r = u.all[k]; break; } }
     if (!r && kind === 'attack2') r = clipFor(u, 'attack');
     return (u.cmap[kind] = r);
@@ -236,7 +237,7 @@ export function createFight(env) {
     else if (GV) { if (scene.fog) { scene.fog.near = GV.n; scene.fog.far = GV.f; } camera.far = GV.c; camera.updateProjectionMatrix(); GV = null; } }
   async function enemyWeapon(key, w) {
     const wid = ENEMY_WEAPONS[key]; if (!wid || !env.loadGLTF) return;
-    let hand = null; w.traverse(o => { if (!hand && o.name === 'hand_R') hand = o; }); if (!hand) return;
+    let hand = null; w.traverse(o => { if (o.name === 'weapon_R') hand = o; }); if (!hand) w.traverse(o => { if (!hand && o.name === 'hand_R') hand = o; }); if (!hand) return;   // palm socket weapon_R when the rig has one (Troll B), else hand_R
     try { if (!EWC[wid]) EWC[wid] = env.loadGLTF('proto3d/models-weapons/enemy/' + wid + '.glb'); const g = await EWC[wid]; if (!w.parent) return;
       const m = g.scene.clone(true); m.name = 'enemy_weapon'; m.traverse(o => { o.frustumCulled = false; if (o.isMesh) o.castShadow = true; });
       w.updateMatrixWorld(true); const hs = new THREE.Vector3(); hand.getWorldScale(hs); const k = ENEMIES[key].giant ? ENEMIES[key].scale / 6 : 1;
@@ -304,7 +305,8 @@ export function createFight(env) {
       const mv = Math.hypot(e.x - e.px, e.z - e.pz) / Math.max(dt, 1e-4); e.px = e.x; e.pz = e.z; r.position.x = e.x; r.position.z = e.z;
       r.rotation.y = yawLerp(r.rotation.y, e.yaw, Math.min(1, dt * 10));
       if (e.state !== e.ls) { const tc = r.userData && r.userData.act && r.userData.act.telegraph;   // coil wind-up clip (Vaelthryx new7 coil_windup, serpent coil) during the telegraph, then the strike
-        if (e.state === 'telegraph') { e.alt = !e.alt; if (tc) oneShot(r, 'telegraph', (e.curTele || e.def.tele), false); else oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'attack' && tc) oneShot(r, e.alt ? 'attack2' : 'attack', 0.8, false); else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
+        if (e.state === 'telegraph') { e.alt = !e.alt; e.wuT = e.def.windupAt ? 0 : -1; if (tc && e.def.windupAt) oneShot(r, 'telegraph', 1.6, true); else if (tc) oneShot(r, 'telegraph', (e.curTele || e.def.tele), false); else oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'attack' && tc && !e.def.windupAt) oneShot(r, e.alt ? 'attack2' : 'attack', 0.8, false); else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
+      if (e.wuT >= 0) { e.wuT += dt; if (e.wuT >= e.def.windupAt) { e.wuT = -1; oneShot(r, e.alt ? 'attack2' : 'attack', 0.9, false); } }   // Troll B: windup (1.6 s, holds) -> attack starts at t = windupAt
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
       let lean = 0; if (e.state === 'telegraph') lean = -0.35 * Math.min(1, e.tStateT / e.def.tele); else if (e.state === 'attack') lean = 0.45; else if (e.state === 'stagger') lean = -0.5; else if (e.flinch > 0) lean = -0.25 * (e.flinch / 0.18);
       r.rotation.x += (lean - r.rotation.x) * Math.min(1, dt * 14);
@@ -325,7 +327,7 @@ export function createFight(env) {
   const cheatSpawn = (key) => {
     if (!ENEMIES[key]) return false;
     if (ENEMIES[key].boss) { if (bossOn) return false; if (ENEMIES[key].ownerTest && !ownerGate()) return false;   // giant titans: owner-only test spawn
-      spawn(key, ENEMIES[key].giant ? ENEMIES[key].scale * 2.4 : key === 'vaelthryx' ? 60 : 26); return true; }
+      spawn(key, ENEMIES[key].giant ? Math.min(110, ENEMIES[key].scale * 2.4) : key === 'vaelthryx' ? 60 : 26); return true; }
     for (const e of cc.enemies.slice()) if (e.state === 'defeated' && !e.def.boss) cc.removeEnemy(e);
     spawn(key, 10); return true;
   };

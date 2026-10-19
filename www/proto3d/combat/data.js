@@ -21,6 +21,8 @@ export const ABILITIES = [
   { id: 'defensive', name: 'Shield', icon: '\u26E8', cd: 12, cost: { mp: 30 }, kind: 'shield', mult: 0, windup: 0.05, T: 0.4, dur: 3, reduce: 0.8, saber: true },
   { id: 'ultimate', name: 'Blade Storm', icon: '\u2604', cd: 25, cost: { mp: 60 }, kind: 'storm', mult: 3, windup: 0.3, T: 1.0, range: 6.5, arc: -1, stagger: 1, saber: true },
 ];
+/* Owner second ultimate (not a HUD slot yet - hud.js untouched; triggered by key 7 or T / fight.useUltimate2()). chain: strikes the nearest enemy from the sky, arcs to nearby ones with falloff. */
+export const ULTIMATE2 = { id: 'ultimate2', name: 'Thunderstorm', icon: '\u26A1', cd: 30, cost: { mp: 70 }, kind: 'chain', mult: 2.5, windup: 0.35, T: 1.1, range: 18, chains: 5, chainRange: 8, falloff: 0.78, stagger: 1, saber: true };
 const E = (name, level, cls, hp, atk, def, speed, o) => Object.assign({ name, level, cls, hp, atk, def, speed, atkMs: 1750, tele: 0.55, reach: 2.2, aggro: 24, scale: 1, xp: Math.round(hp / 25), gold: Math.round(hp / 90), boss: false, stagger: 0.55, poise: 0 }, o);
 export const ENEMIES = {
   wolf:     E('Wild Wolf', 5, 'Beast', 1050, 42, 40, 6.4, { model: 'wolf', tele: 0.4, r: 0.9 }),

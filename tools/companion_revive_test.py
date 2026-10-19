@@ -16,6 +16,7 @@ with sync_playwright() as p:
     pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text[:150]) if m.type == 'error' else 0)
     pg.goto(f'http://127.0.0.1:{port}/proto3d.html?nosave=1&party=2&npcs=1', wait_until='commit', timeout=120000)
     pg.wait_for_function('window.__p3d&&__p3d.frames>5', timeout=120000); pg.wait_for_timeout(1500)
+    pg.evaluate("window.__p3d.owner=true; window.__p3d.cheats=window.__p3d.cheats||{}")   # saber/Thunderstorm are owner-gated on merge-all (Lucky 874a1cd predates the gate)
     pg.evaluate("__p3d.fightToggle()"); pg.wait_for_function("__p3d.fight&&__p3d.fight.on&&__p3d.fight.hasSaber", timeout=90000); pg.wait_for_timeout(1500)
     pg.evaluate("__p3d.fight.cc.god=false;__p3d.fight.cc.res.mp=999;__p3d.fight.cc.clearEnemies()")
     pg.evaluate("(async()=>{const f=__p3d.fight;for(let i=0;i<22;i++){await f.spawn(['wolf','raider','wraith','skeleton'][i%4],10+i*4)}await f.spawn('frosttroll',40);await f.spawn('titan',60)})()")

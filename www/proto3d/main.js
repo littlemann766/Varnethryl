@@ -6,7 +6,7 @@ import { CHARS } from './chars.js';
 import { preload as preloadChars } from './texgen.js';
 import { makeEnterable } from './interiors.js';
 import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
-import { zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
+import { fx, zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { readSave, planFromState, createSaver } from './save3d.js';
 import { SpringBones } from './spring_bones.js';
 import { SpringBones as SpringBonesV2 } from './spring_bones_v2.js';
@@ -64,6 +64,7 @@ M('wall', 0xe9dcc0); M('wallB', 0xd2c2a0); M('stone', 0x9aa0a8); M('stoneD', 0x6
 M('roofR', 0xb5452f); M('roofB', 0x3d6aa8); M('roofG', 0x4b7d4a); M('door', 0x5a3a22);
 M('glass', 0xffe9a0, { emissive: 0x6a5420 }); M('water', 0x4fa8d8, { emissive: 0x103050 });
 M('trunk', 0x6b4a2b); M('leaf', 0x3e8a3a); M('leaf2', 0x57a043); M('gold', 0xe0b040, { emissive: 0x302000 });
+for (const k of ['trunk', 'leaf', 'leaf2']) fx(mats[k], 'tree');   // wind sway (shared shader uniform)
 M('steel', 0xc7ccd6); M('armor', 0x9aa6bd); M('cloth', 0x2d55a8); M('skin', 0xf0c8a0); M('plume', 0xc8302a); M('dark', 0x333844);
 
 function canvasTex(size, draw, repeat) {
@@ -560,11 +561,16 @@ addEventListener('contextmenu', e => e.preventDefault());
 
 // ---------- movement + collision ----------
 const SPEED = 5.2 * HS;
-function resolve(p, ghost) {
+// buildings only playable characters may enter (companions, townsfolk and monsters are kept out by npcOnly door colliders)
+const HERO_ONLY = new Set(['guildhall']), HO_WAIT = { id: null, x: 0, z: 0 };
+function heroOnlyWait() { const id = state.inside; if (!id || !HERO_ONLY.has(id)) return null; if (HO_WAIT.id !== id) { const e = enterables.find(q => q.id === id); const b = e && (e.parts ? e.parts[0] : e); if (!b || !b.toW) return null; const [x, z] = b.toW(0, b.d / 2 + 3.2); HO_WAIT.id = id; HO_WAIT.x = x; HO_WAIT.z = z; } return HO_WAIT; }
+window.__heroOnly = HERO_ONLY;
+function resolve(p, ghost, who) {
   let hitAny = false;
   const LV = state.level;
   for (const c of colliders) {
     if (ghost) break;
+    if (c.npcOnly && who !== 'npc') continue;   // door blockers for hero-only buildings (guild hall): only companions / townsfolk collide
     if (c.lv !== undefined && (Array.isArray(c.lv) ? !c.lv.includes(LV) : c.lv !== LV)) continue;
     if (c.type === 'box') {
       const qx = THREE.MathUtils.clamp(p.x, c.minX, c.maxX), qz = THREE.MathUtils.clamp(p.z, c.minZ, c.maxZ);
@@ -689,8 +695,9 @@ function updateCrowd(dt) {
     if (r.down > 0) { tickDown(r, dt); if (r.down > 0) { r.vxs = r.vzs = 0; a.vx = a.vz = 0; continue; } }
     let tvx = 0, tvz = 0;
     if (r.kind === 'party') {
-      let gx = state.heroX, gz = state.heroZ, far = false;
-      if (r.level !== state.level) {
+      let gx = state.heroX, gz = state.heroZ, far = false; const rw = heroOnlyWait();
+      if (rw) { gx = rw.x; gz = rw.z; r.lvT = 0; }   // hero is inside a playable-characters-only building: companions wait by its door
+      else if (r.level !== state.level) {
         r.lvT += dt; const t = trailTarget(r, a);
         if (t) { gx = t.x; gz = t.z; far = true; }
         if ((r.lvT > 12 || t === null) && state.level === 0) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; }
@@ -713,7 +720,7 @@ function updateCrowd(dt) {
     if (r.down > 0) continue;
     let mx = r.vxs * a.slowMul * dt + a.dx, mz = r.vzs * a.slowMul * dt + a.dz;
     if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
-    tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2); state.level = l0; }
+    tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2, false, 'npc'); state.level = l0; }
     const moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; if (r.kind === 'party') crowdSurface(r, a, dt);
     const sp = Math.hypot(r.vxs, r.vzs);
     if (sp > 0.3) { let da = Math.atan2(r.vxs, r.vzs) - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }
@@ -946,7 +953,7 @@ function frame(now) {
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  updateCrowd(dt); updateHero(dt); updateZone(dt); if (FIGHT) FIGHT.update(dt); updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
+  updateCrowd(dt); updateHero(dt); updateZone(dt); if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
   simTime += dt; if (SMOKE) SMOKE.update(simTime);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
@@ -978,17 +985,23 @@ function entrySpot(d) {
   return { x: THREE.MathUtils.clamp(d.cx, -lim, lim), z: THREE.MathUtils.clamp(d.cz, -lim, lim) };
 }
 /* ---------- fight test mode (1.1.8): lazy-loaded, owner-gated start (owner panel / HUD button it reveals) ---------- */
-let FIGHT = null;
+let FIGHT = null, GUARDS = null;
+/* town guard strike: one reusable line (guard spear-tip -> monster), shown 0.15 s; no allocation per strike */
+const GB = (() => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3)); const l = new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0xfff1a8 })); l.visible = false; l.frustumCulled = false; l.userData.keep = true; l.userData.t = 0; scene.add(l); return l; })();
+function guardBolt(g, e) { const a = GB.geometry.attributes.position; a.setXYZ(0, g.x, 2.4, g.z); a.setXYZ(1, e.x, 1.1, e.z); a.needsUpdate = true; GB.visible = true; GB.userData.t = 0.15; }
 async function fightToggle(createOnly) {
   if (!FIGHT) {
     const mod = await import('./fight.js');
     FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, downAllies, followers: () => crowd.filter(r => r.kind === 'party'), bystanders, killCrowd, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
       selectOwner: async () => { const i = GLB_IDS.indexOf('n:owner'); if (i >= 0 && GLB_IDS[HEROES.indexOf(hero)] !== 'n:owner') await selectVariant(SLOT_G[i], curVar(SLOT_G[i])); },
       makeModel: async id => { try { return modeFor(id) === 'blocky' ? makeBlocky(id) : await loadActorModel(id); } catch (e) { return null; } },
-      loco: locoAnim, resolve: p => resolve(p), free: (x, z) => window.__p3d.free(x, z, 0),
+      loco: locoAnim, resolve: p => resolve(p), resolveMob: p => resolve(p, false, 'npc'), free: (x, z) => window.__p3d.free(x, z, 0),
+      zone: () => ZONE.name, inWilds: (x, z) => ZONE.name === 'wilds' && Math.abs(x - ZONE.cx) < ZONE.half - 4 && Math.abs(z - ZONE.cz) < ZONE.half - 4,
+      biome: (x, z) => WM ? WM.mod.biome(x - WM.mod.WILDS.ox, z - WM.mod.WILDS.oz) : 'meadow',
       loadGLTF: url => new Promise((res, rej) => gl.load(url, res, undefined, rej)),
       respawnPos: () => ZONE.name === 'wilds' && WM ? { x: WM.spawn.x, z: WM.spawn.z } : { x: 0, z: 60 } });
   }
+  if (!GUARDS) { const gm = await import('./combat/guards.js'); GUARDS = new gm.TownGuards(ectx.guardPosts || []); GUARDS.onStrike = guardBolt; }
   if (createOnly) return FIGHT;
   FIGHT.toggle(); return FIGHT;
 }
@@ -1019,7 +1032,7 @@ const fpsEl2 = fpsEl;
 const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
 window.__p3d = { killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
-  cheat, fightToggle, get fight() { return FIGHT; },
+  cheat, fightToggle, get fight() { return FIGHT; }, get guards() { return GUARDS; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },
   toggleModel: i => toggleModel(i), groups: () => [...GROUPS.values()].map(g => ({ key: g.key, name: g.name, vars: g.vars.map(v => v.label) })),
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,

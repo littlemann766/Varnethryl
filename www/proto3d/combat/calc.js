@@ -1,6 +1,7 @@
 /* DamageCalculator: the only place damage is computed (UI never does). Reuses Lucian's enemyHurt() from www/core/combat.js when it loads
    (same formula as fallback). Owner lightsaber damage is flat 99,999 per hit; other weapons use the 2D crit rule (6% base, x1.55). */
 import { SABER, UNARMED, BAMBOO, PLAYER } from './data.js';
+export const GUARD = { min: 22, max: 38, cd: 1.5, range: 15 };   // town guard stats (range in m)
 let L = null;
 export async function loadLucian() { try { L = await import('../../core/combat.js'); return !!L.enemyHurt; } catch (e) { L = null; return false; } }
 export const usingLucian = () => !!L;
@@ -14,6 +15,8 @@ export const DamageCalculator = {
   },
   /* defence mitigation for non-player (companion) damage: same shape as Lucian's formula atk*1000/(1000+def), def softened */
   mitigate(base, def) { return base * 1000 / (1000 + def * 0.5); },
+  /* town guard -> monster (guards never target the hero or companions). Modest: a guard alone takes ~25-40 s on a wolf. */
+  guardHit(rng) { return { dmg: Math.round(GUARD.min + (GUARD.max - GUARD.min) * rng()), crit: false }; },
   /* enemy -> player (before dodge/block/shield, which the controller applies) */
   enemyHit(atk, def, agi, rng) { return (L && L.enemyHurt ? L.enemyHurt : fallbackHurt)(atk, def, agi, rng); },
 };

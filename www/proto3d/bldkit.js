@@ -3,21 +3,36 @@
 // group into one mesh per material (phone-friendly). Local space: +z is the facade/door, y=0 is the ground.
 import * as THREE from 'three';
 import { tex, bannerTexture, signTexture } from './bldtex.js';
+import { FX, fx } from './fx.js';
 
 export const TILE = { stone: 3, stoneD: 3, stoneL: 3.2, rock: 4, plaster: 3, timber: 2.4, darkWood: 2, wood: 1.6, slate: 2.2, slateG: 2.2, hay: 2, floorPlank: 3, floorStone: 3, floorTile: 2, sand: 4, cobble: 3, pave: 3, carpet: 2, rug: 3, sigil: 6, marbleInlay: 3, awning: 1.6, glass: 1, stained: 1, door: 1, iron: 1, water: 4, parchment: 1, gold: 1, books: 1.2, grass: 4 };
+// ===== living-world shader FX (one shared time + wind uniform, no per-frame JS allocation) =====
+// kinds: 'flag' (cloth waves, pinned at the top uv.y=1), 'water' (scrolling two-layer flow + glints), 'flicker' (warm torch/lantern glow),
+// 'tree' / 'grass' (wind sway of the world-space height; instanced or plain meshes). Every FX material is flagged noVC so it never merges into the flat-colour class.
+export { FX, fx };
+// expanding ripple rings (fountain basins): cheap ShaderMaterial on a flat disc, uv-radial
+export function rippleMat(col = '#bfe4ff') { const c = new THREE.Color(col);
+  return new THREE.ShaderMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide, uniforms: { uTime: FX.uTime, uC: { value: c } },
+    vertexShader: 'varying vec2 vU; void main(){ vU = uv - 0.5; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: 'uniform float uTime; uniform vec3 uC; varying vec2 vU; void main(){ float r = length(vU) * 2.0; if (r > 1.0) discard; float w = sin(r * 26.0 - uTime * 2.6) * 0.5 + 0.5; float a = smoothstep(0.78, 1.0, w) * (1.0 - r * 0.7) * 0.5; gl_FragColor = vec4(uC, a); }' }); }
+
 const matCache = {};
 export function M(key, extra) { // shared lit material by texture key (or flat colour with '#rrggbb')
   const id = key + (extra ? JSON.stringify(extra) : ''); if (matCache[id]) return matCache[id];
   const o = Object.assign({}, extra); if (key[0] === '#') o.color = new THREE.Color(key); else o.map = tex(key);
-  return matCache[id] = new THREE.MeshLambertMaterial(o);
+  const m = new THREE.MeshLambertMaterial(o); if (key === 'water') fx(m, 'water');
+  return matCache[id] = m;
 }
-export const GLOW = (c, k = 1) => M('#' + c, { emissive: new THREE.Color('#' + c), emissiveIntensity: k });
+export const WM = (c, kind = 'grass') => { const v = parseInt(c.slice(1), 16), lum = ((v >> 16) & 255) * .3 + ((v >> 8) & 255) * .59 + (v & 255) * .11; return fx(M(lum > 118 ? '#55993f' : '#3f7a3a', { name: 'wind_' + kind }), kind); };   // two shared shades: fewer draw calls   // wind-swayed flat colour (bushes, tufts, potted plants)
+export const GLOW = (c, k = 1) => { const m = M('#' + c, { emissive: new THREE.Color('#' + c), emissiveIntensity: k }); const r = parseInt(c.slice(0, 2), 16), b = parseInt(c.slice(4, 6), 16); if (r > b + 40) fx(m, 'flicker'); return m; };
 export function uvScale(g, su, sv) { const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * su, uv.getY(i) * sv); return g; }
 export function boxG(w, h, d, tile = 2) {
   const g = new THREE.BoxGeometry(w, h, d), uv = g.attributes.uv, dims = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
   for (let f = 0; f < 6; f++) for (let v = 0; v < 4; v++) { const i = f * 4 + v; uv.setXY(i, uv.getX(i) * dims[f][0] / tile, uv.getY(i) * dims[f][1] / tile); }
   return g;
 }
+export function boxL(w, h, d, tile = 2) { // trim box without the underside and back (wall-facing) faces: 8 tris instead of 12
+  const g = boxG(w, h, d, tile), idx = g.index.array, keep = []; for (let f = 0; f < 6; f++) if (f !== 3 && f !== 5) for (let k = 0; k < 6; k++) keep.push(idx[f * 6 + k]); g.setIndex(keep); return g; }
 export function cylG(rt, rb, h, seg, tile = 3, open = false) { const g = new THREE.CylinderGeometry(rt, rb, h, seg, 1, open); const c = 2 * Math.PI * Math.max(rt, rb); return uvScale(g, c / tile, h / tile); }
 export function gableG(W, L, rh, over, tile = 2.2) { // ridge along z; returns slopes (slate) geometry
   const hw = W / 2 + over, hl = L / 2 + over, s = Math.hypot(hw, rh), p = [], uv = [];
@@ -54,6 +69,7 @@ export class Builder {
     this.id = spec.id; this.cx = spec.cx; this.cz = spec.cz; this.rot = spec.rot || 0; this.cs = Math.cos(this.rot); this.sn = Math.sin(this.rot);
     this.root = new THREE.Group(); this.K = spec.K || 1; this.root.position.set(this.cx, 0, this.cz); this.root.rotation.y = this.rot; this.root.scale.setScalar(this.K); scene.add(this.root);
     this.G = {}; this.lvTag = 0; this.curUp = null; this.floors = []; this.ramps = []; for (const k of ['ext', 'walls', 'roof', 'frame', 'int']) { this.G[k] = new THREE.Group(); this.root.add(this.G[k]); }
+    { let h = 0; for (const ch of String(spec.id)) h = (h * 31 + ch.charCodeAt(0)) | 0; this.shutKey = ['darkWood', '#2f56a8', '#3f6a3a', '#7a2a2a', '#9a7a2a', '#5a3a6a'][Math.abs(h >> 2) % 6]; }
     this.cut = []; this.cutCache = {}; this.dyn = []; this.T = 0.45; this.inside = false; this.colInfo = []; this.insideTest = null; this.footprint = null;
   }
   // ---- placement helpers ----
@@ -67,7 +83,7 @@ export class Builder {
   ccol(lx, lz, r) { const [x, z] = this.toW(lx, lz); r *= this.K; this.colliders.push({ type: 'circle', x, z, r, b: this.id, lv: this.lvTag }); }
   // ---- mesh helpers ----
   add(geo, mat, x, y, z, grp, o = {}) { if (this.curUp && grp === this.G.int) { grp = this.curUp.group; y += this.curUp.y; } const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = o.shadow !== false; m.receiveShadow = o.recv !== false; if (o.keep) m.userData.keep = true; if (this._st) m.userData.stairPart = true; (grp || this.G.ext).add(m); return m; }
-  bx(w, h, d, key, x, y, z, grp, o) { return this.add(boxG(w, h, d, TILE[key] || 2), M(key, o && o.mat), x, y, z, grp, o); }
+  bx(w, h, d, key, x, y, z, grp, o) { return this.add((o && o.lite ? boxL : boxG)(w, h, d, TILE[key] || 2), M(key, o && o.mat), x, y, z, grp, o); }
   cm(key) { return this.cutCache[key] || (this.cutCache[key] = (() => { const m = M(key).clone(); this.cut.push(m); return m; })()); } // per-building cutaway material
   wallBox(w, h, d, key, x, y, z, grp) { return this.add(boxG(w, h, d, TILE[key] || 2), this.cm(key), x, y, z, grp || this.G.walls); }
   cyl(rt, rb, h, key, x, y, z, grp, seg = 12, o) { return this.add(cylG(rt, rb, h, seg, TILE[key] || 2), M(key), x, y, z, grp, o); }
@@ -78,16 +94,39 @@ export class Builder {
     const e1 = this.add(triG(W, rh, L / 2, false, TILE[endKey] || 2.4), M(endKey, { side: THREE.DoubleSide }), x, y, z, grp), e2 = this.add(triG(W, rh, -L / 2, true, TILE[endKey] || 2.4), M(endKey, { side: THREE.DoubleSide }), x, y, z, grp);
     if (ridgeX) for (const o of [m, e1, e2]) { o.geometry.rotateY(Math.PI / 2); }
     this.add(ridgeX ? boxG(L + over * 2 + .2, .16, .18, 1) : boxG(.18, .16, L + over * 2 + .2, 1), M('#2a2420'), x, y + rh, z, grp);   // ridge beam
+    this.roofTrim(W, L, rh, over, x, y, z, key, grp, ridgeX, endKey);
     return m;
   }
-  banner(x, y, z, ry = 0, w = 1, h = 2.2, grp) { const m = M('#ffffff', { map: bannerTexture(), side: THREE.DoubleSide, alphaTest: .5 }); const p = this.add(new THREE.PlaneGeometry(w, h), m, x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry; return p; }
+  roofTrim(W, L, rh, over, x, y, z, key, grp, ridgeX, endKey) { // eave fascia + rafter tails, barge boards, ridge cap + finials, half-timber gable ends
+    const hw = W / 2 + over, hl = L / 2 + over, al = Math.atan2(rh, hw), sl = Math.hypot(hw, rh), g = grp || this.G.roof;
+    const P = (geo, mat, ox, oy, oz, rz = 0) => { const m = this.add(geo, mat, x + (ridgeX ? oz : ox), y + oy, z + (ridgeX ? -ox : oz), g, { shadow: false }); m.rotation.order = 'YXZ'; m.rotation.y = ridgeX ? Math.PI / 2 : 0; m.rotation.z = rz; return m; };
+    const boxG = boxL, dk = M('darkWood'), n = Math.max(2, Math.round(2 * hl / 2.4)) * 2;
+    for (const sd of [-1, 1]) { P(boxG(.1, .22, 2 * hl, 1.6), dk, sd * hw, -.09, 0);
+}
+    for (const e of [-1, 1]) for (const sd of [-1, 1]) P(boxG(sl + .1, .17, .09, 1.6), dk, sd * hw / 2, rh / 2 - .02, e * (hl + .02), -sd * al);
+    P(boxG(.42, .1, 2 * hl + .1, 2), M(key === 'slateG' ? 'slateG' : 'slate'), 0, rh + .1, 0);
+    for (const e of [-1, 1]) { P(new THREE.ConeGeometry(.13, .55, 4), M('iron'), 0, rh + .42, e * (hl + .08)); P(new THREE.SphereGeometry(.09, 5, 4), M('gold'), 0, rh + .72, e * (hl + .08)); }
+    if (W > 4) { const gw = W / 2; for (const e of [-1, 1]) { const zz = e * (L / 2 + .06), gk = M('darkWood');   // gable-end timber frame
+      P(boxG(.14, rh * .85, .08, 1.6), gk, 0, rh * .42, zz); P(boxG(W * .62, .12, .08, 1.6), gk, 0, rh * .32, zz);
+      for (const sd of [-1, 1]) P(boxG(Math.hypot(gw * .3, rh * .3) + .1, .1, .08, 1.6), gk, sd * gw * .32, rh * .5, zz, -sd * Math.atan2(rh * .3, gw * .3)); } }
+  }
+  banner(x, y, z, ry = 0, w = 1, h = 2.2, grp) { const m = fx(M('#ffffff', { map: bannerTexture(), side: THREE.DoubleSide, alphaTest: .5 }), 'flag'); const p = this.add(new THREE.PlaneGeometry(w, h, 2, 6), m, x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
+    const rod = this.bx(w + .3, .06, .06, 'iron', x, y + h / 2 + .03, z, grp || this.G.ext, { shadow: false }); rod.rotation.y = ry; for (const s of [-1, 1]) { const k = this.add(new THREE.SphereGeometry(.06, 5, 4), M('gold'), x + Math.cos(ry) * s * (w / 2 + .15), y + h / 2 + .03, z - Math.sin(ry) * s * (w / 2 + .15), grp || this.G.ext, { shadow: false }); }
+    return p; }
   win(x, y, z, ry = 0, w = .9, h = 1.2, key = 'glass', grp, shut = key === 'glass' && w < 1.4 && !this.noShutters) {
-    if (shut) for (const s of [-1, 1]) { const sh = this.bx(w * .42, h, .06, 'darkWood', x + Math.cos(ry) * s * (w * .72), y, z - Math.sin(ry) * s * (w * .72) + Math.cos(ry) * .03, grp || this.G.ext); sh.rotation.y = ry; } const p = this.add(new THREE.PlaneGeometry(w, h), M('#ffffff', { map: tex(key), emissive: key === 'glass' ? new THREE.Color(0x70480f) : new THREE.Color(0x0a1840), side: THREE.DoubleSide }), x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
-    const f = this.bx(w + .2, .12, .2, 'darkWood', x + Math.sin(ry) * .02, y - h / 2 - .04, z + Math.cos(ry) * .02, grp || this.G.ext); f.rotation.y = ry; return p; }
+    if (shut) for (const s of [-1, 1]) { const sh = this.bx(w * .42, h, .06, this.shutKey, x + Math.cos(ry) * s * (w * .72), y, z - Math.sin(ry) * s * (w * .72) + Math.cos(ry) * .03, grp || this.G.ext, { lite: true }); sh.rotation.y = ry; } const p = this.add(new THREE.PlaneGeometry(w, h), M('#ffffff', { map: tex(key), emissive: key === 'glass' ? new THREE.Color(0x70480f) : new THREE.Color(0x0a1840), side: THREE.DoubleSide }), x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
+    const f = this.bx(w + .2, .12, .2, 'darkWood', x + Math.sin(ry) * .02, y - h / 2 - .04, z + Math.cos(ry) * .02, grp || this.G.ext, { lite: true }); f.rotation.y = ry;
+    // frame (jambs + stone lintel with keystone) and glazing bars
+    { const g = grp || this.G.ext, cr = Math.cos(ry), sr = Math.sin(ry), at = (bw, bh, bd, key, u, yy, v) => { const b = this.bx(bw, bh, bd, key, x + cr * u + sr * v, y + yy, z - sr * u + cr * v, g, { shadow: false, lite: true }); b.rotation.y = ry; return b; };
+      for (const sd of [-1, 1]) at(.07, h + .06, .14, 'darkWood', sd * (w / 2 + .03), 0, .04);
+      at(w + .42, .16, .22, 'stoneD', 0, h / 2 + .1, .05);
+      at(.035, h, .05, 'darkWood', 0, 0, .03); }
+    return p; }
   sign(text, emblem, x, y, z, ry = 0) { // hanging shop sign on an iron bracket
     const t = signTexture(text, emblem), s = this.add(new THREE.PlaneGeometry(1.5, .75), new THREE.MeshLambertMaterial({ map: t, side: THREE.DoubleSide }), x, y, z, this.G.ext, { shadow: false, keep: true }); s.rotation.y = ry;
     const br = this.bx(.08, .08, 1.0, 'iron', x, y + .5, z - Math.cos(ry) * .5 * 0, this.G.ext); br.rotation.y = ry; return s; }
-  chimney(x, y, z, h = 2.4, key = 'stoneD', w = .9) { { const [wx, wz] = this.toW(x, z); (this.ctx.smoke || (this.ctx.smoke = [])).push([wx, y + h + .25, wz]); } this.bx(w, h, w, key, x, y + h / 2, z, this.G.roof); this.bx(w + .25, .18, w + .25, key, x, y + h, z, this.G.roof); }
+  chimney(x, y, z, h = 2.4, key = 'stoneD', w = .9) { { const [wx, wz] = this.toW(x, z); (this.ctx.smoke || (this.ctx.smoke = [])).push([wx, y + h + .6, wz]); } this.bx(w, h, w, key, x, y + h / 2, z, this.G.roof); this.bx(w + .25, .18, w + .25, key, x, y + h, z, this.G.roof); this.bx(w + .12, .14, w + .12, 'stoneL', x, y + h * .55, z, this.G.roof);
+    for (const sx of [-1, 1]) { this.cyl(.12, .15, .38, 'iron', x + sx * w * .2, y + h + .27, z, this.G.roof, 6); this.cyl(.17, .12, .08, 'iron', x + sx * w * .2, y + h + .5, z, this.G.roof, 6); } }
   dormer(x, y, z, w = 1.4, h = 1.2) { this.bx(w, h, 1, 'timber', x, y + h / 2, z, this.G.roof); this.gable(w, 1.0, .8, x, y + h, z, 'slate', this.G.roof, false, .2); this.win(x, y + h / 2, z + .52, 0, .6, .7, 'glass', this.G.roof); }
   tower(x, z, r, h, o = {}) { // round stone tower with corbelled crenel ring and conical slate roof (roof in G.roof when o.roofGroup)
     const key = o.key || 'stone'; this.cyl(r, r * 1.06, h, key, x, h / 2, z, this.G.ext, 14);
@@ -117,7 +156,15 @@ export class Builder {
     // door frame, step, open leaf
     for (const sx of [-1, 1]) this.bx(.28, DH, .6, 'stoneD', sx * (DW / 2 + .1), DH / 2, d / 2 - T / 2, this.G.frame);
     this.bx(DW + .7, .3, .6, 'stoneD', 0, DH + .1, d / 2 - T / 2, this.G.frame);
-    this.bx(DW + .8, .14, 1.1, 'stoneD', 0, .07, d / 2 + .3, this.G.ext);
+    this.bx(DW + .8, .14, 1.1, 'stoneD', 0, .07, d / 2 + .3, this.G.ext); this.bx(DW + 1.0, .1, 1.5, 'stoneD', 0, .03, d / 2 + .55, this.G.ext, { shadow: false });
+    this.bx(.3, .26, .5, 'stoneL', 0, DH + .36, d / 2 - T / 2, this.G.frame);   // keystone
+    for (const sx of [-1, 1]) { this.bx(.12, .12, .12, 'iron', sx * (DW / 2 + .1), DH * .3, d / 2 + .03, this.G.ext, { shadow: false, lite: true }); this.bx(.12, .12, .12, 'iron', sx * (DW / 2 + .1), DH * .75, d / 2 + .03, this.G.ext, { shadow: false, lite: true }); }
+    if (o.doorHood && (hs < 2.6 || (h - hs) <= 1.8)) { const hd = this.bx(DW + 1.2, .12, 1.15, 'slate', 0, DH + .72, d / 2 + .48, this.G.frame, { shadow: false, lite: true }); hd.rotation.x = .26; for (const sx of [-1, 1]) { const br = this.bx(.1, .1, .9, 'darkWood', sx * (DW / 2 + .5), DH + .45, d / 2 + .45, this.G.frame, { shadow: false, lite: true }); br.rotation.x = -.5; } this.bx(DW + 1.3, .1, .1, 'darkWood', 0, DH + .62, d / 2 + .98, this.G.frame, { shadow: false, lite: true }); }
+    else if (o.doorHood && hs >= 2.6 && h - hs > 1.8) { const by = hs + .02, bw = DW + 1.8, bz = d / 2 + .6, g = this.G.frame;   // balcony over the door: slab, rail, balusters, brackets
+      this.bx(bw, .16, 1.2, 'darkWood', 0, by, bz, g); this.bx(bw + .1, .08, 1.3, 'wood', 0, by + .1, bz, g, { shadow: false, lite: true });
+      for (const [rx, rz, rw, rd] of [[0, bz + .55, bw, .07], [-bw / 2 + .03, bz, .07, 1.1], [bw / 2 - .03, bz, .07, 1.1]]) this.bx(rw, .08, rd, 'darkWood', rx, by + 1.0, rz, g, { shadow: false, lite: true });
+      for (let i = 0; i <= 8; i++) this.bx(.06, .85, .06, 'darkWood', -bw / 2 + .06 + i * (bw - .12) / 8, by + .55, bz + .55, g, { shadow: false, lite: true });
+      for (const sx of [-1, 1]) { this.bx(.07, .85, .07, 'darkWood', sx * (bw / 2 - .05), by + .55, bz, g, { shadow: false, lite: true }); const br = this.bx(.12, .12, .95, 'darkWood', sx * (bw / 2 - .25), by - .4, bz, g, { shadow: false, lite: true }); br.rotation.x = .75; } }
     const leaf = this.bx(1.0, DH - .1, .1, 'door', -DW / 2 + .05, DH / 2, d / 2 - T - .5, this.G.ext); leaf.rotation.y = Math.PI / 2;
     // plinth + corner posts
     { const pt = .18, ph = .28; // plinth: thin ring outside the walls so the interior floor stays visible
@@ -230,9 +277,27 @@ Builder.prototype.details = function (o = {}) {
     if (v === 1 || v === 3) { this.bx(.8, .8, .8, 'wood', cx + side * .1, .4, cz + .1, g); this.bx(.6, .6, .6, 'wood', cx + side * .2, 1.1, cz + .1, g); this.col(cx + side * .1, cz + .1, .8, .8); }
     if (v === 2) { this.bx(1.6, .5, .5, 'darkWood', cx, .25, cz, g); this.bx(1.6, .08, .6, 'wood', cx, .52, cz, g); this.col(cx, cz, 1.6, .5); for (let i = 0; i < 4; i++) this.add(new THREE.SphereGeometry(.16, 5, 4), M(['#c8452d', '#e3b341', '#6fae45', '#c8452d'][i]), cx - .6 + i * .4, .72, cz, g, { shadow: false }); } }
   // shutters beside the front windows (lower storey)
-  for (const x of frontXs(this)) for (const sx of [-1, 1]) this.bx(.34, 1.05, .06, 'darkWood', x + sx * .78, this.shutY || 1.7, d / 2 + .05, g, { shadow: false });
+  for (const x of frontXs(this)) for (const sx of [-1, 1]) this.bx(.34, 1.05, .06, this.shutKey, x + sx * .78, this.shutY || 1.7, d / 2 + .05, g, { shadow: false });
+  this.details2(o);
   // corner stone quoins every ~1.2 m on the front corners
   for (const sx of [-1, 1]) for (let i = 0; i < 3; i++) this.bx(i % 2 ? .46 : .6, .38, .46, 'stoneD', sx * (w / 2 - .02), .55 + i * .9, d / 2 - .02, g, { shadow: false });
+};
+// second detail layer: storey band + timber studs, door-side bench, potted plants, wall tufts of swaying grass, hanging lantern bracket
+Builder.prototype.details2 = function (o) {
+  const w = this.w, d = this.d, DW = this.DW || 2.2, g = this.G.ext, hs = o.hs || 0, h = this.h, tim = o.upper === 'timber' || o.upper === 'plaster' || o.upper === 'darkWood'; let hh = 0; for (const ch of String(this.id)) hh = (hh * 17 + ch.charCodeAt(0)) | 0; const rnd = k => { const x = Math.sin(hh * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+  if (hs > 1.2 && hs < h - 1) { const key = tim ? 'darkWood' : 'stoneL', th = tim ? .2 : .16;   // storey string course / jetty beam on all four sides
+    this.bx(w + .16, th, .12, key, 0, hs, d / 2 + .05, g, { shadow: false, lite: true }); this.bx(w + .16, th, .12, key, 0, hs, -d / 2 - .05, g, { shadow: false, lite: true });
+    for (const sx of [-1, 1]) this.bx(.12, th, d + .16, key, sx * (w / 2 + .05), hs, 0, g, { shadow: false, lite: true });
+    if (tim) { for (const sx of [-1, 1]) for (const z of [-d / 2 + .9, 0, d / 2 - .9]) this.bx(.1, h - hs - .1, .1, 'darkWood', sx * (w / 2 + .03), hs + (h - hs) / 2, z, g, { shadow: false, lite: true });
+      for (const x of [-w / 2 + .9, w / 2 - .9]) this.bx(.1, h - hs - .1, .1, 'darkWood', x, hs + (h - hs) / 2, d / 2 + .03, g, { shadow: false, lite: true });
+      for (const sx of [-1, 1]) { const br = this.bx(.1, 1.5, .1, 'darkWood', sx * (w / 2 + .03), hs + .8, d / 2 - 1.5, g, { shadow: false, lite: true }); br.rotation.x = .75 * sx * 0 + .8; } } }
+  const side = rnd(1) < .5 ? -1 : 1, bx = -side * (DW / 2 + 1.7), bz = d / 2 + .7;   // opposite side of the door clutter
+  if (w > 7 && rnd(2) < .75) { this.bx(1.5, .1, .5, 'wood', bx, .5, bz, g); for (const sx of [-1, 1]) this.bx(.1, .5, .44, 'darkWood', bx + sx * .6, .25, bz, g, { shadow: false, lite: true }); this.bx(1.5, .5, .08, 'darkWood', bx, .85, bz - .24, g, { shadow: false, lite: true }); }
+  for (const sx of [-1, 1]) { const x = sx * (DW / 2 + .75), z = d / 2 + 1.15; this.cyl(.2, .15, .3, '#a8573a', x, .15, z, g, 7, { shadow: false, lite: true }); this.add(new THREE.IcosahedronGeometry(.28, 1), WM(['#4f9a3e', '#3f7a3a', '#6aaa45'][(hh >> 3 & 3) % 3]), x, .5, z, g, { shadow: false, lite: true }); if (rnd(3 + sx) < .6) this.add(new THREE.SphereGeometry(.09, 5, 4), M(['#e8584a', '#f0d040', '#e88adf'][(hh >> 5 & 3) % 3]), x + .1, .72, z + .08, g, { shadow: false, lite: true }); }
+  { const gm = WM(rnd(4) < .5 ? '#5f9d44' : '#4e8a3a'), cg = new THREE.ConeGeometry(.05, .5, 3, 1, true);   // grass tufts hugging the walls (wind-swayed, geometry merged into one batch)
+    for (let i = 0; i < 18; i++) { const t = rnd(10 + i), e = i % 3, o2 = .35 + rnd(30 + i) * .3; let x, z; if (e === 0) { x = (t - .5) * (w + 2); z = d / 2 + o2 + .5; if (Math.abs(x) < DW / 2 + 1.3) continue; } else if (e === 1) { x = (t < .5 ? -1 : 1) * (w / 2 + o2); z = (rnd(50 + i) - .5) * d; } else { x = (t - .5) * w; z = -d / 2 - o2; }
+      for (let k = 0; k < 2; k++) { const m = this.add(cg, gm, x + (k - 1) * .08, .22, z + (k % 2) * .07, g, { shadow: false, lite: true }); m.rotation.z = (k * 2 - 1) * .22; m.scale.y = .7 + rnd(70 + i + k) * .8; } } }
+  { const x = side * (DW / 2 + .02), b = this.bx(.07, .07, .5, 'iron', x, 2.75, d / 2 + .28, g, { shadow: false, lite: true }); this.add(new THREE.SphereGeometry(.1, 6, 5), GLOW('ff9a3a', 1.8), x, 2.55, d / 2 + .45, g, { shadow: false, lite: true }); }
 };
 function frontXs(B) { const n = Math.max(1, Math.round((B.w - 4) / 4)); const out = []; for (let i = 0; i < n; i++) out.push(((i + .5) / n - .5) * (B.w - 3.2)); return out.filter(x => Math.abs(x) > B.DW / 2 + 1.1); }
 // remove loose props (meshes + colliders) that sit in a stair's footprint / foot approach / top landing, so a flight can never be blocked by furniture
@@ -242,9 +307,11 @@ Builder.prototype.clearZone = function (m, level, du0, du1, floorY) {
   for (const g of grps) for (const ch of [...g.children]) { if (!ch.isMesh || ch.userData.merged || ch.userData.stairPart) continue; const gp = ch.geometry && ch.geometry.parameters; const hgt = gp && gp.height !== undefined ? gp.height : 1;
     const ry = ch.position.y - (level ? floorY : 0); if (ry < .12 || ry > 2.1 || hgt >= 2.4 || (gp && gp.depth !== undefined && Math.min(gp.width, gp.depth) < .13)) continue; if (inZ(ch.position.x, ch.position.z, gp && gp.width ? Math.min(.9, Math.max(gp.width, gp.depth || 0) * .45) : 0)) { g.remove(ch); ch.geometry.dispose(); } }
   const keepLv = c0 => c0.lv === undefined || c0.lv === level || (Array.isArray(c0.lv) && c0.lv.includes(level));
-  this.colliders = this.colliders; for (let i = this.colliders.length - 1; i >= 0; i--) { const q = this.colliders[i]; if (q.b !== this.id || q.stair || !keepLv(q)) continue;
+  this.colliders = this.colliders; for (let i = this.colliders.length - 1; i >= 0; i--) { const q = this.colliders[i]; if (q.b !== this.id || q.stair || q.npcOnly || !keepLv(q)) continue;
     let lx, lz, big; if (q.type === 'box') { [lx, lz] = this.toL((q.minX + q.maxX) / 2, (q.minZ + q.maxZ) / 2); const W = (q.maxX - q.minX) / this.K, D = (q.maxZ - q.minZ) / this.K; big = Math.max(W, D) > 4.2 || Math.min(W, D) < .5 && Math.max(W, D) > 2.4; } else { [lx, lz] = this.toL(q.x, q.z); big = false; }
-    if (!big && inZ(lx, lz, q.type === 'circle' ? q.r / this.K * .5 : Math.min(1.1, Math.max(q.maxX - q.minX, q.maxZ - q.minZ) / this.K * .45))) this.colliders.splice(i, 1); }
+    if (!big && inZ(lx, lz, q.type === 'circle' ? q.r / this.K * .5 : Math.min(1.1, Math.max(q.maxX - q.minX, q.maxZ - q.minZ) / this.K * .45))) {
+      if (q.shell === 1) { const dx = q.x - this.cx, dz = q.z - this.cz, d = Math.hypot(dx, dz) || 1, k = (q.r + .12) / d; q.x += dx * k; q.z += dz * k; q.shell = 2; continue; }   // a stair along a round wall: push the wall circle outward (stair stays clear, the outside stays sealed)
+      this.colliders.splice(i, 1); } }
 };
 Builder.prototype.stairs = function (o) {
   const { cx, cz, ang = 0, len, w = 1.8, l0 = 0, y0 = 0, l1, y1 } = o;
@@ -289,10 +356,11 @@ Builder.prototype.gallery = function (o = {}) {
 };
 
 // round hollow shell (towers, colosseum, windmill, lighthouse, observatory): N wall segments with a door gap at local +z
-Builder.prototype.roundShell = function (o) { const _lv = this.lvTag; this.lvTag = undefined; try { return this._roundShell(o); } finally { this.lvTag = _lv; } };
+Builder.prototype.roundShell = function (o) { const _lv = this.lvTag, n0 = this.colliders.length; this.lvTag = undefined; try { return this._roundShell(o); } finally { this.lvTag = _lv;
+  const R = (o.r || 4) * this.K; for (let i = n0; i < this.colliders.length; i++) { const q = this.colliders[i]; if (q.type === 'circle' && q.lv === undefined && Math.abs(Math.hypot(q.x - this.cx, q.z - this.cz) - R) < 1.5) q.shell = 1; } } };   // ring-wall circles: never deleted by stair lanes (see clearZone)
 Builder.prototype._roundShell = function (o) {
   const { r, h } = o, T = o.T || this.T, N = o.N || Math.max(12, Math.round(r * 2.6)), DW = Math.min(o.DW || 2.2, DOOR_MAXW), DH = Math.min(o.DH || 2.6, DOOR_MAXH), key = o.key || 'stone', seg = 2 * Math.PI * r / N;
-  this.radius = r; this.w = this.d = r * 2; this.h = h; this.DW = DW; this.iw = r - T; this.id_ = r - T;
+  this.radius = r; this.w = this.d = r * 2; this.h = h; this.DW = DW; this.DHr = DH; this.iw = r - T; this.id_ = r - T;
   const doorA = Math.asin(Math.min(.95, (DW / 2 + seg * .35) / r));
   for (let i = 0; i < N; i++) {
     let a = i / N * 2 * Math.PI; if (a > Math.PI) a -= 2 * Math.PI; if (Math.abs(a) < doorA) continue;
@@ -313,14 +381,16 @@ Builder.prototype._roundShell = function (o) {
 
 // ---- quality-pass props ----
 Builder.prototype.apron = function (w, d, zOff = 2) { this.bx(w + 3.4, .04, d + 3.4 + zOff, 'cobble', 0, .02, zOff / 2, this.G.ext, { shadow: false }); };
-Builder.prototype.bush = function (x, z, s = .7, c = '#3f7a3a') { const m = this.add(new THREE.IcosahedronGeometry(s, 0), M(c), x, s * .6, z, this.G.ext); m.scale.y = .8; return m; };
+Builder.prototype.bush = function (x, z, s = .7, c = '#3f7a3a') { const m = this.add(new THREE.IcosahedronGeometry(s, 0), WM(c), x, s * .6, z, this.G.ext); m.scale.y = .8; return m; };
 Builder.prototype.flowers = function (x, y, z, w, ry = 0) { // window flower box
   const f = this.bx(w, .22, .3, 'darkWood', x, y, z, this.G.ext); f.rotation.y = ry; const g = this.bx(w * .95, .12, .26, '#3f7a3a', x, y + .14, z, this.G.ext, { shadow: false }); g.rotation.y = ry;
   for (let i = 0; i < 5; i++) { const t = (i / 4 - .5) * w * .8; this.add(new THREE.SphereGeometry(.07, 5, 4), M(['#d84a5a', '#f0d040', '#e88adf', '#fff0f0'][i % 4]), x + Math.cos(ry) * t, y + .25, z - Math.sin(ry) * t + Math.cos(ry) * .05, this.G.ext, { shadow: false }); } };
 Builder.prototype.lanternPost = function (x, z, h = 2.8) { this.cyl(.07, .1, h, 'iron', x, h / 2, z, this.G.ext, 6); this.bx(.5, .06, .06, 'iron', x + .2, h - .1, z, this.G.ext); this.add(new THREE.SphereGeometry(.17, 6, 5), GLOW('ffc060', 1.7), x + .4, h - .3, z, this.G.ext, { shadow: false }); this.ccol(x, z, .2); };
-Builder.prototype.flag = function (x, y, z, s = 1, grp) { this.bx(.06, 1.6 * s, .06, 'iron', x, y + .8 * s, z, grp || this.G.ext, { shadow: false }); const f = this.add(new THREE.PlaneGeometry(1.0 * s, .6 * s), M('#1f4a9a', { side: THREE.DoubleSide }), x + .5 * s, y + 1.3 * s, z, grp || this.G.ext, { shadow: false }); f.rotation.y = .25; this.add(new THREE.CircleGeometry(.14 * s, 8), M('gold', { side: THREE.DoubleSide }), x + .45 * s, y + 1.3 * s, z + .01, grp || this.G.ext, { shadow: false }); };
+Builder.prototype.flag = function (x, y, z, s = 1, grp) { this.bx(.06, 1.6 * s, .06, 'iron', x, y + .8 * s, z, grp || this.G.ext, { shadow: false }); const fg = new THREE.PlaneGeometry(1.0 * s, .6 * s, 6, 2); { const uv = fg.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - uv.getX(i)); }   // pinned at the pole: sway grows toward the free end
+  const f = this.add(fg, fx(M('#1f4a9a', { side: THREE.DoubleSide, name: 'flagcloth' }), 'flag'), x + .5 * s, y + 1.3 * s, z, grp || this.G.ext, { shadow: false }); f.rotation.y = .25; this.add(new THREE.CircleGeometry(.14 * s, 8), M('gold', { side: THREE.DoubleSide }), x + .45 * s, y + 1.3 * s, z + .01, grp || this.G.ext, { shadow: false }); };
 Builder.prototype.guard = function (x, z, ry = 0) { const g = this.G.ext; this.cyl(.22, .26, .9, '#2f56a8', x, 1.0, z, g, 6); this.cyl(.1, .1, .45, '#444a58', x - .1, .3, z, g, 5); this.cyl(.1, .1, .45, '#444a58', x + .1, .3, z, g, 5);
-  this.add(new THREE.SphereGeometry(.17, 6, 5), M('#e8c09a'), x, 1.65, z, g); this.add(new THREE.ConeGeometry(.2, .26, 6), M('#8a9099'), x, 1.85, z, g); this.bx(.05, 2.3, .05, 'darkWood', x + .35, 1.2, z, g, { shadow: false }); this.add(new THREE.ConeGeometry(.07, .3, 4), M('#b6bcc8'), x + .35, 2.45, z, g, { shadow: false }); this.ccol(x, z, .3); };
+  this.add(new THREE.SphereGeometry(.17, 6, 5), M('#e8c09a'), x, 1.65, z, g); this.add(new THREE.ConeGeometry(.2, .26, 6), M('#8a9099'), x, 1.85, z, g); this.bx(.05, 2.3, .05, 'darkWood', x + .35, 1.2, z, g, { shadow: false }); this.add(new THREE.ConeGeometry(.07, .3, 4), M('#b6bcc8'), x + .35, 2.45, z, g, { shadow: false }); this.ccol(x, z, .3);
+  if (/^(gatehouse|guildhall|townhall)$/.test(this.id)) { const [wx, wz] = this.toW(x, z); (this.ctx.guardPosts || (this.ctx.guardPosts = [])).push({ x: wx, z: wz, at: this.id }); } };   // town guards: live posts (combat/guards.js)
 Builder.prototype.rocks = function (pts, key = 'rock') { for (const [x, z, s, sy] of pts) { const m = this.add(new THREE.DodecahedronGeometry(s, 0), M(key), x, s * .4, z, this.G.ext); m.scale.y = sy || .75; m.rotation.y = x * 3.1 + z; } };
 Builder.prototype.crossGable = function (x, W, rh, depth, key = 'slate', endKey = 'timber', y) { // front-facing cross gable over the facade
   const y0 = y === undefined ? this.h : y, d2 = this.d / 2;
@@ -341,7 +411,9 @@ Builder.prototype.fullUpper = function (o) {
     if (!round) { const k = ax ? 'cx' : 'cz', sg = (ax ? Math.sin(ang) : Math.cos(ang)) > 0 ? 1 : -1, lo = ax ? rect[0] : rect[2], hi = ax ? rect[1] : rect[3], FOOT = o.foot || 1.7;
       const foot0 = st[k] - sg * len0 / 2, nf = sg > 0 ? Math.max(foot0, lo + FOOT) : Math.min(foot0, hi - FOOT), far = sg > 0 ? hi - .5 : lo + .5; const nl = Math.min(len, Math.abs(far - nf)); st[k] = nf + sg * nl / 2; len = Math.max(nl, Math.min(len0, Math.abs(far - nf))); st[k] = nf + sg * len / 2; }
     hole = ax ? [st.cx - len / 2, st.cx + len / 2, st.cz - w / 2, st.cz + w / 2] : [st.cx - w / 2, st.cx + w / 2, st.cz - len / 2, st.cz + len / 2];
-    rects = subRect(rect, hole); this.stairs({ cx: st.cx, cz: st.cz, ang, len, w, l0, y0, l1: level, y1: y });
+    { const sgn = (ax ? Math.sin(ang) : Math.cos(ang)) > 0 ? 1 : -1, ov = o.topOverlap === undefined ? .12 : o.topOverlap, hf = hole.slice();   // top end of the flight: the slab reaches .12 m into the ramp so there is never a gap between ramp and floor
+      if (ax) { if (sgn > 0) hf[1] -= ov; else hf[0] += ov; } else { if (sgn > 0) hf[3] -= ov; else hf[2] += ov; } rects = subRect(rect, hf); }
+    this.stairs({ cx: st.cx, cz: st.cz, ang, len, w, l0, y0, l1: level, y1: y });
     // low end of the opening: block + rail so an upstairs hero cannot step off the slab into the stairwell
     const s = Math.sin(ang), c = Math.cos(ang), lx = st.cx - s * (len / 2 + .15), lz = st.cz - c * (len / 2 + .15), nn = Math.ceil(w / .35);
     for (let q = 0; q <= nn; q++) { const t = -w / 2 + q * w / nn; const [wx, wz] = this.toW(lx + c * t, lz - s * t); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: level, stair: 1 }); }
@@ -435,3 +507,87 @@ Builder.prototype.dress = function (theme = 'tavern', o = {}) {
     for (let z = -id_ + 2; z < id_ - 3.5; z += 4) this.lamp(0, hs - .6, z);
   }
 };
+
+// ---- pass 2 interior props (per building kind): stools / chairs, bottles, forge tools, ovens, stalls, cauldrons; every spot is checked free (no new stuck spots) ----
+Builder.prototype.props2 = function (kind) {
+  const iw = this.iw, id_ = this.id_, G = this.G.int, DWh = (this.DW || 2.2) / 2 + 1.2, hs = Math.min(this.hs || 3, 4.7);
+  const lane = (x, z) => Math.abs(x) < DWh && z > id_ - 4.4, F = (x, z, r) => Math.abs(x) < iw - .3 && Math.abs(z) < id_ - .3 && !lane(x, z) && this.spotFree(x, z, r);
+  const stool = (x, z, h = .55) => { if (!F(x, z, .4)) return false; this.cyl(.2, .17, h, 'wood', x, h / 2, z, G, 8); this.cyl(.24, .24, .07, 'darkWood', x, h, z, G, 8); this.ccol(x, z, .26); return true; };
+  const chair = (x, z, ry) => { if (!F(x, z, .4)) return; this.bx(.42, .07, .42, 'wood', x, .45, z, G, { lite: true }); for (const a of [-1, 1]) for (const b of [-1, 1]) this.bx(.05, .45, .05, 'darkWood', x + a * .17, .22, z + b * .17, G, { lite: true }); const bk = this.bx(.42, .5, .06, 'darkWood', x + Math.sin(ry) * .2, .75, z + Math.cos(ry) * .2, G, { lite: true }); bk.rotation.y = ry; };
+  const bottles = (x, y, z, n, dx = .2, dz = 0) => { for (let i = 0; i < n; i++) this.cyl(.05, .06, .26, ['#2f6a3a', '#6a2a2a', '#b88a2a', '#2f4a8a'][i % 4], x + dx * i, y + .13, z + dz * i, G, 5, { shadow: false }); };
+  const cauldron = (x, z, glow) => { if (!F(x, z, .8)) return; this.add(new THREE.SphereGeometry(.5, 8, 6, 0, 6.3, 0, 1.7), M('iron', { side: THREE.DoubleSide }), x, .62, z, G); for (const a of [0, 2.1, 4.2]) this.cyl(.05, .05, .25, 'iron', x + Math.cos(a) * .35, .12, z + Math.sin(a) * .35, G, 5, { shadow: false }); this.add(new THREE.CircleGeometry(.42, 8), GLOW(glow, 1.2), x, .85, z, G, { shadow: false }).rotation.x = -Math.PI / 2; this.ccol(x, z, .55); };
+  const hang = (x, z, n) => { this.bx(1.6, .06, .06, 'iron', x, hs - .4, z, G, { shadow: false, lite: true }); for (let i = 0; i < n; i++) { this.cyl(.015, .015, .4, 'iron', x - .6 + i * .4, hs - .6, z, G, 3, { shadow: false }); this.cyl(.14, .1, .16, 'iron', x - .6 + i * .4, hs - .86, z, G, 6, { shadow: false }); } };
+  if (kind === 'inn') { for (let i = 0; i < 4; i++) stool(.5 + i * .85, -id_ + 2.2); bottles(1.0, 1.0, -id_ + 1.1, 6, .5); hang(2.2, -id_ + 1.1, 4);
+    for (const [x, z] of [[-1.8, .4], [-.2, 2.2], [-3.4, 2.4]]) for (const [dx, dz, ry] of [[.95, 0, -Math.PI / 2], [-.95, 0, Math.PI / 2], [0, .95, Math.PI], [0, -.95, 0]]) chair(x + dx, z + dz, ry);
+    this.cyl(.28, .28, .5, 'wood', iw - 1.4, .25, -id_ + 1.2, G, 8); this.ccol(iw - 1.4, -id_ + 1.2, .4); cauldron(-iw + 1.5, -id_ + 1.4, 'ff8a2a'); }
+  if (kind === 'smithy') { const x = iw - 1.2; this.bx(1.2, .5, .9, 'iron', x - 1.6, .25, -id_ + 1.4, G); this.add(boxG(1.0, .3, .7, 1), M('#4a90c0', { name: 'quench' }), x - 1.6, .52, -id_ + 1.4, G, { shadow: false }); this.ccol(x - 1.6, -id_ + 1.4, .7);
+    const bw = this.bx(.5, .3, .7, 'darkWood', x - .1, .9, -id_ + 2.0, G, { lite: true }); this.cone(.18, .6, 'darkWood', x - .1, .98, -id_ + 2.5, G, 6).rotation.x = 1.5;
+    for (let i = 0; i < 5; i++) { this.bx(.08, .5, .08, 'darkWood', -1.0 + i * .5, 2.0, -id_ + .12, G, { shadow: false, lite: true }); this.bx(.3, .12, .12, 'iron', -1.0 + i * .5, 2.28, -id_ + .12, G, { shadow: false, lite: true }); }
+    if (F(-iw + 1.2, -id_ + 1.2, .8)) { this.cyl(.4, .4, .12, 'stone', -iw + 1.2, .9, -id_ + 1.2, G, 10); this.bx(.5, .9, .3, 'darkWood', -iw + 1.2, .45, -id_ + 1.2, G, { lite: true }); this.ccol(-iw + 1.2, -id_ + 1.2, .5); }
+    for (let i = 0; i < 6; i++) this.add(new THREE.DodecahedronGeometry(.16, 0), M('#1c1c20'), iw - .5 + (i % 3) * .12 - .2, .14 + (i > 2 ? .2 : 0), -.6 + (i % 3) * .2, G, { shadow: false }); }
+  if (kind === 'bakery') { bottles(-iw + .5, 1.0, -.8, 0); hang(0, -id_ + .7, 3); for (const [x, z] of [[-.6, -.4], [.8, -.4]]) stool(x, z + 1.2, .5);
+    for (let i = 0; i < 5; i++) this.add(new THREE.SphereGeometry(.17, 6, 5), M('#d8a85a'), -1.2 + i * .45, 1.0, -.4 + (i % 2) * .3, G, { shadow: false }).scale.y = .6;
+    this.bx(.08, 1.6, .08, 'darkWood', iw - 2.6, .8, -id_ + 1.4, G, { lite: true }); this.bx(.7, .06, .12, 'wood', iw - 2.6, 1.6, -id_ + 1.4, G, { lite: true });
+    for (let i = 0; i < 3; i++) this.cyl(.34, .3, .5, '#b89a62', iw - .7, .25 + i * .0, id_ - 1.4 - i * .5, G, 7); }
+  if (kind === 'market') { for (const sx of [-1, 1]) { const x = sx * (iw - 2.6), z = id_ - 2.4; if (!F(x, z, 1.2)) continue; for (const a of [-1, 1]) for (const b of [-1, 1]) this.bx(.08, 2.3, .08, 'darkWood', x + a * .9, 1.15, z + b * .55, G, { lite: true });
+      const aw = this.bx(2.1, .06, 1.4, 'awning', x, 2.35, z, G, { shadow: false }); aw.rotation.x = .12; this.bx(1.8, .7, .9, 'wood', x, .35, z, G); this.col(x, z, 1.8, .9);
+      for (let i = 0; i < 6; i++) this.add(new THREE.SphereGeometry(.12, 6, 5), M(['#c8452d', '#e3b341', '#6fae45'][i % 3]), x - .65 + i * .26, .8, z + (i % 2) * .15 - .08, G, { shadow: false }); }
+    for (let i = 0; i < 6; i++) { this.bx(.04, .6, .04, 'iron', -2.5 + i * 1.0, hs - .7, -.5, G, { shadow: false, lite: true }); this.add(new THREE.SphereGeometry(.14, 5, 4), M('#d8aa3a'), -2.5 + i * 1.0, hs - 1.1, -.5, G, { shadow: false }); } }
+  if (kind === 'apothecary') { cauldron(iw - 1.2, id_ - 1.6, '4fe08a'); bottles(-1.8, 1.0, -id_ + .9, 8, .45); for (let i = 0; i < 6; i++) this.cyl(.015, .015, .5 + (i % 2) * .2, '#5a8a3a', -2.4 + i * .95, hs - .5, .5, G, 3, { shadow: false }); stool(-iw + 1.6, id_ - 2.0, .6); if (F(-.8, .6, .4)) { this.cyl(.12, .09, .1, 'stoneL', -.8, 1.05, .6, G, 8, { shadow: false }); } }
+  if (kind === 'house') { for (const [dx, dz, ry] of [[.8, .5, -Math.PI / 2], [-2.0, .5, Math.PI / 2]]) chair(dx - .6 + (dx < 0 ? .6 : 0), dz, ry); hang(0, -id_ + 1.2, 3); if (F(iw - 1.0, -id_ + 1.0, .6)) { this.cyl(.3, .3, .5, 'wood', iw - 1.0, .25, -id_ + 1.0, G, 8); this.ccol(iw - 1.0, -id_ + 1.0, .4); } }
+  const ceil = Math.min(this.h || 6, ...this.floors.filter(f => f.level === 1).map(f => f.y)), chand = (x, y, z, r = .9) => { y = Math.min(y, ceil - .9); this.add(new THREE.TorusGeometry(r, .05, 4, 12), M('iron'), x, y, z, G, { shadow: false }).rotation.x = Math.PI / 2; this.cyl(.02, .02, Math.max(.3, ceil - y - .1), 'iron', x, y + Math.max(.3, ceil - y - .1) / 2, z, G, 3, { shadow: false });
+    for (let i = 0; i < 6; i++) { const a = i / 6 * 6.283, cx = x + Math.cos(a) * r, cz = z + Math.sin(a) * r; this.cyl(.04, .04, .16, '#e8dcc0', cx, y + .1, cz, G, 4, { shadow: false }); this.add(new THREE.ConeGeometry(.045, .12, 4), GLOW('ffb040', 2.0), cx, y + .24, cz, G, { shadow: false }); } };
+  const notes = (x, y, z, w, hgt) => { for (let i = 0; i < 9; i++) { const nx = x - w / 2 + .3 + (i % 3) * (w - .6) / 2 + Math.sin(i * 7.1) * .12, ny = y - hgt / 2 + .35 + Math.floor(i / 3) * (hgt - .7) / 2; this.bx(.42, .5, .02, i % 4 ? 'parchment' : '#d8c890', nx, ny, z, G, { shadow: false, lite: true }); this.bx(.05, .05, .03, '#8a2a2a', nx, ny + .2, z + .015, G, { shadow: false, lite: true }); } };
+  if (kind === 'guildhall') { chand(0, 4.9, -.6, 1.1); chand(0, 4.9, -id_ + 2.6, .8); notes(-3.8, 2.0, -id_ + .43, 3.2, 2.2); notes(3.8, 2.0, -id_ + .43, 3.2, 2.2);
+    for (const z of [-1.5, 1.5]) for (const sx of [-1, 1]) this.banner(sx * 1.6, 4.0, z, Math.PI / 2, .9, 2.0, G); }
+  if (kind === 'hall') { const n = Math.max(1, Math.round(id_ / 4)); for (let i = 0; i < n; i++) chand(0, Math.min((this.h || 6) - 1.6, 5.2), -id_ + (i + .5) * (2 * id_) / n - .5, 1.0); }
+  if (kind === 'inn') chand(-1.8, 2.45, 1.4, .7);
+  if (kind === 'thieves') { for (let i = 0; i < 3; i++) stool(-2.6 + i * .9, 1.8, .5); bottles(-.8, 1.0, .6, 6, .45); hang(0, -.3, 3); }
+};
+
+// gothic pinnacles (cards: town hall, temple, library, mage academy): square shaft + 4-sided spire + gold knob, on the eave line; roof group (hidden with the roof)
+Builder.prototype.pinnacle = function (x, y, z, s = 1) { const g = this.G.roof; this.bx(.36 * s, 1.0 * s, .36 * s, 'stoneL', x, y + .5 * s, z, g, { shadow: false }); this.cone(.3 * s, 1.5 * s, 'slate', x, y + 1.0 * s, z, g, 4, { shadow: false }); this.add(new THREE.SphereGeometry(.09 * s, 5, 4), M('gold'), x, y + 2.55 * s, z, g, { shadow: false }); };
+Builder.prototype.cardSpires = function (o = {}) { const w = this.w, d = this.d, h = o.h || this.h, s = o.s || 1;
+  for (const sx of [-1, 1]) { this.pinnacle(sx * w / 4, h, d / 2 + .05, s); this.pinnacle(sx * (w / 2 - .2), h, -d / 2 + .2, s); if (o.mid !== false) this.pinnacle(sx * (w / 2 + .05), h, 0, s * .85); } };
+
+// birds: n small V-shapes circling over the village, all motion in the vertex shader (static buffers, one draw call, no per-frame JS)
+export function birdFlock(n = 36, R = 100) {
+  const pos = [], ctr = [], ph = []; let sd = 7; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < n; i++) { const g = i % 4, cx = (g % 2 ? 1 : -1) * R * (.25 + r() * .35), cz = (g > 1 ? 1 : -1) * R * (.25 + r() * .35), rad = 8 + r() * 14, y = 22 + r() * 14, p0 = r() * 6.283, sp = .25 + r() * .2;
+    for (const v of [[-1, 0], [0, 0], [0, .35], [1, 0], [0, 0], [0, .35]]) { pos.push(v[0], 0, v[1]); ctr.push(cx, y, cz); ph.push(p0, rad, sp); } }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('ctr', new THREE.Float32BufferAttribute(ctr, 3)); g.setAttribute('ph', new THREE.Float32BufferAttribute(ph, 3)); g.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 30, 0), 1e4);
+  const m = new THREE.ShaderMaterial({ side: THREE.DoubleSide, uniforms: { uTime: FX.uTime },
+    vertexShader: 'attribute vec3 ctr; attribute vec3 ph; uniform float uTime; void main(){ float a = ph.x + uTime * ph.z; vec3 c = ctr + vec3(cos(a) * ph.y, sin(uTime * .7 + ph.x) * 1.5, sin(a) * ph.y); vec3 fw = normalize(vec3(-sin(a), 0.0, cos(a))); vec3 rt = vec3(fw.z, 0.0, -fw.x);'
+      + ' float flap = sin(uTime * 9.0 + ph.x * 5.0) * 0.45; vec3 p = c + rt * position.x * 0.55 + fw * position.z * 0.9 + vec3(0.0, abs(position.x) * flap, 0.0); gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0); }',
+    fragmentShader: 'void main(){ gl_FragColor = vec4(0.12, 0.12, 0.14, 1.0); }' });
+  const mesh = new THREE.Mesh(g, m); mesh.frustumCulled = false; mesh.userData.keep = true; mesh.name = 'birds'; return mesh;
+}
+
+// entrance dressing for the non-standard buildings (door at local +z): wall sconces with flickering flames, lantern posts, potted plants, doormat; spots checked free
+Builder.prototype.entry = function (o = {}) { const DW = this.DW || 2.2, round = !this.footprint, r = this.d / 2, g = this.G.ext;
+  const wallZ = x => round ? Math.sqrt(Math.max(0, r * r - x * x)) : r;
+  for (const sx of [-1, 1]) { const x = sx * (DW / 2 + .55), z = wallZ(x) + .12, y = o.sconceY || 2.5; this.bx(.12, .35, .12, 'iron', x, y, z, g, { shadow: false, lite: true }); this.bx(.06, .06, .3, 'iron', x, y + .15, z + .12, g, { shadow: false, lite: true }); this.add(new THREE.ConeGeometry(.09, .3, 5), GLOW('ff9a3a', 2.0), x, y + .32, z + .25, g, { shadow: false });
+    if (o.posts !== false) { const px = sx * (DW / 2 + 1.7), pz = wallZ(px) + 1.4; if (this.spotFree(px, pz, .5)) this.lanternPost(px, pz, 2.6); }
+    const qx = sx * (DW / 2 + 1.0), qz = wallZ(qx) + .55; this.cyl(.22, .16, .34, '#a8573a', qx, .17, qz, g, 7, { shadow: false }); this.add(new THREE.IcosahedronGeometry(.3, 0), WM('#4f9a3e'), qx, .52, qz, g, { shadow: false }); }
+  if (round && this.DHr) { const DH = this.DHr, z = wallZ(DW / 2) + .1; for (const sx of [-1, 1]) this.bx(.3, DH + .1, .3, 'stoneD', sx * (DW / 2 + .15), (DH + .1) / 2, z, this.G.frame, { lite: true }); this.bx(DW + .9, .34, .34, 'stoneD', 0, DH + .2, z, this.G.frame, { lite: true }); this.bx(.34, .42, .4, 'stoneL', 0, DH + .3, z + .04, this.G.frame, { lite: true }); }
+  this.bx(DW * .8, .03, .9, 'rug', 0, .03, wallZ(0) + .7, g, { shadow: false, lite: true }); };
+
+// butterflies fluttering over garden spots (pass 3 life): pts [[x,z]], 3 per spot, one draw call, motion in the vertex shader
+export function butterflies(pts) {
+  const pos = [], ctr = [], ph = [], col = []; let sd = 11; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647; const pal = [[1, .85, .2], [.95, .5, .8], [.6, .8, 1], [1, 1, 1]];
+  for (const [x, z] of pts) for (let k = 0; k < 3; k++) { const p0 = r() * 6.283, c = pal[(r() * 4) | 0];
+    for (const v of [[-1, 0], [0, -.2], [0, .25], [1, 0], [0, .25], [0, -.2]]) { pos.push(v[0], 0, v[1]); ctr.push(x + (r() - .5) * 2, .7 + r() * .8, z + (r() - .5) * 2); ph.push(p0, .6 + r() * .9, .5 + r() * .5); col.push(...c); } }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('ctr', new THREE.Float32BufferAttribute(ctr, 3)); g.setAttribute('ph', new THREE.Float32BufferAttribute(ph, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  const m = new THREE.ShaderMaterial({ side: THREE.DoubleSide, uniforms: { uTime: FX.uTime },
+    vertexShader: 'attribute vec3 ctr; attribute vec3 ph; attribute vec3 color; varying vec3 vC; uniform float uTime; void main(){ vC = color; float t = uTime * ph.z + ph.x; vec3 c = ctr + vec3(sin(t) * ph.y + sin(t * 2.3) * .3, sin(t * 3.1) * .25, cos(t * .8) * ph.y);'
+      + ' float fl = abs(sin(uTime * 14.0 + ph.x * 3.0)); vec3 p = c + vec3(position.x * .13 * (0.25 + fl), abs(position.x) * .1 * fl, position.z * .13); gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0); }',
+    fragmentShader: 'varying vec3 vC; void main(){ gl_FragColor = vec4(vC, 1.0); }' });
+  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e4); const mesh = new THREE.Mesh(g, m); mesh.frustumCulled = false; mesh.userData.keep = true; mesh.name = 'butterflies'; return mesh;
+}
+// clothesline with waving laundry (flag shader), beside a house; poles collide only when the spot is free
+Builder.prototype.laundry = function () { const g = this.G.ext, x = (this.w / 2 + 1.4), z0 = -this.d / 4, z1 = this.d / 4;
+  if (!this.spotFree(x, z0, .4) || !this.spotFree(x, z1, .4)) return;
+  for (const z of [z0, z1]) { this.cyl(.05, .06, 2.0, 'darkWood', x, 1.0, z, g, 5, { shadow: false }); this.ccol(x, z, .12); }
+  this.bx(.02, .02, z1 - z0, 'iron', x, 1.92, (z0 + z1) / 2, g, { shadow: false, lite: true });
+  const cols = ['#e8e2d0', '#3f5fa8']; const n = Math.max(2, Math.floor((z1 - z0) / .8));
+  for (let i = 0; i < n; i++) { const z = z0 + (i + .5) * (z1 - z0) / n, p = this.add(new THREE.PlaneGeometry(.55, .7, 2, 4), fx(M(cols[i % 2], { side: THREE.DoubleSide, name: 'laundry' }), 'flag'), x, 1.55, z, g, { shadow: false }); p.rotation.y = Math.PI / 2; } };

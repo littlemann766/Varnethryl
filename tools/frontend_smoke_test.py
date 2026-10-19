@@ -30,6 +30,9 @@ with sync_playwright() as p:
         ok(f'{tag} title wanderers 4-8', 4 <= pg.evaluate('__p3d.wanderers') <= 8, pg.evaluate('__p3d.wanderers'))
         pg.screenshot(path=f'{SH}/2-title-{tag}.png')
         if tag == 'desktop': pg.screenshot(path=f'{SH}/2b-title-wanderers.png')
+        bv = pg.evaluate('__p3d.modelStatus().build'); ok(f'{tag} version label shows the real build', pg.inner_text('#fe-ver') == 'v' + bv and pg.evaluate("document.getElementById('ver').textContent") == 'v' + bv, (pg.inner_text('#fe-ver'), bv))
+        SUN = "(()=>{let s=null;__p3d.scene.traverse(o=>{if(o.isDirectionalLight&&o.castShadow!==undefined&&s===null)s=o.castShadow});return s})()"
+        ok(f'{tag} no shadow pass on the title', pg.evaluate(SUN) is False, pg.evaluate(SUN))
         # hidden cheats gesture: 5 quick taps on the version label
         for _ in range(5):
             pg.evaluate("(()=>{const v=document.getElementById('fe-ver');for(const t of ['pointerdown','pointerup'])v.dispatchEvent(new PointerEvent(t,{bubbles:true,pointerId:1,pointerType:'touch'}))})()"); pg.wait_for_timeout(60)
@@ -59,6 +62,7 @@ with sync_playwright() as p:
         ok(f'{tag} no model on loading screen (preview disposed)', not pg.evaluate('__fe.preview.on') and not pg.evaluate('__fe.preview.canvas'), pg.evaluate('__fe.preview')); pg.wait_for_timeout(500); ok(f'{tag} loading with tips', scr(pg) == 'load' and pg.inner_text('#fe-tip') != '')
         pg.wait_for_function("document.body.dataset.fe==='game'", timeout=60000); pg.wait_for_timeout(1500)
         ok(f'{tag} title-only wanderers removed in game (party/NPCs unchanged)', pg.evaluate('__p3d.titleExtrasN') == 0, pg.evaluate('__p3d.titleExtrasN'))
+        ok(f'{tag} shadows restored in game', pg.evaluate(SUN) is True, pg.evaluate(SUN))
         ok(f'{tag} in game, HUD visible', vis(pg, '#hud') and vis(pg, '#fe-pbtn'))
         if tag != 'desktop': pg.screenshot(path=f'{SH}/5-game-{tag}.png')
         pg.click('#fe-pbtn'); pg.wait_for_timeout(800); f0 = pg.evaluate('__p3d.frames'); pg.wait_for_timeout(1500)

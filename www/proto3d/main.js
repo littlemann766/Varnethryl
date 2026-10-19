@@ -163,7 +163,7 @@ function building(cx, cz, w, d, h, opt = {}) {
   return g;
 }
 const enterables = [];
-const ectx = { scene, mats, colliders, multi: [] };
+const ectx = { scene, mats, colliders, multi: [], cam: camera };   // cam: inside view fades the walls between camera and hero
 let LAD = null;   // ladders (ladders.js), created after the key set exists
 // 26 sheet-based 3D buildings (guild, inn, smithy, temple, colosseum, keep ... see docs/proto3d-buildings/README.md). ?oldvillage keeps the original blocky village.
 const SKINS = [];
@@ -250,13 +250,16 @@ function mergeStatic() {
     const parts = b.list.map(o => { const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()); g.applyMatrix4(o.matrixWorld); return g; });
     let n = 0, cv = 0; parts.forEach((g, i) => { const c = g.attributes.position.count; n += c; if (b.list[i].castShadow) cv += c; });
     const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2), col = b.cl.vc ? new Float32Array(n * 3) : null; let o3 = 0, o2 = 0;
+    const moved = [];
     parts.forEach((g, i) => {
+      if (b.list[i].userData.rng) moved.push([b.list[i], o3 / 3]);   // building ext slices (inside view) follow the geometry into the merged mesh
       const cnt = g.attributes.position.count; pos.set(g.attributes.position.array, o3); nor.set(g.attributes.normal.array, o3); if (g.attributes.uv) uv.set(g.attributes.uv.array, o2); if (col) colorFill(col, cnt, o3, b.list[i].material.color);
       o3 += cnt * 3; o2 += cnt * 2; g.dispose();
     });
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); if (col) geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
     const m = new THREE.Mesh(geo, b.cl.mat); m.castShadow = cv * 2 > n; m.receiveShadow = true; scene.add(m);
+    for (const [o, base] of moved) for (const r of o.userData.rng) for (const e of r.B.extRanges || []) if (e.mesh === o && e.start === r.start) { e.mesh = m; e.start = base + r.start; }
   }
   for (const o of remove) { o.parent.remove(o); o.geometry.dispose(); }
 }
@@ -874,8 +877,8 @@ function cullSkins() { // characters: skinned meshes skip frustum culling, so cu
 
 // x-ray: inside a building the hero is also drawn as a faint silhouette wherever banners, door leaves, rails or walls cover him
 const GHOST_MAT = new THREE.MeshBasicMaterial({ color: 0xbfe0ff, transparent: true, opacity: 0.38, depthFunc: THREE.GreaterDepth, depthWrite: false });
-function heroGhost() {
-  const want = !!state.inside, u = hero.userData;
+function heroGhost() {   // boss 9:05: no glowing see-through body; blocking walls are hidden (outlined) instead, so the silhouette is off
+  const want = false, u = hero.userData;
   if (!want && !u.ghosts) return;
   if (want) { const sk = []; hero.traverse(o => { if (o.isSkinnedMesh && !o.userData.isGhost) sk.push(o); });
     if (!u.ghosts || u.ghostN !== sk.length) { (u.ghosts || []).forEach(g => g.parent && g.parent.remove(g)); u.ghosts = sk.map(o => { const g = new THREE.SkinnedMesh(o.geometry, GHOST_MAT); g.userData.isGhost = true; g.frustumCulled = false; g.renderOrder = 20; g.position.copy(o.position); g.quaternion.copy(o.quaternion); g.scale.copy(o.scale); o.parent.add(g); g.bind(o.skeleton, o.bindMatrix); return g; }); u.ghostN = sk.length; } }

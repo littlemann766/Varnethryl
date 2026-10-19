@@ -214,6 +214,7 @@ export class Builder {
     if (this.footprint && !this.noDoorLane) this.clearZone({ cx: 0, cz: this.d / 2 - 2.6, ang: 0, len: 5.2, w: (this.DW || 2.2) + .8 }, 0, -2.6, 2.6, 0);   // keep the entrance lane free of props
     for (const z of this.stairZones || []) this.clearZone(z.m, z.level, z.du0, z.du1, z.fy);
     for (const c of [...this.G.frame.children]) this.G.roof.add(c);   // frame + roof always toggle together: one merged group
+    this.sideWalls();   // walls split by side (own cutaway material per side) so only the walls between camera and hero fade
     for (const k of Object.keys(this.G)) {
       const interior = k === 'int' || k.startsWith('up');
       if (interior) this.G[k].children.forEach(o => { if (o.isMesh) o.castShadow = false; });   // interior casters only switched on while the hero is inside (setInside)
@@ -227,7 +228,10 @@ export class Builder {
     if (this.wallRanges) { this.G.walls.visible = v; for (const r of this.wallRanges) { const at = r.mesh.geometry.attributes.position, a = at.array; if (v) a.fill(0, r.start * 3, (r.start + r.count) * 3); else a.set(r.orig, r.start * 3); at.needsUpdate = true; } }   // walls: opaque copy lives in one world mesh per material; the cutaway (see-through) copy is only drawn while inside
     if (this.roofRanges) for (const r of this.roofRanges) { const at = r.mesh.geometry.attributes.position, a = at.array; if (v) a.fill(0, r.start * 3, (r.start + r.count) * 3); else a.set(r.orig, r.start * 3); at.needsUpdate = true; }   // roofs live in one world mesh per material: collapse/restore this building's slice
     for (const k of Object.keys(this.G)) if (k === 'int' || k.startsWith('up')) this.G[k].traverse(o => { if (o.isMesh && o.userData.interior) o.castShadow = v && !!o.material.map; });
-    for (const m of this.cut) { m.transparent = v; m.opacity = v ? .2 : 1; m.depthWrite = !v; m.needsUpdate = true; }
+    for (const m of this.cut) m.visible = !v;   // remaining cutaway pieces outside the walls group (gable fronts ...): hidden while inside, no see-through
+    if (this.extRanges) for (const r of this.extRanges) { const at = r.mesh.geometry.attributes.position, a = at.array; if (v) a.fill(0, r.start * 3, (r.start + r.count) * 3); else a.set(r.orig, r.start * 3); at.needsUpdate = true; }
+    if (this.sideMats) { for (const m of this.sideMats) { m.userData.op = 1; m.visible = true; } if (v) this.edgeLines(); for (const k in this.edges || {}) this.edges[k].visible = false; }   // start shown; update() hides the camera-side walls
+    this.roofFadeStart(v);
     for (const m of this.G.walls.children) m.castShadow = !v;
   }
   update(hx, hz, dt, level = 0) {
@@ -236,10 +240,69 @@ export class Builder {
     const nearInt = this.inside || dist < (this.radius || 12) + 9; if (this.G.int.visible !== nearInt) this.G.int.visible = nearInt;   // interiors only drawn when close (fewer draw calls)
     const v = this.insideTest ? this.insideTest(lx, lz) : false; if (v !== this.inside) this.setInside(v);
     if (this.lvGroups) for (const l in this.lvGroups) { const g = this.lvGroups[l], sv = v && level >= +l; if (g.visible !== sv) g.visible = sv; }
+    if (this.inside && this.sideMats) this.viewCut(lx, lz, dt || 0.016);
+    if (this.roofFade) this.roofFadeTick(dt || 0.016);
     if (this.tick && vis) this.tick(dt || 0.016);
     return v;
   }
 }
+
+// ===== inside view: camera-side walls fade, roof fades out/in (per-building toggle; nothing per-mesh per-frame) =====
+function setOp(m, op) { const tr = op < .99; m.opacity = tr ? op : 1; if (m.transparent !== tr) { m.transparent = tr; m.depthWrite = !tr; m.needsUpdate = true; } }
+const FADE_OP = .14, FADE_IN = .35;   // camera-side wall opacity, interior partitions opacity
+Builder.prototype.sideWalls = function () {
+  const round = !this.footprint, T = this.T, cache = {}; this.sideMats = []; this.sideOf = {};
+  const hw = (this.w || 0) / 2, hd = (this.d || 0) / 2, R = this.radius ? (this.radius / (this._rs ? this.K : 1)) : hw;
+  for (const m of this.G.walls.children) {
+    if (!m.isMesh) continue; const { x, z } = m.position; let side;
+    if (round) side = Math.hypot(x, z) > R - T * 2.2 ? ['f', 'r', 'b', 'l'][((Math.round(Math.atan2(x, z) / (Math.PI / 2)) % 4) + 4) % 4] : 'in';
+    else side = Math.abs(z) >= hd - T - .06 ? (z > 0 ? 'f' : 'b') : Math.abs(x) >= hw - T - .06 ? (x > 0 ? 'r' : 'l') : 'in';
+    const k = m.material.uuid + side; let mt = cache[k];
+    if (!mt) { mt = cache[k] = m.material.clone(); mt.userData = { side, op: 1 }; this.sideMats.push(mt); }
+    m.material = mt;
+  }
+};
+Builder.prototype.viewCut = function (lx, lz, dt) {
+  const cam = this.ctx.cam; if (!cam) return; const [cx, cz] = this.toL(cam.position.x, cam.position.z), round = !this.footprint;
+  const iw = this.iw || 1, id_ = this.id_ || 1; let hide;
+  if (round) { const rr = Math.hypot(cx, cz), ca = Math.atan2(cx, cz); hide = sd => { if (rr < iw * .7) return false; const a = { f: 0, r: Math.PI / 2, b: Math.PI, l: -Math.PI / 2 }[sd]; let d = Math.abs(ca - a) % (2 * Math.PI); if (d > Math.PI) d = 2 * Math.PI - d; return d < 1.25; }; }
+  else hide = sd => sd === 'f' ? cz > id_ - .25 : sd === 'b' ? cz < -id_ + .25 : sd === 'r' ? cx > iw - .25 : cx < -iw + .25;
+  const st = this._hid || (this._hid = {});
+  for (const sd of ['f', 'b', 'l', 'r', 'in']) { const h = sd === 'in' ? true : hide(sd); if (st[sd] === h) continue; st[sd] = h;
+    for (const m of this.sideMats) if (m.userData.side === sd) { m.visible = !h; m.userData.op = h ? 0 : 1; }
+    if (this.edges && this.edges[sd]) this.edges[sd].visible = h; }
+};
+// thin outline of hidden walls: one EdgesGeometry LineSegments per side (shared line material), built on first entry, drawn only while that side is hidden
+const EDGE_MAT = new THREE.LineBasicMaterial({ color: 0x2a2a30, transparent: true, opacity: .55, depthWrite: false });
+Builder.prototype.edgeLines = function () {
+  if (this.edges) { this._hid = {}; return; } this.edges = {}; this._hid = {};
+  const per = {};
+  for (const m of this.G.walls.children) { if (!m.isMesh) continue; const sd = m.material.userData && m.material.userData.side; if (!sd) continue; m.updateMatrix(); const e = new THREE.EdgesGeometry(m.geometry, 35); e.applyMatrix4(m.matrix); (per[sd] || (per[sd] = [])).push(e); }
+  for (const sd in per) { let n = 0; for (const e of per[sd]) n += e.attributes.position.count; const pos = new Float32Array(n * 3); let o = 0; for (const e of per[sd]) { pos.set(e.attributes.position.array, o); o += e.attributes.position.count * 3; e.dispose(); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); const ls = new THREE.LineSegments(g, EDGE_MAT); ls.visible = false; ls.userData.keep = true; ls.renderOrder = 5; this.G.walls.add(ls); this.edges[sd] = ls; }
+};
+// roof: the building's slice of the shared world roof meshes collapses at once (draw calls stay merged); a per-building transparent copy
+// is drawn only for the ~0.3 s fade (built lazily on first entry)
+Builder.prototype.roofFadeStart = function (inside) {
+  if (!this.roofRanges || !this.roofRanges.length) return;
+  if (!this.fadeG) { const g = new THREE.Group(); g.visible = false; g.userData.keep = true;
+    for (const r of this.roofRanges) { const src = r.mesh.geometry, geo = new THREE.BufferGeometry(), n = r.count;
+      geo.setAttribute('position', new THREE.BufferAttribute(r.orig.slice(), 3));
+      for (const [nm, sz] of [['normal', 3], ['uv', 2], ['color', 3]]) { const a = src.attributes[nm]; if (a) geo.setAttribute(nm, new THREE.BufferAttribute(a.array.slice(r.start * sz, (r.start + n) * sz), sz)); }
+      const mt = r.mesh.material.clone(); mt.transparent = true; mt.depthWrite = false; const fm = new THREE.Mesh(geo, mt); fm.userData.keep = true; fm.castShadow = false; fm.matrixAutoUpdate = false; g.add(fm); }
+    (this.ctx.scene || this.root.parent).add(g); this.fadeG = g; }
+  this.roofFade = { dir: inside ? -1 : 1, op: inside ? 1 : 0 };
+  if (!inside) for (const r of this.roofRanges) { const at = r.mesh.geometry.attributes.position; at.array.fill(0, r.start * 3, (r.start + r.count) * 3); at.needsUpdate = true; }   // exit: keep the slice collapsed until the copy has faded in
+  this.fadeG.visible = true; for (const fm of this.fadeG.children) fm.material.opacity = this.roofFade.op;
+};
+Builder.prototype.roofFadeTick = function (dt) {
+  const f = this.roofFade; f.op = Math.max(0, Math.min(1, f.op + f.dir * dt / .3)); for (const fm of this.fadeG.children) fm.material.opacity = f.op;
+  if ((f.dir < 0 && f.op <= 0) || (f.dir > 0 && f.op >= 1)) { this.fadeG.visible = false; this.roofFade = null;
+    if (f.dir > 0 && !this.inside) for (const r of this.roofRanges) { const at = r.mesh.geometry.attributes.position; at.array.set(r.orig, r.start * 3); at.needsUpdate = true; } }
+};
+Builder.prototype.viewState = function () { const r = this.roofRanges && this.roofRanges[0]; let shown = null; if (r) { const a = r.mesh.geometry.attributes.position.array; shown = false; for (let i = r.start * 3; i < (r.start + r.count) * 3; i++) if (a[i] !== 0) { shown = true; break; } }
+  const sides = {}; for (const m of this.sideMats || []) { const sd = m.userData.side; sides[sd] = Math.min(sides[sd] === undefined ? 1 : sides[sd], m.userData.op); }
+  return { inside: this.inside, roofShown: shown, roofGroupVisible: this.G.roof.visible, fading: !!this.roofFade, fadeOp: this.roofFade ? this.roofFade.op : null, sides, up: Object.fromEntries(Object.entries(this.lvGroups || {}).map(([l, g]) => [l, g.visible])) }; };
 
 // ===== multi-level support: real walkable upper floors, stairs (ramps), partitions, railings =====
 // Hero state: level (0 ground, 1.. upper) + y from surface(). Colliders carry lv (undefined = every level). Upper content lives in per-level groups that are
@@ -447,11 +510,13 @@ export function chunkStatics(builders, scene, cell = 40) {
   for (const B of builders) { if (!B || !B.G || !B.G.ext) continue; B.root.updateMatrixWorld(true); const zk = Math.floor(B.cx / cell) + ',' + Math.floor(B.cz / cell); const cut = new Set(B.cut || []);
     for (const m of [...B.G.ext.children]) { if (!m.isMesh || !m.userData.merged || cut.has(m.material)) continue; m.updateMatrixWorld(true); before++;
       const k = zk + '|' + m.material.uuid + (m.castShadow ? 'c' : '') + (m.receiveShadow ? 'r' : ''); let z = zones.get(k); if (!z) zones.set(k, z = { mat: m.material, c: m.castShadow, r: m.receiveShadow, list: [] });
-      const g = m.geometry.clone(); g.applyMatrix4(m.matrixWorld); z.list.push(g); B.G.ext.remove(m); m.geometry.dispose(); } }
+      const g = m.geometry.clone(); g.applyMatrix4(m.matrixWorld); g.userData.B = B; z.list.push(g); B.G.ext.remove(m); m.geometry.dispose(); } }
   for (const z of zones.values()) { let n = 0; for (const g of z.list) n += g.attributes.position.count; const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2); let a = 0, c = 0;
-    for (const g of z.list) { pos.set(g.attributes.position.array, a); nor.set(g.attributes.normal.array, a); uv.set(g.attributes.uv.array, c); a += g.attributes.position.count * 3; c += g.attributes.position.count * 2; g.dispose(); }
-    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-    const m = new THREE.Mesh(geo, z.mat); m.castShadow = z.c; m.receiveShadow = z.r; m.userData.chunk = true; scene.add(m); }
+    const rec = [];
+    for (const g of z.list) { const cnt = g.attributes.position.count; pos.set(g.attributes.position.array, a); nor.set(g.attributes.normal.array, a); uv.set(g.attributes.uv.array, c); rec.push({ B: g.userData.B, start: a / 3, count: cnt, orig: g.attributes.position.array.slice() }); a += cnt * 3; c += cnt * 2; g.dispose(); }
+    const geo = new THREE.BufferGeometry(); { const pa = new THREE.BufferAttribute(pos, 3); pa.setUsage(THREE.DynamicDrawUsage); geo.setAttribute('position', pa); } geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    const m = new THREE.Mesh(geo, z.mat); m.castShadow = z.c; m.receiveShadow = z.r; m.userData.chunk = true; scene.add(m);
+    m.userData.rng = rec; for (const r of rec) (r.B.extRanges || (r.B.extRanges = [])).push({ mesh: m, start: r.start, count: r.count, orig: r.orig }); }   // inside view: a building's exterior dressing (studs, door frame, lanterns ...) collapses while the hero is inside so nothing outside blocks the view
   return { before, after: zones.size };
 }
 

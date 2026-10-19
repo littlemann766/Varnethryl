@@ -13,11 +13,13 @@ const KINDS = {
   wraith: { top: 2.9, parts: [box(.7, 1.5, .5, 0, 1.0, 0, 0x4f8f78), box(.5, .5, .5, 0, 2.0, 0, 0x75bca1), box(.9, .3, .6, 0, 0.3, 0, 0x3d7664), box(.15, .9, .15, -.5, 1.2, .15, 0x75bca1), box(.15, .9, .15, .5, 1.2, .15, 0x75bca1),
     box(.1, .08, .03, -.12, 2.05, .26, 0xc8ffd8), box(.1, .08, .03, .12, 2.05, .26, 0xc8ffd8)] },
 };
-KINDS.skeleton = KINDS.raider; KINDS.titan = KINDS.raider;
+KINDS.skeleton = KINDS.raider;
+/* Ashen Titan (placeholder primitives until Beth's model): raider-shaped but 3x scale, plus horns, shoulder plates and glowing eyes. */
+KINDS.titan = { scale: 3, top: 2.5, parts: KINDS.raider.parts.concat([box(.9, .22, .5, 0, 1.58, 0, 0x6a5560), box(.28, .5, .28, -.2, 2.15, 0, 0xd9d0c4), box(.28, .5, .28, .2, 2.15, 0, 0xd9d0c4), box(.7, .2, .5, 0, .08, 0, 0x2a2228)]).map((q) => (q.col === 0x7a9a4a ? box(q.w, q.h, q.d, q.x, q.y, q.z, 0x9a4a4a) : q.col === 0xd59066 ? box(q.w, q.h, q.d, q.x, q.y, q.z, 0x7a4a58) : q)) };
 export const kindFor = (key) => (KINDS[key] ? key : 'raider');
 const geoCache = {};
 function buildGeo(kind, S) {
-  const key = kind + S; if (geoCache[key]) return geoCache[key];
+  const key = kind + S; S *= (KINDS[kind].scale || 1); if (geoCache[key]) return geoCache[key];
   const pos = [], nor = [], col = [], c = new THREE.Color();
   for (const p of KINDS[kind].parts) {
     const g = new THREE.BoxGeometry(p.w * S, p.h * S, p.d * S).toNonIndexed(); g.translate(p.x * S, p.y * S, p.z * S);
@@ -46,5 +48,5 @@ export function createFoe(scene, HS) {
   const tele = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({ map: telegraphTexture(), transparent: true, depthWrite: false, opacity: 0.6 }));
   tele.rotation.x = -Math.PI / 2; tele.visible = false; tele.renderOrder = 6; scene.add(tele);
   return { mesh, mat, tele, kind: '', top: 2, busy: false,
-    setKind(k) { const kind = kindFor(k); if (kind !== this.kind) { this.kind = kind; mesh.geometry = buildGeo(kind, HS / 1.5); this.top = KINDS[kind].top * HS / 1.5; } }, hide() { mesh.visible = false; tele.visible = false; } };
+    setKind(k) { const kind = kindFor(k); if (kind !== this.kind) { this.kind = kind; mesh.geometry = buildGeo(kind, HS / 1.5); this.top = KINDS[kind].top * (KINDS[kind].scale || 1) * HS / 1.5; } }, hide() { mesh.visible = false; tele.visible = false; } };
 }

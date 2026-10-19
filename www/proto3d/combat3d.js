@@ -8,13 +8,14 @@ import { ENEMIES, SABER } from './combat/data.js';
 import { loadLucian } from './combat/calc.js';
 
 export const MAX_ENEMIES = 6, TARGET_ALIVE = 3, RESPAWN_S = 6, SPAWN_MIN = 14, SPAWN_MAX = 26, SOFT_RANGE = 8;
+export const TITAN_DIST = 24, TITAN_RESPAWN_S = 45;
 export const SPAWN_TABLE = ['wolf', 'wolf', 'raider', 'wraith'];
 const yawLerp = (cur, to, k) => cur + (((to - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * k;
 
 /* env: {THREE, scene, camera, state, HS, WORLD, resolve(p), free(x,z), hero(), flags, getCheats(), isOwner(), camRig, start:{x,z}} */
 export function createCombat(env) {
   const { THREE, scene, camera, state, HS, flags } = env;
-  let on = false, spawnT = 0, kills = 0, seq = 0;
+  let on = false, spawnT = 0, kills = 0, seq = 0, titanT = 1.5;
   const tmp = { x: 0, z: 0 }, v3 = new THREE.Vector3(), sc = [0, 0];
   const project = (x, y, z, out) => { v3.set(x, y, z).project(camera); if (v3.z > 1 || Math.abs(v3.x) > 1.3 || Math.abs(v3.y) > 1.3) return false; out[0] = (v3.x * 0.5 + 0.5) * innerWidth; out[1] = (-v3.y * 0.5 + 0.5) * innerHeight; return true; };
   const cc = new CombatController({ HS, move: (e, dx, dz) => { tmp.x = e.x + dx; tmp.z = e.z + dz; env.resolve(tmp); e.x = tmp.x; e.z = tmp.z; } });
@@ -42,7 +43,7 @@ export function createCombat(env) {
   saber.add(hilt, blade, glow); saber.visible = false; scene.add(saber);
   let ignite = 0;
   const isOwner = () => !!env.isOwner();
-  const saberOn = () => on && isOwner() && cc.dead <= 0;
+  const saberOn = () => on && isOwner() && cc.dead <= 0 && !env.camRig.fp;   /* first person: the held model would fill the screen */
 
   const syncHero = () => { const own = isOwner(), want = own, id = own ? 'owner' : 'hero'; if (cc.hero.id !== id || cc.hero.saber !== want) cc.setHero({ id, saber: want, name: own ? 'Owner' : 'Hero' }); };
 
@@ -64,11 +65,11 @@ export function createCombat(env) {
     .on('remove', (e) => { if (e.foe) { e.foe.hide(); freeFoes.push(e.foe); e.foe = null; } });
 
   function spawn(key, dist) {
-    if (cc.enemies.length >= MAX_ENEMIES) return null;
+    if (cc.enemies.length >= MAX_ENEMIES + (key === 'titan' ? 1 : 0)) return null;
     let x = state.heroX + 12, z = state.heroZ, ok = false;
     for (let k = 0; k < 24 && !ok; k++) { const a = Math.random() * 6.283, r = (dist || (SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN))) * HS / 1.5, px = state.heroX + Math.cos(a) * r, pz = state.heroZ + Math.sin(a) * r; if (Math.abs(px) < env.WORLD - 8 && Math.abs(pz) < env.WORLD - 8 && env.free(px, pz)) { x = px; z = pz; ok = true; } }
     if (!ok) return null;
-    const f = getFoe(); f.setKind(key === 'wolf' ? 'wolf' : key === 'wraith' ? 'wraith' : 'raider');
+    const f = getFoe(); f.setKind(key === 'wolf' ? 'wolf' : key === 'wraith' ? 'wraith' : key === 'titan' ? 'titan' : 'raider');
     f.mesh.visible = true; f.mesh.rotation.set(0, 0, 0); f.mesh.position.set(x, 0, z); f.mat.emissive.setHex(0);
     return cc.addEnemy(key, x, z, { foe: f, top: f.top, px: x, pz: z, flashOn: false });
   }
@@ -85,6 +86,7 @@ export function createCombat(env) {
     if (!on) return; dt = Math.min(dt, 0.1); syncHero(); cc.god = !!flags.god;
     { const dx = state.heroX - A.lx, dz = state.heroZ - A.lz; A.lx = state.heroX; A.lz = state.heroZ; const l = Math.hypot(dx, dz); if (l > 0.005 && !A.dash) { A.vx = dx / l; A.vz = dz / l; } else if (l <= 0.005) { A.vx = 0; A.vz = 0; } }
     const safe = state.level > 0 || !!state.inside;
+    const fp = !!env.camRig.fp;
     cc.setPlayer(state.heroX, state.heroZ, state.yaw);
     const t = cc.tgt.target;
     if (cc.tgt.locked && t && cc.dead <= 0) {
@@ -92,8 +94,13 @@ export function createCombat(env) {
       if (!env.camRig.pinching) state.camYaw = yawLerp(state.camYaw, Math.atan2(state.heroX - t.x, state.heroZ - t.z), Math.min(1, dt * 2.5));
     }
     if (safe) { cc.cd.tick(dt); cc.res.tick(dt, false); for (const e of cc.enemies) { if (e.state === 'telegraph' || e.state === 'attack') cc.ai.set(e, 'idle'); } } else cc.update(dt);
-    spawnT -= dt; const alive = cc.alive();
+    spawnT -= dt; let alive = 0, titan = null; for (const e of cc.enemies) if (e.key === 'titan') { if (e.state !== 'defeated') titan = e; } else if (e.state !== 'defeated') alive++;
+    if (!safe && !titan && cc.dead <= 0) { titanT -= dt; if (titanT <= 0) { titanT = TITAN_RESPAWN_S; if (spawn('titan', TITAN_DIST)) hud.say('The Ashen Titan awakens!', 2200); else titanT = 3; } }
     if (!safe && spawnT <= 0 && alive < TARGET_ALIVE && cc.dead <= 0) { spawnT = RESPAWN_S; spawn(SPAWN_TABLE[seq++ % SPAWN_TABLE.length]); }
+    if (fp && cc.tgt.locked && t && cc.dead <= 0) {   /* first person: tilt the view up/down toward the locked target (a 3x-tall titan sits well above eye level) */
+      const eye = env.hero().position.y + HS * 1.55, d = Math.max(2, Math.hypot(t.x - state.heroX, t.z - state.heroZ)), want = Math.max(-0.5, Math.min(1.1, Math.atan2((t.top || 2.5) * 0.6 - eye, d)));
+      env.camRig.pitch += (want - env.camRig.pitch) * Math.min(1, dt * 4);
+    }
     if (A.dash) { const d = A.dash, s = Math.min(d.left, d.spd * dt); tmp.x = state.heroX + d.dx * s; tmp.z = state.heroZ + d.dz * s; env.resolve(tmp); state.heroX = tmp.x; state.heroZ = tmp.z; d.left -= s; if (d.left <= 0.01) A.dash = null; }
     const soft = cc.tgt.locked ? cc.tgt.target : cc.tgt.nearest(cc.enemies, state.heroX, state.heroZ, state.yaw, SOFT_RANGE * HS);
     if (soft && !cc.tgt.locked) cc.lastTarget = soft;
@@ -119,11 +126,11 @@ export function createCombat(env) {
     hud.update(dt, cc.enemies, isOwner());
   }
   function start() {
-    if (on) return; on = true; cc.res.full(); cc.cd.reset(); cc.dead = 0; spawnT = 0.5; hud.show(true); syncHero(); cc.res.full(); addEventListener('keydown', onKey);
+    if (on) return; on = true; cc.res.full(); cc.cd.reset(); cc.dead = 0; spawnT = 0.5; titanT = 1.5; hud.show(true); syncHero(); cc.res.full(); addEventListener('keydown', onKey);
     hud.say(isOwner() ? 'FIGHT: F attack · G dodge · T lock-on · 1-6 abilities' : 'FIGHT: F attack · G dodge · T lock-on', 2600);
   }
   function stop() {
-    if (!on) return; on = false; hud.show(false); cc.clearEnemies(); arc.visible = reticle.visible = saber.visible = false; A.dash = null; A.swing = null; env.hero().rotation.x = 0; removeEventListener('keydown', onKey);
+    if (!on) return; on = false; hud.show(false); cc.clearEnemies(); titanT = 1.5; arc.visible = reticle.visible = saber.visible = false; A.dash = null; A.swing = null; env.hero().rotation.x = 0; removeEventListener('keydown', onKey);
   }
   return { start, stop, update, spawn, cc, hud, api, get on() { return on; }, get kills() { return kills; }, get enemies() { return cc.enemies; }, get saberVisible() { return saber.visible; }, pool, SABER_DAMAGE: SABER.max };
 }

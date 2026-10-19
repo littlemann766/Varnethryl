@@ -307,7 +307,7 @@ function wrapGLB(g, id) {
   root.userData = { glb: true, mixer, act, capeUpdate() {} }; try { root.userData.sb = new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.5';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.6';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -749,7 +749,7 @@ const cheatEnv = {
 let ownerFlag = false;
 let combat = null, combatLoading = null;
 async function setCombat(on) {
-  camRig.prefs.combat = !!on; if (prefStore) savePrefs(prefStore, camRig.prefs);
+  camRig.prefs.combat = !!on; camRig.prefs.combatSet = true; if (prefStore) savePrefs(prefStore, camRig.prefs);
   if (on) { if (!combat) { combatLoading = combatLoading || import('./combat3d.js').then((m) => { combat = m.createCombat({ THREE, scene, camera, state, HS, WORLD, flags: cheat, resolve: (p) => resolve(p, false), free: (x, z) => window.__p3d.free(x, z, 0), hero: () => hero, getCheats: () => window.__p3d.cheats, isOwner: () => ownerFlag, camRig, start: { x: 0, z: START_Z } }); }); await combatLoading; } if (camRig.prefs.combat) combat.start(); }
   else if (combat) combat.stop();
   return !!(combat && combat.on);

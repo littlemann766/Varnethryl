@@ -3,14 +3,14 @@
 export const PREF_KEY = 'vn_p3d_prefs_v1';
 export const ZOOM_MIN = 0.4, ZOOM_MAX = 1.7, SENS_MIN = 0.4, SENS_MAX = 2.5;
 export const VIEWS = ['third', 'first'], QUALITIES = ['auto', 'high', 'balanced', 'low'];
-export const DEFAULT_PREFS = Object.freeze({ view: 'third', zoom: 1, zoomSens: 1, lookSens: 1, quality: 'auto', shadows: true, showFps: true, combat: false });
+export const DEFAULT_PREFS = Object.freeze({ view: 'third', zoom: 1, zoomSens: 1, lookSens: 1, quality: 'auto', shadows: true, showFps: true, combatSet: false, combat: true });
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 export const clampZoom = (z) => clamp(num(z, 1), ZOOM_MIN, ZOOM_MAX);
 export function sanitizePrefs(p) {
   const o = p && typeof p === 'object' ? p : {}, d = DEFAULT_PREFS;
   return { view: VIEWS.includes(o.view) ? o.view : d.view, zoom: clampZoom(o.zoom), zoomSens: clamp(num(o.zoomSens, 1), SENS_MIN, SENS_MAX), lookSens: clamp(num(o.lookSens, 1), SENS_MIN, SENS_MAX),
-    quality: QUALITIES.includes(o.quality) ? o.quality : d.quality, shadows: o.shadows !== false, showFps: o.showFps !== false, combat: o.combat === true };
+    quality: QUALITIES.includes(o.quality) ? o.quality : d.quality, shadows: o.shadows !== false, showFps: o.showFps !== false, combatSet: o.combatSet === true, combat: o.combatSet === true ? o.combat === true : true };
 }
 export function loadPrefs(storage) { try { return sanitizePrefs(JSON.parse(storage.getItem(PREF_KEY))); } catch (e) { return sanitizePrefs(null); } }
 export function savePrefs(storage, p) { try { storage.setItem(PREF_KEY, JSON.stringify(sanitizePrefs(p))); return true; } catch (e) { return false; } }

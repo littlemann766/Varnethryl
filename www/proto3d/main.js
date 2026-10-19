@@ -17,7 +17,8 @@ import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
 import { initSettings } from './settingsboot.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
-import { worldProfile, loadScale } from './charscale.js';
+import { worldProfile, loadScale, heroHeight, HERO_M as HERO_REF } from './charscale.js';
+const heroK = id => { const h = heroHeight(id); return h ? h / HERO_REF : 1; };   /* v1.1.15 real hero heights: height-normalised (blocky/v1) models are fitted to the hero's own height */
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -281,7 +282,7 @@ const CLOTH = new Set(["n:owner", "n:frosttroll_b", "n:frosttroll_a", "n:phoenix
 const EXTRA_SCALE = {};   // Frost Troll B (frosttrollB_1, Beth 1019) is baked at 5.715 m: no extra scale   // frost trolls are authored 11.4 m; the boss wants 3x the player (5.7 m). The Ashen Titan stays unscaled (6x).
 /* serpent coil telegraphs (night3 COIL.md): the 'telegraph' one-shot plays 'coil' (wind-up), the strike plays strike_lunge */
 const CLIPMAP = { 'n:ssylthar_coil': { telegraph: 'coil', attack: 'strike_lunge', attack2: 'strike_release' }, 'n:hydrella_coil': { telegraph: 'coil', attack: 'strike_lunge', attack2: 'strike_release' }, 'n:vaelthryx_new7': { telegraph: 'coil_windup' }, 'n:frosttroll_b': { telegraph: 'windup' } };
-const SPEEDS = { 'n:vaelthryx_new7': { walk: 9.89, run: 15.26 }, 'n:frosttroll_b': { walk: 2.21, run: 5.83 }, 'n:owner': { walk: 1.486, run: 2.28 }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 4.5, run: 10.5 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
+const SPEEDS = { 'n:vaelthryx_new7': { walk: 9.89, run: 15.26 }, 'n:frosttroll_b': { walk: 2.21, run: 5.83 }, 'n:owner': { walk: 1.486, run: 2.28 }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
 /* Beth's smoothed blocky models (_smooth.glb): extra 'Smooth' variant for characters that already exist; originals stay the default. Loaded on demand (only when picked). */
 const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'hawk', 'hearth', 'hobgoblin', 'hydrella', 'kael', 'kestrel', 'lorian', 'mirelle', 'morwen', 'mossgut', 'neris', 'nyx', 'orin', 'rook', 'rowan', 'seraphine', 'stonetroll', 'talia', 'thorne', 'valen', 'vesper', 'wolf', 'wyvern'];   // frosttroll_smooth intentionally not used (old 1.8 m base): frosttroll_a4 is the troll
 { const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
@@ -352,10 +353,10 @@ function wrapGLB(g, id, blocky) {
   m.traverse(o => { if (o.isSkinnedMesh && o.name !== 'merged') { o.frustumCulled = false; if (!SKINS.includes(o)) SKINS.push(o); } });
   const hgt = box.max.y - box.min.y;
   if (hgt > 0.01) { const BK_H = { 'o:vaelthryx': 5.1 };   // blocky builders authored smaller than their GLB: match the GLB's in-game height so swapping doesn't jump
-    const sc = (blocky && BK_H[id]) ? BK_H[id] / hgt : EXTRA_URL[id] ? 0.947 * HS * (EXTRA_SCALE[id] || 1) * loadScale(id) : 1.8 * HS / hgt;   // extra models are authored in metres (hero 1.9 m = 1.8 HS); the old 20 heroes are height-normalised
+    const sc = (blocky && BK_H[id]) ? BK_H[id] / hgt : EXTRA_URL[id] ? 0.947 * HS * (EXTRA_SCALE[id] || 1) * loadScale(id) : 1.8 * HS / hgt * heroK(id);   // extra models are authored in metres (hero 1.9 m = 1.8 HS); the old 20 heroes are height-normalised
     m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
   m.traverse(o => { if (o.isMesh) for (const mt of [].concat(o.material)) if (mt && mt.alphaTest > 0) { mt.transparent = false; mt.depthWrite = true; mt.needsUpdate = true; } });   // glTF alphaMode MASK (e.g. Garruk's cape): cut-out, sorted by depth, casts a cut-out shadow
-  const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947 * HS * (EXTRA_SCALE[id] || 1) * loadScale(id) : 1.8 * HS / hgt) : 1;
+  const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947 * HS * (EXTRA_SCALE[id] || 1) * loadScale(id) : 1.8 * HS / hgt * heroK(id)) : 1;
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
   { const cm = CLIPMAP[id]; if (cm) for (const k in cm) if (act[cm[k]]) act[k] = act[cm[k]]; }   // coil serpents: attack = strike after a coil telegraph
   if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];   // e.g. serpent: walk/run = slither/slither_fast

@@ -26,44 +26,33 @@ export const CHARS = {
   /* ---- test-bundle-1019 (Beth). Boss-approved heights only: everyone 1.905 m, Titan 11.4, frost trolls 5.7, Vaelthryx 19.05, giants 20/40/60x.
      Bundle GLBs are size-baked; where the baked height differs from the approved one, `native` = baked height and the model is scaled at load to the approved height (listed in the v1.1.14 report). ---- */
   'n:vaelthryx_new7': { height: 10 * HERO_M, radius: 5.2, speed: 1.5, step: 3.0, reach: 4.8, camDist: 5.0, camHeight: 4.8, camMin: 0.6, camMax: 1.7 },   // baked 19.05 m = approved, no rescale
-  'n:phoenix_new3': { height: HERO_M, native: 0.756 },   // core/phoenix_new3.glb baked 0.756 m -> approved 1.905 m
-  'n:wren_new3': { height: HERO_M, native: 1.35 },   // core/wren_new6_fight.glb baked 1.35 m -> approved 1.905 m
-  'n:ember_new3': { height: HERO_M, native: 1.296 },   // core/ember_new4_fight2.glb baked 1.296 m -> approved 1.905 m
-  'n:thrain_new4': { height: HERO_M, native: 1.477 },   // core/thrain_new6_fight.glb baked 1.477 m -> approved 1.905 m
-  'n:garruk_new5': { height: HERO_M, native: 2.02 },   // core/garruk_new5_arms_fight.glb baked 2.02 m -> approved 1.905 m
-  'n:pip_new2': { height: HERO_M, native: 0.52 },   // core/pip_new3_fight.glb baked 0.52 m -> approved 1.905 m
   'n:ssylthar_coil': { height: HERO_M, native: 2.044 },   // night3/ssylthar_coil.glb baked 2.044 m -> approved 1.905 m
   'n:hydrella_coil': { height: HERO_M, native: 1.928 },   // night3/hydrella_coil.glb baked 1.928 m -> approved 1.905 m
-  'n:orin_armor2': { height: HERO_M, native: 1.84 },   // night2/orin_armor2.glb baked 1.84 m -> approved 1.905 m
-  'n:finn_armor2': { height: HERO_M, native: 1.736 },   // night2/finn_armor2.glb baked 1.736 m -> approved 1.905 m
-  'n:seraphine_armor2': { height: HERO_M, native: 1.77 },   // night2/seraphine_armor2.glb baked 1.77 m -> approved 1.905 m
-  'n:garruk_armor2': { height: HERO_M, native: 2.02 },   // night2/garruk_armor2.glb baked 2.02 m -> approved 1.905 m
-  'n:rook_armor2': { height: HERO_M, native: 1.95 },   // night2/rook_armor2.glb baked 1.95 m -> approved 1.905 m
-  'n:elira_armor2': { height: HERO_M, native: 1.699 },   // night2/elira_armor2.glb baked 1.699 m -> approved 1.905 m
-  'n:brynn_armor2': { height: HERO_M, native: 1.592 },   // night2/brynn_armor2.glb baked 1.592 m -> approved 1.905 m
-  'n:cedric_armor2': { height: HERO_M, native: 2.017 },   // night2/cedric_armor2.glb baked 2.017 m -> approved 1.905 m
-  'n:asha_armor2': { height: HERO_M, native: 1.71 },   // night2/asha_armor2.glb baked 1.71 m -> approved 1.905 m
-  'n:kael_armor2': { height: HERO_M, native: 1.805 },   // night2/kael_armor2.glb baked 1.805 m -> approved 1.905 m
-  'n:mirelle_armor2': { height: HERO_M, native: 1.652 },   // night2/mirelle_armor2.glb baked 1.652 m -> approved 1.905 m
-  'n:morwen_armor2': { height: HERO_M, native: 1.736 },   // night2/morwen_armor2.glb baked 1.736 m -> approved 1.905 m
-  'n:nyx_armor2': { height: HERO_M, native: 1.667 },   // night2/nyx_armor2.glb baked 1.667 m -> approved 1.905 m
-  'n:rowan_armor2': { height: HERO_M, native: 1.877 },   // night2/rowan_armor2.glb baked 1.877 m -> approved 1.905 m
-  'n:selene_armor2': { height: HERO_M, native: 1.946 },   // night2/selene_armor2.glb baked 1.946 m -> approved 1.905 m
-  'n:talia_armor2': { height: HERO_M, native: 1.772 },   // night2/talia_armor2.glb baked 1.772 m -> approved 1.905 m
-  'n:thorne_armor2': { height: HERO_M, native: 1.877 },   // night2/thorne_armor2.glb baked 1.877 m -> approved 1.905 m
-  'n:vesper_armor2': { height: HERO_M, native: 1.768 },   // night2/vesper_armor2.glb baked 1.768 m -> approved 1.905 m
   'n:titan_giant_20x': { height: 38.1, radius: 10.6, speed: 1.6, step: 7.0, reach: 10.0, camDist: 8, camHeight: 8, camMin: 0.6, camMax: 1.7 },   // giant test spawn (night3/titan_giant_20x.glb), owner-only
   'n:titan_giant_40x': { height: 76.2, radius: 21.2, speed: 1.6, step: 14.0, reach: 20, camDist: 8, camHeight: 8, camMin: 0.6, camMax: 1.7 },   // giant test spawn (night3/titan_giant_40x.glb), owner-only
   'n:titan_giant_60x': { height: 114.3, radius: 31.8, speed: 1.6, step: 21.0, reach: 20, camDist: 8, camHeight: 8, camMin: 0.6, camMax: 1.7 },   // giant test spawn (night3/titan_giant_60x.glb), owner-only
 };
+
+/* v1.1.15 REAL HERO HEIGHTS (boss approved Beth's suggested table, 9:15 AM Oct 19). Owner stays HERO_M (1.905), Vaelthryx 10x, Titan 11.4, trolls 5.7.
+   Source: MANIFEST.md baked heights for the core New models (pip/phoenix/wren/ember/thrain/garruk/darius/zephyr), HEIGHTS.md lore/invented heights for everyone else.
+   Every variant of a hero (blocky, refined, New, armor2) is shown at that hero's height. NATIVE = measured idle height of each size-baked GLB (scaled at load to the hero height). */
+export const HERO_HEIGHTS = Object.freeze({"pip": 0.52, "phoenix": 0.756, "wren": 1.35, "ember": 1.296, "thrain": 1.477, "garruk": 2.02, "darius": 1.9, "zephyr": 1.899, "aldric": 1.88, "seraphine": 1.778, "finn": 1.753, "orin": 1.829, "rook": 1.905, "elira": 1.727, "mirelle": 1.676, "rowan": 1.854, "kael": 1.803, "brynn": 1.626, "morwen": 1.753, "nyx": 1.702, "vesper": 1.778, "thorne": 1.854, "cedric": 1.829, "talia": 1.778, "selene": 1.753, "asha": 1.803, "lunara": 1.78, "marella": 1.83, "mortimer": 1.98, "coral": 1.15, "snowy": 1.1, "player": 1.0, "pikachu": 1.0, "cinder": 0.45});
+export const NATIVE_H = Object.freeze({"aldric_armor2": 1.914, "orin_armor2": 1.84, "finn_armor2": 1.736, "seraphine_armor2": 1.77, "garruk_armor2": 2.02, "rook_armor2": 1.95, "elira_armor2": 1.699, "brynn_armor2": 1.592, "cedric_armor2": 2.017, "asha_armor2": 1.71, "kael_armor2": 1.805, "mirelle_armor2": 1.652, "morwen_armor2": 1.736, "nyx_armor2": 1.667, "rowan_armor2": 1.877, "selene_armor2": 1.946, "talia_armor2": 1.772, "thorne_armor2": 1.877, "vesper_armor2": 1.768, "darius_armor2": 1.9, "mortimer_new": 1.903, "lunara_new": 1.902, "marella_new": 1.977, "coral_new": 1.881, "cinder_new": 1.216, "snowy_new4": 1.514, "player_pikachu": 1.902, "asha_new3": 1.708, "garruk_new4": 1.9, "phoenix_new3": 0.756, "wren_new3": 1.35, "ember_new3": 1.296, "thrain_new4": 1.477, "garruk_new5": 2.02, "pip_new2": 0.52, "darius_new6": 1.9, "zephyr_new2": 1.899});
+export const heroBase = (id) => { const b = String(id || '').replace(/^[a-z]:/, '').split('_')[0]; return b === 'owner' ? null : b; };
+export const heroHeight = (id) => { const b = heroBase(id); return b && HERO_HEIGHTS[b] ? HERO_HEIGHTS[b] : null; };
+/* gameplay scaled to height: collision radius and reach linear (reach floored), speed ~ sqrt(height) (walking-pace physics, clamped so tiny heroes keep up),
+   step never below the hero's 0.35 m (tiny heroes still climb town stairs), camera distance/height eased so small heroes stay framed */
+function heroProfile(h) { const s = h / HERO_M, q = Math.sqrt(s); return { height: h, radius: +Math.max(0.18, 0.53 * s).toFixed(3), speed: +Math.min(1.1, Math.max(0.78, q)).toFixed(3), step: +Math.max(0.35, 0.35 * s).toFixed(3), reach: +Math.min(1.15, Math.max(0.6, s)).toFixed(3), camDist: +(0.4 + 0.6 * s).toFixed(3), camHeight: +(0.35 + 0.65 * s).toFixed(3), camMin: 0.4, camMax: 1.7 }; }
+/* config for an id: explicit CHARS entry, else the real-height hero profile (+ native for size-baked GLBs) */
+function charOf(id) { const c = CHARS[id]; if (c) return c; const h = heroHeight(id); if (!h) return null; const k = String(id).replace(/^[a-z]:/, ''), nat = /^n:/.test(id) ? NATIVE_H[k] : 0; const pr = heroProfile(h); if (nat && Math.abs(nat - h) > 0.004) pr.native = nat; return pr; }
 const clampN = (v, lo, hi, d) => { v = +v; return Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d; };
 /* profile in METRES with every field filled + clamped (safe even if the config is edited badly) */
 /* load-time model scale for models whose authored size differs from the config height (1 = use the normal fit) */
-export const loadScale = (id) => { const c = CHARS[id]; return c && c.native > 0 ? clampN(c.height, 0.3, HEIGHT_MAX, DEFAULT.height) / c.native : 1; };
+export const loadScale = (id) => { const c = charOf(id); return c && c.native > 0 ? clampN(c.height, 0.3, HEIGHT_MAX, DEFAULT.height) / c.native : 1; };
 export function profileFor(id) {
-  const c = Object.assign({}, DEFAULT, CHARS[id] || {});
+  const c = Object.assign({}, DEFAULT, charOf(id) || {});
   return { id: id || '', height: clampN(c.height, 0.3, HEIGHT_MAX, DEFAULT.height), radius: clampN(c.radius, 0.1, 20, DEFAULT.radius), speed: clampN(c.speed, 0.3, SPEED_CAP, 1), step: clampN(c.step, 0.05, 8, DEFAULT.step), reach: clampN(c.reach, 0.5, 8, 1),
-    camDist: clampN(c.camDist, 0.5, 8, 1), camHeight: clampN(c.camHeight, 0.5, 8, 1), camMin: clampN(c.camMin, 0.2, 1.7, 0.4), camMax: clampN(c.camMax, 0.4, 2.5, 1.7), scale: clampN(c.height, 0.3, HEIGHT_MAX, DEFAULT.height) / HERO_M, custom: !!CHARS[id] };
+    camDist: clampN(c.camDist, 0.5, 8, 1), camHeight: clampN(c.camHeight, 0.5, 8, 1), camMin: clampN(c.camMin, 0.2, 1.7, 0.4), camMax: clampN(c.camMax, 0.4, 2.5, 1.7), scale: clampN(c.height, 0.3, HEIGHT_MAX, DEFAULT.height) / HERO_M, custom: !!charOf(id) };
 }
 /* same profile in WORLD units (height/radius/step) for the engine */
 export function worldProfile(id, HS = 1.5) { const p = profileFor(id), k = WORLD_PER_M(HS); return Object.assign({}, p, { heightW: p.height * k, radiusW: Math.min(p.radius, COLLIDE_RADIUS_CAP) * k, stepW: p.step * k }); }

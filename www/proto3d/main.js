@@ -383,7 +383,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.1.15';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.16';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -478,6 +478,10 @@ GLB_IDS.forEach((id, i) => { const k = gkey(id); let g = GROUPS.get(k); if (!g) 
 GROUPS.forEach(g => { const nv = g.vars.filter(v => v.label === 'New'); if (nv.length > 1) nv.forEach(v => { v.label = ('New ' + ((GLB_IDS[v.slot].match(/_new(\d+)/) || [0, ''])[1])).trim(); }); });
 const vrank = l => l === 'Smooth' ? 3.5 : l === 'Pikachu' ? 3 : l === 'Blocky' ? 0 : l === 'Old' ? 1 : l === 'Placeholder' ? 9 : 2 + (parseInt(l.replace(/\D/g, '')) || 0) / 100 + (/straight/.test(l) ? .5 : 0);
 GROUPS.forEach(g => g.vars.sort((a, b) => vrank(a.label) - vrank(b.label)));
+// Sort the display rows only: never reorder GLB_IDS/HEROES because saves use their indices.
+// Titles remain visible but are ignored for alphabetical placement (e.g. Sir Aldric is under A).
+const rosterName = g => g.name.replace(/^(?:Sir|Lady|Dame|Brother|Captain|Queen|Elder)\s+/i, '').trim();
+const compareRoster = (a, b) => rosterName(a).localeCompare(rosterName(b), 'en', { numeric: true, sensitivity: 'base' }) || a.name.localeCompare(b.name, 'en');
 const selV = {};   // group key -> chosen variant
 function curVar(g) {
   if (selV[g.key]) return selV[g.key];
@@ -501,10 +505,11 @@ async function selectVariant(g, v) {
   const id = GLB_IDS[v.slot]; if (bk(id) && modeFor(id) !== v.mode) await toggleModel(v.slot);
   await selectHero(v.slot); refreshSel(v.slot);
 }
-{ const bar = document.getElementById('heroes'); const first = [1, 2, ...(savedPlan && qp0.get('all') == null ? savedPlan.party.filter(i => i > 2) : [])], order = [...new Set([...first, ...HERO_NAMES.map((n, i) => i)])], seen = new Set(), gl = [];
-  const OG = SLOT_G[GLB_IDS.indexOf('n:owner')]; if (OG) seen.add(OG);   /* hidden from everyone but the owner */
-  order.forEach(i => { const g = SLOT_G[i]; if (!seen.has(g)) { seen.add(g); gl.push(g); } });
-  if (OG && IS_OWNER_TOKEN) gl.unshift(OG);
+{ const bar = document.getElementById('heroes'); const seen = new Set(), gl = [];
+  const OG = SLOT_G[GLB_IDS.indexOf('n:owner')];
+  if (OG && !IS_OWNER_TOKEN) seen.add(OG);   /* hidden from everyone but the owner */
+  HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g)) { seen.add(g); gl.push(g); } });
+  gl.sort(compareRoster);
   const cur = document.createElement('button'); cur.id = 'hcur'; cur.className = 'cur'; cur.appendChild(document.createTextNode('')); const car = document.createElement('span'); car.textContent = '\u25be'; cur.appendChild(car); cur.title = 'choose character';
   const vars = document.createElement('div'); vars.id = 'hvars'; const list = document.createElement('div'); list.id = 'hlist';
   const rows = [];
@@ -517,7 +522,13 @@ async function selectVariant(g, v) {
     const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = curVar(g).slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = curVar(g).slot; toggleFollower(+f.dataset.f); });
     row.appendChild(b); row.appendChild(f); return { row, b }; };
   gl.forEach(g => { const r = mkRow(g); list.appendChild(r.row); rows.push({ g, b: r.b }); });
-  window.__ownerRoster = () => { if (!OG || rows.some(r => r.g === OG)) return; const r = mkRow(OG); list.insertBefore(r.row, list.firstChild); rows.unshift({ g: OG, b: r.b }); };
+  window.__ownerRoster = () => {
+    if (!OG || rows.some(r => r.g === OG)) return;
+    const r = mkRow(OG);
+    const at = rows.findIndex(x => compareRoster(OG, x.g) < 0);
+    if (at < 0) { list.appendChild(r.row); rows.push({ g: OG, b: r.b }); }
+    else { list.insertBefore(r.row, rows[at].b.parentElement); rows.splice(at, 0, { g: OG, b: r.b }); }
+  };
   bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; })()); }
 async function toggleModel(i) {
   const id = GLB_IDS[i], next = modeFor(id) === 'blocky' ? 'glb' : 'blocky'; try { localStorage.setItem('vn_model_' + id, next); } catch (_) {}

@@ -8,6 +8,7 @@ let bad = 0; const ok = (n, c, d) => { console.log((c ? 'PASS ' : 'FAIL ') + n, 
 const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => { m.set(k, String(v)); }, removeItem: (k) => { m.delete(k); } }; };
 
 ok('defaults on garbage', JSON.stringify(sanitizePrefs('x')) === JSON.stringify(DEFAULT_PREFS) && JSON.stringify(sanitizePrefs({ view: 'bad', zoom: 'a', quality: 9 })) === JSON.stringify(DEFAULT_PREFS));
+ok('fight mode defaults ON; stored choice overrides', DEFAULT_PREFS.combat === true && sanitizePrefs({ combat: false }).combat === true && sanitizePrefs({ combat: false, combatSet: true }).combat === false && sanitizePrefs({ combat: true, combatSet: true }).combat === true);
 ok('zoom clamps', clampZoom(99) === ZOOM_MAX && clampZoom(-5) === ZOOM_MIN && clampZoom(NaN) === 1);
 const st = mem(); savePrefs(st, { view: 'first', zoom: 5, zoomSens: 2, lookSens: 0.1, quality: 'low', shadows: false, showFps: false });
 const lp = loadPrefs(st); ok('prefs round-trip + clamp', lp.view === 'first' && lp.zoom === ZOOM_MAX && lp.lookSens === 0.4 && lp.quality === 'low' && lp.shadows === false && lp.showFps === false, JSON.stringify(lp));

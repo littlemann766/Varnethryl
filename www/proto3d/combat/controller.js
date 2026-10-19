@@ -11,7 +11,7 @@ export class CombatController {
     this.enemies = []; this.ls = {}; this.p = { x: 0, z: 0, yaw: 0, dead: false };
     this.hero = { id: '', name: 'Hero', level: 40, className: 'Adventurer', saber: false };
     this.act = null; this.blocking = false; this.blockT = 0; this.iframes = 0; this.shield = 0; this.potions = this.P.potion.charges; this.dead = 0;
-    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this._mk = ''; this.ownerUnlocked = false; this.meteors = [];
+    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this._mk = ''; this.ownerUnlocked = false; this.meteors = []; this.ultSel = (() => { try { const v = typeof localStorage !== 'undefined' && localStorage.getItem('varn.ultsel'); return v === 'unholy' ? 'unholy' : 'holy'; } catch (e) { return 'holy'; } })(); this.bystanders = null;
     this.env = { HS: this.HS, move: o.move || ((e, dx, dz) => { e.x += dx; e.z += dz; }) };
   }
   on(t, f) { (this.ls[t] || (this.ls[t] = [])).push(f); return this; }
@@ -51,7 +51,7 @@ export class CombatController {
     if (!this.res.can(ab.cost)) { this.emit('denied', { slot: i, why: 'Not enough stamina' }); return false; }
     this.res.spend(ab.cost); this.cd.start(a.id, ab.cd); this.act = { a: ab, slot: i, t: 0, done: false };
     if (a.fury && !this.res.unlimited) this.fury = 0;
-    if (a.kind === 'meteor') { const U = TUNING.ult; this.meteors.push({ t: U.delay, x: this.p.x, z: this.p.z, r: U.radius }); this.emit('meteorCast', { x: this.p.x, z: this.p.z, radius: U.radius, delay: U.delay }); }
+    if (a.kind === 'meteor') { const U = TUNING.ult; this.meteors.push({ t: U.delay, x: this.p.x, z: this.p.z, r: U.radius, mode: ab.mode || 'hostile', name: ab.name }); this.emit('meteorCast', { x: this.p.x, z: this.p.z, radius: U.radius, delay: U.delay, mode: ab.mode || 'hostile', name: ab.name }); }
     const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, 8 * this.HS);
     this.emit('action', { slot: i, a: ab, T: ab.T, aim: t });
     return true;
@@ -59,14 +59,20 @@ export class CombatController {
   /* Unholy Destruction impact. Eligible = hostile, living, non-boss monsters inside the radius (friendlies/protected/props are never in cc.enemies and are skipped if flagged).
      Each gets the normal death handler (defeat) exactly once. Bosses take the normal owner saber hit unless TUNING.ult.bossesInstantKill. The Owner/party are never touched. */
   meteorImpact(m) {
-    const U = TUNING.ult, hit = [];
+    const U = TUNING.ult, hit = [], all = m.mode === 'all';   // 'all' (Unholy): everything in range except the Owner. 'hostile' (Holy): hostile monsters + hostile characters only.
+    const um = Math.max(1, Math.min(100, Math.floor(+U.dmgMul || 1)));
     for (const e of this.enemies.slice()) {
-      if (e.state === 'defeated' || e.friendly || e.protected || e.prop || e.npc) continue;
+      if (e.state === 'defeated' || e.owner || e.prop) continue;
+      if (!all && (e.friendly || e.protected || e.npc || e.party || e.ally || e.hostile === false)) continue;
       if (Math.hypot(e.x - m.x, e.z - m.z) > m.r) continue;
       if (e.def.boss && !U.bossesInstantKill) { this.hitEnemy(e, 1, { stagger: 0, ult: true }); hit.push({ e, kill: false }); continue; }
-      const dmg = Math.ceil(e.hp); e.hp = 0; this.emit('damage', { e, dmg, crit: false, toPlayer: false }); this.defeat(e); hit.push({ e, kill: true });
+      const dmg = Math.max(1, Math.ceil(e.hp)) * um; e.hp = 0; this.emit('damage', { e, dmg, crit: false, toPlayer: false }); this.defeat(e); hit.push({ e, kill: true });
     }
-    this.emit('meteorImpact', { x: m.x, z: m.z, radius: m.r, hits: hit });
+    if (all && typeof this.bystanders === 'function') for (const b of this.bystanders() || []) {   // party members / NPCs / friendly characters held by the host (never the Owner)
+      if (!b || b.owner || b.isOwner || Math.hypot(b.x - m.x, b.z - m.z) > m.r) continue;
+      const dmg = Math.max(1, Math.ceil(b.hp || 1)) * um; this.emit('bystanderKill', { b, dmg }); hit.push({ e: b, kill: true, bystander: true });
+    }
+    this.emit('meteorImpact', { x: m.x, z: m.z, radius: m.r, hits: hit, mode: m.mode, name: m.name });
   }  dodge(dx, dz) {
     const D = this.P.dodge; if (this.dead > 0 || !this.cd.ok('dodge') || !this.res.spend({ sp: D.sp })) { if (this.dead <= 0 && this.cd.ok('dodge')) this.emit('denied', { why: 'Not enough stamina' }); return false; }
     this.cd.start('dodge', D.cd); this.iframes = D.iframes; this.act = null;
@@ -86,7 +92,14 @@ export class CombatController {
   targetOf(e) { return e; }
   hitEnemy(e, mult, a) {
     if (e.state === 'defeated') return;
-    const r = DamageCalculator.playerHit(this.weapon(), mult, this.rng); e.hp = Math.max(0, e.hp - r.dmg); e.flash = 0.2; this.lastTarget = e; this.lastHitT = this.cd.t;
+    const r = DamageCalculator.playerHit(this.weapon(), mult, this.rng);
+    /* Owner saber: regular hostile monsters take current HP x12 per hit (always lethal). Bosses keep flat 99,999 unless TUNING.perks.saberBossesX12. Owner gate enforced here, never from the UI. */
+    const skm = a && a.id && TUNING.skillMul && TUNING.skillMul[a.id];
+    if (skm > 0 && this.weapon() === 'saber' && this.ownerOk()) r.dmg = Math.round(99999 * skm);
+    else {
+    const sm = Math.max(0, Math.min(50, Math.floor(+TUNING.perks.saberMul || 0)));   // 0 = flat 99,999 (old behavior); 1-50 = x target current HP
+    if (sm > 0 && this.weapon() === 'saber' && this.ownerOk() && e.hp > 0 && (!e.def.boss || TUNING.perks.saberBossesX12)) r.dmg = Math.max(1, Math.round(e.hp)) * sm; }
+    e.hp = Math.max(0, e.hp - r.dmg); e.flash = 0.2; this.lastTarget = e; this.lastHitT = this.cd.t;
     const dx = e.x - this.p.x, dz = e.z - this.p.z, d = Math.hypot(dx, dz) || 1; e.kx = dx / d; e.kz = dz / d; e.knockT = (a && a.knock ? 0.35 : 0.12);
     this.emit('damage', { e, dmg: r.dmg, crit: r.crit, toPlayer: false });
     if (this.ownerOk() && !(a && a.ult)) this.fury = Math.min(TUNING.ult.fury, this.fury + (a && a.id !== 'basic' ? TUNING.ult.furyPerSkill : TUNING.ult.furyPerBasic));

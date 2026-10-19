@@ -32,6 +32,7 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
   if (o.extra) o.extra(B);
   if (o.details !== false) B.shutY = gy + .1, B.details({ upper: o.upper, hs });
   if (o.interior) o.interior(B);
+  { const pk = { inn: 'inn', smithy: 'smithy', bakery: 'bakery', market: 'market', apothecary: 'apothecary', thieves: 'thieves', house1: 'house', house2: 'house', house3: 'house', house4: 'house', farmhouse: 'house' }[B.id]; if (pk) B.props2(pk); }
   B.radius = Math.hypot(B.w, B.d) / 2; return B.finish();
 }
 

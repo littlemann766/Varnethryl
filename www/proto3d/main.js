@@ -859,7 +859,7 @@ let WM = null, wildsP = null, townCols = null, portalT = null, zoneCd = 1.5, por
 const wildsMod = import('./wilds.js').then(m => { portalT = m.makePortal(0x9a6bff); portalT.position.set(TOWN_PORTAL.x, 0, TOWN_PORTAL.z); scene.add(portalT);
   for (const [x, z] of [[-9.2, 37], [-2.8, 37]]) { const b = new THREE.Mesh(new THREE.CylinderGeometry(.18, .22, 2.4, 8), new THREE.MeshLambertMaterial({ color: 0x5a4632 })); b.position.set(x, 1.2, z); scene.add(b); colliders.push({ type: 'circle', x, z, r: .3 }); }
   return m; });
-async function ensureWilds() { if (WM) return WM; const m = await wildsMod; WM = Object.assign({ mod: m }, m.buildWilds({ scene, HS })); WM.portalMesh = m.makePortal(0x4fd0ff); WM.portalMesh.position.set(m.WILDS.ox + WM.portal.x, 0, m.WILDS.oz + WM.portal.z); WM.portalMesh.visible = false; scene.add(WM.portalMesh); return WM; }
+async function ensureWilds() { if (WM) return WM; const m = await wildsMod; WM = Object.assign({ mod: m }, m.buildWilds({ scene, HS })); WM.portalMesh = m.makePortal(0x4fd0ff); WM.portalMesh.position.set(WM.portal.x, 0, WM.portal.z); WM.portalMesh.visible = false; scene.add(WM.portalMesh); return WM; }
 function snapFollowers() { TRAIL.length = 0; for (const r of crowd) if (r.kind === 'party') { r.level = 0; r.y = 0; r.ti = null; r.lvT = 0; r.a.x = state.heroX + (Math.random() - 0.5) * 3; r.a.z = state.heroZ + 2.5 * HS; r.vxs = r.vzs = 0; } }
 async function setZone(name) {
   if (name === ZONE.name) return true;
@@ -880,7 +880,7 @@ function updateZone(dt) {
   if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ);
   const t = performance.now() / 1000; if (portalT && portalT.userData.update) portalT.userData.update(t); if (WM && WM.portalMesh.userData.update) WM.portalMesh.userData.update(t);
   zoneCd = Math.max(0, zoneCd - dt); if (zoneCd > 0 || state.level !== 0 || state.climbing) { portalDwell = 0; return; }
-  const p = ZONE.name === 'town' ? TOWN_PORTAL : (WM ? { x: WM.mod.WILDS.ox + WM.portal.x, z: WM.mod.WILDS.oz + WM.portal.z } : null); if (!p) return;
+  const p = ZONE.name === 'town' ? TOWN_PORTAL : (WM ? { x: WM.portal.x, z: WM.portal.z } : null); if (!p) return;
   if (Math.hypot(state.heroX - p.x, state.heroZ - p.z) < 1.7) { portalDwell += dt; if (portalDwell > 0.35) { portalDwell = -99; setZone(ZONE.name === 'town' ? 'wilds' : 'town'); } } else if (portalDwell > -50) portalDwell = 0;
 }
 

@@ -46,12 +46,12 @@ export const KITS = {
     sk('mirelle', 3, { name: "Wolf Dash", icon: 'dash', cd: 12, cost: { sp: 25 }, kind: 'dash', range: 9, dist: 9, arc: 0.7, mult: 2.4 }),
     ult('mirelle', { name: "Grove Awakening", icon: 'ring', kind: 'aoe', range: 11, arc: -1, mult: 5, stagger: 2 })] },
   cedric: { color: '#e8a0d0', basic: "Lute strum", skills: [
-    sk('cedric', 1, { name: "Battle Hymn", icon: 'bolt', cd: 4, cost: { mp: 15 }, kind: 'shield', dur: 4, reduce: 0.25, heal: 0.1 }),
+    sk('cedric', 1, { name: "Battle Hymn", icon: 'bolt', cd: 14, cost: { mp: 20 }, kind: 'buff', buff: { id: 'hymn', dur: 8, dmg: 0.2, reduce: 0.15, party: true }, heal: 0.1 }),
     sk('cedric', 2, { name: "Dissonance", icon: 'wave', cd: 8, cost: { mp: 25 }, kind: 'melee', range: 8, arc: 0.3, mult: 2.2, stagger: 2 }),
     sk('cedric', 3, { name: "Encore", icon: 'heal2', cd: 12, cost: { mp: 30 }, kind: 'heal', heal: 0.2 }),
     ult('cedric', { name: "Grand Crescendo", icon: 'wave', kind: 'aoe', range: 10, arc: -1, mult: 4.5, stagger: 1, heal: 0.3 })] },
   morwen: { color: '#4de0a0', basic: "Scythe sweep", skills: [
-    sk('morwen', 1, { name: "Raise Thrall", icon: 'throw', cd: 4, cost: { mp: 15 }, kind: 'ranged', range: 16, arc: 0.6, mult: 1.8 }),
+    sk('morwen', 1, { name: "Raise Thrall", icon: 'throw', cd: 16, cost: { mp: 25 }, kind: 'summon', summon: { id: 'thrall', dur: 12, hp: 0.35, range: 2.2, speed: 4.5, every: 1.0, mult: 0.7, aggro: 18 } }),
     sk('morwen', 2, { name: "Soul Drain", icon: 'line', cd: 8, cost: { mp: 25 }, kind: 'line', range: 14, arc: 0.9, mult: 2.4, heal: 0.06 }),
     sk('morwen', 3, { name: "Bone Cage", icon: 'trap', cd: 12, cost: { mp: 30 }, kind: 'aoe', range: 5.5, arc: -1, mult: 2.0, stagger: 2 }),
     ult('morwen', { name: "Legion of the Dead", icon: 'storm', kind: 'line', range: 22, arc: 0.95, mult: 6.5 })] },
@@ -67,7 +67,7 @@ export const KITS = {
     ult('vesper', { name: "Judgement Volley", icon: 'volley', kind: 'storm', range: 16, arc: 0.4, mult: 6 })] },
   talia: { color: '#59c3ff', basic: "Spark staff", skills: [
     sk('talia', 1, { name: "Chain Lightning", icon: 'bolt', cd: 4, cost: { mp: 15 }, kind: 'ranged', range: 18, arc: 0.6, mult: 2.2 }),
-    sk('talia', 2, { name: "Totem of Wind", icon: 'wave', cd: 8, cost: { mp: 25 }, kind: 'shield', dur: 4, reduce: 0.25 }),
+    sk('talia', 2, { name: "Totem of Wind", icon: 'wave', cd: 16, cost: { mp: 25 }, kind: 'summon', summon: { id: 'totem', dur: 10, radius: 8, slow: 0.5, reduce: 0.2, haste: 0.25 } }),
     sk('talia', 3, { name: "Static Field", icon: 'trap', cd: 12, cost: { mp: 30 }, kind: 'aoe', range: 6, arc: -1, mult: 1.6, stagger: 2 }),
     ult('talia', { name: "Tempest Call", icon: 'bolt', kind: 'storm', range: 14, arc: -1, mult: 6.5 })] },
   orin: { color: '#d0a070', basic: "Spear thrust", skills: [
@@ -91,9 +91,9 @@ export const KITS = {
     sk('finn', 3, { name: "Feint", icon: 'slash', cd: 12, cost: { sp: 20 }, kind: 'melee', range: 4, arc: 0.4, mult: 2.0, stagger: 2 }),
     ult('finn', { name: "Thousand Cuts", icon: 'dagger', kind: 'storm', range: 9, arc: -1, mult: 7 })] },
   brynn: { color: '#ffb03a', basic: "Repeater crossbow", skills: [
-    sk('brynn', 1, { name: "Turret", icon: 'trap', cd: 4, cost: { sp: 15 }, kind: 'storm', range: 14, arc: 0.5, mult: 2.2 }),
+    sk('brynn', 1, { name: "Turret", icon: 'trap', cd: 14, cost: { sp: 20 }, kind: 'summon', summon: { id: 'turret', dur: 12, range: 14, every: 0.8, mult: 0.8 } }),
     sk('brynn', 2, { name: "Mine Field", icon: 'ring', cd: 8, cost: { sp: 25 }, kind: 'aoe', range: 6, arc: -1, mult: 2.4, stagger: 1 }),
-    sk('brynn', 3, { name: "Overclock", icon: 'bolt', cd: 12, cost: { sp: 20 }, kind: 'shield', dur: 4, reduce: 0.2 }),
+    sk('brynn', 3, { name: "Overclock", icon: 'bolt', cd: 20, cost: { sp: 25 }, kind: 'buff', buff: { id: 'overclock', dur: 6, dmg: 0.15, cdRate: 1.0, summonRate: 1.0 } }),
     ult('brynn', { name: "Siege Cannon", icon: 'meteor', kind: 'meteor', mult: 8, radius: 12, delay: 1.4 })] },
   asha: { color: '#ffcf5a', basic: "Palm combo", skills: [
     sk('asha', 1, { name: "Dragon Kick", icon: 'push', cd: 4, cost: { sp: 15 }, kind: 'melee', range: 4, arc: 0.4, mult: 2.0, stagger: 1, knock: 6 }),

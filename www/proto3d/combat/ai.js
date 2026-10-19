@@ -15,7 +15,7 @@ export class EnemyAIController {
       case 'chase':
         if (p.dead) { this.set(e, 'idle'); break; }
         const spd = e.phase === 2 ? TUNING.boss.enrageSpeed : 1, pt = e.def.boss ? (e.pat || (e.pat = pickPattern(e))) : null, eng = pt ? pt.reach * env.HS + e.def.r : reach;
-        if (d > eng * 0.8) env.move(e, nx * e.def.speed * spd * env.HS / 1.5 * dt, nz * e.def.speed * spd * env.HS / 1.5 * dt);
+        if (d > eng * 0.8) { const sl = 1 - (e.slowT || 0); env.move(e, nx * e.def.speed * spd * sl * env.HS / 1.5 * dt, nz * e.def.speed * spd * sl * env.HS / 1.5 * dt); }   // Totem of Wind slow
         if (d <= eng && e.atkCd <= 0) { e.curTele = pt ? pt.tele * (e.phase === 2 ? TUNING.boss.enrageTele : 1) : e.def.tele; this.set(e, 'telegraph'); }
         break;
       case 'telegraph': if (e.tStateT >= (e.curTele || e.def.tele)) { this.set(e, 'attack'); return 'attack'; } break;

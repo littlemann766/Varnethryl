@@ -23,7 +23,7 @@ with sync_playwright() as p:
     base = pick('aldric'); T('hero: default profile 1.905 m, radius cap rule, speed x1', base['CH']['height'] == 1.905 and base['CH']['speed'] == 1 and abs(base['HERO_R'] - 0.75) < 0.02, base['CH'])
     cb = cam(); print('hero cam', cb, 'height', base['heroH'])
     res = {}
-    for mid, h in [('n:vaelthryx_new', 2.0), ('n:vaelthryx_new6', 14.3), ('n:vaelthryx_straight_rig', 0.65), ('n:frosttroll_b', 5.7), ('n:ashentitan_new', 11.4)]:
+    for mid, h in [('n:vaelthryx_new', 2.0), ('n:vaelthryx_new6', 14.3), ('n:vaelthryx_straight_rig', 19.05), ('n:frosttroll_b', 5.7), ('n:ashentitan_new', 11.4)]:
         s = pick(mid); res[mid] = s; c = cam()
         T(mid + ': profile applied on pick (height/speed/radius)', s['CH']['height'] == h and (s['CH']['speed'] > 1 and s['HERO_R'] > base['HERO_R'] if h > 3 else s['CH']['speed'] > 0), s['CH'])
         T(mid + ': measured model height matches config within 12 percent (baked scale, not rescaled): %.1f m vs %.1f m' % (s['heroH'] / K, h), abs(s['heroH'] / K - h) / h < 0.12, s['heroH'])

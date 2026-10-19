@@ -1,5 +1,5 @@
 // Node tests for the central character-scale config (pure data).
-import { CHARS, DEFAULT, HERO_M, SPEED_CAP, COLLIDE_RADIUS_CAP, profileFor, worldProfile, fitsDoor, isGiant, WORLD_PER_M } from '../www/proto3d/charscale.js';
+import { loadScale, CHARS, DEFAULT, HERO_M, SPEED_CAP, COLLIDE_RADIUS_CAP, profileFor, worldProfile, fitsDoor, isGiant, WORLD_PER_M } from '../www/proto3d/charscale.js';
 import { CombatController } from '../www/proto3d/combat/controller.js';
 let ok = 0, bad = 0; const T = (n, c) => { c ? ok++ : bad++; console.log(c ? 'PASS' : 'FAIL', n); };
 T('hero default is 1.905 m', DEFAULT.height === 1.905 && HERO_M === 1.905 && profileFor('n:aldric').height === 1.905 && !profileFor('n:aldric').custom);
@@ -16,4 +16,5 @@ const mkk = id => { const k = new CombatController({ HS: 1.5, rng: () => 0.5 });
 const hitAt = (id, z) => { const k = mkk(id); const e = k.addEnemy('wolf', 0, z); e.hp = e.max = 1e6; k.on('damage', () => 0); k.use('aldric.2'); for (let i = 0; i < 40; i++) k.update(1 / 60); return e.hp < e.max; };
 T('combat reach scales with size: a 14 world-unit AoE hits only for the giant', !hitAt('n:aldric', 14) && hitAt('n:ashentitan_new', 14));
 T('combat reach 1.0 for the default hero', mkk('n:aldric').RM === 1 && mkk('n:ashentitan_new').RM === CHARS['n:ashentitan_new'].reach);
+T('playable Vaelthryx = 10 x hero height derived from HERO_M, loaded with a scale (file untouched)', Math.abs(profileFor('n:vaelthryx_straight_rig').height - 10 * HERO_M) < 1e-9 && Math.abs(loadScale('n:vaelthryx_straight_rig') - 10 * HERO_M / 0.65) < 1e-9 && loadScale('n:aldric') === 1 && isGiant('n:vaelthryx_straight_rig'));
 console.log(ok + ' pass, ' + bad + ' fail'); process.exit(bad ? 1 : 0);

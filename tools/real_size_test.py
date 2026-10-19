@@ -20,7 +20,7 @@ with sync_playwright() as p:
         return pg.evaluate("__p3d.charScale()")
     def cam():
         pg.wait_for_timeout(1500); return pg.evaluate("(()=>{const r=__p3d.camRig;return {d:r.camDist,zt:r.zoomTarget,prof:r.prof.camDist}})()")
-    base = pick('aldric'); T('hero: default profile 1.905 m, radius cap rule, speed x1', base['CH']['height'] == 1.905 and base['CH']['speed'] == 1 and abs(base['HERO_R'] - 0.75) < 0.02, base['CH'])
+    base = pick('aldric'); T('hero: Aldric real height 1.88 m (v1.1.15), radius cap rule, speed ~x1', base['CH']['height'] == 1.88 and abs(base['CH']['speed'] - 0.993) < 1e-6 and abs(base['HERO_R'] - 0.75) < 0.02, base['CH'])
     cb = cam(); print('hero cam', cb, 'height', base['heroH'])
     res = {}
     for mid, h in [('n:vaelthryx_new', 2.0), ('n:vaelthryx_new6', 14.3), ('n:vaelthryx_straight_rig', 19.05), ('n:frosttroll_b', 5.715), ('n:ashentitan_new', 11.4)]:
@@ -30,7 +30,7 @@ with sync_playwright() as p:
         T(mid + ': camera is further out than the hero camera and the hero stays in view', (c['d'] / c['zt'] > cb['d'] / cb['zt'] if c['prof'] > 1.2 else True) and s['heroH'] < c['d'] * 2.2, (c, cb))
         T(mid + ': zoom clamp comes from the profile', abs(pg.evaluate("__p3d.camRig.setZoom(5)") - s['CH']['camMax']) < 1e-6 and abs(pg.evaluate("__p3d.camRig.setZoom(0.01)") - s['CH']['camMin']) < 1e-6)
         if SH: pg.screenshot(path=f"{SH}/real_{mid.split(':')[1]}.png")
-    back = pick('aldric'); T('picking the hero again restores the default profile + camera', back['CH']['height'] == 1.905 and abs(back['HERO_R'] - base['HERO_R']) < 1e-6 and abs(pg.evaluate("__p3d.camRig.setZoom(5)") - 1.7) < 1e-6)
+    back = pick('aldric'); T('picking the hero again restores the default profile + camera', back['CH']['height'] == 1.88 and abs(back['HERO_R'] - base['HERO_R']) < 1e-6 and abs(pg.evaluate("__p3d.camRig.setZoom(5)") - 1.7) < 1e-6)
     print({k: [round(x / K, 2) for x in v['dims']] for k, v in res.items()})
     print({k: round(v['heroH'] / K, 2) for k, v in res.items()}, 'hero', round(base['heroH'] / K, 2))
     T('no page errors', not errs, errs[:3]); b.close()

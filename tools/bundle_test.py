@@ -11,7 +11,7 @@ def T(n, c, d=''):
     global bad; print('PASS' if c else 'FAIL', n, '' if c else d); bad += 0 if c else 1
 # approved height and Beth's baked (skinned idle t=0) height. Check: load scale x baked == approved (the static rest-pose bbox differs from the idle pose, e.g. Vaelthryx is straight at rest and coiled at idle)
 BAKED = {'n:owner': 1.901, 'n:wren_new3': 1.35, 'n:pip_new2': 0.52, 'n:ember_new3': 1.296, 'n:garruk_new5': 2.02, 'n:brynn_armor2': 1.592, 'n:cedric_armor2': 2.017, 'n:phoenix_new3': 0.756, 'n:frosttroll_a': 5.724, 'n:frosttroll_b': 5.715, 'n:ashentitan_new': 11.445, 'n:vaelthryx_new7': 19.05}
-IDS = {'n:owner': 1.905, 'n:wren_new3': 1.905, 'n:pip_new2': 1.905, 'n:ember_new3': 1.905, 'n:garruk_new5': 1.905, 'n:brynn_armor2': 1.905, 'n:cedric_armor2': 1.905, 'n:phoenix_new3': 1.905,
+IDS = {'n:owner': 1.905, 'n:wren_new3': 1.35, 'n:pip_new2': 0.52, 'n:ember_new3': 1.296, 'n:garruk_new5': 2.02, 'n:brynn_armor2': 1.626, 'n:cedric_armor2': 1.829, 'n:phoenix_new3': 0.756,
        'n:frosttroll_a': 5.7, 'n:frosttroll_b': 5.715, 'n:ashentitan_new': 11.4, 'n:vaelthryx_new7': 19.05}
 with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']); pg = b.new_context(viewport={'width':844,'height':390}, has_touch=True, is_mobile=True).new_page(); errs = []

@@ -16,6 +16,9 @@ with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']); pg = b.new_page(viewport={'width': 390, 'height': 844})
     errs = []; pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
     pg.goto(f'http://127.0.0.1:{port}/proto3d.html?party=0&npcs=0'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=90000); pg.wait_for_timeout(800)
+    if os.environ.get('HERO'):   # v1.1.15 real heights: run the route as a tiny/large hero (e.g. HERO=n:pip_new2 or n:garruk_new5)
+        _i = pg.evaluate("m=>__p3d.modelStatus().models.findIndex(x=>x.id===m)", os.environ['HERO']); assert _i >= 0, os.environ['HERO']
+        pg.evaluate("i=>__p3d.selectHero(i)", _i); pg.wait_for_function("m=>__p3d.charScale().id===m", arg=os.environ['HERO'], timeout=120000); pg.wait_for_timeout(2500); print('HERO', pg.evaluate("__p3d.charScale()"))
     infos = json.loads(pg.evaluate(JS_INFO))
     ONLY = os.environ.get('ONLY', '').split(',') if os.environ.get('ONLY') else None
     for bi in infos:

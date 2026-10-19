@@ -368,7 +368,7 @@ function wrapGLB(g, id, blocky) {
   try { const cfg = CLOTHCFG[id]; root.userData.sb = cfg ? new SpringBonesV2(m, { clips: g.animations, config: cfg }) : new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.14';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.15';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 { const v = document.getElementById('ver'); if (v) v.textContent = 'v' + ASSET_V; }   // version label = real build (package.json via build_sw.py); text only, so the 5-tap cheats listener on #ver stays
 const gl = new GLTFLoader();
 const glbPromise = {};

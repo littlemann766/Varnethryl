@@ -17,10 +17,13 @@ export class CombatController {
   }
   on(t, f) { (this.ls[t] || (this.ls[t] = [])).push(f); return this; }
   emit(t, a) { const l = this.ls[t]; if (l) for (let i = 0; i < l.length; i++) l[i](a); }
-  setHero(h) { Object.assign(this.hero, h); this.hero.owner = /(^|:)owner/.test(this.hero.id || ''); this.kit = kitFor(this.hero.id);  /* Owner gate: only the Owner has 999,999 max HP */ this.applyMax(true); this.emit('hero', this.hero); }
+  setHero(h) { Object.assign(this.hero, h); this.hero.owner = /(^|:)owner/.test(this.hero.id || ''); this.kit = this.gearKit(kitFor(this.hero.id));  /* Owner gate: only the Owner has 999,999 max HP */ this.applyMax(true); this.emit('hero', this.hero); }
   /* max HP/MP/SP: Owner skin = ownerHp; non-Owner hero holding the Owner saber on the owner account = x TUNING.perks.holderMul (not invincible); everyone else normal. Current values keep their fraction; reverts when the saber goes away. */
+  /* Armory bonuses (armory.js bonuses(): percent fractions) override the kit's weapon/armor numbers on a COPY of the shared kit; null/Owner => untouched */
+  setGear(b) { this.gear = b && !b.owner ? b : null; this.kit = this.gearKit(kitFor(this.hero.id)); this.applyMax(true); }
+  gearKit(k) { const g = this.gear; if (!k || !g || !k.weapon || !k.armor) return k; return Object.assign({}, k, { weapon: Object.assign({}, k.weapon, { dmgPct: g.dmgPct }), armor: Object.assign({}, k.armor, { hpPct: g.hpPct, mpPct: g.mpPct, spPct: g.spPct, defPct: g.defPct }) }); }
   applyMax(force) {
-    const own = !!this.hero.owner, hold = !own && this.ownerOk(), m = hold ? TUNING.perks.holderMul : 1, ar = (!own && this.kit && this.kit.armor) || null, key = (own ? 'o' : '') + m + (ar ? ar.name : ''); if (!force && key === this._mk) return; this._mk = key;
+    const own = !!this.hero.owner, hold = !own && this.ownerOk(), m = hold ? TUNING.perks.holderMul : 1, ar = (!own && this.kit && this.kit.armor) || null, key = (own ? 'o' : '') + m + (ar ? ar.name + ar.hpPct + ar.mpPct + ar.spPct : ''); if (!force && key === this._mk) return; this._mk = key;
     const nx = { hp: own ? this.P.ownerHp : Math.round(this.P.hp * m * (1 + (ar ? ar.hpPct : 0))), mp: Math.round(this.P.mp * m * (1 + (ar ? ar.mpPct : 0))), sp: Math.round(this.P.sp * m * (1 + (ar ? ar.spPct : 0))) }, R = this.res;
     for (const k of ['hp', 'mp', 'sp']) { if (R.max[k] === nx[k]) continue; R[k] = own && k === 'hp' ? nx[k] : Math.min(nx[k], Math.max(0, R[k] * nx[k] / R.max[k])); R.max[k] = nx[k]; }
   }

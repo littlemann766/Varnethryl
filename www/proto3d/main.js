@@ -366,6 +366,7 @@ function wrapGLB(g, id, blocky) {
   return root;
 }
 const ASSET_V = '1.1.14';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+{ const v = document.getElementById('ver'); if (v) v.textContent = 'v' + ASSET_V; }   // version label = real build (package.json via build_sw.py); text only, so the 5-tap cheats listener on #ver stays
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).

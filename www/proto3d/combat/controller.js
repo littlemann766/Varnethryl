@@ -166,12 +166,17 @@ export class CombatController {
   stormHit(act) { const a = act.a; for (const e of this.enemies.slice()) if (this.inCone(e, a.range * this.HS, -1)) this.hitEnemy(e, a.mult / 3, a); }
   /* ---- damage in ---- */
   enemyStrike(e) {
-    const dx = this.p.x - e.x, dz = this.p.z - e.z, d = Math.hypot(dx, dz), reach = e.def.reach * this.HS + e.def.r;
-    if (this.p.dead || this.dead > 0) return;
-    if (d > reach * 1.25) { this.emit('enemyAttack', { e, result: 'missed', dmg: 0 }); return; }
+    const dx = this.p.x - e.x, dz = this.p.z - e.z, d = Math.hypot(dx, dz), pt = e.def.boss ? e.pat : null, reach = (pt ? pt.reach : e.def.reach) * this.HS + e.def.r;
+    if (this.p.dead || this.dead > 0) { e.pat = null; return; }
+    /* boss patterns: ring = within reach; cone = within reach and inside the facing arc; line = down the facing axis, inside the width. Facing is frozen during the telegraph, so it can be side-stepped. */
+    let inside = d <= reach * 1.25;
+    if (pt) { const fx = Math.sin(e.yaw), fz = Math.cos(e.yaw), al = dx * fx + dz * fz, pp = Math.abs(dx * fz - dz * fx);
+      inside = pt.shape === 'cone' ? (d <= reach * 1.1 && (d < 1 || al / d >= pt.cos)) : pt.shape === 'line' ? (al >= -1 && al <= reach && pp <= pt.width * this.HS / 2 + 0.6) : d <= reach * 1.1; }
+    if (pt) { e.pat = null; this.emit('bossAttack', { e, pat: pt, hit: inside }); }
+    if (!inside) { this.emit('enemyAttack', { e, result: 'missed', dmg: 0 }); return; }
     if (this.iframes > 0 || this.god) { this.emit('enemyAttack', { e, result: 'dodged', dmg: 0 }); this.emit('dodged', e); return; }
     if (this.blocking && this.blockT <= this.P.block.parry) { this.ai.stagger(e, 0.9); e.poiseBreak = true; this.emit('enemyAttack', { e, result: 'parried', dmg: 0 }); return; }
-    let h = DamageCalculator.enemyHit(e.def.atk, this.P.def, this.P.agi, this.rng), res = 'hit';
+    let h = DamageCalculator.enemyHit(e.def.atk, this.P.def, this.P.agi, this.rng), res = 'hit'; if (pt && pt.dmg) h = Math.round(h * pt.dmg);
     if (h === 0) res = 'dodged';
     if (this.blocking) { h = Math.round(h * (1 - this.P.block.reduce)); if (!this.res.unlimited) this.res.sp = Math.max(0, this.res.sp - Math.max(8, h * 0.02)); res = 'blocked'; if (this.res.sp <= 0) this.block(false); }
     if (this.shield > 0) h = Math.round(h * (1 - ABILITIES[4].reduce));
@@ -197,6 +202,7 @@ export class CombatController {
     this.p.dead = this.dead > 0;
     for (const e of this.enemies) {
       if (e.state === 'defeated') { e.deadT += dt; continue; }
+      if (e.def.boss && e.phase !== 2 && e.state !== 'defeated' && e.hp / e.max < TUNING.boss.enrageAt) { e.phase = 2; e.pat = null; this.emit('bossPhase', { e, phase: 2 }); }
       if (this.ai.update(e, this.p, dt, this.env) === 'attack') this.enemyStrike(e);
     }
     this.tgt.update(this.enemies, this.p.x, this.p.z);

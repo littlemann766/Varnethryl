@@ -68,6 +68,7 @@ function buildPanel(c, gate, env) {
   panel.appendChild(row(kind, il, act('item', 'Spawn', () => c.spawnItem(kind.value, +il.value))));
   panel.appendChild(sec('Party / enemies / quests'));
   panel.appendChild(row(act('heal', 'Heal party', c.healParty), act('kill', 'Kill enemies', c.killEnemies), act('skipq', 'Skip quest', c.skipQuest)));
+  if (env.hooks && env.hooks.fightTest) { panel.appendChild(sec('Fight test')); panel.appendChild(row(act('fight', 'Start / stop fight test', () => { env.hooks.fightTest(); hide(); return true; }))); panel.appendChild(el('div', { textContent: 'Owner + lightsaber vs chasing monsters. Attack: button or F/J.', style: 'font-size:11px;opacity:.7' })); }
   panel.appendChild(sec('Teleport'));
   const zone = el('select', { id: 'ownerZone' }); for (const z of c.zones()) zone.appendChild(el('option', { value: z, textContent: z })); isolateKeys(zone);
   panel.appendChild(row(zone, act('tpz', 'Go zone', () => c.teleportZone(zone.value))));
@@ -110,6 +111,7 @@ async function ensureUi(env) {
 function showMain(env) {
   if (!cheats) { cheats = createCheats(Object.assign({}, env, { onChange: () => { if (ui.main) ui.main.sync(); } })); if (env.onReady) env.onReady(cheats); }
   if (!ui.main) ui.main = buildPanel(cheats, ui.gate, env);
+  if (env.hooks && env.hooks.onOwner) env.hooks.onOwner();
   ui.main.show();
 }
 /* Gesture entry. Owner: toggle the panel. Not owner: local mode shows the passphrase prompt; server mode does nothing. */

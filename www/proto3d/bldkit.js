@@ -357,11 +357,13 @@ Builder.prototype.partition = function (x, z, len, axis, gap, h = 2.7, key = 'pl
   for (const g of gaps) this.bx(axis === 'x' ? g[1] + .2 : T + .06, .25, axis === 'x' ? T + .06 : g[1] + .2, 'darkWood', axis === 'x' ? x + g[0] : x, h - .12, axis === 'x' ? z : z + g[0], this.G.int);
 };
 // mezzanine / gallery along the back wall with a real stair run
+// gallery: the slab reaches .12 m past its front edge into the ramp top (ramp wins where they overlap), so there is no walk gap between the last step and the landing
 Builder.prototype.gallery = function (o = {}) {
-  const y = o.y || 3.1, iw = this.iw, id_ = this.id_, dp = Math.max(o.depth || 2.2, 3.0), rects = [[-iw, iw, -id_, -id_ + dp]]; if (o.side) rects.push(o.side > 0 ? [iw - dp, iw, -id_ + dp, id_ - 2.5] : [-iw, -iw + dp, -id_ + dp, id_ - 2.5]);
+  const y = o.y || 3.1, iw = this.iw, id_ = this.id_, dp = Math.max(o.depth || 2.2, 3.0), rects = [[-iw, iw, -id_, -id_ + dp + (o.topOverlap === undefined ? .12 : o.topOverlap)]]; if (o.side) rects.push(o.side > 0 ? [iw - dp, iw, -id_ + dp, id_ - 2.5] : [-iw, -iw + dp, -id_ + dp, id_ - 2.5]);
   const sx = o.stairX === undefined ? iw - 1.0 : o.stairX, len = Math.min(Math.max(o.run || 3.6, y / Math.tan((o.maxSlope || 26) * Math.PI / 180)), Math.max(3.6, id_ * 2 - dp - 3.0));
   this.stairs({ cx: sx, cz: -id_ + dp + len / 2, ang: Math.PI, len, w: 1.7, l0: 0, y0: 0, l1: 1, y1: y });
   this.upperFloor(1, y, rects, o);
+  { const e = -id_ + dp; this.floors.push({ level: 1, y, rects: [[sx - 1.4, sx + 1.4, e - .5, e + .25]] }); }   // walk-only lip around the ramp top corners (no mesh): stepping off the last step diagonally never meets a no-floor sliver
   if (o.rooms) this.onFloor(1, y, o.rooms);
   this.col(0, -id_ + .4, iw * 2, .6);
 };

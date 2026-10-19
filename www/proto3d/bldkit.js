@@ -540,3 +540,21 @@ Builder.prototype.props2 = function (kind) {
   if (kind === 'inn') chand(-1.8, 2.45, 1.4, .7);
   if (kind === 'thieves') { for (let i = 0; i < 3; i++) stool(-2.6 + i * .9, 1.8, .5); bottles(-.8, 1.0, .6, 6, .45); hang(0, -.3, 3); }
 };
+
+// gothic pinnacles (cards: town hall, temple, library, mage academy): square shaft + 4-sided spire + gold knob, on the eave line; roof group (hidden with the roof)
+Builder.prototype.pinnacle = function (x, y, z, s = 1) { const g = this.G.roof; this.bx(.36 * s, 1.0 * s, .36 * s, 'stoneL', x, y + .5 * s, z, g, { shadow: false }); this.cone(.3 * s, 1.5 * s, 'slate', x, y + 1.0 * s, z, g, 4, { shadow: false }); this.add(new THREE.SphereGeometry(.09 * s, 5, 4), M('gold'), x, y + 2.55 * s, z, g, { shadow: false }); };
+Builder.prototype.cardSpires = function (o = {}) { const w = this.w, d = this.d, h = o.h || this.h, s = o.s || 1;
+  for (const sx of [-1, 1]) { this.pinnacle(sx * w / 4, h, d / 2 + .05, s); this.pinnacle(sx * (w / 2 - .2), h, -d / 2 + .2, s); if (o.mid !== false) this.pinnacle(sx * (w / 2 + .05), h, 0, s * .85); } };
+
+// birds: n small V-shapes circling over the village, all motion in the vertex shader (static buffers, one draw call, no per-frame JS)
+export function birdFlock(n = 36, R = 100) {
+  const pos = [], ctr = [], ph = []; let sd = 7; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < n; i++) { const g = i % 4, cx = (g % 2 ? 1 : -1) * R * (.25 + r() * .35), cz = (g > 1 ? 1 : -1) * R * (.25 + r() * .35), rad = 8 + r() * 14, y = 22 + r() * 14, p0 = r() * 6.283, sp = .25 + r() * .2;
+    for (const v of [[-1, 0], [0, 0], [0, .35], [1, 0], [0, 0], [0, .35]]) { pos.push(v[0], 0, v[1]); ctr.push(cx, y, cz); ph.push(p0, rad, sp); } }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('ctr', new THREE.Float32BufferAttribute(ctr, 3)); g.setAttribute('ph', new THREE.Float32BufferAttribute(ph, 3)); g.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 30, 0), 1e4);
+  const m = new THREE.ShaderMaterial({ side: THREE.DoubleSide, uniforms: { uTime: FX.uTime },
+    vertexShader: 'attribute vec3 ctr; attribute vec3 ph; uniform float uTime; void main(){ float a = ph.x + uTime * ph.z; vec3 c = ctr + vec3(cos(a) * ph.y, sin(uTime * .7 + ph.x) * 1.5, sin(a) * ph.y); vec3 fw = normalize(vec3(-sin(a), 0.0, cos(a))); vec3 rt = vec3(fw.z, 0.0, -fw.x);'
+      + ' float flap = sin(uTime * 9.0 + ph.x * 5.0) * 0.45; vec3 p = c + rt * position.x * 0.55 + fw * position.z * 0.9 + vec3(0.0, abs(position.x) * flap, 0.0); gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0); }',
+    fragmentShader: 'void main(){ gl_FragColor = vec4(0.12, 0.12, 0.14, 1.0); }' });
+  const mesh = new THREE.Mesh(g, m); mesh.frustumCulled = false; mesh.userData.keep = true; mesh.name = 'birds'; return mesh;
+}

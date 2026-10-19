@@ -1,7 +1,7 @@
 // Varnethryl 3D buildings: 26 low-poly walk-in buildings built from the boss's sheets (guild blue / royal gold, lion crest, blue slate,
 // timber + stone). Everything is generated in code (see bldkit.js / bldtex.js). Each builder returns a Builder with .update(hx,hz,dt).
 import * as THREE from 'three';
-import { Builder, M, GLOW, WM, rippleMat, boxG, cylG, uvScale, TILE, mergeGroup } from './bldkit.js';
+import { Builder, M, GLOW, WM, rippleMat, birdFlock, boxG, cylG, uvScale, TILE, mergeGroup } from './bldkit.js';
 import { tex, goldDoorTexture } from './bldtex.js';
 
 // ---------- shared decor ----------
@@ -242,7 +242,7 @@ function townhall(spec, ctx) {
   B.shelf(iw - 1.4, -id_ + .3, 3, 0); B.tableR(iw - 1.8, 1, 2.4, 1.2); B.table(-3.5, 1.5, .9);
   for (const s of [-1, 1]) for (const z of [-2, 1.2]) B.pillar(s * 2.4, z, .35, h - 1.4, 'stoneL');
   for (let i = 0; i < 3; i++) B.banner(-iw + .3, 3.4, -2 + i * 2.6, Math.PI / 2, 1, 2.4); B.lamp(-3, 4.8, 0); B.lamp(3, 4.8, 0);
-  B.gallery({ stairX: iw - 1.0, depth: 1.6 }); B.props2('hall'); B.radius = 10; return B.finish();
+  B.gallery({ stairX: iw - 1.0, depth: 1.6 }); B.props2('hall'); B.cardSpires({ s: 1.1 }); B.radius = 10; return B.finish();
 }
 const DWf = B => B.DW;
 
@@ -269,7 +269,7 @@ function library(spec, ctx) {
     extra(B) { const { w, d, h } = B;
       for (const sx of [-1, 1]) { B.tower(sx * (w / 2 - .2), d / 2 - .2, 1.3, h + 1, { key: 'stoneL', coneH: 5.4, windows: 3 }); B.banner(sx * 3.4, 4.4, d / 2 + .08, 0, 1.1, 3); B.bx(.6, 2.2, .6, 'stoneL', sx * 2.4, 1.1, d / 2 + 1.5, B.G.ext); }
       B.win(0, h - 1.8, d / 2 + .05, 0, 3, 4, 'stained'); for (const z of [-4, 0, 4]) for (const s of [-1, 1]) { B.win(s * (w / 2 + .05), 4.4, z, s * Math.PI / 2, 1.2, 3.4, 'stained'); B.bx(.5, h, .5, 'stoneL', s * (w / 2 + .1), h / 2, z + 2, B.G.ext); }
-      for (let i = 0; i < 4; i++) B.bx(B.DW + 1.6, .22, .7, 'stoneL', 0, .11, d / 2 + .8 + i * .35, B.G.ext); B.sign('Grand Library', '📖', 4.6, 3.8, d / 2 + .5, 0); },
+      for (let i = 0; i < 4; i++) B.bx(B.DW + 1.6, .22, .7, 'stoneL', 0, .11, d / 2 + .8 + i * .35, B.G.ext); B.sign('Grand Library', '📖', 4.6, 3.8, d / 2 + .5, 0); B.cardSpires({ s: 1.1 }); },
     interior(B) { const iw = B.iw, id_ = B.id_, h = B.h;
       for (const z of [-4, 0]) for (const s of [-1, 1]) { B.shelf(s * (iw - 3.2), z - 1, 5, 1.5707); B.shelf(s * (iw - 1.4), z - 1, 5, 1.5707); }
       B.shelf(0, -id_ + .3, 6, 0); B.tableR(0, 1.8, 3.2, 1.2); B.tableR(-3.6, 3.4, 2.4, 1.1); B.tableR(3.6, 3.4, 2.4, 1.1); B.counter(0, id_ - 1.4, 3, .8);
@@ -714,6 +714,7 @@ export const BUILDING_DEFS = [
   { id: 'fountain', f: fountain, cx: 0, cz: 0, rot: 0, name: 'Fountain Monument' },
 ];
 export function buildVillage(ctx, only) {
+  if (!only && ctx.scene) ctx.scene.add(birdFlock(36, WORLD_B * .8));   // pass 3 life: one draw call of circling birds
   const out = []; for (const d of BUILDING_DEFS) { if (only && !only.includes(d.id)) continue; const cz = d.id === 'gatehouse' ? WORLD_B - 1.2 : d.cz * PK;
     const b = d.f({ id: d.id, cx: d.cx * PK, cz, rot: d.rot, K: KB }, ctx); b.defName = d.name; b.def = d; out.push(b); } return out;
 }

@@ -41,6 +41,35 @@ const CSS = `
 #cb .top button{min-height:26px;padding:3px 9px;border-radius:10px;border:1px solid #fff7;background:#000a;font-size:11px}
 #cb .stat{position:absolute;left:max(10px,env(safe-area-inset-left));top:max(76px,calc(env(safe-area-inset-top) + 70px));font-size:11px;text-shadow:0 1px 2px #000;line-height:1.35}
 @media (orientation:portrait){#cb .cl{grid-template-columns:repeat(2,46px);right:max(10px,env(safe-area-inset-right));bottom:calc(max(10px,env(safe-area-inset-bottom)) + clamp(210px,min(48vw,66vh),270px) + 6px)}#cb .vit{bottom:calc(max(10px,env(safe-area-inset-bottom)) + 150px)}}
+/* ==== RESTYLE to /workspace/hudui prototype (Owner Combat HUD): gold-rimmed dark panels, Georgia labels, prototype bar colours, fighting-pad positions,
+   skill names under each button. Overrides only; structure, ids and behaviour above are Lucky's and unchanged. ==== */
+#cb{--gold:#d6ae6a;--line:#947444}
+#cb .vit{flex-wrap:wrap;width:min(320px,47vw);padding:8px 10px;background:#0a0d16bb;border:1px solid #96743f;border-radius:10px;box-shadow:0 8px 30px #0009;bottom:auto;top:calc(max(6px,env(safe-area-inset-top)) + 54px);left:max(12px,env(safe-area-inset-left))}
+#cb .vit .lab{flex:0 0 100%;order:-1;font:400 10px system-ui,sans-serif;letter-spacing:.13em;color:#e8cb92;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+#cb .por{width:52px;height:52px;border:2px solid #c49c60;background:#392c2c;font:700 22px Georgia,serif;color:#f6e9d0}
+#cb .por small{border-color:#c49c60;color:#f2d3a0}
+#cb .vit .bar{height:12px;background:#08090d;border:1px solid #9b8567;border-radius:2px}
+#cb .vit .hp i,#cb .tp .hp i{background:linear-gradient(90deg,#762126,#f54340)}#cb .vit .mp i{background:linear-gradient(90deg,#16457e,#399dfb)}#cb .vit .sp i{background:linear-gradient(90deg,#1d5e2c,#5fd77a)}#cb .vit .fy i{background:linear-gradient(90deg,#8c4b17,#ffbd3f)}
+#cb .vit .bar b{font:600 9px system-ui,sans-serif;color:#f6e9d0}
+#cb .tp{background:#0a0d16cc;border-color:#96743f;font-family:Georgia,serif;color:#f6e9d0}#cb .tp .sub{color:#dfccac}#cb .tp .bar{border-color:#9b8567;background:#08090d;border-radius:2px}
+#cb .stat{top:calc(max(6px,env(safe-area-inset-top)) + 150px);font-family:Georgia,serif;color:#f6e9d0}
+#cb .cx{width:min(410px,49vw);height:min(310px,51vh);aspect-ratio:auto;right:max(15px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom))}
+#cb .sl{overflow:visible;box-shadow:inset 0 0 0 3px #141010,0 4px 14px #000b,0 0 14px #da98}
+#cb .sl.b0{width:auto;height:48%;right:1%;bottom:0;border-width:4px;box-shadow:inset 0 0 0 4px #1d1211,0 0 20px #eda54b5f}
+#cb .sl.b1,#cb .sl.b2,#cb .sl.b3{width:auto;height:32%}
+#cb .sl.b1{right:39%;bottom:2%}#cb .sl.b2{right:64%;bottom:36%}#cb .sl.b3{right:33%;bottom:50%}
+#cb .sl.b4{width:auto;height:40%;right:1%;bottom:52%;box-shadow:0 0 24px #ec421e9c,inset 0 0 16px #ef8f3c}
+#cb .ulp{bottom:102%}
+#cb .sl .k{font:600 10px system-ui,sans-serif;color:#f2d3a0;bottom:7%}
+#cb .sl .nmL{position:absolute;left:50%;bottom:-17px;transform:translateX(-50%);white-space:nowrap;font:600 9px system-ui,sans-serif;color:#e8c887;text-shadow:0 2px 4px #000;pointer-events:none}
+#cb .sl.b4 .nmL{bottom:auto;left:auto;right:0;top:-14px;transform:none;text-transform:uppercase;letter-spacing:.06em}
+#cb .sl .ct{font:700 18px system-ui,sans-serif}
+#cb .msg{font:700 22px Georgia,serif;color:#ffe2a8;letter-spacing:.04em}
+#cb .cl{right:calc(max(15px,env(safe-area-inset-right)) + min(410px,49vw) + 8px);bottom:max(24px,env(safe-area-inset-bottom))}
+#cb .cl button{border-color:#bd9451;background:radial-gradient(circle at 45% 30%,#29344b,#101521 58%,#080c15);color:#f2d3a0}#cb .cl button.on{background:#5a4320;border-color:#ffd56e}
+#cb .top button{border-color:#96743f;background:#0a0d16bb;color:#f6e9d0;font-family:Georgia,serif}
+@media (max-height:470px){#cb .cx{height:58vh;width:min(43vw,77vh)}#cb .cl{right:calc(max(15px,env(safe-area-inset-right)) + min(43vw,77vh) + 8px)}}
+@media (orientation:portrait){#cb .cx{width:70vw;height:53vw}#cb .cl{right:max(10px,env(safe-area-inset-right));bottom:calc(max(24px,env(safe-area-inset-bottom)) + 53vw + 30px)}#cb .vit{width:min(320px,62vw)}}
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';
@@ -68,8 +97,8 @@ export class CombatHUD {
     const r = this.root = document.createElement('div'); r.id = 'cb';
     r.innerHTML = '<div class="flash"></div><div class="tp"><div class="nm"></div><div class="sub"></div><div class="bar hp"><i></i><b></b></div></div>' +
       '<div class="stat"></div><div class="top"><button type="button" data-a="summon">Summon Titan</button><button type="button" data-a="exit">Exit fight</button></div>' +
-      '<div class="vit"><div class="por"><span>?</span><small>1</small></div><div class="bars"><div class="bar hp"><i></i><b></b></div><div class="bar mp"><i></i><b></b></div><div class="bar sp"><i></i><b></b></div><div class="bar fy"><i></i><b></b></div></div></div>' +
-      '<div class="cx"><div class="ulp"><button type="button" data-u="holy">Holy Destruction</button><button type="button" data-u="unholy">Unholy Destruction</button></div>' + [0, 1, 2, 3, 4].map(i => '<button type="button" class="sl b' + i + '" data-s="' + i + '"><span class="ic"></span><span class="k">' + (i ? (i === 4 ? 'ULT' : i) : '') + '</span><span class="rg"></span><span class="ct"></span></button>').join('') + '</div>' +
+      '<div class="vit"><div class="lab"></div><div class="por"><span>?</span><small>1</small></div><div class="bars"><div class="bar hp"><i></i><b></b></div><div class="bar mp"><i></i><b></b></div><div class="bar sp"><i></i><b></b></div><div class="bar fy"><i></i><b></b></div></div></div>' +
+      '<div class="cx"><div class="ulp"><button type="button" data-u="holy">Holy Destruction</button><button type="button" data-u="unholy">Unholy Destruction</button></div>' + [0, 1, 2, 3, 4].map(i => '<button type="button" class="sl b' + i + '" data-s="' + i + '"><span class="ic"></span><span class="k">' + (i ? (i === 4 ? 'ULT' : i) : '') + '</span><span class="rg"></span><span class="ct"></span><span class="nmL"></span></button>').join('') + '</div>' +
       '<div class="cl"><button type="button" data-a="dodge"><span class="g">\u21BA</span>Dodge<span class="q">Spc</span><span class="cdv"></span></button><button type="button" data-a="block"><span class="g">\u26E8</span>Block<span class="q">RMB</span></button>' +
       '<button type="button" data-a="jump"><span class="g">\u2191</span>Jump<span class="q">J</span></button><button type="button" data-a="lock"><span class="g">\u25CE</span>Lock<span class="q">Q</span></button>' +
       '<button type="button" data-a="potion"><span class="g">\u2697</span>Potion<span class="q">R</span><span class="cdv"></span></button><button type="button" data-a="swap"><span class="g">\u2694</span>Weapon<span class="q">E</span></button></div><div class="msg"></div>';
@@ -77,8 +106,8 @@ export class CombatHUD {
     const $ = s => r.querySelector(s), $$ = s => Array.from(r.querySelectorAll(s));
     this.tp = $('.tp'); this.tpNm = $('.tp .nm'); this.tpSub = $('.tp .sub'); this.tpBar = $('.tp .bar i'); this.tpTxt = $('.tp .bar b');
     const vb = n => ({ i: $('.vit .' + n + ' i'), b: $('.vit .' + n + ' b') }); this.vhp = vb('hp'); this.vmp = vb('mp'); this.vsp = vb('sp'); this.vfy = vb('fy');
-    this.por = $('.por span'); this.lvl = $('.por small'); this.stat = $('.stat'); this.msg = $('.msg'); this.flash = $('.flash'); this.sumBtn = $('[data-a=summon]');
-    this.slots = $$('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), cd: -1, st: '', key: '' }));
+    this.por = $('.por span'); this.lab = $('.vit .lab'); this.lvl = $('.por small'); this.stat = $('.stat'); this.msg = $('.msg'); this.flash = $('.flash'); this.sumBtn = $('[data-a=summon]');
+    this.slots = $$('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), nm: b.querySelector('.nmL'), cd: -1, st: '', key: '' }));
     this.btn = {}; $$('.cl button').forEach(b => { this.btn[b.dataset.a] = { b, cdv: b.querySelector('.cdv'), cd: -1 }; });
     for (let i = 0; i < NUM_POOL; i++) { const e = document.createElement('div'); e.className = 'fn'; r.appendChild(e); this.nums.push({ e, t: 9 }); }
     for (let i = 0; i < OH_POOL; i++) { const e = document.createElement('div'); e.className = 'oh'; e.innerHTML = '<i></i>'; r.appendChild(e); this.ohs.push({ e, f: e.firstChild, on: false, last: -1 }); }
@@ -102,7 +131,7 @@ export class CombatHUD {
   /* cluster slot (0 basic,1-3 skills,4 ult) -> ability key for the controller (index into ABILITIES, or an OWNER_SKILLS id). The controller re-validates everything. */
   slotAbility(i) { if (i === 0) return 0; if (this.cc.ownerOk()) return i === 4 ? (this.cc.ultSel || 'holy') : OWNER_CLUSTER[i - 1]; if (this.cc.kit) return this.cc.kit.skills[i - 1].id; return i === 4 ? 5 : i; }
   show(v) { this.root.style.display = v ? 'block' : 'none'; const d = document.getElementById('diagBtn'); if (d) { if (v) { this._dd = d.style.display; d.style.display = 'none'; } else if (this._dd !== undefined) d.style.display = this._dd; } }   /* #diagBtn sits under the first ability slot */
-  heroInfo() { const h = this.cc.hero; this.por.textContent = (h.name || '?')[0]; this.lvl.textContent = h.level; this.cache.k = ''; }
+  heroInfo() { const h = this.cc.hero; this.por.textContent = (h.name || '?')[0]; if (this.lab) this.lab.textContent = (h.name || 'Hero') + ' \u00b7 LV ' + (h.level || 1) + ' \u00b7 ' + (this.cc.kit && this.cc.kit.role ? this.cc.kit.role : (h.className || 'Adventurer')); this.lvl.textContent = h.level; this.cache.k = ''; }
   say(t, ms) { this.msg.textContent = t; this.msg.style.display = 'block'; clearTimeout(this._mt); this._mt = setTimeout(() => { this.msg.style.display = 'none'; }, ms || 1500); }
   floatAt(x, y, z, txt, cls) {
     const n = this.nums[this.numI++ % NUM_POOL]; if (!this.project(x, y, z, this.sc)) return;
@@ -132,7 +161,7 @@ export class CombatHUD {
     const own = cc.ownerOk(); this.setv(null, 'own', own, v => { this.root.classList.toggle('own', v); });
     for (let i = 0; i < 5; i++) {
       const s = this.slots[i], key = this.slotAbility(i), a = cc.skillDef(key);
-      const kk = String(key) + (own ? 'o' : '') + (cc.kit ? 'k' : ''); if (kk !== s.key) { s.key = kk; s.ic.innerHTML = own && ownerIconKey(key, a) ? OWNER_ICON[ownerIconKey(key, a)] : (ICONS[a.kit || a.owner ? a.icon : LEGACY_ICON[key]] || ICONS.basic); s.b.style.borderColor = a.kit && cc.kit ? cc.kit.color : ''; s.b.style.color = a.kit && cc.kit ? cc.kit.color : ''; s.b.title = a.name; s.b.setAttribute('aria-label', a.name); s.cd = -1; }
+      const kk = String(key) + (own ? 'o' : '') + (cc.kit ? 'k' : ''); if (kk !== s.key) { s.key = kk; s.ic.innerHTML = own && ownerIconKey(key, a) ? OWNER_ICON[ownerIconKey(key, a)] : (ICONS[a.kit || a.owner ? a.icon : LEGACY_ICON[key]] || ICONS.basic); s.b.style.borderColor = a.kit && cc.kit ? cc.kit.color : ''; s.b.style.color = a.kit && cc.kit ? cc.kit.color : ''; s.b.title = a.name; s.b.setAttribute('aria-label', a.name); s.nm.textContent = i === 0 ? 'Basic Attack' : a.name; s.cd = -1; }
       const left = cc.cd.left(a.id), use = cc.slotUsable(key), noRes = !R.can(a.cost), isUlt = a.fury, fr = isUlt && use && left <= 0 && !cc.furyReady();
       const q = Math.round(left * 10) / 10 + (fr ? Math.round(cc.fury) / 1000 : 0); if (q !== s.cd) { s.cd = q; const p = left > 0 ? Math.round(cc.cd.frac(a.id) * 100) : fr ? Math.round(cc.fury) : 0; s.rg.style.setProperty('--p', p + '%'); s.ct.textContent = left > 0.05 ? (left >= 10 ? Math.ceil(left) : left.toFixed(1)) : ''; }
       const lock = !use && i === 4, oi = own && ownerIconKey(key, a), st = (i === 4 && own ? 'u-' + key + ' ' : '') + (oi ? 'oi ' : '') + (use ? '' : 'off ') + (fr && left <= 0 ? 'fr ' : '') + (use && noRes && left <= 0 ? 'nores ' : '') + (isUlt && use && left <= 0 && !fr ? 'rdy' : ''); if (st !== s.st) { s.st = st; s.b.className = 'sl b' + i + ' ' + st; if (lock) s.ic.innerHTML = ICONS.lock; }

@@ -12,7 +12,7 @@ import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
 import { initSettings } from './settingsboot.js';
-import { loadPrefs, qualityPlan } from './camprefs.js';
+import { loadPrefs, savePrefs, qualityPlan } from './camprefs.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -307,7 +307,7 @@ function wrapGLB(g, id) {
   root.userData = { glb: true, mixer, act, capeUpdate() {} }; try { root.userData.sb = new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
   return root;
 }
-const ASSET_V = '1.1.4';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.1.5';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -706,7 +706,7 @@ function frame(now) {
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  updateCrowd(dt); updateHero(dt); updateCamera(dt, totalFrames === 0);
+  updateCrowd(dt); updateHero(dt); if (combat && combat.on) combat.update(dt); updateCamera(dt, totalFrames === 0);
   simTime += dt; if (SMOKE) SMOKE.update(simTime);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
@@ -747,8 +747,16 @@ const cheatEnv = {
   onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; },
 };
 let ownerFlag = false;
+let combat = null, combatLoading = null;
+async function setCombat(on) {
+  camRig.prefs.combat = !!on; if (prefStore) savePrefs(prefStore, camRig.prefs);
+  if (on) { if (!combat) { combatLoading = combatLoading || import('./combat3d.js').then((m) => { combat = m.createCombat({ THREE, scene, camera, state, HS, WORLD, flags: cheat, resolve: (p) => resolve(p, false), free: (x, z) => window.__p3d.free(x, z, 0), hero: () => hero, getCheats: () => window.__p3d.cheats, isOwner: () => ownerFlag, camRig, start: { x: 0, z: START_Z } }); }); await combatLoading; } if (camRig.prefs.combat) combat.start(); }
+  else if (combat) combat.stop();
+  return !!(combat && combat.on);
+}
 const cheatBoot = initCheatBoot(cheatEnv);
-const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl, cheatEnv, openCheatPanel: () => cheatBoot.open() });
+const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat, combatOn: () => !!(combat && combat.on) });
+if (camRig.prefs.combat) setCombat(true);
 window.__p3d = { selectHero,
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, error: e[id] || '' })) }; },
   cheat,
@@ -760,7 +768,7 @@ window.__p3d = { selectHero,
   free(x, z, level = 0) { const l0 = state.level; state.level = level; const q = { x, z }; resolve(q); state.level = l0; return !!surfaceAt(x, z, level) && Math.hypot(q.x - x, q.z - z) < 0.02; },
   teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; updateLevel(); },
   setCamYaw(y) { state.camYaw = y; },
-  camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; },
+  camRig, settings: settingsApi, setQuality, setCombat, get combat() { return combat; }, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; },
   setZoom(z) { state.zoom = z; },
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },
   setHero, get heroIndex() { return HEROES.indexOf(hero); },

@@ -29,6 +29,9 @@ with sync_playwright() as p:
     cdp = pg.context.new_cdp_session(pg)
     if THROTTLE > 1: cdp.send('Emulation.setCPUThrottlingRate', {'rate': THROTTLE})
     pg.goto(f'{BASE or "http://127.0.0.1:%d" % port}/proto3d.html?party={PARTY}&npcs={1 if PARTY != "0" else 0}'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=120000); pg.wait_for_timeout(2500)
+    if os.environ.get('HERO'):   # v1.1.15 real heights: run the route as a tiny/large hero (e.g. HERO=n:pip_new2 or n:garruk_new5)
+        _i = pg.evaluate("m=>__p3d.modelStatus().models.findIndex(x=>x.id===m)", os.environ['HERO']); assert _i >= 0, os.environ['HERO']
+        pg.evaluate("i=>__p3d.selectHero(i)", _i); pg.wait_for_function("m=>__p3d.charScale().id===m", arg=os.environ['HERO'], timeout=120000); pg.wait_for_timeout(2500); print('HERO', pg.evaluate("__p3d.charScale()"))
     if PARTY != '0':   # companions load asynchronously: wait until they exist before the first run (a late spawn would start at the town gate)
         try: pg.wait_for_function("__p3d.bump.crowd.filter(c=>c.kind==='party' && c.root).length>=%d" % int(PARTY), timeout=90000)
         except Exception: print('    warn: companions not all loaded', flush=True)

@@ -83,7 +83,9 @@ function mesh(geo, mat, x, y, z, parent, shadow = true) {
 
 // ---------- world ----------
 const HS = 1.5;                 // character scale (hero, party, NPCs) so people are in proportion with the grand doors
+const ZONE = { name: 'town', cx: 0, cz: 0, half: 0 };   // current walkable zone (town or the Wilds); half is set once WORLD is known
 const WORLD = WORLD_B; // half extent (village grew for the 3D buildings)
+ZONE.half = WORLD;
 const START_Z = 14 * PK;
 const grass = canvasTex(256, (g, s) => {
   g.fillStyle = '#5c9a45'; g.fillRect(0, 0, s, s);
@@ -251,10 +253,11 @@ function setHero(i) { { const st = styleFor(GLB_IDS[i]); playerAct.style = st; p
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
 const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
-const EXTRA = [["n:mortimer_new", "Mortimer (NEW)", "proto3d/models-new/mortimer_cl_arms.glb"], ["n:player_pikachu", "Player Pikachu (NEW)", "proto3d/models-new/player_pikachu_cl_arms.glb"], ["n:lunara_new", "Lunara (NEW)", "proto3d/models-new/lunara_cl_arms.glb"], ["n:marella_new", "Marella (NEW)", "proto3d/models-new/marella_cl_arms.glb"], ["n:vaelthryx_straight_rig", "Vaelthryx Straight Rig (NEW)", "proto3d/models-new/vaelthryx_straight_rig.glb"], ["n:vaelthryx_new", "Vaelthryx (NEW)", "proto3d/models-new/vaelthryx_new.glb"], ["n:vaelthryx_new5", "Vaelthryx (NEW 5)", "proto3d/models-new/vaelthryx_new5.glb"], ["n:vaelthryx_new5_long", "Vaelthryx (NEW 5 long)", "proto3d/models-new/vaelthryx_new5_long.glb"], ["n:ssylthar_new", "Ssylthar (NEW)", "proto3d/models-new/ssylthar_new.glb"], ["n:ashentitan_new", "Ashentitan (NEW)", "proto3d/models-new/ashentitan_cl_arms.glb"], ["n:coral_new", "Coral (NEW)", "proto3d/models-new/coral_cl_arms.glb"], ["n:cinder_new", "Cinder (NEW)", "proto3d/models-new/cinder_new.glb"], ["n:snowy_new4", "Snowy (NEW)", "proto3d/models-new/snowy_cl_arms.glb"], ["n:zephyr_new2", "Zephyr (NEW)", "proto3d/models-new/zephyr_new2.glb"], ["n:garruk_new4", "Garruk (NEW)", "proto3d/models-new/garruk_new4.glb"], ["n:garruk_new5", "Garruk (NEW 5)", "proto3d/models-new/garruk_new5_arms.glb"], ["n:darius_new6", "Darius (NEW 6)", "proto3d/models-new/darius_new6_arms.glb"], ["n:pip_new2", "Pip (NEW 2)", "proto3d/models-new/pip_new2.glb"], ["n:owner", "Owner (NEW)", "proto3d/models-new/owner.glb"], ["n:asha_new3", "Asha (NEW)", "proto3d/models-new/asha_cl_arms.glb"], ["n:thrain_new4", "Thrain (NEW)", "proto3d/models-new/thrain_cl_arms.glb"], ["n:wren_new3", "Wren (NEW)", "proto3d/models-new/wren_cl_arms.glb"], ["n:ember_new3", "Ember (NEW)", "proto3d/models-new/ember_new3.glb"], ["p:aldric", "Aldric [PLACEHOLDER]", "proto3d/models-placeholder/aldric_new.glb"], ["p:briar", "Briar [PLACEHOLDER]", "proto3d/models-placeholder/briar_new.glb"], ["p:brynn", "Brynn [PLACEHOLDER]", "proto3d/models-placeholder/brynn_new.glb"], ["p:cedric", "Cedric [PLACEHOLDER]", "proto3d/models-placeholder/cedric_new.glb"], ["p:elira", "Elira [PLACEHOLDER]", "proto3d/models-placeholder/elira_new.glb"], ["p:finn", "Finn [PLACEHOLDER]", "proto3d/models-placeholder/finn_new.glb"], ["p:frosttroll", "Frosttroll [PLACEHOLDER]", "proto3d/models-placeholder/frosttroll_new.glb"], ["p:hearth", "Hearth [PLACEHOLDER]", "proto3d/models-placeholder/hearth_new.glb"], ["p:hobgoblin", "Hobgoblin [PLACEHOLDER]", "proto3d/models-placeholder/hobgoblin_new.glb"], ["p:hydrella", "Hydrella [PLACEHOLDER]", "proto3d/models-placeholder/hydrella_new.glb"], ["p:kael", "Kael [PLACEHOLDER]", "proto3d/models-placeholder/kael_new.glb"], ["p:kestrel", "Kestrel [PLACEHOLDER]", "proto3d/models-placeholder/kestrel_new.glb"], ["p:lorian", "Lorian [PLACEHOLDER]", "proto3d/models-placeholder/lorian_new.glb"], ["p:lunara", "Lunara [PLACEHOLDER]", "proto3d/models-placeholder/lunara_new.glb"], ["p:marella", "Marella [PLACEHOLDER]", "proto3d/models-placeholder/marella_new.glb"], ["p:mirelle", "Mirelle [PLACEHOLDER]", "proto3d/models-placeholder/mirelle_new.glb"], ["p:morwen", "Morwen [PLACEHOLDER]", "proto3d/models-placeholder/morwen_new.glb"], ["p:mossgut", "Mossgut [PLACEHOLDER]", "proto3d/models-placeholder/mossgut_new.glb"], ["p:neris", "Neris [PLACEHOLDER]", "proto3d/models-placeholder/neris_new.glb"], ["p:nyx", "Nyx [PLACEHOLDER]", "proto3d/models-placeholder/nyx_new.glb"], ["p:orin", "Orin [PLACEHOLDER]", "proto3d/models-placeholder/orin_new.glb"], ["p:pip", "Pip [PLACEHOLDER]", "proto3d/models-placeholder/pip_new.glb"], ["p:rook", "Rook [PLACEHOLDER]", "proto3d/models-placeholder/rook_new.glb"], ["p:rowan", "Rowan [PLACEHOLDER]", "proto3d/models-placeholder/rowan_new.glb"], ["p:seraphine", "Seraphine [PLACEHOLDER]", "proto3d/models-placeholder/seraphine_new.glb"], ["p:stonetroll", "Stonetroll [PLACEHOLDER]", "proto3d/models-placeholder/stonetroll_new.glb"], ["p:talia", "Talia [PLACEHOLDER]", "proto3d/models-placeholder/talia_new.glb"], ["p:thorne", "Thorne [PLACEHOLDER]", "proto3d/models-placeholder/thorne_new.glb"], ["p:valen", "Valen [PLACEHOLDER]", "proto3d/models-placeholder/valen_new.glb"], ["p:vesper", "Vesper [PLACEHOLDER]", "proto3d/models-placeholder/vesper_new.glb"], ["p:wyvern", "Wyvern [PLACEHOLDER]", "proto3d/models-placeholder/wyvern_new.glb"], ["p:zephyr", "Zephyr [PLACEHOLDER]", "proto3d/models-placeholder/zephyr_new.glb"], ["o:briar", "Briar", "proto3d/models-beth/briar.glb"], ["o:cinder", "Cinder", "proto3d/models-beth/cinder.glb"], ["o:coral", "Coral", "proto3d/models-beth/coral.glb"], ["o:ember", "Ember", "proto3d/models-beth/ember.glb"], ["o:frosttroll", "Frosttroll", "proto3d/models-beth/frosttroll.glb"], ["o:hawk", "Hawk", "proto3d/models-beth/hawk.glb"], ["o:hearth", "Hearth", "proto3d/models-beth/hearth.glb"], ["o:hobgoblin", "Hobgoblin", "proto3d/models-beth/hobgoblin.glb"], ["o:hydrella", "Hydrella", "proto3d/models-beth/hydrella.glb"], ["o:kestrel", "Kestrel", "proto3d/models-beth/kestrel.glb"], ["o:lorian", "Lorian", "proto3d/models-beth/lorian.glb"], ["o:lunara", "Lunara", "proto3d/models-beth/lunara.glb"], ["o:marella", "Marella", "proto3d/models-beth/marella.glb"], ["o:mortimer", "Mortimer", "proto3d/models-beth/mortimer.glb"], ["o:mossgut", "Mossgut", "proto3d/models-beth/mossgut.glb"], ["o:neris", "Neris", "proto3d/models-beth/neris.glb"], ["o:pip", "Pip", "proto3d/models-beth/pip.glb"], ["o:snowy", "Snowy", "proto3d/models-beth/snowy.glb"], ["o:ssylthar", "Ssylthar", "proto3d/models-beth/ssylthar.glb"], ["o:stonetroll", "Stonetroll", "proto3d/models-beth/stonetroll.glb"], ["o:thrain", "Thrain", "proto3d/models-beth/thrain.glb"], ["o:vaelthryx", "Vaelthryx", "proto3d/models-beth/vaelthryx.glb"], ["o:valen", "Valen", "proto3d/models-beth/valen.glb"], ["o:wren", "Wren", "proto3d/models-beth/wren.glb"], ["o:wyvern", "Wyvern", "proto3d/models-beth/wyvern.glb"], ["o:zephyr", "Zephyr", "proto3d/models-beth/zephyr.glb"], ["wolf", "Wolf", "proto3d/models/wolf.glb"]];   // [id, label, url]: every other model we have, playable as a hero via the selector (native metre scale)
+const EXTRA = [["n:mortimer_new", "Mortimer (NEW)", "proto3d/models-new/mortimer_cl_arms.glb"], ["n:player_pikachu", "Player Pikachu (NEW)", "proto3d/models-new/player_pikachu_cl_arms.glb"], ["n:lunara_new", "Lunara (NEW)", "proto3d/models-new/lunara_cl_arms.glb"], ["n:marella_new", "Marella (NEW)", "proto3d/models-new/marella_cl_arms.glb"], ["n:vaelthryx_straight_rig", "Vaelthryx Straight Rig (NEW)", "proto3d/models-new/vaelthryx_straight_rig.glb"], ["n:vaelthryx_new", "Vaelthryx (NEW)", "proto3d/models-new/vaelthryx_new.glb"], ["n:vaelthryx_new6", "Vaelthryx (NEW 6)", "proto3d/models-new/vaelthryx_new6.glb"], ["n:frosttroll_a", "Frost Troll (A)", "proto3d/models-new/frosttroll_a.glb"], ["n:frosttroll_b", "Frost Troll (B)", "proto3d/models-new/frosttroll_b.glb"], ["n:ssylthar_new", "Ssylthar (NEW)", "proto3d/models-new/ssylthar_new.glb"], ["n:ashentitan_new", "Ashentitan (NEW)", "proto3d/models-new/ashentitan_cl_arms.glb"], ["n:coral_new", "Coral (NEW)", "proto3d/models-new/coral_cl_arms.glb"], ["n:cinder_new", "Cinder (NEW)", "proto3d/models-new/cinder_new.glb"], ["n:snowy_new4", "Snowy (NEW)", "proto3d/models-new/snowy_cl_arms.glb"], ["n:zephyr_new2", "Zephyr (NEW)", "proto3d/models-new/zephyr_new2.glb"], ["n:garruk_new4", "Garruk (NEW)", "proto3d/models-new/garruk_new4.glb"], ["n:garruk_new5", "Garruk (NEW 5)", "proto3d/models-new/garruk_new5_arms.glb"], ["n:darius_new6", "Darius (NEW 6)", "proto3d/models-new/darius_new6_arms.glb"], ["n:pip_new2", "Pip (NEW 2)", "proto3d/models-new/pip_new2.glb"], ["n:owner", "Owner (NEW)", "proto3d/models-new/owner.glb"], ["n:asha_new3", "Asha (NEW)", "proto3d/models-new/asha_cl_arms.glb"], ["n:thrain_new4", "Thrain (NEW)", "proto3d/models-new/thrain_cl_arms.glb"], ["n:wren_new3", "Wren (NEW)", "proto3d/models-new/wren_cl_arms.glb"], ["n:ember_new3", "Ember (NEW)", "proto3d/models-new/ember_new3.glb"], ["p:aldric", "Aldric [PLACEHOLDER]", "proto3d/models-placeholder/aldric_new.glb"], ["p:briar", "Briar [PLACEHOLDER]", "proto3d/models-placeholder/briar_new.glb"], ["p:brynn", "Brynn [PLACEHOLDER]", "proto3d/models-placeholder/brynn_new.glb"], ["p:cedric", "Cedric [PLACEHOLDER]", "proto3d/models-placeholder/cedric_new.glb"], ["p:elira", "Elira [PLACEHOLDER]", "proto3d/models-placeholder/elira_new.glb"], ["p:finn", "Finn [PLACEHOLDER]", "proto3d/models-placeholder/finn_new.glb"], ["p:frosttroll", "Frosttroll [PLACEHOLDER]", "proto3d/models-placeholder/frosttroll_new.glb"], ["p:hearth", "Hearth [PLACEHOLDER]", "proto3d/models-placeholder/hearth_new.glb"], ["p:hobgoblin", "Hobgoblin [PLACEHOLDER]", "proto3d/models-placeholder/hobgoblin_new.glb"], ["p:hydrella", "Hydrella [PLACEHOLDER]", "proto3d/models-placeholder/hydrella_new.glb"], ["p:kael", "Kael [PLACEHOLDER]", "proto3d/models-placeholder/kael_new.glb"], ["p:kestrel", "Kestrel [PLACEHOLDER]", "proto3d/models-placeholder/kestrel_new.glb"], ["p:lorian", "Lorian [PLACEHOLDER]", "proto3d/models-placeholder/lorian_new.glb"], ["p:lunara", "Lunara [PLACEHOLDER]", "proto3d/models-placeholder/lunara_new.glb"], ["p:marella", "Marella [PLACEHOLDER]", "proto3d/models-placeholder/marella_new.glb"], ["p:mirelle", "Mirelle [PLACEHOLDER]", "proto3d/models-placeholder/mirelle_new.glb"], ["p:morwen", "Morwen [PLACEHOLDER]", "proto3d/models-placeholder/morwen_new.glb"], ["p:mossgut", "Mossgut [PLACEHOLDER]", "proto3d/models-placeholder/mossgut_new.glb"], ["p:neris", "Neris [PLACEHOLDER]", "proto3d/models-placeholder/neris_new.glb"], ["p:nyx", "Nyx [PLACEHOLDER]", "proto3d/models-placeholder/nyx_new.glb"], ["p:orin", "Orin [PLACEHOLDER]", "proto3d/models-placeholder/orin_new.glb"], ["p:pip", "Pip [PLACEHOLDER]", "proto3d/models-placeholder/pip_new.glb"], ["p:rook", "Rook [PLACEHOLDER]", "proto3d/models-placeholder/rook_new.glb"], ["p:rowan", "Rowan [PLACEHOLDER]", "proto3d/models-placeholder/rowan_new.glb"], ["p:seraphine", "Seraphine [PLACEHOLDER]", "proto3d/models-placeholder/seraphine_new.glb"], ["p:stonetroll", "Stonetroll [PLACEHOLDER]", "proto3d/models-placeholder/stonetroll_new.glb"], ["p:talia", "Talia [PLACEHOLDER]", "proto3d/models-placeholder/talia_new.glb"], ["p:thorne", "Thorne [PLACEHOLDER]", "proto3d/models-placeholder/thorne_new.glb"], ["p:valen", "Valen [PLACEHOLDER]", "proto3d/models-placeholder/valen_new.glb"], ["p:vesper", "Vesper [PLACEHOLDER]", "proto3d/models-placeholder/vesper_new.glb"], ["p:wyvern", "Wyvern [PLACEHOLDER]", "proto3d/models-placeholder/wyvern_new.glb"], ["p:zephyr", "Zephyr [PLACEHOLDER]", "proto3d/models-placeholder/zephyr_new.glb"], ["o:briar", "Briar", "proto3d/models-beth/briar.glb"], ["o:cinder", "Cinder", "proto3d/models-beth/cinder.glb"], ["o:coral", "Coral", "proto3d/models-beth/coral.glb"], ["o:ember", "Ember", "proto3d/models-beth/ember.glb"], ["o:frosttroll", "Frosttroll", "proto3d/models-beth/frosttroll.glb"], ["o:hawk", "Hawk", "proto3d/models-beth/hawk.glb"], ["o:hearth", "Hearth", "proto3d/models-beth/hearth.glb"], ["o:hobgoblin", "Hobgoblin", "proto3d/models-beth/hobgoblin.glb"], ["o:hydrella", "Hydrella", "proto3d/models-beth/hydrella.glb"], ["o:kestrel", "Kestrel", "proto3d/models-beth/kestrel.glb"], ["o:lorian", "Lorian", "proto3d/models-beth/lorian.glb"], ["o:lunara", "Lunara", "proto3d/models-beth/lunara.glb"], ["o:marella", "Marella", "proto3d/models-beth/marella.glb"], ["o:mortimer", "Mortimer", "proto3d/models-beth/mortimer.glb"], ["o:mossgut", "Mossgut", "proto3d/models-beth/mossgut.glb"], ["o:neris", "Neris", "proto3d/models-beth/neris.glb"], ["o:pip", "Pip", "proto3d/models-beth/pip.glb"], ["o:snowy", "Snowy", "proto3d/models-beth/snowy.glb"], ["o:ssylthar", "Ssylthar", "proto3d/models-beth/ssylthar.glb"], ["o:stonetroll", "Stonetroll", "proto3d/models-beth/stonetroll.glb"], ["o:thrain", "Thrain", "proto3d/models-beth/thrain.glb"], ["o:vaelthryx", "Vaelthryx", "proto3d/models-beth/vaelthryx.glb"], ["o:valen", "Valen", "proto3d/models-beth/valen.glb"], ["o:wren", "Wren", "proto3d/models-beth/wren.glb"], ["o:wyvern", "Wyvern", "proto3d/models-beth/wyvern.glb"], ["o:zephyr", "Zephyr", "proto3d/models-beth/zephyr.glb"], ["wolf", "Wolf", "proto3d/models/wolf.glb"]];   // [id, label, url]: every other model we have, playable as a hero via the selector (native metre scale)
 // Owner: ONE stable file name. To swap in a newer rig (owner_new4...): tools/swap_owner.sh /workspace/rigged/owner_new5 (copies <name>.glb + <name>.cloth.json over models-new/owner.*)
 const CLOTH = new Set(["n:ember_new3", "n:owner", "n:asha_new3", "n:ashentitan_new", "n:coral_new", "n:darius_new6", "n:lunara_new", "n:marella_new", "n:mortimer_new", "n:player_pikachu", "n:snowy_new4", "n:thrain_new4", "n:wren_new3"]);   // models shipped with <name>.cloth.json (runtime/spring_bones_v2.js)
-const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:vaelthryx_new5': { walk: 9.6, run: 14.8, map: { walk: 'slither', run: 'slither_fast' } }, 'n:vaelthryx_new5_long': { walk: 8.2, run: 12.6, map: { walk: 'slither', run: 'slither_fast' } }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
+const EXTRA_SCALE = { 'n:frosttroll_a': 0.5, 'n:frosttroll_b': 0.5 };   // frost trolls are authored 11.4 m; the boss wants 3x the player (5.7 m). The Ashen Titan stays unscaled (6x).
+const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 4.5, run: 10.5 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
 const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
 const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;
@@ -322,10 +325,10 @@ function wrapGLB(g, id, blocky) {
   m.traverse(o => { if (o.isSkinnedMesh && o.name !== 'merged') { o.frustumCulled = false; if (!SKINS.includes(o)) SKINS.push(o); } });
   const hgt = box.max.y - box.min.y;
   if (hgt > 0.01) { const BK_H = { 'o:vaelthryx': 5.1 };   // blocky builders authored smaller than their GLB: match the GLB's in-game height so swapping doesn't jump
-    const sc = (blocky && BK_H[id]) ? BK_H[id] / hgt : EXTRA_URL[id] ? 0.947 * HS : 1.8 * HS / hgt;   // extra models are authored in metres (hero 1.9 m = 1.8 HS); the old 20 heroes are height-normalised
+    const sc = (blocky && BK_H[id]) ? BK_H[id] / hgt : EXTRA_URL[id] ? 0.947 * HS * (EXTRA_SCALE[id] || 1) : 1.8 * HS / hgt;   // extra models are authored in metres (hero 1.9 m = 1.8 HS); the old 20 heroes are height-normalised
     m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
   m.traverse(o => { if (o.isMesh) for (const mt of [].concat(o.material)) if (mt && mt.alphaTest > 0) { mt.transparent = false; mt.depthWrite = true; mt.needsUpdate = true; } });   // glTF alphaMode MASK (e.g. Garruk's cape): cut-out, sorted by depth, casts a cut-out shadow
-  const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947 * HS : 1.8 * HS / hgt) : 1;
+  const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947 * HS * (EXTRA_SCALE[id] || 1) : 1.8 * HS / hgt) : 1;
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
   if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];   // e.g. serpent: walk/run = slither/slither_fast
   if (act.idle) act.idle.play(); if (act.walk) act.walk.play(); if (spd) for (const k of ['trot', 'run']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
@@ -409,6 +412,9 @@ let savedPlan = null;
 try { if (qp0.get('nosave') == null) { const r = readSave(localStorage); if (r.status === 'ok') savedPlan = planFromState(r.state, GLB_NAMES, 60); } } catch (e) { diag('save read failed: ' + (e && e.message || e)); }
 const savedOn = qp0.get('nosave') == null;
 if (!savedPlan) savedPlan = { party: [1, 2, 0], hero: 1, followers: [2, 0], pos: null };
+/* test build 1.1.9: the Owner is the default playable character (first launch of this build; the dropdown still lists everyone and later picks are kept). Not applied in nosave test runs. */
+{ const oi = GLB_IDS.indexOf('n:owner'); let seen = null; try { seen = localStorage.getItem('p3d_owner_default_v119'); } catch (e) {}
+  if (savedOn && qp0.get('hero') == null && oi > 0 && !seen) { savedPlan.hero = oi; savedPlan.pos = null; try { localStorage.setItem('p3d_owner_default_v119', '1'); } catch (e) {} } }
 { const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (!savedPlan.hero) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
 // ---------- character selector: ONE entry per character (all variants grouped), compact dropdown + variant switches ----------
@@ -513,8 +519,8 @@ function tapMoveTo(clientX, clientY) {
   ndc.set((clientX / innerWidth) * 2 - 1, -(clientY / innerHeight) * 2 + 1);
   ray.setFromCamera(ndc, camera);
   if (ray.ray.intersectPlane(plane, hit)) {
-    const lim = WORLD - 1.5;
-    state.target = { x: THREE.MathUtils.clamp(hit.x, -lim, lim), z: THREE.MathUtils.clamp(hit.z, -lim, lim) };
+    const lim = ZONE.half - 1.5;
+    state.target = { x: THREE.MathUtils.clamp(hit.x, ZONE.cx - lim, ZONE.cx + lim), z: THREE.MathUtils.clamp(hit.z, ZONE.cz - lim, ZONE.cz + lim) };
     marker.position.set(state.target.x, 0.06, state.target.z); marker.visible = true;
   }
 }
@@ -553,8 +559,8 @@ function resolve(p, ghost) {
       if (d < min) { hitAny = true; const k = d > 1e-6 ? 1 / d : 0; p.x = c.x + (k ? dx * k : 1) * min; p.z = c.z + (k ? dz * k : 0) * min; }
     }
   }
-  const lim = WORLD - 1.3; p.x = THREE.MathUtils.clamp(p.x, -lim, lim);
-  p.z = THREE.MathUtils.clamp(p.z, -lim, WORLD + 8); // can walk out the gate a bit
+  const lim = ZONE.half - 1.3; p.x = THREE.MathUtils.clamp(p.x, ZONE.cx - lim, ZONE.cx + lim);
+  p.z = THREE.MathUtils.clamp(p.z, ZONE.cz - lim, ZONE.cz + ZONE.half + (ZONE.name === 'town' ? 8 : -1.3)); // town: can walk out the gate a bit
   return hitAny;
 }
 
@@ -645,6 +651,7 @@ function updateCrowd(dt) {
   pa.x = state.heroX; pa.z = state.heroZ; pa.yaw = state.yaw; pa.vx = state.vx; pa.vz = state.vz;
   for (let i = 0; i < crowd.length; i++) {
     const r = crowd[i], a = r.a;
+    if (r.kind === 'npc' && ZONE.name !== 'town') continue;   // townsfolk wait in town while the hero is in the Wilds
     let tvx = 0, tvz = 0;
     if (r.kind === 'party') {
       let gx = state.heroX, gz = state.heroZ, far = false;
@@ -663,6 +670,7 @@ function updateCrowd(dt) {
   bumpSys.update(dt);
   for (let i = 0; i < crowd.length; i++) {
     const r = crowd[i], a = r.a;
+    if (r.kind === 'npc' && ZONE.name !== 'town') continue;
     let mx = r.vxs * a.slowMul * dt + a.dx, mz = r.vzs * a.slowMul * dt + a.dz;
     if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
     tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2); state.level = l0; }
@@ -845,13 +853,44 @@ const SMOKE = (() => {
       pos[j * 3] = src[i][0] + p * p * 2.2 + wob * p; pos[j * 3 + 1] = src[i][1] + p * 4.6; pos[j * 3 + 2] = src[i][2] + p * 0.6 + wob * .5 * p; ph[j] = p; }
     geo.attributes.position.needsUpdate = true; geo.attributes.phase.needsUpdate = true; } };
 })();
+/* ---------- the Wilds (1.1.9): second map at x=1000, reached by the portal in town; a portal there leads back. Monsters spawn only there (fight layer, auto mode). ---------- */
+const TOWN_PORTAL = { x: -6, z: 38 };
+let WM = null, wildsP = null, townCols = null, portalT = null, zoneCd = 1.5, portalDwell = 0;
+const wildsMod = import('./wilds.js').then(m => { portalT = m.makePortal(0x9a6bff); portalT.position.set(TOWN_PORTAL.x, 0, TOWN_PORTAL.z); scene.add(portalT);
+  for (const [x, z] of [[-9.2, 37], [-2.8, 37]]) { const b = new THREE.Mesh(new THREE.CylinderGeometry(.18, .22, 2.4, 8), new THREE.MeshLambertMaterial({ color: 0x5a4632 })); b.position.set(x, 1.2, z); scene.add(b); colliders.push({ type: 'circle', x, z, r: .3 }); }
+  return m; });
+async function ensureWilds() { if (WM) return WM; const m = await wildsMod; WM = Object.assign({ mod: m }, m.buildWilds({ scene, HS })); WM.portalMesh = m.makePortal(0x4fd0ff); WM.portalMesh.position.set(m.WILDS.ox + WM.portal.x, 0, m.WILDS.oz + WM.portal.z); WM.portalMesh.visible = false; scene.add(WM.portalMesh); return WM; }
+function snapFollowers() { TRAIL.length = 0; for (const r of crowd) if (r.kind === 'party') { r.level = 0; r.y = 0; r.ti = null; r.lvT = 0; r.a.x = state.heroX + (Math.random() - 0.5) * 3; r.a.z = state.heroZ + 2.5 * HS; r.vxs = r.vzs = 0; } }
+async function setZone(name) {
+  if (name === ZONE.name) return true;
+  if (name === 'wilds') {
+    await ensureWilds(); const W = WM.mod.WILDS; townCols = colliders.slice(); colliders.length = 0; for (const c of WM.colliders) colliders.push(c);
+    ZONE.name = 'wilds'; ZONE.cx = W.ox; ZONE.cz = W.oz; ZONE.half = W.half; WM.group.visible = true; WM.portalMesh.visible = true; if (portalT) portalT.visible = false;
+    state.heroX = WM.spawn.x; state.heroZ = WM.spawn.z; state.yaw = Math.PI;
+  } else {
+    colliders.length = 0; for (const c of townCols) colliders.push(c); ZONE.name = 'town'; ZONE.cx = 0; ZONE.cz = 0; ZONE.half = WORLD;
+    if (WM) { WM.group.visible = false; WM.portalMesh.visible = false; } if (portalT) portalT.visible = true;
+    state.heroX = TOWN_PORTAL.x; state.heroZ = TOWN_PORTAL.z + 4; state.yaw = 0;
+  }
+  state.level = 0; state.target = null; state.climbing = false; updateLevel(); snapFollowers(); zoneCd = 1.5; portalDwell = 0;
+  if (name === 'wilds') { const f = await fightToggle(true); f.startAuto && f.startAuto(); } else if (FIGHT && FIGHT.auto) FIGHT.stop();
+  return true;
+}
+function updateZone(dt) {
+  if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ);
+  const t = performance.now() / 1000; if (portalT && portalT.userData.update) portalT.userData.update(t); if (WM && WM.portalMesh.userData.update) WM.portalMesh.userData.update(t);
+  zoneCd = Math.max(0, zoneCd - dt); if (zoneCd > 0 || state.level !== 0 || state.climbing) { portalDwell = 0; return; }
+  const p = ZONE.name === 'town' ? TOWN_PORTAL : (WM ? { x: WM.mod.WILDS.ox + WM.portal.x, z: WM.mod.WILDS.oz + WM.portal.z } : null); if (!p) return;
+  if (Math.hypot(state.heroX - p.x, state.heroZ - p.z) < 1.7) { portalDwell += dt; if (portalDwell > 0.35) { portalDwell = -99; setZone(ZONE.name === 'town' ? 'wilds' : 'town'); } } else if (portalDwell > -50) portalDwell = 0;
+}
+
 function frame(now) {
   requestAnimationFrame(frame);
   if (!running) return;
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  updateCrowd(dt); updateHero(dt); if (FIGHT) FIGHT.update(dt); updateCamera(dt, totalFrames === 0);
+  updateCrowd(dt); updateHero(dt); updateZone(dt); if (FIGHT) FIGHT.update(dt); updateCamera(dt, totalFrames === 0);
   simTime += dt; if (SMOKE) SMOKE.update(simTime);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
@@ -884,28 +923,30 @@ function entrySpot(d) {
 }
 /* ---------- fight test mode (1.1.8): lazy-loaded, owner-gated start (owner panel / HUD button it reveals) ---------- */
 let FIGHT = null;
-async function fightToggle() {
+async function fightToggle(createOnly) {
   if (!FIGHT) {
     const mod = await import('./fight.js');
     FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
       selectOwner: async () => { const i = GLB_IDS.indexOf('n:owner'); if (i >= 0 && GLB_IDS[HEROES.indexOf(hero)] !== 'n:owner') await selectVariant(SLOT_G[i], curVar(SLOT_G[i])); },
       makeModel: async id => { try { return modeFor(id) === 'blocky' ? makeBlocky(id) : await loadActorModel(id); } catch (e) { return null; } },
       loco: locoAnim, resolve: p => resolve(p), free: (x, z) => window.__p3d.free(x, z, 0),
-      loadGLTF: url => new Promise((res, rej) => gl.load(url, res, undefined, rej)) });
+      loadGLTF: url => new Promise((res, rej) => gl.load(url, res, undefined, rej)),
+      respawnPos: () => ZONE.name === 'wilds' && WM ? { x: WM.spawn.x, z: WM.spawn.z } : { x: 0, z: 60 } });
   }
+  if (createOnly) return FIGHT;
   FIGHT.toggle(); return FIGHT;
 }
 { const fb = document.getElementById('fightBtn'); if (fb) fb.addEventListener('click', e => { e.preventDefault(); fightToggle(); }); }
 let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
 const cheatEnv = {
-  flags: cheat, bumpSys, storage: cheatStore, zones: ['village'],
+  flags: cheat, bumpSys, storage: cheatStore, zones: ['village', 'wilds'],
   hooks: { fightTest: () => fightToggle(), onOwner: () => { const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
-  teleport: (x, z) => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); },
+  teleport: (x, z, zone) => { if (zone === 'wilds') { setZone('wilds'); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
   onReady: (c) => { window.__p3d.cheats = c; },
 };
 initCheatBoot(cheatEnv);
-window.__p3d = { THREE, selectHero, get ladders() { return LAD; },
+window.__p3d = { get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },

@@ -7,7 +7,7 @@ import { loadLucian } from './combat/calc.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES } from './combat/data.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
 export const SABER_GLB = null;             // URL (or fight.setSaberModel(url)) for Beth's saber: hilt at origin, blade along +Y, ~1 m
-const MAX_ALIVE = 5;
+const MAX_ALIVE = 5, AUTO_MAX = 9, AUTO_AGGRO = 3;   // Wilds: up to 9 passive mobs, aggro only within 3 m
 export function createFight(env) {
   const { THREE, scene, camera, state, HS } = env;
   let on = false, saber = null, saberUrl = SABER_GLB, wave = 1, sheathed = false, spawnT = 0, bossOn = false;
@@ -104,23 +104,23 @@ export function createFight(env) {
     .on('jump', j => { A.jump = 0; }).on('throw', t => { orbT = 0; orbFrom = { x: state.heroX, z: state.heroZ }; orbTo = t.e; })
     .on('block', () => {}).on('swap', () => {})
     .on('playerDown', () => { if (!oneShot(env.hero(), 'death', 0, true)) env.hero().rotation.x = -1.3; })
-    .on('respawn', () => { clearOS(env.hero()); state.heroX = 0; state.heroZ = 60; state.target = null; env.hero().rotation.x = 0; });
+    .on('respawn', () => { clearOS(env.hero()); { const rp = env.respawnPos ? env.respawnPos() : { x: 0, z: 60 }; state.heroX = rp.x; state.heroZ = rp.z; } state.target = null; env.hero().rotation.x = 0; });
   cc.on('damage', d => { if (d.toPlayer) { const h = env.hero(), u = h.userData; if (!(u.os && u.os.kind !== 'hit')) oneShot(h, 'hit', 0.45, false); } else if (d.e.view) { d.e.flinch = 0.18; if (d.e.state !== 'telegraph' && d.e.state !== 'stagger') oneShot(d.e.view, 'hit', 0.4, false); } });
   cc.on('defeat', e => { if (e.def.boss) { bossOn = false; hud.say('ASHEN TITAN DEFEATED', 2600); } if (cc.kills % 6 === 0) { wave++; } });
   cc.on('enemyAttack', a => { if (a.result === 'dodged' && a.dmg === 0 && !cc.god) hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'DODGE', 'heal'); else if (a.result === 'parried') hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'PARRY', 'crit'); else if (a.result === 'blocked') hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'BLOCK', ''); });
 
   /* ---- enemies ---- */
-  async function spawn(key, atPlayerDist) {
+  async function spawn(key, atPlayerDist, extra) {
     const def = ENEMIES[key], w = await env.makeModel(def.model); if (!w || !on) return null;
     let x = state.heroX + 12, z = state.heroZ;
     for (let k = 0; k < 20; k++) { const a = Math.random() * 6.283, r = (atPlayerDist || (14 + Math.random() * 14)) * HS / 1.5, px = state.heroX + Math.cos(a) * r, pz = state.heroZ + Math.sin(a) * r; if (env.free(px, pz)) { x = px; z = pz; break; } }
     w.position.set(x, 0, z); let top;
-    if (def.boss) { top = (w.userData.heightW || 1.8 * HS * def.scale) + 0.5; }   // the GLB is already 6x the hero (11.4 m vs 1.9 m): no extra scaling in game
+    if (def.boss || def.scale > 1) { top = (w.userData.heightW || 1.8 * HS * def.scale) + 0.5; }   // the GLB is already 6x the hero (11.4 m vs 1.9 m): no extra scaling in game
     else { w.updateMatrixWorld(true); top = Math.max(1.5, new THREE.Box3().setFromObject(w).max.y) + 0.3; }
     scene.add(w);
     const ems = []; w.traverse(o => { if (o.isMesh && o.material && o.material.emissive) { ems.push(o); o.userData.em = o.material.emissive.getHex(); } });
     const tele = new THREE.Mesh(ring.geometry, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false })); tele.rotation.x = -Math.PI / 2; tele.visible = false; scene.add(tele);
-    const e = cc.addEnemy(key, x, z, { view: w, top, ems, tele, flashOn: false, px: x, pz: z });
+    const e = cc.addEnemy(key, x, z, Object.assign({ view: w, top, ems, tele, flashOn: false, px: x, pz: z }, extra));
     if (def.boss) { bossOn = true; hud.say('ASHEN TITAN APPEARS', 2200); cc.tgt.target = e; cc.tgt.locked = false; cc.lastTarget = e; }
     return e;
   }
@@ -140,7 +140,10 @@ export function createFight(env) {
     cc.update(dt);
     // spawner (bad guys): small waves of regular enemies
     spawnT -= dt; const reg = cc.enemies.filter(e => !e.def.boss && e.state !== 'defeated').length;
-    if (spawnT <= 0 && reg < Math.min(MAX_ALIVE, 2 + wave) && cc.dead <= 0) { spawnT = 3.5; spawn(WAVE_TABLE[Math.min(WAVE_TABLE.length - 1, Math.floor(Math.random() * Math.min(WAVE_TABLE.length, 1 + wave)))]); }
+    if (auto) {   // the Wilds: scattered, passive mobs (they stand off until you come within 3 m or hit them first); far ones are recycled
+      if (spawnT <= 0 && reg < AUTO_MAX && cc.dead <= 0) { spawnT = 1.6; const r = Math.random(), key = r < 0.36 ? 'wolf' : r < 0.66 ? 'raider' : r < 0.86 ? 'wraith' : r < 0.95 ? 'skeleton' : 'frosttroll'; spawn(key, 12 + Math.random() * 38, { aggroR: AUTO_AGGRO }); }
+      for (const e of cc.enemies) if (e.state === 'idle' && Math.hypot(e.x - state.heroX, e.z - state.heroZ) > 95) cc.removeEnemy(e);
+    } else if (spawnT <= 0 && reg < Math.min(MAX_ALIVE, 2 + wave) && cc.dead <= 0) { spawnT = 3.5; spawn(WAVE_TABLE[Math.min(WAVE_TABLE.length - 1, Math.floor(Math.random() * Math.min(WAVE_TABLE.length, 1 + wave)))]); }
     // dash / jump
     if (A.dash) { const d = A.dash, s = Math.min(d.left, d.spd * dt), p = { x: state.heroX + d.dx * s, z: state.heroZ + d.dz * s }; env.resolve(p); state.heroX = p.x; state.heroZ = p.z; d.left -= s; if (d.left <= 0.01) A.dash = null; }
     if (A.jump >= 0) { A.jump += dt; const u = A.jump / cc.P.jump.dur; if (u >= 1) A.jump = -1; else h.position.y += cc.P.jump.height * HS * 4 * u * (1 - u); }
@@ -171,15 +174,17 @@ export function createFight(env) {
     hud.update(dt, cc.enemies);
     if (!saber && isOwner() && !sheathed && cc.dead <= 0) equip(); if (saber && (!isOwner() || sheathed)) unequip();
   }
-  function start() {
-    if (on) return; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
+  let auto = false;
+  function start(isAuto) {
+    if (on) return; auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
+    if (auto) { syncHero(); equip(); hud.say('THE WILDS - monsters about', 1800); return; }
     env.selectOwner().then(() => { syncHero(); equip(); hud.say('FIGHT TEST', 1800); });
   }
   function stop() {
     if (!on) return; on = false; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
-  return { start, stop, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
+  return { start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
     get on() { return on; }, get hp() { return cc.res.hp; }, get kills() { return cc.kills; }, get monsters() { return cc.enemies; }, get hasSaber() { return !!saber; }, hurt(n) { cc.res.hp = Math.max(0, cc.res.hp - n); if (cc.res.hp <= 0 && cc.dead <= 0) { cc.dead = cc.P.respawn; cc.emit('playerDown'); } } };
 }

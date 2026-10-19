@@ -65,8 +65,8 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   T('ult: nothing dies before the meteor lands', w1.state !== 'defeated'); go(k, 1.5);
   T('ult: eligible monsters within 25 m defeated', w1.state === 'defeated' && w2.state === 'defeated');
   T('ult: monster beyond 25 m survives', far.state !== 'defeated');
-  T('ult: boss NOT instantly killed, takes normal saber hit (99,999)', bo.state !== 'defeated' && bo.max - bo.hp === 99999);
-  T('ult: death handler exactly once per monster', deaths === 2 && rew === 2 && k.kills === 2);
+  T('ult: boss instantly killed by default (bossesInstantKill true)', bo.state === 'defeated');
+  T('ult: death handler exactly once per monster', deaths === 3 && rew === 3 && k.kills === 3);
   T('ult: Fury spent, 35 s cooldown', k.fury === 0 && k.cd.left('unholy') > 32 && k.cd.left('unholy') <= 35);
   k = ow(); k.res.hp = k.res.max.hp - 5; const hp0 = k.res.hp; k.addEnemy('wolf', 0, 5).def = Object.assign({}, ENEMIES_atk0()); k.use('unholy'); go(k, 0.1);
   function ENEMIES_atk0() { return { name: 'w', level: 1, cls: 'x', hp: 100, atk: 0, def: 0, speed: 0, atkMs: 9e9, tele: 9, reach: 0, aggro: 0, scale: 1, xp: 1, gold: 1, boss: false, stagger: 0, poise: 0, r: 1 }; }
@@ -141,7 +141,7 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   k = o(); const ch = k.addEnemy('wolf', 0, 8), npc = k.addEnemy('wolf', 2, 8), pty = k.addEnemy('wolf', 3, 8), fr = k.addEnemy('wolf', 4, 8); ch.isCharacter = true; npc.npc = true; pty.party = true; fr.friendly = true; k.use('holy'); go(k, 2.5);
   T('ult: hostile characters die; npc/party/friendly skipped by default (unholy variant tested below)', ch.state === 'defeated' && npc.state !== 'defeated' && pty.state !== 'defeated' && fr.state !== 'defeated');
   TUNING.ult.dmgMul = 7; k = o(); const m7 = k.addEnemy('wolf', 0, 8); m7.hp = 20; const e7 = []; k.on('damage', d => !d.toPlayer && e7.push(d)); k.use('unholy'); go(k, 2.5); T('ult: multiplier adjustable', e7[0].dmg === 140); TUNING.ult.dmgMul = 50;
-  k = o(); const bo = k.addEnemy('titan', 0, 10); k.use('unholy'); go(k, 2.5); T('ult: boss still follows bossesInstantKill=false', bo.state !== 'defeated' && bo.max - bo.hp === 99999 * 1 || bo.max - bo.hp >= 99999 && bo.state !== 'defeated');
+  TUNING.ult.bossesInstantKill = false; k = o(); const bo = k.addEnemy('titan', 0, 10); k.use('unholy'); go(k, 2.5); T('ult: boss still follows bossesInstantKill=false', bo.state !== 'defeated' && bo.max - bo.hp === 99999 * 1 || bo.max - bo.hp >= 99999 && bo.state !== 'defeated');
   k = o(); k.setHero({ id: 'n:darius', saber: false }); k.ownerUnlocked = false; k.fury = 100; T('ult: non-owner cannot cast', !k.use('unholy')); }
 { const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
   const o = () => { const k = mk(); k.ownerUnlocked = true; k.res.unlimited = true; k.fury = 100; return k; };
@@ -156,7 +156,7 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   T('UNHOLY: x50 current HP shown', ev.find(d => d.e === r.mon).dmg === r.mon.max * 50);
   k = o(); k.setHero({ id: 'n:darius', saber: true }); k.ownerUnlocked = true; T('both ultimates work for saber holders (owner account)', k.ownerOk() && k.use('unholy'));
   k = o(); k.ownerUnlocked = false; k.fury = 100; T('both ultimates denied without owner gate', !k.use('holy') && !k.use('unholy'));
-  k = o(); const bb = k.addEnemy('titan', 0, 10); k.use('holy'); go(k, 2.5); T('HOLY: boss follows bossesInstantKill=false', bb.state !== 'defeated');
+  TUNING.ult.bossesInstantKill = false; k = o(); const bb = k.addEnemy('titan', 0, 10); k.use('holy'); go(k, 2.5); T('HOLY: boss follows bossesInstantKill=false', bb.state !== 'defeated'); TUNING.ult.bossesInstantKill = true;
 }
 { const go = (k, sec) => { for (let i = 0; i < sec * 60; i++) k.update(1 / 60); };
   const o = (sab = false) => { const k = mk(sab); k.ownerUnlocked = true; k.res.unlimited = true; return k; };
@@ -183,8 +183,18 @@ c = mk(); c.res.unlimited = false; c.res.sp = 0; c.block(true); T('non-owner/off
   const o = (unl = true) => { const k = mk(true); k.ownerUnlocked = unl; k.res.unlimited = true; return k; };
   let k = o(); const a = k.addEnemy('wolf', 0, 8), b = k.addEnemy('raider', 30, 40), t = k.addEnemy('titan', 0, 20); k.useUltimate2(); go(k, 2);
   T('Thunderstorm kills every regular enemy in range', a.state === 'defeated' && b.state === 'defeated');
-  T('Thunderstorm does NOT bypass bossesInstantKill=false (Titan survives, normal hit)', t.state !== 'defeated' && t.hp < t.max && t.hp > 0);
-  const keep = TUNING.ult.bossesInstantKill; TUNING.ult.bossesInstantKill = true; k = o(); const t2 = k.addEnemy('titan', 0, 20); k.useUltimate2(); go(k, 2); T('...but kills the boss when bossesInstantKill=true', t2.state === 'defeated'); TUNING.ult.bossesInstantKill = keep;
+  T('Thunderstorm kills the Titan by default (bossesInstantKill true)', t.state === 'defeated');
+  { TUNING.ult.bossesInstantKill = false; const kk = o(); const tt = kk.addEnemy('titan', 0, 20); kk.useUltimate2(); go(kk, 2); T('flag false (Settings toggle): Titan survives with a normal hit', tt.state !== 'defeated' && tt.hp > 0); TUNING.ult.bossesInstantKill = true; }
+  const keep = TUNING.ult.bossesInstantKill; TUNING.ult.bossesInstantKill = true; k = o(); const t2 = k.addEnemy('titan', 0, 20); k.useUltimate2(); go(k, 2); T('...and kills the boss when bossesInstantKill=true', t2.state === 'defeated'); TUNING.ult.bossesInstantKill = keep;
+  { const kk = o(); const E = { wolf: kk.addEnemy('wolf', 3, 3), raider: kk.addEnemy('raider', 5, 5), titan: kk.addEnemy('titan', 0, 30), friendly: kk.addEnemy('wolf', 6, 0), npcFlag: kk.addEnemy('wolf', 0, 6), partyFlag: kk.addEnemy('wolf', -6, 0), allyFlag: kk.addEnemy('wolf', 0, -6), hostileChar: kk.addEnemy('raider', 8, 8), far: kk.addEnemy('wolf', 900, 900) }; E.friendly.friendly = true; E.npcFlag.npc = true; E.partyFlag.party = true; E.allyFlag.ally = true; E.hostileChar.hostile = false;
+    const own = kk.addEnemy('wolf', 2, 2); own.owner = true; const prop = kk.addEnemy('wolf', 4, 4); prop.prop = true;
+    const BY = [{ x: 3, z: 0, hp: 50, kind: 'party' }, { x: 0, z: 3, hp: 1, kind: 'npc' }, { x: -4, z: 0, hp: 9, kind: 'townsfolk' }, { x: 1, z: 1, hp: 5, kind: 'follower' }, { x: 2, z: 2, hp: 5, owner: true }, { x: 800, z: 800, hp: 5, kind: 'far' }]; kk.bystanders = () => BY; const killed = []; kk.on('bystanderKill', ev => killed.push(ev.b));
+    kk.useUltimate2(); go(kk, 2);
+    for (const n of ['wolf', 'raider', 'titan', 'friendly', 'npcFlag', 'partyFlag', 'allyFlag', 'hostileChar']) T('Thunderstorm kills ' + n, E[n].state === 'defeated');
+    T('Thunderstorm: out-of-range enemy untouched', E.far.state !== 'defeated'); T('Thunderstorm: Owner entity exempt', own.state !== 'defeated' && own.hp === own.max); T('Thunderstorm: props not characters, untouched', prop.state !== 'defeated');
+    T('Thunderstorm kills party/npc/townsfolk/follower bystanders', ['party', 'npc', 'townsfolk', 'follower'].every(kd => killed.some(b => b.kind === kd)));
+    T('Thunderstorm: owner bystander and out-of-range bystander spared', !killed.some(b => b.owner || b.kind === 'far')); }
+  { const kk = mk(true); kk.ownerUnlocked = false; const w = kk.addEnemy('wolf', 3, 3); const BY = [{ x: 1, z: 1, hp: 5 }]; kk.bystanders = () => BY; let n = 0; kk.on('bystanderKill', () => n++); kk.useUltimate2(); go(kk, 2); T('Thunderstorm is owner-only: non-owner kills nothing', w.state !== 'defeated' && n === 0); }
   k = o(false); const w = k.addEnemy('wolf', 0, 8); T('Thunderstorm is owner-only (denied without owner gate)', !k.useUltimate2() && w.state !== 'defeated');
   k = o(); k.setHero({ id: 'aldric', saber: false }); k.addEnemy('wolf', 0, 8); T('Thunderstorm denied for a normal hero', !k.useUltimate2());
 }

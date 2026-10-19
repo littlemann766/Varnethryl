@@ -309,7 +309,9 @@ Builder.prototype.clearZone = function (m, level, du0, du1, floorY) {
   const keepLv = c0 => c0.lv === undefined || c0.lv === level || (Array.isArray(c0.lv) && c0.lv.includes(level));
   this.colliders = this.colliders; for (let i = this.colliders.length - 1; i >= 0; i--) { const q = this.colliders[i]; if (q.b !== this.id || q.stair || q.npcOnly || !keepLv(q)) continue;
     let lx, lz, big; if (q.type === 'box') { [lx, lz] = this.toL((q.minX + q.maxX) / 2, (q.minZ + q.maxZ) / 2); const W = (q.maxX - q.minX) / this.K, D = (q.maxZ - q.minZ) / this.K; big = Math.max(W, D) > 4.2 || Math.min(W, D) < .5 && Math.max(W, D) > 2.4; } else { [lx, lz] = this.toL(q.x, q.z); big = false; }
-    if (!big && inZ(lx, lz, q.type === 'circle' ? q.r / this.K * .5 : Math.min(1.1, Math.max(q.maxX - q.minX, q.maxZ - q.minZ) / this.K * .45))) this.colliders.splice(i, 1); }
+    if (!big && inZ(lx, lz, q.type === 'circle' ? q.r / this.K * .5 : Math.min(1.1, Math.max(q.maxX - q.minX, q.maxZ - q.minZ) / this.K * .45))) {
+      if (q.shell === 1) { const dx = q.x - this.cx, dz = q.z - this.cz, d = Math.hypot(dx, dz) || 1, k = (q.r + .12) / d; q.x += dx * k; q.z += dz * k; q.shell = 2; continue; }   // a stair along a round wall: push the wall circle outward (stair stays clear, the outside stays sealed)
+      this.colliders.splice(i, 1); } }
 };
 Builder.prototype.stairs = function (o) {
   const { cx, cz, ang = 0, len, w = 1.8, l0 = 0, y0 = 0, l1, y1 } = o;
@@ -354,7 +356,8 @@ Builder.prototype.gallery = function (o = {}) {
 };
 
 // round hollow shell (towers, colosseum, windmill, lighthouse, observatory): N wall segments with a door gap at local +z
-Builder.prototype.roundShell = function (o) { const _lv = this.lvTag; this.lvTag = undefined; try { return this._roundShell(o); } finally { this.lvTag = _lv; } };
+Builder.prototype.roundShell = function (o) { const _lv = this.lvTag, n0 = this.colliders.length; this.lvTag = undefined; try { return this._roundShell(o); } finally { this.lvTag = _lv;
+  const R = (o.r || 4) * this.K; for (let i = n0; i < this.colliders.length; i++) { const q = this.colliders[i]; if (q.type === 'circle' && q.lv === undefined && Math.abs(Math.hypot(q.x - this.cx, q.z - this.cz) - R) < 1.5) q.shell = 1; } } };   // ring-wall circles: never deleted by stair lanes (see clearZone)
 Builder.prototype._roundShell = function (o) {
   const { r, h } = o, T = o.T || this.T, N = o.N || Math.max(12, Math.round(r * 2.6)), DW = Math.min(o.DW || 2.2, DOOR_MAXW), DH = Math.min(o.DH || 2.6, DOOR_MAXH), key = o.key || 'stone', seg = 2 * Math.PI * r / N;
   this.radius = r; this.w = this.d = r * 2; this.h = h; this.DW = DW; this.DHr = DH; this.iw = r - T; this.id_ = r - T;

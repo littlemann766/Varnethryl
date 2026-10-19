@@ -12,7 +12,7 @@ export class CombatController {
     this.enemies = []; this.ls = {}; this.p = { x: 0, z: 0, yaw: 0, dead: false };
     this.hero = { id: '', name: 'Hero', level: 40, className: 'Adventurer', saber: false };
     this.act = null; this.blocking = false; this.blockT = 0; this.iframes = 0; this.shield = 0; this.potions = this.P.potion.charges; this.dead = 0;
-    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this.kit = null; this._mk = ''; this.ownerUnlocked = false; this.meteors = []; this.bamboo = false; this.RM = 1; this.ultSel = (() => { try { const v = typeof localStorage !== 'undefined' && localStorage.getItem('varn.ultsel'); return v === 'unholy' ? 'unholy' : 'holy'; } catch (e) { return 'holy'; } })(); this.bystanders = null;
+    this.xp = 0; this.gold = 0; this.kills = 0; this.lastTarget = null; this.lastHitT = -99; this.god = false; this.nextId = 1; this.fury = 0; this.kit = null; this._mk = ''; this.ownerUnlocked = false; this.meteors = []; this.bamboo = false; this.buffs = []; this.summons = []; this.sid = 1; this.RM = 1; this.ultSel = (() => { try { const v = typeof localStorage !== 'undefined' && localStorage.getItem('varn.ultsel'); return v === 'unholy' ? 'unholy' : 'holy'; } catch (e) { return 'holy'; } })(); this.bystanders = null;
     this.env = { HS: this.HS, move: o.move || ((e, dx, dz) => { e.x += dx; e.z += dz; }) };
   }
   on(t, f) { (this.ls[t] || (this.ls[t] = [])).push(f); return this; }
@@ -145,6 +145,7 @@ export class CombatController {
     const sm = Math.max(0, Math.min(50, Math.floor(+TUNING.perks.saberMul || 0)));   // 0 = flat 99,999 (old behavior); 1-50 = x target current HP
     if (sm > 0 && this.weapon() === 'saber' && this.ownerOk() && e.hp > 0 && (!e.def.boss || TUNING.perks.saberBossesX12)) r.dmg = Math.max(1, Math.round(e.hp)) * sm; }
     if (wp !== 1 && !lethal) r.dmg = Math.round(r.dmg * wp);
+    { const bd = !this.ownerOk() && !lethal ? this.buffSum('dmg') : 0; if (bd > 0) r.dmg = Math.round(r.dmg * (1 + bd)); }   // party buffs never touch Owner rules
     e.hp = Math.max(0, e.hp - r.dmg); e.flash = 0.2; this.lastTarget = e; this.lastHitT = this.cd.t;
     const dx = e.x - this.p.x, dz = e.z - this.p.z, d = Math.hypot(dx, dz) || 1; e.kx = dx / d; e.kz = dz / d; e.knockT = (a && a.knock ? 0.35 : 0.12);
     this.emit('damage', { e, dmg: r.dmg, crit: r.crit, toPlayer: false });
@@ -173,6 +174,8 @@ export class CombatController {
     if (a.kind === 'line') { const fx = Math.sin(this.p.yaw), fz = Math.cos(this.p.yaw); for (const e of this.enemies.slice()) { const dx = e.x - this.p.x, dz = e.z - this.p.z, al = dx * fx + dz * fz; if (al > 0 && al < a.range + e.def.r && Math.abs(dx * fz - dz * fx) < 1.4 + e.def.r) this.hitEnemy(e, a.mult, a); } return; }
     if (a.kind === 'blink') { const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range); if (t) { const dx = t.x - this.p.x, dz = t.z - this.p.z, d = Math.hypot(dx, dz) || 1, bx = t.x + dx / d * (t.def.r + 1.2), bz = t.z + dz / d * (t.def.r + 1.2); this.emit('blink', { x: bx, z: bz, yaw: Math.atan2(-dx, -dz) + Math.PI }); this.p.x = bx; this.p.z = bz; this.hitEnemy(t, a.mult, a); } return; }   // lands later via this.meteors
     if (a.kind === 'shield') { this.shield = a.dur; this.emit('shield', a); return; }
+    if (a.kind === 'buff') { this.addBuff(a.buff, a); return; }
+    if (a.kind === 'summon') { this.addSummon(a.summon, a); return; }
     if (a.kind === 'ranged') { const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * HS * this.RM); if (t && Math.hypot(t.x - this.p.x, t.z - this.p.z) <= a.range * HS * this.RM + t.def.r) { this.emit('throw', { e: t }); this.hitEnemy(t, a.mult, a); } return; }
     if (a.kind === 'chain') { this.chainStrike(a); return; }
     if (a.kind === 'storm') { act.storm = 3; act.stormT = 0; this.stormHit(act); return; }
@@ -195,14 +198,42 @@ export class CombatController {
     if (h === 0) res = 'dodged';
     if (this.blocking) { h = Math.round(h * (1 - this.P.block.reduce)); if (!this.res.unlimited) this.res.sp = Math.max(0, this.res.sp - Math.max(8, h * 0.02)); res = 'blocked'; if (this.res.sp <= 0) this.block(false); }
     if (this.shield > 0) h = Math.round(h * (1 - ABILITIES[4].reduce));
+    { const br = Math.min(0.6, this.buffSum('reduce')); if (br > 0) h = Math.round(h * (1 - br)); }
     this.res.hp = Math.max(0, this.res.hp - h);
     this.emit('enemyAttack', { e, result: res, dmg: h }); if (h > 0) this.emit('damage', { e, dmg: h, crit: false, toPlayer: true });
     if (this.res.hp <= 0) { this.dead = this.P.respawn; this.act = null; this.block(false); this.emit('playerDown'); }
   }
-  respawn() { this.res.full(); this.dead = 0; this.potions = this.P.potion.charges; this.cd.reset(); this.iframes = 0; this.shield = 0; this.act = null; this.meteors.length = 0; this.clearEnemies(); this.tgt.target = null; this.tgt.locked = false; this.emit('respawn'); }
+  respawn() { for (const s of this.summons.slice()) this.removeSummon(s, 'respawn'); this.buffs.length = 0; this.res.full(); this.dead = 0; this.potions = this.P.potion.charges; this.cd.reset(); this.iframes = 0; this.shield = 0; this.act = null; this.meteors.length = 0; this.clearEnemies(); this.tgt.target = null; this.tgt.locked = false; this.emit('respawn'); }
   /* ---- frame ---- */
+  /* ---- real party buffs + summons (kit skills). Buffs: dmg (+fraction, non-Owner normal damage), reduce (damage taken), cdRate (extra cooldown speed), summonRate (summon attack speed); party:true also emits for the host's followers (visual aura). Re-cast refreshes. ---- */
+  addBuff(b, a) { const o = this.buffs.find(x => x.id === b.id); if (o) o.t = b.dur; else this.buffs.push(Object.assign({ t: b.dur }, b)); this.emit('buff', { id: b.id, dur: b.dur, party: !!b.party, name: a && a.name }); }
+  buffSum(k) { let v = 0; for (const b of this.buffs) v += b[k] || 0; for (const s of this.summons) if (s.id === 'totem' && Math.hypot(s.x - this.p.x, s.z - this.p.z) <= s.radius * this.HS) v += k === 'reduce' ? s.reduce : k === 'haste' ? s.haste : 0; return v; }
+  /* Summons are simple controller entities (no AI tree): thrall chases + melees the nearest enemy, turret shoots in range, totem is an aura (slow enemies, protect/haste the player inside). One of each id at a time (re-cast replaces). */
+  addSummon(sm, a) {
+    for (const o of this.summons.filter(x => x.id === sm.id)) this.removeSummon(o, 'replaced');
+    const HS = this.HS, fx = Math.sin(this.p.yaw), fz = Math.cos(this.p.yaw), off = sm.id === 'totem' ? 0 : 2.2 * HS;
+    const s = Object.assign({ uid: this.sid++, t: sm.dur, cd: 0.3, x: this.p.x + fx * off, z: this.p.z + fz * off, hpMax: Math.round(this.res.max.hp * (sm.hp || 0)) }, sm); s.hp = s.hpMax;
+    this.summons.push(s); this.emit('summon', s); return s;
+  }
+  removeSummon(s, why) { const i = this.summons.indexOf(s); if (i >= 0) { this.summons.splice(i, 1); this.emit('summonEnd', { s, why }); } }
+  summonHit(s, e) { const r = DamageCalculator.playerHit('unarmed', s.mult, this.rng); r.dmg = Math.max(1, Math.round(r.dmg * (1 + this.buffSum('dmg')))); e.hp = Math.max(0, e.hp - r.dmg); e.flash = 0.12; this.emit('damage', { e, dmg: r.dmg, crit: r.crit, toPlayer: false, summon: s.id }); if (e.state === 'idle') this.ai.set(e, 'chase'); if (e.hp <= 0) this.defeat(e); }
+  tickSummons(dt) {
+    const HS = this.HS, rate = 1 + this.buffSum('summonRate');
+    for (const s of this.summons.slice()) {
+      s.t -= dt; if (s.t <= 0 || (s.hpMax && s.hp <= 0)) { this.removeSummon(s, s.t <= 0 ? 'expired' : 'killed'); continue; }
+      const live = this.enemies.filter(e => e.state !== 'defeated');
+      if (s.id === 'totem') { for (const e of live) e.slowT = Math.hypot(e.x - s.x, e.z - s.z) <= s.radius * HS ? s.slow : 0; continue; }
+      let best = null, bd = 1e9; const lim = (s.id === 'turret' ? s.range : s.aggro) * HS; for (const e of live) { const d = Math.hypot(e.x - s.x, e.z - s.z) - (e.def.r || 0); if (d < bd && d <= lim) { bd = d; best = e; } }
+      if (s.id === 'thrall') {   // follow the player when idle
+        const tx = best ? best.x : this.p.x, tz = best ? best.z : this.p.z, d = Math.hypot(tx - s.x, tz - s.z), stop = best ? (best.def.r || 0) + s.range * HS * 0.6 : 2.5 * HS;
+        if (d > stop) { const k = Math.min(1, (s.speed * HS * dt) / d); s.x += (tx - s.x) * k; s.z += (tz - s.z) * k; } s.yaw = Math.atan2(tx - s.x, tz - s.z);
+      }
+      s.cd -= dt * rate; if (best && s.cd <= 0 && bd <= (s.id === 'turret' ? s.range : s.range) * HS + 0.01) { s.cd = s.every; this.emit('summonAttack', { s, e: best }); this.summonHit(s, best); }
+    }
+    for (const b of this.buffs.slice()) { b.t -= dt; if (b.t <= 0) { this.buffs.splice(this.buffs.indexOf(b), 1); this.emit('buffEnd', { id: b.id }); } }
+  }
   update(dt) {
-    this.applyMax(false); this.cd.tick(dt); this.res.tick(dt, this.blocking);
+    this.applyMax(false); this.cd.tick(dt * (1 + this.buffSum('cdRate') + this.buffSum('haste'))); this.tickSummons(dt); this.res.tick(dt, this.blocking);
     if (this.res.unlimited && this.furyOn()) this.fury = TUNING.ult.fury;
     if (this.meteors.length) for (const m of this.meteors.slice()) { m.t -= dt; if (m.t <= 0) { this.meteors.splice(this.meteors.indexOf(m), 1); if (this.dead <= 0) this.meteorImpact(m); } }
     this.iframes = Math.max(0, this.iframes - dt); this.shield = Math.max(0, this.shield - dt);

@@ -169,7 +169,7 @@ export function createFight(env) {
   let fxT = -1, fxMax = 1, orbT = -1, orbFrom = null, orbTo = null;
 
   /* ---- controller events -> world ---- */
-  cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact();  hud.say(ev.name ? ev.name.toUpperCase() : 'DESTRUCTION', 1400); });
+  cc.on('meteorCast', metStart).on('meteorImpact', ev => { metImpact();  hud.say(ev.name ? ev.name.toUpperCase() : 'DESTRUCTION', 1400); }).on('blink', b => { state.heroX = b.x; state.heroZ = b.z; state.yaw = b.yaw; });
   let lfx = null; const getFx = () => lfx || (lfx = new LightningFX({ THREE, scene, HS, canvas: document.querySelector('canvas') }));
   cc.on('lightning', ev => { getFx().strike(ev); });
   if (env.bystanders) cc.bystanders = env.bystanders;
@@ -180,7 +180,7 @@ export function createFight(env) {
       let ok = false; if (ev.a.kind !== 'shield') ok = drawn ? playAct(h, slashA, 'atk', Math.max(0.5, ev.T), false) : oneShot(h, ev.a.id === 'heavy' ? 'attack2' : 'attack', Math.max(0.5, ev.T), false);
       A.clipAtk = ok; }
     if (ev.aim && (ev.a.kind !== 'storm' && ev.a.kind !== 'aoe')) state.yaw = Math.atan2(ev.aim.x - state.heroX, ev.aim.z - state.heroZ);
-    if (ev.a.kind === 'aoe' || ev.a.kind === 'storm') { fxT = 0; fxMax = ev.a.range * HS; ring.material.color.setHex(ev.a.kind === 'storm' ? 0xffd34a : ev.a.owner ? 0xb36bff : 0x66e6ff); }
+    if (ev.a.kind === 'aoe' || ev.a.kind === 'storm' || ev.a.kind === 'line') { fxT = 0; fxMax = ev.a.range * HS; ring.material.color.setHex(ev.a.kit && cc.kit ? parseInt(cc.kit.color.slice(1), 16) : ev.a.kind === 'storm' ? 0xffd34a : ev.a.owner ? 0xb36bff : 0x66e6ff); }
     if (ev.a.kind === 'storm') A.spin = 0.0001;
   }).on('dash', d => { A.dash = { dx: d.dx, dz: d.dz, left: d.dist, spd: d.dist / d.T }; })
     .on('jump', j => { A.jump = 0; }).on('throw', t => { orbT = 0; orbFrom = { x: state.heroX, z: state.heroZ }; orbTo = t.e; })
@@ -207,7 +207,14 @@ export function createFight(env) {
     return e;
   }
   const spawnBoss = () => { if (on && !bossOn) spawn('titan', 26); };
-  cc.on('remove', e => { if (e.view) { scene.remove(e.view); scene.remove(e.tele); e.tele.material.dispose(); } });
+  /* boss telegraph shapes: ONE pooled mesh per boss (plane for line, sector for cone), created lazily. */
+  let GL_LINE = null, GL_CONE = null;
+  function bossTele(e, shape, pt) { if (!e.tele2 || e.tele2s !== shape) { if (e.tele2) { scene.remove(e.tele2); e.tele2.material.dispose(); }
+      const g = shape === 'line' ? (GL_LINE || (GL_LINE = new THREE.PlaneGeometry(1, 1).translate(0, 0, 0))) : (GL_CONE || (GL_CONE = new THREE.CircleGeometry(1, 20, Math.PI / 2 - Math.acos(pt.cos), 2 * Math.acos(pt.cos))));
+      e.tele2 = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.4, side: THREE.DoubleSide, depthWrite: false })); e.tele2s = shape; scene.add(e.tele2); }
+    e.tele2.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); return e.tele2; }
+  cc.on('remove', e => { if (e.view) { scene.remove(e.view); scene.remove(e.tele); e.tele.material.dispose(); if (e.tele2) { scene.remove(e.tele2); e.tele2.material.dispose(); } } });
+  cc.on('bossPhase', ev => { hud.say('THE TITAN ENRAGES', 1800); shakeA = 1.2; shakeT = 0.6; });
   const yawLerp = (cur, to, k) => cur + (((to - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * k;
 
   /* ---- per frame ---- */
@@ -249,7 +256,10 @@ export function createFight(env) {
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
       let lean = 0; if (e.state === 'telegraph') lean = -0.35 * Math.min(1, e.tStateT / e.def.tele); else if (e.state === 'attack') lean = 0.45; else if (e.state === 'stagger') lean = -0.5; else if (e.flinch > 0) lean = -0.25 * (e.flinch / 0.18);
       r.rotation.x += (lean - r.rotation.x) * Math.min(1, dt * 14);
-      if (e.state === 'telegraph') { const reach = (e.def.reach * HS + e.def.r) * 1.1, f = Math.min(1, e.tStateT / e.def.tele); e.tele.visible = true; e.tele.position.set(e.x, 0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; } else e.tele.visible = false;
+      if (e.state === 'telegraph') { const pt = e.def.boss ? e.pat : null, f = Math.min(1, e.tStateT / (e.curTele || e.def.tele)), reach = ((pt ? pt.reach : e.def.reach) * HS + e.def.r) * 1.1;
+        const shape = pt ? pt.shape : 'ring'; e.tele.visible = shape === 'ring'; if (shape === 'ring') { e.tele.position.set(e.x, 0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; e.tele.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); }
+        if (shape !== 'ring') { const t2 = bossTele(e, shape, pt); t2.visible = true; const L = pt.reach * HS + e.def.r; t2.position.set(e.x, 0.13, e.z); t2.rotation.set(-Math.PI / 2, 0, e.yaw + Math.PI); t2.material.opacity = 0.18 + 0.45 * f; if (shape === 'line') { t2.scale.set(pt.width * HS, L * (0.35 + 0.65 * f), 1); t2.position.set(e.x + Math.sin(e.yaw) * t2.scale.y / 2, 0.13, e.z + Math.cos(e.yaw) * t2.scale.y / 2); } else t2.scale.setScalar(L * (0.35 + 0.65 * f)); } else if (e.tele2) e.tele2.visible = false;
+      } else { e.tele.visible = false; if (e.tele2) e.tele2.visible = false; }
       if (u.glb && u.act) { env.loco(u, e.state === 'chase' ? mv : 0); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
       const f = e.flash > 0 || e.state === 'telegraph'; if (f !== e.flashOn) { e.flashOn = f; const hx = e.flash > 0 ? 0xff2020 : 0xaa5500; for (const o of e.ems) o.material.emissive.setHex(f ? hx : o.userData.em); }
     }

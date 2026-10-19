@@ -60,6 +60,8 @@ export function boxG(w, h, d, tile = 2) {
   for (let f = 0; f < 6; f++) for (let v = 0; v < 4; v++) { const i = f * 4 + v; uv.setXY(i, uv.getX(i) * dims[f][0] / tile, uv.getY(i) * dims[f][1] / tile); }
   return g;
 }
+export function boxL(w, h, d, tile = 2) { // trim box without the underside and back (wall-facing) faces: 8 tris instead of 12
+  const g = boxG(w, h, d, tile), idx = g.index.array, keep = []; for (let f = 0; f < 6; f++) if (f !== 3 && f !== 5) for (let k = 0; k < 6; k++) keep.push(idx[f * 6 + k]); g.setIndex(keep); return g; }
 export function cylG(rt, rb, h, seg, tile = 3, open = false) { const g = new THREE.CylinderGeometry(rt, rb, h, seg, 1, open); const c = 2 * Math.PI * Math.max(rt, rb); return uvScale(g, c / tile, h / tile); }
 export function gableG(W, L, rh, over, tile = 2.2) { // ridge along z; returns slopes (slate) geometry
   const hw = W / 2 + over, hl = L / 2 + over, s = Math.hypot(hw, rh), p = [], uv = [];
@@ -110,7 +112,7 @@ export class Builder {
   ccol(lx, lz, r) { const [x, z] = this.toW(lx, lz); r *= this.K; this.colliders.push({ type: 'circle', x, z, r, b: this.id, lv: this.lvTag }); }
   // ---- mesh helpers ----
   add(geo, mat, x, y, z, grp, o = {}) { if (this.curUp && grp === this.G.int) { grp = this.curUp.group; y += this.curUp.y; } const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = o.shadow !== false; m.receiveShadow = o.recv !== false; if (o.keep) m.userData.keep = true; if (this._st) m.userData.stairPart = true; (grp || this.G.ext).add(m); return m; }
-  bx(w, h, d, key, x, y, z, grp, o) { return this.add(boxG(w, h, d, TILE[key] || 2), M(key, o && o.mat), x, y, z, grp, o); }
+  bx(w, h, d, key, x, y, z, grp, o) { return this.add((o && o.lite ? boxL : boxG)(w, h, d, TILE[key] || 2), M(key, o && o.mat), x, y, z, grp, o); }
   cm(key) { return this.cutCache[key] || (this.cutCache[key] = (() => { const m = M(key).clone(); this.cut.push(m); return m; })()); } // per-building cutaway material
   wallBox(w, h, d, key, x, y, z, grp) { return this.add(boxG(w, h, d, TILE[key] || 2), this.cm(key), x, y, z, grp || this.G.walls); }
   cyl(rt, rb, h, key, x, y, z, grp, seg = 12, o) { return this.add(cylG(rt, rb, h, seg, TILE[key] || 2), M(key), x, y, z, grp, o); }
@@ -127,9 +129,9 @@ export class Builder {
   roofTrim(W, L, rh, over, x, y, z, key, grp, ridgeX, endKey) { // eave fascia + rafter tails, barge boards, ridge cap + finials, half-timber gable ends
     const hw = W / 2 + over, hl = L / 2 + over, al = Math.atan2(rh, hw), sl = Math.hypot(hw, rh), g = grp || this.G.roof;
     const P = (geo, mat, ox, oy, oz, rz = 0) => { const m = this.add(geo, mat, x + (ridgeX ? oz : ox), y + oy, z + (ridgeX ? -ox : oz), g, { shadow: false }); m.rotation.order = 'YXZ'; m.rotation.y = ridgeX ? Math.PI / 2 : 0; m.rotation.z = rz; return m; };
-    const dk = M('darkWood'), n = Math.max(2, Math.round(2 * hl / 1.2));
+    const boxG = boxL, dk = M('darkWood'), n = Math.max(2, Math.round(2 * hl / 2.4)) * 2;
     for (const sd of [-1, 1]) { P(boxG(.1, .22, 2 * hl, 1.6), dk, sd * hw, -.09, 0);
-      for (let i = 0; i <= n; i++) P(boxG(.1, .1, .22, 1), dk, sd * (hw - .05), -.24, -hl + .15 + i * (2 * hl - .3) / n); }
+      for (let i = 0; i <= n; i += 2) P(boxG(.1, .1, .22, 1), dk, sd * (hw - .05), -.24, -hl + .15 + i * (2 * hl - .3) / n); }
     for (const e of [-1, 1]) for (const sd of [-1, 1]) P(boxG(sl + .1, .17, .09, 1.6), dk, sd * hw / 2, rh / 2 - .02, e * (hl + .02), -sd * al);
     P(boxG(.42, .1, 2 * hl + .1, 2), M(key === 'slateG' ? 'slateG' : 'slate'), 0, rh + .1, 0);
     for (const e of [-1, 1]) { P(new THREE.ConeGeometry(.13, .55, 4), M('iron'), 0, rh + .42, e * (hl + .08)); P(new THREE.SphereGeometry(.09, 5, 4), M('gold'), 0, rh + .72, e * (hl + .08)); }
@@ -144,7 +146,7 @@ export class Builder {
     if (shut) for (const s of [-1, 1]) { const sh = this.bx(w * .42, h, .06, this.shutKey, x + Math.cos(ry) * s * (w * .72), y, z - Math.sin(ry) * s * (w * .72) + Math.cos(ry) * .03, grp || this.G.ext); sh.rotation.y = ry; } const p = this.add(new THREE.PlaneGeometry(w, h), M('#ffffff', { map: tex(key), emissive: key === 'glass' ? new THREE.Color(0x70480f) : new THREE.Color(0x0a1840), side: THREE.DoubleSide }), x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
     const f = this.bx(w + .2, .12, .2, 'darkWood', x + Math.sin(ry) * .02, y - h / 2 - .04, z + Math.cos(ry) * .02, grp || this.G.ext); f.rotation.y = ry;
     // frame (jambs + stone lintel with keystone) and glazing bars
-    { const g = grp || this.G.ext, cr = Math.cos(ry), sr = Math.sin(ry), at = (bw, bh, bd, key, u, yy, v) => { const b = this.bx(bw, bh, bd, key, x + cr * u + sr * v, y + yy, z - sr * u + cr * v, g, { shadow: false }); b.rotation.y = ry; return b; };
+    { const g = grp || this.G.ext, cr = Math.cos(ry), sr = Math.sin(ry), at = (bw, bh, bd, key, u, yy, v) => { const b = this.bx(bw, bh, bd, key, x + cr * u + sr * v, y + yy, z - sr * u + cr * v, g, { shadow: false, lite: true }); b.rotation.y = ry; return b; };
       for (const sd of [-1, 1]) at(.07, h + .06, .14, 'darkWood', sd * (w / 2 + .03), 0, .04);
       at(w + .26, .1, .14, 'darkWood', 0, h / 2 + .05, .04); at(w + .42, .12, .22, 'stoneD', 0, h / 2 + .17, .05); at(.16, .2, .26, 'stoneL', 0, h / 2 + .2, .06);
       at(.035, h, .05, 'darkWood', 0, 0, .03); at(w, .035, .05, 'darkWood', 0, h * .08, .03); if (shut) for (const sd of [-1, 1]) at(w * .26, h * .8, .03, 'wood', sd * w * .72, 0, .07); }
@@ -185,13 +187,13 @@ export class Builder {
     this.bx(DW + .7, .3, .6, 'stoneD', 0, DH + .1, d / 2 - T / 2, this.G.frame);
     this.bx(DW + .8, .14, 1.1, 'stoneD', 0, .07, d / 2 + .3, this.G.ext); this.bx(DW + 1.0, .1, 1.5, 'stoneD', 0, .03, d / 2 + .55, this.G.ext, { shadow: false });
     this.bx(.3, .26, .5, 'stoneL', 0, DH + .36, d / 2 - T / 2, this.G.frame);   // keystone
-    for (const sx of [-1, 1]) { this.bx(.12, .12, .12, 'iron', sx * (DW / 2 + .1), DH * .3, d / 2 + .03, this.G.ext, { shadow: false }); this.bx(.12, .12, .12, 'iron', sx * (DW / 2 + .1), DH * .75, d / 2 + .03, this.G.ext, { shadow: false }); }
-    if (o.doorHood && (hs < 2.6 || (h - hs) <= 1.8)) { const hd = this.bx(DW + 1.2, .12, 1.15, 'slate', 0, DH + .72, d / 2 + .48, this.G.frame, { shadow: false }); hd.rotation.x = .26; for (const sx of [-1, 1]) { const br = this.bx(.1, .1, .9, 'darkWood', sx * (DW / 2 + .5), DH + .45, d / 2 + .45, this.G.frame, { shadow: false }); br.rotation.x = -.5; } this.bx(DW + 1.3, .1, .1, 'darkWood', 0, DH + .62, d / 2 + .98, this.G.frame, { shadow: false }); }
+    for (const sx of [-1, 1]) { this.bx(.12, .12, .12, 'iron', sx * (DW / 2 + .1), DH * .3, d / 2 + .03, this.G.ext, { shadow: false, lite: true }); this.bx(.12, .12, .12, 'iron', sx * (DW / 2 + .1), DH * .75, d / 2 + .03, this.G.ext, { shadow: false, lite: true }); }
+    if (o.doorHood && (hs < 2.6 || (h - hs) <= 1.8)) { const hd = this.bx(DW + 1.2, .12, 1.15, 'slate', 0, DH + .72, d / 2 + .48, this.G.frame, { shadow: false, lite: true }); hd.rotation.x = .26; for (const sx of [-1, 1]) { const br = this.bx(.1, .1, .9, 'darkWood', sx * (DW / 2 + .5), DH + .45, d / 2 + .45, this.G.frame, { shadow: false, lite: true }); br.rotation.x = -.5; } this.bx(DW + 1.3, .1, .1, 'darkWood', 0, DH + .62, d / 2 + .98, this.G.frame, { shadow: false, lite: true }); }
     else if (o.doorHood && hs >= 2.6 && h - hs > 1.8) { const by = hs + .02, bw = DW + 1.8, bz = d / 2 + .6, g = this.G.frame;   // balcony over the door: slab, rail, balusters, brackets
-      this.bx(bw, .16, 1.2, 'darkWood', 0, by, bz, g); this.bx(bw + .1, .08, 1.3, 'wood', 0, by + .1, bz, g, { shadow: false });
-      for (const [rx, rz, rw, rd] of [[0, bz + .55, bw, .07], [-bw / 2 + .03, bz, .07, 1.1], [bw / 2 - .03, bz, .07, 1.1]]) this.bx(rw, .08, rd, 'darkWood', rx, by + 1.0, rz, g, { shadow: false });
-      for (let i = 0; i <= 8; i++) this.bx(.06, .85, .06, 'darkWood', -bw / 2 + .06 + i * (bw - .12) / 8, by + .55, bz + .55, g, { shadow: false });
-      for (const sx of [-1, 1]) { this.bx(.07, .85, .07, 'darkWood', sx * (bw / 2 - .05), by + .55, bz, g, { shadow: false }); const br = this.bx(.12, .12, .95, 'darkWood', sx * (bw / 2 - .25), by - .4, bz, g, { shadow: false }); br.rotation.x = .75; } }
+      this.bx(bw, .16, 1.2, 'darkWood', 0, by, bz, g); this.bx(bw + .1, .08, 1.3, 'wood', 0, by + .1, bz, g, { shadow: false, lite: true });
+      for (const [rx, rz, rw, rd] of [[0, bz + .55, bw, .07], [-bw / 2 + .03, bz, .07, 1.1], [bw / 2 - .03, bz, .07, 1.1]]) this.bx(rw, .08, rd, 'darkWood', rx, by + 1.0, rz, g, { shadow: false, lite: true });
+      for (let i = 0; i <= 8; i++) this.bx(.06, .85, .06, 'darkWood', -bw / 2 + .06 + i * (bw - .12) / 8, by + .55, bz + .55, g, { shadow: false, lite: true });
+      for (const sx of [-1, 1]) { this.bx(.07, .85, .07, 'darkWood', sx * (bw / 2 - .05), by + .55, bz, g, { shadow: false, lite: true }); const br = this.bx(.12, .12, .95, 'darkWood', sx * (bw / 2 - .25), by - .4, bz, g, { shadow: false, lite: true }); br.rotation.x = .75; } }
     const leaf = this.bx(1.0, DH - .1, .1, 'door', -DW / 2 + .05, DH / 2, d / 2 - T - .5, this.G.ext); leaf.rotation.y = Math.PI / 2;
     // plinth + corner posts
     { const pt = .18, ph = .28; // plinth: thin ring outside the walls so the interior floor stays visible
@@ -313,18 +315,18 @@ Builder.prototype.details = function (o = {}) {
 Builder.prototype.details2 = function (o) {
   const w = this.w, d = this.d, DW = this.DW || 2.2, g = this.G.ext, hs = o.hs || 0, h = this.h, tim = o.upper === 'timber' || o.upper === 'plaster' || o.upper === 'darkWood'; let hh = 0; for (const ch of String(this.id)) hh = (hh * 17 + ch.charCodeAt(0)) | 0; const rnd = k => { const x = Math.sin(hh * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
   if (hs > 1.2 && hs < h - 1) { const key = tim ? 'darkWood' : 'stoneL', th = tim ? .2 : .16;   // storey string course / jetty beam on all four sides
-    this.bx(w + .16, th, .12, key, 0, hs, d / 2 + .05, g, { shadow: false }); this.bx(w + .16, th, .12, key, 0, hs, -d / 2 - .05, g, { shadow: false });
-    for (const sx of [-1, 1]) this.bx(.12, th, d + .16, key, sx * (w / 2 + .05), hs, 0, g, { shadow: false });
-    if (tim) { for (const sx of [-1, 1]) for (const z of [-d / 2 + .9, 0, d / 2 - .9]) this.bx(.1, h - hs - .1, .1, 'darkWood', sx * (w / 2 + .03), hs + (h - hs) / 2, z, g, { shadow: false });
-      for (const x of [-w / 2 + .9, w / 2 - .9]) this.bx(.1, h - hs - .1, .1, 'darkWood', x, hs + (h - hs) / 2, d / 2 + .03, g, { shadow: false });
-      for (const sx of [-1, 1]) { const br = this.bx(.1, 1.5, .1, 'darkWood', sx * (w / 2 + .03), hs + .8, d / 2 - 1.5, g, { shadow: false }); br.rotation.x = .75 * sx * 0 + .8; } } }
+    this.bx(w + .16, th, .12, key, 0, hs, d / 2 + .05, g, { shadow: false, lite: true }); this.bx(w + .16, th, .12, key, 0, hs, -d / 2 - .05, g, { shadow: false, lite: true });
+    for (const sx of [-1, 1]) this.bx(.12, th, d + .16, key, sx * (w / 2 + .05), hs, 0, g, { shadow: false, lite: true });
+    if (tim) { for (const sx of [-1, 1]) for (const z of [-d / 2 + .9, 0, d / 2 - .9]) this.bx(.1, h - hs - .1, .1, 'darkWood', sx * (w / 2 + .03), hs + (h - hs) / 2, z, g, { shadow: false, lite: true });
+      for (const x of [-w / 2 + .9, w / 2 - .9]) this.bx(.1, h - hs - .1, .1, 'darkWood', x, hs + (h - hs) / 2, d / 2 + .03, g, { shadow: false, lite: true });
+      for (const sx of [-1, 1]) { const br = this.bx(.1, 1.5, .1, 'darkWood', sx * (w / 2 + .03), hs + .8, d / 2 - 1.5, g, { shadow: false, lite: true }); br.rotation.x = .75 * sx * 0 + .8; } } }
   const side = rnd(1) < .5 ? -1 : 1, bx = -side * (DW / 2 + 1.7), bz = d / 2 + .7;   // opposite side of the door clutter
-  if (w > 7 && rnd(2) < .75) { this.bx(1.5, .1, .5, 'wood', bx, .5, bz, g); for (const sx of [-1, 1]) this.bx(.1, .5, .44, 'darkWood', bx + sx * .6, .25, bz, g, { shadow: false }); this.bx(1.5, .5, .08, 'darkWood', bx, .85, bz - .24, g, { shadow: false }); }
-  for (const sx of [-1, 1]) { const x = sx * (DW / 2 + .75), z = d / 2 + 1.15; this.cyl(.2, .15, .3, '#a8573a', x, .15, z, g, 7, { shadow: false }); this.add(new THREE.IcosahedronGeometry(.28, 1), WM(['#4f9a3e', '#3f7a3a', '#6aaa45'][(hh >> 3 & 3) % 3]), x, .5, z, g, { shadow: false }); if (rnd(3 + sx) < .6) this.add(new THREE.SphereGeometry(.09, 5, 4), M(['#e8584a', '#f0d040', '#e88adf'][(hh >> 5 & 3) % 3]), x + .1, .72, z + .08, g, { shadow: false }); }
-  { const gm = WM(rnd(4) < .5 ? '#5f9d44' : '#4e8a3a'), cg = new THREE.ConeGeometry(.045, .5, 3);   // grass tufts hugging the walls (wind-swayed, geometry merged into one batch)
-    for (let i = 0; i < 26; i++) { const t = rnd(10 + i), e = i % 3, o2 = .35 + rnd(30 + i) * .3; let x, z; if (e === 0) { x = (t - .5) * (w + 2); z = d / 2 + o2 + .5; if (Math.abs(x) < DW / 2 + 1.3) continue; } else if (e === 1) { x = (t < .5 ? -1 : 1) * (w / 2 + o2); z = (rnd(50 + i) - .5) * d; } else { x = (t - .5) * w; z = -d / 2 - o2; }
-      for (let k = 0; k < 3; k++) { const m = this.add(cg, gm, x + (k - 1) * .08, .22, z + (k % 2) * .07, g, { shadow: false }); m.rotation.z = (k - 1) * .22; m.scale.y = .7 + rnd(70 + i + k) * .8; } } }
-  { const x = side * (DW / 2 + .02), b = this.bx(.07, .07, .5, 'iron', x, 2.75, d / 2 + .28, g, { shadow: false }); this.add(new THREE.SphereGeometry(.1, 6, 5), GLOW('ff9a3a', 1.8), x, 2.55, d / 2 + .45, g, { shadow: false }); }
+  if (w > 7 && rnd(2) < .75) { this.bx(1.5, .1, .5, 'wood', bx, .5, bz, g); for (const sx of [-1, 1]) this.bx(.1, .5, .44, 'darkWood', bx + sx * .6, .25, bz, g, { shadow: false, lite: true }); this.bx(1.5, .5, .08, 'darkWood', bx, .85, bz - .24, g, { shadow: false, lite: true }); }
+  for (const sx of [-1, 1]) { const x = sx * (DW / 2 + .75), z = d / 2 + 1.15; this.cyl(.2, .15, .3, '#a8573a', x, .15, z, g, 7, { shadow: false, lite: true }); this.add(new THREE.IcosahedronGeometry(.28, 1), WM(['#4f9a3e', '#3f7a3a', '#6aaa45'][(hh >> 3 & 3) % 3]), x, .5, z, g, { shadow: false, lite: true }); if (rnd(3 + sx) < .6) this.add(new THREE.SphereGeometry(.09, 5, 4), M(['#e8584a', '#f0d040', '#e88adf'][(hh >> 5 & 3) % 3]), x + .1, .72, z + .08, g, { shadow: false, lite: true }); }
+  { const gm = WM(rnd(4) < .5 ? '#5f9d44' : '#4e8a3a'), cg = new THREE.ConeGeometry(.05, .5, 3, 1, true);   // grass tufts hugging the walls (wind-swayed, geometry merged into one batch)
+    for (let i = 0; i < 18; i++) { const t = rnd(10 + i), e = i % 3, o2 = .35 + rnd(30 + i) * .3; let x, z; if (e === 0) { x = (t - .5) * (w + 2); z = d / 2 + o2 + .5; if (Math.abs(x) < DW / 2 + 1.3) continue; } else if (e === 1) { x = (t < .5 ? -1 : 1) * (w / 2 + o2); z = (rnd(50 + i) - .5) * d; } else { x = (t - .5) * w; z = -d / 2 - o2; }
+      for (let k = 0; k < 2; k++) { const m = this.add(cg, gm, x + (k - 1) * .08, .22, z + (k % 2) * .07, g, { shadow: false, lite: true }); m.rotation.z = (k * 2 - 1) * .22; m.scale.y = .7 + rnd(70 + i + k) * .8; } } }
+  { const x = side * (DW / 2 + .02), b = this.bx(.07, .07, .5, 'iron', x, 2.75, d / 2 + .28, g, { shadow: false, lite: true }); this.add(new THREE.SphereGeometry(.1, 6, 5), GLOW('ff9a3a', 1.8), x, 2.55, d / 2 + .45, g, { shadow: false, lite: true }); }
 };
 function frontXs(B) { const n = Math.max(1, Math.round((B.w - 4) / 4)); const out = []; for (let i = 0; i < n; i++) out.push(((i + .5) / n - .5) * (B.w - 3.2)); return out.filter(x => Math.abs(x) > B.DW / 2 + 1.1); }
 // remove loose props (meshes + colliders) that sit in a stair's footprint / foot approach / top landing, so a flight can never be blocked by furniture
@@ -405,7 +407,7 @@ Builder.prototype._roundShell = function (o) {
 
 // ---- quality-pass props ----
 Builder.prototype.apron = function (w, d, zOff = 2) { this.bx(w + 3.4, .04, d + 3.4 + zOff, 'cobble', 0, .02, zOff / 2, this.G.ext, { shadow: false }); };
-Builder.prototype.bush = function (x, z, s = .7, c = '#3f7a3a') { const m = this.add(new THREE.IcosahedronGeometry(s, 1), WM(c), x, s * .6, z, this.G.ext); m.scale.y = .8; return m; };
+Builder.prototype.bush = function (x, z, s = .7, c = '#3f7a3a') { const m = this.add(new THREE.IcosahedronGeometry(s, 0), WM(c), x, s * .6, z, this.G.ext); m.scale.y = .8; return m; };
 Builder.prototype.flowers = function (x, y, z, w, ry = 0) { // window flower box
   const f = this.bx(w, .22, .3, 'darkWood', x, y, z, this.G.ext); f.rotation.y = ry; const g = this.bx(w * .95, .12, .26, '#3f7a3a', x, y + .14, z, this.G.ext, { shadow: false }); g.rotation.y = ry;
   for (let i = 0; i < 5; i++) { const t = (i / 4 - .5) * w * .8; this.add(new THREE.SphereGeometry(.07, 5, 4), M(['#d84a5a', '#f0d040', '#e88adf', '#fff0f0'][i % 4]), x + Math.cos(ry) * t, y + .25, z - Math.sin(ry) * t + Math.cos(ry) * .05, this.G.ext, { shadow: false }); } };

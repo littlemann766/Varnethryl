@@ -221,7 +221,7 @@ function treasury(spec, ctx) {
   for (const s of [-1, 1]) { B.shelf(s * (iw - .3), -2, 4.5, -s, false); if (s < 0) B.chest(s * (iw - 1.3), id_ - 1.2); }
   B.tableR(-2.5, -id_ + 1.2, 2.4, 1.2, 'darkWood'); B.bx(3.4, 2.3, .3, 'parchment', 0, 3.2, -id_ + .2, B.G.int, { shadow: false });
   B.cyl(.9, .9, .3, 'iron', 3.5, 1.2, -id_ + 1.2, B.G.int, 14).rotation.x = Math.PI / 2; B.banner(-iw + .4, 3.6, -id_ + .3, 0, 1, 2.4); B.banner(iw - .4, 3.6, -id_ + .3, 0, 1, 2.4);
-  B.lamp(-3, 4.4, 0); B.lamp(3, 4.4, 0); upperStd(B, { theme: 'hall', y: 3.6 }); B.props2('hall'); B.radius = 9; return B.finish();
+  B.lamp(-3, 4.4, 0); B.lamp(3, 4.4, 0); upperStd(B, { theme: 'hall', y: 3.6 }); B.props2('hall'); B.radius = 9; B.entry({ posts: true }); return B.finish();
 }
 
 // ---------- 8. Town Hall ----------
@@ -330,7 +330,7 @@ function mage(spec, ctx) {
   for (let i = -3; i <= 3; i++) { if (i === 0) continue; B.add(new THREE.PlaneGeometry(.55, 2.8), GLOW('4f9aff', 1.1), i * 1.9, 5.2, d / 2 + .09, B.G.ext, { shadow: false }); B.add(new THREE.ConeGeometry(.3, .6, 3), GLOW('4f9aff', 1.1), i * 1.9, 6.9, d / 2 + .09, B.G.ext, { shadow: false }).rotation.z = 0; }
   for (const s of [-1, 1]) for (const z of [-4.5, -1.5, 1.5, 4.5]) { B.add(new THREE.PlaneGeometry(.55, 2.8), GLOW('4f9aff', 1.1), s * (w / 2 + .1), 5.2, z, B.G.ext, { shadow: false }).rotation.y = s * Math.PI / 2; B.bx(.5, h, .5, 'stone', s * (w / 2 + .15), h / 2, z + 1.5, B.G.ext); }
   B.rocks([[-w / 2 - 3, d / 2 + 1, 2.4, .8], [w / 2 + 3.2, d / 2, 2.6, .9], [-w / 2 - 4, -2, 3.2, .9], [w / 2 + 4.2, -3, 3.0, .9], [-6, -d / 2 - 3, 3.0], [6, -d / 2 - 3.2, 3.2], [0, -d / 2 - 4, 3.6, 1], [-w / 2 - 2.5, -d / 2 - 2, 2.6], [w / 2 + 2.8, -d / 2 - 2, 2.8]]); B.apron(w * .6, d * .4, 4);
-  for (const x of [-3, 3]) B.lamp(x, 5.4, 0); B.gallery({ stairX: iw - 1.2, depth: 1.8, y: 3.3 }); B.props2('hall'); B.radius = 20; return B.finish();
+  for (const x of [-3, 3]) B.lamp(x, 5.4, 0); B.gallery({ stairX: iw - 1.2, depth: 1.8, y: 3.3 }); B.props2('hall'); B.radius = 20; B.entry({ posts: true }); return B.finish();
 }
 
 // ---------- 15. Colosseum ----------
@@ -365,7 +365,7 @@ function colosseum(spec, ctx) {
   B.bx(3, .5, 1.6, 'stone', 0, 4.4, -PIT - 2.4, B.G.int); for (const s of [-1, 1]) B.banner(s * 2.2, 5.6, -PIT - 3, 0, 1, 2.2);   // royal box
   B.add(boxG(1.8, 2.2, .12, 1), M('iron', { side: THREE.DoubleSide }), 0, 3.9, PIT + 1.0, B.G.frame, { shadow: false });     // raised arena gate grille
   const lam = 6; for (let i = 0; i < lam; i++) { const a = i / lam * 6.283 + .3; B.lamp(Math.sin(a) * (PIT - .4), 1.6, Math.cos(a) * (PIT - .4)); }
-  return B.finish();
+ B.entry({ posts: false });  return B.finish();
 }
 
 // ---------- 16. Castle Keep (simplified: keep + 4 corner towers + throne room) ----------
@@ -404,7 +404,7 @@ function keep(spec, ctx) {
     U.bed(iw - 1.6, -id_ + 1.2, 1); U.chest(4.5, -id_ + .6, .9); U.rugAt(6.8, -4.9, 3, 2.4); U.lamp(6.8, 2.4, -4.9);
     U.tableR(-5.5, 1.5, 2.6, 1.2); U.banner(-iw + .4, 1.8, -2, Math.PI / 2, 1, 2.2); U.lamp(-5.5, 2.4, 1.5); U.lamp(0, 2.4, 1.0); } });
   B.fullUpper({ level: 2, y: 10.2, y0: 5.0, l0: 1, stair: { cx: -(iw - .9), cz: .7, dir: '-z', len: 5.0, w: 1.6 }, rails: true, rooms(U) { U.bx(1.2, .5, 1.2, 'stone', 6, .25, -3, U.G.int); U.ccol(6, -3, .8); U.lamp(0, 1.6, 0); U.banner(0, 1.2, -id_ + .6, 0, 1.4, 2.2); } });
-  B.props2('hall'); B.radius = 14; return B.finish();
+  B.props2('hall'); B.radius = 14; B.entry({ posts: false }); return B.finish();
 }
 
 // ---------- 17. Gatehouse (walkable tunnel gate) ----------
@@ -475,7 +475,7 @@ function observatory(spec, ctx) {
     B.fullUpper({ level: 1, y: 3.7, disc: B.iw - .05, stair: S1, rooms(U) { U.lamp(0, 2.8, 0); U.lamp(0, 2.8, -2.4); } });
     B.fullUpper({ level: 2, y: 7.4, y0: 3.7, l0: 1, disc: B.iw - .05, stair: S2, rooms(U) { U.lamp(0, 2.8, 0); U.lamp(0, 2.8, 2.4); } });
     B.fullUpper({ level: 3, y: 10.9, y0: 7.4, l0: 2, disc: B.iw - .05, stair: S1, rooms(U) { U.add(new THREE.CylinderGeometry(.12, .18, 2.2, 8), M('#b8902c'), 1.8, 1.2, -.4, U.G.int).rotation.z = -.9; U.crystal(2.2, 1.4, .8, '5fa8ff', .3); U.lamp(0, 2.4, 0); } }); }
-  return B.finish();
+ B.entry({ posts: true });  return B.finish();
 }
 
 // ---------- 20. Crypt (links to the Dusk Hollow / Veyra quest) ----------
@@ -503,7 +503,7 @@ function crypt(spec, ctx) {
   for (const z of [-2.2, 2.6]) { B.bx(1.5, .7, 3, 'stone', 0, .35, z, B.G.int); B.bx(1.7, .22, 3.2, 'stoneL', 0, .8, z, B.G.int); B.col(0, z, 1.7, 3.2); }
   for (const s of [-1, 1]) for (let i = 0; i < 3; i++) { B.bx(.3, 1.4, 1.2, '#10141f', s * (iw - .1), 1.2, -3 + i * 3, B.G.int); B.lamp(s * (iw - .6), 3.0, -3 + i * 3); B.add(new THREE.SphereGeometry(.16, 6, 5), GLOW('4fa0ff', 2), s * (iw - .5), 2.4, -1.5 + i * 3, B.G.int, { shadow: false }); }
   B.add(new THREE.PlaneGeometry(2.2, 3), M('iron', { side: THREE.DoubleSide }), 0, 1.7, -id_ + .1, B.G.int, { shadow: false }); B.banner(-3.6, 3.4, -id_ + .2, 0, .9, 2.2); B.banner(3.6, 3.4, -id_ + .2, 0, .9, 2.2);
-  B.crystal(0, -id_ + 3.6, 1.4, '4fa0ff', .4); B.props2('hall'); B.radius = 10; return B.finish();
+  B.crystal(0, -id_ + 3.6, 1.4, '4fa0ff', .4); B.props2('hall'); B.radius = 10; B.entry({ posts: false }); return B.finish();
 }
 
 // ---------- 21. Windmill ----------
@@ -532,7 +532,7 @@ function windmill(spec, ctx) {
   B.add(new THREE.TorusGeometry(.7, .09, 5, 12), M('gold'), 1.0, 3.0, -iw + .4, B.G.int, { shadow: false }); B.add(new THREE.TorusGeometry(.5, .09, 5, 12), M('iron'), -1.0, 3.0, -iw + .4, B.G.int, { shadow: false });
   B.bx(.1, 3.2, .5, 'darkWood', 0, 3.0, -iw + .5, B.G.int); B.lamp(1.4, 2.2, 1.0); B.banner(-iw + .1, 2.0, 0, Math.PI / 2, .7, 1.6);
   B.fullUpper({ y: 2.9, disc: iw - .05, stair: { cx: -1.7, cz: 0, dir: '-z', len: 6.0, w: 1.8 }, rooms(U) { U.sack(1.2, 0); U.sack(1.2, .9); U.crate(.6, -1.4, .8); U.barrel(1.5, -1.0); U.lamp(.6, 2.0, 0.3); U.cyl(.35, .35, .5, 'wood', 1.2, .25, 1.6, U.G.int, 8); } });
-  return B.finish();
+ B.entry({ posts: true });  return B.finish();
 }
 
 // ---------- 22. Lighthouse of Tidewrack Coast ----------
@@ -553,7 +553,7 @@ function lighthouse(spec, ctx) {
   B.fullUpper({ level: 1, y: 4.1, disc: iw - .05, stair: S1, rooms(U) { U.chest(0, 1.65, .6); U.lamp(0, 2.6, 1.0); U.lamp(0, 2.6, -1.0); } });
   B.fullUpper({ level: 2, y: 8.2, y0: 4.1, l0: 1, disc: iw - .05, stair: S2, rooms(U) { U.chest(0, -1.65, .6); U.lamp(0, 2.6, 1.0); U.lamp(0, 2.6, -1.0); } });
   B.fullUpper({ level: 3, y: 12, y0: 8.2, l0: 2, disc: iw - .05, stair: S1, rooms(U) { U.add(new THREE.SphereGeometry(.45, 10, 8), GLOW('fff0b0', 2.2), 1.0, 1.2, 0, U.G.int, { shadow: false }); U.cyl(.5, .6, .7, 'iron', 1.0, .35, 0, U.G.int, 10); U.ccol(1.0, 0, .75); U.rugAt(1.0, 0, 1.6, 1.6, 'rug'); } });
-  return B.finish();
+ B.entry({ posts: true });  return B.finish();
 }
 
 // ---------- 23. Port of Varnethryl (simplified: harbour pond, pier, boats, dock warehouse/tavern, harbour sign) ----------

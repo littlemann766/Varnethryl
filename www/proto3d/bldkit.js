@@ -357,7 +357,7 @@ Builder.prototype.gallery = function (o = {}) {
 Builder.prototype.roundShell = function (o) { const _lv = this.lvTag; this.lvTag = undefined; try { return this._roundShell(o); } finally { this.lvTag = _lv; } };
 Builder.prototype._roundShell = function (o) {
   const { r, h } = o, T = o.T || this.T, N = o.N || Math.max(12, Math.round(r * 2.6)), DW = Math.min(o.DW || 2.2, DOOR_MAXW), DH = Math.min(o.DH || 2.6, DOOR_MAXH), key = o.key || 'stone', seg = 2 * Math.PI * r / N;
-  this.radius = r; this.w = this.d = r * 2; this.h = h; this.DW = DW; this.iw = r - T; this.id_ = r - T;
+  this.radius = r; this.w = this.d = r * 2; this.h = h; this.DW = DW; this.DHr = DH; this.iw = r - T; this.id_ = r - T;
   const doorA = Math.asin(Math.min(.95, (DW / 2 + seg * .35) / r));
   for (let i = 0; i < N; i++) {
     let a = i / N * 2 * Math.PI; if (a > Math.PI) a -= 2 * Math.PI; if (Math.abs(a) < doorA) continue;
@@ -558,3 +558,12 @@ export function birdFlock(n = 36, R = 100) {
     fragmentShader: 'void main(){ gl_FragColor = vec4(0.12, 0.12, 0.14, 1.0); }' });
   const mesh = new THREE.Mesh(g, m); mesh.frustumCulled = false; mesh.userData.keep = true; mesh.name = 'birds'; return mesh;
 }
+
+// entrance dressing for the non-standard buildings (door at local +z): wall sconces with flickering flames, lantern posts, potted plants, doormat; spots checked free
+Builder.prototype.entry = function (o = {}) { const DW = this.DW || 2.2, round = !this.footprint, r = this.d / 2, g = this.G.ext;
+  const wallZ = x => round ? Math.sqrt(Math.max(0, r * r - x * x)) : r;
+  for (const sx of [-1, 1]) { const x = sx * (DW / 2 + .55), z = wallZ(x) + .12, y = o.sconceY || 2.5; this.bx(.12, .35, .12, 'iron', x, y, z, g, { shadow: false, lite: true }); this.bx(.06, .06, .3, 'iron', x, y + .15, z + .12, g, { shadow: false, lite: true }); this.add(new THREE.ConeGeometry(.09, .3, 5), GLOW('ff9a3a', 2.0), x, y + .32, z + .25, g, { shadow: false });
+    if (o.posts !== false) { const px = sx * (DW / 2 + 1.7), pz = wallZ(px) + 1.4; if (this.spotFree(px, pz, .5)) this.lanternPost(px, pz, 2.6); }
+    const qx = sx * (DW / 2 + 1.0), qz = wallZ(qx) + .55; this.cyl(.22, .16, .34, '#a8573a', qx, .17, qz, g, 7, { shadow: false }); this.add(new THREE.IcosahedronGeometry(.3, 0), WM('#4f9a3e'), qx, .52, qz, g, { shadow: false }); }
+  if (round && this.DHr) { const DH = this.DHr, z = wallZ(DW / 2) + .1; for (const sx of [-1, 1]) this.bx(.3, DH + .1, .3, 'stoneD', sx * (DW / 2 + .15), (DH + .1) / 2, z, this.G.frame, { lite: true }); this.bx(DW + .9, .34, .34, 'stoneD', 0, DH + .2, z, this.G.frame, { lite: true }); this.bx(.34, .42, .4, 'stoneL', 0, DH + .3, z + .04, this.G.frame, { lite: true }); }
+  this.bx(DW * .8, .03, .9, 'rug', 0, .03, wallZ(0) + .7, g, { shadow: false, lite: true }); };

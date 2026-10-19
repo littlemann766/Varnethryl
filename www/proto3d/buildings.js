@@ -32,7 +32,7 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
   if (o.extra) o.extra(B);
   if (o.details !== false) B.shutY = gy + .1, B.details({ upper: o.upper, hs });
   if (o.interior) o.interior(B);
-  { const pk = { inn: 'inn', smithy: 'smithy', bakery: 'bakery', market: 'market', apothecary: 'apothecary', thieves: 'thieves', house1: 'house', house2: 'house', house3: 'house', house4: 'house', farmhouse: 'house' }[B.id]; if (pk) B.props2(pk); }
+  { const pk = { inn: 'inn', smithy: 'smithy', bakery: 'bakery', market: 'market', apothecary: 'apothecary', thieves: 'thieves', house1: 'house', house2: 'house', house3: 'house', house4: 'house', farmhouse: 'house', guildhall: 'guildhall' }[B.id]; if (pk) B.props2(pk); }
   B.radius = Math.hypot(B.w, B.d) / 2; return B.finish();
 }
 
@@ -181,7 +181,7 @@ function temple(spec, ctx) {
     B.stairs(S(-1)); B.stairs(S(1));
     B.upperFloor(1, GY, [[-iw, -gx, -id_, 0.0], [gx, iw, -id_, 0.0], [-iw, iw, -id_, -id_ + 2.4]], { key: 'floorPlank' });
     B.onFloor(1, GY, U => { for (const s of [-1, 1]) { U.pew(s * 5.4, -4, 1.8); U.pew(s * 5.4, -1.5, 1.8); U.lamp(s * 4.6, 2.6, 2.0); } U.banner(0, 1.8, -id_ + .4, 0, 2.0, 2.4); U.chest(0, -id_ + 1.0, .9); }); }
-  B.radius = 20; return B.finish();
+  B.props2('hall'); B.radius = 20; return B.finish();
 }
 
 // ---------- 5. Training Hall ----------
@@ -221,7 +221,7 @@ function treasury(spec, ctx) {
   for (const s of [-1, 1]) { B.shelf(s * (iw - .3), -2, 4.5, -s, false); if (s < 0) B.chest(s * (iw - 1.3), id_ - 1.2); }
   B.tableR(-2.5, -id_ + 1.2, 2.4, 1.2, 'darkWood'); B.bx(3.4, 2.3, .3, 'parchment', 0, 3.2, -id_ + .2, B.G.int, { shadow: false });
   B.cyl(.9, .9, .3, 'iron', 3.5, 1.2, -id_ + 1.2, B.G.int, 14).rotation.x = Math.PI / 2; B.banner(-iw + .4, 3.6, -id_ + .3, 0, 1, 2.4); B.banner(iw - .4, 3.6, -id_ + .3, 0, 1, 2.4);
-  B.lamp(-3, 4.4, 0); B.lamp(3, 4.4, 0); upperStd(B, { theme: 'hall', y: 3.6 }); B.radius = 9; return B.finish();
+  B.lamp(-3, 4.4, 0); B.lamp(3, 4.4, 0); upperStd(B, { theme: 'hall', y: 3.6 }); B.props2('hall'); B.radius = 9; return B.finish();
 }
 
 // ---------- 8. Town Hall ----------
@@ -242,13 +242,13 @@ function townhall(spec, ctx) {
   B.shelf(iw - 1.4, -id_ + .3, 3, 0); B.tableR(iw - 1.8, 1, 2.4, 1.2); B.table(-3.5, 1.5, .9);
   for (const s of [-1, 1]) for (const z of [-2, 1.2]) B.pillar(s * 2.4, z, .35, h - 1.4, 'stoneL');
   for (let i = 0; i < 3; i++) B.banner(-iw + .3, 3.4, -2 + i * 2.6, Math.PI / 2, 1, 2.4); B.lamp(-3, 4.8, 0); B.lamp(3, 4.8, 0);
-  B.gallery({ stairX: iw - 1.0, depth: 1.6 }); B.radius = 10; return B.finish();
+  B.gallery({ stairX: iw - 1.0, depth: 1.6 }); B.props2('hall'); B.radius = 10; return B.finish();
 }
 const DWf = B => B.DW;
 
 // ---------- 9. Guild Hall ----------
 const guildhall = (spec, ctx) => std(spec, ctx, { name: 'Guild Hall of Varnethryl', w: 15, d: 11, h: 7.2, hs: 3.0, upper: 'timber', rh: 4.4, ridge: 'z', over: .9, DW: 3, DH: 3.2, floor: 'floorPlank', wn: 2, chimneys: [[5.8, -2], [-5.8, -2]], dormers: [-3.2, 3.2], dormY: 1.4, dormZ: 1.2,
-  banners: [[-3.4, 4.2, 1, 2.6], [3.4, 4.2, 1, 2.6]], sign: ['Guild Hall', '🦁', 7.1, 4.4],
+  banners: [[-3.4, 4.6, 1.3, 3.2], [3.4, 4.6, 1.3, 3.2], [-6.2, 4.4, 1.0, 2.6], [6.2, 4.4, 1.0, 2.6]], sign: ['Guild Hall', '🦁', 7.1, 4.4],
   extra(B) { const { w, d, h } = B, g = B.G.ext;
     B.crossGable(0, 6.0, 3.6, 3.6, 'slate', 'timber', h - .2);
     for (const sx of [-1, 1]) { const X = sx * (w / 2 + .1), Z = d / 2 - .1; B.cyl(1.3, 1.4, h + 2.6, 'stoneL', X, (h + 2.6) / 2, Z, g, 14); B.cone(1.7, 5.6, 'slate', X, h + 2.6, Z, g, 14); B.bx(.1, 1.0, .1, 'gold', X, h + 8.7, Z, g); B.win(X, 3.2, Z + 1.33, 0, .6, 1.4, 'glass'); B.win(X, h + .6, Z + 1.33, 0, .6, 1.2, 'glass'); B.ccol(X, Z, 1.5); }
@@ -330,7 +330,7 @@ function mage(spec, ctx) {
   for (let i = -3; i <= 3; i++) { if (i === 0) continue; B.add(new THREE.PlaneGeometry(.55, 2.8), GLOW('4f9aff', 1.1), i * 1.9, 5.2, d / 2 + .09, B.G.ext, { shadow: false }); B.add(new THREE.ConeGeometry(.3, .6, 3), GLOW('4f9aff', 1.1), i * 1.9, 6.9, d / 2 + .09, B.G.ext, { shadow: false }).rotation.z = 0; }
   for (const s of [-1, 1]) for (const z of [-4.5, -1.5, 1.5, 4.5]) { B.add(new THREE.PlaneGeometry(.55, 2.8), GLOW('4f9aff', 1.1), s * (w / 2 + .1), 5.2, z, B.G.ext, { shadow: false }).rotation.y = s * Math.PI / 2; B.bx(.5, h, .5, 'stone', s * (w / 2 + .15), h / 2, z + 1.5, B.G.ext); }
   B.rocks([[-w / 2 - 3, d / 2 + 1, 2.4, .8], [w / 2 + 3.2, d / 2, 2.6, .9], [-w / 2 - 4, -2, 3.2, .9], [w / 2 + 4.2, -3, 3.0, .9], [-6, -d / 2 - 3, 3.0], [6, -d / 2 - 3.2, 3.2], [0, -d / 2 - 4, 3.6, 1], [-w / 2 - 2.5, -d / 2 - 2, 2.6], [w / 2 + 2.8, -d / 2 - 2, 2.8]]); B.apron(w * .6, d * .4, 4);
-  for (const x of [-3, 3]) B.lamp(x, 5.4, 0); B.gallery({ stairX: iw - 1.2, depth: 1.8, y: 3.3 }); B.radius = 20; return B.finish();
+  for (const x of [-3, 3]) B.lamp(x, 5.4, 0); B.gallery({ stairX: iw - 1.2, depth: 1.8, y: 3.3 }); B.props2('hall'); B.radius = 20; return B.finish();
 }
 
 // ---------- 15. Colosseum ----------
@@ -404,7 +404,7 @@ function keep(spec, ctx) {
     U.bed(iw - 1.6, -id_ + 1.2, 1); U.chest(4.5, -id_ + .6, .9); U.rugAt(6.8, -4.9, 3, 2.4); U.lamp(6.8, 2.4, -4.9);
     U.tableR(-5.5, 1.5, 2.6, 1.2); U.banner(-iw + .4, 1.8, -2, Math.PI / 2, 1, 2.2); U.lamp(-5.5, 2.4, 1.5); U.lamp(0, 2.4, 1.0); } });
   B.fullUpper({ level: 2, y: 10.2, y0: 5.0, l0: 1, stair: { cx: -(iw - .9), cz: .7, dir: '-z', len: 5.0, w: 1.6 }, rails: true, rooms(U) { U.bx(1.2, .5, 1.2, 'stone', 6, .25, -3, U.G.int); U.ccol(6, -3, .8); U.lamp(0, 1.6, 0); U.banner(0, 1.2, -id_ + .6, 0, 1.4, 2.2); } });
-  B.radius = 14; return B.finish();
+  B.props2('hall'); B.radius = 14; return B.finish();
 }
 
 // ---------- 17. Gatehouse (walkable tunnel gate) ----------
@@ -503,7 +503,7 @@ function crypt(spec, ctx) {
   for (const z of [-2.2, 2.6]) { B.bx(1.5, .7, 3, 'stone', 0, .35, z, B.G.int); B.bx(1.7, .22, 3.2, 'stoneL', 0, .8, z, B.G.int); B.col(0, z, 1.7, 3.2); }
   for (const s of [-1, 1]) for (let i = 0; i < 3; i++) { B.bx(.3, 1.4, 1.2, '#10141f', s * (iw - .1), 1.2, -3 + i * 3, B.G.int); B.lamp(s * (iw - .6), 3.0, -3 + i * 3); B.add(new THREE.SphereGeometry(.16, 6, 5), GLOW('4fa0ff', 2), s * (iw - .5), 2.4, -1.5 + i * 3, B.G.int, { shadow: false }); }
   B.add(new THREE.PlaneGeometry(2.2, 3), M('iron', { side: THREE.DoubleSide }), 0, 1.7, -id_ + .1, B.G.int, { shadow: false }); B.banner(-3.6, 3.4, -id_ + .2, 0, .9, 2.2); B.banner(3.6, 3.4, -id_ + .2, 0, .9, 2.2);
-  B.crystal(0, -id_ + 3.6, 1.4, '4fa0ff', .4); B.radius = 10; return B.finish();
+  B.crystal(0, -id_ + 3.6, 1.4, '4fa0ff', .4); B.props2('hall'); B.radius = 10; return B.finish();
 }
 
 // ---------- 21. Windmill ----------

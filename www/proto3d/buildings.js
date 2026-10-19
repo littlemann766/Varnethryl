@@ -30,7 +30,7 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
   if (o.flowers !== false && B.h - hs > 1.8) for (const x of frontWinXs(B, o.wn || 1)) B.flowers(x, gy - .65, B.d / 2 + .2, 1.0);
   if (o.post) { B.lanternPost(B.w / 2 + 1.0, B.d / 2 + 1.2); B.lanternPost(-B.w / 2 - 1.0, B.d / 2 + 1.2); }
   if (o.extra) o.extra(B);
-  if (o.details !== false) B.shutY = gy + .1, B.details({ upper: o.upper, hs });
+  if (o.details !== false) B.shutY = gy + .1, B.details({ upper: o.upper, hs, noClutter: o.noClutter });
   if (o.interior) o.interior(B);
   if (/^house|farmhouse/.test(B.id)) B.laundry();
   { const pk = { inn: 'inn', smithy: 'smithy', bakery: 'bakery', market: 'market', apothecary: 'apothecary', thieves: 'thieves', house1: 'house', house2: 'house', house3: 'house', house4: 'house', farmhouse: 'house', guildhall: 'guildhall' }[B.id]; if (pk) B.props2(pk); }
@@ -580,7 +580,7 @@ function lighthouse(spec, ctx) {
 // ---------- 23. Port of Varnethryl (simplified: harbour pond, pier, boats, dock warehouse/tavern, harbour sign) ----------
 function port(spec, ctx) {
   const parts = []; const mk = (s, f) => { const b = f({ ...s }, ctx); parts.push(b); return b; };
-  const KK = spec.K || 1, warehouse = mk({ id: 'port', cx: spec.cx + 3 * KK, cz: spec.cz - 7.6 * KK, rot: 0, K: KK }, (s, c) => std(s, c, { name: 'Port Tavern & Dockmaster', w: 11, d: 8, h: 6, hs: 2.6, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 3.2, ridge: 'x', over: .8, endKey: 'darkWood', sign: ['Port Tavern', '⚓', 5.9, 3.6], banners: [[-4, 4.4, .8, 1.8], [4, 4.4, .8, 1.8]], chimneys: [[-3, -2]], floor: 'floorPlank', wn: 2,
+  const KK = spec.K || 1, warehouse = mk({ id: 'port', cx: spec.cx + 3 * KK, cz: spec.cz - 7.6 * KK, rot: 0, K: KK }, (s, c) => std(s, c, { noClutter: true, name: 'Port Tavern & Dockmaster', w: 11, d: 8, h: 6, hs: 2.6, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 3.2, ridge: 'x', over: .8, endKey: 'darkWood', sign: ['Port Tavern', '⚓', 5.9, 3.6], banners: [[-4, 4.4, .8, 1.8], [4, 4.4, .8, 1.8]], chimneys: [[-3, -2]], floor: 'floorPlank', wn: 2,
     interior(B) { const iw = B.iw, id_ = B.id_;
       B.counter(1.5, -id_ + 1.1, 4, .8); B.shelf(1.5, -id_ + .35, 3.2); B.table(-2.0, .2); B.table(-.6, 2.0); B.table(-2.4, 2.6); B.barrel(iw - .5, 0); B.barrel(iw - .5, 1); B.crate(iw - 1.2, 2.2, .9); B.tableR(-iw + 1.6, -id_ + 1.3, 2.4, 1.2, 'darkWood'); B.bx(2.6, 1.7, .1, 'parchment', -iw + 1.7, 2.3, -id_ + .2, B.G.int, { shadow: false });
       B.banner(-.4, 3.0, -id_ + .3, 0, .9, 1.8); B.lamp(-2, 3.6, 1); B.lamp(2, 3.6, 1); B.rugAt(-1.4, 1.4, 3.2, 2.8); B.hay(iw - 1.2, -id_ + .8, 1.4, 1, .8); upperStd(B, { theme: 'bed', y: 3.0, side: 'L' });
@@ -601,7 +601,7 @@ function port(spec, ctx) {
     for (const m of g.children) { m.castShadow = true; } boats.push(g); B.ccolWorld = 1; }
   B.col(-5.5, Z0 + 4, 2, 4.4); B.col(5.8, Z0 + 6.2, 1.8, 3.6);
   let t = 0; B.tick = dt => { t += dt; boats.forEach((g, i) => { g.position.y = .2 + Math.sin(t * 1.4 + i * 2) * .05; g.rotation.z = Math.sin(t * 1.1 + i) * .04; }); };
-  for (const [x, z] of [[-6.5, -1.2], [-8, -1.0], [7.5, -1.1], [8.4, -1.6]]) { B.col(x, z, .9, .9); B.bx(.9, .9, .9, 'wood', x, .45, z, B.G.ext); }
+  /* east crate pair removed: it closed the strip in front of the tavern door (roads) */ for (const [x, z] of [[-6.5, -1.2], [-8, -1.0]]) { B.col(x, z, .9, .9); B.bx(.9, .9, .9, 'wood', x, .45, z, B.G.ext); }
   B.barrel; B.bx(.25, 3.2, .25, 'darkWood', -4, 1.6, -1.0, B.G.ext); B.add(new THREE.PlaneGeometry(2.4, 1.1), new THREE.MeshLambertMaterial({ map: signTex() , side: THREE.DoubleSide }), -4, 3.0, -.85, B.G.ext, { shadow: false, keep: true });
   for (const [x, z] of [[-9, Z0 + 9.8], [9, Z0 + 9.8]]) { B.cyl(.35, .5, 2.4, 'stone', x, 1.2, z, B.G.ext, 8); B.add(new THREE.SphereGeometry(.28, 6, 5), GLOW('ffc060', 1.5), x, 2.6, z, B.G.ext, { shadow: false }); }
   for (const x of [-8, 8]) B.banner(x, 2.4, -1.1, 0, .8, 1.8);

@@ -124,7 +124,7 @@ export class CombatHUD {
     if (t) {
       this.setv(null, 'tid', t.id + (t.def.boss ? 'b' : ''), () => { this.tp.className = 'tp' + (t.def.boss ? ' boss' : ''); this.tpNm.textContent = t.def.name; this.tpSub.textContent = 'Lv ' + t.def.level + ' \u2022 ' + t.def.cls + (cc.tgt.locked ? ' \u2022 LOCKED' : ''); this.tp.style.display = 'block'; });
       this.setv(null, 'tlk', cc.tgt.locked, () => { this.tpSub.textContent = 'Lv ' + t.def.level + ' \u2022 ' + t.def.cls + (cc.tgt.locked ? ' \u2022 LOCKED' : ''); });
-      if (t.def.boss) { const st = (t.phase === 2 ? 'E' : '') + (t.state === 'telegraph' && t.pat ? t.pat.id : '');   // boss bar: ENRAGED tint (phase 2), current attack name while telegraphing, 50% marker
+      if (t.def.boss || t.def.patterns) { const st = (t.phase === 2 ? 'E' : '') + (t.state === 'telegraph' && t.pat ? t.pat.id : '');   // boss bar: ENRAGED tint (phase 2), current attack name while telegraphing, 50% marker
         this.setv(null, 'bph', st + t.id, () => { this.tp.classList.toggle('enr', t.phase === 2); this.tp.classList.toggle('tel', !!(t.state === 'telegraph' && t.pat)); this.tpSub.textContent = 'Lv ' + t.def.level + ' \u2022 ' + t.def.cls + (t.phase === 2 ? ' \u2022 ENRAGED' : '') + (t.state === 'telegraph' && t.pat ? ' \u2022 ' + t.pat.name.toUpperCase() : ''); }); }
       const f = Math.round(t.hp / t.max * 400) / 400; this.setv(null, 'tf' + t.id, f, v => { this.tpBar.style.transform = 'scaleX(' + v + ')'; }); this.setv(null, 'tt' + t.id, Math.ceil(t.hp), v => { this.tpTxt.textContent = v + ' / ' + t.max; });
     } else if (this.cache.tid) { this.cache.tid = 0; this.tp.style.display = 'none'; }

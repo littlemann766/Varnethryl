@@ -552,11 +552,16 @@ addEventListener('contextmenu', e => e.preventDefault());
 
 // ---------- movement + collision ----------
 const HERO_R = 0.5 * HS, SPEED = 5.2 * HS;
-function resolve(p, ghost) {
+// buildings only playable characters may enter (companions, townsfolk and monsters are kept out by npcOnly door colliders)
+const HERO_ONLY = new Set(['guildhall']), HO_WAIT = { id: null, x: 0, z: 0 };
+function heroOnlyWait() { const id = state.inside; if (!id || !HERO_ONLY.has(id)) return null; if (HO_WAIT.id !== id) { const e = enterables.find(q => q.id === id); const b = e && (e.parts ? e.parts[0] : e); if (!b || !b.toW) return null; const [x, z] = b.toW(0, b.d / 2 + 3.2); HO_WAIT.id = id; HO_WAIT.x = x; HO_WAIT.z = z; } return HO_WAIT; }
+window.__heroOnly = HERO_ONLY;
+function resolve(p, ghost, who) {
   let hitAny = false;
   const LV = state.level;
   for (const c of colliders) {
     if (ghost) break;
+    if (c.npcOnly && who !== 'npc') continue;   // door blockers for hero-only buildings (guild hall): only companions / townsfolk collide
     if (c.lv !== undefined && (Array.isArray(c.lv) ? !c.lv.includes(LV) : c.lv !== LV)) continue;
     if (c.type === 'box') {
       const qx = THREE.MathUtils.clamp(p.x, c.minX, c.maxX), qz = THREE.MathUtils.clamp(p.z, c.minZ, c.maxZ);
@@ -681,8 +686,9 @@ function updateCrowd(dt) {
     if (r.down > 0) { tickDown(r, dt); if (r.down > 0) { r.vxs = r.vzs = 0; a.vx = a.vz = 0; continue; } }
     let tvx = 0, tvz = 0;
     if (r.kind === 'party') {
-      let gx = state.heroX, gz = state.heroZ, far = false;
-      if (r.level !== state.level) {
+      let gx = state.heroX, gz = state.heroZ, far = false; const rw = heroOnlyWait();
+      if (rw) { gx = rw.x; gz = rw.z; r.lvT = 0; }   // hero is inside a playable-characters-only building: companions wait by its door
+      else if (r.level !== state.level) {
         r.lvT += dt; const t = trailTarget(r, a);
         if (t) { gx = t.x; gz = t.z; far = true; }
         if ((r.lvT > 12 || t === null) && state.level === 0) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; }
@@ -704,7 +710,7 @@ function updateCrowd(dt) {
     if (r.down > 0) continue;
     let mx = r.vxs * a.slowMul * dt + a.dx, mz = r.vzs * a.slowMul * dt + a.dz;
     if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
-    tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2); state.level = l0; }
+    tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2, false, 'npc'); state.level = l0; }
     const moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; if (r.kind === 'party') crowdSurface(r, a, dt);
     const sp = Math.hypot(r.vxs, r.vzs);
     if (sp > 0.3) { let da = Math.atan2(r.vxs, r.vzs) - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }

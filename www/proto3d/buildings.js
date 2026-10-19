@@ -1,7 +1,7 @@
 // Varnethryl 3D buildings: 26 low-poly walk-in buildings built from the boss's sheets (guild blue / royal gold, lion crest, blue slate,
 // timber + stone). Everything is generated in code (see bldkit.js / bldtex.js). Each builder returns a Builder with .update(hx,hz,dt).
 import * as THREE from 'three';
-import { Builder, M, GLOW, WM, rippleMat, birdFlock, boxG, cylG, uvScale, TILE, mergeGroup } from './bldkit.js';
+import { Builder, M, GLOW, WM, rippleMat, birdFlock, butterflies, boxG, cylG, uvScale, TILE, mergeGroup } from './bldkit.js';
 import { tex, goldDoorTexture } from './bldtex.js';
 
 // ---------- shared decor ----------
@@ -32,6 +32,7 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
   if (o.extra) o.extra(B);
   if (o.details !== false) B.shutY = gy + .1, B.details({ upper: o.upper, hs });
   if (o.interior) o.interior(B);
+  if (/^house|farmhouse/.test(B.id)) B.laundry();
   { const pk = { inn: 'inn', smithy: 'smithy', bakery: 'bakery', market: 'market', apothecary: 'apothecary', thieves: 'thieves', house1: 'house', house2: 'house', house3: 'house', house4: 'house', farmhouse: 'house', guildhall: 'guildhall' }[B.id]; if (pk) B.props2(pk); }
   B.radius = Math.hypot(B.w, B.d) / 2; return B.finish();
 }
@@ -716,5 +717,7 @@ export const BUILDING_DEFS = [
 export function buildVillage(ctx, only) {
   if (!only && ctx.scene) ctx.scene.add(birdFlock(36, WORLD_B * .8));   // pass 3 life: one draw call of circling birds
   const out = []; for (const d of BUILDING_DEFS) { if (only && !only.includes(d.id)) continue; const cz = d.id === 'gatehouse' ? WORLD_B - 1.2 : d.cz * PK;
-    const b = d.f({ id: d.id, cx: d.cx * PK, cz, rot: d.rot, K: KB }, ctx); b.defName = d.name; b.def = d; out.push(b); } return out;
+    const b = d.f({ id: d.id, cx: d.cx * PK, cz, rot: d.rot, K: KB }, ctx); b.defName = d.name; b.def = d; out.push(b); }
+  if (!only && ctx.scene) { const pts = []; for (const b of out) { const s0 = b.parts ? b.parts[0] : b; if (!s0 || !s0.toW || !s0.d || /^(gatehouse|port|colosseum|keep)$/.test(s0.id)) continue; for (const sx of [-1, 1]) pts.push(s0.toW(sx * (s0.w / 2 + 1.2), s0.d / 2 + 2.2)); } ctx.scene.add(butterflies(pts)); }
+  return out;
 }

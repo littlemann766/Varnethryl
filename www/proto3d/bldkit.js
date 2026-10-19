@@ -114,13 +114,13 @@ export class Builder {
     const rod = this.bx(w + .3, .06, .06, 'iron', x, y + h / 2 + .03, z, grp || this.G.ext, { shadow: false }); rod.rotation.y = ry; for (const s of [-1, 1]) { const k = this.add(new THREE.SphereGeometry(.06, 5, 4), M('gold'), x + Math.cos(ry) * s * (w / 2 + .15), y + h / 2 + .03, z - Math.sin(ry) * s * (w / 2 + .15), grp || this.G.ext, { shadow: false }); }
     return p; }
   win(x, y, z, ry = 0, w = .9, h = 1.2, key = 'glass', grp, shut = key === 'glass' && w < 1.4 && !this.noShutters) {
-    if (shut) for (const s of [-1, 1]) { const sh = this.bx(w * .42, h, .06, this.shutKey, x + Math.cos(ry) * s * (w * .72), y, z - Math.sin(ry) * s * (w * .72) + Math.cos(ry) * .03, grp || this.G.ext); sh.rotation.y = ry; } const p = this.add(new THREE.PlaneGeometry(w, h), M('#ffffff', { map: tex(key), emissive: key === 'glass' ? new THREE.Color(0x70480f) : new THREE.Color(0x0a1840), side: THREE.DoubleSide }), x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
-    const f = this.bx(w + .2, .12, .2, 'darkWood', x + Math.sin(ry) * .02, y - h / 2 - .04, z + Math.cos(ry) * .02, grp || this.G.ext); f.rotation.y = ry;
+    if (shut) for (const s of [-1, 1]) { const sh = this.bx(w * .42, h, .06, this.shutKey, x + Math.cos(ry) * s * (w * .72), y, z - Math.sin(ry) * s * (w * .72) + Math.cos(ry) * .03, grp || this.G.ext, { lite: true }); sh.rotation.y = ry; } const p = this.add(new THREE.PlaneGeometry(w, h), M('#ffffff', { map: tex(key), emissive: key === 'glass' ? new THREE.Color(0x70480f) : new THREE.Color(0x0a1840), side: THREE.DoubleSide }), x, y, z, grp || this.G.ext, { shadow: false }); p.rotation.y = ry;
+    const f = this.bx(w + .2, .12, .2, 'darkWood', x + Math.sin(ry) * .02, y - h / 2 - .04, z + Math.cos(ry) * .02, grp || this.G.ext, { lite: true }); f.rotation.y = ry;
     // frame (jambs + stone lintel with keystone) and glazing bars
     { const g = grp || this.G.ext, cr = Math.cos(ry), sr = Math.sin(ry), at = (bw, bh, bd, key, u, yy, v) => { const b = this.bx(bw, bh, bd, key, x + cr * u + sr * v, y + yy, z - sr * u + cr * v, g, { shadow: false, lite: true }); b.rotation.y = ry; return b; };
       for (const sd of [-1, 1]) at(.07, h + .06, .14, 'darkWood', sd * (w / 2 + .03), 0, .04);
       at(w + .42, .16, .22, 'stoneD', 0, h / 2 + .1, .05);
-      at(.035, h, .05, 'darkWood', 0, 0, .03); if (shut) for (const sd of [-1, 1]) at(w * .26, h * .8, .03, 'wood', sd * w * .72, 0, .07); }
+      at(.035, h, .05, 'darkWood', 0, 0, .03); }
     return p; }
   sign(text, emblem, x, y, z, ry = 0) { // hanging shop sign on an iron bracket
     const t = signTexture(text, emblem), s = this.add(new THREE.PlaneGeometry(1.5, .75), new THREE.MeshLambertMaterial({ map: t, side: THREE.DoubleSide }), x, y, z, this.G.ext, { shadow: false, keep: true }); s.rotation.y = ry;

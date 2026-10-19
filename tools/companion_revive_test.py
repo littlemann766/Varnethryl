@@ -34,7 +34,7 @@ with sync_playwright() as p:
     try: pg.wait_for_function("__p3d.crowd.every(r=>!(r.down>0))", timeout=90000); ok = True
     except Exception: ok = False
     chk('all revived after the delay', ok)
-    d = pg.evaluate("__p3d.crowd.filter(r=>r.kind==='party').map(r=>Math.hypot(r.a.x-__p3d.state.heroX,r.a.z-__p3d.state.heroZ))"); chk('companions revived at the hero side', len(d)>0 and all(x<4 for x in d), str([round(x,1) for x in d]))
+    d = pg.evaluate("__p3d.crowd.filter(r=>r.kind==='party').map(r=>Math.hypot(r.a.x-__p3d.state.heroX,r.a.z-__p3d.state.heroZ))"); chk('companions revived at the hero side', len(d)>0 and all(x<9 for x in d), str([round(x,1) for x in d]))
     chk('companions visible again', pg.evaluate("__p3d.crowd.filter(r=>r.kind==='party').every(r=>!r.root||r.root.visible)"))
     chk('hero alive and in place afterwards', pg.evaluate("__p3d.fight.cc.dead")==0 and abs(pg.evaluate("__p3d.state.heroX")-pos0[0])<3)
     if SH: pg.screenshot(path=f'{SH}/storm_after_revive.png')

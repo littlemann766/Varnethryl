@@ -30,10 +30,10 @@ with sync_playwright() as p:
             return pg.evaluate("({x:__p3d.state.heroX,z:__p3d.state.heroZ,ins:__p3d.state.inside})")
         front = (bi['r'] if bi['round'] else bi['d'] / 2)
         if bi['id'] == 'gatehouse':
-            s = W(0, front + 0); a = W(0, 8); c = W(0, -8); r = walk(a, c, 9000); ok = abs(r['x'] - c[0]) < 2 and abs(r['z'] - c[1]) < 2
+            s = W(0, front + 0); a = W(0, 8); c = W(0, -8); r = walk(a, c, int(os.environ.get('GATE_MS', 9000))); ok = abs(r['x'] - c[0]) < 2 and abs(r['z'] - c[1]) < 2
             # a solid wall: try to cross the tower line
             a2 = W(7.0, 8); c2 = W(7.0, -8); r2 = walk(a2, c2, 6000); ok2 = abs(r2['z'] - c2[1]) > 3
-            print('PASS' if ok and ok2 else 'FAIL', 'gatehouse walk-through', ok, 'tower solid', ok2); fails += 0 if ok and ok2 else 1; continue
+            print('PASS' if ok and ok2 else 'FAIL', 'gatehouse walk-through', ok, 'tower solid', ok2, '' if ok else ('stopped at %s, wanted %s' % ({k: (round(v, 1) if isinstance(v, float) else v) for k, v in r.items()}, [round(q, 1) for q in c]))); fails += 0 if ok and ok2 else 1; continue
         if not bi['hasIn']: continue
         if bi['id'].startswith(('wt','gt')): front = 4.4
         inner = (0.5 if bi['id'].startswith(('wt','gt')) else bi['r'] - 3.0) if bi['round'] else (bi['id_'] - 1.4)

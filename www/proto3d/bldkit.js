@@ -542,6 +542,19 @@ Builder.prototype.props2 = function (kind) {
     for (const z of [-1.5, 1.5]) for (const sx of [-1, 1]) this.banner(sx * 1.6, 4.0, z, Math.PI / 2, .9, 2.0, G); }
   if (kind === 'hall') { const n = Math.max(1, Math.round(id_ / 4)); for (let i = 0; i < n; i++) chand(0, Math.min((this.h || 6) - 1.6, 5.2), -id_ + (i + .5) * (2 * id_) / n - .5, 1.0); }
   if (kind === 'inn') chand(-1.8, 2.45, 1.4, .7);
+  if (kind === 'inn') {   // card gaps (pass 4): kitchen corner, bar-side shelving + kegs, private rumor corner
+    { const x = -iw + 1.0, z = -id_ + 2.9; if (F(x, z, .8)) { this.bx(.9, .9, 1.3, 'stone', x, .45, z, G); this.bx(1.0, .08, 1.4, 'stoneD', x, .94, z, G, { lite: true }); this.add(new THREE.PlaneGeometry(.5, .3), GLOW('ff8a2a', 1.6), x + .46, .4, z, G, { shadow: false }).rotation.y = Math.PI / 2;
+      this.cyl(.16, .13, .2, 'iron', x, 1.08, z - .3, G, 6, { shadow: false }); this.cyl(.2, .2, .08, 'iron', x, 1.02, z + .3, G, 8, { shadow: false }); this.col(x, z, .9, 1.3); } }
+    for (const [x, z] of [[-iw + 2.6, -id_ + 1.1], [-iw + 3.0, -id_ + 1.3], [-iw + .9, -id_ + 4.6], [-iw + 4.4, -id_ + 1.1]]) { if (F(x, z, .7)) { this.bx(1.4, .08, .7, 'wood', x, .82, z, G, { lite: true }); for (const a of [-1, 1]) for (const b of [-1, 1]) this.bx(.07, .8, .07, 'darkWood', x + a * .62, .4, z + b * .28, G, { lite: true });
+      for (let i = 0; i < 3; i++) this.add(new THREE.SphereGeometry(.13, 6, 4), M('#d8a85a'), x - .4 + i * .3, .92, z, G, { shadow: false }).scale.y = .6; this.bx(.4, .04, .25, 'darkWood', x + .45, .88, z, G, { lite: true }); this.col(x, z, 1.4, .7); hang(x, z, 3); break; } }
+    { const z = -id_ + .25; for (const y of [1.5, 2.0]) { this.bx(1.6, .05, .3, 'darkWood', iw - 1.6, y, z, G, { lite: true }); bottles(iw - 2.2, y + .02, z, 5, .28); } }
+    for (let i = 0; i < 3; i++) { const x = iw - 2.6 + i * .7, z = -id_ + 1.0; if (!F(x, z, .4)) continue; const k = this.cyl(.28, .28, .55, 'wood', x, .3, z, G, 8); k.rotation.x = Math.PI / 2; this.bx(.58, .05, .05, 'iron', x, .3, z, G, { shadow: false, lite: true }); this.ccol(x, z, .32); }
+    { const x = -iw + 1.5, z = id_ - 1.7; if (F(x, z, .9)) { this.cyl(.45, .45, .06, 'darkWood', x, .74, z, G, 10); this.cyl(.07, .1, .72, 'darkWood', x, .37, z, G, 6); this.ccol(x, z, .5);
+      this.cyl(.04, .04, .12, '#e8dcc0', x + .1, .83, z, G, 4, { shadow: false }); this.add(new THREE.ConeGeometry(.04, .1, 4), GLOW('ffb040', 2.0), x + .1, .94, z, G, { shadow: false }); this.bx(.5, .01, .35, 'parchment', x - .1, .775, z, G, { shadow: false, lite: true });
+      chair(x + .98, z, -Math.PI / 2); chair(x, z - .98, 0);
+      this.bx(.02, .9, 1.3, 'parchment', -iw + .07, 1.7, z - .2, G, { shadow: false, lite: true }); this.bx(.02, .08, 1.36, 'darkWood', -iw + .08, 2.18, z - .2, G, { shadow: false, lite: true });
+      this.banner(-iw + .1, 2.6, z + .9, Math.PI / 2, .7, 1.4, G); } }
+  }
   if (kind === 'thieves') { for (let i = 0; i < 3; i++) stool(-2.6 + i * .9, 1.8, .5); bottles(-.8, 1.0, .6, 6, .45); hang(0, -.3, 3); }
 };
 

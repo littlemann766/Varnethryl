@@ -21,7 +21,7 @@ const CSS = `
 #cb .sl{position:absolute;aspect-ratio:1;border-radius:50%;border:2px solid #bd9451;background:radial-gradient(circle at 45% 30%,#29344b,#101521 58%,#080c15);box-shadow:inset 0 0 0 2px #141010,0 3px 10px #000b;padding:0;overflow:hidden;color:#f2d3a0}
 /* fighting-pad layout: LARGE basic in the corner, A/B/C-style staggered arc of skills 1-3, ultimate high on the right */
 #cb .sl.b0{width:42%;right:0;bottom:0;border-width:4px}#cb .sl.b1{width:25%;right:46%;bottom:2%}#cb .sl.b2{width:25%;right:58%;bottom:30%}#cb .sl.b3{width:25%;right:32%;bottom:46%}
-#cb .sl.b4{width:30%;right:0;bottom:58%;border:3px solid #ffd56e;background:radial-gradient(circle,#852723,#321224 54%,#110c19)}
+#cb .ulp{position:absolute;right:0;bottom:92%;display:none;flex-direction:column;gap:6px;z-index:4}#cb .ulp.open{display:flex}#cb .ulp button{min-height:48px;padding:6px 14px;border-radius:12px;border:2px solid #ffd56e;background:#241a35;color:#fff;font:inherit;font-weight:700}#cb .ulp button[data-u=unholy]{border-color:#8a5cf6;background:#120c1c}#cb .ulp button[data-u=holy]{background:#4a4030;color:#fff3c4}#cb .swp{position:absolute;right:31%;bottom:84%;width:44px;height:44px;border-radius:50%;border:2px solid #ffd56e;background:#241a35;color:#fff;font-size:20px;display:none;z-index:3}#cb .sl.b4.u-unholy{border-color:#8a5cf6}#cb .sl.b4.u-unholy .ic{filter:hue-rotate(250deg) saturate(.7) brightness(.55)}#cb .sl.b4.u-holy .ic{filter:saturate(.45) brightness(1.55)}#cb .sl.b4.u-holy{border-color:#fff3c4}#cb .sl.b4{width:30%;right:0;bottom:58%;border:3px solid #ffd56e;background:radial-gradient(circle,#852723,#321224 54%,#110c19)}
 #cb .sl .ic{position:absolute;inset:18%;display:flex;align-items:center;justify-content:center}#cb .sl svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 #cb .sl .k{position:absolute;left:0;right:0;bottom:5%;text-align:center;font-size:9px;color:#ffe9a8;text-shadow:0 1px 2px #000}
 #cb .sl.oi{border-color:transparent;background:none;box-shadow:0 3px 10px #000b}#cb .sl.oi .ic{inset:0}#cb .sl.oi svg{stroke:none;stroke-width:0}#cb .sl.oi.b4.rdy{box-shadow:0 0 18px #ff7a2a}#cb .sl.oi .k{text-shadow:0 1px 3px #000,0 0 4px #000}#cb .sl .rg{position:absolute;inset:0;border-radius:50%;background:conic-gradient(#000d var(--p,0%),transparent 0)}#cb .sl .ct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 16px system-ui;text-shadow:0 1px 2px #000}
@@ -62,7 +62,7 @@ export class CombatHUD {
     r.innerHTML = '<div class="flash"></div><div class="tp"><div class="nm"></div><div class="sub"></div><div class="bar hp"><i></i><b></b></div></div>' +
       '<div class="stat"></div><div class="top"><button type="button" data-a="summon">Summon Titan</button><button type="button" data-a="exit">Exit fight</button></div>' +
       '<div class="vit"><div class="por"><span>?</span><small>1</small></div><div class="bars"><div class="bar hp"><i></i><b></b></div><div class="bar mp"><i></i><b></b></div><div class="bar sp"><i></i><b></b></div><div class="bar fy"><i></i><b></b></div></div></div>' +
-      '<div class="cx">' + [0, 1, 2, 3, 4].map(i => '<button type="button" class="sl b' + i + '" data-s="' + i + '"><span class="ic"></span><span class="k">' + (i ? (i === 4 ? 'ULT' : i) : '') + '</span><span class="rg"></span><span class="ct"></span></button>').join('') + '</div>' +
+      '<div class="cx"><div class="ulp"><button type="button" data-u="holy">Holy Destruction</button><button type="button" data-u="unholy">Unholy Destruction</button></div>' + [0, 1, 2, 3, 4].map(i => '<button type="button" class="sl b' + i + '" data-s="' + i + '"><span class="ic"></span><span class="k">' + (i ? (i === 4 ? 'ULT' : i) : '') + '</span><span class="rg"></span><span class="ct"></span></button>').join('') + '</div>' +
       '<div class="cl"><button type="button" data-a="dodge"><span class="g">\u21BA</span>Dodge<span class="q">Spc</span><span class="cdv"></span></button><button type="button" data-a="block"><span class="g">\u26E8</span>Block<span class="q">RMB</span></button>' +
       '<button type="button" data-a="jump"><span class="g">\u2191</span>Jump<span class="q">J</span></button><button type="button" data-a="lock"><span class="g">\u25CE</span>Lock<span class="q">Q</span></button>' +
       '<button type="button" data-a="potion"><span class="g">\u2697</span>Potion<span class="q">R</span><span class="cdv"></span></button><button type="button" data-a="swap"><span class="g">\u2694</span>Weapon<span class="q">E</span></button></div><div class="msg"></div>';
@@ -78,9 +78,14 @@ export class CombatHUD {
     const stop = e => { e.preventDefault(); e.stopPropagation(); };
     r.addEventListener('pointerdown', e => {
       const b = e.target.closest('button'); if (!b) return; stop(e);
+      if (b.dataset.u) { if (this.cc.ownerOk()) { this.cc.ultSel = b.dataset.u; try { localStorage.setItem('varn.ultsel', b.dataset.u); } catch (x) {} } r.querySelector('.ulp').classList.remove('open'); return; }
+      if (b.dataset.s === '4' && this.cc.ownerOk()) {   // ONE ultimate button: tap = fire selected, long-press (0.45 s) = popup to switch Holy/Unholy
+        const pop = r.querySelector('.ulp'); pop.classList.remove('open'); this.ultP = { id: e.pointerId, long: false, t: setTimeout(() => { if (this.ultP) { this.ultP.long = true; pop.classList.add('open'); } }, 450) }; return;
+      }
+      r.querySelector('.ulp').classList.remove('open');
       if (b.dataset.s !== undefined) { const k = this.slotAbility(+b.dataset.s); if (k !== null) api.use(k); } else { const a = b.dataset.a; if (a === 'block') { this.blockPtr = e.pointerId; api.block(true); } else api[a] && api[a](); }
     });
-    const up = e => { if (this.blockPtr === e.pointerId) { this.blockPtr = null; api.block(false); } };
+    const up = e => { if (this.ultP && this.ultP.id === e.pointerId) { const u = this.ultP; this.ultP = null; clearTimeout(u.t); if (!u.long && e.type === 'pointerup') { const k = this.slotAbility(4); if (k !== null) api.use(k); } } if (this.blockPtr === e.pointerId) { this.blockPtr = null; api.block(false); } };
     addEventListener('pointerup', up); addEventListener('pointercancel', up);
     r.addEventListener('contextmenu', e => e.preventDefault());
     cc.on('damage', d => this.onDamage(d)).on('heal', h => this.floatAt(h.x, 2.4 * cc.HS, h.z, '+' + h.n, 'heal')).on('hero', () => this.heroInfo())
@@ -88,7 +93,7 @@ export class CombatHUD {
     this.heroInfo();
   }
   /* cluster slot (0 basic,1-3 skills,4 ult) -> ability key for the controller (index into ABILITIES, or an OWNER_SKILLS id). The controller re-validates everything. */
-  slotAbility(i) { if (i === 0) return 0; if (this.cc.ownerOk()) return OWNER_CLUSTER[i - 1]; return i === 4 ? 5 : i; }
+  slotAbility(i) { if (i === 0) return 0; if (this.cc.ownerOk()) return i === 4 ? (this.cc.ultSel || 'holy') : OWNER_CLUSTER[i - 1]; return i === 4 ? 5 : i; }
   show(v) { this.root.style.display = v ? 'block' : 'none'; const d = document.getElementById('diagBtn'); if (d) { if (v) { this._dd = d.style.display; d.style.display = 'none'; } else if (this._dd !== undefined) d.style.display = this._dd; } }   /* #diagBtn sits under the first ability slot */
   heroInfo() { const h = this.cc.hero; this.por.textContent = (h.name || '?')[0]; this.lvl.textContent = h.level; this.cache.k = ''; }
   say(t, ms) { this.msg.textContent = t; this.msg.style.display = 'block'; clearTimeout(this._mt); this._mt = setTimeout(() => { this.msg.style.display = 'none'; }, ms || 1500); }
@@ -121,7 +126,7 @@ export class CombatHUD {
       const kk = String(key) + (own ? 'o' : ''); if (kk !== s.key) { s.key = kk; s.ic.innerHTML = own && ownerIconKey(key, a) ? OWNER_ICON[ownerIconKey(key, a)] : (ICONS[a.owner ? a.icon : LEGACY_ICON[key]] || ''); s.b.title = a.name; s.b.setAttribute('aria-label', a.name); s.cd = -1; }
       const left = cc.cd.left(a.id), use = cc.slotUsable(key), noRes = !R.can(a.cost), isUlt = a.fury, fr = isUlt && use && left <= 0 && !cc.furyReady();
       const q = Math.round(left * 10) / 10 + (fr ? Math.round(cc.fury) / 1000 : 0); if (q !== s.cd) { s.cd = q; const p = left > 0 ? Math.round(cc.cd.frac(a.id) * 100) : fr ? Math.round(cc.fury) : 0; s.rg.style.setProperty('--p', p + '%'); s.ct.textContent = left > 0.05 ? (left >= 10 ? Math.ceil(left) : left.toFixed(1)) : ''; }
-      const lock = !use && i === 4, oi = own && ownerIconKey(key, a), st = (oi ? 'oi ' : '') + (use ? '' : 'off ') + (fr && left <= 0 ? 'fr ' : '') + (use && noRes && left <= 0 ? 'nores ' : '') + (isUlt && use && left <= 0 && !fr ? 'rdy' : ''); if (st !== s.st) { s.st = st; s.b.className = 'sl b' + i + ' ' + st; if (lock) s.ic.innerHTML = ICONS.lock; }
+      const lock = !use && i === 4, oi = own && ownerIconKey(key, a), st = (i === 4 && own ? 'u-' + key + ' ' : '') + (oi ? 'oi ' : '') + (use ? '' : 'off ') + (fr && left <= 0 ? 'fr ' : '') + (use && noRes && left <= 0 ? 'nores ' : '') + (isUlt && use && left <= 0 && !fr ? 'rdy' : ''); if (st !== s.st) { s.st = st; s.b.className = 'sl b' + i + ' ' + st; if (lock) s.ic.innerHTML = ICONS.lock; }
     }
     this.bar(this.vfy, 'fy', cc.fury, TUNING.ult.fury);
     for (const k of ['dodge', 'potion']) { const o = this.btn[k], l = Math.round(cc.cd.left(k) * 5) / 5; if (l !== o.cd) { o.cd = l; o.cdv.style.height = l > 0 ? Math.round(cc.cd.frac(k) * 100) + '%' : '0'; } }

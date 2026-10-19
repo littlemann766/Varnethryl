@@ -1,6 +1,7 @@
 /* CombatHUD: presentation only. Subscribes to CombatController events and reads its state; never computes damage.
    Perf: all nodes are built once; per frame we only write a style/text when the displayed value changed. Floating numbers come from a fixed pool. */
 import { ABILITIES, OWNER_SKILLS, OWNER_CLUSTER, TUNING } from './data.js';
+import { OWNER_ICON } from './ownericons.js';
 const CSS = `
 #cb{position:fixed;inset:0;z-index:40;display:none;pointer-events:none;font:700 12px system-ui,sans-serif;color:#fff;user-select:none;-webkit-user-select:none}
 #cb *{box-sizing:border-box}#cb button{pointer-events:auto;touch-action:none;font:inherit;color:#fff;cursor:pointer}
@@ -16,16 +17,17 @@ const CSS = `
 #cb .por small{position:absolute;bottom:-5px;right:-5px;background:#000c;border:1px solid #fff8;border-radius:8px;font:700 9px system-ui;padding:0 3px}
 #cb .bars{flex:1;display:flex;flex-direction:column;gap:3px}
 #cb .fy i{background:linear-gradient(#ffd27a,#c9741a)}#cb .fy{display:none}#cb.own .fy{display:block}
-#cb .cx{position:absolute;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));width:clamp(200px,min(46vw,62vh),260px);aspect-ratio:1}
+#cb .cx{position:absolute;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));width:clamp(210px,min(48vw,66vh),270px);aspect-ratio:1}
 #cb .sl{position:absolute;aspect-ratio:1;border-radius:50%;border:2px solid #bd9451;background:radial-gradient(circle at 45% 30%,#29344b,#101521 58%,#080c15);box-shadow:inset 0 0 0 2px #141010,0 3px 10px #000b;padding:0;overflow:hidden;color:#f2d3a0}
-#cb .sl.b0{width:36%;right:1%;bottom:0;border-width:3px}#cb .sl.b1{width:24%;right:39%;bottom:4%}#cb .sl.b2{width:24%;right:57%;bottom:33%}#cb .sl.b3{width:24%;right:31%;bottom:44%}
-#cb .sl.b4{width:30%;right:1%;bottom:57%;border:3px solid #ffd56e;background:radial-gradient(circle,#852723,#321224 54%,#110c19)}
+/* fighting-pad layout: LARGE basic in the corner, A/B/C-style staggered arc of skills 1-3, ultimate high on the right */
+#cb .sl.b0{width:42%;right:0;bottom:0;border-width:4px}#cb .sl.b1{width:25%;right:46%;bottom:2%}#cb .sl.b2{width:25%;right:58%;bottom:30%}#cb .sl.b3{width:25%;right:32%;bottom:46%}
+#cb .sl.b4{width:30%;right:0;bottom:58%;border:3px solid #ffd56e;background:radial-gradient(circle,#852723,#321224 54%,#110c19)}
 #cb .sl .ic{position:absolute;inset:18%;display:flex;align-items:center;justify-content:center}#cb .sl svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 #cb .sl .k{position:absolute;left:0;right:0;bottom:5%;text-align:center;font-size:9px;color:#ffe9a8;text-shadow:0 1px 2px #000}
-#cb .sl .rg{position:absolute;inset:0;border-radius:50%;background:conic-gradient(#000d var(--p,0%),transparent 0)}#cb .sl .ct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 16px system-ui;text-shadow:0 1px 2px #000}
+#cb .sl.oi{border-color:transparent;background:none;box-shadow:0 3px 10px #000b}#cb .sl.oi .ic{inset:0}#cb .sl.oi svg{stroke:none;stroke-width:0}#cb .sl.oi.b4.rdy{box-shadow:0 0 18px #ff7a2a}#cb .sl.oi .k{text-shadow:0 1px 3px #000,0 0 4px #000}#cb .sl .rg{position:absolute;inset:0;border-radius:50%;background:conic-gradient(#000d var(--p,0%),transparent 0)}#cb .sl .ct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 16px system-ui;text-shadow:0 1px 2px #000}
 #cb .sl.fr .rg{background:conic-gradient(#e8a02c66 var(--p,0%),transparent 0)}#cb .sl.rdy{box-shadow:inset 0 0 0 2px #141010,0 0 16px #ff8a3c}
 #cb .sl.off{filter:grayscale(1) brightness(.55)}#cb .sl.nores{border-color:#f66}#cb .sl:active:not(.off){transform:scale(.93)}
-#cb .cl{position:absolute;right:calc(max(10px,env(safe-area-inset-right)) + clamp(200px,min(46vw,62vh),260px) + 8px);bottom:max(10px,env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(3,46px);gap:5px}
+#cb .cl{position:absolute;right:calc(max(10px,env(safe-area-inset-right)) + clamp(210px,min(48vw,66vh),270px) + 8px);bottom:max(10px,env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(3,46px);gap:5px}
 #cb .cl button{position:relative;width:46px;height:46px;border-radius:50%;border:2px solid #fffb;background:#0c2438dd;font-size:9px;line-height:1.05;padding:0;overflow:hidden}
 #cb .cl button .g{display:block;font:400 19px system-ui;line-height:20px}#cb .cl button.on{background:#2aa;border-color:#9ff}
 #cb .cl button .cdv{position:absolute;left:0;right:0;bottom:0;height:0;background:#000b}#cb .cl button .q{position:absolute;right:3px;top:2px;font-size:9px;color:#ffe9a8}
@@ -38,7 +40,7 @@ const CSS = `
 #cb .top{position:absolute;right:max(10px,env(safe-area-inset-right));top:max(78px,calc(env(safe-area-inset-top) + 72px));display:flex;flex-direction:column;gap:4px;align-items:flex-end;text-shadow:0 1px 2px #000}
 #cb .top button{min-height:26px;padding:3px 9px;border-radius:10px;border:1px solid #fff7;background:#000a;font-size:11px}
 #cb .stat{position:absolute;left:max(10px,env(safe-area-inset-left));top:max(76px,calc(env(safe-area-inset-top) + 70px));font-size:11px;text-shadow:0 1px 2px #000;line-height:1.35}
-@media (orientation:portrait){#cb .cl{grid-template-columns:repeat(2,46px);right:max(10px,env(safe-area-inset-right));bottom:calc(max(10px,env(safe-area-inset-bottom)) + clamp(200px,min(46vw,62vh),260px) + 6px)}#cb .vit{bottom:calc(max(10px,env(safe-area-inset-bottom)) + 150px)}}
+@media (orientation:portrait){#cb .cl{grid-template-columns:repeat(2,46px);right:max(10px,env(safe-area-inset-right));bottom:calc(max(10px,env(safe-area-inset-bottom)) + clamp(210px,min(48vw,66vh),270px) + 6px)}#cb .vit{bottom:calc(max(10px,env(safe-area-inset-bottom)) + 150px)}}
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';
@@ -47,6 +49,7 @@ const ICONS = {
   bolt: SV('<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>'), meteor: SV('<circle cx="15" cy="15" r="5"/><path d="M11 11L3 3M9 15L3 12M15 9L12 3"/>'), lock: SV('<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>'),
   heavy: SV('<path d="M6 20L18 8M13 3l8 8-3 3-8-8z"/>'), push: SV('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>'), throw: SV('<path d="M4 20L16 8M14 4l6 0 0 6"/>'), shield: SV('<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/>'), storm: SV('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 018 8"/>'),
 };
+const ownerIconKey = (key, a) => key === 0 ? 'basic' : (a.owner ? a.id : null);
 const LEGACY_ICON = ['basic', 'heavy', 'push', 'throw', 'shield', 'storm'];
 const NUM_POOL = 24, OH_POOL = 10;
 export class CombatHUD {
@@ -115,10 +118,10 @@ export class CombatHUD {
     const own = cc.ownerOk(); this.setv(null, 'own', own, v => { this.root.classList.toggle('own', v); });
     for (let i = 0; i < 5; i++) {
       const s = this.slots[i], key = this.slotAbility(i), a = typeof key === 'string' ? OWNER_SKILLS[key] : ABILITIES[key];
-      const kk = String(key) + (own ? 'o' : ''); if (kk !== s.key) { s.key = kk; s.ic.innerHTML = ICONS[a.owner ? a.icon : LEGACY_ICON[key]] || ''; s.b.title = a.name; s.b.setAttribute('aria-label', a.name); s.cd = -1; }
+      const kk = String(key) + (own ? 'o' : ''); if (kk !== s.key) { s.key = kk; s.ic.innerHTML = own && ownerIconKey(key, a) ? OWNER_ICON[ownerIconKey(key, a)] : (ICONS[a.owner ? a.icon : LEGACY_ICON[key]] || ''); s.b.title = a.name; s.b.setAttribute('aria-label', a.name); s.cd = -1; }
       const left = cc.cd.left(a.id), use = cc.slotUsable(key), noRes = !R.can(a.cost), isUlt = a.fury, fr = isUlt && use && left <= 0 && !cc.furyReady();
       const q = Math.round(left * 10) / 10 + (fr ? Math.round(cc.fury) / 1000 : 0); if (q !== s.cd) { s.cd = q; const p = left > 0 ? Math.round(cc.cd.frac(a.id) * 100) : fr ? Math.round(cc.fury) : 0; s.rg.style.setProperty('--p', p + '%'); s.ct.textContent = left > 0.05 ? (left >= 10 ? Math.ceil(left) : left.toFixed(1)) : ''; }
-      const lock = !use && i === 4, st = (use ? '' : 'off ') + (fr && left <= 0 ? 'fr ' : '') + (use && noRes && left <= 0 ? 'nores ' : '') + (isUlt && use && left <= 0 && !fr ? 'rdy' : ''); if (st !== s.st) { s.st = st; s.b.className = 'sl b' + i + ' ' + st; if (lock) s.ic.innerHTML = ICONS.lock; else if (!use || true) s.ic.innerHTML = ICONS[a.owner ? a.icon : LEGACY_ICON[key]] || ''; }
+      const lock = !use && i === 4, oi = own && ownerIconKey(key, a), st = (oi ? 'oi ' : '') + (use ? '' : 'off ') + (fr && left <= 0 ? 'fr ' : '') + (use && noRes && left <= 0 ? 'nores ' : '') + (isUlt && use && left <= 0 && !fr ? 'rdy' : ''); if (st !== s.st) { s.st = st; s.b.className = 'sl b' + i + ' ' + st; if (lock) s.ic.innerHTML = ICONS.lock; }
     }
     this.bar(this.vfy, 'fy', cc.fury, TUNING.ult.fury);
     for (const k of ['dodge', 'potion']) { const o = this.btn[k], l = Math.round(cc.cd.left(k) * 5) / 5; if (l !== o.cd) { o.cd = l; o.cdv.style.height = l > 0 ? Math.round(cc.cd.frac(k) * 100) + '%' : '0'; } }

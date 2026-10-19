@@ -1,7 +1,7 @@
 // Varnethryl 3D buildings: 26 low-poly walk-in buildings built from the boss's sheets (guild blue / royal gold, lion crest, blue slate,
 // timber + stone). Everything is generated in code (see bldkit.js / bldtex.js). Each builder returns a Builder with .update(hx,hz,dt).
 import * as THREE from 'three';
-import { Builder, M, GLOW, boxG, cylG, uvScale, TILE, mergeGroup } from './bldkit.js';
+import { Builder, M, GLOW, WM, rippleMat, boxG, cylG, uvScale, TILE, mergeGroup } from './bldkit.js';
 import { tex, goldDoorTexture } from './bldtex.js';
 
 // ---------- shared decor ----------
@@ -16,7 +16,7 @@ export const KB = 1.7, PK = 2.5, WORLD_B = 60 * PK;   // building uniform scale,
 export const PLAN = 1.5;   // plan (footprint) scale for the standard buildings: roomier interiors, gentler stairs; heights unchanged (doors stay ~1.4x hero height)
 function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + banners + sign
   if (!o.noScale) o = Object.assign({}, o, { w: o.w * PLAN, d: o.d * PLAN });
-  const B = new Builder(ctx, spec); B.name = o.name; B.rectShell(o);
+  const B = new Builder(ctx, spec); B.name = o.name; B.rectShell(Object.assign({ doorHood: true }, o));
   const rh = o.roof === false ? 0 : B.roofGable({ rh: o.rh || 3, key: o.roofKey || 'slate', ridge: o.ridge || 'x', over: o.over, endKey: o.endKey || (o.upper === 'stone' || o.upper === 'stoneL' ? o.upper : 'timber') });
   B.rh = rh; const hs = o.hs === undefined ? B.h * .42 : o.hs, up = hs + (B.h - hs) / 2;
   const gy = Math.min(1.9, hs * .7 + .6);
@@ -30,7 +30,7 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
   if (o.flowers !== false && B.h - hs > 1.8) for (const x of frontWinXs(B, o.wn || 1)) B.flowers(x, gy - .65, B.d / 2 + .2, 1.0);
   if (o.post) { B.lanternPost(B.w / 2 + 1.0, B.d / 2 + 1.2); B.lanternPost(-B.w / 2 - 1.0, B.d / 2 + 1.2); }
   if (o.extra) o.extra(B);
-  if (o.details !== false) B.shutY = gy + .1, B.details();
+  if (o.details !== false) B.shutY = gy + .1, B.details({ upper: o.upper, hs });
   if (o.interior) o.interior(B);
   B.radius = Math.hypot(B.w, B.d) / 2; return B.finish();
 }
@@ -435,6 +435,7 @@ function fountain(spec, ctx) {
   const B = new Builder(ctx, spec); B.name = 'Fountain Monument of Varnethryl'; B.radius = 6; B.insideTest = null;
   B.cyl(6.3, 6.5, .3, 'pave', 0, .15, 0, B.G.ext, 8);                                             // octagonal plaza plinth
   B.cyl(4.2, 4.4, 1.0, 'stoneL', 0, .8, 0, B.G.ext, 24); B.add(new THREE.CylinderGeometry(3.8, 3.8, .1, 24), M('water'), 0, 1.3, 0, B.G.ext, { shadow: false }); B.ccol(0, 0, 4.4);
+  { const rm = rippleMat(), r1 = B.add(new THREE.CircleGeometry(3.75, 32), rm, 0, 1.37, 0, B.G.ext, { shadow: false, keep: true }); r1.rotation.x = -Math.PI / 2; r1.renderOrder = 3; const r2 = B.add(new THREE.CircleGeometry(2.05, 24), rm, 0, 3.73, 0, B.G.ext, { shadow: false, keep: true }); r2.rotation.x = -Math.PI / 2; r2.renderOrder = 3; }
   B.cyl(1.3, 1.8, 2.0, 'stoneL', 0, 2.2, 0, B.G.ext, 12); B.cyl(2.4, 1.2, .5, 'stoneL', 0, 3.4, 0, B.G.ext, 16); B.add(new THREE.CylinderGeometry(2.1, 2.1, .08, 16), M('water'), 0, 3.66, 0, B.G.ext, { shadow: false });
   B.cyl(.8, 1.0, 1.2, 'stoneL', 0, 4.3, 0, B.G.ext, 10); B.cyl(1.5, .8, .35, 'stoneL', 0, 4.9, 0, B.G.ext, 12);
   for (let i = 0; i < 4; i++) { const a = i * 1.571 + .78; B.add(new THREE.CylinderGeometry(.08, .1, .5, 5), M('gold'), Math.sin(a) * 3.0, 3.8, Math.cos(a) * 3.0, B.G.ext); B.add(new THREE.CylinderGeometry(.05, .05, 2.2, 5), M('water', { transparent: true, opacity: .6 }), Math.sin(a) * 3.3, 2.6, Math.cos(a) * 3.3, B.G.ext, { shadow: false }); }

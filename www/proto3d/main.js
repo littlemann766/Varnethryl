@@ -6,7 +6,7 @@ import { CHARS } from './chars.js';
 import { preload as preloadChars } from './texgen.js';
 import { makeEnterable } from './interiors.js';
 import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
-import { zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
+import { fx, zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { readSave, planFromState, createSaver } from './save3d.js';
 import { SpringBones } from './spring_bones.js';
 import { SpringBones as SpringBonesV2 } from './spring_bones_v2.js';
@@ -63,6 +63,7 @@ M('wall', 0xe9dcc0); M('wallB', 0xd2c2a0); M('stone', 0x9aa0a8); M('stoneD', 0x6
 M('roofR', 0xb5452f); M('roofB', 0x3d6aa8); M('roofG', 0x4b7d4a); M('door', 0x5a3a22);
 M('glass', 0xffe9a0, { emissive: 0x6a5420 }); M('water', 0x4fa8d8, { emissive: 0x103050 });
 M('trunk', 0x6b4a2b); M('leaf', 0x3e8a3a); M('leaf2', 0x57a043); M('gold', 0xe0b040, { emissive: 0x302000 });
+for (const k of ['trunk', 'leaf', 'leaf2']) fx(mats[k], 'tree');   // wind sway (shared shader uniform)
 M('steel', 0xc7ccd6); M('armor', 0x9aa6bd); M('cloth', 0x2d55a8); M('skin', 0xf0c8a0); M('plume', 0xc8302a); M('dark', 0x333844);
 
 function canvasTex(size, draw, repeat) {

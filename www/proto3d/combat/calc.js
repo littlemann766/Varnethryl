@@ -12,6 +12,8 @@ export const DamageCalculator = {
     const w = weapon === 'bamboo' ? BAMBOO : UNARMED, base = w.min + (w.max - w.min) * rng();
     const crit = rng() < PLAYER.crit; return { dmg: Math.round(base * mult * (crit ? PLAYER.critMult : 1)), crit };
   },
+  /* defence mitigation for non-player (companion) damage: same shape as Lucian's formula atk*1000/(1000+def), def softened */
+  mitigate(base, def) { return base * 1000 / (1000 + def * 0.5); },
   /* enemy -> player (before dodge/block/shield, which the controller applies) */
   enemyHit(atk, def, agi, rng) { return (L && L.enemyHurt ? L.enemyHurt : fallbackHurt)(atk, def, agi, rng); },
 };

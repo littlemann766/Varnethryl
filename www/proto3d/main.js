@@ -611,7 +611,7 @@ async function loadActorModel(id) {
 }
 function spawnCrowd(id, kind, x, z, leash, yaw) {
   const a = makeActor(id, { str: undefined, group: kind === 'party' ? 'party' : null }); a.x = x; a.z = z; a.yaw = yaw || 0;
-  const rec = { a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0, level: state.level, y: state.heroY || 0, ti: null, lvT: 0 };
+  const rec = { id, a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0, level: state.level, y: state.heroY || 0, ti: null, lvT: 0 };
   crowd.push(rec); bumpSys.add(a);
   loadActorModel(id).then(w => { if (!w) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, 0, a.z); w.rotation.y = a.yaw; scene.add(w); });
   return rec;
@@ -689,6 +689,7 @@ function updateCrowd(dt) {
         r.ti = null;   // same floor number but a long way off (other building / stuck behind walls): catch up after a few seconds instead of pushing straight into a wall
         if (Math.hypot(gx - a.x, gz - a.z) > 22) { r.lvT += dt; if (r.lvT > 6 && state.level === 0) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.lvT = 0; } } else r.lvT = 0;
       }
+      { const cg = FIGHT && FIGHT.on && FIGHT.companions && r.level === state.level ? FIGHT.companions.goal(r) : null; r.faceT = cg ? cg.face : null; if (cg) { gx = cg.x; gz = cg.z; far = true; } }   // companions engage nearby enemies (combat/companions.js); otherwise follow as before
       const dx = gx - a.x, dz = gz - a.z, d = Math.hypot(dx, dz);
       if (far && d > 0.3) { const sp = SPEED * Math.max(1, cheat.speedMul) * 1.05; tvx = dx / d * sp; tvz = dz / d * sp; }
       else if (!far && d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * Math.max(1, cheat.speedMul) * 1.05, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
@@ -707,6 +708,7 @@ function updateCrowd(dt) {
     const moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; if (r.kind === 'party') crowdSurface(r, a, dt);
     const sp = Math.hypot(r.vxs, r.vzs);
     if (sp > 0.3) { let da = Math.atan2(r.vxs, r.vzs) - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }
+    else if (r.faceT != null && r.faceT !== undefined) { let da = r.faceT - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }
     const w = r.root; if (!w) continue;
     w.position.set(a.x, r.kind === 'party' ? r.y : 0, a.z); const u = w.userData, ww = Math.min(1, sp / SPEED);
     restoreNodes(r.nd);
@@ -971,7 +973,7 @@ let FIGHT = null;
 async function fightToggle(createOnly) {
   if (!FIGHT) {
     const mod = await import('./fight.js');
-    FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, downAllies, bystanders, killCrowd, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
+    FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, downAllies, followers: () => crowd.filter(r => r.kind === 'party'), bystanders, killCrowd, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
       selectOwner: async () => { const i = GLB_IDS.indexOf('n:owner'); if (i >= 0 && GLB_IDS[HEROES.indexOf(hero)] !== 'n:owner') await selectVariant(SLOT_G[i], curVar(SLOT_G[i])); },
       makeModel: async id => { try { return modeFor(id) === 'blocky' ? makeBlocky(id) : await loadActorModel(id); } catch (e) { return null; } },
       loco: locoAnim, resolve: p => resolve(p), free: (x, z) => window.__p3d.free(x, z, 0),

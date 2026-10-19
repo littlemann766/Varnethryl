@@ -10,7 +10,7 @@ import { Armory } from './combat/armory.js';
 import { gripFor } from './combat/grips.js';
 import { heroKey } from './combat/herokits.js';
 import { CompanionCombat } from './combat/companions.js';
-import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
+import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING, ENEMY_WEAPONS } from './combat/data.js';
 import { Respawner } from './combat/respawn.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
 export const SABER_GLB = null;             // URL (or fight.setSaberModel(url)) for Beth's saber: hilt at origin, blade along +Y, ~1 m
@@ -225,10 +225,24 @@ export function createFight(env) {
     .on('respawn', () => { clearOS(env.hero()); { const rp = env.respawnPos ? env.respawnPos() : { x: 0, z: 60 }; state.heroX = rp.x; state.heroZ = rp.z; } state.target = null; env.hero().rotation.x = 0; });
   cc.on('damage', d => { if (d.toPlayer) { const h = env.hero(), u = h.userData; if (!(u.os && u.os.kind !== 'hit')) oneShot(h, 'hit', 0.45, false); } else if (d.e.view) { d.e.flinch = 0.18; if (d.e.state !== 'telegraph' && d.e.state !== 'stagger') oneShot(d.e.view, 'hit', 0.4, false); } });
   cc.on('chilled', () => hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'CHILLED', ''));
-  cc.on('defeat', e => { if (e.def.boss) { bossOn = false; hud.say(e.def.name.toUpperCase() + ' DEFEATED', 2600); } if (cc.kills % 6 === 0) { wave++; } });
+  cc.on('defeat', e => { if (e.def.giant) giantView(false); if (e.def.boss) { bossOn = false; hud.say(e.def.name.toUpperCase() + ' DEFEATED', 2600); } if (cc.kills % 6 === 0) { wave++; } });
   cc.on('enemyAttack', a => { if (a.result === 'dodged' && a.dmg === 0 && !cc.god) hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'DODGE', 'heal'); else if (a.result === 'parried') hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'PARRY', 'crit'); else if (a.result === 'blocked') hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'BLOCK', ''); });
 
   /* ---- enemies ---- */
+  /* enemy weapons on hand_R (trolls / titan / giants have no weapon socket): identity attach, metres -> the model's world scale; giants scale the 9.1 m greatsword by size */
+  const EWC = {}; let GV = null;
+  /* giant titans: widen fog + camera far while one is alive so the 38-114 m body is not cut by fog/clip; restored when it dies or the fight stops */
+  function giantView(on2) { if (on2) { if (!GV) GV = { n: scene.fog ? scene.fog.near : 0, f: scene.fog ? scene.fog.far : 0, c: camera.far }; if (scene.fog) { scene.fog.near = Math.max(GV.n, 260); scene.fog.far = Math.max(GV.f, 900); } camera.far = Math.max(GV.c, 1600); camera.updateProjectionMatrix(); }
+    else if (GV) { if (scene.fog) { scene.fog.near = GV.n; scene.fog.far = GV.f; } camera.far = GV.c; camera.updateProjectionMatrix(); GV = null; } }
+  async function enemyWeapon(key, w) {
+    const wid = ENEMY_WEAPONS[key]; if (!wid || !env.loadGLTF) return;
+    let hand = null; w.traverse(o => { if (!hand && o.name === 'hand_R') hand = o; }); if (!hand) return;
+    try { if (!EWC[wid]) EWC[wid] = env.loadGLTF('proto3d/models-weapons/enemy/' + wid + '.glb'); const g = await EWC[wid]; if (!w.parent) return;
+      const m = g.scene.clone(true); m.name = 'enemy_weapon'; m.traverse(o => { o.frustumCulled = false; if (o.isMesh) o.castShadow = true; });
+      w.updateMatrixWorld(true); const hs = new THREE.Vector3(); hand.getWorldScale(hs); const k = ENEMIES[key].giant ? ENEMIES[key].scale / 6 : 1;
+      m.scale.setScalar(((w.userData.mscale || 1) * k) / (hs.x || 1)); hand.add(m); w.userData.weapon = m;
+    } catch (e) { console.warn('enemy weapon', wid, e); }
+  }
   async function spawn(key, atPlayerDist, extra) {
     const def = ENEMIES[key], w = await env.makeModel(def.model); if (!w || !on) return null;
     let x = state.heroX + 12, z = state.heroZ;
@@ -236,7 +250,7 @@ export function createFight(env) {
     w.position.set(x, 0, z); let top;
     if (def.boss || def.scale > 1) { top = (w.userData.heightW || 1.8 * HS * def.scale) + 0.5; }   // the GLB is already 6x the hero (11.4 m vs 1.9 m): no extra scaling in game
     else { w.updateMatrixWorld(true); top = Math.max(1.5, new THREE.Box3().setFromObject(w).max.y) + 0.3; }
-    scene.add(w);
+    scene.add(w); enemyWeapon(key, w); if (def.giant) giantView(true);
     const ems = []; w.traverse(o => { if (o.isMesh && o.material && o.material.emissive) { ems.push(o); o.userData.em = o.material.emissive.getHex(); } });
     const tele = new THREE.Mesh(ring.geometry, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false })); tele.rotation.x = -Math.PI / 2; tele.visible = false; scene.add(tele);
     const e = cc.addEnemy(key, x, z, Object.assign({ view: w, top, ems, tele, flashOn: false, px: x, pz: z }, extra));
@@ -289,7 +303,8 @@ export function createFight(env) {
       if (e.state === 'defeated') { if (!e.dying) { e.dying = true; e.deathClip = oneShot(r, 'death', 0, true); } const uu = r.userData; if (e.deathClip) { tickOS(r, dt); if (uu.glb && uu.act) { uu.mixer.update(dt); if (uu.sb) uu.sb.update(dt); } } else r.rotation.x = -Math.min(1.4, e.deadT * 4); r.position.y = -Math.max(0, e.deadT - 1.2) * 1.2 * bs; e.tele.visible = false; if (e.deadT > (e.deathClip ? 4 : 2.4)) cc.removeEnemy(e); continue; }
       const mv = Math.hypot(e.x - e.px, e.z - e.pz) / Math.max(dt, 1e-4); e.px = e.x; e.pz = e.z; r.position.x = e.x; r.position.z = e.z;
       r.rotation.y = yawLerp(r.rotation.y, e.yaw, Math.min(1, dt * 10));
-      if (e.state !== e.ls) { if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
+      if (e.state !== e.ls) { const tc = r.userData && r.userData.act && r.userData.act.telegraph;   // coil wind-up clip (Vaelthryx new7 coil_windup, serpent coil) during the telegraph, then the strike
+        if (e.state === 'telegraph') { e.alt = !e.alt; if (tc) oneShot(r, 'telegraph', (e.curTele || e.def.tele), false); else oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'attack' && tc) oneShot(r, e.alt ? 'attack2' : 'attack', 0.8, false); else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
       let lean = 0; if (e.state === 'telegraph') lean = -0.35 * Math.min(1, e.tStateT / e.def.tele); else if (e.state === 'attack') lean = 0.45; else if (e.state === 'stagger') lean = -0.5; else if (e.flinch > 0) lean = -0.25 * (e.flinch / 0.18);
       r.rotation.x += (lean - r.rotation.x) * Math.min(1, dt * 14);
@@ -309,7 +324,8 @@ export function createFight(env) {
   const cheatKill = () => { let n = 0; for (const e of cc.enemies.slice()) if (e.state !== 'defeated') { e.hp = 0; cc.defeat(e); n++; } if (n) hud.say(n + ' slain', 1200); return n > 0; };
   const cheatSpawn = (key) => {
     if (!ENEMIES[key]) return false;
-    if (ENEMIES[key].boss) { if (bossOn) return false; spawn(key, key === 'vaelthryx' ? 60 : 26); return true; }
+    if (ENEMIES[key].boss) { if (bossOn) return false; if (ENEMIES[key].ownerTest && !ownerGate()) return false;   // giant titans: owner-only test spawn
+      spawn(key, ENEMIES[key].giant ? ENEMIES[key].scale * 2.4 : key === 'vaelthryx' ? 60 : 26); return true; }
     for (const e of cc.enemies.slice()) if (e.state === 'defeated' && !e.def.boss) cc.removeEnemy(e);
     spawn(key, 10); return true;
   };
@@ -324,7 +340,7 @@ export function createFight(env) {
     if (auto) { syncHero(); equip(); hud.say('THE WILDS - monsters about', 1800); return; }
     env.selectOwner().then(() => { syncHero(); equip(); hud.say('FIGHT TEST', 1800); });
   }
-  function stop() { heroWeaponClear(); for (const s of cc.summons.slice()) cc.removeSummon(s, 'stop'); cc.buffs.length = 0; sumSync();
+  function stop() { giantView(false); heroWeaponClear(); for (const s of cc.summons.slice()) cc.removeSummon(s, 'stop'); cc.buffs.length = 0; sumSync();
     if (!on) return; on = false; metHide(); metDispose(); cc.meteors.length = 0; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }

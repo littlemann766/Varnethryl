@@ -36,6 +36,7 @@ const NEW_W = [
   { id: 'frost_greatsword', name: 'Frost Greatsword', tier: 4, heroes: ['aldric', 'darius', 'thorne', 'cedric'], icon: 'sword' }, { id: 'war_axe', name: 'War Axe', tier: 4, heroes: ['garruk', 'thorne', 'darius', 'orin'], icon: 'sword' },
   { id: 'war_spear', name: 'War Spear', tier: 3, heroes: ['orin', 'aldric', 'rook'], icon: 'sword' }, { id: 'arcane_staff', name: 'Arcane Staff', tier: 3, heroes: ['kael', 'rowan', 'talia', 'selene', 'morwen'], icon: 'staff' },
   { id: 'longbow', name: 'Longbow', tier: 3, heroes: ['elira', 'vesper', 'rook'], icon: 'sword' }, { id: 'dual_kukri', name: 'Dual Kukri', tier: 2, heroes: ['nyx', 'finn', 'rook', 'asha'], icon: 'sword' },
+  { id: 'lute', name: 'Bard\u2019s Lute', tier: 2, heroes: ['cedric'], icon: 'sword' },   // test-bundle-1019
   { id: 'round_shield', name: 'Round Shield', tier: 0, heroes: null, icon: 'shield', offhand: true }];
 const NEWWEAPONS = NEW_W.map(w => I('w-' + w.id, w.name, w.offhand ? 'offhand' : 'weapon', w.offhand ? 'Armor' : 'Weapons', w.tier >= 4 ? 'epic' : 'rare', w.icon,
   w.offhand ? { def: 4, hp: 2 } : { dmg: TIER[w.tier] }, 'Beth\u2019s new test-branch model (' + w.id + '.glb). Optional; the hero\u2019s original weapon stays the default.', { heroes: w.heroes, glb: 'proto3d/models-weapons/' + w.id + '.glb', optional: true, beth: true }));
@@ -66,7 +67,8 @@ export function heroItems(key) {
     I('sig-a-' + key, L.armor.name, 'chest', 'Armor', 'epic', 'armor', { hp: pc(L.armor.hpPct), mp: pc(L.armor.mpPct), sp: pc(L.armor.spPct), def: pc(L.armor.defPct) }, 'Signature armor set (the hero\u2019s existing outfit).', { heroes: [key], sig: true })];
 }
 /* optional model variants (data only): refined rigs are NOT the default, partial refine, grips may be a few cm off. Files are not shipped in the APK yet. */
-export const modelVariants = (key) => ({ default: true, refined: { id: key + '_refined', file: 'rigged/' + key + '_refined.glb', shipped: false, note: 'Optional test variant, not default' } });
+export const ARMOR2 = ['aldric', 'orin', 'finn', 'seraphine', 'darius', 'garruk', 'rook', 'elira', 'brynn', 'cedric', 'asha', 'kael', 'mirelle', 'morwen', 'nyx', 'rowan', 'selene', 'talia', 'thorne', 'vesper'];   // Beth night2 armor2 x20 (v1.1.14 default look)
+export const modelVariants = (key) => ({ default: true, primary: ARMOR2.includes(key) ? 'armor2' : 'v1', armor2: ARMOR2.includes(key) ? { id: 'n:' + key + '_armor2', file: 'proto3d/models-armor2/' + key + '_armor2.glb', shipped: true, note: 'Default look (armor2); v1 is the fallback' } : null, v1: { note: 'Previous model (fallback)' }, refined: { id: key + '_refined', file: 'rigged/' + key + '_refined.glb', shipped: false, note: 'Optional test variant, not default' } });
 
 export function catalogFor(key, owner) {
   const own = owner && key === 'owner';
@@ -102,7 +104,7 @@ export class Armory {
       const used = new Set(); for (const [slot, id] of Object.entries(sv.equipment || {})) { const it = this.item(id); if (SLOTS.some(x => x.id === slot) && (id === null || (it && fits(it, slot) && !used.has(id) && (!it.ownerOnly || this.ownerOk())))) { s.equipment[slot] = id; if (id) used.add(id); } }
       for (const [id, l] of Object.entries(sv.enh || {})) { const it = this.item(id); if (it) s.enh[id] = Math.max(0, Math.min(it.enhanceMax, Math.floor(+l || 0))); }
       if (Array.isArray(sv.presets)) s.presets = [0, 1, 2].map(i => { const p = sv.presets[i]; if (!p || typeof p !== 'object') return null; const o = {}; for (const [slot, id] of Object.entries(p)) { const it = this.item(id); if (SLOTS.some(x => x.id === slot) && it && fits(it, slot) && (!it.ownerOnly || this.ownerOk())) o[slot] = id; } return o; });
-      if (sv.variant === 'refined') s.variant = 'refined';
+      if (['refined', 'armor2', 'v1'].includes(sv.variant)) s.variant = sv.variant;
     }
     this.s = s;
   }
@@ -141,7 +143,7 @@ export class Armory {
         for (const [slot, id] of Object.entries(S.presets[i])) { const it = this.item(id); if (!it || !fits(it, slot) || used.has(id) || (it.ownerOnly && !this.ownerOk())) continue; eq[slot] = id; used.add(id); }
         S.equipment = eq; S.active = i; return done('loadPreset', { index: i });
       }
-      case 'variant': { if (r.value !== 'default' && r.value !== 'refined') return no('bad-variant'); S.variant = r.value; return done('variant', { value: r.value }); }   // data only: refined rigs are optional, not default
+      case 'variant': { if (!['default', 'refined', 'armor2', 'v1'].includes(r.value)) return no('bad-variant'); S.variant = r.value; return done('variant', { value: r.value }); }   // data only: refined rigs are optional, not default
       case 'reset': S.equipment = defaultsFor(this.key, this.isOwnerHero); S.enh = {}; S.active = -1; return done('reset');
       default: return no('bad-request');
     }

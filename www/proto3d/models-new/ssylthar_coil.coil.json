@@ -1,0 +1,29 @@
+{
+ "src": "../ssylthar_new.glb",
+ "out": "ssylthar_coil.glb",
+ "strikeClip": "strike",
+ "anticipationT": 0.467,
+ "originalPullbackMeters": 1.112,
+ "bodyLen": 1.04,
+ "coilBendRad": {
+  "upper": 0,
+  "mid": 0.9
+ },
+ "headBackMeters": 0.298,
+ "headUpMeters": 0.69,
+ "base": "idle",
+ "lunge": {
+  "bendRad": {
+   "upper": 0.6,
+   "mid": -0.3
+  },
+  "headForwardMeters": 0.056
+ },
+ "clips": {
+  "coil": 2.15,
+  "coil_hold": 1,
+  "strike_release": 1.133,
+  "strike_lunge": 0.85
+ },
+ "bytes": 1412496
+}

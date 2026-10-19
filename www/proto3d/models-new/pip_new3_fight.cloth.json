@@ -1,0 +1,163 @@
+{
+ "version": 2,
+ "model": "pip_new3",
+ "H": 0.5224,
+ "groups": [
+  {
+   "name": "bandana_tails",
+   "kind": "scarf",
+   "match": "^band[1-5]_[LR]$",
+   "stiffness": 0.28,
+   "damping": 0.82,
+   "gravity": 0.0005,
+   "inertia": 0.5,
+   "maxSwing": [
+    0.14,
+    0.22,
+    0.3,
+    0.38,
+    0.42
+   ],
+   "maxChain": 0.9,
+   "maxVel": 0.006,
+   "smooth": 0.4,
+   "collide": true,
+   "margin": 0.004,
+   "hemLen": 0.14
+  },
+  {
+   "name": "tail_tip",
+   "kind": "tail",
+   "match": "^tail[5-8]$",
+   "stiffness": 0.3,
+   "damping": 0.93,
+   "gravity": 0.0003,
+   "inertia": 0.3,
+   "maxSwing": [
+    0.04,
+    0.06,
+    0.08,
+    0.1
+   ],
+   "maxChain": 0.22,
+   "maxVel": 0.0025,
+   "smooth": 0.55,
+   "collide": false,
+   "margin": 0,
+   "hemLen": 0.2,
+   "note": "pip_new3: calmer tail tip (was stiffness .34 damping .86 inertia .7 maxSwing .1-.22): heavier damping, low inertia, small swing cap so the spring only adds soft tip lag, no wag"
+  },
+  {
+   "name": "bells",
+   "kind": "bell",
+   "match": "^bell[AB]$",
+   "stiffness": 0.22,
+   "damping": 0.78,
+   "gravity": 0.0006,
+   "inertia": 0.6,
+   "maxSwing": [
+    0.35
+   ],
+   "maxChain": 0.35,
+   "maxVel": 0.008,
+   "smooth": 0.5,
+   "collide": false,
+   "margin": 0,
+   "hemLen": 0.03
+  },
+  {
+   "name": "tail_base",
+   "kind": "rigid",
+   "match": "^tail[1-4]$",
+   "enabled": false,
+   "reason": "fur tail root: baked motion only"
+  },
+  {
+   "name": "band_knot",
+   "kind": "rigid",
+   "match": "^band_knot$",
+   "enabled": false,
+   "reason": "bandana ring/knot sits on the neck: rigid"
+  },
+  {
+   "name": "satchel",
+   "kind": "rigid",
+   "match": "^satchel$",
+   "enabled": false,
+   "reason": "satchel body is rigid-deforming (baked sway of 0.05 rad only)"
+  },
+  {
+   "name": "ears",
+   "kind": "rigid",
+   "match": "^ear\\d_[LR]$",
+   "enabled": false,
+   "reason": "fur/skin: baked flicks only"
+  },
+  {
+   "name": "fur_body",
+   "kind": "rigid",
+   "match": "^(hips|spine\\d|neck\\d|head|jaw|eye_[LR]|scapula_\\w+|thigh_\\w+|shin_\\w+|foot_\\w+|toe\\d_\\w+)$",
+   "enabled": false,
+   "reason": "fur/skin: always rigid"
+  }
+ ],
+ "colliders": [
+  {
+   "name": "torso",
+   "a": "hips",
+   "b": "spine2",
+   "ra": 0.078,
+   "rb": 0.078
+  },
+  {
+   "name": "chest",
+   "a": "spine2",
+   "b": "spine3",
+   "ra": 0.08,
+   "rb": 0.074
+  },
+  {
+   "name": "neck",
+   "a": "spine3",
+   "b": "head",
+   "ra": 0.06,
+   "rb": 0.05
+  },
+  {
+   "name": "thigh_LB",
+   "a": "thigh_LB",
+   "b": "shin_LB",
+   "ra": 0.05,
+   "rb": 0.035
+  },
+  {
+   "name": "thigh_RB",
+   "a": "thigh_RB",
+   "b": "shin_RB",
+   "ra": 0.05,
+   "rb": 0.035
+  },
+  {
+   "name": "thigh_LF",
+   "a": "thigh_LF",
+   "b": "shin_LF",
+   "ra": 0.04,
+   "rb": 0.03
+  },
+  {
+   "name": "thigh_RF",
+   "a": "thigh_RF",
+   "b": "shin_RF",
+   "ra": 0.04,
+   "rb": 0.03
+  }
+ ],
+ "global": {
+  "note": "step 1/60; capsules are between bone heads (world space). Pip is a quadruped: spring bones ONLY on tail tip (tail5-8), bandana tails (band1-5_L/R) and bells (bellA/B). Everything else is rigid.",
+  "gait": {
+   "walk": 0.259,
+   "trot": 0.76,
+   "run": 1.397
+  }
+ }
+}

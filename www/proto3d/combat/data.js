@@ -14,6 +14,7 @@ export const UNARMED = { min: TUNING.normal.dmg[0], max: TUNING.normal.dmg[1] };
 /* ---- Boss attack patterns (data-driven). reach/len/width are in hero-scale units (x HS at runtime, like def.reach). shape: ring | cone | line.
    Patterns rotate in order (learnable); phase 2 (HP < TUNING.boss.enrageAt) adds the phase-2 moves, shortens telegraphs and speeds the boss up. Damage still goes through calc.js (atk x dmg). ---- */
 export const BOSS_PATTERNS = {
+  /* giants reuse the Titan moves scaled by size (filled below) */
   titan: [
     { id: 'stomp', name: 'Titan Stomp', shape: 'ring', reach: 6.5, tele: 1.1, dmg: 1.0 },
     { id: 'sweep', name: 'Cleaving Sweep', shape: 'cone', reach: 8.4, cos: 0.35, tele: 1.0, dmg: 1.1 },
@@ -63,7 +64,10 @@ export const ENEMIES = {
   skeleton: E('Ash Skeleton', 30, 'Undead', 5600, 270, 200, 3.6, { model: 'o:stonetroll', atkMs: 2300, tele: 0.8, r: 1.4 }),
   frosttroll: E('Frost Troll', 45, 'Elite', 60000, 900, 400, 4.2, { model: 'n:frosttroll_a', atkMs: 2300, tele: 0.9, reach: 4.2, r: 2.6, scale: 3, aggro: 40, patterns: true, stagger: 0.4, poise: 0.5, xp: 4000, gold: 900 }),
   titan:    E('Ashen Titan', 60, 'Boss', 5000000, 2100, 600, 7.3, { model: 'n:ashentitan_new', atkMs: 2300, tele: 1.1, reach: 8.4, r: 5, scale: 6, aggro: 60, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
-  vaelthryx: E('Vaelthryx the Crystal Sovereign', 70, 'Boss', 8000000, 2600, 700, 7.0, { model: 'n:vaelthryx_straight_rig', atkMs: 2400, tele: 1.1, reach: 9.5, r: 5.2, scale: 10, aggro: 70, boss: true, stagger: 0.25, poise: 0.9, xp: 30000, gold: 6000 }),
+  vaelthryx: E('Vaelthryx the Crystal Sovereign', 70, 'Boss', 8000000, 2600, 700, 7.0, { model: 'n:vaelthryx_new7', atkMs: 2400, tele: 1.1, reach: 9.5, r: 5.2, scale: 10, aggro: 70, boss: true, stagger: 0.25, poise: 0.9, xp: 30000, gold: 6000 }),
+  titan_g20: E('Giant Titan 20x', 70, 'World Boss', 20000000, 2100, 600, 7.3, { model: 'n:titan_giant_20x', atkMs: 2600, tele: 1.4, reach: 28.0, r: 16.7, scale: 20, aggro: 200, boss: true, giant: true, ownerTest: true, stagger: 0.2, poise: 0.95, xp: 20000, gold: 4000 }),   // OWNER-ONLY test spawn, never in waves; Ashen Titan stays the normal boss
+  titan_g40: E('Giant Titan 40x', 80, 'World Boss', 40000000, 2100, 600, 7.3, { model: 'n:titan_giant_40x', atkMs: 2600, tele: 1.4, reach: 56.0, r: 33.3, scale: 40, aggro: 400, boss: true, giant: true, ownerTest: true, stagger: 0.2, poise: 0.95, xp: 20000, gold: 4000 }),   // OWNER-ONLY test spawn, never in waves; Ashen Titan stays the normal boss
+  titan_g60: E('Giant Titan 60x', 90, 'World Boss', 60000000, 2100, 600, 7.3, { model: 'n:titan_giant_60x', atkMs: 2600, tele: 1.4, reach: 84.0, r: 50.0, scale: 60, aggro: 400, boss: true, giant: true, ownerTest: true, stagger: 0.2, poise: 0.95, xp: 20000, gold: 4000 }),   // OWNER-ONLY test spawn, never in waves; Ashen Titan stays the normal boss
 };
 export const WAVE_TABLE = ['wolf', 'raider', 'wraith', 'skeleton'];
 
@@ -83,3 +87,8 @@ export const SABER_PREF_KEY = 'varn.saberdmg.v1';
 export function applySaberPrefs(o) { const P = TUNING.perks; if (o && typeof o === 'object') { if (Number.isFinite(+o.mul)) P.saberMul = Math.max(0, Math.min(50, Math.floor(+o.mul))); if (typeof o.bosses === 'boolean') P.saberBossesX12 = o.bosses; if (typeof o.bossKill === 'boolean') TUNING.ult.bossesInstantKill = o.bossKill; if (Number.isFinite(+o.ult)) TUNING.ult.dmgMul = Math.max(1, Math.min(100, Math.floor(+o.ult))); } return { mul: P.saberMul, bosses: P.saberBossesX12, ult: TUNING.ult.dmgMul }; }
 export function saveSaberPrefs() { try { localStorage.setItem(SABER_PREF_KEY, JSON.stringify({ mul: TUNING.perks.saberMul, bosses: TUNING.perks.saberBossesX12, ult: TUNING.ult.dmgMul, bossKill: TUNING.ult.bossesInstantKill })); } catch (e) {} }
 try { if (typeof localStorage !== 'undefined') { const j = localStorage.getItem(SABER_PREF_KEY); if (j) applySaberPrefs(JSON.parse(j)); } } catch (e) {}
+
+/* giant titans: Titan patterns with reach scaled to their size (k/6 x the 11.4 m Titan) */
+for (const k of [20, 40, 60]) BOSS_PATTERNS['titan_g' + k] = BOSS_PATTERNS.titan.map(p => Object.assign({}, p, { reach: +(p.reach * k / 6).toFixed(1), width: p.width ? +(p.width * k / 6).toFixed(1) : undefined }));
+/* enemy weapons (Beth weapons/enemy, metres, no sockets on these rigs; Vaelthryx new7 is a serpent with no hand bone, so no weapon): attached to hand_R in fight.js with an identity transform */
+export const ENEMY_WEAPONS = { titan: 'ashentitan_magma_greatsword', titan_g20: 'ashentitan_magma_greatsword', titan_g40: 'ashentitan_magma_greatsword', titan_g60: 'ashentitan_magma_greatsword', frosttroll: 'troll_ice_club' };

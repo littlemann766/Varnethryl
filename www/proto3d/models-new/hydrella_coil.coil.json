@@ -1,0 +1,29 @@
+{
+ "src": "../hydrella_refined2.glb",
+ "out": "hydrella_coil.glb",
+ "strikeClip": "attack",
+ "anticipationT": 0.567,
+ "originalPullbackMeters": 1.228,
+ "bodyLen": 1.44,
+ "coilBendRad": {
+  "upper": 0,
+  "mid": -0.3
+ },
+ "headBackMeters": 0.336,
+ "headUpMeters": 0.139,
+ "base": "idle",
+ "lunge": {
+  "bendRad": {
+   "upper": 0,
+   "mid": 0.6
+  },
+  "headForwardMeters": 0.479
+ },
+ "clips": {
+  "coil": 2.15,
+  "coil_hold": 1,
+  "strike_release": 0.733,
+  "strike_lunge": 0.85
+ },
+ "bytes": 1155608
+}

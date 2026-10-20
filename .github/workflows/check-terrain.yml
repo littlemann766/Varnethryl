@@ -18,5 +18,7 @@ jobs:
           node-version: '22'
       - name: Validate height terrain, gates, walls, slopes and JS syntax
         run: node tools/check_town_mountains.mjs
+      - name: Verify frost brothers, Ashen Titan scale, Balthrix patrol, lava and combat HUD
+        run: node tools/check_region_bosses.mjs
       - name: Ensure all original model assets are present
         run: python3 tools/check_assets.py

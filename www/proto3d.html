@@ -45,14 +45,14 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
     <div class="vn-bottom">Your adventure continues from the existing local save. Nothing is reset.</div>
   </div>
 </div>
-<div id="hud" hidden><div><b>VARNETHRYL</b> <span id="ver">v1.2.2</span><span id="fps">-- fps</span></div><a id="mdlBtn" href="#">Models</a><a id="fightBtn" href="#" style="display:none">Fight test</a></div>
+<div id="hud" hidden><div><b>VARNETHRYL</b> <span id="ver">v1.2.3</span><span id="fps">-- fps</span></div><a id="mdlBtn" href="#">Models</a><a id="fightBtn" href="#" style="display:none">Fight test</a></div>
 <button id="vnMenuBtn" type="button" aria-expanded="false" aria-controls="vnQuickMenu" aria-label="Open game menu">☰ Menu</button>
 <nav id="vnQuickMenu" aria-label="Game menu" hidden>
   <div class="vn-qhead"><strong>VARNETHRYL</strong><button id="vnQuickClose" aria-label="Close menu">✕</button></div>
   <details><summary>Game</summary><div class="vn-opts">
     <button id="vnTitleBtn">Return to title</button>
     <button id="vnOpenSettings">Settings</button>
-    <small>3D build <span id="vnVersion">1.2.2</span></small>
+    <small>3D build <span id="vnVersion">1.2.3</span></small>
   </div></details>
   <details><summary>Characters</summary><div class="vn-opts">
     <button id="vnChooseCharacter">Choose character</button>
@@ -76,7 +76,14 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
 <div id="stick"><div id="knob"></div></div>
 <div id="heroes"></div>
 <div id="hint">Joystick or tap the ground to move &middot; drag to rotate camera</div>
-<div id="load"><span id="loadMsg">Loading Liongate...</span></div><button id="diagBtn" type="button">3D status</button><div id="diag"></div>
+<div id="load" role="status" aria-live="polite" aria-label="Loading Varnethryl 3D">
+  <video id="vnLoadingFilm" autoplay muted loop playsinline preload="auto" poster="assets/brand/emblem.webp"><source src="assets/brand/varnethryl-loader.mp4" type="video/mp4"></video>
+  <div id="vnLoadFallback" class="vn-loader-emblem" aria-hidden="true"><img src="assets/brand/emblem.webp" alt=""></div>
+  <h2>VARNETHRYL</h2>
+  <p id="loadMsg">Opening the gates of Varnethryl…</p>
+  <div class="vn-loader-track"><i id="vnLoadProgress"></i></div>
+  <small>Legends Are Forged · Kingdoms Are Conquered</small>
+</div><button id="diagBtn" type="button">3D status</button><div id="diag"></div>
 <script>
 (function(){var lines=[],box=document.getElementById('diag'),btn=document.getElementById('diagBtn'),shown=false,lastT=0;
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
@@ -96,6 +103,7 @@ addEventListener('unhandledrejection',function(e){fatal(String(e.reason&&e.reaso
 setTimeout(function(){if(!window.__p3d)window.__p3dDiag('Still loading after 12s (slow device or blocked script).',true)},12000);
 })();
 </script>
+<script src="proto3d/loader.js"></script>
 <script type="importmap">{"imports":{"three":"./proto3d/vendor/three.module.js","three/addons/":"./proto3d/vendor/jsm/"}}</script>
 <script type="module" src="proto3d/main.js" onerror="__p3dDiag('Could not load proto3d/main.js or one of its imports (three.js). Check connection / update the app.',true)"></script>
 <script>(function(){var b=document.getElementById('mdlBtn');if(!b)return;function cur(){try{return localStorage.getItem('vn_model')||'blocky'}catch(e){return 'blocky'}}function lab(){b.textContent='Models: '+(cur()==='glb'?'GLB':'Blocky')}lab();b.addEventListener('click',function(e){e.preventDefault();try{var n=cur()==='glb'?'blocky':'glb';localStorage.setItem('vn_model',n);Object.keys(localStorage).forEach(function(k){if(k.indexOf('vn_model_')===0)localStorage.removeItem(k)})}catch(x){}location.reload()})})();</script><script src="proto3d/varn-menu.js"></script></body></html>

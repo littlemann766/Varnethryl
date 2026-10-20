@@ -154,6 +154,12 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   }
   const archTop=new THREE.Mesh(new THREE.BoxGeometry(4,1.7,34),hm);archTop.position.set(W,8.1,0);archTop.castShadow=true;harbor.add(archTop);
   group.add(harbor);
+  // Solid harbor ramparts; a broad road-sized opening remains on the east.
+  const cx=PORT_CENTER.x,cz=PORT_CENTER.z;
+  for(const [x,z,w,depth] of [
+   [cx-W,cz,2.6,D*2],[cx,cz-D,W*2,2.6],[cx,cz+D,W*2,2.6],
+   [cx+W,cz-D/2-9,2.6,D-18],[cx+W,cz+D/2+9,2.6,D-18]
+  ])colliders.push({type:'box',minX:x-w/2,maxX:x+w/2,minZ:z-depth/2,maxZ:z+depth/2});
   // Water is a real animated, swimmable surface; unlike lava it doesn't damage the player.
   const waterGeo=new THREE.PlaneGeometry(93,110,24,28);
   const waterMat=new THREE.MeshPhongMaterial({color:0x237fa4,emissive:0x0a3547,transparent:true,opacity:.84,shininess:105,side:THREE.DoubleSide,depthWrite:false});

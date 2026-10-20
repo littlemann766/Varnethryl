@@ -70,6 +70,9 @@ assert(main.includes("finally { state.level = previousLevel; }"),'companion prob
 assert(main.includes('r.avoidSide = chooseLeft ? -1 : 1'),'companions remember avoidance side');
 assert(main.includes('const wideAngle = 1.35'),'companions test wider turns when narrow turns are blocked');
 assert(main.includes("}else if (cfg && id === 'n:owner')"),'Owner incompatible cape rigs bypass generic spring-bone fallback');
+assert(main.includes('window.__varnethrylRigAudits[id] = report'),'Owner and Balthrix rig audit is exposed for device inspection');
+assert(main.includes('Object.assign(root.userData, { glb: true, mixer'),'rig audit survives animation initialization');
+assert(main.includes('serpentBones: bones.filter'),'serpent skeleton audit records relevant bone families');
 assert(main.includes('cape physics disabled until a compatible rig is supplied'),'incompatible Owner cape physics is diagnosed');
 assert(main.includes('const useWide = Math.max(dl, dr) < look * 0.7'),'wider turns only used when useful');
 assert(main.includes("diag('Balthrix rig has no recognized slither/body-wave animation"),'missing Balthrix body-wave clips are reported');

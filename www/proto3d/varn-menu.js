@@ -20,19 +20,8 @@
   document.addEventListener('pointerdown',e=>{if(quick&&!quick.hidden&&!quick.contains(e.target)&&e.target?.id!=='vnMenuBtn')closeQuick();},true);
   document.getElementById('vnHero')?.addEventListener('click', () => { hide(); document.querySelector('#heroes button.cur')?.click(); });
   document.getElementById('vnOptions')?.addEventListener('click', () => { hide(); document.getElementById('setBtn')?.click(); });
-  document.getElementById('vnCamp')?.addEventListener('click', async () => {
-    hide();
-    const game=window.__p3d;
-    if(!game?.setZone)return;
-    try{
-      await game.setZone('town');
-      const site={x:-323,z:-178};
-      if(game.teleportTo)game.teleportTo(site.x+24,site.z+5);
-      else if(game.state){game.state.heroX=site.x+24;game.state.heroZ=site.z+5;}
-      else if(game.cheats?.teleport)game.cheats.teleport(site.x+24,site.z+5);
-    }catch(e){console.warn('camp travel unavailable',e);}
-  });
-  // Prevent combat/movement hotkeys from firing while the front menu is open.
+  // Hobgoblin camps are discovered in the open world, not from the title menu.
+  // Prevent combat//movement hotkeys from firing while the front menu is open.
   addEventListener('keydown', e => {
     if(panel.hidden){
       if(e.key==='Escape'&&quick&&!quick.hidden){e.preventDefault();e.stopImmediatePropagation();closeQuick();return;}

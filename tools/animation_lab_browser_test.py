@@ -20,9 +20,9 @@ with sync_playwright() as p:
     page.wait_for_function('window.__p3d && window.__p3d.frames > 8',timeout=80000)
     assert page.locator('#vnMenu').is_visible()
     # Title version does not unlock on one tap; five taps should show login.
-    page.locator('#vnVersion').dispatch_event('pointerup')
+    page.locator('#vnTitleVersion').dispatch_event('pointerup')
     assert not page.locator('#ownerLogin').is_visible() if page.locator('#ownerLogin').count() else True
-    for _ in range(4):page.locator('#vnVersion').dispatch_event('pointerup')
+    for _ in range(4):page.locator('#vnTitleVersion').dispatch_event('pointerup')
     page.wait_for_selector('#ownerLogin:visible',timeout=15000)
     assert not page.locator('#ownerPanel').is_visible() if page.locator('#ownerPanel').count() else True
     page.locator('#ownerLogin button').filter(has_text='Cancel').click()

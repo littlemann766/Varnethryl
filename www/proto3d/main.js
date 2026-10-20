@@ -473,6 +473,22 @@ function wrapGLB(g, id, blocky) {
     }
   }
   const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947*HS*(EXTRA_SCALE[id]||1)*loadScale(id,hgt) : worldProfile(id,HS).heightW/hgt) : 1;
+  // Keep a concise rig audit on the loaded model for device-side inspection.
+  // Reports authored clips and bone families; does not claim visual approval.
+  if (id === 'n:owner' || /vaelthryx/.test(id)) {
+    const bones = []; let skinnedMeshes = 0;
+    m.traverse(o => { if (o.isBone) bones.push(o.name); if (o.isSkinnedMesh) skinnedMeshes++; });
+    const report = {
+      id, boneCount: bones.length, skinnedMeshes,
+      clips: g.animations.map(clip => ({ name: clip.name, duration: Number(clip.duration.toFixed(2)), tracks: clip.tracks.length })),
+      capeBones: bones.filter(n => /cape|cloak|hood/i.test(n)),
+      serpentBones: bones.filter(n => /spine|tail|body|neck|head/i.test(n))
+    };
+    root.userData.rigAudit = report;
+    window.__varnethrylRigAudits ||= {};
+    window.__varnethrylRigAudits[id] = report;
+    diag('Rig audit ' + id + ': ' + report.boneCount + ' bones, ' + skinnedMeshes + ' skinned meshes, ' + report.clips.length + ' clips.');
+  }
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
   // Normalize animation names across imported Meshy/Mixamo models without editing their skeletons.
   // A missing rig is NOT magically rigged: leave it intact and report it for proper skinning.

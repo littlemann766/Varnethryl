@@ -47,7 +47,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   };
   const claim=(x,z,r)=>occupied.push([x,z,r]);
   // A few lightly textured cultivated plots are visual only; none obstruct player movement.
-  const roadMat=new THREE.MeshLambertMaterial({color:0x9b9177,roughness:1});
+  const roadMat=new THREE.MeshLambertMaterial({color:0x9b9177});
   function roadRing(){
     const N=96,W=4.2,positions=[],indices=[];
     for(let i=0;i<=N;i++){const a=i*2*Math.PI/N,cs=Math.cos(a),sn=Math.sin(a);

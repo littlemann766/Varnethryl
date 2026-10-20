@@ -1,5 +1,6 @@
 /* In-game Settings menu (DOM only: zero draw calls, lazy-loaded by settingsboot.js on first open).
- * Sections: Camera, Graphics, Display, and (owner only, rebuilt each time it opens) the owner cheat toggles + god mode.
+ * Sections: Camera, Combat, Animation Lab, Graphics, Display. All owner-only
+ * movement, damage and cheat controls reside behind the separate owner gate.
  * No sound section: the 3D game has no audio yet. */
 import { ZOOM_MIN, ZOOM_MAX, SENS_MIN, SENS_MAX, DEFAULT_PREFS, QUALITIES } from './camprefs.js';
 import { applyPrefs, persist } from './settingsboot.js';
@@ -29,8 +30,8 @@ const CSS2 = '#settingsPanel{background:linear-gradient(180deg,#171127f2,#0d0b17
  + '#settingsPanel input[type=range]{accent-color:#c9a24a!important;min-height:48px!important}'
  + '#settingsPanel .stp{min-width:48px!important;font-size:20px;font-weight:700}';
 const CSS3 = '#settingsPanel .card.vn-collapsible{padding:4px 6px;margin:5px 0}#settingsPanel .vn-setting-body{display:none;padding:8px 7px 11px}#settingsPanel .vn-card-open>.vn-setting-body{display:block}#settingsPanel .vn-settings-toggle{display:block!important;width:100%;min-height:42px!important;text-align:left!important;padding:8px 12px!important;background:linear-gradient(#253851,#111b2c)!important;border:1px solid #8d7041!important;color:#f5ddab!important;font:700 13px VarnCinzel,Georgia,serif!important}#settingsPanel .vn-settings-toggle:focus-visible{outline:2px solid #ffdd92}';
-const DESCS = { 'Game & version': 'Version information, characters and diagnostics.', 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Display': 'On-screen info.', 'Owner (save is marked cheated)': 'Owner-account tools and power settings.', 'Owner damage': 'Saber and Unholy Destruction damage. Owner account only.' };
-const TITLES = { 'Game & version':'Game', 'Camera':'Camera & movement', 'Combat':'Combat controls', 'Loadout':'Equipment & skills', 'Graphics':'Graphics & performance', 'Display':'On-screen display', 'Owner (save is marked cheated)':'Owner tools', 'Owner damage':'Owner damage' };
+const DESCS = { 'Game & version': 'Version information, characters and diagnostics.', 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Display': 'On-screen info.' };
+const TITLES = { 'Game & version':'Game', 'Camera':'Camera & movement', 'Combat':'Combat controls', 'Loadout':'Equipment & skills', 'Graphics':'Graphics & performance', 'Display':'On-screen display' };
 let selectedSection = 'Camera';
 let root = null, body = null, timer = 0, E = null;
 function el(tag, props, kids) { const e = document.createElement(tag); if (props) Object.assign(e, props); if (kids) for (const k of kids) e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); return e; }
@@ -50,7 +51,7 @@ function slider(key, min, max, step, get, set, fmt) {
 }
 
 function build() {
-  const { rig, prefs } = E, c = () => (window.__p3d && window.__p3d.cheats) || null, owner = () => !!(window.__p3d && window.__p3d.owner && c());
+  const { rig, prefs } = E;
   body.textContent = '';
   body.appendChild(el('div', { className: 'vn-settings-intro', textContent: 'Choose a category below. Changes save automatically.' }));
   const sec = (t) => el('div', { className: 'sec', textContent: t }), row = (...k) => el('div', { className: 'row' }, k);
@@ -129,44 +130,6 @@ function build() {
   body.appendChild(sec('Display'));
   body.appendChild(row(toggleBtn('Show FPS', () => prefs.showFps, (v) => { prefs.showFps = v; applyPrefs(E); save(); }, 'showFps')));
 
-  if (owner()) {
-    const ch = c(), f = ch.flags, box = el('div', { className: 'own' });
-    const own = (key, label, fn, get) => { const b = toggleBtn(label, get, (v) => { fn(v); syncs.forEach((s) => s()); }, 'owner-' + key); syncs.push(b._sync); return b; };
-    box.appendChild(sec('Owner (save is marked cheated)'));
-    box.appendChild(row(own('god', 'God mode', (v) => ch.setGod(v), () => f.god), own('fly', 'Fly', (v) => ch.setFly(v), () => f.fly), own('noclip', 'Noclip', (v) => ch.setNoclip(v), () => f.noclip), own('bump', 'Bumps', (v) => ch.setBump(v), () => f.bump)));
-    box.appendChild(row(own('unlimited', 'Unlimited MP/SP', (v) => ch.setUnlimited(v), () => f.unlimited), own('nocd', 'No cooldowns (Owner skin)', (v) => ch.setNoCooldown(v), () => f.noCooldown)));
-    const spd = el('select', { id: 'setSpeed' }); for (const m of [0.5, 1, 2, 4, 8]) spd.appendChild(el('option', { value: m, textContent: m + '×', selected: m === f.speedMul }));
-    spd.addEventListener('change', () => ch.setSpeed(+spd.value));
-    box.appendChild(row(el('span', { className: 'lab', textContent: 'Speed' }), spd));
-    const msg = el('small', { textContent: 'God mode starts ON for the owner; your choice is remembered.' });
-    const mx = el('button', { type: 'button', textContent: 'Re-max active hero' }); mx.dataset.set = 'owner-max';
-    mx.addEventListener('click', async () => { const m = await import('./ownermax.js'); const r = m.maxOwnerHero(E.storage); msg.textContent = r ? (r.changed ? 'Active hero maxed.' : 'Already maxed.') : 'Could not read the save.'; });
-    const full = el('button', { type: 'button', textContent: 'Full cheat panel' }); full.dataset.set = 'owner-panel';
-    full.addEventListener('click', () => { hide(); if (E.openCheatPanel) E.openCheatPanel(); });
-    const tt = el('button', { type: 'button', textContent: 'Spawn Ashen Titan' }); tt.dataset.set = 'owner-titan';
-    tt.addEventListener('click', () => { msg.textContent = ch.spawnTitan() ? 'The Ashen Titan awakens.' : 'A Titan is already alive.'; });
-    const bb = toggleBtn('Bamboo Stick (test weapon)', () => { const F = window.__p3d && window.__p3d.fight; return !!(F && F.cc && F.cc.bamboo); }, (v) => { const F = window.__p3d && window.__p3d.fight; if (F && F.setBamboo) F.setBamboo(v); }, 'owner-bamboo'); syncs.push(bb._sync); box.appendChild(row(bb));
-    box.appendChild(row(mx, full, tt)); box.appendChild(msg); body.appendChild(box);
-    const dm = el('div', { className: 'own' }); dm.appendChild(sec('Owner damage'));
-    const sd = () => import('./combat/data.js');
-    const stepper = (key, label, lo, hi, get, set, fmt) => {
-      const out = el('span', { className: 'val', style: 'min-width:64px;text-align:center;font-weight:700;color:#f1d98a' });
-      const mk2 = (t, d, k) => { const b = el('button', { type: 'button', textContent: t, className: 'stp' }); b.dataset.set = key + '-' + k; b.addEventListener('click', () => { set(Math.max(lo, Math.min(hi, get() + d))); sy(); }); return b; };
-      const rg = el('input', { type: 'range', min: lo, max: hi, step: 1, value: get() }); rg.dataset.set = key; rg.addEventListener('input', () => { set(+rg.value); sy(); });
-      const sy = () => { out.textContent = fmt(get()); if (document.activeElement !== rg) rg.value = get(); }; sy(); syncs.push(sy);
-      return [el('div', { className: 'row' }, [el('span', { className: 'lab', textContent: label })]), el('div', { className: 'row' }, [mk2('−', -1, 'dec'), rg, mk2('+', 1, 'inc'), out])];
-    };
-    sd().then((D) => {
-      const P = D.TUNING.perks, U = D.TUNING.ult, sv = () => D.saveSaberPrefs();
-      const [l1, r1] = stepper('saberMul', 'Saber damage multiplier (× target current health; 0 = flat 99,999)', 0, 50, () => P.saberMul, (v) => { P.saberMul = v; sv(); }, (v) => v === 0 ? 'Flat' : '×' + v);
-      const bt = toggleBtn('Saber multiplier also hits bosses', () => P.saberBossesX12, (v) => { P.saberBossesX12 = v; sv(); }, 'saberBossesX12'); syncs.push(bt._sync);
-      const bk = toggleBtn('Ultimates instantly kill bosses (incl. Ashen Titan)', () => U.bossesInstantKill, (v) => { U.bossesInstantKill = v; sv(); }, 'bossesInstantKill'); syncs.push(bk._sync);
-      const [l2, r2] = stepper('ultMul', 'Ultimate damage multiplier (Unholy Destruction)', 1, 100, () => U.dmgMul, (v) => { U.dmgMul = v; sv(); }, (v) => '×' + v);
-      dm.append(l1, r1, row(bt), l2, r2, row(bk), el('small', { textContent: 'Ultimates (incl. Thunderstorm) kill bosses too while instant-kill is on (default); turn it off for a normal 99,999 hit. Never affects you, your party, NPCs or props.' }));
-      regroup();
-    });
-    body.appendChild(dm);
-  }
   const reset = el('button', { type: 'button', textContent: 'Restore default settings' }); reset.dataset.set = 'reset';
   reset.addEventListener('click', () => { Object.assign(prefs, DEFAULT_PREFS); rig.setView('third'); rig.setZoom(1); applyPrefs(E); save(); build(); });
   body.appendChild(el('div', { className: 'sec', textContent: ' ' })); body.appendChild(reset);

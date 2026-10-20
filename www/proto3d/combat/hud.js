@@ -70,6 +70,57 @@ const CSS = `
 #cb .top button{border-color:#96743f;background:#0a0d16bb;color:#f6e9d0;font-family:Georgia,serif}
 @media (max-height:470px){#cb .cx{height:58vh;width:min(43vw,77vh)}#cb .cl{right:calc(max(15px,env(safe-area-inset-right)) + min(43vw,77vh) + 8px)}}
 @media (orientation:portrait){#cb .cx{width:70vw;height:53vw}#cb .cl{right:max(10px,env(safe-area-inset-right));bottom:calc(max(24px,env(safe-area-inset-bottom)) + 53vw + 30px)}#cb .vit{width:min(320px,62vw)}}
+
+/* VARNETHRYL BATTLE ARTS: existing real controller slots, with medieval fantasy
+   presentation that adapts to landscape and portrait phones. */
+#cb{--v-gold:#dec08b;--v-iron:#18202a;--v-ivory:#fce6bd;color:var(--v-ivory)}
+#cb .cx{position:absolute;width:min(570px,67vw);height:104px;aspect-ratio:auto;bottom:max(16px,env(safe-area-inset-bottom));right:max(12px,env(safe-area-inset-right));display:flex;align-items:stretch;gap:5px;padding:7px 8px;background:linear-gradient(163deg,#3b414be9,#171c27ef 39%,#0b1019f5);border:2px ridge #cfac76;border-radius:13px;box-shadow:inset 0 0 0 2px #4c3829,0 8px 25px #000b}
+#cb .cx:before{content:'⚜  VARNETHRYL  •  BATTLE ARTS';position:absolute;top:-23px;right:7px;letter-spacing:.15em;font:700 10px Georgia,serif;color:#f5d8a2;text-shadow:0 2px 5px #000}
+#cb .cx .sl,#cb .cx .sl.b0,#cb .cx .sl.b1,#cb .cx .sl.b2,#cb .cx .sl.b3,#cb .cx .sl.b4{position:relative!important;inset:auto!important;display:block;flex:1 1 0;width:20%!important;min-width:0;height:100%!important;aspect-ratio:auto;border-radius:9px;border:1px solid #a67f4e;background:linear-gradient(180deg,#314153,#1a2231 55%,#14121a);box-shadow:inset 0 0 0 2px #0d0e14,0 2px 6px #000c;padding:0;overflow:hidden}
+#cb .cx .sl.b0{flex:1.24 1 0;border:2px solid #e6c48e;background:radial-gradient(circle at 40% 18%,#655333,#201a24 72%)}
+#cb .cx .sl.b4{flex:1.15 1 0;border:2px solid #e6af56;background:radial-gradient(circle at 45% 30%,#7b2820,#250f17 73%);box-shadow:0 0 12px #e9773866,inset 0 0 0 2px #130d14}
+#cb .cx .sl .ic{inset:9% 21% 42%;color:#f5d9a5}
+#cb .cx .sl .ic svg{stroke-width:1.6}
+#cb .cx .sl .nmL,#cb .cx .sl.b4 .nmL{position:absolute;inset:auto 2px 5px!important;display:block;transform:none;text-align:center;white-space:normal;overflow:hidden;text-overflow:ellipsis;max-height:27px;line-height:1.08;font:600 10px Georgia,serif;color:#f4e3c8;text-shadow:0 1px 4px #000}
+#cb .cx .sl .k{top:3px;bottom:auto;right:5px;left:auto;width:auto;font:700 10px system-ui;color:#e9cb85}
+#cb .cx .sl .ct{align-items:flex-start;padding-top:12px;background:linear-gradient(180deg,#05070adb,transparent 55%);color:#fff3db;font-size:17px}
+#cb .cx .sl .rg{border-radius:8px;z-index:1;pointer-events:none}
+#cb .cx .ulp{right:0;bottom:calc(100% + 6px);z-index:15}
+#cb .cx .ulp button{font-family:Georgia,serif}
+#cb .cx .sl.oi{background:radial-gradient(circle,#3b2b39,#16161f);border-color:#bd9451}
+#cb .cx .sl.oi .ic{inset:5% 9% 40%}
+#cb .cx .sl.oi .ic svg{stroke:inherit}
+#cb .cx .sl.off{filter:grayscale(.85) brightness(.75)}
+#cb .cl{right:calc(max(12px,env(safe-area-inset-right)) + min(570px,67vw) + 8px);bottom:max(16px,env(safe-area-inset-bottom));grid-template-columns:repeat(3,minmax(0,44px));gap:5px}
+#cb .cl button{width:44px;height:44px;border-radius:8px;background:linear-gradient(#283a45,#151923);border-color:#bfa06f;color:#ebd7b0}
+#cb .vit{border:2px ridge #c29e65;background:linear-gradient(145deg,#26323ddd,#0a101acb);box-shadow:inset 0 0 0 2px #332419,0 4px 18px #000a}
+#cb .tp.boss{border:2px solid #d7a360;background:linear-gradient(#291822d9,#0a1018f0);box-shadow:0 0 20px #ff693b44}
+#cb .tp.boss .nm{font:700 16px Georgia,serif;letter-spacing:.06em}
+#cb .tp.boss .bar{height:17px;border-color:#d5ad74}
+@media (max-width:900px){
+ #cb .cx{width:min(59vw,520px);height:92px;gap:3px;padding:5px}
+ #cb .cx .sl .nmL,#cb .cx .sl.b4 .nmL{font-size:9px;line-height:1.05}
+ #cb .cl{grid-template-columns:repeat(2,37px);right:calc(max(12px,env(safe-area-inset-right)) + min(59vw,520px) + 7px)}
+ #cb .cl button{width:37px;height:37px;font-size:8px}
+ #cb .cl button .g{font-size:16px}
+}
+@media (orientation:portrait){
+ #cb .cx{right:max(5px,env(safe-area-inset-right));bottom:max(15px,env(safe-area-inset-bottom));width:min(57vw,335px);height:100px;gap:2px;padding:4px}
+ #cb .cx:before{font-size:8px;letter-spacing:.04em;top:-17px}
+ #cb .cx .sl .nmL,#cb .cx .sl.b4 .nmL{font-size:8px;max-height:29px}
+ #cb .cx .sl .ic{inset:16% 8% 42%}
+ #cb .cl{right:max(5px,env(safe-area-inset-right));bottom:calc(max(15px,env(safe-area-inset-bottom)) + 128px);grid-template-columns:repeat(3,38px)}
+ #cb .cl button{width:38px;height:38px}
+ #cb .vit{width:min(320px,69vw)}
+}
+@media (max-height:480px) and (orientation:landscape){
+ #cb .cx{height:77px;width:min(58vw,490px)}
+ #cb .cx .sl .nmL,#cb .cx .sl.b4 .nmL{font-size:8px}
+ #cb .cl{right:calc(max(12px,env(safe-area-inset-right)) + min(58vw,490px) + 7px);grid-template-columns:repeat(3,32px)}
+ #cb .cl button{width:32px;height:32px;font-size:7px}
+ #cb .cl button .g{font-size:15px}
+}
+
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';

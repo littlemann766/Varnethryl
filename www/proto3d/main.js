@@ -1379,7 +1379,22 @@ const wildsMod = import('./wilds.js').then(m => { portalT = m.makeGate(0x9a6bff)
   frostCave.position.set(FROST_PORTAL.x,TOWN_LANDS?TOWN_LANDS.heightAt(FROST_PORTAL.x,FROST_PORTAL.z):FROST_SUMMIT.height,FROST_PORTAL.z);
   scene.add(frostCave);return m; });
 async function ensureWilds() { if (WM) return WM; const m = await wildsMod; WM = Object.assign({ mod: m }, m.buildWilds({ scene, HS })); WM.portalMesh = m.makeGate(0x4fd0ff); WM.portalMesh.position.set(WM.portal.x, 0, WM.portal.z); WM.portalMesh.visible = false; scene.add(WM.portalMesh); return WM; }
-function snapFollowers() { TRAIL.length = 0; for (const r of crowd) if (r.kind === 'party') { r.level = 0; r.ti = null; r.lvT = 0; r.a.x = state.heroX + (Math.random() - 0.5) * 3; r.a.z = state.heroZ + 2.5 * HS; r.y = surfaceAt(r.a.x, r.a.z, 0)?.y ?? (state.heroY || 0); r.vxs = r.vzs = 0; if (r.root) r.root.position.set(r.a.x, r.y, r.a.z); } }
+function snapFollowers() {
+  TRAIL.length = 0;
+  let index = 0;
+  for (const r of crowd) if (r.kind === 'party') {
+    r.level = state.level; r.ti = null; r.lvT = 0; r.stuckT = 0;
+    const angle = Math.PI * (0.3 + index++ * 0.65), radius = 2.2 * HS;
+    const spot = { x: state.heroX + Math.sin(angle) * radius, z: state.heroZ + Math.cos(angle) * radius };
+    // Use the same collision resolver as walking companions, never a raw
+    // teleport coordinate that can put their rig inside walls or props.
+    resolve(spot, false, 'npc');
+    r.a.x = spot.x; r.a.z = spot.z;
+    r.y = surfaceAt(spot.x, spot.z, r.level)?.y ?? (state.heroY || 0);
+    r.vxs = r.vzs = r.a.vx = r.a.vz = 0;
+    if (r.root) r.root.position.set(r.a.x, r.y, r.a.z);
+  }
+}
 /* Map unloading. Leaving town hides every static town node (no draw calls / shadow casters while away; geometry stays resident because the village is built once at boot).
    Leaving the Wilds fully DISPOSES it (geometry, materials, textures, enemies via FIGHT.stop) and it is rebuilt on the next visit. */
 const townHidden = [];
@@ -1558,7 +1573,7 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   onRamp(x, z, level = 0) { const s = surfaceAt(x, z, level); return !!(s && s.ramp); },
   free(x, z, level = 0) { const l0 = state.level; state.level = level; const q = { x, z }; resolve(q); state.level = l0; return !!surfaceAt(x, z, level) && Math.hypot(q.x - x, q.z - z) < 0.02; },
-  teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; marker.visible = false; state.blockedFrames = 0; updateLevel(); if (level === 0) snapFollowers(); },
+  teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; marker.visible = false; state.blockedFrames = 0; updateLevel(); snapFollowers(); },
   setCamYaw(y) { state.camYaw = y; },
   setZoom(z) { state.zoom = z; },
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },

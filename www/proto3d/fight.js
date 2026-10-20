@@ -360,10 +360,48 @@ export function createFight(env) {
   }
   /* Fixed encampments: groups of hobgoblins defend their tents, with a global cap and
      per-camp reinforcement delay. They recycle when out of range; no surprise spawns in town. */
+  // Low, breathy camp grunts. Audio starts only after the browser has
+  // unlocked sound via player interaction; never creates a node per frame.
+  let gruntClock=0, gruntAudio=null;
+  function hobGrunt(distance){
+    const Audio=window.AudioContext||window.webkitAudioContext;
+    if(!Audio||document.hidden)return;
+    try{
+      if(!gruntAudio)gruntAudio=new Audio();
+      if(gruntAudio.state!=='running')return; // respect mobile autoplay restrictions
+      const now=gruntAudio.currentTime;
+      const osc=gruntAudio.createOscillator(), gain=gruntAudio.createGain();
+      const filter=gruntAudio.createBiquadFilter();
+      osc.type='sawtooth';filter.type='lowpass';filter.frequency.value=340;
+      const volume=Math.min(.07,.075*Math.max(0,1-distance/43));
+      osc.frequency.setValueAtTime(105+Math.random()*22,now);
+      osc.frequency.exponentialRampToValueAtTime(62+Math.random()*12,now+.24);
+      gain.gain.setValueAtTime(.0001,now);
+      gain.gain.exponentialRampToValueAtTime(Math.max(.0002,volume),now+.045);
+      gain.gain.exponentialRampToValueAtTime(.0001,now+.32);
+      osc.connect(filter);filter.connect(gain);gain.connect(gruntAudio.destination);
+      osc.start(now);osc.stop(now+.34);
+      osc.onended=()=>{osc.disconnect();filter.disconnect();gain.disconnect();};
+    }catch(e){/* audio is optional; gameplay must continue */ }
+  }
+  // The title-menu Enter button is a genuine user gesture on Android.
+  document.getElementById('vnEnter')?.addEventListener('click',()=>{
+    const Audio=window.AudioContext||window.webkitAudioContext;
+    if(!Audio)return;
+    try{gruntAudio ||= new Audio();gruntAudio.resume().catch(()=>{});}catch(e){}
+  });
   let campTimer=0;
   const campPending=new Set(),campNext=new Map();
   function updateHobCamps(dt){
     if(!auto||(env.zone&&env.zone()!=='town')||isCitySafe(state.heroX,state.heroZ,8)||cc.dead>0)return;
+    gruntClock-=dt;
+    if(gruntClock<=0){
+      let nearest=Infinity;
+      for(const e of cc.enemies)if(e.campId&&e.state!=='defeated')
+        nearest=Math.min(nearest,Math.hypot(e.x-state.heroX,e.z-state.heroZ));
+      if(nearest<43){hobGrunt(nearest);gruntClock=2.4+Math.random()*2.8;}
+      else gruntClock=1.5;
+    }
     campTimer-=dt;if(campTimer>0)return;campTimer=1.6;
     const regular=cc.enemies.filter(e=>!e.def.boss&&e.state!=='defeated').length;
     if(regular>=AUTO_MAX+4)return;

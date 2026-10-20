@@ -200,3 +200,6 @@ body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
 @media (orientation:landscape) and (max-height:540px){
   #vnMenu .vn-card{width:min(400px,46vw);max-height:calc(100dvh - 24px)}
 }
+/* Small, accessible version label on the live 3D title. Five taps invoke
+   ownergate; no owner controls are directly exposed here. */
+#vnTitleVersion.vn-title-version{display:flex;align-items:center;justify-content:center;min-height:44px;min-width:76px;width:max-content;margin:6px auto 0;padding:4px 12px;font:600 12px VarnCinzel,Georgia,serif;color:#d7bf87;opacity:.85;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}

@@ -675,7 +675,7 @@ const travelScale=()=>travelRun?RUN_SPEED:WALK_SPEED;
 // (~30 seconds). Combat and world travel use the same SP pool when combat is active.
 const STAMINA_MAX=100, STAMINA_PER_UNIT=.34, WALK_RECOVERY=8, IDLE_RECOVERY=13;
 let worldStamina=STAMINA_MAX, previousCombatSp=null, exhausted=false;
-function staminaResource(){return typeof FIGHT!=='undefined'&&FIGHT?.on?FIGHT.cc.res:null;}
+function staminaResource(){const f=window.__p3d?.fight;return f?.on?f.cc.res:null;}
 function staminaLevel(){const r=staminaResource();return r?r.sp/r.max.sp:worldStamina/STAMINA_MAX;}
 function updateStamina(dt,ranDistance){
  const resource=staminaResource();

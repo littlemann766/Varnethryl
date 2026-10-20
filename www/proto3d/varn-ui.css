@@ -118,3 +118,19 @@ body:has(#settingsPanel[style*="block"]) #vnQuickMenu{display:none!important}
 #diag{z-index:3003!important}
 body.vn-diagnostic-error #diagBtn{display:block!important}
 body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
+
+/* Two separate character-roster tabs; approved bosses never mix into ordinary roster. */
+#heroes #hlist{min-width:min(310px,86vw)}
+#heroes.open #hlist{display:flex!important;flex-direction:column!important;align-items:stretch}
+#heroes #hlist .vn-roster-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:sticky;top:41px;z-index:3;padding:4px 0;background:#10182def}
+#heroes #hlist .vn-roster-tabs button{min-height:43px;white-space:normal;line-height:1.2;text-align:center;font:700 10px VarnCinzel,Georgia,serif;background:#142034;color:#e2c892;border:1px solid #8b6b44;border-radius:5px}
+#heroes #hlist .vn-roster-tabs button.on{background:linear-gradient(#6e4188,#2c203c);color:#ffe8bd;border-color:#d6ad70;box-shadow:inset 0 0 0 1px #d0a9ea55}
+#heroes #hlist .vn-roster-list{display:flex;flex-direction:column;gap:5px}
+#heroes #hlist .vn-roster-list[hidden]{display:none!important}
+#heroes #hlist .vn-roster-list .row{width:100%;display:flex;gap:6px}
+#heroes #hlist .vn-roster-list .row button:first-child{min-width:0;flex:1;text-align:left}
+#heroes #hlist .vn-picker-close{width:100%;min-height:37px;flex:none}
+@media(orientation:landscape) and (max-height:520px){
+#heroes #hlist{max-height:65dvh!important}
+#heroes #hlist .vn-roster-tabs{top:40px}
+}

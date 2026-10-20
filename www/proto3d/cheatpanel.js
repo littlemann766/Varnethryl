@@ -4,7 +4,7 @@
 import { getOwnerGate } from './ownergate.js';
 import { createCheats, createFlags, MAX_LEVEL, MAX_ITEM_LEVEL, ITEM_KINDS } from './cheats.js';
 
-const CSS = '#ownerPanel,#ownerLogin{position:fixed;z-index:60;background:#12182af2;color:#fff;border:1px solid #c9a24a;border-radius:14px;font:13px system-ui,sans-serif;box-shadow:0 8px 30px #000a;touch-action:pan-y;-webkit-user-select:none;user-select:none}'
+const CSS = '#ownerPanel,#ownerLogin{position:fixed;z-index:1800;background:#12182af2;color:#fff;border:1px solid #c9a24a;border-radius:14px;font:13px system-ui,sans-serif;box-shadow:0 8px 30px #000a;touch-action:pan-y;-webkit-user-select:none;user-select:none}'
  + '#ownerPanel{top:max(8px,env(safe-area-inset-top));right:8px;width:min(340px,calc(100vw - 16px));max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:auto;padding:10px;display:none}'
  + '#ownerLogin{left:50%;top:30%;transform:translateX(-50%);width:min(300px,calc(100vw - 24px));padding:14px;display:none}'
  + '#ownerPanel h3{margin:0 0 6px;font-size:14px;color:#e8c868;display:flex;justify-content:space-between;align-items:center}'

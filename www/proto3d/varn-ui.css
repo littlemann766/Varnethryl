@@ -80,3 +80,34 @@ body.vn-menu-open #diagBtn,body.vn-menu-open #heroes,body.vn-menu-open #hud,body
 body.vn-menu-open #vnQuickMenu,body.vn-menu-open #vnMenuBtn,body.vn-menu-open #moveActions,body.vn-menu-open #staminaHud{visibility:hidden}
 body:has(#settingsPanel[style*="block"]) #vnQuickMenu{display:none!important}
 @media(max-width:500px){#moveActions{left:max(117px,env(safe-area-inset-left))}#staminaHud{width:160px}}
+
+/* Varnethryl loading chamber: matches supplied wood, jewelled gold, violet UI. */
+#load{z-index:2500;display:flex!important;flex-direction:column;gap:8px;justify-content:center;align-items:center;isolation:isolate;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);box-sizing:border-box;background:radial-gradient(ellipse at 50% 36%,#332252,#090c1b 70%,#060914 100%);overflow:hidden;transition:opacity .45s ease}
+#load:before{content:'';position:absolute;inset:0;z-index:-1;opacity:.52;background:repeating-conic-gradient(from 0deg at 50% 50%,#6b4d8410 0deg,#0000 10deg,#bf8bc522 17deg,#0000 25deg);animation:vnStars 24s linear infinite}
+#load:after{content:'';position:absolute;z-index:0;inset:8px;border:2px ridge #a38249;border-radius:11px;pointer-events:none;box-shadow:inset 0 0 0 3px #34263d,inset 0 0 42px #7b31ac33,0 0 12px #8d4aaa55}
+#vnLoadingFilm{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#030408;pointer-events:none;z-index:1}
+#vnLoadingFilm[hidden]{display:none}
+#vnLoadFallback{position:relative;z-index:2;width:min(280px,42vmin);max-height:53vh;aspect-ratio:1;display:grid;place-items:center;margin-bottom:4px;filter:drop-shadow(0 0 19px #a34ce1a3);animation:vnPulse 3.5s ease-in-out infinite}
+#vnLoadFallback[hidden]{display:none}
+#vnLoadFallback img{max-width:100%;max-height:100%;object-fit:contain}
+#load h2,#load #loadMsg,#load small,#load .vn-loader-track{position:relative;z-index:3;box-sizing:border-box}
+#load h2{margin:0;color:#f8daa0;font:700 clamp(24px,5.5vw,48px) VarnCinzel,Georgia,serif;letter-spacing:.15em;text-shadow:0 0 8px #b365e088,0 3px 6px #000}
+#load #loadMsg{margin:4px 0 5px;min-height:20px;color:#ebd8b4;font:700 clamp(11px,2.6vw,15px) VarnCinzel,Georgia,serif;letter-spacing:.06em;text-align:center;text-shadow:0 2px 6px #000}
+#load .vn-loader-track{width:min(380px,78vw);height:12px;border:2px ridge #dfb871;border-radius:18px;background:#130d22;box-shadow:0 2px 7px #0009,inset 0 0 9px #b444f03d;overflow:hidden}
+#load .vn-loader-track i{height:100%;display:block;width:8%;border-radius:12px;background:linear-gradient(90deg,#603288,#b728f5 46%,#ffbaff);box-shadow:0 0 9px #dc73ff;transition:width .18s linear}
+#load small{color:#b7a4ba;font:italic 11px Georgia,serif;text-align:center}
+#load:has(#vnLoadingFilm:not([hidden])) h2,#load:has(#vnLoadingFilm:not([hidden])) #loadMsg,#load:has(#vnLoadingFilm:not([hidden])) .vn-loader-track,#load:has(#vnLoadingFilm:not([hidden])) small{position:relative;z-index:3;text-shadow:0 1px 5px #000,0 0 9px #000;padding-left:6px;padding-right:6px}
+@keyframes vnPulse{0%,100%{filter:drop-shadow(0 0 8px #974ae9aa);transform:scale(1)}50%{filter:drop-shadow(0 0 22px #e777ffdd);transform:scale(1.045)}}
+@keyframes vnStars{to{transform:rotate(360deg)}}
+@media(max-height:520px){#vnLoadFallback{width:min(150px,32vh)}#load h2{font-size:24px}#load #loadMsg{font-size:11px}#load small{display:none}}
+@media(prefers-reduced-motion:reduce){#load:before,#vnLoadFallback{animation:none}}
+/* Richer matching gold/purple controls -- lighter than image overlays for mobile */
+#vnMenu .vn-card,#vnQuickMenu,#settingsPanel{border:2px ridge #c6a267!important;box-shadow:inset 0 0 0 2px #8049a533,0 8px 22px #000c,0 0 10px #a153d13d!important}
+#vnQuickMenu details{border:1px solid #a3834c;background:linear-gradient(110deg,#22182d,#0e1323 60%,#231831)}
+#vnQuickMenu details[open]{box-shadow:inset 0 0 0 1px #a467b844}
+#vnMenuBtn,#moveActions button,#vnQuickMenu .vn-qhead button{border:2px ridge #caa765!important;background:linear-gradient(155deg,#3a2746,#131828 63%,#27143c)!important;box-shadow:inset 0 0 0 1px #a95ef23d,0 0 8px #7535a64d!important}
+#moveActions button[aria-pressed=true]{color:#fff1c9!important;background:linear-gradient(#7942a3,#302044)!important}
+#staminaHud .vn-stambar{height:10px;border:2px ridge #c7a26c;background:#180d23;box-shadow:0 0 8px #8737c855}
+#staminaMeter{background:linear-gradient(90deg,#522681,#a549f6,#eebdff)}
+#stick{background:radial-gradient(circle,#25142d8c 30%,#553070aa 68%,#20142a9e);border:3px ridge #c9a264;box-shadow:inset 0 0 0 5px #6f2dad39,0 0 11px #793bce55}
+#knob{background:radial-gradient(circle at 35% 30%,#bd86f1,#4c2a67 63%,#271a34);border:2px ridge #d8ae6f;box-shadow:0 0 11px #ae58e888}

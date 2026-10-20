@@ -16,7 +16,7 @@ export const CHARS = {
   // Balthrix is the player's named long-bodied serpent boss, NOT Ssylthar or Vaelthryx.
   // GLBs contain their final physical sizes; keep native unset to avoid a second scale pass.
   'n:balthrix_10x': { height: 10 * HERO_M, radius: 4, speed: 1, step: 1, reach: 4.2, camDist: 6, camHeight: 5, camMin: 0.6, camMax: 1.7 },
-  'n:balthrix_50x': { height: 50 * HERO_M, radius: 18, speed: 1, step: 2, reach: 8, camDist: 22, camHeight: 12, camMin: 0.6, camMax: 2.5 },
+  'n:balthrix_50x': { height: 50 * HERO_M, native: 10 * HERO_M, radius: 18, speed: 1, step: 2, reach: 8, camDist: 22, camHeight: 12, camMin: 0.6, camMax: 2.5 },
   'n:ashentitan_new': { height: 11.4, radius: 3.2, speed: 1.4, step: 2.0, reach: 3.2, camDist: 3.4, camHeight: 3.2, camMin: 0.55, camMax: 1.6 },          // Beth native 11.4 m (6x hero)
   // Vaelthryx variants are baked at DIFFERENT native sizes (measured in-game): _new6 14.3 m tall (79 m long), _new 2.0 m, _straight_rig 0.65 m. Boss quote ~18.7 m coiled; edit height here once confirmed.
   'n:vaelthryx_new': { height: 2.0, radius: 0.6, speed: 1.0, step: 0.4, reach: 1.1, camDist: 1.05, camHeight: 1.05, camMin: 0.5, camMax: 1.7 },

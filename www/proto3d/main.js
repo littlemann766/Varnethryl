@@ -288,6 +288,8 @@ const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'ha
 // APPEND AFTER all existing smooth variants: never shift saved character indices.
 EXTRA.push(['n:vaelthryx_straight_rig_50', 'Balthrix (50×)', 'proto3d/models-new/vaelthryx_straight_rig.glb']);
 EXTRA.push(['n:ashentitan_40', 'Ashen Titan (40×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
+EXTRA.push(['n:ashentitan_20', 'Ashen Titan (20×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
+EXTRA.push(['n:ashentitan_60', 'Ashen Titan (60×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
 const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
 const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;

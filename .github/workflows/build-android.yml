@@ -23,7 +23,7 @@ jobs:
         run: python3 tools/check_assets.py
       - name: Check JavaScript syntax
         run: |
-          for file in www/*.js; do node --check "$file"; done
+          find www -type f -name "*.js" -not -path "*/vendor/*" -print0 | xargs -0 -n1 node --check
       - name: Add Android project
         run: npx cap add android
       - name: Copy web assets

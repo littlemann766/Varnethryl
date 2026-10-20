@@ -18,7 +18,7 @@ assert.equal(fitsDoor(b50,3,2),false);
 const main=readFileSync(new URL('../www/proto3d/main.js',import.meta.url),'utf8');
 assert.ok(main.indexOf("EXTRA.push(['n:vaelthryx_straight_rig_50'")>main.indexOf('for (const n of SMOOTH_NAMES)'),'50x variant must follow all existing save slots');
 assert.ok(main.includes(".replace(/_straight_rig(?:_50)?$/, '')"),'50x and 10x share a dropdown');
-assert.ok(main.includes("loadScale(id, hgt)"),'height comes from the actual GLB');
+assert.match(main,/loadScale\(id,\s*hgt\)/,'height comes from the actual GLB');
 const boss=readFileSync(new URL('../www/proto3d/combat/data.js',import.meta.url),'utf8');
 assert.ok(boss.includes("'n:vaelthryx_straight_rig'"),'existing 10x boss model unchanged');
 assert.ok(boss.includes("Balthrix the Crystal Sovereign"),'user-facing boss name');

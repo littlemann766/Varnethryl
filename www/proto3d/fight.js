@@ -166,7 +166,7 @@ export function createFight(env) {
   let LT = null;
   function ltBuild() { if (LT) return LT; const bolts = []; for (let i = 0; i < 14; i++) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(10 * 3), 3)); const l = new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0xb04bff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })); l.frustumCulled = false; l.visible = false; scene.add(l); bolts.push({ l, t: 9 }); } return (LT = { bolts, next: 0, acc: 0 }); }
   function ltStrikeOld(x, z) { const L = ltBuild(), b = L.bolts[L.next++ % L.bolts.length], a = b.l.geometry.attributes.position.array, top = 85; for (let i = 0; i < 10; i++) { const u = i / 9, j = (i === 0 || i === 9) ? 0 : 4 * (1 - u * 0.5); a[i * 3] = x + (Math.random() - 0.5) * j + (1 - u) * 6; a[i * 3 + 1] = top * (1 - u); a[i * 3 + 2] = z + (Math.random() - 0.5) * j; } b.l.geometry.attributes.position.needsUpdate = true; b.t = 0; b.l.visible = true; b.l.material.color.setHex(Math.random() < 0.35 ? 0xe9d6ff : 0xa23cff); }
-  function ltStrike(x, z) { getFx().strike({ path: [{ x, z, y: 1.1 * HS, falloff: 1 }] }); }   // Lucky's LightningFX bolts (pooled)
+  function ltStrike(x, z) { getFx().strike({ path: [{ x, z, y: terrainY(x,z) + 1.1 * HS, falloff: 1 }] }); }   // Lucky's LightningFX bolts (pooled)
   let ltAcc = 0;
   function ltUpdate(dt, active, m) { if (!(active && m)) return; ltAcc += dt; const gap = m.st === 'burst' ? 0.14 : 0.2; while (ltAcc > gap) { ltAcc -= gap; const a = Math.random() * 6.283, d = Math.sqrt(Math.random()) * m.r; ltStrike(m.x + Math.cos(a) * d, m.z + Math.sin(a) * d); } }
   function ltDispose() { if (!LT) return; for (const b of LT.bolts) { scene.remove(b.l); b.l.geometry.dispose(); b.l.material.dispose(); } LT = null; }
@@ -202,7 +202,7 @@ export function createFight(env) {
     const L = env.followers ? env.followers() : []; heroInfo.x = state.heroX; heroInfo.z = state.heroZ; heroInfo.level = state.level; heroInfo.dead = cc.dead > 0;
     if (on) companions.update(dt, L, heroInfo); for (let i = 0; i < L.length; i++) { const w = L[i].root; if (w && w.userData && w.userData.os) tickOS(w, dt); }
   }
-  let lfx = null; const getFx = () => lfx || (lfx = new LightningFX({ THREE, scene, HS, canvas: document.querySelector('canvas') }));
+  let lfx = null; const getFx = () => lfx || (lfx = new LightningFX({ THREE, scene, HS, groundY: terrainY, canvas: document.querySelector('canvas') }));
   cc.on('lightning', ev => { getFx().strike(ev); });
   /* summons + buffs visuals (cheap shared geometry, 1-2 meshes each, removed on end) */
   const SUMG = { thrall: new THREE.CapsuleGeometry(0.45, 1.3, 3, 8), turret: new THREE.CylinderGeometry(0.35, 0.6, 1.1, 8), totem: new THREE.CylinderGeometry(0.22, 0.3, 2.6, 6), ring: new THREE.RingGeometry(0.92, 1, 40) };
@@ -210,7 +210,7 @@ export function createFight(env) {
   const sumMesh = new Map(), buffRing = new THREE.Mesh(SUMG.ring, new THREE.MeshBasicMaterial({ color: 0xffd36a, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide })); buffRing.rotation.x = -Math.PI / 2; buffRing.visible = false; scene.add(buffRing);
   cc.on('summon', s => { const g = new THREE.Group(), m = new THREE.Mesh(SUMG[s.id], SUMM[s.id]); m.position.y = s.id === 'totem' ? 1.3 * HS / 1.5 : 0.9 * HS / 1.5; m.scale.setScalar(HS / 1.5); g.add(m); if (s.id === 'totem') { const r = new THREE.Mesh(SUMG.ring, new THREE.MeshBasicMaterial({ color: 0x9be8d0, transparent: true, opacity: 0.4, depthWrite: false, side: THREE.DoubleSide })); r.rotation.x = -Math.PI / 2; r.position.y = 0.06; r.scale.setScalar(s.radius * HS); g.add(r); } g.position.set(s.x, terrainY(s.x,s.z), s.z); scene.add(g); sumMesh.set(s.uid, g); hud.say(s.id.toUpperCase(), 900); })
     .on('summonEnd', ({ s }) => { const g = sumMesh.get(s.uid); if (g) { scene.remove(g); g.traverse(o => { if (o.material && o.material !== SUMM[s.id]) o.material.dispose(); }); sumMesh.delete(s.uid); } })
-    .on('summonAttack', ({ s, e }) => { if (s.id === 'turret' && getFx) getFx().strike({ from: { x: s.x, z: s.z }, path: [{ x: e.x, z: e.z, y: 1.1 * HS, falloff: 0.6, flash: true }], count: 1 }); })
+    .on('summonAttack', ({ s, e }) => { if (s.id === 'turret' && getFx) getFx().strike({ from: { x: s.x, z: s.z }, path: [{ x: e.x, z: e.z, y: terrainY(e.x,e.z) + 1.1 * HS, falloff: 0.6, flash: true }], count: 1 }); })
     .on('buff', b => { if (b.name) hud.say(b.name.toUpperCase(), 1100); });
   function sumSync() { for (const s of cc.summons) { const g = sumMesh.get(s.uid); if (g) { g.position.set(s.x, terrainY(s.x,s.z), s.z); if (s.yaw !== undefined) g.rotation.y = s.yaw; } } const on2 = cc.buffs.length > 0; buffRing.visible = on2; if (on2) { buffRing.position.set(state.heroX, terrainY(state.heroX,state.heroZ)+0.07, state.heroZ); buffRing.scale.setScalar(1.6 * HS * Math.max(1, cc.RM)); } }
   if (env.bystanders) cc.bystanders = env.bystanders;   // Owner-gated server-trust: controller only fires these from owner ultimates

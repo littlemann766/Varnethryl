@@ -57,6 +57,64 @@ function buildPanel(c, gate, env) {
   spd.addEventListener('change', () => { c.setSpeed(+spd.value); sync(); }); isolateKeys(spd);
   panel.appendChild(row(el('span', { textContent: 'Speed' }), spd));
   panel.appendChild(el('div', { textContent: 'Fly: Space/E up, Q/C/Shift down, or the ▲▼ buttons.', style: 'font-size:11px;opacity:.7' }));
+  // Owner tools were moved here from public Settings. This entire panel is
+  // constructed only after ownergate has verified the passphrase or owner claim.
+  panel.appendChild(sec('Owner tools'));
+  panel.appendChild(row(
+    toggle('unlimited', 'Unlimited MP / stamina', c.setUnlimited, () => !!f.unlimited),
+    toggle('nocd', 'No cooldowns', c.setNoCooldown, () => !!f.noCooldown)
+  ));
+  const bamboo = el('button', { type:'button', textContent:'Bamboo Stick (test weapon)' });
+  const bambooSync = () => {
+    const F = window.__p3d?.fight;
+    bamboo.classList.toggle('on', !!F?.cc?.bamboo);
+  };
+  bamboo.addEventListener('click', () => {
+    const F=window.__p3d?.fight;
+    if (!F?.setBamboo) { say('Start fight mode before using the Bamboo Stick.'); return; }
+    F.setBamboo(!F.cc?.bamboo); bambooSync();
+  });
+  panel.appendChild(row(bamboo));
+  const maxHero = el('button', { type:'button', textContent:'Re-max active hero' });
+  maxHero.addEventListener('click', async () => {
+    const { maxOwnerHero } = await import('./ownermax.js');
+    const result = maxOwnerHero(env.storage);
+    say(!result ? 'Could not read save.' : result.changed ? 'Active hero maxed; save marked cheated.' : 'Active hero already maxed.');
+  });
+  panel.appendChild(row(maxHero));
+  panel.appendChild(sec('Owner damage'));
+  const damageMount = el('div', { className:'ownerDamageMount' });
+  damageMount.textContent='Loading owner damage controls…';
+  panel.appendChild(damageMount);
+  import('./combat/data.js').then(D => {
+    if (!damageMount.isConnected) return;
+    const P=D.TUNING.perks, U=D.TUNING.ult;
+    const save=()=>D.saveSaberPrefs();
+    damageMount.textContent='';
+    const range=(key,label,min,max,step,get,set) => {
+      const title=el('div', { textContent:label, style:'margin:6px 0 2px;color:#f3dfa9' });
+      const current=el('span', {textContent:String(get()),style:'min-width:40px;text-align:right'});
+      const inp=el('input', {type:'range',min,max,step,value:get()});
+      inp.dataset.cheat=key;
+      inp.style.cssText='flex:1 1 120px;min-width:120px';
+      inp.addEventListener('input', () => {
+        set(Number(inp.value)); save(); current.textContent=inp.value;
+      });
+      damageMount.append(title,row(inp,current));
+    };
+    const bool=(key,label,get,set) => {
+      const button=el('button', {type:'button',textContent:label});
+      button.dataset.cheat=key;
+      const refresh=()=>button.classList.toggle('on',!!get());
+      button.addEventListener('click',()=>{set(!get());save();refresh();});
+      refresh();damageMount.appendChild(row(button));
+    };
+    range('saberMul','Saber multiplier (0 = flat 99,999)',0,50,1,()=>P.saberMul,v=>P.saberMul=v);
+    bool('saberBossesX12','Saber multiplier hits bosses',()=>P.saberBossesX12,v=>P.saberBossesX12=v);
+    range('ultMul','Unholy Destruction damage multiplier',1,100,1,()=>U.dmgMul,v=>U.dmgMul=v);
+    bool('bossesInstantKill','Ultimate instantly kills bosses',()=>U.bossesInstantKill,v=>U.bossesInstantKill=v);
+    damageMount.appendChild(el('div',{textContent:'Owner-only controls. Damage changes mark this save cheated. Normal players never see this screen.',style:'opacity:.75;font-size:11px;margin-top:5px'}));
+  }).catch(() => { damageMount.textContent='Damage controls unavailable.'; });
   panel.appendChild(sec('Gold / XP / level'));
   panel.appendChild(row(toggle('inf', '∞ Gold', c.setInfiniteGold, () => f.infGold), act('gold+', '+1M gold', () => c.addGold(1000000))));
   panel.appendChild(row(act('xp+', '+1k XP', () => c.addXp(1000)), act('xp++', '+50k XP', () => c.addXp(50000))));

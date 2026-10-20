@@ -41,11 +41,37 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
       <button id="vnOptions" type="button">Settings</button>
       <button id="vnCamp" type="button">Explore Hobgoblin Camps</button>
     </div>
-    <div class="vn-links"><button type="button" id="vnMenuBtn" aria-label="Open main menu">☰ Menu</button><a href="index2d.html" onclick="try{localStorage.setItem('vn_mode','2d')}catch(e){}">Classic 2D</a><a href="proto3d/model-viewer.html">Model Gallery</a></div>
+    <div class="vn-links"><a href="proto3d/model-viewer.html">3D Model Gallery</a></div>
     <div class="vn-bottom">Your adventure continues from the existing local save. Nothing is reset.</div>
   </div>
 </div>
-<div id="hud"><div><b>VARNETHRYL</b><br><span>Liongate Kingdom</span> <span id="ver">v1.2.1</span><br><span id="fps">-- fps</span></div><a href="index2d.html" onclick="try{localStorage.setItem('vn_mode','2d')}catch(e){}">&larr; Classic 2D</a><a href="proto3d/model-viewer.html" style="margin-left:6px">Lineup</a><a id="mdlBtn" href="#" style="margin-left:6px">Models</a><a id="fightBtn" href="#" style="margin-left:6px;display:none">Fight test</a></div>
+<div id="hud" hidden><div><b>VARNETHRYL</b> <span id="ver">v1.2.2</span><span id="fps">-- fps</span></div><a id="mdlBtn" href="#">Models</a><a id="fightBtn" href="#" style="display:none">Fight test</a></div>
+<button id="vnMenuBtn" type="button" aria-expanded="false" aria-controls="vnQuickMenu" aria-label="Open game menu">☰ Menu</button>
+<nav id="vnQuickMenu" aria-label="Game menu" hidden>
+  <div class="vn-qhead"><strong>VARNETHRYL</strong><button id="vnQuickClose" aria-label="Close menu">✕</button></div>
+  <details><summary>Game</summary><div class="vn-opts">
+    <button id="vnTitleBtn">Return to title</button>
+    <button id="vnOpenSettings">Settings</button>
+    <small>3D build <span id="vnVersion">1.2.2</span></small>
+  </div></details>
+  <details><summary>Characters</summary><div class="vn-opts">
+    <button id="vnChooseCharacter">Choose character</button>
+    <a href="proto3d/model-viewer.html">View 3D character lineup</a>
+  </div></details>
+  <details><summary>Combat &amp; movement</summary><div class="vn-opts">
+    <button id="vnCombatToggle">Toggle fight mode</button>
+    <small>Walk / Run: R · Jump: Space</small>
+  </div></details>
+  <details><summary>Models &amp; diagnostics</summary><div class="vn-opts">
+    <button id="vnModelsToggle">Switch rigged / blocky models</button>
+    <button id="vnStatusOpen">3D model status</button>
+  </div></details>
+</nav>
+<div id="moveActions" aria-label="Movement">
+ <button type="button" id="runBtn" aria-pressed="false" title="Walk or run">WALK</button>
+ <button type="button" id="jumpBtn" title="Jump">JUMP</button>
+</div>
+<div id="staminaHud" role="meter" aria-label="Running stamina" aria-valuemin="0" aria-valuemax="100"><div class="vn-stamlabel"><b>STAMINA</b><span id="staminaValue">100%</span></div><div class="vn-stambar"><i id="staminaMeter"></i></div></div>
 <div id="cinderFlyControls" aria-label="Cinder flight controls" style="display:none"><button type="button" id="cinderFlyBtn">Take off</button><button type="button" id="cinderFlyUp" aria-label="Ascend">↑</button><button type="button" id="cinderFlyDown" aria-label="Descend">↓</button></div>
 <div id="stick"><div id="knob"></div></div>
 <div id="heroes"></div>
@@ -64,12 +90,12 @@ var ua=navigator.userAgent,m=/Chrome\/(\d+)/.exec(ua);
 window.__p3dDiag('UA: '+ua.slice(0,110)+(window.Capacitor?' [Capacitor app]':' [browser]'));
 var okImport=window.HTMLScriptElement&&HTMLScriptElement.supports&&HTMLScriptElement.supports('importmap');
 if(!okImport&&m&&+m[1]<89)window.__p3dDiag('This browser engine (Chrome '+m[1]+') is too old for 3D (needs 89+). Update Android System WebView.',true);
-function fatal(msg){try{if(sessionStorage.getItem('vn_default3d')==='1'&&!window.__p3d){sessionStorage.removeItem('vn_default3d');sessionStorage.setItem('vn_fallback','3d-failed');setTimeout(function(){if(!window.__p3d)location.replace('index2d.html')},2500)}}catch(e){}window.__p3dDiag('ERROR: '+msg,true);var l=document.getElementById('loadMsg');if(l&&document.getElementById('load'))l.textContent='3D failed to start: '+msg}
+function fatal(msg){try{if(sessionStorage.getItem('vn_default3d')==='1'&&!window.__p3d){sessionStorage.removeItem('vn_default3d');sessionStorage.setItem('vn_fallback','3d-failed');/* 3D only: show the error panel instead of redirecting to 2D */}}catch(e){}window.__p3dDiag('ERROR: '+msg,true);var l=document.getElementById('loadMsg');if(l&&document.getElementById('load'))l.textContent='3D failed to start: '+msg}
 addEventListener('error',function(e){fatal((e.message||'script error')+(e.filename?' @'+e.filename.split('/').slice(-2).join('/')+':'+e.lineno:''))});
 addEventListener('unhandledrejection',function(e){fatal(String(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){if(!window.__p3d)window.__p3dDiag('Still loading after 12s (slow device or blocked script).',true)},12000);
 })();
 </script>
 <script type="importmap">{"imports":{"three":"./proto3d/vendor/three.module.js","three/addons/":"./proto3d/vendor/jsm/"}}</script>
-<script type="module" src="proto3d/main.js" onerror="try{if(sessionStorage.getItem('vn_default3d')==='1'){sessionStorage.removeItem('vn_default3d');location.replace('index2d.html')}}catch(e){};__p3dDiag('Could not load proto3d/main.js or one of its imports (three.js). Check connection / update the app.',true)"></script>
+<script type="module" src="proto3d/main.js" onerror="__p3dDiag('Could not load proto3d/main.js or one of its imports (three.js). Check connection / update the app.',true)"></script>
 <script>(function(){var b=document.getElementById('mdlBtn');if(!b)return;function cur(){try{return localStorage.getItem('vn_model')||'blocky'}catch(e){return 'blocky'}}function lab(){b.textContent='Models: '+(cur()==='glb'?'GLB':'Blocky')}lab();b.addEventListener('click',function(e){e.preventDefault();try{var n=cur()==='glb'?'blocky':'glb';localStorage.setItem('vn_model',n);Object.keys(localStorage).forEach(function(k){if(k.indexOf('vn_model_')===0)localStorage.removeItem(k)})}catch(x){}location.reload()})})();</script><script src="proto3d/varn-menu.js"></script></body></html>

@@ -91,7 +91,7 @@ function models(){var out='';try{var st=window.__p3d&&window.__p3d.modelStatus&&
 function render(){box.innerHTML='<button id="diagX" type="button">Close</button>'+models()+'<h4>Log</h4>'+lines.map(function(l){return '<div class="'+(l.bad?'bad':'')+'">'+esc(l.t)+'</div>'}).join('');var x=document.getElementById('diagX');if(x)bind(x,function(){set(false)});box.scrollTop=0}
 function set(v){shown=v;box.style.display=v?'block':'none';if(v)render()}
 function bind(el,fn){function h(e){var n=Date.now();if(n-lastT<350){e.preventDefault&&e.preventDefault();return}lastT=n;e.preventDefault&&e.preventDefault();e.stopPropagation&&e.stopPropagation();fn()}el.addEventListener('pointerup',h);el.addEventListener('touchend',h,{passive:false});el.addEventListener('click',h)}
-window.__p3dDiag=function(t,bad){lines.push({t:t,bad:!!bad});if(lines.length>60)lines.shift();if(shown)render();if(bad&&!shown){set(true)}};
+window.__p3dDiag=function(t,bad){lines.push({t:t,bad:!!bad});if(lines.length>60)lines.shift();if(shown)render();if(bad&&!shown){document.body.classList.add('vn-diagnostic-error');set(true)}};
 bind(btn,function(){set(!shown)});
 var ua=navigator.userAgent,m=/Chrome\/(\d+)/.exec(ua);
 window.__p3dDiag('UA: '+ua.slice(0,110)+(window.Capacitor?' [Capacitor app]':' [browser]'));

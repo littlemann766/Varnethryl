@@ -483,10 +483,12 @@ function wrapGLB(g, id, blocky) {
     // of leaving the snake rigid while its root follows the patrol route.
     const role = /idle|breath|stand|rest/.test(n) ? 'idle' :
       /run|sprint|gallop|charge|fastslither|slitherfast|slitherrun/.test(n) ? 'run' :
-      /walk|stride|trot|locomotion|slither|undulate|crawl/.test(n) ? 'walk' : null;
+      /walk|stride|trot|locomotion|slither|undulate|serpentine|bodywave|snake|crawl/.test(n) ? 'walk' : null;
     if (role && !act[role]) act[role] = act[clip.name];
   }
   if (EXTRA_URL[id] && !g.animations.length) diag('Model ' + id + ' has no animation clips; needs a real rig/animation pass.');
+  if (/vaelthryx/.test(id) && !act.walk && !act.run)
+    diag('Balthrix rig has no recognized slither/body-wave animation; a properly animated serpent GLB is still required.');
   if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];   // e.g. serpent: walk/run = slither/slither_fast
   // Initialize one visible locomotion pose. Previously idle and walk both started
   // at full weight, producing a brief mixed/half-stepping pose while loading.

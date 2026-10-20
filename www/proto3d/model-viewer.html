@@ -110,5 +110,10 @@ const clock=new THREE.Clock();
 window.__viewer={items,load,setClip,get time(){return active?active.time:null},sample(){if(!cur)return null;let s=0;cur.traverse(o=>{if(o.isMesh||o.isObject3D){s+=o.position.x*3+o.position.y*5+o.position.z*7+o.rotation.x*11+o.rotation.y*13+o.rotation.z*17+o.quaternion.x+o.quaternion.y*2+o.quaternion.z*3;}});return s;},loaded:null};
 renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),0.1);if(mixer)mixer.update(dt);if(sb)sb.update(dt);
  cam.position.set(target.x+dist*Math.cos(el)*Math.sin(az),target.y+dist*Math.sin(el),target.z+dist*Math.cos(el)*Math.cos(az));cam.lookAt(target);renderer.render(scene,cam);});
-load(0);
+// A long press in the game opens this viewer on the chosen skin.
+const requested=new URLSearchParams(location.search).get('model');
+const aliases={ashentitan_20:'ashentitan_new',frosttroll_b:'frosttroll_b'};
+const wanted=aliases[requested]||requested;
+const first=wanted?items.findIndex(it=>it.n===wanted):0;
+load(first>=0?first:0);
 </script></body></html>

@@ -27,7 +27,8 @@ const CSS2 = '#settingsPanel{background:linear-gradient(180deg,#171127f2,#0d0b17
  + '#settingsPanel .own button.on{background:linear-gradient(180deg,#e2bd5c,#b8892f)!important}'
  + '#settingsPanel input[type=range]{accent-color:#c9a24a!important;min-height:48px!important}'
  + '#settingsPanel .stp{min-width:48px!important;font-size:20px;font-weight:700}';
-const DESCS = { 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Display': 'On-screen info.', 'Owner (save is marked cheated)': 'Owner-account tools and power settings.', 'Owner damage': 'Saber and Unholy Destruction damage. Owner account only.' };
+const CSS3 = '#settingsPanel .card.vn-collapsible{padding:4px 6px;margin:5px 0}#settingsPanel .vn-setting-body{display:none;padding:8px 7px 11px}#settingsPanel .vn-card-open>.vn-setting-body{display:block}#settingsPanel .vn-settings-toggle{display:block!important;width:100%;min-height:42px!important;text-align:left!important;padding:8px 12px!important;background:linear-gradient(#253851,#111b2c)!important;border:1px solid #8d7041!important;color:#f5ddab!important;font:700 13px VarnCinzel,Georgia,serif!important}#settingsPanel .vn-settings-toggle:focus-visible{outline:2px solid #ffdd92}';
+const DESCS = { 'Game & version': 'Version information, characters and diagnostics.', 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Display': 'On-screen info.', 'Owner (save is marked cheated)': 'Owner-account tools and power settings.', 'Owner damage': 'Saber and Unholy Destruction damage. Owner account only.' };
 let root = null, body = null, timer = 0, E = null;
 function el(tag, props, kids) { const e = document.createElement(tag); if (props) Object.assign(e, props); if (kids) for (const k of kids) e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); return e; }
 const isOpen = () => !!root && root.style.display === 'block';
@@ -52,6 +53,18 @@ function build() {
   const syncs = [];
   const save = () => { persist(E); };
   const view = (v, label) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.set = 'view-' + v; const s = () => b.classList.toggle('on', prefs.view === v); b.addEventListener('click', () => { rig.setView(v); save(); syncs.forEach((f) => f()); }); s(); syncs.push(s); return b; };
+  body.appendChild(sec('Game & version'));
+  body.appendChild(row(el('b',{textContent:'Varnethryl 3D · v1.2.2',style:'color:#f1d28a'})));
+  body.appendChild(el('small',{textContent:'The entire game now runs in 3D. No Classic 2D switching.'}));
+  const lineBtn=el('button',{type:'button',textContent:'Choose a character'});
+  lineBtn.addEventListener('click',()=>{hide();document.querySelector('#heroes button.cur')?.click();});
+  const galBtn=el('button',{type:'button',textContent:'View 3D lineup'});
+  galBtn.addEventListener('click',()=>location.assign('proto3d/model-viewer.html'));
+  const modelBtn=el('button',{type:'button',textContent:'Switch model style'});
+  modelBtn.addEventListener('click',()=>document.getElementById('mdlBtn')?.click());
+  const statusBtn=el('button',{type:'button',textContent:'3D model diagnostics'});
+  statusBtn.addEventListener('click',()=>{hide();document.getElementById('diagBtn')?.click();});
+  body.appendChild(row(lineBtn,galBtn,modelBtn,statusBtn));
   body.appendChild(sec('Camera'));
   body.appendChild(row(view('third', 'Third person'), view('first', 'First person')));
   const cm = (v, label) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.set = 'cam-' + v; const s = () => b.classList.toggle('on', prefs.camMode === v); b.addEventListener('click', () => { prefs.camMode = v; save(); syncs.forEach((f) => f()); }); s(); syncs.push(s); return b; };
@@ -147,13 +160,34 @@ function build() {
       if (isSec && k.textContent.trim()) { card = el('div', { className: 'card' }); body.insertBefore(card, k); card.appendChild(k); const d = DESCS[k.textContent]; if (d) card.appendChild(el('div', { className: 'desc', textContent: d })); continue; }
       if (card) card.appendChild(k);
     }
+    // Each settings category is a one-tap accordion; no enormous scrolling menu.
+    for(const card of body.querySelectorAll('.card')){
+      if(!card.classList.contains('vn-collapsible')){
+        const header=card.querySelector(':scope > .sec');
+        if(!header)continue;
+        const button=el('button',{type:'button',className:'vn-settings-toggle',textContent:header.textContent+' ▾'});
+        button.setAttribute('aria-expanded','false');
+        const inner=el('div',{className:'vn-setting-body'});
+        for(const child of [...card.children])inner.appendChild(child);
+        card.append(button,inner);
+        card.classList.add('vn-collapsible');
+        button.addEventListener('click',()=>{
+          const opened=card.classList.toggle('vn-card-open');
+          button.textContent=header.textContent+(opened?' ▴':' ▾');
+          button.setAttribute('aria-expanded',String(opened));
+        });
+      } else {
+        const inner=card.querySelector(':scope > .vn-setting-body');
+        if(inner)for(const n of [...card.children])if(n!==inner&&!n.classList.contains('vn-settings-toggle'))inner.appendChild(n);
+      }
+    }
   }
 }
 
 export function toggleSettings(env) {
   E = env;
   if (!root) {
-    document.head.appendChild(el('style', { textContent: CSS + CSS2 }));
+    document.head.appendChild(el('style', { textContent: CSS + CSS2 + CSS3 }));
     root = el('div', { id: 'settingsPanel', role: 'dialog', 'aria-label': 'Settings' }); body = el('div');
     const close = el('button', { type: 'button', textContent: '✕', style: 'min-height:40px', id: 'setClose' }); close.addEventListener('click', hide);
     root.append(el('h3', null, [el('span', { textContent: 'Settings' }), close]), body);

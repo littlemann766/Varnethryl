@@ -343,10 +343,12 @@ function mergeRigidParts(root) {
 const CLOTHCFG = {};
 let LOCO_FORCE = null;   // test hook: pretend the hero moves at this ground speed (world units/s)
 // locomotion blend: models with per-clip speeds (SPEEDS) blend idle -> walk -> trot -> run by real ground speed and play each clip at speed/clipSpeed so feet stay planted; others use the legacy walk/idle blend
-function locoAnim(u, sp) {
+function locoAnim(u, sp, dt = 1/60) {
+  // Smooth transitions instead of abruptly switching the Owner's locomotion clips.
+  const smooth = (key, target) => { const alpha = 1 - Math.exp(-Math.max(0, dt) * 11); u[key] = (u[key] ?? target) + (target - (u[key] ?? target)) * alpha; return u[key]; };
   const A = u.act, S = u.speeds;
   if (S && A.idle) {
-    const v = Math.max(0, Number.isFinite(sp) ? sp / (u.mscale || 1) : 0), L = [['walk', S.walk], ['trot', S.trot], ['run', S.run]].filter(([k, c]) => A[k] && c > 0);
+    const v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? sp / (u.mscale || 1) : 0)), L = [['walk', S.walk], ['trot', S.trot], ['run', S.run]].filter(([k, c]) => A[k] && c > 0);
     const wt = { idle: 0 }; for (const [k] of L) wt[k] = 0;
     // Some imported rigs have idle but no walk/run clips. Do not index an empty list.
     if (!L.length || v < 0.025) { wt.idle = 1; }
@@ -356,7 +358,7 @@ function locoAnim(u, sp) {
     for (const [k, c] of L) { A[k].setEffectiveWeight(wt[k] * ov); A[k].timeScale = Math.max(0.5, Math.min(2.4, v / c)); }
     return;
   }
-  const wk = A.walk, id = A.idle, v = Math.max(0, Number.isFinite(sp) ? sp : 0);
+  const wk = A.walk, id = A.idle, v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? sp : 0));
   if (wk && id) {
     const w = v < 0.025 ? 0 : Math.min(1, v / SPEED);
     const ov = 1 - (u.ovr || 0);
@@ -376,7 +378,7 @@ function locoAnim(u, sp) {
     wk.setEffectiveWeight((1-runMix)*ov);
     wk.timeScale = standing ? 0 : 0.6 + v * 0.25;
     if(run){run.setEffectiveWeight(runMix*ov);run.timeScale=Math.max(.65,Math.min(2.2,v/(SPEED*1.8)));}
-    if (standing && !u.wasStanding) wk.time = 0;
+    if (standing && !u.wasStanding) { wk.time = 0; if (u.sb) u.sb.reset(); }
     u.wasStanding = standing;
   }
 }
@@ -1065,7 +1067,7 @@ function updateCrowd(dt) {
     const w = r.root; if (!w) continue;
     w.position.set(a.x, r.kind === 'party' ? r.y : 0, a.z); const u = w.userData, ww = Math.min(1, sp / SPEED);
     restoreNodes(r.nd);
-    if (u.glb) { locoAnim(u, sp); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
+    if (u.glb) { locoAnim(u, sp, dt); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
     applyPose(a, w, r.nd, a.yaw);
   }
 }
@@ -1187,7 +1189,7 @@ function animateHero(dt) {
       }
       u.cinderStep = (u.cinderStep || 0) + dt * (6 + state.speed * 0.8);
       u.cinderHop = cinderFlight.alt < 0.05 ? Math.max(0, Math.sin(u.cinderStep)) * 0.035 * Math.min(1, state.speed / 2) : 0;
-    } else { u.cinderHop = 0; locoAnim(u, LOCO_FORCE !== null ? LOCO_FORCE : state.speed); }
+    } else { u.cinderHop = 0; locoAnim(u, LOCO_FORCE !== null ? LOCO_FORCE : state.speed, dt); }
     u.mixer.update(dt); if (u.sb) u.sb.update(dt); if (u.cinderEmbers) u.cinderEmbers.update(dt);
     return;
   }

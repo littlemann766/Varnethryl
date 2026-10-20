@@ -60,7 +60,7 @@ with sync_playwright() as p:
     check('both Frost Troll brothers spawn together',page.evaluate("['frosttroll_a','frosttroll_b'].every(k=>__p3d.fight.monsters.some(e=>e.key===k))"))
     page.evaluate("__p3d.teleport(2243,177)")
     page.wait_for_function("__p3d.zone==='town'",timeout=90000)
-    check('ice gate returns to mountain summit',page.evaluate("__p3d.zone")==='town')
+    check('ice gate returns to mountain summit',page.evaluate("__p3d.zone")=='town')
     check('no uncaught browser errors',not errors,errors[:2])
     browser.close()
 srv.shutdown()

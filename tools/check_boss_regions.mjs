@@ -20,9 +20,9 @@ for(const id of ['n:frosttroll_a','n:frosttroll_b']){
  assert(close(profileFor(id).height,3.5*HERO_M),id+' must equal 3.5x Owner');
  assert(close(loadScale(id,11.4)*11.4,3.5*HERO_M),'model height normalized for '+id);
 }
-for(const [id,mul] of [['n:ashentitan_new',6],['n:ashentitan_20',15],['n:ashentitan_40',15],['n:ashentitan_60',60],['n:vaelthryx_straight_rig',10],['n:vaelthryx_straight_rig_50',50]])
+for(const [id,mul] of [['n:ashentitan_new',10],['n:ashentitan_20',10],['n:ashentitan_40',10],['n:ashentitan_60',60],['n:vaelthryx_straight_rig',6],['n:vaelthryx_straight_rig_50',50]])
  assert(close(profileFor(id).height,mul*HERO_M),id+' height ratio');
-assert(close(profileFor('n:ashentitan_20').height,28.575),'Active lava boss stands 28.575 m');
+assert(close(profileFor('n:ashentitan_20').height,19.05),'Active lava boss stands 19.05 m');
 for(const [id,model] of [['titan40','n:ashentitan_20'],['frosttroll_a','n:frosttroll_a'],['frosttroll_b','n:frosttroll_b'],['vaelthryx','n:vaelthryx_straight_rig']]){
  assert.equal(ENEMIES[id].model,model,'encounter GLB for '+id);
  assert(ENEMIES[id].boss&&BOSS_PATTERNS[id]?.length>=3,'unique combat skills for '+id);
@@ -33,7 +33,7 @@ assert.equal(CITY_HALF,185,'town walls remain close');
 assert.equal(FROST_SUMMIT.height,60,'steep but walkable mountain summit');
 assert(frostHill(FROST_PORTAL.x,FROST_PORTAL.z)>59,'frost cave on summit');
 assert(frostHill(0,-200)<5,'graded mountain foot');
-assert(onLava(TITAN_CENTER.x,TITAN_CENTER.z),'lava pools surround 40x Titan');
+assert(onLava(TITAN_CENTER.x,TITAN_CENTER.z),'lava pools surround 10x Titan');
 assert(lavaAmount(TITAN_CENTER.x,TITAN_CENTER.z)>.95,'volcano terrain covers boss');
 assert(!isCitySafe(TITAN_CENTER.x,TITAN_CENTER.z)&&!isCitySafe(FROST_SUMMIT.x,FROST_SUMMIT.z),'both boss regions outside city');
 assert(FROST_REALM.cx>1500&&FROST_REALM.half>200,'new separated icy map');
@@ -70,4 +70,4 @@ for(const p of ['bossregions.js','frostreach.js','townlands.js','main.js','fight
  const f='www/proto3d/'+p,v=spawnSync(process.execPath,['--check',f],{encoding:'utf8'});
  assert.equal(v.status,0,f+' syntax: '+v.stderr);
 }
-console.log('PASS: Lore scale / 40x Titan / 3x frost brothers / 10x & 50x Balthrix / lava / mountain portal / icy realm / boss skills / roaming / swimming / HUD / shadows.');
+console.log('PASS: Lore scale / 40x Titan / 3.5x frost brothers / 6x & 50x Balthrix / lava / mountain portal / icy realm / boss skills / roaming / swimming / HUD / shadows.');

@@ -62,9 +62,31 @@ with sync_playwright() as p:
         snow:__p3d.frost.group.visible,brothers:__p3d.frost.brothers.length,
         heroY:__p3d.state.heroY,portal:__p3d.frost.portal})""")
     check('summit cave leads to the new frost realm',ice['zone']=='frost' and ice['snow'] and ice['brothers']==2,ice)
+    # The two boss brothers must exist as real enemy entities, not merely as
+    # markers in a decorative ice map. Both keep their distinct skill patterns.
+    page.wait_for_function("""()=>__p3d.fight&&
+      __p3d.fight.monsters.some(e=>e.key==='frostbrother_a')&&
+      __p3d.fight.monsters.some(e=>e.key==='frostbrother_b')""",timeout=120000)
+    duo=page.evaluate("""()=>__p3d.fight.monsters.filter(e=>e.key.startsWith('frostbrother')).map(e=>({
+      key:e.key,name:e.def.name,modelHeight:e.view.userData.heightW,
+      patterns:e.def.boss,terrainFeet:e.view.position.y}))""")
+    check('both Frost Troll brothers spawn as 3x combat bosses',
+          len(duo)==2 and all(x['modelHeight']>7.9 and x['patterns'] for x in duo),duo)
     page.evaluate("__p3d.teleport(__p3d.frost.portal.x,__p3d.frost.portal.z)")
     page.wait_for_function("__p3d.zone==='town'",timeout=120000)
     check('frost realm portal returns to the main world',page.evaluate("__p3d.zone")=='town')
+    # Approach the volcanic corner without standing in molten lava. Both the
+    # 40x Titan and patrolling Balthrix should spawn lazily and be combat-ready.
+    page.evaluate("__p3d.teleport(-397,-515)")
+    page.wait_for_function("""()=>__p3d.fight&&__p3d.fight.on&&
+      __p3d.fight.monsters.some(e=>e.key==='titan')&&
+      __p3d.fight.monsters.some(e=>e.key==='vaelthryx')""",timeout=120000)
+    bosses=page.evaluate("""()=>__p3d.fight.monsters.filter(e=>e.def.boss).map(e=>({
+      key:e.key,name:e.def.name,height:e.view.userData.heightW,y:e.view.position.y
+    }))""")
+    check('Ashen Titan 40x and roaming Balthrix are real playable encounters',
+          any(e['key']=='titan' and 105<e['height']<115 for e in bosses) and
+          any(e['key']=='vaelthryx' and 25<e['height']<30 for e in bosses),bosses)
     check('no uncaught browser errors',not errors,errors[:2])
     browser.close()
 srv.shutdown()

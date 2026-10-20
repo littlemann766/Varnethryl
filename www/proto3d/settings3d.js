@@ -29,6 +29,8 @@ const CSS2 = '#settingsPanel{background:linear-gradient(180deg,#171127f2,#0d0b17
  + '#settingsPanel .stp{min-width:48px!important;font-size:20px;font-weight:700}';
 const CSS3 = '#settingsPanel .card.vn-collapsible{padding:4px 6px;margin:5px 0}#settingsPanel .vn-setting-body{display:none;padding:8px 7px 11px}#settingsPanel .vn-card-open>.vn-setting-body{display:block}#settingsPanel .vn-settings-toggle{display:block!important;width:100%;min-height:42px!important;text-align:left!important;padding:8px 12px!important;background:linear-gradient(#253851,#111b2c)!important;border:1px solid #8d7041!important;color:#f5ddab!important;font:700 13px VarnCinzel,Georgia,serif!important}#settingsPanel .vn-settings-toggle:focus-visible{outline:2px solid #ffdd92}';
 const DESCS = { 'Game & version': 'Version information, characters and diagnostics.', 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Display': 'On-screen info.', 'Owner (save is marked cheated)': 'Owner-account tools and power settings.', 'Owner damage': 'Saber and Unholy Destruction damage. Owner account only.' };
+const TITLES = { 'Game & version':'Game', 'Camera':'Camera & movement', 'Combat':'Combat controls', 'Loadout':'Equipment & skills', 'Graphics':'Graphics & performance', 'Display':'On-screen display', 'Owner (save is marked cheated)':'Owner tools', 'Owner damage':'Owner damage' };
+let selectedSection = 'Camera';
 let root = null, body = null, timer = 0, E = null;
 function el(tag, props, kids) { const e = document.createElement(tag); if (props) Object.assign(e, props); if (kids) for (const k of kids) e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); return e; }
 const isOpen = () => !!root && root.style.display === 'block';
@@ -49,6 +51,7 @@ function slider(key, min, max, step, get, set, fmt) {
 function build() {
   const { rig, prefs } = E, c = () => (window.__p3d && window.__p3d.cheats) || null, owner = () => !!(window.__p3d && window.__p3d.owner && c());
   body.textContent = '';
+  body.appendChild(el('div', { className: 'vn-settings-intro', textContent: 'Choose a category below. Changes save automatically.' }));
   const sec = (t) => el('div', { className: 'sec', textContent: t }), row = (...k) => el('div', { className: 'row' }, k);
   const syncs = [];
   const save = () => { persist(E); };
@@ -83,13 +86,13 @@ function build() {
   body.appendChild(el('small', { textContent: 'Zoom: mouse wheel, pinch, or + / −.  View: V.  The camera never goes through walls.' }));
 
   body.appendChild(sec('Combat'));
-  const cb = el('button', { type: 'button', textContent: 'Fight mode (spawns a few enemies)' }); cb.dataset.set = 'combat';
+  const cb = el('button', { type: 'button', textContent: 'Enable combat testing' }); cb.dataset.set = 'combat';
   const csync = () => cb.classList.toggle('on', !!(E.combatOn && E.combatOn())); csync(); syncs.push(csync);
   cb.addEventListener('click', async () => { await E.setCombat(!(E.combatOn && E.combatOn())); csync(); });
   body.appendChild(row(cb)); body.appendChild(el('small', { textContent: 'F attack · G dodge · T lock-on · Tab next target · 1-6 abilities (owner). On phone use the buttons by the stick.' }));
   const hudEd = () => (window.__p3d && window.__p3d.combat && window.__p3d.combat.hud && window.__p3d.combat.hud.editor) || null;
-  const eb = el('button', { type: 'button', textContent: 'Edit buttons' }); eb.dataset.set = 'editbtns';
-  const rb = el('button', { type: 'button', textContent: 'Reset buttons' }); rb.dataset.set = 'resetbtns';
+  const eb = el('button', { type: 'button', textContent: 'Move or resize buttons' }); eb.dataset.set = 'editbtns';
+  const rb = el('button', { type: 'button', textContent: 'Restore button layout' }); rb.dataset.set = 'resetbtns';
   const esync = () => { const e = hudEd(); eb.classList.toggle('on', !!(e && e.editing)); }; syncs.push(esync);
   eb.addEventListener('click', async () => { if (!(E.combatOn && E.combatOn())) await E.setCombat(true); const e = hudEd(); if (!e) return; e.enable(!e.editing); esync(); if (e.editing) hide(); });
   rb.addEventListener('click', () => { const e = hudEd(); if (e) { e.reset(); esync(); } });
@@ -152,7 +155,7 @@ function build() {
     });
     body.appendChild(dm);
   }
-  const reset = el('button', { type: 'button', textContent: 'Reset camera & settings' }); reset.dataset.set = 'reset';
+  const reset = el('button', { type: 'button', textContent: 'Restore default settings' }); reset.dataset.set = 'reset';
   reset.addEventListener('click', () => { Object.assign(prefs, DEFAULT_PREFS); rig.setView('third'); rig.setZoom(1); applyPrefs(E); save(); build(); });
   body.appendChild(el('div', { className: 'sec', textContent: ' ' })); body.appendChild(reset);
   build.syncs = syncs; regroup();
@@ -165,20 +168,38 @@ function build() {
       if (isSec && k.textContent.trim()) { card = el('div', { className: 'card' }); body.insertBefore(card, k); card.appendChild(k); const d = DESCS[k.textContent]; if (d) card.appendChild(el('div', { className: 'desc', textContent: d })); continue; }
       if (card) card.appendChild(k);
     }
-    // Each settings category is a one-tap accordion; no enormous scrolling menu.
+    // Keep introductory help outside the accordion, and move reset into
+    // the Game section instead of leaving an unexplained button at the end.
+    const intro=body.querySelector('.vn-settings-intro');
+    if(intro)body.prepend(intro);
+    const resetButton=body.querySelector('[data-set="reset"]');
+    const gameCard=[...body.querySelectorAll('.card')].find(x=>x.querySelector(':scope > .sec')?.textContent==='Game & version');
+    if(resetButton && gameCard)gameCard.appendChild(resetButton);
+    // Only one category is expanded at a time, with the last chosen
+    // category remembered while the settings panel is reopened.
     for(const card of body.querySelectorAll('.card')){
       if(!card.classList.contains('vn-collapsible')){
         const header=card.querySelector(':scope > .sec');
         if(!header)continue;
-        const button=el('button',{type:'button',className:'vn-settings-toggle',textContent:header.textContent+' ▾'});
+        const name=header.textContent;
+        const title=TITLES[name] || name;
+        const button=el('button',{type:'button',className:'vn-settings-toggle',textContent:title+' ▾'});
         button.setAttribute('aria-expanded','false');
         const inner=el('div',{className:'vn-setting-body'});
         for(const child of [...card.children])inner.appendChild(child);
         card.append(button,inner);
         card.classList.add('vn-collapsible');
+        if(name===selectedSection){card.classList.add('vn-card-open');button.textContent=title+' ▴';button.setAttribute('aria-expanded','true');}
         button.addEventListener('click',()=>{
-          const opened=card.classList.toggle('vn-card-open');
-          button.textContent=header.textContent+(opened?' ▴':' ▾');
+          const opened=!card.classList.contains('vn-card-open');
+          for(const other of body.querySelectorAll('.card.vn-collapsible')){
+            other.classList.remove('vn-card-open');
+            const otherButton=other.querySelector(':scope > .vn-settings-toggle');
+            if(otherButton){otherButton.textContent=otherButton.textContent.replace(' ▴',' ▾');otherButton.setAttribute('aria-expanded','false');}
+          }
+          if(opened){card.classList.add('vn-card-open');selectedSection=name;}
+          else selectedSection='';
+          button.textContent=title+(opened?' ▴':' ▾');
           button.setAttribute('aria-expanded',String(opened));
         });
       } else {

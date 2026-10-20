@@ -627,7 +627,7 @@ addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 
 const stick = document.getElementById('stick'), knob = document.getElementById('knob');
 const joy = { id: null, x: 0, y: 0 };
-const STICK_R = 52;
+const STICK_R = 39;
 function joyUpdate(e) {
   const r = stick.getBoundingClientRect();
   let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
@@ -668,6 +668,17 @@ addEventListener('contextmenu', e => e.preventDefault());
 
 // ---------- movement + collision ----------
 const SPEED = 5.2 * HS;
+let travelRun=false;
+const WALK_SPEED=.62, RUN_SPEED=1.24;
+const travelScale=()=>travelRun?RUN_SPEED:WALK_SPEED;
+function setTravelRun(v){travelRun=!!v;const b=document.getElementById('runBtn');if(b){b.textContent=travelRun?'RUN':'WALK';b.setAttribute('aria-pressed',String(travelRun));b.title=travelRun?'Running – tap to walk':'Walking – tap to run';}}
+document.getElementById('runBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setTravelRun(!travelRun);});
+addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.key.toLowerCase()==='r'){setTravelRun(!travelRun);}});
+let jumpVelocity=0,jumpHeight=0;
+function jump(){if(jumpHeight>0||jumpVelocity>0||state.swimming||state.climbing||cheat.fly||isCinder()&&cinderFlight.active)return false;jumpVelocity=7.5*HS;return true;}
+document.getElementById('jumpBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();jump();});
+addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.code==='Space'&&!cheat.fly&&!isCinder()){e.preventDefault();jump();}});
+setTravelRun(false);
 // buildings only playable characters may enter (companions, townsfolk and monsters are kept out by npcOnly door colliders)
 const HERO_ONLY = new Set(['guildhall']), HO_WAIT = { id: null, x: 0, z: 0 };
 function heroOnlyWait() { const id = state.inside; if (!id || !HERO_ONLY.has(id)) return null; if (HO_WAIT.id !== id) { const e = enterables.find(q => q.id === id); const b = e && (e.parts ? e.parts[0] : e); if (!b || !b.toW) return null; const [x, z] = b.toW(0, b.d / 2 + 3.2); HO_WAIT.id = id; HO_WAIT.x = x; HO_WAIT.z = z; } return HO_WAIT; }
@@ -797,7 +808,11 @@ function crowdSurface(r, a, dt) {
   let s = surfaceAt(a.x, a.z, r.level);
   if (s && s.ramp) { const m = s.ramp; if (r.level === m.l0 && s.t > (m.flipUp || 0.93)) r.level = m.l1; else if (r.level === m.l1 && s.t < 0.25) r.level = m.l0; s = surfaceAt(a.x, a.z, r.level) || s; }
   const ty = s ? s.y : (r.level >= 10 && LAD ? LAD.heightOf(r.level) : 0);
-  r.y = Math.abs(ty - r.y) < 0.02 ? ty : r.y + Math.max(-(r.level===0 ? 14 : 4)*dt, Math.min((r.level===0 ? 14 : 4)*dt, ty - r.y));
+  // Outside buildings, ground and followers must share the exact height sampler.
+  // Snap steep outdoor inclines immediately to avoid clipping under mountains.
+  const outdoor=(r.level===0&&(ZONE.name==='frost'||ZONE.name==='town'&&!isCitySafe?.(a.x,a.z,0)));
+  const correction=outdoor?Math.max(45,Math.abs(ty-r.y)/Math.max(dt,.001)):r.level===0?22:7;
+  r.y = Math.abs(ty-r.y)<.025?ty:r.y+Math.max(-correction*dt,Math.min(correction*dt,ty-r.y));
 }
 /* Downed state (Thunderstorm): companions/townsfolk can be killed but it never touches the hero (HP, death, respawn). Companions revive at the hero's side after a short delay, townsfolk back home. */
 const REVIVE_PARTY = 4, REVIVE_NPC = 8;
@@ -832,8 +847,8 @@ function updateCrowd(dt) {
       }
       { const cg = FIGHT && FIGHT.on && FIGHT.companions && r.level === state.level ? FIGHT.companions.goal(r) : null; r.faceT = cg ? cg.face : null; if (cg) { gx = cg.x; gz = cg.z; far = true; } }   // companions engage nearby enemies (combat/companions.js); otherwise follow as before
       const dx = gx - a.x, dz = gz - a.z, d = Math.hypot(dx, dz);
-      if (far && d > 0.3) { const sp = SPEED * Math.max(1, CH.speed) * Math.max(1, cheat.speedMul) * 1.05; tvx = dx / d * sp; tvz = dz / d * sp; }
-      else if (!far && d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * Math.max(1, CH.speed) * Math.max(1, cheat.speedMul) * 1.05, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
+      if (far && d > 0.3) { const sp = SPEED * travelScale() * Math.max(1, CH.speed) * Math.max(1, cheat.speedMul) * 1.18; tvx = dx / d * sp; tvz = dz / d * sp; }
+      else if (!far && d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * travelScale() * Math.max(1, CH.speed) * Math.max(1, cheat.speedMul) * 1.18, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
     }
     const k = Math.min(1, dt * 8); r.vxs += (tvx - r.vxs) * k; r.vzs += (tvz - r.vzs) * k;
     a.vx = r.vxs; a.vz = r.vzs;
@@ -907,7 +922,7 @@ function updateHero(dt) {
   if (!state.climbing) { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
   const moving = (vx || vz);
   if (moving) {
-    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = (state.swimming?0.62:1) * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
+    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = travelScale() * (state.swimming?0.62:1) * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
     tmp.x = state.heroX; tmp.z = state.heroZ; let blocked = false;
     for (let i = 0; i < n; i++) {
       const ox = tmp.x, oz = tmp.z; tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp, ghost)) blocked = true;
@@ -925,7 +940,7 @@ function updateHero(dt) {
     state.yaw += da * Math.min(1, dt * 12);
     state.speed = moved / dt;
   } else state.speed *= 0.8;
-  state.vx = moving ? vx * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0; state.vz = moving ? vz * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0;
+  state.vx = moving ? vx * SPEED * travelScale() * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0; state.vz = moving ? vz * SPEED * travelScale() * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0;
   if (playerAct.dx || playerAct.dz) { tmp.x = state.heroX + playerAct.dx; tmp.z = state.heroZ + playerAct.dz; resolve(tmp, passesWalls(cheat)); state.heroX = tmp.x; state.heroZ = tmp.z; }
   state.moving = state.speed > 0.5;
   updateLevel();
@@ -935,13 +950,14 @@ function updateHero(dt) {
   if (isCinder()) cinderFlight.step(dt, flyTouch.up || keys.has(' ') || keys.has('e'), flyTouch.down || keys.has('q') || keys.has('c'));
   else if (cinderFlight.active || cinderFlight.alt) cinderFlight.reset();
   syncCinderControls();
+  if(jumpVelocity>0||jumpHeight>0){jumpHeight=Math.max(0,jumpHeight+jumpVelocity*dt);jumpVelocity-=20*HS*dt;if(jumpHeight===0)jumpVelocity=0;}
   state.dispY = state.dispY === undefined || Math.abs(state.heroY - state.dispY) > 3 ? state.heroY : state.dispY + (state.heroY - state.dispY) * Math.min(1, dt * 16);
-  hero.position.set(state.heroX, state.dispY + cheat.alt + cinderFlight.alt - (state.swimming?0.75*HS:0), state.heroZ); hero.rotation.y = state.yaw;
+  hero.position.set(state.heroX, state.dispY + jumpHeight + cheat.alt + cinderFlight.alt - (state.swimming?0.75*HS:0), state.heroZ); hero.rotation.y = state.yaw;
   let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
   if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
     try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }
   animateHero(dt); cullSkins(); heroGhost();
-  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); hero.position.y = state.dispY + cheat.alt + cinderFlight.alt + playerAct.phop + (hero.userData.cinderHop || 0) + (state.swimming?-.75*HS+.07*Math.sin(simTime*3.5):0); }
+  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); hero.position.y = state.dispY + jumpHeight + cheat.alt + cinderFlight.alt + playerAct.phop + (hero.userData.cinderHop || 0) + (state.swimming?-.75*HS+.07*Math.sin(simTime*3.5):0); }
 }
 
 const _sp = new THREE.Vector3();

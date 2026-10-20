@@ -69,6 +69,8 @@ assert(main.includes("try { resolve(probe, false, 'npc'); }"),'companion probes 
 assert(main.includes("finally { state.level = previousLevel; }"),'companion probes restore world floor');
 assert(main.includes('r.avoidSide = chooseLeft ? -1 : 1'),'companions remember avoidance side');
 assert(main.includes('const wideAngle = 1.35'),'companions test wider turns when narrow turns are blocked');
+assert(main.includes("}else if (cfg && id === 'n:owner')"),'Owner incompatible cape rigs bypass generic spring-bone fallback');
+assert(main.includes('cape physics disabled until a compatible rig is supplied'),'incompatible Owner cape physics is diagnosed');
 assert(main.includes('const useWide = Math.max(dl, dr) < look * 0.7'),'wider turns only used when useful');
 assert(main.includes("diag('Balthrix rig has no recognized slither/body-wave animation"),'missing Balthrix body-wave clips are reported');
 assert(main.includes('serpentine|bodywave|snake'),'additional serpent locomotion clips are recognized');

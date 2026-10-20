@@ -541,7 +541,35 @@ const APPROVED_DISPLAY=new Map([
  ['garruk',v=>v.label==='Old'||GLB_IDS[v.slot]==='n:garruk_new5'],
  ['owner',v=>GLB_IDS[v.slot]==='n:owner'],
  ['vaelthryx',v=>GLB_IDS[v.slot]==='n:vaelthryx_straight_rig'],
- ['ashentitan',v=>GLB_IDS[v.slot]==='n:ashentitan_20']
+ ['ashentitan',v=>GLB_IDS[v.slot]==='n:ashentitan_20'],
+ ['hawk',v=>v.label==='Old'],
+ ['hearth',v=>v.label==='Old'],
+ ['hobgoblin',v=>v.label==='Old'],
+ ['hydrella',v=>v.label==='Old'],
+ ['kael',v=>v.label==='Old'],
+ ['kestrel',v=>v.label==='Old'],
+ ['lorian',v=>v.label==='Old'],
+ ['mirelle',v=>v.label==='Old'],
+ ['morwen',v=>v.label==='Old'],
+ ['ssylthar',v=>v.label==='Old'],
+ ['talia',v=>v.label==='Old'],
+ ['lunara',v=>v.label==='Old'||v.label.startsWith('New')],
+ ['marella',v=>v.label==='Old'||v.label.startsWith('New')],
+ ['mortimer',v=>v.label==='Old'||v.label.startsWith('New')],
+ ['mossgut',v=>v.label==='Blocky'],
+ ['neris',v=>v.label==='Blocky'||v.label==='Old'],
+ ['nyx',v=>v.label==='Blocky'||v.label==='Old'],
+ ['orin',v=>v.label==='Blocky'||v.label==='Old'],
+ ['pip',v=>v.label.startsWith('New')],
+ ['rook',v=>v.label==='Old'||v.label==='Blocky'],
+ ['rowan',v=>v.label==='Old'||v.label==='Blocky'],
+ ['selene',v=>v.label==='Old'||v.label==='Blocky'],
+ ['seraphine',v=>v.label==='Blocky'||v.label==='Old'||v.label==='Placeholder'],
+ ['stonetroll',v=>v.label==='Blocky'],
+ ['valen',v=>v.label==='Blocky'],
+ ['thorne',v=>v.label==='Blocky'||v.label==='Old'],
+ ['thrain',v=>v.label==='Blocky'||v.label.startsWith('New')],
+ ['vesper',v=>v.label==='Old']
 ]);
 for(const [key,accept] of APPROVED_DISPLAY){
  const group=GROUPS.get(key);if(!group)continue;
@@ -595,6 +623,9 @@ async function selectVariant(g, v) {
   await selectHero(v.slot); refreshSel(v.slot);
 }
 { const bar = document.getElementById('heroes'); const seen = new Set(), gl = [];
+  // Explicitly removed from the visible roster; retain saved slot compatibility.
+  const pikachuGroup = SLOT_G[GLB_IDS.indexOf('n:player_pikachu')];
+  if (pikachuGroup) seen.add(pikachuGroup);
   const OG = SLOT_G[GLB_IDS.indexOf('n:owner')];
   if (OG && !IS_OWNER_TOKEN) seen.add(OG);   /* hidden from everyone but the owner */
   HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g)) { seen.add(g); gl.push(g); } });

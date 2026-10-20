@@ -67,7 +67,12 @@ function buildWalkableTerrain(world){
   const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(P,3));
   geo.setAttribute('color',new THREE.BufferAttribute(C,3));geo.setIndex(ind);geo.computeVertexNormals();
   const mesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide}));
-  mesh.name='walkable-hills-mountains-valleys';mesh.receiveShadow=true;return mesh;
+  mesh.name='walkable-hills-mountains-valleys';
+  // Critical: mergeStatic() does not preserve existing per-vertex color buffers.
+  // Keep this independent vertex-coloured surface or green hills become a near-black flat merge.
+  mesh.userData.keep=true;
+  mesh.castShadow=true;mesh.receiveShadow=true;
+  return mesh;
 }
 
 const rng = seed => () => { seed=(seed+0x6D2B79F5)|0; let t=Math.imul(seed^seed>>>15,1|seed);t=(t+Math.imul(t^t>>>7,61|t))^t;return ((t^t>>>14)>>>0)/4294967296; };

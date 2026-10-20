@@ -1145,9 +1145,16 @@ function updateCrowd(dt) {
       if (!fighting && heroGap > Math.max(4, r.leash + 2) && Math.hypot(r.vxs, r.vzs) > 0.5 && moved < Math.hypot(mx, mz) * 0.15) r.stuckT = (r.stuckT || 0) + dt;
       else r.stuckT = 0;
       if (r.stuckT > 5) {
-        a.x = state.heroX + (Math.random() - 0.5) * 1.2;
-        a.z = state.heroZ + (Math.random() - 0.5) * 1.2;
-        r.y = state.heroY || 0; r.vxs = r.vzs = 0; r.stuckT = 0; r.ti = null;
+        // Resolve the recovery position against the same obstacles as regular
+        // NPC movement; a raw random offset can place a follower inside a wall.
+        const recovery = { x: state.heroX + (Math.random() - 0.5) * 1.2, z: state.heroZ + (Math.random() - 0.5) * 1.2 };
+        const oldLevel = state.level;
+        state.level = r.level;
+        resolve(recovery, false, 'npc');
+        state.level = oldLevel;
+        a.x = recovery.x; a.z = recovery.z;
+        r.y = surfaceAt(a.x, a.z, r.level)?.y ?? (state.heroY || 0);
+        r.vxs = r.vzs = 0; r.stuckT = 0; r.ti = null;
       }
     } else r.stuckT = 0;
     if(r.kind==='party'&&ZONE.name==='town'&&TOWN_LANDS?.waterAt(a.x,a.z))r.y=Math.max(r.y,0.2)-.55*HS;

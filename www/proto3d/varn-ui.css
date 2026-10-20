@@ -112,12 +112,10 @@ body:has(#settingsPanel[style*="block"]) #vnQuickMenu{display:none!important}
 #stick{background:radial-gradient(circle,#25142d8c 30%,#553070aa 68%,#20142a9e);border:3px ridge #c9a264;box-shadow:inset 0 0 0 5px #6f2dad39,0 0 11px #793bce55}
 #knob{background:radial-gradient(circle at 35% 30%,#bd86f1,#4c2a67 63%,#271a34);border:2px ridge #d8ae6f;box-shadow:0 0 11px #ae58e888}
 
-/* Unclutter screen: diagnostics move under top-right Settings. Show the
-   status tool automatically only when the loader reports a genuine error. */
-#diagBtn{display:none!important;z-index:3002!important}
+/* Diagnostics are an explicit menu/Settings tool. Never expose a touch target
+   over the joystick just because a runtime warning occurred during noclip. */
+#diagBtn,body.vn-diagnostic-error #diagBtn{display:none!important;pointer-events:none!important}
 #diag{z-index:3003!important}
-body.vn-diagnostic-error #diagBtn{display:block!important}
-body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
 
 /* Two separate character-roster tabs; approved bosses never mix into ordinary roster. */
 #heroes #hlist{min-width:min(310px,86vw)}

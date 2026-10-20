@@ -19,6 +19,8 @@ import { initSettings } from './settingsboot.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
 import { worldProfile, loadScale } from './charscale.js';
 import { buildTownOutskirts } from './townlands.js';
+import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
+import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -112,15 +114,15 @@ const cobble = canvasTex(256, (g, s) => {
     g.fillRect(x * 32 + (y % 2) * 16 + 1, y * 32 + 1, 30, 30);
   }
 }, 1);
-const ground = mesh(new THREE.PlaneGeometry(new URLSearchParams(location.search).has('oldvillage') ? WORLD * 4 : 360, new URLSearchParams(location.search).has('oldvillage') ? WORLD * 4 : 360), new THREE.MeshLambertMaterial({ map: grass }), 0, 0, 0, null, false);
+const ground = mesh(new THREE.PlaneGeometry(new URLSearchParams(location.search).has('oldvillage') ? WORLD * 4 : CITY_HALF * 2, new URLSearchParams(location.search).has('oldvillage') ? WORLD * 4 : CITY_HALF * 2), new THREE.MeshLambertMaterial({ map: grass }), 0, 0, 0, null, false);
 ground.rotation.x = -Math.PI / 2;
 { // plaza + paths (cobble)
   const cm = new THREE.MeshLambertMaterial({ map: cobble.clone() });
   cm.map.repeat.set(11 * PK, 11 * PK); cm.map.needsUpdate = true;
   const plaza = mesh(new THREE.CircleGeometry(13 * PK, 64), cm, 0, 0.02, 0, null, false); plaza.rotation.x = -Math.PI / 2;
   const pm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); pm.map.repeat.set(1, 22 * PK * 2 * WORLD / (60 * PK)); pm.map.needsUpdate = true;
-  const p1 = mesh(new THREE.PlaneGeometry(5 * KB, WORLD * 2), pm, 0, 0.03, 0, null, false); p1.rotation.x = -Math.PI / 2;
-  const p2 = mesh(new THREE.PlaneGeometry(WORLD * 2, 4 * KB), pm, 0, 0.031, 0, null, false); p2.rotation.x = -Math.PI / 2; p2.material.map.repeat.set(24 * PK * WORLD / (60 * PK), 0.8 * KB);
+  const p1 = mesh(new THREE.PlaneGeometry(5 * KB, CITY_HALF * 2), pm, 0, 0.03, 0, null, false); p1.rotation.x = -Math.PI / 2;
+  const p2 = mesh(new THREE.PlaneGeometry(CITY_HALF * 2, 4 * KB), pm, 0, 0.031, 0, null, false); p2.rotation.x = -Math.PI / 2; p2.material.map.repeat.set(24 * PK * WORLD / (60 * PK), 0.8 * KB);
 }
 
 function wallSeg(x1, z1, x2, z2) {
@@ -169,7 +171,7 @@ const SKINS = [];
 const BLD_ON = new URLSearchParams(location.search).get('oldvillage') == null;
 const drops = []; let dropMade = 0;
 if (BLD_ON) {
-  enterables.push(buildWalls(ectx, WORLD, GATE_W));
+  enterables.push(buildWalls(ectx, CITY_HALF, GATE_W));
   for (const b of buildVillage(ectx)) enterables.push(b);
   if (new URLSearchParams(location.search).get('nochunk') == null) { try { const r = chunkStatics(enterables.flatMap(e => e.parts || [e]), scene, 64); diag('static chunks: ' + r.before + ' -> ' + r.after); const rr = mergeRoofs(enterables.flatMap(e => e.parts || [e]), scene); diag('roofs: ' + rr.before + ' -> ' + rr.after); const rw = mergeWalls(enterables.flatMap(e => e.parts || [e]), scene); diag('walls: ' + rw.before + ' -> ' + rw.after); } catch (e) { console.error('chunkStatics', e.message, e.stack); } }
 } else {
@@ -678,7 +680,7 @@ const tmp = { x: 0, z: 0 };
 function surfaceAt(x, z, level) {
   for (const b of ectx.multi) { { const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
   if (LAD && level >= 10) { const ls = LAD.surface(x, z, level); if (ls) return ls; }
-  return level === 0 ? { y: ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : 0 } : null;
+  return level === 0 ? { y: ZONE.name === 'frost' ? frostElevation(x,z) : ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : 0 } : null;
 }
 function updateLevel() {
   if (state.climbing) return;
@@ -974,14 +976,14 @@ function updateCamera(dt, snap) {
   ci.zx = ZONE.cx; ci.zz = ZONE.cz; ci.zh = ZONE.half;
   camRig.update(ci);
   // Follow the actual elevated terrain on hills: don't let the third-person camera clip into a ridge.
-  if (ZONE.name === 'town' && TOWN_LANDS && !camRig.fp) {
-    const floor = TOWN_LANDS.heightAt(camRig.pos.x, camRig.pos.z) + 1.0 * HS;
+  if (((ZONE.name === 'town' && TOWN_LANDS) || ZONE.name === 'frost') && !camRig.fp) {
+    const floor = (ZONE.name === 'frost' ? frostElevation(camRig.pos.x,camRig.pos.z) : TOWN_LANDS.heightAt(camRig.pos.x,camRig.pos.z)) + 1.0 * HS;
     if (camRig.pos.y < floor) { camRig.pos.y = floor; camera.position.y = floor; camera.lookAt(camRig.look); }
   }
   camPos.copy(camRig.pos); camLook.copy(camRig.look);
   camRig.syncHero(hero);
-  sun.position.set(state.heroX + SUN_OFF.x * SUNK, (ZONE.name === 'town' ? state.heroY : 0) + SUN_OFF.y * SUNK, state.heroZ + SUN_OFF.z * SUNK);
-  sun.target.position.set(state.heroX, ZONE.name === 'town' ? state.heroY : 0, state.heroZ);
+  sun.position.set(state.heroX + SUN_OFF.x * SUNK, (ZONE.name !== 'wilds' ? state.heroY : 0) + SUN_OFF.y * SUNK, state.heroZ + SUN_OFF.z * SUNK);
+  sun.target.position.set(state.heroX, ZONE.name !== 'wilds' ? state.heroY : 0, state.heroZ);
 }
 
 function resize() {
@@ -1026,12 +1028,14 @@ const SMOKE = (() => {
 })();
 /* ---------- the Wilds (1.1.9): second map at x=1000, reached by the portal in town; a portal there leads back. Monsters spawn only there (fight layer, auto mode). ---------- */
 const TOWN_PORTAL = { x: -6, z: 38 };
-let WM = null, wildsP = null, townCols = null, portalT = null, zoneCd = 1.5, portalDwell = 0;
+let WM = null, FM = null, wildsP = null, townCols = null, portalT = null, frostCave = null, zoneCd = 1.5, portalDwell = 0;
 const wildsMod = import('./wilds.js').then(m => { portalT = m.makeGate(0x9a6bff); portalT.position.set(TOWN_PORTAL.x, 0, TOWN_PORTAL.z); scene.add(portalT);
   for (const dx of [-1.9, 1.9]) colliders.push({ type: 'circle', x: TOWN_PORTAL.x + dx, z: TOWN_PORTAL.z, r: .75 });   /* gate pillars; the opening between them is walkable */
-  return m; });
+  frostCave=m.makeGate(0x85d9ff);
+  frostCave.position.set(FROST_PORTAL.x,TOWN_LANDS?TOWN_LANDS.heightAt(FROST_PORTAL.x,FROST_PORTAL.z):FROST_SUMMIT.height,FROST_PORTAL.z);
+  scene.add(frostCave);return m; });
 async function ensureWilds() { if (WM) return WM; const m = await wildsMod; WM = Object.assign({ mod: m }, m.buildWilds({ scene, HS })); WM.portalMesh = m.makeGate(0x4fd0ff); WM.portalMesh.position.set(WM.portal.x, 0, WM.portal.z); WM.portalMesh.visible = false; scene.add(WM.portalMesh); return WM; }
-function snapFollowers() { TRAIL.length = 0; for (const r of crowd) if (r.kind === 'party') { r.level = 0; r.y = 0; r.ti = null; r.lvT = 0; r.a.x = state.heroX + (Math.random() - 0.5) * 3; r.a.z = state.heroZ + 2.5 * HS; r.vxs = r.vzs = 0; } }
+function snapFollowers() { TRAIL.length = 0; for (const r of crowd) if (r.kind === 'party') { r.level = 0; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; r.a.x = state.heroX + (Math.random() - 0.5) * 3; r.a.z = state.heroZ + 2.5 * HS; r.vxs = r.vzs = 0; } }
 /* Map unloading. Leaving town hides every static town node (no draw calls / shadow casters while away; geometry stays resident because the village is built once at boot).
    Leaving the Wilds fully DISPOSES it (geometry, materials, textures, enemies via FIGHT.stop) and it is rebuilt on the next visit. */
 const townHidden = [];
@@ -1046,26 +1050,46 @@ function unloadWilds() {
 }
 async function setZone(name) {
   if (name === ZONE.name) return true;
+  const lastZone=ZONE.name;
+  if(FIGHT&&FIGHT.auto)FIGHT.stop();
   if (name === 'wilds') {
     await ensureWilds(); const W = WM.mod.WILDS; townCols = colliders.slice(); colliders.length = 0; for (const c of WM.colliders) colliders.push(c);
     ZONE.name = 'wilds'; ZONE.cx = W.ox; ZONE.cz = W.oz; ZONE.half = W.half; WM.group.visible = true; WM.portalMesh.visible = true; hideTown();
     state.heroX = WM.spawn.x; state.heroZ = WM.spawn.z; state.yaw = Math.PI;
+  } else if (name === 'frost') {
+    FM=buildFrostRealm({scene}); townCols=colliders.slice();
+    colliders.length=0;for(const c of FM.colliders)colliders.push(c);
+    ZONE.name='frost';ZONE.cx=FROST_REALM.cx;ZONE.cz=FROST_REALM.cz;ZONE.half=FROST_REALM.half;
+    hideTown();FM.group.visible=true;if(portalT)portalT.visible=false;
+    state.heroX=FM.spawn.x;state.heroZ=FM.spawn.z;state.yaw=Math.PI;
   } else {
     colliders.length = 0; for (const c of townCols) colliders.push(c); ZONE.name = 'town'; ZONE.cx = 0; ZONE.cz = 0; ZONE.half = WORLD;
     if (FIGHT && FIGHT.auto) FIGHT.stop();   /* enemies are disposed first */
-    unloadWilds(); for (const n of townHidden) n.visible = true; townHidden.length = 0; if (portalT) portalT.visible = true;
-    state.heroX = TOWN_PORTAL.x; state.heroZ = TOWN_PORTAL.z + 4; state.yaw = 0;
+    unloadWilds();
+    if(FM){const old=FM;FM=null;scene.remove(old.group);old.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const mat of [].concat(o.material))mat.dispose();});}
+    for(const n of townHidden)n.visible=true;townHidden.length=0;
+    if(portalT)portalT.visible=true;if(frostCave)frostCave.visible=true;
+    state.heroX=lastZone==='frost'?FROST_PORTAL.x:TOWN_PORTAL.x;
+    state.heroZ=lastZone==='frost'?FROST_PORTAL.z+6:TOWN_PORTAL.z+4;state.yaw=0;
   }
   state.level = 0; state.target = null; state.climbing = false; updateLevel(); snapFollowers(); zoneCd = 1.5; portalDwell = 0;
-  if (name === 'wilds') { const f = await fightToggle(true); f.startAuto && f.startAuto(); } else if (FIGHT && FIGHT.auto) FIGHT.stop();
+  if(name==='wilds'||name==='frost'){const f=await fightToggle(true);f.startAuto();if(name==='frost')f.startRegionBosses('frost');}
   return true;
 }
 function updateZone(dt) {
   if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ, VIEWK);
-  const t = performance.now() / 1000; if (portalT && portalT.userData.update) portalT.userData.update(t); if (WM && WM.portalMesh.userData.update) WM.portalMesh.userData.update(t);
+  const t=performance.now()/1000;
+  if(portalT?.userData.update)portalT.userData.update(t);
+  if(frostCave?.userData.update)frostCave.userData.update(t);
+  if(WM?.portalMesh?.userData.update)WM.portalMesh.userData.update(t);
+  if(FM)FM.update(t);
   zoneCd = Math.max(0, zoneCd - dt); if (zoneCd > 0 || state.level !== 0 || state.climbing) { portalDwell = 0; return; }
-  const p = ZONE.name === 'town' ? TOWN_PORTAL : (WM ? { x: WM.portal.x, z: WM.portal.z } : null); if (!p) return;
-  if (Math.hypot(state.heroX - p.x, state.heroZ - p.z) < 1.7 + Math.max(0, HERO_R - 0.75)) { portalDwell += dt; if (portalDwell > 0.35) { portalDwell = -99; setZone(ZONE.name === 'town' ? 'wilds' : 'town'); } } else if (portalDwell > -50) portalDwell = 0;
+  const isFrostCave=ZONE.name==='town'&&Math.hypot(state.heroX-FROST_PORTAL.x,state.heroZ-FROST_PORTAL.z)<7;
+  const p=ZONE.name==='town'?(isFrostCave?FROST_PORTAL:TOWN_PORTAL):ZONE.name==='frost'?FROST_EXIT:WM?{x:WM.portal.x,z:WM.portal.z}:null;
+  if(!p)return;
+  if(Math.hypot(state.heroX-p.x,state.heroZ-p.z)<1.7+Math.max(0,HERO_R-0.75)){
+    portalDwell+=dt;if(portalDwell>.35){portalDwell=-99;setZone(ZONE.name==='town'?(isFrostCave?'frost':'wilds'):'town');}
+  }else if(portalDwell>-50)portalDwell=0;
 }
 
 function frame(now) {
@@ -1103,7 +1127,7 @@ if (savedOn) {
 function entrySpot(d) {
   const lim = WORLD - 2, ok = (x, z) => Math.abs(x) < lim && Math.abs(z) < lim && window.__p3d.free(x, z, 0);
   // Registry positions are layout grid coordinates; gatehouse is anchored to the *new* outer wall.
-  const bx = d.cx * PK, bz = d.id === 'gatehouse' ? WORLD - 1.2 : d.cz * PK;
+  const bx = d.cx * PK, bz = d.id === 'gatehouse' ? CITY_HALF - 1.2 : d.cz * PK;
   const fx = bx + Math.sin(d.rot || 0) * 8, fz = bz + Math.cos(d.rot || 0) * 8;
   if (ok(fx, fz)) return { x: fx, z: fz };
   for (let r = 5; r <= 26; r += 1.5) for (let k = 0; k < 16; k++) { const a = k / 16 * 6.2832, x = bx + Math.cos(a) * r, z = bz + Math.sin(a) * r; if (ok(x, z)) return { x, z }; }

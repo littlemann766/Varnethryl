@@ -1,0 +1,44 @@
+/* Varnethryl 3D royal interface: shared navy, worn gold and parchment palette. */
+@font-face{font-family:VarnCinzel;src:url('./fonts/Cinzel.woff') format('woff');font-display:swap}
+:root{--vn-ink:#080e19;--vn-navy:#101c2c;--vn-gold:#d9b46c;--vn-light:#f7e6bf;--vn-steel:#8295ad}
+html,body{background:var(--vn-ink);color:var(--vn-light)}
+#hud{z-index:52;justify-content:flex-start;gap:7px;align-items:center;flex-wrap:wrap;right:150px;max-width:calc(100vw - 160px);font-family:VarnCinzel,Georgia,serif;text-shadow:0 2px 4px #000}
+#hud>div:first-child{background:linear-gradient(160deg,#213047ef,#090f1eea);border:1px solid #ac8749;border-radius:8px;box-shadow:inset 0 0 0 1px #ffe0a229,0 6px 20px #0008;padding:8px 12px;line-height:1.5;min-width:164px}
+#hud b{font-size:14px;color:#f2d89c;letter-spacing:.16em}
+#hud span{font-size:10px;color:#c7bb9e}
+#hud #ver{color:#c8a363}
+#hud a,#hud button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;margin:0!important;padding:7px 11px!important;border-radius:6px!important;color:#f3ddb0!important;background:linear-gradient(180deg,#26364aec,#0b1424e8)!important;border:1px solid #987845!important;text-decoration:none;font:700 11px VarnCinzel,Georgia,serif!important;letter-spacing:.04em;pointer-events:auto}
+#hud a:hover,#hud button:hover,#heroes button:hover{border-color:#f4cc83!important;filter:brightness(1.12)}
+#heroes{top:max(82px,calc(env(safe-area-inset-top) + 74px));max-width:min(300px,64vw)}
+#heroes button{background:linear-gradient(155deg,#263448ed,#0b1120f2);color:#f2e0ba;border:1px solid #a98750;border-radius:7px;font-family:VarnCinzel,Georgia,serif;box-shadow:0 3px 8px #0009}
+#heroes button.cur{background:linear-gradient(160deg,#29364c,#0c1420);color:#f4e5be}
+#hlist{background:#0d1425f5;border:1px solid #b58e55;border-radius:8px}
+#stick{border:3px solid #bd9859;background:radial-gradient(circle,#32435a77,#0c1321bb);box-shadow:inset 0 0 0 4px #0b1021c2,0 4px 20px #0008}
+#knob{border:3px solid #e4c181;background:radial-gradient(circle at 36% 29%,#b6a27c,#475069 55%,#131b2b);box-shadow:inset 0 0 8px #fff3,0 3px 9px #0008}
+#hint{color:#f3d99e;font:11px VarnCinzel,Georgia,serif;max-width:60vw}
+#diagBtn{background:linear-gradient(#293749,#0f1726);border-color:#9f7c4a;color:#f0d7a7;border-radius:6px;font:11px VarnCinzel,Georgia,serif}
+#load{background:radial-gradient(circle,#263452,#090b17 72%);font:700 16px VarnCinzel,Georgia,serif;color:#f4d898;z-index:1200}
+#vnMenu{position:fixed;inset:0;z-index:1050;display:grid;place-items:center;overflow:auto;padding:max(20px,env(safe-area-inset-top)) 18px max(20px,env(safe-area-inset-bottom));background:linear-gradient(#080b16b8,#050814ec),url('./assets/brand/poster.webp') center/cover no-repeat;touch-action:pan-y}
+#vnMenu[hidden]{display:none}
+#vnMenu .vn-card{position:relative;width:min(560px,100%);padding:clamp(20px,5vmin,42px);border:2px ridge #bd9859;border-radius:9px;background:linear-gradient(142deg,#263248f2,#0a1121f7 68%,#16112af7);box-shadow:0 0 0 4px #060b16bb,inset 0 0 0 2px #d6b77f33,0 20px 65px #000b;text-align:center}
+#vnMenu .vn-card:before,#vnMenu .vn-card:after{content:'✦';position:absolute;color:#d4b374;font-size:22px;top:7px}#vnMenu .vn-card:before{left:14px}#vnMenu .vn-card:after{right:14px}
+#vnMenu .vn-emblem{width:clamp(88px,18vmin,152px);height:clamp(88px,18vmin,152px);object-fit:contain;filter:drop-shadow(0 0 20px #bb954e66)}
+#vnMenu h1{font:700 clamp(28px,6vmin,52px) VarnCinzel,Georgia,serif;letter-spacing:.09em;color:#f0d18a;text-shadow:0 3px 8px #000;line-height:1.1;margin:7px 0}
+#vnMenu .vn-legend{font:italic clamp(12px,2.4vmin,16px) Georgia,serif;color:#d4c4a5;margin:8px 0 18px}
+#vnMenu .vn-rule{height:1px;max-width:340px;margin:16px auto;background:linear-gradient(90deg,transparent,#b48c4d,transparent)}
+#vnMenu .vn-actions{display:grid;gap:10px;max-width:340px;margin:auto}
+#vnMenu button,#vnMenu a{min-height:44px;border:1px solid #b78d51;border-radius:5px;background:linear-gradient(180deg,#293a50,#101827);color:#f8e5bf;display:flex;align-items:center;justify-content:center;text-decoration:none;font:700 14px VarnCinzel,Georgia,serif;letter-spacing:.05em;cursor:pointer}
+#vnMenu button.vn-primary{background:linear-gradient(180deg,#e4c689,#a97736);color:#151d2c;border-color:#f2dca3;text-shadow:0 1px #fff4}
+#vnMenu button:focus-visible,#vnMenu a:focus-visible{outline:3px solid #fff1c2;outline-offset:3px}
+#vnMenu button:hover,#vnMenu a:hover{filter:brightness(1.16)}
+#vnMenu .vn-bottom{font:11px Georgia,serif;color:#aeb1c0;margin-top:16px}
+#vnMenu .vn-links{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+#vnMenu .vn-links a{font-size:11px;min-height:34px;padding:5px 12px}
+#settingsPanel{background:linear-gradient(155deg,#1a2639f6,#0a101ef6)!important;border-color:#b28c52!important;color:#f4e6c9!important;box-shadow:inset 0 0 0 1px #f9d89e20,0 12px 34px #000b!important}
+#settingsPanel h3,#settingsPanel .card>.sec{font-family:VarnCinzel,Georgia,serif!important;color:#efd090!important}
+#settingsPanel .card{background:#152138db!important;border-color:#6e5737!important}
+#settingsPanel button,#settingsPanel select{background:linear-gradient(#2b3950,#111c2c)!important;border-color:#87724d!important;color:#f1ddb4!important}
+#settingsPanel button.on{background:linear-gradient(#e5c78c,#aa7d40)!important;color:#142033!important}
+@media(max-width:740px){#hud{right:8px;max-width:calc(100vw - 16px);gap:4px;align-items:flex-start}#hud>div:first-child{min-width:130px;padding:5px 8px}#hud b{font-size:11px}#hud a,#hud button{min-height:31px!important;padding:5px 7px!important;font-size:10px!important}#heroes{top:108px}#hint{bottom:max(13px,env(safe-area-inset-bottom));font-size:10px;max-width:50vw}}
+@media(orientation:landscape) and (max-height:540px){#hud>div:first-child{line-height:1.2}#heroes{top:65px}#vnMenu .vn-card{padding:12px 22px}#vnMenu .vn-emblem{width:55px;height:55px}#vnMenu h1{font-size:26px}#vnMenu .vn-legend{margin:3px 0}#vnMenu .vn-rule{margin:7px auto}#vnMenu .vn-actions{grid-template-columns:1fr 1fr;max-width:none;gap:6px}#vnMenu button{min-height:38px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){#vnMenu *{animation:none!important;transition:none!important}}

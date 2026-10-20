@@ -225,7 +225,7 @@ export function createFight(env) {
     .on('respawn', () => { clearOS(env.hero()); { const rp = env.respawnPos ? env.respawnPos() : { x: 0, z: 60 }; state.heroX = rp.x; state.heroZ = rp.z; } state.target = null; env.hero().rotation.x = 0; });
   cc.on('damage', d => { if (d.toPlayer) { const h = env.hero(), u = h.userData; if (!(u.os && u.os.kind !== 'hit')) oneShot(h, 'hit', 0.45, false); } else if (d.e.view) { d.e.flinch = 0.18; if (d.e.state !== 'telegraph' && d.e.state !== 'stagger') oneShot(d.e.view, 'hit', 0.4, false); } });
   cc.on('chilled', () => hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'CHILLED', ''));
-  cc.on('defeat', e => { if (e.def.boss) { bossOn = false; hud.say(e.def.name.toUpperCase() + ' DEFEATED', 2600); } if (cc.kills % 6 === 0) { wave++; } });
+  cc.on('defeat', e => { if (e.def.boss) { bossOn = cc.enemies.some(x => x!==e && x.def.boss && x.state !== 'defeated'); hud.say(e.def.name.toUpperCase() + ' DEFEATED', 2600); } if (cc.kills % 6 === 0) { wave++; } });
   cc.on('enemyAttack', a => { if (a.result === 'dodged' && a.dmg === 0 && !cc.god) hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'DODGE', 'heal'); else if (a.result === 'parried') hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'PARRY', 'crit'); else if (a.result === 'blocked') hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'BLOCK', ''); });
 
   /* ---- enemies ---- */
@@ -233,17 +233,23 @@ export function createFight(env) {
     const def = ENEMIES[key], w = await env.makeModel(def.model); if (!w || !on) return null;
     let x = state.heroX + 12, z = state.heroZ;
     if (extra && extra.at) { x = extra.at[0]; z = extra.at[1]; } else for (let k = 0; k < 20; k++) { const a = Math.random() * 6.283, r = (atPlayerDist || (14 + Math.random() * 14)) * HS / 1.5 * Math.max(1, cc.RM * 0.7), px = state.heroX + Math.cos(a) * r, pz = state.heroZ + Math.sin(a) * r; if (env.free(px, pz)) { x = px; z = pz; break; } }
-    w.position.set(x, 0, z); let top;
+    w.position.set(x, env.floorAt ? env.floorAt(x,z) : 0, z); let top;
     if (def.boss || def.scale > 1) { top = (w.userData.heightW || 1.8 * HS * def.scale) + 0.5; }   // the GLB is already 6x the hero (11.4 m vs 1.9 m): no extra scaling in game
     else { w.updateMatrixWorld(true); top = Math.max(1.5, new THREE.Box3().setFromObject(w).max.y) + 0.3; }
     scene.add(w);
     const ems = []; w.traverse(o => { if (o.isMesh && o.material && o.material.emissive) { ems.push(o); o.userData.em = o.material.emissive.getHex(); } });
     const tele = new THREE.Mesh(ring.geometry, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false })); tele.rotation.x = -Math.PI / 2; tele.visible = false; scene.add(tele);
     const e = cc.addEnemy(key, x, z, Object.assign({ view: w, top, ems, tele, flashOn: false, px: x, pz: z }, extra));
-    if (def.boss) { bossOn = true; hud.say(def.name.toUpperCase() + ' APPEARS', 2200); cc.tgt.target = e; cc.tgt.locked = false; cc.lastTarget = e; }
+    if(def.boss){
+      bossOn=true;hud.say(def.name.toUpperCase()+' APPEARS',2200);
+      // No forced remote lock-on: only select a boss when it is actually nearby.
+      if(Math.hypot(e.x-state.heroX,e.z-state.heroZ)<90){
+        cc.tgt.target=e;cc.tgt.locked=false;cc.lastTarget=e;
+      }
+    }
     return e;
   }
-  const spawnBoss = () => { if (on && !bossOn) spawn('titan', 26); };
+  const spawnBoss = () => { if (on && !bossAlive('titan')) spawn('titan', 26); };
   /* boss telegraph shapes: ONE pooled mesh per boss (plane for line, sector for cone), created lazily. */
   let GL_LINE = null, GL_CONE = null;
   function bossTele(e, shape, pt) { if (!e.tele2 || e.tele2s !== shape) { if (e.tele2) { scene.remove(e.tele2); e.tele2.material.dispose(); }
@@ -251,7 +257,7 @@ export function createFight(env) {
       e.tele2 = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.4, side: THREE.DoubleSide, depthWrite: false })); e.tele2s = shape; scene.add(e.tele2); }
     e.tele2.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); return e.tele2; }
   cc.on('remove', e => { if (e.view) { scene.remove(e.view); scene.remove(e.tele); e.tele.material.dispose(); if (e.tele2) { scene.remove(e.tele2); e.tele2.material.dispose(); } } });
-  cc.on('bossPhase', ev => { hud.say('THE TITAN ENRAGES', 1800); shakeA = 1.2; shakeT = 0.6; });
+  cc.on('bossPhase', ev => { hud.say((ev.e?.def?.name || 'BOSS').toUpperCase() + ' ENRAGES', 1800); shakeA = 1.2; shakeT = 0.6; });
   const yawLerp = (cur, to, k) => cur + (((to - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * k;
 
   /* ---- per frame ---- */
@@ -266,8 +272,8 @@ export function createFight(env) {
     cc.update(dt); if (lfx) lfx.update(dt); updateCompanions(dt);
     // spawner (bad guys): small waves of regular enemies
     spawnT -= dt; const reg = cc.enemies.filter(e => !e.def.boss && e.state !== 'defeated').length;
-    if (auto) {   // the Wilds: scattered, passive mobs (they stand off until you come within 3 m or hit them first); far ones are recycled
-      RH.hero.x = state.heroX; RH.hero.z = state.heroZ; if (cc.dead <= 0) RS.update(dt, RH);   // respawn: 20-40 s after a kill, out of sight, per-biome cap, Wilds only
+    if (auto) {   // Wilds and town wilderness: passive monsters, never inside the walled city (they stand off until you come within 3 m or hit them first); far ones are recycled
+      RH.hero.x = state.heroX; RH.hero.z = state.heroZ; if (cc.dead <= 0) RS.update(dt, RH); overworldBosses(dt);   // respawn: 20-40 s after a kill, out of sight, per-biome cap, Wilds only
       for (const e of cc.enemies) if (e.state === 'idle' && Math.hypot(e.x - state.heroX, e.z - state.heroZ) > 95) { cc.removeEnemy(e); RS.freeSlot(false); }
     } else if (spawnT <= 0 && reg < Math.min(MAX_ALIVE, 2 + wave) && cc.dead <= 0) { spawnT = 3.5; spawn(WAVE_TABLE[Math.min(WAVE_TABLE.length - 1, Math.floor(Math.random() * Math.min(WAVE_TABLE.length, 1 + wave)))]); }
     // dash / jump
@@ -287,7 +293,10 @@ export function createFight(env) {
     for (const e of cc.enemies.slice()) {
       const r = e.view; if (!r) continue; const u = r.userData, bs = e.def.boss ? 2.2 : 1;
       if (e.state === 'defeated') { if (!e.dying) { e.dying = true; e.deathClip = oneShot(r, 'death', 0, true); } const uu = r.userData; if (e.deathClip) { tickOS(r, dt); if (uu.glb && uu.act) { uu.mixer.update(dt); if (uu.sb) uu.sb.update(dt); } } else r.rotation.x = -Math.min(1.4, e.deadT * 4); r.position.y = -Math.max(0, e.deadT - 1.2) * 1.2 * bs; e.tele.visible = false; if (e.deadT > (e.deathClip ? 4 : 2.4)) cc.removeEnemy(e); continue; }
-      const mv = Math.hypot(e.x - e.px, e.z - e.pz) / Math.max(dt, 1e-4); e.px = e.x; e.pz = e.z; r.position.x = e.x; r.position.z = e.z;
+      const mv = Math.hypot(e.x - e.px, e.z - e.pz) / Math.max(dt, 1e-4); e.px = e.x; e.pz = e.z;
+      r.position.x=e.x;r.position.z=e.z;r.position.y=env.floorAt?env.floorAt(e.x,e.z):0;
+      // A moving boss patrol stays on the real slope, like players and companions.
+      if(e.tele&&e.tele.visible)e.tele.position.y=r.position.y+.13;
       r.rotation.y = yawLerp(r.rotation.y, e.yaw, Math.min(1, dt * 10));
       if (e.state !== e.ls) { if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
@@ -313,18 +322,47 @@ export function createFight(env) {
     for (const e of cc.enemies.slice()) if (e.state === 'defeated' && !e.def.boss) cc.removeEnemy(e);
     spawn(key, 10); return true;
   };
-  let auto = false;
+  let auto=false, overlandTime=0,titanSeen=false,roamer=null,roamerBusy=false,roamerCooldown=0;
+  function bossAlive(key){return cc.enemies.some(e=>e.key===key&&e.state!=='defeated');}
+  function overworldBosses(dt){
+    if(!on||!auto||!env.zone||env.zone()!=='town')return;
+    overlandTime+=dt;roamerCooldown=Math.max(0,roamerCooldown-dt);
+    // Titan is territorial, always the 40x model. Bosses load lazily once the
+    // hero enters the lava region, sparing phones a 76m Titan across the map.
+    const p=env.titanSite?env.titanSite():{x:-397,z:-399};
+    if(!titanSeen&&Math.hypot(state.heroX-p.x,state.heroZ-p.z)<136){
+      titanSeen=true;spawn('titan',0,{at:[p.x,p.z],aggroR:75,biome:'rock'});
+    }
+    // Balthrix physically roams around the entire wilderness, including across
+    // the volcanic lair. When far out of sight, unload his high-poly model.
+    const q=env.roamerAt?env.roamerAt(overlandTime):null;
+    if(roamer&&(!cc.enemies.includes(roamer)||roamer.state==='defeated')){
+      roamer=null;roamerCooldown=65;
+    }
+    if(roamer&&q){
+      if(Math.hypot(roamer.x-state.heroX,roamer.z-state.heroZ)>215){
+        cc.removeEnemy(roamer);roamer=null;roamerCooldown=3;
+      }else if(roamer.state==='idle'){
+        const dx=q.x-roamer.x,dz=q.z-roamer.z,d=Math.hypot(dx,dz);
+        if(d>.05){const step=Math.min(d,5*dt);roamer.x+=dx/d*step;roamer.z+=dz/d*step;roamer.yaw=Math.atan2(dx,dz);}
+      }
+    }
+    if(!roamer&&!roamerBusy&&roamerCooldown<=0&&q&&Math.hypot(state.heroX-q.x,state.heroZ-q.z)<132){
+      roamerBusy=true;
+      spawn('vaelthryx',0,{at:[q.x,q.z],aggroR:38,biome:'rock',roaming:true}).then(e=>{roamer=e;roamerBusy=false;},()=>{roamerBusy=false;roamerCooldown=15;});
+    }
+  }
   const RS = new Respawner({ max: AUTO_MAX, maxDist: 60 * (env.wildsScale || 280 / 170) /* enlarged Wilds: biomes are WS x farther apart */ }), RH = { hero: { x: 0, z: 0 }, zone: () => env.zone ? env.zone() : 'wilds', inWilds: (x, z) => env.inWilds ? env.inWilds(x, z) : true,
     biome: (x, z) => env.biome ? env.biome(x, z) : 'meadow', free: (x, z) => env.free(x, z), visible: (x, z) => project(x, 1.2, z, sc),
     alive: b => { let n = 0; for (const e of cc.enemies) if (e.biome === b && e.state !== 'defeated') n++; return n; }, spawn: (key, x, z, b) => spawn(key, 0, { aggroR: AUTO_AGGRO, at: [x, z], biome: b }) };
   cc.on('defeat', e => { if (auto && !e.def.boss) RS.freeSlot(true); });
   function start(isAuto) {
-    if (on) return; auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
+    if (on) return; auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; overlandTime=0; titanSeen=false;roamer=null;roamerBusy=false;roamerCooldown=0; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
     if (auto) { syncHero(); equip(); hud.say('THE WILDS - monsters about', 1800); return; }
     env.selectOwner().then(() => { syncHero(); equip(); hud.say('FIGHT TEST', 1800); });
   }
-  function stop() { heroWeaponClear(); for (const s of cc.summons.slice()) cc.removeSummon(s, 'stop'); cc.buffs.length = 0; sumSync();
+  function stop() { roamer=null;roamerBusy=false;heroWeaponClear(); for (const s of cc.summons.slice()) cc.removeSummon(s, 'stop'); cc.buffs.length = 0; sumSync();
     if (!on) return; on = false; metHide(); metDispose(); cc.meteors.length = 0; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }

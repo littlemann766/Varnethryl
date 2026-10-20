@@ -8,7 +8,15 @@ export class EnemyAIController {
     if (e.state === 'defeated') return null;
     e.tStateT += dt; e.atkCd = Math.max(0, e.atkCd - dt); e.flash = Math.max(0, e.flash - dt);
     const dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz) || 1e-6, nx = dx / d, nz = dz / d, reach = e.def.reach * env.HS + e.def.r;
-    if (e.state !== 'telegraph' && e.state !== 'attack') e.yaw = Math.atan2(nx, nz);
+    if (e.state !== 'telegraph' && e.state !== 'attack' && Number.isFinite(nx) && Number.isFinite(nz)) {
+      const targetYaw = Math.atan2(nx, nz);
+      const currentYaw = Number.isFinite(e.yaw) ? e.yaw : targetYaw;
+      const deltaYaw = Math.atan2(Math.sin(targetYaw - currentYaw), Math.cos(targetYaw - currentYaw));
+      // Bosses have large bodies: turn smoothly during pursuit, but freeze
+      // their facing while telegraphing so dodging the attack remains fair.
+      const turnSpeed = e.def.boss ? 2.4 : 7;
+      e.yaw = currentYaw + deltaYaw * Math.min(1, Math.max(0, dt) * turnSpeed);
+    }
     if (e.knockT > 0) { e.knockT = Math.max(0, e.knockT - dt); env.move(e, e.kx * 9 * e.knockT * dt * 4, e.kz * 9 * e.knockT * dt * 4); }
     switch (e.state) {
       case 'idle': if (!p.dead && d < (e.aggroR !== undefined ? e.aggroR : e.def.aggro * env.HS / 1.5 * 1.4 * Math.max(1, 0.5 + 0.5 * (env.RM || 1)))) this.set(e, 'chase'); break;

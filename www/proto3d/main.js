@@ -671,7 +671,38 @@ const SPEED = 5.2 * HS;
 let travelRun=false;
 const WALK_SPEED=.62, RUN_SPEED=1.24;
 const travelScale=()=>travelRun?RUN_SPEED:WALK_SPEED;
-function setTravelRun(v){travelRun=!!v;const b=document.getElementById('runBtn');if(b){b.textContent=travelRun?'RUN':'WALK';b.setAttribute('aria-pressed',String(travelRun));b.title=travelRun?'Running – tap to walk':'Walking – tap to run';}}
+// Full stamina covers roughly 290 world units of sustained running on normal ground
+// (~30 seconds). Combat and world travel use the same SP pool when combat is active.
+const STAMINA_MAX=100, STAMINA_PER_UNIT=.34, WALK_RECOVERY=8, IDLE_RECOVERY=13;
+let worldStamina=STAMINA_MAX, previousCombatSp=null, exhausted=false;
+function staminaResource(){return typeof FIGHT!=='undefined'&&FIGHT?.on?FIGHT.cc.res:null;}
+function staminaLevel(){const r=staminaResource();return r?r.sp/r.max.sp:worldStamina/STAMINA_MAX;}
+function updateStamina(dt,ranDistance){
+ const resource=staminaResource();
+ if(resource&&!previousCombatSp){resource.sp=Math.min(resource.max.sp,worldStamina/STAMINA_MAX*resource.max.sp);}
+ else if(!resource&&previousCombatSp){worldStamina=Math.min(STAMINA_MAX,previousCombatSp.sp/previousCombatSp.max.sp*STAMINA_MAX);}
+ previousCombatSp=resource;
+ if(resource?.unlimited){worldStamina=STAMINA_MAX;exhausted=false;}
+ else if(travelRun&&ranDistance>0.01){
+   const use=ranDistance*STAMINA_PER_UNIT;
+   if(resource){resource.sp=Math.max(0,resource.sp-use/STAMINA_MAX*resource.max.sp);resource.spLock=Math.max(resource.spLock,.3);}
+   else worldStamina=Math.max(0,worldStamina-use);
+ } else if(!resource){
+   worldStamina=Math.min(STAMINA_MAX,worldStamina+(ranDistance>.01?WALK_RECOVERY:IDLE_RECOVERY)*dt);
+ }
+ const pct=staminaLevel();
+ if(travelRun&&pct<=.005){exhausted=true;setTravelRun(false);}
+ if(exhausted&&pct>=.30)exhausted=false;
+ const meter=document.getElementById('staminaMeter'),txt=document.getElementById('staminaValue');
+ if(meter)meter.style.width=(100*pct).toFixed(1)+'%';
+ if(txt)txt.textContent=Math.round(pct*100)+'%'+(exhausted?' · Recovering':'');
+ const bar=document.getElementById('staminaHud');if(bar)bar.classList.toggle('exhausted',exhausted);
+}
+function setTravelRun(v){
+ travelRun=!!v&&(!exhausted&&staminaLevel()>=.12||!!staminaResource()?.unlimited);
+ const b=document.getElementById('runBtn');
+ if(b){b.textContent=travelRun?'RUN':exhausted?'REST':'WALK';b.setAttribute('aria-pressed',String(travelRun));b.title=travelRun?'Running – tap to walk':exhausted?'Stamina depleted – recovering':'Walking – tap to run';}
+}
 document.getElementById('runBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setTravelRun(!travelRun);});
 addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.key.toLowerCase()==='r'){setTravelRun(!travelRun);}});
 let jumpVelocity=0,jumpHeight=0;
@@ -810,7 +841,7 @@ function crowdSurface(r, a, dt) {
   const ty = s ? s.y : (r.level >= 10 && LAD ? LAD.heightOf(r.level) : 0);
   // Outside buildings, ground and followers must share the exact height sampler.
   // Snap steep outdoor inclines immediately to avoid clipping under mountains.
-  const outdoor=(r.level===0&&(ZONE.name==='frost'||ZONE.name==='town'&&!isCitySafe?.(a.x,a.z,0)));
+  const outdoor=(r.level===0&&(ZONE.name==='frost'||ZONE.name==='town'&&(Math.abs(a.x)>CITY_HALF||Math.abs(a.z)>CITY_HALF)));
   const correction=outdoor?Math.max(45,Math.abs(ty-r.y)/Math.max(dt,.001)):r.level===0?22:7;
   r.y = Math.abs(ty-r.y)<.025?ty:r.y+Math.max(-correction*dt,Math.min(correction*dt,ty-r.y));
 }
@@ -943,6 +974,7 @@ function updateHero(dt) {
   state.vx = moving ? vx * SPEED * travelScale() * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0; state.vz = moving ? vz * SPEED * travelScale() * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0;
   if (playerAct.dx || playerAct.dz) { tmp.x = state.heroX + playerAct.dx; tmp.z = state.heroZ + playerAct.dz; resolve(tmp, passesWalls(cheat)); state.heroX = tmp.x; state.heroZ = tmp.z; }
   state.moving = state.speed > 0.5;
+  updateStamina(dt, Math.max(0,state.speed*dt));
   updateLevel();
   state.swimming=!!(ZONE.name==='town'&&TOWN_LANDS?.waterAt(state.heroX,state.heroZ)&&state.level===0);
   if(state.swimming)state.heroY=Math.max(state.heroY,.2);
@@ -1232,7 +1264,7 @@ const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
 const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
-window.__p3d = { get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
+window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),running:travelRun,exhausted};}, setRunning:setTravelRun, jump, get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   teleportTo(x,z){if(!Number.isFinite(x)||!Number.isFinite(z))return false;state.heroX=x;state.heroZ=z;state.target=null;state.level=0;updateLevel();snapFollowers();saver?.mark();return true;},
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; }, get guards() { return GUARDS; },

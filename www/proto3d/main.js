@@ -348,7 +348,7 @@ function locoAnim(u, sp, dt = 1/60) {
   const smooth = (key, target) => { const alpha = 1 - Math.exp(-Math.max(0, dt) * 11); u[key] = (u[key] ?? target) + (target - (u[key] ?? target)) * alpha; return u[key]; };
   const A = u.act, S = u.speeds;
   if (S && A.idle) {
-    const v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? sp / (u.mscale || 1) : 0)), L = [['walk', S.walk], ['trot', S.trot], ['run', S.run]].filter(([k, c], i, all) => A[k] && A[k] !== A.idle && c > 0 && all.findIndex(([prev]) => A[prev] === A[k]) === i).sort((a,b)=>a[1]-b[1]);
+    const v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? sp / (Number.isFinite(u.mscale) && u.mscale > 0 ? u.mscale : 1) : 0)), L = [['walk', S.walk], ['trot', S.trot], ['run', S.run]].filter(([k, c], i, all) => A[k] && A[k] !== A.idle && c > 0 && all.findIndex(([prev]) => A[prev] === A[k]) === i).sort((a,b)=>a[1]-b[1]);
     const wt = { idle: 0 }; for (const [k] of L) wt[k] = 0;
     // Some imported rigs have idle but no walk/run clips. Do not index an empty list.
     if (!L.length || v < 0.025) { wt.idle = 1; }
@@ -358,8 +358,8 @@ function locoAnim(u, sp, dt = 1/60) {
     for (const [k, c] of L) { A[k].setEffectiveWeight(wt[k] * ov); A[k].timeScale = Math.max(0.5, Math.min(2.4, v / c)); }
     return;
   }
-  const wk = A.walk, id = A.idle, v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? (S ? sp / (u.mscale || 1) : sp) : 0));
-  if (wk && id) {
+  const wk = A.walk, id = A.idle, v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? (S ? sp / (Number.isFinite(u.mscale) && u.mscale > 0 ? u.mscale : 1) : sp) : 0));
+  if (wk && id && wk !== id) {
     const w = v < 0.025 ? 0 : Math.min(1, v / SPEED);
     const ov = 1 - (u.ovr || 0);
     // Non-profiled rigs can still have a dedicated running clip.
@@ -371,9 +371,9 @@ function locoAnim(u, sp, dt = 1/60) {
     wk.timeScale = 0.6 + v * 0.25;
   }
   // Unrigged Idle fallback: freeze walking at rest instead of marching in place.
-  else if (wk && !id) {
+  else if (wk && (!id || wk === id)) {
     const standing = v < 0.025, ov = 1 - (u.ovr || 0);
-    const run = A.run && A.run !== wk ? A.run : null;
+    const run = A.run && A.run !== wk && A.run !== id ? A.run : null;
     const runMix = run && !standing ? Math.max(0, Math.min(1, (v - (S?.walk || SPEED)) / Math.max(.1, (S?.run || SPEED * 2) - (S?.walk || SPEED)))) : 0;
     wk.setEffectiveWeight((1-runMix)*ov);
     // Profiled rigs need playback rates based on their authored ground speeds,
@@ -388,6 +388,18 @@ function locoAnim(u, sp, dt = 1/60) {
         : Math.max(.65,Math.min(2.2,v/(SPEED*1.8)));
     }
     if (standing && !u.wasStanding) { wk.time = 0; if (u.sb) u.sb.reset(); }
+    u.wasStanding = standing;
+  }
+  // Some imported rigs expose only a running clip. Avoid leaving that action
+  // at its initial zero weight for the entire game.
+  else if (!wk && A.run && A.run !== id) {
+    const standing = v < .025, ov = 1 - (u.ovr || 0);
+    A.run.setEffectiveWeight(standing && id ? 0 : ov);
+    A.run.timeScale = standing ? 0 : S?.run > 0
+      ? Math.max(.5, Math.min(2.4, v / S.run))
+      : Math.max(.5, Math.min(2.4, v / (SPEED * 2)));
+    if (id) id.setEffectiveWeight(standing ? ov : 0);
+    if (standing && !u.wasStanding) { A.run.time = 0; if (u.sb) u.sb.reset(); }
     u.wasStanding = standing;
   }
 }

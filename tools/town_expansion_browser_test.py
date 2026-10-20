@@ -45,6 +45,22 @@ with sync_playwright() as p:
     page.evaluate("__p3d.state.heroX=994;__p3d.state.heroZ=-2")
     page.wait_for_function("__p3d.zone==='town'",timeout=90000)
     check('portal still returns to expanded town',page.evaluate("__p3d.zone")=='town')
+    # The Frost Troll brothers' cave lives at the summit of the north wilderness hill.
+    page.wait_for_timeout(1700)
+    page.evaluate("__p3d.teleport(0,-345)")
+    page.wait_for_function("__p3d.zone==='frost'",timeout=90000)
+    ice=page.evaluate("""()=>({zone:__p3d.zone,ground:__p3d.frostRealm.heightAt(__p3d.state.heroX,__p3d.state.heroZ),
+           y:__p3d.state.heroY,portal:__p3d.frostRealm.exit,triangles:__p3d.info().triangles,
+           bosses:__p3d.fight?.monsters?.map(e=>e.key)||[]})""")
+    print('frost realm',json.dumps(ice),flush=True)
+    check('frost portal teleports to separate icy map',ice['zone']=='frost' and ice['triangles']>20000,ice)
+    check('frost terrain is actual walkable ground',abs(ice['ground']-ice['y'])<.15,ice)
+    # Boss models load asynchronously, but their encounters must become active without input.
+    page.wait_for_function("window.__p3d?.fight?.monsters?.some(e=>e.key==='frosttroll_a')&&__p3d.fight.monsters.some(e=>e.key==='frosttroll_b')",timeout=90000)
+    check('both Frost Troll brothers spawn together',page.evaluate("['frosttroll_a','frosttroll_b'].every(k=>__p3d.fight.monsters.some(e=>e.key===k))"))
+    page.evaluate("__p3d.teleport(2243,177)")
+    page.wait_for_function("__p3d.zone==='town'",timeout=90000)
+    check('ice gate returns to mountain summit',page.evaluate("__p3d.zone")==='town')
     check('no uncaught browser errors',not errors,errors[:2])
     browser.close()
 srv.shutdown()

@@ -28,9 +28,22 @@ const MAIN=['aldric','asha','brynn','cedric','darius','elira','finn','garruk','k
 const BETH=["briar", "cinder", "coral", "ember", "frosttroll", "hawk", "hearth", "hobgoblin", "hydrella", "kestrel", "lorian", "lunara", "marella", "mortimer", "mossgut", "neris", "pip", "snowy", "ssylthar", "stonetroll", "thrain", "vaelthryx", "valen", "wren", "wyvern", "zephyr"];
 const NEW=[['darius','models/darius.glb'],['selene','models/selene.glb'],['mortimer_new','models-new/mortimer_cl_arms.glb'],['player_pikachu','models-new/player_pikachu_cl_arms.glb'],['lunara_new','models-new/lunara_cl_arms.glb'],['marella_new','models-new/marella_cl_arms.glb'],['vaelthryx_straight_rig'],['frosttroll_a','models-new/frosttroll_a.glb'],['frosttroll_b','models-new/frosttroll_a.glb'],['vaelthryx_new'],['ssylthar_new'],['ashentitan_new','models-new/ashentitan_cl_arms.glb'],['coral_new','models-new/coral_cl_arms.glb'],['cinder_new'],['snowy_new4','models-new/snowy_cl_arms.glb'],['zephyr_new2'],['garruk_new4'],['garruk_new5_arms'],['darius_new6_arms'],['pip_new2'],['owner','models-new/owner.glb'],['asha_new3','models-new/asha_cl_arms.glb'],['thrain_new4','models-new/thrain_cl_arms.glb'],['wren_new3','models-new/wren_cl_arms.glb'],['ember_new3']];
 const PH=["aldric", "briar", "brynn", "cedric", "elira", "finn", "frosttroll", "hearth", "hobgoblin", "hydrella", "kael", "kestrel", "lorian", "lunara", "marella", "mirelle", "morwen", "mossgut", "neris", "nyx", "orin", "pip", "rook", "rowan", "seraphine", "stonetroll", "talia", "thorne", "valen", "vesper", "wyvern", "zephyr"];
-const items=[...NEW.map(([n,u])=>({n,set:'NEW (Beth)',url:u||`models-new/${n}.glb`})),...PH.map(n=>({n:n+'_new',set:'PLACEHOLDER',url:`models-placeholder/${n}_new.glb`,ph:true})),...MAIN.map(n=>({n,set:'Old main',url:`models/${n}.glb`})),...BETH.map(n=>({n,set:'Old Beth',url:`models-beth/${n}.glb`}))];
-const HEIGHT={stonetroll_new:3.0,frosttroll_new:3.0,thrain_new:1.35};   // humanoids are normalised to 1.9 m; trolls/dwarf scaled here, Snowy shown at native size with scale buttons
-const NOTES={snowy_new4:'Snowy: walk 0.55 u/s, run 1.5 u/s.',zephyr_new2:'Zephyr: hind-foot sliding in walk is a known issue.',vaelthryx_straight_rig:'Straight rig: slither / coil / strike clips.',vaelthryx_new:'Coiled version.'};
+const APPROVED_BOSS_LABELS=new Map([
+ ['vaelthryx_straight_rig','Balthrix (10×)'],
+ ['ashentitan_new','Ashen Titan (15×)'],
+ ['frosttroll_a','Frost Troll A (3.5×)'],
+ ['frosttroll_b','Frost Troll B (3.5×) · troll visual']
+]);
+const newItems=NEW.map(([n,u])=>({n,set:APPROVED_BOSS_LABELS.has(n)?'New Boss Approved Models':'New character models',label:APPROVED_BOSS_LABELS.get(n)||n,url:u||`models-new/${n}.glb`}));
+const items=[
+ ...newItems.filter(it=>it.set==='New Boss Approved Models'),
+ ...newItems.filter(it=>it.set==='New character models'),
+ ...PH.map(n=>({n:n+'_new',set:'PLACEHOLDER',url:`models-placeholder/${n}_new.glb`,ph:true})),
+ ...MAIN.map(n=>({n,set:'Old main',url:`models/${n}.glb`})),
+ ...BETH.map(n=>({n,set:'Old Beth',url:`models-beth/${n}.glb`}))
+];
+const HEIGHT={stonetroll_new:3.0,frosttroll_new:3.0,thrain_new:1.35,frosttroll_a:6.65,frosttroll_b:6.65,ashentitan_new:28.5,vaelthryx_straight_rig:19.0};   // humanoids are normalised to 1.9 m; trolls/dwarf scaled here, Snowy shown at native size with scale buttons
+const NOTES={frosttroll_b:'Uses the verified humanoid Frost Troll A geometry as a temporary visual for B, not the serpent model.',snowy_new4:'Snowy: walk 0.55 u/s, run 1.5 u/s.',zephyr_new2:'Zephyr: hind-foot sliding in walk is a known issue.',vaelthryx_straight_rig:'Straight rig: slither / coil / strike clips.',vaelthryx_new:'Coiled version.'};
 const canvas=document.getElementById('c');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
@@ -56,7 +69,11 @@ function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);c
 addEventListener('resize',resize);resize();
 // ui
 const list=document.getElementById('list'),ctl=document.getElementById('ctl'),info=document.getElementById('info');
-items.forEach((it,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(it.ph?'PLACEHOLDER: ':it.set+': ')+it.n;list.appendChild(o);});
+let optionGroup=null,lastOptionSet='';
+items.forEach((it,i)=>{
+  if(it.set!==lastOptionSet){optionGroup=document.createElement('optgroup');optionGroup.label=it.set;list.appendChild(optionGroup);lastOptionSet=it.set;}
+  const o=document.createElement('option');o.value=i;o.textContent=it.label||it.n;optionGroup.appendChild(o);
+});
 let sb=null,scale=1,cur=null,mixer=null,actions={},active=null,idx=0,tris=0,loadId=0;
 const loader=new GLTFLoader();
 function setClip(name){if(!mixer)return;const a=actions[name];if(!a)return;if(active&&active!==a)active.fadeOut(0.2);a.reset().fadeIn(0.2).play();active=a;
@@ -83,8 +100,8 @@ const allEl=document.getElementById('all');
 const allBack=document.createElement('button');allBack.type='button';allBack.id='vnAllBack';allBack.textContent='✕ Close lineup list';allBack.style.cssText='position:sticky;top:0;display:block;width:100%;background:#5c4426;color:#fce2a3;z-index:2';allBack.addEventListener('click',()=>{allEl.style.display='none';});allEl.prepend(allBack);
 document.getElementById('vnViewerClose')?.addEventListener('click',()=>location.assign('../proto3d.html'));
 addEventListener('keydown',e=>{if(e.key==='Escape'){if(allEl.style.display==='block')allEl.style.display='none';else location.assign('../proto3d.html');}});document.getElementById('cnt').textContent=items.length;
-{let last='';items.forEach((it,i)=>{if(it.set!==last){last=it.set;const h=document.createElement('div');h.className='hd';h.textContent=(it.ph?'PLACEHOLDER (old generated, to be replaced)':it.set==='NEW (Beth)'?'NEW (Beth) - real models':it.set==='Old main'?'Old main set (playable + wolf)':'Old Beth set (NPCs/monsters/bosses)');allEl.appendChild(h);}
- const d=document.createElement('div');d.dataset.i=i;d.innerHTML=it.n+(it.ph?'<small class="tagp">PLACEHOLDER</small>':'');d.addEventListener('click',()=>{allEl.style.display='none';load(i);});allEl.appendChild(d);});}
+{let last='';items.forEach((it,i)=>{if(it.set!==last){last=it.set;const h=document.createElement('div');h.className='hd';h.textContent=it.set==='New Boss Approved Models'?'NEW BOSS APPROVED MODELS':it.set==='New character models'?'NEW CHARACTER MODELS':it.ph?'PLACEHOLDER (old generated, to be replaced)':it.set==='Old main'?'ORIGINAL CHARACTERS':'ORIGINAL NPCS & MONSTERS';allEl.appendChild(h);}
+ const d=document.createElement('div');d.dataset.i=i;d.textContent=it.label||it.n;if(it.ph){const s=document.createElement('small');s.className='tagp';s.textContent=' PLACEHOLDER';d.appendChild(s);}d.addEventListener('click',()=>{allEl.style.display='none';load(i);});allEl.appendChild(d);});}
 document.getElementById('showall').onclick=()=>{allEl.style.display=allEl.style.display==='block'?'none':'block';[...allEl.querySelectorAll('div[data-i]')].forEach(d=>d.classList.toggle('on',+d.dataset.i===idx));const o=allEl.querySelector('.on');if(o)o.scrollIntoView({block:'center'});};
 list.onchange=()=>load(+list.value);
 document.getElementById('prev').onclick=()=>load((idx+items.length-1)%items.length);

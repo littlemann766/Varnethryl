@@ -64,7 +64,7 @@ export function createFight(env) {
     if (!slashA && u.all.saber_slash) { slashA = u.all.saber_slash; slashA.setLoop(THREE.LoopOnce, 1); slashA.clampWhenFinished = true; }
   }
   function attach(drawn) {
-    const h = env.hero(), hb = bone(h, drawn ? 'weapon_R' : 'weapon_back'); if (!saber || !hb) return false;
+    const h = env.hero(), hb = bone(h, drawn ? 'weapon_R' : 'weapon_back') || (drawn ? bone(h,'RightHand') || bone(h,'hand_R') : bone(h,'Spine')); if (!saber || !hb) return false;
     hb.add(saber); saber.position.set(0, 0, 0); saber.quaternion.identity(); saber.scale.set(1, 1, 1); setBlade(drawn, drawn ? 0.001 : 0); if (drawn) igniteT = 0; return true;
   }
   /* Bamboo Stick: procedural low-poly staff (green segments + darker nodes), auto-scaled to the hero (HS) and parented to the right-hand bone. */
@@ -72,7 +72,7 @@ export function createFight(env) {
   function bambooBuild() { const g = new THREE.Group(), seg = new THREE.MeshStandardMaterial({ color: 0x5fae3a, roughness: 0.8, flatShading: true }), nod = new THREE.MeshStandardMaterial({ color: 0x2f6b1c, roughness: 0.9, flatShading: true }); const L = 2.4 * (env.HS ? env.HS / 1.5 : 1), n = 5, sl = L / n;
     for (let i = 0; i < n; i++) { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.06, sl * 0.92, 6), seg); m.position.y = (i + 0.5) * sl - L * 0.25; g.add(m); const k = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, sl * 0.1, 6), nod); k.position.y = (i + 1) * sl - L * 0.25; g.add(k); }
     g.name = 'bamboo_stick'; g.traverse(o => { o.frustumCulled = false; }); return g; }
-  function bambooSync() { const want = cc.bambooOn() && cc.dead <= 0; if (want) { if (!BAM) BAM = bambooBuild(); const hb = bone(env.hero(), 'weapon_R') || bone(env.hero(), 'weapon_back'); if (hb && BAM.parent !== hb) { hb.add(BAM); BAM.position.set(0, 0, 0); BAM.quaternion.identity(); } } else if (BAM && BAM.parent) BAM.parent.remove(BAM); }
+  function bambooSync() { const want = cc.bambooOn() && cc.dead <= 0; if (want) { if (!BAM) BAM = bambooBuild(); const hb = bone(env.hero(), 'weapon_R') || bone(env.hero(), 'RightHand') || bone(env.hero(), 'weapon_back'); if (hb && BAM.parent !== hb) { hb.add(BAM); BAM.position.set(0, 0, 0); BAM.quaternion.identity(); } } else if (BAM && BAM.parent) BAM.parent.remove(BAM); }
   function bambooDispose() { if (BAM) { if (BAM.parent) BAM.parent.remove(BAM); BAM.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); BAM = null; } }
   /* Hero-kit weapons in hand (non-Owner heroes): the armory's equipped weapon item (signature by default, Beth's optional weapons when chosen) is loaded once
      and parented to hand_R with the per-hero grip offset (combat/grips.js; refined2 sockets only when enabled). Owner keeps the saber/bamboo path. */
@@ -81,7 +81,7 @@ export function createFight(env) {
   function heroWeaponSync() {
     const h = env.hero(), it = !cc.hero.owner && cc.dead <= 0 && armory.item(armory.s.equipment.weapon), url = it && it.glb ? it.glb : '', key = url && (h.uuid + '|' + url);
     if (!key) { if (HW) heroWeaponClear(); return; } if (key === hwKey || hwLoading === key) return;
-    heroWeaponClear(); const hb = bone(h, 'hand_R'); if (!hb) return; hwLoading = key;
+    heroWeaponClear(); const hb = bone(h, 'hand_R') || bone(h,'RightHand'); if (!hb) return; hwLoading = key;
     const done = (g) => { hwLoading = ''; if (!g || env.hero() !== h || cc.hero.owner) return; const o = g.clone(true), G = gripFor(armory.key); o.position.fromArray(G.pos); o.quaternion.fromArray(G.quat); h.updateMatrixWorld(true); const ws = new THREE.Vector3(); hb.getWorldScale(ws); o.scale.setScalar((0.947 * HS) / (ws.x || 1));   /* weapon GLBs are metres: world size = metres * 0.947*HS whatever the rig's own scale */ o.name = 'hero_weapon'; o.userData.grip = G; o.traverse(m => { m.frustumCulled = false; if (m.isMesh) m.castShadow = true; }); hb.add(o); HW = o; hwKey = key; };
     if (WCACHE.has(url)) return done(WCACHE.get(url));
     env.loadGLTF(url).then(g => { WCACHE.set(url, g.scene); done(g.scene); }).catch(() => { hwLoading = ''; hwKey = key; });

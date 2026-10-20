@@ -607,7 +607,7 @@ const selV = {};   // group key -> chosen variant
 function curVar(g) {
   if (selV[g.key]) return selV[g.key];
   let v = null; try { const r = localStorage.getItem('vn_var_' + g.key); if (r) v = g.vars.find(x => x.slot + '|' + x.mode === r); } catch (_) {}
-  if (!v) { v = g.vars[0]; if (v.mode === 'blocky' && modeFor(GLB_IDS[v.slot]) === 'glb') v = g.vars.find(x => x.slot === v.slot && x.mode === 'glb') || v; }
+  if (!v) { v = g.vars.find(x => APPROVED_BOSS_IDS.has(GLB_IDS[x.slot])) || g.vars[0]; if (v.mode === 'blocky' && modeFor(GLB_IDS[v.slot]) === 'glb') v = g.vars.find(x => x.slot === v.slot && x.mode === 'glb') || v; }
   return selV[g.key] = v;
 }
 const fbtn = i => document.querySelector('#heroes button.fol[data-g="' + SLOT_G[i].key + '"]');

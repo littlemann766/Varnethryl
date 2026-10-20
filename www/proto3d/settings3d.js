@@ -30,7 +30,7 @@ const CSS2 = '#settingsPanel{background:linear-gradient(180deg,#171127f2,#0d0b17
  + '#settingsPanel input[type=range]{accent-color:#c9a24a!important;min-height:48px!important}'
  + '#settingsPanel .stp{min-width:48px!important;font-size:20px;font-weight:700}';
 const CSS3 = '#settingsPanel .card.vn-collapsible{padding:4px 6px;margin:5px 0}#settingsPanel .vn-setting-body{display:none;padding:8px 7px 11px}#settingsPanel .vn-card-open>.vn-setting-body{display:block}#settingsPanel .vn-settings-toggle{display:block!important;width:100%;min-height:42px!important;text-align:left!important;padding:8px 12px!important;background:linear-gradient(#253851,#111b2c)!important;border:1px solid #8d7041!important;color:#f5ddab!important;font:700 13px VarnCinzel,Georgia,serif!important}#settingsPanel .vn-settings-toggle:focus-visible{outline:2px solid #ffdd92}';
-const DESCS = { 'Game & version': 'Version information, characters and diagnostics.', 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Animation Lab': 'Preview Beth rigs and Meshy bodies while moving in game. Temporary: does not change saves.', 'Display': 'On-screen info.' };
+const DESCS = { 'Game & version': 'Version information, characters and diagnostics.', 'Camera': 'How the view follows your hero.', 'Combat': 'Combat activates automatically in enemy areas. Customize the on-screen controls here.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Animation Lab': 'Preview Beth rigs and Meshy bodies while moving in game. Temporary: does not change saves.', 'Display': 'On-screen info.' };
 const TITLES = { 'Game & version':'Game', 'Camera':'Camera & movement', 'Combat':'Combat controls', 'Loadout':'Equipment & skills', 'Graphics':'Graphics & performance', 'Animation Lab':'Animation Lab (test)', 'Display':'On-screen display' };
 let selectedSection = 'Camera';
 let animationLabNotes = ''; // local, temporary tester feedback; never written into game saves
@@ -90,25 +90,23 @@ function build() {
   body.appendChild(el('small', { textContent: 'Zoom: mouse wheel, pinch, or + / −.  View: V.  The camera never goes through walls.' }));
 
   body.appendChild(sec('Combat'));
-  const cb = el('button', { type: 'button', textContent: 'Enable combat testing' }); cb.dataset.set = 'combat';
-  const csync = () => cb.classList.toggle('on', !!(E.combatOn && E.combatOn())); csync(); syncs.push(csync);
-  cb.addEventListener('click', async () => { await E.setCombat(!(E.combatOn && E.combatOn())); csync(); });
-  body.appendChild(row(cb)); body.appendChild(el('small', { textContent: 'F attack · G dodge · T lock-on · Tab next target · 1-6 abilities (owner). On phone use the buttons by the stick.' }));
+  body.appendChild(el('small', { textContent: 'Combat is automatic in enemy areas. Use the basic attack, skills and ultimate buttons when enemies appear. Town center stays protected.' }));
   const hudEd = () => (window.__p3d && window.__p3d.combat && window.__p3d.combat.hud && window.__p3d.combat.hud.editor) || null;
   const eb = el('button', { type: 'button', textContent: 'Move or resize buttons' }); eb.dataset.set = 'editbtns';
   const rb = el('button', { type: 'button', textContent: 'Restore button layout' }); rb.dataset.set = 'resetbtns';
   const esync = () => { const e = hudEd(); eb.classList.toggle('on', !!(e && e.editing)); }; syncs.push(esync);
-  eb.addEventListener('click', async () => { if (!(E.combatOn && E.combatOn())) await E.setCombat(true); const e = hudEd(); if (!e) return; e.enable(!e.editing); esync(); if (e.editing) hide(); });
+  eb.addEventListener('click', () => { const e=hudEd(); if (!e || !(E.combatOn && E.combatOn())) { body.querySelector('#combatEditHint').textContent='Enter an enemy area first; the combat HUD activates automatically there.'; return; } e.enable(!e.editing); esync(); if(e.editing)hide(); });
   rb.addEventListener('click', () => { const e = hudEd(); if (e) { e.reset(); esync(); } });
   body.appendChild(row(eb, rb));
+  body.appendChild(el('small',{id:'combatEditHint',textContent:'Customize this layout when the combat HUD is active outdoors.'}));
   body.appendChild(el('small', { textContent: 'Edit buttons: the menu closes; drag a button to move it, pinch it (two fingers) or use the size slider. Saved on this device. Tap Done when finished.' }));
   body.appendChild(sec('Loadout'));
   const ld = el('div', { className: 'ld', style: 'font-size:13px;line-height:1.5' }); body.appendChild(ld);
-  const ldSync = () => { const F = window.__p3d && window.__p3d.fight, kit = F && F.cc && F.cc.kit; if (!kit || !kit.weapon) { ld.textContent = F && F.on ? 'This hero uses the generic kit.' : 'Start Fight mode to see the active hero\u2019s weapon, armor and skills.'; return; }
+  const ldSync = () => { const F = window.__p3d && window.__p3d.fight, kit = F && F.cc && F.cc.kit; if (!kit || !kit.weapon) { ld.textContent = F && F.on ? 'This hero uses the generic kit.' : 'Your equipment and combat abilities appear when you enter an enemy area.'; return; }
     const w = kit.weapon, a = kit.armor, pc = (v) => '+' + Math.round(v * 100) + '%', st = [a.hpPct && 'HP ' + pc(a.hpPct), a.mpPct && 'MP ' + pc(a.mpPct), a.spPct && 'SP ' + pc(a.spPct), a.defPct && 'DEF ' + pc(a.defPct)].filter(Boolean).join(' \u00b7 ');
     ld.innerHTML = ''; for (const [h, t] of [['Weapon', w.name + ' (damage ' + pc(w.dmgPct) + ')'], ['Armor', a.name + ' \u2014 ' + st], ['Skills', kit.skills.map((x) => x.name).join(' \u00b7 ')]]) ld.appendChild(el('div', null, [el('b', { textContent: h + ': ', style: 'color:#f1d98a' }), t])); };
   const ab = el('button', { type: 'button', className: 'ctl', id: 'openArmory', textContent: 'Open Armory (12 slots, inventory, compare, presets)' }); ab.style.cssText = 'width:100%;min-height:48px;margin-top:8px;border:1px solid #c9a24d;background:linear-gradient(180deg,#3a2a5c,#1d1533);color:#f3d9a0;border-radius:12px;font-weight:700';
-  ab.addEventListener('click', async () => { const F = window.__p3d && window.__p3d.fight; if (!F || !F.armory) { ld.textContent = 'Start Fight mode first to open the Armory.'; return; } const m = await import('./armoryui.js'); m.openArmory(F.armory); });
+  ab.addEventListener('click', async () => { const F = window.__p3d && window.__p3d.fight; if (!F || !F.armory) { ld.textContent = 'Visit an enemy area first; the combat system initializes automatically.'; return; } const m = await import('./armoryui.js'); m.openArmory(F.armory); });
   body.appendChild(ab);
   ldSync(); syncs.push(ldSync);
   body.appendChild(sec('Animation Lab'));

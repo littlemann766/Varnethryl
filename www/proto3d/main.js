@@ -534,10 +534,12 @@ function wrapGLB(g, id, blocky) {
       if(id==='n:owner' && compatible.colliders.length < (cfg.colliders||[]).length)
         diag('Owner cape: '+compatible.colliders.length+'/'+(cfg.colliders||[]).length+' body colliders match this rig.');
       root.userData.sb=new SpringBonesV2(m,{clips:g.animations,config:compatible});
+    }else if (cfg && id === 'n:owner') {
+      // Do not run the generic spring-bone fallback against an incompatible
+      // Owner rig: it may move unrelated skeletal joints and corrupt the pose.
+      diag('Animated Owner rig has no enabled compatible cape/hood bones; cape physics disabled until a compatible rig is supplied.');
     }else{
       root.userData.sb=new SpringBones(m,{clips:g.animations});
-      if(cfg && id==='n:owner')
-        diag('Animated Owner rig has no enabled compatible cape/hood bones; skipping incompatible cape physics.');
     }
   } catch (e) { console.warn('spring bones', e); }
   if (id === 'n:cinder_new') initCinderEmbers(root, m);

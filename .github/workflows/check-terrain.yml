@@ -1,0 +1,22 @@
+name: Validate expanded terrain
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'www/proto3d/**'
+      - 'tools/check_town_mountains.mjs'
+      - '.github/workflows/check-terrain.yml'
+permissions:
+  contents: read
+jobs:
+  terrain-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate height terrain, gates, walls, slopes and JS syntax
+        run: node tools/check_town_mountains.mjs
+      - name: Ensure all original model assets are present
+        run: python3 tools/check_assets.py

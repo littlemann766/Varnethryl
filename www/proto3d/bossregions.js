@@ -36,13 +36,22 @@ export function terrainBiome(x,z){
  return x<-140&&z<0?'forest':'meadow';
 }
 /* The roamer follows one continuous route, including the volcano, and stays outside city walls. */
+// Continuous position and tangent through route corners, preventing abrupt head snapping.
+// Catmull-Rom uses the same patrol waypoints; no changes to saved encounter locations.
 export function balthrixPosition(t,speed=14){
- const P=BALTHRIX_ROUTE,seg=P.map((p,i)=>Math.hypot(P[(i+1)%P.length][0]-p[0],P[(i+1)%P.length][1]-p[1])),total=seg.reduce((a,b)=>a+b,0);
+ const P=BALTHRIX_ROUTE,n=P.length;
+ const seg=P.map((p,i)=>Math.hypot(P[(i+1)%n][0]-p[0],P[(i+1)%n][1]-p[1]));
+ const total=seg.reduce((a,b)=>a+b,0);
  let dist=((t*speed)%total+total)%total;
- for(let i=0;i<P.length;i++){
-   if(dist<=seg[i]){const a=P[i],b=P[(i+1)%P.length],u=dist/seg[i];
-     return {x:a[0]+(b[0]-a[0])*u,z:a[1]+(b[1]-a[1])*u,yaw:Math.atan2(b[0]-a[0],b[1]-a[1])};}
-   dist-=seg[i];
+ for(let i=0;i<n;i++){
+  if(dist<=seg[i]){
+   const u=dist/seg[i],p0=P[(i+n-1)%n],p1=P[i],p2=P[(i+1)%n],p3=P[(i+2)%n];
+   const point=(axis,v)=>0.5*((2*p1[axis])+(-p0[axis]+p2[axis])*v+(2*p0[axis]-5*p1[axis]+4*p2[axis]-p3[axis])*v*v+(-p0[axis]+3*p1[axis]-3*p2[axis]+p3[axis])*v*v*v);
+   const x=point(0,u),z=point(1,u),before=Math.max(0,u-0.002),after=Math.min(1,u+0.002);
+   const dx=point(0,after)-point(0,before),dz=point(1,after)-point(1,before);
+   return {x,z,yaw:Math.atan2(dx,dz)};
+  }
+  dist-=seg[i];
  }
  return {x:P[0][0],z:P[0][1],yaw:0};
 }

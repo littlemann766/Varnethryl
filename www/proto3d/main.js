@@ -27,8 +27,12 @@ import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 const canvas = document.getElementById('c');
 const diag = (msg, bad) => { try { (window.__p3dDiag || (() => {}))(msg, bad); } catch (_) {} };
 const COARSE = matchMedia('(pointer:coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+// Natural rendering is reversible. Keep existing player saves and model overrides intact.
+const VISUAL_STYLE_KEY = 'vn_render_style_v1';
+let visualStyle = 'natural';
+try { if (localStorage.getItem(VISUAL_STYLE_KEY) === 'classic') visualStyle = 'classic'; } catch (_) {}
 let renderer;
-try { renderer = new THREE.WebGLRenderer({ canvas, antialias: !COARSE && (window.devicePixelRatio || 1) < 1.5, powerPreference: 'high-performance' }); }
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: visualStyle === 'natural' && (window.devicePixelRatio || 1) <= 3, powerPreference: 'high-performance' }); }
 catch (e) { diag('WebGL failed to start: ' + (e && e.message || e), true); throw e; }
 diag('WebGL ok · ' + (renderer.capabilities.isWebGL2 ? 'WebGL2' : 'WebGL1') + ' · max tex ' + renderer.capabilities.maxTextureSize);
 const DPR_CAP = 1.5;                       // cap pixel ratio: biggest single mobile perf lever
@@ -59,6 +63,18 @@ sun.castShadow = true;
 sun.shadow.mapSize.set(SHADOW_SIZE, SHADOW_SIZE);
 Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 110 });
 sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.03;
+function setVisualStyle(style) {
+  visualStyle = style === 'classic' ? 'classic' : 'natural';
+  renderer.toneMapping = visualStyle === 'natural' ? THREE.ACESFilmicToneMapping : THREE.NoToneMapping;
+  renderer.toneMappingExposure = visualStyle === 'natural' ? 1.16 : 1;
+  renderer.shadowMap.type = visualStyle === 'natural' ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
+  renderer.shadowMap.needsUpdate = true;
+  sun.shadow.radius = visualStyle === 'natural' ? 2.5 : 1;
+  scene.fog.color.setHex(visualStyle === 'natural' ? 0xd6e0e4 : 0xdde8ee);
+  try { localStorage.setItem(VISUAL_STYLE_KEY, visualStyle); } catch (_) {}
+  return visualStyle;
+}
+setVisualStyle(visualStyle);
 const SUN_OFF = new THREE.Vector3(-41, 77, 35);
 scene.add(sun, sun.target);
 
@@ -661,7 +677,9 @@ function loadGlbHero(gi) {
 }
 // ---------- blocky (procedural, chars.js rigs) vs GLB model per character ----------
 // Default is BLOCKY for every character that has a builder (CHARS: the 20 heroes + wolf); GLB models are an optional per-character / global toggle.
-const DEFAULT_MODEL = 'blocky';
+// Prefer the approved 3D GLB rigs by default. Any saved per-character/classic
+// model choice still wins; a missing file retains the existing model fallback.
+const DEFAULT_MODEL = 'glb';
 const VAR = {};   // slot -> { blocky, glb } cached variants (both kept so toggling never reloads or jumps)
 const bk = id => CHARS[id] ? id : (id.startsWith('o:') && CHARS[id.slice(2)] ? id.slice(2) : null);   // blocky builder key for a model id
 function modeFor(id) {
@@ -1220,6 +1238,9 @@ function tickDown(r, dt) {
   r.vxs = r.vzs = 0; if (r.root) r.root.visible = true;
 }
 function updateCrowd(dt) {
+  // The live title shows real townsfolk walking, not a prerendered backdrop.
+  // This patrol is limited to the title and never changes their saved home positions.
+  const titlePreview = document.body.classList.contains('vn-menu-open') && ZONE.name === 'town';
   recordTrail();
   const pa = playerAct;
   pa.x = state.heroX; pa.z = state.heroZ; pa.yaw = state.yaw; pa.vx = state.vx; pa.vz = state.vz;
@@ -1243,6 +1264,14 @@ function updateCrowd(dt) {
       const dx = gx - a.x, dz = gz - a.z, d = Math.hypot(dx, dz);
       if (far && d > 0.3) { const sp = SPEED * travelScale() * Math.max(1, CH.speed) * Math.max(1, cheat.speedMul) * 1.18; tvx = dx / d * sp; tvz = dz / d * sp; }
       else if (!far && d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * travelScale() * Math.max(1, CH.speed) * Math.max(1, cheat.speedMul) * 1.18, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
+    }
+    // The original 3D title had ambient movement. Small, slow circuits around
+    // each townsfolk's own home restore that effect without a separate scene.
+    if (r.kind === 'npc' && titlePreview) {
+      const t = performance.now() * 0.00044 + i * 2.8;
+      const gx = r.hx + Math.cos(t) * 2.6, gz = r.hz + Math.sin(t) * 2.6;
+      const dx = gx - a.x, dz = gz - a.z, dist = Math.hypot(dx, dz);
+      if (dist > 0.35) { const speed = Math.min(1.2, dist * 0.9); tvx = dx / dist * speed; tvz = dz / dist * speed; }
     }
     // Short-range obstacle avoidance: test forward and two angled probes
     // against the same collision resolver used by NPC movement. This is
@@ -1294,7 +1323,7 @@ function updateCrowd(dt) {
     if (r.kind === 'npc' && ZONE.name !== 'town') continue;
     if (r.down > 0) continue;
     let mx = r.vxs * a.slowMul * dt + a.dx, mz = r.vzs * a.slowMul * dt + a.dz;
-    if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
+    if (r.kind === 'npc' && !titlePreview && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
     tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2, false, 'npc'); state.level = l0; }
     let moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; crowdSurface(r, a, dt);
     // A follower can remain within 22 units of the hero while continuously
@@ -1721,7 +1750,7 @@ const cheatEnv = {
 const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
-const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
+const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on), setVisualStyle, getVisualStyle: () => visualStyle });
 window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),running:travelRun,exhausted};}, setRunning:setTravelRun, jump, get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   teleportTo(x,z){if(!Number.isFinite(x)||!Number.isFinite(z))return false;state.heroX=x;state.heroZ=z;state.target=null;marker.visible=false;state.blockedFrames=0;state.level=0;updateLevel();snapFollowers();saver?.mark();return true;},
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },

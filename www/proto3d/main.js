@@ -513,9 +513,15 @@ function wrapGLB(g, id, blocky) {
       catch (_) { return false; }
     });
     if(cfg && matchingGroups.length){
+      // Avoid allocating spring physics for disabled-only groups. An imported
+      // Owner skeleton with no active cape bones should remain on its authored
+      // animation rather than pretending cloth simulation is attached.
+      const activeGroups=matchingGroups.filter(group=>group.enabled!==false);
+      if(!activeGroups.length && id==='n:owner')
+        diag('Owner rig has no enabled compatible cape groups; using authored cape pose.');
       // Only pass capsules with both endpoints in this skeleton. A different
       // Owner rig can have a cape but lack the old torso/limb collider names.
-      const compatible = {...cfg, groups:matchingGroups,
+      const compatible = {...cfg, groups:activeGroups,
         colliders:(cfg.colliders||[]).filter(c=>names.has(c.a)&&names.has(c.b))};
       if(id==='n:owner' && compatible.colliders.length < (cfg.colliders||[]).length)
         diag('Owner cape: '+compatible.colliders.length+'/'+(cfg.colliders||[]).length+' body colliders match this rig.');

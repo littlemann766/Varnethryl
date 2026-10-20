@@ -112,7 +112,7 @@ const cobble = canvasTex(256, (g, s) => {
     g.fillRect(x * 32 + (y % 2) * 16 + 1, y * 32 + 1, 30, 30);
   }
 }, 1);
-const ground = mesh(new THREE.PlaneGeometry(WORLD * 4, WORLD * 4), new THREE.MeshLambertMaterial({ map: grass }), 0, 0, 0, null, false);
+const ground = mesh(new THREE.PlaneGeometry(new URLSearchParams(location.search).has('oldvillage') ? WORLD * 4 : 360, new URLSearchParams(location.search).has('oldvillage') ? WORLD * 4 : 360), new THREE.MeshLambertMaterial({ map: grass }), 0, 0, 0, null, false);
 ground.rotation.x = -Math.PI / 2;
 { // plaza + paths (cobble)
   const cm = new THREE.MeshLambertMaterial({ map: cobble.clone() });
@@ -194,7 +194,7 @@ if (BLD_ON) {
 let TOWN_LANDS = null;
 if (BLD_ON) {
   try { TOWN_LANDS = buildTownOutskirts({ scene, colliders, world: WORLD, buildings: BUILDING_DEFS, spacing: PK });
-    diag('Town expanded to ' + WORLD * 2 + ' units wide · landscaped chunks: ' + TOWN_LANDS.chunkCount); }
+    diag('Town expanded to ' + WORLD * 2 + ' units wide · walkable hills, valleys, mountains · landscape chunks: ' + TOWN_LANDS.chunkCount); }
   catch (e) { console.warn('town outskirts failed', e); diag('Town landscape fallback: ' + (e && e.message || e), true); }
 }
 // Original trees stay in the historic village/inner grounds; outer forests are chunked independently.
@@ -677,7 +677,7 @@ const tmp = { x: 0, z: 0 };
 function surfaceAt(x, z, level) {
   for (const b of ectx.multi) { { const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
   if (LAD && level >= 10) { const ls = LAD.surface(x, z, level); if (ls) return ls; }
-  return level === 0 ? { y: 0 } : null;
+  return level === 0 ? { y: ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : 0 } : null;
 }
 function updateLevel() {
   if (state.climbing) return;
@@ -769,7 +769,7 @@ function crowdSurface(r, a, dt) {
   let s = surfaceAt(a.x, a.z, r.level);
   if (s && s.ramp) { const m = s.ramp; if (r.level === m.l0 && s.t > (m.flipUp || 0.93)) r.level = m.l1; else if (r.level === m.l1 && s.t < 0.25) r.level = m.l0; s = surfaceAt(a.x, a.z, r.level) || s; }
   const ty = s ? s.y : (r.level >= 10 && LAD ? LAD.heightOf(r.level) : 0);
-  r.y = Math.abs(ty - r.y) < 0.02 ? ty : r.y + Math.max(-4 * dt, Math.min(4 * dt, ty - r.y)) * (Math.abs(ty - r.y) > 1.3 ? 1 : 1);
+  r.y = Math.abs(ty - r.y) < 0.02 ? ty : r.y + Math.max(-(r.level===0 ? 14 : 4)*dt, Math.min((r.level===0 ? 14 : 4)*dt, ty - r.y));
 }
 /* Downed state (Thunderstorm): companions/townsfolk can be killed but it never touches the hero (HP, death, respawn). Companions revive at the hero's side after a short delay, townsfolk back home. */
 const REVIVE_PARTY = 4, REVIVE_NPC = 8;

@@ -1096,10 +1096,12 @@ if (savedOn) {
 /* ---------- owner cheat panel (hidden gesture; loads cheatpanel.js lazily; owner-gated, see ownergate.js and README) ---------- */
 function entrySpot(d) {
   const lim = WORLD - 2, ok = (x, z) => Math.abs(x) < lim && Math.abs(z) < lim && window.__p3d.free(x, z, 0);
-  const fx = d.cx + Math.sin(d.rot || 0) * 8, fz = d.cz + Math.cos(d.rot || 0) * 8;
+  // Registry positions are layout grid coordinates; gatehouse is anchored to the *new* outer wall.
+  const bx = d.cx * PK, bz = d.id === 'gatehouse' ? WORLD - 1.2 : d.cz * PK;
+  const fx = bx + Math.sin(d.rot || 0) * 8, fz = bz + Math.cos(d.rot || 0) * 8;
   if (ok(fx, fz)) return { x: fx, z: fz };
-  for (let r = 5; r <= 26; r += 1.5) for (let k = 0; k < 16; k++) { const a = k / 16 * 6.2832, x = d.cx + Math.cos(a) * r, z = d.cz + Math.sin(a) * r; if (ok(x, z)) return { x, z }; }
-  return { x: THREE.MathUtils.clamp(d.cx, -lim, lim), z: THREE.MathUtils.clamp(d.cz, -lim, lim) };
+  for (let r = 5; r <= 26; r += 1.5) for (let k = 0; k < 16; k++) { const a = k / 16 * 6.2832, x = bx + Math.cos(a) * r, z = bz + Math.sin(a) * r; if (ok(x, z)) return { x, z }; }
+  return { x: THREE.MathUtils.clamp(bx, -lim, lim), z: THREE.MathUtils.clamp(bz, -lim, lim) };
 }
 /* ---------- fight test mode (1.1.8): lazy-loaded, owner-gated start (owner panel / HUD button it reveals) ---------- */
 let FIGHT = null, GUARDS = null;

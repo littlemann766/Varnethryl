@@ -20,7 +20,7 @@ export function initCheatBoot(env) {
   });
   // One consistent hidden gesture: five quick taps on the visible version,
   // whether the player is at the title screen or inside the game HUD.
-  for (const id of ['ver', 'vnVersion']) {
+  for (const id of ['ver', 'vnVersion', 'vnTitleVersion']) {
     const ver = document.getElementById(id);
     if (!ver) continue;
     const tap = createTapCounter();

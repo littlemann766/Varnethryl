@@ -16,6 +16,9 @@ export const COLLIDE_RADIUS_CAP = 2.1;                        // metres: the PLA
 export const DEFAULT = Object.freeze({ height: HERO_M, radius: 0.53, speed: 1, step: 0.35, reach: 1, camDist: 1, camHeight: 1, camMin: 0.4, camMax: 1.7 });
 export const CHARS = {
   'n:ashentitan_new': { height: 6 * HERO_M, fitMeasuredHeight: true, radius: 3.2, speed: 1.4, step: 2.0, reach: 3.2, camDist: 3.4, camHeight: 3.2, camMin: 0.55, camMax: 1.6 },          // Beth native 11.4 m (6x hero)
+  // Extra Titan variants: all share one rigged GLB with uniform lore-height scaling.
+  'n:ashentitan_20': { height: 20 * HERO_M, fitMeasuredHeight: true, radius: 7, speed: 1.4, step: 4, reach: 5.5, camDist: 6, camHeight: 6, camMin: .55, camMax: 1.8 },
+  'n:ashentitan_60': { height: 60 * HERO_M, fitMeasuredHeight: true, radius: 19, speed: 1.4, step: 8, reach: 8, camDist: 8, camHeight: 8, camMin: .55, camMax: 2.0 },
   // Titan encounter (40x); uses the same source GLB, never stretches a single axis.
   'n:ashentitan_40': { height: 40 * HERO_M, fitMeasuredHeight: true, radius: 14, speed: 1.4, step: 6, reach: 8, camDist: 8, camHeight: 8, camMin: 0.55, camMax: 2.0 },
   // Vaelthryx variants are baked at DIFFERENT native sizes (measured in-game): _new6 14.3 m tall (79 m long), _new 2.0 m, _straight_rig 0.65 m. Boss quote ~18.7 m coiled; edit height here once confirmed.

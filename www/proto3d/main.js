@@ -478,9 +478,12 @@ function wrapGLB(g, id, blocky) {
   // A missing rig is NOT magically rigged: leave it intact and report it for proper skinning.
   for (const clip of g.animations) {
     const n = clip.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    // Serpent rigs often name their authored body-wave clips "Slither"
+    // rather than "Walk". Bind those clips to real ground movement instead
+    // of leaving the snake rigid while its root follows the patrol route.
     const role = /idle|breath|stand|rest/.test(n) ? 'idle' :
-      /run|sprint|gallop|charge/.test(n) ? 'run' :
-      /walk|stride|trot|locomotion/.test(n) ? 'walk' : null;
+      /run|sprint|gallop|charge|fastslither|slitherfast|slitherrun/.test(n) ? 'run' :
+      /walk|stride|trot|locomotion|slither|undulate|crawl/.test(n) ? 'walk' : null;
     if (role && !act[role]) act[role] = act[clip.name];
   }
   if (EXTRA_URL[id] && !g.animations.length) diag('Model ' + id + ' has no animation clips; needs a real rig/animation pass.');

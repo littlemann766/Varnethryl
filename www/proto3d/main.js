@@ -1135,7 +1135,7 @@ function updateCrowd(dt) {
     let mx = r.vxs * a.slowMul * dt + a.dx, mz = r.vzs * a.slowMul * dt + a.dz;
     if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
     tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2, false, 'npc'); state.level = l0; }
-    const moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; crowdSurface(r, a, dt);
+    let moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; crowdSurface(r, a, dt);
     // A follower can remain within 22 units of the hero while continuously
     // walking into a wall. Detect lack of progress and recover after a delay.
     // Never teleport an actively engaged companion away from its opponent.
@@ -1154,7 +1154,8 @@ function updateCrowd(dt) {
         state.level = oldLevel;
         a.x = recovery.x; a.z = recovery.z;
         r.y = surfaceAt(a.x, a.z, r.level)?.y ?? (state.heroY || 0);
-        r.vxs = r.vzs = 0; r.stuckT = 0; r.ti = null;
+        r.vxs = r.vzs = a.vx = a.vz = 0; r.stuckT = 0; r.ti = null;
+        moved = 0; // Recovery is a teleport, not a sprint: keep idle animation and speed correct.
       }
     } else r.stuckT = 0;
     if(r.kind==='party'&&ZONE.name==='town'&&TOWN_LANDS?.waterAt(a.x,a.z))r.y=Math.max(r.y,0.2)-.55*HS;

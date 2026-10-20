@@ -1,5 +1,5 @@
 /* Varnethryl 3D royal interface: shared navy, worn gold and parchment palette. */
-@font-face{font-family:VarnCinzel;src:url('./fonts/Cinzel.woff') format('woff');font-display:swap}
+@font-face{font-family:VarnCinzel;src:url('../fonts/Cinzel.woff') format('woff');font-display:swap}
 :root{--vn-ink:#080e19;--vn-navy:#101c2c;--vn-gold:#d9b46c;--vn-light:#f7e6bf;--vn-steel:#8295ad}
 html,body{background:var(--vn-ink);color:var(--vn-light)}
 #hud{z-index:52;justify-content:flex-start;gap:7px;align-items:center;flex-wrap:wrap;right:150px;max-width:calc(100vw - 160px);font-family:VarnCinzel,Georgia,serif;text-shadow:0 2px 4px #000}
@@ -18,7 +18,7 @@ html,body{background:var(--vn-ink);color:var(--vn-light)}
 #hint{color:#f3d99e;font:11px VarnCinzel,Georgia,serif;max-width:60vw}
 #diagBtn{background:linear-gradient(#293749,#0f1726);border-color:#9f7c4a;color:#f0d7a7;border-radius:6px;font:11px VarnCinzel,Georgia,serif}
 #load{background:radial-gradient(circle,#263452,#090b17 72%);font:700 16px VarnCinzel,Georgia,serif;color:#f4d898;z-index:1200}
-#vnMenu{position:fixed;inset:0;z-index:1050;display:grid;place-items:center;overflow:auto;padding:max(20px,env(safe-area-inset-top)) 18px max(20px,env(safe-area-inset-bottom));background:linear-gradient(#080b16b8,#050814ec),url('./assets/brand/poster.webp') center/cover no-repeat;touch-action:pan-y}
+#vnMenu{position:fixed;inset:0;z-index:1050;display:grid;place-items:center;overflow:auto;padding:max(20px,env(safe-area-inset-top)) 18px max(20px,env(safe-area-inset-bottom));background:linear-gradient(#080b16b8,#050814ec),url('../assets/brand/poster.webp') center/cover no-repeat;touch-action:pan-y}
 #vnMenu[hidden]{display:none}
 #vnMenu .vn-card{position:relative;width:min(560px,100%);padding:clamp(20px,5vmin,42px);border:2px ridge #bd9859;border-radius:9px;background:linear-gradient(142deg,#263248f2,#0a1121f7 68%,#16112af7);box-shadow:0 0 0 4px #060b16bb,inset 0 0 0 2px #d6b77f33,0 20px 65px #000b;text-align:center}
 #vnMenu .vn-card:before,#vnMenu .vn-card:after{content:'✦';position:absolute;color:#d4b374;font-size:22px;top:7px}#vnMenu .vn-card:before{left:14px}#vnMenu .vn-card:after{right:14px}

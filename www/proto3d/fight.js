@@ -294,7 +294,7 @@ export function createFight(env) {
     const outside=!isCitySafe(state.heroX,state.heroZ,8);
     if(outside){
       if(Math.hypot(state.heroX-TITAN_CENTER.x,state.heroZ-TITAN_CENTER.z)<125)
-        spawnRegion('titan40',TITAN_CENTER.x,TITAN_CENTER.z,{aggroR:100});
+        spawnRegion('titan40',TITAN_CENTER.x,TITAN_CENTER.z,{aggroR:75});
       if(onLava(state.heroX,state.heroZ)){
         lavaT+=dt;if(lavaT>.8&&cc.dead<=0){lavaT=0;const amt=Math.max(18,Math.floor(cc.res.max.hp*.013));
           if(!cc.god){cc.res.hp=Math.max(0,cc.res.hp-amt);hud.floatAt(state.heroX,terrainY(state.heroX,state.heroZ)+2,state.heroZ,'LAVA -'+amt,'pl');

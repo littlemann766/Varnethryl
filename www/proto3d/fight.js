@@ -505,7 +505,9 @@ export function createFight(env) {
     if (on) return; auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
     if (auto) { syncHero(); equip(); hud.say('THE WILDS - monsters about', 1800); return; }
-    env.selectOwner().then(() => { syncHero(); equip(); hud.say('FIGHT TEST', 1800); });
+    // Normal combat is available to every playable hero. Do not silently
+    // replace the chosen character with the Owner when fight mode is toggled.
+    syncHero(); equip(); hud.say('COMBAT READY', 1800);
   }
   function stop() { heroWeaponClear(); for (const s of cc.summons.slice()) cc.removeSummon(s, 'stop'); cc.buffs.length = 0; sumSync();
     if (!on) return; on = false; metHide(); metDispose(); cc.meteors.length = 0; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;

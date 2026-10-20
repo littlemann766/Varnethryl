@@ -127,3 +127,9 @@ const loaderCss = readFileSync(new URL('../www/proto3d/varn-ui.css', import.meta
 assert(loader.includes('if(engineReady)finish()'),'cinematic loader exits when engine is ready');
 assert(loader.includes('video.hidden=true; // prevent black video placeholder'),'loader hides unavailable film');
 assert(loaderCss.includes('Cinematic loader layout'),'loader video has separate cinematic layout');
+
+const titlePage=src('www/proto3d.html'),menuScript=src('www/proto3d/varn-menu.js');
+assert(!titlePage.includes('id="vnCamp"'),'hobgoblin camp removed from title menu');
+assert(!menuScript.includes("getElementById('vnCamp')"),'no menu teleport to hobgoblin camp');
+assert(fight.includes('function hobGrunt(distance)'),'camp grunts generated in combat world');
+assert(fight.includes('if(nearest<43)'),'hobgoblin grunt distance is bounded');

@@ -492,6 +492,22 @@ GLB_IDS.forEach((id, i) => { const k = gkey(id); let g = GROUPS.get(k); if (!g) 
   else if (px === 'p') g.vars.push({ slot: i, mode: 'glb', label: 'Placeholder' });
   else { if (bk(id)) g.vars.push({ slot: i, mode: 'blocky', label: 'Blocky' }); g.vars.push({ slot: i, mode: 'glb', label: 'Old' }); } });
 GROUPS.forEach(g => { const nv = g.vars.filter(v => v.label === 'New'); if (nv.length > 1) nv.forEach(v => { v.label = ('New ' + ((GLB_IDS[v.slot].match(/_new(\d+)/) || [0, ''])[1])).trim(); }); });
+// Hide rejected versions only in the visible model chooser. Leave GLB_IDS, binary files,
+// saved slots, and all model-loading fallback logic unchanged.
+const APPROVED_DISPLAY=new Map([
+ ['aldric',v=>v.label==='Old'||v.label==='Blocky'],
+ ['darius',v=>v.label==='Blocky'],
+ ['elira',v=>v.label==='Blocky'],
+ ['asha',v=>v.label==='Old'||GLB_IDS[v.slot]==='n:asha_new3'],
+ ['garruk',v=>v.label==='Old'||GLB_IDS[v.slot]==='n:garruk_new5'],
+ ['owner',v=>GLB_IDS[v.slot]==='n:owner']
+]);
+for(const [key,accept] of APPROVED_DISPLAY){
+ const group=GROUPS.get(key);if(!group)continue;
+ const approved=group.vars.filter(accept);
+ if(approved.length)group.vars=approved;
+}
+
 const vrank = l => l === 'Smooth' ? 3.5 : l === 'Pikachu' ? 3 : l === 'Blocky' ? 0 : l === 'Old' ? 1 : l === 'Placeholder' ? 9 : 2 + (parseInt(l.replace(/\D/g, '')) || 0) / 100 + (/straight/.test(l) ? .5 : 0);
 GROUPS.forEach(g => g.vars.sort((a, b) => vrank(a.label) - vrank(b.label)));
 // Sort the display rows only: never reorder GLB_IDS/HEROES because saves use their indices.

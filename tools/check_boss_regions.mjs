@@ -2,13 +2,20 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
-import {HERO_M,CHARS,profileFor,loadScale} from '../www/proto3d/charscale.js';
+import {HERO_M,HERO_LORE_HEIGHTS,inchesToMeters,CHARS,profileFor,loadScale} from '../www/proto3d/charscale.js';
 import {BOSS_PATTERNS,ENEMIES} from '../www/proto3d/combat/data.js';
 import {pickPattern} from '../www/proto3d/combat/ai.js';
 import {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_REALM,FROST_PORTAL,LAVA_POOLS,PORT_CENTER,isCitySafe,balthrixPosition,onLava,frostHill,lavaAmount} from '../www/proto3d/bossregions.js';
 const src=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const close=(a,b)=>Math.abs(a-b)<1e-8;
 assert(close(HERO_M,1.905),'Owner must be 1.905 m');
+assert.equal(Object.keys(HERO_LORE_HEIGHTS).length,20,'all 20 established heroes need lore heights');
+for(const [id,inch] of Object.entries(HERO_LORE_HEIGHTS)){
+ assert(close(profileFor(id).height,inchesToMeters(inch)),'lore height '+id);
+ assert(close(loadScale(id,1.8)*1.8,inchesToMeters(inch)),'uniform scale '+id);
+ assert(close(loadScale('n:'+id+'_smooth',1.8)*1.8,inchesToMeters(inch)),'smooth skin scale '+id);
+}
+for(const id of ['n:owner','n:owner_pika1'])assert(close(profileFor(id).height,HERO_M),'Owner skin remains 1.905 m');
 for(const id of ['n:frosttroll_a','n:frosttroll_b']){
  assert(close(profileFor(id).height,5.715),id+' must equal 3x Owner');
  assert(close(loadScale(id,11.4)*11.4,5.715),'model height normalized for '+id);

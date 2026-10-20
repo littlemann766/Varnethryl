@@ -417,7 +417,16 @@ export function createFight(env) {
       const r = e.view; if (!r) continue; const u = r.userData, bs = e.def.boss ? 2.2 : 1;
       if (e.state === 'defeated') { if (!e.dying) { e.dying = true; e.deathClip = oneShot(r, 'death', 0, true); } const uu = r.userData; if (e.deathClip) { tickOS(r, dt); if (uu.glb && uu.act) { uu.mixer.update(dt); if (uu.sb) uu.sb.update(dt); } } else r.rotation.x = -Math.min(1.4, e.deadT * 4); r.position.y = -Math.max(0, e.deadT - 1.2) * 1.2 * bs; e.tele.visible = false; if (e.deadT > (e.deathClip ? 4 : 2.4)) cc.removeEnemy(e); continue; }
       const mv = Math.hypot(e.x - e.px, e.z - e.pz) / Math.max(dt, 1e-4); e.px = e.x; e.pz = e.z; r.position.x = e.x; r.position.z = e.z;
-      r.position.y=terrainY(e.x,e.z);e.top=r.position.y+(e.heightAbove||2.5);
+      // Bosses use the shared terrain height. Smooth the roamer's vertical movement
+      // so steep ridges do not produce a visible up/down snap every simulation tick.
+      const ground=terrainY(e.x,e.z);
+      if(e.key==='vaelthryx'&&e.roaming){
+        const previous=Number.isFinite(r.position.y)?r.position.y:ground;
+        const rise=ground-previous;
+        const maxStep=Math.max(.25,dt*13);
+        r.position.y=previous+Math.max(-maxStep,Math.min(maxStep,rise));
+      }else r.position.y=ground;
+      e.top=r.position.y+(e.heightAbove||2.5);
       r.rotation.y = yawLerp(r.rotation.y, e.yaw, Math.min(1, dt * 10));
       if (e.state !== e.ls) { if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);

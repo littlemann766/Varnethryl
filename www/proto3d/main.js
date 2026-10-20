@@ -1137,8 +1137,13 @@ function updateCrowd(dt) {
       const nx = tvx / speed, nz = tvz / speed;
       const test = (x, z) => {
         const probe = { x: a.x + x * look, z: a.z + z * look };
-        resolve(probe, false, 'npc');
-        return Math.hypot(probe.x - a.x, probe.z - a.z);
+        const previousLevel = state.level;
+        state.level = r.level;
+        try { resolve(probe, false, 'npc'); }
+        finally { state.level = previousLevel; }
+        // Measure forward progress rather than total displacement: a collision
+        // resolver may push sideways while still leaving the path blocked.
+        return Math.max(0, (probe.x - a.x) * x + (probe.z - a.z) * z);
       };
       const straight = test(nx, nz);
       if (straight < look * 0.7) {
@@ -1146,8 +1151,15 @@ function updateCrowd(dt) {
         const left = { x: nx * ca - nz * sa, z: nx * sa + nz * ca };
         const right = { x: nx * ca + nz * sa, z: -nx * sa + nz * ca };
         const dl = test(left.x, left.z), dr = test(right.x, right.z);
-        const side = dl >= dr ? left : right;
-        if (Math.max(dl, dr) > straight + 0.15) { tvx = side.x * speed; tvz = side.z * speed; }
+        // Hold the chosen side briefly to avoid zig-zagging each frame
+        // when both sides of a rock are almost equally open.
+        const chooseLeft = Math.abs(dl - dr) < 0.2 && r.avoidSide != null
+          ? r.avoidSide < 0 : dl >= dr;
+        const side = chooseLeft ? left : right;
+        if (Math.max(dl, dr) > straight + 0.15) {
+          r.avoidSide = chooseLeft ? -1 : 1;
+          tvx = side.x * speed; tvz = side.z * speed;
+        }
       }
     }
     const k = Math.min(1, dt * 8); r.vxs += (tvx - r.vxs) * k; r.vzs += (tvz - r.vzs) * k;

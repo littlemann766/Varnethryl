@@ -294,7 +294,7 @@ const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'ha
 { const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
 // APPEND AFTER all existing smooth variants: never shift saved character indices.
 EXTRA.push(['n:vaelthryx_straight_rig_50', 'Balthrix (50×)', 'proto3d/models-new/vaelthryx_straight_rig.glb']);
-EXTRA.push(['n:ashentitan_40', 'Ashen Titan (40×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
+EXTRA.push(['n:ashentitan_40', 'Ashen Titan (legacy slot · 20×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
 EXTRA.push(['n:ashentitan_20', 'Ashen Titan (20×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
 EXTRA.push(['n:ashentitan_60', 'Ashen Titan (60×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
 const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
@@ -1217,6 +1217,7 @@ async function setFight(on) { const f = await fightToggle(true); if (on !== f.on
 const fpsEl2 = fpsEl;
 const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
 window.__p3d = { get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
+  teleportTo(x,z){if(!Number.isFinite(x)||!Number.isFinite(z))return false;state.heroX=x;state.heroZ=z;state.target=null;state.level=0;updateLevel();snapFollowers();saver?.mark();return true;},
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; }, get guards() { return GUARDS; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },

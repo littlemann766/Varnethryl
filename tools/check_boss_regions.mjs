@@ -73,6 +73,8 @@ assert(main.includes("}else if (cfg && id === 'n:owner')"),'Owner incompatible c
 assert(main.includes('window.__varnethrylRigAudits[id] = report'),'Owner and Balthrix rig audit is exposed for device inspection');
 assert(main.includes('Object.assign(root.userData, { glb: true, mixer'),'rig audit survives animation initialization');
 assert(main.includes('serpentBones: bones.filter'),'serpent skeleton audit records relevant bone families');
+assert(main.includes('serpentAnimatedTracks: g.animations.map'),'serpent audit checks actual animation tracks');
+assert(main.includes('full-body wave is not verified'),'serpent audit diagnoses clips without spine animation');
 assert(main.includes('root.userData.rigAudit.resolved = {'),'rig audit records resolved locomotion capabilities');
 assert(main.includes("if (id === 'n:owner' && !act.walk && !act.run)"),'Owner missing locomotion clips are diagnosed');
 assert(main.indexOf('if (/vaelthryx/.test(id) && !act.walk && !act.run)') > main.indexOf('if (spd && spd.map)'),'Balthrix missing-clip diagnostic runs after profile mapping');

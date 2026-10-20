@@ -14,9 +14,10 @@ import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './
 import { Respawner } from './combat/respawn.js';
 import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, balthrixPosition, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
+import { HOB_CAMPS } from './hobcamps.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
 export const SABER_GLB = null;             // URL (or fight.setSaberModel(url)) for Beth's saber: hilt at origin, blade along +Y, ~1 m
-const MAX_ALIVE = 5, AUTO_MAX = 9, AUTO_AGGRO = 3;   // Wilds: up to 9 passive mobs, aggro only within 3 m
+const MAX_ALIVE = 5, AUTO_MAX = (typeof matchMedia==='function' && matchMedia('(pointer:coarse)').matches) ? 12 : 15, AUTO_AGGRO = 3; // Lively world with mobile cap; wild mobs remain passive
 export function createFight(env) {
   const { THREE, scene, camera, state, HS } = env;
   let on = false, saber = null, saberUrl = SABER_GLB, wave = 1, sheathed = false, spawnT = 0, bossOn = false;
@@ -315,6 +316,34 @@ export function createFight(env) {
       cc.removeEnemy(e);bossDue.set(e.key,regionClock+4);
     }
   }
+  /* Fixed encampments: groups of hobgoblins defend their tents, with a global cap and
+     per-camp reinforcement delay. They recycle when out of range; no surprise spawns in town. */
+  let campTimer=0;
+  const campPending=new Set(),campNext=new Map();
+  function updateHobCamps(dt){
+    if(!auto||(env.zone&&env.zone()!=='town')||isCitySafe(state.heroX,state.heroZ,8)||cc.dead>0)return;
+    campTimer-=dt;if(campTimer>0)return;campTimer=1.6;
+    const regular=cc.enemies.filter(e=>!e.def.boss&&e.state!=='defeated').length;
+    if(regular>=AUTO_MAX+4)return;
+    for(const site of HOB_CAMPS){
+      const distance=Math.hypot(state.heroX-site.x,state.heroZ-site.z);
+      if(distance>135)continue;
+      if(distance<16||regionClock<(campNext.get(site.id)||0)||campPending.has(site.id))continue;
+      const campAlive=cc.enemies.filter(e=>e.campId===site.id&&e.state!=='defeated');
+      if(campAlive.length>=site.guards)continue;
+      const n=campAlive.length,angle=(n*2.4+site.id.length*.3)%(Math.PI*2);
+      let x=site.x+Math.cos(angle)*(7.5+n*.6),z=site.z+Math.sin(angle)*(7.5+n*.6);
+      if(!env.free(x,z)) { x=site.x+Math.cos(angle+1.1)*10;z=site.z+Math.sin(angle+1.1)*10; }
+      if(!env.free(x,z)||Math.hypot(x-state.heroX,z-state.heroZ)<12)continue;
+      const key=(n===site.guards-1)?'hob_enforcer':'raider';
+      campPending.add(site.id);campNext.set(site.id,regionClock+2.5);
+      // Spawn model asynchronously, without saturating WebGL model loads.
+      Promise.resolve(spawn(key,0,{at:[x,z],aggroR:19,biome:'forest',campId:site.id}))
+        .then(e=>{if(!e)campNext.set(site.id,regionClock+5);},()=>{campNext.set(site.id,regionClock+5);})
+        .finally(()=>campPending.delete(site.id));
+      break; // one guard per tick across camps
+    }
+  }
   let lavaT=0;
   function update(dt) {
     if (!on) return;
@@ -324,12 +353,12 @@ export function createFight(env) {
     const h = env.hero();
     // lock-on: face the target
     if (cc.tgt.locked && cc.tgt.target && cc.dead <= 0) state.yaw = yawLerp(state.yaw, Math.atan2(cc.tgt.target.x - state.heroX, cc.tgt.target.z - state.heroZ), Math.min(1, dt * 9));
-    cc.update(dt); if (lfx) lfx.update(dt); updateCompanions(dt); regionUpdate(dt);
+    cc.update(dt); if (lfx) lfx.update(dt); updateCompanions(dt); regionUpdate(dt); updateHobCamps(dt);
     // spawner (bad guys): small waves of regular enemies
     spawnT -= dt; const reg = cc.enemies.filter(e => !e.def.boss && e.state !== 'defeated').length;
     if (auto && (env.zone?.()==='wilds'||env.zone?.()==='town')) {   // Wilds + wilderness beyond the walls: scattered, passive mobs (they stand off until you come within 3 m or hit them first); far ones are recycled
       RH.hero.x = state.heroX; RH.hero.z = state.heroZ; if (cc.dead <= 0 && (env.zone?.()==='wilds'||!isCitySafe(state.heroX,state.heroZ,8))) RS.update(dt, RH);   // respawn: 20-40 s after a kill, out of sight, per-biome cap, Wilds only
-      for (const e of cc.enemies) if (e.state === 'idle' && Math.hypot(e.x - state.heroX, e.z - state.heroZ) > 95) { cc.removeEnemy(e); RS.freeSlot(false); }
+      for (const e of cc.enemies) if (e.state === 'idle' && Math.hypot(e.x - state.heroX, e.z - state.heroZ) > (e.campId?130:95)) { cc.removeEnemy(e); if(!e.campId)RS.freeSlot(false); }
     } else if (!auto && spawnT <= 0 && reg < Math.min(MAX_ALIVE, 2 + wave) && cc.dead <= 0) { spawnT = 3.5; spawn(WAVE_TABLE[Math.min(WAVE_TABLE.length - 1, Math.floor(Math.random() * Math.min(WAVE_TABLE.length, 1 + wave)))]); }
     // dash / jump
     if (A.dash) { const d = A.dash, s = Math.min(d.left, d.spd * dt), p = { x: state.heroX + d.dx * s, z: state.heroZ + d.dz * s }; env.resolve(p); state.heroX = p.x; state.heroZ = p.z; d.left -= s; if (d.left <= 0.01) A.dash = null; }
@@ -379,7 +408,7 @@ export function createFight(env) {
   const RS = new Respawner({ max: AUTO_MAX, maxDist: 60 * (env.wildsScale || 280 / 170) /* enlarged Wilds: biomes are WS x farther apart */ }), RH = { hero: { x: 0, z: 0 }, zone: () => env.zone ? env.zone() : 'wilds', inWilds: (x, z) => env.inWilds ? env.inWilds(x, z) : true,
     biome: (x, z) => env.biome ? env.biome(x, z) : 'meadow', free: (x, z) => env.free(x, z), visible: (x, z) => project(x, 1.2, z, sc),
     alive: b => { let n = 0; for (const e of cc.enemies) if (e.biome === b && e.state !== 'defeated') n++; return n; }, spawn: (key, x, z, b) => spawn(key, 0, { aggroR: AUTO_AGGRO, at: [x, z], biome: b }) };
-  cc.on('defeat', e => { if (auto && !e.def.boss) RS.freeSlot(true); });
+  cc.on('defeat', e => { if(auto&&e.campId)campNext.set(e.campId,regionClock+20+Math.random()*10); else if (auto && !e.def.boss) RS.freeSlot(true); });
   function start(isAuto) {
     if (on) return; auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);

@@ -430,7 +430,10 @@ export function createFight(env) {
         r.position.y=previous+Math.max(-maxStep,Math.min(maxStep,rise));
       }else r.position.y=ground;
       e.top=r.position.y+(e.heightAbove||2.5);
-      r.rotation.y = yawLerp(r.rotation.y, e.yaw, Math.min(1, dt * 10));
+      // Imported bosses can start without a finite yaw. Keep the rendered
+      // heading valid so the serpent never disappears into NaN transforms.
+      const heading=Number.isFinite(e.yaw)?e.yaw:0;
+      r.rotation.y = yawLerp(Number.isFinite(r.rotation.y)?r.rotation.y:heading, heading, Math.min(1,Math.max(0,dt)*10));
       if (e.state !== e.ls) { if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
       let lean = 0; if (e.state === 'telegraph') lean = -0.35 * Math.min(1, e.tStateT / e.def.tele); else if (e.state === 'attack') lean = 0.45; else if (e.state === 'stagger') lean = -0.5; else if (e.flinch > 0) lean = -0.25 * (e.flinch / 0.18);

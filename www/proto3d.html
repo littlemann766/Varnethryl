@@ -87,12 +87,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
   <small>Legends Are Forged · Kingdoms Are Conquered</small>
 </div><button id="diagBtn" type="button">3D status</button><div id="diag"></div>
 <script>
-(function(){var lines=[],box=document.getElementById('diag'),btn=document.getElementById('diagBtn'),shown=false,lastT=0;
+(function(){var lines=[],box=document.getElementById('diag'),btn=document.getElementById('diagBtn'),shown=false;
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
 function models(){var out='';try{var st=window.__p3d&&window.__p3d.modelStatus&&window.__p3d.modelStatus();if(st){out+='<h4>3D models (build '+esc(st.build)+', '+st.loaded+' loaded, '+st.failed+' failed)</h4>';st.models.forEach(function(m){out+='<div class="'+(m.state==='loaded'?'ok':m.state==='failed'?'bad':'pend')+'">'+esc(m.id)+': '+esc(m.state)+(m.kb?' - '+m.kb+' KB':'')+(m.error?' - '+esc(m.error):'')+'</div>'});}else out+='<h4>3D models</h4><div class="pend">engine still starting...</div>'}catch(e){out+='<div class="bad">status error: '+esc(e.message||e)+'</div>'}return out}
 function render(){box.innerHTML='<button id="diagX" type="button">Close</button>'+models()+'<h4>Log</h4>'+lines.map(function(l){return '<div class="'+(l.bad?'bad':'')+'">'+esc(l.t)+'</div>'}).join('');var x=document.getElementById('diagX');if(x)bind(x,function(){set(false)});box.scrollTop=0}
 function set(v){shown=v;box.style.display=v?'block':'none';if(v)render()}
-function bind(el,fn){function h(e){var n=Date.now();if(n-lastT<350){e.preventDefault&&e.preventDefault();return}lastT=n;e.preventDefault&&e.preventDefault();e.stopPropagation&&e.stopPropagation();fn()}el.addEventListener('pointerup',h);el.addEventListener('touchend',h,{passive:false});el.addEventListener('click',h)}
+function bind(el,fn){el.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();fn()})}
 window.__p3dDiag=function(t,bad){lines.push({t:t,bad:!!bad});if(lines.length>60)lines.shift();if(shown)render();if(bad)document.body.classList.add('vn-diagnostic-error');/* Runtime warnings never interrupt movement or noclip. Open diagnostics only on explicit request or an unrecoverable startup error. */};
 bind(btn,function(){set(!shown)});
 var ua=navigator.userAgent,m=/Chrome\/(\d+)/.exec(ua);

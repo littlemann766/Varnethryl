@@ -1640,12 +1640,12 @@ function entrySpot(d) {
   return { x: THREE.MathUtils.clamp(bx, -lim, lim), z: THREE.MathUtils.clamp(bz, -lim, lim) };
 }
 /* ---------- fight test mode (1.1.8): lazy-loaded, owner-gated start (owner panel / HUD button it reveals) ---------- */
-let FIGHT = null, GUARDS = null;
+let FIGHT = null, GUARDS = null, fightInitPromise = null;
 /* town guard strike: one reusable line (guard spear-tip -> monster), shown 0.15 s; no allocation per strike */
 const GB = (() => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3)); const l = new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0xfff1a8 })); l.visible = false; l.frustumCulled = false; l.userData.keep = true; l.userData.t = 0; scene.add(l); return l; })();
 function guardBolt(g, e) { const a = GB.geometry.attributes.position; a.setXYZ(0, g.x, 2.4, g.z); a.setXYZ(1, e.x, 1.1, e.z); a.needsUpdate = true; GB.visible = true; GB.userData.t = 0.15; }
 async function fightToggle(createOnly) {
-  if (!FIGHT) {
+  if (!FIGHT && !fightInitPromise) fightInitPromise = (async () => {
     const mod = await import('./fight.js');
     FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, downAllies, followers: () => crowd.filter(r => r.kind === 'party'), bystanders, killCrowd, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
       selectOwner: async () => { const i = GLB_IDS.indexOf('n:owner'); if (i >= 0 && GLB_IDS[HEROES.indexOf(hero)] !== 'n:owner') await selectVariant(SLOT_G[i], curVar(SLOT_G[i])); },
@@ -1658,7 +1658,9 @@ async function fightToggle(createOnly) {
       groundY:(x,z)=>ZONE.name==='frost'?frostElevation(x,z):ZONE.name==='town'&&TOWN_LANDS?TOWN_LANDS.heightAt(x,z):0,
       loadGLTF: url => new Promise((res, rej) => gl.load(url, res, undefined, rej)),
       respawnPos:()=>ZONE.name==='wilds'&&WM?{x:WM.spawn.x,z:WM.spawn.z}:ZONE.name==='frost'?{x:FROST_REALM.cx-8,z:FROST_REALM.cz+155}:{x:0,z:60} });
-  }
+    return FIGHT;
+  })().catch(err=>{fightInitPromise=null;throw err;});
+  if (fightInitPromise) await fightInitPromise;
   if (!GUARDS) { const gm = await import('./combat/guards.js'); GUARDS = new gm.TownGuards(ectx.guardPosts || []); GUARDS.onStrike = guardBolt; }
   if (createOnly) return FIGHT;
   FIGHT.toggle(); return FIGHT;

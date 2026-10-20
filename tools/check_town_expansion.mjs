@@ -1,4 +1,4 @@
-// Regression checks for the 560-unit Varnethryl town expansion.
+// Regression checks for the doubled 1120-unit Varnethryl town expansion.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -12,8 +12,8 @@ const pk=Number(building.match(/PK\s*=\s*([\d.]+)/)?.[1]);
 const wildHalf=Number(wilds.match(/half:\s*(\d+),\s*base/)?.[1]);
 assert.ok(worldExpression && Number.isFinite(pk),'town half-extent constants');
 const townHalf=Number(worldExpression[1])*pk;
-assert.equal(townHalf,280,'town matches Wilds 280-unit half-extent');
-assert.equal(wildHalf,townHalf,'matching Wilds bounds');
+assert.equal(townHalf,560,'town doubled to 560-unit half extent');
+assert.equal(townHalf,wildHalf*2,'town is exactly twice the Wilds half extent');
 assert.ok(building.includes("const Q = WORLD * 0.5, DECO"),'wall towers spread along expanded perimeter');
 assert.ok(building.includes("run(-WORLD, -WORLD, WORLD, -WORLD)"),'north wall');
 assert.ok(building.includes("run(-WORLD, -WORLD, -WORLD, WORLD)"),'west wall');
@@ -33,4 +33,4 @@ for(const fname of ['../www/proto3d/townlands.js','../www/proto3d/buildings.js',
  const p=spawnSync(process.execPath,['--check','--input-type=module'],{input:text(fname),encoding:'utf8'});
  assert.equal(p.status,0,'Syntax: '+fname+': '+p.stderr);
 }
-console.log('Town expansion passed: Wilds-sized map, continuous walls, gate anchor, existing saves/portal, scenery & JS syntax.');
+console.log('Town expansion passed: double-Wilds-size map, continuous walls, gate anchor, saves/portal, scenery & JS syntax.');

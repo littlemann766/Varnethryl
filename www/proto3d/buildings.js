@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { Builder, M, GLOW, WM, rippleMat, birdFlock, butterflies, boxG, cylG, uvScale, TILE, mergeGroup } from './bldkit.js';
 import { tex, goldDoorTexture } from './bldtex.js';
+import { CITY_HALF, PORT_CENTER } from './bossregions.js';
 
 // ---------- shared decor ----------
 function wins(B, o) { // facade windows: front [[x,y]], side [[z,y]] (both sides), back [[x,y]]
@@ -675,7 +676,7 @@ export function buildWalls(ctx, WORLD_W, GATE_W) {
       const ang = horiz ? (nz > 0 ? Math.PI : 0) : (nx > 0 ? -Math.PI / 2 : Math.PI / 2);   // climbs toward the wall
       B.stairs({ cx: cxs, cz: czs, ang, len: LEN, w: 1.7, l0: 0, y0: 0, l1: 1, y1: h, key: 'stoneD', flipUp: .7 }); } };
   const g = GATE_W;
-  run(-WORLD, -WORLD, WORLD, -WORLD); run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -10.4, WORLD); run(10.4, WORLD, WORLD, WORLD);
+  run(-WORLD, -WORLD, -10.4, -WORLD); run(10.4, -WORLD, WORLD, -WORLD); run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -10.4, WORLD); run(10.4, WORLD, WORLD, WORLD);
   const towers = []; const tw = (x, z, enter) => { if (!enter) { B.tower(x, z, 2.4, 7.6, { coneH: 5.4, windows: 3, wa: x + z }); B.banner(x, 4.2, z + (z < 0 ? 2.5 : -2.5), z < 0 ? 0 : Math.PI, 1, 2.2); return; }
     const th = Math.atan2(-x, -z), t = hollowTower(ctx, 'wt' + towers.length, x * KW, z * KW, th, 6.0, KW); towers.push(t); };
   const E = WORLD - 6;
@@ -711,14 +712,14 @@ export const BUILDING_DEFS = [
   { id: 'house2', f: house(1), cx: 9, cz: 19, rot: Math.PI, name: 'Village House' },
   { id: 'house3', f: house(2), cx: -9, cz: 31, rot: Math.PI, name: 'Village House' },
   { id: 'house4', f: house(3), cx: 9, cz: 31, rot: Math.PI, name: 'Village House' },
-  { id: 'lighthouse', f: lighthouse, cx: -33, cz: 51, rot: 0, name: 'Lighthouse' },
-  { id: 'port', f: port, cx: -45, cz: 40, rot: 0, name: 'Port' },
+  { id: 'lighthouse', f: lighthouse, cx: -157, cz: 119, rot: 0, name: 'Lighthouse' },
+  { id: 'port', f: port, cx: PORT_CENTER.x / PK, cz: PORT_CENTER.z / PK, rot: 0, name: 'Port' },
   { id: 'gatehouse', f: gatehouse, cx: 0, cz: 59, rot: 0, name: 'Gatehouse' },
   { id: 'fountain', f: fountain, cx: 0, cz: 0, rot: 0, name: 'Fountain Monument' },
 ];
 export function buildVillage(ctx, only) {
   if (!only && ctx.scene) ctx.scene.add(birdFlock(36, WORLD_B * .8));   // pass 3 life: one draw call of circling birds
-  const out = []; for (const d of BUILDING_DEFS) { if (only && !only.includes(d.id)) continue; const cz = d.id === 'gatehouse' ? WORLD_B - 1.2 : d.cz * PK;
+  const out = []; for (const d of BUILDING_DEFS) { if (only && !only.includes(d.id)) continue; const cz = d.id === 'gatehouse' ? CITY_HALF - 1.2 : d.cz * PK;
     const b = d.f({ id: d.id, cx: d.cx * PK, cz, rot: d.rot, K: KB }, ctx); b.defName = d.name; b.def = d; out.push(b); }
   if (!only && ctx.scene) { const pts = []; for (const b of out) { const s0 = b.parts ? b.parts[0] : b; if (!s0 || !s0.toW || !s0.d || /^(gatehouse|port|colosseum|keep)$/.test(s0.id)) continue; for (const sx of [-1, 1]) pts.push(s0.toW(sx * (s0.w / 2 + 1.2), s0.d / 2 + 2.2)); } ctx.scene.add(butterflies(pts)); }
   return out;

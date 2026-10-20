@@ -69,7 +69,10 @@ export class SpringBones {
   disable() { this.enabled=false; for (const it of this.items) if (!it.animated) it.bone.quaternion.copy(it.restQ); }
   update(dt) {
     if (!this.enabled) return;
-    this.acc += Math.min(dt, 0.1); let n=0;
+    // Clamp invalid or stalled frame deltas: a resumed mobile tab must not
+    // inject negative/NaN time or build an unbounded cloth catch-up backlog.
+    const frameDt=Number.isFinite(dt)?Math.max(0,Math.min(dt,0.1)):0;
+    this.acc=Math.min(this.acc+frameDt,this.step*4); let n=0;
     for (const it of this.items) it.q0 = it.animated ? it.bone.quaternion.clone() : it.restQ;
     while (this.acc >= this.step && n++<4) { this.acc -= this.step; this._sub(); }
     // Do not leave the previous frame's simulated cape pose in place when the

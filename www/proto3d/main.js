@@ -294,8 +294,8 @@ const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'ha
 { const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
 // APPEND AFTER all existing smooth variants: never shift saved character indices.
 EXTRA.push(['n:vaelthryx_straight_rig_50', 'Balthrix (50×)', 'proto3d/models-new/vaelthryx_straight_rig.glb']);
-EXTRA.push(['n:ashentitan_40', 'Ashen Titan (legacy slot · 20×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
-EXTRA.push(['n:ashentitan_20', 'Ashen Titan (20×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
+EXTRA.push(['n:ashentitan_40', 'Ashen Titan (legacy slot · 15×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
+EXTRA.push(['n:ashentitan_20', 'Ashen Titan (15×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
 EXTRA.push(['n:ashentitan_60', 'Ashen Titan (60×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
 const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
 const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };

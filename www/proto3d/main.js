@@ -18,6 +18,7 @@ import { createCamRig } from './camrig.js';
 import { initSettings } from './settingsboot.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
 import { worldProfile, loadScale } from './charscale.js';
+import { buildTownOutskirts } from './townlands.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 const canvas = document.getElementById('c');
@@ -103,7 +104,7 @@ const START_Z = 14 * PK;
 const grass = canvasTex(256, (g, s) => {
   g.fillStyle = '#5c9a45'; g.fillRect(0, 0, s, s);
   for (let i = 0; i < 2600; i++) { g.fillStyle = `hsl(${88 + rnd() * 30},${40 + rnd() * 20}%,${30 + rnd() * 18}%)`; g.fillRect(rnd() * s, rnd() * s, 2, 3); }
-}, 41);
+}, Math.round(41 * WORLD / (60 * PK)));
 const cobble = canvasTex(256, (g, s) => {
   g.fillStyle = '#8d8579'; g.fillRect(0, 0, s, s);
   for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
@@ -117,9 +118,9 @@ ground.rotation.x = -Math.PI / 2;
   const cm = new THREE.MeshLambertMaterial({ map: cobble.clone() });
   cm.map.repeat.set(11 * PK, 11 * PK); cm.map.needsUpdate = true;
   const plaza = mesh(new THREE.CircleGeometry(13 * PK, 64), cm, 0, 0.02, 0, null, false); plaza.rotation.x = -Math.PI / 2;
-  const pm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); pm.map.repeat.set(1, 22 * PK * 2); pm.map.needsUpdate = true;
+  const pm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); pm.map.repeat.set(1, 22 * PK * 2 * WORLD / (60 * PK)); pm.map.needsUpdate = true;
   const p1 = mesh(new THREE.PlaneGeometry(5 * KB, WORLD * 2), pm, 0, 0.03, 0, null, false); p1.rotation.x = -Math.PI / 2;
-  const p2 = mesh(new THREE.PlaneGeometry(WORLD * 2, 4 * KB), pm, 0, 0.031, 0, null, false); p2.rotation.x = -Math.PI / 2; p2.material.map.repeat.set(24 * PK, 0.8 * KB);
+  const p2 = mesh(new THREE.PlaneGeometry(WORLD * 2, 4 * KB), pm, 0, 0.031, 0, null, false); p2.rotation.x = -Math.PI / 2; p2.material.map.repeat.set(24 * PK * WORLD / (60 * PK), 0.8 * KB);
 }
 
 function wallSeg(x1, z1, x2, z2) {
@@ -188,7 +189,15 @@ if (BLD_ON) {
   addCircCol(0, 0, 3.5);
 }
 
-// trees (instanced: 2 draw calls for ~60 trees)
+// Extra wall-to-wall landscape, orchards and fields use the Wilds' chunked scenery approach.
+// Keep the original 29 buildings, save coordinates and town↔Wilds portal unchanged.
+let TOWN_LANDS = null;
+if (BLD_ON) {
+  try { TOWN_LANDS = buildTownOutskirts({ scene, colliders, world: WORLD, buildings: BUILDING_DEFS, spacing: PK });
+    diag('Town expanded to ' + WORLD * 2 + ' units wide · landscaped chunks: ' + TOWN_LANDS.chunkCount); }
+  catch (e) { console.warn('town outskirts failed', e); diag('Town landscape fallback: ' + (e && e.message || e), true); }
+}
+// Original trees stay in the historic village/inner grounds; outer forests are chunked independently.
 {
   const pts = [];
   const blocked = (x, z) => {
@@ -204,7 +213,7 @@ if (BLD_ON) {
   };
   let guard = 0;
   while (pts.length < (BLD_ON ? 230 : 56) && guard++ < 6000) {
-    const x = (rnd() * 2 - 1) * (WORLD - 3), z = (rnd() * 2 - 1) * (WORLD - 3);
+    const treeLimit = Math.min(WORLD - 3, 161); const x = (rnd() * 2 - 1) * treeLimit, z = (rnd() * 2 - 1) * treeLimit;
     if (!blocked(x, z) && !pts.some(p => Math.hypot(p.x - x, p.z - z) < 5)) pts.push({ x, z, s: (0.8 + rnd() * 0.7) * 1.6 });
   }
   const trunkG = new THREE.CylinderGeometry(0.22, 0.32, 1.8, 6), leafG = new THREE.ConeGeometry(1.5, 3.4, 7), leaf2G = new THREE.ConeGeometry(1.1, 2.6, 7);
@@ -1059,7 +1068,7 @@ function frame(now) {
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  updateCrowd(dt); updateHero(dt); updateZone(dt); if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
+  updateCrowd(dt); updateHero(dt); updateZone(dt); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
   simTime += dt; if (SMOKE) SMOKE.update(simTime);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
@@ -1138,7 +1147,7 @@ const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
 const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
-window.__p3d = { killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
+window.__p3d = { get townLands() { return TOWN_LANDS; }, killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; }, get guards() { return GUARDS; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },

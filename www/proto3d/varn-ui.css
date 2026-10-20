@@ -155,3 +155,8 @@ body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
   #load h2,#load #loadMsg,#load .vn-loader-track,#load small{margin-left:49vw!important;width:min(45vw,380px)!important}
   #load h2{font-size:clamp(20px,3vw,34px)!important}
 }
+
+/* Three clear roster categories, optimized for narrow Android screens. */
+#heroes #hlist .vn-roster-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+#heroes #hlist .vn-roster-tabs button{font-size:9px;min-height:47px;padding:6px 3px;white-space:normal}
+#heroes #hlist .vn-roster-list .row button:first-child{touch-action:pan-y}

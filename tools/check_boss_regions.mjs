@@ -57,6 +57,9 @@ for(let t=.1;t<=60;t+=.1){
 }
 const main=src('www/proto3d/main.js'),terrain=src('www/proto3d/townlands.js'),ice=src('www/proto3d/frostreach.js'),fight=src('www/proto3d/fight.js'),hud=src('www/proto3d/combat/hud.js');
 assert(main.includes("setZone(ZONE.name==='town'?(isFrostCave?'frost':'wilds'):'town')"),'bidirectional ice cave portal wired');
+assert(main.includes("r.level = state.level; r.ti = null; r.lvT = 0; r.stuckT = 0;"),'teleport followers match hero floor and reset stuck state');
+assert(main.includes("resolve(spot, false, 'npc')"),'teleported followers use collision resolution');
+assert(main.includes("r.vxs = r.vzs = r.a.vx = r.a.vz = 0"),'teleported followers do not retain sprint velocity');
 assert(main.includes('TOWN_LANDS.updateWater?.(simTime)'),'water animation runs');
 assert(main.includes('state.swimming'),'hero can swim');
 assert(terrain.includes('mesh.castShadow=true')&&terrain.includes('mesh.receiveShadow=true'),'hills cast and receive shadows');

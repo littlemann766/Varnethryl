@@ -1076,7 +1076,13 @@ async function setZone(name) {
   if(name==='wilds'||name==='frost'){const f=await fightToggle(true);f.startAuto();if(name==='frost')f.startRegionBosses('frost');}
   return true;
 }
+let outdoorCombatStarting=false;
 function updateZone(dt) {
+  // Automatically enter PvE beyond the walls; town interiors remain protected.
+  if(ZONE.name==='town' && (Math.abs(state.heroX)>CITY_HALF+14 || Math.abs(state.heroZ)>CITY_HALF+14) && !outdoorCombatStarting && (!FIGHT||!FIGHT.on)){
+    outdoorCombatStarting=true;
+    fightToggle(true).then(f=>{if(ZONE.name==='town')f.startAuto();}).finally(()=>{outdoorCombatStarting=false;});
+  }
   if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ, VIEWK);
   const t=performance.now()/1000;
   if(portalT?.userData.update)portalT.userData.update(t);
@@ -1145,10 +1151,13 @@ async function fightToggle(createOnly) {
       selectOwner: async () => { const i = GLB_IDS.indexOf('n:owner'); if (i >= 0 && GLB_IDS[HEROES.indexOf(hero)] !== 'n:owner') await selectVariant(SLOT_G[i], curVar(SLOT_G[i])); },
       makeModel: async id => { try { return modeFor(id) === 'blocky' ? makeBlocky(id) : await loadActorModel(id); } catch (e) { return null; } },
       loco: locoAnim, resolve: p => resolve(p), resolveMob: p => resolve(p, false, 'npc'), free: (x, z) => window.__p3d.free(x, z, 0),
-      zone: () => ZONE.name, inWilds: (x, z) => ZONE.name === 'wilds' && Math.abs(x - ZONE.cx) < ZONE.half - 4 && Math.abs(z - ZONE.cz) < ZONE.half - 4,
-      biome: (x, z) => WM ? WM.mod.biome(x - WM.mod.WILDS.ox, z - WM.mod.WILDS.oz) : 'meadow',
+      zone: () => ZONE.name, inWilds:(x,z)=>
+        (ZONE.name==='wilds' && Math.abs(x-ZONE.cx)<ZONE.half-4 && Math.abs(z-ZONE.cz)<ZONE.half-4) ||
+        (ZONE.name==='town' && (Math.abs(x)>CITY_HALF+22||Math.abs(z)>CITY_HALF+22) && Math.max(Math.abs(x),Math.abs(z))<WORLD-18 && Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z)>120 && Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)>92),
+      biome: (x, z) => ZONE.name==='wilds'&&WM?WM.mod.biome(x - WM.mod.WILDS.ox,z - WM.mod.WILDS.oz):terrainBiome(x,z),
+      groundY:(x,z)=>ZONE.name==='frost'?frostElevation(x,z):ZONE.name==='town'&&TOWN_LANDS?TOWN_LANDS.heightAt(x,z):0,
       loadGLTF: url => new Promise((res, rej) => gl.load(url, res, undefined, rej)),
-      respawnPos: () => ZONE.name === 'wilds' && WM ? { x: WM.spawn.x, z: WM.spawn.z } : { x: 0, z: 60 } });
+      respawnPos:()=>ZONE.name==='wilds'&&WM?{x:WM.spawn.x,z:WM.spawn.z}:ZONE.name==='frost'?{x:FROST_REALM.cx-8,z:FROST_REALM.cz+155}:{x:0,z:60} });
   }
   if (!GUARDS) { const gm = await import('./combat/guards.js'); GUARDS = new gm.TownGuards(ectx.guardPosts || []); GUARDS.onStrike = guardBolt; }
   if (createOnly) return FIGHT;
@@ -1179,7 +1188,7 @@ const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
 const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
-window.__p3d = { get townLands() { return TOWN_LANDS; }, killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
+window.__p3d = { get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; }, get guards() { return GUARDS; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },

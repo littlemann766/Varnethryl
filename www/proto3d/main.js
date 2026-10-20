@@ -376,8 +376,17 @@ function locoAnim(u, sp, dt = 1/60) {
     const run = A.run && A.run !== wk ? A.run : null;
     const runMix = run && !standing ? Math.max(0, Math.min(1, (v - (S?.walk || SPEED)) / Math.max(.1, (S?.run || SPEED * 2) - (S?.walk || SPEED)))) : 0;
     wk.setEffectiveWeight((1-runMix)*ov);
-    wk.timeScale = standing ? 0 : 0.6 + v * 0.25;
-    if(run){run.setEffectiveWeight(runMix*ov);run.timeScale=Math.max(.65,Math.min(2.2,v/(SPEED*1.8)));}
+    // Profiled rigs need playback rates based on their authored ground speeds,
+    // even if their imported GLB is missing an idle animation.
+    wk.timeScale = standing ? 0 : S?.walk > 0
+      ? Math.max(.5,Math.min(2.4,v/S.walk))
+      : 0.6 + v * 0.25;
+    if(run){
+      run.setEffectiveWeight(runMix*ov);
+      run.timeScale=S?.run > 0
+        ? Math.max(.5,Math.min(2.4,v/S.run))
+        : Math.max(.65,Math.min(2.2,v/(SPEED*1.8)));
+    }
     if (standing && !u.wasStanding) { wk.time = 0; if (u.sb) u.sb.reset(); }
     u.wasStanding = standing;
   }

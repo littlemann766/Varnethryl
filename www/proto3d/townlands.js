@@ -52,7 +52,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const N=96,W=4.2,positions=[],indices=[];
     for(let i=0;i<=N;i++){const a=i*2*Math.PI/N,cs=Math.cos(a),sn=Math.sin(a);
       positions.push((RING-W)*cs,.045,(RING-W)*sn,(RING+W)*cs,.045,(RING+W)*sn);
-      if(i<N){const j=i*2;indices.push(j,j+1,j+2,j+1,j+3,j+2);}
+      if(i<N){const j=i*2;indices.push(j,j+2,j+1,j+1,j+2,j+3);}
     }
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setIndex(indices);g.computeVertexNormals();
     const m=new THREE.Mesh(g,roadMat);m.receiveShadow=true;m.userData.keep=true;group.add(m);

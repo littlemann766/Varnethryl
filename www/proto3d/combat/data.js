@@ -21,10 +21,10 @@ export const BOSS_PATTERNS = {
     { id: 'quake', name: 'Rage Quake', shape: 'ring', reach: 12, tele: 1.0, dmg: 1.6, phase: 2 },
   ],
   titan40: [
-    { id:'moltenStomp',name:'Molten Cataclysm',shape:'ring',reach:23,tele:2.1,dmg:1.35 },
-    { id:'ashenWave',name:'Lava Shockwave',shape:'cone',reach:29,cos:.1,tele:1.9,dmg:1.5 },
-    { id:'eruption',name:'Eruption Pillars',shape:'line',reach:39,width:11,tele:2.4,dmg:1.85 },
-    { id:'inferno',name:'Inferno Collapse',shape:'ring',reach:34,tele:2.3,dmg:2.15,phase:2 }
+    { id:'moltenStomp',name:'Molten Cataclysm',shape:'ring',reach:13,tele:2.1,dmg:1.35 },
+    { id:'ashenWave',name:'Lava Shockwave',shape:'cone',reach:17,cos:.1,tele:1.9,dmg:1.5 },
+    { id:'eruption',name:'Eruption Pillars',shape:'line',reach:22,width:6,tele:2.4,dmg:1.85 },
+    { id:'inferno',name:'Inferno Collapse',shape:'ring',reach:19,tele:2.3,dmg:2.15,phase:2 }
   ],
   frosttroll_a:[
     { id:'winterhammer',name:'Winterhammer',shape:'cone',reach:6.4,cos:.28,tele:1.1,dmg:1.1,slow:.35 },
@@ -81,7 +81,7 @@ export const ENEMIES = {
   frosttroll: E('Frost Troll', 45, 'Elite', 60000, 900, 400, 4.2, { model: 'n:frosttroll_a', atkMs: 2300, tele: 0.9, reach: 4.2, r: 2.6, scale: 3, aggro: 40, patterns: true, stagger: 0.4, poise: 0.5, xp: 4000, gold: 900 }),
   frosttroll_a:E('Frost Troll A — Elder Brother',52,'Brother Boss',780000,1320,480,4.4,{model:'n:frosttroll_a',atkMs:2200,tele:1.0,reach:6.4,r:2.5,scale:3,aggro:65,boss:true,stagger:.45,poise:.65,xp:6200,gold:1500}),
   frosttroll_b:E('Frost Troll B — Younger Brother',52,'Brother Boss',780000,1450,430,4.9,{model:'n:frosttroll_b',atkMs:2250,tele:1.0,reach:7.2,r:2.5,scale:3,aggro:65,boss:true,stagger:.45,poise:.65,xp:6200,gold:1500}),
-  titan40: E('Ashen Titan — 40×',80,'Volcanic Boss',11500000,3200,990,4.1,{model:'n:ashentitan_40',atkMs:3400,tele:2.2,reach:27,r:18,scale:40,aggro:105,boss:true,stagger:.25,poise:.95,xp:54000,gold:13000}),
+  titan40: E('Ashen Titan — 20×',80,'Volcanic Boss',11500000,3200,990,4.1,{model:'n:ashentitan_20',atkMs:3400,tele:2.2,reach:15,r:9,scale:20,aggro:75,boss:true,stagger:.25,poise:.95,xp:54000,gold:13000}),
   titan:    E('Ashen Titan', 60, 'Boss', 5000000, 2100, 600, 7.3, { model: 'n:ashentitan_new', atkMs: 2300, tele: 1.1, reach: 8.4, r: 5, scale: 6, aggro: 60, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
   vaelthryx: E('Balthrix the Crystal Sovereign', 70, 'Boss', 8000000, 2600, 700, 7.0, { model: 'n:vaelthryx_straight_rig', atkMs: 2400, tele: 1.1, reach: 9.5, r: 5.2, scale: 10, aggro: 70, boss: true, stagger: 0.25, poise: 0.9, xp: 30000, gold: 6000 }),
 };

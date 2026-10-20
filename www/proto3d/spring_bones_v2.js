@@ -108,7 +108,7 @@ export class SpringBones {
       const aim=(pt,limit)=>{ _v.copy(pt).sub(head).normalize(); b.parent.getWorldQuaternion(_q).invert(); _v.applyQuaternion(_q);
         const q0=_q3.copy(it.q0||it.restQ); _v3.copy(it.localDir).applyQuaternion(q0); _q2.setFromUnitVectors(_v3,_v);
         let ang=2*Math.acos(Math.min(1,Math.abs(_q2.w)));
-        if (ang>limit) { if (limit<1e-5) _q2.set(0,0,0,1); else _q2.set(0,0,0,1).slerp(_q2, limit/ang); ang=Math.min(ang,limit); }
+        if (ang>limit) { if (limit<1e-5) _q2.set(0,0,0,1); else _q2.slerpQuaternions(_q3.set(0,0,0,1), _q2, limit/ang); ang=Math.min(ang,limit); }
         _q2.multiply(q0); hold.copy(_q2); return ang; };
       const pc=it.parentItem?it.parentItem.cum:0, lim=Math.max(0,Math.min(f.maxSwing, f.maxChain-pc));
       let ang=aim(next,lim); const dyn=next.clone(); let delta=null;

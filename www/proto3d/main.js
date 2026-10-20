@@ -348,7 +348,7 @@ function locoAnim(u, sp, dt = 1/60) {
   const smooth = (key, target) => { const alpha = 1 - Math.exp(-Math.max(0, dt) * 11); u[key] = (u[key] ?? target) + (target - (u[key] ?? target)) * alpha; return u[key]; };
   const A = u.act, S = u.speeds;
   if (S && A.idle) {
-    const v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? sp / (u.mscale || 1) : 0)), L = [['walk', S.walk], ['trot', S.trot], ['run', S.run]].filter(([k, c], i, all) => A[k] && c > 0 && all.findIndex(([prev]) => A[prev] === A[k]) === i).sort((a,b)=>a[1]-b[1]);
+    const v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? sp / (u.mscale || 1) : 0)), L = [['walk', S.walk], ['trot', S.trot], ['run', S.run]].filter(([k, c], i, all) => A[k] && A[k] !== A.idle && c > 0 && all.findIndex(([prev]) => A[prev] === A[k]) === i).sort((a,b)=>a[1]-b[1]);
     const wt = { idle: 0 }; for (const [k] of L) wt[k] = 0;
     // Some imported rigs have idle but no walk/run clips. Do not index an empty list.
     if (!L.length || v < 0.025) { wt.idle = 1; }

@@ -93,7 +93,7 @@ let CH = worldProfile('', HS);   // active character's real-size profile (charsc
 let HERO_R = CH.radiusW;
 /* giants see further: fog, camera far plane, shadow frustum and chunk culling scale with the profile's camera distance (capped for phone perf) */
 let VIEWK = 1;
-function applyView() { const kf = Math.max(1, Math.min(5, CH.camDist)), k2 = Math.min(2.2, kf), sk = Math.min(3, kf); VIEWK = k2; scene.fog.near = 70 * k2; scene.fog.far = 180 * k2; camera.far = 320 * k2 * (kf > 2.2 ? 1.5 : 1); camera.updateProjectionMatrix(); const R = 24 * sk; Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, far: 110 * sk }); sun.shadow.camera.updateProjectionMatrix(); SUNK = sk; }
+function applyView() { const balthrix = /^n:balthrix_(10|50)x$/.test(CH.id); const giantBalthrix = CH.id === 'n:balthrix_50x'; const kf = Math.max(1, Math.min(5, CH.camDist)), k2 = Math.min(2.2, kf), sk = Math.min(3, kf); VIEWK = k2; scene.fog.near = 70 * k2; scene.fog.far = 180 * k2; camera.far = balthrix ? (giantBalthrix ? 3500 : 1800) : 320 * k2 * (kf > 2.2 ? 1.5 : 1); if (balthrix) { scene.fog.near = giantBalthrix ? 220 : 100; scene.fog.far = giantBalthrix ? 2800 : 1250; } camera.updateProjectionMatrix(); const R = 24 * sk; Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, far: 110 * sk }); sun.shadow.camera.updateProjectionMatrix(); SUNK = sk; }
 let SUNK = 1;
 function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; try { applyView(); } catch (e) {} try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
 const ZONE = { name: 'town', cx: 0, cz: 0, half: 0 };   // current walkable zone (town or the Wilds); half is set once WORLD is known
@@ -274,6 +274,11 @@ const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28 }, 'n:owner_pika1': { walk:
 /* Beth's smoothed blocky models (_smooth.glb): extra 'Smooth' variant for characters that already exist; originals stay the default. Loaded on demand (only when picked). */
 const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'hawk', 'hearth', 'hobgoblin', 'hydrella', 'kael', 'kestrel', 'lorian', 'mirelle', 'morwen', 'mossgut', 'neris', 'nyx', 'orin', 'rook', 'rowan', 'seraphine', 'stonetroll', 'talia', 'thorne', 'valen', 'vesper', 'wolf', 'wyvern'];   // frosttroll_smooth intentionally not used (old 1.8 m base): frosttroll_a4 is the troll
 { const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
+// Append after the existing roster to keep saved character indices stable.
+EXTRA.push(
+  ['n:balthrix_10x', 'Balthrix', 'proto3d/models-new/Balthrix-10x.glb'],
+  ['n:balthrix_50x', 'Balthrix', 'proto3d/models-new/Balthrix-50x.glb']
+);
 const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
 const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;
@@ -467,12 +472,12 @@ const IS_OWNER_TOKEN = (() => { try { return !!localStorage.getItem('vn_owner_un
 { const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (savedPlan.hero == null) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
 // ---------- character selector: ONE entry per character (all variants grouped), compact dropdown + variant switches ----------
-const gkey = id => id.replace(/^[a-z]:/, '').replace(/_straight_rig$/, '').replace(/_smooth$/, '').replace(/_new\d*$/, '').replace(/^owner_pika\d*$/, 'owner').replace(/^player_/, '');
+const gkey = id => id.replace(/^[a-z]:/, '').replace(/_straight_rig$/, '').replace(/_(?:10|50)x$/, '').replace(/_smooth$/, '').replace(/_new\d*$/, '').replace(/^owner_pika\d*$/, 'owner').replace(/^player_/, '');
 const GROUPS = new Map(), SLOT_G = [], VRANK = { Blocky: 0, Old: 1, New: 2, 'New (straight)': 3, Placeholder: 4 };
 GLB_IDS.forEach((id, i) => { const k = gkey(id); let g = GROUPS.get(k); if (!g) GROUPS.set(k, g = { key: k, name: '', nameRank: 9, vars: [], slots: [] }); g.slots.push(i); SLOT_G[i] = g;
   const px = id[1] === ':' ? id[0] : '', rank = px === '' ? 0 : px === 'o' ? 1 : px === 'n' ? 2 : 3;
   if (rank < g.nameRank) { g.nameRank = rank; g.name = HERO_NAMES[i].replace(/\s*(\(NEW\)|\(SMOOTH\)|\[PLACEHOLDER\]|\(OLD\))\s*$/i, '').replace(/ Straight Rig$/, ''); }
-  if (px === 'n') g.vars.push({ slot: i, mode: 'glb', label: /_smooth$/.test(id) ? 'Smooth' : /pika/.test(id) ? 'Pikachu' : /straight/.test(id) ? 'New (straight)' : 'New' });
+  if (px === 'n') g.vars.push({ slot: i, mode: 'glb', label: id === 'n:balthrix_10x' ? '10×' : id === 'n:balthrix_50x' ? '50×' : /_smooth$/.test(id) ? 'Smooth' : /pika/.test(id) ? 'Pikachu' : /straight/.test(id) ? 'New (straight)' : 'New' });
   else if (px === 'p') g.vars.push({ slot: i, mode: 'glb', label: 'Placeholder' });
   else { if (bk(id)) g.vars.push({ slot: i, mode: 'blocky', label: 'Blocky' }); g.vars.push({ slot: i, mode: 'glb', label: 'Old' }); } });
 GROUPS.forEach(g => { const nv = g.vars.filter(v => v.label === 'New'); if (nv.length > 1) nv.forEach(v => { v.label = ('New ' + ((GLB_IDS[v.slot].match(/_new(\d+)/) || [0, ''])[1])).trim(); }); });

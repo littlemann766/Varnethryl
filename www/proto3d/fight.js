@@ -344,7 +344,8 @@ export function createFight(env) {
             if(dist>.01){
               const move=Math.min(dist,14*step);
               roamer.x+=dx/dist*move;roamer.z+=dz/dist*move;
-              roamer.yaw=Math.atan2(dx,dz);
+              // Turn toward the actual travel vector without snapping across the -PI/PI seam.
+              roamer.yaw=yawLerp(roamer.yaw??Math.atan2(dx,dz),Math.atan2(dx,dz),Math.min(1,step*3.5));
             }
           }
         }

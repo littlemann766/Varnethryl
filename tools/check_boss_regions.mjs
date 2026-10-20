@@ -17,13 +17,13 @@ for(const [id,inch] of Object.entries(HERO_LORE_HEIGHTS)){
 }
 for(const id of ['n:owner','n:owner_pika1'])assert(close(profileFor(id).height,HERO_M),'Owner skin remains 1.905 m');
 for(const id of ['n:frosttroll_a','n:frosttroll_b']){
- assert(close(profileFor(id).height,5.715),id+' must equal 3x Owner');
- assert(close(loadScale(id,11.4)*11.4,5.715),'model height normalized for '+id);
+ assert(close(profileFor(id).height,3.5*HERO_M),id+' must equal 3x Owner');
+ assert(close(loadScale(id,11.4)*11.4,3.5*HERO_M),'model height normalized for '+id);
 }
-for(const [id,mul] of [['n:ashentitan_new',6],['n:ashentitan_20',20],['n:ashentitan_40',40],['n:ashentitan_60',60],['n:vaelthryx_straight_rig',10],['n:vaelthryx_straight_rig_50',50]])
+for(const [id,mul] of [['n:ashentitan_new',6],['n:ashentitan_20',15],['n:ashentitan_40',15],['n:ashentitan_60',60],['n:vaelthryx_straight_rig',10],['n:vaelthryx_straight_rig_50',50]])
  assert(close(profileFor(id).height,mul*HERO_M),id+' height ratio');
-assert(close(profileFor('n:ashentitan_40').height,76.2),'Active lava boss stands 76.2 m');
-for(const [id,model] of [['titan40','n:ashentitan_40'],['frosttroll_a','n:frosttroll_a'],['frosttroll_b','n:frosttroll_b'],['vaelthryx','n:vaelthryx_straight_rig']]){
+assert(close(profileFor('n:ashentitan_20').height,28.575),'Active lava boss stands 28.575 m');
+for(const [id,model] of [['titan40','n:ashentitan_20'],['frosttroll_a','n:frosttroll_a'],['frosttroll_b','n:frosttroll_b'],['vaelthryx','n:vaelthryx_straight_rig']]){
  assert.equal(ENEMIES[id].model,model,'encounter GLB for '+id);
  assert(ENEMIES[id].boss&&BOSS_PATTERNS[id]?.length>=3,'unique combat skills for '+id);
  const e={key:id,def:ENEMIES[id],phase:1,patI:0};

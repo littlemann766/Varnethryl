@@ -27,6 +27,16 @@ export const BOSS_PATTERNS = {
     { id: 'roll', name: 'Avalanche Charge', shape: 'line', reach: 9, width: 2.6, tele: 1.2, dmg: 1.2 },
     { id: 'glacier', name: 'Glacier Spike', shape: 'line', reach: 13, width: 2.0, tele: 1.0, dmg: 1.5, phase: 2, slow: 0.5 },
   ],
+  frostbrother_a: [
+    { id: 'iceclub', name: "Brother A: Glacial Hammer", shape: 'cone', reach: 6.5, cos: 0.28, tele: 1.0, dmg: 1.25, slow: 0.3 },
+    { id: 'icestomp', name: "Brother A: Permafrost Stomp", shape: 'ring', reach: 7.5, tele: 1.2, dmg: 1.0, slow: 0.45 },
+    { id: 'avalanche', name: "Brother A: Avalanche Breaker", shape: 'line', reach: 17, width: 4.5, tele: 1.6, dmg: 1.7, phase: 2 },
+  ],
+  frostbrother_b: [
+    { id: 'icelance', name: "Brother B: Frozen Lance", shape: 'line', reach: 16, width: 2.7, tele: 1.1, dmg: 1.3, slow: 0.5 },
+    { id: 'blizzard', name: "Brother B: Blizzard Ring", shape: 'ring', reach: 10, tele: 1.35, dmg: 1.1, slow: 0.6 },
+    { id: 'glacialfury', name: "Brother B: Shattering Frost", shape: 'cone', reach: 8.5, cos: .1, tele: 1.0, dmg: 1.65, phase: 2 },
+  ],
   /* Vaelthryx (enemy boss, 10x hero): huge reaches, crystal moves; phase 2 adds the Sovereign Nova. */
   vaelthryx: [
     { id: 'claw', name: 'Crystal Claw', shape: 'cone', reach: 9.5, cos: 0.3, tele: 1.0, dmg: 1.0 },
@@ -62,7 +72,9 @@ export const ENEMIES = {
   wraith:   E('Vine Wraith', 18, 'Spirit', 1700, 66, 90, 4.2, { model: 'o:mossgut', r: 1.1 }),
   skeleton: E('Ash Skeleton', 30, 'Undead', 5600, 270, 200, 3.6, { model: 'o:stonetroll', atkMs: 2300, tele: 0.8, r: 1.4 }),
   frosttroll: E('Frost Troll', 45, 'Elite', 60000, 900, 400, 4.2, { model: 'n:frosttroll_a', atkMs: 2300, tele: 0.9, reach: 4.2, r: 2.6, scale: 3, aggro: 40, patterns: true, stagger: 0.4, poise: 0.5, xp: 4000, gold: 900 }),
-  titan:    E('Ashen Titan', 60, 'Boss', 5000000, 2100, 600, 7.3, { model: 'n:ashentitan_new', atkMs: 2300, tele: 1.1, reach: 8.4, r: 5, scale: 6, aggro: 60, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
+  titan:    E('Ashen Titan (40×)', 60, 'Boss', 5000000, 2100, 600, 7.3, { model: 'n:ashentitan_40', atkMs: 2300, tele: 1.1, reach: 8.4, r: 8, scale: 40, aggro: 80, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
+  frostbrother_a: E('Frost Troll A · Elder Brother', 48, 'Frost Boss', 150000, 1050, 500, 4.5, { model: 'n:frosttroll_a', atkMs: 2100, tele: 1.0, reach: 5.5, r: 2.3, scale: 3, aggro: 39, boss: true, stagger: .45, poise: .7, xp: 8500, gold: 1400 }),
+  frostbrother_b: E('Frost Troll B · Younger Brother', 49, 'Frost Boss', 145000, 980, 480, 5.5, { model: 'n:frosttroll_b', atkMs: 1950, tele: .9, reach: 6.1, r: 2.3, scale: 3, aggro: 42, boss: true, stagger: .45, poise: .7, xp: 8500, gold: 1400 }),
   vaelthryx: E('Balthrix the Crystal Sovereign', 70, 'Boss', 8000000, 2600, 700, 7.0, { model: 'n:vaelthryx_straight_rig', atkMs: 2400, tele: 1.1, reach: 9.5, r: 5.2, scale: 10, aggro: 70, boss: true, stagger: 0.25, poise: 0.9, xp: 30000, gold: 6000 }),
 };
 export const WAVE_TABLE = ['wolf', 'raider', 'wraith', 'skeleton'];

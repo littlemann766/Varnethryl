@@ -65,6 +65,9 @@ assert(main.includes('run.setEffectiveWeight((standing ? 0 : runMix)*ov)'),'miss
 assert(main.includes('const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0'),'animation frame stalls are bounded');
 assert(main.includes('u.mixer.update(animDt); if (u.sb) u.sb.update(animDt)'),'hero cloth and mixer use bounded animation delta');
 assert(main.includes('Short-range obstacle avoidance: test forward and two angled probes'),'companions probe obstacles before steering');
+assert(main.includes("try { resolve(probe, false, 'npc'); }"),'companion probes use collision resolver');
+assert(main.includes("finally { state.level = previousLevel; }"),'companion probes restore world floor');
+assert(main.includes('r.avoidSide = chooseLeft ? -1 : 1'),'companions remember avoidance side');
 assert(main.includes("diag('Balthrix rig has no recognized slither/body-wave animation"),'missing Balthrix body-wave clips are reported');
 assert(main.includes('serpentine|bodywave|snake'),'additional serpent locomotion clips are recognized');
 assert(main.includes("r.vxs = r.vzs = r.a.vx = r.a.vz = 0"),'teleported followers do not retain sprint velocity');

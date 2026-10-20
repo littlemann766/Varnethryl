@@ -50,9 +50,18 @@ export function townElevation(x,z,world=560){
   // Broad summit overrides the north-south flat road only where the climb is intentional.
   const iceBlend=1-smooth01((frostD-112)/55);
   terrain=terrain*(1-iceBlend)+frost;
-  // Titan's arena is wide enough for the 76.2-m boss and its lava pools.
-  const volcanic=lavaAmount(x,z);
-  if(volcanic>0)terrain=terrain*(1-volcanic*.94)+volcanic*(5+1.3*Math.sin(x*.037)*Math.cos(z*.032));
+  // Ashen Titan's volcanic massif: genuine traversable slope, high jagged rim
+  // and lowered crater. This is the single shared physics/render surface.
+  const dx=x-TITAN_CENTER.x,dz=z-TITAN_CENTER.z,d=Math.hypot(dx,dz);
+  if(d<148){
+    const blend=1-smooth(115,148,d);
+    const angle=Math.atan2(dz,dx);
+    const shoulder=65*(1-smooth(20,135,d));
+    const crater=30*(1-smooth(0,36,d));
+    const ribs=5*Math.sin(angle*9+d*.065)*smooth(8,37,d)*(1-smooth(62,135,d));
+    const volcano=Math.max(0,shoulder-crater+ribs);
+    terrain=terrain*(1-blend)+volcano*blend;
+  }
   return terrain;
 }
 // ~41K triangles, one draw call; not a distant prop: heroes can traverse this actual mesh.
@@ -73,7 +82,14 @@ function buildWalkableTerrain(world){
     const ice=1-smooth01((Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)-35)/115);
     if(ice>0)paint.lerp(snow,Math.min(0.97,ice*.93));
     const volc=lavaAmount(x,z);
-    if(volc>0)paint.lerp(new THREE.Color(0x242028),volc*.98);
+    if(volc>0){
+      const d=Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z);
+      const ash=1-smooth(115,150,d);
+      paint.lerp(new THREE.Color(0x201f28),Math.min(1,Math.max(volc*.92,ash*.96)));
+      // Fire-red mineral seams along the crater and jagged rim.
+      if(d<45&&d>20&&Math.sin(Math.atan2(z-TITAN_CENTER.z,x-TITAN_CENTER.x)*11)>0.7)
+        paint.lerp(new THREE.Color(0x81382b),.33);
+    }
     if(Math.min(Math.abs(x),Math.abs(z))<15&&Math.max(Math.abs(x),Math.abs(z))>160)paint.lerp(earth,.7);
     C[k]=paint.r;C[k+1]=paint.g;C[k+2]=paint.b;
   }
@@ -99,6 +115,24 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   const stats={trees:0,bushes:0,rocks:0,flowers:0,grass:0,orchard:0,fields:0};
   const usable=world-13;
   const terrain=buildWalkableTerrain(world);group.add(terrain);
+  // Distant low-poly mountain range outside the playable boundary: visual
+  // backdrop only (no colliders or simulation). Sixteen affordable draw calls.
+  const farMountains=new THREE.Group();farMountains.name='distant-mountain-silhouettes';group.add(farMountains);
+  const farStone=new THREE.MeshLambertMaterial({color:0x556679,flatShading:true,side:THREE.DoubleSide});
+  const farSnow=new THREE.MeshLambertMaterial({color:0x9baaba,flatShading:true,side:THREE.DoubleSide});
+  const farRock=new THREE.ConeGeometry(1,1,7);
+  for(let i=0;i<16;i++){
+    const a=i*2*Math.PI/16,offset=world+50+(i%3)*31;
+    const x=Math.cos(a)*offset,z=Math.sin(a)*offset;
+    const height=72+(i*37%61),radius=53+(i*19%34);
+    const mountain=new THREE.Mesh(farRock,farStone);
+    mountain.position.set(x,height*.5-8,z);mountain.scale.set(radius,height,radius*.82);
+    mountain.rotation.y=a*.57;mountain.receiveShadow=true;mountain.castShadow=false;
+    farMountains.add(mountain);
+    const crown=new THREE.Mesh(farRock,farSnow);
+    crown.position.set(x,height-8-height*.18,z);crown.scale.set(radius*.27,height*.36,radius*.22);
+    crown.rotation.y=mountain.rotation.y;farMountains.add(crown);
+  }
   const lavaMat=new THREE.MeshLambertMaterial({color:0xff5b18,emissive:0xe23b08,emissiveIntensity:1.25,side:THREE.DoubleSide});
   const poolMeshes=[];
   for(const pool of LAVA_POOLS){

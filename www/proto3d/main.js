@@ -346,15 +346,20 @@ let LOCO_FORCE = null;   // test hook: pretend the hero moves at this ground spe
 function locoAnim(u, sp) {
   const A = u.act, S = u.speeds;
   if (S && A.idle) {
-    const v = sp / u.mscale, L = [['walk', S.walk], ['trot', S.trot], ['run', S.run]].filter(([k, c]) => A[k] && c);
+    const v = Math.max(0, Number.isFinite(sp) ? sp / (u.mscale || 1) : 0), L = [['walk', S.walk], ['trot', S.trot], ['run', S.run]].filter(([k, c]) => A[k] && c > 0);
     const wt = { idle: 0 }; for (const [k] of L) wt[k] = 0;
-    if (v <= L[0][1]) { wt[L[0][0]] = v / L[0][1]; wt.idle = 1 - wt[L[0][0]]; }
+    // Some imported rigs have idle but no walk/run clips. Do not index an empty list.
+    if (!L.length || v < 0.025) { wt.idle = 1; }
+    else if (v <= L[0][1]) { wt[L[0][0]] = v / L[0][1]; wt.idle = 1 - wt[L[0][0]]; }
     else { let i = 0; while (i < L.length - 1 && v > L[i + 1][1]) i++; if (i >= L.length - 1) wt[L[L.length - 1][0]] = 1; else { const t = (v - L[i][1]) / (L[i + 1][1] - L[i][1]); wt[L[i][0]] = 1 - t; wt[L[i + 1][0]] = t; } }
     const ov = 1 - (u.ovr || 0); A.idle.setEffectiveWeight(wt.idle * ov);
     for (const [k, c] of L) { A[k].setEffectiveWeight(wt[k] * ov); A[k].timeScale = Math.max(0.5, Math.min(2.4, v / c)); }
     return;
   }
-  const wk = A.walk, id = A.idle; if (wk && id) { const w = Math.min(1, sp / SPEED); { const ov = 1 - (u.ovr || 0); wk.setEffectiveWeight(w * ov); id.setEffectiveWeight((1 - w) * ov); } wk.timeScale = 0.6 + sp * 0.25; }
+  const wk = A.walk, id = A.idle, v = Math.max(0, Number.isFinite(sp) ? sp : 0);
+  if (wk && id) { const w = v < 0.025 ? 0 : Math.min(1, v / SPEED); { const ov = 1 - (u.ovr || 0); wk.setEffectiveWeight(w * ov); id.setEffectiveWeight((1 - w) * ov); } wk.timeScale = 0.6 + v * 0.25; }
+  // Unrigged Idle fallback: freeze walking at rest instead of marching in place.
+  else if (wk && !id) { const standing = v < 0.025; wk.setEffectiveWeight(1 - (u.ovr || 0)); wk.timeScale = standing ? 0 : 0.6 + v * 0.25; if (standing && !u.wasStanding) wk.time = 0; u.wasStanding = standing; }
 }
 // Low-cost phoenix embers follow Cinder's wing tips and tail (one Points draw call).
 // No particles are attached to the bones; the original GLB and skinning remain unchanged.
@@ -882,9 +887,9 @@ async function loadActorModel(id) {
 }
 function spawnCrowd(id, kind, x, z, leash, yaw) {
   const a = makeActor(id, { str: undefined, group: kind === 'party' ? 'party' : null }); a.x = x; a.z = z; a.yaw = yaw || 0;
-  const rec = { id, a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0, level: state.level, y: state.heroY || 0, ti: null, lvT: 0 };
+  const rec = { id, a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0, level: state.level, y: surfaceAt(x,z,state.level)?.y ?? (state.heroY || 0), ti: null, lvT: 0 };
   crowd.push(rec); bumpSys.add(a);
-  loadActorModel(id).then(w => { if (!w) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, 0, a.z); w.rotation.y = a.yaw; scene.add(w); });
+  loadActorModel(id).then(w => { if (!w) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, rec.y, a.z); w.rotation.y = a.yaw; scene.add(w); });
   return rec;
 }
 {
@@ -946,11 +951,14 @@ function crowdSurface(r, a, dt) {
   let s = surfaceAt(a.x, a.z, r.level);
   if (s && s.ramp) { const m = s.ramp; if (r.level === m.l0 && s.t > (m.flipUp || 0.93)) r.level = m.l1; else if (r.level === m.l1 && s.t < 0.25) r.level = m.l0; s = surfaceAt(a.x, a.z, r.level) || s; }
   const ty = s ? s.y : (r.level >= 10 && LAD ? LAD.heightOf(r.level) : 0);
-  // Outside buildings, ground and followers must share the exact height sampler.
-  // Snap steep outdoor inclines immediately to avoid clipping under mountains.
-  const outdoor=(r.level===0&&(ZONE.name==='frost'||ZONE.name==='town'&&(Math.abs(a.x)>CITY_HALF||Math.abs(a.z)>CITY_HALF)));
-  const correction=outdoor?Math.max(45,Math.abs(ty-r.y)/Math.max(dt,.001)):r.level===0?22:7;
-  r.y = Math.abs(ty-r.y)<.025?ty:r.y+Math.max(-correction*dt,Math.min(correction*dt,ty-r.y));
+  // Follow the same terrain height as the player on ALL outdoor hills (including
+  // slopes inside the town map), not just beyond CITY_HALF. Teleports/steep
+  // slopes snap immediately so companions never pass through the mountain.
+  const groundLevel = r.level === 0 && !s?.ramp;
+  const rise = ty - r.y;
+  const step = (groundLevel ? 60 : 12) * Math.max(0, dt);
+  r.y = groundLevel && Math.abs(rise) > 1.2 ? ty
+    : Math.abs(rise) <= 0.025 ? ty : r.y + Math.max(-step, Math.min(step, rise));
 }
 /* Downed state (Thunderstorm): companions/townsfolk can be killed but it never touches the hero (HP, death, respawn). Companions revive at the hero's side after a short delay, townsfolk back home. */
 const REVIVE_PARTY = 4, REVIVE_NPC = 8;
@@ -1001,7 +1009,7 @@ function updateCrowd(dt) {
     tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2, false, 'npc'); state.level = l0; }
     const moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; if (r.kind === 'party') crowdSurface(r, a, dt);
     if(r.kind==='party'&&ZONE.name==='town'&&TOWN_LANDS?.waterAt(a.x,a.z))r.y=Math.max(r.y,0.2)-.55*HS;
-    const sp = Math.hypot(r.vxs, r.vzs);
+    const sp = dt > 0 ? moved / dt : 0;
     if (sp > 0.3) { let da = Math.atan2(r.vxs, r.vzs) - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }
     else if (r.faceT != null && r.faceT !== undefined) { let da = r.faceT - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }
     const w = r.root; if (!w) continue;
@@ -1077,7 +1085,7 @@ function updateHero(dt) {
     let da = want - state.yaw; da = Math.atan2(Math.sin(da), Math.cos(da));
     state.yaw += da * Math.min(1, dt * 12);
     state.speed = moved / dt;
-  } else state.speed *= 0.8;
+  } else state.speed = 0; // Stop locomotion as soon as motion ceases; use Idle, not walking in place.
   state.vx = moving ? vx * SPEED * travelScale() * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0; state.vz = moving ? vz * SPEED * travelScale() * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0;
   if (playerAct.dx || playerAct.dz) { tmp.x = state.heroX + playerAct.dx; tmp.z = state.heroZ + playerAct.dz; resolve(tmp, passesWalls(cheat)); state.heroX = tmp.x; state.heroZ = tmp.z; }
   state.moving = state.speed > 0.5;
@@ -1154,7 +1162,7 @@ const camPos = new THREE.Vector3(0, 8 * HS, START_Z + 10 * HS), camLook = new TH
 const _want = new THREE.Vector3(), _look = new THREE.Vector3();
 const camIn = {}; let lastDragT = 0;
 function updateCamera(dt, snap) {
-  const ci = camIn; ci.heroX = state.heroX; ci.heroZ = state.heroZ; ci.hy = (state.heroY || 0) + cheat.alt + cinderFlight.alt; ci.dispY = state.dispY === undefined ? state.heroY || 0 : state.dispY; ci.alt = cheat.alt + cinderFlight.alt; ci.camYaw = state.camYaw; ci.legacyZoom = state.zoom; ci.portrait = innerHeight > innerWidth; ci.dt = dt; ci.snap = snap;
+  const ci = camIn; ci.heroX = state.heroX; ci.heroZ = state.heroZ; ci.hy = (state.heroY || 0) + cheat.alt + cinderFlight.alt; ci.dispY = state.dispY === undefined ? state.heroY || 0 : state.dispY; ci.alt = cheat.alt + cinderFlight.alt; ci.jumpHeight = jumpHeight; ci.camYaw = state.camYaw; ci.legacyZoom = state.zoom; ci.portrait = innerHeight > innerWidth; ci.dt = dt; ci.snap = snap;
   if (camRig.prefs.camMode !== 'free' && !camRig.fp && !camRig.pinching && performance.now() - lastDragT > 1500) state.camYaw = followYaw(state.camYaw, state.vx, state.vz, dt);
   ci.zx = ZONE.cx; ci.zz = ZONE.cz; ci.zh = ZONE.half;
   camRig.update(ci);
@@ -1218,7 +1226,7 @@ const wildsMod = import('./wilds.js').then(m => { portalT = m.makeGate(0x9a6bff)
   frostCave.position.set(FROST_PORTAL.x,TOWN_LANDS?TOWN_LANDS.heightAt(FROST_PORTAL.x,FROST_PORTAL.z):FROST_SUMMIT.height,FROST_PORTAL.z);
   scene.add(frostCave);return m; });
 async function ensureWilds() { if (WM) return WM; const m = await wildsMod; WM = Object.assign({ mod: m }, m.buildWilds({ scene, HS })); WM.portalMesh = m.makeGate(0x4fd0ff); WM.portalMesh.position.set(WM.portal.x, 0, WM.portal.z); WM.portalMesh.visible = false; scene.add(WM.portalMesh); return WM; }
-function snapFollowers() { TRAIL.length = 0; for (const r of crowd) if (r.kind === 'party') { r.level = 0; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; r.a.x = state.heroX + (Math.random() - 0.5) * 3; r.a.z = state.heroZ + 2.5 * HS; r.vxs = r.vzs = 0; } }
+function snapFollowers() { TRAIL.length = 0; for (const r of crowd) if (r.kind === 'party') { r.level = 0; r.ti = null; r.lvT = 0; r.a.x = state.heroX + (Math.random() - 0.5) * 3; r.a.z = state.heroZ + 2.5 * HS; r.y = surfaceAt(r.a.x, r.a.z, 0)?.y ?? (state.heroY || 0); r.vxs = r.vzs = 0; if (r.root) r.root.position.set(r.a.x, r.y, r.a.z); } }
 /* Map unloading. Leaving town hides every static town node (no draw calls / shadow casters while away; geometry stays resident because the village is built once at boot).
    Leaving the Wilds fully DISPOSES it (geometry, materials, textures, enemies via FIGHT.stop) and it is rebuilt on the next visit. */
 const townHidden = [];

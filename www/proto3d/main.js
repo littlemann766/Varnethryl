@@ -882,6 +882,9 @@ function tapMoveTo(clientX, clientY) {
   if(walkableTerrain)walkableTerrain.updateWorldMatrix(true,false);
   const landHit=walkableTerrain?ray.intersectObject(walkableTerrain,false)[0]:null;
   const found=landHit?(hit.copy(landHit.point),true):!walkableTerrain&&!!ray.ray.intersectPlane(plane,hit);
+  // Ignore taps into the sky or beyond the walkable terrain; preserve the
+  // current destination instead of steering toward a false ground hit.
+  if(!found)return;
   // Never use the imaginary y=0 plane after missing an actual mountain:
   // that can send the hero to a point behind a ridge or beneath the map.
   if(found){
@@ -889,7 +892,7 @@ function tapMoveTo(clientX, clientY) {
     state.target={x:THREE.MathUtils.clamp(hit.x,ZONE.cx-lim,ZONE.cx+lim),z:THREE.MathUtils.clamp(hit.z,ZONE.cz-lim,ZONE.cz+lim)};
     state.blockedFrames=0; // a new tap must not inherit the previous destination's collision timeout
     const surface=surfaceAt(state.target.x,state.target.z,0);
-    marker.position.set(state.target.x,(surface?.y||0)+.07,state.target.z);marker.visible=true;
+    marker.position.set(state.target.x,(surface?.y??hit.y)+.07,state.target.z);marker.visible=true;
   }
 }
 let prefStore = null; try { prefStore = localStorage; } catch (e) { prefStore = null; }

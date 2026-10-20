@@ -13,7 +13,12 @@ export const saveGodPref = (storage, on) => { try { storage.setItem(GOD_KEY, on 
 export const NOCD_KEY = 'vn_owner_nocd_v1';
 export const nocdPref = (storage) => { try { return storage.getItem(NOCD_KEY) !== '0'; } catch (e) { return true; } };
 
-let running = null;
+let running = null, ownerPollTimer = null;
+export function stopOwner() {
+  if (ownerPollTimer !== null) clearInterval(ownerPollTimer);
+  ownerPollTimer = null;
+  running = null;
+}
 /* env: the same env main.js gives the cheat panel ({flags, storage, ...}) plus onOwner(cheats). Resolves true if the owner path started. */
 export function initOwner(env) {
   if (running) return running;
@@ -30,7 +35,7 @@ export function initOwner(env) {
       if (active === last && last !== null) return;
       const r = maxOwnerHero(env.storage); last = r ? r.id : active;
     };
-    tick(); setInterval(tick, POLL_MS);
+    tick(); ownerPollTimer = setInterval(tick, POLL_MS);
     return true;
   })();
   running = p; p.then((ok) => { if (!ok && running === p) running = null; });

@@ -46,7 +46,7 @@ with sync_playwright() as p:
         gesture(pg, mob); pg.wait_for_selector('#ownerLogin', state='visible', timeout=10000)
         ok(f'{tag} gesture shows only the passphrase prompt', vis(pg, '#ownerLogin') and not vis(pg, '#ownerPanel'))
         pg.fill('#ownerPass', 'not-the-passphrase'); click(pg, '#ownerGo'); pg.wait_for_function("document.getElementById('ownerLoginMsg').textContent.length>0")
-        ok(f'{tag} wrong passphrase: panel stays hidden, no unlock stored', not vis(pg, '#ownerPanel') and pg.evaluate("localStorage.getItem('vn_owner_unlock_v1')===null"))
+        ok(f'{tag} wrong passphrase: panel stays hidden, no unlock stored', not vis(pg, '#ownerPanel') and pg.evaluate("localStorage.getItem('vn_owner_unlock_v2')===null"))
         ok(f'{tag} typing in the prompt does not move the hero (keys isolated)', (pg.fill('#ownerPass', ''), pg.focus('#ownerPass'), pg.keyboard.type('wasd'), pg.evaluate("__p3d.state.speed<0.5"))[3])
         for _ in range(2): pg.fill('#ownerPass', 'wrong-again'); click(pg, '#ownerGo'); pg.wait_for_timeout(700)
         pg.fill('#ownerPass', PASS); click(pg, '#ownerGo'); pg.wait_for_timeout(900)

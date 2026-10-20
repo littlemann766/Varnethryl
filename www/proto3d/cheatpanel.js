@@ -2,7 +2,7 @@
  * Loaded lazily by cheatboot.js. Shows nothing unless ownergate.isOwner(); otherwise shows only the passphrase prompt (local mode)
  * or does nothing at all (server mode and not the owner). Remember: client-side gating is a speed bump, not security (see README). */
 import { getOwnerGate } from './ownergate.js';
-import { createCheats, MAX_LEVEL, MAX_ITEM_LEVEL, ITEM_KINDS } from './cheats.js';
+import { createCheats, createFlags, MAX_LEVEL, MAX_ITEM_LEVEL, ITEM_KINDS } from './cheats.js';
 
 const CSS = '#ownerPanel,#ownerLogin{position:fixed;z-index:60;background:#12182af2;color:#fff;border:1px solid #c9a24a;border-radius:14px;font:13px system-ui,sans-serif;box-shadow:0 8px 30px #000a;touch-action:pan-y;-webkit-user-select:none;user-select:none}'
  + '#ownerPanel{top:max(8px,env(safe-area-inset-top));right:8px;width:min(340px,calc(100vw - 16px));max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:auto;padding:10px;display:none}'
@@ -76,7 +76,16 @@ function buildPanel(c, gate, env) {
   panel.appendChild(row(zone, act('tpz', 'Go zone', () => c.teleportZone(zone.value))));
   const place = el('select', { id: 'ownerPlace' }); for (const p of c.places()) place.appendChild(el('option', { value: p.id, textContent: p.name })); isolateKeys(place);
   panel.appendChild(row(place, act('tpb', 'Go building', () => c.teleportPlace(place.value))));
-  panel.appendChild(row(act('reset', 'Reset cheats', () => { c.reset(); return true; }), act('lock', 'Lock owner', () => { gate.lock(); c.reset(); hide(); return true; })));
+  panel.appendChild(row(act('reset', 'Reset cheats', () => { c.reset(); return true; }), act('lock', 'Lock owner', () => {
+    gate.lock(); c.reset();
+    // reset() restores saved owner preferences; a true lock must override all of them.
+    Object.assign(c.flags, createFlags());
+    if (typeof env.onLocked === 'function') env.onLocked();
+    // Do not retain an unlocked cheats object/DOM after signing out.
+    ui.main?.panel.remove(); ui.main = null; cheats = null;
+    ui.fly.style.display = 'none'; ui.badge.style.display = 'none';
+    hide(); return true;
+  })));
   panel.appendChild(msg); isolateKeys(panel);
   function sync() {
     for (const k in btns) btns[k].b.classList.toggle('on', !!btns[k].get());

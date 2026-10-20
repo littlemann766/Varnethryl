@@ -38,20 +38,41 @@ export function terrainBiome(x,z){
 /* The roamer follows one continuous route, including the volcano, and stays outside city walls. */
 // Continuous position and tangent through route corners, preventing abrupt head snapping.
 // Catmull-Rom uses the same patrol waypoints; no changes to saved encounter locations.
-export function balthrixPosition(t,speed=14){
+// Cache spline samples once. Chord-length timing made Balthrix accelerate at
+// corners and slow down on curved stretches even when speed was constant.
+const BALTHRIX_STEPS = 32;
+function balthrixPoint(i,u) {
  const P=BALTHRIX_ROUTE,n=P.length;
- const seg=P.map((p,i)=>Math.hypot(P[(i+1)%n][0]-p[0],P[(i+1)%n][1]-p[1]));
- const total=seg.reduce((a,b)=>a+b,0);
- let dist=((t*speed)%total+total)%total;
- for(let i=0;i<n;i++){
-  if(dist<=seg[i]){
-   const u=dist/seg[i],p0=P[(i+n-1)%n],p1=P[i],p2=P[(i+1)%n],p3=P[(i+2)%n];
-   const point=(axis,v)=>0.5*((2*p1[axis])+(-p0[axis]+p2[axis])*v+(2*p0[axis]-5*p1[axis]+4*p2[axis]-p3[axis])*v*v+(-p0[axis]+3*p1[axis]-3*p2[axis]+p3[axis])*v*v*v);
-   const x=point(0,u),z=point(1,u),before=Math.max(0,u-0.002),after=Math.min(1,u+0.002);
-   const dx=point(0,after)-point(0,before),dz=point(1,after)-point(1,before);
-   return {x,z,yaw:Math.atan2(dx,dz)};
-  }
-  dist-=seg[i];
+ const p0=P[(i+n-1)%n],p1=P[i],p2=P[(i+1)%n],p3=P[(i+2)%n];
+ const axis=a=>.5*(2*p1[a]+(-p0[a]+p2[a])*u+
+  (2*p0[a]-5*p1[a]+4*p2[a]-p3[a])*u*u+
+  (-p0[a]+3*p1[a]-3*p2[a]+p3[a])*u*u*u);
+ return {x:axis(0),z:axis(1)};
+}
+const BALTHRIX_ARC = (() => {
+ const samples=[{dist:0,seg:0,u:0}];
+ let dist=0,prev=balthrixPoint(0,0);
+ for(let i=0;i<BALTHRIX_ROUTE.length;i++)for(let j=1;j<=BALTHRIX_STEPS;j++){
+  const u=j/BALTHRIX_STEPS,p=balthrixPoint(i,u);
+  dist+=Math.hypot(p.x-prev.x,p.z-prev.z);
+  samples.push({dist,seg:i,u});prev=p;
  }
- return {x:P[0][0],z:P[0][1],yaw:0};
+ return {samples,total:dist};
+})();
+export function balthrixPosition(t,speed=14){
+ const {samples,total}=BALTHRIX_ARC;
+ if(!Number.isFinite(t)||!Number.isFinite(speed)||total<=0)
+  return {x:BALTHRIX_ROUTE[0][0],z:BALTHRIX_ROUTE[0][1],yaw:0};
+ const distance=((t*speed)%total+total)%total;
+ let lo=0,hi=samples.length-1;
+ while(lo+1<hi){const mid=(lo+hi)>>1;if(samples[mid].dist<distance)lo=mid;else hi=mid;}
+ const a=samples[lo],b=samples[hi];
+ const blend=(distance-a.dist)/Math.max(1e-9,b.dist-a.dist);
+ const param=(a.seg+a.u)+(b.seg+b.u-(a.seg+a.u))*blend;
+ const seg=Math.floor(param)%BALTHRIX_ROUTE.length,u=param-Math.floor(param);
+ const p=balthrixPoint(seg,u);
+ const ahead=balthrixPoint(Math.floor((param+.001)%BALTHRIX_ROUTE.length), (param+.001)%1);
+ const behindParam=(param-.001+BALTHRIX_ROUTE.length)%BALTHRIX_ROUTE.length;
+ const behind=balthrixPoint(Math.floor(behindParam),behindParam%1);
+ return {x:p.x,z:p.z,yaw:Math.atan2(ahead.x-behind.x,ahead.z-behind.z)};
 }

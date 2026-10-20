@@ -288,7 +288,7 @@ const EXTRA = [["n:mortimer_new", "Mortimer (NEW)", "proto3d/models-new/mortimer
 // Owner: ONE stable file name. To swap in a newer rig (owner_new4...): tools/swap_owner.sh /workspace/rigged/owner_new5 (copies <name>.glb + <name>.cloth.json over models-new/owner.*)
 const CLOTH = new Set(["n:ember_new3", "n:owner", "n:owner_pika1", "n:asha_new3", "n:ashentitan_new", "n:coral_new", "n:darius_new6", "n:lunara_new", "n:marella_new", "n:mortimer_new", "n:player_pikachu", "n:snowy_new4", "n:thrain_new4", "n:wren_new3"]);   // models shipped with <name>.cloth.json (runtime/spring_bones_v2.js)
 const EXTRA_SCALE = {}; // lore-height normalization happens once, centrally in loadScale() for both Frost Troll brothers and Titan variants.
-const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28 }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 4.5, run: 10.5 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 }, 'n:cinder_new': { walk: 0.65, run: 1.95 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
+const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28, map:{idle:'Owner_Idle',walk:'Owner_Walk',run:'Owner_Run'} }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 4.5, run: 10.5 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 }, 'n:cinder_new': { walk: 0.65, run: 1.95 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
 /* Beth's smoothed blocky models (_smooth.glb): extra 'Smooth' variant for characters that already exist; originals stay the default. Loaded on demand (only when picked). */
 const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'hawk', 'hearth', 'hobgoblin', 'hydrella', 'kael', 'kestrel', 'lorian', 'mirelle', 'morwen', 'mossgut', 'neris', 'nyx', 'orin', 'rook', 'rowan', 'seraphine', 'stonetroll', 'talia', 'thorne', 'valen', 'vesper', 'wolf', 'wyvern'];   // frosttroll_smooth intentionally not used (old 1.8 m base): frosttroll_a4 is the troll
 { const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
@@ -412,8 +412,11 @@ const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
 async function fetchGLB(id) {
   let lastErr = '';
+  // If the player's newer 18-bone / 4-clip Owner rig has been uploaded, use it.
+  // Old Owner asset remains the automatic fallback: no broken saved characters.
+  const rigV2 = id === 'n:owner' ? 'proto3d/models-new/owner-rigged-v2.glb' : null;
   for (let attempt = 0; attempt < 2; attempt++) {
-    const url = (EXTRA_URL[id] || 'proto3d/models/' + id + '.glb') + '?v=' + ASSET_V + (attempt ? '&r=' + Date.now() : '');
+    const url = (rigV2 && !attempt ? rigV2 : (EXTRA_URL[id] || 'proto3d/models/' + id + '.glb')) + '?v=' + ASSET_V + (attempt ? '&r=' + Date.now() : '');
     try {
       const r = await fetch(url, attempt ? { cache: 'reload' } : undefined);
       if (!r.ok) { lastErr = 'HTTP ' + r.status; continue; }

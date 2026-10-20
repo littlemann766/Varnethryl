@@ -552,8 +552,9 @@ function refreshSel(i) {
   if (!selUI) return; const g = SLOT_G[i];
   if (i !== undefined) { const v = g.vars.find(x => x.slot === i && x.mode === modeFor(GLB_IDS[i])) || g.vars.find(x => x.slot === i); if (v) { selV[g.key] = v; try { localStorage.setItem('vn_var_' + g.key, v.slot + '|' + v.mode); } catch (_) {} } }
   const cur = curVar(g); selUI.cur.firstChild.textContent = g.name + ' '; 
-  selUI.vars.textContent = ''; selUI.vars.style.display = g.vars.length > 1 ? 'flex' : 'none';
-  g.vars.forEach(v => { const c = document.createElement('button'); c.className = 'vr' + (v === cur ? ' on' : ''); c.textContent = v.label; c.dataset.i = v.slot; c.dataset.m = v.mode; c.title = g.name + ': ' + v.label + ' version';
+  const visibleVariants=bossVariant(g)?g.vars.filter(v=>APPROVED_BOSS_IDS.has(GLB_IDS[v.slot])):g.vars;
+  selUI.vars.textContent = ''; selUI.vars.style.display = visibleVariants.length > 1 ? 'flex' : 'none';
+  visibleVariants.forEach(v => { const c = document.createElement('button'); c.className = 'vr' + (v === cur ? ' on' : ''); c.textContent = v.label; c.dataset.i = v.slot; c.dataset.m = v.mode; c.title = g.name + ': ' + v.label + ' version';
     c.addEventListener('pointerdown', e => e.stopPropagation()); c.addEventListener('click', e => { e.stopPropagation(); selectVariant(g, v); }); selUI.vars.appendChild(c); });
   selUI.rows.forEach(r => { const gg = r.g, v = r.approved ? bossVariant(gg) : curVar(gg); if(v)r.b.dataset.i = v.slot; r.b.classList.toggle('on', gg === g); });
 }
@@ -588,7 +589,7 @@ async function selectVariant(g, v) {
   cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation(); bar.classList.toggle('open'); });
   document.addEventListener('pointerdown', e => { if (!bar.contains(e.target)) close(); }, true);
   const mkRow = (g, approved=false) => { const item=approved?bossVariant(g):curVar(g); const n = approved?(BOSS_DISPLAY.get(GLB_IDS[item.slot])||g.name):g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = item.slot;
-    if (g.vars.length > 1) { const sp = document.createElement('small'); sp.textContent = ' \u00b7' + g.vars.length; b.appendChild(sp); }
+    if (!approved && g.vars.length > 1) { const sp = document.createElement('small'); sp.textContent = ' \u00b7' + g.vars.length; b.appendChild(sp); }
     b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); close(); selectVariant(g, approved?bossVariant(g):curVar(g)); });
     const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = item.slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = approved?bossVariant(g).slot:curVar(g).slot; toggleFollower(+f.dataset.f); });
     row.appendChild(b); row.appendChild(f); return { row, b }; };
@@ -602,9 +603,10 @@ async function selectVariant(g, v) {
   window.__ownerRoster = () => {
     if (!OG || rows.some(r => r.g === OG)) return;
     const r = mkRow(OG);
-    const at = rows.findIndex(x => compareRoster(OG, x.g) < 0);
-    if (at < 0) { normalList.appendChild(r.row); rows.push({ g: OG, b: r.b }); }
-    else { normalList.insertBefore(r.row, rows[at].b.parentElement); rows.splice(at, 0, { g: OG, b: r.b }); }
+    const before=rows.filter(x=>!x.approved).find(x=>compareRoster(OG,x.g)<0);
+    if(before)normalList.insertBefore(r.row,before.b.parentElement);
+    else normalList.appendChild(r.row);
+    rows.push({g:OG,b:r.b,approved:false});
   };
   bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; })()); }
 async function toggleModel(i) {

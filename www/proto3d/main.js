@@ -1098,7 +1098,7 @@ function killCrowd(b) { const r = b && b.rec; if (!r || r.down > 0) return; r.do
 function bystanders() { const o = []; for (const r of crowd) if (!(r.down > 0)) o.push({ x: r.a.x, z: r.a.z, hp: 1, rec: r, kind: r.kind }); return o; }
 function tickDown(r, dt) {
   r.down -= dt; if (r.down > 0) return; r.down = 0; const a = r.a;
-  if (r.kind === 'party') { a.x = state.heroX + (Math.random() - 0.5) * 1.6; a.z = state.heroZ + (Math.random() - 0.5) * 1.6; r.level = state.level; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; }
+  if (r.kind === 'party') { const spot = { x: state.heroX + (Math.random() - 0.5) * 1.6, z: state.heroZ + (Math.random() - 0.5) * 1.6 }; r.level = state.level; resolve(spot, false, 'npc'); a.x = spot.x; a.z = spot.z; r.y = surfaceAt(a.x, a.z, r.level)?.y ?? (state.heroY || 0); r.ti = null; r.lvT = 0; r.stuckT = 0; }
   else { a.x = r.hx; a.z = r.hz; r.level = 0; r.y = 0; }
   r.vxs = r.vzs = 0; if (r.root) r.root.visible = true;
 }
@@ -1117,10 +1117,10 @@ function updateCrowd(dt) {
       else if (r.level !== state.level) {
         r.lvT += dt; const t = trailTarget(r, a);
         if (t) { gx = t.x; gz = t.z; far = true; const se = stairEntry(r, a, t); if (se) { gx = se.x; gz = se.z; } }   // walk to the stair foot (or top) first, then up/down the ramp
-        if ((r.lvT > 12 || t === null) && state.level === 0) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.ti = null; r.lvT = 0; }
+        if ((r.lvT > 12 || t === null) && state.level === 0) { const spot = { x: state.heroX + (Math.random() - 0.5) * 1.2, z: state.heroZ + (Math.random() - 0.5) * 1.2 }; resolve(spot, false, 'npc'); a.x = spot.x; a.z = spot.z; r.level = state.level; r.y = surfaceAt(a.x, a.z, r.level)?.y ?? (state.heroY || 0); r.ti = null; r.lvT = 0; r.stuckT = 0; }
       } else {
         r.ti = null;   // same floor number but a long way off (other building / stuck behind walls): catch up after a few seconds instead of pushing straight into a wall
-        if (Math.hypot(gx - a.x, gz - a.z) > 22) { r.lvT += dt; if (r.lvT > 6 && state.level === 0) { a.x = state.heroX + (Math.random() - 0.5) * 1.2; a.z = state.heroZ + (Math.random() - 0.5) * 1.2; r.level = state.level; r.y = state.heroY || 0; r.lvT = 0; } } else r.lvT = 0;
+        if (Math.hypot(gx - a.x, gz - a.z) > 22) { r.lvT += dt; if (r.lvT > 6 && state.level === 0) { const spot = { x: state.heroX + (Math.random() - 0.5) * 1.2, z: state.heroZ + (Math.random() - 0.5) * 1.2 }; resolve(spot, false, 'npc'); a.x = spot.x; a.z = spot.z; r.level = state.level; r.y = surfaceAt(a.x, a.z, r.level)?.y ?? (state.heroY || 0); r.lvT = 0; r.stuckT = 0; } } else r.lvT = 0;
       }
       { const cg = FIGHT && FIGHT.on && FIGHT.companions && r.level === state.level ? FIGHT.companions.goal(r) : null; r.faceT = cg ? cg.face : null; if (cg) { gx = cg.x; gz = cg.z; far = true; } }   // companions engage nearby enemies (combat/companions.js); otherwise follow as before
       const dx = gx - a.x, dz = gz - a.z, d = Math.hypot(dx, dz);

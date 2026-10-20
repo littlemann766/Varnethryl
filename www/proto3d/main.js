@@ -1168,7 +1168,7 @@ function updateCrowd(dt) {
     const w = r.root; if (!w) continue;
     w.position.set(a.x, r.y, a.z); const u = w.userData, ww = Math.min(1, sp / SPEED);
     restoreNodes(r.nd);
-    if (u.glb) { locoAnim(u, sp, dt); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
+    if (u.glb) { const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0; locoAnim(u, sp, animDt); u.mixer.update(animDt); if (u.sb) u.sb.update(animDt); }
     applyPose(a, w, r.nd, a.yaw);
   }
 }
@@ -1291,7 +1291,8 @@ function animateHero(dt) {
       u.cinderStep = (u.cinderStep || 0) + dt * (6 + state.speed * 0.8);
       u.cinderHop = cinderFlight.alt < 0.05 ? Math.max(0, Math.sin(u.cinderStep)) * 0.035 * Math.min(1, state.speed / 2) : 0;
     } else { u.cinderHop = 0; locoAnim(u, LOCO_FORCE !== null ? LOCO_FORCE : state.speed, dt); }
-    u.mixer.update(dt); if (u.sb) u.sb.update(dt); if (u.cinderEmbers) u.cinderEmbers.update(dt);
+    const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0;
+    u.mixer.update(animDt); if (u.sb) u.sb.update(animDt); if (u.cinderEmbers) u.cinderEmbers.update(animDt);
     return;
   }
   walkT += dt * (4 + state.speed * 1.9); idleT += dt;

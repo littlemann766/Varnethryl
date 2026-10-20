@@ -539,7 +539,9 @@ const APPROVED_DISPLAY=new Map([
  ['elira',v=>v.label==='Blocky'],
  ['asha',v=>v.label==='Old'||GLB_IDS[v.slot]==='n:asha_new3'],
  ['garruk',v=>v.label==='Old'||GLB_IDS[v.slot]==='n:garruk_new5'],
- ['owner',v=>GLB_IDS[v.slot]==='n:owner']
+ ['owner',v=>GLB_IDS[v.slot]==='n:owner'],
+ ['vaelthryx',v=>GLB_IDS[v.slot]==='n:vaelthryx_straight_rig'],
+ ['ashentitan',v=>GLB_IDS[v.slot]==='n:ashentitan_20']
 ]);
 for(const [key,accept] of APPROVED_DISPLAY){
  const group=GROUPS.get(key);if(!group)continue;

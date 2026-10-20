@@ -48,7 +48,8 @@ export function enhanceHumanoidClips(THREE, sourceClips, helperNames) {
   if(walk && !result.some(c=>/run/i.test(c.name))) {
     const run=walk.clone();
     run.name='run';
-    run.scale(0.72);
+    for (const track of run.tracks) track.scale(0.72);
+    run.resetDuration();
     result.push(run);
   }
   const cfg=[

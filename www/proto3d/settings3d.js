@@ -68,7 +68,7 @@ function build() {
   lineBtn.addEventListener('click',()=>{hide();document.querySelector('#heroes button.cur')?.click();});
   const galBtn=el('button',{type:'button',textContent:'View 3D lineup'});
   galBtn.addEventListener('click',()=>location.assign('proto3d/model-viewer.html'));
-  const modelBtn=el('button',{type:'button',textContent:'Switch model style'});
+  const modelBtn=el('button',{type:'button',textContent:'Switch 3D / Classic character models'});
   modelBtn.addEventListener('click',()=>document.getElementById('mdlBtn')?.click());
   const statusBtn=el('button',{type:'button',textContent:'3D model diagnostics'});
   statusBtn.addEventListener('click',()=>{hide();document.getElementById('diagBtn')?.click();});
@@ -108,6 +108,16 @@ function build() {
   body.appendChild(ab);
   ldSync(); syncs.push(ldSync);
   body.appendChild(sec('Graphics'));
+  // Natural visuals change only rendering; saved world, combat and character skins are untouched.
+  const look = el('select', { id: 'setVisualStyle' });
+  look.dataset.set = 'visual-style';
+  const activeLook = E.getVisualStyle ? E.getVisualStyle() : 'natural';
+  for (const [value, label] of [['natural', 'Natural 3D (soft shadows & lighting)'], ['classic', 'Classic (original rendering)']]) {
+    look.appendChild(el('option', { value, textContent: label, selected: value === activeLook }));
+  }
+  look.addEventListener('change', () => { E.setVisualStyle?.(look.value); });
+  body.appendChild(row(el('span', { className: 'lab', textContent: 'Rendering style' }), look));
+  body.appendChild(el('small', { textContent: 'Natural improves lighting and soft shadows without replacing your world. Restart the game after changing style to update edge smoothing.' }));
   const q = el('select', { id: 'setQuality' }); q.dataset.set = 'quality';
   const names = { auto: 'Auto (adapts to your device)', high: 'High (sharpest)', balanced: 'Balanced', low: 'Low (fastest)' };
   for (const k of QUALITIES) q.appendChild(el('option', { value: k, textContent: names[k], selected: prefs.quality === k }));

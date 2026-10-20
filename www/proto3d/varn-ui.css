@@ -160,3 +160,11 @@ body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
 #heroes #hlist .vn-roster-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
 #heroes #hlist .vn-roster-tabs button{font-size:9px;min-height:47px;padding:6px 3px;white-space:normal}
 #heroes #hlist .vn-roster-list .row button:first-child{touch-action:pan-y}
+
+/* In-game long-press skin bubble: stays above the roster and combat HUD. */
+#vnSkinBubble{position:fixed;z-index:4100;left:50%;top:50%;transform:translate(-50%,-50%);width:min(350px,calc(100vw - 32px));max-height:70dvh;overflow:auto;box-sizing:border-box;padding:14px;background:linear-gradient(165deg,#24364d,#0b1222);border:2px ridge #d4a969;border-radius:13px;color:#f5dfaf;box-shadow:0 16px 50px #000d;font:14px VarnCinzel,Georgia,serif}
+#vnSkinBubble[hidden]{display:none}
+#vnSkinBubble .vn-skin-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+#vnSkinBubble .vn-skin-options{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+#vnSkinBubble button{padding:9px 12px;min-height:40px;background:#192a40;color:#f3dbad;border:1px solid #b89055;border-radius:7px;font:inherit}
+#vnSkinBubble small{display:block;color:#cbbd9d;font-size:11px}

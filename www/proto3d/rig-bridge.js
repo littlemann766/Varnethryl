@@ -37,6 +37,52 @@ export function splitHumanoidRig(THREE, root) {
   return output;
 }
 
+/**
+ * Add subtle secondary joint motion to Beth's two original clips, plus a
+ * faster run test loop. This is experimental motion, not artist-authored
+ * foot contact / IK; the Animation Lab report explicitly says so.
+ */
+export function enhanceHumanoidClips(THREE, sourceClips, helperNames) {
+  const has=new Set(helperNames), result=sourceClips.map(clip=>clip.clone());
+  const walk=result.find(c=>/walk/i.test(c.name));
+  if(walk && !result.some(c=>/run/i.test(c.name))) {
+    const run=walk.clone();
+    run.name='run';
+    run.scale(0.72);
+    result.push(run);
+  }
+  const cfg=[
+    ['upperSpine',(p,run,idle)=>[.016*Math.cos(p*(idle?.5:1)),.085*Math.sin(p)*(idle?.12:run?1.4:1),.022*Math.sin(p+1)]],
+    ['elbow_L',(p,run,idle)=>[-Math.max(0,Math.sin(p))*(idle?.01:run?.30:.19),0,.018*Math.cos(p)]],
+    ['elbow_R',(p,run,idle)=>[-Math.max(0,Math.sin(p+Math.PI))*(idle?.01:run?.30:.19),0,-.018*Math.cos(p)]],
+    ['wrist_L',(p,run,idle)=>[.065*Math.sin(p+1)*(idle?.2:run?1.5:1),.04*Math.sin(p),.025*Math.cos(p)]],
+    ['wrist_R',(p,run,idle)=>[.065*Math.sin(p+Math.PI+1)*(idle?.2:run?1.5:1),-.04*Math.sin(p),-.025*Math.cos(p)]],
+    ['knee_L',(p,run,idle)=>[.13*Math.max(0,Math.cos(p))*(idle?.06:run?1.9:1),0,0]],
+    ['knee_R',(p,run,idle)=>[.13*Math.max(0,Math.cos(p+Math.PI))*(idle?.06:run?1.9:1),0,0]],
+    ['ankle_L',(p,run,idle)=>[.10*Math.sin(p-0.6)*(idle?.05:run?1.6:1),0,0]],
+    ['ankle_R',(p,run,idle)=>[.10*Math.sin(p+Math.PI-0.6)*(idle?.05:run?1.6:1),0,0]]
+  ];
+  for(const clip of result) {
+    const idle=/idle|rest|stand/i.test(clip.name), run=/run|sprint/i.test(clip.name);
+    if(!idle && !run && !/walk|stride|trot/i.test(clip.name))continue;
+    const count=25, duration=clip.duration>0?clip.duration:1;
+    const times=Array.from({length:count},(_,i)=>i*duration/(count-1));
+    for(const [name,pose] of cfg) {
+      if(!has.has(name))continue;
+      const data=[];
+      for(let i=0;i<count;i++) {
+        const p=i/(count-1)*Math.PI*2;
+        const e=pose(p,run,idle);
+        const q=new THREE.Quaternion().setFromEuler(new THREE.Euler(...e));
+        data.push(q.x,q.y,q.z,q.w);
+      }
+      clip.tracks.push(new THREE.QuaternionKeyframeTrack(name+'.quaternion',times,data));
+    }
+    clip.resetDuration();
+  }
+  return result;
+}
+
 function distanceSquaredToSegment(p, a, b) {
   const dx=b.x-a.x, dy=b.y-a.y, dz=b.z-a.z;
   const len=dx*dx+dy*dy+dz*dz;
@@ -157,7 +203,7 @@ export function bridgeUnskinnedHumanoid(THREE, donor, imported, options = {}) {
   // Existing clips use the original joint names, which were NOT renamed.
   out.ok=true; out.reason='Experimental automatic weights; manual inspection required';
   out.scene=donorRoot;
-  out.animations=donor.clips();
+  out.animations=enhanceHumanoidClips(THREE,donor.clips(),out.helpers);
   out.convertedMeshes=prepared.length;
   out.vertices=count;
   return out;

@@ -71,8 +71,17 @@ export function balthrixPosition(t,speed=14){
  const param=(a.seg+a.u)+(b.seg+b.u-(a.seg+a.u))*blend;
  const seg=Math.floor(param)%BALTHRIX_ROUTE.length,u=param-Math.floor(param);
  const p=balthrixPoint(seg,u);
- const ahead=balthrixPoint(Math.floor((param+.001)%BALTHRIX_ROUTE.length), (param+.001)%1);
- const behindParam=(param-.001+BALTHRIX_ROUTE.length)%BALTHRIX_ROUTE.length;
- const behind=balthrixPoint(Math.floor(behindParam),behindParam%1);
+ // Sample the spline at a fixed physical distance ahead/behind, rather than
+ // fixed spline parameters. This stabilizes heading through sharp curves.
+ const atDistance=d=>{
+  const target=((d%total)+total)%total;
+  let low=0,high=samples.length-1;
+  while(low+1<high){const mid=(low+high)>>1;if(samples[mid].dist<target)low=mid;else high=mid;}
+  const left=samples[low],right=samples[high];
+  const mix=(target-left.dist)/Math.max(1e-9,right.dist-left.dist);
+  const position=left.seg+left.u+(right.seg+right.u-left.seg-left.u)*mix;
+  return balthrixPoint(Math.floor(position)%BALTHRIX_ROUTE.length,position%1);
+ };
+ const ahead=atDistance(distance+1.5),behind=atDistance(distance-1.5);
  return {x:p.x,z:p.z,yaw:Math.atan2(ahead.x-behind.x,ahead.z-behind.z)};
 }

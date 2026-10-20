@@ -121,3 +121,9 @@ for(const p of ['bossregions.js','frostreach.js','townlands.js','main.js','fight
  assert.equal(v.status,0,f+' syntax: '+v.stderr);
 }
 console.log('PASS: Lore scale / 40x Titan / 3.5x frost brothers / 6x & 50x Balthrix / lava / mountain portal / icy realm / boss skills / roaming / swimming / HUD / shadows.');
+
+const loader = fs.readFileSync(new URL('../www/proto3d/loader.js', import.meta.url), 'utf8');
+const loaderCss = fs.readFileSync(new URL('../www/proto3d/varn-ui.css', import.meta.url), 'utf8');
+assert(loader.includes('if(engineReady)finish()'),'cinematic loader exits when engine is ready');
+assert(loader.includes('video.hidden=true; // prevent black video placeholder'),'loader hides unavailable film');
+assert(loaderCss.includes('Cinematic loader layout'),'loader video has separate cinematic layout');

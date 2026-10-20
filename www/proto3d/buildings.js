@@ -12,7 +12,7 @@ function wins(B, o) { // facade windows: front [[x,y]], side [[z,y]] (both sides
   for (const [x, y] of o.back || []) B.win(x, y, -d / 2 - .04, Math.PI, ww, hh, key);
 }
 const frontWinXs = (B, n = 1) => { const fw = (B.w - B.DW) / 2, out = []; for (const s of [-1, 1]) for (let i = 0; i < n; i++) out.push(s * (B.DW / 2 + fw * (i + .5) / n)); return out; };
-export const KB = 1.7, PK = 2.8, WORLD_B = 60 * PK;   // building uniform scale, village spacing scale, world half extent
+export const KB = 1.7, PK = 2.8, WORLD_B = 100 * PK;   // 280-unit town half extent: equal to Wilds; keep established village coordinates
 export const PLAN = 1.5;   // plan (footprint) scale for the standard buildings: roomier interiors, gentler stairs; heights unchanged (doors stay ~1.4x hero height)
 function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + banners + sign
   if (!o.noScale) o = Object.assign({}, o, { w: o.w * PLAN, d: o.d * PLAN });
@@ -653,7 +653,7 @@ export function buildWalls(ctx, WORLD_W, GATE_W) {
   const KW = KB, WORLD = WORLD_W / KW;   // the wall builder works in local units (uniformly scaled by KW like every building)
   const tmpl = { id: 'walls', cx: 0, cz: 0, rot: 0, K: KW }; const B = new Builder(ctx, tmpl); B.name = 'Town Walls & Watchtowers'; B.insideTest = null; B.radius = 9999;
   B.reach = 9999; const WH = 4.2, WT = 2.6;   // wall height / thickness (wide enough for a wall walk)
-  const Q = 30 * PK / KW, DECO = [[0, -WORLD], [-Q, -WORLD], [Q, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, Q], [WORLD, Q], [-WORLD, -Q], [WORLD, -Q], [-Q, WORLD], [Q, WORLD]];
+  const Q = WORLD * 0.5, DECO = [[0, -WORLD], [-Q, -WORLD], [Q, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, Q], [WORLD, Q], [-WORLD, -Q], [WORLD, -Q], [-Q, WORLD], [Q, WORLD]];
   const run = (x1, z1, x2, z2) => { const len = Math.hypot(x2 - x1, z2 - z1), horiz = Math.abs(z2 - z1) < .01, h = WH, t = WT, cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
     const nx = horiz ? 0 : (x1 < 0 ? 1 : -1), nz = horiz ? (z1 < 0 ? 1 : -1) : 0;   // inward normal
     B.bx(horiz ? len : t, h, horiz ? t : len, 'stone', cx, h / 2, cz, B.G.ext);

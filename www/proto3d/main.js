@@ -53,12 +53,12 @@ const camera = new THREE.PerspectiveCamera(50, 1, 0.5, 320);
 // Lights: hemisphere fill + one shadow-casting sun that follows the hero
 scene.add(new THREE.HemisphereLight(0xcfe6ff, 0x6a7a4a, 1.25));
 const sun = new THREE.DirectionalLight(0xfff0d0, 2.2);
-const SHADOW_SIZE = 1024, SHADOW_R = 24;
+const SHADOW_SIZE = COARSE ? 1024 : 1536, SHADOW_R = 32;
 sun.castShadow = true;
 sun.shadow.mapSize.set(SHADOW_SIZE, SHADOW_SIZE);
 Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 110 });
 sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.03;
-const SUN_OFF = new THREE.Vector3(-27, 45, 21);
+const SUN_OFF = new THREE.Vector3(-41, 77, 35);
 scene.add(sun, sun.target);
 
 // ---------- helpers ----------
@@ -564,7 +564,7 @@ const marker = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.55, 20), new THREE.
 marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = false; scene.add(marker);
 
 // ---------- input ----------
-const state = { level: 0, heroY: 0, inside: null, zoom: 1, heroX: 0, heroZ: START_Z, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0, vx: 0, vz: 0 };
+const state = { swimming:false, level: 0, heroY: 0, inside: null, zoom: 1, heroX: 0, heroZ: START_Z, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0, vx: 0, vz: 0 };
 const posOk = (x, z) => { const r = 0.5 * HS + 0.3; for (const c of colliders) { if (c.type === 'box' ? (x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r) : Math.hypot(x - c.x, z - c.z) < c.r + r) return false; } return Math.abs(x) < WORLD - 3 && Math.abs(z) < WORLD - 3; };   // a save from the smaller village may sit inside a (now bigger) building
 if (savedPlan && savedPlan.pos && qp0.get('hero') == null && posOk(savedPlan.pos.x, savedPlan.pos.z)) { state.heroX = savedPlan.pos.x; state.heroZ = savedPlan.pos.z; state.yaw = savedPlan.pos.yaw; }
 const keys = new Set();
@@ -822,6 +822,7 @@ function updateCrowd(dt) {
     if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
     tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2, false, 'npc'); state.level = l0; }
     const moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; if (r.kind === 'party') crowdSurface(r, a, dt);
+    if(r.kind==='party'&&ZONE.name==='town'&&TOWN_LANDS?.waterAt(a.x,a.z))r.y=Math.max(r.y,0.2)-.55*HS;
     const sp = Math.hypot(r.vxs, r.vzs);
     if (sp > 0.3) { let da = Math.atan2(r.vxs, r.vzs) - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }
     else if (r.faceT != null && r.faceT !== undefined) { let da = r.faceT - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }
@@ -881,7 +882,7 @@ function updateHero(dt) {
   if (!state.climbing) { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
   const moving = (vx || vz);
   if (moving) {
-    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
+    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = (state.swimming?0.62:1) * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
     tmp.x = state.heroX; tmp.z = state.heroZ; let blocked = false;
     for (let i = 0; i < n; i++) {
       const ox = tmp.x, oz = tmp.z; tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp, ghost)) blocked = true;
@@ -903,17 +904,19 @@ function updateHero(dt) {
   if (playerAct.dx || playerAct.dz) { tmp.x = state.heroX + playerAct.dx; tmp.z = state.heroZ + playerAct.dz; resolve(tmp, passesWalls(cheat)); state.heroX = tmp.x; state.heroZ = tmp.z; }
   state.moving = state.speed > 0.5;
   updateLevel();
+  state.swimming=!!(ZONE.name==='town'&&TOWN_LANDS?.waterAt(state.heroX,state.heroZ)&&state.level===0);
+  if(state.swimming)state.heroY=Math.max(state.heroY,.2);
   if (cheat.fly || cheat.alt > 0) stepAltitude(cheat, ((cheat.up || keys.has(' ') || keys.has('e')) ? 1 : 0) - ((cheat.down || keys.has('q') || keys.has('c') || keys.has('shift')) ? 1 : 0), dt);
   if (isCinder()) cinderFlight.step(dt, flyTouch.up || keys.has(' ') || keys.has('e'), flyTouch.down || keys.has('q') || keys.has('c'));
   else if (cinderFlight.active || cinderFlight.alt) cinderFlight.reset();
   syncCinderControls();
   state.dispY = state.dispY === undefined || Math.abs(state.heroY - state.dispY) > 3 ? state.heroY : state.dispY + (state.heroY - state.dispY) * Math.min(1, dt * 16);
-  hero.position.set(state.heroX, state.dispY + cheat.alt + cinderFlight.alt, state.heroZ); hero.rotation.y = state.yaw;
+  hero.position.set(state.heroX, state.dispY + cheat.alt + cinderFlight.alt - (state.swimming?0.75*HS:0), state.heroZ); hero.rotation.y = state.yaw;
   let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
   if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
     try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }
   animateHero(dt); cullSkins(); heroGhost();
-  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); hero.position.y = state.dispY + cheat.alt + cinderFlight.alt + playerAct.phop + (hero.userData.cinderHop || 0); }
+  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); hero.position.y = state.dispY + cheat.alt + cinderFlight.alt + playerAct.phop + (hero.userData.cinderHop || 0) + (state.swimming?-.75*HS+.07*Math.sin(simTime*3.5):0); }
 }
 
 const _sp = new THREE.Vector3();
@@ -1105,7 +1108,7 @@ function frame(now) {
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   updateCrowd(dt); updateHero(dt); updateZone(dt); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
-  simTime += dt; if (SMOKE) SMOKE.update(simTime);
+  simTime += dt; if (SMOKE) SMOKE.update(simTime); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateWater?.(simTime);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
   totalFrames++; fpsAcc += dt; fpsFrames++;

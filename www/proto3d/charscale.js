@@ -32,17 +32,17 @@ export const CHARS = {
   'n:garruk_new5': {height:inchesToMeters(82),fitMeasuredHeight:true},
   'n:darius_new6': {height:inchesToMeters(74),fitMeasuredHeight:true},
   'n:asha_new3': {height:inchesToMeters(71),fitMeasuredHeight:true},
-  'n:ashentitan_new': { height: 6 * HERO_M, fitMeasuredHeight: true, radius: 3.2, speed: 1.4, step: 2.0, reach: 3.2, camDist: 3.4, camHeight: 3.2, camMin: 0.55, camMax: 1.6 },          // Beth native 11.4 m (6x hero)
+  'n:ashentitan_new': { height: 10 * HERO_M, fitMeasuredHeight: true, radius: 3.2, speed: 1.4, step: 2.0, reach: 3.2, camDist: 3.4, camHeight: 3.2, camMin: 0.55, camMax: 1.6 },          // Main Titan encounter: 10x Owner
   // Extra Titan variants: all share one rigged GLB with uniform lore-height scaling.
-  'n:ashentitan_20': { height: 15 * HERO_M, fitMeasuredHeight: true, radius: 5.4, speed: 1.4, step: 3.2, reach: 4.7, camDist: 5.2, camHeight: 5, camMin: .55, camMax: 1.8 },
+  'n:ashentitan_20': { height: 10 * HERO_M, fitMeasuredHeight: true, radius: 5.4, speed: 1.4, step: 3.2, reach: 4.7, camDist: 5.2, camHeight: 5, camMin: .55, camMax: 1.8 },
   'n:ashentitan_60': { height: 60 * HERO_M, fitMeasuredHeight: true, radius: 19, speed: 1.4, step: 8, reach: 8, camDist: 8, camHeight: 8, camMin: .55, camMax: 2.0 },
-  // Legacy Titan selector slot retained for old saves; all playable arena variants now use 20x.
-  'n:ashentitan_40': { height: 15 * HERO_M, fitMeasuredHeight: true, radius: 5.4, speed: 1.4, step: 3.2, reach: 4.7, camDist: 5.2, camHeight: 5, camMin: 0.55, camMax: 1.8 },
+  // Legacy Titan selector slot retained for old saves; legacy selector uses the current 10x encounter size.
+  'n:ashentitan_40': { height: 10 * HERO_M, fitMeasuredHeight: true, radius: 5.4, speed: 1.4, step: 3.2, reach: 4.7, camDist: 5.2, camHeight: 5, camMin: 0.55, camMax: 1.8 },
   // Vaelthryx variants are baked at DIFFERENT native sizes (measured in-game): _new6 14.3 m tall (79 m long), _new 2.0 m, _straight_rig 0.65 m. Boss quote ~18.7 m coiled; edit height here once confirmed.
   'n:vaelthryx_new': { height: 2.0, radius: 0.6, speed: 1.0, step: 0.4, reach: 1.1, camDist: 1.05, camHeight: 1.05, camMin: 0.5, camMax: 1.7 },
   'n:vaelthryx_new6': { height: 14.3, radius: 4.0, speed: 1.5, step: 2.6, reach: 4.0, camDist: 3.8, camHeight: 3.7, camMin: 0.6, camMax: 1.7 },
-  // PLAYABLE Vaelthryx (boss 1:11 AM): 10x the player. height = 10 * HERO_M (19.05 m), derived from the base constant. `native` = the GLB's authored height (0.65 m); the model is scaled at LOAD by loadScale() = height/native, the file on disk is untouched.
-  'n:vaelthryx_straight_rig': { height: 10 * HERO_M, native: 0.65, fitMeasuredHeight: true, radius: 5.2, speed: 1.5, step: 3.0, reach: 4.8, camDist: 5.0, camHeight: 4.8, camMin: 0.6, camMax: 1.7 },
+  // PLAYABLE Balthrix: 6x the player. height = 6 * HERO_M (11.43 m), derived from the base constant. `native` = the GLB's authored height (0.65 m); the model is scaled at LOAD by loadScale() = height/native, the file on disk is untouched.
+  'n:vaelthryx_straight_rig': { height: 6 * HERO_M, native: 0.65, fitMeasuredHeight: true, radius: 3.4, speed: 1.5, step: 2.0, reach: 3.2, camDist: 3.6, camHeight: 3.4, camMin: 0.6, camMax: 1.7 },
   // Balthrix / Vaelthryx 50x visual test: SAME GLB as 10x; no extra binary, skeleton or animation edits.
   'n:vaelthryx_straight_rig_50': { height: 50 * HERO_M, native: 0.65, fitMeasuredHeight: true, radius: 20, speed: 1.5, step: 8, reach: 8, camDist: 8, camHeight: 8, camMin: 0.6, camMax: 1.7 },
   'n:frosttroll_a': { height: 3.5 * HERO_M, fitMeasuredHeight: true, radius: 1.9, speed: 1.25, step: 1.2, reach: 2.15, camDist: 2.2, camHeight: 2, camMin: 0.5, camMax: 1.7 },              // trolls = 3x the hero

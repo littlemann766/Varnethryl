@@ -3,6 +3,7 @@
  * No sound section: the 3D game has no audio yet. */
 import { ZOOM_MIN, ZOOM_MAX, SENS_MIN, SENS_MAX, DEFAULT_PREFS, QUALITIES } from './camprefs.js';
 import { applyPrefs, persist } from './settingsboot.js';
+import { createTapCounter } from './cheatboot.js';
 
 const CSS = '#settingsPanel{position:fixed;z-index:70;top:calc(max(8px,env(safe-area-inset-top)) + 44px);right:8px;width:min(360px,calc(100vw - 16px));max-height:calc(100vh - 64px);max-height:calc(100dvh - 64px);overflow:auto;box-sizing:border-box;padding:10px 12px;background:#12182af5;color:#fff;border:1px solid #7fb2e6;border-radius:14px;font:13px system-ui,sans-serif;box-shadow:0 8px 30px #000a;display:none;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-overflow-scrolling:touch}'
  + '#settingsPanel h3{margin:0 0 4px;font-size:15px;display:flex;justify-content:space-between;align-items:center}'
@@ -59,9 +60,10 @@ function build() {
   body.appendChild(sec('Game & version'));
   const version = el('button', { type: 'button', textContent: 'Varnethryl 3D · v1.2.4' });
   version.dataset.set = 'version-cheats';
-  version.setAttribute('aria-label', 'Version — open owner cheats');
+  version.setAttribute('aria-label', 'Version');
   version.style.cssText = 'color:#f1d28a;font-weight:700;cursor:pointer;touch-action:manipulation';
-  version.addEventListener('click', () => { hide(); E.openCheatPanel?.(); });
+  const versionTaps = createTapCounter();
+  version.addEventListener('pointerup', e => { if (versionTaps(e.timeStamp || performance.now())) { hide(); E.openCheatPanel?.(); } });
   body.appendChild(row(version));
   body.appendChild(el('small',{textContent:'The entire game now runs in 3D. No Classic 2D switching.'}));
   const lineBtn=el('button',{type:'button',textContent:'Choose a character'});

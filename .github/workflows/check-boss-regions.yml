@@ -1,5 +1,11 @@
 name: Validate Varnethryl boss regions
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'www/proto3d/**'
+      - 'tools/check_boss_regions.mjs'
+      - '.github/workflows/check-boss-regions.yml'
   pull_request:
     branches: [main]
     paths:

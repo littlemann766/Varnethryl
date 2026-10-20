@@ -12,7 +12,7 @@ import { heroKey } from './combat/herokits.js';
 import { CompanionCombat } from './combat/companions.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 import { Respawner } from './combat/respawn.js';
-import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, balthrixPosition, onLava, isCitySafe } from './bossregions.js';
+import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
 import { HOB_CAMPS } from './hobcamps.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
@@ -291,6 +291,19 @@ export function createFight(env) {
     try{return await spawn(key,0,Object.assign({at:[x,z],aggroR:34},extra));}
     finally{bossPending.delete(key);}
   }
+  // Locate the player's nearest point along Balthrix's continuous world circuit.
+  // Spawn close enough to be encountered rather than waiting for a distant global timer.
+  function nearestRoamTime(x,z){
+    const p=BALTHRIX_ROUTE;let best=Infinity,elapsed=0,closest=0;
+    for(let i=0;i<p.length;i++){
+      const a=p[i],b=p[(i+1)%p.length],dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);
+      const u=Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(len*len||1)));
+      const d=Math.hypot(x-a[0]-dx*u,z-a[1]-dz*u);
+      if(d<best){best=d;closest=(elapsed+len*u)/14;}elapsed+=len;
+    }
+    return{distance:best,time:closest};
+  }
+  let roamBusy=false;
   function startRegionBosses(zone){
     if(zone==='frost')for(const brother of FROST_BROTHERS)spawnRegion(brother.key,brother.x,brother.z,{aggroR:80});
   }
@@ -311,12 +324,29 @@ export function createFight(env) {
         }
       }else lavaT=0;
       roamClock+=dt;
-      if(roamClock>.22){roamClock=0;
-        const where=balthrixPosition(regionClock);
-        if(Math.hypot(state.heroX-where.x,state.heroZ-where.z)<115)spawnRegion('vaelthryx',where.x,where.z,{aggroR:36,roaming:true});
+      if(roamClock>.22){
+        const step=roamClock;roamClock=0;
+        const route=nearestRoamTime(state.heroX,state.heroZ);
         const roamer=cc.enemies.find(e=>e.key==='vaelthryx'&&e.state!=='defeated');
-        if(roamer&&Math.hypot(roamer.x-state.heroX,roamer.z-state.heroZ)>42){
-          roamer.x=where.x;roamer.z=where.z;roamer.yaw=where.yaw;
+        if(!roamer&&route.distance<112&&!roamBusy){
+          roamBusy=true;
+          const phase=route.time+2-regionClock, where=balthrixPosition(regionClock+phase);
+          Promise.resolve(spawnRegion('vaelthryx',where.x,where.z,{aggroR:48,roaming:true,routePhase:phase}))
+            .finally(()=>{roamBusy=false;});
+        }
+        if(roamer&&roamer.roaming){
+          // Combat temporarily interrupts his patrol; afterward he rejoins
+          // the route gradually. Never teleport him while the player can see him.
+          const dHero=Math.hypot(roamer.x-state.heroX,roamer.z-state.heroZ);
+          if(dHero>52&&!['telegraph','attack','stagger'].includes(roamer.state)){
+            const p=balthrixPosition(regionClock+(roamer.routePhase||0));
+            const dx=p.x-roamer.x,dz=p.z-roamer.z,dist=Math.hypot(dx,dz);
+            if(dist>.01){
+              const move=Math.min(dist,14*step);
+              roamer.x+=dx/dist*move;roamer.z+=dz/dist*move;
+              roamer.yaw=Math.atan2(dx,dz);
+            }
+          }
         }
       }
     }
@@ -396,7 +426,7 @@ export function createFight(env) {
         const shape = pt ? pt.shape : 'ring'; e.tele.visible = shape === 'ring'; if (shape === 'ring') { e.tele.position.set(e.x, 0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; e.tele.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); }
         if (shape !== 'ring') { const t2 = bossTele(e, shape, pt); t2.visible = true; const L = pt.reach * HS + e.def.r; t2.position.set(e.x, 0.13, e.z); t2.rotation.set(-Math.PI / 2, 0, e.yaw + Math.PI); t2.material.opacity = 0.18 + 0.45 * f; if (shape === 'line') { t2.scale.set(pt.width * HS, L * (0.35 + 0.65 * f), 1); t2.position.set(e.x + Math.sin(e.yaw) * t2.scale.y / 2, 0.13, e.z + Math.cos(e.yaw) * t2.scale.y / 2); } else t2.scale.setScalar(L * (0.35 + 0.65 * f)); } else if (e.tele2) e.tele2.visible = false;
       } else { e.tele.visible = false; if (e.tele2) e.tele2.visible = false; }
-      if (u.glb && u.act) { env.loco(u, e.state === 'chase' ? mv : 0); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
+      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.roaming && mv > .5 ? mv : 0); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
       const f = e.flash > 0 || e.state === 'telegraph'; if (f !== e.flashOn) { e.flashOn = f; const hx = e.flash > 0 ? 0xff2020 : 0xaa5500; for (const o of e.ems) o.material.emissive.setHex(f ? hx : o.userData.em); }
     }
     if (shakeT > 0) shakeT = Math.max(0, shakeT - dt); metUpdate(dt);

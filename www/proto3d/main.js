@@ -446,9 +446,14 @@ function wrapGLB(g, id, blocky) {
   m.traverse(o => { if (o.isMesh) for (const mt of [].concat(o.material)) if (mt && mt.alphaTest > 0) { mt.transparent = false; mt.depthWrite = true; mt.needsUpdate = true; } });   // glTF alphaMode MASK (e.g. Garruk's cape): cut-out, sorted by depth, casts a cut-out shadow
   // Temporary Owner integration: attach the purple blade to the animated right-hand bone.
   // Keep the original rig/mesh untouched so cape skinning can be refined later.
-  if (id === 'n:owner' && g.animations.some(c => c.name === 'Walking')) {
-    const hand = m.getObjectByName('mixamorig:RightHand');
-    if (hand) {
+  if (id === 'n:owner') {
+    // The weapon must not disappear when an imported rig renames its clips.
+    // Accept Mixamo and non-Mixamo hand bones, but never attach two sabers.
+    let hand = m.getObjectByName('mixamorig:RightHand') || m.getObjectByName('RightHand');
+    if (!hand) m.traverse(o => {
+      if (!hand && o.isBone && /(?:^|[:_])right[_ ]?hand$/i.test(o.name)) hand = o;
+    });
+    if (hand && !hand.getObjectByName('OwnerPurpleSaber')) {
       const saber = new THREE.Group(); saber.name = 'OwnerPurpleSaber'; hand.add(saber);
       saber.position.set(0, .03, 0);
       const grip = new THREE.Mesh(new THREE.CylinderGeometry(.028, .035, .24, 12), new THREE.MeshStandardMaterial({color:0x999ba5,metalness:.85,roughness:.2}));

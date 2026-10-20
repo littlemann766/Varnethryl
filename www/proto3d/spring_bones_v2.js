@@ -72,7 +72,10 @@ export class SpringBones {
     this.acc += Math.min(dt, 0.1); let n=0;
     for (const it of this.items) it.q0 = it.animated ? it.bone.quaternion.clone() : it.restQ;
     while (this.acc >= this.step && n++<4) { this.acc -= this.step; this._sub(); }
-    if (!n) for (const it of this.items) if (it.qs) it.bone.quaternion.copy(it.qs);
+    // Do not leave the previous frame's simulated cape pose in place when the
+    // render frame is shorter than a physics step. The mixer has just restored
+    // the authored pose; blend the cached cloth result back in consistently.
+    if (!n) for (const it of this.items) if (it.qs) { it.bone.quaternion.copy(it.qs); it.bone.updateWorldMatrix(false,true); }
   }
   _caps() { // world-space capsule endpoints for this step
     for (const c of this.capsules) { c.a.getWorldPosition(c.pa||(c.pa=new THREE.Vector3())); c.b.getWorldPosition(c.pb||(c.pb=new THREE.Vector3()));

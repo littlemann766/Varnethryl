@@ -1127,6 +1127,27 @@ function updateCrowd(dt) {
       if (far && d > 0.3) { const sp = SPEED * travelScale() * Math.max(1, CH.speed) * Math.max(1, cheat.speedMul) * 1.18; tvx = dx / d * sp; tvz = dz / d * sp; }
       else if (!far && d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * travelScale() * Math.max(1, CH.speed) * Math.max(1, cheat.speedMul) * 1.18, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
     }
+    // Short-range obstacle avoidance: test forward and two angled probes
+    // against the same collision resolver used by NPC movement. This is
+    // local steering, not full navigation-mesh pathfinding.
+    if (r.kind === 'party' && r.level === state.level && (Math.abs(tvx) + Math.abs(tvz)) > 0.01) {
+      const speed = Math.hypot(tvx, tvz), look = Math.max(0.65, Math.min(2.1, speed * 0.35));
+      const nx = tvx / speed, nz = tvz / speed;
+      const test = (x, z) => {
+        const probe = { x: a.x + x * look, z: a.z + z * look };
+        resolve(probe, false, 'npc');
+        return Math.hypot(probe.x - a.x, probe.z - a.z);
+      };
+      const straight = test(nx, nz);
+      if (straight < look * 0.7) {
+        const angle = 0.75, ca = Math.cos(angle), sa = Math.sin(angle);
+        const left = { x: nx * ca - nz * sa, z: nx * sa + nz * ca };
+        const right = { x: nx * ca + nz * sa, z: -nx * sa + nz * ca };
+        const dl = test(left.x, left.z), dr = test(right.x, right.z);
+        const side = dl >= dr ? left : right;
+        if (Math.max(dl, dr) > straight + 0.15) { tvx = side.x * speed; tvz = side.z * speed; }
+      }
+    }
     const k = Math.min(1, dt * 8); r.vxs += (tvx - r.vxs) * k; r.vzs += (tvz - r.vzs) * k;
     a.vx = r.vxs; a.vz = r.vzs;
   }

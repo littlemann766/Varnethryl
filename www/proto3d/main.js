@@ -450,7 +450,23 @@ function wrapGLB(g, id, blocky) {
   root.userData = { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 };
   // Cinder's authored wing and tail clips must NOT be re-aimed by spring physics.
   // The generic spring-bone family matches wing1/wing2/wing3 and creates rubbery, overlapping wing flaps.
-  if (id !== 'n:cinder_new') try { const cfg = CLOTHCFG[id]; root.userData.sb = cfg ? new SpringBonesV2(m, { clips: g.animations, config: cfg }) : new SpringBones(m, { clips: g.animations }); } catch (e) { console.warn('spring bones', e); }
+  if (id !== 'n:cinder_new') try {
+    const cfg = CLOTHCFG[id];
+    // Imported animated Owner rigs may use Mixamo names instead of the legacy
+    // cape/hood bones. Never apply legacy capsule physics to an incompatible rig.
+    const names = new Set(); m.traverse(o=>{if(o.isBone)names.add(o.name);});
+    const matches = cfg?.groups?.some(group=>{
+      try { const re=new RegExp(group.match); return [...names].some(name=>re.test(name)); }
+      catch (_) { return false; }
+    });
+    if(cfg && matches){
+      root.userData.sb=new SpringBonesV2(m,{clips:g.animations,config:cfg});
+    }else{
+      root.userData.sb=new SpringBones(m,{clips:g.animations});
+      if(cfg && !matches && id==='n:owner')
+        diag('Animated Owner rig has no legacy cape/hood bones; skipping incompatible cape physics.');
+    }
+  } catch (e) { console.warn('spring bones', e); }
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }

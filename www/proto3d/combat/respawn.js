@@ -1,7 +1,7 @@
 /* Wilds auto-respawn: a fixed population of slots. A slot frees when its monster is defeated (respawns after 20-40 s) or recycled for being far away
    (respawns soon). New monsters are placed out of the hero's sight (outside the camera view and >= minDist away), never outside the Wilds, and
    never above the per-biome cap. Pure logic (no THREE / DOM): the host passes zone, biome, free-space and visibility callbacks. */
-export const RESPAWN = { max: 9, delay: [20, 40], refill: 1.6, minDist: 22, maxDist: 60, caps: { meadow: 4, forest: 3, rock: 2, snow: 2, shore: 2 },
+export const RESPAWN = { max: 14, delay: [14, 28], refill: 1.25, minDist: 22, maxDist: 60, caps: { meadow: 6, forest: 5, rock: 3, snow: 3, shore: 3 },
   kinds: { meadow: ['wolf', 'raider', 'raider'], forest: ['wolf', 'wraith', 'raider'], rock: ['skeleton', 'raider'], snow: ['frosttroll', 'wolf', 'wolf'], shore: ['wraith', 'wolf'] } };
 export class Respawner {
   constructor(o = {}) { this.C = Object.assign({}, RESPAWN, o); this.t = 0; this.ready = []; for (let i = 0; i < this.C.max; i++) this.ready.push(0); this.cool = 0; this.log = []; this.rng = o.rng || Math.random; this.pending = 0; }

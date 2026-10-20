@@ -345,7 +345,16 @@ let LOCO_FORCE = null;   // test hook: pretend the hero moves at this ground spe
 // locomotion blend: models with per-clip speeds (SPEEDS) blend idle -> walk -> trot -> run by real ground speed and play each clip at speed/clipSpeed so feet stay planted; others use the legacy walk/idle blend
 function locoAnim(u, sp, dt = 1/60) {
   // Smooth transitions instead of abruptly switching the Owner's locomotion clips.
-  const smooth = (key, target) => { const alpha = 1 - Math.exp(-Math.max(0, dt) * 11); u[key] = (u[key] ?? target) + (target - (u[key] ?? target)) * alpha; return u[key]; };
+  const smooth = (key, target) => {
+    // Android resume and frame stalls can supply irregular frame deltas.
+    // Keep locomotion blending finite and prevent a long stall from snapping
+    // the Owner straight from idle to a full-speed running pose.
+    const elapsed = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.1)) : 0;
+    const alpha = 1 - Math.exp(-elapsed * 11);
+    const prev = Number.isFinite(u[key]) ? u[key] : target;
+    u[key] = prev + (target - prev) * alpha;
+    return u[key];
+  };
   const A = u.act, S = u.speeds;
   if (S && A.idle) {
     const v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? sp / (Number.isFinite(u.mscale) && u.mscale > 0 ? u.mscale : 1) : 0)), L = [['walk', S.walk || SPEED], ['trot', S.trot || SPEED * 1.45], ['run', S.run || SPEED * 2]].filter(([k, c], i, all) => A[k] && A[k] !== A.idle && c > 0 && all.findIndex(([prev]) => A[prev] === A[k]) === i).sort((a,b)=>a[1]-b[1]);

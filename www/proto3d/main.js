@@ -622,11 +622,17 @@ const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.
 const touches = new Map();
 function tapMoveTo(clientX, clientY) {
   ndc.set((clientX / innerWidth) * 2 - 1, -(clientY / innerHeight) * 2 + 1);
-  ray.setFromCamera(ndc, camera);
-  if (ray.ray.intersectPlane(plane, hit)) {
+  ray.setFromCamera(ndc,camera);
+  // Pick the actual elevated triangles, not an infinite sea-level plane:
+  // hilltop taps now send characters up the mountain and keep markers visible.
+  const terrain=ZONE.name==='town'&&TOWN_LANDS?TOWN_LANDS.terrain:
+    ZONE.name==='frost'&&FM?FM.group.getObjectByName('frostbound-climbable-ice-terrain'):null;
+  const hits=terrain?ray.intersectObject(terrain,false):[];
+  const hitOk=hits.length?(hit.copy(hits[0].point),true):ray.ray.intersectPlane(plane,hit);
+  if(hitOk){
     const lim = ZONE.half - 1.5;
     state.target = { x: THREE.MathUtils.clamp(hit.x, ZONE.cx - lim, ZONE.cx + lim), z: THREE.MathUtils.clamp(hit.z, ZONE.cz - lim, ZONE.cz + lim) };
-    marker.position.set(state.target.x, 0.06, state.target.z); marker.visible = true;
+    marker.position.set(state.target.x, surfaceAt(state.target.x,state.target.z,0)?.y+0.10||0.10, state.target.z); marker.visible = true;
   }
 }
 let prefStore = null; try { prefStore = localStorage; } catch (e) { prefStore = null; }
@@ -682,7 +688,12 @@ const tmp = { x: 0, z: 0 };
 function surfaceAt(x, z, level) {
   for (const b of ectx.multi) { { const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
   if (LAD && level >= 10) { const ls = LAD.surface(x, z, level); if (ls) return ls; }
-  return level === 0 ? { y: ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : ZONE.name === 'frost' && FM ? FM.heightAt(x,z) : 0 } : null;
+  if(level!==0)return null;
+  if(ZONE.name==='town'&&TOWN_LANDS){
+    // The harbor water's swimmable surface is separate from the seabed.
+    return {y:TOWN_LANDS.isWater(x,z)?TOWN_LANDS.waterLevel-.60:TOWN_LANDS.heightAt(x,z),swim:TOWN_LANDS.isWater(x,z)};
+  }
+  return {y:ZONE.name==='frost'&&FM?FM.heightAt(x,z):0};
 }
 function updateLevel() {
   if (state.climbing) return;
@@ -881,9 +892,10 @@ function updateHero(dt) {
   }
   if (LAD && LAD.update(dt, vx, vz)) { vx = 0; vz = 0; mag = 0; }
   if (!state.climbing) { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
+  const swimming=ZONE.name==='town'&&TOWN_LANDS&&TOWN_LANDS.isWater(state.heroX,state.heroZ);
   const moving = (vx || vz);
   if (moving) {
-    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
+    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * (swimming ? .6 : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
     tmp.x = state.heroX; tmp.z = state.heroZ; let blocked = false;
     for (let i = 0; i < n; i++) {
       const ox = tmp.x, oz = tmp.z; tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp, ghost)) blocked = true;
@@ -901,7 +913,7 @@ function updateHero(dt) {
     state.yaw += da * Math.min(1, dt * 12);
     state.speed = moved / dt;
   } else state.speed *= 0.8;
-  state.vx = moving ? vx * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0; state.vz = moving ? vz * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0;
+  state.vx = moving ? vx * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * (swimming ? .6 : 1) : 0; state.vz = moving ? vz * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * (swimming ? .6 : 1) : 0;
   if (playerAct.dx || playerAct.dz) { tmp.x = state.heroX + playerAct.dx; tmp.z = state.heroZ + playerAct.dz; resolve(tmp, passesWalls(cheat)); state.heroX = tmp.x; state.heroZ = tmp.z; }
   state.moving = state.speed > 0.5;
   updateLevel();
@@ -910,7 +922,13 @@ function updateHero(dt) {
   else if (cinderFlight.active || cinderFlight.alt) cinderFlight.reset();
   syncCinderControls();
   state.dispY = state.dispY === undefined || Math.abs(state.heroY - state.dispY) > 3 ? state.heroY : state.dispY + (state.heroY - state.dispY) * Math.min(1, dt * 16);
-  hero.position.set(state.heroX, state.dispY + cheat.alt + cinderFlight.alt, state.heroZ); hero.rotation.y = state.yaw;
+  hero.position.set(state.heroX,state.dispY+cheat.alt+cinderFlight.alt,state.heroZ);
+  hero.rotation.y=state.yaw;
+  // Buoyant body pitch on the water surface; preserves attack/death animation
+  // priority while allowing the existing walk cycle to approximate a paddle.
+  if(!FIGHT||!FIGHT.on||FIGHT.cc.dead<=0){
+    hero.rotation.x=swimming?-.15+.035*Math.sin(performance.now()*.003):0;
+  }
   let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
   if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
     try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }

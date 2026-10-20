@@ -9,9 +9,16 @@ button.on{background:#6a5a3a;color:#fff}
 #nav{display:flex;gap:6px}
 #all{position:fixed;left:0;top:0;bottom:0;width:min(78vw,320px);background:#000d;z-index:5;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;display:none;padding:8px 6px}
 #all div{padding:10px 10px;border-bottom:1px solid #fff2;font-size:15px;min-height:24px}#all div.on{background:#6a5a3a}#all div.hd{background:#241f2e;font-weight:700;position:sticky;top:0}
-#all small{opacity:.7;margin-left:6px}.tagp{color:#ffb060}</style></head><body>
+#all small{opacity:.7;margin-left:6px}.tagp{color:#ffb060}</style><style>
+.vn-viewer-nav{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.vn-back{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 13px;background:linear-gradient(#293b52,#0d1829);border:1px solid #d2aa69;border-radius:7px;text-decoration:none;color:#f8e1b1;font:700 12px Georgia,serif}
+#ui{background:linear-gradient(#1e3045ee,#0a1123eb)!important;border-bottom:1px solid #be9758}
+#all{background:linear-gradient(#21324af9,#0c1221fc)!important;border-right:2px solid #bf9755}
+#all .hd{background:#1b2c41!important;color:#efd59e}
+#all div.on{background:#52402b}
+</style></head><body>
 <canvas id="c"></canvas><div id="all"></div>
-<div id="ui"><div id="sel"><select id="list"></select><div id="nav"><button id="prev">◀</button><button id="next">▶</button></div></div><div id="ctl"></div><button id="showall">☰ All models (<span id="cnt"></span>)</button><div id="info">loading…</div></div>
+<div id="ui"><div class="vn-viewer-nav"><a class="vn-back" href="../proto3d.html">← Back to Varnethryl</a><button id="vnViewerClose" type="button">Close lineup</button></div><div id="sel"><select id="list"></select><div id="nav"><button id="prev">◀</button><button id="next">▶</button></div></div><div id="ctl"></div><button id="showall">☰ All models (<span id="cnt"></span>)</button><div id="info">loading…</div></div>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
 <script type="module">
 import * as THREE from 'three';
@@ -19,7 +26,7 @@ import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 import { SpringBones } from './spring_bones.js';
 const MAIN=['aldric','asha','brynn','cedric','darius','elira','finn','garruk','kael','mirelle','morwen','nyx','orin','rook','rowan','selene','seraphine','talia','thorne','vesper','wolf'];
 const BETH=["briar", "cinder", "coral", "ember", "frosttroll", "hawk", "hearth", "hobgoblin", "hydrella", "kestrel", "lorian", "lunara", "marella", "mortimer", "mossgut", "neris", "pip", "snowy", "ssylthar", "stonetroll", "thrain", "vaelthryx", "valen", "wren", "wyvern", "zephyr"];
-const NEW=[['darius','models/darius.glb'],['selene','models/selene.glb'],['mortimer_new','models-new/mortimer_cl_arms.glb'],['player_pikachu','models-new/player_pikachu_cl_arms.glb'],['lunara_new','models-new/lunara_cl_arms.glb'],['marella_new','models-new/marella_cl_arms.glb'],['vaelthryx_straight_rig'],['vaelthryx_new'],['ssylthar_new'],['ashentitan_new','models-new/ashentitan_cl_arms.glb'],['coral_new','models-new/coral_cl_arms.glb'],['cinder_new'],['snowy_new4','models-new/snowy_cl_arms.glb'],['zephyr_new2'],['garruk_new4'],['garruk_new5_arms'],['darius_new6_arms'],['pip_new2'],['owner','models-new/owner.glb'],['asha_new3','models-new/asha_cl_arms.glb'],['thrain_new4','models-new/thrain_cl_arms.glb'],['wren_new3','models-new/wren_cl_arms.glb'],['ember_new3']];
+const NEW=[['darius','models/darius.glb'],['selene','models/selene.glb'],['mortimer_new','models-new/mortimer_cl_arms.glb'],['player_pikachu','models-new/player_pikachu_cl_arms.glb'],['lunara_new','models-new/lunara_cl_arms.glb'],['marella_new','models-new/marella_cl_arms.glb'],['vaelthryx_straight_rig'],['frosttroll_a','models-new/frosttroll_a.glb'],['frosttroll_b','models-new/frosttroll_a.glb'],['vaelthryx_new'],['ssylthar_new'],['ashentitan_new','models-new/ashentitan_cl_arms.glb'],['coral_new','models-new/coral_cl_arms.glb'],['cinder_new'],['snowy_new4','models-new/snowy_cl_arms.glb'],['zephyr_new2'],['garruk_new4'],['garruk_new5_arms'],['darius_new6_arms'],['pip_new2'],['owner','models-new/owner.glb'],['asha_new3','models-new/asha_cl_arms.glb'],['thrain_new4','models-new/thrain_cl_arms.glb'],['wren_new3','models-new/wren_cl_arms.glb'],['ember_new3']];
 const PH=["aldric", "briar", "brynn", "cedric", "elira", "finn", "frosttroll", "hearth", "hobgoblin", "hydrella", "kael", "kestrel", "lorian", "lunara", "marella", "mirelle", "morwen", "mossgut", "neris", "nyx", "orin", "pip", "rook", "rowan", "seraphine", "stonetroll", "talia", "thorne", "valen", "vesper", "wyvern", "zephyr"];
 const items=[...NEW.map(([n,u])=>({n,set:'NEW (Beth)',url:u||`models-new/${n}.glb`})),...PH.map(n=>({n:n+'_new',set:'PLACEHOLDER',url:`models-placeholder/${n}_new.glb`,ph:true})),...MAIN.map(n=>({n,set:'Old main',url:`models/${n}.glb`})),...BETH.map(n=>({n,set:'Old Beth',url:`models-beth/${n}.glb`}))];
 const HEIGHT={stonetroll_new:3.0,frosttroll_new:3.0,thrain_new:1.35};   // humanoids are normalised to 1.9 m; trolls/dwarf scaled here, Snowy shown at native size with scale buttons
@@ -72,7 +79,10 @@ async function load(i){idx=i;list.value=i;const my=++loadId;const it=items[i];in
   info.textContent=`${it.ph?'PLACEHOLDER (old generated model)':it.set}: ${it.n} · ${kb} KB · ${(box.max.y-box.min.y).toFixed(2)} m · ${Math.round(tris).toLocaleString()} tris · `+(names.length?`clips: ${names.join(', ')}`:'no animation clips in this model (static pose)');
   if(NOTES[it.n])info.textContent+=' · '+NOTES[it.n];window.__viewer.loaded={name:it.n,set:it.set,kb,dim:[size.x,size.y,size.z].map(v=>+v.toFixed(2)),tris:Math.round(tris),clips:names};
  }}
-const allEl=document.getElementById('all');document.getElementById('cnt').textContent=items.length;
+const allEl=document.getElementById('all');
+const allBack=document.createElement('button');allBack.type='button';allBack.id='vnAllBack';allBack.textContent='✕ Close lineup list';allBack.style.cssText='position:sticky;top:0;display:block;width:100%;background:#5c4426;color:#fce2a3;z-index:2';allBack.addEventListener('click',()=>{allEl.style.display='none';});allEl.prepend(allBack);
+document.getElementById('vnViewerClose')?.addEventListener('click',()=>location.assign('../proto3d.html'));
+addEventListener('keydown',e=>{if(e.key==='Escape'){if(allEl.style.display==='block')allEl.style.display='none';else location.assign('../proto3d.html');}});document.getElementById('cnt').textContent=items.length;
 {let last='';items.forEach((it,i)=>{if(it.set!==last){last=it.set;const h=document.createElement('div');h.className='hd';h.textContent=(it.ph?'PLACEHOLDER (old generated, to be replaced)':it.set==='NEW (Beth)'?'NEW (Beth) - real models':it.set==='Old main'?'Old main set (playable + wolf)':'Old Beth set (NPCs/monsters/bosses)');allEl.appendChild(h);}
  const d=document.createElement('div');d.dataset.i=i;d.innerHTML=it.n+(it.ph?'<small class="tagp">PLACEHOLDER</small>':'');d.addEventListener('click',()=>{allEl.style.display='none';load(i);});allEl.appendChild(d);});}
 document.getElementById('showall').onclick=()=>{allEl.style.display=allEl.style.display==='block'?'none':'block';[...allEl.querySelectorAll('div[data-i]')].forEach(d=>d.classList.toggle('on',+d.dataset.i===idx));const o=allEl.querySelector('.on');if(o)o.scrollIntoView({block:'center'});};

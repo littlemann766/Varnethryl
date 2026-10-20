@@ -972,10 +972,15 @@ function updateCamera(dt, snap) {
   if (camRig.prefs.camMode !== 'free' && !camRig.fp && !camRig.pinching && performance.now() - lastDragT > 1500) state.camYaw = followYaw(state.camYaw, state.vx, state.vz, dt);
   ci.zx = ZONE.cx; ci.zz = ZONE.cz; ci.zh = ZONE.half;
   camRig.update(ci);
+  // Follow the actual elevated terrain on hills: don't let the third-person camera clip into a ridge.
+  if (ZONE.name === 'town' && TOWN_LANDS && !camRig.fp) {
+    const floor = TOWN_LANDS.heightAt(camRig.pos.x, camRig.pos.z) + 1.0 * HS;
+    if (camRig.pos.y < floor) { camRig.pos.y = floor; camera.position.y = floor; camera.lookAt(camRig.look); }
+  }
   camPos.copy(camRig.pos); camLook.copy(camRig.look);
   camRig.syncHero(hero);
-  sun.position.set(state.heroX + SUN_OFF.x * SUNK, SUN_OFF.y * SUNK, state.heroZ + SUN_OFF.z * SUNK);
-  sun.target.position.set(state.heroX, 0, state.heroZ);
+  sun.position.set(state.heroX + SUN_OFF.x * SUNK, (ZONE.name === 'town' ? state.heroY : 0) + SUN_OFF.y * SUNK, state.heroZ + SUN_OFF.z * SUNK);
+  sun.target.position.set(state.heroX, ZONE.name === 'town' ? state.heroY : 0, state.heroZ);
 }
 
 function resize() {

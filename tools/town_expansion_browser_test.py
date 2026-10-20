@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Browser smoke test: 560-unit town, exterior landscaping, new wall gate and Wilds transition."""
+"""Browser smoke test: 1120-unit town, walkable mountain terrain, walls, Wilds transition."""
 from playwright.sync_api import sync_playwright
 import os, http.server, threading, functools, sys, json
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),'..','www'))
@@ -24,20 +24,21 @@ with sync_playwright() as p:
       const g=gate.parts[0];
       const q=(x,z)=>a.colliders.some(c=>c.type==='box'&&x>c.minX&&x<c.maxX&&z>c.minZ&&z<c.maxZ);
       return {zone:a.zone,half:W.half,tree:L.stats.trees,chunks:L.chunkCount,fields:L.stats.fields,gate:g.cz,
-      top:q(0,-280),west:q(-280,0),east:q(280,0),south:q(60,280),frames:a.frames,calls:a.info().calls};}""")
+      top:q(0,-560),west:q(-560,0),east:q(560,0),south:q(60,560),frames:a.frames,calls:a.info().calls};}""")
     print('initial world',json.dumps(info),flush=True)
-    check('town opens at Wilds-scale 280 half-extent',info['zone']=='town' and info['half']==280)
+    check('town opens at doubled 560-unit half extent',info['zone']=='town' and info['half']==560)
     check('landscaped trees/fields/chunks present',info['tree']>=250 and info['fields']==3 and info['chunks']>0)
-    check('gatehouse moved with south wall',abs(info['gate']-278.8)<0.1,info['gate'])
+    check('gatehouse moved with south wall',abs(info['gate']-558.8)<0.1,info['gate'])
     check('all four wall sides have physical collision',all(info[k] for k in ('top','west','east','south')))
     check('Town camera and landscape render after travelling to outskirts',True)
-    page.evaluate("window.__p3d.teleport(191,15);window.__p3d.setCamYaw(0)")
+    page.evaluate("window.__p3d.teleport(390,265);window.__p3d.setCamYaw(0)")
     page.wait_for_timeout(2200)
     out=page.evaluate("""()=>({zone:__p3d.zone,rendered:__p3d.info().triangles,calls:__p3d.info().calls,visible:[...__p3d.townLands.group.children].filter(m=>m.visible).length,
-         pos:[__p3d.state.heroX,__p3d.state.heroZ],camera:[__p3d.camRig.pos.x,__p3d.camRig.pos.y,__p3d.camRig.pos.z]})""")
+         pos:[__p3d.state.heroX,__p3d.state.heroZ],ground:__p3d.townLands.heightAt(__p3d.state.heroX,__p3d.state.heroZ),feet:__p3d.state.heroY,camera:[__p3d.camRig.pos.x,__p3d.camRig.pos.y,__p3d.camRig.pos.z]})""")
     print('outskirts',json.dumps(out),flush=True)
     check('outer districts render without disappearing',out['visible']>0 and out['rendered']>10000,out)
     check('camera stays finite near hero',all(isinstance(x,(int,float)) and abs(x)<10000 for x in out['camera']))
+    check('hero feet follow walkable hill height',out['ground']>5 and abs(out['feet']-out['ground'])<0.05,out)
     page.evaluate("__p3d.state.heroX=-6;__p3d.state.heroZ=38")
     page.wait_for_function("__p3d.zone==='wilds'",timeout=90000)
     check('portal continues to enter Wilds',page.evaluate("__p3d.zone")=='wilds')

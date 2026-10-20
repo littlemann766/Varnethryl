@@ -394,11 +394,14 @@ function locoAnim(u, sp, dt = 1/60) {
   // at its initial zero weight for the entire game.
   else if (!wk && A.run && A.run !== id) {
     const standing = v < .025, ov = 1 - (u.ovr || 0);
-    A.run.setEffectiveWeight(standing && id ? 0 : ov);
+    // With a real idle clip, blend into it as the player accelerates rather
+    // than snapping straight to a full-speed run on the first movement frame.
+    const runWeight = id ? Math.max(0, Math.min(1, v / (S?.run || SPEED * 2))) : 1;
+    A.run.setEffectiveWeight(runWeight * ov);
     A.run.timeScale = standing ? 0 : S?.run > 0
       ? Math.max(.5, Math.min(2.4, v / S.run))
       : Math.max(.5, Math.min(2.4, v / (SPEED * 2)));
-    if (id) id.setEffectiveWeight(standing ? ov : 0);
+    if (id) id.setEffectiveWeight((1 - runWeight) * ov);
     if (standing && !u.wasStanding) { A.run.time = 0; if (u.sb) u.sb.reset(); }
     u.wasStanding = standing;
   }

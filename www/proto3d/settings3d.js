@@ -30,9 +30,10 @@ const CSS2 = '#settingsPanel{background:linear-gradient(180deg,#171127f2,#0d0b17
  + '#settingsPanel input[type=range]{accent-color:#c9a24a!important;min-height:48px!important}'
  + '#settingsPanel .stp{min-width:48px!important;font-size:20px;font-weight:700}';
 const CSS3 = '#settingsPanel .card.vn-collapsible{padding:4px 6px;margin:5px 0}#settingsPanel .vn-setting-body{display:none;padding:8px 7px 11px}#settingsPanel .vn-card-open>.vn-setting-body{display:block}#settingsPanel .vn-settings-toggle{display:block!important;width:100%;min-height:42px!important;text-align:left!important;padding:8px 12px!important;background:linear-gradient(#253851,#111b2c)!important;border:1px solid #8d7041!important;color:#f5ddab!important;font:700 13px VarnCinzel,Georgia,serif!important}#settingsPanel .vn-settings-toggle:focus-visible{outline:2px solid #ffdd92}';
-const DESCS = { 'Game & version': 'Version information, characters and diagnostics.', 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Display': 'On-screen info.' };
-const TITLES = { 'Game & version':'Game', 'Camera':'Camera & movement', 'Combat':'Combat controls', 'Loadout':'Equipment & skills', 'Graphics':'Graphics & performance', 'Display':'On-screen display' };
+const DESCS = { 'Game & version': 'Version information, characters and diagnostics.', 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Animation Lab': 'Preview Beth rigs and Meshy bodies while moving in game. Temporary: does not change saves.', 'Display': 'On-screen info.' };
+const TITLES = { 'Game & version':'Game', 'Camera':'Camera & movement', 'Combat':'Combat controls', 'Loadout':'Equipment & skills', 'Graphics':'Graphics & performance', 'Animation Lab':'Animation Lab (test)', 'Display':'On-screen display' };
 let selectedSection = 'Camera';
+let animationLabNotes = ''; // local, temporary tester feedback; never written into game saves
 let root = null, body = null, timer = 0, E = null;
 function el(tag, props, kids) { const e = document.createElement(tag); if (props) Object.assign(e, props); if (kids) for (const k of kids) e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); return e; }
 const isOpen = () => !!root && root.style.display === 'block';
@@ -110,6 +111,71 @@ function build() {
   ab.addEventListener('click', async () => { const F = window.__p3d && window.__p3d.fight; if (!F || !F.armory) { ld.textContent = 'Start Fight mode first to open the Armory.'; return; } const m = await import('./armoryui.js'); m.openArmory(F.armory); });
   body.appendChild(ab);
   ldSync(); syncs.push(ldSync);
+  body.appendChild(sec('Animation Lab'));
+  const lab=E.animationLab;
+  if(lab) {
+    const labHelp=el('small',{textContent:'Experimental movement tests on the REAL map. Your hero stats, original models and saved selection remain unchanged. Not all Meshy files can be rebound automatically.'});
+    body.appendChild(labHelp);
+    const people=el('select',{id:'labHero'});
+    people.dataset.set='lab-hero';
+    for(const p of lab.candidates()) people.appendChild(el('option',{value:p.id,textContent:p.name}));
+    const styles=el('select',{id:'labStyle'});
+    styles.dataset.set='lab-style';
+    for (const [value,label] of [
+      ['bridge','Experimental: Beth skeleton + Meshy surface'],
+      ['detailed','Detailed Meshy / original GLB rig'],
+      ['classic','Original Beth blocky rig']]) {
+      styles.appendChild(el('option',{value,textContent:label}));
+    }
+    const source=el('select',{id:'labSource'});
+    source.dataset.set='lab-source';
+    for(const [value,label] of [['original','Original detailed mesh'],['new','Newer detailed mesh (when available)']])
+      source.appendChild(el('option',{value,textContent:label}));
+    body.appendChild(row(el('span',{className:'lab',textContent:'Character'}),people));
+    body.appendChild(row(el('span',{className:'lab',textContent:'Rig test'}),styles));
+    body.appendChild(row(el('span',{className:'lab',textContent:'Mesh source'}),source));
+    const labMessage=el('small',{textContent:lab.status().active
+      ? 'Running: '+lab.status().character+' · '+lab.status().style+' (temporary)'
+      : 'No rig experiment active.'});
+    const tryBtn=el('button',{type:'button',id:'animationLabStart',textContent:'Test character in-game'});
+    tryBtn.dataset.set='lab-start';
+    const restore=el('button',{type:'button',id:'animationLabStop',textContent:'Restore original'});
+    restore.dataset.set='lab-stop';
+    const working=(busy)=>{tryBtn.disabled=busy;restore.disabled=busy;};
+    tryBtn.addEventListener('click',async()=>{
+      working(true);
+      labMessage.textContent='Preparing character preview…';
+      try{
+        const response=await lab.start(people.value,styles.value,source.value);
+        labMessage.textContent=response.message;
+        if(response.ok)hide(); // Walk, run and fight with standard in-game controls.
+      }finally{working(false);}
+    });
+    restore.addEventListener('click',()=>{
+      const r=lab.stop(); labMessage.textContent=r.message;
+    });
+    body.appendChild(row(tryBtn,restore));body.appendChild(labMessage);
+    const issues=el('textarea',{id:'animationLabNotes',rows:3,value:animationLabNotes,
+      placeholder:'Examples: knees snap; feet slide when running; cape clips; attack pose twists'});
+    issues.dataset.set='lab-notes';issues.style.cssText='width:100%;box-sizing:border-box;background:#12182a;color:#fff;border:1px solid #c9a24a;border-radius:8px;padding:8px;font:inherit';
+    issues.addEventListener('input',()=>{animationLabNotes=issues.value;});
+    body.appendChild(issues);
+    const reportBtn=el('button',{type:'button',id:'animationLabCopy',textContent:'Copy animation test report'});
+    reportBtn.dataset.set='lab-copy';
+    reportBtn.addEventListener('click',async()=>{
+      const report=lab.report(animationLabNotes);
+      try{
+        await navigator.clipboard.writeText(report);
+        labMessage.textContent='Report copied. Paste it into our chat with your feedback.';
+      }catch(e){
+        issues.value=report;animationLabNotes=report;
+        issues.focus();issues.select();
+        labMessage.textContent='Copy access unavailable. Report selected above; use Copy.';
+      }
+    });
+    body.appendChild(row(reportBtn));
+    body.appendChild(el('small',{textContent:'To exit test mode, reopen Settings → Animation Lab → Restore original. If the experiment cannot bind a model, the original stays visible.'}));
+  }
   body.appendChild(sec('Graphics'));
   // Natural visuals change only rendering; saved world, combat and character skins are untouched.
   const look = el('select', { id: 'setVisualStyle' });

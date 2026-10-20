@@ -3,6 +3,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { CHARS } from './chars.js';
+import { bridgeUnskinnedHumanoid } from './rig-bridge.js';
 import { preload as preloadChars } from './texgen.js';
 import { makeEnterable } from './interiors.js';
 import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
@@ -296,7 +297,7 @@ let hero = HEROES[0];
 let startHero = 0;
 let saver;
 HEROES.forEach((h, i) => { h.position.set(0, 0, START_Z); h.visible = i === 0; scene.add(h); });
-function setHero(i) { applyChar(GLB_IDS[i]); { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; if (typeof refreshSel === 'function') refreshSel(i); if (typeof saver !== 'undefined') saver.mark(); }
+function setHero(i) { if (animationLab) stopAnimationLab(); applyChar(GLB_IDS[i]); { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; if (typeof refreshSel === 'function') refreshSel(i); if (typeof saver !== 'undefined') saver.mark(); }
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
 const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
@@ -462,7 +463,7 @@ function wrapGLB(g, id, blocky) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
   m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
   m.updateMatrixWorld(true); const box = new THREE.Box3().setFromObject(m);   // measured BEFORE the rigid-part merge: the merged SkinnedMesh bounding box is NaN, which silently skipped scaling
-  if (new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
+  if (!g.experimentalBridge && new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
   m.traverse(o => { if (o.isSkinnedMesh && o.name !== 'merged') { o.frustumCulled = false; if (!SKINS.includes(o)) SKINS.push(o); } });
   const hgt = box.max.y - box.min.y;
   if (hgt > 0.01) { const BK_H = { 'o:vaelthryx': 5.1 };   // blocky builders authored smaller than their GLB: match the GLB's in-game height so swapping doesn't jump
@@ -681,6 +682,7 @@ function loadGlbHero(gi) {
 // model choice still wins; a missing file retains the existing model fallback.
 const DEFAULT_MODEL = 'glb';
 const VAR = {};   // slot -> { blocky, glb } cached variants (both kept so toggling never reloads or jumps)
+let animationLab = null;  // temporary local-only in-world visual swap; never saved
 const bk = id => CHARS[id] ? id : (id.startsWith('o:') && CHARS[id.slice(2)] ? id.slice(2) : null);   // blocky builder key for a model id
 function modeFor(id) {
   if (!bk(id)) return 'glb';
@@ -707,6 +709,95 @@ function loadHero(gi) {
   return loadGlbHero(gi);
 }
 for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(i < GLB_NAMES.length ? GLB_NAMES[i] : EXTRA[i - GLB_NAMES.length][1]); }
+
+// --- In-game Animation Lab: temporary visual swap, with original model/state kept. ---
+// The tester moves/attacks with the normal controls. We only swap the drawn
+// model in the current HEROES slot, never the saved hero id, index or stats.
+const animationLabCandidates = () => GLB_IDS.slice(0, GLB_NAMES.length)
+  .map((id, i) => ({id, name:GLB_NAMES[i]})).filter(x=>!!CHARS[x.id]);
+
+function stopAnimationLab() {
+  if (!animationLab) return {ok:true, message:'Animation Lab already off'};
+  const t=animationLab; animationLab=null;
+  HEROES[t.index]=t.original;
+  if (hero===t.preview) hero=t.original;
+  scene.remove(t.preview);
+  t.original.visible=t.wasVisible;
+  // Never dispose a shared texture/material: source GLBs can share GPU resources.
+  return {ok:true, message:'Original character restored; saved game unchanged.'};
+}
+function animationLabStatus() {
+  return animationLab ? {active:true, character:animationLab.name,
+    style:animationLab.style, source:animationLab.source,
+    slots:animationLab.slots, notes:animationLab.notes} : {active:false};
+}
+async function startAnimationLab(baseId, style='bridge', requestedSource='original') {
+  stopAnimationLab();
+  if (!CHARS[baseId] || !GLB_IDS.includes(baseId))
+    return {ok:false, message:'No compatible original Beth biped rig for '+baseId};
+  const index=HEROES.indexOf(hero);
+  if(index<0) return {ok:false,message:'Character is changing. Retry after it loads.'};
+  const original=hero;
+  const alternate=EXTRA.find(e=>e[0].startsWith('n:'+baseId+'_') &&
+    !/smooth|pika|straight/.test(e[0]));
+  const sourceId=requestedSource==='new' && alternate ? alternate[0] : baseId;
+  let result=null, root=null, note='', slots=[];
+  try{
+    if(style==='classic') {
+      root=makeBlocky(baseId);
+      note='Original Beth rig and original blocky geometry.';
+    } else {
+      const buf=await fetchGLB(sourceId);
+      const parsed=await new Promise((resolve,reject)=>
+        gl.parse(buf,'',resolve,reject));
+      if(style==='detailed'){
+        root=wrapGLB(parsed,baseId);
+        note='Existing detailed GLB and its authored animations.';
+      }else if(style==='bridge'){
+        const donor=CHARS[baseId].build();
+        const trial=bridgeUnskinnedHumanoid(THREE,donor,parsed.scene);
+        if(!trial.ok) return {ok:false,message:'Beth rig bridge unavailable: '+trial.reason+
+          '. Try Detailed or Classic instead; original model is unchanged.'};
+        slots=trial.helpers;
+        root=wrapGLB({scene:trial.scene,animations:trial.animations,
+          experimentalBridge:true},baseId);
+        note='Experimental automated weights on Beth joints: '+trial.convertedMeshes+
+          ' surfaces, '+trial.vertices+' vertices, '+trial.helpers.length+
+          ' added intermediate joints. Needs visual approval.';
+      }else return {ok:false,message:'Unknown Animation Lab style'};
+    }
+    if(!root?.children?.length) return {ok:false,message:'Model could not be displayed'};
+    // A different choice/zone or another asynchronous load may occur during
+    // fetch. Refuse to replace a character that is no longer active.
+    if(original!==hero || HEROES[index]!==original) {
+      scene.remove(root);
+      return {ok:false,message:'Character changed during loading; retry.'};
+    }
+    root.position.copy(original.position);
+    root.rotation.copy(original.rotation);
+    root.visible=true;
+    original.visible=false;
+    scene.add(root);
+    HEROES[index]=root;
+    hero=root;
+    animationLab={index,original,preview:root,wasVisible:true,
+      style,source:sourceId,name:GLB_NAMES[GLB_IDS.indexOf(baseId)]||baseId,
+      slots,notes:note};
+    return {ok:true,message:note,character:animationLab.name,source:sourceId};
+  }catch(e){
+    if(root)scene.remove(root);
+    return {ok:false,message:'Model preview failed: '+String(e?.message||e)};
+  }
+}
+function animationLabReport(observation='') {
+  const s=animationLabStatus();
+  const p=window.__p3d;
+  const payload={game:'Varnethryl',build:ASSET_V,time:new Date().toISOString(),
+    lab:s,activeHeroId:GLB_IDS[HEROES.indexOf(hero)]||'',
+    renderer:p?.info?.(),observations:String(observation).slice(0,2000)};
+  return JSON.stringify(payload,null,2);
+}
+
 const heroKind = w => w.userData.blocky ? 'blocky' : w.userData.glb ? 'glb' : 'none';
 async function selectHero(i) { if (heroKind(HEROES[i]) !== modeFor(GLB_IDS[i])) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
 const qp0 = new URLSearchParams(location.search);
@@ -1750,7 +1841,7 @@ const cheatEnv = {
 const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
-const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on), setVisualStyle, getVisualStyle: () => visualStyle });
+const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on), setVisualStyle, getVisualStyle: () => visualStyle, animationLab: {candidates:animationLabCandidates, start:startAnimationLab, stop:stopAnimationLab, status:animationLabStatus, report:animationLabReport} });
 window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),running:travelRun,exhausted};}, setRunning:setTravelRun, jump, get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   teleportTo(x,z){if(!Number.isFinite(x)||!Number.isFinite(z))return false;state.heroX=x;state.heroZ=z;state.target=null;marker.visible=false;state.blockedFrames=0;state.level=0;updateLevel();snapFollowers();saver?.mark();return true;},
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
@@ -1769,4 +1860,5 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },
   setHero, get heroIndex() { return HEROES.indexOf(hero); },
   tapAt: tapMoveTo,
+  animationLab: {candidates:animationLabCandidates, start:startAnimationLab, stop:stopAnimationLab, status:animationLabStatus, report:animationLabReport},
 };

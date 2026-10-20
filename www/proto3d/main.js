@@ -856,8 +856,32 @@ async function selectVariant(g, v) {
       held=false;startX=e.clientX;startY=e.clientY;
       cancelHold();holdTimer=setTimeout(()=>{
         held=true;holdTimer=null;
-        const v=approved?bossVariant(g):curVar(g),id=GLB_IDS[v.slot].replace(/^[a-z]:/,'');
-        window.location.href='proto3d/model-viewer.html?model='+encodeURIComponent(id);
+        // Stay in-game: show a compact skin bubble instead of navigating
+        // away to the separate 3D model viewer.
+        let bubble=document.getElementById('vnSkinBubble');
+        if(!bubble){
+          bubble=document.createElement('div');bubble.id='vnSkinBubble';
+          bubble.setAttribute('role','dialog');bubble.setAttribute('aria-label','Character skins');
+          document.body.appendChild(bubble);
+        }
+        bubble.replaceChildren();
+        const heading=document.createElement('strong');heading.textContent=g.name+' · Skins';
+        const dismiss=document.createElement('button');dismiss.type='button';dismiss.textContent='✕';
+        dismiss.setAttribute('aria-label','Close skins');
+        dismiss.addEventListener('click',()=>bubble.hidden=true);
+        const top=document.createElement('div');top.className='vn-skin-head';top.append(heading,dismiss);bubble.appendChild(top);
+        const options=document.createElement('div');options.className='vn-skin-options';
+        const skins=approved?g.vars.filter(v=>APPROVED_BOSS_IDS.has(GLB_IDS[v.slot])):g.vars;
+        for(const skin of skins){
+          const choice=document.createElement('button');choice.type='button';
+          choice.textContent=skin.label+(skin===curVar(g)?' ✓':'');
+          choice.title='Use '+g.name+' '+skin.label;
+          choice.addEventListener('click',()=>{bubble.hidden=true;close();selectVariant(g,skin);});
+          options.appendChild(choice);
+        }
+        bubble.appendChild(options);
+        const hint=document.createElement('small');hint.textContent='Tap a skin to select it. Close to keep your current character.';
+        bubble.appendChild(hint);bubble.hidden=false;
       },550);
     });
     b.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-startX,e.clientY-startY)>12)cancelHold();});

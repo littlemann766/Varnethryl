@@ -357,7 +357,17 @@ function locoAnim(u, sp) {
     return;
   }
   const wk = A.walk, id = A.idle, v = Math.max(0, Number.isFinite(sp) ? sp : 0);
-  if (wk && id) { const w = v < 0.025 ? 0 : Math.min(1, v / SPEED); { const ov = 1 - (u.ovr || 0); wk.setEffectiveWeight(w * ov); id.setEffectiveWeight((1 - w) * ov); } wk.timeScale = 0.6 + v * 0.25; }
+  if (wk && id) {
+    const w = v < 0.025 ? 0 : Math.min(1, v / SPEED);
+    const ov = 1 - (u.ovr || 0);
+    // Non-profiled rigs can still have a dedicated running clip.
+    const run = A.run && A.run !== wk && A.run !== id ? A.run : null;
+    const runMix = run ? Math.max(0, Math.min(1, (v - SPEED * 1.15) / (SPEED * .85))) : 0;
+    wk.setEffectiveWeight(w * (1-runMix) * ov);
+    id.setEffectiveWeight((1-w) * ov);
+    if(run){run.setEffectiveWeight(w*runMix*ov);run.timeScale=Math.max(.65,Math.min(2.2,v/(SPEED*1.8)));}
+    wk.timeScale = 0.6 + v * 0.25;
+  }
   // Unrigged Idle fallback: freeze walking at rest instead of marching in place.
   else if (wk && !id) { const standing = v < 0.025; wk.setEffectiveWeight(1 - (u.ovr || 0)); wk.timeScale = standing ? 0 : 0.6 + v * 0.25; if (standing && !u.wasStanding) wk.time = 0; u.wasStanding = standing; }
 }
@@ -426,7 +436,7 @@ function wrapGLB(g, id, blocky) {
   }
   if (EXTRA_URL[id] && !g.animations.length) diag('Model ' + id + ' has no animation clips; needs a real rig/animation pass.');
   if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];   // e.g. serpent: walk/run = slither/slither_fast
-  if (act.idle) act.idle.play(); if (act.walk) act.walk.play(); if (spd) for (const k of ['trot', 'run']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
+  if (act.idle) act.idle.play(); if (act.walk) act.walk.play(); for (const k of ['trot', 'run']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
   if (id === 'n:cinder_new') for (const k of ['hover', 'flap', 'glide', 'dive', 'land']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
   root.userData = { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 };
   // Cinder's authored wing and tail clips must NOT be re-aimed by spring physics.

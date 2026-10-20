@@ -1151,12 +1151,20 @@ function updateCrowd(dt) {
         const left = { x: nx * ca - nz * sa, z: nx * sa + nz * ca };
         const right = { x: nx * ca + nz * sa, z: -nx * sa + nz * ca };
         const dl = test(left.x, left.z), dr = test(right.x, right.z);
+        // If both shallow turns hit the obstacle, probe a wider turn
+        // before falling back to the stuck-recovery system.
+        const wideAngle = 1.35, cw = Math.cos(wideAngle), sw = Math.sin(wideAngle);
+        const wideLeft = { x: nx * cw - nz * sw, z: nx * sw + nz * cw };
+        const wideRight = { x: nx * cw + nz * sw, z: -nx * sw + nz * cw };
+        const wl = test(wideLeft.x, wideLeft.z), wr = test(wideRight.x, wideRight.z);
         // Hold the chosen side briefly to avoid zig-zagging each frame
         // when both sides of a rock are almost equally open.
-        const chooseLeft = Math.abs(dl - dr) < 0.2 && r.avoidSide != null
-          ? r.avoidSide < 0 : dl >= dr;
-        const side = chooseLeft ? left : right;
-        if (Math.max(dl, dr) > straight + 0.15) {
+        const useWide = Math.max(dl, dr) < look * 0.7 && Math.max(wl, wr) > Math.max(dl, dr) + 0.1;
+        const l = useWide ? wl : dl, rr = useWide ? wr : dr;
+        const chooseLeft = Math.abs(l - rr) < 0.2 && r.avoidSide != null
+          ? r.avoidSide < 0 : l >= rr;
+        const side = chooseLeft ? (useWide ? wideLeft : left) : (useWide ? wideRight : right);
+        if (Math.max(l, rr) > straight + 0.15) {
           r.avoidSide = chooseLeft ? -1 : 1;
           tvx = side.x * speed; tvz = side.z * speed;
         }

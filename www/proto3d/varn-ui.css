@@ -134,3 +134,24 @@ body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
 #heroes #hlist{max-height:65dvh!important}
 #heroes #hlist .vn-roster-tabs{top:40px}
 }
+
+/* Cinematic loader layout: the supplied 960x960 crest film belongs in its
+   own stage, not stretched behind the title, status text and progress bar. */
+#load{gap:0!important;justify-content:flex-end!important;padding:0 18px max(24px,env(safe-area-inset-bottom))!important;background:#050409!important}
+#load:before{opacity:.16!important}
+#load:after{inset:10px!important;border:1px solid #8c6b46!important;border-radius:4px!important;box-shadow:inset 0 0 0 3px #150e20,0 0 25px #4d2266!important}
+#vnLoadingFilm,#vnLoadFallback{position:absolute!important;top:0!important;left:50%!important;transform:translateX(-50%)!important;width:min(100vw,calc(100dvh - 158px))!important;height:min(100vw,calc(100dvh - 158px))!important;max-height:none!important;aspect-ratio:1!important;object-fit:contain!important;margin:0!important;background:transparent!important;z-index:1!important}
+#vnLoadFallback{display:grid;place-items:center;animation:none!important}
+#vnLoadFallback img{width:100%;height:100%;object-fit:contain}
+#load h2,#load #loadMsg,#load .vn-loader-track,#load small{z-index:4!important;flex-shrink:0;text-align:center}
+#load h2{font-size:clamp(23px,5vw,44px)!important;letter-spacing:.12em!important;margin:0 0 6px!important}
+#load #loadMsg{margin:0 0 12px!important;min-height:1.5em!important;font-size:clamp(12px,2.5vw,15px)!important}
+#load .vn-loader-track{width:min(410px,84vw)!important;height:10px!important;margin:0 0 9px!important}
+#load small{font-size:11px!important;letter-spacing:.08em;padding-bottom:2px}
+#load:has(#vnLoadingFilm:not([hidden])) h2,#load:has(#vnLoadingFilm:not([hidden])) #loadMsg{background:none!important}
+@media (max-height:580px) and (orientation:landscape){
+  #load{padding-bottom:14px!important}
+  #vnLoadingFilm,#vnLoadFallback{left:25%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(53vh,42vw)!important;height:min(53vh,42vw)!important}
+  #load h2,#load #loadMsg,#load .vn-loader-track,#load small{margin-left:49vw!important;width:min(45vw,380px)!important}
+  #load h2{font-size:clamp(20px,3vw,34px)!important}
+}

@@ -447,7 +447,17 @@ function wrapGLB(g, id, blocky) {
   }
   if (EXTRA_URL[id] && !g.animations.length) diag('Model ' + id + ' has no animation clips; needs a real rig/animation pass.');
   if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];   // e.g. serpent: walk/run = slither/slither_fast
-  if (act.idle) act.idle.play(); if (act.walk) act.walk.play(); for (const k of ['trot', 'run']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
+  // Initialize one visible locomotion pose. Previously idle and walk both started
+  // at full weight, producing a brief mixed/half-stepping pose while loading.
+  if (act.idle) { act.idle.play(); act.idle.setEffectiveWeight(1); }
+  if (act.walk && act.walk !== act.idle) {
+    act.walk.play();
+    act.walk.setEffectiveWeight(act.idle ? 0 : 1);
+    if (!act.idle) act.walk.timeScale = 0; // hold the first frame until movement starts
+  }
+  for (const k of ['trot', 'run']) if (act[k] && act[k] !== act.walk && act[k] !== act.idle) {
+    act[k].play(); act[k].setEffectiveWeight(0);
+  }
   if (id === 'n:cinder_new') for (const k of ['hover', 'flap', 'glide', 'dive', 'land']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
   root.userData = { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 };
   // Cinder's authored wing and tail clips must NOT be re-aimed by spring physics.

@@ -503,9 +503,19 @@ function wrapGLB(g, id, blocky) {
     if (role && !act[role]) act[role] = act[clip.name];
   }
   if (EXTRA_URL[id] && !g.animations.length) diag('Model ' + id + ' has no animation clips; needs a real rig/animation pass.');
+  if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];
+  // Some imported rigs name their clips differently from the profile map.
+  // Only warn after explicit mappings have had a chance to resolve.
   if (/vaelthryx/.test(id) && !act.walk && !act.run)
     diag('Balthrix rig has no recognized slither/body-wave animation; a properly animated serpent GLB is still required.');
-  if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];   // e.g. serpent: walk/run = slither/slither_fast
+  if (id === 'n:owner' && !act.walk && !act.run)
+    diag('Owner rig has no recognized walk/run clips; natural running requires authored locomotion clips.');
+  if (root.userData.rigAudit) {
+    root.userData.rigAudit.resolved = {
+      idle: !!act.idle, walk: !!act.walk, run: !!act.run,
+      hasCapePhysicsBones: root.userData.rigAudit.capeBones.length > 0
+    };
+  }   // e.g. serpent: walk/run = slither/slither_fast
   // Initialize one visible locomotion pose. Previously idle and walk both started
   // at full weight, producing a brief mixed/half-stepping pose while loading.
   if (act.idle) { act.idle.play(); act.idle.setEffectiveWeight(1); }

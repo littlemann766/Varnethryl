@@ -62,6 +62,8 @@ assert(main.includes("resolve(spot, false, 'npc')"),'teleported followers use co
 assert(main.includes("r.y = surfaceAt(a.x, a.z, r.level)?.y ?? (state.heroY || 0)"),'revived and catch-up followers use surface height');
 assert(main.includes("if (document.hidden) setTravelRun(false)"),'backgrounding game clears held sprint state');
 assert(main.includes('run.setEffectiveWeight((standing ? 0 : runMix)*ov)'),'missing-idle rigs never blend into running while standing');
+assert(main.includes('const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0'),'animation frame stalls are bounded');
+assert(main.includes('u.mixer.update(animDt); if (u.sb) u.sb.update(animDt)'),'hero cloth and mixer use bounded animation delta');
 assert(main.includes("r.vxs = r.vzs = r.a.vx = r.a.vz = 0"),'teleported followers do not retain sprint velocity');
 assert(main.includes('TOWN_LANDS.updateWater?.(simTime)'),'water animation runs');
 assert(main.includes('state.swimming'),'hero can swim');

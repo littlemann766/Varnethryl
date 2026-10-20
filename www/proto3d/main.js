@@ -650,10 +650,15 @@ const touches = new Map();
 function tapMoveTo(clientX, clientY) {
   ndc.set((clientX / innerWidth) * 2 - 1, -(clientY / innerHeight) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  if (ray.ray.intersectPlane(plane, hit)) {
-    const lim = ZONE.half - 1.5;
-    state.target = { x: THREE.MathUtils.clamp(hit.x, ZONE.cx - lim, ZONE.cx + lim), z: THREE.MathUtils.clamp(hit.z, ZONE.cz - lim, ZONE.cz + lim) };
-    marker.position.set(state.target.x, 0.06, state.target.z); marker.visible = true;
+  // Raycast against the actual sculpted ground; the old y=0 plane failed on
+  // volcano slopes, causing taps to send companions into raised terrain.
+  const landHit=ZONE.name==='town'&&TOWN_LANDS?.terrain?ray.intersectObject(TOWN_LANDS.terrain,false)[0]:null;
+  const found=landHit?(hit.copy(landHit.point),true):!!ray.ray.intersectPlane(plane,hit);
+  if(found){
+    const lim=ZONE.half-1.5;
+    state.target={x:THREE.MathUtils.clamp(hit.x,ZONE.cx-lim,ZONE.cx+lim),z:THREE.MathUtils.clamp(hit.z,ZONE.cz-lim,ZONE.cz+lim)};
+    const surface=surfaceAt(state.target.x,state.target.z,0);
+    marker.position.set(state.target.x,(surface?.y||0)+.07,state.target.z);marker.visible=true;
   }
 }
 let prefStore = null; try { prefStore = localStorage; } catch (e) { prefStore = null; }

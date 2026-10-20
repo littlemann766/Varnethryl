@@ -508,10 +508,21 @@ function wrapGLB(g, id, blocky) {
     // Imported animated Owner rigs may use Mixamo names instead of the legacy
     // cape/hood bones. Never apply legacy capsule physics to an incompatible rig.
     const names = new Set(); m.traverse(o=>{if(o.isBone)names.add(o.name);});
-    const matchingGroups = (cfg?.groups || []).filter(group=>{
-      try { const re=new RegExp(group.match); return [...names].some(name=>re.test(name)); }
-      catch (_) { return false; }
-    });
+    // Imported cape bones may be named Cape_01 / mixamorig:Cape02 rather
+    // than the legacy cape1 convention. Normalize only cape/hood groups;
+    // never apply cloth dynamics to unrelated body or weapon bones.
+    const capeAlias = /^(?:.*[:|])?(?:cape|cloak)[_ .-]*\\d*$/i;
+    const hoodAlias = /^(?:.*[:|])?hood[_ .-]*\\d*$/i;
+    const compatibleGroups = (cfg?.groups || []).map(group=>{
+      try {
+        const re=new RegExp(group.match);
+        if([...names].some(name=>re.test(name))) return group;
+        const alias=group.kind==='cape'?capeAlias:group.kind==='hood'?hoodAlias:null;
+        return alias && [...names].some(name=>alias.test(name))
+          ? {...group,match:alias.source} : null;
+      } catch (_) { return null; }
+    }).filter(Boolean);
+    const matchingGroups=compatibleGroups;
     if(cfg && matchingGroups.length){
       // Avoid allocating spring physics for disabled-only groups. An imported
       // Owner skeleton with no active cape bones should remain on its authored

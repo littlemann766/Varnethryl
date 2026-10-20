@@ -11,10 +11,10 @@
  *           (2) in sync.js after sign-in: ownerGate.setServerOwnerProvider(() => auth.currentUser.getIdTokenResult().then(r => r.claims));
  *           (3) the backend must ALSO reject/flag saves carrying cheated:true. Client-side gating cannot stop a determined user.
  */
-export const GATE = Object.freeze({ v: 1, salt: 'cb50c04f22338c58bf6a892d1baa078a', hash: '7d5e6a57574903852d4895b848bfaf22b67faa643578309a4b075c10540cf031', iter: 210000 });
+export const GATE = Object.freeze({ v: 2, salt: '150a1c54ab232044870dcb521f1468ba', hash: '6a14971cd36e613ecebccedf46344f1fcf74bef61c0be542baad29048733c480', iter: 210000 });
 export const OWNER_UID_ALLOWLIST = Object.freeze([]);
-export const UNLOCK_KEY = 'vn_owner_unlock_v1';
-export const THROTTLE_KEY = 'vn_owner_attempts_v1';
+export const UNLOCK_KEY = 'vn_owner_unlock_v2';
+export const THROTTLE_KEY = 'vn_owner_attempts_v2';
 export const FREE_TRIES = 3, LOCK_BASE_MS = 30000, LOCK_MAX_MS = 3600000, MAX_PASS_LEN = 128;
 
 const enc = new TextEncoder();

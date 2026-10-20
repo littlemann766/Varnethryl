@@ -42,3 +42,5 @@ html,body{background:var(--vn-ink);color:var(--vn-light)}
 @media(max-width:740px){#hud{right:8px;max-width:calc(100vw - 16px);gap:4px;align-items:flex-start}#hud>div:first-child{min-width:130px;padding:5px 8px}#hud b{font-size:11px}#hud a,#hud button{min-height:31px!important;padding:5px 7px!important;font-size:10px!important}#heroes{top:108px}#hint{bottom:max(13px,env(safe-area-inset-bottom));font-size:10px;max-width:50vw}}
 @media(orientation:landscape) and (max-height:540px){#hud>div:first-child{line-height:1.2}#heroes{top:65px}#vnMenu .vn-card{padding:12px 22px}#vnMenu .vn-emblem{width:55px;height:55px}#vnMenu h1{font-size:26px}#vnMenu .vn-legend{margin:3px 0}#vnMenu .vn-rule{margin:7px auto}#vnMenu .vn-actions{grid-template-columns:1fr 1fr;max-width:none;gap:6px}#vnMenu button{min-height:38px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){#vnMenu *{animation:none!important;transition:none!important}}
+
+body.vn-menu-open #diagBtn,body.vn-menu-open #heroes,body.vn-menu-open #hud,body.vn-menu-open #stick,body.vn-menu-open #hint,body.vn-menu-open #cinderFlyControls,body.vn-menu-open #cb{visibility:hidden!important}

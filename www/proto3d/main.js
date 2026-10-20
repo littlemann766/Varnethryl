@@ -524,6 +524,21 @@ GROUPS.forEach(g => g.vars.sort((a, b) => vrank(a.label) - vrank(b.label)));
 // Titles remain visible but are ignored for alphabetical placement (e.g. Sir Aldric is under A).
 const rosterName = g => g.name.replace(/^(?:Sir|Lady|Dame|Brother|Captain|Queen|Elder)\s+/i, '').trim();
 const compareRoster = (a, b) => rosterName(a).localeCompare(rosterName(b), 'en', { numeric: true, sensitivity: 'base' }) || a.name.localeCompare(b.name, 'en');
+// Owner-approved 3D boss variants, displayed in their OWN roster tab.
+ // Model IDs / saved slot indices stay unchanged so existing saves still work.
+const APPROVED_BOSS_IDS = new Set([
+  'n:vaelthryx_straight_rig', // Balthrix 10×
+  'n:ashentitan_20',          // Ashen Titan 15×, stable legacy ID
+  'n:frosttroll_a',           // 3.5×
+  'n:frosttroll_b'            // 3.5×
+]);
+const bossVariant = g => g.vars.find(v => APPROVED_BOSS_IDS.has(GLB_IDS[v.slot]));
+const BOSS_DISPLAY = new Map([
+  ['n:vaelthryx_straight_rig','Balthrix (10×)'],
+  ['n:ashentitan_20','Ashen Titan (15×)'],
+  ['n:frosttroll_a','Frost Troll A (3.5×)'],
+  ['n:frosttroll_b','Frost Troll B (3.5×)']
+]);
 const selV = {};   // group key -> chosen variant
 function curVar(g) {
   if (selV[g.key]) return selV[g.key];
@@ -540,7 +555,7 @@ function refreshSel(i) {
   selUI.vars.textContent = ''; selUI.vars.style.display = g.vars.length > 1 ? 'flex' : 'none';
   g.vars.forEach(v => { const c = document.createElement('button'); c.className = 'vr' + (v === cur ? ' on' : ''); c.textContent = v.label; c.dataset.i = v.slot; c.dataset.m = v.mode; c.title = g.name + ': ' + v.label + ' version';
     c.addEventListener('pointerdown', e => e.stopPropagation()); c.addEventListener('click', e => { e.stopPropagation(); selectVariant(g, v); }); selUI.vars.appendChild(c); });
-  selUI.rows.forEach((r, k) => { const gg = r.g, v = curVar(gg); r.b.dataset.i = v.slot; r.b.classList.toggle('on', gg === g); });
+  selUI.rows.forEach(r => { const gg = r.g, v = r.approved ? bossVariant(gg) : curVar(gg); if(v)r.b.dataset.i = v.slot; r.b.classList.toggle('on', gg === g); });
 }
 async function selectVariant(g, v) {
   selV[g.key] = v; try { localStorage.setItem('vn_var_' + g.key, v.slot + '|' + v.mode); } catch (_) {}
@@ -552,25 +567,44 @@ async function selectVariant(g, v) {
   if (OG && !IS_OWNER_TOKEN) seen.add(OG);   /* hidden from everyone but the owner */
   HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g)) { seen.add(g); gl.push(g); } });
   gl.sort(compareRoster);
+  const approvedGroups=gl.filter(g=>!!bossVariant(g));
+  const standardGroups=gl.filter(g=>!bossVariant(g));
   const cur = document.createElement('button'); cur.id = 'hcur'; cur.className = 'cur'; cur.appendChild(document.createTextNode('')); const car = document.createElement('span'); car.textContent = '\u25be'; cur.appendChild(car); cur.title = 'choose character';
   const vars = document.createElement('div'); vars.id = 'hvars'; const list = document.createElement('div'); list.id = 'hlist';
+  const tabs=document.createElement('div'); tabs.className='vn-roster-tabs';
+  const rosterTab=document.createElement('button');rosterTab.type='button';rosterTab.textContent='Characters';
+  const bossTab=document.createElement('button');bossTab.type='button';bossTab.textContent='New Boss Approved Models';
+  tabs.append(rosterTab,bossTab);
+  const normalList=document.createElement('div');normalList.className='vn-roster-list';
+  const bossList=document.createElement('div');bossList.className='vn-roster-list';
+  const showRosterTab=which=>{
+    normalList.hidden=which!=='regular';bossList.hidden=which!=='boss';
+    rosterTab.classList.toggle('on',which==='regular');bossTab.classList.toggle('on',which==='boss');
+  };
+  rosterTab.addEventListener('click',e=>{e.stopPropagation();showRosterTab('regular')});
+  bossTab.addEventListener('click',e=>{e.stopPropagation();showRosterTab('boss')});
   const rows = [];
   const close = () => bar.classList.remove('open');
   cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation(); bar.classList.toggle('open'); });
   document.addEventListener('pointerdown', e => { if (!bar.contains(e.target)) close(); }, true);
-  const mkRow = g => { const n = g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = curVar(g).slot;
+  const mkRow = (g, approved=false) => { const item=approved?bossVariant(g):curVar(g); const n = approved?(BOSS_DISPLAY.get(GLB_IDS[item.slot])||g.name):g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = item.slot;
     if (g.vars.length > 1) { const sp = document.createElement('small'); sp.textContent = ' \u00b7' + g.vars.length; b.appendChild(sp); }
-    b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); close(); selectVariant(g, curVar(g)); });
-    const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = curVar(g).slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = curVar(g).slot; toggleFollower(+f.dataset.f); });
+    b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); close(); selectVariant(g, approved?bossVariant(g):curVar(g)); });
+    const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = item.slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = approved?bossVariant(g).slot:curVar(g).slot; toggleFollower(+f.dataset.f); });
     row.appendChild(b); row.appendChild(f); return { row, b }; };
   const back= document.createElement('button');back.type='button';back.className='vn-picker-close';back.textContent='← Back to game';back.addEventListener('pointerdown',e=>e.stopPropagation());back.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();close();});list.appendChild(back);
-  gl.forEach(g => { const r = mkRow(g); list.appendChild(r.row); rows.push({ g, b: r.b }); });
+  list.appendChild(tabs);
+  list.appendChild(normalList);list.appendChild(bossList);
+  showRosterTab('regular');
+  standardGroups.forEach(g=>{const r=mkRow(g);normalList.appendChild(r.row);rows.push({g,b:r.b,approved:false});});
+  approvedGroups.forEach(g=>{const r=mkRow(g,true);bossList.appendChild(r.row);rows.push({g,b:r.b,approved:true});});
+  window.__openBossRoster=()=>{showRosterTab('boss');bar.classList.add('open')};
   window.__ownerRoster = () => {
     if (!OG || rows.some(r => r.g === OG)) return;
     const r = mkRow(OG);
     const at = rows.findIndex(x => compareRoster(OG, x.g) < 0);
-    if (at < 0) { list.appendChild(r.row); rows.push({ g: OG, b: r.b }); }
-    else { list.insertBefore(r.row, rows[at].b.parentElement); rows.splice(at, 0, { g: OG, b: r.b }); }
+    if (at < 0) { normalList.appendChild(r.row); rows.push({ g: OG, b: r.b }); }
+    else { normalList.insertBefore(r.row, rows[at].b.parentElement); rows.splice(at, 0, { g: OG, b: r.b }); }
   };
   bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; })()); }
 async function toggleModel(i) {

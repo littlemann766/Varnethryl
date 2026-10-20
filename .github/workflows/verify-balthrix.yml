@@ -1,0 +1,25 @@
+name: Verify Balthrix scale variants
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'www/proto3d/charscale.js'
+      - 'www/proto3d/main.js'
+      - 'www/proto3d/combat/data.js'
+      - 'www/balthrix-scale.html'
+      - 'tools/check_balthrix_scale.mjs'
+      - '.github/workflows/verify-balthrix.yml'
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Balthrix scale and syntax regressions
+        run: node tools/check_balthrix_scale.mjs
+      - name: Check full asset catalogue
+        run: python3 tools/check_assets.py

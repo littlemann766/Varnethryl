@@ -358,7 +358,7 @@ function locoAnim(u, sp, dt = 1/60) {
     for (const [k, c] of L) { A[k].setEffectiveWeight(wt[k] * ov); A[k].timeScale = Math.max(0.5, Math.min(2.4, v / c)); }
     return;
   }
-  const wk = A.walk, id = A.idle, v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? sp : 0));
+  const wk = A.walk, id = A.idle, v = smooth('locoSpeed', Math.max(0, Number.isFinite(sp) ? (S ? sp / (u.mscale || 1) : sp) : 0));
   if (wk && id) {
     const w = v < 0.025 ? 0 : Math.min(1, v / SPEED);
     const ov = 1 - (u.ovr || 0);
@@ -374,7 +374,7 @@ function locoAnim(u, sp, dt = 1/60) {
   else if (wk && !id) {
     const standing = v < 0.025, ov = 1 - (u.ovr || 0);
     const run = A.run && A.run !== wk ? A.run : null;
-    const runMix = run && !standing ? Math.max(0, Math.min(1, (v - SPEED * 1.15) / (SPEED * .85))) : 0;
+    const runMix = run && !standing ? Math.max(0, Math.min(1, (v - (S?.walk || SPEED)) / Math.max(.1, (S?.run || SPEED * 2) - (S?.walk || SPEED)))) : 0;
     wk.setEffectiveWeight((1-runMix)*ov);
     wk.timeScale = standing ? 0 : 0.6 + v * 0.25;
     if(run){run.setEffectiveWeight(runMix*ov);run.timeScale=Math.max(.65,Math.min(2.2,v/(SPEED*1.8)));}

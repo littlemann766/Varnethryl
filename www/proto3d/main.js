@@ -530,6 +530,11 @@ GROUPS.forEach(g => { const nv = g.vars.filter(v => v.label === 'New'); if (nv.l
 // saved slots, and all model-loading fallback logic unchanged.
 const APPROVED_DISPLAY=new Map([
  ['aldric',v=>v.label==='Old'||v.label==='Blocky'],
+ ['briar',v=>v.label==='Blocky'],
+ ['brynn',v=>v.label==='Old'],
+ ['cedric',v=>v.label==='Old'],
+ ['cinder',v=>GLB_IDS[v.slot]==='n:cinder_new'],
+ ['frosttroll',v=>GLB_IDS[v.slot]==='n:frosttroll_a'||GLB_IDS[v.slot]==='n:frosttroll_b'],
  ['darius',v=>v.label==='Blocky'],
  ['elira',v=>v.label==='Blocky'],
  ['asha',v=>v.label==='Old'||GLB_IDS[v.slot]==='n:asha_new3'],

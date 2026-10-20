@@ -12,7 +12,8 @@ function wins(B, o) { // facade windows: front [[x,y]], side [[z,y]] (both sides
   for (const [x, y] of o.back || []) B.win(x, y, -d / 2 - .04, Math.PI, ww, hh, key);
 }
 const frontWinXs = (B, n = 1) => { const fw = (B.w - B.DW) / 2, out = []; for (const s of [-1, 1]) for (let i = 0; i < n; i++) out.push(s * (B.DW / 2 + fw * (i + .5) / n)); return out; };
-export const KB = 1.7, PK = 2.8, WORLD_B = 200 * PK; // 560-unit half extent: double the Wilds-sized town, all walls/gates follow it   // 280-unit town half extent: equal to Wilds; keep established village coordinates
+export const KB = 1.7, PK = 2.8, WORLD_B = 200 * PK; // enlarged overworld half-extent (560)
+export const CITY_WALL_B = 210; // compact walled city inside an expansive 1120-unit wilderness   // 280-unit town half extent: equal to Wilds; keep established village coordinates
 export const PLAN = 1.5;   // plan (footprint) scale for the standard buildings: roomier interiors, gentler stairs; heights unchanged (doors stay ~1.4x hero height)
 function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + banners + sign
   if (!o.noScale) o = Object.assign({}, o, { w: o.w * PLAN, d: o.d * PLAN });
@@ -603,6 +604,20 @@ function port(spec, ctx) {
   for (const [hx, hz, hw, hd, hy, hh] of TERR) { if (hy) { B.bx(hw + 1.4, hy, hd + 1.4, 'stoneD', hx, hy / 2, hz, B.G.ext); } B.bx(hw, hh, hd, 'darkWood', hx, hy + hh / 2, hz, B.G.ext); B.gable(hw, hd, 2.4 + (hw > 6 ? .4 : 0), hx, hy + hh, hz, 'slate', B.G.ext, true, .6, 'timber'); B.bx(1, 1, .3, 'stoneD', hx + 1.6, hy + hh + 2.3, hz, B.G.ext);
     for (let k = -1; k <= 1; k += 2) for (const wy of [1.2, 2.5]) if (hy + wy < hy + hh) B.add(new THREE.PlaneGeometry(.7, .9), GLOW('ffb347', 1.4), hx + k * hw * .27, hy + wy, hz + hd / 2 + .02, B.G.ext, { shadow: false });
     B.bx(hw * .9, .15, 1.0, 'wood', hx, hy + 2.3, hz + hd / 2 + .5, B.G.ext); B.col(hx, hz, hw + .5, hd + .5); }
+  // Compact independent harbor fortifications, open toward the water so boats
+  // can actually leave. Breakwaters and gate form a separate fortified port.
+  const hw=27,north=-23,south=33;
+  for(const [x,z,w,d] of [[-16,north,hw*2-24,1.6],[16,north,hw*2-24,1.6],[-hw,5,1.6,south-north],[hw,5,1.6,south-north]]){
+    B.bx(w,4.1,d,'stoneD',x,2.05,z,B.G.ext);
+    B.col(x,z,w,d);
+    for(let i=0;i<Math.floor((w>d?w:d)/2.8);i++){
+      const k=i-(Math.floor((w>d?w:d)/2.8)-1)/2;
+      B.bx(w>d?1.5:1.8,.8,w>d?1.8:1.5,'stone',x+(w>d?k*2.8:0),4.5,z+(w>d?0:k*2.8),B.G.ext);
+    }
+  }
+  for(const x of [-hw,hw])for(const z of [north,south]){B.tower(x,z,2.5,7.2,{coneH:3.3,key:'stoneD',collide:true});}
+  B.bx(10.2,1.25,2,'stone',0,5.0,north,B.G.ext);
+  // Safe entry path reaches the tavern and dock without crossing a wall.
   B.rocks([[-22, -3, 4.6, 1.1], [24, -2, 4.4, 1.2], [26, -10, 5, 1.3], [-14, -2, 3.0, 1.0], [-4, -26, 6, 1.8], [7, -26, 6, 1.7], [17, -25, 5.5, 1.5], [26, -20, 5, 1.4], [-20, 6, 3.6, .8], [22, 5, 3.4, .8], [-11, Z0 - 3, 1.8, .6], [11, Z0 - 3, 1.8, .6]], '#585b61');
   B.finish(); parts.push(B);
   return { id: 'port', parts, update(hx, hz, dt, lv) { let ins = false; for (const p of parts) if (p.update(hx, hz, dt, lv)) ins = true; return ins; }, name: 'Port of Varnethryl' };
@@ -653,7 +668,7 @@ export function buildWalls(ctx, WORLD_W, GATE_W) {
   const KW = KB, WORLD = WORLD_W / KW;   // the wall builder works in local units (uniformly scaled by KW like every building)
   const tmpl = { id: 'walls', cx: 0, cz: 0, rot: 0, K: KW }; const B = new Builder(ctx, tmpl); B.name = 'Town Walls & Watchtowers'; B.insideTest = null; B.radius = 9999;
   B.reach = 9999; const WH = 4.2, WT = 2.6;   // wall height / thickness (wide enough for a wall walk)
-  const Q = WORLD * 0.5, DECO = [[0, -WORLD], [-Q, -WORLD], [Q, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, Q], [WORLD, Q], [-WORLD, -Q], [WORLD, -Q], [-Q, WORLD], [Q, WORLD]];
+  const Q = WORLD * 0.5, DECO = [[-13,-WORLD],[13,-WORLD], [-Q, -WORLD], [Q, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, Q], [WORLD, Q], [-WORLD, -Q], [WORLD, -Q], [-Q, WORLD], [Q, WORLD]];
   const run = (x1, z1, x2, z2) => { const len = Math.hypot(x2 - x1, z2 - z1), horiz = Math.abs(z2 - z1) < .01, h = WH, t = WT, cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
     const nx = horiz ? 0 : (x1 < 0 ? 1 : -1), nz = horiz ? (z1 < 0 ? 1 : -1) : 0;   // inward normal
     B.bx(horiz ? len : t, h, horiz ? t : len, 'stone', cx, h / 2, cz, B.G.ext);
@@ -675,7 +690,10 @@ export function buildWalls(ctx, WORLD_W, GATE_W) {
       const ang = horiz ? (nz > 0 ? Math.PI : 0) : (nx > 0 ? -Math.PI / 2 : Math.PI / 2);   // climbs toward the wall
       B.stairs({ cx: cxs, cz: czs, ang, len: LEN, w: 1.7, l0: 0, y0: 0, l1: 1, y1: h, key: 'stoneD', flipUp: .7 }); } };
   const g = GATE_W;
-  run(-WORLD, -WORLD, WORLD, -WORLD); run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -10.4, WORLD); run(10.4, WORLD, WORLD, WORLD);
+  // Northern pass heads up to the Frost Troll cave. The southern gate leads
+  // to the coastal road; both openings are real, not invisible wall colliders.
+  run(-WORLD, -WORLD, -10.4, -WORLD);run(10.4,-WORLD,WORLD,-WORLD);
+  run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -10.4, WORLD); run(10.4, WORLD, WORLD, WORLD);
   const towers = []; const tw = (x, z, enter) => { if (!enter) { B.tower(x, z, 2.4, 7.6, { coneH: 5.4, windows: 3, wa: x + z }); B.banner(x, 4.2, z + (z < 0 ? 2.5 : -2.5), z < 0 ? 0 : Math.PI, 1, 2.2); return; }
     const th = Math.atan2(-x, -z), t = hollowTower(ctx, 'wt' + towers.length, x * KW, z * KW, th, 6.0, KW); towers.push(t); };
   const E = WORLD - 6;
@@ -711,14 +729,14 @@ export const BUILDING_DEFS = [
   { id: 'house2', f: house(1), cx: 9, cz: 19, rot: Math.PI, name: 'Village House' },
   { id: 'house3', f: house(2), cx: -9, cz: 31, rot: Math.PI, name: 'Village House' },
   { id: 'house4', f: house(3), cx: 9, cz: 31, rot: Math.PI, name: 'Village House' },
-  { id: 'lighthouse', f: lighthouse, cx: -33, cz: 51, rot: 0, name: 'Lighthouse' },
-  { id: 'port', f: port, cx: -45, cz: 40, rot: 0, name: 'Port' },
+  { id: 'lighthouse', f: lighthouse, cx: 134, cz: 132, rot: 0, name: 'Lighthouse' },
+  { id: 'port', f: port, cx: 142, cz: 143, rot: 0, name: 'Port' },
   { id: 'gatehouse', f: gatehouse, cx: 0, cz: 59, rot: 0, name: 'Gatehouse' },
   { id: 'fountain', f: fountain, cx: 0, cz: 0, rot: 0, name: 'Fountain Monument' },
 ];
 export function buildVillage(ctx, only) {
   if (!only && ctx.scene) ctx.scene.add(birdFlock(36, WORLD_B * .8));   // pass 3 life: one draw call of circling birds
-  const out = []; for (const d of BUILDING_DEFS) { if (only && !only.includes(d.id)) continue; const cz = d.id === 'gatehouse' ? WORLD_B - 1.2 : d.cz * PK;
+  const out = []; for (const d of BUILDING_DEFS) { if (only && !only.includes(d.id)) continue; const cz = d.id === 'gatehouse' ? CITY_WALL_B - 1.2 : d.cz * PK;
     const b = d.f({ id: d.id, cx: d.cx * PK, cz, rot: d.rot, K: KB }, ctx); b.defName = d.name; b.def = d; out.push(b); }
   if (!only && ctx.scene) { const pts = []; for (const b of out) { const s0 = b.parts ? b.parts[0] : b; if (!s0 || !s0.toW || !s0.d || /^(gatehouse|port|colosseum|keep)$/.test(s0.id)) continue; for (const sx of [-1, 1]) pts.push(s0.toW(sx * (s0.w / 2 + 1.2), s0.d / 2 + 2.2)); } ctx.scene.add(butterflies(pts)); }
   return out;

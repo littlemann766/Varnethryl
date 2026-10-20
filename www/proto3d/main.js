@@ -5,7 +5,9 @@ import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { CHARS } from './chars.js';
 import { preload as preloadChars } from './texgen.js';
 import { makeEnterable } from './interiors.js';
-import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
+import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, CITY_WALL_B, PK, KB } from './buildings.js';
+import { FROST_PEAK, VOLCANO, HARBOR } from './townlands.js';
+import { wilderness, isTownSafe, balthrixPatrol } from './bossworld.js';
 import { fx, zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { readSave, planFromState, createSaver } from './save3d.js';
 import { SpringBones } from './spring_bones.js';
@@ -51,7 +53,7 @@ const camera = new THREE.PerspectiveCamera(50, 1, 0.5, 320);
 // Lights: hemisphere fill + one shadow-casting sun that follows the hero
 scene.add(new THREE.HemisphereLight(0xcfe6ff, 0x6a7a4a, 1.25));
 const sun = new THREE.DirectionalLight(0xfff0d0, 2.2);
-const SHADOW_SIZE = 1024, SHADOW_R = 24;
+const SHADOW_SIZE = 1536, SHADOW_R = 38;   // better terrain/tree shadows without excessive mobile memory
 sun.castShadow = true;
 sun.shadow.mapSize.set(SHADOW_SIZE, SHADOW_SIZE);
 Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 110 });
@@ -94,7 +96,7 @@ let CH = worldProfile('', HS);   // active character's real-size profile (charsc
 let HERO_R = CH.radiusW;
 /* giants see further: fog, camera far plane, shadow frustum and chunk culling scale with the profile's camera distance (capped for phone perf) */
 let VIEWK = 1;
-function applyView() { const kf = Math.max(1, Math.min(5, CH.camDist)), k2 = Math.min(2.2, kf), sk = Math.min(3, kf); VIEWK = k2; scene.fog.near = 70 * k2; scene.fog.far = 180 * k2; camera.far = 320 * k2 * (kf > 2.2 ? 1.5 : 1); camera.updateProjectionMatrix(); const R = 24 * sk; Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, far: 110 * sk }); sun.shadow.camera.updateProjectionMatrix(); SUNK = sk; }
+function applyView() { const kf = Math.max(1, Math.min(5, CH.camDist)), k2 = Math.min(2.2, kf), sk = Math.min(3, kf); VIEWK = k2; scene.fog.near = 70 * k2; scene.fog.far = 180 * k2; camera.far = 320 * k2 * (kf > 2.2 ? 1.5 : 1); camera.updateProjectionMatrix(); const R = 38 * sk; Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, far: 110 * sk }); sun.shadow.camera.updateProjectionMatrix(); SUNK = sk; }
 let SUNK = 1;
 function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; try { applyView(); } catch (e) {} try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
 const ZONE = { name: 'town', cx: 0, cz: 0, half: 0 };   // current walkable zone (town or the Wilds); half is set once WORLD is known
@@ -169,7 +171,7 @@ const SKINS = [];
 const BLD_ON = new URLSearchParams(location.search).get('oldvillage') == null;
 const drops = []; let dropMade = 0;
 if (BLD_ON) {
-  enterables.push(buildWalls(ectx, WORLD, GATE_W));
+  enterables.push(buildWalls(ectx, CITY_WALL_B, GATE_W));
   for (const b of buildVillage(ectx)) enterables.push(b);
   if (new URLSearchParams(location.search).get('nochunk') == null) { try { const r = chunkStatics(enterables.flatMap(e => e.parts || [e]), scene, 64); diag('static chunks: ' + r.before + ' -> ' + r.after); const rr = mergeRoofs(enterables.flatMap(e => e.parts || [e]), scene); diag('roofs: ' + rr.before + ' -> ' + rr.after); const rw = mergeWalls(enterables.flatMap(e => e.parts || [e]), scene); diag('walls: ' + rw.before + ' -> ' + rw.after); } catch (e) { console.error('chunkStatics', e.message, e.stack); } }
 } else {
@@ -278,13 +280,16 @@ const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elir
 const EXTRA = [["n:mortimer_new", "Mortimer (NEW)", "proto3d/models-new/mortimer_cl_arms.glb"], ["n:player_pikachu", "Player Pikachu (NEW)", "proto3d/models-new/player_pikachu_cl_arms.glb"], ["n:lunara_new", "Lunara (NEW)", "proto3d/models-new/lunara_cl_arms.glb"], ["n:marella_new", "Marella (NEW)", "proto3d/models-new/marella_cl_arms.glb"], ["n:vaelthryx_straight_rig", "Balthrix (10×)", "proto3d/models-new/vaelthryx_straight_rig.glb"], ["n:vaelthryx_new", "Balthrix (NEW)", "proto3d/models-new/vaelthryx_new.glb"], ["n:vaelthryx_new6", "Balthrix (NEW 6)", "proto3d/models-new/vaelthryx_new6.glb"], ["n:owner_pika1", "Owner (NEW)", "proto3d/models-new/owner_pika1.glb"], ["n:frosttroll_a", "Frost Troll (A)", "proto3d/models-new/frosttroll_a.glb"], ["n:frosttroll_b", "Frost Troll (B)", "proto3d/models-new/frosttroll_b.glb"], ["n:ssylthar_new", "Ssylthar (NEW)", "proto3d/models-new/ssylthar_new.glb"], ["n:ashentitan_new", "Ashentitan (NEW)", "proto3d/models-new/ashentitan_cl_arms.glb"], ["n:coral_new", "Coral (NEW)", "proto3d/models-new/coral_cl_arms.glb"], ["n:cinder_new", "Cinder (NEW)", "proto3d/models-new/cinder_new.glb"], ["n:snowy_new4", "Snowy (NEW)", "proto3d/models-new/snowy_cl_arms.glb"], ["n:zephyr_new2", "Zephyr (NEW)", "proto3d/models-new/zephyr_new2.glb"], ["n:garruk_new4", "Garruk (NEW)", "proto3d/models-new/garruk_new4.glb"], ["n:garruk_new5", "Garruk (NEW 5)", "proto3d/models-new/garruk_new5_arms.glb"], ["n:darius_new6", "Darius (NEW 6)", "proto3d/models-new/darius_new6_arms.glb"], ["n:pip_new2", "Pip (NEW 2)", "proto3d/models-new/pip_new2.glb"], ["n:owner", "Owner (NEW)", "proto3d/models-new/owner.glb"], ["n:asha_new3", "Asha (NEW)", "proto3d/models-new/asha_cl_arms.glb"], ["n:thrain_new4", "Thrain (NEW)", "proto3d/models-new/thrain_cl_arms.glb"], ["n:wren_new3", "Wren (NEW)", "proto3d/models-new/wren_cl_arms.glb"], ["n:ember_new3", "Ember (NEW)", "proto3d/models-new/ember_new3.glb"], ["p:aldric", "Aldric [PLACEHOLDER]", "proto3d/models-placeholder/aldric_new.glb"], ["p:briar", "Briar [PLACEHOLDER]", "proto3d/models-placeholder/briar_new.glb"], ["p:brynn", "Brynn [PLACEHOLDER]", "proto3d/models-placeholder/brynn_new.glb"], ["p:cedric", "Cedric [PLACEHOLDER]", "proto3d/models-placeholder/cedric_new.glb"], ["p:elira", "Elira [PLACEHOLDER]", "proto3d/models-placeholder/elira_new.glb"], ["p:finn", "Finn [PLACEHOLDER]", "proto3d/models-placeholder/finn_new.glb"], ["p:frosttroll", "Frosttroll [PLACEHOLDER]", "proto3d/models-placeholder/frosttroll_new.glb"], ["p:hearth", "Hearth [PLACEHOLDER]", "proto3d/models-placeholder/hearth_new.glb"], ["p:hobgoblin", "Hobgoblin [PLACEHOLDER]", "proto3d/models-placeholder/hobgoblin_new.glb"], ["p:hydrella", "Hydrella [PLACEHOLDER]", "proto3d/models-placeholder/hydrella_new.glb"], ["p:kael", "Kael [PLACEHOLDER]", "proto3d/models-placeholder/kael_new.glb"], ["p:kestrel", "Kestrel [PLACEHOLDER]", "proto3d/models-placeholder/kestrel_new.glb"], ["p:lorian", "Lorian [PLACEHOLDER]", "proto3d/models-placeholder/lorian_new.glb"], ["p:lunara", "Lunara [PLACEHOLDER]", "proto3d/models-placeholder/lunara_new.glb"], ["p:marella", "Marella [PLACEHOLDER]", "proto3d/models-placeholder/marella_new.glb"], ["p:mirelle", "Mirelle [PLACEHOLDER]", "proto3d/models-placeholder/mirelle_new.glb"], ["p:morwen", "Morwen [PLACEHOLDER]", "proto3d/models-placeholder/morwen_new.glb"], ["p:mossgut", "Mossgut [PLACEHOLDER]", "proto3d/models-placeholder/mossgut_new.glb"], ["p:neris", "Neris [PLACEHOLDER]", "proto3d/models-placeholder/neris_new.glb"], ["p:nyx", "Nyx [PLACEHOLDER]", "proto3d/models-placeholder/nyx_new.glb"], ["p:orin", "Orin [PLACEHOLDER]", "proto3d/models-placeholder/orin_new.glb"], ["p:pip", "Pip [PLACEHOLDER]", "proto3d/models-placeholder/pip_new.glb"], ["p:rook", "Rook [PLACEHOLDER]", "proto3d/models-placeholder/rook_new.glb"], ["p:rowan", "Rowan [PLACEHOLDER]", "proto3d/models-placeholder/rowan_new.glb"], ["p:seraphine", "Seraphine [PLACEHOLDER]", "proto3d/models-placeholder/seraphine_new.glb"], ["p:stonetroll", "Stonetroll [PLACEHOLDER]", "proto3d/models-placeholder/stonetroll_new.glb"], ["p:talia", "Talia [PLACEHOLDER]", "proto3d/models-placeholder/talia_new.glb"], ["p:thorne", "Thorne [PLACEHOLDER]", "proto3d/models-placeholder/thorne_new.glb"], ["p:valen", "Valen [PLACEHOLDER]", "proto3d/models-placeholder/valen_new.glb"], ["p:vesper", "Vesper [PLACEHOLDER]", "proto3d/models-placeholder/vesper_new.glb"], ["p:wyvern", "Wyvern [PLACEHOLDER]", "proto3d/models-placeholder/wyvern_new.glb"], ["p:zephyr", "Zephyr [PLACEHOLDER]", "proto3d/models-placeholder/zephyr_new.glb"], ["o:briar", "Briar", "proto3d/models-beth/briar.glb"], ["o:cinder", "Cinder", "proto3d/models-beth/cinder.glb"], ["o:coral", "Coral", "proto3d/models-beth/coral.glb"], ["o:ember", "Ember", "proto3d/models-beth/ember.glb"], ["o:frosttroll", "Frosttroll", "proto3d/models-beth/frosttroll.glb"], ["o:hawk", "Hawk", "proto3d/models-beth/hawk.glb"], ["o:hearth", "Hearth", "proto3d/models-beth/hearth.glb"], ["o:hobgoblin", "Hobgoblin", "proto3d/models-beth/hobgoblin.glb"], ["o:hydrella", "Hydrella", "proto3d/models-beth/hydrella.glb"], ["o:kestrel", "Kestrel", "proto3d/models-beth/kestrel.glb"], ["o:lorian", "Lorian", "proto3d/models-beth/lorian.glb"], ["o:lunara", "Lunara", "proto3d/models-beth/lunara.glb"], ["o:marella", "Marella", "proto3d/models-beth/marella.glb"], ["o:mortimer", "Mortimer", "proto3d/models-beth/mortimer.glb"], ["o:mossgut", "Mossgut", "proto3d/models-beth/mossgut.glb"], ["o:neris", "Neris", "proto3d/models-beth/neris.glb"], ["o:pip", "Pip", "proto3d/models-beth/pip.glb"], ["o:snowy", "Snowy", "proto3d/models-beth/snowy.glb"], ["o:ssylthar", "Ssylthar", "proto3d/models-beth/ssylthar.glb"], ["o:stonetroll", "Stonetroll", "proto3d/models-beth/stonetroll.glb"], ["o:thrain", "Thrain", "proto3d/models-beth/thrain.glb"], ["o:vaelthryx", "Balthrix", "proto3d/models-beth/vaelthryx.glb"], ["o:valen", "Valen", "proto3d/models-beth/valen.glb"], ["o:wren", "Wren", "proto3d/models-beth/wren.glb"], ["o:wyvern", "Wyvern", "proto3d/models-beth/wyvern.glb"], ["o:zephyr", "Zephyr", "proto3d/models-beth/zephyr.glb"], ["wolf", "Wolf", "proto3d/models/wolf.glb"]];   // [id, label, url]: every other model we have, playable as a hero via the selector (native metre scale)
 // Owner: ONE stable file name. To swap in a newer rig (owner_new4...): tools/swap_owner.sh /workspace/rigged/owner_new5 (copies <name>.glb + <name>.cloth.json over models-new/owner.*)
 const CLOTH = new Set(["n:ember_new3", "n:owner", "n:owner_pika1", "n:asha_new3", "n:ashentitan_new", "n:coral_new", "n:darius_new6", "n:lunara_new", "n:marella_new", "n:mortimer_new", "n:player_pikachu", "n:snowy_new4", "n:thrain_new4", "n:wren_new3"]);   // models shipped with <name>.cloth.json (runtime/spring_bones_v2.js)
-const EXTRA_SCALE = { 'n:frosttroll_b': 0.5 };   // frost trolls are authored 11.4 m; the boss wants 3x the player (5.7 m). The Ashen Titan stays unscaled (6x).
+const EXTRA_SCALE = {};  // all boss skins use exact charscale.js height via loadScale; no second scaling pass
 const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28 }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 4.5, run: 10.5 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 }, 'n:cinder_new': { walk: 0.65, run: 1.95 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
 /* Beth's smoothed blocky models (_smooth.glb): extra 'Smooth' variant for characters that already exist; originals stay the default. Loaded on demand (only when picked). */
 const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'hawk', 'hearth', 'hobgoblin', 'hydrella', 'kael', 'kestrel', 'lorian', 'mirelle', 'morwen', 'mossgut', 'neris', 'nyx', 'orin', 'rook', 'rowan', 'seraphine', 'stonetroll', 'talia', 'thorne', 'valen', 'vesper', 'wolf', 'wyvern'];   // frosttroll_smooth intentionally not used (old 1.8 m base): frosttroll_a4 is the troll
 { const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
 // APPEND AFTER all existing smooth variants: never shift saved character indices.
 EXTRA.push(['n:vaelthryx_straight_rig_50', 'Balthrix (50×)', 'proto3d/models-new/vaelthryx_straight_rig.glb']);
+// Append to avoid changing existing saved character indices. Same original GLB and
+// animations are used; each size variant is uniformly fitted to the lore height.
+for (const factor of [20,40,60]) EXTRA.push(['n:ashentitan_' + factor, 'Ashen Titan (' + factor + '×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
 const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
 const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };
 const useGLB = new URLSearchParams(location.search).get('procedural') == null;
@@ -489,6 +494,20 @@ GLB_IDS.forEach((id, i) => { const k = gkey(id); let g = GROUPS.get(k); if (!g) 
 GROUPS.forEach(g => { const nv = g.vars.filter(v => v.label === 'New'); if (nv.length > 1) nv.forEach(v => { v.label = ('New ' + ((GLB_IDS[v.slot].match(/_new(\d+)/) || [0, ''])[1])).trim(); }); });
 const vrank = l => l === 'Smooth' ? 3.5 : l === 'Pikachu' ? 3 : l === 'Blocky' ? 0 : l === 'Old' ? 1 : l === 'Placeholder' ? 9 : 2 + (parseInt(l.replace(/\D/g, '')) || 0) / 100 + (/straight/.test(l) ? .5 : 0);
 GROUPS.forEach(g => g.vars.sort((a, b) => vrank(a.label) - vrank(b.label)));
+// Approved character skin list: hide unapproved variants in the UI; never delete
+// their GLBs or reorder character indices, which would corrupt old saves.
+const APPROVED_SKINS=Object.freeze({
+  aldric:['Blocky','Old'],asha:['Old','New'],
+  garruk:['Old','New 5'],darius:['Blocky'],
+  elira:['Blocky'],owner:['New']
+});
+for(const [key,approved]of Object.entries(APPROVED_SKINS)){
+  const group=GROUPS.get(key);
+  if(group){
+    const allowed=group.vars.filter(v=>approved.includes(v.label));
+    if(allowed.length)group.vars=allowed;
+  }
+}
 // Sort the display rows only: never reorder GLB_IDS/HEROES because saves use their indices.
 // Titles remain visible but are ignored for alphabetical placement (e.g. Sir Aldric is under A).
 const rosterName = g => g.name.replace(/^(?:Sir|Lady|Dame|Brother|Captain|Queen|Elder)\s+/i, '').trim();
@@ -617,11 +636,17 @@ const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.
 const touches = new Map();
 function tapMoveTo(clientX, clientY) {
   ndc.set((clientX / innerWidth) * 2 - 1, -(clientY / innerHeight) * 2 + 1);
-  ray.setFromCamera(ndc, camera);
-  if (ray.ray.intersectPlane(plane, hit)) {
+  ray.setFromCamera(ndc,camera);
+  // Pick the actual elevated triangles, not an infinite sea-level plane:
+  // hilltop taps now send characters up the mountain and keep markers visible.
+  const terrain=ZONE.name==='town'&&TOWN_LANDS?TOWN_LANDS.terrain:
+    ZONE.name==='frost'&&FM?FM.group.getObjectByName('frostbound-climbable-ice-terrain'):null;
+  const hits=terrain?ray.intersectObject(terrain,false):[];
+  const hitOk=hits.length?(hit.copy(hits[0].point),true):ray.ray.intersectPlane(plane,hit);
+  if(hitOk){
     const lim = ZONE.half - 1.5;
     state.target = { x: THREE.MathUtils.clamp(hit.x, ZONE.cx - lim, ZONE.cx + lim), z: THREE.MathUtils.clamp(hit.z, ZONE.cz - lim, ZONE.cz + lim) };
-    marker.position.set(state.target.x, 0.06, state.target.z); marker.visible = true;
+    marker.position.set(state.target.x, surfaceAt(state.target.x,state.target.z,0)?.y+0.10||0.10, state.target.z); marker.visible = true;
   }
 }
 let prefStore = null; try { prefStore = localStorage; } catch (e) { prefStore = null; }
@@ -677,7 +702,12 @@ const tmp = { x: 0, z: 0 };
 function surfaceAt(x, z, level) {
   for (const b of ectx.multi) { { const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
   if (LAD && level >= 10) { const ls = LAD.surface(x, z, level); if (ls) return ls; }
-  return level === 0 ? { y: ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : 0 } : null;
+  if(level!==0)return null;
+  if(ZONE.name==='town'&&TOWN_LANDS){
+    // The harbor water's swimmable surface is separate from the seabed.
+    return {y:TOWN_LANDS.isWater(x,z)?TOWN_LANDS.waterLevel-.60:TOWN_LANDS.heightAt(x,z),swim:TOWN_LANDS.isWater(x,z)};
+  }
+  return {y:ZONE.name==='frost'&&FM?FM.heightAt(x,z):0};
 }
 function updateLevel() {
   if (state.climbing) return;
@@ -876,9 +906,10 @@ function updateHero(dt) {
   }
   if (LAD && LAD.update(dt, vx, vz)) { vx = 0; vz = 0; mag = 0; }
   if (!state.climbing) { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
+  const swimming=ZONE.name==='town'&&TOWN_LANDS&&TOWN_LANDS.isWater(state.heroX,state.heroZ);
   const moving = (vx || vz);
   if (moving) {
-    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
+    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * (swimming ? .6 : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
     tmp.x = state.heroX; tmp.z = state.heroZ; let blocked = false;
     for (let i = 0; i < n; i++) {
       const ox = tmp.x, oz = tmp.z; tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp, ghost)) blocked = true;
@@ -896,7 +927,7 @@ function updateHero(dt) {
     state.yaw += da * Math.min(1, dt * 12);
     state.speed = moved / dt;
   } else state.speed *= 0.8;
-  state.vx = moving ? vx * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0; state.vz = moving ? vz * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) : 0;
+  state.vx = moving ? vx * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * (swimming ? .6 : 1) : 0; state.vz = moving ? vz * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * (swimming ? .6 : 1) : 0;
   if (playerAct.dx || playerAct.dz) { tmp.x = state.heroX + playerAct.dx; tmp.z = state.heroZ + playerAct.dz; resolve(tmp, passesWalls(cheat)); state.heroX = tmp.x; state.heroZ = tmp.z; }
   state.moving = state.speed > 0.5;
   updateLevel();
@@ -905,7 +936,13 @@ function updateHero(dt) {
   else if (cinderFlight.active || cinderFlight.alt) cinderFlight.reset();
   syncCinderControls();
   state.dispY = state.dispY === undefined || Math.abs(state.heroY - state.dispY) > 3 ? state.heroY : state.dispY + (state.heroY - state.dispY) * Math.min(1, dt * 16);
-  hero.position.set(state.heroX, state.dispY + cheat.alt + cinderFlight.alt, state.heroZ); hero.rotation.y = state.yaw;
+  hero.position.set(state.heroX,state.dispY+cheat.alt+cinderFlight.alt,state.heroZ);
+  hero.rotation.y=state.yaw;
+  // Buoyant body pitch on the water surface; preserves attack/death animation
+  // priority while allowing the existing walk cycle to approximate a paddle.
+  if(!FIGHT||!FIGHT.on||FIGHT.cc.dead<=0){
+    hero.rotation.x=swimming?-.15+.035*Math.sin(performance.now()*.003):0;
+  }
   let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
   if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
     try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }
@@ -973,14 +1010,14 @@ function updateCamera(dt, snap) {
   ci.zx = ZONE.cx; ci.zz = ZONE.cz; ci.zh = ZONE.half;
   camRig.update(ci);
   // Follow the actual elevated terrain on hills: don't let the third-person camera clip into a ridge.
-  if (ZONE.name === 'town' && TOWN_LANDS && !camRig.fp) {
-    const floor = TOWN_LANDS.heightAt(camRig.pos.x, camRig.pos.z) + 1.0 * HS;
+  if (((ZONE.name === 'town' && TOWN_LANDS) || (ZONE.name === 'frost' && FM)) && !camRig.fp) {
+    const floor = (ZONE.name === 'town' ? TOWN_LANDS.heightAt(camRig.pos.x, camRig.pos.z) : FM.heightAt(camRig.pos.x,camRig.pos.z)) + 1.0 * HS;
     if (camRig.pos.y < floor) { camRig.pos.y = floor; camera.position.y = floor; camera.lookAt(camRig.look); }
   }
   camPos.copy(camRig.pos); camLook.copy(camRig.look);
   camRig.syncHero(hero);
-  sun.position.set(state.heroX + SUN_OFF.x * SUNK, (ZONE.name === 'town' ? state.heroY : 0) + SUN_OFF.y * SUNK, state.heroZ + SUN_OFF.z * SUNK);
-  sun.target.position.set(state.heroX, ZONE.name === 'town' ? state.heroY : 0, state.heroZ);
+  sun.position.set(state.heroX + SUN_OFF.x * SUNK, state.heroY + SUN_OFF.y * SUNK, state.heroZ + SUN_OFF.z * SUNK);
+  sun.target.position.set(state.heroX, state.heroY, state.heroZ);
 }
 
 function resize() {
@@ -1023,48 +1060,150 @@ const SMOKE = (() => {
       pos[j * 3] = src[i][0] + p * p * 2.2 + wob * p; pos[j * 3 + 1] = src[i][1] + p * 4.6; pos[j * 3 + 2] = src[i][2] + p * 0.6 + wob * .5 * p; ph[j] = p; }
     geo.attributes.position.needsUpdate = true; geo.attributes.phase.needsUpdate = true; } };
 })();
-/* ---------- the Wilds (1.1.9): second map at x=1000, reached by the portal in town; a portal there leads back. Monsters spawn only there (fight layer, auto mode). ---------- */
-const TOWN_PORTAL = { x: -6, z: 38 };
-let WM = null, wildsP = null, townCols = null, portalT = null, zoneCd = 1.5, portalDwell = 0;
-const wildsMod = import('./wilds.js').then(m => { portalT = m.makeGate(0x9a6bff); portalT.position.set(TOWN_PORTAL.x, 0, TOWN_PORTAL.z); scene.add(portalT);
-  for (const dx of [-1.9, 1.9]) colliders.push({ type: 'circle', x: TOWN_PORTAL.x + dx, z: TOWN_PORTAL.z, r: .75 });   /* gate pillars; the opening between them is walkable */
-  return m; });
-async function ensureWilds() { if (WM) return WM; const m = await wildsMod; WM = Object.assign({ mod: m }, m.buildWilds({ scene, HS })); WM.portalMesh = m.makeGate(0x4fd0ff); WM.portalMesh.position.set(WM.portal.x, 0, WM.portal.z); WM.portalMesh.visible = false; scene.add(WM.portalMesh); return WM; }
-function snapFollowers() { TRAIL.length = 0; for (const r of crowd) if (r.kind === 'party') { r.level = 0; r.y = 0; r.ti = null; r.lvT = 0; r.a.x = state.heroX + (Math.random() - 0.5) * 3; r.a.z = state.heroZ + 2.5 * HS; r.vxs = r.vzs = 0; } }
-/* Map unloading. Leaving town hides every static town node (no draw calls / shadow casters while away; geometry stays resident because the village is built once at boot).
-   Leaving the Wilds fully DISPOSES it (geometry, materials, textures, enemies via FIGHT.stop) and it is rebuilt on the next visit. */
-const townHidden = [];
-function hideTown() {
-  const keep = new Set([...HEROES, ...crowd.map(r => r.root), WM && WM.group, WM && WM.portalMesh, marker, sun, sun.target, camera, ...(FIGHT ? [] : [])]);
-  for (const n of scene.children) { if (n.visible && !keep.has(n) && !n.isLight && !n.isCamera && !(FIGHT && n.userData && n.userData.fightFx) && Math.hypot(n.position.x - 1000, n.position.z) > 400 && !(n.userData && n.userData.keepAlways)) { n.visible = false; townHidden.push(n); } }
-}
-function unloadWilds() {
-  if (!WM) return; const g = WM.group, pm = WM.portalMesh; scene.remove(g); scene.remove(pm);
-  const seen = new Set(); const dis = (o) => { if (o.geometry) o.geometry.dispose(); const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : []; for (const m of ms) { for (const k in m) { const v = m[k]; if (v && v.isTexture && !seen.has(v)) { seen.add(v); v.dispose(); } } m.dispose(); } };
-  g.traverse(dis); pm.traverse(dis); window.__unloaded = (window.__unloaded || 0) + 1; WM = null;
-}
-async function setZone(name) {
-  if (name === ZONE.name) return true;
-  if (name === 'wilds') {
-    await ensureWilds(); const W = WM.mod.WILDS; townCols = colliders.slice(); colliders.length = 0; for (const c of WM.colliders) colliders.push(c);
-    ZONE.name = 'wilds'; ZONE.cx = W.ox; ZONE.cz = W.oz; ZONE.half = W.half; WM.group.visible = true; WM.portalMesh.visible = true; hideTown();
-    state.heroX = WM.spawn.x; state.heroZ = WM.spawn.z; state.yaw = Math.PI;
-  } else {
-    colliders.length = 0; for (const c of townCols) colliders.push(c); ZONE.name = 'town'; ZONE.cx = 0; ZONE.cz = 0; ZONE.half = WORLD;
-    if (FIGHT && FIGHT.auto) FIGHT.stop();   /* enemies are disposed first */
-    unloadWilds(); for (const n of townHidden) n.visible = true; townHidden.length = 0; if (portalT) portalT.visible = true;
-    state.heroX = TOWN_PORTAL.x; state.heroZ = TOWN_PORTAL.z + 4; state.yaw = 0;
+/* Region portals: the historic Wilds stays intact; new climbable cave
+   summit leads to a separate frozen realm inhabited by two troll brothers. */
+const TOWN_PORTAL = {x:-6,z:38}, FROST_CAVE={x:FROST_PEAK.x,z:FROST_PEAK.z};
+let WM=null, FM=null, wildsP=null, townCols=null, portalT=null, frostPeakT=null;
+let zoneCd=1.5,portalDwell=0,regionCheck=0,lavaTick=0;
+const wildsMod=import('./wilds.js').then(m=>{
+  portalT=m.makeGate(0x9a6bff);portalT.position.set(TOWN_PORTAL.x,0,TOWN_PORTAL.z);scene.add(portalT);
+  for(const dx of [-1.9,1.9])colliders.push({type:'circle',x:TOWN_PORTAL.x+dx,z:TOWN_PORTAL.z,r:.75});
+  // Visibly enterable cave: upright portal flanked by dark rock and a high
+  // crest. Exactly on the climbable 52-unit summit plateau.
+  frostPeakT=m.makeGate(0x82dffd);
+  frostPeakT.position.set(FROST_CAVE.x,52.07,FROST_CAVE.z);scene.add(frostPeakT);
+  const rock=new THREE.MeshLambertMaterial({color:0x424854,flatShading:true});
+  for(const dx of [-5.2,5.2]){
+    const leg=new THREE.Mesh(new THREE.CylinderGeometry(2.1,3.1,8.7,7),rock);
+    leg.position.set(FROST_CAVE.x+dx,56.4,FROST_CAVE.z);
+    leg.castShadow=leg.receiveShadow=true;leg.userData.keep=true;scene.add(leg);
   }
-  state.level = 0; state.target = null; state.climbing = false; updateLevel(); snapFollowers(); zoneCd = 1.5; portalDwell = 0;
-  if (name === 'wilds') { const f = await fightToggle(true); f.startAuto && f.startAuto(); } else if (FIGHT && FIGHT.auto) FIGHT.stop();
+  const cap=new THREE.Mesh(new THREE.DodecahedronGeometry(7.2,0),rock);
+  cap.position.set(FROST_CAVE.x,62.1,FROST_CAVE.z);
+  cap.scale.set(1.3,.45,.85);cap.castShadow=true;cap.userData.keep=true;scene.add(cap);
+  return m;
+});
+async function ensureWilds(){
+  if(WM)return WM;
+  const m=await wildsMod;WM=Object.assign({mod:m},m.buildWilds({scene,HS}));
+  WM.portalMesh=m.makeGate(0x4fd0ff);WM.portalMesh.position.set(WM.portal.x,0,WM.portal.z);
+  WM.portalMesh.visible=false;scene.add(WM.portalMesh);return WM;
+}
+async function ensureFrost(){
+  if(FM)return FM;
+  const [m,doors]=await Promise.all([import('./frostrealm.js'),wildsMod]);
+  FM=m.buildFrostRealm({scene,HS});
+  FM.portalMesh=doors.makeGate(0x82dffd);
+  FM.portalMesh.position.set(FM.portal.x,FM.heightAt(FM.portal.x,FM.portal.z)+.08,FM.portal.z);
+  FM.group.add(FM.portalMesh);FM.group.visible=false;return FM;
+}
+function snapFollowers(){
+  TRAIL.length=0;
+  for(const r of crowd)if(r.kind==='party'){
+    r.level=0;r.y=state.heroY||0;r.ti=null;r.lvT=0;
+    r.a.x=state.heroX+(Math.random()-.5)*3;r.a.z=state.heroZ+2.5*HS;
+    r.vxs=r.vzs=0;
+  }
+}
+/* Hide the inactive scene without disposing original models, saved records
+   or city buildings. Frost can be revisited and does not duplicate meshes. */
+const townHidden=[];
+function hideTown(){
+  const keep=new Set([...HEROES,...crowd.map(r=>r.root),WM&&WM.group,WM&&WM.portalMesh,FM&&FM.group,marker,sun,sun.target,camera]);
+  for(const n of scene.children){
+    if(n.visible&&!keep.has(n)&&!n.isLight&&!n.isCamera&&!(FIGHT&&n.userData&&n.userData.fightFx)&&Math.hypot(n.position.x-1000,n.position.z)>400&&!(n.userData&&n.userData.keepAlways)){
+      n.visible=false;townHidden.push(n);
+    }
+  }
+}
+function unloadWilds(){
+  if(!WM)return;
+  const g=WM.group,pm=WM.portalMesh;scene.remove(g);scene.remove(pm);
+  const seen=new Set(),dis=o=>{
+    if(o.geometry)o.geometry.dispose();
+    const ms=Array.isArray(o.material)?o.material:o.material?[o.material]:[];
+    for(const m of ms){for(const k in m){const v=m[k];if(v&&v.isTexture&&!seen.has(v)){seen.add(v);v.dispose();}}m.dispose();}
+  };
+  g.traverse(dis);pm.traverse(dis);window.__unloaded=(window.__unloaded||0)+1;WM=null;
+}
+async function setZone(name){
+  if(name===ZONE.name)return true;
+  if(!['town','wilds','frost'].includes(name))return false;
+  if(ZONE.name==='town')townCols=colliders.slice();
+  if(FIGHT&&FIGHT.on)FIGHT.stop();
+  // Empty the old zone's physical obstacles before installing the new ones.
+  colliders.length=0;
+  if(name==='wilds'){
+    const m=await ensureWilds(),W=m.mod.WILDS;
+    for(const c of m.colliders)colliders.push(c);
+    ZONE.name='wilds';ZONE.cx=W.ox;ZONE.cz=W.oz;ZONE.half=W.half;
+    m.group.visible=true;m.portalMesh.visible=true;if(FM)FM.group.visible=false;
+    if(!townHidden.length)hideTown();
+    state.heroX=m.spawn.x;state.heroZ=m.spawn.z;state.yaw=Math.PI;
+  }else if(name==='frost'){
+    const m=await ensureFrost();
+    for(const c of m.colliders)colliders.push(c);
+    ZONE.name='frost';ZONE.cx=m.center.cx;ZONE.cz=m.center.cz;ZONE.half=m.center.half;
+    m.group.visible=true;if(WM){WM.group.visible=false;WM.portalMesh.visible=false;}
+    if(!townHidden.length)hideTown();
+    state.heroX=m.spawn.x;state.heroZ=m.spawn.z;state.yaw=0;
+  }else{
+    for(const c of townCols||[])colliders.push(c);
+    ZONE.name='town';ZONE.cx=0;ZONE.cz=0;ZONE.half=WORLD;
+    unloadWilds();if(FM)FM.group.visible=false;
+    for(const n of townHidden)n.visible=true;townHidden.length=0;
+    if(portalT)portalT.visible=true;if(frostPeakT)frostPeakT.visible=true;
+    state.heroX=FROST_CAVE.x;state.heroZ=FROST_CAVE.z+19;state.yaw=Math.PI;
+  }
+  state.level=0;state.target=null;state.climbing=false;updateLevel();snapFollowers();zoneCd=2;portalDwell=0;regionCheck=0;
+  if(name==='wilds'){
+    const f=await fightToggle(true);if(!f.on)f.startAuto();
+  }else if(name==='frost'){
+    const f=await fightToggle(true);if(!f.on)f.startAuto();
+    for(const p of FM.brothers)f.spawn(p.key,0,{at:[p.x,p.z],aggroR:37,biome:'snow'});
+  }
   return true;
 }
-function updateZone(dt) {
-  if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ, VIEWK);
-  const t = performance.now() / 1000; if (portalT && portalT.userData.update) portalT.userData.update(t); if (WM && WM.portalMesh.userData.update) WM.portalMesh.userData.update(t);
-  zoneCd = Math.max(0, zoneCd - dt); if (zoneCd > 0 || state.level !== 0 || state.climbing) { portalDwell = 0; return; }
-  const p = ZONE.name === 'town' ? TOWN_PORTAL : (WM ? { x: WM.portal.x, z: WM.portal.z } : null); if (!p) return;
-  if (Math.hypot(state.heroX - p.x, state.heroZ - p.z) < 1.7 + Math.max(0, HERO_R - 0.75)) { portalDwell += dt; if (portalDwell > 0.35) { portalDwell = -99; setZone(ZONE.name === 'town' ? 'wilds' : 'town'); } } else if (portalDwell > -50) portalDwell = 0;
+function updateZone(dt){
+  if(ZONE.name==='wilds'&&WM&&WM.cull)WM.cull(state.heroX,state.heroZ,VIEWK);
+  if(ZONE.name==='frost'&&FM)FM.update(dt);
+  // Lava is deadly environment gameplay, not an orange decorative texture.
+  // Damage ticks are discrete and cannot hammer HP at 72 fps.
+  if(ZONE.name==='town'&&TOWN_LANDS&&TOWN_LANDS.isLava(state.heroX,state.heroZ)){
+    lavaTick-=dt;
+    if(lavaTick<=0){
+      lavaTick=1.2;
+      if(FIGHT&&FIGHT.on){FIGHT.hurt(100);FIGHT.hud.say('LAVA BURNS!',750);}
+    }
+  }else lavaTick=0;
+  const t=performance.now()/1000;
+  for(const p of [portalT,frostPeakT,WM&&WM.portalMesh,FM&&FM.portalMesh])if(p&&p.visible&&p.userData.update)p.userData.update(t);
+  // Battle begins outside the town walls; harmless town NPCs stay protected.
+  // Enemies are cleared as the hero returns to the guarded settlement.
+  regionCheck-=dt;
+  if(regionCheck<=0&&ZONE.name==='town'){
+    regionCheck=.8;
+    if(!isTownSafe(state.heroX,state.heroZ,4)&&!(FIGHT&&FIGHT.on)){
+      fightToggle(true).then(f=>{
+        if(ZONE.name==='town'&&!isTownSafe(state.heroX,state.heroZ,4)&&!f.on)f.startAuto();
+      }).catch(e=>console.warn('wilderness combat',e));
+    }else if(isTownSafe(state.heroX,state.heroZ)&&FIGHT&&FIGHT.auto){FIGHT.stop();}
+  }
+  zoneCd=Math.max(0,zoneCd-dt);
+  if(zoneCd>0||state.level!==0||state.climbing){portalDwell=0;return;}
+  const here={x:state.heroX,z:state.heroZ};
+  let next=null,dist=1e6;
+  const portals=ZONE.name==='town'?
+    [[TOWN_PORTAL,'wilds'],[FROST_CAVE,'frost']]:
+    ZONE.name==='wilds'&&WM?[[WM.portal,'town']]:ZONE.name==='frost'&&FM?[[FM.portal,'town']]:[];
+  for(const [p,dest]of portals){
+    const dd=Math.hypot(here.x-p.x,here.z-p.z);
+    if(dd<dist){dist=dd;next=dest;}
+  }
+  if(next&&dist<1.7+Math.max(0,HERO_R-.75)){
+    portalDwell+=dt;
+    if(portalDwell>.35){portalDwell=-99;setZone(next).catch(e=>diag('Portal failed: '+e.message,true));}
+  }else if(portalDwell>-50)portalDwell=0;
 }
 
 function frame(now) {
@@ -1073,7 +1212,7 @@ function frame(now) {
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  updateCrowd(dt); updateHero(dt); updateZone(dt); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
+  updateCrowd(dt); updateHero(dt); updateZone(dt); if (TOWN_LANDS && ZONE.name === 'town') { TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); TOWN_LANDS.update(dt); } if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
   simTime += dt; if (SMOKE) SMOKE.update(simTime);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
@@ -1119,11 +1258,32 @@ async function fightToggle(createOnly) {
     FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, downAllies, followers: () => crowd.filter(r => r.kind === 'party'), bystanders, killCrowd, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
       selectOwner: async () => { const i = GLB_IDS.indexOf('n:owner'); if (i >= 0 && GLB_IDS[HEROES.indexOf(hero)] !== 'n:owner') await selectVariant(SLOT_G[i], curVar(SLOT_G[i])); },
       makeModel: async id => { try { return modeFor(id) === 'blocky' ? makeBlocky(id) : await loadActorModel(id); } catch (e) { return null; } },
-      loco: locoAnim, resolve: p => resolve(p), resolveMob: p => resolve(p, false, 'npc'), free: (x, z) => window.__p3d.free(x, z, 0),
-      zone: () => ZONE.name, inWilds: (x, z) => ZONE.name === 'wilds' && Math.abs(x - ZONE.cx) < ZONE.half - 4 && Math.abs(z - ZONE.cz) < ZONE.half - 4,
-      biome: (x, z) => WM ? WM.mod.biome(x - WM.mod.WILDS.ox, z - WM.mod.WILDS.oz) : 'meadow',
+      loco:locoAnim,resolve:p=>resolve(p),
+      resolveMob:(p,e)=>{
+        // Hostile monsters never walk through the safe town walls or leave their
+        // authored map, even if AI chase or knockback aims there.
+        if(ZONE.name==='town'){
+          if(isTownSafe(p.x,p.z,11)) {p.x=e.x;p.z=e.z;return true;}
+          if(e.key==='titan'&&Math.hypot(p.x-VOLCANO.x,p.z-VOLCANO.z)>117){p.x=e.x;p.z=e.z;return true;}
+        }
+        return resolve(p,false,'npc');
+      },
+      free:(x,z)=>window.__p3d.free(x,z,0),
+      floorAt:(x,z)=>ZONE.name==='town'&&TOWN_LANDS?TOWN_LANDS.heightAt(x,z):ZONE.name==='frost'&&FM?FM.heightAt(x,z):0,
+      outsideCity:()=>ZONE.name==='town'&&!isTownSafe(state.heroX,state.heroZ,4),
+      titanSite:()=>VOLCANO,roamerAt:sec=>balthrixPatrol(sec),
+      zone:()=>ZONE.name,
+      inWilds:(x,z)=>ZONE.name==='wilds'
+        ?Math.abs(x-ZONE.cx)<ZONE.half-4&&Math.abs(z-ZONE.cz)<ZONE.half-4
+        :ZONE.name==='town'&&wilderness(x,z)&&
+          Math.hypot(x-FROST_PEAK.x,z-FROST_PEAK.z)>80&&
+          Math.hypot(x-VOLCANO.x,z-VOLCANO.z)>135&&
+          !(TOWN_LANDS&&TOWN_LANDS.isLava(x,z)),
+      biome:(x,z)=>ZONE.name==='wilds'&&WM
+        ?WM.mod.biome(x-WM.mod.WILDS.ox,z-WM.mod.WILDS.oz)
+        :ZONE.name==='frost'?'snow':x< -180?'forest':Math.hypot(x-VOLCANO.x,z-VOLCANO.z)<180?'rock':'meadow',
       loadGLTF: url => new Promise((res, rej) => gl.load(url, res, undefined, rej)),
-      respawnPos: () => ZONE.name === 'wilds' && WM ? { x: WM.spawn.x, z: WM.spawn.z } : { x: 0, z: 60 } });
+      respawnPos:()=>ZONE.name==='wilds'&&WM?WM.spawn:ZONE.name==='frost'&&FM?FM.spawn:{x:0,z:60} });
   }
   if (!GUARDS) { const gm = await import('./combat/guards.js'); GUARDS = new gm.TownGuards(ectx.guardPosts || []); GUARDS.onStrike = guardBolt; }
   if (createOnly) return FIGHT;
@@ -1146,7 +1306,7 @@ const cheatEnv = {
     spawnEnemy: (k) => { if (FIGHT && FIGHT.on) return FIGHT.cheatSpawn(k); fightToggle().then(() => setTimeout(() => FIGHT && FIGHT.on && FIGHT.cheatSpawn(k), 900)); return true; },
     onOwner: () => { if (window.__ownerRoster) window.__ownerRoster(); const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
-  teleport: (x, z, zone) => { if (zone === 'wilds') { setZone('wilds'); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
+  teleport: (x, z, zone) => { if (zone === 'wilds'||zone==='frost') { setZone(zone); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
   onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); settingsApi.ownerInit(); },
   onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); },
 };
@@ -1166,6 +1326,7 @@ window.__p3d = { get townLands() { return TOWN_LANDS; }, killCrowd, bystanders, 
   onRamp(x, z, level = 0) { const s = surfaceAt(x, z, level); return !!(s && s.ramp); },
   free(x, z, level = 0) { const l0 = state.level; state.level = level; const q = { x, z }; resolve(q); state.level = l0; return !!surfaceAt(x, z, level) && Math.hypot(q.x - x, q.z - z) < 0.02; },
   teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; updateLevel(); },
+  get frost() { return FM; }, bossSites: {titan:VOLCANO,frost:FROST_CAVE,harbor:HARBOR}, roamerAt:balthrixPatrol,
   setCamYaw(y) { state.camYaw = y; },
   setZoom(z) { state.zoom = z; },
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },

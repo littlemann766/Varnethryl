@@ -523,13 +523,8 @@ function wrapGLB(g, id, blocky) {
       } catch (_) { return null; }
     }).filter(Boolean);
     const matchingGroups=compatibleGroups;
-    if(cfg && matchingGroups.length){
-      // Avoid allocating spring physics for disabled-only groups. An imported
-      // Owner skeleton with no active cape bones should remain on its authored
-      // animation rather than pretending cloth simulation is attached.
-      const activeGroups=matchingGroups.filter(group=>group.enabled!==false);
-      if(!activeGroups.length && id==='n:owner')
-        diag('Owner rig has no enabled compatible cape groups; using authored cape pose.');
+    const activeGroups=matchingGroups.filter(group=>group.enabled!==false);
+    if(cfg && activeGroups.length){
       // Only pass capsules with both endpoints in this skeleton. A different
       // Owner rig can have a cape but lack the old torso/limb collider names.
       const compatible = {...cfg, groups:activeGroups,
@@ -540,7 +535,7 @@ function wrapGLB(g, id, blocky) {
     }else{
       root.userData.sb=new SpringBones(m,{clips:g.animations});
       if(cfg && id==='n:owner')
-        diag('Animated Owner rig has no legacy cape/hood bones; skipping incompatible cape physics.');
+        diag('Animated Owner rig has no enabled compatible cape/hood bones; skipping incompatible cape physics.');
     }
   } catch (e) { console.warn('spring bones', e); }
   if (id === 'n:cinder_new') initCinderEmbers(root, m);

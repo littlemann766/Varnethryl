@@ -881,10 +881,13 @@ function tapMoveTo(clientX, clientY) {
   // before raycasting so tap-to-move lands on its real walkable surface.
   if(walkableTerrain)walkableTerrain.updateWorldMatrix(true,false);
   const landHit=walkableTerrain?ray.intersectObject(walkableTerrain,false)[0]:null;
-  const found=landHit?(hit.copy(landHit.point),true):!!ray.ray.intersectPlane(plane,hit);
+  const found=landHit?(hit.copy(landHit.point),true):!walkableTerrain&&!!ray.ray.intersectPlane(plane,hit);
+  // Never use the imaginary y=0 plane after missing an actual mountain:
+  // that can send the hero to a point behind a ridge or beneath the map.
   if(found){
     const lim=ZONE.half-1.5;
     state.target={x:THREE.MathUtils.clamp(hit.x,ZONE.cx-lim,ZONE.cx+lim),z:THREE.MathUtils.clamp(hit.z,ZONE.cz-lim,ZONE.cz+lim)};
+    state.blockedFrames=0; // a new tap must not inherit the previous destination's collision timeout
     const surface=surfaceAt(state.target.x,state.target.z,0);
     marker.position.set(state.target.x,(surface?.y||0)+.07,state.target.z);marker.visible=true;
   }

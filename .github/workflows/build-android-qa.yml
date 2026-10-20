@@ -51,7 +51,7 @@ jobs:
       - name: Set Android version for safe updates
         run: |
           VNAME=$(node -p "require('./package.json').version")
-          VCODE=$((30200 + RUN_NUMBER))
+          VCODE=$(node -p "const [major,minor,patch]=require('./package.json').version.split('.').map(Number);major*100000+minor*1000+patch*10")
           python3 - "$VNAME" "$VCODE" <<'PY'
           import pathlib, re, sys
           p=pathlib.Path('android/app/build.gradle')

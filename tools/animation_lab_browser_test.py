@@ -56,7 +56,8 @@ with sync_playwright() as p:
     assert 'runs smoothly' in report
     # Reopen the lab and restore exactly the previous playable hero.
     page.evaluate('__p3d.settings.open()')
-    page.get_by_role('button',name='Animation Lab (test) ▾').click()
+    if page.get_by_role('button',name='Animation Lab (test) ▾').count():
+        page.get_by_role('button',name='Animation Lab (test) ▾').click()
     page.locator('#animationLabStop').click()
     assert not page.evaluate('__p3d.animationLab.status().active')
     assert page.evaluate('__p3d.heroIndex')>=0

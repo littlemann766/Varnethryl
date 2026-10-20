@@ -65,7 +65,7 @@ export class SpringBones {
     this.reset();
   }
   _target(it, out) { const b=it.bone; b.updateWorldMatrix(true,false); _v.copy(it.localDir).multiplyScalar(it.len); return out.copy(_v).applyMatrix4(b.matrixWorld); }
-  reset() { for (const it of this.items) it.qs=null; for (const it of this.items) { if (!it.animated) it.bone.quaternion.copy(it.restQ); } this.items.forEach(it=>{ this._target(it, it.cur); it.prev.copy(it.cur); it.lastTgt.copy(it.cur); }); }
+  reset() { this.acc = 0; for (const it of this.items) it.qs=null; for (const it of this.items) { if (!it.animated) it.bone.quaternion.copy(it.restQ); } this.items.forEach(it=>{ this._target(it, it.cur); it.prev.copy(it.cur); it.lastTgt.copy(it.cur); }); }
   disable() { this.enabled=false; for (const it of this.items) if (!it.animated) it.bone.quaternion.copy(it.restQ); }
   update(dt) {
     if (!this.enabled) return;

@@ -74,7 +74,8 @@ export const ULTIMATE2 = { id: 'ultimate2', name: 'Thunderstorm', icon: '\u26A1'
 const E = (name, level, cls, hp, atk, def, speed, o) => Object.assign({ name, level, cls, hp, atk, def, speed, atkMs: 1750, tele: 0.55, reach: 2.2, aggro: 24, scale: 1, xp: Math.round(hp / 25), gold: Math.round(hp / 90), boss: false, stagger: 0.55, poise: 0 }, o);
 export const ENEMIES = {
   wolf:     E('Wild Wolf', 5, 'Beast', 1050, 42, 40, 6.4, { model: 'wolf', tele: 0.4, r: 0.9 }),
-  raider:   E('Forest Raider', 12, 'Bandit', 1450, 56, 80, 4.6, { model: 'o:hobgoblin', r: 1.0 }),
+  raider:   E('Hobgoblin Raider', 12, 'Bandit', 1450, 56, 80, 4.6, { model: 'o:hobgoblin', r: 1.0 }),
+  hob_enforcer: E('Hobgoblin Enforcer', 19, 'Camp Guard', 3200, 100, 160, 4.2, { model:'o:hobgoblin', r:1.05, aggro:23, xp:190, gold:58 }),
   wraith:   E('Vine Wraith', 18, 'Spirit', 1700, 66, 90, 4.2, { model: 'o:mossgut', r: 1.1 }),
   skeleton: E('Ash Skeleton', 30, 'Undead', 5600, 270, 200, 3.6, { model: 'o:stonetroll', atkMs: 2300, tele: 0.8, r: 1.4 }),
   frosttroll: E('Frost Troll', 45, 'Elite', 60000, 900, 400, 4.2, { model: 'n:frosttroll_a', atkMs: 2300, tele: 0.9, reach: 4.2, r: 2.6, scale: 3, aggro: 40, patterns: true, stagger: 0.4, poise: 0.5, xp: 4000, gold: 900 }),

@@ -101,7 +101,7 @@ export class Armory {
     if (sv && typeof sv === 'object') {   // re-validate EVERYTHING from storage (it is untrusted)
       const used = new Set(); for (const [slot, id] of Object.entries(sv.equipment || {})) { const it = this.item(id); if (SLOTS.some(x => x.id === slot) && (id === null || (it && fits(it, slot) && !used.has(id) && (!it.ownerOnly || this.ownerOk())))) { s.equipment[slot] = id; if (id) used.add(id); } }
       for (const [id, l] of Object.entries(sv.enh || {})) { const it = this.item(id); if (it) s.enh[id] = Math.max(0, Math.min(it.enhanceMax, Math.floor(+l || 0))); }
-      if (Array.isArray(sv.presets)) s.presets = [0, 1, 2].map(i => { const p = sv.presets[i]; if (!p || typeof p !== 'object') return null; const o = {}; for (const [slot, id] of Object.entries(p)) { const it = this.item(id); if (SLOTS.some(x => x.id === slot) && it && fits(it, slot) && (!it.ownerOnly || this.ownerOk())) o[slot] = id; } return o; });
+      if (Array.isArray(sv.presets)) s.presets = [0, 1, 2].map(i => { const p = sv.presets[i]; if (!p || typeof p !== 'object') return null; const o = {}, seen = new Set(); for (const [slot, id] of Object.entries(p)) { const it = this.item(id); if (SLOTS.some(x => x.id === slot) && it && fits(it, slot) && !seen.has(id) && (!it.ownerOnly || this.ownerOk())) { o[slot] = id; seen.add(id); } } return o; });
       if (sv.variant === 'refined') s.variant = 'refined';
     }
     this.s = s;

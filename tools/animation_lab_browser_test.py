@@ -28,6 +28,16 @@ with sync_playwright() as p:
     page.locator('#ownerLogin button').filter(has_text='Cancel').click()
     page.locator('#vnEnter').click()
     page.wait_for_function("getComputedStyle(document.querySelector('#vnMenu')).display==='none'",timeout=15000)
+    # Diagnostics must never interrupt noclip or joystick travel on a running game.
+    assert page.evaluate("getComputedStyle(document.getElementById('diagBtn')).display")=='none'
+    page.evaluate("window.__p3dDiag('noclip: passed through a wall',true)")
+    assert page.evaluate("getComputedStyle(document.getElementById('diag')).display")=='none'
+    # The diagnostics log remains available through explicit menu/settings action.
+    page.evaluate("document.getElementById('diagBtn').click()")
+    assert page.evaluate("getComputedStyle(document.getElementById('diag')).display")=='block'
+    assert 'noclip: passed through a wall' in page.locator('#diag').inner_text()
+    page.locator('#diagX').click()
+    assert page.evaluate("getComputedStyle(document.getElementById('diag')).display")=='none'
     page.evaluate('__p3d.settings.open()')
     page.locator('#settingsPanel:visible').wait_for()
     assert page.locator('[data-set="owner-god"]').count()==0
@@ -62,5 +72,5 @@ with sync_playwright() as p:
     assert not page.evaluate('__p3d.animationLab.status().active')
     assert page.evaluate('__p3d.heroIndex')>=0
     assert not errors,errors[:6]
-    print('PASS Animation Lab: real-game preview and restore, owner menu gated by 5 quick taps')
+    print('PASS Animation Lab, hidden diagnostics during noclip, manual status access and 5-tap owner gate')
     browser.close()

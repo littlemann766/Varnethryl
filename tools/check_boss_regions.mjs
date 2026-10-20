@@ -68,6 +68,8 @@ assert(main.includes('Short-range obstacle avoidance: test forward and two angle
 assert(main.includes("try { resolve(probe, false, 'npc'); }"),'companion probes use collision resolver');
 assert(main.includes("finally { state.level = previousLevel; }"),'companion probes restore world floor');
 assert(main.includes('r.avoidSide = chooseLeft ? -1 : 1'),'companions remember avoidance side');
+assert(main.includes('const wideAngle = 1.35'),'companions test wider turns when narrow turns are blocked');
+assert(main.includes('const useWide = Math.max(dl, dr) < look * 0.7'),'wider turns only used when useful');
 assert(main.includes("diag('Balthrix rig has no recognized slither/body-wave animation"),'missing Balthrix body-wave clips are reported');
 assert(main.includes('serpentine|bodywave|snake'),'additional serpent locomotion clips are recognized');
 assert(main.includes("r.vxs = r.vzs = r.a.vx = r.a.vz = 0"),'teleported followers do not retain sprint velocity');

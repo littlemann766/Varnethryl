@@ -68,6 +68,10 @@ assert(ice.includes("ground.castShadow")===false||ice.includes("terrain.castShad
 assert(ice.includes("frosttroll_b")===false||ice.includes('FROST_BROTHERS'),'ice realm uses both brothers');
 assert(fight.includes('startRegionBosses'),'automatic boss spawning at frost');
 assert(fight.includes('balthrixPosition(regionClock+(roamer.routePhase||0))'),'roaming Balthrix follows phased patrol');
+const ai=src('www/proto3d/combat/ai.js');
+assert(ai.includes('const deltaYaw = Math.atan2(Math.sin(targetYaw - currentYaw)'),'boss facing turns smoothly');
+assert(ai.includes("e.state !== 'telegraph' && e.state !== 'attack'"),'telegraphed attacks lock their facing');
+assert(fight.includes("dHero>52&&roamer.state==='idle'"),'Balthrix patrol never overrides active chase or recovery');
 assert(hud.includes('VARNETHRYL ⚜')&&hud.includes("this.slotAbility"),'Varnethryl HUD retains real combat controls');
 const controller=src('www/proto3d/combat/controller.js');
 const lightning=src('www/proto3d/combat/lightning.js');

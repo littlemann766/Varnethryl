@@ -338,7 +338,7 @@ export function createFight(env) {
           // Combat temporarily interrupts his patrol; afterward he rejoins
           // the route gradually. Never teleport him while the player can see him.
           const dHero=Math.hypot(roamer.x-state.heroX,roamer.z-state.heroZ);
-          if(dHero>52&&!['telegraph','attack','stagger'].includes(roamer.state)){
+          if(dHero>52&&roamer.state==='idle'){
             const p=balthrixPosition(regionClock+(roamer.routePhase||0));
             const dx=p.x-roamer.x,dz=p.z-roamer.z,dist=Math.hypot(dx,dz);
             if(dist>.01){

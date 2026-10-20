@@ -876,7 +876,11 @@ function tapMoveTo(clientX, clientY) {
   ray.setFromCamera(ndc, camera);
   // Raycast against the actual sculpted ground; the old y=0 plane failed on
   // volcano slopes, causing taps to send companions into raised terrain.
-  const landHit=ZONE.name==='town'&&TOWN_LANDS?.terrain?ray.intersectObject(TOWN_LANDS.terrain,false)[0]:null;
+  const walkableTerrain=ZONE.name==='town'?TOWN_LANDS?.terrain:ZONE.name==='frost'?FM?.group?.getObjectByName('walkable-frost-terrain'):null;
+  // The ice realm mesh is parented to an offset group: update world transforms
+  // before raycasting so tap-to-move lands on its real walkable surface.
+  if(walkableTerrain)walkableTerrain.updateWorldMatrix(true,false);
+  const landHit=walkableTerrain?ray.intersectObject(walkableTerrain,false)[0]:null;
   const found=landHit?(hit.copy(landHit.point),true):!!ray.ray.intersectPlane(plane,hit);
   if(found){
     const lim=ZONE.half-1.5;

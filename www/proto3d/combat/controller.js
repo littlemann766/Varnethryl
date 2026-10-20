@@ -185,7 +185,10 @@ export class CombatController {
     if (a.kind === 'shield') { this.shield = a.dur; this.emit('shield', a); return; }
     if (a.kind === 'buff') { this.addBuff(a.buff, a); return; }
     if (a.kind === 'summon') { this.addSummon(a.summon, a); return; }
-    if (a.kind === 'ranged') { const t = this.tgt.target || this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, a.range * HS * this.RM); if (t && Math.hypot(t.x - this.p.x, t.z - this.p.z) <= a.range * HS * this.RM + t.def.r) { this.emit('throw', { e: t }); this.hitEnemy(t, a.mult, a); } return; }
+    if (a.kind === 'ranged') { const locked = this.tgt.target, maxRange = a.range * HS * this.RM;
+      const t = locked && locked.state !== 'defeated' && Math.hypot(locked.x - this.p.x, locked.z - this.p.z) <= maxRange + locked.def.r
+        ? locked : this.tgt.nearest(this.enemies, this.p.x, this.p.z, this.p.yaw, maxRange);
+      if (t && t.state !== 'defeated' && Math.hypot(t.x - this.p.x, t.z - this.p.z) <= maxRange + t.def.r) { this.emit('throw', { e: t }); this.hitEnemy(t, a.mult, a); } return; }
     if (a.kind === 'chain') { this.chainStrike(a); return; }
     if (a.kind === 'storm') { act.storm = 3; act.stormT = 0; this.stormHit(act); return; }
     for (const e of this.enemies.slice()) if (this.inCone(e, a.range * HS * this.RM, a.arc)) this.hitEnemy(e, a.mult, a);

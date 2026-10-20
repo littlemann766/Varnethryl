@@ -70,6 +70,60 @@ const CSS = `
 #cb .top button{border-color:#96743f;background:#0a0d16bb;color:#f6e9d0;font-family:Georgia,serif}
 @media (max-height:470px){#cb .cx{height:58vh;width:min(43vw,77vh)}#cb .cl{right:calc(max(15px,env(safe-area-inset-right)) + min(43vw,77vh) + 8px)}}
 @media (orientation:portrait){#cb .cx{width:70vw;height:53vw}#cb .cl{right:max(10px,env(safe-area-inset-right));bottom:calc(max(24px,env(safe-area-inset-bottom)) + 53vw + 30px)}#cb .vit{width:min(320px,62vw)}}
+
+/* VARNETHRYL v1.2 — royal fantasy combat UI. All old button handlers, skills and
+   controller permissions stay intact. This is visual only, not a fake demo HUD. */
+#cb{--bronze:#ae8754;--gold:#eccd8b;--blue:#182838;--surface:#101621;--ruby:#a42a31;color:#f8efdc;font-family:Georgia,'Times New Roman',serif}
+#cb .vit{width:min(316px,45vw);border:2px solid #ba9355;border-radius:6px;
+ background:linear-gradient(146deg,#303039f0,#111b26f3 55%,#080d16f0);
+ box-shadow:0 5px 0 #08090e99,inset 0 0 0 2px #42351e,0 9px 27px #0008}
+#cb .vit:after{content:'⚜ VARNETHRYL ⚜';position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+ font:700 9px Georgia,serif;letter-spacing:.22em;white-space:nowrap;color:#f6d493;
+ padding:3px 13px;background:linear-gradient(#293445,#121a27);border:1px solid #ab8a57;border-radius:16px;
+ text-shadow:0 1px 4px #09080b}
+#cb .vit .lab{font:700 11px Georgia,serif;color:#f6dfa8;letter-spacing:.1em;margin-top:2px}
+#cb .por{background:radial-gradient(circle at 39% 33%,#766240,#342d35 50%,#0c121a);border:3px ridge #cfaf73;
+ box-shadow:inset 0 0 6px #000c,0 0 9px #b9894255}
+#cb .cx{filter:drop-shadow(0 8px 9px #0009)}
+#cb .sl{border:3px solid #ad8c5c;background:
+ radial-gradient(circle at 46% 30%,#304359,#16202e 52%,#080d16 82%);
+ box-shadow:0 0 0 2px #0a0d14,0 0 0 3px #46381f,inset 0 0 0 2px #69522c,0 4px 12px #000d;
+ transition:filter .1s,box-shadow .1s}
+#cb .sl .ic{color:#ffdf96;filter:drop-shadow(0 0 3px #db8a3388)}
+#cb .sl .nmL{font:700 10px Georgia,serif;color:#fff0c9;letter-spacing:.012em;
+ text-shadow:0 2px 2px #000,0 0 7px #000,0 0 9px #000}
+#cb .sl.b0{border-color:#e2bd78;background:radial-gradient(circle at 45% 30%,#5a3c24,#252232 58%,#0e1622)}
+#cb .sl.b0 .nmL{font-size:11px}
+#cb .sl.b4{border:4px ridge #e9ad5d;background:radial-gradient(circle at 43% 35%,#ae4a20,#432027 56%,#160b15);
+ box-shadow:inset 0 0 0 3px #ffd28d4b,0 0 19px #ff7d3766}
+#cb .sl.b4 .nmL{color:#ffe2ad;font-size:10px;top:-18px}
+#cb .sl.b4.rdy{animation:varnUltGlow 2s ease-in-out infinite}
+@keyframes varnUltGlow{50%{box-shadow:inset 0 0 13px #ebbd71,0 0 25px #f0833599}}
+#cb .sl.off{opacity:.60;filter:grayscale(.85)}
+#cb .sl .k{font:700 10px Georgia,serif;bottom:6%;color:#fff2cf}
+#cb .cl button{border:2px ridge #aa8b5c;background:radial-gradient(circle at 42% 27%,#334459,#111b29 60%,#090d15);
+ box-shadow:inset 0 0 0 1px #71603e,0 3px 9px #0009;
+ color:#f4ddab;font:700 10px Georgia,serif}
+#cb .cl button .g{color:#e8b86f}
+#cb .tp{border:2px ridge #ac8a58;border-radius:5px;background:linear-gradient(110deg,#101721ee,#2c2029ee,#101721ee);
+ box-shadow:inset 0 0 0 2px #352b23,0 5px 16px #000c}
+#cb .tp.boss .nm{font:700 17px Georgia,serif;color:#ffcf84;text-shadow:0 2px 5px #000}
+#cb .tp.boss .bar{border:1px solid #bba173}
+#cb .top button{font:700 11px Georgia,serif;border:1px solid #c09d63;background:linear-gradient(#233144dd,#0e1624ee);border-radius:5px}
+#cb .stat{color:#f4e0ac}
+#cb .ulp button{font:700 13px Georgia,serif;background:linear-gradient(#2d2a3f,#101421);box-shadow:0 5px 10px #0007}
+@media(orientation:portrait){
+ #cb .vit{width:min(274px,59vw)}
+ #cb .cx{right:max(8px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));width:64vw;height:49vw}
+ #cb .sl .nmL{font-size:8px}
+ #cb .cl{right:max(8px,env(safe-area-inset-right));bottom:calc(max(14px,env(safe-area-inset-bottom)) + 49vw + 33px)}
+}
+@media(orientation:landscape) and (max-height:490px){
+ #cb .vit{top:calc(max(3px,env(safe-area-inset-top)) + 38px);padding:5px 8px}
+ #cb .stat{display:none}
+ #cb .cx{height:61vh;width:min(39vw,70vh)}
+ #cb .sl .nmL{font-size:8px}
+}
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';

@@ -18,7 +18,7 @@ export class Respawner {
     return null;
   }
   update(dt, host) {
-    this.t += dt; if (host.zone() !== 'wilds') return 0;   // never in town
+    this.t += dt; if (!['wilds','town'].includes(host.zone())) return 0; // town zone means wilderness outside the protected city; host.inWilds rejects all inner-city locations
     this.cool -= dt; if (this.cool > 0 || this.pending > 0 || !this.ready.length) return 0;
     let bi = -1; for (let i = 0; i < this.ready.length; i++) if (this.ready[i] <= this.t && (bi < 0 || this.ready[i] < this.ready[bi])) bi = i;
     if (bi < 0) return 0;

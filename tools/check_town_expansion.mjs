@@ -15,11 +15,12 @@ const townHalf=Number(worldExpression[1])*pk;
 assert.equal(townHalf,560,'town doubled to 560-unit half extent');
 assert.equal(townHalf,wildHalf*2,'town is exactly twice the Wilds half extent');
 assert.ok(building.includes("const Q = WORLD * 0.5, DECO"),'wall towers spread along expanded perimeter');
-assert.ok(building.includes("run(-WORLD, -WORLD, WORLD, -WORLD)"),'north wall');
+assert.ok(building.includes("run(-WORLD, -WORLD, -10.4, -WORLD)"),'north cave trail gateway');
 assert.ok(building.includes("run(-WORLD, -WORLD, -WORLD, WORLD)"),'west wall');
 assert.ok(building.includes("run(WORLD, -WORLD, WORLD, WORLD)"),'east wall');
 assert.ok(building.includes("run(-WORLD, WORLD, -10.4, WORLD)"),'south gate opening');
-assert.ok(building.includes("WORLD_B - 1.2"),'gatehouse stays attached to south wall');
+assert.match(main,/buildWalls\(ectx, CITY_HALF, GATE_W\)/,'fortress walls now inside the world wilderness');
+assert.ok(building.includes("CITY_HALF - 1.2"),'gatehouse stays attached to the smaller town wall');
 assert.ok(main.includes("const TOWN_PORTAL = { x: -6, z: 38 }"),'portal access unchanged');
 assert.ok(main.includes("TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK)"),'outskirt chunk culling');
 assert.ok(main.includes("if (BLD_ON) {\n  try { TOWN_LANDS = buildTownOutskirts"),'old village debug mode unaffected');
@@ -28,7 +29,7 @@ assert.ok(lands.includes("makeVariant")&&lands.includes("new Acc()"),'reuse Wild
 assert.ok(lands.includes("indices.push(j,j+2,j+1,j+1,j+2,j+3)"),'road facing upward');
 assert.ok(lands.includes("colliders.push({type:'circle'"),'tree collision included');
 assert.ok(lands.includes("FIELDS")&&lands.includes("roadRing()"),'outskirts have farms and roads');
-assert.ok(main.includes("d.id === 'gatehouse' ? WORLD - 1.2 : d.cz * PK"),'gatehouse quick-travel location updated');
+assert.ok(main.includes("d.id === 'gatehouse' ? CITY_HALF - 1.2 : d.cz * PK"),'gatehouse quick-travel attached to city');
 for(const fname of ['../www/proto3d/townlands.js','../www/proto3d/buildings.js','../www/proto3d/main.js']){
  const p=spawnSync(process.execPath,['--check','--input-type=module'],{input:text(fname),encoding:'utf8'});
  assert.equal(p.status,0,'Syntax: '+fname+': '+p.stderr);

@@ -24,12 +24,12 @@ with sync_playwright() as p:
       const g=gate.parts[0];
       const q=(x,z)=>a.colliders.some(c=>c.type==='box'&&x>c.minX&&x<c.maxX&&z>c.minZ&&z<c.maxZ);
       return {zone:a.zone,half:W.half,tree:L.stats.trees,chunks:L.chunkCount,fields:L.stats.fields,gate:g.cz,
-      top:q(0,-560),west:q(-560,0),east:q(560,0),south:q(60,560),frames:a.frames,calls:a.info().calls};}""")
+      top:q(60,-185),west:q(-185,0),east:q(185,0),south:q(60,185),frames:a.frames,calls:a.info().calls};}""")
     print('initial world',json.dumps(info),flush=True)
     check('town opens at doubled 560-unit half extent',info['zone']=='town' and info['half']==560)
     check('landscaped trees/fields/chunks present',info['tree']>=250 and info['fields']==3 and info['chunks']>0)
-    check('gatehouse moved with south wall',abs(info['gate']-558.8)<0.1,info['gate'])
-    check('all four wall sides have physical collision',all(info[k] for k in ('top','west','east','south')))
+    check('gatehouse stays on inner city walls',abs(info['gate']-183.8)<0.1,info['gate'])
+    check('four inner city wall sides have collision',all(info[k] for k in ('top','west','east','south')))
     check('Town camera and landscape render after travelling to outskirts',True)
     page.evaluate("window.__p3d.teleport(390,265);window.__p3d.setCamYaw(0)")
     page.wait_for_timeout(2200)
@@ -45,6 +45,22 @@ with sync_playwright() as p:
     page.evaluate("__p3d.state.heroX=994;__p3d.state.heroZ=-2")
     page.wait_for_function("__p3d.zone==='town'",timeout=90000)
     check('portal still returns to expanded town',page.evaluate("__p3d.zone")=='town')
+    # The Frost Troll brothers' cave lives at the summit of the north wilderness hill.
+    page.wait_for_timeout(1700)
+    page.evaluate("__p3d.teleport(0,-345)")
+    page.wait_for_function("__p3d.zone==='frost'",timeout=90000)
+    ice=page.evaluate("""()=>({zone:__p3d.zone,ground:__p3d.frostRealm.heightAt(__p3d.state.heroX,__p3d.state.heroZ),
+           y:__p3d.state.heroY,portal:__p3d.frostRealm.exit,triangles:__p3d.info().triangles,
+           bosses:__p3d.fight?.monsters?.map(e=>e.key)||[]})""")
+    print('frost realm',json.dumps(ice),flush=True)
+    check('frost portal teleports to separate icy map',ice['zone']=='frost' and ice['triangles']>20000,ice)
+    check('frost terrain is actual walkable ground',abs(ice['ground']-ice['y'])<.15,ice)
+    # Boss models load asynchronously, but their encounters must become active without input.
+    page.wait_for_function("window.__p3d?.fight?.monsters?.some(e=>e.key==='frosttroll_a')&&__p3d.fight.monsters.some(e=>e.key==='frosttroll_b')",timeout=90000)
+    check('both Frost Troll brothers spawn together',page.evaluate("['frosttroll_a','frosttroll_b'].every(k=>__p3d.fight.monsters.some(e=>e.key===k))"))
+    page.evaluate("__p3d.teleport(2243,177)")
+    page.wait_for_function("__p3d.zone==='town'",timeout=90000)
+    check('ice gate returns to mountain summit',page.evaluate("__p3d.zone")=='town')
     check('no uncaught browser errors',not errors,errors[:2])
     browser.close()
 srv.shutdown()

@@ -277,7 +277,7 @@ const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'ha
 // Append after the existing roster to keep saved character indices stable.
 EXTRA.push(
   ['n:balthrix_10x', 'Balthrix', 'proto3d/models-new/Balthrix-10x.glb'],
-  ['n:balthrix_50x', 'Balthrix', 'proto3d/models-new/Balthrix-50x.glb']
+  ['n:balthrix_50x', 'Balthrix', 'proto3d/models-new/Balthrix-10x.glb']
 );
 const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
 const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };
@@ -369,7 +369,7 @@ function wrapGLB(g, id, blocky) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
   m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
   m.updateMatrixWorld(true); const box = new THREE.Box3().setFromObject(m);   // measured BEFORE the rigid-part merge: the merged SkinnedMesh bounding box is NaN, which silently skipped scaling
-  if (new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
+  if (!/^n:balthrix_(10|50)x$/.test(id) && new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
   m.traverse(o => { if (o.isSkinnedMesh && o.name !== 'merged') { o.frustumCulled = false; if (!SKINS.includes(o)) SKINS.push(o); } });
   const hgt = box.max.y - box.min.y;
   if (hgt > 0.01) { const BK_H = { 'o:vaelthryx': 5.1 };   // blocky builders authored smaller than their GLB: match the GLB's in-game height so swapping doesn't jump
@@ -392,7 +392,32 @@ const ASSET_V = '1.1.16';   // stamped by tools/build_sw.py from package.json: b
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
+let balthrixGLB = null;  // share the same original mesh/texture bytes across 10× and 50× variants
 async function fetchGLB(id) {
+  if (id === 'n:balthrix_10x' || id === 'n:balthrix_50x') {
+    if (!balthrixGLB) balthrixGLB = (async () => {
+      // GitHub text integration cannot write this 7.3 MB binary as one object.
+      // Four byte-exact Git blobs are concatenated BEFORE GLTFLoader parses the intact file.
+      const prefix = 'proto3d/models-new/Balthrix-10x.glb.part';
+      const chunks = await Promise.all([1, 2, 3, 4].map(async n => {
+        const path = prefix + String(n).padStart(2, '0') + '?v=' + ASSET_V;
+        const r = await fetch(path);
+        if (!r.ok) throw new Error('Balthrix model part ' + n + ' HTTP ' + r.status);
+        return new Uint8Array(await r.arrayBuffer());
+      }));
+      const expected = 7279188;
+      const bytes = chunks.reduce((n, c) => n + c.length, 0);
+      if (bytes !== expected) throw new Error('Balthrix GLB size mismatch: ' + bytes + '/' + expected);
+      const out = new Uint8Array(expected);
+      let pos = 0;
+      for (const c of chunks) { out.set(c, pos); pos += c.length; }
+      const magic = new TextDecoder().decode(out.subarray(0, 4));
+      const declaredLength = new DataView(out.buffer).getUint32(8, true);
+      if (magic !== 'glTF' || declaredLength !== expected) throw new Error('Balthrix GLB header mismatch');
+      return out.buffer;
+    })().catch(e => { balthrixGLB = null; throw e; });
+    return balthrixGLB;
+  }
   let lastErr = '';
   for (let attempt = 0; attempt < 2; attempt++) {
     const url = (EXTRA_URL[id] || 'proto3d/models/' + id + '.glb') + '?v=' + ASSET_V + (attempt ? '&r=' + Date.now() : '');

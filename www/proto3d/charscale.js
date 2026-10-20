@@ -8,6 +8,8 @@
      camMin/camMax  zoom clamp for this character (zoom pref units, hero 0.4..1.7)
    Lookup key = the dropdown model id (e.g. 'n:ashentitan_new'). */
 export const HERO_M = 1.905;
+// Allows the 50x serpent (95.25 m) and reserved 60x Titan (114.3 m); keeps the per-model scale limits explicit.
+export const MAX_HEIGHT_M = 120;
 export const WORLD_PER_M = (HS = 1.5) => 0.947 * HS;       // main.js: extra models are authored in metres and drawn at 0.947*HS
 export const SPEED_CAP = 1.6;                               // never faster than 1.6x the hero (phone-friendly, keeps the world readable)
 export const COLLIDE_RADIUS_CAP = 2.1;                        // metres: the PLAYER collision radius never exceeds this (giants stay able to walk the town; they visually overlap thin buildings = giant mode)
@@ -18,7 +20,9 @@ export const CHARS = {
   'n:vaelthryx_new': { height: 2.0, radius: 0.6, speed: 1.0, step: 0.4, reach: 1.1, camDist: 1.05, camHeight: 1.05, camMin: 0.5, camMax: 1.7 },
   'n:vaelthryx_new6': { height: 14.3, radius: 4.0, speed: 1.5, step: 2.6, reach: 4.0, camDist: 3.8, camHeight: 3.7, camMin: 0.6, camMax: 1.7 },
   // PLAYABLE Vaelthryx (boss 1:11 AM): 10x the player. height = 10 * HERO_M (19.05 m), derived from the base constant. `native` = the GLB's authored height (0.65 m); the model is scaled at LOAD by loadScale() = height/native, the file on disk is untouched.
-  'n:vaelthryx_straight_rig': { height: 10 * HERO_M, native: 0.65, radius: 5.2, speed: 1.5, step: 3.0, reach: 4.8, camDist: 5.0, camHeight: 4.8, camMin: 0.6, camMax: 1.7 },
+  'n:vaelthryx_straight_rig': { height: 10 * HERO_M, native: 0.65, fitMeasuredHeight: true, radius: 5.2, speed: 1.5, step: 3.0, reach: 4.8, camDist: 5.0, camHeight: 4.8, camMin: 0.6, camMax: 1.7 },
+  // Balthrix / Vaelthryx 50x visual test: SAME GLB as 10x; no extra binary, skeleton or animation edits.
+  'n:vaelthryx_straight_rig_50': { height: 50 * HERO_M, native: 0.65, fitMeasuredHeight: true, radius: 20, speed: 1.5, step: 8, reach: 8, camDist: 8, camHeight: 8, camMin: 0.6, camMax: 1.7 },
   'n:frosttroll_a': { height: 5.7, radius: 1.6, speed: 1.25, step: 1.0, reach: 1.9, camDist: 1.9, camHeight: 1.8, camMin: 0.5, camMax: 1.7 },              // trolls = 3x the hero
   'n:frosttroll_b': { height: 5.7, radius: 1.6, speed: 1.25, step: 1.0, reach: 1.9, camDist: 1.9, camHeight: 1.8, camMin: 0.5, camMax: 1.7 },
   'o:vaelthryx': { height: 3.59, radius: 1.0, speed: 1.1, step: 0.7, reach: 1.4, camDist: 1.5, camHeight: 1.4, camMin: 0.45, camMax: 1.7 },                  // blocky builder (authored 5.1 world units)
@@ -26,11 +30,11 @@ export const CHARS = {
 const clampN = (v, lo, hi, d) => { v = +v; return Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d; };
 /* profile in METRES with every field filled + clamped (safe even if the config is edited badly) */
 /* load-time model scale for models whose authored size differs from the config height (1 = use the normal fit) */
-export const loadScale = (id) => { const c = CHARS[id]; return c && c.native > 0 ? clampN(c.height, 0.3, 60, DEFAULT.height) / c.native : 1; };
+export const loadScale = (id, measuredHeight = 0) => { const c = CHARS[id]; const native = c && c.fitMeasuredHeight && Number.isFinite(measuredHeight) && measuredHeight > 0.01 ? measuredHeight : c && c.native; return native > 0 ? clampN(c.height, 0.3, MAX_HEIGHT_M, DEFAULT.height) / native : 1; };
 export function profileFor(id) {
   const c = Object.assign({}, DEFAULT, CHARS[id] || {});
-  return { id: id || '', height: clampN(c.height, 0.3, 60, DEFAULT.height), radius: clampN(c.radius, 0.1, 20, DEFAULT.radius), speed: clampN(c.speed, 0.3, SPEED_CAP, 1), step: clampN(c.step, 0.05, 8, DEFAULT.step), reach: clampN(c.reach, 0.5, 8, 1),
-    camDist: clampN(c.camDist, 0.5, 8, 1), camHeight: clampN(c.camHeight, 0.5, 8, 1), camMin: clampN(c.camMin, 0.2, 1.7, 0.4), camMax: clampN(c.camMax, 0.4, 2.5, 1.7), scale: clampN(c.height, 0.3, 60, DEFAULT.height) / HERO_M, custom: !!CHARS[id] };
+  return { id: id || '', height: clampN(c.height, 0.3, MAX_HEIGHT_M, DEFAULT.height), radius: clampN(c.radius, 0.1, 20, DEFAULT.radius), speed: clampN(c.speed, 0.3, SPEED_CAP, 1), step: clampN(c.step, 0.05, 8, DEFAULT.step), reach: clampN(c.reach, 0.5, 8, 1),
+    camDist: clampN(c.camDist, 0.5, 8, 1), camHeight: clampN(c.camHeight, 0.5, 8, 1), camMin: clampN(c.camMin, 0.2, 1.7, 0.4), camMax: clampN(c.camMax, 0.4, 2.5, 1.7), scale: clampN(c.height, 0.3, MAX_HEIGHT_M, DEFAULT.height) / HERO_M, custom: !!CHARS[id] };
 }
 /* same profile in WORLD units (height/radius/step) for the engine */
 export function worldProfile(id, HS = 1.5) { const p = profileFor(id), k = WORLD_PER_M(HS); return Object.assign({}, p, { heightW: p.height * k, radiusW: Math.min(p.radius, COLLIDE_RADIUS_CAP) * k, stepW: p.step * k }); }

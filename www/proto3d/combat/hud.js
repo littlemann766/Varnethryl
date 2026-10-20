@@ -124,6 +124,28 @@ const CSS = `
  #cb .cx{height:61vh;width:min(39vw,70vh)}
  #cb .sl .nmL{font-size:8px}
 }
+
+/* Unified Varnethryl chrome - match the title screen without changing live combat handlers. */
+@font-face{font-family:VarnCinzel;src:url('./fonts/Cinzel.woff') format('woff');font-display:swap}
+#cb{color:#f7e8c8;font-family:VarnCinzel,Georgia,serif}
+#cb .vit{background:linear-gradient(135deg,#25344bee,#0a1120f6);border:2px ridge #c5a064;box-shadow:inset 0 0 0 2px #f0d49a22,0 8px 24px #000a}
+#cb .vit:after{background:linear-gradient(#253449,#0a1322);border-color:#bc995a;font:700 9px VarnCinzel,Georgia,serif}
+#cb .vit .lab{font-family:VarnCinzel,Georgia,serif}
+#cb .tp{background:linear-gradient(120deg,#1a2840f4,#0a1120f0);border:2px ridge #c09a58}
+#cb .tp .nm{color:#f7da92;font-family:VarnCinzel,Georgia,serif}
+#cb .tp.boss .nm{color:#f0c47b;font-family:VarnCinzel,Georgia,serif}
+#cb .sl{border-color:#b99457;background:radial-gradient(circle at 43% 29%,#304158,#0c1728 69%,#070d18);box-shadow:0 0 0 2px #0a101c,inset 0 0 0 2px #765d33,0 5px 14px #000a}
+#cb .sl.b0{border-color:#e2bc70;background:radial-gradient(circle at 43% 29%,#614a2f,#263044 59%,#0b1321)}
+#cb .sl.b4{border:4px ridge #e4bd73;background:radial-gradient(circle at 45% 33%,#853d31,#381c2c 53%,#100b1e)}
+#cb .sl .nmL{font:700 10px VarnCinzel,Georgia,serif;color:#f5ddb0}
+#cb .sl .k{font-family:VarnCinzel,Georgia,serif;color:#f4dda6}
+#cb .cl button{border:2px ridge #b99558;background:radial-gradient(circle at 45% 30%,#30435c,#111e30 70%,#0c1120);font:700 10px VarnCinzel,Georgia,serif}
+#cb .top button,#cb .ulp button{border:1px solid #bc9553;border-radius:6px;background:linear-gradient(#28394e,#0b1526);color:#f8e4b8;font-family:VarnCinzel,Georgia,serif}
+#cb .oh{border:1px solid #ccaa62;background:#1d0e15}
+#cb .oh i{background:linear-gradient(90deg,#82272b,#eb5c51)}
+#cb .stat{color:#f0d8a4}
+@media(orientation:landscape) and (max-height:490px){#cb .sl .nmL{font-size:9px}}
+
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';
@@ -141,7 +163,7 @@ Object.assign(ICONS, {
   blink: SV('<path d="M4 20L12 12M12 12l8-8M14 4h6v6M4 14v6h6"/>'), poison: SV('<path d="M12 3c4 5 6 8 6 11a6 6 0 01-12 0c0-3 2-6 6-11zM10 14h4"/>'),
 });
 const LEGACY_ICON = ['basic', 'heavy', 'push', 'throw', 'shield', 'storm'];
-const NUM_POOL = 24, OH_POOL = 10;
+const NUM_POOL = 24, OH_POOL = 16;
 export class CombatHUD {
   /* api: {use(i), dodge(), block(on), jump(), lock(), switchTarget(), potion(), swap(), exit(), summon()} - plain callbacks into the host.
      project(x,y,z,out) -> true if on screen (out[0],out[1] px). Heights are supplied by the host per entity (e.top). */

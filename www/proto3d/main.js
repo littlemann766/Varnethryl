@@ -494,6 +494,20 @@ GLB_IDS.forEach((id, i) => { const k = gkey(id); let g = GROUPS.get(k); if (!g) 
 GROUPS.forEach(g => { const nv = g.vars.filter(v => v.label === 'New'); if (nv.length > 1) nv.forEach(v => { v.label = ('New ' + ((GLB_IDS[v.slot].match(/_new(\d+)/) || [0, ''])[1])).trim(); }); });
 const vrank = l => l === 'Smooth' ? 3.5 : l === 'Pikachu' ? 3 : l === 'Blocky' ? 0 : l === 'Old' ? 1 : l === 'Placeholder' ? 9 : 2 + (parseInt(l.replace(/\D/g, '')) || 0) / 100 + (/straight/.test(l) ? .5 : 0);
 GROUPS.forEach(g => g.vars.sort((a, b) => vrank(a.label) - vrank(b.label)));
+// Approved character skin list: hide unapproved variants in the UI; never delete
+// their GLBs or reorder character indices, which would corrupt old saves.
+const APPROVED_SKINS=Object.freeze({
+  aldric:['Blocky','Old'],asha:['Old','New'],
+  garruk:['Old','New 5'],darius:['Blocky'],
+  elira:['Blocky'],owner:['New']
+});
+for(const [key,approved]of Object.entries(APPROVED_SKINS)){
+  const group=GROUPS.get(key);
+  if(group){
+    const allowed=group.vars.filter(v=>approved.includes(v.label));
+    if(allowed.length)group.vars=allowed;
+  }
+}
 // Sort the display rows only: never reorder GLB_IDS/HEROES because saves use their indices.
 // Titles remain visible but are ignored for alphabetical placement (e.g. Sir Aldric is under A).
 const rosterName = g => g.name.replace(/^(?:Sir|Lady|Dame|Brother|Captain|Queen|Elder)\s+/i, '').trim();

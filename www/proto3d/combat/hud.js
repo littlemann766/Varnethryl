@@ -169,6 +169,45 @@ const CSS = `
 #cb .cl{right:calc(max(10px,env(safe-area-inset-right)) + min(29.25vw,52.5vh) + 7px)!important}
 }
 
+
+/* Varnethryl forge: the same antique gold, obsidian, and violet gemstones
+   used by the supplied chest/lantern/reference HUD concept. */
+#cb{--crystal:#af4bfe;--antique:#d8b675;--darkwood:#221727;--ember:#d896ec;color:#f7e7c8}
+#cb .vit{
+ background:linear-gradient(145deg,#33203cfa,#090d1bfa 55%,#2a152ef6)!important;
+ border:3px ridge #caa66b!important;
+ border-radius:11px!important;
+ box-shadow:inset 0 0 0 2px #824aa333,inset 0 0 17px #76489b6a,0 5px 16px #000b!important
+}
+#cb .vit:after{content:'✦ VARNETHRYL ✦';color:#f4d695;border:1px solid #b78b64;background:linear-gradient(#3c2546,#101321);text-shadow:0 0 7px #a04cde;box-shadow:0 0 8px #aa67de61}
+#cb .por{
+ border:3px ridge #e0bc7a!important;
+ background:radial-gradient(circle at 45% 35%,#834abc,#33174f 65%,#161221)!important;
+ box-shadow:inset 0 0 6px #a854f0,0 0 10px #8d39bf99!important
+}
+#cb .bar,#cb .tp .bar{border:1px ridge #e0b16e!important;border-radius:12px!important;background:#0f0b19!important;box-shadow:inset 0 0 6px #000}
+#cb .vit .hp i{background:linear-gradient(90deg,#631124,#c72a39,#ff677b)!important}
+#cb .vit .mp i{background:linear-gradient(90deg,#22266b,#6a50c9,#8cadf5)!important}
+#cb .vit .sp i{background:linear-gradient(90deg,#54267f,#a037e0,#ec9cff)!important}
+#cb .vit .fy i{background:linear-gradient(90deg,#654024,#c28a36,#f8d08a)!important}
+#cb .tp{background:linear-gradient(145deg,#342043f6,#0a1020f8 52%,#3d2345f6)!important;border:3px ridge #d2aa6b!important;border-radius:12px!important;box-shadow:inset 0 0 0 2px #b754e635,0 2px 12px #000b,0 0 12px #8f3bd15c!important}
+#cb .tp:before,#cb .tp:after{content:'◆';position:absolute;top:50%;font-size:16px;line-height:0;color:#c484ff;text-shadow:0 0 5px #db75ff,0 0 8px #b56ae9}
+#cb .tp:before{left:-10px}#cb .tp:after{right:-10px}
+#cb .tp.boss .nm{color:#f7d89d!important;font:700 16px VarnCinzel,Georgia,serif!important;letter-spacing:.07em;text-shadow:0 1px 6px #ab4df2a4!important}
+#cb .tp .hp i{background:linear-gradient(90deg,#5c2681,#9c3dda,#ed9aff)!important}
+#cb .tp .bar{border:2px ridge #c8a064!important;border-radius:10px!important}
+#cb .sl{border:3px ridge #d7ad71!important;background:radial-gradient(circle at 38% 31%,#503067,#21152f 65%,#0f1220)!important;box-shadow:inset 0 0 0 2px #9c52c945,0 3px 10px #0009,0 0 7px #a242e855!important}
+#cb .sl.rdy{box-shadow:inset 0 0 0 2px #d5ad744d,0 0 12px #ca79f2b9!important}
+#cb .sl.b0{border:4px ridge #e5b974!important;background:radial-gradient(circle at 40% 32%,#70358e,#291a46 58%,#121226)!important}
+#cb .sl.b4{border:4px ridge #f4c783!important;background:radial-gradient(circle at 42% 32%,#b04ae3,#4f2377 55%,#171223)!important}
+#cb .sl .ic{color:#e8b6ff!important;filter:drop-shadow(0 0 5px #bb5bf2)!important}
+#cb .sl .nmL,#cb .sl .k{color:#f7deb8!important;font-family:VarnCinzel,Georgia,serif!important;text-shadow:0 1px 4px #000,0 0 3px #7c39ba}
+#cb .cl button,#cb .top button{border:2px ridge #c8a46a!important;background:linear-gradient(145deg,#362142,#10172a)!important;color:#e9cfab!important;box-shadow:inset 0 0 6px #8133b34d!important}
+#cb .cl button.on{background:linear-gradient(130deg,#7941a0,#321f48)!important;color:#fff5e5!important}
+#cb .msg{color:#fbe1ae!important;text-shadow:0 0 8px #a35ce1,0 2px 5px #000!important}
+#cb .ulp button{border:2px ridge #d5ac76!important;color:#f8e3b8!important;background:linear-gradient(#432955,#130f22)!important}
+#cb .stat{color:#dbc6a9}
+
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';

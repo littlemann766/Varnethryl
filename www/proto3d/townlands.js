@@ -15,6 +15,9 @@ export const LAVA_POOLS = Object.freeze([
   {x:-453,z:-357,r:19},{x:-348,z:-358,r:16}
 ]);
 export const lavaAt=(x,z)=>LAVA_POOLS.some(p=>Math.hypot(x-p.x,z-p.z)<p.r-2);
+export const HARBOR_WATER={x:460,z:477,rx:97,rz:91,level:0.16};
+export const harborWaterRadius=(x,z)=>Math.hypot((x-HARBOR_WATER.x)/HARBOR_WATER.rx,(z-HARBOR_WATER.z)/HARBOR_WATER.rz);
+export const harborWaterAt=(x,z)=>harborWaterRadius(x,z)<.98;
 const FIELDS = [
   { x: -211, z: 111, w: 48, d: 31, color: 0x866738 },
   { x: -209, z: -108, w: 43, d: 34, color: 0x918047 },
@@ -69,6 +72,8 @@ export function townElevation(x,z,world=560){
   // cutting through the docks. The connecting road follows real elevation.
   const pr=Math.hypot(x-HARBOR.x,z-HARBOR.z);
   if(pr<100)y*=smooth(61,100,pr);
+  const sea=harborWaterRadius(x,z);
+  if(sea<1){y=y*(smooth(.58,1,sea))-2.7*(1-smooth(.68,1,sea));}
   return y;
 }
 // ~41K triangles, one draw call; not a distant prop: heroes can traverse this actual mesh.
@@ -150,11 +155,29 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const inner=new THREE.Mesh(new THREE.RingGeometry(p.r*.24,p.r*.42,30),glowMat);
     inner.rotation.x=-Math.PI/2;inner.position.set(p.x,townElevation(p.x,p.z,world)+.22,p.z);inner.userData.keep=true;group.add(inner);pools.push(inner);
   }
+  // A small navigable harbor bay. Water receives reflected warm/cool hues,
+  // has moving translucent ripples, and is gameplay-swimmable (see main.js).
+  const seaMat=new THREE.MeshPhongMaterial({color:0x3b91b0,emissive:0x073e5d,emissiveIntensity:.32,shininess:115,transparent:true,opacity:.81,side:THREE.DoubleSide,depthWrite:false});
+  const water=new THREE.Mesh(new THREE.CircleGeometry(1,72),seaMat);
+  water.name='swimmable-corner-harbor';water.rotation.x=-Math.PI/2;
+  water.scale.set(HARBOR_WATER.rx,HARBOR_WATER.rz,1);
+  water.position.set(HARBOR_WATER.x,HARBOR_WATER.level,HARBOR_WATER.z);
+  water.userData.keep=true;water.renderOrder=2;group.add(water);
+  const foamMat=new THREE.MeshBasicMaterial({color:0xc4ede8,transparent:true,opacity:.21,side:THREE.DoubleSide,depthWrite:false});
+  const foam=[];
+  for(const scale of [.75,.89,.97]){
+    const ring=new THREE.Mesh(new THREE.RingGeometry(scale-.009,scale+.009,72),foamMat);
+    ring.rotation.x=-Math.PI/2;ring.position.set(HARBOR_WATER.x,HARBOR_WATER.level+.035,HARBOR_WATER.z);
+    ring.scale.set(HARBOR_WATER.rx,HARBOR_WATER.rz,1);ring.userData.keep=true;ring.renderOrder=3;group.add(ring);foam.push(ring);
+  }
   let lavaTime=0;
-  const update=dt=>{lavaTime+=dt;lavaMat.opacity=.84+.12*Math.sin(lavaTime*2.4);glowMat.opacity=.35+.25*Math.sin(lavaTime*1.9);};
+  const update=dt=>{lavaTime+=dt;lavaMat.opacity=.84+.12*Math.sin(lavaTime*2.4);glowMat.opacity=.35+.25*Math.sin(lavaTime*1.9);
+    water.position.y=HARBOR_WATER.level+.04*Math.sin(lavaTime*1.7);
+    foamMat.opacity=.14+.11*Math.sin(lavaTime*1.4);
+  };
   const insideField=(x,z,pad=0)=>FIELDS.some(f=>Math.abs(x-f.x)<f.w/2+pad&&Math.abs(z-f.z)<f.d/2+pad);
   const nearBuilding=(x,z,pad=0)=>buildings.some(b=>{
-    const bx=b.cx*spacing,bz=b.id==='gatehouse'?world-1.2:b.cz*spacing;
+    const bx=b.cx*spacing,bz=b.id==='gatehouse'?210-1.2:b.cz*spacing;
     return Math.abs(x-bx)<26+pad&&Math.abs(z-bz)<26+pad;
   });
   // Clear avenues across the centre, the old village, gatehouse approach and a ring road.
@@ -267,5 +290,5 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
       mesh.visible=d<140*Math.max(1,k);
     }
   }
-  return {group,cull,update,stats,terrain,heightAt:(x,z)=>townElevation(x,z,world),isLava:lavaAt,biomes:{frostPeak:FROST_PEAK,volcano:VOLCANO,harbor:HARBOR},chunkCount:meshes.length,fieldCount:stats.fields};
+  return {group,cull,update,stats,terrain,heightAt:(x,z)=>townElevation(x,z,world),isLava:lavaAt,isWater:harborWaterAt,waterLevel:HARBOR_WATER.level,biomes:{frostPeak:FROST_PEAK,volcano:VOLCANO,harbor:HARBOR},chunkCount:meshes.length,fieldCount:stats.fields};
 }

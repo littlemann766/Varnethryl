@@ -482,11 +482,24 @@ function wrapGLB(g, id, blocky) {
       id, boneCount: bones.length, skinnedMeshes,
       clips: g.animations.map(clip => ({ name: clip.name, duration: Number(clip.duration.toFixed(2)), tracks: clip.tracks.length })),
       capeBones: bones.filter(n => /cape|cloak|hood/i.test(n)),
-      serpentBones: bones.filter(n => /spine|tail|body|neck|head/i.test(n))
+      serpentBones: bones.filter(n => /spine|tail|body|neck|head/i.test(n)),
+      // A clip named "Slither" is not sufficient: the spine/tail bones
+      // must actually receive animated transforms for a body wave.
+      serpentAnimatedTracks: g.animations.map(clip => ({
+        clip: clip.name,
+        tracks: clip.tracks.filter(track =>
+          /spine|tail|body|neck/i.test(track.name) &&
+          /\\.(?:quaternion|rotation|position)$/.test(track.name)
+        ).length
+      }))
     };
     root.userData.rigAudit = report;
     window.__varnethrylRigAudits ||= {};
     window.__varnethrylRigAudits[id] = report;
+    if (/vaelthryx/.test(id) && report.serpentBones.length === 0)
+      diag('Balthrix rig has no identifiable spine/tail bones: full-body slither cannot be verified.');
+    if (/vaelthryx/.test(id) && !report.serpentAnimatedTracks.some(clip => clip.tracks > 0))
+      diag('Balthrix clips do not animate named spine/tail/body/neck bones: a full-body wave is not verified.');
     diag('Rig audit ' + id + ': ' + report.boneCount + ' bones, ' + skinnedMeshes + ' skinned meshes, ' + report.clips.length + ' clips.');
   }
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);

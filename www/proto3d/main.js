@@ -1530,7 +1530,7 @@ const cheatEnv = {
     spawnEnemy: (k) => { if (FIGHT && FIGHT.on) return FIGHT.cheatSpawn(k); fightToggle().then(() => setTimeout(() => FIGHT && FIGHT.on && FIGHT.cheatSpawn(k), 900)); return true; },
     onOwner: () => { if (window.__ownerRoster) window.__ownerRoster(); const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
-  teleport: (x, z, zone) => { if (zone === 'wilds') { setZone('wilds'); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
+  teleport: (x, z, zone) => { if (zone === 'wilds') { setZone('wilds'); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; updateLevel(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
   onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); settingsApi.ownerInit(); },
   onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); },
   onLocked: () => {
@@ -1558,7 +1558,7 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   onRamp(x, z, level = 0) { const s = surfaceAt(x, z, level); return !!(s && s.ramp); },
   free(x, z, level = 0) { const l0 = state.level; state.level = level; const q = { x, z }; resolve(q); state.level = l0; return !!surfaceAt(x, z, level) && Math.hypot(q.x - x, q.z - z) < 0.02; },
-  teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; updateLevel(); },
+  teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; marker.visible = false; state.blockedFrames = 0; updateLevel(); },
   setCamYaw(y) { state.camYaw = y; },
   setZoom(z) { state.zoom = z; },
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },

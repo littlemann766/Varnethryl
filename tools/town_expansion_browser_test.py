@@ -24,12 +24,12 @@ with sync_playwright() as p:
       const g=gate.parts[0];
       const q=(x,z)=>a.colliders.some(c=>c.type==='box'&&x>c.minX&&x<c.maxX&&z>c.minZ&&z<c.maxZ);
       return {zone:a.zone,half:W.half,tree:L.stats.trees,chunks:L.chunkCount,fields:L.stats.fields,gate:g.cz,
-      top:q(0,-560),west:q(-560,0),east:q(560,0),south:q(60,560),frames:a.frames,calls:a.info().calls};}""")
+      top:q(60,-185),west:q(-185,0),east:q(185,0),south:q(60,185),frames:a.frames,calls:a.info().calls};}""")
     print('initial world',json.dumps(info),flush=True)
     check('town opens at doubled 560-unit half extent',info['zone']=='town' and info['half']==560)
     check('landscaped trees/fields/chunks present',info['tree']>=250 and info['fields']==3 and info['chunks']>0)
-    check('gatehouse moved with south wall',abs(info['gate']-558.8)<0.1,info['gate'])
-    check('all four wall sides have physical collision',all(info[k] for k in ('top','west','east','south')))
+    check('gatehouse stays on inner city walls',abs(info['gate']-183.8)<0.1,info['gate'])
+    check('four inner city wall sides have collision',all(info[k] for k in ('top','west','east','south')))
     check('Town camera and landscape render after travelling to outskirts',True)
     page.evaluate("window.__p3d.teleport(390,265);window.__p3d.setCamYaw(0)")
     page.wait_for_timeout(2200)

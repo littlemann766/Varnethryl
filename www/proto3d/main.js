@@ -713,8 +713,11 @@ for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Grou
 // --- In-game Animation Lab: temporary visual swap, with original model/state kept. ---
 // The tester moves/attacks with the normal controls. We only swap the drawn
 // model in the current HEROES slot, never the saved hero id, index or stats.
-const animationLabCandidates = () => GLB_IDS.slice(0, GLB_NAMES.length)
-  .map((id, i) => ({id, name:GLB_NAMES[i]})).filter(x=>!!CHARS[x.id]);
+const animationLabCandidates = () => {
+  const seen=new Set();
+  return GLB_IDS.map((id,i)=>({id,name:HERO_NAMES[i]||id,donor:bk(id)}))
+    .filter(p=>{if(!p.donor||seen.has(p.donor))return false;seen.add(p.donor);return true;});
+};
 
 function stopAnimationLab() {
   if (!animationLab) return {ok:true, message:'Animation Lab already off'};
@@ -733,12 +736,13 @@ function animationLabStatus() {
 }
 async function startAnimationLab(baseId, style='bridge', requestedSource='original') {
   stopAnimationLab();
-  if (!CHARS[baseId] || !GLB_IDS.includes(baseId))
-    return {ok:false, message:'No compatible original Beth biped rig for '+baseId};
+  const donorKey=bk(baseId);
+  if (!donorKey || !GLB_IDS.includes(baseId))
+    return {ok:false, message:'No compatible original Beth rig for '+baseId};
   const index=HEROES.indexOf(hero);
   if(index<0) return {ok:false,message:'Character is changing. Retry after it loads.'};
   const original=hero;
-  const alternate=EXTRA.find(e=>e[0].startsWith('n:'+baseId+'_') &&
+  const alternate=EXTRA.find(e=>e[0].startsWith('n:'+donorKey+'_') &&
     !/smooth|pika|straight/.test(e[0]));
   const sourceId=requestedSource==='new' && alternate ? alternate[0] : baseId;
   let result=null, root=null, note='', slots=[];
@@ -754,7 +758,7 @@ async function startAnimationLab(baseId, style='bridge', requestedSource='origin
         root=wrapGLB(parsed,baseId);
         note='Existing detailed GLB and its authored animations.';
       }else if(style==='bridge'){
-        const donor=CHARS[baseId].build();
+        const donor=CHARS[donorKey].build();
         const trial=bridgeUnskinnedHumanoid(THREE,donor,parsed.scene);
         if(!trial.ok) return {ok:false,message:'Beth rig bridge unavailable: '+trial.reason+
           '. Try Detailed or Classic instead; original model is unchanged.'};
@@ -781,7 +785,7 @@ async function startAnimationLab(baseId, style='bridge', requestedSource='origin
     HEROES[index]=root;
     hero=root;
     animationLab={index,original,preview:root,wasVisible:true,
-      style,source:sourceId,name:GLB_NAMES[GLB_IDS.indexOf(baseId)]||baseId,
+      style,source:sourceId,name:HERO_NAMES[GLB_IDS.indexOf(baseId)]||baseId,
       slots,notes:note};
     return {ok:true,message:note,character:animationLab.name,source:sourceId};
   }catch(e){

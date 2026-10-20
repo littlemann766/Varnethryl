@@ -560,6 +560,7 @@ async function selectVariant(g, v) {
     b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); close(); selectVariant(g, curVar(g)); });
     const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = curVar(g).slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = curVar(g).slot; toggleFollower(+f.dataset.f); });
     row.appendChild(b); row.appendChild(f); return { row, b }; };
+  const back= document.createElement('button');back.type='button';back.className='vn-picker-close';back.textContent='← Back to game';back.addEventListener('pointerdown',e=>e.stopPropagation());back.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();close();});list.appendChild(back);
   gl.forEach(g => { const r = mkRow(g); list.appendChild(r.row); rows.push({ g, b: r.b }); });
   window.__ownerRoster = () => {
     if (!OG || rows.some(r => r.g === OG)) return;

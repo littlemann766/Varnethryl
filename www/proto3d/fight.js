@@ -252,6 +252,14 @@ export function createFight(env) {
     w.position.set(x, terrainY(x,z), z); let top;
     if (def.boss || def.scale > 1) { top = (w.userData.heightW || 1.8 * HS * def.scale) + 0.5; }   // the GLB is already 6x the hero (11.4 m vs 1.9 m): no extra scaling in game
     else { w.updateMatrixWorld(true); top = Math.max(1.5, new THREE.Box3().setFromObject(w).max.y) + 0.3; }
+    // Both Frost Brothers use the humanoid Frost Troll rig; B has an ice-blue
+    // material variant rather than falling back to a serpent asset.
+    if(def.trollTint)w.traverse(o=>{
+      if(!o.isMesh || !o.material)return;
+      const src=Array.isArray(o.material)?o.material:[o.material];
+      const tinted=src.map(mat=>{const copy=mat.clone();if(copy.color)copy.color.multiply(new THREE.Color(0xa2cfff));return copy;});
+      o.material=Array.isArray(o.material)?tinted:tinted[0];
+    });
     scene.add(w);
     const ems = []; w.traverse(o => { if (o.isMesh && o.material && o.material.emissive) { ems.push(o); o.userData.em = o.material.emissive.getHex(); } });
     const tele = new THREE.Mesh(ring.geometry, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false })); tele.rotation.x = -Math.PI / 2; tele.visible = false; scene.add(tele);

@@ -187,6 +187,29 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const cap=new THREE.Mesh(new THREE.ConeGeometry(5.6,5.5,10),wood);cap.position.set(x,13.5,z);cap.castShadow=true;harbor.add(cap);
   }
   const archTop=new THREE.Mesh(new THREE.BoxGeometry(4,1.7,34),hm);archTop.position.set(W,8.1,0);archTop.castShadow=true;harbor.add(archTop);
+  // Volcanic harbor dressing: dark basalt walls, glowing forge vents and lava-lit beacons.
+  // All features are inside the existing harbor footprint; roads, saves and collision stay intact.
+  const basalt=new THREE.MeshLambertMaterial({color:0x302c35});
+  const ember=new THREE.MeshLambertMaterial({color:0xff6326,emissive:0xb72b09,emissiveIntensity:0.8});
+  const cooled=new THREE.MeshLambertMaterial({color:0x514049});
+  for(const wall of harbor.children){
+    if(wall.material===hm)wall.material=basalt;
+    else if(wall.material===wood)wall.material=cooled;
+  }
+  for(const [x,z] of [[-49,-43],[-49,43],[43,-44],[43,44]]){
+    const brazier=new THREE.Group();brazier.position.set(x,0,z);
+    const base=new THREE.Mesh(new THREE.CylinderGeometry(2.1,2.8,3.2,8),basalt);
+    base.position.y=1.6;base.castShadow=true;brazier.add(base);
+    const flame=new THREE.Mesh(new THREE.ConeGeometry(1.35,3.8,7),ember);
+    flame.position.y=4.9;brazier.add(flame);
+    harbor.add(brazier);
+  }
+  for(let i=0;i<9;i++){
+    const x=-54+i*11;
+    const slab=new THREE.Mesh(new THREE.BoxGeometry(7,.16,1.4),i%3===0?ember:cooled);
+    slab.position.set(x,.12,52);slab.receiveShadow=true;harbor.add(slab);
+  }
+  harbor.userData.region='volcanic-port';
   group.add(harbor);
   // Solid harbor ramparts; a broad road-sized opening remains on the east.
   const cx=PORT_CENTER.x,cz=PORT_CENTER.z;

@@ -174,15 +174,15 @@ export function createFight(env) {
   function metDispose() { ltDispose(); bambooDispose(); if (!MET) return; for (const o of [MET.rock, MET.shadow, MET.zone, MET.burst]) { scene.remove(o); o.geometry.dispose(); o.material.dispose(); } MET = null; }
   const ROCK_R = 11, FALL_H = 75;
   function metStart(ev) { const m = metBuild(); m.st = 'fall'; m.t = 0; m.x = ev.x; m.z = ev.z; m.r = ev.radius; m.delay = ev.delay; m.mode = ev.mode; const uh = ev.mode === 'all'; m.zone.material.color.setHex(uh ? 0x8a2be2 : 0xffe9a0); m.burst.material.color.setHex(uh ? 0xb04bff : 0xfff0b0); m.rock.material.emissive.setHex(uh ? 0x000000 : 0xffd27a); m.rock.visible = !uh; m.shadow.visible = m.zone.visible = true; m.rock.scale.setScalar(ROCK_R); shakeA = 0.25; shakeT = 0.25; }
-  function metImpact() { const m = MET; if (!m) return; m.st = 'burst'; m.t = 0; m.rock.visible = false; m.shadow.visible = false; m.burst.visible = true; m.burst.position.set(m.x, 1, m.z);
+  function metImpact() { const m = MET; if (!m) return; m.st = 'burst'; m.t = 0; m.rock.visible = false; m.shadow.visible = false; m.burst.visible = true; m.burst.position.set(m.x, terrainY(m.x,m.z)+1, m.z);
     for (let i = 0; i < m.N; i++) { const a = Math.random() * 6.283, sp = 20 + Math.random() * 40, up = 15 + Math.random() * 30; m.vel.set([Math.cos(a) * sp, up, Math.sin(a) * sp], i * 3); m.pos.set([0, 0, 0], i * 3); } m.burst.geometry.attributes.position.needsUpdate = true; shakeA = 1.6; shakeT = 0.7; }
   function metUpdate(dt) {
     const m = MET; if (!m || m.st === 'off') { ltUpdate(dt, false); return; } m.t += dt; ltUpdate(dt, m.mode === 'all', m);
     if (m.st === 'fall') {
       const u = Math.min(1, m.t / m.delay), e = u * u;
-      m.rock.position.set(m.x, ROCK_R * 0.6 + (1 - e) * FALL_H, m.z); m.rock.rotation.x += dt * 1.2; m.rock.rotation.z += dt * 0.7; m.rock.material.emissiveIntensity = 0.6 + u;
-      m.shadow.position.set(m.x, 0.1, m.z); m.shadow.scale.setScalar(Math.max(0.5, ROCK_R * 1.15 * e)); m.shadow.material.opacity = 0.65 * u;
-      m.zone.position.set(m.x, 0.12, m.z); m.zone.scale.setScalar(m.r); m.zone.material.opacity = 0.25 + 0.35 * Math.abs(Math.sin(m.t * 9));
+      m.rock.position.set(m.x, terrainY(m.x,m.z)+ROCK_R * 0.6 + (1 - e) * FALL_H, m.z); m.rock.rotation.x += dt * 1.2; m.rock.rotation.z += dt * 0.7; m.rock.material.emissiveIntensity = 0.6 + u;
+      m.shadow.position.set(m.x, terrainY(m.x,m.z)+0.1, m.z); m.shadow.scale.setScalar(Math.max(0.5, ROCK_R * 1.15 * e)); m.shadow.material.opacity = 0.65 * u;
+      m.zone.position.set(m.x, terrainY(m.x,m.z)+0.12, m.z); m.zone.scale.setScalar(m.r); m.zone.material.opacity = 0.25 + 0.35 * Math.abs(Math.sin(m.t * 9));
     } else if (m.st === 'burst') {
       const u = m.t / 0.9; if (u >= 1) { metHide(); return; }
       const p = m.pos, v = m.vel; for (let i = 0; i < m.N; i++) { const k = i * 3; v[k + 1] -= 60 * dt; p[k] += v[k] * dt; p[k + 1] = Math.max(0, p[k + 1] + v[k + 1] * dt); p[k + 2] += v[k + 2] * dt; }
@@ -208,11 +208,11 @@ export function createFight(env) {
   const SUMG = { thrall: new THREE.CapsuleGeometry(0.45, 1.3, 3, 8), turret: new THREE.CylinderGeometry(0.35, 0.6, 1.1, 8), totem: new THREE.CylinderGeometry(0.22, 0.3, 2.6, 6), ring: new THREE.RingGeometry(0.92, 1, 40) };
   const SUMM = { thrall: new THREE.MeshLambertMaterial({ color: 0x3b2f4d, emissive: 0x2a0f3a }), turret: new THREE.MeshLambertMaterial({ color: 0x8a6d3b }), totem: new THREE.MeshLambertMaterial({ color: 0x6fae9a, emissive: 0x0d3a2a }) };
   const sumMesh = new Map(), buffRing = new THREE.Mesh(SUMG.ring, new THREE.MeshBasicMaterial({ color: 0xffd36a, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide })); buffRing.rotation.x = -Math.PI / 2; buffRing.visible = false; scene.add(buffRing);
-  cc.on('summon', s => { const g = new THREE.Group(), m = new THREE.Mesh(SUMG[s.id], SUMM[s.id]); m.position.y = s.id === 'totem' ? 1.3 * HS / 1.5 : 0.9 * HS / 1.5; m.scale.setScalar(HS / 1.5); g.add(m); if (s.id === 'totem') { const r = new THREE.Mesh(SUMG.ring, new THREE.MeshBasicMaterial({ color: 0x9be8d0, transparent: true, opacity: 0.4, depthWrite: false, side: THREE.DoubleSide })); r.rotation.x = -Math.PI / 2; r.position.y = 0.06; r.scale.setScalar(s.radius * HS); g.add(r); } g.position.set(s.x, 0, s.z); scene.add(g); sumMesh.set(s.uid, g); hud.say(s.id.toUpperCase(), 900); })
+  cc.on('summon', s => { const g = new THREE.Group(), m = new THREE.Mesh(SUMG[s.id], SUMM[s.id]); m.position.y = s.id === 'totem' ? 1.3 * HS / 1.5 : 0.9 * HS / 1.5; m.scale.setScalar(HS / 1.5); g.add(m); if (s.id === 'totem') { const r = new THREE.Mesh(SUMG.ring, new THREE.MeshBasicMaterial({ color: 0x9be8d0, transparent: true, opacity: 0.4, depthWrite: false, side: THREE.DoubleSide })); r.rotation.x = -Math.PI / 2; r.position.y = 0.06; r.scale.setScalar(s.radius * HS); g.add(r); } g.position.set(s.x, terrainY(s.x,s.z), s.z); scene.add(g); sumMesh.set(s.uid, g); hud.say(s.id.toUpperCase(), 900); })
     .on('summonEnd', ({ s }) => { const g = sumMesh.get(s.uid); if (g) { scene.remove(g); g.traverse(o => { if (o.material && o.material !== SUMM[s.id]) o.material.dispose(); }); sumMesh.delete(s.uid); } })
     .on('summonAttack', ({ s, e }) => { if (s.id === 'turret' && getFx) getFx().strike({ from: { x: s.x, z: s.z }, path: [{ x: e.x, z: e.z, y: 1.1 * HS, falloff: 0.6, flash: true }], count: 1 }); })
     .on('buff', b => { if (b.name) hud.say(b.name.toUpperCase(), 1100); });
-  function sumSync() { for (const s of cc.summons) { const g = sumMesh.get(s.uid); if (g) { g.position.set(s.x, 0, s.z); if (s.yaw !== undefined) g.rotation.y = s.yaw; } } const on2 = cc.buffs.length > 0; buffRing.visible = on2; if (on2) { buffRing.position.set(state.heroX, 0.07, state.heroZ); buffRing.scale.setScalar(1.6 * HS * Math.max(1, cc.RM)); } }
+  function sumSync() { for (const s of cc.summons) { const g = sumMesh.get(s.uid); if (g) { g.position.set(s.x, terrainY(s.x,s.z), s.z); if (s.yaw !== undefined) g.rotation.y = s.yaw; } } const on2 = cc.buffs.length > 0; buffRing.visible = on2; if (on2) { buffRing.position.set(state.heroX, terrainY(state.heroX,state.heroZ)+0.07, state.heroZ); buffRing.scale.setScalar(1.6 * HS * Math.max(1, cc.RM)); } }
   if (env.bystanders) cc.bystanders = env.bystanders;   // Owner-gated server-trust: controller only fires these from owner ultimates
   cc.on('bystanderKill', ev => { if (env.killCrowd) env.killCrowd(ev.b); });
   cc.on('action', ev => {

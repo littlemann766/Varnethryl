@@ -70,6 +70,24 @@ const CSS = `
 #cb .top button{border-color:#96743f;background:#0a0d16bb;color:#f6e9d0;font-family:Georgia,serif}
 @media (max-height:470px){#cb .cx{height:58vh;width:min(43vw,77vh)}#cb .cl{right:calc(max(15px,env(safe-area-inset-right)) + min(43vw,77vh) + 8px)}}
 @media (orientation:portrait){#cb .cx{width:70vw;height:53vw}#cb .cl{right:max(10px,env(safe-area-inset-right));bottom:calc(max(24px,env(safe-area-inset-bottom)) + 53vw + 30px)}#cb .vit{width:min(320px,62vw)}}
+
+/* Varnethryl royal combat redesign: responsive readability, cohesive crests, parchment/gold edging. */
+#cb{--vn-gold:#e2bd78;--vn-ink:#0d1620;--vn-slate:#182735;--vn-copper:#a87b40}
+#cb .vit{background:linear-gradient(145deg,#162536ed,#080f1cf0);border:2px solid #ba985a;border-radius:13px;box-shadow:inset 0 0 0 1px #e7c88936,0 4px 20px #0009;padding:9px 11px}
+#cb .vit .lab{font:700 11px Georgia,serif;color:#f3d79e;letter-spacing:.09em}
+#cb .tp{background:linear-gradient(130deg,#1e2e42ee,#090e18ed);border:2px solid #af854b;border-radius:10px;box-shadow:0 5px 18px #0008}
+#cb .tp.boss{border-color:#de944d;box-shadow:0 0 17px #d4823d44,0 5px 18px #000c}
+#cb .sl{border:3px solid #cfad67;background:radial-gradient(circle at 40% 28%,#2f4c5a,#111b2a 72%);box-shadow:inset 0 0 0 3px #0c1520,0 3px 14px #000c,0 0 8px #af854b4a}
+#cb .sl.b0{border-color:#f0d59d;background:radial-gradient(circle at 42% 30%,#556b70,#1a3342 64%,#08131d)}
+#cb .sl.b4{border-color:#ebae62;background:radial-gradient(circle at 45% 30%,#9b552d,#451a2d 60%,#1a1022);box-shadow:0 0 18px #b9633880,inset 0 0 7px #df955e}
+#cb .sl .nmL{background:#0c1625e6;border:1px solid #b49354aa;border-radius:4px;padding:2px 5px;bottom:-20px;color:#f4e2b5;font:600 9px Georgia,serif}
+#cb .sl.b4 .nmL{top:-19px;bottom:auto;color:#f9d69c}
+#cb .sl .k{color:#fff4ca;font:800 10px Georgia,serif}
+#cb .cl button{border-color:#ba9555;background:linear-gradient(#243c4d,#101b2b);box-shadow:0 3px 9px #0008;color:#f6ddb1}
+#cb .top button{border:1px solid #ac8b54;border-radius:8px;background:linear-gradient(110deg,#213449,#0b1425);color:#f2d4a5}
+#cb .cl button:focus-visible,#cb .sl:focus-visible,#cb .top button:focus-visible{outline:3px solid #f9e3af;outline-offset:2px}
+@media(orientation:landscape) and (max-height:500px){#cb .vit{top:calc(max(4px,env(safe-area-inset-top)) + 42px);padding:4px 7px;width:min(265px,37vw)}#cb .stat{top:calc(max(4px,env(safe-area-inset-top)) + 135px)}#cb .cx{right:max(6px,env(safe-area-inset-right));bottom:max(6px,env(safe-area-inset-bottom))}#cb .cl{bottom:max(6px,env(safe-area-inset-bottom))}#cb .sl .nmL{font-size:8px;padding:1px 3px}}
+@media(orientation:portrait) and (max-width:430px){#cb .vit{top:calc(env(safe-area-inset-top) + 51px);width:min(235px,61vw);padding:5px 7px}#cb .por{width:38px;height:38px}#cb .stat{top:calc(env(safe-area-inset-top) + 160px)}#cb .cx{width:69vw;height:51vw;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 3px)}#cb .cl{grid-template-columns:repeat(2,40px);bottom:calc(max(14px,env(safe-area-inset-bottom)) + 52vw + 9px)}#cb .cl button{width:40px;height:40px;font-size:8px}#cb .cl button .g{font-size:15px;line-height:16px}}
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';

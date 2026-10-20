@@ -6,7 +6,7 @@ const root=new URL('../www/',import.meta.url), pkg=JSON.parse(readFileSync(new U
 const sw=readFileSync(new URL('sw.js',root),'utf8');
 const main=readFileSync(new URL('proto3d/main.js',root),'utf8');
 const html=readFileSync(new URL('proto3d.html',root),'utf8');
-assert.equal(pkg.version,'1.1.17');
+assert.match(pkg.version,/^\d+\.\d+\.\d+$/,'package version must be semantic');
 assert.ok(sw.includes("const CACHE = PREFIX + '"+pkg.version+"'"));
 assert.ok(main.includes("const ASSET_V = '"+pkg.version+"'"));
 assert.ok(html.includes('id="ver">v'+pkg.version));

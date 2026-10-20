@@ -406,7 +406,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.2.1';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.2.3';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1187,7 +1187,13 @@ function frame(now) {
   renderer.render(scene, camera);
   totalFrames++; fpsAcc += dt; fpsFrames++;
   if (fpsAcc >= 0.5) { fps = fpsFrames / fpsAcc; fpsAcc = 0; fpsFrames = 0; fpsEl.textContent = fps.toFixed(0) + ' fps · ' + renderer.info.render.calls + ' calls'; }
-  if (totalFrames === 2) { const l = document.getElementById('load'); l.style.opacity = 0; setTimeout(() => l.remove(), 500); setTimeout(() => { const h = document.getElementById('hint'); if (h) h.style.opacity = 0; }, 6000); }
+  if (totalFrames === 2) {
+    // Respect the cinematic loader: it closes after first real 3D paint and
+    // the seven-second loading sequence, never before the engine is ready.
+    if (window.__vnFinishLoading) window.__vnFinishLoading();
+    else {const l=document.getElementById('load');if(l){l.style.opacity=0;setTimeout(()=>l.remove(),480);}}
+    setTimeout(()=>{const h=document.getElementById('hint');if(h)h.style.opacity=0;},6000);
+  }
 }
 requestAnimationFrame(frame);
 

@@ -133,3 +133,8 @@ assert(!titlePage.includes('id="vnCamp"'),'hobgoblin camp removed from title men
 assert(!menuScript.includes("getElementById('vnCamp')"),'no menu teleport to hobgoblin camp');
 assert(fight.includes('function hobGrunt(distance)'),'camp grunts generated in combat world');
 assert(fight.includes('if(nearest<43)'),'hobgoblin grunt distance is bounded');
+
+const viewer=src('www/proto3d/model-viewer.html');
+assert(main.includes("'Playable Characters'")&&main.includes("'Companions'")&&main.includes("'Enemies & Bosses'"),'character roster has three clear categories');
+assert(main.includes("setTimeout(()=>{")&&main.includes("encodeURIComponent(id)"),'long press opens chosen 3D skin');
+assert(viewer.includes("new URLSearchParams(location.search).get('model')"),'model viewer deep links to requested skin');

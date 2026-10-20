@@ -36,8 +36,8 @@ export const CHARS = {
   // Extra Titan variants: all share one rigged GLB with uniform lore-height scaling.
   'n:ashentitan_20': { height: 20 * HERO_M, fitMeasuredHeight: true, radius: 7, speed: 1.4, step: 4, reach: 5.5, camDist: 6, camHeight: 6, camMin: .55, camMax: 1.8 },
   'n:ashentitan_60': { height: 60 * HERO_M, fitMeasuredHeight: true, radius: 19, speed: 1.4, step: 8, reach: 8, camDist: 8, camHeight: 8, camMin: .55, camMax: 2.0 },
-  // Titan encounter (40x); uses the same source GLB, never stretches a single axis.
-  'n:ashentitan_40': { height: 40 * HERO_M, fitMeasuredHeight: true, radius: 14, speed: 1.4, step: 6, reach: 8, camDist: 8, camHeight: 8, camMin: 0.55, camMax: 2.0 },
+  // Legacy Titan selector slot retained for old saves; all playable arena variants now use 20x.
+  'n:ashentitan_40': { height: 20 * HERO_M, fitMeasuredHeight: true, radius: 7, speed: 1.4, step: 4, reach: 5.5, camDist: 6, camHeight: 6, camMin: 0.55, camMax: 1.8 },
   // Vaelthryx variants are baked at DIFFERENT native sizes (measured in-game): _new6 14.3 m tall (79 m long), _new 2.0 m, _straight_rig 0.65 m. Boss quote ~18.7 m coiled; edit height here once confirmed.
   'n:vaelthryx_new': { height: 2.0, radius: 0.6, speed: 1.0, step: 0.4, reach: 1.1, camDist: 1.05, camHeight: 1.05, camMin: 0.5, camMax: 1.7 },
   'n:vaelthryx_new6': { height: 14.3, radius: 4.0, speed: 1.5, step: 2.6, reach: 4.0, camDist: 3.8, camHeight: 3.7, camMin: 0.6, camMax: 1.7 },

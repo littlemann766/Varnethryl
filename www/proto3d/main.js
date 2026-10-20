@@ -1342,7 +1342,7 @@ resize();
 const fpsEl = document.getElementById('fps');
 let last = performance.now(), fpsAcc = 0, fpsFrames = 0, fps = 0, totalFrames = 0, simTime = 0;
 let running = true;
-document.addEventListener('visibilitychange', () => { running = !document.hidden; last = performance.now(); lastDraw = 0; adaptSkip = Math.max(adaptSkip, 30); });
+document.addEventListener('visibilitychange', () => { running = !document.hidden; last = performance.now(); lastDraw = 0; adaptSkip = Math.max(adaptSkip, 30); if (document.hidden) setTravelRun(false); });
 // adaptive resolution: if frames average > 22 ms for ~1 s, shrink the render resolution (min 0.6x); never climb back above a level that failed.
 let adaptT = 0, adaptN = 0, adaptSkip = 90, adaptLock = false;
 function setQuality(q) { const plan = qualityPlan(q, window.devicePixelRatio || 1); adaptLock = !plan.adaptive; prCeil = plan.ceil; pr = plan.ceil; renderer.setPixelRatio(pr); resize(); adaptSkip = 60; adaptT = 0; adaptN = 0; }

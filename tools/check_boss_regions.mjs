@@ -17,7 +17,7 @@ for(const [id,inch] of Object.entries(HERO_LORE_HEIGHTS)){
 }
 for(const id of ['n:owner','n:owner_pika1'])assert(close(profileFor(id).height,HERO_M),'Owner skin remains 1.905 m');
 for(const id of ['n:frosttroll_a','n:frosttroll_b']){
- assert(close(profileFor(id).height,3.5*HERO_M),id+' must equal 3x Owner');
+ assert(close(profileFor(id).height,3.5*HERO_M),id+' must equal 3.5x Owner');
  assert(close(loadScale(id,11.4)*11.4,3.5*HERO_M),'model height normalized for '+id);
 }
 for(const [id,mul] of [['n:ashentitan_new',6],['n:ashentitan_20',15],['n:ashentitan_40',15],['n:ashentitan_60',60],['n:vaelthryx_straight_rig',10],['n:vaelthryx_straight_rig_50',50]])
@@ -44,6 +44,17 @@ for(let t=0;t<900;t+=.5){
  if(Math.hypot(p.x-TITAN_CENTER.x,p.z-TITAN_CENTER.z)<32)roamerVisitsVolcano=true;
 }
 assert(roamerVisitsVolcano,'Balthrix patrol crosses Titan lava region');
+// Regression: the serpent's arc-length patrol should maintain steady travel
+// speed and its heading should not snap as it rounds waypoint corners.
+let previous=balthrixPosition(0);
+for(let t=.1;t<=60;t+=.1){
+ const current=balthrixPosition(t);
+ const distance=Math.hypot(current.x-previous.x,current.z-previous.z);
+ assert(distance>.95&&distance<1.85,'Balthrix patrol speed must remain near 14 units/s');
+ const headingDelta=Math.atan2(Math.sin(current.yaw-previous.yaw),Math.cos(current.yaw-previous.yaw));
+ assert(Math.abs(headingDelta)<.25,'Balthrix heading must turn continuously');
+ previous=current;
+}
 const main=src('www/proto3d/main.js'),terrain=src('www/proto3d/townlands.js'),ice=src('www/proto3d/frostreach.js'),fight=src('www/proto3d/fight.js'),hud=src('www/proto3d/combat/hud.js');
 assert(main.includes("setZone(ZONE.name==='town'?(isFrostCave?'frost':'wilds'):'town')"),'bidirectional ice cave portal wired');
 assert(main.includes('TOWN_LANDS.updateWater?.(simTime)'),'water animation runs');

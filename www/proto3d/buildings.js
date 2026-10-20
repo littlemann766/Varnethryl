@@ -12,7 +12,7 @@ function wins(B, o) { // facade windows: front [[x,y]], side [[z,y]] (both sides
   for (const [x, y] of o.back || []) B.win(x, y, -d / 2 - .04, Math.PI, ww, hh, key);
 }
 const frontWinXs = (B, n = 1) => { const fw = (B.w - B.DW) / 2, out = []; for (const s of [-1, 1]) for (let i = 0; i < n; i++) out.push(s * (B.DW / 2 + fw * (i + .5) / n)); return out; };
-export const KB = 1.7, PK = 2.8, WORLD_B = 100 * PK;   // 280-unit town half extent: equal to Wilds; keep established village coordinates
+export const KB = 1.7, PK = 2.8, WORLD_B = 200 * PK; // 560-unit half extent: double the Wilds-sized town, all walls/gates follow it   // 280-unit town half extent: equal to Wilds; keep established village coordinates
 export const PLAN = 1.5;   // plan (footprint) scale for the standard buildings: roomier interiors, gentler stairs; heights unchanged (doors stay ~1.4x hero height)
 function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + banners + sign
   if (!o.noScale) o = Object.assign({}, o, { w: o.w * PLAN, d: o.d * PLAN });

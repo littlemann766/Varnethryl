@@ -462,7 +462,15 @@ async function fetchGLB(id) {
       const buf = await r.arrayBuffer();
       const magic = new TextDecoder().decode(new Uint8Array(buf, 0, Math.min(4, buf.byteLength)));
       if (magic !== 'glTF') { lastErr = 'not a GLB (type ' + r.headers.get('content-type') + ', ' + buf.byteLength + ' bytes, starts "' + magic.replace(/[^\x20-\x7e]/g, '?') + '")'; continue; }
-      if (CLOTH.has(id) && !CLOTHCFG[id]) { try { const cr = await fetch(url.split('?')[0].replace(/\.glb$/, '.cloth.json') + '?v=' + ASSET_V); if (cr.ok) CLOTHCFG[id] = await cr.json(); } catch (_) {} }
+      if (CLOTH.has(id) && !CLOTHCFG[id]) {
+        // The animated Owner rig lives outside models-new; its cloth config does not.
+        // Resolve that shared config explicitly so cape collision settings are not lost.
+        const clothUrl = id === 'n:owner'
+          ? 'proto3d/models-new/owner.cloth.json'
+          : url.split('?')[0].replace(/\.glb$/, '.cloth.json');
+        try { const cr = await fetch(clothUrl + '?v=' + ASSET_V); if (cr.ok) CLOTHCFG[id] = await cr.json(); }
+        catch (e) { console.warn('cloth config unavailable', id, e); }
+      }
       return buf;
     } catch (e) { lastErr = 'fetch error: ' + (e && e.message || e); }
   }

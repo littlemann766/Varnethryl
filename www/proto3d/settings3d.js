@@ -54,7 +54,7 @@ function build() {
   const save = () => { persist(E); };
   const view = (v, label) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.set = 'view-' + v; const s = () => b.classList.toggle('on', prefs.view === v); b.addEventListener('click', () => { rig.setView(v); save(); syncs.forEach((f) => f()); }); s(); syncs.push(s); return b; };
   body.appendChild(sec('Game & version'));
-  body.appendChild(row(el('b',{textContent:'Varnethryl 3D · v1.2.2',style:'color:#f1d28a'})));
+  body.appendChild(row(el('b',{textContent:'Varnethryl 3D · v1.2.3',style:'color:#f1d28a'})));
   body.appendChild(el('small',{textContent:'The entire game now runs in 3D. No Classic 2D switching.'}));
   const lineBtn=el('button',{type:'button',textContent:'Choose a character'});
   lineBtn.addEventListener('click',()=>{hide();document.querySelector('#heroes button.cur')?.click();});

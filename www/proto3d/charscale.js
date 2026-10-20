@@ -14,8 +14,30 @@ export const WORLD_PER_M = (HS = 1.5) => 0.947 * HS;       // main.js: extra mod
 export const SPEED_CAP = 1.6;                               // never faster than 1.6x the hero (phone-friendly, keeps the world readable)
 export const COLLIDE_RADIUS_CAP = 2.1;                        // metres: the PLAYER collision radius never exceeds this (giants stay able to walk the town; they visually overlap thin buildings = giant mode)
 export const DEFAULT = Object.freeze({ height: HERO_M, radius: 0.53, speed: 1, step: 0.35, reach: 1, camDist: 1, camHeight: 1, camMin: 0.4, camMax: 1.7 });
+// Approved character heights (feet/inches), measured foot to head, not horns, hair or weapons.
+// Prior established lore overrides these proposed heights if the lore changes.
+export const HERO_LORE_HEIGHTS=Object.freeze({
+  aldric:74,darius:74,selene:69,elira:68,orin:72,seraphine:70,talia:70,
+  finn:69,brynn:64,mirelle:66,nyx:67,vesper:70,thorne:73,rook:75,
+  asha:71,rowan:73,kael:71,cedric:72,morwen:69,garruk:82
+});
+export const inchesToMeters=inches=>inches*0.0254;
+const HERO_LORE=Object.fromEntries(Object.entries(HERO_LORE_HEIGHTS).map(([name,inches])=>
+  [name,{height:inchesToMeters(inches),fitMeasuredHeight:true}]));
 export const CHARS = {
-  'n:ashentitan_new': { height: 11.4, radius: 3.2, speed: 1.4, step: 2.0, reach: 3.2, camDist: 3.4, camHeight: 3.2, camMin: 0.55, camMax: 1.6 },          // Beth native 11.4 m (6x hero)
+  ...HERO_LORE,
+  'n:owner': {height:HERO_M,fitMeasuredHeight:true},
+  'n:owner_pika1': {height:HERO_M,fitMeasuredHeight:true},
+  'n:garruk_new4': {height:inchesToMeters(82),fitMeasuredHeight:true},
+  'n:garruk_new5': {height:inchesToMeters(82),fitMeasuredHeight:true},
+  'n:darius_new6': {height:inchesToMeters(74),fitMeasuredHeight:true},
+  'n:asha_new3': {height:inchesToMeters(71),fitMeasuredHeight:true},
+  'n:ashentitan_new': { height: 6 * HERO_M, fitMeasuredHeight: true, radius: 3.2, speed: 1.4, step: 2.0, reach: 3.2, camDist: 3.4, camHeight: 3.2, camMin: 0.55, camMax: 1.6 },          // Beth native 11.4 m (6x hero)
+  // Extra Titan variants: all share one rigged GLB with uniform lore-height scaling.
+  'n:ashentitan_20': { height: 20 * HERO_M, fitMeasuredHeight: true, radius: 7, speed: 1.4, step: 4, reach: 5.5, camDist: 6, camHeight: 6, camMin: .55, camMax: 1.8 },
+  'n:ashentitan_60': { height: 60 * HERO_M, fitMeasuredHeight: true, radius: 19, speed: 1.4, step: 8, reach: 8, camDist: 8, camHeight: 8, camMin: .55, camMax: 2.0 },
+  // Titan encounter (40x); uses the same source GLB, never stretches a single axis.
+  'n:ashentitan_40': { height: 40 * HERO_M, fitMeasuredHeight: true, radius: 14, speed: 1.4, step: 6, reach: 8, camDist: 8, camHeight: 8, camMin: 0.55, camMax: 2.0 },
   // Vaelthryx variants are baked at DIFFERENT native sizes (measured in-game): _new6 14.3 m tall (79 m long), _new 2.0 m, _straight_rig 0.65 m. Boss quote ~18.7 m coiled; edit height here once confirmed.
   'n:vaelthryx_new': { height: 2.0, radius: 0.6, speed: 1.0, step: 0.4, reach: 1.1, camDist: 1.05, camHeight: 1.05, camMin: 0.5, camMax: 1.7 },
   'n:vaelthryx_new6': { height: 14.3, radius: 4.0, speed: 1.5, step: 2.6, reach: 4.0, camDist: 3.8, camHeight: 3.7, camMin: 0.6, camMax: 1.7 },
@@ -23,16 +45,16 @@ export const CHARS = {
   'n:vaelthryx_straight_rig': { height: 10 * HERO_M, native: 0.65, fitMeasuredHeight: true, radius: 5.2, speed: 1.5, step: 3.0, reach: 4.8, camDist: 5.0, camHeight: 4.8, camMin: 0.6, camMax: 1.7 },
   // Balthrix / Vaelthryx 50x visual test: SAME GLB as 10x; no extra binary, skeleton or animation edits.
   'n:vaelthryx_straight_rig_50': { height: 50 * HERO_M, native: 0.65, fitMeasuredHeight: true, radius: 20, speed: 1.5, step: 8, reach: 8, camDist: 8, camHeight: 8, camMin: 0.6, camMax: 1.7 },
-  'n:frosttroll_a': { height: 5.7, radius: 1.6, speed: 1.25, step: 1.0, reach: 1.9, camDist: 1.9, camHeight: 1.8, camMin: 0.5, camMax: 1.7 },              // trolls = 3x the hero
-  'n:frosttroll_b': { height: 5.7, radius: 1.6, speed: 1.25, step: 1.0, reach: 1.9, camDist: 1.9, camHeight: 1.8, camMin: 0.5, camMax: 1.7 },
+  'n:frosttroll_a': { height: 3 * HERO_M, fitMeasuredHeight: true, radius: 1.6, speed: 1.25, step: 1.0, reach: 1.9, camDist: 1.9, camHeight: 1.8, camMin: 0.5, camMax: 1.7 },              // trolls = 3x the hero
+  'n:frosttroll_b': { height: 3 * HERO_M, fitMeasuredHeight: true, radius: 1.6, speed: 1.25, step: 1.0, reach: 1.9, camDist: 1.9, camHeight: 1.8, camMin: 0.5, camMax: 1.7 },
   'o:vaelthryx': { height: 3.59, radius: 1.0, speed: 1.1, step: 0.7, reach: 1.4, camDist: 1.5, camHeight: 1.4, camMin: 0.45, camMax: 1.7 },                  // blocky builder (authored 5.1 world units)
 };
 const clampN = (v, lo, hi, d) => { v = +v; return Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d; };
 /* profile in METRES with every field filled + clamped (safe even if the config is edited badly) */
 /* load-time model scale for models whose authored size differs from the config height (1 = use the normal fit) */
-export const loadScale = (id, measuredHeight = 0) => { const c = CHARS[id]; const native = c && c.fitMeasuredHeight && Number.isFinite(measuredHeight) && measuredHeight > 0.01 ? measuredHeight : c && c.native; return native > 0 ? clampN(c.height, 0.3, MAX_HEIGHT_M, DEFAULT.height) / native : 1; };
+export const loadScale = (id, measuredHeight = 0) => { const c = CHARS[id] || (id.startsWith('n:') && id.endsWith('_smooth') ? CHARS[id.slice(2,-7)] : null); const native = c && c.fitMeasuredHeight && Number.isFinite(measuredHeight) && measuredHeight > 0.01 ? measuredHeight : c && c.native; return native > 0 ? clampN(c.height, 0.3, MAX_HEIGHT_M, DEFAULT.height) / native : 1; };
 export function profileFor(id) {
-  const c = Object.assign({}, DEFAULT, CHARS[id] || {});
+  const c = Object.assign({}, DEFAULT, CHARS[id] || (id.startsWith('n:') && id.endsWith('_smooth') ? CHARS[id.slice(2,-7)] : null) || {});
   return { id: id || '', height: clampN(c.height, 0.3, MAX_HEIGHT_M, DEFAULT.height), radius: clampN(c.radius, 0.1, 20, DEFAULT.radius), speed: clampN(c.speed, 0.3, SPEED_CAP, 1), step: clampN(c.step, 0.05, 8, DEFAULT.step), reach: clampN(c.reach, 0.5, 8, 1),
     camDist: clampN(c.camDist, 0.5, 8, 1), camHeight: clampN(c.camHeight, 0.5, 8, 1), camMin: clampN(c.camMin, 0.2, 1.7, 0.4), camMax: clampN(c.camMax, 0.4, 2.5, 1.7), scale: clampN(c.height, 0.3, MAX_HEIGHT_M, DEFAULT.height) / HERO_M, custom: !!CHARS[id] };
 }

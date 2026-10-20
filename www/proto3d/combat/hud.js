@@ -146,6 +146,29 @@ const CSS = `
 #cb .stat{color:#f0d8a4}
 @media(orientation:landscape) and (max-height:490px){#cb .sl .nmL{font-size:9px}}
 
+
+/* 75% combat HUD: retain all combat controls and accessible taps while clearing sightlines. */
+#cb .cx{width:min(308px,37vw)!important;height:min(233px,38vh)!important;right:max(10px,env(safe-area-inset-right))!important;bottom:max(14px,env(safe-area-inset-bottom))!important}
+#cb .vit{transform:scale(.75);transform-origin:top left;left:max(9px,env(safe-area-inset-left))!important}
+#cb .top{transform:scale(.75);transform-origin:top right;right:8px!important;top:max(55px,calc(env(safe-area-inset-top) + 48px))!important}
+#cb .tp{transform:translateX(-50%) scale(.75);transform-origin:top center}
+#cb .tp.boss{width:min(480px,95vw)}
+#cb .cl{grid-template-columns:repeat(3,35px)!important;gap:4px!important;right:calc(max(10px,env(safe-area-inset-right)) + min(308px,37vw) + 7px)!important;bottom:max(15px,env(safe-area-inset-bottom))!important}
+#cb .cl button{width:35px!important;height:35px!important;font-size:8px!important}
+#cb .cl button .g{font-size:14px!important;line-height:16px!important}
+#cb .sl .nmL{font-size:8px!important}
+#cb .sl .k{font-size:8px!important}
+#cb .ulp button{min-height:36px!important;padding:5px 9px!important;font-size:10px!important}
+@media(orientation:portrait){
+#cb .cx{width:48vw!important;height:36.75vw!important;bottom:max(15px,env(safe-area-inset-bottom))!important}
+#cb .cl{grid-template-columns:repeat(2,35px)!important;right:max(8px,env(safe-area-inset-right))!important;bottom:calc(max(15px,env(safe-area-inset-bottom)) + 36.75vw + 20px)!important}
+#cb .vit{transform:scale(.75);width:min(274px,59vw)}
+}
+@media(orientation:landscape) and (max-height:490px){
+#cb .cx{width:min(29.25vw,52.5vh)!important;height:45.75vh!important}
+#cb .cl{right:calc(max(10px,env(safe-area-inset-right)) + min(29.25vw,52.5vh) + 7px)!important}
+}
+
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';

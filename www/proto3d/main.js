@@ -817,38 +817,63 @@ async function selectVariant(g, v) {
   if (OG && !IS_OWNER_TOKEN) seen.add(OG);   /* hidden from everyone but the owner */
   HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g)) { seen.add(g); gl.push(g); } });
   gl.sort(compareRoster);
-  const approvedGroups=gl.filter(g=>!!bossVariant(g));
-  const standardGroups=gl.filter(g=>!bossVariant(g));
+  const enemyKeys=new Set(['vaelthryx','ashentitan','frosttroll','stonetroll','hobgoblin','mossgut','ssylthar','hydrella','wyvern']);
+  const companionKeys=new Set(['wolf','snowy','hawk','kestrel','zephyr','pip','briar','cinder','coral','ember','hearth','wren']);
+  const enemyGroups=gl.filter(g=>enemyKeys.has(g.key)||!!bossVariant(g));
+  const companionGroups=gl.filter(g=>companionKeys.has(g.key)&&!enemyGroups.includes(g));
+  const playableGroups=gl.filter(g=>!enemyGroups.includes(g)&&!companionGroups.includes(g));
   const cur = document.createElement('button'); cur.id = 'hcur'; cur.className = 'cur'; cur.appendChild(document.createTextNode('')); const car = document.createElement('span'); car.textContent = '\u25be'; cur.appendChild(car); cur.title = 'choose character';
   const vars = document.createElement('div'); vars.id = 'hvars'; const list = document.createElement('div'); list.id = 'hlist';
   const tabs=document.createElement('div'); tabs.className='vn-roster-tabs';
-  const rosterTab=document.createElement('button');rosterTab.type='button';rosterTab.textContent='Characters';
-  const bossTab=document.createElement('button');bossTab.type='button';bossTab.textContent='New Boss Approved Models';
-  tabs.append(rosterTab,bossTab);
-  const normalList=document.createElement('div');normalList.className='vn-roster-list';
-  const bossList=document.createElement('div');bossList.className='vn-roster-list';
+  const tabLists={};
+  const tabButtons={};
   const showRosterTab=which=>{
-    normalList.hidden=which!=='regular';bossList.hidden=which!=='boss';
-    rosterTab.classList.toggle('on',which==='regular');bossTab.classList.toggle('on',which==='boss');
+    for(const key of Object.keys(tabLists)){
+      tabLists[key].hidden=key!==which;
+      tabButtons[key].classList.toggle('on',key===which);
+      tabButtons[key].setAttribute('aria-selected',String(key===which));
+    }
   };
-  rosterTab.addEventListener('click',e=>{e.stopPropagation();showRosterTab('regular')});
-  bossTab.addEventListener('click',e=>{e.stopPropagation();showRosterTab('boss')});
+  for(const [key,label] of [['playable','Playable Characters'],['companions','Companions'],['enemies','Enemies & Bosses']]){
+    const tab=document.createElement('button');tab.type='button';tab.textContent=label;tab.setAttribute('role','tab');
+    tab.addEventListener('click',e=>{e.stopPropagation();showRosterTab(key);});
+    tabs.appendChild(tab);tabButtons[key]=tab;
+    const group=document.createElement('div');group.className='vn-roster-list';group.setAttribute('role','tabpanel');
+    tabLists[key]=group;
+  }
   const rows = [];
   const close = () => bar.classList.remove('open');
   cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation(); bar.classList.toggle('open'); });
   document.addEventListener('pointerdown', e => { if (!bar.contains(e.target)) close(); }, true);
   const mkRow = (g, approved=false) => { const item=approved?bossVariant(g):curVar(g); const n = approved?(BOSS_DISPLAY.get(GLB_IDS[item.slot])||g.name):g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = item.slot;
     if (!approved && g.vars.length > 1) { const sp = document.createElement('small'); sp.textContent = ' \u00b7' + g.vars.length; b.appendChild(sp); }
-    b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); close(); selectVariant(g, approved?bossVariant(g):curVar(g)); });
+    // Hold a name for 550 ms to inspect its 3D skin without changing hero,
+    // companions, or the saved selection. Tap retains existing behavior.
+    let holdTimer=null,held=false,startX=0,startY=0;
+    const cancelHold=()=>{if(holdTimer!==null){clearTimeout(holdTimer);holdTimer=null;}};
+    b.addEventListener('pointerdown',e=>{
+      e.stopPropagation();if(e.button!==0)return;
+      held=false;startX=e.clientX;startY=e.clientY;
+      cancelHold();holdTimer=setTimeout(()=>{
+        held=true;holdTimer=null;
+        const v=approved?bossVariant(g):curVar(g),id=GLB_IDS[v.slot].replace(/^[a-z]:/,'');
+        window.location.href='proto3d/model-viewer.html?model='+encodeURIComponent(id);
+      },550);
+    });
+    b.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-startX,e.clientY-startY)>12)cancelHold();});
+    b.addEventListener('pointerup',cancelHold);b.addEventListener('pointercancel',cancelHold);
+    b.addEventListener('contextmenu',e=>{e.preventDefault();});
+    b.addEventListener('click',e=>{e.stopPropagation();if(held){e.preventDefault();held=false;return;}close();selectVariant(g,approved?bossVariant(g):curVar(g));});
     const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = item.slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = approved?bossVariant(g).slot:curVar(g).slot; toggleFollower(+f.dataset.f); });
     row.appendChild(b); row.appendChild(f); return { row, b }; };
   const back= document.createElement('button');back.type='button';back.className='vn-picker-close';back.textContent='← Back to game';back.addEventListener('pointerdown',e=>e.stopPropagation());back.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();close();});list.appendChild(back);
   list.appendChild(tabs);
-  list.appendChild(normalList);list.appendChild(bossList);
-  showRosterTab('regular');
-  standardGroups.forEach(g=>{const r=mkRow(g);normalList.appendChild(r.row);rows.push({g,b:r.b,approved:false});});
-  approvedGroups.forEach(g=>{const r=mkRow(g,true);bossList.appendChild(r.row);rows.push({g,b:r.b,approved:true});});
-  window.__openBossRoster=()=>{showRosterTab('boss');bar.classList.add('open')};
+  for(const group of Object.values(tabLists))list.appendChild(group);
+  showRosterTab('playable');
+  for(const [key,groups] of [['playable',playableGroups],['companions',companionGroups],['enemies',enemyGroups]]){
+    for(const g of groups){const approved=!!bossVariant(g),r=mkRow(g,approved);tabLists[key].appendChild(r.row);rows.push({g,b:r.b,approved});}
+  }
+  window.__openBossRoster=()=>{showRosterTab('enemies');bar.classList.add('open')};
   window.__ownerRoster = (allow = true) => {
     if (!OG) return;
     const i = rows.findIndex(r => r.g === OG);
@@ -860,8 +885,8 @@ async function selectVariant(g, v) {
     if (i >= 0) return;
     const r = mkRow(OG);
     const before = rows.filter(x => !x.approved).find(x => compareRoster(OG, x.g) < 0);
-    if (before) normalList.insertBefore(r.row, before.b.parentElement);
-    else normalList.appendChild(r.row);
+    if (before) tabLists.playable.insertBefore(r.row, before.b.parentElement);
+    else tabLists.playable.appendChild(r.row);
     rows.push({ g: OG, b: r.b, approved: false });
   };
   bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; })()); }

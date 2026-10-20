@@ -342,10 +342,13 @@ export function createFight(env) {
             const p=balthrixPosition(regionClock+(roamer.routePhase||0));
             const dx=p.x-roamer.x,dz=p.z-roamer.z,dist=Math.hypot(dx,dz);
             if(dist>.01){
-              const move=Math.min(dist,14*step);
+              // When combat has displaced Balthrix far from the route, approach
+              // at patrol speed instead of teleporting. Orient to actual motion.
+              const move=Math.min(dist,14*Math.max(0,step));
               roamer.x+=dx/dist*move;roamer.z+=dz/dist*move;
-              // Turn toward the actual travel vector without snapping across the -PI/PI seam.
-              roamer.yaw=yawLerp(roamer.yaw??Math.atan2(dx,dz),Math.atan2(dx,dz),Math.min(1,step*3.5));
+              // Avoid a NaN heading from missing imported boss rotation.
+              const heading=Math.atan2(dx,dz);
+              roamer.yaw=yawLerp(Number.isFinite(roamer.yaw)?roamer.yaw:heading,heading,Math.min(1,Math.max(0,step)*3.5));
             }
           }
         }

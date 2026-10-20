@@ -50,7 +50,11 @@ export function createCamRig(env) {
     const sy = Math.sin(c.camYaw), cy = Math.cos(c.camYaw);
     if (fp) {
       const cp = Math.cos(r.pitch), sp = Math.sin(r.pitch);
-      pos.set(c.heroX - sy * 0.12 * HS * prof.camHeight, c.dispY + c.alt + HS * 1.55 * prof.camHeight, c.heroZ - cy * 0.12 * HS * prof.camHeight);
+      // Keep the first-person view attached to the character's airborne body rather than
+      // leaving the camera on the ground while the mesh jumps. The jump arc is
+      // computed in main.js by the same physics that moves the character.
+      const jumpRise = Math.max(0, Number.isFinite(c.jumpHeight) ? c.jumpHeight : 0);
+      pos.set(c.heroX - sy * 0.12 * HS * prof.camHeight, c.dispY + c.alt + jumpRise + HS * 1.55 * prof.camHeight, c.heroZ - cy * 0.12 * HS * prof.camHeight);
       look.set(pos.x - sy * cp * 10, pos.y + sp * 10, pos.z - cy * cp * 10);
       camera.position.copy(pos); camera.lookAt(look); r.camDist = 0; r.hideHero = true; return;
     }

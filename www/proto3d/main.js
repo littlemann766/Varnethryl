@@ -511,8 +511,8 @@ function wrapGLB(g, id, blocky) {
     // Imported cape bones may be named Cape_01 / mixamorig:Cape02 rather
     // than the legacy cape1 convention. Normalize only cape/hood groups;
     // never apply cloth dynamics to unrelated body or weapon bones.
-    const capeAlias = /^(?:.*[:|])?(?:cape|cloak)[_ .-]*\\d*$/i;
-    const hoodAlias = /^(?:.*[:|])?hood[_ .-]*\\d*$/i;
+    const capeAlias = /^(?:.*[:|])?(?:cape|cloak)[_ .-]*\d*$/i;
+    const hoodAlias = /^(?:.*[:|])?hood[_ .-]*\d*$/i;
     const compatibleGroups = (cfg?.groups || []).map(group=>{
       try {
         const re=new RegExp(group.match);

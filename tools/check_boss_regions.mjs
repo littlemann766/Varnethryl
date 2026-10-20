@@ -74,6 +74,14 @@ assert(controller.includes('if (e.state === \'defeated\') return;'),'defeated en
 assert(controller.includes("pt.shape === 'cone'")&&controller.includes("pt.shape === 'line'"),'boss hit detection checks directional telegraphs');
 assert(fight.includes('groundY: terrainY')&&lightning.includes('this.groundY(x,z)'),'boss lightning impacts use actual terrain height');
 assert(hud.includes('#cb .sl:focus-visible')&&hud.includes('border:2px solid #caa35c'),'medieval combat controls remain keyboard accessible');
+const armory=src('www/proto3d/combat/armory.js'),menu=src('www/proto3d/varn-menu.js'),settings=src('www/proto3d/settings3d.js');
+assert(armory.includes('seen.has(id)')&&armory.includes('used.has(id)'),'equipment load and presets reject duplicate items');
+assert(armory.includes('(!it.ownerOnly || this.ownerOk())'),'saved owner equipment remains gated');
+assert(hud.includes("addEventListener('blur'")&&hud.includes('api.block(false)'),'held block releases if app loses focus');
+assert(hud.includes("aria-label', i === 0 ? 'Basic attack'"),'skill buttons have accessible labels');
+assert(menu.includes("document.getElementById('vnQuickMenu')?.setAttribute('hidden', '')"),'title menu closes quick menu');
+assert(settings.includes('E.openCheatPanel?.()'),'owner cheat entry still routes through gated panel');
+
 
 for(const p of ['bossregions.js','frostreach.js','townlands.js','main.js','fight.js','charscale.js','combat/data.js','combat/hud.js']){
  const f='www/proto3d/'+p,v=spawnSync(process.execPath,['--check',f],{encoding:'utf8'});

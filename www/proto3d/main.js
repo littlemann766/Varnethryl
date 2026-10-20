@@ -1032,7 +1032,7 @@ const SMOKE = (() => {
    summit leads to a separate frozen realm inhabited by two troll brothers. */
 const TOWN_PORTAL = {x:-6,z:38}, FROST_CAVE={x:FROST_PEAK.x,z:FROST_PEAK.z};
 let WM=null, FM=null, wildsP=null, townCols=null, portalT=null, frostPeakT=null;
-let zoneCd=1.5,portalDwell=0,regionCheck=0;
+let zoneCd=1.5,portalDwell=0,regionCheck=0,lavaTick=0;
 const wildsMod=import('./wilds.js').then(m=>{
   portalT=m.makeGate(0x9a6bff);portalT.position.set(TOWN_PORTAL.x,0,TOWN_PORTAL.z);scene.add(portalT);
   for(const dx of [-1.9,1.9])colliders.push({type:'circle',x:TOWN_PORTAL.x+dx,z:TOWN_PORTAL.z,r:.75});
@@ -1135,6 +1135,15 @@ async function setZone(name){
 function updateZone(dt){
   if(ZONE.name==='wilds'&&WM&&WM.cull)WM.cull(state.heroX,state.heroZ,VIEWK);
   if(ZONE.name==='frost'&&FM)FM.update(dt);
+  // Lava is deadly environment gameplay, not an orange decorative texture.
+  // Damage ticks are discrete and cannot hammer HP at 72 fps.
+  if(ZONE.name==='town'&&TOWN_LANDS&&TOWN_LANDS.isLava(state.heroX,state.heroZ)){
+    lavaTick-=dt;
+    if(lavaTick<=0){
+      lavaTick=1.2;
+      if(FIGHT&&FIGHT.on){FIGHT.hurt(100);FIGHT.hud.say('LAVA BURNS!',750);}
+    }
+  }else lavaTick=0;
   const t=performance.now()/1000;
   for(const p of [portalT,frostPeakT,WM&&WM.portalMesh,FM&&FM.portalMesh])if(p&&p.visible&&p.userData.update)p.userData.update(t);
   // Battle begins outside the town walls; harmless town NPCs stay protected.
@@ -1217,11 +1226,32 @@ async function fightToggle(createOnly) {
     FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, downAllies, followers: () => crowd.filter(r => r.kind === 'party'), bystanders, killCrowd, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
       selectOwner: async () => { const i = GLB_IDS.indexOf('n:owner'); if (i >= 0 && GLB_IDS[HEROES.indexOf(hero)] !== 'n:owner') await selectVariant(SLOT_G[i], curVar(SLOT_G[i])); },
       makeModel: async id => { try { return modeFor(id) === 'blocky' ? makeBlocky(id) : await loadActorModel(id); } catch (e) { return null; } },
-      loco: locoAnim, resolve: p => resolve(p), resolveMob: p => resolve(p, false, 'npc'), free: (x, z) => window.__p3d.free(x, z, 0),
-      zone: () => ZONE.name, inWilds: (x, z) => ZONE.name === 'wilds' && Math.abs(x - ZONE.cx) < ZONE.half - 4 && Math.abs(z - ZONE.cz) < ZONE.half - 4,
-      biome: (x, z) => WM ? WM.mod.biome(x - WM.mod.WILDS.ox, z - WM.mod.WILDS.oz) : 'meadow',
+      loco:locoAnim,resolve:p=>resolve(p),
+      resolveMob:(p,e)=>{
+        // Hostile monsters never walk through the safe town walls or leave their
+        // authored map, even if AI chase or knockback aims there.
+        if(ZONE.name==='town'){
+          if(isTownSafe(p.x,p.z,11)) {p.x=e.x;p.z=e.z;return true;}
+          if(e.key==='titan'&&Math.hypot(p.x-VOLCANO.x,p.z-VOLCANO.z)>117){p.x=e.x;p.z=e.z;return true;}
+        }
+        return resolve(p,false,'npc');
+      },
+      free:(x,z)=>window.__p3d.free(x,z,0),
+      floorAt:(x,z)=>ZONE.name==='town'&&TOWN_LANDS?TOWN_LANDS.heightAt(x,z):ZONE.name==='frost'&&FM?FM.heightAt(x,z):0,
+      outsideCity:()=>ZONE.name==='town'&&!isTownSafe(state.heroX,state.heroZ,4),
+      titanSite:()=>VOLCANO,roamerAt:sec=>balthrixPatrol(sec),
+      zone:()=>ZONE.name,
+      inWilds:(x,z)=>ZONE.name==='wilds'
+        ?Math.abs(x-ZONE.cx)<ZONE.half-4&&Math.abs(z-ZONE.cz)<ZONE.half-4
+        :ZONE.name==='town'&&wilderness(x,z)&&
+          Math.hypot(x-FROST_PEAK.x,z-FROST_PEAK.z)>80&&
+          Math.hypot(x-VOLCANO.x,z-VOLCANO.z)>135&&
+          !(TOWN_LANDS&&TOWN_LANDS.isLava(x,z)),
+      biome:(x,z)=>ZONE.name==='wilds'&&WM
+        ?WM.mod.biome(x-WM.mod.WILDS.ox,z-WM.mod.WILDS.oz)
+        :ZONE.name==='frost'?'snow':x< -180?'forest':Math.hypot(x-VOLCANO.x,z-VOLCANO.z)<180?'rock':'meadow',
       loadGLTF: url => new Promise((res, rej) => gl.load(url, res, undefined, rej)),
-      respawnPos: () => ZONE.name === 'wilds' && WM ? { x: WM.spawn.x, z: WM.spawn.z } : { x: 0, z: 60 } });
+      respawnPos:()=>ZONE.name==='wilds'&&WM?WM.spawn:ZONE.name==='frost'&&FM?FM.spawn:{x:0,z:60} });
   }
   if (!GUARDS) { const gm = await import('./combat/guards.js'); GUARDS = new gm.TownGuards(ectx.guardPosts || []); GUARDS.onStrike = guardBolt; }
   if (createOnly) return FIGHT;
@@ -1244,7 +1274,7 @@ const cheatEnv = {
     spawnEnemy: (k) => { if (FIGHT && FIGHT.on) return FIGHT.cheatSpawn(k); fightToggle().then(() => setTimeout(() => FIGHT && FIGHT.on && FIGHT.cheatSpawn(k), 900)); return true; },
     onOwner: () => { if (window.__ownerRoster) window.__ownerRoster(); const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
-  teleport: (x, z, zone) => { if (zone === 'wilds') { setZone('wilds'); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
+  teleport: (x, z, zone) => { if (zone === 'wilds'||zone==='frost') { setZone(zone); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
   onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); settingsApi.ownerInit(); },
   onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); },
 };
@@ -1264,6 +1294,7 @@ window.__p3d = { get townLands() { return TOWN_LANDS; }, killCrowd, bystanders, 
   onRamp(x, z, level = 0) { const s = surfaceAt(x, z, level); return !!(s && s.ramp); },
   free(x, z, level = 0) { const l0 = state.level; state.level = level; const q = { x, z }; resolve(q); state.level = l0; return !!surfaceAt(x, z, level) && Math.hypot(q.x - x, q.z - z) < 0.02; },
   teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; updateLevel(); },
+  get frost() { return FM; }, bossSites: {titan:VOLCANO,frost:FROST_CAVE,harbor:HARBOR}, roamerAt:balthrixPatrol,
   setCamYaw(y) { state.camYaw = y; },
   setZoom(z) { state.zoom = z; },
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },

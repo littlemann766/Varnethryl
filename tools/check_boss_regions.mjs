@@ -66,6 +66,15 @@ assert(ice.includes("frosttroll_b")===false||ice.includes('FROST_BROTHERS'),'ice
 assert(fight.includes('startRegionBosses'),'automatic boss spawning at frost');
 assert(fight.includes('balthrixPosition(regionClock+(roamer.routePhase||0))'),'roaming Balthrix follows phased patrol');
 assert(hud.includes('VARNETHRYL ⚜')&&hud.includes("this.slotAbility"),'Varnethryl HUD retains real combat controls');
+const controller=src('www/proto3d/combat/controller.js');
+const lightning=src('www/proto3d/combat/lightning.js');
+// Verify the key combat safeguards stay wired into the actual gameplay modules.
+assert(controller.includes("locked.state !== 'defeated'")&&controller.includes('maxRange + locked.def.r'),'ranged skills discard stale/out-of-range locks');
+assert(controller.includes('if (e.state === \'defeated\') return;'),'defeated enemies cannot be hit repeatedly');
+assert(controller.includes("pt.shape === 'cone'")&&controller.includes("pt.shape === 'line'"),'boss hit detection checks directional telegraphs');
+assert(fight.includes('groundY: terrainY')&&lightning.includes('this.groundY(x,z)'),'boss lightning impacts use actual terrain height');
+assert(hud.includes('#cb .sl:focus-visible')&&hud.includes('border:2px solid #caa35c'),'medieval combat controls remain keyboard accessible');
+
 for(const p of ['bossregions.js','frostreach.js','townlands.js','main.js','fight.js','charscale.js','combat/data.js','combat/hud.js']){
  const f='www/proto3d/'+p,v=spawnSync(process.execPath,['--check',f],{encoding:'utf8'});
  assert.equal(v.status,0,f+' syntax: '+v.stderr);

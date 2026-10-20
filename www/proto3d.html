@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#1b2433">
-<title>Varnethryl 3D Prototype</title>
+<title>Varnethryl · Enter the Kingdom</title>
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:system-ui,sans-serif;color:#fff;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 #c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
@@ -27,9 +27,25 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
 #diag{position:fixed;left:8px;right:8px;top:10vh;bottom:64px;font:13px/1.45 ui-monospace,monospace;color:#dff;background:#000d;border:1px solid #fff4;border-radius:10px;padding:10px 12px;overflow:auto;display:none;z-index:2000;pointer-events:auto;white-space:pre-wrap;-webkit-overflow-scrolling:touch}#diag h4{margin:6px 0 4px;color:#ffd979;font:700 13px system-ui}#diag .ok{color:#9ff2b0}#diag .pend{color:#ffd979}#diagX{position:sticky;top:0;float:right;font:700 14px system-ui;color:#fff;background:#a33;border:0;border-radius:8px;padding:8px 14px}#diag .bad{color:#ffb4a8}#diagBtn{position:fixed;left:8px;bottom:max(14px,env(safe-area-inset-bottom));min-height:40px;min-width:92px;touch-action:manipulation;z-index:2001;font:13px system-ui;color:#fff;background:#0008;border:1px solid #fff4;border-radius:10px;padding:3px 8px;pointer-events:auto}
 #cinderFlyControls{position:fixed;right:12px;bottom:max(58px,env(safe-area-inset-bottom));z-index:100;display:flex;gap:8px;align-items:center;touch-action:manipulation}
 #cinderFlyControls button{background:#352115dc;color:#ffe4a0;border:1px solid #ffac43;border-radius:12px;padding:11px 15px;min-height:44px;font:bold 14px system-ui;touch-action:none;user-select:none}
-</style></head><body>
+</style><link rel="stylesheet" href="proto3d/varn-ui.css"></head><body>
 <canvas id="c"></canvas>
-<div id="hud"><div><b>VARNETHRYL 3D</b><br><span>Liongate prototype</span> <span id="ver">v1.2.0</span><br><span id="fps">-- fps</span></div><a href="index2d.html" onclick="try{localStorage.setItem('vn_mode','2d')}catch(e){}">&larr; Classic 2D</a><a href="proto3d/model-viewer.html" style="margin-left:6px">Lineup</a><a id="mdlBtn" href="#" style="margin-left:6px">Models</a><a id="fightBtn" href="#" style="margin-left:6px;display:none">Fight test</a></div>
+<div id="vnMenu" role="dialog" aria-label="Varnethryl start menu" aria-modal="true">
+  <div class="vn-card">
+    <img class="vn-emblem" src="assets/brand/emblem.webp" alt="Varnethryl crest">
+    <h1>VARNETHRYL</h1>
+    <p class="vn-legend">Legends Are Forged. Kingdoms Are Conquered.</p>
+    <div class="vn-rule"></div>
+    <div class="vn-actions">
+      <button class="vn-primary" id="vnEnter" type="button">Enter the Kingdom</button>
+      <button id="vnHero" type="button">Choose a Hero</button>
+      <button id="vnOptions" type="button">Settings</button>
+      <button id="vnCamp" type="button">Explore Hobgoblin Camps</button>
+    </div>
+    <div class="vn-links"><button type="button" id="vnMenuBtn" aria-label="Open main menu">☰ Menu</button><a href="index2d.html" onclick="try{localStorage.setItem('vn_mode','2d')}catch(e){}">Classic 2D</a><a href="proto3d/model-viewer.html">Model Gallery</a></div>
+    <div class="vn-bottom">Your adventure continues from the existing local save. Nothing is reset.</div>
+  </div>
+</div>
+<div id="hud"><div><b>VARNETHRYL</b><br><span>Liongate Kingdom</span> <span id="ver">v1.2.1</span><br><span id="fps">-- fps</span></div><a href="index2d.html" onclick="try{localStorage.setItem('vn_mode','2d')}catch(e){}">&larr; Classic 2D</a><a href="proto3d/model-viewer.html" style="margin-left:6px">Lineup</a><a id="mdlBtn" href="#" style="margin-left:6px">Models</a><a id="fightBtn" href="#" style="margin-left:6px;display:none">Fight test</a></div>
 <div id="cinderFlyControls" aria-label="Cinder flight controls" style="display:none"><button type="button" id="cinderFlyBtn">Take off</button><button type="button" id="cinderFlyUp" aria-label="Ascend">↑</button><button type="button" id="cinderFlyDown" aria-label="Descend">↓</button></div>
 <div id="stick"><div id="knob"></div></div>
 <div id="heroes"></div>
@@ -56,4 +72,4 @@ setTimeout(function(){if(!window.__p3d)window.__p3dDiag('Still loading after 12s
 </script>
 <script type="importmap">{"imports":{"three":"./proto3d/vendor/three.module.js","three/addons/":"./proto3d/vendor/jsm/"}}</script>
 <script type="module" src="proto3d/main.js" onerror="try{if(sessionStorage.getItem('vn_default3d')==='1'){sessionStorage.removeItem('vn_default3d');location.replace('index2d.html')}}catch(e){};__p3dDiag('Could not load proto3d/main.js or one of its imports (three.js). Check connection / update the app.',true)"></script>
-<script>(function(){var b=document.getElementById('mdlBtn');if(!b)return;function cur(){try{return localStorage.getItem('vn_model')||'blocky'}catch(e){return 'blocky'}}function lab(){b.textContent='Models: '+(cur()==='glb'?'GLB':'Blocky')}lab();b.addEventListener('click',function(e){e.preventDefault();try{var n=cur()==='glb'?'blocky':'glb';localStorage.setItem('vn_model',n);Object.keys(localStorage).forEach(function(k){if(k.indexOf('vn_model_')===0)localStorage.removeItem(k)})}catch(x){}location.reload()})})();</script></body></html>
+<script>(function(){var b=document.getElementById('mdlBtn');if(!b)return;function cur(){try{return localStorage.getItem('vn_model')||'blocky'}catch(e){return 'blocky'}}function lab(){b.textContent='Models: '+(cur()==='glb'?'GLB':'Blocky')}lab();b.addEventListener('click',function(e){e.preventDefault();try{var n=cur()==='glb'?'blocky':'glb';localStorage.setItem('vn_model',n);Object.keys(localStorage).forEach(function(k){if(k.indexOf('vn_model_')===0)localStorage.removeItem(k)})}catch(x){}location.reload()})})();</script><script src="proto3d/varn-menu.js"></script></body></html>

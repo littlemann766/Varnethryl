@@ -515,7 +515,9 @@ function wrapGLB(g, id, blocky) {
       idle: !!act.idle, walk: !!act.walk, run: !!act.run,
       hasCapePhysicsBones: root.userData.rigAudit.capeBones.length > 0
     };
-  }   // e.g. serpent: walk/run = slither/slither_fast
+  }
+  // The animated rig audit is available in the browser console as
+  // window.__varnethrylRigAudits; inspect it before replacing a GLB.
   // Initialize one visible locomotion pose. Previously idle and walk both started
   // at full weight, producing a brief mixed/half-stepping pose while loading.
   if (act.idle) { act.idle.play(); act.idle.setEffectiveWeight(1); }

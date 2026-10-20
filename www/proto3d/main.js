@@ -708,11 +708,11 @@ function setTravelRun(v){
  if(b){b.textContent=travelRun?'RUN':exhausted?'REST':'WALK';b.setAttribute('aria-pressed',String(travelRun));b.title=travelRun?'Running – tap to walk':exhausted?'Stamina depleted – recovering':'Walking – tap to run';}
 }
 document.getElementById('runBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setTravelRun(!travelRun);});
-addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.key.toLowerCase()==='r'){setTravelRun(!travelRun);}});
+addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.key.toLowerCase()==='capslock'||e.key.toLowerCase()==='r'&&!window.__p3d?.fight?.on){setTravelRun(!travelRun);}});
 let jumpVelocity=0,jumpHeight=0;
 function jump(){if(jumpHeight>0||jumpVelocity>0||state.swimming||state.climbing||cheat.fly||isCinder()&&cinderFlight.active)return false;jumpVelocity=7.5*HS;return true;}
 document.getElementById('jumpBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();jump();});
-addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.code==='Space'&&!cheat.fly&&!isCinder()){e.preventDefault();jump();}});
+addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.code==='Space'&&!cheat.fly&&!isCinder()&&!window.__p3d?.fight?.on){e.preventDefault();jump();}});
 setTravelRun(false);
 // buildings only playable characters may enter (companions, townsfolk and monsters are kept out by npcOnly door colliders)
 const HERO_ONLY = new Set(['guildhall']), HO_WAIT = { id: null, x: 0, z: 0 };

@@ -410,6 +410,16 @@ function wrapGLB(g, id, blocky) {
   }
   const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947*HS*(EXTRA_SCALE[id]||1)*loadScale(id,hgt) : worldProfile(id,HS).heightW/hgt) : 1;
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
+  // Normalize animation names across imported Meshy/Mixamo models without editing their skeletons.
+  // A missing rig is NOT magically rigged: leave it intact and report it for proper skinning.
+  for (const clip of g.animations) {
+    const n = clip.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const role = /idle|breath|stand|rest/.test(n) ? 'idle' :
+      /run|sprint|gallop|charge/.test(n) ? 'run' :
+      /walk|stride|trot|locomotion/.test(n) ? 'walk' : null;
+    if (role && !act[role]) act[role] = act[clip.name];
+  }
+  if (EXTRA_URL[id] && !g.animations.length) diag('Model ' + id + ' has no animation clips; needs a real rig/animation pass.');
   if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];   // e.g. serpent: walk/run = slither/slither_fast
   if (act.idle) act.idle.play(); if (act.walk) act.walk.play(); if (spd) for (const k of ['trot', 'run']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
   if (id === 'n:cinder_new') for (const k of ['hover', 'flap', 'glide', 'dive', 'land']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }

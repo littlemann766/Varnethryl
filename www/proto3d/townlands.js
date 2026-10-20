@@ -127,7 +127,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(indices);g.computeVertexNormals();
     const m=new THREE.Mesh(g,mat);m.receiveShadow=true;m.userData.keep=true;group.add(m);return m;
   }
-  const harborRoad=path([[0,CITY_HALF+8],[-82,210],[-165,247],[-245,285],[-325,332],[-400,375],[PORT_CENTER.x,PORT_CENTER.z-17]],9.2);
+  const harborRoad=path([[0,CITY_HALF+8],[-82,210],[-165,247],[-245,285],[-325,332],[-365,379],[-403,382],[PORT_CENTER.x,PORT_CENTER.z-15]],9.2);
   const mountainRoad=path([[0,-CITY_HALF-12],[-45,-231],[-80,-285],[-57,-337],[-18,-386],[30,-374],[25,-348],[FROST_PORTAL.x,FROST_PORTAL.z+7]],7.4,new THREE.MeshLambertMaterial({color:0x7b847f,side:THREE.DoubleSide}));
   // A dark cave mouth at the summit. The interactive portal is attached by main.js at ground height.
   const cave=new THREE.Group();cave.position.set(FROST_PORTAL.x,townElevation(FROST_PORTAL.x,FROST_PORTAL.z,world),FROST_PORTAL.z-2);
@@ -138,6 +138,36 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     rock.castShadow=true;rock.receiveShadow=true;cave.add(rock);
   }
   group.add(cave);
+  // The harbor is a small separately walled village with a gated eastern road approach.
+  const harbor=new THREE.Group();harbor.name='walled-harbor';harbor.position.set(PORT_CENTER.x,0,PORT_CENTER.z);
+  const hm=new THREE.MeshLambertMaterial({color:0x96989e}),wood=new THREE.MeshLambertMaterial({color:0x634d3d});
+  function piece(w,h,l,x,y,z,mat=hm){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,l),mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;harbor.add(m);
+  }
+  const W=68,D=64;
+  piece(2.6,6,D*2,-W,3,0);piece(W*2,6,2.6,0,3,-D);piece(W*2,6,2.6,0,3,D);
+  piece(2.6,6,D-18,W,3,-D/2-9);piece(2.6,6,D-18,W,3,D/2+9);
+  for(const x of [-W,W])for(const z of [-D,D]){
+    const tower=new THREE.Mesh(new THREE.CylinderGeometry(4.5,5.3,11,10),hm);
+    tower.position.set(x,5.5,z);tower.castShadow=tower.receiveShadow=true;harbor.add(tower);
+    const cap=new THREE.Mesh(new THREE.ConeGeometry(5.6,5.5,10),wood);cap.position.set(x,13.5,z);cap.castShadow=true;harbor.add(cap);
+  }
+  const archTop=new THREE.Mesh(new THREE.BoxGeometry(4,1.7,34),hm);archTop.position.set(W,8.1,0);archTop.castShadow=true;harbor.add(archTop);
+  group.add(harbor);
+  // Water is a real animated, swimmable surface; unlike lava it doesn't damage the player.
+  const waterGeo=new THREE.PlaneGeometry(93,110,24,28);
+  const waterMat=new THREE.MeshPhongMaterial({color:0x237fa4,emissive:0x0a3547,transparent:true,opacity:.84,shininess:105,side:THREE.DoubleSide,depthWrite:false});
+  const water=new THREE.Mesh(waterGeo,waterMat);
+  water.rotation.x=-Math.PI/2;water.position.set(PORT_CENTER.x-49,.17,PORT_CENTER.z);
+  water.receiveShadow=true;water.userData.keep=true;water.name='harbor-swim-water';group.add(water);
+  const wp=waterGeo.attributes.position,original=wp.array.slice();
+  const waterAt=(x,z)=>x<PORT_CENTER.x-26 && x>PORT_CENTER.x-96 && Math.abs(z-PORT_CENTER.z)<51;
+  function updateWater(t){
+    for(let i=0;i<wp.count;i++){const ix=i*3,x=original[ix],y=original[ix+1];
+      wp.array[ix+2]=.17*Math.sin(x*.19+t*1.6)+.11*Math.sin(y*.24-t*1.15);}
+    wp.needsUpdate=true;
+    if((Math.floor(t*10)%4)===0)waterGeo.computeVertexNormals();
+  }
   const insideField=(x,z,pad=0)=>FIELDS.some(f=>Math.abs(x-f.x)<f.w/2+pad&&Math.abs(z-f.z)<f.d/2+pad);
   const nearBuilding=(x,z,pad=0)=>buildings.some(b=>{
     const bx=b.cx*spacing,bz=b.id==='gatehouse'?CITY_HALF-1.2:b.cz*spacing;
@@ -253,5 +283,5 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
       mesh.visible=d<140*Math.max(1,k);
     }
   }
-  return {group,cull,stats,terrain,poolMeshes,harborRoad,mountainRoad,cave,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields};
+  return {group,cull,stats,terrain,poolMeshes,harborRoad,mountainRoad,cave,harbor,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields};
 }

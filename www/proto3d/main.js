@@ -518,7 +518,7 @@ function wrapGLB(g, id, blocky) {
     act[k].play(); act[k].setEffectiveWeight(0);
   }
   if (id === 'n:cinder_new') for (const k of ['hover', 'flap', 'glide', 'dive', 'land']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
-  root.userData = { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 };
+  Object.assign(root.userData, { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 });
   // Cinder's authored wing and tail clips must NOT be re-aimed by spring physics.
   // The generic spring-bone family matches wing1/wing2/wing3 and creates rubbery, overlapping wing flaps.
   if (id !== 'n:cinder_new') try {

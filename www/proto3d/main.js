@@ -1136,6 +1136,20 @@ function updateCrowd(dt) {
     if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
     tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2, false, 'npc'); state.level = l0; }
     const moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; crowdSurface(r, a, dt);
+    // A follower can remain within 22 units of the hero while continuously
+    // walking into a wall. Detect lack of progress and recover after a delay.
+    // Never teleport an actively engaged companion away from its opponent.
+    if (r.kind === 'party' && r.level === state.level && state.level === 0) {
+      const heroGap = Math.hypot(state.heroX - a.x, state.heroZ - a.z);
+      const fighting = !!(FIGHT && FIGHT.on && FIGHT.companions?.goal(r));
+      if (!fighting && heroGap > Math.max(4, r.leash + 2) && Math.hypot(r.vxs, r.vzs) > 0.5 && moved < Math.hypot(mx, mz) * 0.15) r.stuckT = (r.stuckT || 0) + dt;
+      else r.stuckT = 0;
+      if (r.stuckT > 5) {
+        a.x = state.heroX + (Math.random() - 0.5) * 1.2;
+        a.z = state.heroZ + (Math.random() - 0.5) * 1.2;
+        r.y = state.heroY || 0; r.vxs = r.vzs = 0; r.stuckT = 0; r.ti = null;
+      }
+    } else r.stuckT = 0;
     if(r.kind==='party'&&ZONE.name==='town'&&TOWN_LANDS?.waterAt(a.x,a.z))r.y=Math.max(r.y,0.2)-.55*HS;
     const sp = dt > 0 ? moved / dt : 0;
     if (sp > 0.3) { let da = Math.atan2(r.vxs, r.vzs) - a.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); a.yaw += da * Math.min(1, dt * 10); }

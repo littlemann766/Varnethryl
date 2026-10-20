@@ -467,15 +467,21 @@ function wrapGLB(g, id, blocky) {
     // Imported animated Owner rigs may use Mixamo names instead of the legacy
     // cape/hood bones. Never apply legacy capsule physics to an incompatible rig.
     const names = new Set(); m.traverse(o=>{if(o.isBone)names.add(o.name);});
-    const matches = cfg?.groups?.some(group=>{
+    const matchingGroups = (cfg?.groups || []).filter(group=>{
       try { const re=new RegExp(group.match); return [...names].some(name=>re.test(name)); }
       catch (_) { return false; }
     });
-    if(cfg && matches){
-      root.userData.sb=new SpringBonesV2(m,{clips:g.animations,config:cfg});
+    if(cfg && matchingGroups.length){
+      // Only pass capsules with both endpoints in this skeleton. A different
+      // Owner rig can have a cape but lack the old torso/limb collider names.
+      const compatible = {...cfg, groups:matchingGroups,
+        colliders:(cfg.colliders||[]).filter(c=>names.has(c.a)&&names.has(c.b))};
+      if(id==='n:owner' && compatible.colliders.length < (cfg.colliders||[]).length)
+        diag('Owner cape: '+compatible.colliders.length+'/'+(cfg.colliders||[]).length+' body colliders match this rig.');
+      root.userData.sb=new SpringBonesV2(m,{clips:g.animations,config:compatible});
     }else{
       root.userData.sb=new SpringBones(m,{clips:g.animations});
-      if(cfg && !matches && id==='n:owner')
+      if(cfg && id==='n:owner')
         diag('Animated Owner rig has no legacy cape/hood bones; skipping incompatible cape physics.');
     }
   } catch (e) { console.warn('spring bones', e); }

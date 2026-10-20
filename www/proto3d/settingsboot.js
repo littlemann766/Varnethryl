@@ -2,7 +2,7 @@
  * It also starts the owner defaults (ownerboot.js) but ONLY if this device holds an owner unlock token, so ordinary players download nothing extra. */
 import { savePrefs } from './camprefs.js';
 
-export const OWNER_TOKEN_KEY = 'vn_owner_unlock_v1';
+export const OWNER_TOKEN_KEY = 'vn_owner_unlock_v2';
 /* env: {rig, prefs, storage, applyQuality(q), setShadows(on), fpsEl, cheatEnv, openCheatPanel()} */
 export function applyPrefs(env) {
   const p = env.prefs;

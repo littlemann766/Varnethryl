@@ -515,7 +515,7 @@ try { if (qp0.get('nosave') == null) { const r = readSave(localStorage); if (r.s
 const savedOn = qp0.get('nosave') == null;
 if (!savedPlan) savedPlan = { party: [1, 2, 0], hero: 1, followers: [2, 0], pos: null };
 /* test build 1.1.9: the Owner is the default playable character (first launch of this build; the dropdown still lists everyone and later picks are kept). Not applied in nosave test runs. */
-const IS_OWNER_TOKEN = (() => { try { return !!localStorage.getItem('vn_owner_unlock_v1'); } catch (e) { return false; } })();   /* cheap local check; the real gate (ownergate.js) still decides cheats */
+const IS_OWNER_TOKEN = (() => { try { return !!localStorage.getItem('vn_owner_unlock_v2'); } catch (e) { return false; } })();   /* cheap local check; the real gate (ownergate.js) still decides cheats */
 { const oi = GLB_IDS.indexOf('n:owner'); let seen = null; try { seen = localStorage.getItem('p3d_owner_default_v119'); } catch (e) {}
   if (savedOn && qp0.get('hero') == null && oi > 0 && IS_OWNER_TOKEN && !seen) { savedPlan.hero = oi; savedPlan.pos = null; try { localStorage.setItem('p3d_owner_default_v119', '1'); } catch (e) {} }
   if (!IS_OWNER_TOKEN && savedPlan.hero === oi) savedPlan.hero = 1;   /* the Owner skin is for the owner account only */ }
@@ -667,13 +667,20 @@ async function selectVariant(g, v) {
   standardGroups.forEach(g=>{const r=mkRow(g);normalList.appendChild(r.row);rows.push({g,b:r.b,approved:false});});
   approvedGroups.forEach(g=>{const r=mkRow(g,true);bossList.appendChild(r.row);rows.push({g,b:r.b,approved:true});});
   window.__openBossRoster=()=>{showRosterTab('boss');bar.classList.add('open')};
-  window.__ownerRoster = () => {
-    if (!OG || rows.some(r => r.g === OG)) return;
+  window.__ownerRoster = (allow = true) => {
+    if (!OG) return;
+    const i = rows.findIndex(r => r.g === OG);
+    if (!allow) {
+      if (i >= 0) { const old = rows.splice(i, 1)[0]; old.b.parentElement.remove(); }
+      if (GLB_IDS[HEROES.indexOf(hero)] === 'n:owner') selectHero(1);
+      return;
+    }
+    if (i >= 0) return;
     const r = mkRow(OG);
-    const before=rows.filter(x=>!x.approved).find(x=>compareRoster(OG,x.g)<0);
-    if(before)normalList.insertBefore(r.row,before.b.parentElement);
+    const before = rows.filter(x => !x.approved).find(x => compareRoster(OG, x.g) < 0);
+    if (before) normalList.insertBefore(r.row, before.b.parentElement);
     else normalList.appendChild(r.row);
-    rows.push({g:OG,b:r.b,approved:false});
+    rows.push({ g: OG, b: r.b, approved: false });
   };
   bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; })()); }
 async function toggleModel(i) {
@@ -1380,6 +1387,14 @@ const cheatEnv = {
   teleport: (x, z, zone) => { if (zone === 'wilds') { setZone('wilds'); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; updateLevel(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
   onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); settingsApi.ownerInit(); },
   onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); },
+  onLocked: () => {
+    if (window.__p3d) { window.__p3d.cheats = null; window.__p3d.owner = false; }
+    if (window.__ownerRoster) window.__ownerRoster(false);
+    const b = document.getElementById('fightBtn'); if (b) b.style.display = 'none';
+    const settingsPanel = document.getElementById('settingsPanel');
+    if (settingsPanel) { settingsPanel.style.display = 'none'; settingsPanel.querySelectorAll('.own').forEach(e => e.remove()); }
+    import('./ownerboot.js').then(m => m.stopOwner?.()).catch(() => {});
+  },
 };
 const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }

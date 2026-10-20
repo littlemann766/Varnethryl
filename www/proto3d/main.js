@@ -502,6 +502,29 @@ function wrapGLB(g, id, blocky) {
       diag('Balthrix clips do not animate named spine/tail/body/neck bones: a full-body wave is not verified.');
     diag('Rig audit ' + id + ': ' + report.boneCount + ' bones, ' + skinnedMeshes + ' skinned meshes, ' + report.clips.length + ' clips.');
   }
+  // Fallback serpent body wave only when imported clips do not animate the
+  // spine/tail. Preserve authored animation where it exists.
+  if (/vaelthryx/.test(id) && root.userData.rigAudit &&
+      !root.userData.rigAudit.serpentAnimatedTracks.some(clip => clip.tracks > 0)) {
+    const joints = [];
+    m.traverse(o => {
+      if (o.isBone && /spine|tail|body/i.test(o.name)) joints.push(o);
+    });
+    if (joints.length >= 3) {
+      const rest = joints.map(b => b.rotation.y);
+      let phase = 0, strength = 0;
+      root.userData.serpentWave = (dt, speed) => {
+        const moving = Math.max(0, Math.min(1, speed / 3));
+        strength += (moving - strength) * (1 - Math.exp(-dt * 5));
+        phase += dt * (2.8 + Math.min(5, speed * 0.45));
+        joints.forEach((bone, i) => {
+          // Small lateral rotations propagate from neck to tail.
+          bone.rotation.y = rest[i] + Math.sin(phase - i * 0.65) * 0.12 * strength;
+        });
+      };
+      diag('Balthrix: enabled procedural spine/tail wave fallback on ' + joints.length + ' bones.');
+    }
+  }
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
   // Normalize animation names across imported Meshy/Mixamo models without editing their skeletons.
   // A missing rig is NOT magically rigged: leave it intact and report it for proper skinning.
@@ -1254,7 +1277,7 @@ function updateCrowd(dt) {
     const w = r.root; if (!w) continue;
     w.position.set(a.x, r.y, a.z); const u = w.userData, ww = Math.min(1, sp / SPEED);
     restoreNodes(r.nd);
-    if (u.glb) { const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0; locoAnim(u, sp, animDt); u.mixer.update(animDt); if (u.sb) u.sb.update(animDt); }
+    if (u.glb) { const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0; locoAnim(u, sp, animDt); u.mixer.update(animDt); if (u.serpentWave) u.serpentWave(animDt, sp); if (u.sb) u.sb.update(animDt); }
     applyPose(a, w, r.nd, a.yaw);
   }
 }

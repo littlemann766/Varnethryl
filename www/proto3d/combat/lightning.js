@@ -5,7 +5,7 @@
 const MAXSEG = 220, POOL = 7, SPARKS = 160, SCORCH = 6;
 export class LightningFX {
   constructor(o) {
-    this.T = o.THREE; this.scene = o.scene; this.HS = o.HS || 1.5; this.canvas = o.canvas || null; this.rng = o.rng || Math.random;
+    this.T = o.THREE; this.scene = o.scene; this.HS = o.HS || 1.5; this.canvas = o.canvas || null; this.rng = o.rng || Math.random; this.groundY = o.groundY || (() => 0);
     const T = this.T; this.group = new T.Group(); this.group.name = 'lightningFX'; this.group.visible = false; this.scene.add(this.group);
     const mk = (color, op) => new T.LineBasicMaterial({ color, transparent: true, opacity: op, blending: T.AdditiveBlending, depthWrite: false });
     this.bolts = []; for (let i = 0; i < POOL; i++) {
@@ -51,7 +51,7 @@ export class LightningFX {
     b.core.visible = b.glow.visible = b.halo.visible = delay <= 0; if (delay <= 0) this.rebuild(b); return b;
   }
   sparksAt(x, y, z, n, v) { for (let i = 0; i < n; i++) { const k = this.sIdx = (this.sIdx + 1) % SPARKS, a = this.rng() * 6.283, h = this.rng() * v; this.sp[k * 3] = x; this.sp[k * 3 + 1] = y; this.sp[k * 3 + 2] = z; this.sv[k * 3] = Math.cos(a) * h; this.sv[k * 3 + 1] = 2 + this.rng() * v * 1.3; this.sv[k * 3 + 2] = Math.sin(a) * h; this.sl[k] = 0.5 + this.rng() * 0.6; } }
-  scorchAt(x, z, s) { const c = this.scorch[this.scIdx = (this.scIdx + 1) % SCORCH]; c.t = 0; c.x = x; c.z = z; c.s = s; c.m.position.set(x, 0.03, z); c.r.position.set(x, 0.05, z); c.m.visible = c.r.visible = true; }
+  scorchAt(x, z, s) { const c = this.scorch[this.scIdx = (this.scIdx + 1) % SCORCH]; c.t = 0; c.x = x; c.z = z; c.s = s; const ground = this.groundY(x,z); c.m.position.set(x, ground + 0.03, z); c.r.position.set(x, ground + 0.05, z); c.m.visible = c.r.visible = true; }
   /* ev: { from:{x,z}, path:[{x,z,y,falloff}], big } - first path point is struck from the sky, the rest are arcs conductor to conductor (decaying) */
   strike(ev) {
     const HS = this.HS, path = ev.path || []; if (!path.length) return; this.group.visible = true; let prev = null, d = 0;
@@ -59,8 +59,8 @@ export class LightningFX {
       const p = path[i], f = p.falloff === undefined ? 1 : p.falloff, y = p.y === undefined ? 1.1 * HS : p.y;
       if (p.flash) { this.queue.push({ t: this.clock + 0.05 + (i % 12) * 0.012, x: p.x, z: p.z, y, f: 0.7 }); prev = p; continue; }   // beyond the drawn-bolt cap: cheap impact flash only
       if (i === 0) {
-        this.spawnBolt([p.x + this.r(3 * HS), 26 * HS, p.z + this.r(3 * HS)], p.x, y, p.z, 0.42, 1.25, 0.55, 0, 1);
-        this.spawnBolt([p.x + this.r(2 * HS), 24 * HS, p.z + this.r(2 * HS)], p.x, y, p.z, 0.3, 1.0, 0.35, 0.03, 0.8);   // twin, staggered re-strike
+        this.spawnBolt([p.x + this.r(3 * HS), y + 26 * HS, p.z + this.r(3 * HS)], p.x, y, p.z, 0.42, 1.25, 0.55, 0, 1);
+        this.spawnBolt([p.x + this.r(2 * HS), y + 24 * HS, p.z + this.r(2 * HS)], p.x, y, p.z, 0.3, 1.0, 0.35, 0.03, 0.8);   // twin, staggered re-strike
         this.flash = 1; this.shake = 0.9; this.impact(p.x, p.z, 1.6 * f, y);
       } else {
         const dl = d += 0.09; this.spawnBolt([prev.x, (prev.y === undefined ? 1.1 * HS : prev.y), prev.z], p.x, y, p.z, 0.3 * (0.6 + 0.4 * f), 0.8, 0.3, dl, f);
@@ -69,7 +69,7 @@ export class LightningFX {
       prev = p;
     }
   }
-  impact(x, z, s, y) { this.sparksAt(x, (y || 1) * 0.5, z, 22, 5.5); this.scorchAt(x, z, s * this.HS * 0.45); }
+  impact(x, z, s, y) { this.sparksAt(x, y ?? (this.groundY(x,z) + 1), z, 22, 5.5); this.scorchAt(x, z, s * this.HS * 0.45); }
   update(dt) {
     this.clock += dt; if (!this.group.visible) return;
     let live = 0;
@@ -84,7 +84,7 @@ export class LightningFX {
     for (let i = this.queue.length - 1; i >= 0; i--) { const q = this.queue[i]; if (q.t <= this.clock) { this.impact(q.x, q.z, 0.8 * q.f, q.y); this.shake = Math.max(this.shake, 0.35 * q.f); this.flash = Math.max(this.flash, 0.35 * q.f); this.queue.splice(i, 1); } }
     let anySp = false; for (let k = 0; k < SPARKS; k++) { if (this.sl[k] <= 0) continue; this.sl[k] -= dt; if (this.sl[k] <= 0) { this.sp[k * 3 + 1] = -9999; continue; } anySp = true;
       this.sv[k * 3 + 1] -= 18 * dt; const i3 = k * 3; this.sp[i3] += this.sv[i3] * dt; this.sp[i3 + 1] += this.sv[i3 + 1] * dt; this.sp[i3 + 2] += this.sv[i3 + 2] * dt;
-      if (this.sp[i3 + 1] < 0.03) { this.sp[i3 + 1] = 0.03; this.sv[i3 + 1] *= -0.35; this.sv[i3] *= 0.6; this.sv[i3 + 2] *= 0.6; } }   // gravity, bounce, friction
+      const floor = this.groundY(this.sp[i3],this.sp[i3 + 2]) + 0.03; if (this.sp[i3 + 1] < floor) { this.sp[i3 + 1] = floor; this.sv[i3 + 1] *= -0.35; this.sv[i3] *= 0.6; this.sv[i3 + 2] *= 0.6; } }   // gravity, bounce, friction
     if (anySp) this.spA.needsUpdate = true;
     let anySc = false; for (const c of this.scorch) { if (c.t >= 2.2) continue; anySc = true; c.t += dt; const u = c.t / 2.2; if (u >= 1) { c.m.visible = c.r.visible = false; continue; }
       c.m.scale.setScalar(c.s * (0.7 + 0.3 * Math.min(1, c.t * 6))); c.m.material.opacity = 0.55 * (1 - u); c.r.scale.setScalar(c.s * (0.5 + 2.4 * Math.min(1, c.t * 3.5))); c.r.material.opacity = Math.max(0, 0.9 * (1 - c.t * 3)); }

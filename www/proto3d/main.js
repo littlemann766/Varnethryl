@@ -369,7 +369,16 @@ function locoAnim(u, sp) {
     wk.timeScale = 0.6 + v * 0.25;
   }
   // Unrigged Idle fallback: freeze walking at rest instead of marching in place.
-  else if (wk && !id) { const standing = v < 0.025; wk.setEffectiveWeight(1 - (u.ovr || 0)); wk.timeScale = standing ? 0 : 0.6 + v * 0.25; if (standing && !u.wasStanding) wk.time = 0; u.wasStanding = standing; }
+  else if (wk && !id) {
+    const standing = v < 0.025, ov = 1 - (u.ovr || 0);
+    const run = A.run && A.run !== wk ? A.run : null;
+    const runMix = run && !standing ? Math.max(0, Math.min(1, (v - SPEED * 1.15) / (SPEED * .85))) : 0;
+    wk.setEffectiveWeight((1-runMix)*ov);
+    wk.timeScale = standing ? 0 : 0.6 + v * 0.25;
+    if(run){run.setEffectiveWeight(runMix*ov);run.timeScale=Math.max(.65,Math.min(2.2,v/(SPEED*1.8)));}
+    if (standing && !u.wasStanding) wk.time = 0;
+    u.wasStanding = standing;
+  }
 }
 // Low-cost phoenix embers follow Cinder's wing tips and tail (one Points draw call).
 // No particles are attached to the bones; the original GLB and skinning remain unchanged.

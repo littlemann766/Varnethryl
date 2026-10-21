@@ -780,7 +780,7 @@ const APPROVED_BOSS_IDS = new Set([
 ]);
 const bossVariant = g => g.vars.find(v => APPROVED_BOSS_IDS.has(GLB_IDS[v.slot]));
 const BOSS_DISPLAY = new Map([
-  ['n:vaelthryx_straight_rig','Balthrix (10×)'],
+  ['n:vaelthryx_straight_rig','Balthrix (6×)'],
   ['n:ashentitan_20','Ashen Titan (15×)'],
   ['n:frosttroll_a','Frost Troll A (3.5×)'],
   ['n:frosttroll_b','Frost Troll B (3.5×)']

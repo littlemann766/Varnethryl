@@ -15,6 +15,7 @@ import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './
 import { Respawner } from './combat/respawn.js';
 import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
+import { terrainBodyPitch } from './terrain-follow.js';
 import { bossHome, telegraphKey } from './combat/boss-arena.js';
 import { HOB_CAMPS } from './hobcamps.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
@@ -521,6 +522,14 @@ export function createFight(env) {
       if (e.state !== e.ls) { if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
       let lean = 0; if (e.state === 'telegraph') lean = -0.35 * Math.min(1, e.tStateT / e.def.tele); else if (e.state === 'attack') lean = 0.45; else if (e.state === 'stagger') lean = -0.5; else if (e.flinch > 0) lean = -0.25 * (e.flinch / 0.18);
+      // Balthrix's ROOT gently matches hill inclination, while authored
+      // spine/tail joints handle the actual serpent gait. Never lean the
+      // body through the ground or override strike/stagger attack poses.
+      if(e.key==='vaelthryx'&&e.roaming&&(e.state==='idle'||e.state==='chase')){
+        const along=7,fx=Math.sin(heading)*along,fz=Math.cos(heading)*along;
+        const behind=terrainY(e.x-fx,e.z-fz),ahead=terrainY(e.x+fx,e.z+fz);
+        lean+=terrainBodyPitch(behind,ahead,2*along,.16);
+      }
       r.rotation.x += (lean - r.rotation.x) * Math.min(1, dt * 14);
       if (e.state === 'telegraph') { const pt = (e.def.boss || e.def.patterns) ? e.pat : null, f = Math.min(1, e.tStateT / (e.curTele || e.def.tele)), reach = ((pt ? pt.reach : e.def.reach) * HS + e.def.r) * 1.1;
         const shape = pt ? pt.shape : 'ring'; e.tele.visible = shape === 'ring'; if (shape === 'ring') { e.tele.position.set(e.x, terrainY(e.x,e.z)+0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; e.tele.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); }

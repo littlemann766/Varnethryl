@@ -41,7 +41,7 @@ Canonical slot order below must not change, since saves refer to these IDs. Sour
 | 19 | `morwen` | Morwen Blackveil | `models/morwen.glb` |
 | 20 | `garruk` | Garruk Stonefist | `models/garruk.glb` |
 
-All twenty original files currently exist, **but presence does not establish correct appearance, class, equipment or movement**. Review **one character at a time** against the established portrait, outfit, weapon, role and lore height. Record status as `unreviewed` until visual approval; do not blindly overwrite the original models or alter saved slot order.
+**Automated original-20 audit:** 20/20 GLBs present. **18 have no skinned skeleton**, instead using animated object/node transforms (two animation clips each). **Darius and Selene** have skinned, animated 27-joint skeletons (three clips each). These numbers explain why a full locomotion/rig overhaul is justified, but **do not prove that any particular model's art matches its portrait**. See the GitHub Actions `Varnethryl-Original-20-Character-Audit` artifact for the full per-character report.\n\nAll twenty original files currently exist, **but presence does not establish correct appearance, class, equipment or movement**. Review **one character at a time** against the established portrait, outfit, weapon, role and lore height. Record status as `unreviewed` until visual approval; do not blindly overwrite the original models or alter saved slot order.
 
 ## Safe correction workflow
 

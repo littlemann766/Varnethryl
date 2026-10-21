@@ -1,5 +1,7 @@
 # Varnethryl — Full 3D Overhaul Status
 
+**Current signed main release:** 1.2.7. **Next development build:** 1.2.8. The full world/model overhaul remains underway.
+
 This is a **multi-phase game rebuild**, not a single APK patch. The current signed release on `main` is **1.2.6**. The next version, **1.2.7**, is **staged only** in a draft PR until its tests and device behavior are reviewed.
 
 ## Already on main (versions 1.2.4–1.2.5)
@@ -50,3 +52,10 @@ GitHub contains playable-character and monster GLBs. The **approved original ext
 4. Only merge/ship a build after the specific phase is tested and clearly label what remains. **Do not mark the full overhaul finished merely because an automated build passes.**
 
 **UI preservation:** Version 1.2.7 is based on the repaired, nine-sliced gold/purple border hotfix. Keep its mobile frame CSS and EXP bar unchanged.
+
+## 1.2.8 staged improvements
+
+- Titan volcanic ground repainted with charcoal and warm mineral streaks instead of unreadable near-black surfaces, with 12 low-draw-call self-lit molten fissures. Original lava collisions and damage are untouched.
+- Explicit giant-boss lock-on gently frames the upper body and battle space in portrait/landscape camera views; it does **not** override manually chosen free-orbit pitch/yaw, pinch zoom, or first-person view.
+- Added tests for real Titan terrain vertex brightness, fissure geometry, voluntary camera framing, and original controls. Packaging cache/version bumped to 1.2.8.
+- Original ship/environment GLBs and visual rig weight painting are still outstanding. Do not claim finished full overhaul.

@@ -61,14 +61,49 @@ export function buildFrostCave(group, half, elevation, exclusions=[]) {
     if(j<crystalCount&&!avoid(x,z,5)){
       const size=.7+rand()*2,height=size*(2+rand()*3.2);
       put(crystals,j++,x,floor+height*.55,z,size,height,size);
+      // Large freestanding crystal clusters are solid scenery, not ghost
+      // decorations. They share the same ground collision rules as ice spires.
+      if(size>1.75)COLS.push({type:'circle',x,z,r:size*.46});
     }
   }
   stalagmites.count=n;icicles.count=k;crystals.count=j;
   for(const mesh of [stalagmites,icicles,crystals])mesh.instanceMatrix.needsUpdate=true;
-  // Colored bounce light from clusters; keep shadow casting disabled on phones.
-  for(const [x,z] of [[-103,-85],[91,82],[-99,118],[112,-97],[0,-173]]){
-    const light=new THREE.PointLight(0x7ab5ed,.75,83,2);
+  // Five carefully placed lights, not many per-crystal point lights.
+  // Both troll arenas and the return portal now stay readable in the
+  // otherwise genuinely dark cave. Shadows remain off for phone FPS.
+  const lights=[];
+  for(const [x,z,r] of [[-40,-66,83],[40,-66,83],[-7,170,71],[0,-174,83],[-112,80,83]]){
+    const light=new THREE.PointLight(0x83bcf3,.74,r,2);
     light.position.set(x,elevation(x,z)+9,z);light.castShadow=false;group.add(light);
+    lights.push(light);
   }
-  return {colliders:COLS,roof:vault,walls,stalagmites,icicles,crystals,ceilingAt};
+  // One transparent draw call for suspended ice dust; built once and gently
+  // moved as a group. It casts no shadows and cannot block the player.
+  const moteCount=168,motePositions=new Float32Array(moteCount*3);
+  for(let q=0;q<moteCount;q++){
+    const x=(rand()*2-1)*(half-9),z=(rand()*2-1)*(half-9);
+    const floor=elevation(x,z),ceiling=ceilingAt(x,z);
+    const clearance=Math.max(.5,Math.min(ceiling-floor-4,20));
+    motePositions[q*3]=x;
+    motePositions[q*3+1]=floor+2+clearance*rand();
+    motePositions[q*3+2]=z;
+  }
+  const moteGeo=new THREE.BufferGeometry();
+  moteGeo.setAttribute('position',new THREE.BufferAttribute(motePositions,3));
+  const moteMat=new THREE.PointsMaterial({
+    color:0x9dccf2,size:.42,sizeAttenuation:true,
+    transparent:true,opacity:.5,depthWrite:false
+  });
+  const motes=new THREE.Points(moteGeo,moteMat);
+  motes.name='frost-cave-airborne-ice-motes';motes.frustumCulled=false;
+  group.add(motes);
+  const update=t=>{
+    if(!Number.isFinite(t))return;
+    motes.position.y=.32*Math.sin(t*.48);
+    motes.rotation.y=.005*Math.sin(t*.18);
+    glow.emissiveIntensity=.88+.11*Math.sin(t*.85);
+    for(let i=0;i<lights.length;i++)lights[i].intensity=.72+.055*Math.sin(t*.65+i*1.3);
+  };
+  return {colliders:COLS,roof:vault,walls,stalagmites,icicles,crystals,
+    motes,lights,ceilingAt,update};
 }

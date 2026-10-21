@@ -22,6 +22,16 @@ jobs:
         run: node tools/check_exp_ui.mjs
       - name: Check boss arena retreat, telegraph warnings, and respawning
         run: node tools/check_boss_ai.mjs
+      - name: Verify authored serpent gait selection without changing other heroes
+        run: node tools/check_serpent_locomotion.mjs
+      - name: Verify dark Frost Cave, lava atmosphere, and restoration
+        run: node tools/check_zone_ambience.mjs
+      - name: Verify Balthrix pitch follows terrain safely
+        run: node tools/check_terrain_follow.mjs
+      - name: Verify ice particles, cave formation physics, and lit boss arenas
+        run: node tools/check_frost_visuals.mjs
+      - name: Verify Titan lava pools, rising embers, and safe-city culling
+        run: node tools/check_volcano_visuals.mjs
       - name: Check established encounter geography and gameplay invariants
         run: node tools/check_boss_regions.mjs
       - name: Check walkable terrain and portal stability

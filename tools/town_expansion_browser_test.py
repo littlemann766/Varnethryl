@@ -55,12 +55,94 @@ with sync_playwright() as p:
     print('frost realm',json.dumps(ice),flush=True)
     check('frost portal teleports to separate icy map',ice['zone']=='frost' and ice['triangles']>20000,ice)
     check('frost terrain is actual walkable ground',abs(ice['ground']-ice['y'])<.15,ice)
+    cave=page.evaluate("""()=>{const a=__p3d,realm=a.frostRealm,c=realm?.cave;
+       return {visible:realm?.group.visible,lights:c?.lights?.length,iceMotes:c?.motes?.geometry?.attributes?.position?.count,
+       colliders:c?.colliders?.length,sky:a.scene.background?.getHex?.(),fog:a.scene.fog?.color?.getHex?.(),
+       litBrothers:c?.lights?.filter(l=>Math.hypot(l.position.x-37,l.position.z+66)<20||
+         Math.hypot(l.position.x+37,l.position.z+66)<20).length,
+       litExit:c?.lights?.some(l=>Math.hypot(l.position.x+7,l.position.z-177)<20)};}""")
+    print('frost cave lighting and physics',json.dumps(cave),flush=True)
+    check('Frost Cave is visibly active and ceiling-dark, never outdoor sky',cave['visible'] and cave['sky']==0x0c1422,cave)
+    check('both brothers have nearby cave lighting',cave['lights']==5 and cave['litBrothers']>=2,cave)
+    check('portal has cave lighting',cave['litExit'],cave)
+    check('low-cost airborne ice motes and solid ice collision present',cave['iceMotes']==168 and cave['colliders']>0,cave)
+    # Previous screenshots mistakenly showed the full-screen title menu
+    # instead of the game. Hide it explicitly for a TRUE scene preview;
+    # do not change the user's save or entry behavior in the shipped game.
+    page.evaluate("""()=>{document.getElementById('vnMenu').hidden=true;
+                         document.body.classList.remove('vn-menu-open');}""")
+    check('actual 3D Frost Cave is visible rather than obscured by the title menu',
+          page.evaluate("getComputedStyle(document.getElementById('vnMenu')).display==='none'"))
+    page.wait_for_timeout(750)
+    page.screenshot(path='frost-cave-mobile-test.png')
     # Boss models load asynchronously, but their encounters must become active without input.
     page.wait_for_function("window.__p3d?.fight?.monsters?.some(e=>e.key==='frosttroll_a')&&__p3d.fight.monsters.some(e=>e.key==='frosttroll_b')",timeout=90000)
     check('both Frost Troll brothers spawn together',page.evaluate("['frosttroll_a','frosttroll_b'].every(k=>__p3d.fight.monsters.some(e=>e.key===k))"))
+    # Portrait cameras have a narrow HORIZONTAL field of view. Two brothers
+    # 74 world units apart cannot both appear from x=2250; the old screenshot
+    # showed an empty patch of fog. Frame each boss individually, and require
+    # the actual live model to project inside the camera's viewport.
+    for key,x in [('frosttroll_a',2213),('frosttroll_b',2287)]:
+        page.evaluate("""x=>{__p3d.teleport(x,-21);__p3d.setCamYaw(0);}""",x)
+        page.wait_for_timeout(1100)
+        projection=page.evaluate("""key=>{
+          const a=__p3d,e=a.fight?.monsters?.find(v=>v.key===key);
+          if(!e||!e.view)return null;
+          const worldY=(e.view.position.y||0)+Math.min(7,(e.heightAbove||12)*.3);
+          const p=new a.THREE.Vector3(e.x,worldY,e.z).project(a.camera);
+          return {x:p.x,y:p.y,z:p.z,loaded:!!e.view.userData?.glb,
+                  visible:e.view.visible,attached:e.view.parent===a.scene,
+                  distance:Math.hypot(e.x-a.state.heroX,e.z-a.state.heroZ)};
+        }""",key)
+        print('boss camera projection',key,projection,flush=True)
+        check(f'{key} live model is in the gameplay camera frame',
+              projection is not None and projection['visible'] and projection['attached'] and
+              abs(projection['x'])<1 and abs(projection['y'])<1 and -1<=projection['z']<=1,
+              projection)
+        page.screenshot(path=f'frost-cave-{key}-mobile-test.png')
     page.evaluate("__p3d.teleport(2243,177)")
     page.wait_for_function("__p3d.zone==='town'",timeout=90000)
     check('ice gate returns to mountain summit',page.evaluate("__p3d.zone")=='town')
+    # The next overhaul zone must render actual 3D basalt and animated lava,
+    # and it must cull the entire optional FX batch near the peaceful town.
+    page.evaluate("__p3d.teleport(405,-302);__p3d.setCamYaw(0)")
+    page.wait_for_function("""()=>{
+      const a=__p3d;return Math.hypot(a.camera.position.x-a.state.heroX,
+                                         a.camera.position.z-a.state.heroZ)<70;}""",timeout=90000)
+    page.wait_for_timeout(1400)
+    camera=page.evaluate("""()=>{
+      const a=__p3d,c=a.camera,land=a.townLands;
+      const d=Math.hypot(c.position.x-a.state.heroX,c.position.z-a.state.heroZ);
+      const q=new a.THREE.Vector3(405,land.heightAt(405,-402)+9,-402).project(c);
+      return {distance:d,cameraY:c.position.y,heroY:a.state.heroY,
+              craterProjection:{x:q.x,y:q.y,z:q.z},
+              terrainVisible:land.terrain.visible && land.group.visible};
+    }""")
+    print('Titan camera preview',json.dumps(camera),flush=True)
+    check('post-portal camera snaps back to player and frames volcanic ground',
+          camera['distance']<70 and camera['terrainVisible'] and
+          abs(camera['craterProjection']['x'])<1 and
+          -1<=camera['craterProjection']['z']<=1,camera)
+    volcano=page.evaluate("""()=>{
+       const a=__p3d,t=a.townLands,v=t?.volcano,m=t?.poolMeshes?.[0]?.material;
+       return {zone:a.zone,active:v?.active,visible:v?.group.visible,
+         emberCount:v?.embers?.geometry.attributes.position.count,
+         basaltCount:v?.shards?.count,lights:v?.glowLights?.length,
+         lavaGlow:m?.emissiveIntensity,playerY:a.state.heroY,
+         playerX:a.state.heroX,playerZ:a.state.heroZ,
+         lavaPools:t?.poolMeshes?.length,
+         triangles:a.info()?.triangles};}""")
+    print('Titan volcanic atmosphere',json.dumps(volcano),flush=True)
+    check('volcano lava has real embers, basalt scenery and two low-cost glowing lights',
+          volcano['zone']=='town' and volcano['active'] and volcano['visible'] and
+          volcano['emberCount']==128 and volcano['basaltCount']==42 and
+          volcano['lights']==2 and volcano['lavaPools']==5,volcano)
+    page.screenshot(path='titan-volcano-mobile-test.png')
+    # Walking back into the village removes the optional volcano FX batch.
+    page.evaluate("__p3d.teleport(0,0)")
+    page.wait_for_timeout(600)
+    check('town culls remote Titan embers but keeps original lava pools',
+          page.evaluate("!__p3d.townLands.volcano.active && !__p3d.townLands.volcano.group.visible"))
     check('no uncaught browser errors',not errors,errors[:2])
     browser.close()
 srv.shutdown()

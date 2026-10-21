@@ -26,10 +26,10 @@ jobs:
         run: |
           python -m pip install playwright
           python -m playwright install --with-deps chromium
-      - name: Test larger town and Wilds travel
-        run: python tools/town_expansion_browser_test.py
       - name: Verify animated 3D character roster on Android-size screens
         run: python tools/roster_3d_browser_test.py
+      - name: Test larger town and Wilds travel
+        run: python tools/town_expansion_browser_test.py
       - name: Attach Frost Cave mobile gameplay screenshot
         if: always()
         uses: actions/upload-artifact@v4

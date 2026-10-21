@@ -33,4 +33,5 @@ jobs:
           path: |
             frost-cave*.png
             titan-volcano*.png
+            tidewrack-harbor*.png
           if-no-files-found: warn

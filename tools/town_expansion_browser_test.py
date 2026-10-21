@@ -78,11 +78,28 @@ with sync_playwright() as p:
     # Boss models load asynchronously, but their encounters must become active without input.
     page.wait_for_function("window.__p3d?.fight?.monsters?.some(e=>e.key==='frosttroll_a')&&__p3d.fight.monsters.some(e=>e.key==='frosttroll_b')",timeout=90000)
     check('both Frost Troll brothers spawn together',page.evaluate("['frosttroll_a','frosttroll_b'].every(k=>__p3d.fight.monsters.some(e=>e.key===k))"))
-    # A second frame from the combat approach captures both original boss
-    # models with cave geometry. We stay outside melee range for safety.
-    page.evaluate("__p3d.teleport(2250,-21);__p3d.setCamYaw(0)")
-    page.wait_for_timeout(850)
-    page.screenshot(path='frost-cave-boss-arena-mobile-test.png')
+    # Portrait cameras have a narrow HORIZONTAL field of view. Two brothers
+    # 74 world units apart cannot both appear from x=2250; the old screenshot
+    # showed an empty patch of fog. Frame each boss individually, and require
+    # the actual live model to project inside the camera's viewport.
+    for key,x in [('frosttroll_a',2213),('frosttroll_b',2287)]:
+        page.evaluate("""x=>{__p3d.teleport(x,-21);__p3d.setCamYaw(0);}""",x)
+        page.wait_for_timeout(1100)
+        projection=page.evaluate("""key=>{
+          const a=__p3d,e=a.fight?.monsters?.find(v=>v.key===key);
+          if(!e||!e.view)return null;
+          const worldY=(e.view.position.y||0)+Math.min(7,(e.heightAbove||12)*.3);
+          const p=new a.THREE.Vector3(e.x,worldY,e.z).project(a.camera);
+          return {x:p.x,y:p.y,z:p.z,loaded:!!e.view.userData?.glb,
+                  visible:e.view.visible,attached:e.view.parent===a.scene,
+                  distance:Math.hypot(e.x-a.state.heroX,e.z-a.state.heroZ)};
+        }""",key)
+        print('boss camera projection',key,projection,flush=True)
+        check(f'{key} live model is in the gameplay camera frame',
+              projection is not None and projection['visible'] and projection['attached'] and
+              abs(projection['x'])<1 and abs(projection['y'])<1 and -1<=projection['z']<=1,
+              projection)
+        page.screenshot(path=f'frost-cave-{key}-mobile-test.png')
     page.evaluate("__p3d.teleport(2243,177)")
     page.wait_for_function("__p3d.zone==='town'",timeout=90000)
     check('ice gate returns to mountain summit',page.evaluate("__p3d.zone")=='town')

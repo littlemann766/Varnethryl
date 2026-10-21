@@ -1421,7 +1421,7 @@ function updateCrowd(dt) {
     const w = r.root; if (!w) continue;
     w.position.set(a.x, r.y, a.z); const u = w.userData, ww = Math.min(1, sp / SPEED);
     restoreNodes(r.nd);
-    if (u.glb) { const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0; locoAnim(u, sp, animDt); u.mixer.update(animDt); if (u.serpentWave) u.serpentWave(animDt, sp); if (u.sb) u.sb.update(animDt); }
+    if (u.glb) { const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0; locoAnim(u, sp, animDt); u.mixer.update(animDt); if (u.sb) u.sb.update(animDt); }
     applyPose(a, w, r.nd, a.yaw);
   }
 }

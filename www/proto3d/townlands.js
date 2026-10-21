@@ -309,7 +309,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const s=randRange(rnd,.85,1.5);
     put('trees',type,pal,x,z,s,true);claim(x,z,2.9*s);
     // Simple circular trunk collider, keeping long clear roads, doors and orchard paths navigable.
-    colliders.push({type:'circle',x,z,r:.42*s+.15});
+    colliders.push({type:'circle',x,z,r:.42*s+.15,cameraTop:townElevation(x,z,world)+15*s,tree:true});
     stats.trees++;if(r==='orchard')stats.orchard++;
   },2);
   sample(360,(x,z,r)=>{if(!clear(x,z,1.3))return false;

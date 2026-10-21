@@ -285,7 +285,7 @@ export function createFight(env) {
     const e = cc.addEnemy(key, x, z, Object.assign({ view: w, top:top+terrainY(x,z), heightAbove:top, ems, tele, flashOn: false, px: x, pz: z }, bossHome(key,x,z)||{}, extra));
     if(def.boss){bossOn=true;
       if(Math.hypot(x-state.heroX,z-state.heroZ)<65){
-        hud.say(def.name.toUpperCase()+' APPEARS',2200);
+        hud.say(def.name.toUpperCase()+' APPEARS',1250);
         cc.tgt.target=e;cc.tgt.locked=false;cc.lastTarget=e;
       }
     }

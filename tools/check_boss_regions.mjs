@@ -138,6 +138,7 @@ assert(fight.includes('startRegionBosses'),'automatic boss spawning at frost');
 assert(fight.includes('balthrixPosition(regionClock+(roamingBoss.routePhase||0))'),'roaming Balthrix follows phased patrol');
 assert(fight.includes('projectBalthrixToTrail(p.x,p.z)'),'Balthrix chase and knockback stay on the path');
 assert(fight.includes('const pitch=-Math.atan2(high-low,2*span)'),'serpent inclines into hill rises and descents');
+assert(fight.includes('if (u.serpentWave) u.serpentWave(dt, mv)'),'enemy Balthrix actually animates its fallback spine and tail while moving');
 assert(fight.includes('1.05*Math.max(0,dt)'),'serpent turning is speed-limited');
 const ai=src('www/proto3d/combat/ai.js');
 assert(ai.includes('const deltaYaw = Math.atan2(Math.sin(targetYaw - currentYaw)'),'boss facing turns smoothly');

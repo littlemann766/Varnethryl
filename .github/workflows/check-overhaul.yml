@@ -20,6 +20,8 @@ jobs:
         run: node tools/check_overhaul.mjs
       - name: Check persistent EXP, level rollover, and ornate UI frames
         run: node tools/check_exp_ui.mjs
+      - name: Check boss arena retreat, telegraph warnings, and respawning
+        run: node tools/check_boss_ai.mjs
       - name: Check established encounter geography and gameplay invariants
         run: node tools/check_boss_regions.mjs
       - name: Check walkable terrain and portal stability

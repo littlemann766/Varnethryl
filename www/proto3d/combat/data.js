@@ -80,7 +80,7 @@ export const ENEMIES = {
   skeleton: E('Ash Skeleton', 30, 'Undead', 5600, 270, 200, 3.6, { model: 'o:stonetroll', atkMs: 2300, tele: 0.8, r: 1.4 }),
   frosttroll: E('Frost Troll', 45, 'Elite', 60000, 900, 400, 4.2, { model: 'n:frosttroll_a', atkMs: 2300, tele: 0.9, reach: 4.2, r: 3.0, scale: 3.5, aggro: 40, patterns: true, stagger: 0.4, poise: 0.5, xp: 4000, gold: 900 }),
   frosttroll_a:E('Frost Troll A — Elder Brother',52,'Brother Boss',780000,1320,480,4.4,{model:'n:frosttroll_a',atkMs:2200,tele:1.0,reach:6.4,r:3,scale:3.5,aggro:65,boss:true,stagger:.45,poise:.65,xp:6200,gold:1500}),
-  frosttroll_b:E('Frost Troll B — Younger Brother',52,'Brother Boss',780000,1450,430,4.9,{model:'n:frosttroll_b',atkMs:2250,tele:1.0,reach:7.2,r:3,scale:3.5,aggro:65,boss:true,stagger:.45,poise:.65,xp:6200,gold:1500}),
+  frosttroll_b:E('Frost Troll B — Younger Brother',52,'Brother Boss',780000,1450,430,4.9,{model:'n:frosttroll_b',atkMs:2250,tele:1.0,reach:7.2,r:3,scale:3.5,aggro:65,boss:true,stagger:.45,poise:.65,xp:6200,gold:1500,trollTint:true}),
   titan40: E('Ashen Titan — 15×',80,'Volcanic Boss',11500000,3200,990,4.1,{model:'n:ashentitan_20',atkMs:3400,tele:2.2,reach:12,r:7,scale:15,aggro:75,boss:true,stagger:.25,poise:.95,xp:54000,gold:13000}),
   titan:    E('Ashen Titan', 60, 'Boss', 5000000, 2100, 600, 7.3, { model: 'n:ashentitan_new', atkMs: 2300, tele: 1.1, reach: 8.4, r: 5, scale: 6, aggro: 60, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
   vaelthryx: E('Balthrix the Crystal Sovereign', 70, 'Boss', 8000000, 2600, 700, 7.0, { model: 'n:vaelthryx_straight_rig', atkMs: 2400, tele: 1.1, reach: 9.5, r: 5.2, scale: 10, aggro: 70, boss: true, stagger: 0.25, poise: 0.9, xp: 30000, gold: 6000 }),

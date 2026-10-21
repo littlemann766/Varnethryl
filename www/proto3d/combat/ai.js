@@ -1,5 +1,6 @@
 /* EnemyAIController: idle -> chase -> telegraph -> attack -> recover, with stagger and defeated. Pure state machine; the controller applies results. */
 import { BOSS_PATTERNS, TUNING } from './data.js';
+import { outsideBossArena, homeDistance } from './boss-arena.js';
 /* Boss pattern pick: ordered rotation over the patterns available in the current phase (deterministic, learnable). Non-bosses return null (classic single attack). */
 export function pickPattern(e) { const L = BOSS_PATTERNS[e.key]; if (!(e.def.boss || e.def.patterns) || !L) return null; const ph = e.phase || 1, A = L.filter(p => (p.phase || 1) <= ph); e.patI = (e.patI || 0) + 1; return A[(e.patI - 1) % A.length]; }
 export class EnemyAIController {
@@ -7,7 +8,14 @@ export class EnemyAIController {
   update(e, p, dt, env) {
     if (e.state === 'defeated') return null;
     e.tStateT += dt; e.atkCd = Math.max(0, e.atkCd - dt); e.flash = Math.max(0, e.flash - dt);
-    const dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz) || 1e-6, nx = dx / d, nz = dz / d, reach = e.def.reach * env.HS + e.def.r;
+    // Bosses that the player kites outside their arenas disengage before the
+    // telegraphed strike can land. Balthrix has no leash and roams freely.
+    if (!p.dead && e.state !== 'idle' && e.state !== 'return' && outsideBossArena(e,p.x,p.z)) {
+      e.pat=null;e.curTele=0;this.set(e,'return');
+    }
+    const returning=e.state==='return';
+    const tx=returning?e.homeX:p.x,tz=returning?e.homeZ:p.z;
+    const dx=tx-e.x,dz=tz-e.z,d=Math.hypot(dx,dz)||1e-6,nx=dx/d,nz=dz/d,reach=e.def.reach*env.HS+e.def.r;
     if (e.state !== 'telegraph' && e.state !== 'attack' && Number.isFinite(nx) && Number.isFinite(nz)) {
       const targetYaw = Math.atan2(nx, nz);
       const currentYaw = Number.isFinite(e.yaw) ? e.yaw : targetYaw;
@@ -19,7 +27,15 @@ export class EnemyAIController {
     }
     if (e.knockT > 0) { e.knockT = Math.max(0, e.knockT - dt); env.move(e, e.kx * 9 * e.knockT * dt * 4, e.kz * 9 * e.knockT * dt * 4); }
     switch (e.state) {
-      case 'idle': if (!p.dead && d < (e.aggroR !== undefined ? e.aggroR : e.def.aggro * env.HS / 1.5 * 1.4 * Math.max(1, 0.5 + 0.5 * (env.RM || 1)))) this.set(e, 'chase'); break;
+      case 'idle': if (!p.dead && !outsideBossArena(e,p.x,p.z) && d < (e.aggroR !== undefined ? e.aggroR : e.def.aggro * env.HS / 1.5 * 1.4 * Math.max(1, 0.5 + 0.5 * (env.RM || 1)))) this.set(e, 'chase'); break;
+      case 'return': {
+        const remaining=homeDistance(e);
+        if(remaining<=1.6){e.hp=e.max;e.phase=1;e.pat=null;e.patI=0;e.atkCd=.8;this.set(e,'idle');break;}
+        const speed=e.def.speed*1.05*env.HS/1.5;
+        const step=Math.min(remaining,speed*Math.max(0,dt));
+        env.move(e,nx*step,nz*step);
+        break;
+      }
       case 'chase':
         if (p.dead) { this.set(e, 'idle'); break; }
         const spd = e.phase === 2 ? TUNING.boss.enrageSpeed : 1, pt = (e.def.boss || e.def.patterns) ? (e.pat || (e.pat = pickPattern(e))) : null, eng = pt ? pt.reach * env.HS + e.def.r : reach;

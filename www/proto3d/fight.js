@@ -15,6 +15,7 @@ import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './
 import { Respawner } from './combat/respawn.js';
 import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
+import { bossHome, telegraphKey } from './combat/boss-arena.js';
 import { HOB_CAMPS } from './hobcamps.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
 export const SABER_GLB = null;             // URL (or fight.setSaberModel(url)) for Beth's saber: hilt at origin, blade along +Y, ~1 m
@@ -23,7 +24,7 @@ export function createFight(env) {
   const { THREE, scene, camera, state, HS } = env;
   let on = false, saber = null, saberUrl = SABER_GLB, wave = 1, sheathed = false, spawnT = 0, bossOn = false;
   const terrainY=(x,z)=>env.groundY?env.groundY(x,z):0;
-  const bossDue=new Map();const bossPending=new Set();let regionClock=0,roamClock=0;
+  const bossDue=new Map();const bossPending=new Set();let regionClock=0,roamClock=0,frostSpawnT=0,spawnEpoch=0;
   const v3 = new THREE.Vector3(), sc = [0, 0];
   const project = (x, y, z, out) => { v3.set(x, y, z).project(camera); if (v3.z > 1 || Math.abs(v3.x) > 1.3 || Math.abs(v3.y) > 1.3) return false; out[0] = (v3.x * 0.5 + 0.5) * innerWidth; out[1] = (-v3.y * 0.5 + 0.5) * innerHeight; return true; };
   const armory = new Armory({ ownerOk: () => !!(window.__p3d && window.__p3d.owner && window.__p3d.cheats), wallet: null });   // engine-side validation of every Armory UI request
@@ -259,7 +260,11 @@ export function createFight(env) {
 
   /* ---- enemies ---- */
   async function spawn(key, atPlayerDist, extra) {
-    const def = ENEMIES[key], w = await env.makeModel(def.model); if (!w || !on) return null;
+    const generation=spawnEpoch,spawnZone=env.zone?.();
+    const def = ENEMIES[key], w = await env.makeModel(def.model);
+    // A GLB may finish loading after a portal transition, death, or fight stop.
+    // Never allow it to spawn into a different zone's new combat session.
+    if (!w || !on || generation!==spawnEpoch || spawnZone!==env.zone?.()) return null;
     let x = state.heroX + 12, z = state.heroZ;
     if (extra && extra.at) { x = extra.at[0]; z = extra.at[1]; } else for (let k = 0; k < 20; k++) { const a = Math.random() * 6.283, r = (atPlayerDist || (14 + Math.random() * 14)) * HS / 1.5 * Math.max(1, cc.RM * 0.7), px = state.heroX + Math.cos(a) * r, pz = state.heroZ + Math.sin(a) * r; if (env.free(px, pz)) { x = px; z = pz; break; } }
     w.position.set(x, terrainY(x,z), z); let top;
@@ -276,7 +281,7 @@ export function createFight(env) {
     scene.add(w);
     const ems = []; w.traverse(o => { if (o.isMesh && o.material && o.material.emissive) { ems.push(o); o.userData.em = o.material.emissive.getHex(); } });
     const tele = new THREE.Mesh(ring.geometry, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false })); tele.rotation.x = -Math.PI / 2; tele.visible = false; scene.add(tele);
-    const e = cc.addEnemy(key, x, z, Object.assign({ view: w, top:top+terrainY(x,z), heightAbove:top, ems, tele, flashOn: false, px: x, pz: z }, extra));
+    const e = cc.addEnemy(key, x, z, Object.assign({ view: w, top:top+terrainY(x,z), heightAbove:top, ems, tele, flashOn: false, px: x, pz: z }, bossHome(key,x,z)||{}, extra));
     if(def.boss){bossOn=true;
       if(Math.hypot(x-state.heroX,z-state.heroZ)<65){
         hud.say(def.name.toUpperCase()+' APPEARS',2200);
@@ -287,13 +292,32 @@ export function createFight(env) {
   }
   const spawnBoss = () => { if (on && !bossOn) spawn('titan', 26); };
   /* boss telegraph shapes: ONE pooled mesh per boss (plane for line, sector for cone), created lazily. */
-  let GL_LINE = null, GL_CONE = null;
-  function bossTele(e, shape, pt) { if (!e.tele2 || e.tele2s !== shape) { if (e.tele2) { scene.remove(e.tele2); e.tele2.material.dispose(); }
-      const g = shape === 'line' ? (GL_LINE || (GL_LINE = new THREE.PlaneGeometry(1, 1).translate(0, 0, 0))) : (GL_CONE || (GL_CONE = new THREE.CircleGeometry(1, 20, Math.PI / 2 - Math.acos(pt.cos), 2 * Math.acos(pt.cos))));
-      e.tele2 = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.4, side: THREE.DoubleSide, depthWrite: false })); e.tele2s = shape; scene.add(e.tele2); }
-    e.tele2.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); return e.tele2; }
+  let GL_LINE = null; const GL_CONES=new Map();
+  function bossTele(e,shape,pt) {
+    // Cone half-angles differ by skill: caching only by 'cone' made later
+    // warnings display an older hitbox. Cache geometry by exact attack angle.
+    const key=telegraphKey(shape,pt);
+    if(!e.tele2 || e.tele2s!==key){
+      if(e.tele2){scene.remove(e.tele2);e.tele2.material.dispose();}
+      let g;
+      if(shape==='line')g=GL_LINE||(GL_LINE=new THREE.PlaneGeometry(1,1));
+      else{
+        g=GL_CONES.get(key);
+        if(!g){
+          const half=Math.acos(Math.max(-1,Math.min(1,pt.cos)));
+          g=new THREE.CircleGeometry(1,32,Math.PI/2-half,2*half);
+          GL_CONES.set(key,g);
+        }
+      }
+      e.tele2=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:0xff2a2a,transparent:true,opacity:.4,side:THREE.DoubleSide,depthWrite:false}));
+      e.tele2s=key;scene.add(e.tele2);
+    }
+    e.tele2.material.color.setHex(e.phase===2?0xff7a1a:0xff2a2a);
+    return e.tele2;
+  }
   cc.on('remove', e => { if (e.view) { scene.remove(e.view); scene.remove(e.tele); e.tele.material.dispose(); if (e.tele2) { scene.remove(e.tele2); e.tele2.material.dispose(); } } });
-  cc.on('bossPhase', ev => { hud.say('THE TITAN ENRAGES', 1800); shakeA = 1.2; shakeT = 0.6; });
+  cc.on('bossPhase', ev => { hud.say((ev.e?.def?.name || 'THE BOSS').toUpperCase()+' ENRAGES', 1800); shakeA = 1.2; shakeT = 0.6; });
+  cc.on('bossRetreat', ev=>hud.say((ev.e?.def?.name || 'Boss')+' retreats',1300));
   const yawLerp = (cur, to, k) => cur + (((to - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * k;
 
   /* ---- per frame ---- */
@@ -322,7 +346,15 @@ export function createFight(env) {
   }
   function regionUpdate(dt){
     const zone=env.zone?env.zone():'town';regionClock+=dt;
-    if(zone==='frost')return;
+    if(zone==='frost'){
+      // Dying clears all enemies. Repopulate the brothers once the player
+      // respawns, without needing to exit and re-enter the cave portal.
+      if(cc.dead<=0&&regionClock>=frostSpawnT){
+        frostSpawnT=regionClock+2.5;
+        for(const brother of FROST_BROTHERS)spawnRegion(brother.key,brother.x,brother.z,{aggroR:80});
+      }
+      return;
+    }
     if(zone!=='town')return;
     // Protected village: no spawns or lava damage inside city walls.
     const outside=!isCitySafe(state.heroX,state.heroZ,8);
@@ -494,7 +526,7 @@ export function createFight(env) {
         const shape = pt ? pt.shape : 'ring'; e.tele.visible = shape === 'ring'; if (shape === 'ring') { e.tele.position.set(e.x, terrainY(e.x,e.z)+0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; e.tele.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); }
         if (shape !== 'ring') { const t2 = bossTele(e, shape, pt); t2.visible = true; const L = pt.reach * HS + e.def.r; t2.position.set(e.x, terrainY(e.x,e.z)+0.13, e.z); t2.rotation.set(-Math.PI / 2, 0, e.yaw + Math.PI); t2.material.opacity = 0.18 + 0.45 * f; if (shape === 'line') { t2.scale.set(pt.width * HS, L * (0.35 + 0.65 * f), 1); t2.position.set(e.x + Math.sin(e.yaw) * t2.scale.y / 2, terrainY(e.x + Math.sin(e.yaw) * t2.scale.y / 2,e.z + Math.cos(e.yaw) * t2.scale.y / 2)+0.13, e.z + Math.cos(e.yaw) * t2.scale.y / 2); } else t2.scale.setScalar(L * (0.35 + 0.65 * f)); } else if (e.tele2) e.tele2.visible = false;
       } else { e.tele.visible = false; if (e.tele2) e.tele2.visible = false; }
-      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.roaming && mv > .5 ? mv : 0); u.mixer.update(dt); if (e.key === 'vaelthryx' && u.serpentWave) u.serpentWave(dt,mv); if (u.sb) u.sb.update(dt); }
+      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.state === 'return' || e.roaming && mv > .5 ? mv : 0); u.mixer.update(dt); if (e.key === 'vaelthryx' && u.serpentWave) u.serpentWave(dt,mv); if (u.sb) u.sb.update(dt); }
       const f = e.flash > 0 || e.state === 'telegraph'; if (f !== e.flashOn) { e.flashOn = f; const hx = e.flash > 0 ? 0xff2020 : 0xaa5500; for (const o of e.ems) o.material.emissive.setHex(f ? hx : o.userData.em); }
     }
     if (shakeT > 0) shakeT = Math.max(0, shakeT - dt); metUpdate(dt);
@@ -524,7 +556,7 @@ export function createFight(env) {
     syncHero(); equip(); hud.say('COMBAT READY', 1800);
   }
   function stop() { heroWeaponClear(); for (const s of cc.summons.slice()) cc.removeSummon(s, 'stop'); cc.buffs.length = 0; sumSync();
-    if (!on) return; on = false; metHide(); metDispose(); cc.meteors.length = 0; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
+    if (!on) return; on = false; spawnEpoch++; metHide(); metDispose(); cc.meteors.length = 0; hud.show(false); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
   const moveMul = () => (on && cc.chill > 0 && !cc.hero.owner) ? Math.max(0.3, 1 - (cc.chillAmt || 0)) : 1; if (typeof window !== 'undefined') window.__fightMove = moveMul;

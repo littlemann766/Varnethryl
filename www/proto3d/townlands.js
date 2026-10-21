@@ -6,6 +6,7 @@ import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js
 import { buildBalthrixTrail } from './balthrix-trail.js';
 import { makeVolcanoEffects } from './volcano-effects.js';
 import { buildSailingShip,animateMooredShip } from './port-ships.js';
+import { MOUNTAIN_APPROACH, MOUNTAIN_WILDS_GATE, buildMountainWildsGateway } from './wilds-gateway.js';
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
 const CHUNK = 64;
@@ -183,6 +184,11 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   }
   const harborRoad=path([[0,CITY_HALF+8],[-82,210],[-165,247],[-245,285],[-325,332],[-365,379],[-403,382],[PORT_CENTER.x,PORT_CENTER.z-15]],9.2);
   const mountainRoad=path([[0,-CITY_HALF-12],[-45,-231],[-80,-285],[-57,-337],[-18,-386],[30,-374],[25,-348],[FROST_PORTAL.x,FROST_PORTAL.z+7]],7.4,new THREE.MeshLambertMaterial({color:0x7b847f,side:THREE.DoubleSide}));
+  // Separate westward branch from the established frost road. Stone paving follows
+  // the real mountain terrain: no floating staircase and no Frost portal changes.
+  const brokenSealRoad=path(MOUNTAIN_APPROACH,8.4,new THREE.MeshLambertMaterial({color:0x756b6b,side:THREE.DoubleSide}));
+  const ruinedGateway=buildMountainWildsGateway(group,(x,z)=>townElevation(x,z,world));
+  for(const c of ruinedGateway.colliders)colliders.push(c);
   // Summit approach: an actual rocky ice tunnel. Enter from the southern road
   // and continue north to the existing portal at local z=-18, well inside.
   // Portal coordinates remain unchanged to preserve save and teleport behavior.
@@ -334,9 +340,16 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   // Clear avenues across the centre, the old village, gatehouse approach and a ring road.
   const route=(x,z,pad=0)=>Math.abs(x)<15+pad||Math.abs(z)<10+pad||
     Math.abs(Math.hypot(x,z)-RING)<8+pad;
+  const nearBrokenSealPath=(x,z,pad=0)=>MOUNTAIN_APPROACH.some((p,i)=>{if(i===0)return false;
+    const [ax,az]=MOUNTAIN_APPROACH[i-1],[bx,bz]=p,dx=bx-ax,dz=bz-az;
+    const t=Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/(dx*dx+dz*dz||1)));
+    return Math.hypot(x-ax-t*dx,z-az-t*dz)<9+pad;
+  });
   const possible=(x,z,pad=0)=>Math.max(Math.abs(x),Math.abs(z))>CORE+pad &&
     Math.max(Math.abs(x),Math.abs(z))<usable-pad &&
-    !route(x,z,pad) && !insideField(x,z,pad) && !nearBuilding(x,z,pad) &&
+    !route(x,z,pad) && !nearBrokenSealPath(x,z,pad) &&
+    Math.hypot(x-MOUNTAIN_WILDS_GATE.x,z-MOUNTAIN_WILDS_GATE.z)>34+pad &&
+    !insideField(x,z,pad) && !nearBuilding(x,z,pad) &&
     Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)>46+pad &&
     Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z)>76+pad &&
     Math.hypot(x-PORT_CENTER.x,z-PORT_CENTER.z)>65+pad;
@@ -446,5 +459,5 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
       mesh.visible=d<140*Math.max(1,k);
     }
   }
-  return {group,cull,stats,terrain,poolMeshes,volcano,updateVolcano,harborRoad,mountainRoad,cave,harbor,harborShips,ships,dockPlanks,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields,trail};
+  return {group,cull,stats,terrain,poolMeshes,volcano,updateVolcano,harborRoad,mountainRoad,brokenSealRoad,ruinedGateway,cave,harbor,harborShips,ships,dockPlanks,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields,trail};
 }

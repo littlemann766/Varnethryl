@@ -6,7 +6,7 @@ const clamp01=x=>Math.min(1,Math.max(0,Number.isFinite(x)?x:0));
 const smooth=x=>{const t=clamp01(x);return t*t*(3-2*t);};
 export const DAYLIGHT=Object.freeze({fogColor:0xdde8ee,fogNear:70,fogFar:180,sun:2.2,fill:1.25,sunColor:0xfff0d0,darkSky:false});
 export const FROST_CAVE=Object.freeze({fogColor:0x0d1829,fogNear:27,fogFar:165,sun:0.17,fill:0.35,sunColor:0x779cce,darkSky:true});
-export const VOLCANO=Object.freeze({fogColor:0x684039,fogNear:36,fogFar:130,sun:1.35,fill:0.69,sunColor:0xffa367,darkSky:false});
+export const VOLCANO=Object.freeze({fogColor:0x786257,fogNear:57,fogFar:172,sun:1.9,fill:1.12,sunColor:0xffbd8d,darkSky:false});
 export function zoneAtmosphere(zone,x=0,z=0,titan={x:405,z:-402},scale=1){
  const view=Math.max(1,Math.min(2.2,Number.isFinite(scale)?scale:1));
  if(zone==='frost')return {...FROST_CAVE,fogNear:FROST_CAVE.fogNear*view,fogFar:FROST_CAVE.fogFar*view,heat:0};

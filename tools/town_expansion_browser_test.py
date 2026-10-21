@@ -125,9 +125,23 @@ with sync_playwright() as p:
           -1<=camera['craterProjection']['z']<=1,camera)
     volcano=page.evaluate("""()=>{
        const a=__p3d,t=a.townLands,v=t?.volcano,m=t?.poolMeshes?.[0]?.material;
+       // Read the real vertex colors around the Titan, not only CSS or test
+       // constants: an earlier release accidentally painted this ground black.
+       const pos=t.terrain.geometry.attributes.position;
+       const col=t.terrain.geometry.attributes.color;
+       let best=1e30,ashLinear=0,terrainY=0;
+       for(let i=0;i<pos.count;i++){
+         const d=(pos.getX(i)-405)**2+(pos.getZ(i)+402)**2;
+         if(d<best){
+           best=d;ashLinear=(col.getX(i)+col.getY(i)+col.getZ(i))/3;
+           terrainY=pos.getY(i);
+         }
+       }
        return {zone:a.zone,active:v?.active,visible:v?.group.visible,
          emberCount:v?.embers?.geometry.attributes.position.count,
          basaltCount:v?.shards?.count,lights:v?.glowLights?.length,
+         moltenCracks:v?.fissures?.geometry.index?.count,
+         ashLinear,terrainY,
          lavaGlow:m?.emissiveIntensity,playerY:a.state.heroY,
          playerX:a.state.heroX,playerZ:a.state.heroZ,
          lavaPools:t?.poolMeshes?.length,
@@ -137,6 +151,8 @@ with sync_playwright() as p:
           volcano['zone']=='town' and volcano['active'] and volcano['visible'] and
           volcano['emberCount']==128 and volcano['basaltCount']==42 and
           volcano['lights']==2 and volcano['lavaPools']==5,volcano)
+    check('ash terrain preserves readable charcoal shading and self-lit fissures',
+          volcano['ashLinear']>.04 and volcano['moltenCracks']==12*15*6,volcano)
     page.screenshot(path='titan-volcano-mobile-test.png')
     # Walking back into the village removes the optional volcano FX batch.
     page.evaluate("__p3d.teleport(0,0)")

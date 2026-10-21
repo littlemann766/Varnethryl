@@ -84,13 +84,20 @@ function buildWalkableTerrain(world){
     const ice=1-smooth01((Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)-35)/115);
     if(ice>0)paint.lerp(snow,Math.min(0.97,ice*.93));
     const volc=lavaAmount(x,z);
-    if(volc>0){
-      const d=Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z);
-      const ash=1-smooth(115,150,d);
-      paint.lerp(new THREE.Color(0x201f28),Math.min(1,Math.max(volc*.92,ash*.96)));
-      // Fire-red mineral seams along the crater and jagged rim.
-      if(d<45&&d>20&&Math.sin(Math.atan2(z-TITAN_CENTER.z,x-TITAN_CENTER.x)*11)>0.7)
-        paint.lerp(new THREE.Color(0x81382b),.33);
+    const titanD=Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z);
+    const ash=1-smooth(115,153,titanD);
+    if(ash>0){
+      // Keep volcanic ground charcoal and readable in the third-person
+      // camera. Previously near-black #201f28 swallowed terrain contours,
+      // leaving an almost featureless solid black field on Android phones.
+      const cooledRock=new THREE.Color(0x554840);
+      const basaltRock=new THREE.Color(0x40373c);
+      const variegation=.15*Math.sin(x*.079+z*.051)*Math.cos(z*.091-x*.038);
+      paint.lerp(cooledRock,Math.min(.94,ash*(.65+variegation)));
+      paint.lerp(basaltRock,Math.min(.48,volc*.48));
+      // Warm exposed mineral streaks give depth even at low graphics settings.
+      if(titanD<100&&titanD>18&&Math.sin(Math.atan2(z-TITAN_CENTER.z,x-TITAN_CENTER.x)*11)>0.35)
+        paint.lerp(new THREE.Color(0x99583f),.24*ash);
     }
     if(Math.min(Math.abs(x),Math.abs(z))<15&&Math.max(Math.abs(x),Math.abs(z))>160)paint.lerp(earth,.7);
     C[k]=paint.r;C[k+1]=paint.g;C[k+2]=paint.b;
@@ -216,9 +223,9 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   const archTop=new THREE.Mesh(new THREE.BoxGeometry(4,1.7,34),hm);archTop.position.set(W,8.1,0);archTop.castShadow=true;harbor.add(archTop);
   // Volcanic harbor dressing: dark basalt walls, glowing forge vents and lava-lit beacons.
   // All features are inside the existing harbor footprint; roads, saves and collision stay intact.
-  const basalt=new THREE.MeshLambertMaterial({color:0x302c35});
+  const basalt=new THREE.MeshLambertMaterial({color:0x514449});
   const ember=new THREE.MeshLambertMaterial({color:0xff6326,emissive:0xb72b09,emissiveIntensity:0.8});
-  const cooled=new THREE.MeshLambertMaterial({color:0x514049});
+  const cooled=new THREE.MeshLambertMaterial({color:0x68514b});
   for(const wall of harbor.children){
     if(wall.material===hm)wall.material=basalt;
     else if(wall.material===wood)wall.material=cooled;

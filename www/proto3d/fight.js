@@ -12,7 +12,7 @@ import { heroKey } from './combat/herokits.js';
 import { CompanionCombat } from './combat/companions.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 import { Respawner } from './combat/respawn.js';
-import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, onLava, isCitySafe } from './bossregions.js';
+import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, nearestBalthrixRoamTime, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
 import { HOB_CAMPS } from './hobcamps.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
@@ -346,16 +346,7 @@ export function createFight(env) {
   }
   // Locate the player's nearest point along Balthrix's continuous world circuit.
   // Spawn close enough to be encountered rather than waiting for a distant global timer.
-  function nearestRoamTime(x,z){
-    const p=BALTHRIX_ROUTE;let best=Infinity,elapsed=0,closest=0;
-    for(let i=0;i<p.length;i++){
-      const a=p[i],b=p[(i+1)%p.length],dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);
-      const u=Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(len*len||1)));
-      const d=Math.hypot(x-a[0]-dx*u,z-a[1]-dz*u);
-      if(d<best){best=d;closest=(elapsed+len*u)/14;}elapsed+=len;
-    }
-    return{distance:best,time:closest};
-  }
+  const nearestRoamTime = (x,z)=>nearestBalthrixRoamTime(x,z);
   let roamBusy=false;
   function startRegionBosses(zone){
     if(zone==='frost')for(const brother of FROST_BROTHERS)spawnRegion(brother.key,brother.x,brother.z,{aggroR:80});

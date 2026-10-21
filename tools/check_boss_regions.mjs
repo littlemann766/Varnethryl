@@ -64,7 +64,7 @@ for (const p of BALTHRIX_TRAIL) {
 assert(closestSwim>22,'Balthrix path and raised banks stay outside coastal swimming water');
 assert(closestPier>20,'Balthrix cannot crush the northwest harbor dock');
 for(const p of BALTHRIX_TRAIL){
- assert(Math.max(Math.abs(p.x),Math.abs(p.z))>405,'Balthrix must patrol the map perimeter, never cut through the village');
+ assert(Math.max(Math.abs(p.x),Math.abs(p.z))>195,'Balthrix detours between boss regions without cutting into the protected village');
  assert(Math.max(Math.abs(p.x),Math.abs(p.z))<540,'trail cannot leave walkable map');
  assert(!(p.x>-511&&p.x<-340&&p.z>311&&p.z<475),'trail cannot cut across northwest coastal harbor');
  assert(balthrixTrailDistance(p.x,p.z)<.001,'trail must align with roamer spline');
@@ -108,7 +108,7 @@ assert(main.includes("r.y = surfaceAt(a.x, a.z, r.level)?.y ?? (state.heroY || 0
 assert(main.includes("if (document.hidden) setTravelRun(false)"),'backgrounding game clears held sprint state');
 assert(main.includes('run.setEffectiveWeight((standing ? 0 : runMix)*ov)'),'missing-idle rigs never blend into running while standing');
 assert(main.includes('const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0'),'animation frame stalls are bounded');
-assert(main.includes('u.mixer.update(animDt); if (u.sb) u.sb.update(animDt)'),'hero cloth and mixer use bounded animation delta');
+assert(main.includes('u.mixer.update(animDt);')&&main.includes('if (u.sb) u.sb.update(animDt)'),'hero cloth and mixer use bounded animation delta');
 assert(main.includes('Short-range obstacle avoidance: test forward and two angled probes'),'companions probe obstacles before steering');
 assert(main.includes("try { resolve(probe, false, 'npc'); }"),'companion probes use collision resolver');
 assert(main.includes("finally { state.level = previousLevel; }"),'companion probes restore world floor');

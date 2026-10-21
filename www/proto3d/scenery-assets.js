@@ -8,7 +8,7 @@ import {GLTFLoader} from './vendor/jsm/loaders/GLTFLoader.js';
 import {SCENERY_ASSETS,SCENERY_SITES,sceneryAssetPath} from './scenery-map-data.js';
 export {SCENERY_ASSETS,SCENERY_SITES,sceneryAssetPath,scenerySiteErrors} from './scenery-map-data.js';
 
-export function createSceneryAssets({scene,townElevation,frostElevation,version='1.2.8',onEvent=()=>{}}){
+export function createSceneryAssets({scene,townElevation,frostElevation,version='1.2.9',onEvent=()=>{}}){
   const loader=new GLTFLoader(),groups={town:new THREE.Group(),frost:new THREE.Group()};
   for(const z of ['town','frost']){
     groups[z].name='optional-creator-scenery-'+z;

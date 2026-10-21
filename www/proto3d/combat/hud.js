@@ -312,6 +312,10 @@ const CSS = `
 }
 #cb .cl button .g{font:400 19px/21px system-ui!important;flex:none}
 #cb .cl button .q{display:none}
+/* Potion count must remain visible; all keyboard prompts are hidden on the touch strip. */
+#cb .cl button[data-a="potion"] .q{display:block;right:-3px;top:-6px;padding:2px 3px;
+ color:#ffe8b3;background:#291437;border:1px solid #cba367;border-radius:7px;
+ font:700 9px system-ui;line-height:1;z-index:2}
 #cb .cl button .cdv{pointer-events:none}
 #cb .ulp{right:0!important;bottom:calc(100% + 65px)!important;width:min(210px,70vw);gap:6px;z-index:6}
 #cb .ulp button{width:100%;min-height:44px!important;padding:8px!important;

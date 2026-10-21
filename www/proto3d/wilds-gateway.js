@@ -23,7 +23,13 @@ const mats=()=>({
 });
 function addMesh(group,geo,mat,name,x,y,z,sx=1,sy=1,sz=1){
   const mesh=new THREE.Mesh(geo,mat);mesh.name=name;mesh.position.set(x,y,z);
-  mesh.scale.set(sx,sy,sz);mesh.castShadow=false;mesh.receiveShadow=true;group.add(mesh);return mesh;
+  mesh.scale.set(sx,sy,sz);mesh.castShadow=false;mesh.receiveShadow=true;
+  // Startup's global static-batcher is allowed to merge plain rock and paving,
+  // but not portal arch lintels or animated emissive runes/crystals.
+  // Retaining only these small accents keeps the Android draw-call count low.
+  if (/arch-lintel|purple-crystal|purple-ward|floor-runes|ancient-seal/.test(name))
+    mesh.userData.keep=true;
+  group.add(mesh);return mesh;
 }
 function ruinArch(g, M, x, floor, broken=false){
   const pillar=new THREE.BoxGeometry(1.65,5.5,1.7);

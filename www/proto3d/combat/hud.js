@@ -217,7 +217,7 @@ const CSS = `
 #cb .vn-exp .vn-exp-track{position:absolute;left:10.5%;right:10.5%;top:43%;height:22%;background:linear-gradient(#13091c,#35103f 50%,#0d0818);border:1px solid #8e5b40;overflow:hidden}
 #cb .vn-exp .vn-exp-fill{position:absolute;inset:0;transform-origin:left center;transform:scaleX(0);background:linear-gradient(180deg,#ffe0ff 0%,#de86ff 14%,#9a31e6 45%,#6424ab 77%,#410f7e);box-shadow:inset 0 2px 5px #fff5,0 0 12px #ba58fb;will-change:transform;transition:transform .55s cubic-bezier(.2,.7,.2,1)}
 #cb .vn-exp .vn-exp-fill:after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(105deg,transparent 0 23px,#ffdbff26 24px 27px,transparent 28px 40px)}
-#cb .vn-exp .vn-exp-art{position:absolute;inset:0;width:100%;height:100%;background:url('../assets/hud/exp-frame.svg') center/100% 100% no-repeat;z-index:2}
+#cb .vn-exp .vn-exp-art{position:absolute;inset:0;width:100%;height:100%;background:url('assets/hud/exp-frame.svg') center/100% 100% no-repeat;z-index:2}
 #cb .vn-exp .vn-exp-level,#cb .vn-exp .vn-exp-value{position:absolute;z-index:3;left:50%;transform:translateX(-50%);white-space:nowrap;font-variant-numeric:tabular-nums}
 #cb .vn-exp .vn-exp-level{top:0;font-size:10px;letter-spacing:.11em;color:#ffdfa6}
 #cb .vn-exp .vn-exp-value{bottom:0;font-size:10px;letter-spacing:.02em;color:#f7dcff}
@@ -232,7 +232,7 @@ const CSS = `
 #cb .tp,#cb .tp.boss{
   background:linear-gradient(145deg,#281631ef,#120d19ef)!important;
   border:9px solid transparent!important;
-  border-image-source:url('../assets/hud/label-long.svg')!important;
+  border-image-source:url('assets/hud/label-long.svg')!important;
   border-image-slice:42 122!important;
   border-image-width:9px 13px!important;
   border-image-outset:0!important;
@@ -248,7 +248,7 @@ const CSS = `
 #cb .vit{
   background:linear-gradient(140deg,#25172ff6,#140e1bf6)!important;
   border:10px solid transparent!important;
-  border-image-source:url('../assets/hud/panel-wide.svg')!important;
+  border-image-source:url('assets/hud/panel-wide.svg')!important;
   border-image-slice:92!important;
   border-image-width:10px!important;
   border-image-outset:0!important;

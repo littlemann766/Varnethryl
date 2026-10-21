@@ -108,6 +108,14 @@ export function nearestBalthrixRoamTime(x,z,speed=14){
   return {distance:best,time};
 }
 
+// Nearest patrol point for combat steering. Both roaming and pursuit must
+// use the SAME centerline as the visible trail, never shortcut across hills.
+export function projectBalthrixToTrail(x,z,speed=14){
+  const near=nearestBalthrixRoamTime(x,z,speed);
+  const point=balthrixPosition(near.time,speed);
+  return {...point,distance:near.distance,time:near.time};
+}
+
 export function balthrixPosition(t,speed=14){
  const {samples,total}=BALTHRIX_ARC;
  if(!Number.isFinite(t)||!Number.isFinite(speed)||total<=0)

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {SCENERY_SITES,SCENERY_ASSETS,scenerySiteErrors,sceneryAssetPath} from '../www/proto3d/scenery-assets.js';
+import {SCENERY_SITES,SCENERY_ASSETS,scenerySiteErrors,sceneryAssetPath} from '../www/proto3d/scenery-map-data.js';
 import {PORT_CENTER,TITAN_CENTER,FROST_REALM,isCitySafe} from '../www/proto3d/bossregions.js';
 const root=new URL('../',import.meta.url);
 assert.deepEqual(scenerySiteErrors(),[],'all creator-model sites valid');

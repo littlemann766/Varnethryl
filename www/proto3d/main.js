@@ -15,6 +15,7 @@ import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
 import { createCinderFlight, cinderAnimationWeights } from './cinderflight.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
+import { preferSerpentClips } from './serpent-locomotion.js';
 import { initSettings } from './settingsboot.js';
 import { createMiniMap } from './minimap.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
@@ -541,17 +542,8 @@ function wrapGLB(g, id, blocky) {
   }
   if (EXTRA_URL[id] && !g.animations.length) diag('Model ' + id + ' has no animation clips; needs a real rig/animation pass.');
   if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];
-  // The approved serpent rigs have REAL spine-animated Slither/Slither_fast
-  // clips. Prefer them over generic Walk/Run clips to prevent player-like
-  // foot-cycle motion while Balthrix travels across the terrain.
-  // Keep the source GLB untouched and preserve idle/coil/strike actions.
-  if (/vaelthryx/.test(id)) {
-    const slither = act.slither || act.Slither || act.body_wave || act.BodyWave;
-    const fastSlither = act.slither_fast || act.slitherFast || act.Slither_fast || act.SlitherFast;
-    if (slither) act.walk = slither;
-    if (fastSlither) act.run = fastSlither;
-    else if (slither) act.run = slither;
-  }
+  // Balthrix gets authored body-wave clips, not player-style walking cycles.
+  preferSerpentClips(id,act);
   // Some imported rigs name their clips differently from the profile map.
   // Only warn after explicit mappings have had a chance to resolve.
   if (/vaelthryx/.test(id) && !act.walk && !act.run)

@@ -86,7 +86,7 @@ assert(main.includes('const useWide = Math.max(dl, dr) < look * 0.7'),'wider tur
 assert(main.includes("diag('Balthrix rig has no recognized slither/body-wave animation"),'missing Balthrix body-wave clips are reported');
 assert(main.includes('serpentine|bodywave|snake'),'additional serpent locomotion clips are recognized');
 assert(main.includes("r.vxs = r.vzs = r.a.vx = r.a.vz = 0"),'teleported followers do not retain sprint velocity');
-assert(main.includes('TOWN_LANDS.updateWater?.(simTime)'),'water animation runs');
+assert(main.includes('TOWN_LANDS.updateWater?.(simTime,state.heroX,state.heroZ)'),'water animation and ship culling use player position');
 assert(main.includes('state.swimming'),'hero can swim');
 assert(terrain.includes('mesh.castShadow=true')&&terrain.includes('mesh.receiveShadow=true'),'hills cast and receive shadows');
 assert(terrain.includes("water.name='harbor-swim-water'"),'water available at port');

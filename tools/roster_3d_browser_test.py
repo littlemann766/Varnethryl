@@ -17,8 +17,7 @@ with sync_playwright() as p:
         page.on('pageerror',lambda e:errors.append(str(e)))
         page.goto(f'http://127.0.0.1:{server.server_address[1]}/proto3d.html?nosave=1&party=0&npcs=0',wait_until='commit',timeout=120000)
         page.wait_for_function('window.__p3d && __p3d.frames > 8',timeout=120000)
-        page.locator('#vnEnter').click()
-        page.locator('#hcur').click()
+        page.locator('#vnHero').click()  # Actual title-screen entry opens selector
         page.wait_for_function("""()=>document.querySelector('#heroes.open .vn-character-stage canvas') &&
              document.querySelector('#heroes.open #hlist .vn-roster-tabs button')""",timeout=30000)
         assert page.locator('.vn-roster-tabs button').count()==3
@@ -47,7 +46,8 @@ with sync_playwright() as p:
         page.wait_for_function('__p3d.heroIndex === 2',timeout=30000)
         assert not page.locator('#heroes').evaluate("(el)=>el.classList.contains('open')")
         # Both brothers must be listed individually and show the distinct approved GLB.
-        page.locator('#hcur').click()
+        page.locator('#vnMenuBtn').click()
+        page.locator('#vnChooseCharacter').click()
         page.get_by_role('tab',name='Enemies & Bosses').click()
         assert page.locator('#hlist button[title="Frost Troll A (3.5×)"]').count()==1
         b=page.locator('#hlist button[title="Frost Troll B (3.5×)"]')

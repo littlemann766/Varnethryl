@@ -81,14 +81,15 @@ export function createCamRig(env) {
       clearDistance + Math.max(0,dt)*Math.max(4,dist)*3.0);
     if (!Number.isFinite(clearDistance) && t>=1) clearDistance=Infinity;
     if (clearDistance<full) {
-      const frac=Math.max(MIN_TP_DIST_T,clearDistance/full);
+      const minBodyDistance=Math.min(full,Math.max(HS*1.4,prof.heightW*.43));
+      // Keep the approved original near-body clearance around walls, while
+      // lifting the perspective if a wall intrudes into a giant's silhouette.
+      const safeDistance=Math.min(full,Math.max(clearDistance,minBodyDistance));
+      const frac=Math.max(MIN_TP_DIST_T,safeDistance/full);
       pos.x=c.heroX+(pos.x-c.heroX)*frac;
       pos.z=c.heroZ+(pos.z-c.heroZ)*frac;
       pos.y=lk.y+(pos.y-lk.y)*frac;
-      // If a wall is closer than the large body's radius, lift the camera
-      // rather than letting it sit inside the model's head/torso.
-      const minBodyDistance=Math.max(HS*1.4,prof.heightW*.43);
-      if (clearDistance<minBodyDistance) pos.y+=Math.min(prof.heightW*.4,Math.max(0,minBodyDistance-clearDistance)*.6);
+      if (clearDistance<minBodyDistance) pos.y+=Math.min(prof.heightW*.4,(minBodyDistance-clearDistance)*.6);
     }
     const lim = (c.zh || WORLD) - 0.8, zx = c.zx || 0, zz = c.zz || 0;   /* clamp to the CURRENT map (the Wilds sit at x=1000: clamping to the town's bounds threw the camera 850 m away = empty world) */
     pos.x = Math.max(zx - lim, Math.min(zx + lim, pos.x)); pos.z = Math.max(zz - lim, Math.min(zz + lim, pos.z));

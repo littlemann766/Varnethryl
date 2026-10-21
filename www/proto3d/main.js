@@ -15,6 +15,8 @@ import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
 import { createCinderFlight, cinderAnimationWeights } from './cinderflight.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
+import { preferSerpentClips } from './serpent-locomotion.js';
+import { zoneAtmosphere } from './zone-ambience.js';
 import { initSettings } from './settingsboot.js';
 import { createMiniMap } from './minimap.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
@@ -53,7 +55,8 @@ scene.fog = new THREE.Fog(0xdde8ee, 70, 180);
 const camera = new THREE.PerspectiveCamera(50, 1, 0.5, 320);
 
 // Lights: hemisphere fill + one shadow-casting sun that follows the hero
-scene.add(new THREE.HemisphereLight(0xcfe6ff, 0x6a7a4a, 1.25));
+const hemi = new THREE.HemisphereLight(0xcfe6ff, 0x6a7a4a, 1.25);
+scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff0d0, 2.2);
 const SHADOW_SIZE = COARSE ? 1024 : 1536, SHADOW_R = 32;
 sun.castShadow = true;
@@ -101,7 +104,27 @@ let VIEWK = 1;
 function applyView() { const kf = Math.max(1, Math.min(5, CH.camDist)), k2 = Math.min(2.2, kf), sk = Math.min(3, kf); VIEWK = k2; scene.fog.near = 70 * k2; scene.fog.far = 180 * k2; camera.far = 320 * k2 * (kf > 2.2 ? 1.5 : 1); camera.updateProjectionMatrix(); const R = 24 * sk; Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, far: 110 * sk }); sun.shadow.camera.updateProjectionMatrix(); SUNK = sk; }
 let SUNK = 1;
 function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; try { applyView(); } catch (e) {} try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
-const ZONE = { name: 'town', cx: 0, cz: 0, half: 0 };   // current walkable zone (town or the Wilds); half is set once WORLD is known
+const ZONE = { name: 'town', cx: 0, cz: 0, half: 0 };
+// Entering the ice cavern dims the REAL world lights, sky and fog.
+// Restore the original town sky on exit, with no texture replacement/leaks.
+const outdoorSky=scene.background;
+const caveSky=new THREE.Color(0x0c1422);
+const ambienceColor=new THREE.Color();
+let lastAmbienceZone='town';
+function updateZoneAmbience(dt,instant=false){
+  const goal=zoneAtmosphere(ZONE.name,state?.heroX??0,state?.heroZ??0,TITAN_CENTER,VIEWK);
+  const a=instant?1:1-Math.exp(-Math.max(0,Math.min(Number.isFinite(dt)?dt:0,.1))*4);
+  sun.intensity+=(goal.sun-sun.intensity)*a;
+  hemi.intensity+=(goal.fill-hemi.intensity)*a;
+  sun.color.lerp(ambienceColor.setHex(goal.sunColor),a);
+  scene.fog.color.lerp(ambienceColor.setHex(goal.fogColor),a);
+  scene.fog.near+=(goal.fogNear-scene.fog.near)*a;
+  scene.fog.far+=(goal.fogFar-scene.fog.far)*a;
+  if(lastAmbienceZone!==ZONE.name || instant){
+    scene.background=goal.darkSky?caveSky:outdoorSky;
+    lastAmbienceZone=ZONE.name;
+  }
+}   // current walkable zone (town or the Wilds); half is set once WORLD is known
 const WORLD = WORLD_B; // half extent (village grew for the 3D buildings)
 ZONE.half = WORLD;
 const START_Z = 14 * PK;
@@ -289,7 +312,7 @@ const EXTRA = [["n:mortimer_new", "Mortimer (NEW)", "proto3d/models-new/mortimer
 // Owner: ONE stable file name. To swap in a newer rig (owner_new4...): tools/swap_owner.sh /workspace/rigged/owner_new5 (copies <name>.glb + <name>.cloth.json over models-new/owner.*)
 const CLOTH = new Set(["n:ember_new3", "n:owner", "n:owner_pika1", "n:asha_new3", "n:ashentitan_new", "n:coral_new", "n:darius_new6", "n:lunara_new", "n:marella_new", "n:mortimer_new", "n:player_pikachu", "n:snowy_new4", "n:thrain_new4", "n:wren_new3"]);   // models shipped with <name>.cloth.json (runtime/spring_bones_v2.js)
 const EXTRA_SCALE = {}; // lore-height normalization happens once, centrally in loadScale() for both Frost Troll brothers and Titan variants.
-const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28, map:{walk:'Walking',run:'Running'} }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 4.5, run: 10.5 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 }, 'n:cinder_new': { walk: 0.65, run: 1.95 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
+const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28, map:{walk:'Walking',run:'Running'} }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 4.5, run: 10.5 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:vaelthryx_straight_rig': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 }, 'n:cinder_new': { walk: 0.65, run: 1.95 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
 /* Beth's smoothed blocky models (_smooth.glb): extra 'Smooth' variant for characters that already exist; originals stay the default. Loaded on demand (only when picked). */
 const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'hawk', 'hearth', 'hobgoblin', 'hydrella', 'kael', 'kestrel', 'lorian', 'mirelle', 'morwen', 'mossgut', 'neris', 'nyx', 'orin', 'rook', 'rowan', 'seraphine', 'stonetroll', 'talia', 'thorne', 'valen', 'vesper', 'wolf', 'wyvern'];   // frosttroll_smooth intentionally not used (old 1.8 m base): frosttroll_a4 is the troll
 { const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
@@ -541,6 +564,8 @@ function wrapGLB(g, id, blocky) {
   }
   if (EXTRA_URL[id] && !g.animations.length) diag('Model ' + id + ' has no animation clips; needs a real rig/animation pass.');
   if (spd && spd.map) for (const k in spd.map) if (act[spd.map[k]]) act[k] = act[spd.map[k]];
+  // Balthrix gets authored body-wave clips, not player-style walking cycles.
+  preferSerpentClips(id,act);
   // Some imported rigs name their clips differently from the profile map.
   // Only warn after explicit mappings have had a chance to resolve.
   if (/vaelthryx/.test(id) && !act.walk && !act.run)
@@ -610,7 +635,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.2.6';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.2.7';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1602,7 +1627,8 @@ async function setZone(name) {
     state.heroX=lastZone==='frost'?FROST_PORTAL.x:TOWN_PORTAL.x;
     state.heroZ=lastZone==='frost'?FROST_PORTAL.z+6:TOWN_PORTAL.z+4;state.yaw=0;
   }
-  state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); zoneCd = 1.5; portalDwell = 0;
+  state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
+  updateZoneAmbience(.1,true);
   if(name==='wilds'||name==='frost'){const f=await fightToggle(true);f.startAuto();if(name==='frost')f.startRegionBosses('frost');}
   return true;
 }
@@ -1635,8 +1661,8 @@ function frame(now) {
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  updateCrowd(dt); updateHero(dt); updateZone(dt); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if(HOB_CAMPS_WORLD){HOB_CAMPS_WORLD.group.visible=ZONE.name==='town';if(ZONE.name==='town')HOB_CAMPS_WORLD.cull(state.heroX,state.heroZ);} if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
-  simTime += dt; if (SMOKE) SMOKE.update(simTime); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateWater?.(simTime);
+  updateCrowd(dt); updateHero(dt); updateZone(dt); updateZoneAmbience(dt); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if(HOB_CAMPS_WORLD){HOB_CAMPS_WORLD.group.visible=ZONE.name==='town';if(ZONE.name==='town')HOB_CAMPS_WORLD.cull(state.heroX,state.heroZ);} if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
+  simTime += dt; if (SMOKE) SMOKE.update(simTime); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateWater?.(simTime); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateVolcano?.(simTime,state.heroX,state.heroZ);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
   totalFrames++; fpsAcc += dt; fpsFrames++;
@@ -1747,12 +1773,12 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },
   toggleModel: i => toggleModel(i), groups: () => [...GROUPS.values()].map(g => ({ key: g.key, name: g.name, vars: g.vars.map(v => v.label) })),
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,
-  state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, enterables,
+  state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, camera, enterables,
   enterables, get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   onRamp(x, z, level = 0) { const s = surfaceAt(x, z, level); return !!(s && s.ramp); },
   free(x, z, level = 0) { const l0 = state.level; state.level = level; const q = { x, z }; resolve(q); state.level = l0; return !!surfaceAt(x, z, level) && Math.hypot(q.x - x, q.z - z) < 0.02; },
-  teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; marker.visible = false; state.blockedFrames = 0; updateLevel(); snapFollowers(); },
+  teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; marker.visible = false; state.blockedFrames = 0; updateLevel(); snapFollowers(); camRig.snap = true; },
   setCamYaw(y) { state.camYaw = y; },
   setZoom(z) { state.zoom = z; },
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },

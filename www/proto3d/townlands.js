@@ -4,6 +4,7 @@
 import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
 import { buildBalthrixTrail } from './balthrix-trail.js';
+import { makeVolcanoEffects } from './volcano-effects.js';
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
 const CHUNK = 64;
@@ -145,6 +146,8 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(points,3));g.setIndex(indices);g.computeVertexNormals();
     const m=new THREE.Mesh(g,lavaMat);m.name='lava-pool';m.userData.keep=true;m.receiveShadow=true;group.add(m);poolMeshes.push(m);
   }
+  const volcano=makeVolcanoEffects({group,poolMeshes,heightAt:(x,z)=>townElevation(x,z,world)});
+  const updateVolcano=(t,x,z)=>volcano.update(t,x,z);
   const pathsMat=new THREE.MeshLambertMaterial({color:0x958675,side:THREE.DoubleSide});
   // Surfaced roads interpolate actual terrain height: no floating paths through hills.
   function path(points,width=7.4,mat=pathsMat){
@@ -375,5 +378,5 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
       mesh.visible=d<140*Math.max(1,k);
     }
   }
-  return {group,cull,stats,terrain,poolMeshes,harborRoad,mountainRoad,cave,harbor,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields,trail};
+  return {group,cull,stats,terrain,poolMeshes,volcano,updateVolcano,harborRoad,mountainRoad,cave,harbor,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields,trail};
 }

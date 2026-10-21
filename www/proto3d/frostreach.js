@@ -46,5 +46,5 @@ export function buildFrostRealm({scene}){
  group.add(arch);
  const cols=cave.colliders.map(c=>({...c,x:c.x+OX,z:c.z+OZ})); // local cave spires use world-space collision positions
  group.visible=false;
- return{group,cave,portalMesh:arch,colliders:cols,spawn:FROST_SPAWN,exit:FROST_EXIT,brothers:FROST_BROTHERS,heightAt:frostElevation,update:t=>arch.userData.update?.(t)};
+ return{group,cave,portalMesh:arch,colliders:cols,spawn:FROST_SPAWN,exit:FROST_EXIT,brothers:FROST_BROTHERS,heightAt:frostElevation,update:t=>{arch.userData.update?.(t);cave.update(t);}};
 }

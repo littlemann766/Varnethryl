@@ -78,6 +78,10 @@ assert(main.includes('FROST_PORTAL.x,TOWN_LANDS?TOWN_LANDS.heightAt(FROST_PORTAL
 
 // Existing 3D harbor now has swept hulls with physical depth and curved sails.
 assert(ship.includes('hullGeo.computeVertexNormals()'),'ship uses true curved mesh normals');
+assert(ship.includes('tidewrack_sailing_ship.glb'),'Tidewrack loads the uploaded original 3D ship');
+assert(ship.includes('export async function installImportedShip('),'Tidewrack can switch ships on GLB load');
+assert(ship.includes('ship.userData.originalShipFallback=fallbackChildren'),'Tidewrack procedural ship is kept as fallback');
+assert(terrain.includes('installImportedShip(ships[0],{large:true})'),'actual ship attached to main mooring');
 assert(ship.includes('const billow='),'sails have three-dimensional billow');
 assert(building.includes('buildSailingShip(.8,true)'),'harbor visibly uses large 3D ship');
 assert(building.includes('buildSailingShip(.38*sc,false)'),'small boats also use 3D hulls');

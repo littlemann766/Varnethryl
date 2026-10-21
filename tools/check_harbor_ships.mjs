@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {buildSailingShip,animateMooredShip} from '../www/proto3d/port-ships.js';
+import {townElevation} from '../www/proto3d/townlands.js';
 import {PORT_CENTER,LAVA_POOLS,onLava} from '../www/proto3d/bossregions.js';
 const s=buildSailingShip(1.27,true),boat=buildSailingShip(1,false);
 assert(s.children.length>20,'large sailing ship has a true hull, 3 masts, sails and rigging');
@@ -42,6 +43,17 @@ assert(main.includes('TOWN_LANDS.updateWater?.(simTime,state.heroX,state.heroZ)'
 assert(!onLava(0,0),'town remains safe');
 assert(LAVA_POOLS.length>0,'Titan lava hazard definition unaffected');
 assert(Number.isFinite(PORT_CENTER.x)&&Number.isFinite(PORT_CENTER.z));
+assert(townElevation(PORT_CENTER.x-50,PORT_CENTER.z+23)<-.9,
+       'real seabed below sailing ship must stay under visible water plane');
+assert(townElevation(PORT_CENTER.x-70,PORT_CENTER.z-25)<-.9,
+       'whole swimmable harbor basin must be submerged');
+assert(townElevation(PORT_CENTER.x-10,PORT_CENTER.z)>-.4,
+       'harbor entrance remains dry and has no unintended deep channel');
+assert(town.includes('new THREE.PlaneGeometry(70,102,24,28)'),
+       'rendered seawater matches playable swimming footprint');
+assert(town.includes('paint.lerp(new THREE.Color(0x285363),.86)'),
+       'submerged harbor floor is not painted bright green grass');
+
 for(const path of ['www/proto3d/port-ships.js','www/proto3d/townlands.js','www/proto3d/main.js']){
  const r=spawnSync(process.execPath,['--check',path],{encoding:'utf8'});
  assert.equal(r.status,0,path+' fails JS syntax: '+r.stderr);

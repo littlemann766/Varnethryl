@@ -37,6 +37,12 @@ assert(hud.includes("this.expFill.style.transform='scaleX('+fraction+')'"),'EXP 
 assert(hud.includes('this.expFill.style.transform=\'scaleX(1)\''),'level-up rollover reaches 100%');
 assert(hud.includes('this.expValue.textContent='),'XP progress shown numerically');
 assert(mini.includes("createMiniMap(")&&main.includes('const miniMap=createMiniMap('),'minimap integrated with real position');
+// These styles are dynamically injected into the HTML document, not an external
+// stylesheet: '../assets' would escape GitHub Pages' /Varnethryl/ subpath.
+assert(hud.includes("url('assets/hud/exp-frame.svg')"),'EXP decoration resolves under web app subpath');
+assert(hud.includes("url('../assets/hud/")===false,'combat borders do not escape the hosted app root');
+assert(mini.includes("url('assets/hud/minimap-ring.svg')"),'minimap ring resolves under web app subpath');
+assert(mini.includes("url('../assets/hud/")===false,'minimap border does not escape the hosted app root');
 assert(ui.includes('VARNETHRYL ORNATE FRAME FIX') && ui.includes('border-image-slice:92'),'nine-sliced gold-purple ornate frame system applied to menus');
 for(const asset of ['exp-frame.svg','minimap-ring.svg','panel-wide.svg','panel-square.svg','label-long.svg']){
  const path='www/assets/hud/'+asset;

@@ -57,7 +57,12 @@ export function createRosterPreview({ THREE, mount, status, load, release }) {
     const dt=Math.min(.05,Math.max(0,(now-last)/1000||0)); last=now;
     if (!mount.isConnected||!mount.offsetWidth) return;
     size();
-    if (actor?.model.userData?.mixer) actor.model.userData.mixer.update(dt);
+    if (actor?.model.userData?.mixer) {
+      actor.model.userData.mixer.update(dt);
+      // Boss preview must show the same full-body serpentine motion as gameplay.
+      // Use a demonstration travel speed without moving the preview pedestal.
+      if(actor.model.userData.serpentWave)actor.model.userData.serpentWave(dt,7.5,0,false);
+    }
     if (!dragging) yaw += dt*.15;
     camera.position.set(Math.sin(yaw)*Math.cos(pitch)*distance,
       targetY+Math.sin(pitch)*distance, Math.cos(yaw)*Math.cos(pitch)*distance);

@@ -26,7 +26,7 @@ assert(main.includes("fightToggle(true).then(f=>f.startAuto())"),'all heroes rec
 assert(main.includes("!FIGHT.on||!FIGHT.auto"),'wilderness promotes training mode into auto encounters');
 assert(camera.includes('const orbitAngle ='),'third-person camera uses real spherical pitch orbit');
 assert(main.includes('camRig.look(0, -(e.clientY - t.ly) * 0.005'),'vertical touch orbit is actually connected');
-assert(fight.includes("u.serpentWave(dt,mv)"),'Balthrix enemy rig updates a spine/body wave');
+assert(fight.includes('u.serpentWave(dt,mv,dyaw/Math.max(.016,dt),'),'Balthrix enemy rig updates a spine/body wave');
 assert(fight.includes('14*Math.max(0,dt)'),'Balthrix patrol advances per frame instead of jerky time chunks');
 assert(fight.includes('if (on) { if (isAuto === true) auto = true; return; }'),'existing active combat must be promotable');
 assert(main.includes("group.key === 'ssylthar'"),'unreleased Sslythar remains hidden');

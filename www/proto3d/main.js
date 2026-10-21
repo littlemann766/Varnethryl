@@ -4,6 +4,7 @@ import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { CHARS } from './chars.js';
 import { bridgeUnskinnedHumanoid } from './rig-bridge.js';
+import { createOwnerFooting } from './owner-footing.js';
 import { preload as preloadChars } from './texgen.js';
 import { makeEnterable } from './interiors.js';
 import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
@@ -479,6 +480,7 @@ function wrapGLB(g, id, blocky) {
     if (!mount.attached) diag('Owner saber not mounted: '+mount.reason);
     else diag('Owner saber grip mounted: '+mount.hand+(mount.fingerAligned?' (finger-aligned)':' (hand-axis fallback)'));
   }
+  const ownerFooting = id === 'n:owner' ? createOwnerFooting(m) : null;
   const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947*HS*(EXTRA_SCALE[id]||1)*loadScale(id,hgt) : worldProfile(id,HS).heightW/hgt) : 1;
   // Keep a concise rig audit on the loaded model for device-side inspection.
   // Reports authored clips and bone families; does not claim visual approval.
@@ -573,7 +575,7 @@ function wrapGLB(g, id, blocky) {
     act[k].play(); act[k].setEffectiveWeight(0);
   }
   if (id === 'n:cinder_new') for (const k of ['hover', 'flap', 'glide', 'dive', 'land']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
-  Object.assign(root.userData, { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 });
+  Object.assign(root.userData, { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, ownerFooting, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 });
   // Cinder's authored wing and tail clips must NOT be re-aimed by spring physics.
   // The generic spring-bone family matches wing1/wing2/wing3 and creates rubbery, overlapping wing flaps.
   if (id !== 'n:cinder_new') try {
@@ -1571,7 +1573,10 @@ function animateHero(dt) {
       u.cinderHop = cinderFlight.alt < 0.05 ? Math.max(0, Math.sin(u.cinderStep)) * 0.035 * Math.min(1, state.speed / 2) : 0;
     } else { u.cinderHop = 0; locoAnim(u, LOCO_FORCE !== null ? LOCO_FORCE : state.speed, dt); }
     const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0;
-    u.mixer.update(animDt); if (u.sb) u.sb.update(animDt); if (u.cinderEmbers) u.cinderEmbers.update(animDt);
+    if (u.ownerFooting) u.ownerFooting.beforeAnimation();
+    u.mixer.update(animDt);
+    if (u.ownerFooting) u.ownerFooting.afterAnimation(LOCO_FORCE !== null ? LOCO_FORCE : state.speed, animDt);
+    if (u.sb) u.sb.update(animDt); if (u.cinderEmbers) u.cinderEmbers.update(animDt);
     return;
   }
   walkT += dt * (4 + state.speed * 1.9); idleT += dt;

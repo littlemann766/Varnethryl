@@ -12,8 +12,9 @@ export const FROST_REALM = Object.freeze({cx: 2250, cz: 0, half: 235});
 // This closed loop also stays clear of the walled port's northern and western
 // ramparts. Its exact spline is shared by roaming AI and the visible trail.
 export const BALTHRIX_ROUTE = Object.freeze([
-  [-486,-96],[-486,-266],[-455,-421],[-323,-476],[-142,-489],
-  [75,-494],[260,-487],[441,-455],[497,-286],[506,-92],
+  [-486,-96],[-486,-266],[-455,-421],[-323,-489],[-142,-524],
+  [75,-530],[188,-517],[195,-395],[206,-306],
+  [255,-220],[362,-195],[492,-184],[506,-92],
   [505,115],[493,288],[447,467],[276,493],[85,503],
   [-116,503],[-289,497],[-454,515],[-532,506],[-535,391],[-531,234],[-516,145]
 ]);
@@ -42,7 +43,7 @@ export function terrainBiome(x,z){
  if(Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)<170)return 'snow';
  return x<-140&&z<0?'forest':'meadow';
 }
-/* The roamer follows one continuous route, including the volcano, and stays outside city walls. */
+/* The roamer follows one continuous path OUTSIDE the Titan's volcanic massif and ice summit; neither boss arena is crossed. */
 // Continuous position and tangent through route corners, preventing abrupt head snapping.
 // Catmull-Rom uses the same patrol waypoints; no changes to saved encounter locations.
 // Cache spline samples once. Chord-length timing made Balthrix accelerate at

@@ -14,7 +14,7 @@ for(const site of SCENERY_SITES){
  if(site.zone==='frost')assert(Math.hypot(site.x-FROST_REALM.cx,site.z-FROST_REALM.cz)<FROST_REALM.half-20);
 }
 const find=id=>SCENERY_SITES.find(s=>s.id===id);
-assert(Math.hypot(find('volcanic-harbor-ship').x-PORT_CENTER.x,find('volcanic-harbor-ship').z-PORT_CENTER.z)<90,'ship belongs to port water');
+assert(Math.hypot(find('northwest-coastal-harbor-ship').x-PORT_CENTER.x,find('northwest-coastal-harbor-ship').z-PORT_CENTER.z)<90,'ship belongs to port water');
 assert(Math.hypot(find('titan-lava-outcrop').x-TITAN_CENTER.x,find('titan-lava-outcrop').z-TITAN_CENTER.z)<110,'lava rock belongs to Titan terrain');
 assert(SCENERY_SITES.filter(s=>s.asset==='crystals').length===2,'ice crystals reused in frost zone');
 const game=readFileSync(new URL('www/proto3d/main.js',root),'utf8');

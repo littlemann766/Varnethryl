@@ -3,6 +3,7 @@
  * All new scenery is batched per 64-world-unit chunk and culled by proximity. */
 import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
+import { buildBalthrixTrail } from './balthrix-trail.js';
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
 const CHUNK = 64;
@@ -112,7 +113,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   // Do not modify the Wilds' map, the established village, or either portal.
   const rnd=rng(20261020), group=new THREE.Group();group.name='town-landscaped-outskirts';scene.add(group);
   const mats=makeMaterials(makeDetailTexture()), cache=new Map(), chunks=new Map(), occupied=[];
-  const stats={trees:0,bushes:0,rocks:0,flowers:0,grass:0,orchard:0,fields:0};
+  const stats={trees:0,bushes:0,rocks:0,flowers:0,grass:0,orchard:0,fields:0,fallenTrees:0};
   const usable=world-13;
   const terrain=buildWalkableTerrain(world);group.add(terrain);
   // Distant low-poly mountain range outside the playable boundary: visual
@@ -163,14 +164,37 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   }
   const harborRoad=path([[0,CITY_HALF+8],[-82,210],[-165,247],[-245,285],[-325,332],[-365,379],[-403,382],[PORT_CENTER.x,PORT_CENTER.z-15]],9.2);
   const mountainRoad=path([[0,-CITY_HALF-12],[-45,-231],[-80,-285],[-57,-337],[-18,-386],[30,-374],[25,-348],[FROST_PORTAL.x,FROST_PORTAL.z+7]],7.4,new THREE.MeshLambertMaterial({color:0x7b847f,side:THREE.DoubleSide}));
-  // A dark cave mouth at the summit. The interactive portal is attached by main.js at ground height.
-  const cave=new THREE.Group();cave.position.set(FROST_PORTAL.x,townElevation(FROST_PORTAL.x,FROST_PORTAL.z,world),FROST_PORTAL.z-2);
+  // Summit approach: an actual rocky ice tunnel. Enter from the southern road
+  // and continue north to the existing portal at local z=-18, well inside.
+  // Portal coordinates remain unchanged to preserve save and teleport behavior.
+  const cave=new THREE.Group();cave.position.set(FROST_PORTAL.x,townElevation(FROST_PORTAL.x,FROST_PORTAL.z,world),FROST_PORTAL.z+18);
   cave.name='frost-summit-cave';cave.userData.keep=true;
-  const cr=new THREE.MeshLambertMaterial({color:0x343945,flatShading:true,side:THREE.DoubleSide});
-  for(const [x,y,z,s] of [[-7,4,0,5.2],[7,4,0,5.1],[-5,9,-3,5.8],[5,9,-3,5.8],[0,12,-3,6.4],[-11,2,-4,4.6],[11,2,-4,4.6]]){
-    const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(s,0),cr);rock.position.set(x,y,z);
-    rock.castShadow=true;rock.receiveShadow=true;cave.add(rock);
+  const cr=new THREE.MeshLambertMaterial({color:0x283342,flatShading:true,side:THREE.DoubleSide});
+  const iceBlue=new THREE.MeshPhongMaterial({color:0x597d98,emissive:0x10283e,shininess:105,flatShading:true});
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(13.5,36),new THREE.MeshLambertMaterial({color:0x526b83,side:THREE.DoubleSide}));
+  floor.rotation.x=-Math.PI/2;floor.position.set(0,.12,-2.5);floor.receiveShadow=true;floor.userData.keep=true;cave.add(floor);
+  for(let i=0;i<7;i++){
+    const z=11-i*5.0,depth=i/6;
+    for(const side of [-1,1]){
+      const stone=new THREE.Mesh(new THREE.DodecahedronGeometry(4.8+(i%3)*.6,0),cr);
+      stone.position.set(side*(7.5+Math.sin(i*2)*.6),4.2,z);
+      stone.rotation.set(.12*i,.23*i,.11*side);stone.scale.set(1.16,1.38,1.04);
+      stone.castShadow=true;stone.receiveShadow=true;stone.userData.keep=true;cave.add(stone);
+      const shard=new THREE.Mesh(new THREE.ConeGeometry(.85+(i%2)*.2,3.5+(i%3),7),iceBlue);
+      shard.position.set(side*6.45,2.1,z+1.2);shard.castShadow=true;shard.userData.keep=true;cave.add(shard);
+    }
+    const crown=new THREE.Mesh(new THREE.DodecahedronGeometry(5.6,0),cr);
+    crown.position.set(0,12+Math.sin(i)*.8,z);crown.scale.set(1.18,.96,1.08);
+    crown.castShadow=true;crown.receiveShadow=true;crown.userData.keep=true;cave.add(crown);
+    for(const side of [-1,1]){
+      const spike=new THREE.Mesh(new THREE.ConeGeometry(.48,3.8+(i%2),6),iceBlue);
+      spike.position.set(side*3.5,7.7,z);spike.rotation.z=Math.PI;
+      spike.castShadow=true;spike.userData.keep=true;cave.add(spike);
+    }
   }
+  // The colder light at the end makes the recessed portal findable in darkness.
+  const light=new THREE.PointLight(0x80c3f9,.9,43,2);
+  light.position.set(0,6,-18);light.castShadow=false;cave.add(light);
   group.add(cave);
   // The harbor is a small separately walled village with a gated eastern road approach.
   const harbor=new THREE.Group();harbor.name='walled-harbor';harbor.position.set(PORT_CENTER.x,0,PORT_CENTER.z);
@@ -258,6 +282,11 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     acc(shadow?'cast':'plain',x,z).add(v.geo,x,townElevation(x,z,world),z,rnd()*Math.PI*2,s);
   };
   const claim=(x,z,r)=>occupied.push([x,z,r]);
+  // Balthrix's trail is positioned before tree scattering so standing trees
+  // do not grow directly through his fallen trunks. Shared terrain and collision.
+  const trail=buildBalthrixTrail(group,(x,z)=>townElevation(x,z,world),colliders);
+  for(const site of trail.sites)claim(site.x,site.z,Math.max(4,site.length*.45));
+  stats.fallenTrees=trail.count;
   // A few lightly textured cultivated plots are visual only; none obstruct player movement.
   const roadMat=new THREE.MeshLambertMaterial({color:0x9b9177});
   function roadRing(){
@@ -346,5 +375,5 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
       mesh.visible=d<140*Math.max(1,k);
     }
   }
-  return {group,cull,stats,terrain,poolMeshes,harborRoad,mountainRoad,cave,harbor,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields};
+  return {group,cull,stats,terrain,poolMeshes,harborRoad,mountainRoad,cave,harbor,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields,trail};
 }

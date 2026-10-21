@@ -16,6 +16,7 @@ import { createCinderFlight, cinderAnimationWeights } from './cinderflight.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
 import { initSettings } from './settingsboot.js';
+import { createMiniMap } from './minimap.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
 import { worldProfile, loadScale } from './charscale.js';
 import { buildTownOutskirts } from './townlands.js';
@@ -609,7 +610,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.2.3';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.2.4';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -690,7 +691,13 @@ function loadHero(gi) {
 }
 for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(i < GLB_NAMES.length ? GLB_NAMES[i] : EXTRA[i - GLB_NAMES.length][1]); }
 const heroKind = w => w.userData.blocky ? 'blocky' : w.userData.glb ? 'glb' : 'none';
-async function selectHero(i) { if (heroKind(HEROES[i]) !== modeFor(GLB_IDS[i])) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
+// Sslythar's models remain in the repo for private rig/viewer work, but a
+// previously saved character, follower or URL query must not reveal him in
+// normal gameplay before approval. Keep stored slot numbers unchanged.
+const hiddenSerpentSlot = i => /ssylthar/i.test(GLB_IDS[i] || '');
+const playableSlot = i => Number.isInteger(i) && i >= 0 && i < HEROES.length && !hiddenSerpentSlot(i);
+const activeSlot = i => playableSlot(i) ? i : 1;
+async function selectHero(i) { if (!playableSlot(i)) return; if (heroKind(HEROES[i]) !== modeFor(GLB_IDS[i])) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
 const qp0 = new URLSearchParams(location.search);
 let savedPlan = null;
 try { if (qp0.get('nosave') == null) { const r = readSave(localStorage); if (r.status === 'ok') savedPlan = planFromState(r.state, GLB_NAMES, 60); } } catch (e) { diag('save read failed: ' + (e && e.message || e)); }
@@ -701,7 +708,7 @@ const IS_OWNER_TOKEN = (() => { try { return !!localStorage.getItem('vn_owner_un
 { const oi = GLB_IDS.indexOf('n:owner'); let seen = null; try { seen = localStorage.getItem('p3d_owner_default_v119'); } catch (e) {}
   if (savedOn && qp0.get('hero') == null && oi > 0 && IS_OWNER_TOKEN && !seen) { savedPlan.hero = oi; savedPlan.pos = null; try { localStorage.setItem('p3d_owner_default_v119', '1'); } catch (e) {} }
   if (!IS_OWNER_TOKEN && savedPlan.hero === oi) savedPlan.hero = 1;   /* the Owner skin is for the owner account only */ }
-{ const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (savedPlan.hero == null) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
+{ const u = a => [...new Set(a)].filter(playableSlot); savedPlan.hero = activeSlot(savedPlan.hero); savedPlan.party = u([1, 2, ...savedPlan.party]); savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
 // ---------- character selector: ONE entry per character (all variants grouped), compact dropdown + variant switches ----------
 const gkey = id => id.replace(/^[a-z]:/, '').replace(/_straight_rig(?:_50)?$/, '').replace(/_smooth$/, '').replace(/_new\d*$/, '').replace(/^owner_pika\d*$/, 'owner').replace(/^player_/, '');
@@ -780,7 +787,7 @@ const APPROVED_BOSS_IDS = new Set([
 ]);
 const bossVariant = g => g.vars.find(v => APPROVED_BOSS_IDS.has(GLB_IDS[v.slot]));
 const BOSS_DISPLAY = new Map([
-  ['n:vaelthryx_straight_rig','Balthrix (10×)'],
+  ['n:vaelthryx_straight_rig','Balthrix (6×)'],
   ['n:ashentitan_20','Ashen Titan (15×)'],
   ['n:frosttroll_a','Frost Troll A (3.5×)'],
   ['n:frosttroll_b','Frost Troll B (3.5×)']
@@ -815,6 +822,9 @@ async function selectVariant(g, v) {
   if (pikachuGroup) seen.add(pikachuGroup);
   const OG = SLOT_G[GLB_IDS.indexOf('n:owner')];
   if (OG && !IS_OWNER_TOKEN) seen.add(OG);   /* hidden from everyone but the owner */
+  // Sslythar remains an unreleased creature while the serpentine rig is refined.
+  // Preserve its GLB, stable slot number and saved selection compatibility.
+  for (const group of GROUPS.values()) if (group.key === 'ssylthar') seen.add(group);
   HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g)) { seen.add(g); gl.push(g); } });
   gl.sort(compareRoster);
   const enemyKeys=new Set(['vaelthryx','ashentitan','frosttroll','stonetroll','hobgoblin','mossgut','ssylthar','hydrella','wyvern']);
@@ -913,20 +923,21 @@ async function selectVariant(g, v) {
     else tabLists.playable.appendChild(r.row);
     rows.push({ g: OG, b: r.b, approved: false });
   };
-  bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; })()); }
+  bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return activeSlot(q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0); })()); }
 async function toggleModel(i) {
   const id = GLB_IDS[i], next = modeFor(id) === 'blocky' ? 'glb' : 'blocky'; try { localStorage.setItem('vn_model_' + id, next); } catch (_) {}
   if (HEROES.indexOf(hero) === i) { await loadHero(i); }
   for (const r of crowd) if (r.a.id === id) { if (r.root) { scene.remove(r.root); r.root = null; r.nd = null; } loadActorModel(id).then(w => { if (!w || r.root) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); r.root = w; r.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(r.a.x, 0, r.a.z); w.rotation.y = r.a.yaw; scene.add(w); }); }
 }
 function toggleFollower(i) {
+  if (!playableSlot(i)) return;
   const id = GLB_IDS[i], cur = crowd.find(c => c.kind === 'party' && SLOT_G[GLB_IDS.indexOf(c.a.id)] === SLOT_G[i]), btn = fbtn(i);
   if (cur) { crowd.splice(crowd.indexOf(cur), 1); bumpSys.remove(cur.a); if (cur.root) scene.remove(cur.root); if (btn) btn.classList.remove('on'); return; }
   if (SLOT_G[HEROES.indexOf(hero)] === SLOT_G[i]) return;
   const pm = crowd.filter(c => c.kind === 'party'); if (pm.length >= 3) { const o = pm[0], oi = GLB_IDS.indexOf(o.a.id); crowd.splice(crowd.indexOf(o), 1); bumpSys.remove(o.a); if (o.root) scene.remove(o.root); const ob = fbtn(oi); if (ob) ob.classList.remove('on'); }
   spawnCrowd(id, 'party', state.heroX + (Math.random() - 0.5) * 2 * HS, state.heroZ + 2.2 * HS, (2.6 + pm.length * 0.5) * HS, 0); if (btn) btn.classList.add('on');
 }
-{ const q = qp0.get('hero'); const qi = q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; startHero = qi; if (qi) HEROES[0].visible = false; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); else HEROES[0].visible = true; }); }
+{ const q = qp0.get('hero'); const qi = activeSlot(q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0); startHero = qi; if (qi) HEROES[0].visible = false; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); else HEROES[0].visible = true; }); }
 // preload the first three quietly after first paint (they replace the procedural stand-ins)
 
 // blob shadow is the real shadow map; no extra.
@@ -935,6 +946,7 @@ marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = fal
 
 // ---------- input ----------
 const state = { swimming:false, level: 0, heroY: 0, inside: null, zoom: 1, heroX: 0, heroZ: START_Z, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0, vx: 0, vz: 0 };
+const miniMap=createMiniMap(()=>state,()=>ZONE);
 const posOk = (x, z) => { const r = 0.5 * HS + 0.3; for (const c of colliders) { if (c.type === 'box' ? (x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r) : Math.hypot(x - c.x, z - c.z) < c.r + r) return false; } return Math.abs(x) < WORLD - 3 && Math.abs(z) < WORLD - 3; };   // a save from the smaller village may sit inside a (now bigger) building
 if (savedPlan && savedPlan.pos && qp0.get('hero') == null && posOk(savedPlan.pos.x, savedPlan.pos.z)) { state.heroX = savedPlan.pos.x; state.heroZ = savedPlan.pos.z; state.yaw = savedPlan.pos.yaw; }
 const keys = new Set();
@@ -1019,7 +1031,7 @@ canvas.addEventListener('pointerdown', e => { try { canvas.setPointerCapture(e.p
 canvas.addEventListener('pointermove', e => {
   const t = touches.get(e.pointerId); if (!t) return;
   if (!t.drag && Math.hypot(e.clientX - t.sx, e.clientY - t.sy) > 12) t.drag = true;
-  if (t.drag && !camRig.pinching) { lastDragT = performance.now(); state.camYaw -= (e.clientX - t.lx) * 0.006 * camRig.prefs.lookSens; if (camRig.fp) camRig.look(0, -(e.clientY - t.ly) * 0.005 * camRig.prefs.lookSens); }
+  if (t.drag && !camRig.pinching) { lastDragT = performance.now(); state.camYaw -= (e.clientX - t.lx) * 0.006 * camRig.prefs.lookSens; camRig.look(0, -(e.clientY - t.ly) * 0.005 * camRig.prefs.lookSens); }
   t.lx = e.clientX; t.ly = e.clientY;
 });
 const canvasUp = e => { const t = touches.get(e.pointerId); touches.delete(e.pointerId); if (t && !t.drag && e.type === 'pointerup') tapMoveTo(e.clientX, e.clientY); };
@@ -1597,9 +1609,9 @@ async function setZone(name) {
 let outdoorCombatStarting=false;
 function updateZone(dt) {
   // Automatically enter PvE beyond the walls; town interiors remain protected.
-  if(ZONE.name==='town' && (Math.abs(state.heroX)>CITY_HALF+14 || Math.abs(state.heroZ)>CITY_HALF+14) && !outdoorCombatStarting && (!FIGHT||!FIGHT.on)){
+  if(ZONE.name==='town' && (Math.abs(state.heroX)>CITY_HALF+14 || Math.abs(state.heroZ)>CITY_HALF+14) && !outdoorCombatStarting && (!FIGHT||!FIGHT.on||!FIGHT.auto)){
     outdoorCombatStarting=true;
-    fightToggle(true).then(f=>{if(ZONE.name==='town')f.startAuto();}).finally(()=>{outdoorCombatStarting=false;});
+    fightToggle(true).then(f=>{if(ZONE.name==='town')f.startAuto();}).catch(err=>diag('Wilderness combat startup failed: '+err.message,true)).finally(()=>{outdoorCombatStarting=false;});
   }
   if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ, VIEWK);
   const t=performance.now()/1000;
@@ -1617,6 +1629,7 @@ function updateZone(dt) {
 }
 
 function frame(now) {
+  miniMap.update(now);
   requestAnimationFrame(frame);
   if (!running) return;
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
@@ -1689,7 +1702,12 @@ async function fightToggle(createOnly) {
   if (createOnly) return FIGHT;
   FIGHT.toggle(); return FIGHT;
 }
-{ const fb = document.getElementById('fightBtn'); if (fb) fb.addEventListener('click', e => { e.preventDefault(); fightToggle(); }); }
+{ const fb = document.getElementById('fightBtn'); if (fb) fb.addEventListener('click', e => { e.preventDefault(); fightToggle().catch(err=>diag('Combat startup failed: '+err.message,true)); }); }
+// Entering the world arms normal attacks and the skill HUD for EVERY hero.
+// Auto mode keeps the protected village peaceful; enemies spawn outside the walls.
+document.getElementById('vnEnter')?.addEventListener('click',()=>{
+  fightToggle(true).then(f=>f.startAuto()).catch(err=>diag('Combat startup failed: '+err.message,true));
+});
 let ownerFlag = false;
 let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
 const cheatEnv = {

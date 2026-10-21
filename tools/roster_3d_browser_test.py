@@ -55,8 +55,22 @@ with sync_playwright() as p:
         assert b.count()==1
         b.scroll_into_view_if_needed()
         b.click()
-        page.wait_for_function("""()=>!document.querySelector('.vn-character-choose').disabled &&
-          document.querySelector('.vn-character-status').textContent.includes('Frost Troll B')""",timeout=60000)
+        try:
+            page.wait_for_function("""()=>!document.querySelector('.vn-character-choose').disabled &&
+              document.querySelector('.vn-character-status').textContent.includes('Frost Troll B')""",timeout=30000)
+        except Exception:
+            diagnostics=page.evaluate("""()=>({
+              status:document.querySelector('.vn-character-status')?.textContent,
+              choose:document.querySelector('.vn-character-choose')?.disabled,
+              chooseText:document.querySelector('.vn-character-choose')?.textContent,
+              rosterOpen:document.getElementById('heroes')?.classList.contains('open'),
+              canvas:!!document.querySelector('.vn-character-stage canvas'),
+              selectedRow:[...document.querySelectorAll('#hlist .vn-roster-list .row button')]
+                .filter(b=>b.title.includes('Frost Troll')).map(b=>({title:b.title,slot:b.dataset.i})),
+              models:__p3d.modelStatus(),hero:__p3d.heroIndex})""")
+            print('FROST SELECTOR DIAGNOSTIC',diagnostics,'JS ERRORS',errors,flush=True)
+            page.screenshot(path=f'frost-troll-b-roster-error-{orientation}.png')
+            raise
         assert page.evaluate('__p3d.heroIndex')==2
         page.screenshot(path=f'frost-troll-b-roster-{orientation}.png')
         assert not errors,errors

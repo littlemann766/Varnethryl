@@ -26,7 +26,16 @@ assert(main.includes("fightToggle(true).then(f=>f.startAuto())"),'all heroes rec
 assert(main.includes("!FIGHT.on||!FIGHT.auto"),'wilderness promotes training mode into auto encounters');
 assert(camera.includes('const orbitAngle ='),'third-person camera uses real spherical pitch orbit');
 assert(main.includes('camRig.look(0, -(e.clientY - t.ly) * 0.005'),'vertical touch orbit is actually connected');
-assert(fight.includes('u.serpentWave(dt,mv,dyaw/Math.max(.016,dt),'),'Balthrix enemy rig updates a spine/body wave');
+assert(!fight.includes('u.serpentWave(dt,mv'),'Balthrix must not corkscrew his 29 animated spine/tail joints with a post-mixer overlay');
+
+const wrenCloth=JSON.parse(source('www/proto3d/models-new/wren_cl_arms.cloth.json'));
+const wrenWings=wrenCloth.groups.filter(g=>g.kind==='wing');
+assert.equal(wrenWings.length,2,'Wren has independently authored left and right wing joints');
+assert(wrenWings.every(g=>g.enabled===false),'no wing spring may fight Wren baked wing animations');
+assert(main.includes("const matchingGroups=id==='n:wren_new3'"),"Wren 3D model must filter out wing springs");
+assert(main.includes("}else if (id === 'n:wren_new3')"),'a missing cloth JSON must never reactivate generic wing springs');
+assert(main.includes("const ASSET_V = '1.3.2'"),'1.3.2 must bust stale Android model caches');
+
 assert(fight.includes('14*Math.max(0,dt)'),'Balthrix patrol advances per frame instead of jerky time chunks');
 assert(fight.includes('if (on) { if (isAuto === true) auto = true; return; }'),'existing active combat must be promotable');
 assert(main.includes("group.key === 'ssylthar'"),'unreleased Sslythar remains hidden');

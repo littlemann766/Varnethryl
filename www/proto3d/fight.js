@@ -411,10 +411,10 @@ export function createFight(env) {
   // unlocked sound via player interaction; never creates a node per frame.
   let gruntClock=0, gruntAudio=null;
   function hobGrunt(distance){
-    const Audio=window.AudioContext||window.webkitAudioContext;
-    if(!Audio||document.hidden)return;
+    const AudioContextType=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContextType||document.hidden)return;
     try{
-      if(!gruntAudio)gruntAudio=new Audio();
+      if(!gruntAudio)return; // Do not instantiate an AudioContext outside a gesture on mobile.
       if(gruntAudio.state!=='running')return; // respect mobile autoplay restrictions
       const now=gruntAudio.currentTime;
       const osc=gruntAudio.createOscillator(), gain=gruntAudio.createGain();
@@ -433,9 +433,9 @@ export function createFight(env) {
   }
   // The title-menu Enter button is a genuine user gesture on Android.
   document.getElementById('vnEnter')?.addEventListener('click',()=>{
-    const Audio=window.AudioContext||window.webkitAudioContext;
-    if(!Audio)return;
-    try{gruntAudio ||= new Audio();gruntAudio.resume().catch(()=>{});}catch(e){}
+    const AudioContextType=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContextType)return;
+    try{gruntAudio ||= new AudioContextType();gruntAudio.resume().catch(()=>{});}catch(e){}
   });
   let campTimer=0;
   const campPending=new Set(),campNext=new Map();
@@ -530,12 +530,14 @@ export function createFight(env) {
         const behind=terrainY(e.x-fx,e.z-fz),ahead=terrainY(e.x+fx,e.z+fz);
         lean+=terrainBodyPitch(behind,ahead,2*along,.16);
       }
+      // Giant Troll B's bulky neck should not fold inside its chest during telegraphs or strikes.
+      if (e.key === 'frosttroll_b') lean = Math.max(-0.12, Math.min(0.16, lean));
       r.rotation.x += (lean - r.rotation.x) * Math.min(1, dt * 14);
       if (e.state === 'telegraph') { const pt = (e.def.boss || e.def.patterns) ? e.pat : null, f = Math.min(1, e.tStateT / (e.curTele || e.def.tele)), reach = ((pt ? pt.reach : e.def.reach) * HS + e.def.r) * 1.1;
         const shape = pt ? pt.shape : 'ring'; e.tele.visible = shape === 'ring'; if (shape === 'ring') { e.tele.position.set(e.x, terrainY(e.x,e.z)+0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; e.tele.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); }
         if (shape !== 'ring') { const t2 = bossTele(e, shape, pt); t2.visible = true; const L = pt.reach * HS + e.def.r; t2.position.set(e.x, terrainY(e.x,e.z)+0.13, e.z); t2.rotation.set(-Math.PI / 2, 0, e.yaw + Math.PI); t2.material.opacity = 0.18 + 0.45 * f; if (shape === 'line') { t2.scale.set(pt.width * HS, L * (0.35 + 0.65 * f), 1); t2.position.set(e.x + Math.sin(e.yaw) * t2.scale.y / 2, terrainY(e.x + Math.sin(e.yaw) * t2.scale.y / 2,e.z + Math.cos(e.yaw) * t2.scale.y / 2)+0.13, e.z + Math.cos(e.yaw) * t2.scale.y / 2); } else t2.scale.setScalar(L * (0.35 + 0.65 * f)); } else if (e.tele2) e.tele2.visible = false;
       } else { e.tele.visible = false; if (e.tele2) e.tele2.visible = false; }
-      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.state === 'return' || e.roaming && mv > .5 ? mv : 0); u.mixer.update(dt); if (e.key === 'vaelthryx' && u.serpentWave) u.serpentWave(dt,mv); if (u.sb) u.sb.update(dt); }
+      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.state === 'return' || e.roaming && mv > .5 ? mv : 0, dt); u.mixer.update(dt); if (e.key === 'vaelthryx' && u.serpentWave) u.serpentWave(dt,mv); if (u.sb) u.sb.update(dt); }
       const f = e.flash > 0 || e.state === 'telegraph'; if (f !== e.flashOn) { e.flashOn = f; const hx = e.flash > 0 ? 0xff2020 : 0xaa5500; for (const o of e.ems) o.material.emissive.setHex(f ? hx : o.userData.em); }
     }
     if (shakeT > 0) shakeT = Math.max(0, shakeT - dt); metUpdate(dt);

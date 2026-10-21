@@ -5,6 +5,7 @@ on:
     paths:
       - 'www/proto3d/**'
       - 'tools/check_overhaul.mjs'
+      - 'tools/verify_frost_troll_b.py'
       - '.github/workflows/check-overhaul.yml'
 permissions:
   contents: read
@@ -18,6 +19,8 @@ jobs:
           node-version: '22'
       - name: Check overhaul invariants and syntax
         run: node tools/check_overhaul.mjs
+      - name: Verify Frost Troll B is the animated bipedal mesh, never a serpent
+        run: python3 tools/verify_frost_troll_b.py
       - name: Check persistent EXP, level rollover, and ornate UI frames
         run: node tools/check_exp_ui.mjs
       - name: Check boss arena retreat, telegraph warnings, and respawning

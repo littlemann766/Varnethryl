@@ -1,8 +1,18 @@
 # Varnethryl — Full 3D Overhaul Status
 
-**Current signed main release:** 1.2.8. **Next test build:** 1.2.9 (Tidewrack Harbor 3D sailing-ship integration).
+**Current main before merge:** 1.2.9. **Staged upgrade:** 1.3.0 (Frost Troll B actual rig, movement and gameplay fixes).
 
 The 3D overhaul proceeds zone by zone; a successful Android build is not proof of a fully finished game. All changes remain source-preserving and keep the saved character roster, installed app signature, purple EXP bar, and corrected nine-sliced gold/amethyst HUD.
+
+## 1.3.0 model/animation integration (staged for release)
+
+- **Corrected Troll B is now physically in the Varnethryl game tree** at `www/proto3d/models-new/frosttroll_b.glb` (5,571,196 bytes). This is a separate bipedal, skinned Meshy replacement, **not the deleted snake**, and not a download users must manually combine with the game.
+- Retains stable `n:frosttroll_b` ID, Frost Troll A unchanged, 71 skeleton joints, walking and running clips, 0.85 s refined run cycle, and corrected neck/head placement. Final Android visual approval is pending.
+- Adjusted the model's movement-profile speeds for its actual 1.70 m native mesh scaled to giant lore height. Synchronized enemy gait smoothing to real simulation frame time and clamped the oversized wind-up lean that could bury Troll B's head in the torso.
+- Restored live hobgoblin camp grunts with an `AudioContext` unlocked by the game Enter button. No sound before user interaction on Android.
+- Bumped release and model cache identifiers to 1.3.0, retaining stable Android signing and old saved character slots. Added binary GLB checks to CI to prevent snake/troll model regressions.
+- Automatic code/asset/APK testing gates publication; screenshots and real-device testing must confirm the actual visual gait, boss attacks, HUD, cave travel, and Android performance. The **full world overhaul is NOT signed off** by this single asset pass.
+- Original user-supplied harbor ship/environment GLBs must still be added when their actual bytes are available; do not mislabel the procedural harbor ships as imported originals.
 
 ### 1.2.9 harbor pass
 

@@ -17,7 +17,7 @@ export function createOwnerFooting(model, THREE) {
   }));
   const feet = [rig[2], rig[5]];
   const left = new THREE.Vector3(), right = new THREE.Vector3(), adjusted = new THREE.Vector3();
-  let idleBlend = 0, corrected = false;
+  let idleBlend = 0, flightBlend = 0, corrected = false;
   return {
     names,
     beforeAnimation() {
@@ -30,12 +30,18 @@ export function createOwnerFooting(model, THREE) {
       }
       corrected = false;
     },
-    afterAnimation(speed, dt) {
+    afterAnimation(speed, dt, flightActive = false) {
       const v = Number.isFinite(speed) ? Math.max(0, speed) : 0;
       // Feet plant at rest, but regular authored locomotion wins before the
       // hero has built up a meaningful walking speed.
-      const target = v <= 0.09 ? 1 : v >= 0.72 ? 0 : (0.72 - v) / (0.72 - 0.09);
       const seconds = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.1)) : 0;
+      // Takeoff reveals the Owner's original, intentionally raised-leg Idle
+      // stance. Landing restores a planted two-foot stance. Preserve the GLB's
+      // actual authored leg pose for flight instead of inventing a stiff pose.
+      const airborne = flightActive ? 1 : 0;
+      flightBlend += (airborne - flightBlend) * (1 - Math.exp(-seconds * 5.0));
+      const standing = v <= 0.09 ? 1 : v >= 0.72 ? 0 : (0.72 - v) / 0.63;
+      const target = standing * (1 - flightBlend);
       const t = 1 - Math.exp(-seconds * 9);
       idleBlend += (target - idleBlend) * t;
       if (idleBlend < 0.0005) { idleBlend = 0; return; }
@@ -66,5 +72,6 @@ export function createOwnerFooting(model, THREE) {
       corrected = true;
     },
     get blend() { return idleBlend; },
+    get flightBlend() { return flightBlend; },
   };
 }

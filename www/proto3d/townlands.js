@@ -109,18 +109,23 @@ function buildWalkableTerrain(world){
  * actual terrain elevations at every strip vertex, including volcano slopes.
  * It is decorative only; navmesh/collision and terrain physics remain intact. */
 function buildBalthrixTrail(group,world){
-  const points=BALTHRIX_TRAIL,N=points.length,h=BALTHRIX_TRAIL_HALF_WIDTH;
-  const widths=[-h-6,-h,-h*.64,0,h*.64,h,h+6];
+  const points=BALTHRIX_TRAIL,N=points.length;
   const color=new THREE.Color(),earth=new THREE.Color(0x63452e),
     center=new THREE.Color(0x795239),edge=new THREE.Color(0x846b4b),
     bank=new THREE.Color(0x64563e);
   const P=[],C=[],I=[];
   for(let i=0;i<=N;i++){
     const cur=points[i%N],left=points[(i+N-1)%N],right=points[(i+1)%N];
+    // Narrow only between the outer map edge and the coastal harbor.
+    // The 30-unit tread is still wider than Balthrix's body; raised banks
+    // taper smoothly from 6 to 3 units, clearing the swimming cove and docks.
+    const shore=1-smooth(155,235,Math.hypot(cur.x-PORT_CENTER.x,cur.z-PORT_CENTER.z));
+    const h=BALTHRIX_TRAIL_HALF_WIDTH-3*shore,berm=6-3*shore;
+    const widths=[-h-berm,-h,-h*.64,0,h*.64,h,h+berm];
     const tx=right.x-left.x,tz=right.z-left.z,len=Math.hypot(tx,tz)||1;
     const nx=-tz/len,nz=tx/len;
     for(let j=0;j<widths.length;j++){
-      const w=widths[j],x=cur.x+nx*w,z=cur.z+nz*w;
+      const w=widths[j],x=Math.max(-world+1.25,Math.min(world-1.25,cur.x+nx*w)),z=Math.max(-world+1.25,Math.min(world-1.25,cur.z+nz*w));
       const b=(j===0||j===6)?1.45:(j===1||j===5)?.38:0;
       const grain=.09*Math.sin(i*.65+j*2.1);
       P.push(x,townElevation(x,z,world)+.14+b+grain,z);
@@ -148,7 +153,9 @@ function buildBalthrixTrail(group,world){
   for(let i=0;i<N&&n<logs.count;i+=17){
     const p=points[i],prev=points[(i+N-1)%N],next=points[(i+1)%N];
     const dx=next.x-prev.x,dz=next.z-prev.z,len=Math.hypot(dx,dz)||1;
-    const side=i%2?1:-1,x=p.x-side*dz/len*(h+7),z=p.z+side*dx/len*(h+7);
+    const nearPort=1-smooth(155,235,Math.hypot(p.x-PORT_CENTER.x,p.z-PORT_CENTER.z));
+    const halfWidth=BALTHRIX_TRAIL_HALF_WIDTH-3*nearPort;
+    const side=i%2?1:-1,x=Math.max(-world+1.5,Math.min(world-1.5,p.x-side*dz/len*(halfWidth+7-3*nearPort))),z=Math.max(-world+1.5,Math.min(world-1.5,p.z+side*dx/len*(halfWidth+7-3*nearPort)));
     dummy.position.set(x,townElevation(x,z,world)+.75,z);
     dummy.quaternion.setFromUnitVectors(up,new THREE.Vector3(dx/len,.12,dz/len).normalize());
     dummy.scale.setScalar(.65+(i%6)*.045);dummy.updateMatrix();
@@ -284,10 +291,10 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   const waterGeo=new THREE.PlaneGeometry(93,110,24,28);
   const waterMat=new THREE.MeshPhongMaterial({color:0x237fa4,emissive:0x0a3547,transparent:true,opacity:.84,shininess:105,side:THREE.DoubleSide,depthWrite:false});
   const water=new THREE.Mesh(waterGeo,waterMat);
-  water.rotation.x=-Math.PI/2;water.position.set(PORT_CENTER.x-49,.17,PORT_CENTER.z);
+  water.rotation.x=-Math.PI/2;water.position.set(PORT_CENTER.x-39,.17,PORT_CENTER.z);
   water.receiveShadow=true;water.userData.keep=true;water.name='harbor-swim-water';group.add(water);
   const wp=waterGeo.attributes.position,original=wp.array.slice();
-  const waterAt=(x,z)=>x<PORT_CENTER.x-26 && x>PORT_CENTER.x-96 && Math.abs(z-PORT_CENTER.z)<51;
+  const waterAt=(x,z)=>x<PORT_CENTER.x+6 && x>PORT_CENTER.x-85 && Math.abs(z-PORT_CENTER.z)<51;
   function updateWater(t){
     for(let i=0;i<wp.count;i++){const ix=i*3,x=original[ix],y=original[ix+1];
       wp.array[ix+2]=.17*Math.sin(x*.19+t*1.6)+.11*Math.sin(y*.24-t*1.15);}

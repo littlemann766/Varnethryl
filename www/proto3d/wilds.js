@@ -2,6 +2,7 @@
    merged into spatial chunks (frustum-culled) so the whole map costs only a handful of draw calls: ground 1, water 1, hills 1, portals 2, plus ~2 per visible chunk. */
 import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
+import { buildWildsReturnRuins } from './wilds-gateway.js';
 /* ONE-LINE MAP SIZE: `half` is the half extent (world units; 1 m = 0.947*HS = 1.42 wu). 280 wu = ~197 m => ~394 m across (~20x the 19.05 m playable Vaelthryx). Was 170.
    Everything below (biomes, set pieces, lake, trails, scatter counts, lanes, ground texture, hills ring) derives from it. Terrain/mountains are config-ready, NOT built yet:
    set WILDS.terrain = { heightmap, mountains } later and route placement through groundY(x, z) (flat 0 for now). */
@@ -60,6 +61,9 @@ export function makeGate(color) {
 }
 export function buildWilds(env) {
   const { scene, HS } = env, { ox, oz, half } = WILDS, cols = [], rnd = rng(20261018), grp = new THREE.Group(); grp.name = 'wilds'; scene.add(grp);
+  // Return shrine occupies the original Wilds exit location; old save positions remain valid.
+  const ruinedReturn=buildWildsReturnRuins(grp,ox-6,oz-2);
+  cols.push(...ruinedReturn.colliders);
   const map = makeDetailTexture(), mats = makeMaterials(map), cache = new Map(), chunks = new Map(), taken = [];
   const rp = a => a[Math.floor(rnd() * a.length) % a.length], rf = (a, b) => a + (b - a) * rnd();
   const variant = (kind, name, pal) => { const slot = Math.floor(rnd() * 2), key = kind + name + pal + slot; if (!cache.has(key)) cache.set(key, makeVariant(kind, name, pal, slot + 3, false)); return cache.get(key); };
@@ -134,5 +138,5 @@ export function buildWilds(env) {
   grp.visible = false;
   /* distance culling: only chunks near the hero are drawn (keeps draw calls low on a big map) */
   const cull = (hx, hz, k) => { k = k || 1; for (const m of chunkMeshes) { const s = m.geometry.boundingSphere, d = Math.hypot(s.center.x - hx, s.center.z - hz) - s.radius; m.visible = d < (m.castShadow ? 105 : 125) * k; } };   // k = view scale for giants (main.js)
-  return { cull, lanes: LANES, group: grp, colliders: cols, spawn: { x: ox - 6, z: oz + 4 }, portal: { x: ox - 6, z: oz - 2 }, drawCalls: grp.children.length };
+  return { cull, lanes: LANES, group: grp, colliders: cols, ruinedReturn, spawn: { x: ox - 6, z: oz + 4 }, portal: { x: ox - 6, z: oz - 2 }, drawCalls: grp.children.length };
 }

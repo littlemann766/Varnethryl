@@ -8,10 +8,17 @@ export const FROST_SUMMIT = Object.freeze({x: 0, z: -345, radius: 137, height: 6
 export const FROST_PORTAL = Object.freeze({x: 0, z: -345});
 export const PORT_CENTER = Object.freeze({x: -425.6, z: 392});
 export const FROST_REALM = Object.freeze({cx: 2250, cz: 0, half: 235});
+// Balthrix uses the OUTER wilderness, skirting hills and the volcano's rim.
+// This closed loop also stays clear of the walled port's northern and western
+// ramparts. Its exact spline is shared by roaming AI and the visible trail.
 export const BALTHRIX_ROUTE = Object.freeze([
-  [-435, -205],[-320,-360],[-55,-445],[230,-455],[405,-403], // visits the Titan's lava
-  [465,-175],[447,135],[375,400],[105,454],[-190,460],[-445,348],[-485,28]
+  [-486,-96],[-486,-266],[-455,-421],[-323,-476],[-142,-489],
+  [75,-494],[260,-487],[441,-455],[497,-286],[506,-92],
+  [505,115],[493,288],[447,467],[276,493],[85,503],
+  [-116,503],[-289,497],[-454,515],[-520,501],[-523,385],[-516,145]
 ]);
+export const BALTHRIX_TRAIL_HALF_WIDTH = 18; // 36-unit broad trampled route
+
 export const LAVA_POOLS = Object.freeze([
   {x: 402, z: -419, r: 25}, {x: 449, z: -371, r: 16},
   {x: 351, z: -438, r: 14}, {x: 376, z: -358, r: 10},
@@ -59,6 +66,48 @@ const BALTHRIX_ARC = (() => {
  }
  return {samples,total:dist};
 })();
+// World-space points have exact agreement with Balthrix's constant-speed
+// spline; they are used for terrain dressing and exclusion of trees/rocks.
+export const BALTHRIX_TRAIL = Object.freeze(BALTHRIX_ARC.samples
+  .slice(0,-1).map(s=>Object.freeze(balthrixPoint(s.seg,s.u))));
+const TRAIL_CELL=48, TRAIL_MARGIN=BALTHRIX_TRAIL_HALF_WIDTH+17;
+const trailCells=new Map();
+for(let i=0;i<BALTHRIX_TRAIL.length;i++){
+  const a=BALTHRIX_TRAIL[i],b=BALTHRIX_TRAIL[(i+1)%BALTHRIX_TRAIL.length];
+  const minX=Math.floor((Math.min(a.x,b.x)-TRAIL_MARGIN)/TRAIL_CELL),
+    maxX=Math.floor((Math.max(a.x,b.x)+TRAIL_MARGIN)/TRAIL_CELL),
+    minZ=Math.floor((Math.min(a.z,b.z)-TRAIL_MARGIN)/TRAIL_CELL),
+    maxZ=Math.floor((Math.max(a.z,b.z)+TRAIL_MARGIN)/TRAIL_CELL);
+  for(let x=minX;x<=maxX;x++)for(let z=minZ;z<=maxZ;z++){
+    const key=x+':'+z;
+    if(!trailCells.has(key))trailCells.set(key,[]);
+    trailCells.get(key).push([a,b]);
+  }
+}
+export function balthrixTrailDistance(x,z){
+  const segs=trailCells.get(Math.floor(x/TRAIL_CELL)+':'+Math.floor(z/TRAIL_CELL));
+  if(!segs)return Infinity;
+  let best=Infinity;
+  for(const [a,b] of segs){
+    const dx=b.x-a.x,dz=b.z-a.z,l2=dx*dx+dz*dz||1;
+    const t=Math.max(0,Math.min(1,((x-a.x)*dx+(z-a.z)*dz)/l2));
+    best=Math.min(best,Math.hypot(x-a.x-t*dx,z-a.z-t*dz));
+  }
+  return best;
+}
+export function nearestBalthrixRoamTime(x,z,speed=14){
+  let best=Infinity,time=0;
+  const S=BALTHRIX_ARC.samples;
+  for(let i=0;i<S.length-1;i++){
+    const p=balthrixPoint(S[i].seg,S[i].u),q=balthrixPoint(S[i+1].seg,S[i+1].u);
+    const dx=q.x-p.x,dz=q.z-p.z,l2=dx*dx+dz*dz||1;
+    const f=Math.max(0,Math.min(1,((x-p.x)*dx+(z-p.z)*dz)/l2));
+    const d=Math.hypot(x-p.x-f*dx,z-p.z-f*dz);
+    if(d<best){best=d;time=(S[i].dist+(S[i+1].dist-S[i].dist)*f)/speed;}
+  }
+  return {distance:best,time};
+}
+
 export function balthrixPosition(t,speed=14){
  const {samples,total}=BALTHRIX_ARC;
  if(!Number.isFinite(t)||!Number.isFinite(speed)||total<=0)

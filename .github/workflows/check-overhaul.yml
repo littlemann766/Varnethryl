@@ -1,0 +1,24 @@
+name: Validate staged Varnethryl overhaul
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'www/proto3d/**'
+      - 'tools/check_overhaul.mjs'
+      - '.github/workflows/check-overhaul.yml'
+permissions:
+  contents: read
+jobs:
+  overhaul-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check overhaul invariants and syntax
+        run: node tools/check_overhaul.mjs
+      - name: Check established encounter geography and gameplay invariants
+        run: node tools/check_boss_regions.mjs
+      - name: Check walkable terrain and portal stability
+        run: node tools/check_town_mountains.mjs

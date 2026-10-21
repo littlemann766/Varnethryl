@@ -20,6 +20,9 @@ This is a **multi-phase game rebuild**, not a single APK patch. The current sign
 - First audit result: 10/10 structurally valid GLB files, **but valid does not mean visually correct**.
 - Balthrix straight rig has 8 authored clips and 29 animated spine/tail-related joints. His dedicated `slither` and `slither_fast` animations are now explicitly preferred in the staged branch instead of generic walk/run.
 - The newer Sslythar model has an animated skeleton; the older model is unskinned. **Both remain hidden** until in-game movement is tested and approved.
+- **Frost Cave gameplay pass:** stronger local lighting at Krag and Mog's arenas and the return portal, large crystal clusters with collision, a guaranteed clear boss/portal travel corridor, and one low-cost animated airborne-ice particle batch. Cave glow pulses without adding shadow passes.
+- **Browser regression:** checks actual cave color, both lit arenas, colliders and particles after the Frost portal, captures a mobile-size screenshot and checks both brothers still spawn.
+- **Compatibility:** fixes inline CSS ornament URLs for GitHub Pages subpaths as well as Android; this keeps the repaired gold/purple HUD and original EXP fill visible on both.
 - Varnethryl app, XP, HUD, and saved model slot ordering are otherwise retained.
 - Latest CI and isolated Android side-by-side test build must pass before this work can be considered for release. Code checks alone are not a visual-animation quality guarantee.
 

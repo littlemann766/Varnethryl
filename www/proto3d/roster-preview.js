@@ -70,12 +70,12 @@ export function createRosterPreview({ THREE, mount, status, load, release }) {
     return true;
   }
   async function show(id,mode,name) {
-    if (!open()) return;
+    if (!open()) return false;
     const n=++ticket;
     clear(); say('Loading '+name+'…');
     try {
       const model=await load(id,mode);
-      if(n!==ticket||!running) { if(model)release(model);return; }
+      if(n!==ticket||!running) { if(model)release(model);return false; }
       if(!model)throw new Error('Model unavailable');
       // Stage never moves the live in-game avatar. Every preview owns its model.
       const group=new THREE.Group(); group.add(model); stage.add(group);
@@ -100,7 +100,8 @@ export function createRosterPreview({ THREE, mount, status, load, release }) {
       const idle=actions.idle || actions.walk || actions.run;
       if(idle){idle.reset();idle.setLoop(THREE.LoopRepeat);idle.play();idle.setEffectiveWeight(1);idle.timeScale=actions.idle?1:.65;}
       say(name+' · drag to rotate · scroll to zoom');
-    } catch(e) { if(n===ticket) say(name+' · 3D model unavailable'); }
+      return true;
+    } catch(e) { if(n===ticket) say(name+' · 3D model unavailable'); return false; }
   }
   function hide() {
     ++ticket;running=false;cancelAnimationFrame(frame);dragging=false;clear();

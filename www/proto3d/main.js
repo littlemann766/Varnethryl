@@ -16,7 +16,7 @@ import { createCinderFlight, cinderAnimationWeights } from './cinderflight.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
 import { bossCameraFocus } from './boss-camera-focus.js';
-import { preferSerpentClips } from './serpent-locomotion.js';
+import { preferSerpentClips, createSerpentWave, serpentBodyChain } from './serpent-locomotion.js';
 import { zoneAtmosphere } from './zone-ambience.js';
 import { initSettings } from './settingsboot.js';
 import { createMiniMap } from './minimap.js';
@@ -532,27 +532,19 @@ function wrapGLB(g, id, blocky) {
       diag('Balthrix clips do not animate named spine/tail/body/neck bones: a full-body wave is not verified.');
     diag('Rig audit ' + id + ': ' + report.boneCount + ' bones, ' + skinnedMeshes + ' skinned meshes, ' + report.clips.length + ' clips.');
   }
-  // Fallback serpent body wave only when imported clips do not animate the
-  // spine/tail. Preserve authored animation where it exists.
-  if (/vaelthryx/.test(id) && root.userData.rigAudit &&
-      !root.userData.rigAudit.serpentAnimatedTracks.some(clip => clip.tracks > 0)) {
-    const joints = [];
-    m.traverse(o => {
-      if (o.isBone && /spine|tail|body/i.test(o.name)) joints.push(o);
-    });
-    if (joints.length >= 3) {
-      const rest = joints.map(b => b.rotation.y);
-      let phase = 0, strength = 0;
-      root.userData.serpentWave = (dt, speed) => {
-        const moving = Math.max(0, Math.min(1, speed / 3));
-        strength += (moving - strength) * (1 - Math.exp(-dt * 5));
-        phase += dt * (2.8 + Math.min(5, speed * 0.45));
-        joints.forEach((bone, i) => {
-          // Small lateral rotations propagate from neck to tail.
-          bone.rotation.y = rest[i] + Math.sin(phase - i * 0.65) * 0.12 * strength;
-        });
-      };
-      diag('Balthrix: enabled procedural spine/tail wave fallback on ' + joints.length + ' bones.');
+  // Balthrix has authored slither clips that animate 29 spine/tail joints, but
+  // those clips alone barely flex the actual body as it patrols. Add a gentle,
+  // physically continuous traveling S-wave on top AFTER mixer.update instead
+  // of enabling the procedural pose only when clips are missing.
+  if (/vaelthryx/.test(id)) {
+    const chain = serpentBodyChain(m);
+    const gait = createSerpentWave(m);
+    if (gait) {
+      root.userData.serpentWave = gait;
+      if(root.userData.rigAudit)root.userData.rigAudit.proceduralSlitherJoints=chain.length;
+      diag('Balthrix: animated head-to-tail serpent slither on '+chain.length+' connected joints.');
+    } else {
+      diag('Balthrix: insufficient connected body joints for full-body slither.',true);
     }
   }
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);

@@ -2,6 +2,7 @@
  * Procedural fallback until the approved external ship GLB is imported.
  * No box-shaped hulls, false flat bow cones or 2D cutout silhouettes. */
 import * as THREE from './vendor/three.module.js';
+import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 export function buildSailingShip(scale=1, large=true) {
   const ship=new THREE.Group();ship.name=large?'tidewrack-three-mast-galleon':'tidewrack-boat';
@@ -74,4 +75,64 @@ export function animateMooredShip(ship,t){
   ship.rotation.z=.025*Math.sin(t*.76+p.phase);
   ship.rotation.y=p.yaw+.012*Math.sin(t*.35+p.phase);
   return true;
+}
+
+
+/* The owner's individual 3D sailing-ship FBX (supplied as a ZIP) was converted
+ * to a textured, self-contained glTF binary at the path below.
+ *
+ * Import ONE actual ship at the main harbor mooring, and retain the existing
+ * procedural boat as both fallback and secondary docked vessel. The imported
+ * model is checked for finite geometry and normalized to the current harbor
+ * footprint so it won't block the road, break physics, or appear hundreds of
+ * metres tall when an FBX exporter changes units.
+ *
+ * Separate source/model uploader is needed when the binary isn't yet present
+ * on the deployed branch. Do not claim a GLB loaded unless success is true.
+ */
+export const TIDEWRACK_SHIP_GLB='proto3d/models-new/tidewrack_sailing_ship.glb';
+let approvedShipPromise=null;
+const loader=new GLTFLoader();
+function shipAsset(){
+  if(!approvedShipPromise)approvedShipPromise=new Promise((resolve,reject)=>{
+    loader.load(TIDEWRACK_SHIP_GLB+'?v=1.3.2',resolve,undefined,reject);
+  });
+  return approvedShipPromise;
+}
+export async function installImportedShip(ship,{large=true}={}){
+  if(!ship||!ship.isGroup)return false;
+  if(ship.userData.importedShip===true)return true;
+  try{
+    const gltf=await shipAsset();
+    if(!gltf?.scene)throw new Error('No scene in sailing ship GLB');
+    const model=gltf.scene.clone(true);
+    model.updateMatrixWorld(true);
+    const bounds=new THREE.Box3().setFromObject(model);
+    const size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
+    if (![size.x,size.y,size.z,center.x,center.y,center.z].every(Number.isFinite)
+        ||size.y<0.001||size.x<0.001||size.z<0.001)throw new Error('Invalid ship geometry bounds');
+    // Ship FBX exporter normalized everything to roughly one metre.
+    // Existing harbor dimensions expect a 12 m tall galleon.
+    const height=large?10.8:6.4,scale=height/size.y;
+    model.scale.setScalar(scale);
+    // Keep the imported mesh attached to the animated mooring group.
+    model.position.set(-center.x*scale,-bounds.min.y*scale-.30,-center.z*scale);
+    model.rotation.y=Math.PI*.5;
+    model.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true;}});
+    model.name='original-user-sailing-ship-3d';
+    model.userData.keep=true;
+    const fallbackChildren=ship.children.slice();
+    ship.add(model);
+    for(const part of fallbackChildren)part.visible=false;
+    ship.userData.importedShip=true;
+    ship.userData.importedShipModel=model;
+    ship.userData.originalShipFallback=fallbackChildren;
+    return true;
+  }catch(e){
+    // A missing or invalid shipped binary never blanks out Tidewrack Harbor.
+    ship.userData.importedShip=false;
+    ship.userData.importError=String(e?.message||e);
+    console.warn('Tidewrack: original sailing ship GLB unavailable; using curved-hull fallback',e);
+    return false;
+  }
 }

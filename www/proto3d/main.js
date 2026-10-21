@@ -854,7 +854,7 @@ async function selectVariant(g, v) {
   const id = GLB_IDS[v.slot]; if (bk(id) && modeFor(id) !== v.mode) await toggleModel(v.slot);
   await selectHero(v.slot); refreshSel(v.slot);
 }
-{ const bar = document.getElementById('heroes'); const seen = new Set(), gl = [];
+{ const bar = document.getElementById('heroes'); const seen = new Set(), rosterGroups = [];
   // Explicitly removed from the visible roster; retain saved slot compatibility.
   const pikachuGroup = SLOT_G[GLB_IDS.indexOf('n:player_pikachu')];
   if (pikachuGroup) seen.add(pikachuGroup);
@@ -863,13 +863,13 @@ async function selectVariant(g, v) {
   // Sslythar remains an unreleased creature while the serpentine rig is refined.
   // Preserve its GLB, stable slot number and saved selection compatibility.
   for (const group of GROUPS.values()) if (group.key === 'ssylthar') seen.add(group);
-  HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g) && !/^odyssey$/i.test(g.key)) { seen.add(g); gl.push(g); } });
-  gl.sort(compareRoster);
+  HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g) && !/^odyssey$/i.test(g.key)) { seen.add(g); rosterGroups.push(g); } });
+  rosterGroups.sort(compareRoster);
   const enemyKeys=new Set(['vaelthryx','ashentitan','frosttroll','stonetroll','hobgoblin','mossgut','ssylthar','hydrella','wyvern']);
   const companionKeys=new Set(['wolf','snowy','hawk','kestrel','zephyr','pip','briar','cinder','coral','ember','hearth','wren']);
-  const enemyGroups=gl.filter(g=>enemyKeys.has(g.key)||!!bossVariant(g));
-  const companionGroups=gl.filter(g=>companionKeys.has(g.key)&&!enemyGroups.includes(g));
-  const playableGroups=gl.filter(g=>!enemyGroups.includes(g)&&!companionGroups.includes(g));
+  const enemyGroups=rosterGroups.filter(g=>enemyKeys.has(g.key)||!!bossVariant(g));
+  const companionGroups=rosterGroups.filter(g=>companionKeys.has(g.key)&&!enemyGroups.includes(g));
+  const playableGroups=rosterGroups.filter(g=>!enemyGroups.includes(g)&&!companionGroups.includes(g));
   const cur = document.createElement('button'); cur.id = 'hcur'; cur.className = 'cur'; cur.appendChild(document.createTextNode('')); const car = document.createElement('span'); car.textContent = '\u25be'; cur.appendChild(car); cur.title = 'choose character';
   const vars = document.createElement('div'); vars.id = 'hvars'; const list = document.createElement('div'); list.id = 'hlist';
   // Live 3D selector preview: one reusable WebGL viewport and no extra game actors.

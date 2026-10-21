@@ -61,6 +61,12 @@ export function createCamRig(env) {
     const z = c.legacyZoom || 1, close = z < 1, f = r.zoom;
     const dist = HS * (close ? (c.portrait ? 7.0 : 6.0) * (z / 0.3) : (c.portrait ? 10.5 : 9)) * f * prof.camDist, height = HS * (close ? 2.2 : (c.portrait ? 7.2 : 6.2)) * f * prof.camHeight;
     lk.set(c.heroX, HS * (close ? 1.05 : 1.6) * prof.camHeight + c.hy, c.heroZ);
+    // Voluntary giant-boss lock-on shifts the camera's aim, never its yaw,
+    // orbit pitch, controls or actual camera position. Smoothing below
+    // handles both acquiring and releasing lock without abrupt snapping.
+    if(c.bossFocus){
+      lk.x+=c.bossFocus.x;lk.y+=c.bossFocus.rise;lk.z+=c.bossFocus.z;
+    }
     // Full third-person orbit: the same pitch gesture works in BOTH views.
     // Pitch 0 preserves the familiar elevated over-shoulder camera; drag up
     // or down for near-vertical views without flipping controls upside down.

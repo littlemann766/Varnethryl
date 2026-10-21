@@ -63,3 +63,15 @@ export function buildSailingShip(scale=1, large=true) {
   ship.scale.setScalar(scale);ship.userData.keep=true;
   return ship;
 }
+
+/* Moored hull and every attached mast/sail rock together; exported separately
+ * so the same production motion can be verified in Node without a DOM/canvas. */
+export function animateMooredShip(ship,t){
+  const p=ship?.userData?.mooring;
+  if(!p||!Number.isFinite(t))return false;
+  ship.position.y=ship.userData.baseY+.105*Math.sin(t*.82+p.phase);
+  ship.rotation.x=.013*Math.sin(t*.55+p.phase);
+  ship.rotation.z=.025*Math.sin(t*.76+p.phase);
+  ship.rotation.y=p.yaw+.012*Math.sin(t*.35+p.phase);
+  return true;
+}

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 import {spawnSync} from 'node:child_process';
-import {CITY_HALF,FROST_SUMMIT,FROST_PORTAL,PORT_CENTER,smooth01,frostHill,lavaAmount} from '../www/proto3d/bossregions.js';
+import {CITY_HALF,FROST_SUMMIT,FROST_PORTAL,PORT_CENTER,TITAN_CENTER,smooth01,frostHill,lavaAmount} from '../www/proto3d/bossregions.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const building=read('www/proto3d/buildings.js'),land=read('www/proto3d/townlands.js'),game=read('www/proto3d/main.js');
 assert.match(building,/WORLD_B\s*=\s*200\s*\*\s*PK/, 'map is 2x the previous 280 half extent');

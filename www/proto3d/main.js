@@ -847,7 +847,7 @@ function refreshSel(i) {
   selUI.vars.textContent = ''; selUI.vars.style.display = visibleVariants.length > 1 ? 'flex' : 'none';
   visibleVariants.forEach(v => { const c = document.createElement('button'); c.className = 'vr' + (v === cur ? ' on' : ''); c.textContent = v.label; c.dataset.i = v.slot; c.dataset.m = v.mode; c.title = g.name + ': ' + v.label + ' version';
     c.addEventListener('pointerdown', e => e.stopPropagation()); c.addEventListener('click', e => { e.stopPropagation(); selectVariant(g, v); }); selUI.vars.appendChild(c); });
-  selUI.rows.forEach(r => { const gg = r.g, v = r.approved ? bossVariant(gg) : curVar(gg); if(v)r.b.dataset.i = v.slot; r.b.classList.toggle('on', gg === g); });
+  selUI.rows.forEach(r => { const gg = r.g, v = r.variant || (r.approved ? bossVariant(gg) : curVar(gg)); if(v)r.b.dataset.i = v.slot; r.b.classList.toggle('on', gg === g && v.slot === cur.slot); });
 }
 async function selectVariant(g, v) {
   selV[g.key] = v; try { localStorage.setItem('vn_var_' + g.key, v.slot + '|' + v.mode); } catch (_) {}
@@ -937,7 +937,7 @@ async function selectVariant(g, v) {
   const open = () => { bar.classList.add('open');const g=SLOT_G[HEROES.indexOf(hero)];if(g)previewFor(g,curVar(g)); };
   cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation();bar.classList.contains('open')?close():open(); });
   document.addEventListener('pointerdown', e => { if (!bar.contains(e.target) && !document.getElementById('vnSkinBubble')?.contains(e.target)) close(); }, true);
-  const mkRow = (g, approved=false) => { const item=approved?bossVariant(g):curVar(g); const n = approved?(BOSS_DISPLAY.get(GLB_IDS[item.slot])||g.name):g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = item.slot;
+  const mkRow = (g, approved=false, fixedVariant=null) => { const item=fixedVariant||(approved?bossVariant(g):curVar(g)); const n = approved?(BOSS_DISPLAY.get(GLB_IDS[item.slot])||g.name):g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = item.slot;
     if (!approved && g.vars.length > 1) { const sp = document.createElement('small'); sp.textContent = ' \u00b7' + g.vars.length; b.appendChild(sp); }
     // Hold a name for 550 ms to inspect its 3D skin without changing hero,
     // companions, or the saved selection. Tap retains existing behavior.
@@ -979,15 +979,22 @@ async function selectVariant(g, v) {
     b.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-startX,e.clientY-startY)>12)cancelHold();});
     b.addEventListener('pointerup',cancelHold);b.addEventListener('pointercancel',cancelHold);
     b.addEventListener('contextmenu',e=>{e.preventDefault();});
-    b.addEventListener('click',e=>{e.stopPropagation();if(held){e.preventDefault();held=false;return;}previewFor(g,approved?bossVariant(g):curVar(g));});
-    const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = item.slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = approved?bossVariant(g).slot:curVar(g).slot; toggleFollower(+f.dataset.f); });
+    b.addEventListener('click',e=>{e.stopPropagation();if(held){e.preventDefault();held=false;return;}previewFor(g,fixedVariant||(approved?bossVariant(g):curVar(g)));});
+    const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = item.slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = fixedVariant?.slot ?? (approved?bossVariant(g).slot:curVar(g).slot); toggleFollower(+f.dataset.f); });
     row.appendChild(b); row.appendChild(f); return { row, b }; };
   const back= document.createElement('button');back.type='button';back.className='vn-picker-close';back.textContent='← Back to game';back.addEventListener('pointerdown',e=>e.stopPropagation());back.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();close();});list.appendChild(back);
   list.appendChild(previewShell);list.appendChild(tabs);
   for(const group of Object.values(tabLists))list.appendChild(group);
   showRosterTab('playable');
   for(const [key,groups] of [['playable',playableGroups],['companions',companionGroups],['enemies',enemyGroups]]){
-    for(const g of groups){const approved=!!bossVariant(g),r=mkRow(g,approved);tabLists[key].appendChild(r.row);rows.push({g,b:r.b,approved});}
+    for(const g of groups){
+      const approved=!!bossVariant(g);
+      const variants=(approved && g.key==='frosttroll')
+        ? g.vars.filter(v=>APPROVED_BOSS_IDS.has(GLB_IDS[v.slot]))
+        : [null];
+      for(const variant of variants){const r=mkRow(g,approved,variant);
+        tabLists[key].appendChild(r.row);rows.push({g,b:r.b,approved,variant});}
+    }
   }
   window.__openBossRoster=()=>{showRosterTab('enemies');open();if(enemyGroups.length)previewFor(enemyGroups[0],bossVariant(enemyGroups[0])||curVar(enemyGroups[0]));};
   window.__ownerRoster = (allow = true) => {

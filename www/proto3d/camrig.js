@@ -5,7 +5,7 @@ import * as THREE from './vendor/three.module.js';
 import { ZOOM_MIN, ZOOM_MAX, clampZoom, segmentClearT } from './camprefs.js';
 import { worldProfile } from './charscale.js';
 
-export const FP_FOV = 72, FP_NEAR = 0.12, TP_NEAR = 0.5, PITCH_MAX = 1.2, MIN_TP_DIST_T = 0.02;
+export const FP_FOV = 72, FP_NEAR = 0.12, TP_NEAR = 0.5, PITCH_MAX = 1.47, MIN_TP_DIST_T = 0.02;
 const typing = (t) => !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT');
 
 /* env: {camera, canvas, colliders, HS, WORLD, prefs, onPrefs?:(prefs)=>void} */
@@ -60,8 +60,16 @@ export function createCamRig(env) {
     }
     const z = c.legacyZoom || 1, close = z < 1, f = r.zoom;
     const dist = HS * (close ? (c.portrait ? 7.0 : 6.0) * (z / 0.3) : (c.portrait ? 10.5 : 9)) * f * prof.camDist, height = HS * (close ? 2.2 : (c.portrait ? 7.2 : 6.2)) * f * prof.camHeight;
-    want.set(c.heroX + sy * dist, height + c.hy, c.heroZ + cy * dist);
     lk.set(c.heroX, HS * (close ? 1.05 : 1.6) * prof.camHeight + c.hy, c.heroZ);
+    // Full third-person orbit: the same pitch gesture works in BOTH views.
+    // Pitch 0 preserves the familiar elevated over-shoulder camera; drag up
+    // or down for near-vertical views without flipping controls upside down.
+    const baseVertical = height + c.hy - lk.y;
+    const orbitRadius = Math.hypot(dist,baseVertical);
+    const baseAngle = Math.atan2(baseVertical,dist);
+    const orbitAngle = Math.max(-1.47,Math.min(1.47,baseAngle+r.pitch));
+    const radiusXZ = orbitRadius*Math.cos(orbitAngle);
+    want.set(c.heroX + sy * radiusXZ, lk.y + orbitRadius*Math.sin(orbitAngle), c.heroZ + cy * radiusXZ);
     const k = snap ? 1 : 1 - Math.pow(0.0015, dt);
     pos.lerp(want, k); look.lerp(lk, k);
     /* never through walls/buildings/trees: pull the camera in along the line from the hero, every frame, on the final position */

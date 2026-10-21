@@ -226,6 +226,25 @@ const CSS = `
 @media(orientation:landscape) and (max-height:440px){#cb .vn-exp{height:43px;width:min(365px,43vw);bottom:max(3px,env(safe-area-inset-bottom))}#cb .vn-exp .vn-exp-level,#cb .vn-exp .vn-exp-value{font-size:9px}}
 @media(prefers-reduced-motion:reduce){#cb .vn-exp .vn-exp-fill{transition:none!important}}
 
+/* Gold-purple UI border family: boss header uses long plate, player panel wide frame. */
+#cb .tp,#cb .tp.boss{
+ background-image:url('../assets/hud/label-long.svg'),linear-gradient(145deg,#281631ef,#120d19ef)!important;
+ background-size:100% 100%!important;background-repeat:no-repeat!important;
+ border:0!important;border-radius:4px!important;
+ padding:10px 24px 14px!important;
+ box-shadow:0 6px 19px #000b!important;
+}
+#cb .tp.boss{min-height:65px}
+#cb .tp.boss .nm{color:#ffdfae!important}
+#cb .vit{
+ background-image:url('../assets/hud/panel-wide.svg'),linear-gradient(140deg,#25172ff6,#140e1bf6)!important;
+ background-size:100% 100%!important;background-repeat:no-repeat!important;
+ border:0!important;border-radius:6px!important;padding:17px 21px!important;
+}
+#cb .vit:after{border:0!important;background:linear-gradient(#3e234c,#1a1225)!important}
+#cb .cl button,#cb .sl{background:radial-gradient(circle at 42% 29%,#553069,#281534 55%,#0d0a17)!important}
+@media(orientation:landscape) and (max-height:490px){#cb .vit{padding:12px 19px!important}}
+
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';

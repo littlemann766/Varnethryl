@@ -480,7 +480,7 @@ function wrapGLB(g, id, blocky) {
     if (!mount.attached) diag('Owner saber not mounted: '+mount.reason);
     else diag('Owner saber grip mounted: '+mount.hand+(mount.fingerAligned?' (finger-aligned)':' (hand-axis fallback)'));
   }
-  const ownerFooting = id === 'n:owner' ? createOwnerFooting(m) : null;
+  const ownerFooting = id === 'n:owner' ? createOwnerFooting(m, THREE) : null;
   const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947*HS*(EXTRA_SCALE[id]||1)*loadScale(id,hgt) : worldProfile(id,HS).heightW/hgt) : 1;
   // Keep a concise rig audit on the loaded model for device-side inspection.
   // Reports authored clips and bone families; does not claim visual approval.

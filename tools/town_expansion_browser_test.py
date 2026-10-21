@@ -104,7 +104,7 @@ with sync_playwright() as p:
         }""",key)
         print('boss camera projection',key,projection,flush=True)
         check(f'{key} live model is in the gameplay camera frame',
-              projection is not None and projection['visible'] and projection['attached'] and
+              projection is not None and projection['loaded'] and projection['visible'] and projection['attached'] and
               abs(projection['x'])<1 and abs(projection['y'])<1 and -1<=projection['z']<=1,
               projection)
         page.screenshot(path=f'frost-cave-{key}-mobile-test.png')

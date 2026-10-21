@@ -22,7 +22,8 @@ with sync_playwright() as p:
                 mountain=__p3d.scene.getObjectByName('mountain-wilds-cave-portal');
           return {terrain:!!land?.terrain,approach:!!land?.brokenSealRoad,
             chamber:!!ruins?.group,rocks:!!ruins?.group.getObjectByName('mountain-cave-rock-shell'),
-            arches:ruins?.group.children.filter(x=>x.name==='mountain-portal-arch-lintel').length,
+            arches:ruins?.group.getObjectByName('mountain-portal-arch-lintel')!==undefined,
+            objects:ruins?.group.children.slice(0,30).map(x=>x.name),
             portal:!!mountain,portalY:mountain?.position.y,
             floorY:land?.heightAt(-315,-284),frost:!!__p3d.scene.getObjectByName('frost-summit-cave')};
         }""")

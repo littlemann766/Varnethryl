@@ -1,0 +1,32 @@
+name: Import approved Frost Troll B asset
+on:
+  push:
+    branches: [overhaul-2026-10-21]
+    paths:
+      - '.github/workflows/import-frost-troll-b.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  install-boss-mesh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Retrieve, validate and commit corrected GLB
+        shell: bash
+        run: |
+          set -euo pipefail
+          target=www/proto3d/models-new/frosttroll_b.glb
+          mkdir -p "$(dirname "$target")"
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 180 \
+            'https://ddf182b4-309e-4710-9b4c-19ca52017df8.sandbox.floot.app/_cdn/static/6a0f3959-6eb3-44ed-acdd-5eb0a3e4039e-frosttroll_b.glb' \
+            --output "$target"
+          echo '8c6e4c267dee522915b05e1411964238877ba78bf830db76d73079246b89673f  www/proto3d/models-new/frosttroll_b.glb' | sha256sum --check --status
+          test "$(head -c 4 "$target")" = glTF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$target"
+          git commit -m 'Install corrected, animated Frost Troll B boss model'
+          git push origin HEAD:overhaul-2026-10-21

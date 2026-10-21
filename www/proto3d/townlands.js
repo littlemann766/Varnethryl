@@ -3,6 +3,7 @@
  * All new scenery is batched per 64-world-unit chunk and culled by proximity. */
 import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
+import { buildBalthrixTrail } from './balthrix-trail.js';
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
 const CHUNK = 64;
@@ -112,7 +113,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   // Do not modify the Wilds' map, the established village, or either portal.
   const rnd=rng(20261020), group=new THREE.Group();group.name='town-landscaped-outskirts';scene.add(group);
   const mats=makeMaterials(makeDetailTexture()), cache=new Map(), chunks=new Map(), occupied=[];
-  const stats={trees:0,bushes:0,rocks:0,flowers:0,grass:0,orchard:0,fields:0};
+  const stats={trees:0,bushes:0,rocks:0,flowers:0,grass:0,orchard:0,fields:0,fallenTrees:0};
   const usable=world-13;
   const terrain=buildWalkableTerrain(world);group.add(terrain);
   // Distant low-poly mountain range outside the playable boundary: visual
@@ -258,6 +259,11 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     acc(shadow?'cast':'plain',x,z).add(v.geo,x,townElevation(x,z,world),z,rnd()*Math.PI*2,s);
   };
   const claim=(x,z,r)=>occupied.push([x,z,r]);
+  // Balthrix's trail is positioned before tree scattering so standing trees
+  // do not grow directly through his fallen trunks. Shared terrain and collision.
+  const trail=buildBalthrixTrail(group,(x,z)=>townElevation(x,z,world),colliders);
+  for(const site of trail.sites)claim(site.x,site.z,Math.max(4,site.length*.45));
+  stats.fallenTrees=trail.count;
   // A few lightly textured cultivated plots are visual only; none obstruct player movement.
   const roadMat=new THREE.MeshLambertMaterial({color:0x9b9177});
   function roadRing(){
@@ -346,5 +352,5 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
       mesh.visible=d<140*Math.max(1,k);
     }
   }
-  return {group,cull,stats,terrain,poolMeshes,harborRoad,mountainRoad,cave,harbor,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields};
+  return {group,cull,stats,terrain,poolMeshes,harborRoad,mountainRoad,cave,harbor,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields,trail};
 }

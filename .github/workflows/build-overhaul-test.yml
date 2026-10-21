@@ -38,6 +38,7 @@ jobs:
           node tools/check_boss_regions.mjs
           node tools/check_release_cache.mjs
           python3 tools/check_assets.py
+          python3 tools/verify_frost_troll_b.py
       - name: Install Capacitor
         run: npm install --no-audit --no-fund
       - name: Create Android project

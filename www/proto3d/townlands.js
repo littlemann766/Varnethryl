@@ -5,7 +5,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
 import { buildBalthrixTrail } from './balthrix-trail.js';
 import { makeVolcanoEffects } from './volcano-effects.js';
-import { buildSailingShip,animateMooredShip } from './port-ships.js';
+import { buildSailingShip,animateMooredShip,installImportedShip } from './port-ships.js';
 import { MOUNTAIN_APPROACH, MOUNTAIN_WILDS_GATE, buildMountainWildsGateway } from './wilds-gateway.js';
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
@@ -271,6 +271,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     {x:-44,z:-25,scale:1.27,large:true,yaw:.15,phase:0},
     {x:-49,z:24,scale:1.0,large:false,yaw:-.14,phase:2.25}
   ];
+  let shipAssetLoadStarted=false;
   const ships=shipMoorings.map((p,i)=>{
     const ship=buildSailingShip(p.scale,p.large);
     ship.name=i===0?'harbor-three-mast-sailing-ship':'harbor-single-mast-sailing-boat';
@@ -328,6 +329,11 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
       ?Math.hypot(heroX-PORT_CENTER.x,heroZ-PORT_CENTER.z)<150:true;
     harborShips.visible=near;
     if(!near)return;
+    if(!shipAssetLoadStarted){
+      shipAssetLoadStarted=true;
+      installImportedShip(ships[0],{large:true}).catch(err=>
+        console.warn('Tidewrack original ship unavailable, using fallback',err));
+    }
     for(let i=0;i<ships.length;i++){
       animateMooredShip(ships[i],t);
     }

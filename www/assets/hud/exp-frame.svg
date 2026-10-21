@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 150" role="img" aria-label="Ornate golden amethyst experience frame">
+<defs>
+<linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffebac"/><stop offset=".22" stop-color="#ad763c"/><stop offset=".46" stop-color="#f8d899"/><stop offset=".7" stop-color="#573626"/><stop offset="1" stop-color="#c29b63"/></linearGradient>
+<linearGradient id="plum" x2="0" y2="1"><stop stop-color="#4f1a61"/><stop offset=".48" stop-color="#120b22"/><stop offset="1" stop-color="#8a3989"/></linearGradient>
+<radialGradient id="gem"><stop stop-color="#ffe5ff"/><stop offset=".17" stop-color="#c37dff"/><stop offset=".56" stop-color="#7a1bb3"/><stop offset="1" stop-color="#180726"/></radialGradient>
+<g id="end"><path d="M16 75 64 45 82 13 108 46 160 40 146 62 183 75 147 91 161 112 108 105 82 137 60 104Z" fill="#231024" stroke="#694125" stroke-width="6"/><path d="M22 75 67 53 82 24 107 56 149 49 137 65 168 75 138 86 149 102 105 97 82 126 65 99Z" fill="url(#plum)" stroke="url(#metal)" stroke-width="8"/><path d="M82 29 106 75 82 120 57 75Z" fill="url(#gem)" stroke="#edc88b" stroke-width="5"/><path d="M82 48 93 75 82 102 72 75Z" fill="none" stroke="#f2c4ff" stroke-opacity=".64" stroke-width="2"/><path d="M48 75h68M82 44v62" stroke="#f5ceff" stroke-opacity=".55" stroke-width="2"/><path d="m117 56 46-17-14 24 31 12-31 12 13 25-45-19" fill="none" stroke="#e7b96b" stroke-width="7"/><path d="m20 75 33-7M20 75l33 7" stroke="#e8bf7b" stroke-width="4"/></g>
+</defs>
+<path d="M113 49H1088L1130 64 1094 81H109L72 64Z" fill="url(#plum)" stroke="#654223" stroke-width="11"/>
+<path d="M136 43H1064L1106 57H95Z" fill="url(#metal)" stroke="#f9d995" stroke-width="3"/>
+<path d="M136 96H1064L1106 83H95Z" fill="url(#metal)" stroke="#f9d995" stroke-width="3"/>
+<path d="M145 53h905M145 88h905" stroke="#e4c383" stroke-width="2" opacity=".7"/>
+<path d="M424 52 444 29 477 45 490 64 477 84 444 99 425 84 443 75 425 65Z" fill="url(#metal)" opacity=".92"/>
+<path d="M778 52 758 29 725 45 712 64 725 84 758 99 777 84 759 75 777 65Z" fill="url(#metal)" opacity=".92"/>
+<path d="M600 15 617 49 649 65 618 84 600 129 582 84 552 65 582 48Z" fill="url(#metal)" stroke="#4e2a22" stroke-width="4"/>
+<path d="M600 30 617 65 600 103 583 65Z" fill="url(#gem)" stroke="#fff2c0" stroke-width="3"/>
+<g><use href="#end"/><use href="#end" transform="translate(1200 0) scale(-1 1)"/></g>
+</svg>

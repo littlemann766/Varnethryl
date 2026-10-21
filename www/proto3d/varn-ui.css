@@ -168,3 +168,59 @@ body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
 #vnSkinBubble .vn-skin-options{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 #vnSkinBubble button{padding:9px 12px;min-height:40px;background:#192a40;color:#f3dbad;border:1px solid #b89055;border-radius:7px;font:inherit}
 #vnSkinBubble small{display:block;color:#cbbd9d;font-size:11px}
+
+
+/* VARNETHRYL ORNATE BORDER SYSTEM
+   The blue in the reference pictures was a temporary background, NOT a UI color.
+   Frame art is separate, transparent and stable; menu controls remain operable. */
+:root{--vn-frame-gold:#e1bd7d;--vn-frame-purple:#8941b1;--vn-panel-dark:#120d1bf5}
+#vnMenu .vn-card{
+ background-image:url('../assets/hud/panel-wide.svg'),linear-gradient(153deg,#261631f8,#130e1cfb 55%,#201325f8)!important;
+ background-size:100% 100%,100% 100%!important;background-position:center!important;background-repeat:no-repeat!important;
+ border:0!important;border-radius:10px!important;padding:clamp(25px,6vmin,52px)!important;
+ box-shadow:0 10px 32px #000e,0 0 17px #733b9d55!important;
+}
+#vnMenu .vn-card:before,#vnMenu .vn-card:after{content:none!important}
+#vnMenu button:not(.vn-primary),#vnMenu a,#vnQuickMenu button,#vnQuickMenu a,#vnMenuBtn,
+#hlist button,#vnSkinBubble button,#settingsPanel button,#settingsPanel select{
+ background:linear-gradient(170deg,#42234c,#16101e 72%,#24152c)!important;
+ color:#f6dfb9!important;border:1px solid #b99760!important;
+ box-shadow:inset 0 1px 0 #e6ca8c45,0 3px 9px #0008!important;
+}
+#vnMenu button.vn-primary{background:linear-gradient(#f0dcac,#b78a4e)!important;color:#251622!important}
+#vnQuickMenu,#settingsPanel,#hlist,#vnSkinBubble{
+ background-image:url('../assets/hud/panel-wide.svg'),linear-gradient(150deg,#25152ff7,#0f0c17f8 65%,#23142bfa)!important;
+ background-size:100% 100%,cover!important;background-repeat:no-repeat!important;
+ border:0!important;border-radius:8px!important;color:#f8eac9!important;
+ box-shadow:0 9px 28px #000c!important;
+}
+#vnQuickMenu{padding:22px 20px!important}
+#settingsPanel{padding:24px 20px!important}
+#hlist{padding:19px 13px!important;background-image:url('../assets/hud/panel-square.svg'),linear-gradient(150deg,#281730f7,#0e0a16fc)!important;background-size:100% 100%,cover!important}
+#vnSkinBubble{padding:23px!important;background-image:url('../assets/hud/panel-square.svg'),linear-gradient(150deg,#281730f7,#0e0a16fc)!important;background-size:100% 100%,cover!important}
+#vnQuickMenu .vn-qhead{
+ min-height:45px;padding:9px 17px!important;margin:0 -5px 8px;
+ background:url('../assets/hud/label-long.svg') center/100% 100% no-repeat!important;
+ color:#ffe1a5!important;text-shadow:0 2px 4px #000;
+}
+#settingsPanel h3,#settingsPanel .card>.sec,#vnQuickMenu summary{color:#f6dea5!important}
+#settingsPanel .card,#vnQuickMenu details{
+ background:linear-gradient(130deg,#211529ed,#140f1eed)!important;
+ border:1px solid #795b46!important;border-radius:7px!important;
+}
+#vnSkinBubble .vn-skin-title,.vn-qhead strong{font-family:VarnCinzel,Georgia,serif}
+#vnMenuBtn{
+ background-image:url('../assets/hud/label-long.svg'),linear-gradient(#311c3d,#160f1d)!important;
+ background-size:100% 100%!important;padding:9px 18px!important;border:0!important;
+}
+#hud>div:first-child{
+ background-image:url('../assets/hud/label-long.svg'),linear-gradient(#291a34ed,#140d1ded)!important;
+ background-size:100% 100%!important;border:0!important;padding:13px 22px!important;
+}
+#moveActions button{background:linear-gradient(155deg,#382442,#151020)!important}
+#vnMenu .vn-card,#settingsPanel,#vnQuickMenu{box-sizing:border-box;overflow-wrap:anywhere}
+@media(orientation:landscape) and (max-height:540px){
+ #vnMenu .vn-card{padding:13px 32px!important}
+ #vnQuickMenu{padding:15px 18px!important}
+ #settingsPanel{padding:16px!important}
+}

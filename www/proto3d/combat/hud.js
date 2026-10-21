@@ -211,6 +211,40 @@ const CSS = `
 #cb .ulp button{border:2px ridge #d5ac76!important;color:#f8e3b8!important;background:linear-gradient(#432955,#130f22)!important}
 #cb .stat{color:#dbc6a9}
 
+/* True combat EXP: decorative amethyst frame, persistent left-to-right fill.
+   Keep metal endcaps fixed; only the inner track scales. No blue background. */
+#cb .vn-exp{position:absolute;left:50%;bottom:max(7px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(500px,40vw);height:61px;pointer-events:none;color:#fbecc8;text-shadow:0 1px 4px #000,0 0 4px #2a132e;font:700 11px VarnCinzel,Georgia,serif;z-index:4;filter:drop-shadow(0 3px 7px #000c)}
+#cb .vn-exp .vn-exp-track{position:absolute;left:10.5%;right:10.5%;top:43%;height:22%;background:linear-gradient(#13091c,#35103f 50%,#0d0818);border:1px solid #8e5b40;overflow:hidden}
+#cb .vn-exp .vn-exp-fill{position:absolute;inset:0;transform-origin:left center;transform:scaleX(0);background:linear-gradient(180deg,#ffe0ff 0%,#de86ff 14%,#9a31e6 45%,#6424ab 77%,#410f7e);box-shadow:inset 0 2px 5px #fff5,0 0 12px #ba58fb;will-change:transform;transition:transform .55s cubic-bezier(.2,.7,.2,1)}
+#cb .vn-exp .vn-exp-fill:after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(105deg,transparent 0 23px,#ffdbff26 24px 27px,transparent 28px 40px)}
+#cb .vn-exp .vn-exp-art{position:absolute;inset:0;width:100%;height:100%;background:url('../assets/hud/exp-frame.svg') center/100% 100% no-repeat;z-index:2}
+#cb .vn-exp .vn-exp-level,#cb .vn-exp .vn-exp-value{position:absolute;z-index:3;left:50%;transform:translateX(-50%);white-space:nowrap;font-variant-numeric:tabular-nums}
+#cb .vn-exp .vn-exp-level{top:0;font-size:10px;letter-spacing:.11em;color:#ffdfa6}
+#cb .vn-exp .vn-exp-value{bottom:0;font-size:10px;letter-spacing:.02em;color:#f7dcff}
+#cb .vn-exp.vn-level-up .vn-exp-art{filter:drop-shadow(0 0 8px #df8dff)}
+@media(orientation:portrait){#cb .vn-exp{width:min(350px,86vw);bottom:calc(max(5px,env(safe-area-inset-bottom)) + 145px);height:52px;filter:drop-shadow(0 2px 5px #000a)}#cb .vn-exp .vn-exp-level{font-size:9px}#cb .vn-exp .vn-exp-value{font-size:9px}}
+@media(orientation:landscape) and (max-height:440px){#cb .vn-exp{height:43px;width:min(365px,43vw);bottom:max(3px,env(safe-area-inset-bottom))}#cb .vn-exp .vn-exp-level,#cb .vn-exp .vn-exp-value{font-size:9px}}
+@media(prefers-reduced-motion:reduce){#cb .vn-exp .vn-exp-fill{transition:none!important}}
+
+/* Gold-purple UI border family: boss header uses long plate, player panel wide frame. */
+#cb .tp,#cb .tp.boss{
+ background-image:url('../assets/hud/label-long.svg'),linear-gradient(145deg,#281631ef,#120d19ef)!important;
+ background-size:100% 100%!important;background-repeat:no-repeat!important;
+ border:0!important;border-radius:4px!important;
+ padding:10px 24px 14px!important;
+ box-shadow:0 6px 19px #000b!important;
+}
+#cb .tp.boss{min-height:65px}
+#cb .tp.boss .nm{color:#ffdfae!important}
+#cb .vit{
+ background-image:url('../assets/hud/panel-wide.svg'),linear-gradient(140deg,#25172ff6,#140e1bf6)!important;
+ background-size:100% 100%!important;background-repeat:no-repeat!important;
+ border:0!important;border-radius:6px!important;padding:17px 21px!important;
+}
+#cb .vit:after{border:0!important;background:linear-gradient(#3e234c,#1a1225)!important}
+#cb .cl button,#cb .sl{background:radial-gradient(circle at 42% 29%,#553069,#281534 55%,#0d0a17)!important}
+@media(orientation:landscape) and (max-height:490px){#cb .vit{padding:12px 19px!important}}
+
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';
@@ -239,6 +273,7 @@ export class CombatHUD {
     r.innerHTML = '<div class="flash"></div><div class="tp"><div class="nm"></div><div class="sub"></div><div class="bar hp"><i></i><b></b></div></div>' +
       '<div class="stat"></div><div class="top"><button type="button" data-a="summon">Summon Titan</button><button type="button" data-a="exit">Exit fight</button></div>' +
       '<div class="vit"><div class="lab"></div><div class="por"><span>?</span><small>1</small></div><div class="bars"><div class="bar hp"><i></i><b></b></div><div class="bar mp"><i></i><b></b></div><div class="bar sp"><i></i><b></b></div><div class="bar fy"><i></i><b></b></div></div></div>' +
+      '<div class="vn-exp" role="progressbar" aria-label="Experience to next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="vn-exp-track"><i class="vn-exp-fill"></i></div><i class="vn-exp-art" aria-hidden="true"></i><span class="vn-exp-level">LV 40</span><span class="vn-exp-value">0 / 0 XP</span></div>' +
       '<div class="cx"><div class="ulp"><button type="button" data-u="holy">Holy Destruction</button><button type="button" data-u="unholy">Unholy Destruction</button></div>' + [0, 1, 2, 3, 4].map(i => '<button type="button" class="sl b' + i + '" data-s="' + i + '"><span class="ic"></span><span class="k">' + (i ? (i === 4 ? 'ULT' : i) : '') + '</span><span class="rg"></span><span class="ct"></span><span class="nmL"></span></button>').join('') + '</div>' +
       '<div class="cl"><button type="button" data-a="dodge"><span class="g">\u21BA</span>Dodge<span class="q">Spc</span><span class="cdv"></span></button><button type="button" data-a="block"><span class="g">\u26E8</span>Block<span class="q">RMB</span></button>' +
       '<button type="button" data-a="jump"><span class="g">\u2191</span>Jump<span class="q">J</span></button><button type="button" data-a="lock"><span class="g">\u25CE</span>Lock<span class="q">Q</span></button>' +
@@ -247,9 +282,10 @@ export class CombatHUD {
     const $ = s => r.querySelector(s), $$ = s => Array.from(r.querySelectorAll(s));
     this.tp = $('.tp'); this.tpNm = $('.tp .nm'); this.tpSub = $('.tp .sub'); this.tpBar = $('.tp .bar i'); this.tpTxt = $('.tp .bar b');
     const vb = n => ({ i: $('.vit .' + n + ' i'), b: $('.vit .' + n + ' b') }); this.vhp = vb('hp'); this.vmp = vb('mp'); this.vsp = vb('sp'); this.vfy = vb('fy');
+    this.exp = $('.vn-exp'); this.expFill = $('.vn-exp-fill'); this.expLevel = $('.vn-exp-level'); this.expValue = $('.vn-exp-value'); this.expKey = '';
     this.por = $('.por span'); this.lab = $('.vit .lab'); this.lvl = $('.por small'); this.stat = $('.stat'); this.msg = $('.msg'); this.flash = $('.flash'); this.sumBtn = $('[data-a=summon]');
-    $('.sl').forEach((b, i) => { b.setAttribute('aria-label', i === 0 ? 'Basic attack' : i === 4 ? 'Ultimate ability' : 'Skill ' + i); b.title = b.getAttribute('aria-label'); });
-    this.slots = $('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), nm: b.querySelector('.nmL'), cd: -1, st: '', key: '' }));
+    $$('.sl').forEach((b, i) => { b.setAttribute('aria-label', i === 0 ? 'Basic attack' : i === 4 ? 'Ultimate ability' : 'Skill ' + i); b.title = b.getAttribute('aria-label'); });
+    this.slots = $$('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), nm: b.querySelector('.nmL'), cd: -1, st: '', key: '' }));
     this.btn = {}; $$('.cl button').forEach(b => { this.btn[b.dataset.a] = { b, cdv: b.querySelector('.cdv'), cd: -1 }; });
     for (let i = 0; i < NUM_POOL; i++) { const e = document.createElement('div'); e.className = 'fn'; r.appendChild(e); this.nums.push({ e, t: 9 }); }
     for (let i = 0; i < OH_POOL; i++) { const e = document.createElement('div'); e.className = 'oh'; e.innerHTML = '<i></i>'; r.appendChild(e); this.ohs.push({ e, f: e.firstChild, on: false, last: -1 }); }
@@ -268,6 +304,7 @@ export class CombatHUD {
     addEventListener('blur', () => { if (this.ultP) { clearTimeout(this.ultP.t); this.ultP = null; } if (this.blockPtr !== undefined && this.blockPtr !== null) { this.blockPtr = null; api.block(false); } r.querySelector('.ulp')?.classList.remove('open'); });
     r.addEventListener('contextmenu', e => e.preventDefault());
     cc.on('damage', d => this.onDamage(d)).on('heal', h => this.floatAt(h.x, 2.4 * cc.HS, h.z, '+' + h.n, 'heal')).on('hero', () => this.heroInfo())
+      .on('experience', p => this.expInfo(p))
       .on('denied', d => this.say(d.why, 900)).on('playerDown', () => this.say('You fell...', 2200)).on('reward', rw => this.say('+' + rw.xp + ' XP   +' + rw.gold + ' gold', 1300));
     this.heroInfo();
   }
@@ -275,6 +312,39 @@ export class CombatHUD {
   slotAbility(i) { if (i === 0) return 0; if (this.cc.ownerOk()) return i === 4 ? (this.cc.ultSel || 'holy') : OWNER_CLUSTER[i - 1]; if (this.cc.kit) return this.cc.kit.skills[i - 1].id; return i === 4 ? 5 : i; }
   show(v) { this.root.style.display = v ? 'block' : 'none'; const d = document.getElementById('diagBtn'); if (d) { if (v) { this._dd = d.style.display; d.style.display = 'none'; } else if (this._dd !== undefined) d.style.display = this._dd; } }   /* #diagBtn sits under the first ability slot */
   heroInfo() { const h = this.cc.hero; this.por.textContent = (h.name || '?')[0]; if (this.lab) this.lab.textContent = (h.name || 'Hero') + ' \u00b7 LV ' + (h.level || 1) + ' \u00b7 ' + (this.cc.kit && this.cc.kit.role ? this.cc.kit.role : (h.className || 'Adventurer')); this.lvl.textContent = h.level; this.cache.k = ''; }
+  expInfo(p) {
+    if(!p||!this.exp)return;
+    clearTimeout(this._expRollover);clearTimeout(this._expPulse);
+    const level=Math.max(1,Math.floor(Number(p.level)||1));
+    const max=Math.max(0,Math.floor(Number(p.needed)||0));
+    const xp=Math.max(0,Math.min(max,Math.floor(Number(p.xp)||0)));
+    const fraction=max?xp/max:1;
+    const key=String(p.id||this.cc.hero.id||'hero');
+    const first=this.expKey!==key || !this.expLast;
+    const leveled=!first&&(Number(p.levels)>0||level>this.expLast.level);
+    this.expKey=key;this.expLast={level,xp,max};
+    this.expLevel.textContent='LEVEL '+level+(max?'':' · MAX');
+    this.expValue.textContent=max?xp.toLocaleString()+' / '+max.toLocaleString()+' XP':'MAX LEVEL';
+    this.exp.setAttribute('aria-valuemin','0');
+    this.exp.setAttribute('aria-valuemax',String(max||1));
+    this.exp.setAttribute('aria-valuenow',String(max?xp:1));
+    this.exp.setAttribute('aria-valuetext',max?('Level '+level+', '+xp+' of '+max+' experience'):('Level '+level+', maximum level'));
+    if(first){this.expFill.style.transition='none';this.expFill.style.transform='scaleX('+fraction+')';requestAnimationFrame(()=>{if(this.expFill)this.expFill.style.transition='';});return;}
+    if(leveled){
+      this.exp.classList.add('vn-level-up');
+      this.expFill.style.transition='transform .4s ease-out';
+      this.expFill.style.transform='scaleX(1)';
+      this._expRollover=setTimeout(()=>{
+        this.expFill.style.transition='none';
+        this.expFill.style.transform='scaleX(0)';
+        requestAnimationFrame(()=>{this.expFill.style.transition='';this.expFill.style.transform='scaleX('+fraction+')';});
+        this._expPulse=setTimeout(()=>this.exp.classList.remove('vn-level-up'),1050);
+      },430);
+    }else{
+      this.expFill.style.transition='';
+      this.expFill.style.transform='scaleX('+fraction+')';
+    }
+  }
   say(t, ms) { this.msg.textContent = t; this.msg.style.display = 'block'; clearTimeout(this._mt); this._mt = setTimeout(() => { this.msg.style.display = 'none'; }, ms || 1500); }
   floatAt(x, y, z, txt, cls) {
     const n = this.nums[this.numI++ % NUM_POOL]; if (!this.project(x, y, z, this.sc)) return;

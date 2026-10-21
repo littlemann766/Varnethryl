@@ -480,7 +480,7 @@ function wrapGLB(g, id, blocky) {
     if (!mount.attached) diag('Owner saber not mounted: '+mount.reason);
     else diag('Owner saber grip mounted: '+mount.hand+(mount.fingerAligned?' (finger-aligned)':' (hand-axis fallback)'));
   }
-  const ownerFooting = id === 'n:owner' ? createOwnerFooting(m, THREE) : null;
+  const ownerFooting = (id === 'n:owner' || id === 'n:owner_pika1') ? createOwnerFooting(m, THREE) : null;
   const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947*HS*(EXTRA_SCALE[id]||1)*loadScale(id,hgt) : worldProfile(id,HS).heightW/hgt) : 1;
   // Keep a concise rig audit on the loaded model for device-side inspection.
   // Reports authored clips and bone families; does not claim visual approval.
@@ -1571,11 +1571,17 @@ function animateHero(dt) {
       }
       u.cinderStep = (u.cinderStep || 0) + dt * (6 + state.speed * 0.8);
       u.cinderHop = cinderFlight.alt < 0.05 ? Math.max(0, Math.sin(u.cinderStep)) * 0.035 * Math.min(1, state.speed / 2) : 0;
-    } else { u.cinderHop = 0; locoAnim(u, LOCO_FORCE !== null ? LOCO_FORCE : state.speed, dt); }
+    } else {
+      u.cinderHop = 0;
+      // Owner flight reuses the leg-raised imported idle as a flying stance.
+      // Do not cycle the running legs in midair, even when flying forward.
+      const ownerAirborne = !!u.ownerFooting && (cheat.fly || cheat.alt > 0.07);
+      locoAnim(u, LOCO_FORCE !== null ? LOCO_FORCE : ownerAirborne ? 0 : state.speed, dt);
+    }
     const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0;
     if (u.ownerFooting) u.ownerFooting.beforeAnimation();
     u.mixer.update(animDt);
-    if (u.ownerFooting) u.ownerFooting.afterAnimation(LOCO_FORCE !== null ? LOCO_FORCE : state.speed, animDt);
+    if (u.ownerFooting) u.ownerFooting.afterAnimation(LOCO_FORCE !== null ? LOCO_FORCE : (cheat.fly || cheat.alt > 0.07) ? 0 : state.speed, animDt, cheat.fly || cheat.alt > 0.07);
     if (u.sb) u.sb.update(animDt); if (u.cinderEmbers) u.cinderEmbers.update(animDt);
     return;
   }

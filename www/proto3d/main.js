@@ -16,6 +16,7 @@ import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
 import { createCinderFlight, cinderAnimationWeights } from './cinderflight.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
+import { attachOwnerSaber } from './owner-saber.js';
 import { initSettings } from './settingsboot.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
 import { worldProfile, loadScale } from './charscale.js';
@@ -470,24 +471,12 @@ function wrapGLB(g, id, blocky) {
     const sc = (blocky && BK_H[id]) ? BK_H[id]/hgt : EXTRA_URL[id] ? 0.947*HS*(EXTRA_SCALE[id]||1)*loadScale(id,hgt) : worldProfile(id,HS).heightW/hgt;   // extra models are authored in metres (hero 1.9 m = 1.8 HS); the old 20 heroes are height-normalised
     m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
   m.traverse(o => { if (o.isMesh) for (const mt of [].concat(o.material)) if (mt && mt.alphaTest > 0) { mt.transparent = false; mt.depthWrite = true; mt.needsUpdate = true; } });   // glTF alphaMode MASK (e.g. Garruk's cape): cut-out, sorted by depth, casts a cut-out shadow
-  // Temporary Owner integration: attach the purple blade to the animated right-hand bone.
-  // Keep the original rig/mesh untouched so cape skinning can be refined later.
-  if (id === 'n:owner') {
-    // The weapon must not disappear when an imported rig renames its clips.
-    // Accept Mixamo and non-Mixamo hand bones, but never attach two sabers.
-    let hand = m.getObjectByName('mixamorig:RightHand') || m.getObjectByName('RightHand');
-    if (!hand) m.traverse(o => {
-      if (!hand && o.isBone && /(?:^|[:_])right[_ ]?hand$/i.test(o.name)) hand = o;
-    });
-    if (hand && !hand.getObjectByName('OwnerPurpleSaber')) {
-      const saber = new THREE.Group(); saber.name = 'OwnerPurpleSaber'; hand.add(saber);
-      saber.position.set(0, .03, 0);
-      const grip = new THREE.Mesh(new THREE.CylinderGeometry(.028, .035, .24, 12), new THREE.MeshStandardMaterial({color:0x999ba5,metalness:.85,roughness:.2}));
-      grip.position.y=.12; saber.add(grip);
-      const blade = new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.95,12), new THREE.MeshBasicMaterial({color:0xa685ff}));
-      blade.position.y=.71; saber.add(blade);
-      const glow = new THREE.PointLight(0x8b5cff,1.5,2); glow.position.y=.6; saber.add(glow);
-    }
+  // Render the Owner's violet saber only when attached to a real animated
+  // right-hand/wrist joint. Never create a world-floating purple cylinder.
+  if (id === 'n:owner' || id === 'n:owner_pika1') {
+    const mount=attachOwnerSaber(THREE,m);
+    if (!mount.attached) diag('Owner saber not mounted: '+mount.reason);
+    else diag('Owner saber grip mounted: '+mount.hand+(mount.fingerAligned?' (finger-aligned)':' (hand-axis fallback)'));
   }
   const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947*HS*(EXTRA_SCALE[id]||1)*loadScale(id,hgt) : worldProfile(id,HS).heightW/hgt) : 1;
   // Keep a concise rig audit on the loaded model for device-side inspection.

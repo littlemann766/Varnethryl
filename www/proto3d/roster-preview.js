@@ -106,7 +106,17 @@ export function createRosterPreview({ THREE, mount, status, load, release }) {
       const idle=/vaelthryx/i.test(id)
         ? (actions.slither || actions.walk || actions.idle || actions.run)
         : (actions.idle || actions.walk || actions.run);
-      if(idle){idle.reset();idle.setLoop(THREE.LoopRepeat);idle.play();idle.setEffectiveWeight(1);idle.timeScale=/vaelthryx/i.test(id)?0.78:(actions.idle===idle?1:.65);}
+      if(idle){
+        // Wren and Balthrix have multiple clips already started by wrapGLB.
+        // Stop old idle weighting before showing the newly chosen 3D pose:
+        // simultaneous idle + slither at full weight makes Balthrix look stiff.
+        for(const other of new Set(Object.values(actions)))
+          if(other && other!==idle && typeof other.setEffectiveWeight==='function')
+            other.setEffectiveWeight(0);
+        idle.reset();idle.setLoop(THREE.LoopRepeat);idle.play();
+        idle.setEffectiveWeight(1);
+        idle.timeScale=/vaelthryx/i.test(id)?0.78:(actions.idle===idle?1:.65);
+      }
       say(name+' · drag to rotate · scroll to zoom');
       return true;
     } catch(e) { if(n===ticket) { console.warn('Varnethryl roster 3D model failed',id,e); say(name+' · 3D unavailable: '+String(e?.message || e).slice(0,130)); } return false; }

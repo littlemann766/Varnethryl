@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import * as THREE from '../www/proto3d/vendor/three.module.js';
+import {attachOwnerSaber,findOwnerGripBone} from '../www/proto3d/owner-saber.js';
+const r=new THREE.Group();
+const arm=new THREE.Bone();arm.name='mixamorig:RightForeArm';r.add(arm);
+const hand=new THREE.Bone();hand.name='mixamorig:RightHand';hand.position.set(0,-.25,0);arm.add(hand);
+const finger=new THREE.Bone();finger.name='mixamorig:RightHandIndex1';finger.position.set(.03,-.08,.01);hand.add(finger);
+const result=attachOwnerSaber(THREE,r);
+assert.equal(result.attached,true);
+assert.equal(result.hand,'mixamorig:RightHand');
+assert.equal(result.fingerAligned,true);
+const saber=hand.getObjectByName('OwnerPurpleSaber');
+assert(saber);
+for(const name of ['saber-hilt','saber-emitter','luminous-white-core','violet-blade','violet-blade-glow'])
+ assert(saber.getObjectByName(name),name+' is present');
+assert.equal(attachOwnerSaber(THREE,r).reason,'Already mounted','No duplicate weapon');
+assert.equal(findOwnerGripBone(r).bone,hand);
+arm.rotation.z=.7;r.updateMatrixWorld(true);
+const a=saber.getWorldPosition(new THREE.Vector3());
+arm.rotation.z=-.7;r.updateMatrixWorld(true);
+const b=saber.getWorldPosition(new THREE.Vector3());
+assert(a.distanceTo(b)>.1,'Blade grip follows animated right arm');
+const noHand=new THREE.Group();const missing=attachOwnerSaber(THREE,noHand);
+assert.equal(missing.attached,false,'Never make floating blade without hand');
+console.log('PASS Owner lightsaber follows right hand, glows and never duplicates or floats');

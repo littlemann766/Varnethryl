@@ -1,0 +1,44 @@
+name: Audit Varnethryl 3D rigs
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'www/proto3d/models-new/**'
+      - 'www/proto3d/models-beth/**'
+      - 'www/proto3d/main.js'
+      - 'tools/audit_3d_rigs.py'
+      - '.github/workflows/audit-3d-rigs.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit GLB structure and skeletal animation targets
+        run: python3 tools/audit_3d_rigs.py --report model-rig-audit.json
+      - name: Export inspectable rig findings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Varnethryl-GLB-Rig-Report
+          path: model-rig-audit.json
+          if-no-files-found: error
+      - name: Add status summary
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          path=Path('model-rig-audit.json')
+          if not path.exists(): raise SystemExit()
+          d=json.loads(path.read_text())
+          s=['## Varnethryl GLB rig readiness','',f"Checked: {d['total']} models · Structural failures: {d['failed']}",'',
+             '| Model | Skin joints | Animated joints | Clips | Notes |','|:--|--:|--:|--:|:--|']
+          for m in d['models']:
+              notes=', '.join(m.get('warnings',[])+m.get('errors',[])).replace('|','/')[:260]
+              s.append(f"| {m['path'].split('/')[-1]} | {m.get('skin_joints','—')} | {m.get('animated_joint_count','—')} | {m.get('animation_clips','—')} | {notes} |")
+          s+=['','**Important:** a structurally valid model can still have an unusable gait, bad weight painting, incorrect scale, or clipping. Verify on Android before approval.']
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:f.write('\n'.join(s)+'\n')
+          PY

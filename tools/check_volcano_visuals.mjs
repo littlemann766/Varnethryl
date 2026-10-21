@@ -50,6 +50,7 @@ const main=readFileSync(new URL('../www/proto3d/main.js',import.meta.url),'utf8'
 assert(lands.includes('makeVolcanoEffects({group,poolMeshes,heightAt:'),'effects are built into live world');
 assert(lands.includes('updateVolcano')&&main.includes('TOWN_LANDS.updateVolcano?.(simTime,state.heroX,state.heroZ)'),'real frame update drives lava');
 assert(!main.includes("TOWN_LANDS.updateVolcano?.(simTime);"),'volcano never runs without player position culling');
+assert(main.includes('snapFollowers(); camRig.snap = true; zoneCd = 1.5'),'zone portal resets camera to prevent blank-sky transition');
 for(const p of ['www/proto3d/volcano-effects.js','www/proto3d/townlands.js','www/proto3d/main.js']){
  const check=spawnSync(process.execPath,['--check',p],{encoding:'utf8'});
  assert.equal(check.status,0,p+' parse failure '+check.stderr);

@@ -4,8 +4,8 @@
  * Applied AFTER AnimationMixer.update and faded out before walking/running.
  * No GLB, cape, weapon, animation clip or save data is modified.
  */
-export function createOwnerFooting(model) {
-  if (!model || typeof model.getObjectByName !== 'function') return null;
+export function createOwnerFooting(model, THREE) {
+  if (!model || !THREE || typeof model.getObjectByName !== 'function') return null;
   const names = ['thigh_L', 'shin_L', 'foot_L', 'thigh_R', 'shin_R', 'foot_R'];
   const joints = names.map(name => model.getObjectByName(name));
   if (joints.some(j => !j || !j.isBone)) return null;
@@ -13,7 +13,10 @@ export function createOwnerFooting(model) {
   // Capture the neutral pose BEFORE the mixer evaluates the authored Idle clip.
   const rig = joints.map(bone => ({
     bone, neutral: bone.quaternion.clone(), incoming: bone.quaternion.clone(),
+    offset: new THREE.Vector3(),
   }));
+  const feet = [rig[2], rig[5]];
+  const left = new THREE.Vector3(), right = new THREE.Vector3(), adjusted = new THREE.Vector3();
   let idleBlend = 0, corrected = false;
   return {
     names,
@@ -21,7 +24,10 @@ export function createOwnerFooting(model) {
       // If a rig's Idle clip omits some leg tracks, reset last frame's
       // procedural pose first so smoothing never accumulates endlessly.
       if (!corrected) return;
-      for (const j of rig) j.bone.quaternion.copy(j.incoming);
+      for (const j of rig) {
+        j.bone.quaternion.copy(j.incoming);
+        if (j.offset.lengthSq() > 0) { j.bone.position.sub(j.offset); j.offset.set(0, 0, 0); }
+      }
       corrected = false;
     },
     afterAnimation(speed, dt) {
@@ -37,6 +43,25 @@ export function createOwnerFooting(model) {
       for (const j of rig) {
         j.incoming.copy(j.bone.quaternion);
         j.bone.quaternion.slerp(j.neutral, weight);
+      }
+      // Correct a small residual raised-boot gap left by imported hip motion.
+      // Match ankle heights in WORLD space, never by pushing the whole hero
+      // beneath the landscape (that would sink the opposite foot).
+      if (typeof model.updateWorldMatrix === 'function') {
+        model.updateWorldMatrix(true, true);
+        feet[0].bone.getWorldPosition(left);
+        feet[1].bone.getWorldPosition(right);
+        const raised = left.y > right.y ? feet[0] : feet[1];
+        const higher = left.y > right.y ? left : right;
+        const lower = left.y > right.y ? right : left;
+        const gap = higher.y - lower.y;
+        if (gap > 0.018 && raised.bone.parent) {
+          adjusted.copy(higher);
+          adjusted.y -= Math.min(0.36, gap - 0.012) * weight;
+          raised.bone.parent.worldToLocal(adjusted);
+          raised.offset.copy(adjusted).sub(raised.bone.position);
+          raised.bone.position.add(raised.offset);
+        }
       }
       corrected = true;
     },

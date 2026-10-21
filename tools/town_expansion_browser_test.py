@@ -66,11 +66,23 @@ with sync_playwright() as p:
     check('both brothers have nearby cave lighting',cave['lights']==5 and cave['litBrothers']>=2,cave)
     check('portal has cave lighting',cave['litExit'],cave)
     check('low-cost airborne ice motes and solid ice collision present',cave['iceMotes']==168 and cave['colliders']>0,cave)
-    page.wait_for_timeout(400)
+    # Previous screenshots mistakenly showed the full-screen title menu
+    # instead of the game. Hide it explicitly for a TRUE scene preview;
+    # do not change the user's save or entry behavior in the shipped game.
+    page.evaluate("""()=>{document.getElementById('vnMenu').hidden=true;
+                         document.body.classList.remove('vn-menu-open');}""")
+    check('actual 3D Frost Cave is visible rather than obscured by the title menu',
+          page.evaluate("getComputedStyle(document.getElementById('vnMenu')).display==='none'"))
+    page.wait_for_timeout(750)
     page.screenshot(path='frost-cave-mobile-test.png')
     # Boss models load asynchronously, but their encounters must become active without input.
     page.wait_for_function("window.__p3d?.fight?.monsters?.some(e=>e.key==='frosttroll_a')&&__p3d.fight.monsters.some(e=>e.key==='frosttroll_b')",timeout=90000)
     check('both Frost Troll brothers spawn together',page.evaluate("['frosttroll_a','frosttroll_b'].every(k=>__p3d.fight.monsters.some(e=>e.key===k))"))
+    # A second frame from the combat approach captures both original boss
+    # models with cave geometry. We stay outside melee range for safety.
+    page.evaluate("__p3d.teleport(2250,-21);__p3d.setCamYaw(0)")
+    page.wait_for_timeout(850)
+    page.screenshot(path='frost-cave-boss-arena-mobile-test.png')
     page.evaluate("__p3d.teleport(2243,177)")
     page.wait_for_function("__p3d.zone==='town'",timeout=90000)
     check('ice gate returns to mountain summit',page.evaluate("__p3d.zone")=='town')

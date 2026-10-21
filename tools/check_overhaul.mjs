@@ -34,7 +34,9 @@ assert.equal(wrenWings.length,2,'Wren has independently authored left and right 
 assert(wrenWings.every(g=>g.enabled===false),'no wing spring may fight Wren baked wing animations');
 assert(main.includes("const matchingGroups=id==='n:wren_new3'"),"Wren 3D model must filter out wing springs");
 assert(main.includes("}else if (id === 'n:wren_new3')"),'a missing cloth JSON must never reactivate generic wing springs');
-assert(main.includes("const ASSET_V = '1.3.2'"),'1.3.2 must bust stale Android model caches');
+const appVersion=JSON.parse(source('package.json')).version;
+assert(main.includes("const ASSET_V = '"+appVersion+"'"),
+  'model cache must match current '+appVersion+' Android/Web release');
 
 assert(fight.includes('14*Math.max(0,dt)'),'Balthrix patrol advances per frame instead of jerky time chunks');
 assert(fight.includes('if (on) { if (isAuto === true) auto = true; return; }'),'existing active combat must be promotable');

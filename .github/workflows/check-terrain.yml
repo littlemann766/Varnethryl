@@ -5,6 +5,7 @@ on:
     paths:
       - 'www/proto3d/**'
       - 'tools/check_town_mountains.mjs'
+      - 'tools/check_wilds_gateway.mjs'
       - '.github/workflows/check-terrain.yml'
 permissions:
   contents: read
@@ -18,5 +19,7 @@ jobs:
           node-version: '22'
       - name: Validate height terrain, gates, walls, slopes and JS syntax
         run: node tools/check_town_mountains.mjs
+      - name: Check ruined mountain Wilds gateway and preserved original portals
+        run: node tools/check_wilds_gateway.mjs
       - name: Ensure all original model assets are present
         run: python3 tools/check_assets.py

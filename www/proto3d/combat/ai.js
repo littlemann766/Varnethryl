@@ -8,7 +8,7 @@ export class EnemyAIController {
     if (e.state === 'defeated') return null;
     e.tStateT += dt; e.atkCd = Math.max(0, e.atkCd - dt); e.flash = Math.max(0, e.flash - dt);
     const dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz) || 1e-6, nx = dx / d, nz = dz / d, reach = e.def.reach * env.HS + e.def.r;
-    if (e.state !== 'telegraph' && e.state !== 'attack' && Number.isFinite(nx) && Number.isFinite(nz)) {
+    if (!e.roaming && e.state !== 'telegraph' && e.state !== 'attack' && Number.isFinite(nx) && Number.isFinite(nz)) {
       const targetYaw = Math.atan2(nx, nz);
       const currentYaw = Number.isFinite(e.yaw) ? e.yaw : targetYaw;
       const deltaYaw = Math.atan2(Math.sin(targetYaw - currentYaw), Math.cos(targetYaw - currentYaw));

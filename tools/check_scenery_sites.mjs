@@ -17,8 +17,14 @@ const find=id=>SCENERY_SITES.find(s=>s.id===id);
 assert(Math.hypot(find('northwest-coastal-harbor-ship').x-PORT_CENTER.x,find('northwest-coastal-harbor-ship').z-PORT_CENTER.z)<90,'ship belongs to port water');
 assert(Math.hypot(find('titan-lava-outcrop').x-TITAN_CENTER.x,find('titan-lava-outcrop').z-TITAN_CENTER.z)<110,'lava rock belongs to Titan terrain');
 assert(SCENERY_SITES.filter(s=>s.asset==='crystals').length===2,'ice crystals reused in frost zone');
+const castle=SCENERY_SITES.find(s=>s.asset==='castle');
+assert(castle?.id==='distant-castle-skyline'&&Math.hypot(castle.x,castle.z)>290,'castle GLB reserved as distant visual landmark');
 const game=readFileSync(new URL('www/proto3d/main.js',root),'utf8');
 assert(game.includes('SCENERY.update(ZONE.name'),'optional scenery updates only near current player');
+assert(game.includes("const hiddenDragon=GROUPS.get('ssylthar')")&&game.includes('seen.add(hiddenDragon)'),
+ 'Ssylthar dragon remains hidden from public character and enemy selection');
+assert(game.includes("if(p.donor==='ssylthar'&&!IS_OWNER_TOKEN)return false"),
+ 'unfinished dragon stays in Owner-only movement test lab');
 assert(game.includes('get sceneryModels(){return SCENERY.status();}'),'device diagnostic available');
 const module=readFileSync(new URL('www/proto3d/scenery-assets.js',root),'utf8');
 assert(module.includes('if(loading)return'),'only one heavy model loads at a time');

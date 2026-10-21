@@ -9,6 +9,7 @@ import { LightningFX } from './combat/lightning.js';
 import { Armory } from './combat/armory.js';
 import { gripFor } from './combat/grips.js';
 import { heroKey } from './combat/herokits.js';
+import { createExperience } from './combat/experience.js';
 import { CompanionCombat } from './combat/companions.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 import { Respawner } from './combat/respawn.js';
@@ -39,6 +40,18 @@ export function createFight(env) {
     lock: () => on && cc.lock(), switchTarget: () => on && cc.switchTarget(), potion: () => on && cc.potion(), swap: () => { if (on) swapWeapon(); }, exit: () => stop(), summon: () => spawnBoss(),
   };
   const hud = new CombatHUD(cc, api, project);
+  // Combat XP previously reset every fight. The new per-hero progression is
+  // persistent and rewards only the controller's one-time defeat event.
+  const progress = createExperience((()=>{try{return localStorage;}catch(_){return null;}})());
+  cc.on('reward', reward=>{
+    const currentId=cc.hero.id;
+    if(!currentId)return;
+    const earned=progress.award(currentId,reward.xp);
+    cc.hero.level=earned.level;
+    cc.experience=earned;
+    cc.emit('experience',earned);
+    if(earned.levels){cc.emit('hero',cc.hero);hud.say(earned.levels===1?'LEVEL UP!  LV '+earned.level:'LEVEL UP!  +'+earned.levels+' LEVELS',2300);}
+  });
   const onKey = e => {
     if (!on || e.repeat || /input|textarea/i.test((e.target && e.target.tagName) || '')) return;
     const k = e.key;
@@ -98,7 +111,7 @@ export function createFight(env) {
     if (sheathed) { clipSet(false); if (saber) attach(false); } else { clipSet(true); if (saber) attach(true); else equip(); }
     hud.say(sheathed ? 'Saber sheathed (unarmed)' : 'Lightsaber drawn', 900);
   }
-  function syncHero() { const id = env.heroId(), own = isOwner(), want = canWield() && !sheathed; if (cc.hero.id !== id || cc.hero.saber !== want) cc.setHero({ id, saber: want, name: own ? 'Owner' : (id.split(':').pop().replace(/_.*/, '') || 'Hero').replace(/^./, c => c.toUpperCase()), className: own ? 'Saber Knight' : 'Adventurer' }); cc.setScale(worldProfile(id, HS)); if (armory.key !== (cc.hero.owner ? 'owner' : heroKey(id))) { armory.setHero(id, cc.hero.owner); cc.setGear(armory.bonuses()); } }
+  function syncHero() { const id = env.heroId(), own = isOwner(), want = canWield() && !sheathed; const changed=cc.hero.id!==id; if(changed || cc.hero.saber!==want){ const saved=progress.get(id); cc.setHero({ id, saber: want, level:saved.level, name: own ? 'Owner' : (id.split(':').pop().replace(/_.*/, '') || 'Hero').replace(/^./, c => c.toUpperCase()), className: own ? 'Saber Knight' : 'Adventurer' }); cc.experience=saved;cc.emit('experience',saved); } cc.setScale(worldProfile(id, HS)); if (armory.key !== (cc.hero.owner ? 'owner' : heroKey(id))) { armory.setHero(id, cc.hero.owner); cc.setGear(armory.bonuses()); } }
   armory.wallet = { get: () => cc.gold, spend: (n) => { if (cc.gold < n) return false; cc.gold -= n; return true; } }; armory.on(() => cc.setGear(armory.bonuses()));
 
   /* ---- action clips (any model): attack, attack2, hit, death. Aliases are matched case-insensitively; missing clip => procedural lunge/flinch/fall ---- */

@@ -159,6 +159,29 @@ with sync_playwright() as p:
     page.wait_for_timeout(600)
     check('town culls remote Titan embers but keeps original lava pools',
           page.evaluate("!__p3d.townLands.volcano.active && !__p3d.townLands.volcano.group.visible"))
+    # The formerly unused THREE-based sailing ship builder must actually
+    # appear at Tidewrack's water rather than remaining an isolated file.
+    page.evaluate("__p3d.teleport(-441.6,367);__p3d.setCamYaw(Math.PI/2)")
+    page.wait_for_timeout(1450)
+    port=page.evaluate("""()=>{
+      const a=__p3d,land=a.townLands,h=land.harborShips;
+      const p=land.ships.map(s=>({name:s.name,parts:s.children.length,
+        world:s.getWorldPosition(new a.THREE.Vector3()).toArray(),
+        visible:s.visible,rock:s.rotation.z,
+        water:land.waterAt(-425.6+s.position.x,392+s.position.z)}));
+      return {visible:h.visible,docks:land.dockPlanks.count,ships:p,
+          waterVisible:land.water.visible,waterVertices:land.water.geometry.attributes.position.count};
+    }""")
+    print('Tidewrack 3D ships',json.dumps(port),flush=True)
+    check('two real curved ships moored in the animated water',
+          port['visible'] and len(port['ships'])==2 and
+          all(p['parts']>7 and p['water'] and p['visible'] for p in port['ships']) and
+          port['docks']==46 and port['waterVertices']==725,port)
+    page.screenshot(path='tidewrack-harbor-mobile-test.png')
+    page.evaluate("__p3d.teleport(0,0)")
+    page.wait_for_timeout(380)
+    check('remote harbor ships are correctly culled',
+          page.evaluate("!__p3d.townLands.harborShips.visible"))
     check('no uncaught browser errors',not errors,errors[:2])
     browser.close()
 srv.shutdown()

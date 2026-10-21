@@ -34,6 +34,8 @@ jobs:
         run: node tools/check_volcano_visuals.mjs
       - name: Verify voluntary lock-on boss framing without breaking free camera
         run: node tools/check_boss_camera.mjs
+      - name: Verify live 3D sailing ships and harbor water motion
+        run: node tools/check_harbor_ships.mjs
       - name: Check established encounter geography and gameplay invariants
         run: node tools/check_boss_regions.mjs
       - name: Check walkable terrain and portal stability

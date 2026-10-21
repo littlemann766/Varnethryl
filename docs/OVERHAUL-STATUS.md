@@ -1,8 +1,17 @@
 # Varnethryl — Full 3D Overhaul Status
 
-**Current signed main release:** 1.2.7. **Next development build:** 1.2.8. The full world/model overhaul remains underway.
+**Current signed main release:** 1.2.8. **Next test build:** 1.2.9 (Tidewrack Harbor 3D sailing-ship integration).
 
-This is a **multi-phase game rebuild**, not a single APK patch. The current signed release on `main` is **1.2.6**. The next version, **1.2.7**, is **staged only** in a draft PR until its tests and device behavior are reviewed.
+The 3D overhaul proceeds zone by zone; a successful Android build is not proof of a fully finished game. All changes remain source-preserving and keep the saved character roster, installed app signature, purple EXP bar, and corrected nine-sliced gold/amethyst HUD.
+
+### 1.2.9 harbor pass
+
+- Connected the existing curved-hull 3D galleon and smaller sailing boat geometry into the live volcanic harbor scene (the model-building file previously existed but was never instantiated in the world).
+- Ships now occupy separate moorings on the animated, swimmable harbor surface, gently bob and roll as grouped 3D rigs, and are culled beyond 150 game units.
+- Added two batched 3D mooring piers with no additional player collision or changes to water, lava damage, or any boss arena.
+- Added world-construction tests and a mobile-size gameplay screenshot test for ship visibility, water placement, movement, and culling.
+- **Limitation:** The user's separate approved original ship GLB has not been found in the repository or available upload context. These are clearly identified procedural ship models, not that approved GLB. Importing the actual source remains pending.
+- Next priorities are character animation polish and real-device performance testing, then original environment/ship GLBs when obtainable. **Sslythar remains hidden** until animation is approved.
 
 ## Already on main (versions 1.2.4–1.2.5)
 

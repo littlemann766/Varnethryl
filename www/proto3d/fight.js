@@ -502,7 +502,7 @@ export function createFight(env) {
     alive: b => { let n = 0; for (const e of cc.enemies) if (e.biome === b && e.state !== 'defeated') n++; return n; }, spawn: (key, x, z, b) => spawn(key, 0, { aggroR: AUTO_AGGRO, at: [x, z], biome: b }) };
   cc.on('defeat', e => { if(auto&&e.campId)campNext.set(e.campId,regionClock+20+Math.random()*10); else if (auto && !e.def.boss) RS.freeSlot(true); });
   function start(isAuto) {
-    if (on) return; auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
+    if (on) { if (isAuto === true) auto = true; return; } auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
     if (auto) { syncHero(); equip(); hud.say('THE WILDS - monsters about', 1800); return; }
     // Normal combat is available to every playable hero. Do not silently

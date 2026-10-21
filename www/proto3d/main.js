@@ -16,7 +16,7 @@ import { createCinderFlight, cinderAnimationWeights } from './cinderflight.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
 import { bossCameraFocus } from './boss-camera-focus.js';
-import { preferSerpentClips } from './serpent-locomotion.js';
+import { preferSerpentClips, createSerpentWave, serpentBodyChain } from './serpent-locomotion.js';
 import { zoneAtmosphere } from './zone-ambience.js';
 import { initSettings } from './settingsboot.js';
 import { createMiniMap } from './minimap.js';
@@ -27,6 +27,7 @@ import { buildHobgoblinCamps } from './hobcamps.js';
 import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
 import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
+import { createRosterPreview } from './roster-preview.js';
 
 const canvas = document.getElementById('c');
 const diag = (msg, bad) => { try { (window.__p3dDiag || (() => {}))(msg, bad); } catch (_) {} };
@@ -531,27 +532,19 @@ function wrapGLB(g, id, blocky) {
       diag('Balthrix clips do not animate named spine/tail/body/neck bones: a full-body wave is not verified.');
     diag('Rig audit ' + id + ': ' + report.boneCount + ' bones, ' + skinnedMeshes + ' skinned meshes, ' + report.clips.length + ' clips.');
   }
-  // Fallback serpent body wave only when imported clips do not animate the
-  // spine/tail. Preserve authored animation where it exists.
-  if (/vaelthryx/.test(id) && root.userData.rigAudit &&
-      !root.userData.rigAudit.serpentAnimatedTracks.some(clip => clip.tracks > 0)) {
-    const joints = [];
-    m.traverse(o => {
-      if (o.isBone && /spine|tail|body/i.test(o.name)) joints.push(o);
-    });
-    if (joints.length >= 3) {
-      const rest = joints.map(b => b.rotation.y);
-      let phase = 0, strength = 0;
-      root.userData.serpentWave = (dt, speed) => {
-        const moving = Math.max(0, Math.min(1, speed / 3));
-        strength += (moving - strength) * (1 - Math.exp(-dt * 5));
-        phase += dt * (2.8 + Math.min(5, speed * 0.45));
-        joints.forEach((bone, i) => {
-          // Small lateral rotations propagate from neck to tail.
-          bone.rotation.y = rest[i] + Math.sin(phase - i * 0.65) * 0.12 * strength;
-        });
-      };
-      diag('Balthrix: enabled procedural spine/tail wave fallback on ' + joints.length + ' bones.');
+  // Balthrix has authored slither clips that animate 29 spine/tail joints, but
+  // those clips alone barely flex the actual body as it patrols. Add a gentle,
+  // physically continuous traveling S-wave on top AFTER mixer.update instead
+  // of enabling the procedural pose only when clips are missing.
+  if (/vaelthryx/.test(id)) {
+    const chain = serpentBodyChain(m);
+    const gait = createSerpentWave(m);
+    if (gait) {
+      root.userData.serpentWave = gait;
+      if(root.userData.rigAudit)root.userData.rigAudit.proceduralSlitherJoints=chain.length;
+      diag('Balthrix: animated head-to-tail serpent slither on '+chain.length+' connected joints.');
+    } else {
+      diag('Balthrix: insufficient connected body joints for full-body slither.',true);
     }
   }
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
@@ -640,7 +633,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.3.0';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.3.1';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -846,14 +839,14 @@ function refreshSel(i) {
   selUI.vars.textContent = ''; selUI.vars.style.display = visibleVariants.length > 1 ? 'flex' : 'none';
   visibleVariants.forEach(v => { const c = document.createElement('button'); c.className = 'vr' + (v === cur ? ' on' : ''); c.textContent = v.label; c.dataset.i = v.slot; c.dataset.m = v.mode; c.title = g.name + ': ' + v.label + ' version';
     c.addEventListener('pointerdown', e => e.stopPropagation()); c.addEventListener('click', e => { e.stopPropagation(); selectVariant(g, v); }); selUI.vars.appendChild(c); });
-  selUI.rows.forEach(r => { const gg = r.g, v = r.approved ? bossVariant(gg) : curVar(gg); if(v)r.b.dataset.i = v.slot; r.b.classList.toggle('on', gg === g); });
+  selUI.rows.forEach(r => { const gg = r.g, v = r.variant || (r.approved ? bossVariant(gg) : curVar(gg)); if(v)r.b.dataset.i = v.slot; r.b.classList.toggle('on', gg === g && v.slot === cur.slot); });
 }
 async function selectVariant(g, v) {
   selV[g.key] = v; try { localStorage.setItem('vn_var_' + g.key, v.slot + '|' + v.mode); } catch (_) {}
   const id = GLB_IDS[v.slot]; if (bk(id) && modeFor(id) !== v.mode) await toggleModel(v.slot);
   await selectHero(v.slot); refreshSel(v.slot);
 }
-{ const bar = document.getElementById('heroes'); const seen = new Set(), gl = [];
+{ const bar = document.getElementById('heroes'); const seen = new Set(), rosterGroups = [];
   // Explicitly removed from the visible roster; retain saved slot compatibility.
   const pikachuGroup = SLOT_G[GLB_IDS.indexOf('n:player_pikachu')];
   if (pikachuGroup) seen.add(pikachuGroup);
@@ -862,15 +855,56 @@ async function selectVariant(g, v) {
   // Sslythar remains an unreleased creature while the serpentine rig is refined.
   // Preserve its GLB, stable slot number and saved selection compatibility.
   for (const group of GROUPS.values()) if (group.key === 'ssylthar') seen.add(group);
-  HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g)) { seen.add(g); gl.push(g); } });
-  gl.sort(compareRoster);
+  HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g) && !/^odyssey$/i.test(g.key)) { seen.add(g); rosterGroups.push(g); } });
+  rosterGroups.sort(compareRoster);
   const enemyKeys=new Set(['vaelthryx','ashentitan','frosttroll','stonetroll','hobgoblin','mossgut','ssylthar','hydrella','wyvern']);
   const companionKeys=new Set(['wolf','snowy','hawk','kestrel','zephyr','pip','briar','cinder','coral','ember','hearth','wren']);
-  const enemyGroups=gl.filter(g=>enemyKeys.has(g.key)||!!bossVariant(g));
-  const companionGroups=gl.filter(g=>companionKeys.has(g.key)&&!enemyGroups.includes(g));
-  const playableGroups=gl.filter(g=>!enemyGroups.includes(g)&&!companionGroups.includes(g));
+  const enemyGroups=rosterGroups.filter(g=>enemyKeys.has(g.key)||!!bossVariant(g));
+  const companionGroups=rosterGroups.filter(g=>companionKeys.has(g.key)&&!enemyGroups.includes(g));
+  const playableGroups=rosterGroups.filter(g=>!enemyGroups.includes(g)&&!companionGroups.includes(g));
   const cur = document.createElement('button'); cur.id = 'hcur'; cur.className = 'cur'; cur.appendChild(document.createTextNode('')); const car = document.createElement('span'); car.textContent = '\u25be'; cur.appendChild(car); cur.title = 'choose character';
   const vars = document.createElement('div'); vars.id = 'hvars'; const list = document.createElement('div'); list.id = 'hlist';
+  // Live 3D selector preview: one reusable WebGL viewport and no extra game actors.
+  const previewShell=document.createElement('section');previewShell.className='vn-character-preview';
+  previewShell.setAttribute('aria-label','Selected character 3D preview');
+  const previewStage=document.createElement('div');previewStage.className='vn-character-stage';
+  const previewStatus=document.createElement('small');previewStatus.className='vn-character-status';
+  previewStatus.textContent='Choose a character to preview';
+  const choose=document.createElement('button');choose.type='button';choose.className='vn-character-choose';choose.textContent='Use this character';
+  previewShell.append(previewStage,previewStatus,choose);
+  let previewChoice=null;
+  const preview3D=createRosterPreview({
+    THREE,mount:previewStage,status:previewStatus,
+    load:async(id,mode)=>{
+      if(mode==='blocky'&&bk(id))return makeBlocky(id);
+      const buffer=await fetchGLB(id);
+      return new Promise((resolve,reject)=>gl.parse(buffer,'',g=>{
+        try{resolve(wrapGLB(g,id));}catch(err){reject(err);}
+      },reject));
+    },
+    release:model=>{
+      model.traverse(o=>{
+        if(o.isSkinnedMesh){const ix=SKINS.indexOf(o);if(ix>=0)SKINS.splice(ix,1);}
+        if(o.geometry)o.geometry.dispose();
+        if(o.material)for(const mat of [].concat(o.material))mat?.dispose?.();
+      });
+    }
+  });
+  const previewFor=(g,v)=>{
+    if(!g||!v)return;
+    previewChoice={g,v};
+    choose.textContent='Use '+(BOSS_DISPLAY.get(GLB_IDS[v.slot])||g.name);
+    choose.disabled=true;
+    if(list.scrollTop>0)list.scrollTop=0;
+    preview3D.show(GLB_IDS[v.slot],v.mode,BOSS_DISPLAY.get(GLB_IDS[v.slot])||g.name)
+      .then(ok=>{if(previewChoice?.g===g&&previewChoice?.v===v)choose.disabled=!ok;});
+  };
+  choose.addEventListener('click',async e=>{
+    e.preventDefault();e.stopPropagation();
+    if(!previewChoice||choose.disabled)return;
+    const {g,v}=previewChoice;choose.disabled=true;close();
+    try{await selectVariant(g,v);}finally{choose.disabled=false;}
+  });
   const tabs=document.createElement('div'); tabs.className='vn-roster-tabs';
   const tabLists={};
   const tabButtons={};
@@ -883,16 +917,19 @@ async function selectVariant(g, v) {
   };
   for(const [key,label] of [['playable','Playable Characters'],['companions','Companions'],['enemies','Enemies & Bosses']]){
     const tab=document.createElement('button');tab.type='button';tab.textContent=label;tab.setAttribute('role','tab');
-    tab.addEventListener('click',e=>{e.stopPropagation();showRosterTab(key);});
+    tab.addEventListener('click',e=>{e.stopPropagation();showRosterTab(key);
+      const listForTab=key==='playable'?playableGroups:key==='companions'?companionGroups:enemyGroups;
+      const first=listForTab[0];if(first)previewFor(first,bossVariant(first)||curVar(first));});
     tabs.appendChild(tab);tabButtons[key]=tab;
     const group=document.createElement('div');group.className='vn-roster-list';group.setAttribute('role','tabpanel');
     tabLists[key]=group;
   }
   const rows = [];
-  const close = () => bar.classList.remove('open');
-  cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation(); bar.classList.toggle('open'); });
-  document.addEventListener('pointerdown', e => { if (!bar.contains(e.target)) close(); }, true);
-  const mkRow = (g, approved=false) => { const item=approved?bossVariant(g):curVar(g); const n = approved?(BOSS_DISPLAY.get(GLB_IDS[item.slot])||g.name):g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = item.slot;
+  const close = () => { bar.classList.remove('open');preview3D.hide(); };
+  const open = () => { bar.classList.add('open');const g=SLOT_G[HEROES.indexOf(hero)];if(g)previewFor(g,curVar(g)); };
+  cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation();bar.classList.contains('open')?close():open(); });
+  document.addEventListener('pointerdown', e => { if (!bar.contains(e.target) && !document.getElementById('vnSkinBubble')?.contains(e.target)) close(); }, true);
+  const mkRow = (g, approved=false, fixedVariant=null) => { const item=fixedVariant||(approved?bossVariant(g):curVar(g)); const n = approved?(BOSS_DISPLAY.get(GLB_IDS[item.slot])||g.name):g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = item.slot;
     if (!approved && g.vars.length > 1) { const sp = document.createElement('small'); sp.textContent = ' \u00b7' + g.vars.length; b.appendChild(sp); }
     // Hold a name for 550 ms to inspect its 3D skin without changing hero,
     // companions, or the saved selection. Tap retains existing behavior.
@@ -923,7 +960,7 @@ async function selectVariant(g, v) {
           const choice=document.createElement('button');choice.type='button';
           choice.textContent=skin.label+(skin===curVar(g)?' ✓':'');
           choice.title='Use '+g.name+' '+skin.label;
-          choice.addEventListener('click',()=>{bubble.hidden=true;close();selectVariant(g,skin);});
+          choice.addEventListener('click',()=>{bubble.hidden=true;previewFor(g,skin);});
           options.appendChild(choice);
         }
         bubble.appendChild(options);
@@ -934,17 +971,24 @@ async function selectVariant(g, v) {
     b.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-startX,e.clientY-startY)>12)cancelHold();});
     b.addEventListener('pointerup',cancelHold);b.addEventListener('pointercancel',cancelHold);
     b.addEventListener('contextmenu',e=>{e.preventDefault();});
-    b.addEventListener('click',e=>{e.stopPropagation();if(held){e.preventDefault();held=false;return;}close();selectVariant(g,approved?bossVariant(g):curVar(g));});
-    const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = item.slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = approved?bossVariant(g).slot:curVar(g).slot; toggleFollower(+f.dataset.f); });
+    b.addEventListener('click',e=>{e.stopPropagation();if(held){e.preventDefault();held=false;return;}previewFor(g,fixedVariant||(approved?bossVariant(g):curVar(g)));});
+    const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = item.slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = fixedVariant?.slot ?? (approved?bossVariant(g).slot:curVar(g).slot); toggleFollower(+f.dataset.f); });
     row.appendChild(b); row.appendChild(f); return { row, b }; };
   const back= document.createElement('button');back.type='button';back.className='vn-picker-close';back.textContent='← Back to game';back.addEventListener('pointerdown',e=>e.stopPropagation());back.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();close();});list.appendChild(back);
-  list.appendChild(tabs);
+  list.appendChild(previewShell);list.appendChild(tabs);
   for(const group of Object.values(tabLists))list.appendChild(group);
   showRosterTab('playable');
   for(const [key,groups] of [['playable',playableGroups],['companions',companionGroups],['enemies',enemyGroups]]){
-    for(const g of groups){const approved=!!bossVariant(g),r=mkRow(g,approved);tabLists[key].appendChild(r.row);rows.push({g,b:r.b,approved});}
+    for(const g of groups){
+      const approved=!!bossVariant(g);
+      const variants=(approved && g.key==='frosttroll')
+        ? g.vars.filter(v=>APPROVED_BOSS_IDS.has(GLB_IDS[v.slot]))
+        : [null];
+      for(const variant of variants){const r=mkRow(g,approved,variant);
+        tabLists[key].appendChild(r.row);rows.push({g,b:r.b,approved,variant});}
+    }
   }
-  window.__openBossRoster=()=>{showRosterTab('enemies');bar.classList.add('open')};
+  window.__openBossRoster=()=>{showRosterTab('enemies');open();if(enemyGroups.length)previewFor(enemyGroups[0],bossVariant(enemyGroups[0])||curVar(enemyGroups[0]));};
   window.__ownerRoster = (allow = true) => {
     if (!OG) return;
     const i = rows.findIndex(r => r.g === OG);
@@ -960,7 +1004,7 @@ async function selectVariant(g, v) {
     else tabLists.playable.appendChild(r.row);
     rows.push({ g: OG, b: r.b, approved: false });
   };
-  bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return activeSlot(q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0); })()); }
+  bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows, previewFor }; refreshSel((() => { const q = qp0.get('hero'); return activeSlot(q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0); })()); }
 async function toggleModel(i) {
   const id = GLB_IDS[i], next = modeFor(id) === 'blocky' ? 'glb' : 'blocky'; try { localStorage.setItem('vn_model_' + id, next); } catch (_) {}
   if (HEROES.indexOf(hero) === i) { await loadHero(i); }

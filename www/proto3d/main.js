@@ -1640,6 +1640,8 @@ const wildsMod = import('./wilds.js').then(m => { portalT = m.makeGate(0x9a6bff)
   for (const dx of [-1.9, 1.9]) colliders.push({ type: 'circle', x: TOWN_PORTAL.x + dx, z: TOWN_PORTAL.z, r: .75 });   /* old gate retained for save compatibility */
   mountainWildsPortal=m.makePortal(0xa86bff);
   mountainWildsPortal.name='mountain-wilds-cave-portal';
+  // The road approaches from the east: face the circular portal into the tunnel, not edge-on.
+  mountainWildsPortal.rotation.y=Math.PI/2;
   mountainWildsPortal.position.set(MOUNTAIN_WILDS_GATE.x,
     TOWN_LANDS?TOWN_LANDS.heightAt(MOUNTAIN_WILDS_GATE.x,MOUNTAIN_WILDS_GATE.z):0,
     MOUNTAIN_WILDS_GATE.z);

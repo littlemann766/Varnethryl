@@ -103,6 +103,30 @@ with sync_playwright() as p:
     page.evaluate("__p3d.teleport(2243,177)")
     page.wait_for_function("__p3d.zone==='town'",timeout=90000)
     check('ice gate returns to mountain summit',page.evaluate("__p3d.zone")=='town')
+    # The next overhaul zone must render actual 3D basalt and animated lava,
+    # and it must cull the entire optional FX batch near the peaceful town.
+    page.evaluate("__p3d.teleport(405,-280);__p3d.setCamYaw(0)")
+    page.wait_for_timeout(1450)
+    volcano=page.evaluate("""()=>{
+       const a=__p3d,t=a.townLands,v=t?.volcano,m=t?.poolMeshes?.[0]?.material;
+       return {zone:a.zone,active:v?.active,visible:v?.group.visible,
+         emberCount:v?.embers?.geometry.attributes.position.count,
+         basaltCount:v?.shards?.count,lights:v?.glowLights?.length,
+         lavaGlow:m?.emissiveIntensity,playerY:a.state.heroY,
+         playerX:a.state.heroX,playerZ:a.state.heroZ,
+         lavaPools:t?.poolMeshes?.length,
+         triangles:a.info()?.triangles};}""")
+    print('Titan volcanic atmosphere',json.dumps(volcano),flush=True)
+    check('volcano lava has real embers, basalt scenery and two low-cost glowing lights',
+          volcano['zone']=='town' and volcano['active'] and volcano['visible'] and
+          volcano['emberCount']==128 and volcano['basaltCount']==42 and
+          volcano['lights']==2 and volcano['lavaPools']==5,volcano)
+    page.screenshot(path='titan-volcano-mobile-test.png')
+    # Walking back into the village removes the optional volcano FX batch.
+    page.evaluate("__p3d.teleport(0,0)")
+    page.wait_for_timeout(600)
+    check('town culls remote Titan embers but keeps original lava pools',
+          page.evaluate("!__p3d.townLands.volcano.active && !__p3d.townLands.volcano.group.visible"))
     check('no uncaught browser errors',not errors,errors[:2])
     browser.close()
 srv.shutdown()

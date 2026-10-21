@@ -5,7 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {HERO_M,HERO_LORE_HEIGHTS,inchesToMeters,CHARS,profileFor,loadScale} from '../www/proto3d/charscale.js';
 import {BOSS_PATTERNS,ENEMIES} from '../www/proto3d/combat/data.js';
 import {pickPattern} from '../www/proto3d/combat/ai.js';
-import {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_REALM,FROST_PORTAL,LAVA_POOLS,PORT_CENTER,isCitySafe,balthrixPosition,onLava,frostHill,lavaAmount} from '../www/proto3d/bossregions.js';
+import {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_REALM,FROST_PORTAL,LAVA_POOLS,PORT_CENTER,BALTHRIX_TRAIL,BALTHRIX_TRAIL_HALF_WIDTH,balthrixTrailDistance,nearestBalthrixRoamTime,isCitySafe,balthrixPosition,onLava,frostHill,lavaAmount} from '../www/proto3d/bossregions.js';
 const src=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const close=(a,b)=>Math.abs(a-b)<1e-8;
 assert(close(HERO_M,1.905),'Owner must be 1.905 m');
@@ -41,9 +41,23 @@ let roamerVisitsVolcano=false;
 for(let t=0;t<900;t+=.5){
  const p=balthrixPosition(t);
  assert(!isCitySafe(p.x,p.z),'Balthrix never enters protected city walls');
- if(Math.hypot(p.x-TITAN_CENTER.x,p.z-TITAN_CENTER.z)<32)roamerVisitsVolcano=true;
+ if(Math.hypot(p.x-TITAN_CENTER.x,p.z-TITAN_CENTER.z)<100)roamerVisitsVolcano=true;
 }
-assert(roamerVisitsVolcano,'Balthrix patrol crosses Titan lava region');
+assert(roamerVisitsVolcano,'Balthrix roams volcano outskirts without charging across the Titan crater');
+assert(BALTHRIX_TRAIL.length>300,'smooth trail has terrain-fitting samples');
+assert(BALTHRIX_TRAIL_HALF_WIDTH>=16,'roaming serpent has a broad enough scarred path');
+for(const p of BALTHRIX_TRAIL){
+ assert(Math.max(Math.abs(p.x),Math.abs(p.z))>405,'Balthrix must patrol the map perimeter, never cut through the village');
+ assert(Math.max(Math.abs(p.x),Math.abs(p.z))<540,'trail cannot leave walkable map');
+ assert(!(p.x>-511&&p.x<-340&&p.z>311&&p.z<475),'trail cannot cut across volcanic port');
+ assert(balthrixTrailDistance(p.x,p.z)<.001,'trail must align with roamer spline');
+}
+for(const p of [[0,0],[120,140],[0,-345],[-425.6,392]])
+ assert(balthrixTrailDistance(...p)>BALTHRIX_TRAIL_HALF_WIDTH+15,'no trail through city, frost cave or port');
+for(const t of [1,15,42,135,360,720]){
+ const p=balthrixPosition(t),nearest=nearestBalthrixRoamTime(p.x,p.z);
+ assert(nearest.distance<.2,'encounter spawns exactly along visible trail');
+}
 // Regression: the serpent's arc-length patrol should maintain steady travel
 // speed and its heading should not snap as it rounds waypoint corners.
 let previous=balthrixPosition(0);

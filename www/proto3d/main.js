@@ -1773,7 +1773,7 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },
   toggleModel: i => toggleModel(i), groups: () => [...GROUPS.values()].map(g => ({ key: g.key, name: g.name, vars: g.vars.map(v => v.label) })),
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,
-  state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, enterables,
+  state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, camera, enterables,
   enterables, get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   onRamp(x, z, level = 0) { const s = surfaceAt(x, z, level); return !!(s && s.ramp); },

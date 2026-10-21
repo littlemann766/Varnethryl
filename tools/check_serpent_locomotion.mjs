@@ -18,7 +18,7 @@ preferSerpentClips('n:owner',biped);
 assert.equal(biped.walk,walk,'normal player walk animations are never changed');
 assert.equal(biped.run,run,'normal player run animations are never changed');
 const main=readFileSync(new URL('../www/proto3d/main.js',import.meta.url),'utf8');
-assert(main.includes("import { preferSerpentClips } from './serpent-locomotion.js'"));
+assert(main.includes("import { preferSerpentClips, createSerpentWave, serpentBodyChain } from './serpent-locomotion.js'"));
 assert(main.includes('preferSerpentClips(id,act);'),'the clip preference is actually used');
 assert(main.includes("group.key === 'ssylthar'"),'Sslythar remains hidden');
 

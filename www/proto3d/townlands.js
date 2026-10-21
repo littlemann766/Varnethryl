@@ -235,7 +235,11 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,l),mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;harbor.add(m);
   }
   const W=68,D=64;
-  piece(2.6,6,D*2,-W,3,0);piece(W*2,6,2.6,0,3,-D);piece(W*2,6,2.6,0,3,D);
+  // West-facing harbor mouth: a pier opens onto the sea, not a solid wall.
+  // Retain the two side ramparts and the original eastern road gate.
+  piece(2.6,6,D-15,-W,3,-(D+15)/2);
+  piece(2.6,6,D-15,-W,3,(D+15)/2);
+  piece(W*2,6,2.6,0,3,-D);piece(W*2,6,2.6,0,3,D);
   piece(2.6,6,D-18,W,3,-D/2-9);piece(2.6,6,D-18,W,3,D/2+9);
   for(const x of [-W,W])for(const z of [-D,D]){
     const tower=new THREE.Mesh(new THREE.CylinderGeometry(4.5,5.3,11,10),hm);
@@ -243,34 +247,37 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const cap=new THREE.Mesh(new THREE.ConeGeometry(5.6,5.5,10),wood);cap.position.set(x,13.5,z);cap.castShadow=true;harbor.add(cap);
   }
   const archTop=new THREE.Mesh(new THREE.BoxGeometry(4,1.7,34),hm);archTop.position.set(W,8.1,0);archTop.castShadow=true;harbor.add(archTop);
-  // Volcanic harbor dressing: dark basalt walls, glowing forge vents and lava-lit beacons.
-  // All features are inside the existing harbor footprint; roads, saves and collision stay intact.
-  const basalt=new THREE.MeshLambertMaterial({color:0x302c35});
-  const ember=new THREE.MeshLambertMaterial({color:0xff6326,emissive:0xb72b09,emissiveIntensity:0.8});
-  const cooled=new THREE.MeshLambertMaterial({color:0x514049});
-  for(const wall of harbor.children){
-    if(wall.material===hm)wall.material=basalt;
-    else if(wall.material===wood)wall.material=cooled;
+  // Real corner harbor: weathered coastal stone, wooden piers, mooring posts
+  // and rope; the lava and obsidian props belong ONLY at Ashen Titan.
+  const plank=new THREE.MeshLambertMaterial({color:0x80674a});
+  const piling=new THREE.MeshLambertMaterial({color:0x564735});
+  const rope=new THREE.MeshLambertMaterial({color:0xb2a37e});
+  // Walk-out dock through the new west-facing opening. No new collision boxes:
+  // the player can enter the water from either side of the wooden pier.
+  piece(44,.35,9,-66,.6,0,plank);
+  for(const x of [-84,-72,-60,-48]){
+    for(const z of [-4.6,4.6]){
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(.58,.72,3.2,8),piling);
+      post.position.set(x,-.55,z);post.castShadow=true;harbor.add(post);
+      const cap=new THREE.Mesh(new THREE.CylinderGeometry(.72,.72,.2,8),rope);
+      cap.position.set(x,1.2,z);harbor.add(cap);
+    }
   }
-  for(const [x,z] of [[-49,-43],[-49,43],[43,-44],[43,44]]){
-    const brazier=new THREE.Group();brazier.position.set(x,0,z);
-    const base=new THREE.Mesh(new THREE.CylinderGeometry(2.1,2.8,3.2,8),basalt);
-    base.position.y=1.6;base.castShadow=true;brazier.add(base);
-    const flame=new THREE.Mesh(new THREE.ConeGeometry(1.35,3.8,7),ember);
-    flame.position.y=4.9;brazier.add(flame);
-    harbor.add(brazier);
+  for(const z of [-22,22]){
+    piece(28,.27,5,-62,.51,z,plank);
+    for(const x of [-73,-51]){
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(.5,.65,2.1,7),piling);
+      post.position.set(x,-.35,z);
+      post.castShadow=true;harbor.add(post);
+    }
   }
-  for(let i=0;i<9;i++){
-    const x=-54+i*11;
-    const slab=new THREE.Mesh(new THREE.BoxGeometry(7,.16,1.4),i%3===0?ember:cooled);
-    slab.position.set(x,.12,52);slab.receiveShadow=true;harbor.add(slab);
-  }
-  harbor.userData.region='volcanic-port';
+  harbor.userData.region='coastal-corner-harbor';
   group.add(harbor);
   // Solid harbor ramparts; a broad road-sized opening remains on the east.
   const cx=PORT_CENTER.x,cz=PORT_CENTER.z;
   for(const [x,z,w,depth] of [
-   [cx-W,cz,2.6,D*2],[cx,cz-D,W*2,2.6],[cx,cz+D,W*2,2.6],
+   [cx-W,cz-(D+15)/2,2.6,D-15],[cx-W,cz+(D+15)/2,2.6,D-15],
+   [cx,cz-D,W*2,2.6],[cx,cz+D,W*2,2.6],
    [cx+W,cz-D/2-9,2.6,D-18],[cx+W,cz+D/2+9,2.6,D-18]
   ])colliders.push({type:'box',minX:x-w/2,maxX:x+w/2,minZ:z-depth/2,maxZ:z+depth/2});
   // Water is a real animated, swimmable surface; unlike lava it doesn't damage the player.

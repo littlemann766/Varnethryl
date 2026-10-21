@@ -1,7 +1,7 @@
 /* Curved, fully three-dimensional medieval sailing ships for Tidewrack Harbor.
  * Procedural fallback until the approved external ship GLB is imported.
  * No box-shaped hulls, false flat bow cones or 2D cutout silhouettes. */
-import * as THREE from 'three';
+import * as THREE from './vendor/three.module.js';
 
 export function buildSailingShip(scale=1, large=true) {
   const ship=new THREE.Group();ship.name=large?'tidewrack-three-mast-galleon':'tidewrack-boat';

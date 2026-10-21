@@ -25,7 +25,7 @@ export function qualityPlan(q, dpr) {
 /* Segment (ax,az)->(bx,bz) against 2D colliders. Returns the smallest t in [0,1] where the segment first enters a collider grown by `margin`, or 1.
  * A collider the start point is already inside is skipped; one the start is only inside because of the margin uses margin 0, so hugging a wall still blocks it.
  * interior furniture (small interior colliders) is ignored: only walls and outdoor things block the camera. */
-export function segmentClearT(cols, ax, az, bx, bz, margin) {
+export function segmentClearT(cols, ax, az, bx, bz, margin, blocksAtT = null) {
   let best = 1; const dx = bx - ax, dz = bz - az, m = margin || 0;
   for (let i = 0; i < cols.length; i++) {
     const c = cols[i];
@@ -38,18 +38,25 @@ export function segmentClearT(cols, ax, az, bx, bz, margin) {
         if (Math.abs(d) < 1e-9) { if (o <= lo || o >= hi) ok = false; }
         else { let ta = (lo - o) / d, tb = (hi - o) / d; if (ta > tb) { const s = ta; ta = tb; tb = s; } if (ta > t0) t0 = ta; if (tb < t1) t1 = tb; if (t0 >= t1) ok = false; }
       }
-      if (ok && t0 < best) best = t0;
+      if (ok && t0 < best && (!blocksAtT || blocksAtT(c,t0))) best = t0;
     } else {
       if (c.interior && c.r < 0.7) continue;
       const fx = ax - c.x, fz = az - c.z, d0 = Math.hypot(fx, fz);
       let r = c.r + m; if (d0 < r) { if (d0 < c.r) continue; r = c.r; }
       const a = dx * dx + dz * dz; if (a < 1e-12) continue;
       const b = 2 * (fx * dx + fz * dz), cc = fx * fx + fz * fz - r * r, disc = b * b - 4 * a * cc; if (disc < 0) continue;
-      const t = (-b - Math.sqrt(disc)) / (2 * a); if (t >= 0 && t < best) best = t;
+      const t = (-b - Math.sqrt(disc)) / (2 * a); if (t >= 0 && t < best && (!blocksAtT || blocksAtT(c,t))) best = t;
     }
   }
   return best;
 }
+
+
+// Tree trunks and similar low scenery obstruct a camera only when the
+// actual sight line reaches their height. Camera collision remains strict
+// for walls/structures without cameraTop (including near the town gate).
+export const cameraColliderBlocks = (c,t,eyeY,targetY) =>
+  !Number.isFinite(c.cameraTop) || eyeY + (targetY - eyeY)*Math.max(0,Math.min(1,t)) <= c.cameraTop + .7;
 
 /* Behind-the-character follow: returns the new camYaw. The camera sits at +(sin,cos)*dist from the hero, so 'behind' the hero's travel (vx,vz) is yaw = atan2(-vx,-vz).
    Only eases while the hero is moving mostly away from the camera (>0.5 forward component), so strafing / turning in place never spins the view. Exponential damping, rate-capped: no wobble. */

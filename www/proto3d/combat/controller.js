@@ -263,7 +263,14 @@ export class CombatController {
     for (const e of this.enemies) {
       if (e.state === 'defeated') { e.deadT += dt; continue; }
       if ((e.def.boss || e.def.patterns) && e.phase !== 2 && e.state !== 'defeated' && e.hp / e.max < TUNING.boss.enrageAt) { e.phase = 2; e.pat = null; this.emit('bossPhase', { e, phase: 2 }); }
+      const formerState=e.state;
       if (this.ai.update(e, this.p, dt, this.env) === 'attack') this.enemyStrike(e);
+      if(formerState!=='return'&&e.state==='return'){
+        if(this.tgt.target===e){this.tgt.target=null;this.tgt.locked=false;}
+        if(this.lastTarget===e)this.lastTarget=null;
+        this.emit('bossRetreat',{e});
+      }
+      if(formerState==='return'&&e.state==='idle')this.emit('bossReset',{e});
     }
     this.tgt.update(this.enemies, this.p.x, this.p.z);
     if (!this.tgt.locked && this.lastTarget && (this.lastTarget.state === 'defeated' || this.cd.t - this.lastHitT > 6)) this.lastTarget = null;

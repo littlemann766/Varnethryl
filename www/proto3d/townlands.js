@@ -5,7 +5,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
 import { buildBalthrixTrail } from './balthrix-trail.js';
 import { makeVolcanoEffects } from './volcano-effects.js';
-import { buildSailingShip,animateMooredShip } from './port-ships.js';
+import { buildSailingShip,animateMooredShip,installImportedShip } from './port-ships.js';
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
 const CHUNK = 64;
@@ -253,10 +253,9 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     slab.position.set(x,.12,52);slab.receiveShadow=true;harbor.add(slab);
   }
   harbor.userData.region='volcanic-port';
-  // Two REAL 3D curved-hull sailing ships, already defined by the approved
-  // styling fallback in port-ships.js. They were previously never added to
-  // the live harbor scene. Preserve these original shapes until the user's
-  // separate GLB ship source is available; do NOT pretend these are that GLB.
+  // Render both existing curved-hull fallback ships initially. Once the user's
+  // imported model loads, replace the MAIN mooring only and keep the small boat.
+  // Loading never changes dock collision, saved positions or sea animation.
   const harborShips=new THREE.Group();
   harborShips.name='harbor-waterborne-sailing-ships';
   harborShips.userData.keep=true;
@@ -265,6 +264,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     {x:-44,z:-25,scale:1.27,large:true,yaw:.15,phase:0},
     {x:-49,z:24,scale:1.0,large:false,yaw:-.14,phase:2.25}
   ];
+  let shipAssetLoadStarted=false;
   const ships=shipMoorings.map((p,i)=>{
     const ship=buildSailingShip(p.scale,p.large);
     ship.name=i===0?'harbor-three-mast-sailing-ship':'harbor-single-mast-sailing-boat';
@@ -322,6 +322,13 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
       ?Math.hypot(heroX-PORT_CENTER.x,heroZ-PORT_CENTER.z)<150:true;
     harborShips.visible=near;
     if(!near)return;
+    // Lazy-load the owner's uploaded full 3D ship only while Tidewrack is visible.
+    // Leave the procedural ships in place until the GLB actually loads.
+    if(!shipAssetLoadStarted){
+      shipAssetLoadStarted=true;
+      installImportedShip(ships[0],{large:true}).catch(err=>
+        console.warn('Tidewrack original sailing ship failed, keeping fallback',err));
+    }
     for(let i=0;i<ships.length;i++){
       animateMooredShip(ships[i],t);
     }

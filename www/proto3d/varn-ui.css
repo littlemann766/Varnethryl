@@ -196,8 +196,8 @@ body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
 }
 #vnQuickMenu{padding:22px 20px!important}
 #settingsPanel{padding:24px 20px!important}
-#hlist{padding:19px 13px!important}
-#vnSkinBubble{padding:23px!important}
+#hlist{padding:19px 13px!important;background-image:url('../assets/hud/panel-square.svg'),linear-gradient(150deg,#281730f7,#0e0a16fc)!important;background-size:100% 100%,cover!important}
+#vnSkinBubble{padding:23px!important;background-image:url('../assets/hud/panel-square.svg'),linear-gradient(150deg,#281730f7,#0e0a16fc)!important;background-size:100% 100%,cover!important}
 #vnQuickMenu .vn-qhead{
  min-height:45px;padding:9px 17px!important;margin:0 -5px 8px;
  background:url('../assets/hud/label-long.svg') center/100% 100% no-repeat!important;

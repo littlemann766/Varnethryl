@@ -47,7 +47,6 @@ export function createSerpentWave(root,{ maxAngle=.125 }={}) {
   const bones=serpentBodyChain(root);
   if(bones.length<4)return null;
   let phase=0,strength=0,steering=0;
-  const lastTime={value:0};
   // Reuse one mathematical delta per joint; no new Three.js allocations.
   return function serpentWave(dt,speed,turnRate=0,attacking=false) {
     dt=clamp(Number.isFinite(dt)?dt:0,0,.06);
@@ -61,7 +60,6 @@ export function createSerpentWave(root,{ maxAngle=.125 }={}) {
     if(speed>.12)phase+=dt*(1.55+Math.min(7,speed*.42));
     else phase+=dt*.17;
     if(phase>Math.PI*200)phase%=Math.PI*2;
-    lastTime.value=phase;
     const count=bones.length;
     for(let i=0;i<count;i++){
       const t=i/(count-1); // neck first, tail last
@@ -71,9 +69,9 @@ export function createSerpentWave(root,{ maxAngle=.125 }={}) {
       const angle=clamp((lateral*.78+trailing*.22)*maxAngle*taper*strength-steering*t*.09*strength,-.21,.21);
       // Rotate around the serpent's local up axis. This bends spine + tail
       // left/right, rather than shifting only the texture/sides of its mesh.
-      bones[i].quaternion.multiplyQuaternions(bones[i].quaternion,
-        // Local vertical quaternion without depending on a Three.js import.
-        {x:0,y:Math.sin(angle*.5),z:0,w:Math.cos(angle*.5)});
+      const q=bones[i].quaternion, sn=Math.sin(angle*.5), cs=Math.cos(angle*.5);
+      const x=q.x,y=q.y,z=q.z,w=q.w;
+      q.set(x*cs-z*sn, y*cs+w*sn, x*sn+z*cs, w*cs-y*sn);
     }
   };
 }

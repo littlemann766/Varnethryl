@@ -2,7 +2,6 @@
  * Procedural fallback until the approved external ship GLB is imported.
  * No box-shaped hulls, false flat bow cones or 2D cutout silhouettes. */
 import * as THREE from './vendor/three.module.js';
-import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 
 export function buildSailingShip(scale=1, large=true) {
   const ship=new THREE.Group();ship.name=large?'tidewrack-three-mast-galleon':'tidewrack-boat';
@@ -92,11 +91,16 @@ export function animateMooredShip(ship,t){
  */
 export const TIDEWRACK_SHIP_GLB='proto3d/models-new/tidewrack_sailing_ship.glb';
 let approvedShipPromise=null;
-const loader=new GLTFLoader();
 function shipAsset(){
-  if(!approvedShipPromise)approvedShipPromise=new Promise((resolve,reject)=>{
-    loader.load(TIDEWRACK_SHIP_GLB+'?v=1.3.2',resolve,undefined,reject);
-  });
+  // Lazy import: only browsers need GLTFLoader. Static loader imports fail in
+  // Node.js-only terrain audits because the vendored loader expects the
+  // browser's three.js importmap, not an installed npm 'three' package.
+  if(!approvedShipPromise)approvedShipPromise=(async()=>{
+    const {GLTFLoader}=await import('./vendor/jsm/loaders/GLTFLoader.js');
+    return await new Promise((resolve,reject)=>{
+      new GLTFLoader().load(TIDEWRACK_SHIP_GLB+'?v=1.3.2',resolve,undefined,reject);
+    });
+  })();
   return approvedShipPromise;
 }
 export async function installImportedShip(ship,{large=true}={}){

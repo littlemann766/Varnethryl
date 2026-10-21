@@ -37,6 +37,41 @@ export function makeVolcanoEffects({group,poolMeshes,heightAt}){
   shards.instanceMatrix.needsUpdate=true;
   shards.computeBoundingSphere();
   crater.add(shards);
+  // Broad self-lit molten cracks make the distant Titan territory legible
+  // even in dark weather. The ribbons lie ON the shared ground and are purely
+  // decorative: they neither create collision nor change lava damage.
+  // All 12 fissures share ONE indexed mesh / draw call on mobile.
+  const fissureVerts=[],fissureIndices=[];
+  const fissureCount=12, fissureSegments=15;
+  for(let i=0;i<fissureCount;i++){
+    const bearing=i*2*Math.PI/fissureCount+.14*seeded(i+410);
+    for(let j=0;j<=fissureSegments;j++){
+      const d=23+j*7.2;
+      const az=bearing+.095*Math.sin(j*.83+i*2.3);
+      const x=TITAN_CENTER.x+Math.cos(az)*d;
+      const z=TITAN_CENTER.z+Math.sin(az)*d;
+      const width=(.9+seeded(i*19+j+708)*1.3)*(1-.27*j/fissureSegments);
+      const normalX=-Math.sin(az),normalZ=Math.cos(az);
+      for(const dir of [-1,1]){
+        const px=x+normalX*width*dir,pz=z+normalZ*width*dir;
+        fissureVerts.push(px,heightAt(px,pz)+.13,pz);
+      }
+      if(j<fissureSegments){
+        const k=i*(fissureSegments+1)*2+j*2;
+        fissureIndices.push(k,k+1,k+2,k+1,k+3,k+2);
+      }
+    }
+  }
+  const fissureGeo=new THREE.BufferGeometry();
+  fissureGeo.setAttribute('position',new THREE.Float32BufferAttribute(fissureVerts,3));
+  fissureGeo.setIndex(fissureIndices);fissureGeo.computeVertexNormals();
+  const fissureMat=new THREE.MeshBasicMaterial({
+    color:0xff5922,side:THREE.DoubleSide,transparent:true,opacity:.78,
+    depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1
+  });
+  const fissures=new THREE.Mesh(fissureGeo,fissureMat);
+  fissures.name='titan-visible-molten-ground-fissures';
+  fissures.castShadow=false;fissures.receiveShadow=false;crater.add(fissures);
   // One dynamic draw call, no new per-frame meshes and no shadow maps.
   // Embers float upward from the actual (unchanged) damaging lava pools.
   const positions=new Float32Array(emberCount*3);
@@ -82,6 +117,7 @@ export function makeVolcanoEffects({group,poolMeshes,heightAt}){
     // Pulsating lava emission and local glow WITHOUT altering lava damage
     // or geometry; no large permanent scene-wide brightness changes.
     if(mat)mat.emissiveIntensity=1.10+.24*(.5+.5*Math.sin(t*1.8));
+    fissureMat.opacity=.67+.13*(.5+.5*Math.sin(t*1.45));
     for(let i=0;i<glowLights.length;i++)
       glowLights[i].intensity=.85+.24*Math.sin(t*1.15+i*1.8);
     for(let i=0;i<emberCount;i++){
@@ -94,7 +130,7 @@ export function makeVolcanoEffects({group,poolMeshes,heightAt}){
     return true;
   }
   crater.visible=false;
-  return {group:crater,embers,shards,glowLights,update,
+  return {group:crater,embers,shards,fissures,glowLights,update,
     get active(){return active;},get lastUpdate(){return lastUpdate;},
-    counts:{embers:emberCount,basalt:basaltCount}};
+    counts:{embers:emberCount,basalt:basaltCount,fissures:12}};
 }

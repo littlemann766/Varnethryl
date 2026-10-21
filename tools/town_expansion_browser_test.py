@@ -76,7 +76,15 @@ with sync_playwright() as p:
     page.wait_for_timeout(750)
     page.screenshot(path='frost-cave-mobile-test.png')
     # Boss models load asynchronously, but their encounters must become active without input.
-    page.wait_for_function("window.__p3d?.fight?.monsters?.some(e=>e.key==='frosttroll_a')&&__p3d.fight.monsters.some(e=>e.key==='frosttroll_b')",timeout=90000)
+    try:
+        page.wait_for_function("window.__p3d?.fight?.monsters?.some(e=>e.key==='frosttroll_a')&&__p3d.fight.monsters.some(e=>e.key==='frosttroll_b')",timeout=45000)
+    except Exception:
+        diagnostic=page.evaluate("""()=>({zone:__p3d.zone,combatOn:__p3d.fight?.on,
+          combatAuto:__p3d.fight?.auto,monsterKeys:__p3d.fight?.monsters?.map(e=>e.key),
+          glb:__p3d.glbInfo,errors:__p3d.errors,hero:[__p3d.state.heroX,__p3d.state.heroZ]})""")
+        print('FROST SPAWN DIAGNOSTIC',json.dumps(diagnostic),flush=True)
+        print('PAGE ERRORS',errors[-12:],flush=True)
+        raise
     check('both Frost Troll brothers spawn together',page.evaluate("['frosttroll_a','frosttroll_b'].every(k=>__p3d.fight.monsters.some(e=>e.key===k))"))
     # Portrait cameras have a narrow HORIZONTAL field of view. Two brothers
     # 74 world units apart cannot both appear from x=2250; the old screenshot

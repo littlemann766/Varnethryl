@@ -66,3 +66,34 @@ export function followYaw(cur, vx, vz, dt, rate = 2.4, maxRate = 1.8) {
   let d = Math.atan2(-vx, -vz) - cur; d = Math.atan2(Math.sin(d), Math.cos(d));
   const step = Math.max(-maxRate * dt, Math.min(maxRate * dt, d * (1 - Math.exp(-rate * dt)))); return cur + step;
 }
+
+/* Terrain-aware spherical camera orbit. Find first collision on the 3D ray
+ * from the hero's shoulder-height pivot to the desired orbit position.
+ * On a hill, the camera slides inward toward the hero rather than popping
+ * above the horizon or tunneling underground. Pure for deterministic tests.
+ * The pivot is usually above the ground; fallback to it if it isn't.
+ */
+export function orbitGroundT(start,end,heightAt,clearance=.45,steps=28) {
+  if(typeof heightAt!=='function')return 1;
+  const safe=(t)=>{
+    const x=start.x+(end.x-start.x)*t, z=start.z+(end.z-start.z)*t;
+    const y=start.y+(end.y-start.y)*t;
+    const floor=heightAt(x,z);
+    return !Number.isFinite(floor)||y>=floor+clearance;
+  };
+  if(!safe(0))return 0;
+  let last=0;
+  for(let i=1;i<=steps;i++){
+    const t=i/steps;
+    if(!safe(t)){
+      let lo=last,hi=t;
+      for(let j=0;j<10;j++){
+        const mid=(lo+hi)*.5;
+        if(safe(mid))lo=mid;else hi=mid;
+      }
+      return Math.max(0,lo-.005);
+    }
+    last=t;
+  }
+  return 1;
+}

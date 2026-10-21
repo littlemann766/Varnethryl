@@ -5,6 +5,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
 import { buildBalthrixTrail } from './balthrix-trail.js';
 import { makeVolcanoEffects } from './volcano-effects.js';
+import { buildSailingShip } from './port-ships.js';
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
 const CHUNK = 64;
@@ -244,6 +245,48 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     slab.position.set(x,.12,52);slab.receiveShadow=true;harbor.add(slab);
   }
   harbor.userData.region='volcanic-port';
+  // Two REAL 3D curved-hull sailing ships, already defined by the approved
+  // styling fallback in port-ships.js. They were previously never added to
+  // the live harbor scene. Preserve these original shapes until the user's
+  // separate GLB ship source is available; do NOT pretend these are that GLB.
+  const harborShips=new THREE.Group();
+  harborShips.name='harbor-waterborne-sailing-ships';
+  harborShips.userData.keep=true;
+  harbor.add(harborShips);
+  const shipMoorings=[
+    {x:-44,z:-25,scale:1.27,large:true,yaw:.15,phase:0},
+    {x:-49,z:24,scale:1.0,large:false,yaw:-.14,phase:2.25}
+  ];
+  const ships=shipMoorings.map((p,i)=>{
+    const ship=buildSailingShip(p.scale,p.large);
+    ship.name=i===0?'harbor-three-mast-sailing-ship':'harbor-single-mast-sailing-boat';
+    // Keep model components grouped so the hull, sails and rigging bob as
+    // ONE object instead of sliding past each other.
+    ship.position.set(p.x,-.28,p.z);
+    ship.rotation.y=p.yaw;
+    ship.userData.baseY=-.28;ship.userData.mooring=p;
+    ship.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true;}});
+    harborShips.add(ship);
+    return ship;
+  });
+  // Dockside bollards and a short landing mark the two moorings without
+  // introducing new physics colliders or blocking harbor entrances.
+  const dockMat=new THREE.MeshLambertMaterial({color:0x806047});
+  const pierGeo=new THREE.BoxGeometry(1.25,.3,3.1),count=46;
+  const dockPlanks=new THREE.InstancedMesh(pierGeo,dockMat,count);
+  dockPlanks.name='harbor-wooden-mooring-piers';
+  dockPlanks.castShadow=false;dockPlanks.receiveShadow=true;
+  const dockDummy=new THREE.Object3D();
+  for(let j=0;j<count;j++){
+    const i=j%23,side=Math.floor(j/23);
+    dockDummy.position.set(-14-i*1.3,.42,side===0?-24:24);
+    dockDummy.rotation.set(0,0,0);
+    dockDummy.scale.set(1,1,1);
+    dockDummy.updateMatrix();dockPlanks.setMatrixAt(j,dockDummy.matrix);
+  }
+  dockPlanks.instanceMatrix.needsUpdate=true;
+  harborShips.add(dockPlanks);
+  harborShips.visible=false;
   group.add(harbor);
   // Solid harbor ramparts; a broad road-sized opening remains on the east.
   const cx=PORT_CENTER.x,cz=PORT_CENTER.z;
@@ -259,11 +302,25 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   water.receiveShadow=true;water.userData.keep=true;water.name='harbor-swim-water';group.add(water);
   const wp=waterGeo.attributes.position,original=wp.array.slice();
   const waterAt=(x,z)=>x<PORT_CENTER.x-26 && x>PORT_CENTER.x-96 && Math.abs(z-PORT_CENTER.z)<51;
-  function updateWater(t){
+  function updateWater(t,heroX,heroZ){
+    if(!Number.isFinite(t))return;
     for(let i=0;i<wp.count;i++){const ix=i*3,x=original[ix],y=original[ix+1];
       wp.array[ix+2]=.17*Math.sin(x*.19+t*1.6)+.11*Math.sin(y*.24-t*1.15);}
     wp.needsUpdate=true;
     if((Math.floor(t*10)%4)===0)waterGeo.computeVertexNormals();
+    // Save ship/sail draw calls outside the harbor. No camera or other zone
+    // needs to render these grouped models hundreds of meters away.
+    const near=Number.isFinite(heroX)&&Number.isFinite(heroZ)
+      ?Math.hypot(heroX-PORT_CENTER.x,heroZ-PORT_CENTER.z)<150:true;
+    harborShips.visible=near;
+    if(!near)return;
+    for(let i=0;i<ships.length;i++){
+      const ship=ships[i],p=ship.userData.mooring;
+      ship.position.y=ship.userData.baseY+.105*Math.sin(t*.82+p.phase);
+      ship.rotation.x=.013*Math.sin(t*.55+p.phase);
+      ship.rotation.z=.025*Math.sin(t*.76+p.phase);
+      ship.rotation.y=p.yaw+.012*Math.sin(t*.35+p.phase);
+    }
   }
   const insideField=(x,z,pad=0)=>FIELDS.some(f=>Math.abs(x-f.x)<f.w/2+pad&&Math.abs(z-f.z)<f.d/2+pad);
   const nearBuilding=(x,z,pad=0)=>buildings.some(b=>{
@@ -385,5 +442,5 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
       mesh.visible=d<140*Math.max(1,k);
     }
   }
-  return {group,cull,stats,terrain,poolMeshes,volcano,updateVolcano,harborRoad,mountainRoad,cave,harbor,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields,trail};
+  return {group,cull,stats,terrain,poolMeshes,volcano,updateVolcano,harborRoad,mountainRoad,cave,harbor,harborShips,ships,dockPlanks,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields,trail};
 }

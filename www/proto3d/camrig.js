@@ -2,10 +2,10 @@
  * (mouse wheel, pinch, + / - keys, V to switch view). main.js calls update() once per frame and syncHero() to hide the player's own model.
  * No extra draw calls: it only moves the existing camera. Collision is a 2D segment test against the same colliders the hero uses. */
 import * as THREE from './vendor/three.module.js';
-import { ZOOM_MIN, ZOOM_MAX, clampZoom, segmentClearT, cameraColliderBlocks } from './camprefs.js';
+import { ZOOM_MIN, ZOOM_MAX, clampZoom, segmentClearT, cameraColliderBlocks, orbitGroundT } from './camprefs.js';
 import { worldProfile } from './charscale.js';
 
-export const FP_FOV = 72, FP_NEAR = 0.12, TP_NEAR = 0.5, PITCH_MAX = 1.2, MIN_TP_DIST_T = 0.02;
+export const FP_FOV = 72, FP_NEAR = 0.12, TP_NEAR = 0.5, PITCH_MAX = Math.PI/2 - 0.055, MIN_TP_DIST_T = 0.02;
 const typing = (t) => !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT');
 
 /* env: {camera, canvas, colliders, HS, WORLD, prefs, onPrefs?:(prefs)=>void} */
@@ -64,14 +64,21 @@ export function createCamRig(env) {
     const dist = HS * (close ? (c.portrait ? 7.0 : 6.0) * (z / 0.3) : (c.portrait ? 10.5 : 9)) * f * prof.camDist;
     // For giants, frame their *body*, not a point at human chest height.
     const height = Math.max(HS * (close ? 2.2 : (c.portrait ? 7.2 : 6.2)) * f * prof.camHeight, prof.heightW * .72);
-    want.set(c.heroX + sy * dist, height + c.hy, c.heroZ + cy * dist);
     lk.set(c.heroX, Math.max(HS * (close ? 1.05 : 1.6) * prof.camHeight,prof.heightW * .55) + c.hy, c.heroZ);
+    // Full 360-degree yaw + nearly 180 degrees of vertical orbit.
+    // The initial elevation is the legacy camera angle, preserving existing
+    // saved framing; dragging up/down adds to it, with no automatic reset.
+    const initialElevation=Math.atan2(height+c.hy-lk.y,dist);
+    const elevation=Math.max(-PITCH_MAX,Math.min(PITCH_MAX,initialElevation+r.pitch));
+    const radius=Math.hypot(dist,height+c.hy-lk.y);
+    const horizontal=Math.cos(elevation)*radius;
+    want.set(c.heroX+sy*horizontal,lk.y+Math.sin(elevation)*radius,c.heroZ+cy*horizontal);
     const k = snap ? 1 : 1 - Math.pow(0.0015, dt);
     pos.lerp(want, k); look.lerp(lk, k);
     /* Walls still block the camera, but tiny trunks below a giant's sightline
        must not yank a hundred-metre camera into the character every frame. */
-    const full = Math.hypot(pos.x-c.heroX,pos.z-c.heroZ) || 1;
-    const t = segmentClearT(colliders,c.heroX,c.heroZ,pos.x,pos.z,
+    const full = pos.distanceTo(look) || 1;
+    const t = segmentClearT(colliders,look.x,look.z,pos.x,pos.z,
       0.55*Math.min(prof.camDist,2), (obstacle,hitT) =>
         cameraColliderBlocks(obstacle,hitT,lk.y,pos.y));
     const obstacleDist = t<1 ? Math.max(0.1,full*Math.max(MIN_TP_DIST_T,t-.012)) : Infinity;
@@ -86,17 +93,21 @@ export function createCamRig(env) {
       // lifting the perspective if a wall intrudes into a giant's silhouette.
       const safeDistance=Math.min(full,Math.max(clearDistance,minBodyDistance));
       const frac=Math.max(MIN_TP_DIST_T,safeDistance/full);
-      pos.x=c.heroX+(pos.x-c.heroX)*frac;
-      pos.z=c.heroZ+(pos.z-c.heroZ)*frac;
-      pos.y=lk.y+(pos.y-lk.y)*frac;
+      pos.lerpVectors(look,pos,frac);
       if (clearDistance<minBodyDistance) pos.y+=Math.min(prof.heightW*.4,(minBodyDistance-clearDistance)*.6);
     }
     const lim = (c.zh || WORLD) - 0.8, zx = c.zx || 0, zz = c.zz || 0;   /* clamp to the CURRENT map (the Wilds sit at x=1000: clamping to the town's bounds threw the camera 850 m away = empty world) */
     pos.x = Math.max(zx - lim, Math.min(zx + lim, pos.x)); pos.z = Math.max(zz - lim, Math.min(zz + lim, pos.z));
-    if (pos.y < c.hy + 0.6 * prof.camHeight) pos.y = c.hy + 0.6 * prof.camHeight;
+    // Terrain collision is a 3D ray test. Pull the orbit inward when the
+    // ground rises into the view (especially near hills and tall characters).
+    // Never clamp the camera's Y alone: that causes abrupt vertical snaps.
+    const groundT=orbitGroundT(look,pos,c.groundAt,Math.max(.38,HS*.27));
+    if(groundT<1)pos.lerpVectors(look,pos,groundT);
     camera.position.copy(pos); camera.lookAt(look);
-    r.camDist = Math.hypot(pos.x - c.heroX, pos.z - c.heroZ);
-    r.hideHero = false;   /* third person: the hero is never hidden */
+    r.camDist = pos.distanceTo(look);
+    // If scenery forces the camera directly into the character, keep the
+    // scene visible rather than displaying an opaque head across the screen.
+    r.hideHero = r.camDist < Math.max(.65,prof.radiusW*.28);
   };
   /* hide / restore the player's own model (first person, or the camera pressed right up against the hero) */
   r.syncHero = (hero) => { if (r.hideHero) { hero.visible = false; r.hidden = true; } else if (r.hidden) { hero.visible = true; r.hidden = false; } };

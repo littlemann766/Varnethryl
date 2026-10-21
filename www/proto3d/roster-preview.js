@@ -101,7 +101,7 @@ export function createRosterPreview({ THREE, mount, status, load, release }) {
       if(idle){idle.reset();idle.setLoop(THREE.LoopRepeat);idle.play();idle.setEffectiveWeight(1);idle.timeScale=actions.idle?1:.65;}
       say(name+' · drag to rotate · scroll to zoom');
       return true;
-    } catch(e) { if(n===ticket) say(name+' · 3D model unavailable'); return false; }
+    } catch(e) { if(n===ticket) { console.warn('Varnethryl roster 3D model failed',id,e); say(name+' · 3D unavailable: '+String(e?.message || e).slice(0,130)); } return false; }
   }
   function hide() {
     ++ticket;running=false;cancelAnimationFrame(frame);dragging=false;clear();

@@ -552,7 +552,7 @@ export function createFight(env) {
         const shape = pt ? pt.shape : 'ring'; e.tele.visible = shape === 'ring'; if (shape === 'ring') { e.tele.position.set(e.x, terrainY(e.x,e.z)+0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; e.tele.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); }
         if (shape !== 'ring') { const t2 = bossTele(e, shape, pt); t2.visible = true; const L = pt.reach * HS + e.def.r; t2.position.set(e.x, terrainY(e.x,e.z)+0.13, e.z); t2.rotation.set(-Math.PI / 2, 0, e.yaw + Math.PI); t2.material.opacity = 0.18 + 0.45 * f; if (shape === 'line') { t2.scale.set(pt.width * HS, L * (0.35 + 0.65 * f), 1); t2.position.set(e.x + Math.sin(e.yaw) * t2.scale.y / 2, terrainY(e.x + Math.sin(e.yaw) * t2.scale.y / 2,e.z + Math.cos(e.yaw) * t2.scale.y / 2)+0.13, e.z + Math.cos(e.yaw) * t2.scale.y / 2); } else t2.scale.setScalar(L * (0.35 + 0.65 * f)); } else if (e.tele2) e.tele2.visible = false;
       } else { e.tele.visible = false; if (e.tele2) e.tele2.visible = false; }
-      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.roaming && mv > .5 ? mv : 0); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
+      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.roaming && mv > .5 ? mv : 0); u.mixer.update(dt); if (u.serpentWave) u.serpentWave(dt, mv); if (u.sb) u.sb.update(dt); }
       const f = e.flash > 0 || e.state === 'telegraph'; if (f !== e.flashOn) { e.flashOn = f; const hx = e.flash > 0 ? 0xff2020 : 0xaa5500; for (const o of e.ems) o.material.emissive.setHex(f ? hx : o.userData.em); }
     }
     if (shakeT > 0) shakeT = Math.max(0, shakeT - dt); metUpdate(dt);

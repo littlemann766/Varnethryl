@@ -82,12 +82,13 @@ with sync_playwright() as p:
         page.wait_for_function("""()=>!document.querySelector('.vn-character-choose').disabled &&
           document.querySelector('.vn-character-status').textContent.includes('Balthrix')""",timeout=40000)
         wave=page.evaluate("""()=>window.__varnethrylRigAudits?.['n:vaelthryx_straight_rig']||null""")
-        assert wave is not None and wave.get('proceduralSlitherJoints',0)>=8,wave
+        assert wave is not None and wave.get('connectedSpine',0)>=8,wave
+        assert any(c.get('bones',0)>=20 for c in wave.get('authoredSlither',[])),wave
         assert wave['animatedSerpent'] if 'animatedSerpent' in wave else wave['serpentAnimatedTracks']
         page.wait_for_timeout(1100)
         page.screenshot(path=f'balthrix-slither-preview-{orientation}.png')
         assert page.evaluate('__p3d.heroIndex')==2,'previewing the boss must never switch the active hero'
         assert not errors,errors
-        print('PASS',orientation,'animated 3D selector, Frost Troll B and Balthrix full-body slither',wave.get('proceduralSlitherJoints'),flush=True)
+        print('PASS',orientation,'animated 3D selector, Frost Troll B and Balthrix native full-body slither',wave.get('connectedSpine'),flush=True)
         ctx.close()
     browser.close()

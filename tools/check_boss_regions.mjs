@@ -74,9 +74,9 @@ assert(main.includes('window.__varnethrylRigAudits[id] = report'),'Owner and Bal
 assert(main.includes('Object.assign(root.userData, { glb: true, mixer'),'rig audit survives animation initialization');
 assert(main.includes('serpentBones: bones.filter'),'serpent skeleton audit records relevant bone families');
 assert(main.includes('serpentAnimatedTracks: g.animations.map'),'serpent audit checks actual animation tracks');
-assert(main.includes('root.userData.serpentWave = gait'),'Balthrix always runs a connected full-body skeletal wave');
-assert(main.includes('const gait = createSerpentWave(m)'),'additive wave is attached after rig audit and supports authored clips');
-assert(main.includes('if (u.serpentWave) u.serpentWave(animDt, sp)'),'companion animation updates the real body wave');
+assert(main.includes('root.userData.rigAudit.authoredSlither=clips.filter'),'Balthrix preserves authored full-body slither clips');
+assert(!main.includes('createSerpentWave(m)'),'Balthrix no longer receives a destructive additive skeletal twist');
+assert(main.includes("'n:vaelthryx_straight_rig': { walk: 0.30, run: 0.80 }"),'Balthrix body animations play at achievable native gait speeds');
 assert(main.includes('full-body wave is not verified'),'serpent audit diagnoses clips without spine animation');
 assert(main.includes('root.userData.rigAudit.resolved = {'),'rig audit records resolved locomotion capabilities');
 assert(main.includes("if (id === 'n:owner' && !act.walk && !act.run)"),'Owner missing locomotion clips are diagnosed');

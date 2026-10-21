@@ -5,7 +5,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
 import { buildBalthrixTrail } from './balthrix-trail.js';
 import { makeVolcanoEffects } from './volcano-effects.js';
-import { buildSailingShip } from './port-ships.js';
+import { buildSailingShip,animateMooredShip } from './port-ships.js';
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
 const CHUNK = 64;
@@ -315,11 +315,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     harborShips.visible=near;
     if(!near)return;
     for(let i=0;i<ships.length;i++){
-      const ship=ships[i],p=ship.userData.mooring;
-      ship.position.y=ship.userData.baseY+.105*Math.sin(t*.82+p.phase);
-      ship.rotation.x=.013*Math.sin(t*.55+p.phase);
-      ship.rotation.z=.025*Math.sin(t*.76+p.phase);
-      ship.rotation.y=p.yaw+.012*Math.sin(t*.35+p.phase);
+      animateMooredShip(ships[i],t);
     }
   }
   const insideField=(x,z,pad=0)=>FIELDS.some(f=>Math.abs(x-f.x)<f.w/2+pad&&Math.abs(z-f.z)<f.d/2+pad);

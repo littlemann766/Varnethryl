@@ -3,6 +3,7 @@
  */
 import * as THREE from './vendor/three.module.js';
 import { makeGate } from './wilds.js';
+import { buildFrostCave } from './frost-cave.js';
 import { FROST_REALM, smooth01 } from './bossregions.js';
 const {cx:OX,cz:OZ,half:HALF}=FROST_REALM;
 const peaks=[[-153,-142,38,77],[151,-120,37,86],[-165,110,30,79],[165,123,33,87],[4,-188,26,72]];
@@ -22,7 +23,7 @@ export function frostElevation(x,z){
 export function buildFrostRealm({scene}){
  const group=new THREE.Group();group.name='frost-realm-two-brothers';group.position.set(OX,0,OZ);scene.add(group);
  const seg=132,N=seg+1,P=new Float32Array(N*N*3),C=new Float32Array(N*N*3),I=[];
- const ice=new THREE.Color(0x9ac7df),snow=new THREE.Color(0xe4f1f5),rock=new THREE.Color(0x7f91b0),paint=new THREE.Color();
+ const ice=new THREE.Color(0x54738f),snow=new THREE.Color(0x9bbbc8),rock=new THREE.Color(0x2a3549),paint=new THREE.Color();
  for(let iz=0;iz<=seg;iz++)for(let ix=0;ix<=seg;ix++){
   const x=(ix/seg*2-1)*HALF,z=(iz/seg*2-1)*HALF,y=frostElevation(OX+x,OZ+z),k=(iz*N+ix)*3;
   P[k]=x;P[k+1]=y;P[k+2]=z;
@@ -33,24 +34,17 @@ export function buildFrostRealm({scene}){
  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(P,3));geo.setAttribute('color',new THREE.BufferAttribute(C,3));geo.setIndex(I);geo.computeVertexNormals();
  const terrain=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide}));
  terrain.name='walkable-frost-terrain';terrain.castShadow=true;terrain.receiveShadow=true;terrain.userData.keep=true;group.add(terrain);
- const frozenLake=new THREE.Mesh(new THREE.CircleGeometry(45,48),new THREE.MeshPhongMaterial({color:0x7ac6e9,transparent:true,opacity:.75,shininess:100,side:THREE.DoubleSide}));
+ const frozenLake=new THREE.Mesh(new THREE.CircleGeometry(45,48),new THREE.MeshPhongMaterial({color:0x4786a8,transparent:true,opacity:.72,shininess:100,side:THREE.DoubleSide}));
  frozenLake.rotation.x=-Math.PI/2;frozenLake.position.set(91,frostElevation(OX+91,OZ+18)+.18,18);group.add(frozenLake);
- const trunks=new THREE.InstancedMesh(new THREE.CylinderGeometry(.32,.55,4.6,6),new THREE.MeshLambertMaterial({color:0x545764}),76);
- const pines=new THREE.InstancedMesh(new THREE.ConeGeometry(3.6,9,8),new THREE.MeshLambertMaterial({color:0xb2cbd2,flatShading:true}),76);
- const crystals=new THREE.InstancedMesh(new THREE.ConeGeometry(1.6,7.5,6),new THREE.MeshPhongMaterial({color:0x79bddc,emissive:0x164b68,flatShading:true}),40);
- let seed=73513;const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)|0;return(seed>>>0)/4294967296;};
- const d=new THREE.Object3D();let k=0,j=0,tries=0;
- while((k<76||j<40)&&tries++<900){
-  const x=(rnd()*2-1)*(HALF-10),z=(rnd()*2-1)*(HALF-10),y=frostElevation(OX+x,OZ+z);
-  if(Math.hypot(x+7,z-160)<49||Math.hypot(x,z+66)<72||Math.hypot(x-91,z-18)<51)continue;
-  if(k<76){const s=.8+rnd()*.8;d.position.set(x,y+2.3*s,z);d.scale.setScalar(s);d.rotation.y=rnd()*Math.PI*2;d.updateMatrix();trunks.setMatrixAt(k,d.matrix);d.position.y=y+9*s;d.updateMatrix();pines.setMatrixAt(k,d.matrix);k++;}
-  else if(j<40){const s=.7+rnd()*1.5;d.position.set(x,y+3.2*s,z);d.scale.setScalar(s);d.rotation.y=rnd()*6.28;d.updateMatrix();crystals.setMatrixAt(j++,d.matrix);}
- }
- trunks.count=pines.count=k;crystals.count=j;trunks.castShadow=pines.castShadow=crystals.castShadow=true;
- group.add(trunks,pines,crystals);
+ // Replace the outdoor tree line with a traversable, vaulted ice cave.
+ // Keep an unobstructed entry and arena for both of the approved Troll GLBs.
+ const cave=buildFrostCave(group,HALF,(x,z)=>frostElevation(OX+x,OZ+z),[
+   {x:-7,z:155,r:38},{x:-7,z:177,r:25},
+   {x:-37,z:-66,r:31},{x:37,z:-66,r:31}
+ ]);
  const arch=makeGate(0x9bdfff);arch.position.set(FROST_EXIT.x-OX,frostElevation(FROST_EXIT.x,FROST_EXIT.z),FROST_EXIT.z-OZ);
  group.add(arch);
- const cols=[]; // frosted open world; no artificial blockers on the entrance or the bosses
+ const cols=cave.colliders; // real collisions around large stalagmites, clear combat lanes
  group.visible=false;
- return{group,portalMesh:arch,colliders:cols,spawn:FROST_SPAWN,exit:FROST_EXIT,brothers:FROST_BROTHERS,heightAt:frostElevation,update:t=>arch.userData.update?.(t)};
+ return{group,cave,portalMesh:arch,colliders:cols,spawn:FROST_SPAWN,exit:FROST_EXIT,brothers:FROST_BROTHERS,heightAt:frostElevation,update:t=>arch.userData.update?.(t)};
 }

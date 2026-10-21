@@ -105,8 +105,24 @@ with sync_playwright() as p:
     check('ice gate returns to mountain summit',page.evaluate("__p3d.zone")=='town')
     # The next overhaul zone must render actual 3D basalt and animated lava,
     # and it must cull the entire optional FX batch near the peaceful town.
-    page.evaluate("__p3d.teleport(405,-280);__p3d.setCamYaw(0)")
-    page.wait_for_timeout(1450)
+    page.evaluate("__p3d.teleport(405,-302);__p3d.setCamYaw(0)")
+    page.wait_for_function("""()=>{
+      const a=__p3d;return Math.hypot(a.camera.position.x-a.state.heroX,
+                                         a.camera.position.z-a.state.heroZ)<70;}""",timeout=90000)
+    page.wait_for_timeout(1400)
+    camera=page.evaluate("""()=>{
+      const a=__p3d,c=a.camera,land=a.townLands;
+      const d=Math.hypot(c.position.x-a.state.heroX,c.position.z-a.state.heroZ);
+      const q=new a.THREE.Vector3(405,land.heightAt(405,-402)+9,-402).project(c);
+      return {distance:d,cameraY:c.position.y,heroY:a.state.heroY,
+              craterProjection:{x:q.x,y:q.y,z:q.z},
+              terrainVisible:land.terrain.visible && land.group.visible};
+    }""")
+    print('Titan camera preview',json.dumps(camera),flush=True)
+    check('post-portal camera snaps back to player and frames volcanic ground',
+          camera['distance']<70 and camera['terrainVisible'] and
+          abs(camera['craterProjection']['x'])<1 and
+          -1<=camera['craterProjection']['z']<=1,camera)
     volcano=page.evaluate("""()=>{
        const a=__p3d,t=a.townLands,v=t?.volcano,m=t?.poolMeshes?.[0]?.material;
        return {zone:a.zone,active:v?.active,visible:v?.group.visible,

@@ -26,6 +26,7 @@ jobs:
       - name: Validate changed systems
         run: |
           node tools/check_overhaul.mjs
+          node tools/check_boss_camera.mjs
           node tools/check_volcano_visuals.mjs
           node tools/check_frost_visuals.mjs
           node tools/check_zone_ambience.mjs

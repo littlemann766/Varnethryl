@@ -46,10 +46,24 @@ for(let t=0;t<900;t+=.5){
 assert(roamerVisitsVolcano,'Balthrix roams volcano outskirts without charging across the Titan crater');
 assert(BALTHRIX_TRAIL.length>300,'smooth trail has terrain-fitting samples');
 assert(BALTHRIX_TRAIL_HALF_WIDTH>=16,'roaming serpent has a broad enough scarred path');
+const rectGap=(x,z,minX,maxX,minZ,maxZ)=>
+ Math.hypot(Math.max(minX-x,0,x-maxX),Math.max(minZ-z,0,z-maxZ));
+// The NORTHWEST PORT is a coastal swimming cove, not a volcanic boss zone.
+// Balthrix can pass behind it on a slightly narrower shoreline stretch but
+// his visible raised embankments must not enter swimming water or docks.
+let closestSwim=Infinity,closestPier=Infinity;
+for (const p of BALTHRIX_TRAIL) {
+ closestSwim=Math.min(closestSwim,rectGap(p.x,p.z,PORT_CENTER.x-39-93/2,
+     PORT_CENTER.x-39+93/2,PORT_CENTER.z-55,PORT_CENTER.z+55));
+ closestPier=Math.min(closestPier,rectGap(p.x,p.z,PORT_CENTER.x-88,
+     PORT_CENTER.x-44,PORT_CENTER.z-4.5,PORT_CENTER.z+4.5));
+}
+assert(closestSwim>22,'Balthrix path and raised banks stay outside coastal swimming water');
+assert(closestPier>20,'Balthrix cannot crush the northwest harbor dock');
 for(const p of BALTHRIX_TRAIL){
  assert(Math.max(Math.abs(p.x),Math.abs(p.z))>405,'Balthrix must patrol the map perimeter, never cut through the village');
  assert(Math.max(Math.abs(p.x),Math.abs(p.z))<540,'trail cannot leave walkable map');
- assert(!(p.x>-511&&p.x<-340&&p.z>311&&p.z<475),'trail cannot cut across volcanic port');
+ assert(!(p.x>-511&&p.x<-340&&p.z>311&&p.z<475),'trail cannot cut across northwest coastal harbor');
  assert(balthrixTrailDistance(p.x,p.z)<.001,'trail must align with roamer spline');
 }
 for(const p of [[0,0],[120,140],[0,-345],[-425.6,392]])

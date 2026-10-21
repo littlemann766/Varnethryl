@@ -226,24 +226,50 @@ const CSS = `
 @media(orientation:landscape) and (max-height:440px){#cb .vn-exp{height:43px;width:min(365px,43vw);bottom:max(3px,env(safe-area-inset-bottom))}#cb .vn-exp .vn-exp-level,#cb .vn-exp .vn-exp-value{font-size:9px}}
 @media(prefers-reduced-motion:reduce){#cb .vn-exp .vn-exp-fill{transition:none!important}}
 
-/* Gold-purple UI border family: boss header uses long plate, player panel wide frame. */
+/* Gold-purple combat frame correction: nine-slice, fixed-size ornamentation.
+   Preserves EXP bar markup, fill, position, progression and level-up animation.
+   Do not put oversized crystal corner images behind the boss name or HP. */
 #cb .tp,#cb .tp.boss{
- background-image:url('../assets/hud/label-long.svg'),linear-gradient(145deg,#281631ef,#120d19ef)!important;
- background-size:100% 100%!important;background-repeat:no-repeat!important;
- border:0!important;border-radius:4px!important;
- padding:10px 24px 14px!important;
- box-shadow:0 6px 19px #000b!important;
+  background:linear-gradient(145deg,#281631ef,#120d19ef)!important;
+  border:9px solid transparent!important;
+  border-image-source:url('../assets/hud/label-long.svg')!important;
+  border-image-slice:42 122!important;
+  border-image-width:9px 13px!important;
+  border-image-outset:0!important;
+  border-image-repeat:stretch!important;
+  border-radius:0!important;
+  padding:3px 8px 5px!important;
+  box-shadow:0 6px 19px #000b!important;
+  max-width:calc(100vw - 22px);
 }
-#cb .tp.boss{min-height:65px}
-#cb .tp.boss .nm{color:#ffdfae!important}
+#cb .tp:before,#cb .tp:after{content:none!important}
+#cb .tp.boss{min-height:60px}
+#cb .tp.boss .nm{color:#ffdfae!important;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #cb .vit{
- background-image:url('../assets/hud/panel-wide.svg'),linear-gradient(140deg,#25172ff6,#140e1bf6)!important;
- background-size:100% 100%!important;background-repeat:no-repeat!important;
- border:0!important;border-radius:6px!important;padding:17px 21px!important;
+  background:linear-gradient(140deg,#25172ff6,#140e1bf6)!important;
+  border:10px solid transparent!important;
+  border-image-source:url('../assets/hud/panel-wide.svg')!important;
+  border-image-slice:92!important;
+  border-image-width:10px!important;
+  border-image-outset:0!important;
+  border-image-repeat:stretch!important;
+  border-radius:0!important;
+  padding:6px 9px!important;
+  overflow:visible;
 }
-#cb .vit:after{border:0!important;background:linear-gradient(#3e234c,#1a1225)!important}
+#cb .vit:after{
+  border:1px solid #99724d!important;
+  background:linear-gradient(#3e234c,#1a1225)!important;
+}
 #cb .cl button,#cb .sl{background:radial-gradient(circle at 42% 29%,#553069,#281534 55%,#0d0a17)!important}
-@media(orientation:landscape) and (max-height:490px){#cb .vit{padding:12px 19px!important}}
+@media(orientation:portrait) and (max-width:440px){
+  #cb .vit{max-width:calc(100vw - 16px);border-width:8px!important;border-image-width:8px!important;padding:5px 8px!important}
+  #cb .tp,#cb .tp.boss{border-width:7px!important;border-image-width:7px 10px!important}
+}
+@media(orientation:landscape) and (max-height:490px){
+  #cb .vit{border-width:7px!important;border-image-width:7px!important;padding:4px 7px!important}
+  #cb .tp,#cb .tp.boss{border-width:6px!important;border-image-width:6px 9px!important;padding:2px 7px 3px!important}
+}
 
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */

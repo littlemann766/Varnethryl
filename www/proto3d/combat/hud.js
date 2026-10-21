@@ -67,7 +67,7 @@ const CSS = `
 #cb .sl .nmL{position:absolute;left:50%;bottom:-17px;transform:translateX(-50%);white-space:nowrap;font:600 9px system-ui,sans-serif;color:#e8c887;text-shadow:0 2px 4px #000;pointer-events:none}
 #cb .sl.b4 .nmL{bottom:auto;left:auto;right:0;top:-14px;transform:none;text-transform:uppercase;letter-spacing:.06em}
 #cb .sl .ct{font:700 18px system-ui,sans-serif}
-#cb .msg{font:700 22px Georgia,serif;color:#ffe2a8;letter-spacing:.04em}
+#cb .msg{font:700 clamp(13px,3vw,19px) Georgia,serif;color:#ffe2a8;letter-spacing:.03em;max-width:min(72vw,290px);line-height:1.3;text-wrap:balance}
 #cb .cl{right:calc(max(15px,env(safe-area-inset-right)) + min(410px,49vw) + 8px);bottom:max(24px,env(safe-area-inset-bottom))}
 #cb .cl button{border-color:#bd9451;background:radial-gradient(circle at 45% 30%,#29344b,#101521 58%,#080c15);color:#f2d3a0}#cb .cl button.on{background:#5a4320;border-color:#ffd56e}
 #cb .top button{border-color:#96743f;background:#0a0d16bb;color:#f6e9d0;font-family:Georgia,serif}

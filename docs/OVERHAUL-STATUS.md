@@ -1,52 +1,46 @@
-# Varnethryl — Staged 3D Overhaul
+# Varnethryl — Full 3D Overhaul Status
 
-**Branch:** `overhaul-2026-10-20`  
-**Status:** DRAFT, NOT RELEASED. Do not merge this branch into `main` or install over the user's signed app without browser, Android and save-compatibility verification.
+This is a **multi-phase game rebuild**, not a single APK patch. The current signed release on `main` is **1.2.5**. The next version, **1.2.6**, is **staged only** in a draft PR until its tests and device behavior are reviewed.
 
-## Implemented in the staged branch
+## Already on main (versions 1.2.4–1.2.5)
 
-1. Fix crash while creating the five-button CombatHUD: use the all-matches selector for ability buttons.
-2. Activate regular combat on entering the 3D world without owner-only tools; trigger wilderness auto encounters for ordinary heroes.
-3. Keep unreleased Sslythar hidden from normal roster, URLs and restored hero/companion slots. Preserve existing model files and stored save IDs.
-4. Rebuild the frost brothers' realm as an enclosed dark icy cave with hanging icicles, floor spires and blue crystal lighting; preserve the brothers' arena and exit.
-5. Replace the summit's decorative rock cluster with a traversable ice tunnel leading to the unchanged portal coordinates.
-6. Replace the harbor's old geometric block boats with curved 3D sailing-ship fallback meshes, rigging and shaped sails.
-7. Add 16 deterministic fallen trees, splintered stumps and debris along Balthrix's curved path, with real colliders and instanced rendering.
-8. Advance Balthrix's patrol every frame rather than every ~220 ms, and drive serpent spine fallback on enemy animation updates.
-9. Add full vertical pitch to the third-person camera orbit.
-10. Simplify the combat settings label and correct the controls hint.
-11. Repair outdated Balthrix scale/terrain test fixtures and refresh the offline precache list.
+- Combat HUD activation for normal heroes; persistent character XP and gold/purple EXP meter.
+- Purple crystal/gold medieval frames across menus and combat; expandable circular minimap.
+- Freedom to look around with near-spherical third-person orbit.
+- Frost Troll brothers' ice realm, cave tunnel and entry portal; region-specific boss spawns, aggro, telegraphs and retreats.
+- Ashen Titan's region/lava effects and arena retreat; safer region transitions and async spawn guards.
+- Tidewrack fallback 3D harbor ships (original approved ship asset **not yet integrated**).
+- Balthrix's long patrol route, fallen trees and continuous position updates.
+- Keep Sslythar hidden from standard gameplay, selections and older saves.
+- Test workflows, Android APK build, and 1.2.4 rollback branch.
 
-## Automated checks
+## In development: 1.2.6 rig/animation phase
 
-- `node tools/check_overhaul.mjs`
-- `node tools/check_boss_regions.mjs`
-- `node tools/check_town_mountains.mjs`
-- `node tools/check_balthrix_scale.mjs`
-- `node tools/check_release_cache.mjs`
-- Browser: `tools/town_expansion_browser_test.py` (GitHub Actions)
-- Side-by-side installable debug APK: `.github/workflows/build-overhaul-test.yml` (no production signing secrets; separate `.overhaul` application ID).
+- **Actual GLB rig audit**, covering Owner, two Balthrix rigs, Titan, Frost Troll A/B and two Sslythar rigs; logs and downloadable machine-readable report from GitHub Actions.
+- First audit result: 10/10 structurally valid GLB files, **but valid does not mean visually correct**.
+- Balthrix straight rig has 8 authored clips and 29 animated spine/tail-related joints. His dedicated `slither` and `slither_fast` animations are now explicitly preferred in the staged branch instead of generic walk/run.
+- The newer Sslythar model has an animated skeleton; the older model is unskinned. **Both remain hidden** until in-game movement is tested and approved.
+- Varnethryl app, XP, HUD, and saved model slot ordering are otherwise retained.
+- Latest CI and isolated Android side-by-side test build must pass before this work can be considered for release. Code checks alone are not a visual-animation quality guarantee.
 
-**Passing automated checks are not proof of working Android combat or smooth imported GLB rig animations.** An actual Android playthrough still needs to validate input, frame rate, animation integrity, load time, portals, save/restore, and UI readability.
+## Remaining work — in zone-by-zone order
 
-## Explicitly outstanding before release
+1. **Frost Troll cave:** Verify all walkable/collidable cave geometry, enemy attacks, low lighting, stable portal passage, battle stamina, weapon reach, model silhouettes and on-device rendering. Replace placeholders with approved original 3D assets where source files are available.
+2. **Ashen Titan volcano:** Make lava terrain read properly at play height; proper heat light/shadows, giant-scale movement, attack collision and visual effects. Confirm no crossing into village.
+3. **Tidewrack harbor:** Replace generated sailing ships with the approved source 3D ship GLB, tune scale/docking/water, and test on phone.
+4. **Overworld / Balthrix:** Continue actual slither gait, turning and terrain-following spine movement, tree fallout collisions, foliage, slopes, dynamic shadows, distant castle, and player view freedom.
+5. **Characters and companions:** Full skeletal skin/bone weight visual checks for Owner and all playable heroes, foot placement, idle/walk/run/sprint, companion AI and real attack hitboxes.
+6. **Interfaces and world systems:** Complete consistent ornate HUD/menus, equipment, inventory, combat skill icons, quest interactions, loading video, audio and reliable save/restore.
+7. **Sslythar:** Private animation playground only until body/tail/turns look right; do not spawn or reveal him in normal gameplay.
+8. **Performance and release:** Browser and Android playthroughs for every zone, low/high graphics performance, textures/shadows, model load failure handling, no crashes, Android signature/versionCode preserved, backups and rollback instructions.
 
-- **Models:** replace procedural harbor ship with user's approved 3D ship GLB once the source file is actually imported. Import any additional lava/ice/creature GLBs only after file size, skeleton and texture audits. No existing binary has been deleted.
-- **Sslythar:** remain hidden from normal gameplay; inspect full spine/tail bone weights, use the model viewer/isolated rig sandbox to build a terrain-following flight/slither gait.
-- **Balthrix:** inspect authored serpent animations on a real device; the code-level fallback does not replace a sufficiently weighted, articulated skeleton.
-- **Bosses/AI:** confirm Krag/Mog, Titan, nearby mobs, and companion attacks with direct gameplay recording, not only test assertions; tune pathing and combat hitboxes as needed.
-- **Level art:** refine Frost tunnel roof/ice occlusion and lava terrain/harbor transitions using verified game screenshots.
-- **Owner:** import final approved replacement Owner rig if different from `models-new/owner.glb`. Check hands, weapons, knees, run loop, cloak and attack animation weights.
-- **UI and sound:** finish all menu/HUD screens and voice integration after input playtest; remove or implement any HUD edit controls that are misleading or inoperative.
-- **Release:** confirm Android side-by-side debug build, memory and FPS, backup/restore compatibility. Only then selectively merge to `main` and create a separately signed release using existing keystore.
+## Original artwork and models
 
-## How to test
+GitHub contains playable-character and monster GLBs. The **approved original external environment GLBs** (especially the harbor ship and any terrain/lava/ice packs) need their source bytes made available in the repository before we can claim those particular assets are integrated. Do not substitute generated placeholder geometry while claiming the approved file has been used.
 
-1. Open the draft PR and check its status checks.
-2. When `Build isolated Varnethryl overhaul test APK` completes successfully, download the `Varnethryl-Overhaul-Test-APK` artifact from that run.
-3. **This debug edition installs alongside normal Varnethryl.** It has separate storage: importing an existing backup for testing is optional, but do not uninstall or overwrite the normal signed app.
-4. Record any failures with zone name, hero selected, device model, and a short video if possible.
+## Release discipline
 
-## Safety
-
-No force pushes, no automatic main-branch merge, no live Play/App Store release, no save schema migration, no deletion of user GLB models, and no production signing keys in the test workflow.
+1. Work in a branch, audit original models before editing skins, and stage changes zone-by-zone.
+2. Run code + browser + Android test APK checks. Record which *specific* visual checks cannot be verified without a physical phone.
+3. Keep the previous signed Android APK, ZIP, and backup GitHub branches. Do not break save slot ordering or change signing identity.
+4. Only merge/ship a build after the specific phase is tested and clearly label what remains. **Do not mark the full overhaul finished merely because an automated build passes.**

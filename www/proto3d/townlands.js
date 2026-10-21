@@ -65,6 +65,12 @@ export function townElevation(x,z,world=560){
     const volcano=Math.max(0,shoulder-crater+ribs);
     terrain=terrain*(1-blend)+volcano*blend;
   }
+  // The harbor water and swim hitbox must cover the SAME basin. Previously
+  // inland hills rose through the transparent water, making a green island
+  // beside the moored ships. Grade the seabed below the waterline instead.
+  const seaX=x-PORT_CENTER.x,seaZ=Math.abs(z-PORT_CENTER.z);
+  const seaMask=smooth(-104,-96,seaX)*(1-smooth(-26,-19,seaX))*(1-smooth(51,57,seaZ));
+  terrain=terrain*(1-seaMask)-1.75*seaMask;
   return terrain;
 }
 // ~41K triangles, one draw call; not a distant prop: heroes can traverse this actual mesh.
@@ -82,6 +88,8 @@ function buildWalkableTerrain(world){
     if(y>16||slope>.42)paint.lerp(stone,Math.min(1,Math.max(smooth(12,40,y),smooth(.32,.83,slope))*.8));
     if(y>49)paint.lerp(snow,smooth(47,61,y)*.72);
     if(y<0)paint.lerp(earth,smooth(0,11,-y)*.22);
+    if(y<-.9&&Math.hypot(x-PORT_CENTER.x,z-PORT_CENTER.z)<115)
+      paint.lerp(new THREE.Color(0x285363),.86); // blue-grey seabed, not grass through translucent water
     const ice=1-smooth01((Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)-35)/115);
     if(ice>0)paint.lerp(snow,Math.min(0.97,ice*.93));
     const volc=lavaAmount(x,z);
@@ -295,10 +303,10 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
    [cx+W,cz-D/2-9,2.6,D-18],[cx+W,cz+D/2+9,2.6,D-18]
   ])colliders.push({type:'box',minX:x-w/2,maxX:x+w/2,minZ:z-depth/2,maxZ:z+depth/2});
   // Water is a real animated, swimmable surface; unlike lava it doesn't damage the player.
-  const waterGeo=new THREE.PlaneGeometry(93,110,24,28);
+  const waterGeo=new THREE.PlaneGeometry(70,102,24,28);
   const waterMat=new THREE.MeshPhongMaterial({color:0x237fa4,emissive:0x0a3547,transparent:true,opacity:.84,shininess:105,side:THREE.DoubleSide,depthWrite:false});
   const water=new THREE.Mesh(waterGeo,waterMat);
-  water.rotation.x=-Math.PI/2;water.position.set(PORT_CENTER.x-49,.17,PORT_CENTER.z);
+  water.rotation.x=-Math.PI/2;water.position.set(PORT_CENTER.x-61,.17,PORT_CENTER.z);
   water.receiveShadow=true;water.userData.keep=true;water.name='harbor-swim-water';group.add(water);
   const wp=waterGeo.attributes.position,original=wp.array.slice();
   const waterAt=(x,z)=>x<PORT_CENTER.x-26 && x>PORT_CENTER.x-96 && Math.abs(z-PORT_CENTER.z)<51;

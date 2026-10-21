@@ -85,3 +85,27 @@ export function balthrixPosition(t,speed=14){
  const ahead=atDistance(distance+1.5),behind=atDistance(distance-1.5);
  return {x:p.x,z:p.z,yaw:Math.atan2(ahead.x-behind.x,ahead.z-behind.z)};
 }
+
+/* Procedural, deterministic aftermath along Balthrix's existing curved patrol.
+ * Positions are kept at least a giant body-width away from the route, so the
+ * player can explore the wreckage without trapping the roaming serpent.
+ * This is pure geometry data: it can be validated without WebGL or a phone. */
+export function fallenTreeSites() {
+ const sites=[];
+ for(let i=0,t=8;t<250;t+=12.5,i++){
+  const p=balthrixPosition(t),side=i%2===0?1:-1,offset=21+(i%4)*2.3;
+  const x=p.x+side*Math.cos(p.yaw)*offset;
+  const z=p.z-side*Math.sin(p.yaw)*offset;
+  const len=10+(i%4)*2.3;
+  const angle=p.yaw+side*.73+((i%3)-1)*.18;
+  const ux=Math.sin(angle),uz=Math.cos(angle);
+  const ends=[[x-ux*len*.53,z-uz*len*.53],[x+ux*len*.53,z+uz*len*.53]];
+  if(Math.max(Math.abs(x),Math.abs(z))>535||
+   Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)<165||
+   Math.hypot(x-PORT_CENTER.x,z-PORT_CENTER.z)<107||
+   Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z)<100||
+   ends.some(([ex,ez])=>isCitySafe(ex,ez,20)||onLava(ex,ez)))continue;
+  sites.push(Object.freeze({x,z,length:len,angle,burnt:Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z)<205}));
+ }
+ return Object.freeze(sites);
+}

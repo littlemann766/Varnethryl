@@ -61,7 +61,8 @@ export function createRosterPreview({ THREE, mount, status, load, release }) {
       actor.model.userData.mixer.update(dt);
       // Boss preview must show the same full-body serpentine motion as gameplay.
       // Use a demonstration travel speed without moving the preview pedestal.
-      if(actor.model.userData.serpentWave)actor.model.userData.serpentWave(dt,7.5,0,false);
+      // The approved Balthrix slither bones are fully animated by the authored clip.
+      // Never rotate them a second time: it corkscrews the model.
     }
     if (!dragging) yaw += dt*.15;
     camera.position.set(Math.sin(yaw)*Math.cos(pitch)*distance,
@@ -102,8 +103,10 @@ export function createRosterPreview({ THREE, mount, status, load, release }) {
       yaw=.28;pitch=.10;
       actor={group,model};
       const actions=model.userData?.act || {};
-      const idle=actions.idle || actions.walk || actions.run;
-      if(idle){idle.reset();idle.setLoop(THREE.LoopRepeat);idle.play();idle.setEffectiveWeight(1);idle.timeScale=actions.idle?1:.65;}
+      const idle=/vaelthryx/i.test(id)
+        ? (actions.slither || actions.walk || actions.idle || actions.run)
+        : (actions.idle || actions.walk || actions.run);
+      if(idle){idle.reset();idle.setLoop(THREE.LoopRepeat);idle.play();idle.setEffectiveWeight(1);idle.timeScale=/vaelthryx/i.test(id)?0.78:(actions.idle===idle?1:.65);}
       say(name+' · drag to rotate · scroll to zoom');
       return true;
     } catch(e) { if(n===ticket) { console.warn('Varnethryl roster 3D model failed',id,e); say(name+' · 3D unavailable: '+String(e?.message || e).slice(0,130)); } return false; }

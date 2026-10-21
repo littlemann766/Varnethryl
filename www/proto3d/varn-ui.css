@@ -170,57 +170,133 @@ body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
 #vnSkinBubble small{display:block;color:#cbbd9d;font-size:11px}
 
 
-/* VARNETHRYL ORNATE BORDER SYSTEM
-   The blue in the reference pictures was a temporary background, NOT a UI color.
-   Frame art is separate, transparent and stable; menu controls remain operable. */
+/* VARNETHRYL ORNATE FRAME FIX
+   The UI reference's blue backdrop is discarded. Existing frame SVGs are
+   NINE-SLICED as a border: corners keep their shape on any aspect ratio.
+   Never paint a full-stretch ornate picture BEHIND panel content. */
 :root{--vn-frame-gold:#e1bd7d;--vn-frame-purple:#8941b1;--vn-panel-dark:#120d1bf5}
+
+/* Keep original corners intact; text flows INSIDE the transparent border. */
 #vnMenu .vn-card{
- background-image:url('../assets/hud/panel-wide.svg'),linear-gradient(153deg,#261631f8,#130e1cfb 55%,#201325f8)!important;
- background-size:100% 100%,100% 100%!important;background-position:center!important;background-repeat:no-repeat!important;
- border:0!important;border-radius:10px!important;padding:clamp(25px,6vmin,52px)!important;
- box-shadow:0 10px 32px #000e,0 0 17px #733b9d55!important;
+  box-sizing:border-box!important;
+  background:linear-gradient(150deg,#291a32fa,#100d19fc 60%,#21162cfc)!important;
+  border:18px solid transparent!important;
+  border-image-source:url('../assets/hud/panel-wide.svg')!important;
+  border-image-slice:92!important;
+  border-image-width:18px!important;
+  border-image-outset:0!important;
+  border-image-repeat:stretch!important;
+  border-radius:0!important;
+  padding:clamp(12px,3vw,28px)!important;
+  box-shadow:0 10px 32px #000d,0 0 14px #74359d45!important;
+  max-height:calc(100dvh - 28px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  overflow-wrap:anywhere;
 }
 #vnMenu .vn-card:before,#vnMenu .vn-card:after{content:none!important}
-#vnMenu button:not(.vn-primary),#vnMenu a,#vnQuickMenu button,#vnQuickMenu a,#vnMenuBtn,
-#hlist button,#vnSkinBubble button,#settingsPanel button,#settingsPanel select{
- background:linear-gradient(170deg,#42234c,#16101e 72%,#24152c)!important;
- color:#f6dfb9!important;border:1px solid #b99760!important;
- box-shadow:inset 0 1px 0 #e6ca8c45,0 3px 9px #0008!important;
+
+/* Scrollable panels need stable fixed-width ornamentation, not a warped
+   background and certainly not cropped over their first/last controls. */
+#vnQuickMenu,#settingsPanel{
+  box-sizing:border-box!important;
+  background:linear-gradient(148deg,#25182efa,#110d1afa 65%,#1c1326fa)!important;
+  border:13px solid transparent!important;
+  border-image-source:url('../assets/hud/panel-wide.svg')!important;
+  border-image-slice:92!important;
+  border-image-width:13px!important;
+  border-image-outset:0!important;
+  border-image-repeat:stretch!important;
+  border-radius:0!important;
+  padding:12px 13px!important;
+  color:#f9e7c8!important;
+  box-shadow:0 9px 24px #000d!important;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overflow-wrap:anywhere;
 }
-#vnMenu button.vn-primary{background:linear-gradient(#f0dcac,#b78a4e)!important;color:#251622!important}
-#vnQuickMenu,#settingsPanel,#hlist,#vnSkinBubble{
- background-image:url('../assets/hud/panel-wide.svg'),linear-gradient(150deg,#25152ff7,#0f0c17f8 65%,#23142bfa)!important;
- background-size:100% 100%,cover!important;background-repeat:no-repeat!important;
- border:0!important;border-radius:8px!important;color:#f8eac9!important;
- box-shadow:0 9px 28px #000c!important;
+#hlist,#vnSkinBubble{
+  box-sizing:border-box!important;
+  background:linear-gradient(150deg,#29192ff9,#100c19fc 70%,#1c1225fa)!important;
+  border:13px solid transparent!important;
+  border-image-source:url('../assets/hud/panel-square.svg')!important;
+  border-image-slice:90!important;
+  border-image-width:13px!important;
+  border-image-outset:0!important;
+  border-image-repeat:stretch!important;
+  border-radius:0!important;
+  padding:9px 11px!important;
+  color:#f8eac9!important;
+  box-shadow:0 5px 16px #000c!important;
+  overflow-wrap:anywhere;
 }
-#vnQuickMenu{padding:22px 20px!important}
-#settingsPanel{padding:24px 20px!important}
-#hlist{padding:19px 13px!important;background-image:url('../assets/hud/panel-square.svg'),linear-gradient(150deg,#281730f7,#0e0a16fc)!important;background-size:100% 100%,cover!important}
-#vnSkinBubble{padding:23px!important;background-image:url('../assets/hud/panel-square.svg'),linear-gradient(150deg,#281730f7,#0e0a16fc)!important;background-size:100% 100%,cover!important}
+#vnSkinBubble{padding:13px!important;overflow-y:auto}
+#hlist{overflow-y:auto;overflow-x:hidden;scroll-padding-block:44px}
+
+/* Labels are decorative but must not bury text or close controls. */
 #vnQuickMenu .vn-qhead{
- min-height:45px;padding:9px 17px!important;margin:0 -5px 8px;
- background:url('../assets/hud/label-long.svg') center/100% 100% no-repeat!important;
- color:#ffe1a5!important;text-shadow:0 2px 4px #000;
+  box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;
+  gap:8px;min-height:49px;margin:0 0 9px;
+  background:linear-gradient(145deg,#33203b,#14101b)!important;
+  border:8px solid transparent!important;
+  border-image-source:url('../assets/hud/label-long.svg')!important;
+  border-image-slice:42 122!important;
+  border-image-width:8px 13px!important;
+  border-image-repeat:stretch!important;
+  padding:3px 7px!important;
+  color:#ffe1a5!important;text-shadow:0 2px 4px #000!important;
 }
+#vnQuickMenu .vn-qhead strong{min-width:0;flex:1;text-align:center;overflow-wrap:anywhere}
+#vnQuickMenu #vnQuickClose{
+  flex:none;width:40px!important;min-width:40px!important;min-height:40px!important;
+  padding:5px!important;text-align:center!important;
+}
+/* A tiny Menu button, HUD status, and movement key must NOT inherit
+   a massive 980-pixel ornamental rectangle. Use tidy metal outlines. */
+#vnMenuBtn,#hud>div:first-child{
+  background:linear-gradient(155deg,#382341,#160f20)!important;
+  background-image:none!important;
+  background-size:auto!important;
+  border:2px solid #c7a16c!important;border-radius:8px!important;
+  box-shadow:inset 0 0 0 1px #7d498b44,0 4px 11px #000b!important;
+  color:#f8dfb5!important;
+  padding:7px 11px!important;
+}
+#vnMenu button:not(.vn-primary),#vnMenu a,#vnQuickMenu button,#vnQuickMenu a,
+#hlist button,#vnSkinBubble button,#settingsPanel button,#settingsPanel select{
+  background:linear-gradient(170deg,#40244d,#17111f 75%)!important;
+  color:#f6dfb9!important;border:1px solid #b99760!important;
+  border-image:none!important;
+  border-radius:6px!important;
+  box-shadow:inset 0 1px 0 #e6ca8c45,0 3px 9px #0008!important;
+}
+#vnMenu button.vn-primary{
+  background:linear-gradient(#f0dcac,#b78a4e)!important;color:#251622!important;
+}
+#settingsPanel button.on{background:linear-gradient(#f0dcac,#b78a4e)!important;color:#251622!important}
 #settingsPanel h3,#settingsPanel .card>.sec,#vnQuickMenu summary{color:#f6dea5!important}
 #settingsPanel .card,#vnQuickMenu details{
- background:linear-gradient(130deg,#211529ed,#140f1eed)!important;
- border:1px solid #795b46!important;border-radius:7px!important;
+  background:linear-gradient(130deg,#211529ed,#140f1eed)!important;
+  border:1px solid #795b46!important;border-radius:7px!important;
 }
-#vnSkinBubble .vn-skin-title,.vn-qhead strong{font-family:VarnCinzel,Georgia,serif}
-#vnMenuBtn{
- background-image:url('../assets/hud/label-long.svg'),linear-gradient(#311c3d,#160f1d)!important;
- background-size:100% 100%!important;padding:9px 18px!important;border:0!important;
-}
-#hud>div:first-child{
- background-image:url('../assets/hud/label-long.svg'),linear-gradient(#291a34ed,#140d1ded)!important;
- background-size:100% 100%!important;border:0!important;padding:13px 22px!important;
-}
+#vnSkinBubble .vn-skin-title{font-family:VarnCinzel,Georgia,serif}
 #moveActions button{background:linear-gradient(155deg,#382442,#151020)!important}
-#vnMenu .vn-card,#settingsPanel,#vnQuickMenu{box-sizing:border-box;overflow-wrap:anywhere}
+/* Respect thumb-sized tap targets and the phone safe area. */
+#vnMenu .vn-actions button{min-height:44px}
+#vnQuickMenu .vn-opts button,#vnQuickMenu .vn-opts a{min-height:40px}
+@media(orientation:portrait) and (max-width:420px){
+  #vnMenu .vn-card{border-width:13px!important;border-image-width:13px!important;padding:12px 13px!important}
+  #vnQuickMenu,#settingsPanel{border-width:11px!important;border-image-width:11px!important;padding:9px 10px!important}
+  #hlist,#vnSkinBubble{border-width:10px!important;border-image-width:10px!important;padding:8px!important}
+}
 @media(orientation:landscape) and (max-height:540px){
- #vnMenu .vn-card{padding:13px 32px!important}
- #vnQuickMenu{padding:15px 18px!important}
- #settingsPanel{padding:16px!important}
+  #vnMenu{padding:4px 12px!important}
+  #vnMenu .vn-card{max-height:calc(100dvh - 8px);border-width:9px!important;border-image-width:9px!important;padding:5px 13px!important}
+  #vnMenu .vn-emblem{width:54px;height:54px}
+  #vnMenu h1{font-size:25px;margin:3px 0}
+  #vnMenu .vn-rule{margin:6px auto}
+  #vnMenu .vn-actions{gap:5px}
+  #vnMenu .vn-actions button{min-height:36px}
+  #vnQuickMenu,#settingsPanel{border-width:9px!important;border-image-width:9px!important;padding:7px 10px!important}
+  #hlist,#vnSkinBubble{border-width:9px!important;border-image-width:9px!important;padding:7px!important}
 }

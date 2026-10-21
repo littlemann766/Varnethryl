@@ -1,0 +1,34 @@
+name: Validate ornate Varnethryl borders on phones
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'www/proto3d/varn-ui.css'
+      - 'www/proto3d/combat/hud.js'
+      - 'www/assets/hud/**'
+      - 'tools/test_ornate_borders.py'
+      - '.github/workflows/test-ornate-borders.yml'
+permissions:
+  contents: read
+jobs:
+  mobile-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install mobile browser automation
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Check portrait and landscape borders
+        run: python tools/test_ornate_borders.py
+      - name: Attach mobile layout screenshots for visual review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Varnethryl-Ornate-Borders-Mobile-Screenshots
+          path: border-screenshots/*.png
+          if-no-files-found: warn

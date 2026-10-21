@@ -40,7 +40,7 @@ The Owner is exactly **1.905 m**. Each hero has one central body-height target; 
 | Morwen Blackveil | 5′9″ | 1.7526 |
 | Garruk Stonefist | 6′10″ | 2.0828 |
 
-**Bosses using existing GitHub GLBs:** Frost Troll A and B exactly **5.715 m** each (3× Owner); Ashen Titan available in 6×, 20×, **40× active lava encounter**, and 60×; Balthrix available in 10× roam and 50× model-viewer comparison.
+**Bosses using existing GitHub GLBs:** Frost Troll A and B exactly **5.715 m** each (3× Owner); Ashen Titan available in 6×, 20×, **40× active lava encounter**, and 60×; Balthrix available in 6× roam and 50× model-viewer comparison.
 
 ## Uploaded source GLBs pending optimized GitHub import
 

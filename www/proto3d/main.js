@@ -715,7 +715,10 @@ for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Grou
 const animationLabCandidates = () => {
   const seen=new Set();
   return GLB_IDS.map((id,i)=>({id,name:HERO_NAMES[i]||id,donor:bk(id)}))
-    .filter(p=>{if(!p.donor||seen.has(p.donor))return false;seen.add(p.donor);return true;});
+    .filter(p=>{if(!p.donor||seen.has(p.donor))return false;
+      // Dragon stays in original GLB inventory for private animation tests.
+      if(p.donor==='ssylthar'&&!IS_OWNER_TOKEN)return false;
+      seen.add(p.donor);return true;});
 };
 
 function stopAnimationLab() {
@@ -925,6 +928,10 @@ async function selectVariant(g, v) {
   // Explicitly removed from the visible roster; retain saved slot compatibility.
   const pikachuGroup = SLOT_G[GLB_IDS.indexOf('n:player_pikachu')];
   if (pikachuGroup) seen.add(pikachuGroup);
+  // The unfinished Ssylthar is kept in GLB IDs for rig work, but removed
+  // from playable and enemy rosters until natural movement is approved.
+  const hiddenDragon=GROUPS.get('ssylthar');
+  if(hiddenDragon) seen.add(hiddenDragon);
   const OG = SLOT_G[GLB_IDS.indexOf('n:owner')];
   if (OG && !IS_OWNER_TOKEN) seen.add(OG);   /* hidden from everyone but the owner */
   HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g)) { seen.add(g); gl.push(g); } });

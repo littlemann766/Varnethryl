@@ -37,13 +37,16 @@ assert(onLava(TITAN_CENTER.x,TITAN_CENTER.z),'lava pools surround 10x Titan');
 assert(lavaAmount(TITAN_CENTER.x,TITAN_CENTER.z)>.95,'volcano terrain covers boss');
 assert(!isCitySafe(TITAN_CENTER.x,TITAN_CENTER.z)&&!isCitySafe(FROST_SUMMIT.x,FROST_SUMMIT.z),'both boss regions outside city');
 assert(FROST_REALM.cx>1500&&FROST_REALM.half>200,'new separated icy map');
-let roamerVisitsVolcano=false;
-for(let t=0;t<900;t+=.5){
- const p=balthrixPosition(t);
+// Balthrix is territorial but NEVER crosses the Ashen Titan's volcano.
+// Test the actual continuous spline, not only its control waypoints.
+let closestTitan=Infinity,closestFrost=Infinity;
+for(const p of BALTHRIX_TRAIL) {
  assert(!isCitySafe(p.x,p.z),'Balthrix never enters protected city walls');
- if(Math.hypot(p.x-TITAN_CENTER.x,p.z-TITAN_CENTER.z)<100)roamerVisitsVolcano=true;
+ closestTitan=Math.min(closestTitan,Math.hypot(p.x-TITAN_CENTER.x,p.z-TITAN_CENTER.z));
+ closestFrost=Math.min(closestFrost,Math.hypot(p.x-FROST_SUMMIT.x,p.z-FROST_SUMMIT.z));
 }
-assert(roamerVisitsVolcano,'Balthrix roams volcano outskirts without charging across the Titan crater');
+assert(closestTitan>185,'Balthrix and its dirt berm stay outside Titan volcanic mountain (148 radius + margin)');
+assert(closestFrost>160,'Balthrix must avoid the frost summit and its cave foothills');
 assert(BALTHRIX_TRAIL.length>300,'smooth trail has terrain-fitting samples');
 assert(BALTHRIX_TRAIL_HALF_WIDTH>=16,'roaming serpent has a broad enough scarred path');
 const rectGap=(x,z,minX,maxX,minZ,maxZ)=>

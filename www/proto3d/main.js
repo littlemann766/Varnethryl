@@ -3,6 +3,8 @@ import * as THREE from './vendor/three.module.js';
 import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { CHARS } from './chars.js';
+import { bridgeUnskinnedHumanoid } from './rig-bridge.js';
+import { createOwnerFooting } from './owner-footing.js';
 import { preload as preloadChars } from './texgen.js';
 import { makeEnterable } from './interiors.js';
 import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
@@ -15,10 +17,12 @@ import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
 import { createCinderFlight, cinderAnimationWeights } from './cinderflight.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
+import { attachOwnerSaber } from './owner-saber.js';
 import { initSettings } from './settingsboot.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
 import { worldProfile, loadScale } from './charscale.js';
 import { buildTownOutskirts } from './townlands.js';
+import { createSceneryAssets } from './scenery-assets.js';
 import { buildHobgoblinCamps } from './hobcamps.js';
 import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
 import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
@@ -27,8 +31,12 @@ import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 const canvas = document.getElementById('c');
 const diag = (msg, bad) => { try { (window.__p3dDiag || (() => {}))(msg, bad); } catch (_) {} };
 const COARSE = matchMedia('(pointer:coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+// Natural rendering is reversible. Keep existing player saves and model overrides intact.
+const VISUAL_STYLE_KEY = 'vn_render_style_v1';
+let visualStyle = 'natural';
+try { if (localStorage.getItem(VISUAL_STYLE_KEY) === 'classic') visualStyle = 'classic'; } catch (_) {}
 let renderer;
-try { renderer = new THREE.WebGLRenderer({ canvas, antialias: !COARSE && (window.devicePixelRatio || 1) < 1.5, powerPreference: 'high-performance' }); }
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: visualStyle === 'natural' && (window.devicePixelRatio || 1) <= 3, powerPreference: 'high-performance' }); }
 catch (e) { diag('WebGL failed to start: ' + (e && e.message || e), true); throw e; }
 diag('WebGL ok · ' + (renderer.capabilities.isWebGL2 ? 'WebGL2' : 'WebGL1') + ' · max tex ' + renderer.capabilities.maxTextureSize);
 const DPR_CAP = 1.5;                       // cap pixel ratio: biggest single mobile perf lever
@@ -59,6 +67,18 @@ sun.castShadow = true;
 sun.shadow.mapSize.set(SHADOW_SIZE, SHADOW_SIZE);
 Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 110 });
 sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.03;
+function setVisualStyle(style) {
+  visualStyle = style === 'classic' ? 'classic' : 'natural';
+  renderer.toneMapping = visualStyle === 'natural' ? THREE.ACESFilmicToneMapping : THREE.NoToneMapping;
+  renderer.toneMappingExposure = visualStyle === 'natural' ? 1.16 : 1;
+  renderer.shadowMap.type = visualStyle === 'natural' ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
+  renderer.shadowMap.needsUpdate = true;
+  sun.shadow.radius = visualStyle === 'natural' ? 2.5 : 1;
+  scene.fog.color.setHex(visualStyle === 'natural' ? 0xd6e0e4 : 0xdde8ee);
+  try { localStorage.setItem(VISUAL_STYLE_KEY, visualStyle); } catch (_) {}
+  return visualStyle;
+}
+setVisualStyle(visualStyle);
 const SUN_OFF = new THREE.Vector3(-41, 77, 35);
 scene.add(sun, sun.target);
 
@@ -280,7 +300,7 @@ let hero = HEROES[0];
 let startHero = 0;
 let saver;
 HEROES.forEach((h, i) => { h.position.set(0, 0, START_Z); h.visible = i === 0; scene.add(h); });
-function setHero(i) { applyChar(GLB_IDS[i]); { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; if (typeof refreshSel === 'function') refreshSel(i); if (typeof saver !== 'undefined') saver.mark(); }
+function setHero(i) { if (animationLab) stopAnimationLab(); applyChar(GLB_IDS[i]); { const st = styleFor(GLB_IDS[i]); playerAct.style = st; playerAct.str = st.str; } hero.visible = false; hero = HEROES[i]; hero.visible = true; hero.position.set(state.heroX, 0, state.heroZ); hero.rotation.y = state.yaw; if (typeof refreshSel === 'function') refreshSel(i); if (typeof saver !== 'undefined') saver.mark(); }
 // ---------- GLB heroes: every model in models/, loaded lazily (procedural fallback for the first 3) ----------
 const GLB_IDS = ['aldric', 'darius', 'selene', 'elira', 'orin', 'seraphine', 'talia', 'finn', 'brynn', 'mirelle', 'nyx', 'vesper', 'thorne', 'rook', 'asha', 'rowan', 'kael', 'cedric', 'morwen', 'garruk'];
 const GLB_NAMES = ['Sir Aldric', 'Darius Umbral', 'Selene Frostveil', 'Lady Elira', 'Orin Ashlance', 'Dame Seraphine', 'Talia Stormcall', 'Finn Valecourt', 'Brynn Cogwright', 'Mirelle Thornroot', 'Nyx Varrin', 'Vesper Crowe', 'Brother Thorne', 'Rook Wildbane', 'Asha Ironfist', 'Rowan Firebrand', 'Kael Runebinder', 'Cedric Vale', 'Morwen Blackveil', 'Garruk Stonefist'];
@@ -446,32 +466,21 @@ function wrapGLB(g, id, blocky) {
   const root = new THREE.Group(); const m = g.scene; root.add(m);
   m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
   m.updateMatrixWorld(true); const box = new THREE.Box3().setFromObject(m);   // measured BEFORE the rigid-part merge: the merged SkinnedMesh bounding box is NaN, which silently skipped scaling
-  if (new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
+  if (!g.experimentalBridge && new URLSearchParams(location.search).get('nomerge') == null) { m.updateMatrixWorld(true); mergeRigidParts(m); }
   m.traverse(o => { if (o.isSkinnedMesh && o.name !== 'merged') { o.frustumCulled = false; if (!SKINS.includes(o)) SKINS.push(o); } });
   const hgt = box.max.y - box.min.y;
   if (hgt > 0.01) { const BK_H = { 'o:vaelthryx': 5.1 };   // blocky builders authored smaller than their GLB: match the GLB's in-game height so swapping doesn't jump
     const sc = (blocky && BK_H[id]) ? BK_H[id]/hgt : EXTRA_URL[id] ? 0.947*HS*(EXTRA_SCALE[id]||1)*loadScale(id,hgt) : worldProfile(id,HS).heightW/hgt;   // extra models are authored in metres (hero 1.9 m = 1.8 HS); the old 20 heroes are height-normalised
     m.scale.multiplyScalar(sc); m.position.y -= box.min.y * sc; }
   m.traverse(o => { if (o.isMesh) for (const mt of [].concat(o.material)) if (mt && mt.alphaTest > 0) { mt.transparent = false; mt.depthWrite = true; mt.needsUpdate = true; } });   // glTF alphaMode MASK (e.g. Garruk's cape): cut-out, sorted by depth, casts a cut-out shadow
-  // Temporary Owner integration: attach the purple blade to the animated right-hand bone.
-  // Keep the original rig/mesh untouched so cape skinning can be refined later.
-  if (id === 'n:owner') {
-    // The weapon must not disappear when an imported rig renames its clips.
-    // Accept Mixamo and non-Mixamo hand bones, but never attach two sabers.
-    let hand = m.getObjectByName('mixamorig:RightHand') || m.getObjectByName('RightHand');
-    if (!hand) m.traverse(o => {
-      if (!hand && o.isBone && /(?:^|[:_])right[_ ]?hand$/i.test(o.name)) hand = o;
-    });
-    if (hand && !hand.getObjectByName('OwnerPurpleSaber')) {
-      const saber = new THREE.Group(); saber.name = 'OwnerPurpleSaber'; hand.add(saber);
-      saber.position.set(0, .03, 0);
-      const grip = new THREE.Mesh(new THREE.CylinderGeometry(.028, .035, .24, 12), new THREE.MeshStandardMaterial({color:0x999ba5,metalness:.85,roughness:.2}));
-      grip.position.y=.12; saber.add(grip);
-      const blade = new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.95,12), new THREE.MeshBasicMaterial({color:0xa685ff}));
-      blade.position.y=.71; saber.add(blade);
-      const glow = new THREE.PointLight(0x8b5cff,1.5,2); glow.position.y=.6; saber.add(glow);
-    }
+  // Render the Owner's violet saber only when attached to a real animated
+  // right-hand/wrist joint. Never create a world-floating purple cylinder.
+  if (id === 'n:owner' || id === 'n:owner_pika1') {
+    const mount=attachOwnerSaber(THREE,m);
+    if (!mount.attached) diag('Owner saber not mounted: '+mount.reason);
+    else diag('Owner saber grip mounted: '+mount.hand+(mount.fingerAligned?' (finger-aligned)':' (hand-axis fallback)'));
   }
+  const ownerFooting = (id === 'n:owner' || id === 'n:owner_pika1') ? createOwnerFooting(m, THREE) : null;
   const mixer = new THREE.AnimationMixer(m), act = {}, spd = SPEEDS[id] || null, mscale = hgt > 0.01 ? (EXTRA_URL[id] ? 0.947*HS*(EXTRA_SCALE[id]||1)*loadScale(id,hgt) : worldProfile(id,HS).heightW/hgt) : 1;
   // Keep a concise rig audit on the loaded model for device-side inspection.
   // Reports authored clips and bone families; does not claim visual approval.
@@ -566,7 +575,7 @@ function wrapGLB(g, id, blocky) {
     act[k].play(); act[k].setEffectiveWeight(0);
   }
   if (id === 'n:cinder_new') for (const k of ['hover', 'flap', 'glide', 'dive', 'land']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
-  Object.assign(root.userData, { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 });
+  Object.assign(root.userData, { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, ownerFooting, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 });
   // Cinder's authored wing and tail clips must NOT be re-aimed by spring physics.
   // The generic spring-bone family matches wing1/wing2/wing3 and creates rubbery, overlapping wing flaps.
   if (id !== 'n:cinder_new') try {
@@ -609,8 +618,15 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.2.3';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.2.9';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
+// User-provided landscape props. Optional GLBs are lazy-loaded only near their
+// designated territory, while established scenery remains fully playable.
+const SCENERY = createSceneryAssets({scene,version:ASSET_V,
+  townElevation:(x,z)=>TOWN_LANDS?.heightAt(x,z)??0,
+  frostElevation,
+  onEvent:(kind,id)=>{ if(kind==='failed')console.warn('Scenery model unavailable:',id); }
+});
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
 async function fetchGLB(id) {
@@ -661,8 +677,11 @@ function loadGlbHero(gi) {
 }
 // ---------- blocky (procedural, chars.js rigs) vs GLB model per character ----------
 // Default is BLOCKY for every character that has a builder (CHARS: the 20 heroes + wolf); GLB models are an optional per-character / global toggle.
-const DEFAULT_MODEL = 'blocky';
+// Prefer the approved 3D GLB rigs by default. Any saved per-character/classic
+// model choice still wins; a missing file retains the existing model fallback.
+const DEFAULT_MODEL = 'glb';
 const VAR = {};   // slot -> { blocky, glb } cached variants (both kept so toggling never reloads or jumps)
+let animationLab = null;  // temporary local-only in-world visual swap; never saved
 const bk = id => CHARS[id] ? id : (id.startsWith('o:') && CHARS[id.slice(2)] ? id.slice(2) : null);   // blocky builder key for a model id
 function modeFor(id) {
   if (!bk(id)) return 'glb';
@@ -689,6 +708,102 @@ function loadHero(gi) {
   return loadGlbHero(gi);
 }
 for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(i < GLB_NAMES.length ? GLB_NAMES[i] : EXTRA[i - GLB_NAMES.length][1]); }
+
+// --- In-game Animation Lab: temporary visual swap, with original model/state kept. ---
+// The tester moves/attacks with the normal controls. We only swap the drawn
+// model in the current HEROES slot, never the saved hero id, index or stats.
+const animationLabCandidates = () => {
+  const seen=new Set();
+  return GLB_IDS.map((id,i)=>({id,name:HERO_NAMES[i]||id,donor:bk(id)}))
+    .filter(p=>{if(!p.donor||seen.has(p.donor))return false;
+      // Dragon stays in original GLB inventory for private animation tests.
+      if(p.donor==='ssylthar'&&!IS_OWNER_TOKEN)return false;
+      seen.add(p.donor);return true;});
+};
+
+function stopAnimationLab() {
+  if (!animationLab) return {ok:true, message:'Animation Lab already off'};
+  const t=animationLab; animationLab=null;
+  HEROES[t.index]=t.original;
+  if (hero===t.preview) hero=t.original;
+  scene.remove(t.preview);
+  t.original.visible=t.wasVisible;
+  // Never dispose a shared texture/material: source GLBs can share GPU resources.
+  return {ok:true, message:'Original character restored; saved game unchanged.'};
+}
+function animationLabStatus() {
+  return animationLab ? {active:true, character:animationLab.name,
+    style:animationLab.style, source:animationLab.source,
+    slots:animationLab.slots, notes:animationLab.notes} : {active:false};
+}
+async function startAnimationLab(baseId, style='bridge', requestedSource='original') {
+  stopAnimationLab();
+  const donorKey=bk(baseId);
+  if (!donorKey || !GLB_IDS.includes(baseId))
+    return {ok:false, message:'No compatible original Beth rig for '+baseId};
+  const index=HEROES.indexOf(hero);
+  if(index<0) return {ok:false,message:'Character is changing. Retry after it loads.'};
+  const original=hero;
+  const alternate=EXTRA.find(e=>e[0].startsWith('n:'+donorKey+'_') &&
+    !/smooth|pika|straight/.test(e[0]));
+  const sourceId=requestedSource==='new' && alternate ? alternate[0] : baseId;
+  let result=null, root=null, note='', slots=[];
+  try{
+    if(style==='classic') {
+      root=makeBlocky(baseId);
+      note='Original Beth rig and original blocky geometry.';
+    } else {
+      const buf=await fetchGLB(sourceId);
+      const parsed=await new Promise((resolve,reject)=>
+        gl.parse(buf,'',resolve,reject));
+      if(style==='detailed'){
+        root=wrapGLB(parsed,baseId);
+        note='Existing detailed GLB and its authored animations.';
+      }else if(style==='bridge'){
+        const donor=CHARS[donorKey].build();
+        const trial=bridgeUnskinnedHumanoid(THREE,donor,parsed.scene);
+        if(!trial.ok) return {ok:false,message:'Beth rig bridge unavailable: '+trial.reason+
+          '. Try Detailed or Classic instead; original model is unchanged.'};
+        slots=trial.helpers;
+        root=wrapGLB({scene:trial.scene,animations:trial.animations,
+          experimentalBridge:true},baseId);
+        note='Experimental automated weights on Beth joints: '+trial.convertedMeshes+
+          ' surfaces, '+trial.vertices+' vertices, '+trial.helpers.length+
+          ' added intermediate joints. Needs visual approval.';
+      }else return {ok:false,message:'Unknown Animation Lab style'};
+    }
+    if(!root?.children?.length) return {ok:false,message:'Model could not be displayed'};
+    // A different choice/zone or another asynchronous load may occur during
+    // fetch. Refuse to replace a character that is no longer active.
+    if(original!==hero || HEROES[index]!==original) {
+      scene.remove(root);
+      return {ok:false,message:'Character changed during loading; retry.'};
+    }
+    root.position.copy(original.position);
+    root.rotation.copy(original.rotation);
+    root.visible=true;
+    original.visible=false;
+    scene.add(root);
+    HEROES[index]=root;
+    hero=root;
+    animationLab={index,original,preview:root,wasVisible:true,
+      style,source:sourceId,name:HERO_NAMES[GLB_IDS.indexOf(baseId)]||baseId,
+      slots,notes:note};
+    return {ok:true,message:note,character:animationLab.name,source:sourceId};
+  }catch(e){
+    if(root)scene.remove(root);
+    return {ok:false,message:'Model preview failed: '+String(e?.message||e)};
+  }
+}
+function animationLabReport(observation='') {
+  const s=animationLabStatus();
+  const p=window.__p3d;
+  const payload={game:'Varnethryl',build:ASSET_V,time:new Date().toISOString(),
+    lab:s,activeHeroId:GLB_IDS[HEROES.indexOf(hero)]||'',
+    renderer:p?.info?.(),observations:String(observation).slice(0,2000)};
+  return JSON.stringify(payload,null,2);
+}
+
 const heroKind = w => w.userData.blocky ? 'blocky' : w.userData.glb ? 'glb' : 'none';
 async function selectHero(i) { if (heroKind(HEROES[i]) !== modeFor(GLB_IDS[i])) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
 const qp0 = new URLSearchParams(location.search);
@@ -813,6 +928,10 @@ async function selectVariant(g, v) {
   // Explicitly removed from the visible roster; retain saved slot compatibility.
   const pikachuGroup = SLOT_G[GLB_IDS.indexOf('n:player_pikachu')];
   if (pikachuGroup) seen.add(pikachuGroup);
+  // The unfinished Ssylthar is kept in GLB IDs for rig work, but removed
+  // from playable and enemy rosters until natural movement is approved.
+  const hiddenDragon=GROUPS.get('ssylthar');
+  if(hiddenDragon) seen.add(hiddenDragon);
   const OG = SLOT_G[GLB_IDS.indexOf('n:owner')];
   if (OG && !IS_OWNER_TOKEN) seen.add(OG);   /* hidden from everyone but the owner */
   HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g)) { seen.add(g); gl.push(g); } });
@@ -1019,7 +1138,7 @@ canvas.addEventListener('pointerdown', e => { try { canvas.setPointerCapture(e.p
 canvas.addEventListener('pointermove', e => {
   const t = touches.get(e.pointerId); if (!t) return;
   if (!t.drag && Math.hypot(e.clientX - t.sx, e.clientY - t.sy) > 12) t.drag = true;
-  if (t.drag && !camRig.pinching) { lastDragT = performance.now(); state.camYaw -= (e.clientX - t.lx) * 0.006 * camRig.prefs.lookSens; if (camRig.fp) camRig.look(0, -(e.clientY - t.ly) * 0.005 * camRig.prefs.lookSens); }
+  if (t.drag && !camRig.pinching) { lastDragT = performance.now(); state.camYaw -= (e.clientX - t.lx) * 0.006 * camRig.prefs.lookSens; camRig.look(0, -(e.clientY - t.ly) * 0.005 * camRig.prefs.lookSens); }
   t.lx = e.clientX; t.ly = e.clientY;
 });
 const canvasUp = e => { const t = touches.get(e.pointerId); touches.delete(e.pointerId); if (t && !t.drag && e.type === 'pointerup') tapMoveTo(e.clientX, e.clientY); };
@@ -1220,6 +1339,9 @@ function tickDown(r, dt) {
   r.vxs = r.vzs = 0; if (r.root) r.root.visible = true;
 }
 function updateCrowd(dt) {
+  // The live title shows real townsfolk walking, not a prerendered backdrop.
+  // This patrol is limited to the title and never changes their saved home positions.
+  const titlePreview = document.body.classList.contains('vn-menu-open') && ZONE.name === 'town';
   recordTrail();
   const pa = playerAct;
   pa.x = state.heroX; pa.z = state.heroZ; pa.yaw = state.yaw; pa.vx = state.vx; pa.vz = state.vz;
@@ -1243,6 +1365,14 @@ function updateCrowd(dt) {
       const dx = gx - a.x, dz = gz - a.z, d = Math.hypot(dx, dz);
       if (far && d > 0.3) { const sp = SPEED * travelScale() * Math.max(1, CH.speed) * Math.max(1, cheat.speedMul) * 1.18; tvx = dx / d * sp; tvz = dz / d * sp; }
       else if (!far && d > r.leash && d > 1e-4) { const sp = Math.min(SPEED * travelScale() * Math.max(1, CH.speed) * Math.max(1, cheat.speedMul) * 1.18, (d - r.leash) * 3 + 0.8); tvx = dx / d * sp; tvz = dz / d * sp; }
+    }
+    // The original 3D title had ambient movement. Small, slow circuits around
+    // each townsfolk's own home restore that effect without a separate scene.
+    if (r.kind === 'npc' && titlePreview) {
+      const t = performance.now() * 0.00044 + i * 2.8;
+      const gx = r.hx + Math.cos(t) * 2.6, gz = r.hz + Math.sin(t) * 2.6;
+      const dx = gx - a.x, dz = gz - a.z, dist = Math.hypot(dx, dz);
+      if (dist > 0.35) { const speed = Math.min(1.2, dist * 0.9); tvx = dx / dist * speed; tvz = dz / dist * speed; }
     }
     // Short-range obstacle avoidance: test forward and two angled probes
     // against the same collision resolver used by NPC movement. This is
@@ -1294,7 +1424,7 @@ function updateCrowd(dt) {
     if (r.kind === 'npc' && ZONE.name !== 'town') continue;
     if (r.down > 0) continue;
     let mx = r.vxs * a.slowMul * dt + a.dx, mz = r.vzs * a.slowMul * dt + a.dz;
-    if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
+    if (r.kind === 'npc' && !titlePreview && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
     tmp2.x = a.x + mx; tmp2.z = a.z + mz; { const l0 = state.level; state.level = r.level; resolve(tmp2, false, 'npc'); state.level = l0; }
     let moved = Math.hypot(tmp2.x - a.x, tmp2.z - a.z); a.x = tmp2.x; a.z = tmp2.z; crowdSurface(r, a, dt);
     // A follower can remain within 22 units of the hero while continuously
@@ -1448,9 +1578,18 @@ function animateHero(dt) {
       }
       u.cinderStep = (u.cinderStep || 0) + dt * (6 + state.speed * 0.8);
       u.cinderHop = cinderFlight.alt < 0.05 ? Math.max(0, Math.sin(u.cinderStep)) * 0.035 * Math.min(1, state.speed / 2) : 0;
-    } else { u.cinderHop = 0; locoAnim(u, LOCO_FORCE !== null ? LOCO_FORCE : state.speed, dt); }
+    } else {
+      u.cinderHop = 0;
+      // Owner flight reuses the leg-raised imported idle as a flying stance.
+      // Do not cycle the running legs in midair, even when flying forward.
+      const ownerAirborne = !!u.ownerFooting && (cheat.fly || cheat.alt > 0.07);
+      locoAnim(u, LOCO_FORCE !== null ? LOCO_FORCE : ownerAirborne ? 0 : state.speed, dt);
+    }
     const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0;
-    u.mixer.update(animDt); if (u.sb) u.sb.update(animDt); if (u.cinderEmbers) u.cinderEmbers.update(animDt);
+    if (u.ownerFooting) u.ownerFooting.beforeAnimation();
+    u.mixer.update(animDt);
+    if (u.ownerFooting) u.ownerFooting.afterAnimation(LOCO_FORCE !== null ? LOCO_FORCE : (cheat.fly || cheat.alt > 0.07) ? 0 : state.speed, animDt, cheat.fly || cheat.alt > 0.07);
+    if (u.sb) u.sb.update(animDt); if (u.cinderEmbers) u.cinderEmbers.update(animDt);
     return;
   }
   walkT += dt * (4 + state.speed * 1.9); idleT += dt;
@@ -1477,12 +1616,11 @@ function updateCamera(dt, snap) {
   const ci = camIn; ci.heroX = state.heroX; ci.heroZ = state.heroZ; ci.hy = (state.heroY || 0) + cheat.alt + cinderFlight.alt; ci.dispY = state.dispY === undefined ? state.heroY || 0 : state.dispY; ci.alt = cheat.alt + cinderFlight.alt; ci.jumpHeight = jumpHeight; ci.camYaw = state.camYaw; ci.legacyZoom = state.zoom; ci.portrait = innerHeight > innerWidth; ci.dt = dt; ci.snap = snap;
   if (camRig.prefs.camMode !== 'free' && !camRig.fp && !camRig.pinching && performance.now() - lastDragT > 1500) state.camYaw = followYaw(state.camYaw, state.vx, state.vz, dt);
   ci.zx = ZONE.cx; ci.zz = ZONE.cz; ci.zh = ZONE.half;
+  ci.groundAt = ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt
+    : ZONE.name === 'frost' ? frostElevation : () => 0;
   camRig.update(ci);
-  // Follow the actual elevated terrain on hills: don't let the third-person camera clip into a ridge.
-  if (((ZONE.name === 'town' && TOWN_LANDS) || ZONE.name === 'frost') && !camRig.fp) {
-    const floor = (ZONE.name === 'frost' ? frostElevation(camRig.pos.x,camRig.pos.z) : TOWN_LANDS.heightAt(camRig.pos.x,camRig.pos.z)) + 1.0 * HS;
-    if (camRig.pos.y < floor) { camRig.pos.y = floor; camera.position.y = floor; camera.lookAt(camRig.look); }
-  }
+  // Terrain-aware 3D orbit collision is handled continuously inside camRig;
+  // never snap the camera vertically after orbit resolution.
   camPos.copy(camRig.pos); camLook.copy(camRig.look);
   camRig.syncHero(hero);
   sun.position.set(state.heroX + SUN_OFF.x * SUNK, (ZONE.name !== 'wilds' ? state.heroY : 0) + SUN_OFF.y * SUNK, state.heroZ + SUN_OFF.z * SUNK);
@@ -1622,7 +1760,7 @@ function frame(now) {
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  updateCrowd(dt); updateHero(dt); updateZone(dt); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if(HOB_CAMPS_WORLD){HOB_CAMPS_WORLD.group.visible=ZONE.name==='town';if(ZONE.name==='town')HOB_CAMPS_WORLD.cull(state.heroX,state.heroZ);} if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
+  updateCrowd(dt); updateHero(dt); updateZone(dt); SCENERY.update(ZONE.name,state.heroX,state.heroZ,simTime); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if(HOB_CAMPS_WORLD){HOB_CAMPS_WORLD.group.visible=ZONE.name==='town';if(ZONE.name==='town')HOB_CAMPS_WORLD.cull(state.heroX,state.heroZ);} if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
   simTime += dt; if (SMOKE) SMOKE.update(simTime); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateWater?.(simTime);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   renderer.render(scene, camera);
@@ -1721,9 +1859,10 @@ const cheatEnv = {
 const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
-const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
+const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on), setVisualStyle, getVisualStyle: () => visualStyle, animationLab: {candidates:animationLabCandidates, start:startAnimationLab, stop:stopAnimationLab, status:animationLabStatus, report:animationLabReport} });
 window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),running:travelRun,exhausted};}, setRunning:setTravelRun, jump, get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   teleportTo(x,z){if(!Number.isFinite(x)||!Number.isFinite(z))return false;state.heroX=x;state.heroZ=z;state.target=null;marker.visible=false;state.blockedFrames=0;state.level=0;updateLevel();snapFollowers();saver?.mark();return true;},
+  get sceneryModels(){return SCENERY.status();},
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; }, get guards() { return GUARDS; },
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },
@@ -1740,4 +1879,5 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },
   setHero, get heroIndex() { return HEROES.indexOf(hero); },
   tapAt: tapMoveTo,
+  animationLab: {candidates:animationLabCandidates, start:startAnimationLab, stop:stopAnimationLab, status:animationLabStatus, report:animationLabReport},
 };

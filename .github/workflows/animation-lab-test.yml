@@ -1,0 +1,51 @@
+name: Test Animation Lab and owner menu
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'www/proto3d/main.js'
+      - 'www/proto3d/rig-bridge.js'
+      - 'www/proto3d/owner-saber.js'
+      - 'www/proto3d/owner-footing.js'
+      - 'tools/owner_footing_test.mjs'
+      - 'www/proto3d/camrig.js'
+      - 'www/proto3d/camprefs.js'
+      - 'tools/owner_saber_test.mjs'
+      - 'tools/camera_giant_test.mjs'
+      - 'www/proto3d/settings3d.js'
+      - 'www/proto3d/cheatpanel.js'
+      - 'www/proto3d/cheatboot.js'
+      - 'www/proto3d.html'
+      - 'tools/animation_lab_browser_test.py'
+      - '.github/workflows/animation-lab-test.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check changed JavaScript modules
+        run: |
+          node --check www/proto3d/main.js
+          node --check www/proto3d/rig-bridge.js
+          node --check www/proto3d/settings3d.js
+          node --check www/proto3d/cheatpanel.js
+          node --check www/proto3d/cheatboot.js
+          node tools/rig_bridge_test.mjs
+          node tools/owner_saber_test.mjs
+          node tools/owner_footing_test.mjs
+          node tools/camera_giant_test.mjs
+      - name: Install Chromium for phone-size tests
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Test in-world animation preview and private owner gate
+        run: python tools/animation_lab_browser_test.py

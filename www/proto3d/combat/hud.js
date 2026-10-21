@@ -237,7 +237,7 @@ export class CombatHUD {
     const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     const r = this.root = document.createElement('div'); r.id = 'cb';
     r.innerHTML = '<div class="flash"></div><div class="tp"><div class="nm"></div><div class="sub"></div><div class="bar hp"><i></i><b></b></div></div>' +
-      '<div class="stat"></div><div class="top"><button type="button" data-a="summon">Summon Titan</button><button type="button" data-a="exit">Exit fight</button></div>' +
+      '<div class="stat"></div>' +
       '<div class="vit"><div class="lab"></div><div class="por"><span>?</span><small>1</small></div><div class="bars"><div class="bar hp"><i></i><b></b></div><div class="bar mp"><i></i><b></b></div><div class="bar sp"><i></i><b></b></div><div class="bar fy"><i></i><b></b></div></div></div>' +
       '<div class="cx"><div class="ulp"><button type="button" data-u="holy">Holy Destruction</button><button type="button" data-u="unholy">Unholy Destruction</button></div>' + [0, 1, 2, 3, 4].map(i => '<button type="button" class="sl b' + i + '" data-s="' + i + '"><span class="ic"></span><span class="k">' + (i ? (i === 4 ? 'ULT' : i) : '') + '</span><span class="rg"></span><span class="ct"></span><span class="nmL"></span></button>').join('') + '</div>' +
       '<div class="cl"><button type="button" data-a="dodge"><span class="g">\u21BA</span>Dodge<span class="q">Spc</span><span class="cdv"></span></button><button type="button" data-a="block"><span class="g">\u26E8</span>Block<span class="q">RMB</span></button>' +
@@ -247,9 +247,9 @@ export class CombatHUD {
     const $ = s => r.querySelector(s), $$ = s => Array.from(r.querySelectorAll(s));
     this.tp = $('.tp'); this.tpNm = $('.tp .nm'); this.tpSub = $('.tp .sub'); this.tpBar = $('.tp .bar i'); this.tpTxt = $('.tp .bar b');
     const vb = n => ({ i: $('.vit .' + n + ' i'), b: $('.vit .' + n + ' b') }); this.vhp = vb('hp'); this.vmp = vb('mp'); this.vsp = vb('sp'); this.vfy = vb('fy');
-    this.por = $('.por span'); this.lab = $('.vit .lab'); this.lvl = $('.por small'); this.stat = $('.stat'); this.msg = $('.msg'); this.flash = $('.flash'); this.sumBtn = $('[data-a=summon]');
-    $('.sl').forEach((b, i) => { b.setAttribute('aria-label', i === 0 ? 'Basic attack' : i === 4 ? 'Ultimate ability' : 'Skill ' + i); b.title = b.getAttribute('aria-label'); });
-    this.slots = $('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), nm: b.querySelector('.nmL'), cd: -1, st: '', key: '' }));
+    this.por = $('.por span'); this.lab = $('.vit .lab'); this.lvl = $('.por small'); this.stat = $('.stat'); this.msg = $('.msg'); this.flash = $('.flash');
+    $$('.sl').forEach((b, i) => { b.setAttribute('aria-label', i === 0 ? 'Basic attack' : i === 4 ? 'Ultimate ability' : 'Skill ' + i); b.title = b.getAttribute('aria-label'); });
+    this.slots = $$('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), nm: b.querySelector('.nmL'), cd: -1, st: '', key: '' }));
     this.btn = {}; $$('.cl button').forEach(b => { this.btn[b.dataset.a] = { b, cdv: b.querySelector('.cdv'), cd: -1 }; });
     for (let i = 0; i < NUM_POOL; i++) { const e = document.createElement('div'); e.className = 'fn'; r.appendChild(e); this.nums.push({ e, t: 9 }); }
     for (let i = 0; i < OH_POOL; i++) { const e = document.createElement('div'); e.className = 'oh'; e.innerHTML = '<i></i>'; r.appendChild(e); this.ohs.push({ e, f: e.firstChild, on: false, last: -1 }); }

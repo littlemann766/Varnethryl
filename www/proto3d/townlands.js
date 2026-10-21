@@ -3,7 +3,7 @@
  * All new scenery is batched per 64-world-unit chunk and culled by proximity. */
 import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
-import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
+import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, BALTHRIX_TRAIL, BALTHRIX_TRAIL_HALF_WIDTH, balthrixTrailDistance, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
 const CHUNK = 64;
 const CORE = 164;           // original town wall was at +/-168 world units
@@ -104,6 +104,68 @@ function buildWalkableTerrain(world){
   mesh.name='walkable-hills-mountains-valleys';mesh.receiveShadow=true;mesh.castShadow=true;mesh.userData.keep=true;return mesh;
 }
 
+/* Balthrix's old stomping/slithering track: raised, scarred earth banks,
+ * bare central dirt, and fallen timber on the outer edge. This mesh follows
+ * actual terrain elevations at every strip vertex, including volcano slopes.
+ * It is decorative only; navmesh/collision and terrain physics remain intact. */
+function buildBalthrixTrail(group,world){
+  const points=BALTHRIX_TRAIL,N=points.length;
+  const color=new THREE.Color(),earth=new THREE.Color(0x63452e),
+    center=new THREE.Color(0x795239),edge=new THREE.Color(0x846b4b),
+    bank=new THREE.Color(0x64563e);
+  const P=[],C=[],I=[];
+  for(let i=0;i<=N;i++){
+    const cur=points[i%N],left=points[(i+N-1)%N],right=points[(i+1)%N];
+    // Narrow only between the outer map edge and the coastal harbor.
+    // The 30-unit tread is still wider than Balthrix's body; raised banks
+    // taper smoothly from 6 to 3 units, clearing the swimming cove and docks.
+    const shore=1-smooth(155,235,Math.hypot(cur.x-PORT_CENTER.x,cur.z-PORT_CENTER.z));
+    const h=BALTHRIX_TRAIL_HALF_WIDTH-3*shore,berm=6-3*shore;
+    const widths=[-h-berm,-h,-h*.64,0,h*.64,h,h+berm];
+    const tx=right.x-left.x,tz=right.z-left.z,len=Math.hypot(tx,tz)||1;
+    const nx=-tz/len,nz=tx/len;
+    for(let j=0;j<widths.length;j++){
+      const w=widths[j],x=Math.max(-world+1.25,Math.min(world-1.25,cur.x+nx*w)),z=Math.max(-world+1.25,Math.min(world-1.25,cur.z+nz*w));
+      const b=(j===0||j===6)?1.45:(j===1||j===5)?.38:0;
+      const grain=.09*Math.sin(i*.65+j*2.1);
+      P.push(x,townElevation(x,z,world)+.14+b+grain,z);
+      color.copy(j===3?center:j===0||j===6?bank:j===1||j===5?edge:earth);
+      color.multiplyScalar(.93+.09*Math.sin(i*.31+j*.71));
+      C.push(color.r,color.g,color.b);
+      if(i<N&&j<widths.length-1){
+        const a=i*widths.length+j,bb=a+widths.length;
+        I.push(a,bb,a+1,a+1,bb,bb+1);
+      }
+    }
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(P,3));
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(C,3));
+  geo.setIndex(I);geo.computeVertexNormals();
+  const surface=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide}));
+  surface.name='balthrix-perimeter-scarred-brown-trail';
+  surface.userData.keep=true;surface.receiveShadow=true;group.add(surface);
+  // Knocked-over timber is deliberately light-weight and non-colliding.
+  const trunkGeo=new THREE.CylinderGeometry(.55,.85,7,7),timberMat=new THREE.MeshLambertMaterial({color:0x4d3628});
+  const logs=new THREE.InstancedMesh(trunkGeo,timberMat,Math.floor(N/17));
+  const dummy=new THREE.Object3D(),up=new THREE.Vector3(0,1,0);
+  let n=0;
+  for(let i=0;i<N&&n<logs.count;i+=17){
+    const p=points[i],prev=points[(i+N-1)%N],next=points[(i+1)%N];
+    const dx=next.x-prev.x,dz=next.z-prev.z,len=Math.hypot(dx,dz)||1;
+    const nearPort=1-smooth(155,235,Math.hypot(p.x-PORT_CENTER.x,p.z-PORT_CENTER.z));
+    const halfWidth=BALTHRIX_TRAIL_HALF_WIDTH-3*nearPort;
+    const side=i%2?1:-1,x=Math.max(-world+1.5,Math.min(world-1.5,p.x-side*dz/len*(halfWidth+7-3*nearPort))),z=Math.max(-world+1.5,Math.min(world-1.5,p.z+side*dx/len*(halfWidth+7-3*nearPort)));
+    dummy.position.set(x,townElevation(x,z,world)+.75,z);
+    dummy.quaternion.setFromUnitVectors(up,new THREE.Vector3(dx/len,.12,dz/len).normalize());
+    dummy.scale.setScalar(.65+(i%6)*.045);dummy.updateMatrix();
+    logs.setMatrixAt(n++,dummy.matrix);
+  }
+  logs.count=n;logs.castShadow=true;logs.receiveShadow=true;logs.name='balthrix-fallen-timber';logs.userData.keep=true;
+  group.add(logs);
+  return surface;
+}
+
 const rng = seed => () => { seed=(seed+0x6D2B79F5)|0; let t=Math.imul(seed^seed>>>15,1|seed);t=(t+Math.imul(t^t>>>7,61|t))^t;return ((t^t>>>14)>>>0)/4294967296; };
 const randRange = (rnd,a,b) => a+(b-a)*rnd();
 const pick = (rnd,arr) => arr[Math.min(arr.length-1,Math.floor(rnd()*arr.length))];
@@ -115,6 +177,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   const stats={trees:0,bushes:0,rocks:0,flowers:0,grass:0,orchard:0,fields:0};
   const usable=world-13;
   const terrain=buildWalkableTerrain(world);group.add(terrain);
+  const balthrixTrail=buildBalthrixTrail(group,world);
   // Distant low-poly mountain range outside the playable boundary: visual
   // backdrop only (no colliders or simulation). Sixteen affordable draw calls.
   const farMountains=new THREE.Group();farMountains.name='distant-mountain-silhouettes';group.add(farMountains);
@@ -179,7 +242,11 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,l),mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;harbor.add(m);
   }
   const W=68,D=64;
-  piece(2.6,6,D*2,-W,3,0);piece(W*2,6,2.6,0,3,-D);piece(W*2,6,2.6,0,3,D);
+  // West-facing harbor mouth: a pier opens onto the sea, not a solid wall.
+  // Retain the two side ramparts and the original eastern road gate.
+  piece(2.6,6,D-15,-W,3,-(D+15)/2);
+  piece(2.6,6,D-15,-W,3,(D+15)/2);
+  piece(W*2,6,2.6,0,3,-D);piece(W*2,6,2.6,0,3,D);
   piece(2.6,6,D-18,W,3,-D/2-9);piece(2.6,6,D-18,W,3,D/2+9);
   for(const x of [-W,W])for(const z of [-D,D]){
     const tower=new THREE.Mesh(new THREE.CylinderGeometry(4.5,5.3,11,10),hm);
@@ -187,44 +254,47 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const cap=new THREE.Mesh(new THREE.ConeGeometry(5.6,5.5,10),wood);cap.position.set(x,13.5,z);cap.castShadow=true;harbor.add(cap);
   }
   const archTop=new THREE.Mesh(new THREE.BoxGeometry(4,1.7,34),hm);archTop.position.set(W,8.1,0);archTop.castShadow=true;harbor.add(archTop);
-  // Volcanic harbor dressing: dark basalt walls, glowing forge vents and lava-lit beacons.
-  // All features are inside the existing harbor footprint; roads, saves and collision stay intact.
-  const basalt=new THREE.MeshLambertMaterial({color:0x302c35});
-  const ember=new THREE.MeshLambertMaterial({color:0xff6326,emissive:0xb72b09,emissiveIntensity:0.8});
-  const cooled=new THREE.MeshLambertMaterial({color:0x514049});
-  for(const wall of harbor.children){
-    if(wall.material===hm)wall.material=basalt;
-    else if(wall.material===wood)wall.material=cooled;
+  // Real corner harbor: weathered coastal stone, wooden piers, mooring posts
+  // and rope; the lava and obsidian props belong ONLY at Ashen Titan.
+  const plank=new THREE.MeshLambertMaterial({color:0x80674a});
+  const piling=new THREE.MeshLambertMaterial({color:0x564735});
+  const rope=new THREE.MeshLambertMaterial({color:0xb2a37e});
+  // Walk-out dock through the new west-facing opening. No new collision boxes:
+  // the player can enter the water from either side of the wooden pier.
+  piece(44,.35,9,-66,.6,0,plank);
+  for(const x of [-84,-72,-60,-48]){
+    for(const z of [-4.6,4.6]){
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(.58,.72,3.2,8),piling);
+      post.position.set(x,-.55,z);post.castShadow=true;harbor.add(post);
+      const cap=new THREE.Mesh(new THREE.CylinderGeometry(.72,.72,.2,8),rope);
+      cap.position.set(x,1.2,z);harbor.add(cap);
+    }
   }
-  for(const [x,z] of [[-49,-43],[-49,43],[43,-44],[43,44]]){
-    const brazier=new THREE.Group();brazier.position.set(x,0,z);
-    const base=new THREE.Mesh(new THREE.CylinderGeometry(2.1,2.8,3.2,8),basalt);
-    base.position.y=1.6;base.castShadow=true;brazier.add(base);
-    const flame=new THREE.Mesh(new THREE.ConeGeometry(1.35,3.8,7),ember);
-    flame.position.y=4.9;brazier.add(flame);
-    harbor.add(brazier);
+  for(const z of [-22,22]){
+    piece(28,.27,5,-62,.51,z,plank);
+    for(const x of [-73,-51]){
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(.5,.65,2.1,7),piling);
+      post.position.set(x,-.35,z);
+      post.castShadow=true;harbor.add(post);
+    }
   }
-  for(let i=0;i<9;i++){
-    const x=-54+i*11;
-    const slab=new THREE.Mesh(new THREE.BoxGeometry(7,.16,1.4),i%3===0?ember:cooled);
-    slab.position.set(x,.12,52);slab.receiveShadow=true;harbor.add(slab);
-  }
-  harbor.userData.region='volcanic-port';
+  harbor.userData.region='coastal-corner-harbor';
   group.add(harbor);
   // Solid harbor ramparts; a broad road-sized opening remains on the east.
   const cx=PORT_CENTER.x,cz=PORT_CENTER.z;
   for(const [x,z,w,depth] of [
-   [cx-W,cz,2.6,D*2],[cx,cz-D,W*2,2.6],[cx,cz+D,W*2,2.6],
+   [cx-W,cz-(D+15)/2,2.6,D-15],[cx-W,cz+(D+15)/2,2.6,D-15],
+   [cx,cz-D,W*2,2.6],[cx,cz+D,W*2,2.6],
    [cx+W,cz-D/2-9,2.6,D-18],[cx+W,cz+D/2+9,2.6,D-18]
   ])colliders.push({type:'box',minX:x-w/2,maxX:x+w/2,minZ:z-depth/2,maxZ:z+depth/2});
   // Water is a real animated, swimmable surface; unlike lava it doesn't damage the player.
   const waterGeo=new THREE.PlaneGeometry(93,110,24,28);
   const waterMat=new THREE.MeshPhongMaterial({color:0x237fa4,emissive:0x0a3547,transparent:true,opacity:.84,shininess:105,side:THREE.DoubleSide,depthWrite:false});
   const water=new THREE.Mesh(waterGeo,waterMat);
-  water.rotation.x=-Math.PI/2;water.position.set(PORT_CENTER.x-49,.17,PORT_CENTER.z);
+  water.rotation.x=-Math.PI/2;water.position.set(PORT_CENTER.x-39,.17,PORT_CENTER.z);
   water.receiveShadow=true;water.userData.keep=true;water.name='harbor-swim-water';group.add(water);
   const wp=waterGeo.attributes.position,original=wp.array.slice();
-  const waterAt=(x,z)=>x<PORT_CENTER.x-26 && x>PORT_CENTER.x-96 && Math.abs(z-PORT_CENTER.z)<51;
+  const waterAt=(x,z)=>x<PORT_CENTER.x+6 && x>PORT_CENTER.x-85 && Math.abs(z-PORT_CENTER.z)<51;
   function updateWater(t){
     for(let i=0;i<wp.count;i++){const ix=i*3,x=original[ix],y=original[ix+1];
       wp.array[ix+2]=.17*Math.sin(x*.19+t*1.6)+.11*Math.sin(y*.24-t*1.15);}
@@ -242,6 +312,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   const possible=(x,z,pad=0)=>Math.max(Math.abs(x),Math.abs(z))>CORE+pad &&
     Math.max(Math.abs(x),Math.abs(z))<usable-pad &&
     !route(x,z,pad) && !insideField(x,z,pad) && !nearBuilding(x,z,pad) &&
+    balthrixTrailDistance(x,z)>BALTHRIX_TRAIL_HALF_WIDTH+8+pad &&
     Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)>46+pad &&
     Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z)>76+pad &&
     Math.hypot(x-PORT_CENTER.x,z-PORT_CENTER.z)>65+pad;
@@ -309,7 +380,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const s=randRange(rnd,.85,1.5);
     put('trees',type,pal,x,z,s,true);claim(x,z,2.9*s);
     // Simple circular trunk collider, keeping long clear roads, doors and orchard paths navigable.
-    colliders.push({type:'circle',x,z,r:.42*s+.15});
+    colliders.push({type:'circle',x,z,r:.42*s+.15,cameraTop:townElevation(x,z,world)+15*s,tree:true});
     stats.trees++;if(r==='orchard')stats.orchard++;
   },2);
   sample(360,(x,z,r)=>{if(!clear(x,z,1.3))return false;
@@ -346,5 +417,5 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
       mesh.visible=d<140*Math.max(1,k);
     }
   }
-  return {group,cull,stats,terrain,poolMeshes,harborRoad,mountainRoad,cave,harbor,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields};
+  return {group,cull,stats,terrain,balthrixTrail,poolMeshes,harborRoad,mountainRoad,cave,harbor,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields};
 }

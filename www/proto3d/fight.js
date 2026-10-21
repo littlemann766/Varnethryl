@@ -12,7 +12,7 @@ import { heroKey } from './combat/herokits.js';
 import { CompanionCombat } from './combat/companions.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 import { Respawner } from './combat/respawn.js';
-import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, onLava, isCitySafe } from './bossregions.js';
+import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, nearestBalthrixRoamTime, projectBalthrixToTrail, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
 import { HOB_CAMPS } from './hobcamps.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
@@ -26,7 +26,16 @@ export function createFight(env) {
   const v3 = new THREE.Vector3(), sc = [0, 0];
   const project = (x, y, z, out) => { v3.set(x, y, z).project(camera); if (v3.z > 1 || Math.abs(v3.x) > 1.3 || Math.abs(v3.y) > 1.3) return false; out[0] = (v3.x * 0.5 + 0.5) * innerWidth; out[1] = (-v3.y * 0.5 + 0.5) * innerHeight; return true; };
   const armory = new Armory({ ownerOk: () => !!(window.__p3d && window.__p3d.owner && window.__p3d.cheats), wallet: null });   // engine-side validation of every Armory UI request
-  const cc = new CombatController({ HS, move: (e, dx, dz) => { const p = { x: e.x + dx, z: e.z + dz }; (env.resolveMob || env.resolve)(p); e.x = p.x; e.z = p.z; } });
+  const cc = new CombatController({ HS, move: (e, dx, dz) => {
+      const p = { x:e.x+dx, z:e.z+dz };
+      if(e.roaming && e.key==='vaelthryx'){
+        // Constrain chase/knockback to the trampled route as well as idle patrol.
+        // No arbitrary sideways movement across hills or through the harbor.
+        const trail=projectBalthrixToTrail(p.x,p.z);
+        e.x=trail.x;e.z=trail.z;
+        e.yaw=turnLimited(e.yaw,trail.yaw,Math.max(0,Math.hypot(dx,dz))*.13);
+      }else{(env.resolveMob || env.resolve)(p);e.x=p.x;e.z=p.z;}
+    } });
   loadLucian();
   /* owner gate: Owner skin + the passphrase/owner unlock (window.__p3d.owner + cheats object, set only by the gated owner boot). Never read from UI or demo events. */
   const ownerGate = () => !!(window.__p3d && window.__p3d.owner && window.__p3d.cheats);
@@ -245,32 +254,85 @@ export function createFight(env) {
   cc.on('enemyAttack', a => { if (a.result === 'dodged' && a.dmg === 0 && !cc.god) hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'DODGE', 'heal'); else if (a.result === 'parried') hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'PARRY', 'crit'); else if (a.result === 'blocked') hud.floatAt(cc.p.x, 2.8 * HS, cc.p.z, 'BLOCK', ''); });
 
   /* ---- enemies ---- */
-  async function spawn(key, atPlayerDist, extra) {
-    const def = ENEMIES[key], w = await env.makeModel(def.model); if (!w || !on) return null;
-    let x = state.heroX + 12, z = state.heroZ;
-    if (extra && extra.at) { x = extra.at[0]; z = extra.at[1]; } else for (let k = 0; k < 20; k++) { const a = Math.random() * 6.283, r = (atPlayerDist || (14 + Math.random() * 14)) * HS / 1.5 * Math.max(1, cc.RM * 0.7), px = state.heroX + Math.cos(a) * r, pz = state.heroZ + Math.sin(a) * r; if (env.free(px, pz)) { x = px; z = pz; break; } }
-    w.position.set(x, terrainY(x,z), z); let top;
-    if (def.boss || def.scale > 1) { top = (w.userData.heightW || 1.8 * HS * def.scale) + 0.5; }   // the GLB is already 6x the hero (11.4 m vs 1.9 m): no extra scaling in game
-    else { w.updateMatrixWorld(true); top = Math.max(1.5, new THREE.Box3().setFromObject(w).max.y) + 0.3; }
-    // Both Frost Brothers use the humanoid Frost Troll rig; B has an ice-blue
-    // material variant rather than falling back to a serpent asset.
-    if(def.trollTint)w.traverse(o=>{
-      if(!o.isMesh || !o.material)return;
-      const src=Array.isArray(o.material)?o.material:[o.material];
-      const tinted=src.map(mat=>{const copy=mat.clone();if(copy.color)copy.color.multiply(new THREE.Color(0xa2cfff));return copy;});
-      o.material=Array.isArray(o.material)?tinted:tinted[0];
+  // An encounter must not be blocked by an asynchronous GLB download or rig
+  // parse. Use a small temporary ice/ash silhouette; switch to the approved
+  // detailed model in-place when it is ready. AI, damage and drops start now.
+  function modelProxy(def) {
+    const h=Math.max(1.6,Number(worldProfile(def.model,HS).heightW)||1.8*HS*def.scale);
+    const isIce=/frost/i.test(def.model);
+    const root=new THREE.Group(), material=new THREE.MeshLambertMaterial({
+      color:isIce?0x83cbe8:def.boss?0x79728b:0x837c72,
+      emissive:isIce?0x18445a:0x1d1820,transparent:true,opacity:0.80
     });
-    scene.add(w);
-    const ems = []; w.traverse(o => { if (o.isMesh && o.material && o.material.emissive) { ems.push(o); o.userData.em = o.material.emissive.getHex(); } });
-    const tele = new THREE.Mesh(ring.geometry, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false })); tele.rotation.x = -Math.PI / 2; tele.visible = false; scene.add(tele);
-    const e = cc.addEnemy(key, x, z, Object.assign({ view: w, top:top+terrainY(x,z), heightAbove:top, ems, tele, flashOn: false, px: x, pz: z }, extra));
-    if(def.boss){bossOn=true;
+    const geo=new THREE.CapsuleGeometry(Math.min(1.6,h*.18),Math.max(.1,h*.62),4,8);
+    const mesh=new THREE.Mesh(geo,material);mesh.position.y=h*.5;
+    mesh.castShadow=true;root.add(mesh);
+    root.userData.loadingModel=true;root.userData.heightW=h;
+    return root;
+  }
+  function disposeProxy(w) {
+    if(!w?.userData?.loadingModel)return;
+    w.traverse(o=>{
+      if(o.isMesh){o.geometry?.dispose();for(const m of [].concat(o.material||[]))m.dispose();}
+    });
+  }
+  function decorateMonster(w,def) {
+    // The two approved troll GLBs are unchanged. Only the younger brother
+    // receives a fresh blue material variant; no shared model is recolored.
+    if(def.trollTint)w.traverse(o=>{
+      if(!o.isMesh||!o.material)return;
+      const list=[].concat(o.material).map(m=>{const copy=m.clone();if(copy.color)copy.color.multiply(new THREE.Color(0xa2cfff));return copy;});
+      o.material=Array.isArray(o.material)?list:list[0];
+    });
+  }
+  function spawn(key,atPlayerDist,extra) {
+    const def=ENEMIES[key];if(!def)return Promise.resolve(null);
+    let x=state.heroX+12,z=state.heroZ;
+    if(extra?.at){x=extra.at[0];z=extra.at[1];}
+    else for(let k=0;k<20;k++){
+      const a=Math.random()*6.283,r=(atPlayerDist||(14+Math.random()*14))*HS/1.5*Math.max(1,cc.RM*.7);
+      const px=state.heroX+Math.cos(a)*r,pz=state.heroZ+Math.sin(a)*r;
+      if(env.free(px,pz)){x=px;z=pz;break;}
+    }
+    const proxy=modelProxy(def),zoneAtSpawn=env.zone?.();
+    proxy.position.set(x,terrainY(x,z),z);scene.add(proxy);
+    const tele=new THREE.Mesh(ring.geometry,new THREE.MeshBasicMaterial({
+      color:0xff2a2a,transparent:true,opacity:0.45,
+      side:THREE.DoubleSide,depthWrite:false
+    }));
+    tele.rotation.x=-Math.PI/2;tele.visible=false;scene.add(tele);
+    const top=proxy.userData.heightW+.5;
+    const e=cc.addEnemy(key,x,z,Object.assign({
+      view:proxy,top:top+terrainY(x,z),heightAbove:top,
+      ems:[],tele,flashOn:false,px:x,pz:z
+    },extra));
+    if(def.boss){
+      bossOn=true;
       if(Math.hypot(x-state.heroX,z-state.heroZ)<65){
         hud.say(def.name.toUpperCase()+' APPEARS',2200);
         cc.tgt.target=e;cc.tgt.locked=false;cc.lastTarget=e;
       }
     }
-    return e;
+    // No save/index change, double-spawn or delayed resurrection. Replacing
+    // the visual has no effect on current health, AI target or combat state.
+    Promise.resolve().then(()=>env.makeModel(def.model)).then(w=>{
+      if(!w){console.warn('Monster model unavailable; keeping temporary visual',key,def.model);return;}
+      if(!on || !cc.enemies.includes(e) || (env.zone?.()!==zoneAtSpawn))return;
+      decorateMonster(w,def);
+      w.position.set(e.x,terrainY(e.x,e.z),e.z);
+      w.rotation.y=Number.isFinite(e.yaw)?e.yaw:0;
+      let top=0;
+      if(def.boss||def.scale>1)top=(w.userData.heightW||1.8*HS*def.scale)+.5;
+      else{w.updateMatrixWorld(true);top=Math.max(1.5,new THREE.Box3().setFromObject(w).max.y)+.3;}
+      const ems=[];
+      w.traverse(o=>{if(o.isMesh&&o.material&&!Array.isArray(o.material)&&o.material.emissive){
+        ems.push(o);o.userData.em=o.material.emissive.getHex();
+      }});
+      scene.add(w);scene.remove(proxy);disposeProxy(proxy);
+      e.view=w;e.ems=ems;e.heightAbove=top;e.top=terrainY(e.x,e.z)+top;
+      if(e.state==='defeated')w.rotation.x=-.9;
+    }).catch(err=>console.warn('Monster model load failed; keeping temporary visual',key,err));
+    return Promise.resolve(e);
   }
   const spawnBoss = () => { if (on && !bossOn) spawn('titan', 26); };
   /* boss telegraph shapes: ONE pooled mesh per boss (plane for line, sector for cone), created lazily. */
@@ -279,9 +341,14 @@ export function createFight(env) {
       const g = shape === 'line' ? (GL_LINE || (GL_LINE = new THREE.PlaneGeometry(1, 1).translate(0, 0, 0))) : (GL_CONE || (GL_CONE = new THREE.CircleGeometry(1, 20, Math.PI / 2 - Math.acos(pt.cos), 2 * Math.acos(pt.cos))));
       e.tele2 = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.4, side: THREE.DoubleSide, depthWrite: false })); e.tele2s = shape; scene.add(e.tele2); }
     e.tele2.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); return e.tele2; }
-  cc.on('remove', e => { if (e.view) { scene.remove(e.view); scene.remove(e.tele); e.tele.material.dispose(); if (e.tele2) { scene.remove(e.tele2); e.tele2.material.dispose(); } } });
+  cc.on('remove', e => { if (e.view) { scene.remove(e.view); disposeProxy(e.view); scene.remove(e.tele); e.tele.material.dispose(); if (e.tele2) { scene.remove(e.tele2); e.tele2.material.dispose(); } } });
   cc.on('bossPhase', ev => { hud.say('THE TITAN ENRAGES', 1800); shakeA = 1.2; shakeT = 0.6; });
   const yawLerp = (cur, to, k) => cur + (((to - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * k;
+  const turnLimited=(from,to,maxStep)=>{
+    const angle=Number.isFinite(from)?from:to;
+    const delta=Math.atan2(Math.sin(to-angle),Math.cos(to-angle));
+    return angle+Math.max(-maxStep,Math.min(maxStep,delta));
+  };
 
   /* ---- per frame ---- */
   // Region boss spawning happens near the player. Do not keep enormous GLBs active across the entire map.
@@ -293,16 +360,7 @@ export function createFight(env) {
   }
   // Locate the player's nearest point along Balthrix's continuous world circuit.
   // Spawn close enough to be encountered rather than waiting for a distant global timer.
-  function nearestRoamTime(x,z){
-    const p=BALTHRIX_ROUTE;let best=Infinity,elapsed=0,closest=0;
-    for(let i=0;i<p.length;i++){
-      const a=p[i],b=p[(i+1)%p.length],dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);
-      const u=Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(len*len||1)));
-      const d=Math.hypot(x-a[0]-dx*u,z-a[1]-dz*u);
-      if(d<best){best=d;closest=(elapsed+len*u)/14;}elapsed+=len;
-    }
-    return{distance:best,time:closest};
-  }
+  const nearestRoamTime = (x,z)=>nearestBalthrixRoamTime(x,z);
   let roamBusy=false;
   function startRegionBosses(zone){
     if(zone==='frost')for(const brother of FROST_BROTHERS)spawnRegion(brother.key,brother.x,brother.z,{aggroR:80});
@@ -334,23 +392,22 @@ export function createFight(env) {
           Promise.resolve(spawnRegion('vaelthryx',where.x,where.z,{aggroR:48,roaming:true,routePhase:phase}))
             .finally(()=>{roamBusy=false;});
         }
-        if(roamer&&roamer.roaming){
-          // Combat temporarily interrupts his patrol; afterward he rejoins
-          // the route gradually. Never teleport him while the player can see him.
-          const dHero=Math.hypot(roamer.x-state.heroX,roamer.z-state.heroZ);
-          if(dHero>52&&roamer.state==='idle'){
-            const p=balthrixPosition(regionClock+(roamer.routePhase||0));
-            const dx=p.x-roamer.x,dz=p.z-roamer.z,dist=Math.hypot(dx,dz);
-            if(dist>.01){
-              // When combat has displaced Balthrix far from the route, approach
-              // at patrol speed instead of teleporting. Orient to actual motion.
-              const move=Math.min(dist,14*Math.max(0,step));
-              roamer.x+=dx/dist*move;roamer.z+=dz/dist*move;
-              // Avoid a NaN heading from missing imported boss rotation.
-              const heading=Math.atan2(dx,dz);
-              roamer.yaw=yawLerp(Number.isFinite(roamer.yaw)?roamer.yaw:heading,heading,Math.min(1,Math.max(0,step)*3.5));
-            }
+
+      }
+      // Advance on each frame, not only the 220ms boss-spawn poll. Heading
+      // follows the route tangent rather than staring at the player.
+      const roamingBoss=cc.enemies.find(e=>e.key==='vaelthryx'&&e.roaming&&e.state!=='defeated');
+      if(roamingBoss){
+        if(roamingBoss.state!=='idle')roamingBoss.rejoinRoute=true;
+        else{
+          if(roamingBoss.rejoinRoute){
+            const near=projectBalthrixToTrail(roamingBoss.x,roamingBoss.z);
+            roamingBoss.routePhase=near.time-regionClock;
+            roamingBoss.rejoinRoute=false;
           }
+          const point=balthrixPosition(regionClock+(roamingBoss.routePhase||0));
+          roamingBoss.x=point.x;roamingBoss.z=point.z;
+          roamingBoss.yaw=turnLimited(roamingBoss.yaw,point.yaw,1.05*Math.max(0,dt));
         }
       }
     }
@@ -475,12 +532,27 @@ export function createFight(env) {
       if (e.state !== e.ls) { if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
       let lean = 0; if (e.state === 'telegraph') lean = -0.35 * Math.min(1, e.tStateT / e.def.tele); else if (e.state === 'attack') lean = 0.45; else if (e.state === 'stagger') lean = -0.5; else if (e.flinch > 0) lean = -0.25 * (e.flinch / 0.18);
-      r.rotation.x += (lean - r.rotation.x) * Math.min(1, dt * 14);
+      // A long creature needs to tip into rises/descents, not float level
+      // through the slope. Sample terrain ahead, behind and across his body.
+      // The rig's own slither clip remains in charge of spine articulation.
+      if(e.key==='vaelthryx'&&e.roaming){
+        const fx=Math.sin(r.rotation.y),fz=Math.cos(r.rotation.y),span=11;
+        const high=terrainY(e.x+fx*span,e.z+fz*span);
+        const low=terrainY(e.x-fx*span,e.z-fz*span);
+        const pitch=-Math.atan2(high-low,2*span);
+        lean+=Math.max(-.34,Math.min(.34,pitch));
+        const sideways=6;
+        const lh=terrainY(e.x-fz*sideways,e.z+fx*sideways);
+        const rh=terrainY(e.x+fz*sideways,e.z-fx*sideways);
+        const bank=Math.max(-.14,Math.min(.14,Math.atan2(lh-rh,2*sideways)));
+        r.rotation.z+=(bank-r.rotation.z)*Math.min(1,Math.max(0,dt)*3);
+      }
+      r.rotation.x += (lean - r.rotation.x) * Math.min(1, dt * (e.roaming?3:14));
       if (e.state === 'telegraph') { const pt = (e.def.boss || e.def.patterns) ? e.pat : null, f = Math.min(1, e.tStateT / (e.curTele || e.def.tele)), reach = ((pt ? pt.reach : e.def.reach) * HS + e.def.r) * 1.1;
         const shape = pt ? pt.shape : 'ring'; e.tele.visible = shape === 'ring'; if (shape === 'ring') { e.tele.position.set(e.x, terrainY(e.x,e.z)+0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; e.tele.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); }
         if (shape !== 'ring') { const t2 = bossTele(e, shape, pt); t2.visible = true; const L = pt.reach * HS + e.def.r; t2.position.set(e.x, terrainY(e.x,e.z)+0.13, e.z); t2.rotation.set(-Math.PI / 2, 0, e.yaw + Math.PI); t2.material.opacity = 0.18 + 0.45 * f; if (shape === 'line') { t2.scale.set(pt.width * HS, L * (0.35 + 0.65 * f), 1); t2.position.set(e.x + Math.sin(e.yaw) * t2.scale.y / 2, terrainY(e.x + Math.sin(e.yaw) * t2.scale.y / 2,e.z + Math.cos(e.yaw) * t2.scale.y / 2)+0.13, e.z + Math.cos(e.yaw) * t2.scale.y / 2); } else t2.scale.setScalar(L * (0.35 + 0.65 * f)); } else if (e.tele2) e.tele2.visible = false;
       } else { e.tele.visible = false; if (e.tele2) e.tele2.visible = false; }
-      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.roaming && mv > .5 ? mv : 0); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
+      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.roaming && mv > .5 ? mv : 0); u.mixer.update(dt); if (u.serpentWave) u.serpentWave(dt, mv); if (u.sb) u.sb.update(dt); }
       const f = e.flash > 0 || e.state === 'telegraph'; if (f !== e.flashOn) { e.flashOn = f; const hx = e.flash > 0 ? 0xff2020 : 0xaa5500; for (const o of e.ems) o.material.emissive.setHex(f ? hx : o.userData.em); }
     }
     if (shakeT > 0) shakeT = Math.max(0, shakeT - dt); metUpdate(dt);

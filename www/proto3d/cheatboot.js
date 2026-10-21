@@ -18,7 +18,13 @@ export function initCheatBoot(env) {
     if (typing) return;
     if (e.key === '`' || (e.ctrlKey && e.shiftKey && (e.key === 'G' || e.key === 'g'))) { e.preventDefault(); open(); }
   });
-  const ver = document.getElementById('ver');
-  if (ver) { const tap = createTapCounter(); ver.addEventListener('pointerup', (e) => { if (tap(e.timeStamp || performance.now())) open(); }); }
+  // One consistent hidden gesture: five quick taps on the visible version,
+  // whether the player is at the title screen or inside the game HUD.
+  for (const id of ['ver', 'vnVersion', 'vnTitleVersion']) {
+    const ver = document.getElementById(id);
+    if (!ver) continue;
+    const tap = createTapCounter();
+    ver.addEventListener('pointerup', e => { if (tap(e.timeStamp || performance.now())) open(); });
+  }
   return { open };
 }

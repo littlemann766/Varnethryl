@@ -112,12 +112,10 @@ body:has(#settingsPanel[style*="block"]) #vnQuickMenu{display:none!important}
 #stick{background:radial-gradient(circle,#25142d8c 30%,#553070aa 68%,#20142a9e);border:3px ridge #c9a264;box-shadow:inset 0 0 0 5px #6f2dad39,0 0 11px #793bce55}
 #knob{background:radial-gradient(circle at 35% 30%,#bd86f1,#4c2a67 63%,#271a34);border:2px ridge #d8ae6f;box-shadow:0 0 11px #ae58e888}
 
-/* Unclutter screen: diagnostics move under top-right Settings. Show the
-   status tool automatically only when the loader reports a genuine error. */
-#diagBtn{display:none!important;z-index:3002!important}
+/* Diagnostics are an explicit menu/Settings tool. Never expose a touch target
+   over the joystick just because a runtime warning occurred during noclip. */
+#diagBtn,body.vn-diagnostic-error #diagBtn{display:none!important;pointer-events:none!important}
 #diag{z-index:3003!important}
-body.vn-diagnostic-error #diagBtn{display:block!important}
-body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
 
 /* Two separate character-roster tabs; approved bosses never mix into ordinary roster. */
 #heroes #hlist{min-width:min(310px,86vw)}
@@ -168,3 +166,38 @@ body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
 #vnSkinBubble .vn-skin-options{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 #vnSkinBubble button{padding:9px 12px;min-height:40px;background:#192a40;color:#f3dbad;border:1px solid #b89055;border-radius:7px;font:inherit}
 #vnSkinBubble small{display:block;color:#cbbd9d;font-size:11px}
+
+/* Restore the approved live 3D title: the existing rendered kingdom, heroes and
+   ambient characters remain visible. Only the MENU overlay changes; no world
+   models, save state, animation rigs or gameplay screens are replaced. */
+#vnMenu{
+  background:linear-gradient(90deg,rgba(5,9,19,.80) 0%,rgba(8,12,25,.42) 42%,rgba(4,8,18,.07) 85%,transparent 100%);
+  place-items:center start;
+}
+#vnMenu .vn-card{
+  width:min(430px,43vw);
+  max-height:calc(100dvh - 32px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+/* A phone in portrait gets a smaller title panel at the bottom, leaving most
+   of the upper screen for the actual animated 3D world. */
+@media (orientation:portrait){
+  #vnMenu{
+    place-items:end center;
+    background:linear-gradient(0deg,rgba(5,9,19,.90) 0%,rgba(8,12,25,.50) 42%,rgba(4,8,18,.07) 90%,transparent 100%);
+  }
+  #vnMenu .vn-card{width:min(450px,100%);max-height:min(60dvh,560px);padding:clamp(12px,3.5vw,26px)}
+  #vnMenu .vn-emblem{width:clamp(54px,11vw,84px);height:clamp(54px,11vw,84px)}
+  #vnMenu h1{font-size:clamp(24px,6.8vw,36px)}
+  #vnMenu .vn-legend{margin:4px 0 8px}
+  #vnMenu .vn-rule{margin:8px auto}
+  #vnMenu .vn-actions{gap:6px}
+}
+@media (orientation:landscape) and (max-height:540px){
+  #vnMenu .vn-card{width:min(400px,46vw);max-height:calc(100dvh - 24px)}
+}
+/* Small, accessible version label on the live 3D title. Five taps invoke
+   ownergate; no owner controls are directly exposed here. */
+#vnTitleVersion.vn-title-version{display:flex;align-items:center;justify-content:center;min-height:44px;min-width:76px;width:max-content;margin:6px auto 0;padding:4px 12px;font:600 12px VarnCinzel,Georgia,serif;color:#d7bf87;opacity:.85;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}

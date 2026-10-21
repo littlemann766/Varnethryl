@@ -1,0 +1,113 @@
+name: Build Varnethryl QA APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/restore-live-title-world-20261020]
+    paths:
+      - '.github/workflows/build-android-qa.yml'
+      - 'www/**'
+      - 'android-res/**'
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'tools/configure_android_signing.py'
+      - 'tools/apply_android_icons.py'
+concurrency:
+  group: varnethryl-qa-android-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      VARNETHRYL_KEYSTORE_B64: ${{ secrets.VARNETHRYL_KEYSTORE_B64 }}
+      VARNETHRYL_KEYSTORE_PASSWORD: ${{ secrets.VARNETHRYL_KEYSTORE_PASSWORD }}
+      VARNETHRYL_KEY_ALIAS: ${{ secrets.VARNETHRYL_KEY_ALIAS }}
+      VARNETHRYL_KEY_PASSWORD: ${{ secrets.VARNETHRYL_KEY_PASSWORD }}
+      RUN_NUMBER: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Check game assets
+        run: python3 tools/check_assets.py
+      - name: Check JavaScript syntax
+        run: |
+          find www -type f -name "*.js" -not -path "*/vendor/*" -print0 | xargs -0 -n1 node --check
+      - name: Add Android project
+        run: npx cap add android
+      - name: Copy web assets
+        run: npx cap sync android
+      - name: Apply Varnethryl launcher icon and splash
+        run: python3 tools/apply_android_icons.py
+      - name: Set Android version for safe updates
+        run: |
+          VNAME=$(node -p "require('./package.json').version")
+          VCODE=$(node -p "const [major,minor,patch]=require('./package.json').version.split('.').map(Number);major*100000+minor*1000+patch*10")
+          python3 - "$VNAME" "$VCODE" <<'PY'
+          import pathlib, re, sys
+          p=pathlib.Path('android/app/build.gradle')
+          text=p.read_text()
+          text,n1=re.subn(r'versionCode\s+\d+', 'versionCode '+sys.argv[2],text,count=1)
+          text,n2=re.subn(r'versionName\s+"[^"]*"', 'versionName "'+sys.argv[1]+'"',text,count=1)
+          assert n1==1 and n2==1,'Cannot stamp Android version'
+          p.write_text(text)
+          PY
+          echo "VARN_VERSION_NAME=$VNAME" >> "$GITHUB_ENV"
+          echo "VARN_VERSION_CODE=$VCODE" >> "$GITHUB_ENV"
+      - name: Check existing signing configuration
+        run: |
+          if [ -n "$VARNETHRYL_KEYSTORE_B64" ] && [ -n "$VARNETHRYL_KEYSTORE_PASSWORD" ] && [ -n "$VARNETHRYL_KEY_ALIAS" ] && [ -n "$VARNETHRYL_KEY_PASSWORD" ]; then
+            echo "VARN_SIGNED=true" >> "$GITHUB_ENV"
+            echo "Existing release signing is available."
+          else
+            echo "VARN_SIGNED=false" >> "$GITHUB_ENV"
+            echo "::warning::No complete signing secrets; debug APK uses Android debug key and cannot update release-signed installs."
+          fi
+      - name: Configure signed debug and release (when secrets exist)
+        if: env.VARN_SIGNED == 'true'
+        run: |
+          printf '%s' "$VARNETHRYL_KEYSTORE_B64" | base64 -d > android/app/varnethryl-release.jks
+          test -s android/app/varnethryl-release.jks
+          python3 tools/configure_android_signing.py "$VARN_VERSION_NAME" "$VARN_VERSION_CODE"
+      - name: Build test APK
+        run: |
+          chmod +x android/gradlew
+          cd android
+          for attempt in 1 2 3; do
+            if ./gradlew assembleDebug --no-daemon --stacktrace; then exit 0; fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep 20
+          done
+      - name: Upload Varnethryl test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Varnethryl-1.2.9-test-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Build signed release APK
+        if: env.VARN_SIGNED == 'true'
+        run: |
+          cd android
+          for attempt in 1 2 3; do
+            if ./gradlew assembleRelease --no-daemon --stacktrace; then exit 0; fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep 20
+          done
+      - name: Upload release APK
+        if: env.VARN_SIGNED == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Varnethryl-1.2.9-release-APK
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 14

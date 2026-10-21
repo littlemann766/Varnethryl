@@ -16,7 +16,8 @@ with sync_playwright() as p:
     browser=p.chromium.launch(args=['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
     page=browser.new_context(viewport={'width':412,'height':915},has_touch=True,is_mobile=True,service_workers='block').new_page()
     errors=[]
-    page.on('pageerror',lambda e: errors.append(str(e)))
+    page.on('pageerror',lambda e: (errors.append(str(e)),print('PAGEERROR',str(e),flush=True)))
+    page.on('console',lambda m: print('BROWSER',m.type,m.text[:500],flush=True) if m.type in ('error','warning') else None)
     page.goto(f'http://127.0.0.1:{port}/proto3d.html?nosave=1&party=0&npcs=0',wait_until='commit',timeout=120000)
     page.wait_for_function('window.__p3d&&__p3d.frames>8',timeout=120000)
     info=page.evaluate("""()=>{const a=__p3d,W=a.ZONE,L=a.townLands;
@@ -56,7 +57,15 @@ with sync_playwright() as p:
     check('frost portal teleports to separate icy map',ice['zone']=='frost' and ice['triangles']>20000,ice)
     check('frost terrain is actual walkable ground',abs(ice['ground']-ice['y'])<.15,ice)
     # Boss models load asynchronously, but their encounters must become active without input.
-    page.wait_for_function("window.__p3d?.fight?.monsters?.some(e=>e.key==='frosttroll_a')&&__p3d.fight.monsters.some(e=>e.key==='frosttroll_b')",timeout=90000)
+    page.wait_for_timeout(4500)
+    print('frost combat init',page.evaluate("""()=>({
+      zone:__p3d.zone,
+      fightPresent:!!__p3d.fight,fightOn:__p3d.fight?.on??null,
+      auto:__p3d.fight?.auto??null,
+      bosses:__p3d.fight?.monsters?.map(e=>({key:e.key,state:e.state}))||[],
+      frames:__p3d.frames
+    })"""),'pageErrors',errors[:8],flush=True)
+    page.wait_for_function("window.__p3d?.fight?.monsters?.some(e=>e.key==='frosttroll_a')&&__p3d.fight.monsters.some(e=>e.key==='frosttroll_b')",timeout=25000)
     check('both Frost Troll brothers spawn together',page.evaluate("['frosttroll_a','frosttroll_b'].every(k=>__p3d.fight.monsters.some(e=>e.key===k))"))
     page.evaluate("__p3d.teleport(2243,177)")
     page.wait_for_function("__p3d.zone==='town'",timeout=90000)

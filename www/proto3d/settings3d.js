@@ -1,8 +1,10 @@
 /* In-game Settings menu (DOM only: zero draw calls, lazy-loaded by settingsboot.js on first open).
- * Sections: Camera, Graphics, Display, and (owner only, rebuilt each time it opens) the owner cheat toggles + god mode.
+ * Sections: Camera, Combat, Animation Lab, Graphics, Display. All owner-only
+ * movement, damage and cheat controls reside behind the separate owner gate.
  * No sound section: the 3D game has no audio yet. */
 import { ZOOM_MIN, ZOOM_MAX, SENS_MIN, SENS_MAX, DEFAULT_PREFS, QUALITIES } from './camprefs.js';
 import { applyPrefs, persist } from './settingsboot.js';
+import { createTapCounter } from './cheatboot.js';
 
 const CSS = '#settingsPanel{position:fixed;z-index:70;top:calc(max(8px,env(safe-area-inset-top)) + 44px);right:8px;width:min(360px,calc(100vw - 16px));max-height:calc(100vh - 64px);max-height:calc(100dvh - 64px);overflow:auto;box-sizing:border-box;padding:10px 12px;background:#12182af5;color:#fff;border:1px solid #7fb2e6;border-radius:14px;font:13px system-ui,sans-serif;box-shadow:0 8px 30px #000a;display:none;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-overflow-scrolling:touch}'
  + '#settingsPanel h3{margin:0 0 4px;font-size:15px;display:flex;justify-content:space-between;align-items:center}'
@@ -28,9 +30,10 @@ const CSS2 = '#settingsPanel{background:linear-gradient(180deg,#171127f2,#0d0b17
  + '#settingsPanel input[type=range]{accent-color:#c9a24a!important;min-height:48px!important}'
  + '#settingsPanel .stp{min-width:48px!important;font-size:20px;font-weight:700}';
 const CSS3 = '#settingsPanel .card.vn-collapsible{padding:4px 6px;margin:5px 0}#settingsPanel .vn-setting-body{display:none;padding:8px 7px 11px}#settingsPanel .vn-card-open>.vn-setting-body{display:block}#settingsPanel .vn-settings-toggle{display:block!important;width:100%;min-height:42px!important;text-align:left!important;padding:8px 12px!important;background:linear-gradient(#253851,#111b2c)!important;border:1px solid #8d7041!important;color:#f5ddab!important;font:700 13px VarnCinzel,Georgia,serif!important}#settingsPanel .vn-settings-toggle:focus-visible{outline:2px solid #ffdd92}';
-const DESCS = { 'Game & version': 'Version information, characters and diagnostics.', 'Camera': 'How the view follows your hero.', 'Combat': 'Fight mode, hotkeys and on-screen buttons.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Display': 'On-screen info.', 'Owner (save is marked cheated)': 'Owner-account tools and power settings.', 'Owner damage': 'Saber and Unholy Destruction damage. Owner account only.' };
-const TITLES = { 'Game & version':'Game', 'Camera':'Camera & movement', 'Combat':'Combat controls', 'Loadout':'Equipment & skills', 'Graphics':'Graphics & performance', 'Display':'On-screen display', 'Owner (save is marked cheated)':'Owner tools', 'Owner damage':'Owner damage' };
+const DESCS = { 'Game & version': 'Version information, characters and diagnostics.', 'Camera': 'How the view follows your hero.', 'Combat': 'Combat activates automatically in enemy areas. Customize the on-screen controls here.', 'Loadout': 'Signature weapon, armor set and skills of your current hero.', 'Graphics': 'Quality and shadows. Lower is faster.', 'Animation Lab': 'Preview Beth rigs and Meshy bodies while moving in game. Temporary: does not change saves.', 'Display': 'On-screen info.' };
+const TITLES = { 'Game & version':'Game', 'Camera':'Camera & movement', 'Combat':'Combat controls', 'Loadout':'Equipment & skills', 'Graphics':'Graphics & performance', 'Animation Lab':'Animation Lab (test)', 'Display':'On-screen display' };
 let selectedSection = 'Camera';
+let animationLabNotes = ''; // local, temporary tester feedback; never written into game saves
 let root = null, body = null, timer = 0, E = null;
 function el(tag, props, kids) { const e = document.createElement(tag); if (props) Object.assign(e, props); if (kids) for (const k of kids) e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); return e; }
 const isOpen = () => !!root && root.style.display === 'block';
@@ -49,7 +52,7 @@ function slider(key, min, max, step, get, set, fmt) {
 }
 
 function build() {
-  const { rig, prefs } = E, c = () => (window.__p3d && window.__p3d.cheats) || null, owner = () => !!(window.__p3d && window.__p3d.owner && c());
+  const { rig, prefs } = E;
   body.textContent = '';
   body.appendChild(el('div', { className: 'vn-settings-intro', textContent: 'Choose a category below. Changes save automatically.' }));
   const sec = (t) => el('div', { className: 'sec', textContent: t }), row = (...k) => el('div', { className: 'row' }, k);
@@ -57,18 +60,19 @@ function build() {
   const save = () => { persist(E); };
   const view = (v, label) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.set = 'view-' + v; const s = () => b.classList.toggle('on', prefs.view === v); b.addEventListener('click', () => { rig.setView(v); save(); syncs.forEach((f) => f()); }); s(); syncs.push(s); return b; };
   body.appendChild(sec('Game & version'));
-  const version = el('button', { type: 'button', textContent: 'Varnethryl 3D · v1.2.3' });
+  const version = el('button', { type: 'button', textContent: 'Varnethryl 3D · v1.2.9' });
   version.dataset.set = 'version-cheats';
-  version.setAttribute('aria-label', 'Version — open owner cheats');
+  version.setAttribute('aria-label', 'Version');
   version.style.cssText = 'color:#f1d28a;font-weight:700;cursor:pointer;touch-action:manipulation';
-  version.addEventListener('click', () => { hide(); E.openCheatPanel?.(); });
+  const versionTaps = createTapCounter();
+  version.addEventListener('pointerup', e => { if (versionTaps(e.timeStamp || performance.now())) { hide(); E.openCheatPanel?.(); } });
   body.appendChild(row(version));
   body.appendChild(el('small',{textContent:'The entire game now runs in 3D. No Classic 2D switching.'}));
   const lineBtn=el('button',{type:'button',textContent:'Choose a character'});
   lineBtn.addEventListener('click',()=>{hide();document.querySelector('#heroes button.cur')?.click();});
   const galBtn=el('button',{type:'button',textContent:'View 3D lineup'});
   galBtn.addEventListener('click',()=>location.assign('proto3d/model-viewer.html'));
-  const modelBtn=el('button',{type:'button',textContent:'Switch model style'});
+  const modelBtn=el('button',{type:'button',textContent:'Switch 3D / Classic character models'});
   modelBtn.addEventListener('click',()=>document.getElementById('mdlBtn')?.click());
   const statusBtn=el('button',{type:'button',textContent:'3D model diagnostics'});
   statusBtn.addEventListener('click',()=>{hide();document.getElementById('diagBtn')?.click();});
@@ -86,28 +90,101 @@ function build() {
   body.appendChild(el('small', { textContent: 'Zoom: mouse wheel, pinch, or + / −.  View: V.  The camera never goes through walls.' }));
 
   body.appendChild(sec('Combat'));
-  const cb = el('button', { type: 'button', textContent: 'Enable combat testing' }); cb.dataset.set = 'combat';
-  const csync = () => cb.classList.toggle('on', !!(E.combatOn && E.combatOn())); csync(); syncs.push(csync);
-  cb.addEventListener('click', async () => { await E.setCombat(!(E.combatOn && E.combatOn())); csync(); });
-  body.appendChild(row(cb)); body.appendChild(el('small', { textContent: 'F attack · G dodge · T lock-on · Tab next target · 1-6 abilities (owner). On phone use the buttons by the stick.' }));
+  body.appendChild(el('small', { textContent: 'Combat is automatic in enemy areas. Use the basic attack, skills and ultimate buttons when enemies appear. Town center stays protected.' }));
   const hudEd = () => (window.__p3d && window.__p3d.combat && window.__p3d.combat.hud && window.__p3d.combat.hud.editor) || null;
   const eb = el('button', { type: 'button', textContent: 'Move or resize buttons' }); eb.dataset.set = 'editbtns';
   const rb = el('button', { type: 'button', textContent: 'Restore button layout' }); rb.dataset.set = 'resetbtns';
   const esync = () => { const e = hudEd(); eb.classList.toggle('on', !!(e && e.editing)); }; syncs.push(esync);
-  eb.addEventListener('click', async () => { if (!(E.combatOn && E.combatOn())) await E.setCombat(true); const e = hudEd(); if (!e) return; e.enable(!e.editing); esync(); if (e.editing) hide(); });
+  eb.addEventListener('click', () => { const e=hudEd(); if (!e || !(E.combatOn && E.combatOn())) { body.querySelector('#combatEditHint').textContent='Enter an enemy area first; the combat HUD activates automatically there.'; return; } e.enable(!e.editing); esync(); if(e.editing)hide(); });
   rb.addEventListener('click', () => { const e = hudEd(); if (e) { e.reset(); esync(); } });
   body.appendChild(row(eb, rb));
+  body.appendChild(el('small',{id:'combatEditHint',textContent:'Customize this layout when the combat HUD is active outdoors.'}));
   body.appendChild(el('small', { textContent: 'Edit buttons: the menu closes; drag a button to move it, pinch it (two fingers) or use the size slider. Saved on this device. Tap Done when finished.' }));
   body.appendChild(sec('Loadout'));
   const ld = el('div', { className: 'ld', style: 'font-size:13px;line-height:1.5' }); body.appendChild(ld);
-  const ldSync = () => { const F = window.__p3d && window.__p3d.fight, kit = F && F.cc && F.cc.kit; if (!kit || !kit.weapon) { ld.textContent = F && F.on ? 'This hero uses the generic kit.' : 'Start Fight mode to see the active hero\u2019s weapon, armor and skills.'; return; }
+  const ldSync = () => { const F = window.__p3d && window.__p3d.fight, kit = F && F.cc && F.cc.kit; if (!kit || !kit.weapon) { ld.textContent = F && F.on ? 'This hero uses the generic kit.' : 'Your equipment and combat abilities appear when you enter an enemy area.'; return; }
     const w = kit.weapon, a = kit.armor, pc = (v) => '+' + Math.round(v * 100) + '%', st = [a.hpPct && 'HP ' + pc(a.hpPct), a.mpPct && 'MP ' + pc(a.mpPct), a.spPct && 'SP ' + pc(a.spPct), a.defPct && 'DEF ' + pc(a.defPct)].filter(Boolean).join(' \u00b7 ');
     ld.innerHTML = ''; for (const [h, t] of [['Weapon', w.name + ' (damage ' + pc(w.dmgPct) + ')'], ['Armor', a.name + ' \u2014 ' + st], ['Skills', kit.skills.map((x) => x.name).join(' \u00b7 ')]]) ld.appendChild(el('div', null, [el('b', { textContent: h + ': ', style: 'color:#f1d98a' }), t])); };
   const ab = el('button', { type: 'button', className: 'ctl', id: 'openArmory', textContent: 'Open Armory (12 slots, inventory, compare, presets)' }); ab.style.cssText = 'width:100%;min-height:48px;margin-top:8px;border:1px solid #c9a24d;background:linear-gradient(180deg,#3a2a5c,#1d1533);color:#f3d9a0;border-radius:12px;font-weight:700';
-  ab.addEventListener('click', async () => { const F = window.__p3d && window.__p3d.fight; if (!F || !F.armory) { ld.textContent = 'Start Fight mode first to open the Armory.'; return; } const m = await import('./armoryui.js'); m.openArmory(F.armory); });
+  ab.addEventListener('click', async () => { const F = window.__p3d && window.__p3d.fight; if (!F || !F.armory) { ld.textContent = 'Visit an enemy area first; the combat system initializes automatically.'; return; } const m = await import('./armoryui.js'); m.openArmory(F.armory); });
   body.appendChild(ab);
   ldSync(); syncs.push(ldSync);
+  body.appendChild(sec('Animation Lab'));
+  const lab=E.animationLab;
+  if(lab) {
+    const labHelp=el('small',{textContent:'Experimental movement tests on the REAL map. Your hero stats, original models and saved selection remain unchanged. Not all Meshy files can be rebound automatically.'});
+    body.appendChild(labHelp);
+    const people=el('select',{id:'labHero'});
+    people.dataset.set='lab-hero';
+    for(const p of lab.candidates()) people.appendChild(el('option',{value:p.id,textContent:p.name}));
+    const styles=el('select',{id:'labStyle'});
+    styles.dataset.set='lab-style';
+    for (const [value,label] of [
+      ['bridge','Experimental: Beth skeleton + Meshy surface'],
+      ['detailed','Detailed Meshy / original GLB rig'],
+      ['classic','Original Beth blocky rig']]) {
+      styles.appendChild(el('option',{value,textContent:label}));
+    }
+    const source=el('select',{id:'labSource'});
+    source.dataset.set='lab-source';
+    for(const [value,label] of [['original','Original detailed mesh'],['new','Newer detailed mesh (when available)']])
+      source.appendChild(el('option',{value,textContent:label}));
+    body.appendChild(row(el('span',{className:'lab',textContent:'Character'}),people));
+    body.appendChild(row(el('span',{className:'lab',textContent:'Rig test'}),styles));
+    body.appendChild(row(el('span',{className:'lab',textContent:'Mesh source'}),source));
+    const labMessage=el('small',{textContent:lab.status().active
+      ? 'Running: '+lab.status().character+' · '+lab.status().style+' (temporary)'
+      : 'No rig experiment active.'});
+    const tryBtn=el('button',{type:'button',id:'animationLabStart',textContent:'Test character in-game'});
+    tryBtn.dataset.set='lab-start';
+    const restore=el('button',{type:'button',id:'animationLabStop',textContent:'Restore original'});
+    restore.dataset.set='lab-stop';
+    const working=(busy)=>{tryBtn.disabled=busy;restore.disabled=busy;};
+    tryBtn.addEventListener('click',async()=>{
+      working(true);
+      labMessage.textContent='Preparing character preview…';
+      try{
+        const response=await lab.start(people.value,styles.value,source.value);
+        labMessage.textContent=response.message;
+        if(response.ok)hide(); // Walk, run and fight with standard in-game controls.
+      }finally{working(false);}
+    });
+    restore.addEventListener('click',()=>{
+      const r=lab.stop(); labMessage.textContent=r.message;
+    });
+    body.appendChild(row(tryBtn,restore));body.appendChild(labMessage);
+    const issues=el('textarea',{id:'animationLabNotes',rows:3,value:animationLabNotes,
+      placeholder:'Examples: knees snap; feet slide when running; cape clips; attack pose twists'});
+    issues.dataset.set='lab-notes';issues.style.cssText='width:100%;box-sizing:border-box;background:#12182a;color:#fff;border:1px solid #c9a24a;border-radius:8px;padding:8px;font:inherit';
+    issues.addEventListener('input',()=>{animationLabNotes=issues.value;});
+    body.appendChild(issues);
+    const reportBtn=el('button',{type:'button',id:'animationLabCopy',textContent:'Copy animation test report'});
+    reportBtn.dataset.set='lab-copy';
+    reportBtn.addEventListener('click',async()=>{
+      const report=lab.report(animationLabNotes);
+      try{
+        await navigator.clipboard.writeText(report);
+        labMessage.textContent='Report copied. Paste it into our chat with your feedback.';
+      }catch(e){
+        issues.value=report;animationLabNotes=report;
+        issues.focus();issues.select();
+        labMessage.textContent='Copy access unavailable. Report selected above; use Copy.';
+      }
+    });
+    body.appendChild(row(reportBtn));
+    body.appendChild(el('small',{textContent:'To exit test mode, reopen Settings → Animation Lab → Restore original. If the experiment cannot bind a model, the original stays visible.'}));
+  }
   body.appendChild(sec('Graphics'));
+  // Natural visuals change only rendering; saved world, combat and character skins are untouched.
+  const look = el('select', { id: 'setVisualStyle' });
+  look.dataset.set = 'visual-style';
+  const activeLook = E.getVisualStyle ? E.getVisualStyle() : 'natural';
+  for (const [value, label] of [['natural', 'Natural 3D (soft shadows & lighting)'], ['classic', 'Classic (original rendering)']]) {
+    look.appendChild(el('option', { value, textContent: label, selected: value === activeLook }));
+  }
+  look.addEventListener('change', () => { E.setVisualStyle?.(look.value); });
+  body.appendChild(row(el('span', { className: 'lab', textContent: 'Rendering style' }), look));
+  body.appendChild(el('small', { textContent: 'Natural improves lighting and soft shadows without replacing your world. Restart the game after changing style to update edge smoothing.' }));
   const q = el('select', { id: 'setQuality' }); q.dataset.set = 'quality';
   const names = { auto: 'Auto (adapts to your device)', high: 'High (sharpest)', balanced: 'Balanced', low: 'Low (fastest)' };
   for (const k of QUALITIES) q.appendChild(el('option', { value: k, textContent: names[k], selected: prefs.quality === k }));
@@ -117,44 +194,6 @@ function build() {
   body.appendChild(sec('Display'));
   body.appendChild(row(toggleBtn('Show FPS', () => prefs.showFps, (v) => { prefs.showFps = v; applyPrefs(E); save(); }, 'showFps')));
 
-  if (owner()) {
-    const ch = c(), f = ch.flags, box = el('div', { className: 'own' });
-    const own = (key, label, fn, get) => { const b = toggleBtn(label, get, (v) => { fn(v); syncs.forEach((s) => s()); }, 'owner-' + key); syncs.push(b._sync); return b; };
-    box.appendChild(sec('Owner (save is marked cheated)'));
-    box.appendChild(row(own('god', 'God mode', (v) => ch.setGod(v), () => f.god), own('fly', 'Fly', (v) => ch.setFly(v), () => f.fly), own('noclip', 'Noclip', (v) => ch.setNoclip(v), () => f.noclip), own('bump', 'Bumps', (v) => ch.setBump(v), () => f.bump)));
-    box.appendChild(row(own('unlimited', 'Unlimited MP/SP', (v) => ch.setUnlimited(v), () => f.unlimited), own('nocd', 'No cooldowns (Owner skin)', (v) => ch.setNoCooldown(v), () => f.noCooldown)));
-    const spd = el('select', { id: 'setSpeed' }); for (const m of [0.5, 1, 2, 4, 8]) spd.appendChild(el('option', { value: m, textContent: m + '×', selected: m === f.speedMul }));
-    spd.addEventListener('change', () => ch.setSpeed(+spd.value));
-    box.appendChild(row(el('span', { className: 'lab', textContent: 'Speed' }), spd));
-    const msg = el('small', { textContent: 'God mode starts ON for the owner; your choice is remembered.' });
-    const mx = el('button', { type: 'button', textContent: 'Re-max active hero' }); mx.dataset.set = 'owner-max';
-    mx.addEventListener('click', async () => { const m = await import('./ownermax.js'); const r = m.maxOwnerHero(E.storage); msg.textContent = r ? (r.changed ? 'Active hero maxed.' : 'Already maxed.') : 'Could not read the save.'; });
-    const full = el('button', { type: 'button', textContent: 'Full cheat panel' }); full.dataset.set = 'owner-panel';
-    full.addEventListener('click', () => { hide(); if (E.openCheatPanel) E.openCheatPanel(); });
-    const tt = el('button', { type: 'button', textContent: 'Spawn Ashen Titan' }); tt.dataset.set = 'owner-titan';
-    tt.addEventListener('click', () => { msg.textContent = ch.spawnTitan() ? 'The Ashen Titan awakens.' : 'A Titan is already alive.'; });
-    const bb = toggleBtn('Bamboo Stick (test weapon)', () => { const F = window.__p3d && window.__p3d.fight; return !!(F && F.cc && F.cc.bamboo); }, (v) => { const F = window.__p3d && window.__p3d.fight; if (F && F.setBamboo) F.setBamboo(v); }, 'owner-bamboo'); syncs.push(bb._sync); box.appendChild(row(bb));
-    box.appendChild(row(mx, full, tt)); box.appendChild(msg); body.appendChild(box);
-    const dm = el('div', { className: 'own' }); dm.appendChild(sec('Owner damage'));
-    const sd = () => import('./combat/data.js');
-    const stepper = (key, label, lo, hi, get, set, fmt) => {
-      const out = el('span', { className: 'val', style: 'min-width:64px;text-align:center;font-weight:700;color:#f1d98a' });
-      const mk2 = (t, d, k) => { const b = el('button', { type: 'button', textContent: t, className: 'stp' }); b.dataset.set = key + '-' + k; b.addEventListener('click', () => { set(Math.max(lo, Math.min(hi, get() + d))); sy(); }); return b; };
-      const rg = el('input', { type: 'range', min: lo, max: hi, step: 1, value: get() }); rg.dataset.set = key; rg.addEventListener('input', () => { set(+rg.value); sy(); });
-      const sy = () => { out.textContent = fmt(get()); if (document.activeElement !== rg) rg.value = get(); }; sy(); syncs.push(sy);
-      return [el('div', { className: 'row' }, [el('span', { className: 'lab', textContent: label })]), el('div', { className: 'row' }, [mk2('−', -1, 'dec'), rg, mk2('+', 1, 'inc'), out])];
-    };
-    sd().then((D) => {
-      const P = D.TUNING.perks, U = D.TUNING.ult, sv = () => D.saveSaberPrefs();
-      const [l1, r1] = stepper('saberMul', 'Saber damage multiplier (× target current health; 0 = flat 99,999)', 0, 50, () => P.saberMul, (v) => { P.saberMul = v; sv(); }, (v) => v === 0 ? 'Flat' : '×' + v);
-      const bt = toggleBtn('Saber multiplier also hits bosses', () => P.saberBossesX12, (v) => { P.saberBossesX12 = v; sv(); }, 'saberBossesX12'); syncs.push(bt._sync);
-      const bk = toggleBtn('Ultimates instantly kill bosses (incl. Ashen Titan)', () => U.bossesInstantKill, (v) => { U.bossesInstantKill = v; sv(); }, 'bossesInstantKill'); syncs.push(bk._sync);
-      const [l2, r2] = stepper('ultMul', 'Ultimate damage multiplier (Unholy Destruction)', 1, 100, () => U.dmgMul, (v) => { U.dmgMul = v; sv(); }, (v) => '×' + v);
-      dm.append(l1, r1, row(bt), l2, r2, row(bk), el('small', { textContent: 'Ultimates (incl. Thunderstorm) kill bosses too while instant-kill is on (default); turn it off for a normal 99,999 hit. Never affects you, your party, NPCs or props.' }));
-      regroup();
-    });
-    body.appendChild(dm);
-  }
   const reset = el('button', { type: 'button', textContent: 'Restore default settings' }); reset.dataset.set = 'reset';
   reset.addEventListener('click', () => { Object.assign(prefs, DEFAULT_PREFS); rig.setView('third'); rig.setZoom(1); applyPrefs(E); save(); build(); });
   body.appendChild(el('div', { className: 'sec', textContent: ' ' })); body.appendChild(reset);

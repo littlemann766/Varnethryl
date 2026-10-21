@@ -1,0 +1,43 @@
+name: Audit model rigs and animations
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'www/proto3d/models/**'
+      - 'www/proto3d/models-beth/**'
+      - 'www/proto3d/models-new/**'
+      - 'www/proto3d/models-placeholder/**'
+      - 'tools/model_audit.mjs'
+      - 'tools/rig_bridge_test.mjs'
+      - 'www/proto3d/rig-bridge.js'
+      - '.github/workflows/model-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  model-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Unit-test GLB metadata reader
+        run: node tools/model_audit.mjs --self-test
+      - name: Unit-test experimental Beth-to-Meshy rig bridge
+        run: node tools/rig_bridge_test.mjs
+      - name: Audit every repository GLB without changing assets
+        run: |
+          node tools/model_audit.mjs > model-audit.md
+          node tools/model_audit.mjs --json > model-audit.json
+          head -n 7 model-audit.md >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Download the artifact for the full per-model report.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: varnethryl-model-audit
+          path: |
+            model-audit.md
+            model-audit.json
+          retention-days: 14

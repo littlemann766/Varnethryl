@@ -1131,7 +1131,7 @@ canvas.addEventListener('pointerdown', e => { try { canvas.setPointerCapture(e.p
 canvas.addEventListener('pointermove', e => {
   const t = touches.get(e.pointerId); if (!t) return;
   if (!t.drag && Math.hypot(e.clientX - t.sx, e.clientY - t.sy) > 12) t.drag = true;
-  if (t.drag && !camRig.pinching) { lastDragT = performance.now(); state.camYaw -= (e.clientX - t.lx) * 0.006 * camRig.prefs.lookSens; if (camRig.fp) camRig.look(0, -(e.clientY - t.ly) * 0.005 * camRig.prefs.lookSens); }
+  if (t.drag && !camRig.pinching) { lastDragT = performance.now(); state.camYaw -= (e.clientX - t.lx) * 0.006 * camRig.prefs.lookSens; camRig.look(0, -(e.clientY - t.ly) * 0.005 * camRig.prefs.lookSens); }
   t.lx = e.clientX; t.ly = e.clientY;
 });
 const canvasUp = e => { const t = touches.get(e.pointerId); touches.delete(e.pointerId); if (t && !t.drag && e.type === 'pointerup') tapMoveTo(e.clientX, e.clientY); };
@@ -1609,12 +1609,11 @@ function updateCamera(dt, snap) {
   const ci = camIn; ci.heroX = state.heroX; ci.heroZ = state.heroZ; ci.hy = (state.heroY || 0) + cheat.alt + cinderFlight.alt; ci.dispY = state.dispY === undefined ? state.heroY || 0 : state.dispY; ci.alt = cheat.alt + cinderFlight.alt; ci.jumpHeight = jumpHeight; ci.camYaw = state.camYaw; ci.legacyZoom = state.zoom; ci.portrait = innerHeight > innerWidth; ci.dt = dt; ci.snap = snap;
   if (camRig.prefs.camMode !== 'free' && !camRig.fp && !camRig.pinching && performance.now() - lastDragT > 1500) state.camYaw = followYaw(state.camYaw, state.vx, state.vz, dt);
   ci.zx = ZONE.cx; ci.zz = ZONE.cz; ci.zh = ZONE.half;
+  ci.groundAt = ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt
+    : ZONE.name === 'frost' ? frostElevation : () => 0;
   camRig.update(ci);
-  // Follow the actual elevated terrain on hills: don't let the third-person camera clip into a ridge.
-  if (((ZONE.name === 'town' && TOWN_LANDS) || ZONE.name === 'frost') && !camRig.fp) {
-    const floor = (ZONE.name === 'frost' ? frostElevation(camRig.pos.x,camRig.pos.z) : TOWN_LANDS.heightAt(camRig.pos.x,camRig.pos.z)) + 1.0 * HS;
-    if (camRig.pos.y < floor) { camRig.pos.y = floor; camera.position.y = floor; camera.lookAt(camRig.look); }
-  }
+  // Terrain-aware 3D orbit collision is handled continuously inside camRig;
+  // never snap the camera vertically after orbit resolution.
   camPos.copy(camRig.pos); camLook.copy(camRig.look);
   camRig.syncHero(hero);
   sun.position.set(state.heroX + SUN_OFF.x * SUNK, (ZONE.name !== 'wilds' ? state.heroY : 0) + SUN_OFF.y * SUNK, state.heroZ + SUN_OFF.z * SUNK);

@@ -23,7 +23,9 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Check game assets
-        run: python3 tools/check_assets.py
+        run: |
+          python3 tools/check_assets.py
+          python3 tools/verify_frost_troll_b.py
       - name: Check JavaScript syntax
         run: |
           find www -type f -name "*.js" -not -path "*/vendor/*" -print0 | xargs -0 -n1 node --check

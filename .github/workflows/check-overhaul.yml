@@ -30,6 +30,8 @@ jobs:
         run: node tools/check_terrain_follow.mjs
       - name: Verify ice particles, cave formation physics, and lit boss arenas
         run: node tools/check_frost_visuals.mjs
+      - name: Verify Titan lava pools, rising embers, and safe-city culling
+        run: node tools/check_volcano_visuals.mjs
       - name: Check established encounter geography and gameplay invariants
         run: node tools/check_boss_regions.mjs
       - name: Check walkable terrain and portal stability

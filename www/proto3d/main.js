@@ -15,6 +15,7 @@ import { createFlags, passesWalls, stepAltitude } from './cheatflags.js';
 import { createCinderFlight, cinderAnimationWeights } from './cinderflight.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
+import { bossCameraFocus } from './boss-camera-focus.js';
 import { preferSerpentClips } from './serpent-locomotion.js';
 import { zoneAtmosphere } from './zone-ambience.js';
 import { initSettings } from './settingsboot.js';
@@ -1514,6 +1515,10 @@ function updateCamera(dt, snap) {
   const ci = camIn; ci.heroX = state.heroX; ci.heroZ = state.heroZ; ci.hy = (state.heroY || 0) + cheat.alt + cinderFlight.alt; ci.dispY = state.dispY === undefined ? state.heroY || 0 : state.dispY; ci.alt = cheat.alt + cinderFlight.alt; ci.jumpHeight = jumpHeight; ci.camYaw = state.camYaw; ci.legacyZoom = state.zoom; ci.portrait = innerHeight > innerWidth; ci.dt = dt; ci.snap = snap;
   if (camRig.prefs.camMode !== 'free' && !camRig.fp && !camRig.pinching && performance.now() - lastDragT > 1500) state.camYaw = followYaw(state.camYaw, state.vx, state.vz, dt);
   ci.zx = ZONE.cx; ci.zz = ZONE.cz; ci.zh = ZONE.half;
+  // Only explicit lock-on may gently raise the view toward giant bosses;
+  // ordinary free camera, first-person, heroes and non-boss enemies stay as-is.
+  const tgt = FIGHT?.on && FIGHT.cc?.tgt?.locked ? FIGHT.cc.tgt.target : null;
+  ci.bossFocus = camRig.fp ? null : bossCameraFocus(state.heroX,state.heroZ,tgt,!!tgt,ci.portrait);
   camRig.update(ci);
   // Follow the actual elevated terrain on hills: don't let the third-person camera clip into a ridge.
   if (((ZONE.name === 'town' && TOWN_LANDS) || ZONE.name === 'frost') && !camRig.fp) {

@@ -815,6 +815,9 @@ async function selectVariant(g, v) {
   if (pikachuGroup) seen.add(pikachuGroup);
   const OG = SLOT_G[GLB_IDS.indexOf('n:owner')];
   if (OG && !IS_OWNER_TOKEN) seen.add(OG);   /* hidden from everyone but the owner */
+  // Sslythar remains an unreleased creature while the serpentine rig is refined.
+  // Preserve its GLB, stable slot number and saved selection compatibility.
+  for (const group of GROUPS.values()) if (group.key === 'ssylthar') seen.add(group);
   HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g)) { seen.add(g); gl.push(g); } });
   gl.sort(compareRoster);
   const enemyKeys=new Set(['vaelthryx','ashentitan','frosttroll','stonetroll','hobgoblin','mossgut','ssylthar','hydrella','wyvern']);
@@ -1597,9 +1600,9 @@ async function setZone(name) {
 let outdoorCombatStarting=false;
 function updateZone(dt) {
   // Automatically enter PvE beyond the walls; town interiors remain protected.
-  if(ZONE.name==='town' && (Math.abs(state.heroX)>CITY_HALF+14 || Math.abs(state.heroZ)>CITY_HALF+14) && !outdoorCombatStarting && (!FIGHT||!FIGHT.on)){
+  if(ZONE.name==='town' && (Math.abs(state.heroX)>CITY_HALF+14 || Math.abs(state.heroZ)>CITY_HALF+14) && !outdoorCombatStarting && (!FIGHT||!FIGHT.on||!FIGHT.auto)){
     outdoorCombatStarting=true;
-    fightToggle(true).then(f=>{if(ZONE.name==='town')f.startAuto();}).finally(()=>{outdoorCombatStarting=false;});
+    fightToggle(true).then(f=>{if(ZONE.name==='town')f.startAuto();}).catch(err=>diag('Wilderness combat startup failed: '+err.message,true)).finally(()=>{outdoorCombatStarting=false;});
   }
   if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ, VIEWK);
   const t=performance.now()/1000;
@@ -1689,7 +1692,12 @@ async function fightToggle(createOnly) {
   if (createOnly) return FIGHT;
   FIGHT.toggle(); return FIGHT;
 }
-{ const fb = document.getElementById('fightBtn'); if (fb) fb.addEventListener('click', e => { e.preventDefault(); fightToggle(); }); }
+{ const fb = document.getElementById('fightBtn'); if (fb) fb.addEventListener('click', e => { e.preventDefault(); fightToggle().catch(err=>diag('Combat startup failed: '+err.message,true)); }); }
+// Entering the world arms normal attacks and the skill HUD for EVERY hero.
+// Auto mode keeps the protected village peaceful; enemies spawn outside the walls.
+document.getElementById('vnEnter')?.addEventListener('click',()=>{
+  fightToggle(true).then(f=>f.startAuto()).catch(err=>diag('Combat startup failed: '+err.message,true));
+});
 let ownerFlag = false;
 let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
 const cheatEnv = {

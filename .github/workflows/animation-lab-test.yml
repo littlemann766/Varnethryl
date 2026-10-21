@@ -6,6 +6,8 @@ on:
       - 'www/proto3d/main.js'
       - 'www/proto3d/rig-bridge.js'
       - 'www/proto3d/owner-saber.js'
+      - 'www/proto3d/owner-footing.js'
+      - 'tools/owner_footing_test.mjs'
       - 'www/proto3d/camrig.js'
       - 'www/proto3d/camprefs.js'
       - 'tools/owner_saber_test.mjs'
@@ -39,6 +41,7 @@ jobs:
           node --check www/proto3d/cheatboot.js
           node tools/rig_bridge_test.mjs
           node tools/owner_saber_test.mjs
+          node tools/owner_footing_test.mjs
           node tools/camera_giant_test.mjs
       - name: Install Chromium for phone-size tests
         run: |

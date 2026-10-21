@@ -723,9 +723,12 @@ function loadHero(gi) {
 }
 for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(i < GLB_NAMES.length ? GLB_NAMES[i] : EXTRA[i - GLB_NAMES.length][1]); }
 const heroKind = w => w.userData.blocky ? 'blocky' : w.userData.glb ? 'glb' : 'none';
-// Sslythar's models remain in the repo for private rig/viewer work, but a
-// previously saved character, follower or URL query must not reveal him in
-// normal gameplay before approval. Keep stored slot numbers unchanged.
+// Sslythar is a BASILISK (serpentine like Balthrix), NOT a dragon.
+// His candidate source asset happens to be named 'dragon 3d model', which is
+// a filename only—not his species, animation set, or a reason to add flight.
+// Keep his models for private head-to-tail slither/turn rig development only;
+// previously saved characters, followers or URL queries must not reveal him
+// in normal gameplay before approval. Preserve stored slot indices.
 const hiddenSerpentSlot = i => /ssylthar/i.test(GLB_IDS[i] || '');
 const playableSlot = i => Number.isInteger(i) && i >= 0 && i < HEROES.length && !hiddenSerpentSlot(i);
 const activeSlot = i => playableSlot(i) ? i : 1;

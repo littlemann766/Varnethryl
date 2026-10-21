@@ -5,7 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {HERO_M,HERO_LORE_HEIGHTS,inchesToMeters,CHARS,profileFor,loadScale} from '../www/proto3d/charscale.js';
 import {BOSS_PATTERNS,ENEMIES} from '../www/proto3d/combat/data.js';
 import {pickPattern} from '../www/proto3d/combat/ai.js';
-import {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_REALM,FROST_PORTAL,LAVA_POOLS,PORT_CENTER,BALTHRIX_TRAIL,BALTHRIX_TRAIL_HALF_WIDTH,balthrixTrailDistance,nearestBalthrixRoamTime,isCitySafe,balthrixPosition,onLava,frostHill,lavaAmount} from '../www/proto3d/bossregions.js';
+import {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_REALM,FROST_PORTAL,LAVA_POOLS,PORT_CENTER,BALTHRIX_TRAIL,BALTHRIX_TRAIL_HALF_WIDTH,balthrixTrailDistance,nearestBalthrixRoamTime,projectBalthrixToTrail,isCitySafe,balthrixPosition,onLava,frostHill,lavaAmount} from '../www/proto3d/bossregions.js';
 const src=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const close=(a,b)=>Math.abs(a-b)<1e-8;
 assert(close(HERO_M,1.905),'Owner must be 1.905 m');
@@ -68,6 +68,20 @@ for(const p of BALTHRIX_TRAIL){
 }
 for(const p of [[0,0],[120,140],[0,-345],[-425.6,392]])
  assert(balthrixTrailDistance(...p)>BALTHRIX_TRAIL_HALF_WIDTH+15,'no trail through city, frost cave or port');
+// The boss's center must remain on the visible trail during both patrol
+// and chase, including around the northwest port and volcano ridges.
+for(let t=0;t<90;t+=.4){
+ const p=balthrixPosition(t);
+ const normal={x:p.x+Math.cos(p.yaw)*8,z:p.z-Math.sin(p.yaw)*8};
+ const q=projectBalthrixToTrail(normal.x,normal.z);
+ assert(q.distance<12,'projection searches nearby trail segment');
+ assert(balthrixTrailDistance(q.x,q.z)<.3,'chasing Balthrix is confined to painted trail');
+ assert(Number.isFinite(q.yaw),'trail tangent is finite');
+}
+for(const id of ['n:ashentitan_new','n:ashentitan_20','n:ashentitan_40','n:ashentitan_60'])
+ assert(profileFor(id).speed<.8,'every playable Titan skin moves at giant walking pace');
+for(const id of ['titan','titan40'])
+ assert(ENEMIES[id].speed<=2.4,'both Titan encounter variants move slowly');
 for(const t of [1,15,42,135,360,720]){
  const p=balthrixPosition(t),nearest=nearestBalthrixRoamTime(p.x,p.z);
  assert(nearest.distance<.2,'encounter spawns exactly along visible trail');
@@ -121,11 +135,14 @@ assert(terrain.includes("water.name='harbor-swim-water'"),'water available at po
 assert(ice.includes("ground.castShadow")===false||ice.includes("terrain.castShadow=true"),'ice mountains cast shadows');
 assert(ice.includes("frosttroll_b")===false||ice.includes('FROST_BROTHERS'),'ice realm uses both brothers');
 assert(fight.includes('startRegionBosses'),'automatic boss spawning at frost');
-assert(fight.includes('balthrixPosition(regionClock+(roamer.routePhase||0))'),'roaming Balthrix follows phased patrol');
+assert(fight.includes('balthrixPosition(regionClock+(roamingBoss.routePhase||0))'),'roaming Balthrix follows phased patrol');
+assert(fight.includes('projectBalthrixToTrail(p.x,p.z)'),'Balthrix chase and knockback stay on the path');
+assert(fight.includes('const pitch=-Math.atan2(high-low,2*span)'),'serpent inclines into hill rises and descents');
+assert(fight.includes('1.05*Math.max(0,dt)'),'serpent turning is speed-limited');
 const ai=src('www/proto3d/combat/ai.js');
 assert(ai.includes('const deltaYaw = Math.atan2(Math.sin(targetYaw - currentYaw)'),'boss facing turns smoothly');
 assert(ai.includes("e.state !== 'telegraph' && e.state !== 'attack'"),'telegraphed attacks lock their facing');
-assert(fight.includes("dHero>52&&roamer.state==='idle'"),'Balthrix patrol never overrides active chase or recovery');
+assert(fight.includes("if(roamingBoss.state!=='idle')roamingBoss.rejoinRoute=true"),'Balthrix patrol waits until combat ends before rejoining');
 assert(hud.includes('VARNETHRYL ⚜')&&hud.includes("this.slotAbility"),'Varnethryl HUD retains real combat controls');
 const controller=src('www/proto3d/combat/controller.js');
 const lightning=src('www/proto3d/combat/lightning.js');

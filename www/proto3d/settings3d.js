@@ -57,7 +57,7 @@ function build() {
   const save = () => { persist(E); };
   const view = (v, label) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.set = 'view-' + v; const s = () => b.classList.toggle('on', prefs.view === v); b.addEventListener('click', () => { rig.setView(v); save(); syncs.forEach((f) => f()); }); s(); syncs.push(s); return b; };
   body.appendChild(sec('Game & version'));
-  const version = el('button', { type: 'button', textContent: 'Varnethryl 3D · v1.2.3' });
+  const version = el('button', { type: 'button', textContent: 'Varnethryl 3D · v1.2.4' });
   version.dataset.set = 'version-cheats';
   version.setAttribute('aria-label', 'Version — open owner cheats');
   version.style.cssText = 'color:#f1d28a;font-weight:700;cursor:pointer;touch-action:manipulation';
@@ -86,10 +86,10 @@ function build() {
   body.appendChild(el('small', { textContent: 'Zoom: mouse wheel, pinch, or + / −.  View: V.  The camera never goes through walls.' }));
 
   body.appendChild(sec('Combat'));
-  const cb = el('button', { type: 'button', textContent: 'Enable combat testing' }); cb.dataset.set = 'combat';
-  const csync = () => cb.classList.toggle('on', !!(E.combatOn && E.combatOn())); csync(); syncs.push(csync);
+  const cb = el('button', { type: 'button', textContent: 'Combat' }); cb.dataset.set = 'combat';
+  const csync = () => { const active = !!(E.combatOn && E.combatOn()); cb.classList.toggle('on', active); cb.textContent = active ? 'Combat: On' : 'Combat: Off'; }; csync(); syncs.push(csync);
   cb.addEventListener('click', async () => { await E.setCombat(!(E.combatOn && E.combatOn())); csync(); });
-  body.appendChild(row(cb)); body.appendChild(el('small', { textContent: 'F attack · G dodge · T lock-on · Tab next target · 1-6 abilities (owner). On phone use the buttons by the stick.' }));
+  body.appendChild(row(cb)); body.appendChild(el('small', { textContent: 'F basic attack · Space dodge · Q lock-on · Tab next target · 1–4 skills · R potion · E weapon. On phones, tap the medieval combat buttons.' }));
   const hudEd = () => (window.__p3d && window.__p3d.combat && window.__p3d.combat.hud && window.__p3d.combat.hud.editor) || null;
   const eb = el('button', { type: 'button', textContent: 'Move or resize buttons' }); eb.dataset.set = 'editbtns';
   const rb = el('button', { type: 'button', textContent: 'Restore button layout' }); rb.dataset.set = 'resetbtns';

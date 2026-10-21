@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { Builder, M, GLOW, WM, rippleMat, birdFlock, butterflies, boxG, cylG, uvScale, TILE, mergeGroup } from './bldkit.js';
 import { tex, goldDoorTexture } from './bldtex.js';
 import { CITY_HALF, PORT_CENTER } from './bossregions.js';
+import { buildSailingShip } from './port-ships.js';
 
 // ---------- shared decor ----------
 function wins(B, o) { // facade windows: front [[x,y]], side [[z,y]] (both sides), back [[x,y]]
@@ -577,11 +578,11 @@ function port(spec, ctx) {
   for (const s of [-1, 1]) B.col(s * (PW / 4 + .7), Z0 + PD / 2, PW / 2 - 1.4, PD + 1);
   for (const s of [-1, 1]) B.col(s * 6.2, Z0 + PD + .6, 9, 1);
   const boatMats = [M('darkWood'), M('wood')]; const boats = [];
-  for (const [bx_, bz, s] of [[-5.5, Z0 + 4, 1], [5.8, Z0 + 6.2, .8]]) {
-    const g = new THREE.Group(); g.position.set(bx_, .2, bz); B.root.add(g);
-    const hull = new THREE.Mesh(boxG(1.6 * s, .6, 4.2 * s, 1.4), boatMats[0]); hull.position.y = .2; g.add(hull); const bow = new THREE.Mesh(new THREE.ConeGeometry(.8 * s, 1.4 * s, 4), boatMats[0]); bow.rotation.x = Math.PI / 2; bow.rotation.z = Math.PI / 4; bow.position.set(0, .2, 2.7 * s); g.add(bow);
-    const mast = new THREE.Mesh(boxG(.1, 3.6 * s, .1, 1), boatMats[1]); mast.position.y = 2; g.add(mast); const sail = new THREE.Mesh(new THREE.PlaneGeometry(1.7 * s, 2.6 * s), M('#1f3f86', { side: THREE.DoubleSide })); sail.position.set(0, 2.2, .05); g.add(sail);
-    for (const m of g.children) { m.castShadow = true; } boats.push(g); B.ccolWorld = 1; }
+  // Three-dimensional wooden hulls, not rectangular blocks with cone bows.
+  for(const [bx_,bz,sc] of [[-5.5,Z0+4,1],[5.8,Z0+6.2,.8]]){
+    const g=buildSailingShip(.38*sc,false);
+    g.position.set(bx_,.2,bz);B.root.add(g);boats.push(g);B.ccolWorld=1;
+  }
   B.col(-5.5, Z0 + 4, 2, 4.4); B.col(5.8, Z0 + 6.2, 1.8, 3.6);
   let t = 0; B.tick = dt => { t += dt; boats.forEach((g, i) => { g.position.y = .2 + Math.sin(t * 1.4 + i * 2) * .05; g.rotation.z = Math.sin(t * 1.1 + i) * .04; }); };
   for (const [x, z] of [[-6.5, -1.2], [-8, -1.0], [7.5, -1.1], [8.4, -1.6]]) { B.col(x, z, .9, .9); B.bx(.9, .9, .9, 'wood', x, .45, z, B.G.ext); }
@@ -592,14 +593,11 @@ function port(spec, ctx) {
   const wm = M('water', { transparent: true, opacity: .95 }); B.add(new THREE.PlaneGeometry(44, 18), wm, 0, .02, Z0 + PD + 9.4, B.G.ext, { shadow: false }).rotation.x = -Math.PI / 2;
   B.bx(2.6, .22, 15, 'wood', 0, .45, Z0 + PD + 8, B.G.ext); for (let i = 0; i < 8; i++) for (const s of [-1, 1]) { B.cyl(.2, .22, 1.3, 'darkWood', s * 1.4, .1, Z0 + PD + 1 + i * 1.9, B.G.ext, 6); if (i % 3 === 2) B.add(new THREE.SphereGeometry(.2, 6, 5), GLOW('ffc060', 1.6), s * 1.4, 1.5, Z0 + PD + 1 + i * 1.9, B.G.ext, { shadow: false }); }
   for (const [px, pz, pl] of [[-4, Z0 + PD + 8, 7], [4.5, Z0 + PD + 13, 6]]) { B.bx(1.8, .2, pl, 'wood', px, .42, pz, B.G.ext); for (let i = 0; i < 4; i++) for (const s of [-1, 1]) B.cyl(.16, .18, 1.1, 'darkWood', px + s * .9, .1, pz - pl / 2 + .5 + i * (pl - 1) / 3, B.G.ext, 6); }
-  { // galleon: dark hull, 3 masts, cream sails, gold stern lanterns
-    const g = new THREE.Group(); g.position.set(7.5, .2, Z0 + PD + 10); g.rotation.y = .12; B.root.add(g); const wd = M('darkWood'), sailM = M('#d8cba4', { side: THREE.DoubleSide });
-    const hull = new THREE.Mesh(boxG(3.2, 1.3, 9, 1.4), wd); hull.position.y = .5; g.add(hull); const bow = new THREE.Mesh(new THREE.ConeGeometry(1.6, 3, 4), wd); bow.rotation.x = Math.PI / 2; bow.rotation.y = Math.PI / 4; bow.scale.set(1, 1, .8); bow.position.set(0, .5, 5.8); g.add(bow);
-    const cast = new THREE.Mesh(boxG(3.0, 1.2, 2.6, 1.4), wd); cast.position.set(0, 1.7, -3.2); g.add(cast);
-    for (const [mz, mh, sw] of [[2.6, 7.5, 3.4], [0, 9, 4.2], [-2.8, 6.5, 3]]) { const m = new THREE.Mesh(boxG(.2, mh, .2, 1), wd); m.position.set(0, mh / 2 + .8, mz); g.add(m); for (const [sy, sh] of [[mh * .55, mh * .38], [mh * .88, mh * .26]]) { const s = new THREE.Mesh(new THREE.PlaneGeometry(sw * (sh / (mh * .38) > .8 ? 1 : .75), sh), sailM); s.position.set(0, sy + .8, mz + .15); g.add(s); const y = new THREE.Mesh(boxG(sw + .4, .12, .12, 1), wd); y.position.set(0, sy + sh / 2 + .8, mz); g.add(y); } }
-    const fl = new THREE.Mesh(new THREE.PlaneGeometry(1, .6), M('#1f3f86', { side: THREE.DoubleSide })); fl.position.set(.5, 10.1, 0); g.add(fl);
-    for (const sx of [-.8, .8]) { const l = new THREE.Mesh(new THREE.SphereGeometry(.18, 6, 5), GLOW('ffc060', 1.8)); l.position.set(sx, 2.5, -4.6); g.add(l); }
-    for (const m of g.children) m.castShadow = true; boats.push(g); B.col(7.5, Z0 + PD + 10, 3.4, 9.5); }
+  { // Full 3D galleon: swept curved hull, deck, rails, rigging and bowed sails.
+    const g=buildSailingShip(.8,true);
+    g.position.set(7.5,.2,Z0+PD+10);g.rotation.y=.12;
+    B.root.add(g);boats.push(g);B.col(7.5,Z0+PD+10,3.4,9.5);
+  }
   const TERR = [[15.5, -7, 6, 5, 0, 3.4]];
   for (const [hx, hz, hw, hd, hy, hh] of TERR) { if (hy) { B.bx(hw + 1.4, hy, hd + 1.4, 'stoneD', hx, hy / 2, hz, B.G.ext); } B.bx(hw, hh, hd, 'darkWood', hx, hy + hh / 2, hz, B.G.ext); B.gable(hw, hd, 2.4 + (hw > 6 ? .4 : 0), hx, hy + hh, hz, 'slate', B.G.ext, true, .6, 'timber'); B.bx(1, 1, .3, 'stoneD', hx + 1.6, hy + hh + 2.3, hz, B.G.ext);
     for (let k = -1; k <= 1; k += 2) for (const wy of [1.2, 2.5]) if (hy + wy < hy + hh) B.add(new THREE.PlaneGeometry(.7, .9), GLOW('ffb347', 1.4), hx + k * hw * .27, hy + wy, hz + hd / 2 + .02, B.G.ext, { shadow: false });

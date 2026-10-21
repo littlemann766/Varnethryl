@@ -9,6 +9,7 @@ import { LightningFX } from './combat/lightning.js';
 import { Armory } from './combat/armory.js';
 import { gripFor } from './combat/grips.js';
 import { heroKey } from './combat/herokits.js';
+import { createExperience } from './combat/experience.js';
 import { CompanionCombat } from './combat/companions.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 import { Respawner } from './combat/respawn.js';
@@ -39,6 +40,18 @@ export function createFight(env) {
     lock: () => on && cc.lock(), switchTarget: () => on && cc.switchTarget(), potion: () => on && cc.potion(), swap: () => { if (on) swapWeapon(); }, exit: () => stop(), summon: () => spawnBoss(),
   };
   const hud = new CombatHUD(cc, api, project);
+  // Combat XP previously reset every fight. The new per-hero progression is
+  // persistent and rewards only the controller's one-time defeat event.
+  const progress = createExperience((()=>{try{return localStorage;}catch(_){return null;}})());
+  cc.on('reward', reward=>{
+    const currentId=cc.hero.id;
+    if(!currentId)return;
+    const earned=progress.award(currentId,reward.xp);
+    cc.hero.level=earned.level;
+    cc.experience=earned;
+    cc.emit('experience',earned);
+    if(earned.levels){cc.emit('hero',cc.hero);hud.say(earned.levels===1?'LEVEL UP!  LV '+earned.level:'LEVEL UP!  +'+earned.levels+' LEVELS',2300);}
+  });
   const onKey = e => {
     if (!on || e.repeat || /input|textarea/i.test((e.target && e.target.tagName) || '')) return;
     const k = e.key;
@@ -98,7 +111,7 @@ export function createFight(env) {
     if (sheathed) { clipSet(false); if (saber) attach(false); } else { clipSet(true); if (saber) attach(true); else equip(); }
     hud.say(sheathed ? 'Saber sheathed (unarmed)' : 'Lightsaber drawn', 900);
   }
-  function syncHero() { const id = env.heroId(), own = isOwner(), want = canWield() && !sheathed; if (cc.hero.id !== id || cc.hero.saber !== want) cc.setHero({ id, saber: want, name: own ? 'Owner' : (id.split(':').pop().replace(/_.*/, '') || 'Hero').replace(/^./, c => c.toUpperCase()), className: own ? 'Saber Knight' : 'Adventurer' }); cc.setScale(worldProfile(id, HS)); if (armory.key !== (cc.hero.owner ? 'owner' : heroKey(id))) { armory.setHero(id, cc.hero.owner); cc.setGear(armory.bonuses()); } }
+  function syncHero() { const id = env.heroId(), own = isOwner(), want = canWield() && !sheathed; const changed=cc.hero.id!==id; if(changed || cc.hero.saber!==want){ const saved=progress.get(id); cc.setHero({ id, saber: want, level:saved.level, name: own ? 'Owner' : (id.split(':').pop().replace(/_.*/, '') || 'Hero').replace(/^./, c => c.toUpperCase()), className: own ? 'Saber Knight' : 'Adventurer' }); cc.experience=saved;cc.emit('experience',saved); } cc.setScale(worldProfile(id, HS)); if (armory.key !== (cc.hero.owner ? 'owner' : heroKey(id))) { armory.setHero(id, cc.hero.owner); cc.setGear(armory.bonuses()); } }
   armory.wallet = { get: () => cc.gold, spend: (n) => { if (cc.gold < n) return false; cc.gold -= n; return true; } }; armory.on(() => cc.setGear(armory.bonuses()));
 
   /* ---- action clips (any model): attack, attack2, hit, death. Aliases are matched case-insensitively; missing clip => procedural lunge/flinch/fall ---- */
@@ -323,33 +336,34 @@ export function createFight(env) {
           }
         }
       }else lavaT=0;
+      // Only discovery uses a slow timer. Once the serpent is visible its
+      // location is integrated EVERY frame; moving it every .22 seconds caused
+      // visible snapping and made its skeleton look like a sliding player.
       roamClock+=dt;
       if(roamClock>.22){
-        const step=roamClock;roamClock=0;
+        roamClock=0;
         const route=nearestRoamTime(state.heroX,state.heroZ);
-        const roamer=cc.enemies.find(e=>e.key==='vaelthryx'&&e.state!=='defeated');
-        if(!roamer&&route.distance<112&&!roamBusy){
+        const hasRoamer=cc.enemies.some(e=>e.key==='vaelthryx'&&e.state!=='defeated');
+        if(!hasRoamer&&route.distance<112&&!roamBusy){
           roamBusy=true;
-          const phase=route.time+2-regionClock, where=balthrixPosition(regionClock+phase);
+          const phase=route.time+2-regionClock,where=balthrixPosition(regionClock+phase);
           Promise.resolve(spawnRegion('vaelthryx',where.x,where.z,{aggroR:48,roaming:true,routePhase:phase}))
             .finally(()=>{roamBusy=false;});
         }
-        if(roamer&&roamer.roaming){
-          // Combat temporarily interrupts his patrol; afterward he rejoins
-          // the route gradually. Never teleport him while the player can see him.
-          const dHero=Math.hypot(roamer.x-state.heroX,roamer.z-state.heroZ);
-          if(dHero>52&&roamer.state==='idle'){
-            const p=balthrixPosition(regionClock+(roamer.routePhase||0));
-            const dx=p.x-roamer.x,dz=p.z-roamer.z,dist=Math.hypot(dx,dz);
-            if(dist>.01){
-              // When combat has displaced Balthrix far from the route, approach
-              // at patrol speed instead of teleporting. Orient to actual motion.
-              const move=Math.min(dist,14*Math.max(0,step));
-              roamer.x+=dx/dist*move;roamer.z+=dz/dist*move;
-              // Avoid a NaN heading from missing imported boss rotation.
-              const heading=Math.atan2(dx,dz);
-              roamer.yaw=yawLerp(Number.isFinite(roamer.yaw)?roamer.yaw:heading,heading,Math.min(1,Math.max(0,step)*3.5));
-            }
+      }
+      const roamer=cc.enemies.find(e=>e.key==='vaelthryx'&&e.state!=='defeated'&&e.roaming);
+      if(roamer){
+        const dHero=Math.hypot(roamer.x-state.heroX,roamer.z-state.heroZ);
+        if(dHero>52&&roamer.state==='idle'){
+          const p=balthrixPosition(regionClock+(roamer.routePhase||0));
+          const dx=p.x-roamer.x,dz=p.z-roamer.z,dist=Math.hypot(dx,dz);
+          if(dist>.01){
+            // Physical pursuit of the curve, not instant correction of the
+            // mesh transform. Combat interrupts his patrol without teleporting.
+            const move=Math.min(dist,14*Math.max(0,dt));
+            roamer.x+=dx/dist*move;roamer.z+=dz/dist*move;
+            const heading=Math.atan2(dx,dz);
+            roamer.yaw=yawLerp(Number.isFinite(roamer.yaw)?roamer.yaw:heading,heading,Math.min(1,Math.max(0,dt)*3.5));
           }
         }
       }
@@ -480,7 +494,7 @@ export function createFight(env) {
         const shape = pt ? pt.shape : 'ring'; e.tele.visible = shape === 'ring'; if (shape === 'ring') { e.tele.position.set(e.x, terrainY(e.x,e.z)+0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; e.tele.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); }
         if (shape !== 'ring') { const t2 = bossTele(e, shape, pt); t2.visible = true; const L = pt.reach * HS + e.def.r; t2.position.set(e.x, terrainY(e.x,e.z)+0.13, e.z); t2.rotation.set(-Math.PI / 2, 0, e.yaw + Math.PI); t2.material.opacity = 0.18 + 0.45 * f; if (shape === 'line') { t2.scale.set(pt.width * HS, L * (0.35 + 0.65 * f), 1); t2.position.set(e.x + Math.sin(e.yaw) * t2.scale.y / 2, terrainY(e.x + Math.sin(e.yaw) * t2.scale.y / 2,e.z + Math.cos(e.yaw) * t2.scale.y / 2)+0.13, e.z + Math.cos(e.yaw) * t2.scale.y / 2); } else t2.scale.setScalar(L * (0.35 + 0.65 * f)); } else if (e.tele2) e.tele2.visible = false;
       } else { e.tele.visible = false; if (e.tele2) e.tele2.visible = false; }
-      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.roaming && mv > .5 ? mv : 0); u.mixer.update(dt); if (u.sb) u.sb.update(dt); }
+      if (u.glb && u.act) { env.loco(u, e.state === 'chase' || e.roaming && mv > .5 ? mv : 0); u.mixer.update(dt); if (e.key === 'vaelthryx' && u.serpentWave) u.serpentWave(dt,mv); if (u.sb) u.sb.update(dt); }
       const f = e.flash > 0 || e.state === 'telegraph'; if (f !== e.flashOn) { e.flashOn = f; const hx = e.flash > 0 ? 0xff2020 : 0xaa5500; for (const o of e.ems) o.material.emissive.setHex(f ? hx : o.userData.em); }
     }
     if (shakeT > 0) shakeT = Math.max(0, shakeT - dt); metUpdate(dt);
@@ -502,7 +516,7 @@ export function createFight(env) {
     alive: b => { let n = 0; for (const e of cc.enemies) if (e.biome === b && e.state !== 'defeated') n++; return n; }, spawn: (key, x, z, b) => spawn(key, 0, { aggroR: AUTO_AGGRO, at: [x, z], biome: b }) };
   cc.on('defeat', e => { if(auto&&e.campId)campNext.set(e.campId,regionClock+20+Math.random()*10); else if (auto && !e.def.boss) RS.freeSlot(true); });
   function start(isAuto) {
-    if (on) return; auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
+    if (on) { if (isAuto === true) auto = true; return; } auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
     if (auto) { syncHero(); equip(); hud.say('THE WILDS - monsters about', 1800); return; }
     // Normal combat is available to every playable hero. Do not silently

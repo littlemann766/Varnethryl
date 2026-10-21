@@ -300,3 +300,48 @@ body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
   #vnQuickMenu,#settingsPanel{border-width:9px!important;border-image-width:9px!important;padding:7px 10px!important}
   #hlist,#vnSkinBubble{border-width:9px!important;border-image-width:9px!important;padding:7px!important}
 }
+
+
+/* Character selection is an actual 3D roster, not a link to a separate viewer.
+   Retain the game's gold/amethyst HUD palette and the three roster categories. */
+#heroes.open{
+  box-sizing:border-box;z-index:3200;right:max(7px,env(safe-area-inset-right));top:max(8px,env(safe-area-inset-top));
+  width:min(450px,calc(100vw - 14px));height:calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-width:none;min-height:0;align-items:stretch;gap:6px;padding:9px;
+  border:2px ridge #caa56a;border-radius:13px;
+  background:linear-gradient(140deg,#261830fa,#0e1320fd 54%,#271a31fa);
+  box-shadow:inset 0 0 0 2px #7b438344,0 10px 35px #000d;
+}
+#heroes.open button.cur{align-self:stretch;text-align:left}
+#heroes.open #hvars{justify-content:flex-start}
+#heroes.open #hlist{
+  display:flex!important;flex:1 1 auto;min-height:0;max-height:none!important;width:100%;
+  min-width:0!important;box-sizing:border-box;overflow-y:auto;overflow-x:hidden;
+  padding:8px;background:#0d1022de;border:1px solid #80623c;border-radius:9px;
+}
+#heroes #hlist .vn-roster-tabs{position:relative;top:auto;padding:4px 0 8px;background:none;flex:none;}
+#heroes #hlist .vn-roster-list .row button:first-child{text-align:left}
+#heroes .vn-character-preview{
+  width:100%;box-sizing:border-box;flex:none;display:flex;flex-direction:column;gap:5px;
+  margin:0 0 7px;padding:7px;border:1px solid #9a73a9;border-radius:9px;
+  background:linear-gradient(170deg,#20192b,#0d1528);
+}
+#heroes .vn-character-stage{
+  position:relative;overflow:hidden;width:100%;height:clamp(145px,29dvh,255px);
+  border:1px solid #b18a50;border-radius:7px;background:#101422;
+}
+#heroes .vn-character-stage canvas{display:block;width:100%;height:100%;touch-action:none}
+#heroes .vn-character-status{display:block;min-height:14px;white-space:normal;text-align:center;color:#e4cfa9;font:11px/1.3 VarnCinzel,Georgia,serif}
+#heroes button.vn-character-choose{
+  width:100%;min-height:42px;white-space:normal;
+  background:linear-gradient(100deg,#5b3374,#322142)!important;color:#fbe6be!important;
+  border:2px ridge #d7ad70!important;border-radius:7px;font:700 12px VarnCinzel,Georgia,serif;
+}
+#heroes button.vn-character-choose:disabled{opacity:.65}
+#heroes #hlist .vn-roster-list .row button:first-child.on{background:#634081;color:#fff0bc}
+@media (orientation:landscape) and (max-height:520px){
+  #heroes.open{top:4px;height:calc(100dvh - 8px);width:min(420px,calc(100vw - 16px))}
+  #heroes #hlist .vn-character-stage{height:100px}
+  #heroes.open #hlist{max-height:none!important;display:flex!important}
+  #heroes #hlist .vn-roster-tabs{top:auto}
+}

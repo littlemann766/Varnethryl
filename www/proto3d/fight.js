@@ -559,7 +559,7 @@ export function createFight(env) {
   function start(isAuto) {
     if (on) { if (isAuto === true) auto = true; return; } auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
-    if (auto) { syncHero(); equip(); hud.say('THE WILDS - monsters about', 1800); return; }
+    if (auto) { syncHero(); equip(); const zone=env.zone?.(); hud.say(zone==='frost'?'FROST CAVE — THE BROTHERS AWAIT':zone==='town'?'OUTSKIRTS — DANGER AHEAD':'THE WILDS — MONSTERS ABOUT',1800); return; }
     // Normal combat is available to every playable hero. Do not silently
     // replace the chosen character with the Owner when fight mode is toggled.
     syncHero(); equip(); hud.say('COMBAT READY', 1800);

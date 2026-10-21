@@ -17,6 +17,7 @@ import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
 import { bossCameraFocus } from './boss-camera-focus.js';
 import { preferSerpentClips, serpentBodyChain, serpentAnimatedBody } from './serpent-locomotion.js';
+import { MOUNTAIN_WILDS_GATE, MOUNTAIN_WILDS_RETURN, nearMountainWildsGate } from './wilds-gateway.js';
 import { zoneAtmosphere } from './zone-ambience.js';
 import { initSettings } from './settingsboot.js';
 import { createMiniMap } from './minimap.js';
@@ -1633,9 +1634,16 @@ const SMOKE = (() => {
 })();
 /* ---------- the Wilds (1.1.9): second map at x=1000, reached by the portal in town; a portal there leads back. Monsters spawn only there (fight layer, auto mode). ---------- */
 const TOWN_PORTAL = { x: -6, z: 38 };
-let WM = null, FM = null, wildsP = null, townCols = null, portalT = null, frostCave = null, zoneCd = 1.5, portalDwell = 0;
+let WM = null, FM = null, wildsP = null, townCols = null, portalT = null, mountainWildsPortal = null, frostCave = null, zoneCd = 1.5, portalDwell = 0;
+let lastWildsEntrance = 'town'; // return to the town entrance actually used
 const wildsMod = import('./wilds.js').then(m => { portalT = m.makeGate(0x9a6bff); portalT.position.set(TOWN_PORTAL.x, 0, TOWN_PORTAL.z); scene.add(portalT);
-  for (const dx of [-1.9, 1.9]) colliders.push({ type: 'circle', x: TOWN_PORTAL.x + dx, z: TOWN_PORTAL.z, r: .75 });   /* gate pillars; the opening between them is walkable */
+  for (const dx of [-1.9, 1.9]) colliders.push({ type: 'circle', x: TOWN_PORTAL.x + dx, z: TOWN_PORTAL.z, r: .75 });   /* old gate retained for save compatibility */
+  mountainWildsPortal=m.makePortal(0xa86bff);
+  mountainWildsPortal.name='mountain-wilds-cave-portal';
+  mountainWildsPortal.position.set(MOUNTAIN_WILDS_GATE.x,
+    TOWN_LANDS?TOWN_LANDS.heightAt(MOUNTAIN_WILDS_GATE.x,MOUNTAIN_WILDS_GATE.z):0,
+    MOUNTAIN_WILDS_GATE.z);
+  scene.add(mountainWildsPortal);
   frostCave=m.makeGate(0x85d9ff);
   frostCave.position.set(FROST_PORTAL.x,TOWN_LANDS?TOWN_LANDS.heightAt(FROST_PORTAL.x,FROST_PORTAL.z):FROST_SUMMIT.height,FROST_PORTAL.z);
   scene.add(frostCave);return m; });
@@ -1688,9 +1696,10 @@ async function setZone(name) {
     unloadWilds();
     if(FM){const old=FM;FM=null;scene.remove(old.group);old.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const mat of [].concat(o.material))mat.dispose();});}
     for(const n of townHidden)n.visible=true;townHidden.length=0;
-    if(portalT)portalT.visible=true;if(frostCave)frostCave.visible=true;
-    state.heroX=lastZone==='frost'?FROST_PORTAL.x:TOWN_PORTAL.x;
-    state.heroZ=lastZone==='frost'?FROST_PORTAL.z+6:TOWN_PORTAL.z+4;state.yaw=0;
+    if(portalT)portalT.visible=true;if(mountainWildsPortal)mountainWildsPortal.visible=true;if(frostCave)frostCave.visible=true;
+    state.heroX=lastZone==='frost'?FROST_PORTAL.x:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.x:TOWN_PORTAL.x;
+    state.heroZ=lastZone==='frost'?FROST_PORTAL.z+6:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.z:TOWN_PORTAL.z+4;
+    state.yaw=lastZone==='wilds'&&lastWildsEntrance==='mountain'?-Math.PI/2:0;
   }
   state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
   updateZoneAmbience(.1,true);
@@ -1707,15 +1716,20 @@ function updateZone(dt) {
   if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ, VIEWK);
   const t=performance.now()/1000;
   if(portalT?.userData.update)portalT.userData.update(t);
+  if(mountainWildsPortal?.userData.update)mountainWildsPortal.userData.update(t);
+  if(ZONE.name==='town')TOWN_LANDS?.ruinedGateway?.update?.(t);
   if(frostCave?.userData.update)frostCave.userData.update(t);
   if(WM?.portalMesh?.userData.update)WM.portalMesh.userData.update(t);
   if(FM)FM.update(t);
   zoneCd = Math.max(0, zoneCd - dt); if (zoneCd > 0 || state.level !== 0 || state.climbing) { portalDwell = 0; return; }
   const isFrostCave=ZONE.name==='town'&&Math.hypot(state.heroX-FROST_PORTAL.x,state.heroZ-FROST_PORTAL.z)<7;
-  const p=ZONE.name==='town'?(isFrostCave?FROST_PORTAL:TOWN_PORTAL):ZONE.name==='frost'?FROST_EXIT:WM?{x:WM.portal.x,z:WM.portal.z}:null;
+  const isMountainWilds=ZONE.name==='town'&&nearMountainWildsGate(state.heroX,state.heroZ,7);
+  const p=ZONE.name==='town'?(isFrostCave?FROST_PORTAL:isMountainWilds?MOUNTAIN_WILDS_GATE:TOWN_PORTAL):ZONE.name==='frost'?FROST_EXIT:WM?{x:WM.portal.x,z:WM.portal.z}:null;
   if(!p)return;
   if(Math.hypot(state.heroX-p.x,state.heroZ-p.z)<1.7+Math.max(0,HERO_R-0.75)){
-    portalDwell+=dt;if(portalDwell>.35){portalDwell=-99;setZone(ZONE.name==='town'?(isFrostCave?'frost':'wilds'):'town');}
+    portalDwell+=dt;if(portalDwell>.35){
+      if(ZONE.name==='town'&&!isFrostCave)lastWildsEntrance=isMountainWilds?'mountain':'town';
+      portalDwell=-99;setZone(ZONE.name==='town'?(isFrostCave?'frost':'wilds'):'town');}
   }else if(portalDwell>-50)portalDwell=0;
 }
 

@@ -32,7 +32,7 @@ const wrenCloth=JSON.parse(source('www/proto3d/models-new/wren_cl_arms.cloth.jso
 const wrenWings=wrenCloth.groups.filter(g=>g.kind==='wing');
 assert.equal(wrenWings.length,2,'Wren has independently authored left and right wing joints');
 assert(wrenWings.every(g=>g.enabled===false),'no wing spring may fight Wren baked wing animations');
-assert(main.includes("const matchingGroups=id==='n:wren_new3'"),'Wren's live 3D model must filter out wing springs');
+assert(main.includes("const matchingGroups=id==='n:wren_new3'"),"Wren 3D model must filter out wing springs");
 assert(main.includes("}else if (id === 'n:wren_new3')"),'a missing cloth JSON must never reactivate generic wing springs');
 assert(main.includes("const ASSET_V = '1.3.2'"),'1.3.2 must bust stale Android model caches');
 

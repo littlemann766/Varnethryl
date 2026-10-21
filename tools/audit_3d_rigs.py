@@ -109,6 +109,8 @@ def main():
  Path(args.report).write_text(json.dumps(report,indent=2)+'\n')
  for r in records:
   print(('PASS' if r['valid'] else 'FAIL')+' '+r['path']+' | clips='+str(r.get('animation_clips','?'))+' | animated joints='+str(r.get('animated_joint_count','?')))
+  print('  CLIPS: '+', '.join(r.get('clip_names',[])))
+  print('  SERPENT: '+str(r.get('animated_serpent_joint_count',0))+' animated spine/tail joints of '+str(r.get('serpent_joint_count',0)))
   for w in r.get('warnings',[]):print('  WARN '+w)
   for err in r.get('errors',[]):print('  ERROR '+err)
  print('Audited',report['total'],'models; structural failures:',report['failed'])

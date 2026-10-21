@@ -15,7 +15,7 @@ const css=`
 #vnMiniMap[hidden]{display:none!important}
 #vnMiniMap button{position:relative;display:block;width:138px;height:138px;border:0;background:transparent;cursor:pointer;pointer-events:auto;padding:0;touch-action:manipulation;border-radius:50%;filter:drop-shadow(0 3px 6px #000b)}
 #vnMiniMap canvas{position:absolute;left:12%;top:12%;width:76%;height:76%;border-radius:50%;background:#211925}
-#vnMiniMap .vn-mini-ring{position:absolute;inset:0;display:block;background:url('../assets/hud/minimap-ring.svg') center/contain no-repeat;pointer-events:none}
+#vnMiniMap .vn-mini-ring{position:absolute;inset:0;display:block;background:url('assets/hud/minimap-ring.svg') center/contain no-repeat;pointer-events:none}
 #vnMiniMap .vn-mini-zone{display:block;margin-top:-2px;letter-spacing:.07em;pointer-events:none}
 #vnMiniMap button:focus-visible{outline:3px solid #eedba6;outline-offset:0}
 #vnMiniMap.expanded{width:238px;height:252px}

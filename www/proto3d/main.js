@@ -16,7 +16,7 @@ import { createCinderFlight, cinderAnimationWeights } from './cinderflight.js';
 import { initCheatBoot } from './cheatboot.js';
 import { createCamRig } from './camrig.js';
 import { bossCameraFocus } from './boss-camera-focus.js';
-import { preferSerpentClips, createSerpentWave, serpentBodyChain } from './serpent-locomotion.js';
+import { preferSerpentClips, serpentBodyChain, serpentAnimatedBody } from './serpent-locomotion.js';
 import { zoneAtmosphere } from './zone-ambience.js';
 import { initSettings } from './settingsboot.js';
 import { createMiniMap } from './minimap.js';
@@ -318,7 +318,7 @@ const EXTRA_SCALE = {}; // lore-height normalization happens once, centrally in 
 // Frost Troll B's new Meshy rig is only 1.70 m authored height, scaled to a 6.67 m boss.
 // Its in-place 0.85 s Running clip needs native gait speeds, NOT the old 4.5/10.5 values
 // (which made the run blend unreachable at normal boss chase speeds).
-const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28, map:{walk:'Walking',run:'Running'} }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 0.52, run: 1.10 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:vaelthryx_straight_rig': { walk: 9.57, run: 14.77 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 }, 'n:cinder_new': { walk: 0.65, run: 1.95 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
+const SPEEDS = { 'n:owner': { walk: 1.486, run: 2.28, map:{walk:'Walking',run:'Running'} }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 0.52, run: 1.10 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:vaelthryx_straight_rig': { walk: 0.30, run: 0.80 }, 'n:vaelthryx_straight_rig_50': { walk: 0.055, run: 0.13 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 }, 'n:cinder_new': { walk: 0.65, run: 1.95 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
 /* Beth's smoothed blocky models (_smooth.glb): extra 'Smooth' variant for characters that already exist; originals stay the default. Loaded on demand (only when picked). */
 const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'hawk', 'hearth', 'hobgoblin', 'hydrella', 'kael', 'kestrel', 'lorian', 'mirelle', 'morwen', 'mossgut', 'neris', 'nyx', 'orin', 'rook', 'rowan', 'seraphine', 'stonetroll', 'talia', 'thorne', 'valen', 'vesper', 'wolf', 'wyvern'];   // frosttroll_smooth intentionally not used (old 1.8 m base): frosttroll_a4 is the troll
 { const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
@@ -532,20 +532,15 @@ function wrapGLB(g, id, blocky) {
       diag('Balthrix clips do not animate named spine/tail/body/neck bones: a full-body wave is not verified.');
     diag('Rig audit ' + id + ': ' + report.boneCount + ' bones, ' + skinnedMeshes + ' skinned meshes, ' + report.clips.length + ' clips.');
   }
-  // Balthrix has authored slither clips that animate 29 spine/tail joints, but
-  // those clips alone barely flex the actual body as it patrols. Add a gentle,
-  // physically continuous traveling S-wave on top AFTER mixer.update instead
-  // of enabling the procedural pose only when clips are missing.
+  // Balthrix has 29 authored body joints in slither/slither_fast.
+  // Never add post-mixer rotations that twist the mesh around its own spine.
   if (/vaelthryx/.test(id)) {
-    const chain = serpentBodyChain(m);
-    const gait = createSerpentWave(m);
-    if (gait) {
-      root.userData.serpentWave = gait;
-      if(root.userData.rigAudit)root.userData.rigAudit.proceduralSlitherJoints=chain.length;
-      diag('Balthrix: animated head-to-tail serpent slither on '+chain.length+' connected joints.');
-    } else {
-      diag('Balthrix: insufficient connected body joints for full-body slither.',true);
+    const clips=serpentAnimatedBody(g.animations);
+    if(root.userData.rigAudit) {
+      root.userData.rigAudit.authoredSlither=clips.filter(c=>/slither/i.test(c.clip));
+      root.userData.rigAudit.connectedSpine=serpentBodyChain(m).length;
     }
+    diag('Balthrix: authored full-body slither '+JSON.stringify(clips.filter(c=>/slither/i.test(c.clip)))+'; twisting overlay off.');
   }
   for (const c of g.animations) act[c.name] = mixer.clipAction(c);
   // Normalize animation names across imported Meshy/Mixamo models without editing their skeletons.
@@ -612,7 +607,11 @@ function wrapGLB(g, id, blocky) {
           ? {...group,match:alias.source} : null;
       } catch (_) { return null; }
     }).filter(Boolean);
-    const matchingGroups=compatibleGroups;
+    // Wren's wing bones already have animation tracks across every authored clip.
+    // Don't let cloth physics re-aim them and twist their joint chains.
+    const matchingGroups=id==='n:wren_new3'
+      ? compatibleGroups.filter(group=>group.kind!=='wing' && !/^wing/i.test(group.name||''))
+      : compatibleGroups;
     const activeGroups=matchingGroups.filter(group=>group.enabled!==false);
     if(cfg && activeGroups.length){
       // Only pass capsules with both endpoints in this skeleton. A different
@@ -622,6 +621,9 @@ function wrapGLB(g, id, blocky) {
       if(id==='n:owner' && compatible.colliders.length < (cfg.colliders||[]).length)
         diag('Owner cape: '+compatible.colliders.length+'/'+(cfg.colliders||[]).length+' body colliders match this rig.');
       root.userData.sb=new SpringBonesV2(m,{clips:g.animations,config:compatible});
+    }else if (id === 'n:wren_new3') {
+      // A missing cloth JSON must not silently activate generic wing springs.
+      diag('Wren: preserved authored wing rotation, spring re-aiming disabled.');
     }else if (cfg && id === 'n:owner') {
       // Do not run the generic spring-bone fallback against an incompatible
       // Owner rig: it may move unrelated skeletal joints and corrupt the pose.
@@ -633,7 +635,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.3.1';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.3.2';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).

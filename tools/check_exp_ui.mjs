@@ -37,7 +37,7 @@ assert(hud.includes("this.expFill.style.transform='scaleX('+fraction+')'"),'EXP 
 assert(hud.includes('this.expFill.style.transform=\'scaleX(1)\''),'level-up rollover reaches 100%');
 assert(hud.includes('this.expValue.textContent='),'XP progress shown numerically');
 assert(mini.includes("createMiniMap(")&&main.includes('const miniMap=createMiniMap('),'minimap integrated with real position');
-assert(ui.includes('VARNETHRYL ORNATE BORDER SYSTEM'),'ornate border system applied to menus');
+assert(ui.includes('VARNETHRYL ORNATE FRAME FIX') && ui.includes('border-image-slice:92'),'nine-sliced gold-purple ornate frame system applied to menus');
 for(const asset of ['exp-frame.svg','minimap-ring.svg','panel-wide.svg','panel-square.svg','label-long.svg']){
  const path='www/assets/hud/'+asset;
  assert(existsSync(new URL(path,root)),path+' exists for offline release');

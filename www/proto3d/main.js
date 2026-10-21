@@ -690,7 +690,13 @@ function loadHero(gi) {
 }
 for (let i = HEROES.length; i < GLB_IDS.length; i++) { const ph = new THREE.Group(); ph.visible = false; scene.add(ph); HEROES.push(ph); HERO_NAMES.push(i < GLB_NAMES.length ? GLB_NAMES[i] : EXTRA[i - GLB_NAMES.length][1]); }
 const heroKind = w => w.userData.blocky ? 'blocky' : w.userData.glb ? 'glb' : 'none';
-async function selectHero(i) { if (heroKind(HEROES[i]) !== modeFor(GLB_IDS[i])) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
+// Sslythar's models remain in the repo for private rig/viewer work, but a
+// previously saved character, follower or URL query must not reveal him in
+// normal gameplay before approval. Keep stored slot numbers unchanged.
+const hiddenSerpentSlot = i => /ssylthar/i.test(GLB_IDS[i] || '');
+const playableSlot = i => Number.isInteger(i) && i >= 0 && i < HEROES.length && !hiddenSerpentSlot(i);
+const activeSlot = i => playableSlot(i) ? i : 1;
+async function selectHero(i) { if (!playableSlot(i)) return; if (heroKind(HEROES[i]) !== modeFor(GLB_IDS[i])) await loadHero(i); if (!HEROES[i].children.length) return; const prev = GLB_IDS[HEROES.indexOf(hero)]; setHero(i); if (typeof swapFollower === 'function') swapFollower(prev, GLB_IDS[i]); }
 const qp0 = new URLSearchParams(location.search);
 let savedPlan = null;
 try { if (qp0.get('nosave') == null) { const r = readSave(localStorage); if (r.status === 'ok') savedPlan = planFromState(r.state, GLB_NAMES, 60); } } catch (e) { diag('save read failed: ' + (e && e.message || e)); }
@@ -701,7 +707,7 @@ const IS_OWNER_TOKEN = (() => { try { return !!localStorage.getItem('vn_owner_un
 { const oi = GLB_IDS.indexOf('n:owner'); let seen = null; try { seen = localStorage.getItem('p3d_owner_default_v119'); } catch (e) {}
   if (savedOn && qp0.get('hero') == null && oi > 0 && IS_OWNER_TOKEN && !seen) { savedPlan.hero = oi; savedPlan.pos = null; try { localStorage.setItem('p3d_owner_default_v119', '1'); } catch (e) {} }
   if (!IS_OWNER_TOKEN && savedPlan.hero === oi) savedPlan.hero = 1;   /* the Owner skin is for the owner account only */ }
-{ const u = a => [...new Set(a)]; savedPlan.party = u([1, 2, ...savedPlan.party]); if (savedPlan.hero == null) savedPlan.hero = 1; savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
+{ const u = a => [...new Set(a)].filter(playableSlot); savedPlan.hero = activeSlot(savedPlan.hero); savedPlan.party = u([1, 2, ...savedPlan.party]); savedPlan.followers = u([1, 2, ...(savedPlan.followers || [])]).filter(i => i !== savedPlan.hero).slice(0, 3); }  // Darius + Selene are always the visible/selectable heroes
 if (savedPlan) diag('3D: loaded saved party (' + savedPlan.party.map(i => GLB_NAMES[i]).join(', ') + ')');
 // ---------- character selector: ONE entry per character (all variants grouped), compact dropdown + variant switches ----------
 const gkey = id => id.replace(/^[a-z]:/, '').replace(/_straight_rig(?:_50)?$/, '').replace(/_smooth$/, '').replace(/_new\d*$/, '').replace(/^owner_pika\d*$/, 'owner').replace(/^player_/, '');
@@ -916,20 +922,21 @@ async function selectVariant(g, v) {
     else tabLists.playable.appendChild(r.row);
     rows.push({ g: OG, b: r.b, approved: false });
   };
-  bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; })()); }
+  bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return activeSlot(q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0); })()); }
 async function toggleModel(i) {
   const id = GLB_IDS[i], next = modeFor(id) === 'blocky' ? 'glb' : 'blocky'; try { localStorage.setItem('vn_model_' + id, next); } catch (_) {}
   if (HEROES.indexOf(hero) === i) { await loadHero(i); }
   for (const r of crowd) if (r.a.id === id) { if (r.root) { scene.remove(r.root); r.root = null; r.nd = null; } loadActorModel(id).then(w => { if (!w || r.root) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); r.root = w; r.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(r.a.x, 0, r.a.z); w.rotation.y = r.a.yaw; scene.add(w); }); }
 }
 function toggleFollower(i) {
+  if (!playableSlot(i)) return;
   const id = GLB_IDS[i], cur = crowd.find(c => c.kind === 'party' && SLOT_G[GLB_IDS.indexOf(c.a.id)] === SLOT_G[i]), btn = fbtn(i);
   if (cur) { crowd.splice(crowd.indexOf(cur), 1); bumpSys.remove(cur.a); if (cur.root) scene.remove(cur.root); if (btn) btn.classList.remove('on'); return; }
   if (SLOT_G[HEROES.indexOf(hero)] === SLOT_G[i]) return;
   const pm = crowd.filter(c => c.kind === 'party'); if (pm.length >= 3) { const o = pm[0], oi = GLB_IDS.indexOf(o.a.id); crowd.splice(crowd.indexOf(o), 1); bumpSys.remove(o.a); if (o.root) scene.remove(o.root); const ob = fbtn(oi); if (ob) ob.classList.remove('on'); }
   spawnCrowd(id, 'party', state.heroX + (Math.random() - 0.5) * 2 * HS, state.heroZ + 2.2 * HS, (2.6 + pm.length * 0.5) * HS, 0); if (btn) btn.classList.add('on');
 }
-{ const q = qp0.get('hero'); const qi = q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0; startHero = qi; if (qi) HEROES[0].visible = false; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); else HEROES[0].visible = true; }); }
+{ const q = qp0.get('hero'); const qi = activeSlot(q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0); startHero = qi; if (qi) HEROES[0].visible = false; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); else HEROES[0].visible = true; }); }
 // preload the first three quietly after first paint (they replace the procedural stand-ins)
 
 // blob shadow is the real shadow map; no extra.

@@ -12,7 +12,7 @@ import { heroKey } from './combat/herokits.js';
 import { CompanionCombat } from './combat/companions.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 import { Respawner } from './combat/respawn.js';
-import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, nearestBalthrixRoamTime, onLava, isCitySafe } from './bossregions.js';
+import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, nearestBalthrixRoamTime, projectBalthrixToTrail, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
 import { HOB_CAMPS } from './hobcamps.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
@@ -26,7 +26,16 @@ export function createFight(env) {
   const v3 = new THREE.Vector3(), sc = [0, 0];
   const project = (x, y, z, out) => { v3.set(x, y, z).project(camera); if (v3.z > 1 || Math.abs(v3.x) > 1.3 || Math.abs(v3.y) > 1.3) return false; out[0] = (v3.x * 0.5 + 0.5) * innerWidth; out[1] = (-v3.y * 0.5 + 0.5) * innerHeight; return true; };
   const armory = new Armory({ ownerOk: () => !!(window.__p3d && window.__p3d.owner && window.__p3d.cheats), wallet: null });   // engine-side validation of every Armory UI request
-  const cc = new CombatController({ HS, move: (e, dx, dz) => { const p = { x: e.x + dx, z: e.z + dz }; (env.resolveMob || env.resolve)(p); e.x = p.x; e.z = p.z; } });
+  const cc = new CombatController({ HS, move: (e, dx, dz) => {
+      const p = { x:e.x+dx, z:e.z+dz };
+      if(e.roaming && e.key==='vaelthryx'){
+        // Constrain chase/knockback to the trampled route as well as idle patrol.
+        // No arbitrary sideways movement across hills or through the harbor.
+        const trail=projectBalthrixToTrail(p.x,p.z);
+        e.x=trail.x;e.z=trail.z;
+        e.yaw=turnLimited(e.yaw,trail.yaw,Math.max(0,Math.hypot(dx,dz))*.13);
+      }else{(env.resolveMob || env.resolve)(p);e.x=p.x;e.z=p.z;}
+    } });
   loadLucian();
   /* owner gate: Owner skin + the passphrase/owner unlock (window.__p3d.owner + cheats object, set only by the gated owner boot). Never read from UI or demo events. */
   const ownerGate = () => !!(window.__p3d && window.__p3d.owner && window.__p3d.cheats);
@@ -335,6 +344,11 @@ export function createFight(env) {
   cc.on('remove', e => { if (e.view) { scene.remove(e.view); disposeProxy(e.view); scene.remove(e.tele); e.tele.material.dispose(); if (e.tele2) { scene.remove(e.tele2); e.tele2.material.dispose(); } } });
   cc.on('bossPhase', ev => { hud.say('THE TITAN ENRAGES', 1800); shakeA = 1.2; shakeT = 0.6; });
   const yawLerp = (cur, to, k) => cur + (((to - cur + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * k;
+  const turnLimited=(from,to,maxStep)=>{
+    const angle=Number.isFinite(from)?from:to;
+    const delta=Math.atan2(Math.sin(to-angle),Math.cos(to-angle));
+    return angle+Math.max(-maxStep,Math.min(maxStep,delta));
+  };
 
   /* ---- per frame ---- */
   // Region boss spawning happens near the player. Do not keep enormous GLBs active across the entire map.
@@ -378,23 +392,22 @@ export function createFight(env) {
           Promise.resolve(spawnRegion('vaelthryx',where.x,where.z,{aggroR:48,roaming:true,routePhase:phase}))
             .finally(()=>{roamBusy=false;});
         }
-        if(roamer&&roamer.roaming){
-          // Combat temporarily interrupts his patrol; afterward he rejoins
-          // the route gradually. Never teleport him while the player can see him.
-          const dHero=Math.hypot(roamer.x-state.heroX,roamer.z-state.heroZ);
-          if(dHero>52&&roamer.state==='idle'){
-            const p=balthrixPosition(regionClock+(roamer.routePhase||0));
-            const dx=p.x-roamer.x,dz=p.z-roamer.z,dist=Math.hypot(dx,dz);
-            if(dist>.01){
-              // When combat has displaced Balthrix far from the route, approach
-              // at patrol speed instead of teleporting. Orient to actual motion.
-              const move=Math.min(dist,14*Math.max(0,step));
-              roamer.x+=dx/dist*move;roamer.z+=dz/dist*move;
-              // Avoid a NaN heading from missing imported boss rotation.
-              const heading=Math.atan2(dx,dz);
-              roamer.yaw=yawLerp(Number.isFinite(roamer.yaw)?roamer.yaw:heading,heading,Math.min(1,Math.max(0,step)*3.5));
-            }
+
+      }
+      // Advance on each frame, not only the 220ms boss-spawn poll. Heading
+      // follows the route tangent rather than staring at the player.
+      const roamingBoss=cc.enemies.find(e=>e.key==='vaelthryx'&&e.roaming&&e.state!=='defeated');
+      if(roamingBoss){
+        if(roamingBoss.state!=='idle')roamingBoss.rejoinRoute=true;
+        else{
+          if(roamingBoss.rejoinRoute){
+            const near=projectBalthrixToTrail(roamingBoss.x,roamingBoss.z);
+            roamingBoss.routePhase=near.time-regionClock;
+            roamingBoss.rejoinRoute=false;
           }
+          const point=balthrixPosition(regionClock+(roamingBoss.routePhase||0));
+          roamingBoss.x=point.x;roamingBoss.z=point.z;
+          roamingBoss.yaw=turnLimited(roamingBoss.yaw,point.yaw,1.05*Math.max(0,dt));
         }
       }
     }
@@ -519,7 +532,22 @@ export function createFight(env) {
       if (e.state !== e.ls) { if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
       let lean = 0; if (e.state === 'telegraph') lean = -0.35 * Math.min(1, e.tStateT / e.def.tele); else if (e.state === 'attack') lean = 0.45; else if (e.state === 'stagger') lean = -0.5; else if (e.flinch > 0) lean = -0.25 * (e.flinch / 0.18);
-      r.rotation.x += (lean - r.rotation.x) * Math.min(1, dt * 14);
+      // A long creature needs to tip into rises/descents, not float level
+      // through the slope. Sample terrain ahead, behind and across his body.
+      // The rig's own slither clip remains in charge of spine articulation.
+      if(e.key==='vaelthryx'&&e.roaming){
+        const fx=Math.sin(r.rotation.y),fz=Math.cos(r.rotation.y),span=11;
+        const high=terrainY(e.x+fx*span,e.z+fz*span);
+        const low=terrainY(e.x-fx*span,e.z-fz*span);
+        const pitch=-Math.atan2(high-low,2*span);
+        lean+=Math.max(-.34,Math.min(.34,pitch));
+        const sideways=6;
+        const lh=terrainY(e.x-fz*sideways,e.z+fx*sideways);
+        const rh=terrainY(e.x+fz*sideways,e.z-fx*sideways);
+        const bank=Math.max(-.14,Math.min(.14,Math.atan2(lh-rh,2*sideways)));
+        r.rotation.z+=(bank-r.rotation.z)*Math.min(1,Math.max(0,dt)*3);
+      }
+      r.rotation.x += (lean - r.rotation.x) * Math.min(1, dt * (e.roaming?3:14));
       if (e.state === 'telegraph') { const pt = (e.def.boss || e.def.patterns) ? e.pat : null, f = Math.min(1, e.tStateT / (e.curTele || e.def.tele)), reach = ((pt ? pt.reach : e.def.reach) * HS + e.def.r) * 1.1;
         const shape = pt ? pt.shape : 'ring'; e.tele.visible = shape === 'ring'; if (shape === 'ring') { e.tele.position.set(e.x, terrainY(e.x,e.z)+0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; e.tele.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); }
         if (shape !== 'ring') { const t2 = bossTele(e, shape, pt); t2.visible = true; const L = pt.reach * HS + e.def.r; t2.position.set(e.x, terrainY(e.x,e.z)+0.13, e.z); t2.rotation.set(-Math.PI / 2, 0, e.yaw + Math.PI); t2.material.opacity = 0.18 + 0.45 * f; if (shape === 'line') { t2.scale.set(pt.width * HS, L * (0.35 + 0.65 * f), 1); t2.position.set(e.x + Math.sin(e.yaw) * t2.scale.y / 2, terrainY(e.x + Math.sin(e.yaw) * t2.scale.y / 2,e.z + Math.cos(e.yaw) * t2.scale.y / 2)+0.13, e.z + Math.cos(e.yaw) * t2.scale.y / 2); } else t2.scale.setScalar(L * (0.35 + 0.65 * f)); } else if (e.tele2) e.tele2.visible = false;

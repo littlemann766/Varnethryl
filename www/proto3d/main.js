@@ -902,8 +902,10 @@ async function selectVariant(g, v) {
     if(!g||!v)return;
     previewChoice={g,v};
     choose.textContent='Use '+(BOSS_DISPLAY.get(GLB_IDS[v.slot])||g.name);
-    choose.disabled=false;
-    preview3D.show(GLB_IDS[v.slot],v.mode,BOSS_DISPLAY.get(GLB_IDS[v.slot])||g.name);
+    choose.disabled=true;
+    if(list.scrollTop>0)list.scrollTop=0;
+    preview3D.show(GLB_IDS[v.slot],v.mode,BOSS_DISPLAY.get(GLB_IDS[v.slot])||g.name)
+      .then(ok=>{if(previewChoice?.g===g&&previewChoice?.v===v)choose.disabled=!ok;});
   };
   choose.addEventListener('click',async e=>{
     e.preventDefault();e.stopPropagation();
@@ -923,7 +925,9 @@ async function selectVariant(g, v) {
   };
   for(const [key,label] of [['playable','Playable Characters'],['companions','Companions'],['enemies','Enemies & Bosses']]){
     const tab=document.createElement('button');tab.type='button';tab.textContent=label;tab.setAttribute('role','tab');
-    tab.addEventListener('click',e=>{e.stopPropagation();showRosterTab(key);});
+    tab.addEventListener('click',e=>{e.stopPropagation();showRosterTab(key);
+      const listForTab=key==='playable'?playableGroups:key==='companions'?companionGroups:enemyGroups;
+      const first=listForTab[0];if(first)previewFor(first,bossVariant(first)||curVar(first));});
     tabs.appendChild(tab);tabButtons[key]=tab;
     const group=document.createElement('div');group.className='vn-roster-list';group.setAttribute('role','tabpanel');
     tabLists[key]=group;
@@ -932,7 +936,7 @@ async function selectVariant(g, v) {
   const close = () => { bar.classList.remove('open');preview3D.hide(); };
   const open = () => { bar.classList.add('open');const g=SLOT_G[HEROES.indexOf(hero)];if(g)previewFor(g,curVar(g)); };
   cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation();bar.classList.contains('open')?close():open(); });
-  document.addEventListener('pointerdown', e => { if (!bar.contains(e.target)) close(); }, true);
+  document.addEventListener('pointerdown', e => { if (!bar.contains(e.target) && !document.getElementById('vnSkinBubble')?.contains(e.target)) close(); }, true);
   const mkRow = (g, approved=false) => { const item=approved?bossVariant(g):curVar(g); const n = approved?(BOSS_DISPLAY.get(GLB_IDS[item.slot])||g.name):g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = item.slot;
     if (!approved && g.vars.length > 1) { const sp = document.createElement('small'); sp.textContent = ' \u00b7' + g.vars.length; b.appendChild(sp); }
     // Hold a name for 550 ms to inspect its 3D skin without changing hero,

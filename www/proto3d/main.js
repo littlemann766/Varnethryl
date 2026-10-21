@@ -27,6 +27,7 @@ import { buildHobgoblinCamps } from './hobcamps.js';
 import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
 import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
+import { createRosterPreview } from './roster-preview.js';
 
 const canvas = document.getElementById('c');
 const diag = (msg, bad) => { try { (window.__p3dDiag || (() => {}))(msg, bad); } catch (_) {} };
@@ -862,7 +863,7 @@ async function selectVariant(g, v) {
   // Sslythar remains an unreleased creature while the serpentine rig is refined.
   // Preserve its GLB, stable slot number and saved selection compatibility.
   for (const group of GROUPS.values()) if (group.key === 'ssylthar') seen.add(group);
-  HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g)) { seen.add(g); gl.push(g); } });
+  HERO_NAMES.forEach((_, i) => { const g = SLOT_G[i]; if (g && !seen.has(g) && !/^odyssey$/i.test(g.key)) { seen.add(g); gl.push(g); } });
   gl.sort(compareRoster);
   const enemyKeys=new Set(['vaelthryx','ashentitan','frosttroll','stonetroll','hobgoblin','mossgut','ssylthar','hydrella','wyvern']);
   const companionKeys=new Set(['wolf','snowy','hawk','kestrel','zephyr','pip','briar','cinder','coral','ember','hearth','wren']);
@@ -871,6 +872,45 @@ async function selectVariant(g, v) {
   const playableGroups=gl.filter(g=>!enemyGroups.includes(g)&&!companionGroups.includes(g));
   const cur = document.createElement('button'); cur.id = 'hcur'; cur.className = 'cur'; cur.appendChild(document.createTextNode('')); const car = document.createElement('span'); car.textContent = '\u25be'; cur.appendChild(car); cur.title = 'choose character';
   const vars = document.createElement('div'); vars.id = 'hvars'; const list = document.createElement('div'); list.id = 'hlist';
+  // Live 3D selector preview: one reusable WebGL viewport and no extra game actors.
+  const previewShell=document.createElement('section');previewShell.className='vn-character-preview';
+  previewShell.setAttribute('aria-label','Selected character 3D preview');
+  const previewStage=document.createElement('div');previewStage.className='vn-character-stage';
+  const previewStatus=document.createElement('small');previewStatus.className='vn-character-status';
+  previewStatus.textContent='Choose a character to preview';
+  const choose=document.createElement('button');choose.type='button';choose.className='vn-character-choose';choose.textContent='Use this character';
+  previewShell.append(previewStage,previewStatus,choose);
+  let previewChoice=null;
+  const preview3D=createRosterPreview({
+    THREE,mount:previewStage,status:previewStatus,
+    load:async(id,mode)=>{
+      if(mode==='blocky'&&bk(id))return makeBlocky(id);
+      const buffer=await fetchGLB(id);
+      return new Promise((resolve,reject)=>gl.parse(buffer,'',g=>{
+        try{resolve(wrapGLB(g,id));}catch(err){reject(err);}
+      },reject));
+    },
+    release:model=>{
+      model.traverse(o=>{
+        if(o.isSkinnedMesh){const ix=SKINS.indexOf(o);if(ix>=0)SKINS.splice(ix,1);}
+        if(o.geometry)o.geometry.dispose();
+        if(o.material)for(const mat of [].concat(o.material))mat?.dispose?.();
+      });
+    }
+  });
+  const previewFor=(g,v)=>{
+    if(!g||!v)return;
+    previewChoice={g,v};
+    choose.textContent='Use '+(BOSS_DISPLAY.get(GLB_IDS[v.slot])||g.name);
+    choose.disabled=false;
+    preview3D.show(GLB_IDS[v.slot],v.mode,BOSS_DISPLAY.get(GLB_IDS[v.slot])||g.name);
+  };
+  choose.addEventListener('click',async e=>{
+    e.preventDefault();e.stopPropagation();
+    if(!previewChoice||choose.disabled)return;
+    const {g,v}=previewChoice;choose.disabled=true;close();
+    try{await selectVariant(g,v);}finally{choose.disabled=false;}
+  });
   const tabs=document.createElement('div'); tabs.className='vn-roster-tabs';
   const tabLists={};
   const tabButtons={};
@@ -889,8 +929,9 @@ async function selectVariant(g, v) {
     tabLists[key]=group;
   }
   const rows = [];
-  const close = () => bar.classList.remove('open');
-  cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation(); bar.classList.toggle('open'); });
+  const close = () => { bar.classList.remove('open');preview3D.hide(); };
+  const open = () => { bar.classList.add('open');const g=SLOT_G[HEROES.indexOf(hero)];if(g)previewFor(g,curVar(g)); };
+  cur.addEventListener('pointerdown', e => e.stopPropagation()); cur.addEventListener('click', e => { e.stopPropagation();bar.classList.contains('open')?close():open(); });
   document.addEventListener('pointerdown', e => { if (!bar.contains(e.target)) close(); }, true);
   const mkRow = (g, approved=false) => { const item=approved?bossVariant(g):curVar(g); const n = approved?(BOSS_DISPLAY.get(GLB_IDS[item.slot])||g.name):g.name, row = document.createElement('div'); row.className = 'row'; const b = document.createElement('button'); b.className = g.slots.every(s => /^p:/.test(GLB_IDS[s])) ? 'ph' : ''; b.title = n; b.textContent = n; b.dataset.i = item.slot;
     if (!approved && g.vars.length > 1) { const sp = document.createElement('small'); sp.textContent = ' \u00b7' + g.vars.length; b.appendChild(sp); }
@@ -923,7 +964,7 @@ async function selectVariant(g, v) {
           const choice=document.createElement('button');choice.type='button';
           choice.textContent=skin.label+(skin===curVar(g)?' ✓':'');
           choice.title='Use '+g.name+' '+skin.label;
-          choice.addEventListener('click',()=>{bubble.hidden=true;close();selectVariant(g,skin);});
+          choice.addEventListener('click',()=>{bubble.hidden=true;previewFor(g,skin);});
           options.appendChild(choice);
         }
         bubble.appendChild(options);
@@ -934,17 +975,17 @@ async function selectVariant(g, v) {
     b.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-startX,e.clientY-startY)>12)cancelHold();});
     b.addEventListener('pointerup',cancelHold);b.addEventListener('pointercancel',cancelHold);
     b.addEventListener('contextmenu',e=>{e.preventDefault();});
-    b.addEventListener('click',e=>{e.stopPropagation();if(held){e.preventDefault();held=false;return;}close();selectVariant(g,approved?bossVariant(g):curVar(g));});
+    b.addEventListener('click',e=>{e.stopPropagation();if(held){e.preventDefault();held=false;return;}previewFor(g,approved?bossVariant(g):curVar(g));});
     const f = document.createElement('button'); f.textContent = '+'; f.className = 'fol'; f.title = 'add/remove ' + n + ' as party follower'; f.dataset.f = item.slot; f.dataset.g = g.key; f.addEventListener('pointerdown', e => e.stopPropagation()); f.addEventListener('click', e => { e.stopPropagation(); f.dataset.f = approved?bossVariant(g).slot:curVar(g).slot; toggleFollower(+f.dataset.f); });
     row.appendChild(b); row.appendChild(f); return { row, b }; };
   const back= document.createElement('button');back.type='button';back.className='vn-picker-close';back.textContent='← Back to game';back.addEventListener('pointerdown',e=>e.stopPropagation());back.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();close();});list.appendChild(back);
-  list.appendChild(tabs);
+  list.appendChild(previewShell);list.appendChild(tabs);
   for(const group of Object.values(tabLists))list.appendChild(group);
   showRosterTab('playable');
   for(const [key,groups] of [['playable',playableGroups],['companions',companionGroups],['enemies',enemyGroups]]){
     for(const g of groups){const approved=!!bossVariant(g),r=mkRow(g,approved);tabLists[key].appendChild(r.row);rows.push({g,b:r.b,approved});}
   }
-  window.__openBossRoster=()=>{showRosterTab('enemies');bar.classList.add('open')};
+  window.__openBossRoster=()=>{showRosterTab('enemies');open();if(enemyGroups.length)previewFor(enemyGroups[0],bossVariant(enemyGroups[0])||curVar(enemyGroups[0]));};
   window.__ownerRoster = (allow = true) => {
     if (!OG) return;
     const i = rows.findIndex(r => r.g === OG);
@@ -960,7 +1001,7 @@ async function selectVariant(g, v) {
     else tabLists.playable.appendChild(r.row);
     rows.push({ g: OG, b: r.b, approved: false });
   };
-  bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows }; refreshSel((() => { const q = qp0.get('hero'); return activeSlot(q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0); })()); }
+  bar.appendChild(cur); bar.appendChild(vars); bar.appendChild(list); selUI = { cur, vars, rows, previewFor }; refreshSel((() => { const q = qp0.get('hero'); return activeSlot(q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0); })()); }
 async function toggleModel(i) {
   const id = GLB_IDS[i], next = modeFor(id) === 'blocky' ? 'glb' : 'blocky'; try { localStorage.setItem('vn_model_' + id, next); } catch (_) {}
   if (HEROES.indexOf(hero) === i) { await loadHero(i); }

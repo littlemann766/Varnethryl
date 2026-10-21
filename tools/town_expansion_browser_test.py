@@ -55,6 +55,19 @@ with sync_playwright() as p:
     print('frost realm',json.dumps(ice),flush=True)
     check('frost portal teleports to separate icy map',ice['zone']=='frost' and ice['triangles']>20000,ice)
     check('frost terrain is actual walkable ground',abs(ice['ground']-ice['y'])<.15,ice)
+    cave=page.evaluate("""()=>{const a=__p3d,realm=a.frostRealm,c=realm?.cave;
+       return {visible:realm?.group.visible,lights:c?.lights?.length,iceMotes:c?.motes?.geometry?.attributes?.position?.count,
+       colliders:c?.colliders?.length,sky:a.scene.background?.getHex?.(),fog:a.scene.fog?.color?.getHex?.(),
+       litBrothers:c?.lights?.filter(l=>Math.hypot(l.position.x-37,l.position.z+66)<20||
+         Math.hypot(l.position.x+37,l.position.z+66)<20).length,
+       litExit:c?.lights?.some(l=>Math.hypot(l.position.x+7,l.position.z-177)<20)};}""")
+    print('frost cave lighting and physics',json.dumps(cave),flush=True)
+    check('Frost Cave is visibly active and ceiling-dark, never outdoor sky',cave['visible'] and cave['sky']==0x0c1422,cave)
+    check('both brothers have nearby cave lighting',cave['lights']==5 and cave['litBrothers']>=2,cave)
+    check('portal has cave lighting',cave['litExit'],cave)
+    check('low-cost airborne ice motes and solid ice collision present',cave['iceMotes']==168 and cave['colliders']>0,cave)
+    page.wait_for_timeout(400)
+    page.screenshot(path='frost-cave-mobile-test.png')
     # Boss models load asynchronously, but their encounters must become active without input.
     page.wait_for_function("window.__p3d?.fight?.monsters?.some(e=>e.key==='frosttroll_a')&&__p3d.fight.monsters.some(e=>e.key==='frosttroll_b')",timeout=90000)
     check('both Frost Troll brothers spawn together',page.evaluate("['frosttroll_a','frosttroll_b'].every(k=>__p3d.fight.monsters.some(e=>e.key===k))"))

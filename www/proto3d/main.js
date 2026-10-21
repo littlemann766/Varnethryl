@@ -1627,7 +1627,7 @@ async function setZone(name) {
     state.heroX=lastZone==='frost'?FROST_PORTAL.x:TOWN_PORTAL.x;
     state.heroZ=lastZone==='frost'?FROST_PORTAL.z+6:TOWN_PORTAL.z+4;state.yaw=0;
   }
-  state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); zoneCd = 1.5; portalDwell = 0;
+  state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
   updateZoneAmbience(.1,true);
   if(name==='wilds'||name==='frost'){const f=await fightToggle(true);f.startAuto();if(name==='frost')f.startRegionBosses('frost');}
   return true;
@@ -1778,7 +1778,7 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   onRamp(x, z, level = 0) { const s = surfaceAt(x, z, level); return !!(s && s.ramp); },
   free(x, z, level = 0) { const l0 = state.level; state.level = level; const q = { x, z }; resolve(q); state.level = l0; return !!surfaceAt(x, z, level) && Math.hypot(q.x - x, q.z - z) < 0.02; },
-  teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; marker.visible = false; state.blockedFrames = 0; updateLevel(); snapFollowers(); },
+  teleport(x, z, level = 0) { state.heroX = x; state.heroZ = z; state.level = level; state.target = null; marker.visible = false; state.blockedFrames = 0; updateLevel(); snapFollowers(); camRig.snap = true; },
   setCamYaw(y) { state.camYaw = y; },
   setZoom(z) { state.zoom = z; },
   bump: { sys: bumpSys, player: playerAct, crowd, on: BUMP_ON },

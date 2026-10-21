@@ -25,3 +25,12 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Test larger town and Wilds travel
         run: python tools/town_expansion_browser_test.py
+      - name: Attach Frost Cave mobile gameplay screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Varnethryl-Zone-Gameplay-Previews
+          path: |
+            frost-cave*.png
+            titan-volcano*.png
+          if-no-files-found: warn

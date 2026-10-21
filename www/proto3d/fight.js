@@ -15,6 +15,7 @@ import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './
 import { Respawner } from './combat/respawn.js';
 import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
+import { terrainBodyPitch } from './terrain-follow.js';
 import { bossHome, telegraphKey } from './combat/boss-arena.js';
 import { HOB_CAMPS } from './hobcamps.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
@@ -284,7 +285,7 @@ export function createFight(env) {
     const e = cc.addEnemy(key, x, z, Object.assign({ view: w, top:top+terrainY(x,z), heightAbove:top, ems, tele, flashOn: false, px: x, pz: z }, bossHome(key,x,z)||{}, extra));
     if(def.boss){bossOn=true;
       if(Math.hypot(x-state.heroX,z-state.heroZ)<65){
-        hud.say(def.name.toUpperCase()+' APPEARS',2200);
+        hud.say(def.name.toUpperCase()+' APPEARS',1250);
         cc.tgt.target=e;cc.tgt.locked=false;cc.lastTarget=e;
       }
     }
@@ -521,6 +522,14 @@ export function createFight(env) {
       if (e.state !== e.ls) { if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
       let lean = 0; if (e.state === 'telegraph') lean = -0.35 * Math.min(1, e.tStateT / e.def.tele); else if (e.state === 'attack') lean = 0.45; else if (e.state === 'stagger') lean = -0.5; else if (e.flinch > 0) lean = -0.25 * (e.flinch / 0.18);
+      // Balthrix's ROOT gently matches hill inclination, while authored
+      // spine/tail joints handle the actual serpent gait. Never lean the
+      // body through the ground or override strike/stagger attack poses.
+      if(e.key==='vaelthryx'&&e.roaming&&(e.state==='idle'||e.state==='chase')){
+        const along=7,fx=Math.sin(heading)*along,fz=Math.cos(heading)*along;
+        const behind=terrainY(e.x-fx,e.z-fz),ahead=terrainY(e.x+fx,e.z+fz);
+        lean+=terrainBodyPitch(behind,ahead,2*along,.16);
+      }
       r.rotation.x += (lean - r.rotation.x) * Math.min(1, dt * 14);
       if (e.state === 'telegraph') { const pt = (e.def.boss || e.def.patterns) ? e.pat : null, f = Math.min(1, e.tStateT / (e.curTele || e.def.tele)), reach = ((pt ? pt.reach : e.def.reach) * HS + e.def.r) * 1.1;
         const shape = pt ? pt.shape : 'ring'; e.tele.visible = shape === 'ring'; if (shape === 'ring') { e.tele.position.set(e.x, terrainY(e.x,e.z)+0.12, e.z); e.tele.scale.setScalar(reach); e.tele.material.opacity = 0.2 + 0.45 * f; e.tele.material.color.setHex(e.phase === 2 ? 0xff7a1a : 0xff2a2a); }
@@ -550,7 +559,7 @@ export function createFight(env) {
   function start(isAuto) {
     if (on) { if (isAuto === true) auto = true; return; } auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
-    if (auto) { syncHero(); equip(); hud.say('THE WILDS - monsters about', 1800); return; }
+    if (auto) { syncHero(); equip(); const zone=env.zone?.(); hud.say(zone==='frost'?'FROST CAVE — THE BROTHERS AWAIT':zone==='town'?'OUTSKIRTS — DANGER AHEAD':'THE WILDS — MONSTERS ABOUT',1800); return; }
     // Normal combat is available to every playable hero. Do not silently
     // replace the chosen character with the Owner when fight mode is toggled.
     syncHero(); equip(); hud.say('COMBAT READY', 1800);

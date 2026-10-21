@@ -26,6 +26,11 @@ jobs:
       - name: Validate changed systems
         run: |
           node tools/check_overhaul.mjs
+          node tools/check_volcano_visuals.mjs
+          node tools/check_frost_visuals.mjs
+          node tools/check_zone_ambience.mjs
+          node tools/check_terrain_follow.mjs
+          node tools/check_serpent_locomotion.mjs
           node tools/check_boss_ai.mjs
           node tools/check_exp_ui.mjs
           node tools/check_boss_regions.mjs

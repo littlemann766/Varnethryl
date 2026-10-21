@@ -30,6 +30,9 @@ assert(fight.includes("u.serpentWave(dt,mv)"),'Balthrix enemy rig updates a spin
 assert(fight.includes('14*Math.max(0,dt)'),'Balthrix patrol advances per frame instead of jerky time chunks');
 assert(fight.includes('if (on) { if (isAuto === true) auto = true; return; }'),'existing active combat must be promotable');
 assert(main.includes("group.key === 'ssylthar'"),'unreleased Sslythar remains hidden');
+assert(main.includes('const hiddenSerpentSlot ='),'unreleased Sslythar saved/URL selection is guarded');
+assert(main.includes('savedPlan.hero = activeSlot(savedPlan.hero)'),'stored Sslythar avatar is not resurrected in live gameplay');
+assert(main.includes('if (!playableSlot(i)) return;'),'Sslythar cannot be selected or added as a companion');
 assert(main.includes("EXTRA.push(['n:vaelthryx_straight_rig_50'"),'stable existing boss slot retained');
 
 // Make sure the serpent's aftermath avoids all mission-critical safe areas.

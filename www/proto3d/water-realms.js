@@ -42,7 +42,7 @@ function island(parent,x,z,r,sizeSeed,colliders){
 }
 async function glbFromGzip(url){
  if(!('DecompressionStream'in window))throw new Error('This Android WebView does not support compressed GLB models');
- const response=await fetch(url+'?v=1.5.4');if(!response.ok)throw new Error('GLB HTTP '+response.status);
+ const response=await fetch(url+'?v=1.5.5');if(!response.ok)throw new Error('GLB HTTP '+response.status);
  const bytes=await response.arrayBuffer(),head=new Uint8Array(bytes,0,Math.min(4,bytes.byteLength));
  // Some hosts decode .gz on the HTTP layer. Accept either raw GLB or gzip
  // exactly once so the original ship and Hydra load on both web and Android.
@@ -199,24 +199,41 @@ export function buildSailingOcean(scene){
    }
    return{x:nx,z:nz,heading:nav.heading,speed:nav.speed,blocked:false};
  }
+ // One deterministic island layout feeds BOTH streaming 3D geometry and the
+ // full-ocean chart. An unloaded island must not vanish from the overview.
+ // Do not independently randomize minimap rocks: use this exact RNG order.
+ function islandLayout(tx,tz){
+   const seed=((tx*73856093)^(tz*19349663)^9201)|0,r=rnd(seed),result=[];
+   if(Math.hypot(tx*TILE,tz*TILE-(OCEAN.half-175))<=260)return result;
+   const count=r()>.60?1+Math.floor(r()*2):0;
+   for(let i=0;i<count;i++){
+     const x=OCEAN.cx+(tx+r()-.5)*TILE,z=OCEAN.cz+(tz+r()-.5)*TILE;
+     const half=OCEAN.half-45;
+     if(Math.abs(x-OCEAN.cx)>half||Math.abs(z-OCEAN.cz)>half)continue;
+     if(Math.hypot(x-spawn.x,z-spawn.z)<310)continue;
+     result.push({x,z,r:18+r()*35,seed:seed+i*83});
+   }
+   return result;
+ }
  function tile(tx,tz){
   const k=tx+','+tz;if(tiles.has(k))return;
   const group=new THREE.Group();group.name='ocean-island-tile-'+k;root.add(group);const hits=[];
-  const seed=((tx*73856093)^(tz*19349663)^9201)|0,r= rnd(seed);
-  // Wide open sea, scenic rocky archipelagos. Keep initial departure lane free.
-  if(Math.hypot(tx*TILE, tz*TILE-(OCEAN.half-175))>260){
-   const count=r()>.60?1+Math.floor(r()*2):0;
-   for(let i=0;i<count;i++){
-    const x=OCEAN.cx+(tx+r()-.5)*TILE,z=OCEAN.cz+(tz+r()-.5)*TILE;
-    const half=OCEAN.half-45;
-    if(Math.abs(x-OCEAN.cx)>half||Math.abs(z-OCEAN.cz)>half)continue;
-    // Start in an open sailing lane, not beneath oversized placeholder crags.
-    // Their outer tile can be far from spawn while the actual island is near.
-    if(Math.hypot(x-spawn.x,z-spawn.z)<310)continue;
-    island(group,x,z,18+r()*35,seed+i*83,hits);
-   }
-  }
+  for(const p of islandLayout(tx,tz))island(group,p.x,p.z,p.r,p.seed,hits);
   tiles.set(k,group);obstacles.set(k,hits);
+ }
+ // Cached lightweight map geometry covers the full 9x9 km without loading
+ // remote tiles into the scene or changing boat collision / performance.
+ let fullIslandChart=null;
+ function mapFeatures(full=false){
+   if(!full)return [...obstacles.values()].flat();
+   if(!fullIslandChart){
+     const all=[],limit=Math.ceil(OCEAN.half/TILE)+1;
+     for(let tz=-limit;tz<=limit;tz++)for(let tx=-limit;tx<=limit;tx++){
+       for(const p of islandLayout(tx,tz))all.push({type:'circle',x:p.x,z:p.z,r:p.r*.83});
+     }
+     fullIslandChart=all;
+   }
+   return fullIslandChart;
  }
  function update(t,x,z,yaw){
   if(disposed)return;
@@ -240,6 +257,6 @@ export function buildSailingOcean(scene){
    get shipReady(){return shipReady;},get shipLoadError(){return shipLoadError;},
    get navigation(){return {...nav};},
    // Same positions as the streamed 3D island collision geometry.
-   mapFeatures(){return [...obstacles.values()].flat();},crewSpot,sail,blocked,
+   mapFeatures,crewSpot,sail,blocked,
    update,dispose(){disposed=true;scene.remove(root);dispose(root);}};
 }

@@ -22,7 +22,12 @@ assert(minimap.includes('e.height?.(zone,x,z)'),'minimap samples actual terrain 
 assert(minimap.includes('e.water?.(zone,x,z)'),'minimap samples current water');
 assert(minimap.includes('env.islands?.()'),'minimap shows real streamed ocean islands');
 assert(main.includes('miniMap.invalidate(); // redraw the real top-down'),'zone travel refreshes the map');
-assert(marine.includes('mapFeatures(){return [...obstacles.values()].flat();}'),'islands source is live');
+assert(marine.includes('if(!full)return [...obstacles.values()].flat();'),'local chart keeps streamed islands live');
+assert(marine.includes('for(const p of islandLayout(tx,tz))island('),'3D islands use same layout as map chart');
+assert(marine.includes('function mapFeatures(full=false)'),'full-ocean chart computes future unloaded islands');
+assert(minimap.includes("overview?cfg.cx:(state.heroX||0)"),'FULL chart stays centred on map bounds, not hero');
+assert(minimap.includes('Math.SQRT2*1.07'),'full zone view fits all square corners inside the circular minimap');
+assert(minimap.includes('ctx.translate(player[0],player[1])'),'player location is plotted at world coordinates');
 assert(main.includes('zoneTransitionQueue.then(()=>setZoneNow(name))'),'travel requests must be serialized');
 assert(main.includes("if(qp.has('party'))for(const id of defaultFollowers)"),'explicit party override must fill missing saved follower berths');
 assert(main.includes("fromSave&&!qp.has('party')"),'ordinary saved party remains unchanged without a party override');

@@ -72,19 +72,23 @@ export function createMiniMap(getState,getZone,env={}){
  bgCanvas.width=bgCanvas.height=N;
  const bg=bgCanvas.getContext('2d',{alpha:false}),pixels=bg?.createImageData(N,N);
  const parsed=new Map();
- let active='',cfg=null,radius=0,dirty=true,expanded=false,last=-1000,lastPaint=-1000,originX=0,originZ=0,paintCount=0,signature='';
+ let active='',cfg=null,radius=0,dirty=true,expanded=false,overview=false,last=-1000,lastPaint=-1000,originX=0,originZ=0,paintCount=0,signature='';
  const invalidate=()=>{dirty=true;last=-1000;};
  function configure(){
   const z=getZone()||{name:'town'};
   if(!cfg||z.name!==active||z.half!==cfg.half||z.cx!==cfg.cx||z.cz!==cfg.cz){
    active=z.name||'town';const v=custom.get(active)||P[active]||[active.toUpperCase(),(z.half||560)*.3,35];
-   cfg={cx:z.cx||0,cz:z.cz||0,half:z.half||560,name:active,label:v[0],min:v[2],max:(z.half||560)*1.08,markers:v[3]||[]};
-   radius=v[1];root.dataset.zone=active;invalidate();
+   // A full-map circle must accommodate the furthest square corner.
+   // A radius of half*1.08 clips entire quadrants near zone corners.
+   cfg={cx:z.cx||0,cz:z.cz||0,half:z.half||560,name:active,label:v[0],min:v[2],max:(z.half||560)*Math.SQRT2*1.07,markers:v[3]||[]};
+   radius=v[1];overview=false;root.dataset.view='follow';root.dataset.zone=active;invalidate();
   }
  }
  function zoom(action){
-  configure();radius=action==='full'?cfg.max:Math.max(cfg.min,Math.min(cfg.max,radius*(action==='in'?.65:1.5)));
-  invalidate();
+  configure();
+  if(action==='full'){overview=true;radius=cfg.max;}
+  else{overview=false;radius=Math.max(cfg.min,Math.min(cfg.max,radius*(action==='in'?.65:1.5)));}
+  root.dataset.view=overview?'full':'follow';invalidate();
  }
  for(const [action,label,aria] of [['in','+','Zoom in'],['out','−','Zoom out'],['full','FULL','Show full map']]){
   const b=document.createElement('button');b.type='button';b.className='vn-mini-control '+action;b.textContent=label;b.setAttribute('aria-label',aria);
@@ -98,7 +102,8 @@ export function createMiniMap(getState,getZone,env={}){
  });
  function raster(state,time){
   if(!pixels)return;
-  const px=state.heroX||0,pz=state.heroZ||0,unit=2*radius*1.2/N;
+  // The full chart stays fixed on the world centre; local mode follows hero.
+  const px=overview?cfg.cx:(state.heroX||0),pz=overview?cfg.cz:(state.heroZ||0),unit=2*radius*1.2/N;
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){
    const x=px+(i+.5-N/2)*unit,z=pz+(j+.5-N/2)*unit;
    const hex=terrainColor(active,x,z,env,cfg.cx,cfg.cz);
@@ -111,7 +116,7 @@ export function createMiniMap(getState,getZone,env={}){
   root.dataset.paintCount=String(++paintCount);
  }
  function overlay(s){
-  const scale=C/radius,px=s.heroX||0,pz=s.heroZ||0;
+  const scale=C/radius,px=overview?cfg.cx:(s.heroX||0),pz=overview?cfg.cz:(s.heroZ||0);
   const at=(x,z)=>[C+(x-px)*scale,C+(z-pz)*scale];
   const onscreen=(p,r=0)=>p[0]>-r&&p[0]<W+r&&p[1]>-r&&p[1]<W+r;
   if(active==='town'){
@@ -148,7 +153,7 @@ export function createMiniMap(getState,getZone,env={}){
     }
    }
   }
-  if(active==='sailing')for(const island of env.islands?.()||[]){
+  if(active==='sailing')for(const island of env.islands?.(overview)||[]){
    const p=at(island.x,island.z),r=(island.r||1)*scale;if(!onscreen(p,r))continue;
    ctx.fillStyle='#637979';ctx.strokeStyle='#c2bfae';ctx.lineWidth=2;
    ctx.beginPath();ctx.arc(p[0],p[1],Math.max(1,r),0,Math.PI*2);ctx.fill();ctx.stroke();
@@ -163,23 +168,30 @@ export function createMiniMap(getState,getZone,env={}){
    ctx.beginPath();ctx.arc(p[0],p[1],kind==='boss'?5:4,0,Math.PI*2);ctx.fill();ctx.stroke();
    if(expanded&&kind!=='party'&&scale>.28){ctx.fillStyle='#fff0d5';ctx.font='bold 8px Georgia';ctx.textAlign='center';ctx.fillText(label,p[0],p[1]-8);}
   }
-  // North is always up. Walking yaw zero faces +Z; sailing yaw zero faces -Z.
-  ctx.save();ctx.translate(C,C);ctx.rotate(active==='sailing'?-(s.yaw||0):Math.PI-(s.yaw||0));
+  // A full map keeps the actual player at their world coordinate, not at
+  // the map centre. On local follow mode this still sits at canvas centre.
+  // North is always up; walking +Z is south, sailing -Z is north.
+  const player=at(s.heroX||0,s.heroZ||0);
+  ctx.save();ctx.translate(player[0],player[1]);ctx.rotate(active==='sailing'?-(s.yaw||0):Math.PI-(s.yaw||0));
   ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(-9,10);ctx.lineTo(0,4);ctx.lineTo(9,10);ctx.closePath();
   ctx.fillStyle='#ffe4a4';ctx.strokeStyle='#39223e';ctx.lineWidth=3;ctx.stroke();ctx.fill();ctx.restore();
   ctx.fillStyle='#fff0ce';ctx.textAlign='center';ctx.font='bold 13px Georgia';ctx.fillText('N',C,17);
-  ctx.font='10px Georgia';ctx.fillText(Math.round(radius*2)+' wu',C,W-9);
+  ctx.font='10px Georgia';ctx.fillText((overview?'FULL · ':'')+Math.round(radius*2)+' wu',C,W-9);
  }
  function update(now=0){
   if(!ctx||now-last<180)return;last=now;
   const state=getState()||{};configure();title.textContent=cfg.label;
   const next=active+'|'+cfg.half+'|'+(env.revision?.()||'');
   if(next!==signature){signature=next;dirty=true;}
-  if(dirty||Math.hypot((state.heroX||0)-originX,(state.heroZ||0)-originZ)>radius*.08||now-lastPaint>2400)raster(state,now);
+  if(dirty||(!overview&&(Math.hypot((state.heroX||0)-originX,(state.heroZ||0)-originZ)>radius*.08||now-lastPaint>2400)))raster(state,now);
   ctx.save();ctx.beginPath();ctx.arc(C,C,C-1,0,Math.PI*2);ctx.clip();
   ctx.fillStyle='#314e4b';ctx.fillRect(0,0,W,W);
-  const size=W*1.2,scale=C/radius;
-  ctx.drawImage(bgCanvas,C-size/2+(originX-(state.heroX||0))*scale,C-size/2+(originZ-(state.heroZ||0))*scale,size,size);
+  const size=W*1.2,scale=C/radius,centreX=overview?cfg.cx:(state.heroX||0),centreZ=overview?cfg.cz:(state.heroZ||0);
+  ctx.drawImage(bgCanvas,C-size/2+(originX-centreX)*scale,C-size/2+(originZ-centreZ)*scale,size,size);
+  root.dataset.centerX=String(centreX);root.dataset.centerZ=String(centreZ);
+  root.dataset.playerX=String(state.heroX||0);root.dataset.playerZ=String(state.heroZ||0);
+  root.dataset.radius=String(radius);
+  root.dataset.islandCount=active==='sailing'?String((env.islands?.(overview)||[]).length):'0';
   overlay(state);ctx.restore();
  }
  // First draw belongs to the animation frame after all party/zone bindings exist.

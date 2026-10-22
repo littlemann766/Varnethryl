@@ -5,6 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {HERO_M,HERO_LORE_HEIGHTS,inchesToMeters,CHARS,profileFor,loadScale} from '../www/proto3d/charscale.js';
 import {BOSS_PATTERNS,ENEMIES} from '../www/proto3d/combat/data.js';
 import {pickPattern} from '../www/proto3d/combat/ai.js';
+import {applyPose} from '../www/proto3d/bump.js';
 import {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_REALM,FROST_PORTAL,LAVA_POOLS,PORT_CENTER,isCitySafe,balthrixPosition,onLava,frostHill,lavaAmount} from '../www/proto3d/bossregions.js';
 const src=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const close=(a,b)=>Math.abs(a-b)<1e-8;
@@ -112,6 +113,14 @@ assert(main.includes('performance.now()>=outdoorCombatRetryAt'),'combat startup 
 
 const bump=src('www/proto3d/bump.js'), buildingsKit=src('www/proto3d/bldkit.js');
 assert(bump.includes('root.position.y = baseY + fin(a.phop, 0)'),'animated companions preserve terrain elevation');
+// Exercise the exact bug: pose animation must add hop to outdoor terrain height,
+// not reset the model to y=0 (which made companions disappear through hills).
+const companionMock={rotation:{order:'XYZ',x:0,y:0,z:0},position:{y:0}};
+applyPose({ptx:0,ptz:0,pyaw:0,phop:.25},companionMock,null,0,37.5);
+assert.equal(companionMock.position.y,37.75,'companion stands on 37.5m slope while reacting to bump');
+applyPose({ptx:0,ptz:0,pyaw:0,phop:0},companionMock,null,0,0);
+assert.equal(companionMock.position.y,0,'flat village placement remains grounded');
+
 assert(main.includes('applyPose(a, w, r.nd, a.yaw, r.y)'),'followers pass terrain height through pose');
 assert(main.includes('crowdSurface(r, a, dt)'),'followers continue sampling shared terrain after moving');
 assert(buildingsKit.includes('export function scrubDecorativeFaces('),'malformed colorful town decor is sanitized');

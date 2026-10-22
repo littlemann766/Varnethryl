@@ -382,7 +382,7 @@ export class CombatHUD {
     document.body.appendChild(r);
     // Anchor all six movement/defense buttons to the same responsive pad.
     r.querySelector('.cx').appendChild(r.querySelector('.cl'));
-    const $ = s => r.querySelector(s), $ = s => Array.from(r.querySelectorAll(s));
+    const $ = s => r.querySelector(s), $$ = s => Array.from(r.querySelectorAll(s));
     this.tp = $('.tp'); this.tpNm = $('.tp .nm'); this.tpSub = $('.tp .sub'); this.tpBar = $('.tp .bar i'); this.tpTxt = $('.tp .bar b');
     const vb = n => ({ i: $('.vit .' + n + ' i'), b: $('.vit .' + n + ' b') }); this.vhp = vb('hp'); this.vmp = vb('mp'); this.vsp = vb('sp'); this.vfy = vb('fy');
     this.exp = $('.vn-exp'); this.expFill = $('.vn-exp-fill'); this.expLevel = $('.vn-exp-level'); this.expValue = $('.vn-exp-value'); this.expKey = '';

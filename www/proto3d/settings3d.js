@@ -34,7 +34,7 @@ let selectedSection = 'Camera';
 let root = null, body = null, timer = 0, E = null;
 function el(tag, props, kids) { const e = document.createElement(tag); if (props) Object.assign(e, props); if (kids) for (const k of kids) e.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); return e; }
 const isOpen = () => !!root && root.style.display === 'block';
-const hide = () => { if (root) root.style.display = 'none'; clearInterval(timer); };
+const hide = () => { if (root) root.style.display = 'none'; document.body.classList.remove('vn-settings-open'); clearInterval(timer); };
 
 function toggleBtn(label, get, set, key) {
   const b = el('button', { type: 'button', textContent: label }); b.dataset.set = key;
@@ -57,7 +57,8 @@ function build() {
   const save = () => { persist(E); };
   const view = (v, label) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.set = 'view-' + v; const s = () => b.classList.toggle('on', prefs.view === v); b.addEventListener('click', () => { rig.setView(v); save(); syncs.forEach((f) => f()); }); s(); syncs.push(s); return b; };
   body.appendChild(sec('Game & version'));
-  const version = el('button', { type: 'button', textContent: 'Varnethryl 3D · v1.2.9' });
+  const activeVersion = document.getElementById('vnVersion')?.textContent?.trim() || 'unknown';
+  const version = el('button', { type: 'button', textContent: 'Varnethryl 3D · v' + activeVersion });
   version.dataset.set = 'version-cheats';
   version.setAttribute('aria-label', 'Version — open owner cheats');
   version.style.cssText = 'color:#f1d28a;font-weight:700;cursor:pointer;touch-action:manipulation';
@@ -90,14 +91,14 @@ function build() {
   const csync = () => { const active = !!(E.combatOn && E.combatOn()); cb.classList.toggle('on', active); cb.textContent = active ? 'Combat: On' : 'Combat: Off'; }; csync(); syncs.push(csync);
   cb.addEventListener('click', async () => { await E.setCombat(!(E.combatOn && E.combatOn())); csync(); });
   body.appendChild(row(cb)); body.appendChild(el('small', { textContent: 'F basic attack · Space dodge · Q lock-on · Tab next target · 1–4 skills · R potion · E weapon. On phones, tap the medieval combat buttons.' }));
-  const hudEd = () => (window.__p3d && window.__p3d.combat && window.__p3d.combat.hud && window.__p3d.combat.hud.editor) || null;
+  const hudEd = () => window.__vnHudEditor || null;
   const eb = el('button', { type: 'button', textContent: 'Move or resize buttons' }); eb.dataset.set = 'editbtns';
   const rb = el('button', { type: 'button', textContent: 'Restore button layout' }); rb.dataset.set = 'resetbtns';
-  const esync = () => { const e = hudEd(); eb.classList.toggle('on', !!(e && e.editing)); }; syncs.push(esync);
-  eb.addEventListener('click', async () => { if (!(E.combatOn && E.combatOn())) await E.setCombat(true); const e = hudEd(); if (!e) return; e.enable(!e.editing); esync(); if (e.editing) hide(); });
-  rb.addEventListener('click', () => { const e = hudEd(); if (e) { e.reset(); esync(); } });
+  const esync = () => { const e = hudEd(); eb.classList.toggle('on', !!e?.isEditing?.()); }; syncs.push(esync);
+  eb.addEventListener('click', () => { hide(); hudEd()?.open?.(); });
+  rb.addEventListener('click', () => { if (window.confirm('Restore default button layout in portrait and landscape?')) hudEd()?.reset?.(); });
   body.appendChild(row(eb, rb));
-  body.appendChild(el('small', { textContent: 'Edit buttons: the menu closes; drag a button to move it, pinch it (two fingers) or use the size slider. Saved on this device. Tap Done when finished.' }));
+  body.appendChild(el('small', { textContent: 'Move / resize opens the HUD editor. Drag controls to move them, tap + or − to resize, then Save HUD. Portrait and landscape save separately.' }));
   body.appendChild(sec('Loadout'));
   const ld = el('div', { className: 'ld', style: 'font-size:13px;line-height:1.5' }); body.appendChild(ld);
   const ldSync = () => { const F = window.__p3d && window.__p3d.fight, kit = F && F.cc && F.cc.kit; if (!kit || !kit.weapon) { ld.textContent = F && F.on ? 'This hero uses the generic kit.' : 'Start Fight mode to see the active hero\u2019s weapon, armor and skills.'; return; }
@@ -221,7 +222,8 @@ export function toggleSettings(env) {
     document.body.appendChild(root);
   }
   if (isOpen()) { hide(); return false; }
-  build(); root.style.display = 'block';
+  window.__vnHudEditor?.close?.(false);
+  build(); root.style.display = 'block'; document.body.classList.add('vn-settings-open');
   timer = setInterval(() => { if (build.syncs) build.syncs.forEach((f) => f()); }, 400);
   return true;
 }

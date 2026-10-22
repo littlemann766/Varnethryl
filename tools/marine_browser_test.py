@@ -64,7 +64,11 @@ with sync_playwright() as pw:
    check(tag+' minimap zoom returns to following player',pg.evaluate(
      "document.getElementById('vnMiniMap').dataset.view==='follow'"))
    pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.full').click()")
-   pg.wait_for_function("document.getElementById('vnMiniMap').dataset.view==='full'",timeout=12000)
+   pg.wait_for_function("""()=>{
+     const n=document.getElementById('vnMiniMap');
+     return n?.dataset.view==='full' && Number(n.dataset.centerZ)===0
+       && Number(n.dataset.radius)>__p3d.ZONE.half*1.42;
+   }""",timeout=12000)
    check(tag+' FULL town map anchors on zone centre',pg.evaluate("""()=>{
      const n=document.getElementById('vnMiniMap');
      return Number(n.dataset.centerX)===0&&Number(n.dataset.centerZ)===0

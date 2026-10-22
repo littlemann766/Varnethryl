@@ -58,13 +58,19 @@ assert(main.includes('zonePending(){return zoneTransitionCount;}'),'test runner 
 assert(main.includes("if(ZONE.name==='town' && totalFrames%9===0)hideInactiveHeroModels()"),'town must suppress inactive cached heroes');
 assert(main.includes('!w || rec.retired || !crowd.includes(rec)'), 'retired follower downloads must never spawn ghost people');
 assert(marine.includes("const vessel=new THREE.Group();vessel.name='player-sailing-ship'"),'sailing uses empty container with only the supplied GLB');
+assert(marine.includes('export const OCEAN_METERS=1000'),'sailing zone resized to 1 km square');
+assert(marine.includes('TILE=240,VIEW_RADIUS=2'),'island stream spans the smaller sea');
+assert(marine.includes('const ready=glbFromGzip('),'sailing realm exposes approved-ship ready promise');
+assert(main.includes('try{await target.ready;}catch(err)'),'sailing portal waits for original ship to load');
+assert(main.includes('target.dispose();')&&main.includes('Tidewrack ship could not load'),'a failed ship leaves player safely in town');
 assert(!marine.includes('buildSailingShip('),'the procedural stand-in cannot appear on the sailing map');
 assert(marine.includes("foam.name='tapered-foam-streak'"),'sailing uses irregular tapered foam geometry');
 assert(!marine.includes('new THREE.PlaneGeometry(5.5,23)'),'legacy white rectangle wake removed');
 assert(marine.includes('cachedRockMaterials.has(m)'), 'streamed ocean tiles must not dispose shared rock materials');
 assert(marine.includes('nav.heading-=rudder*step*.64*steering*'), 'right rudder must turn starboard, not port');
 assert(marine.includes('if(disposed){dispose(model);return;}'), 'late Hydra model loads must be discarded after exit');
-assert(marine.includes('if(disposed){dispose(imported);return;}'), 'late sailing model loads must be discarded after exit');
+assert(marine.includes("if(disposed){dispose(imported);throw Error('Sailing realm unloaded before ship was ready');}"),
+  'late sailing model loads must be discarded after exit');
 
 // Critical combat failure: querySelector returns ONE button, not an array.
 // Both slots and labels must use querySelectorAll's array wrapper.

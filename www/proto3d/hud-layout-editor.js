@@ -30,6 +30,18 @@ const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
 const orient=()=>innerWidth>=innerHeight?'landscape':'portrait';
 let saved=empty();
 try{const j=JSON.parse(localStorage.getItem(KEY)||'null');if(j&&j.portrait&&j.landscape)saved=j;}catch(e){}
+// Remove outdated scattered combat-button positions once after this HUD update.
+// Other customized controls and gameplay save data are left untouched.
+try{
+ const marker='vn.hud.compact-circles.v1';
+ if(!localStorage.getItem(marker)){
+  const affected=['#cb .cx','#runBtn','#jumpBtn',...[0,1,2,3,4].map(n=>'#cb .sl.b'+n)];
+  for(const orientation of ['portrait','landscape'])
+   for(const key of affected)delete saved[orientation][key];
+  localStorage.setItem(KEY,JSON.stringify(saved));
+  localStorage.setItem(marker,'1');
+ }
+}catch(e){console.warn('HUD preset migration unavailable',e)}
 let staged=clone(saved),on=false,chosen=null,drag=null;
 const panel=document.createElement('section');panel.id='vnHudEditorPanel';panel.hidden=true;panel.setAttribute('aria-label','Customize game controls');
 panel.innerHTML='<strong>✦ Edit HUD</strong><div>Tap and drag a control. Choose − or + to resize. Portrait and landscape save separately.</div>'

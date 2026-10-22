@@ -84,23 +84,69 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
   <p id="loadMsg">Opening the gates of Varnethryl…</p>
   <div class="vn-loader-track"><i id="vnLoadProgress"></i></div>
   <small>Legends Are Forged · Kingdoms Are Conquered</small>
-</div><button id="diagBtn" type="button">3D status</button><div id="diag"></div>
+</div><button id="diagBtn" type="button">3D status</button><div id="diag"></div><div id="vnDiagToast" role="status" aria-live="polite" hidden><span id="vnDiagToastText">A game warning was logged.</span><button id="vnDiagToastOpen" type="button">Details</button><button id="vnDiagToastDismiss" type="button" aria-label="Dismiss warning">×</button></div>
 <script>
-(function(){var lines=[],box=document.getElementById('diag'),btn=document.getElementById('diagBtn'),shown=false,lastT=0;
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
-function models(){var out='';try{var st=window.__p3d&&window.__p3d.modelStatus&&window.__p3d.modelStatus();if(st){out+='<h4>3D models (build '+esc(st.build)+', '+st.loaded+' loaded, '+st.failed+' failed)</h4>';st.models.forEach(function(m){out+='<div class="'+(m.state==='loaded'?'ok':m.state==='failed'?'bad':'pend')+'">'+esc(m.id)+': '+esc(m.state)+(m.kb?' - '+m.kb+' KB':'')+(m.error?' - '+esc(m.error):'')+'</div>'});}else out+='<h4>3D models</h4><div class="pend">engine still starting...</div>'}catch(e){out+='<div class="bad">status error: '+esc(e.message||e)+'</div>'}return out}
-function render(){box.innerHTML='<button id="diagX" type="button">Close</button>'+models()+'<h4>Log</h4>'+lines.map(function(l){return '<div class="'+(l.bad?'bad':'')+'">'+esc(l.t)+'</div>'}).join('');var x=document.getElementById('diagX');if(x)bind(x,function(){set(false)});box.scrollTop=0}
-function set(v){shown=v;box.style.display=v?'block':'none';if(v)render()}
-function bind(el,fn){function h(e){var n=Date.now();if(n-lastT<350){e.preventDefault&&e.preventDefault();return}lastT=n;e.preventDefault&&e.preventDefault();e.stopPropagation&&e.stopPropagation();fn()}el.addEventListener('pointerup',h);el.addEventListener('touchend',h,{passive:false});el.addEventListener('click',h)}
-window.__p3dDiag=function(t,bad){lines.push({t:t,bad:!!bad});if(lines.length>60)lines.shift();if(shown)render();if(bad&&!shown){document.body.classList.add('vn-diagnostic-error');set(true)}};
+(function(){
+var lines=[],box=document.getElementById('diag'),btn=document.getElementById('diagBtn'),shown=false;
+var toast=document.getElementById('vnDiagToast'),toastText=document.getElementById('vnDiagToastText'),timer=0;
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function models(){
+  var out='';
+  try{
+    var st=window.__p3d&&window.__p3d.modelStatus&&window.__p3d.modelStatus();
+    if(!st)return '<h4>3D models</h4><div class="pend">Engine is still starting...</div>';
+    var failed=st.models.filter(function(m){return m.state==='failed'});
+    var pending=st.models.filter(function(m){return m.state==='loading'});
+    var idle=st.models.filter(function(m){return m.state==='not loaded yet'});
+    out='<h4>3D models (build '+esc(st.build)+', '+st.loaded+' loaded, '+st.failed+' failed)</h4>';
+    out+='<p>Models load as you select characters or enter their areas. Unloaded models are not failures.</p>';
+    function row(m){return '<div class="'+(m.state==='loaded'?'ok':m.state==='failed'?'bad':'pend')+'">'+esc(m.id)+': '+esc(m.state)+(m.kb?' - '+m.kb+' KB':'')+(m.error?' - '+esc(m.error):'')+'</div>';}
+    if(failed.length)out+='<h4>Failed models</h4>'+failed.map(row).join('');
+    if(pending.length)out+='<h4>Currently loading</h4>'+pending.map(row).join('');
+    out+='<details><summary>All models ('+st.models.length+'), including '+idle.length+' not needed yet</summary>'+st.models.map(row).join('')+'</details>';
+  }catch(e){out+='<div class="bad">status error: '+esc(e.message||e)+'</div>';}
+  return out;
+}
+function bind(el,fn){if(!el)return;var lastT=0;function h(e){var now=Date.now();if(now-lastT<350){e.preventDefault&&e.preventDefault();return;}lastT=now;e.preventDefault&&e.preventDefault();e.stopPropagation&&e.stopPropagation();fn();}el.addEventListener('pointerup',h);el.addEventListener('touchend',h,{passive:false});el.addEventListener('click',h);}
+function render(){box.innerHTML='<button id="diagX" type="button">Close</button>'+models()+'<h4>Log</h4>'+lines.map(function(l){return '<div class="'+(l.bad?'bad':'')+'">'+esc(l.t)+'</div>'}).join('');bind(document.getElementById('diagX'),function(){set(false)});box.scrollTop=0;}
+function set(v){shown=!!v;box.style.display=shown?'block':'none';if(shown){toast.hidden=true;render();}}
+function warning(message){
+  // Diagnostics stay non-modal during a playable game, including portal transitions.
+  if(shown)return;
+  if(!window.__p3d){
+    var load=document.getElementById('load');
+    if(load&&!load.hidden){
+      var open=document.getElementById('vnLoadDiagnostics');
+      if(!open){open=document.createElement('button');open.id='vnLoadDiagnostics';open.type='button';open.textContent='Show diagnostics';open.addEventListener('click',function(){set(true)});load.appendChild(open);}
+      open.hidden=false;
+      return;
+    }
+  }
+  toastText.textContent='Game warning logged';
+  toast.hidden=false;clearTimeout(timer);timer=setTimeout(function(){toast.hidden=true},6500);
+}
+window.__p3dDiag=function(t,bad){
+  lines.push({t:String(t),bad:!!bad});if(lines.length>60)lines.shift();
+  if(shown)render();
+  if(bad)warning(t);
+};
 bind(btn,function(){set(!shown)});
+document.getElementById('vnDiagToastOpen').addEventListener('click',function(){set(true)});
+document.getElementById('vnDiagToastDismiss').addEventListener('click',function(){toast.hidden=true});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&shown){set(false);e.stopPropagation();}},true);
 var ua=navigator.userAgent,m=/Chrome\/(\d+)/.exec(ua);
 window.__p3dDiag('UA: '+ua.slice(0,110)+(window.Capacitor?' [Capacitor app]':' [browser]'));
 var okImport=window.HTMLScriptElement&&HTMLScriptElement.supports&&HTMLScriptElement.supports('importmap');
 if(!okImport&&m&&+m[1]<89)window.__p3dDiag('This browser engine (Chrome '+m[1]+') is too old for 3D (needs 89+). Update Android System WebView.',true);
-function fatal(msg){try{if(sessionStorage.getItem('vn_default3d')==='1'&&!window.__p3d){sessionStorage.removeItem('vn_default3d');sessionStorage.setItem('vn_fallback','3d-failed');/* 3D only: show the error panel instead of redirecting to 2D */}}catch(e){}window.__p3dDiag('ERROR: '+msg,true);var l=document.getElementById('loadMsg');if(l&&document.getElementById('load'))l.textContent='3D failed to start: '+msg}
-addEventListener('error',function(e){fatal((e.message||'script error')+(e.filename?' @'+e.filename.split('/').slice(-2).join('/')+':'+e.lineno:''))});
-addEventListener('unhandledrejection',function(e){fatal(String(e.reason&&e.reason.message||e.reason))});
+function fatal(msg){
+  var ready=!!window.__p3d;
+  try{if(!ready&&sessionStorage.getItem('vn_default3d')==='1'){sessionStorage.removeItem('vn_default3d');sessionStorage.setItem('vn_fallback','3d-failed');}}catch(e){}
+  window.__p3dDiag('ERROR: '+msg,true);
+  var l=document.getElementById('loadMsg');
+  if(!ready&&l&&document.getElementById('load'))l.textContent='3D failed to start: '+msg;
+}
+addEventListener('error',function(e){if(e instanceof ErrorEvent || e.message)fatal((e.message||'script error')+(e.filename?' @'+e.filename.split('/').slice(-2).join('/')+':'+e.lineno:''));});
+addEventListener('unhandledrejection',function(e){fatal(String(e.reason&&e.reason.message||e.reason));});
 setTimeout(function(){if(!window.__p3d)window.__p3dDiag('Still loading after 12s (slow device or blocked script).',true)},12000);
 })();
 </script>

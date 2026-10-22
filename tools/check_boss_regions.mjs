@@ -192,6 +192,22 @@ assert(fight.includes("document.getElementById('stick')?.addEventListener('point
 assert(fight.includes("const onKey = e =>"),'existing keyboard block, potion, weapon and lock commands remain supported');
 
 assert(main.includes('stick.offsetWidth,stick.offsetHeight'),'movement joystick range changes with user resize');
+const water=src('www/proto3d/water-realms.js');
+assert(water.includes('export const OCEAN_METERS=9000'),'sailing world starts at 9x9 km');
+assert(water.includes('OCEAN_METERS*WORLD_UNITS_PER_METER/2'),'ocean world size configurable');
+assert(water.includes('const TILE=420') || water.includes('TILE=420'),'ocean islands load by local tiles');
+assert(water.includes('tiles.delete(k)')&&water.includes('obstacles.delete(k)'),'ocean tiles unload outside view');
+assert(water.includes('hydra_restored_mobile.glb.gz'),'Hydra model path points to restored chest and rock cleanup');
+assert(water.includes('tidewrack_sailing_ship.glb.gz'),'sailing world uses owner-supplied vessel');
+assert(water.includes('glbFromGzip')&&water.includes('DecompressionStream'),'compressed models are loaded into Three.js');
+assert(water.includes('hydra-unrigged-5-head'),'Hydra is not inaccurately labelled fully rigged');
+for(const btn of ['vnTravelSail','vnTravelHydra','vnTravelTown']) assert(titlePage.includes('id="'+btn+'"')&&main.includes("'"+btn+"'"),'menu and game must wire travel button: '+btn);
+assert(main.includes("name === 'hydra' || name === 'sailing'"),'separate marine realm traversal is integrated');
+assert(main.includes("ZONE.name==='sailing'&&SM?.blocked"),'sailing boat collides with discovered islands');
+assert(main.includes("ZONE.name==='hydra'&&HM?.waterAt"),'Hydra water and terrain are part of player movement');
+assert(screenCss.includes('body.vn-sailing-zone #moveActions'),'sailing hides irrelevant walking controls');
+const waterParse=spawnSync(process.execPath,['--check','www/proto3d/water-realms.js'],{encoding:'utf8'});
+assert.equal(waterParse.status,0,'water realms JavaScript must parse: '+waterParse.stderr);
 const hudParse=spawnSync(process.execPath,['--check','www/proto3d/hud-layout-editor.js'],{encoding:'utf8'});
 assert.equal(hudParse.status,0,'HUD editor must be syntactically valid: '+hudParse.stderr);
 

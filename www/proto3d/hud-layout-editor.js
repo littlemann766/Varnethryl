@@ -1,19 +1,20 @@
 /* Varnethryl custom HUD layout: touch drag + independent scale, portrait/landscape. */
 (function(){
 'use strict';
-const KEY='vn.hud.layout.v1';
+// Fresh compact default: obsolete v1 offsets belong to the old six-button strip.
+const KEY='vn.hud.layout.v2';
 const controls=[
  ['#stick','Joystick'],['#runBtn','Walk / Run'],['#jumpBtn','Jump'],
  ['#staminaHud','Stamina'],['#cinderFlyControls','Flight'],
  ...[0,1,2,3,4].map((n)=>['#cb .sl.b'+n,n===0?'Basic Attack':n===4?'Ultimate':'Skill '+n]),
- ...['dodge','block','jump','lock','potion','swap'].map((k)=>['#cb .cl button[data-a="'+k+'"]',k]),
  ['#cb .cx','Combat pad'],['#cb .vn-exp','XP bar'],['#cb .vit','Vitals'],
  ['#cb .tp','Enemy health'],['#cb .top','Combat options']
 ];
 const css=document.createElement('style');css.id='vnHudEditorStyle';
 css.textContent=
- '#vnHudEditorPanel{position:fixed;z-index:9000;top:calc(max(8px,env(safe-area-inset-top)) + 51px);left:8px;right:8px;padding:9px;background:linear-gradient(145deg,#2b1837f5,#141324fb);border:2px ridge #c49c61;border-radius:12px;box-shadow:0 8px 22px #000b;color:#fce5be;font:700 11px/1.35 VarnCinzel,Georgia,serif;touch-action:manipulation}'
- +'#vnHudEditorPanel[hidden]{display:none!important}'
+ '#vnHudEditorPanel{position:fixed;z-index:9000;top:calc(max(8px,env(safe-area-inset-top)) + 148px);left:8px;right:8px;padding:9px;background:linear-gradient(145deg,#2b1837f5,#141324fb);border:2px ridge #c49c61;border-radius:12px;box-shadow:0 8px 22px #000b;color:#fce5be;font:700 11px/1.35 VarnCinzel,Georgia,serif;touch-action:manipulation}'
+ +'#vnHudEditorPanel{max-height:calc(100dvh - 190px);overflow-y:auto;box-sizing:border-box}'
++'#vnHudEditorPanel[hidden]{display:none!important}'
  +'#vnHudEditorPanel strong{font-size:14px}#vnHudEditorPanel .hed-row{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:7px}'
  +'#vnHudEditorPanel .hed-name{flex:1;min-width:110px;color:#f0caff}'
  +'#vnHudEditorPanel button{min-width:38px;min-height:40px;padding:6px 9px;color:#fff0ce;background:linear-gradient(#492c58,#21162c);border:1px solid #b78c50;border-radius:7px;font:700 12px VarnCinzel,Georgia,serif}'

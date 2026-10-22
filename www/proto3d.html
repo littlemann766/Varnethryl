@@ -60,6 +60,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
   </div></details>
   <details><summary>Combat &amp; movement</summary><div class="vn-opts">
     <button id="vnCombatToggle">Toggle fight mode</button>
+    <button id="vnEditHud" type="button">✥ Edit HUD — Move &amp; Resize Buttons</button>
+    <small>Customize button locations and sizes. Saved separately for portrait and landscape.</small>
     <small>Walk / Run: R · Jump: Space</small>
   </div></details>
   <details><summary>Advanced tools</summary><div class="vn-opts">
@@ -150,6 +152,7 @@ addEventListener('unhandledrejection',function(e){fatal(String(e.reason&&e.reaso
 setTimeout(function(){if(!window.__p3d)window.__p3dDiag('Still loading after 12s (slow device or blocked script).',true)},12000);
 })();
 </script>
+<script src="proto3d/hud-layout-editor.js"></script>
 <script src="proto3d/loader.js"></script>
 <script type="importmap">{"imports":{"three":"./proto3d/vendor/three.module.js","three/addons/":"./proto3d/vendor/jsm/"}}</script>
 <script type="module" src="proto3d/main.js" onerror="__p3dDiag('Could not load proto3d/main.js or one of its imports (three.js). Check connection / update the app.',true)"></script>

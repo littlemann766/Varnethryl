@@ -636,7 +636,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.4.7';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.4.8';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1248,8 +1248,18 @@ function spawnCrowd(id, kind, x, z, leash, yaw) {
   const startId = qp.get('hero') != null ? +qp.get('hero') || 0 : savedPlan ? savedPlan.hero : 0;
   const used = new Set([HERO_GLB_ID(startId)]);
   const fromSave = savedPlan && qp.get('hero') == null;
-  const pick = fromSave ? savedPlan.followers.map(HERO_GLB_ID).filter(x => !used.has(x)) : ['elira', 'orin', 'seraphine', 'finn', 'brynn'].filter(x => !used.has(x));
-  const nFol = !BUMP_ON ? 0 : fromSave && qp.get('party') == null ? Math.min(3, pick.length) : Math.min(PARTY_N, pick.length);
+  // Saved party choices always win in normal play. An explicit party=N
+  // override (QA / owner preview) must also fill missing berths rather than
+  // silently capping at however many followers happen to be in the save.
+  const defaultFollowers=['elira','orin','seraphine','finn','brynn'];
+  const pick=fromSave
+    ? [...new Set(savedPlan.followers.map(HERO_GLB_ID))].filter(x=>!used.has(x))
+    : defaultFollowers.filter(x=>!used.has(x));
+  if(qp.has('party'))for(const id of defaultFollowers){
+    if(!used.has(id)&&!pick.includes(id))pick.push(id);
+  }
+  const nFol=!BUMP_ON?0:fromSave&&!qp.has('party')
+    ? Math.min(3,pick.length):Math.min(PARTY_N,pick.length);
   const bx = state.heroX, bz = state.heroZ + 2.8 * HS;
   for (let i = 0; i < nFol; i++) spawnCrowd(pick[i], 'party', bx + (i - (nFol - 1) / 2) * 1.6 * HS, bz + i * 0.3 * HS, (2.6 + i * 0.5) * HS, 0);
   for (let i = 0; i < NPC_N; i++) spawnCrowd(['thorne', 'rook'][i], 'npc', (4.5 + i * 2.5) * HS, START_Z + (1.5 - i * 1.5) * HS, 0, Math.PI * 0.75);

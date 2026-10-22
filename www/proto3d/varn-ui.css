@@ -345,3 +345,33 @@ body.vn-menu-open.vn-diagnostic-error #diagBtn{visibility:visible!important}
   #heroes.open #hlist{max-height:none!important;display:flex!important}
   #heroes #hlist .vn-roster-tabs{top:auto}
 }
+
+
+/* Diagnostics remain available from Menu > Advanced tools.
+   Runtime warnings never turn the diagnostic window into a startup/portal blocker. */
+body.vn-diagnostic-error #diagBtn{display:none!important}
+body.vn-menu-open #vnDiagToast{display:none!important}
+#vnDiagToast[hidden]{display:none!important}
+#vnDiagToast{
+ position:fixed;left:50%;transform:translateX(-50%);
+ bottom:39dvh;z-index:1400;
+ display:flex;gap:8px;align-items:center;justify-content:center;
+ width:max-content;max-width:calc(100vw - 30px);
+ min-height:44px;padding:7px 10px;
+ border:1px solid #c6a369;border-radius:9px;
+ background:linear-gradient(140deg,#291d36ed,#151427f5);
+ color:#f9e4bd;box-shadow:0 5px 14px #0009;
+ font:700 11px/1.2 VarnCinzel,Georgia,serif;pointer-events:auto
+}
+#vnDiagToast span{max-width:48vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#vnDiagToast button,#vnLoadDiagnostics{
+ min-height:36px;padding:7px 10px;background:#3e2c55;
+ color:#ffecba;border:1px solid #c7a16a;border-radius:7px;
+ font:700 11px VarnCinzel,Georgia,serif;touch-action:manipulation
+}
+#vnDiagToastDismiss{min-width:34px;padding:6px!important;font:700 18px system-ui!important}
+#vnLoadDiagnostics{position:relative;z-index:1;margin-top:12px;pointer-events:auto}
+@media(orientation:landscape) and (max-height:480px){
+ #vnDiagToast{bottom:max(55px,env(safe-area-inset-bottom));max-width:50vw}
+ #vnDiagToast span{max-width:26vw}
+}

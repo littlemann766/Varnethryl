@@ -109,6 +109,17 @@ assert(fight.includes('groundY: terrainY')&&lightning.includes('this.groundY(x,z
 assert(hud.includes('#cb .sl:focus-visible')&&hud.includes('border:2px solid #caa35c'),'medieval combat controls remain keyboard accessible');
 assert(hud.includes("const $ = s => r.querySelector(s), $$ = s => Array.from(r.querySelectorAll(s));"),'combat selectors must be unique: $ for single and $$ for multiple elements');
 assert(main.includes('performance.now()>=outdoorCombatRetryAt'),'combat startup import errors must not re-trigger every frame');
+
+const bump=src('www/proto3d/bump.js'), buildingsKit=src('www/proto3d/bldkit.js');
+assert(bump.includes('root.position.y = baseY + fin(a.phop, 0)'),'animated companions preserve terrain elevation');
+assert(main.includes('applyPose(a, w, r.nd, a.yaw, r.y)'),'followers pass terrain height through pose');
+assert(main.includes('crowdSurface(r, a, dt)'),'followers continue sampling shared terrain after moving');
+assert(buildingsKit.includes('export function scrubDecorativeFaces('),'malformed colorful town decor is sanitized');
+assert(buildingsKit.includes('scrubDecorativeFaces(raw, m.material)'),'village exterior batching filters oversized decoration triangles');
+assert(hud.includes('1.3.7 portrait HUD')&&hud.includes('grid-template-rows:repeat(2,auto)'),'portrait combat uses compact right-hand skill pad');
+const desktopCss=src('www/proto3d/varn-ui.css');
+assert(desktopCss.includes('#diagBtn,body.vn-diagnostic-error #diagBtn'),'3D Status cannot cover joystick');
+
 const armory=src('www/proto3d/combat/armory.js'),menu=src('www/proto3d/varn-menu.js'),settings=src('www/proto3d/settings3d.js');
 assert(armory.includes('seen.has(id)')&&armory.includes('used.has(id)'),'equipment load and presets reject duplicate items');
 assert(armory.includes('(!it.ownerOnly || this.ownerOk())'),'saved owner equipment remains gated');

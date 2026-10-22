@@ -39,7 +39,10 @@ assert(marine.includes('if(disposed){dispose(imported);return;}'), 'late sailing
 
 // Critical combat failure: querySelector returns ONE button, not an array.
 // Both slots and labels must use querySelectorAll's array wrapper.
-assert(hud.includes("$$('.sl').forEach"),'skill labels must select ALL 5 buttons');
+assert(hud.includes("$('.sl').forEach"),'skill labels must select ALL 5 buttons');
+assert(hud.includes('#cb .cx>.sl .nmL{display:none!important}'),'narrow skill labels must not overlap');
+assert(hud.includes('skill-name-callout'),'touch and focus must reveal full skill names');
+assert(hud.includes("body:has(#vnMiniMap.expanded) #cb .top"),'owner actions must clear expanded minimap');
 assert(hud.includes("$$('.sl').map"),'skill array must select ALL 5 buttons');
 assert(!hud.includes("this.slots = $('.sl').map"),'fatal HUD initialization regression');
 assert(main.includes("document.getElementById('vnEnter')?.addEventListener('click'"),'ordinary Enter activates combat');

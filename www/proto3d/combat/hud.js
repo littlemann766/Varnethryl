@@ -446,6 +446,39 @@ const CSS = `
  #cb .stat{top:calc(max(6px,env(safe-area-inset-top)) + 136px)!important}
  #cb .cx{bottom:calc(max(6px,env(safe-area-inset-bottom)) + 22px)!important}
 }
+/* 1.5.1: Keep owner commands completely below the interactive minimap.
+   Both normal and expanded minimaps have separate responsive clearance. */
+#cb .top{
+ top:calc(max(90px,env(safe-area-inset-top) + 76px) + 160px)!important;
+ right:max(9px,env(safe-area-inset-right))!important;
+}
+body:has(#vnMiniMap.expanded) #cb .top{
+ top:calc(max(90px,env(safe-area-inset-top) + 76px) + 260px)!important;
+}
+/* Full skill names remain in aria-label/title. On narrow touch screens the
+   five labels otherwise overlap each other; show one readable name on focus
+   or contact instead of stacking five clipped words. */
+#cb .skill-name-callout{display:none;position:absolute;right:0;bottom:calc(100% + 10px);
+ max-width:min(220px,74vw);padding:5px 10px;border:2px ridge #d6b679;
+ border-radius:9px;background:linear-gradient(155deg,#3d2652ee,#121625f5);
+ color:#fbe9be;font:700 11px VarnCinzel,Georgia,serif;
+ text-align:center;text-shadow:0 1px 3px #000;line-height:1.3;
+ box-shadow:0 3px 14px #000a;pointer-events:none;white-space:normal;overflow-wrap:anywhere;
+ z-index:8}
+@media(orientation:portrait) and (max-width:560px){
+ #cb .cx>.sl .nmL{display:none!important}
+ #cb .skill-name-callout.show{display:block}
+ #cb .top{top:calc(max(12px,env(safe-area-inset-top)) + 187px)!important}
+ body:has(#vnMiniMap.expanded) #cb .top{
+   top:calc(max(12px,env(safe-area-inset-top)) + 269px)!important
+ }
+}
+@media(orientation:landscape) and (max-height:450px){
+ #cb .top{top:calc(max(54px,env(safe-area-inset-top) + 48px) + 122px)!important}
+ body:has(#vnMiniMap.expanded) #cb .top{
+  top:calc(max(54px,env(safe-area-inset-top) + 48px) + 182px)!important
+ }
+}
 
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
@@ -476,7 +509,7 @@ export class CombatHUD {
       '<div class="stat"></div><div class="top"><button type="button" data-a="summon">Summon Titan</button><button type="button" data-a="exit">Exit fight</button></div>' +
       '<div class="vit"><div class="lab"></div><div class="por"><span>?</span><small>1</small></div><div class="bars"><div class="bar hp"><i></i><b></b></div><div class="bar mp"><i></i><b></b></div><div class="bar sp"><i></i><b></b></div><div class="bar fy"><i></i><b></b></div></div></div>' +
       '<div class="vn-exp" role="progressbar" aria-label="Experience to next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="vn-exp-track"><i class="vn-exp-fill"></i></div><i class="vn-exp-art" aria-hidden="true"></i><span class="vn-exp-level">LV 40</span><span class="vn-exp-value">0 / 0 XP</span></div>' +
-      '<div class="cx"><div class="ulp"><button type="button" data-u="holy">Holy Destruction</button><button type="button" data-u="unholy">Unholy Destruction</button></div>' + [0, 1, 2, 3, 4].map(i => '<button type="button" class="sl b' + i + '" data-s="' + i + '"><span class="ic"></span><span class="k">' + (i ? (i === 4 ? 'ULT' : i) : '') + '</span><span class="rg"></span><span class="ct"></span><span class="nmL"></span></button>').join('') + '</div>' +
+      '<div class="cx"><div class="skill-name-callout" role="status" aria-live="polite"></div><div class="ulp"><button type="button" data-u="holy">Holy Destruction</button><button type="button" data-u="unholy">Unholy Destruction</button></div>' + [0, 1, 2, 3, 4].map(i => '<button type="button" class="sl b' + i + '" data-s="' + i + '"><span class="ic"></span><span class="k">' + (i ? (i === 4 ? 'ULT' : i) : '') + '</span><span class="rg"></span><span class="ct"></span><span class="nmL"></span></button>').join('') + '</div>' +
       '<div class="cl"><button type="button" data-a="dodge"><span class="g">\u21BA</span>Dodge<span class="q">Spc</span><span class="cdv"></span></button><button type="button" data-a="block"><span class="g">\u26E8</span>Block<span class="q">RMB</span></button>' +
       '<button type="button" data-a="jump"><span class="g">\u2191</span>Jump<span class="q">J</span></button><button type="button" data-a="lock"><span class="g">\u25CE</span>Lock<span class="q">Q</span></button>' +
       '<button type="button" data-a="potion"><span class="g">\u2697</span>Potion<span class="q">R</span><span class="cdv"></span></button><button type="button" data-a="swap"><span class="g">\u2694</span>Weapon<span class="q">E</span></button></div><div class="msg"></div>';
@@ -489,7 +522,17 @@ export class CombatHUD {
     this.exp = $('.vn-exp'); this.expFill = $('.vn-exp-fill'); this.expLevel = $('.vn-exp-level'); this.expValue = $('.vn-exp-value'); this.expKey = '';
     this.por = $('.por span'); this.lab = $('.vit .lab'); this.lvl = $('.por small'); this.stat = $('.stat'); this.msg = $('.msg'); this.flash = $('.flash'); this.sumBtn = $('[data-a=summon]');
     $$('.sl').forEach((b, i) => { b.setAttribute('aria-label', i === 0 ? 'Basic attack' : i === 4 ? 'Ultimate ability' : 'Skill ' + i); b.title = b.getAttribute('aria-label'); });
-    this.slots = $$('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), nm: b.querySelector('.nmL'), cd: -1, st: '', key: '' }));
+    this.slots = $('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), nm: b.querySelector('.nmL'), cd: -1, st: '', key: '' }));
+    const skillNameCallout = $('.skill-name-callout');
+    const showSkillName = b => {
+      if (!b || !skillNameCallout) return;
+      skillNameCallout.textContent = b.getAttribute('aria-label') || b.title || '';
+      skillNameCallout.classList.add('show');
+      clearTimeout(this._skillLabelTimer);
+      this._skillLabelTimer = setTimeout(() => skillNameCallout.classList.remove('show'), 1600);
+    };
+    r.addEventListener('focusin', e => showSkillName(e.target.closest?.('.sl')));
+    r.addEventListener('pointerdown', e => showSkillName(e.target.closest?.('.sl')));
     this.btn = {}; $$('.cl button').forEach(b => { this.btn[b.dataset.a] = { b, cdv: b.querySelector('.cdv'), cd: -1 }; });
     for (let i = 0; i < NUM_POOL; i++) { const e = document.createElement('div'); e.className = 'fn'; r.appendChild(e); this.nums.push({ e, t: 9 }); }
     for (let i = 0; i < OH_POOL; i++) { const e = document.createElement('div'); e.className = 'oh'; e.innerHTML = '<i></i>'; r.appendChild(e); this.ohs.push({ e, f: e.firstChild, on: false, last: -1 }); }

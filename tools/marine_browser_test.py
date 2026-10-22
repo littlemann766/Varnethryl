@@ -54,7 +54,17 @@ with sync_playwright() as pw:
    pg.wait_for_function("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')",timeout=35000)
    check(tag+' approved ship GLB visible',pg.evaluate("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')?.visible"))
    check(tag+' real water mesh',pg.evaluate("!!__p3d.scene.getObjectByName('sailing-water-window')"))
+   # Enter-world fight initialization can complete after the ocean begins
+   # streaming. Never accept a single transient frame with active combat.
+   pg.wait_for_function("__p3d.fight && !__p3d.fight.on",timeout=15000)
    check(tag+' shipboard combat safely disarmed',pg.evaluate("__p3d.fight && !__p3d.fight.on"))
+   # Simulate the late callback and a manual fight toggle aboard the boat.
+   pg.evaluate("__p3d.fight.startAuto()")
+   check(tag+' delayed combat cannot rearm aboard ship',
+     pg.evaluate("!__p3d.fight.on"))
+   pg.evaluate("__p3d.fight.toggle()")
+   check(tag+' manually toggling fight at sea is blocked',
+     pg.evaluate("!__p3d.fight.on"))
    # Passengers must genuinely board: verify the real model roots occupy the
    # deck in ship-local coordinates, not world-space water to either side.
    pg.wait_for_function("""(count)=>{

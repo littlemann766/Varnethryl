@@ -375,3 +375,9 @@ body.vn-menu-open #vnDiagToast{display:none!important}
  #vnDiagToast{bottom:max(55px,env(safe-area-inset-bottom));max-width:50vw}
  #vnDiagToast span{max-width:26vw}
 }
+
+/* 1.3.7: 3D model diagnostics are launched from Menu > Advanced tools only.
+   A stale error class must never create a 3D STATUS button across the joystick. */
+#diagBtn,body.vn-diagnostic-error #diagBtn,body.vn-menu-open.vn-diagnostic-error #diagBtn{
+  display:none!important;visibility:hidden!important;pointer-events:none!important
+}

@@ -211,6 +211,28 @@ assert(main.includes("name === 'hydra' || name === 'sailing'"),'separate marine 
 assert(main.includes("ZONE.name==='sailing'&&SM?.blocked"),'sailing boat collides with discovered islands');
 assert(main.includes("ZONE.name==='hydra'&&HM?.waterAt"),'Hydra water and terrain are part of player movement');
 assert(screenCss.includes('body.vn-sailing-zone #moveActions'),'sailing hides irrelevant walking controls');
+const ownerPanelSrc=src('www/proto3d/cheatpanel.js');
+assert(main.includes("zones: ['village', 'wilds', 'frost', 'hydra', 'sailing']"),'owner teleport includes all five maps');
+for(const id of ["'hydra'","'sailing'","'frost'","'village'"]){
+ assert(ownerPanelSrc.includes(id),'owner travel shortcut visible for '+id);
+}
+for(const id of ['tp-hydra','tp-sailing','tp-frost','tp-main']){
+ assert(ownerPanelSrc.includes(id),'owner cheats direct map button '+id);
+}
+assert(main.includes("['wilds','frost','hydra','sailing'].includes(zone)"),'owner map shortcuts use zone lifecycle instead of unloaded coordinates');
+assert(main.includes("lastZone!=='town'&&name!=='town'"),'travel between any non-town maps safely returns through main overworld');
+assert(water.includes("function sail(dt,turn,throttle,x,z)"),'ship rudder/throttle is distinct from walking movement');
+assert(water.includes("nav.speed+=(target-nav.speed)"),'ship acceleration is smooth rather than instant');
+assert(water.includes("blocked(nx,nz,8)"),'ship tests collision with jagged islands');
+assert(main.includes("SM.sail(dt,rudder,throttle,state.heroX,state.heroZ)"),'touch and keyboard steering invoke real boat physics');
+const combatData=src('www/proto3d/combat/data.js');
+for(const head of ['leftsnap','acidbreath','kinglunge','tailsweep','venomburst'])
+ assert(combatData.includes("id:'"+head+"'"),'Hydra has attack pattern '+head);
+assert(combatData.includes("hydra: E('Five-Headed Hydra'"),'Hydra has a boss-health entry');
+assert(main.includes("f.startRegionBosses('hydra')"),'Hydra arena auto-starts its five-attack boss encounter');
+assert(main.includes("id==='hydra:mire'"),'Hydra combat hitbox reuses the full intact 3D map model');
+assert(water.includes("defeatBoss(){hydraDefeated=true"),'Hydra victory animation and return state');
+assert(fight.includes("env.onHydraDefeat?.()"),'Hydra boss victory reports to the map');
 const waterParse=spawnSync(process.execPath,['--check','www/proto3d/water-realms.js'],{encoding:'utf8'});
 assert.equal(waterParse.status,0,'water realms JavaScript must parse: '+waterParse.stderr);
 const hudParse=spawnSync(process.execPath,['--check','www/proto3d/hud-layout-editor.js'],{encoding:'utf8'});

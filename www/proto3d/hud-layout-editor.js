@@ -126,7 +126,7 @@ new MutationObserver(list=>{
  if(!list.some(m=>m.addedNodes.length||m.removedNodes.length)||queued)return;
  queued=true;
  requestAnimationFrame(()=>{queued=false;refresh();});
-}).observe(document.body,{childList:true,subtree:true});
+}).observe(document.body,{childList:true});
 refresh();
 window.__vnHudEditor={open,close,refresh,isEditing:()=>on};
 })();

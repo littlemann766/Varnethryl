@@ -1849,7 +1849,7 @@ const cheatEnv = {
     if (window.__ownerRoster) window.__ownerRoster(false);
     const b = document.getElementById('fightBtn'); if (b) b.style.display = 'none';
     const settingsPanel = document.getElementById('settingsPanel');
-    if (settingsPanel) { settingsPanel.style.display = 'none'; settingsPanel.querySelectorAll('.own').forEach(e => e.remove()); }
+    if (settingsPanel) { settingsPanel.style.display = 'none'; document.body.classList.remove('vn-settings-open'); settingsPanel.querySelectorAll('.own').forEach(e => e.remove()); }
     import('./ownerboot.js').then(m => m.stopOwner?.()).catch(() => {});
   },
 };

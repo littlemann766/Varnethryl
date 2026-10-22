@@ -5,7 +5,7 @@ import {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL,PORT_CENTER,lavaAmount,
 
 const P={town:['VARNETHRYL',160,30],wilds:['THE WILDS',160,35],
  frost:['FROST CAVE',155,30],hydra:['HYDRA MIRE',145,25],
- sailing:['TIDEWRACK OCEAN',250,65]};
+ sailing:['TIDEWRACK OCEAN',250,65],coliseum:['COLOSSEUM PvP',155,32]};
 const custom=new Map();
 const W=220,C=110,N=112;
 const css=[
@@ -32,11 +32,13 @@ function landmarks(zone,z){
   [TITAN_CENTER.x,TITAN_CENTER.z,'Ashen Titan','boss'],
   [FROST_SUMMIT.x,FROST_SUMMIT.z,'Ice Cave','portal'],
   [-315,-284,'Broken Seal','portal'],
-  [PORT_CENTER.x,PORT_CENTER.z,'Harbor','port'],[0,CITY_HALF-1.2,'Town Gate','portal']];
+  [PORT_CENTER.x,PORT_CENTER.z,'Harbor','port'],[117.6,126.4,'Coliseum PvP Portal','portal'],[0,CITY_HALF-1.2,'Town Gate','portal']];
  if(zone==='frost')return [[cx-7,cz+177,'Exit','portal'],[cx-37,cz-66,'Frost Troll A','boss'],[cx+37,cz-66,'Frost Troll B','boss'],[cx+91,cz+18,'Frozen Lake','water']];
  if(zone==='hydra')return [[cx,cz-11,'Hydra','boss'],[cx,cz+117,'Exit','portal']];
+ if(zone==='coliseum'){const r=Math.hypot(x-cx,z-cz);return r<60?'#a38c69':r<95?'#8b8580':r<112?'#645e58':r<140?'#9c8d78':'#675c4a';}
  if(zone==='wilds')return [[cx-6,cz-2,'Return Ruins','portal'],[cx,cz+85*(h/280),'Standing Stones','ruin']];
  if(zone==='sailing')return [[cx,cz+h-175,'Departure','port']];
+ if(zone==='coliseum')return [[0,145,'Return to Varnethryl','portal'],[0,0,'PvP Battle Floor','boss']];
  return [];
 }
 const markerColors={town:'#ead39e',boss:'#ff8064',portal:'#c199fe',port:'#e4b881',water:'#5bcae6',ruin:'#c9b99e',party:'#8fddff'};

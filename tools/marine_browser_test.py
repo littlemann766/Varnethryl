@@ -99,6 +99,21 @@ with sync_playwright() as pw:
     pg.wait_for_function(f"__p3d.zone==='{zone}'",timeout=35000)
    pg.wait_for_timeout(1500)
    check(tag+' rapid map changes leave no ghost marine zones',pg.evaluate("!__p3d.scene.getObjectByName('hydra-mire-zone') && !__p3d.scene.getObjectByName('tidewrack-open-ocean') && __p3d.hero.visible"))
+   # Simulate double-taps / overlapping owner travel while models are still
+   # streaming. All three requests arrive in the *same* event-loop turn.
+   # Their completion must leave exactly the last requested map loaded.
+   pg.evaluate("""()=>{
+     for(const id of ['vnTravelHydra','vnTravelSail','vnTravelTown'])
+       document.getElementById(id).click();
+   }""")
+   pg.wait_for_function("""()=>{
+     const p=window.__p3d;
+     return p?.zonePending===0 && p.zone==='town'
+       && !p.scene.getObjectByName('hydra-mire-zone')
+       && !p.scene.getObjectByName('tidewrack-open-ocean');
+   }""",timeout=90000)
+   check(tag+' simultaneous travel requests serialize and return to town',
+     pg.evaluate("__p3d.zonePending===0 && __p3d.zone==='town' && __p3d.hero.visible"))
    check(tag+' no missing marine assets',not failedAssets,failedAssets[:5])
    major=[e for e in errs if any(t in e for t in ['Uncaught','hydra_restored','tidewrack_sailing','TypeError','GLB','camRig.look.set','camRig.lookTarget','is not a function'])]
    check(tag+' no runtime errors for marine gameplay',not major,major[:5])

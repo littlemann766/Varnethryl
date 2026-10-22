@@ -12,7 +12,7 @@ const css=[
  '#vnMiniMap{position:fixed;top:max(90px,calc(env(safe-area-inset-top) + 76px));right:max(9px,env(safe-area-inset-right));width:138px;height:152px;z-index:55;display:block;pointer-events:none;color:#f5e4ba;font:700 10px VarnCinzel,Georgia,serif;text-align:center;text-shadow:0 1px 3px #000}',
  '#vnMiniMap .vn-mini-open{position:relative;display:block;width:138px;height:138px;border:0;background:transparent;cursor:pointer;pointer-events:auto;padding:0;touch-action:manipulation;border-radius:50%;filter:drop-shadow(0 3px 6px #000b)}',
  '#vnMiniMap canvas{position:absolute;left:12%;top:12%;width:76%;height:76%;border-radius:50%}',
- '#vnMiniMap .vn-mini-ring{position:absolute;inset:0;display:block;background:url("assets/hud/minimap-ring.svg") center/contain no-repeat;pointer-events:none}',
+ "#vnMiniMap .vn-mini-ring{position:absolute;inset:0;display:block;background:url('assets/hud/minimap-ring.svg') center/contain no-repeat;pointer-events:none}",
  '#vnMiniMap .vn-mini-zone{display:block;margin-top:-2px;letter-spacing:.07em;pointer-events:none}',
  '#vnMiniMap.expanded{width:238px;height:252px}#vnMiniMap.expanded .vn-mini-open{width:238px;height:238px}',
  '#vnMiniMap .vn-mini-controls{display:none;position:absolute;right:100%;top:55px;margin-right:5px;gap:4px;flex-direction:column;pointer-events:auto}',

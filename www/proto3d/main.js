@@ -1698,7 +1698,7 @@ async function setZone(name) {
   if((lastZone==='hydra'||lastZone==='sailing')&&name!=='town'){
     await setZone('town');return setZone(name);
   }
-  if(FIGHT&&FIGHT.auto)FIGHT.stop();
+  if(FIGHT&&(FIGHT.auto||name==='sailing'))FIGHT.stop();
   if (name === 'wilds') {
     await ensureWilds(); const W = WM.mod.WILDS; townCols = colliders.slice(); colliders.length = 0; for (const c of WM.colliders) colliders.push(c);
     ZONE.name = 'wilds'; ZONE.cx = W.ox; ZONE.cz = W.oz; ZONE.half = W.half; WM.group.visible = true; WM.portalMesh.visible = true; hideTown();

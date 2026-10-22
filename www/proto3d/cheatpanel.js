@@ -72,8 +72,28 @@ function buildPanel(c, gate, env) {
   panel.appendChild(row(foe, act('spawn', 'Spawn enemy', () => c.spawnEnemy(foe.value), 'fight mode is full'), act('spawn-titan', 'Spawn Ashen Titan', () => c.spawnTitan(), 'a Titan is already alive')));
   if (env.hooks && env.hooks.fightTest) { panel.appendChild(sec('Fight test')); panel.appendChild(row(act('fight', 'Start / stop fight test', () => { env.hooks.fightTest(); hide(); return true; }))); panel.appendChild(el('div', { textContent: 'Owner + lightsaber vs chasing monsters. Attack: button or F/J.', style: 'font-size:11px;opacity:.7' })); }
   panel.appendChild(sec('Teleport'));
-  const zone = el('select', { id: 'ownerZone' }); for (const z of c.zones()) zone.appendChild(el('option', { value: z, textContent: z })); isolateKeys(zone);
-  panel.appendChild(row(zone, act('tpz', 'Go zone', () => c.teleportZone(zone.value))));
+  const zone = el('select', { id: 'ownerZone', ariaLabel: 'Select map destination' });
+  const zoneNames={village:'Kingdom / Main Overworld',wilds:'The Wilds',frost:'Frost Troll Ice Cave',hydra:'Hydra Mire — Five-Headed Boss',sailing:'Tidewrack Ocean — 9 × 9 km'};
+  for(const z of c.zones())zone.appendChild(el('option',{value:z,textContent:zoneNames[z]||z}));
+  isolateKeys(zone);
+  const travel=(key,label,z)=>{
+    const b=el('button',{type:'button',textContent:label});
+    b.dataset.cheat=key;
+    b.addEventListener('click',()=>{
+      const ok=c.teleportZone(z);
+      say(ok?'Entering '+(zoneNames[z]||z)+'…':'Destination unavailable');
+      if(ok)hide();
+    });
+    return b;
+  };
+  panel.appendChild(row(zone, act('tpz', 'Go zone', () => {const ok=c.teleportZone(zone.value);if(ok)hide();return ok;})));
+  // Dedicated owner-only shortcuts in addition to the dropdown.
+  panel.appendChild(row(
+    travel('tp-hydra','🐉 Hydra Mire','hydra'),
+    travel('tp-sailing','⛵ Sailing Ocean','sailing'),
+    travel('tp-frost','❄ Frost Cave','frost'),
+    travel('tp-main','↩ Main Map','village')
+  ));
   const place = el('select', { id: 'ownerPlace' }); for (const p of c.places()) place.appendChild(el('option', { value: p.id, textContent: p.name })); isolateKeys(place);
   panel.appendChild(row(place, act('tpb', 'Go building', () => c.teleportPlace(place.value))));
   panel.appendChild(row(act('reset', 'Reset cheats', () => { c.reset(); return true; }), act('lock', 'Lock owner', () => {

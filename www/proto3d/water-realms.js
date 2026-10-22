@@ -107,6 +107,36 @@ export function buildSailingOcean(scene){
  }).catch(e=>console.warn('Original sailing ship not loaded; retaining temporary fallback',e));
  const tiles=new Map(),obstacles=new Map(),TILE=420,VIEW_RADIUS=2,colliders=[];
  const spawn={x:OCEAN.cx,z:OCEAN.cz+OCEAN.half-175};
+ // Rudder steering: left/right rotates the hull; forward/reverse controls sail
+ // speed. This avoids the previous sideways character-strafing boat movement.
+ const nav={heading:0,speed:0,throttle:0};
+ const wakeMat=new THREE.MeshBasicMaterial({color:0xd5f3e9,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide});
+ const wake=new THREE.Mesh(new THREE.PlaneGeometry(5.5,23),wakeMat);
+ wake.rotation.x=-Math.PI/2;wake.name='player-ship-wake';root.add(wake);
+ function blocked(x,z,pad=5){
+   for(const arr of obstacles.values())for(const c of arr)
+     if(Math.hypot(x-c.x,z-c.z)<c.r+pad)return true;
+   return false;
+ }
+ function sail(dt,turn,throttle,x,z){
+   const step=Math.max(0,Math.min(.05,Number(dt)||0));
+   const rudder=THREE.MathUtils.clamp(Number(turn)||0,-1,1);
+   const power=THREE.MathUtils.clamp(Number(throttle)||0,-1,1);
+   nav.throttle=power;
+   // A galleon takes time to accelerate and coasts when sails are furled.
+   const target=power>=0?power*19:power*5;
+   nav.speed+=(target-nav.speed)*Math.min(1,step*(power===0?1.5:.65));
+   const steering=Math.min(1,.25+Math.abs(nav.speed)/9);
+   nav.heading+=rudder*step*.64*steering*(nav.speed<-.2?-1:1);
+   const dd=nav.speed*step;
+   const mx=-Math.sin(nav.heading)*dd,mz=-Math.cos(nav.heading)*dd;
+   const nx=x+mx,nz=z+mz,edge=OCEAN.half-12;
+   if(Math.abs(nx-OCEAN.cx)>edge||Math.abs(nz-OCEAN.cz)>edge||blocked(nx,nz,8)){
+     nav.speed*=.3;
+     return{x,z,heading:nav.heading,speed:nav.speed,blocked:true};
+   }
+   return{x:nx,z:nz,heading:nav.heading,speed:nav.speed,blocked:false};
+ }
  function tile(tx,tz){
   const k=tx+','+tz;if(tiles.has(k))return;
   const group=new THREE.Group();group.name='ocean-island-tile-'+k;root.add(group);const hits=[];
@@ -125,8 +155,11 @@ export function buildSailingOcean(scene){
  }
  function update(t,x,z,yaw){
   vessel.position.set(x,.35+.19*Math.sin(t*1.1),z);
-  vessel.rotation.set(.027*Math.sin(t*.67),yaw,.034*Math.sin(t*.91));
+  vessel.rotation.set(.027*Math.sin(t*.67),yaw+Math.PI,.034*Math.sin(t*.91));
   water.mesh.position.x=x;water.mesh.position.z=z;water.tex.offset.set(t*.0017,t*.0009);
+  wake.position.set(x+Math.sin(yaw)*14,.05,z+Math.cos(yaw)*14);
+  wake.rotation.set(-Math.PI/2,0,-yaw);
+  wakeMat.opacity=Math.min(.4,Math.max(0,Math.abs(nav.speed)/19*.34));
   const ix=Math.floor((x-OCEAN.cx)/TILE),iz=Math.floor((z-OCEAN.cz)/TILE);
   const keys=new Set();
   for(let dz=-VIEW_RADIUS;dz<=VIEW_RADIUS;dz++)for(let dx=-VIEW_RADIUS;dx<=VIEW_RADIUS;dx++){
@@ -137,6 +170,6 @@ export function buildSailingOcean(scene){
  }
  update(0,spawn.x,spawn.z,0);
  return{group:root,ship:vessel,colliders,spawn,half:OCEAN.half,get shipReady(){return shipReady;},
-   blocked(x,z,pad=5){for(const arr of obstacles.values())for(const c of arr)if(Math.hypot(x-c.x,z-c.z)<c.r+pad)return true;return false;},
+   get navigation(){return {...nav};},sail,blocked,
    update,dispose(){scene.remove(root);dispose(root);}};
 }

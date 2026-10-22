@@ -1460,6 +1460,27 @@ function stairGuide(vx, vz) {
   return _g;
 }
 function updateHero(dt) {
+  // Sailing is a separate vehicle mode: rudder turn + sail throttle, never a
+  // humanoid strafe. We reuse the joystick and keyboard without extra HUD.
+  if(ZONE.name==='sailing'&&SM){
+    let rudder=joy.x,throttle=-joy.y;
+    if(keys.has('a')||keys.has('arrowleft'))rudder-=1;
+    if(keys.has('d')||keys.has('arrowright'))rudder+=1;
+    if(keys.has('w')||keys.has('arrowup'))throttle+=1;
+    if(keys.has('s')||keys.has('arrowdown'))throttle-=1;
+    if(Math.abs(rudder)<.12)rudder=0;
+    if(Math.abs(throttle)<.12)throttle=0;
+    const sailed=SM.sail(dt,rudder,throttle,state.heroX,state.heroZ);
+    state.heroX=sailed.x;state.heroZ=sailed.z;
+    state.yaw=sailed.heading;state.camYaw=sailed.heading;
+    state.speed=Math.abs(sailed.speed);
+    state.vx=-Math.sin(state.yaw)*sailed.speed;
+    state.vz=-Math.cos(state.yaw)*sailed.speed;
+    state.heroY=0;state.dispY=0;state.swimming=false;state.moving=state.speed>.3;
+    state.target=null;marker.visible=false;state.blockedFrames=0;
+    hero.visible=false;
+    return;
+  }
   // input vector in screen space (x right, y up)
   let ix = joy.x, iy = -joy.y;
   if (keys.has('a') || keys.has('arrowleft')) ix -= 1;
@@ -1695,7 +1716,7 @@ async function setZone(name) {
   if (name === ZONE.name) return true;
   const lastZone=ZONE.name;
   // Return via town when switching directly between self-contained maps.
-  if((lastZone==='hydra'||lastZone==='sailing')&&name!=='town'){
+  if(lastZone!=='town'&&name!=='town'){
     await setZone('town');return setZone(name);
   }
   if(FIGHT&&(FIGHT.auto||name==='sailing'))FIGHT.stop();

@@ -152,6 +152,20 @@ assert(loaderCss.includes('Cinematic loader layout'),'loader video has separate 
 
 const titlePage=src('www/proto3d.html'),menuScript=src('www/proto3d/varn-menu.js');
 
+const settingsSrc=src('www/proto3d/settings3d.js'),settingsStyles=src('www/proto3d/varn-ui.css');
+const pkg=JSON.parse(src('package.json'));
+assert.equal(titlePage.match(/id="vnVersion">([^<]+)</)[1],pkg.version,'in-game version badge must match installed package version');
+assert(!settingsSrc.includes('Varnethryl 3D · v1.2.9'),'settings cannot display the obsolete hardcoded version');
+assert(settingsSrc.includes("getElementById('vnVersion')?.textContent"),'settings version sourced from active build label');
+assert(settingsSrc.includes("document.body.classList.add('vn-settings-open')"),'opening settings enters gameplay-blocking modal state');
+assert(settingsSrc.includes("document.body.classList.remove('vn-settings-open')"),'closing settings restores the controls');
+assert(settingsStyles.includes('body.vn-settings-open #settingsPanel')&&settingsStyles.includes('z-index:7000!important'),'settings must sit above combat and touch controls');
+for(const key of ['#staminaHud','#moveActions','#stick','#cb','#vnHudEditorPanel'])
+ assert(settingsStyles.includes(key),'settings blocks gameplay control '+key);
+assert(settingsSrc.includes("const hudEd = () => window.__vnHudEditor || null;"),'settings HUD editor uses active custom layout editor');
+assert(src('www/proto3d/hud-layout-editor.js').includes('window.__vnHudEditor={open,close,refresh,reset'), 'settings reset has a functioning HUD reset method');
+
+
 const hudEditor=src('www/proto3d/hud-layout-editor.js');
 assert(titlePage.includes('id="vnEditHud"')&&titlePage.includes('proto3d/hud-layout-editor.js'),'HUD editor is accessible from the actual in-game menu');
 assert(hudEditor.includes("document.getElementById('vnEditHud')?.addEventListener('click',open)"),'HUD editor menu starts editable state');

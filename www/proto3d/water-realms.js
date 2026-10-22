@@ -74,7 +74,7 @@ export function buildHydraMire(scene){
  // Five-headed Hydra: original mesh, selectively cleaned ground and intact
  // chest; this remains an unrigged visual placeholder pending five-neck skinning.
  const hydraHolder=new THREE.Group();hydraHolder.name='hydra-unrigged-5-head';hydraHolder.position.set(0,2.3,-11);root.add(hydraHolder);
- let hydraReady=false;
+ let hydraReady=false,hydraDefeated=false,hydraDeathTime=null;
  glbFromGzip('proto3d/models-new/hydra_restored_mobile.glb.gz').then(gltf=>{
   const model=gltf.scene;const b=new THREE.Box3().setFromObject(model);const ht=b.max.y-b.min.y;
   if(!Number.isFinite(ht)||ht<.01)throw new Error('Hydra model bounds are invalid');
@@ -83,11 +83,24 @@ export function buildHydraMire(scene){
   model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
   hydraHolder.add(model);hydraReady=true;
  }).catch(e=>console.warn('Hydra Mire model could not load',e));
+ colliders.push({type:'circle',x:MIRE.cx,z:MIRE.cz-11,r:11}); // Hydra torso collision
  const exit={x:MIRE.cx,z:MIRE.cz+117},spawn={x:MIRE.cx,z:MIRE.cz+105};
  return{group:root,colliders,spawn,exit,half:MIRE.half,updates:0,get hydraReady(){return hydraReady;},
    heightAt(x,z){const r=Math.hypot(x-MIRE.cx,z-MIRE.cz);return r<60?1.25:r<70?.2:r<111&&Math.abs(x-MIRE.cx)<9?.9:r<125&&Math.abs(x-MIRE.cx)<12?.7:-.65;},
    waterAt(x,z){const r=Math.hypot(x-MIRE.cx,z-MIRE.cz);return r>70&&!(r<125&&Math.abs(x-MIRE.cx)<12);},
-   update(t){hydraHolder.position.y=2.3+.035*Math.sin(t*.8);},dispose(){scene.remove(root);dispose(root);}};
+   defeatBoss(){hydraDefeated=true;hydraDeathTime=null;},
+  resetBoss(){hydraDefeated=false;hydraDeathTime=null;hydraHolder.visible=true;},
+  update(t){
+    if(hydraDefeated){
+      if(hydraDeathTime===null)hydraDeathTime=t;
+      const age=Math.max(0,t-hydraDeathTime);
+      hydraHolder.position.y=2.3-Math.min(16,age*5);
+      hydraHolder.visible=age<3.25;
+    }else{
+      hydraHolder.visible=true;
+      hydraHolder.position.y=2.3+.035*Math.sin(t*.8);
+    }
+  },dispose(){scene.remove(root);dispose(root);}};
 }
 export function buildSailingOcean(scene){
  const root=new THREE.Group();root.name='tidewrack-open-ocean';scene.add(root);

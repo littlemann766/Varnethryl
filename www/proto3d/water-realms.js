@@ -1,9 +1,9 @@
-/* Varnethryl: separate Hydra Mire and 9x9 km Tidewrack sailing world.
+/* Varnethryl: separate Hydra Mire and compact 1,000 x 1,000 m Tidewrack sea.
    1 game unit ~= .704 m (1 m ~= 1.42 units). Only the nearby ocean terrain
-   is instantiated, so the complete 81 km^2 world does not load at once. */
+   is instantiated, and the full chart uses deterministic island positions. */
 import * as THREE from './vendor/three.module.js';
 export const WORLD_UNITS_PER_METER=1.42;
-export const OCEAN_METERS=9000; // CHANGE THIS to 6000 or 3000 to shrink the world later
+export const OCEAN_METERS=1000; // 1 km by 1 km while sailing gameplay is refined
 export const OCEAN=Object.freeze({cx:17500,cz:0,half:OCEAN_METERS*WORLD_UNITS_PER_METER/2});
 export const MIRE=Object.freeze({cx:12500,cz:0,half:190});
 const TWOPI=Math.PI*2;
@@ -42,7 +42,7 @@ function island(parent,x,z,r,sizeSeed,colliders){
 }
 async function glbFromGzip(url){
  if(!('DecompressionStream'in window))throw new Error('This Android WebView does not support compressed GLB models');
- const response=await fetch(url+'?v=1.5.7');if(!response.ok)throw new Error('GLB HTTP '+response.status);
+ const response=await fetch(url+'?v=1.5.8');if(!response.ok)throw new Error('GLB HTTP '+response.status);
  const bytes=await response.arrayBuffer(),head=new Uint8Array(bytes,0,Math.min(4,bytes.byteLength));
  // Some hosts decode .gz on the HTTP layer. Accept either raw GLB or gzip
  // exactly once so the original ship and Hydra load on both web and Android.
@@ -114,11 +114,17 @@ export function buildSailingOcean(scene){
  const water=seaWater();root.add(water.mesh);
  const vessel=new THREE.Group();vessel.name='player-sailing-ship';vessel.position.set(OCEAN.cx,0,OCEAN.cz+OCEAN.half-180);root.add(vessel);
  let shipReady=false,shipLoadError='',disposed=false;
- glbFromGzip('proto3d/models-new/tidewrack_sailing_ship.glb.gz').then(gltf=>{
+ const ready=glbFromGzip('proto3d/models-new/tidewrack_sailing_ship.glb.gz').then(gltf=>{
   const imported=gltf.scene;
-   if(disposed){dispose(imported);return;}
+   if(disposed){dispose(imported);throw Error('Sailing realm unloaded before ship was ready');}
+   // Refuse to board an empty or non-renderable GLB scene. A valid parser
+   // response isn't proof that the file contains visible ship geometry.
+   let meshCount=0;
+   imported.traverse(o=>{if(o.isMesh && o.geometry?.attributes?.position?.count>0)meshCount++;});
+   if(meshCount===0)throw Error('Approved sailing GLB contains no renderable ship meshes');
    const bounds=new THREE.Box3().setFromObject(imported);const dim=bounds.getSize(new THREE.Vector3());
-  if(!Number.isFinite(dim.y)||dim.y<.005)throw Error('Ship model has invalid vertical dimensions');
+  if(![dim.x,dim.y,dim.z].every(Number.isFinite)||dim.y<.005||dim.x<.005||dim.z<.005)
+    throw Error('Ship model has invalid dimensions');
   const scale=13.5/dim.y;
   imported.scale.setScalar(scale);
   imported.position.set(-(bounds.min.x+bounds.max.x)/2*scale,-bounds.min.y*scale-.7,-(bounds.min.z+bounds.max.z)/2*scale);
@@ -126,7 +132,11 @@ export function buildSailingOcean(scene){
   imported.name='user-supplied-sailing-ship';
   imported.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
   vessel.add(imported);shipReady=true;
- }).catch(e=>{if(!disposed){shipLoadError=String(e?.message||e);console.error('Approved 3D sailing ship failed to load; no substitute ship will be displayed',e);}});
+ }).catch(e=>{
+   shipLoadError=String(e?.message||e);
+   if(!disposed)console.error('Approved sailing ship failed to load; stay in town',e);
+   throw e; // Realm transition awaits this: no crew stranded on empty ocean.
+ });
  // Deck positions are ship-local and therefore follow the hull's position,
  // turning and wave-induced roll. Slot 0 is the helmsman, 1-3 companions.
  // Separate Y values account for the raised stern of the medieval galleon.
@@ -141,7 +151,7 @@ export function buildSailingOcean(scene){
    vessel.updateMatrixWorld(true);
    return vessel.localToWorld(out.copy(pos));
  }
- const tiles=new Map(),obstacles=new Map(),TILE=420,VIEW_RADIUS=2,colliders=[];
+ const tiles=new Map(),obstacles=new Map(),TILE=240,VIEW_RADIUS=2,colliders=[];
  const spawn={x:OCEAN.cx,z:OCEAN.cz+OCEAN.half-175};
  // Rudder steering: left/right rotates the hull; forward/reverse controls sail
  // speed. This avoids the previous sideways character-strafing boat movement.
@@ -221,7 +231,7 @@ export function buildSailingOcean(scene){
   for(const p of islandLayout(tx,tz))island(group,p.x,p.z,p.r,p.seed,hits);
   tiles.set(k,group);obstacles.set(k,hits);
  }
- // Cached lightweight map geometry covers the full 9x9 km without loading
+ // Cached lightweight map geometry covers the full 1 km square without loading
  // remote tiles into the scene or changing boat collision / performance.
  let fullIslandChart=null;
  function mapFeatures(full=false){
@@ -253,7 +263,7 @@ export function buildSailingOcean(scene){
   for(const [k,g] of tiles)if(!keys.has(k)){root.remove(g);dispose(g);tiles.delete(k);obstacles.delete(k);}
  }
  update(0,spawn.x,spawn.z,0);
- return{group:root,ship:vessel,colliders,spawn,half:OCEAN.half,
+ return{group:root,ship:vessel,colliders,spawn,half:OCEAN.half,ready,
    get shipReady(){return shipReady;},get shipLoadError(){return shipLoadError;},
    get navigation(){return {...nav};},
    // Same positions as the streamed 3D island collision geometry.

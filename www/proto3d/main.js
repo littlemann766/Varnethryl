@@ -636,7 +636,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.7';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.8';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1772,7 +1772,9 @@ async function setZoneNow(name) {
   if(lastZone!=='town'&&name!=='town'){
     await setZoneNow('town');return setZoneNow(name);
   }
-  if(FIGHT&&(FIGHT.auto||name==='sailing'))FIGHT.stop();
+  // Keep kingdom combat active while the ship is still being verified.
+  // Sailing disarms attacks only after its approved hull is loaded.
+  if(name!=='sailing'&&FIGHT?.auto)FIGHT.stop();
   if (name === 'wilds') {
     await ensureWilds(); const W = WM.mod.WILDS; townCols = colliders.slice(); colliders.length = 0; for (const c of WM.colliders) colliders.push(c);
     ZONE.name = 'wilds'; ZONE.cx = W.ox; ZONE.cz = W.oz; ZONE.half = W.half; WM.group.visible = true; WM.portalMesh.visible = true; hideTown();
@@ -1780,6 +1782,18 @@ async function setZoneNow(name) {
   } else if (name === 'hydra' || name === 'sailing') {
     const marine=await import('./water-realms.js');
     const target=name==='hydra'?marine.buildHydraMire(scene):marine.buildSailingOcean(scene);
+    if(name==='sailing'){
+      try{await target.ready;}catch(err){
+        target.dispose();
+        diag('Tidewrack ship could not load. Still in the Kingdom; retry from Menu → Travel. '+String(err?.message||err),true);
+        return false;
+      }
+      if(!target.shipReady || !target.ship.getObjectByName('user-supplied-sailing-ship')){
+        target.dispose();
+        diag('Tidewrack ship is unavailable; remaining in the Kingdom.',true);
+        return false;
+      }
+    }
     if(name==='hydra')HM=target;else SM=target;
     townCols=colliders.slice();colliders.length=0;for(const c of target.colliders)colliders.push(c);
     const region=name==='hydra'?marine.MIRE:marine.OCEAN;

@@ -125,17 +125,22 @@ with sync_playwright() as pw:
    check(tag+' Hydra walking works',sum((x-y)**2 for x,y in zip(a,c))>0.02,(a,c))
    pg.evaluate("document.getElementById('vnTravelSail').click()")
    pg.wait_for_function("__p3d.zone==='sailing'",timeout=35000)
-   check(tag+' 9x9 km size',pg.evaluate("Math.abs(__p3d.ZONE.half-6390)<1"))
+   check(tag+' 1000 x 1000 meter sea',pg.evaluate("Math.abs(__p3d.ZONE.half-710)<.1"))
+   check(tag+' ship loaded BEFORE entering sailing',pg.evaluate("""()=>{
+     const ship=__p3d.scene.getObjectByName('player-sailing-ship'),
+           approved=ship?.getObjectByName('user-supplied-sailing-ship');
+     return !!approved && approved.visible && ship.children.length===1;
+   }"""))
    pg.wait_for_function("document.getElementById('vnMiniMap')?.dataset.zone==='sailing'",timeout=12000)
    check(tag+' live ocean chart replaces Mire',pg.evaluate("document.getElementById('vnMiniMap').dataset.zone==='sailing'"))
    pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-open').click()")
    pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.full').click()")
-   pg.wait_for_function("Number(document.getElementById('vnMiniMap').dataset.islandCount)>20",timeout=12000)
+   pg.wait_for_function("Number(document.getElementById('vnMiniMap').dataset.islandCount)>=5",timeout=12000)
    check(tag+' FULL ocean chart includes unloaded distant islands',pg.evaluate("""()=>{
      const n=document.getElementById('vnMiniMap');
      return n.dataset.view==='full'&&Number(n.dataset.centerX)===__p3d.ZONE.cx
        && Number(n.dataset.radius)>__p3d.ZONE.half*1.42
-       && Number(n.dataset.islandCount)>20;
+       && Number(n.dataset.islandCount)>=5 && Number(n.dataset.islandCount)<=24;
    }"""))
    pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.in').click()")
    pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-open').click()")

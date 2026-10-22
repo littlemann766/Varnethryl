@@ -202,7 +202,7 @@ assert(fight.includes("const onKey = e =>"),'existing keyboard block, potion, we
 
 assert(main.includes('stick.offsetWidth,stick.offsetHeight'),'movement joystick range changes with user resize');
 const water=src('www/proto3d/water-realms.js');
-assert(water.includes('export const OCEAN_METERS=9000'),'sailing world starts at 9x9 km');
+assert(water.includes('export const OCEAN_METERS=1000'),'sailing world is a 1,000 by 1,000 meter sea');
 assert(water.includes('OCEAN_METERS*WORLD_UNITS_PER_METER/2'),'ocean world size configurable');
 assert(water.includes('const TILE=420') || water.includes('TILE=420'),'ocean islands load by local tiles');
 assert(water.includes('tiles.delete(k)')&&water.includes('obstacles.delete(k)'),'ocean tiles unload outside view');

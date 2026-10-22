@@ -73,7 +73,7 @@ function buildPanel(c, gate, env) {
   if (env.hooks && env.hooks.fightTest) { panel.appendChild(sec('Fight test')); panel.appendChild(row(act('fight', 'Start / stop fight test', () => { env.hooks.fightTest(); hide(); return true; }))); panel.appendChild(el('div', { textContent: 'Owner + lightsaber vs chasing monsters. Attack: button or F/J.', style: 'font-size:11px;opacity:.7' })); }
   panel.appendChild(sec('Teleport'));
   const zone = el('select', { id: 'ownerZone', ariaLabel: 'Select map destination' });
-  const zoneNames={village:'Kingdom / Main Overworld',wilds:'The Wilds',frost:'Frost Troll Ice Cave',hydra:'Hydra Mire — Five-Headed Boss',sailing:'Tidewrack Ocean — 9 × 9 km'};
+  const zoneNames={village:'Kingdom / Main Overworld',wilds:'The Wilds',frost:'Frost Troll Ice Cave',hydra:'Hydra Mire — Five-Headed Boss',sailing:'Tidewrack Ocean — 1 × 1 km'};
   for(const z of c.zones())zone.appendChild(el('option',{value:z,textContent:zoneNames[z]||z}));
   isolateKeys(zone);
   const travel=(key,label,z)=>{

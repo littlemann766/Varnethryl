@@ -5,7 +5,7 @@ import {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL,PORT_CENTER,lavaAmount,
 
 const P={town:['VARNETHRYL',160,30],wilds:['THE WILDS',160,35],
  frost:['FROST CAVE',155,30],hydra:['HYDRA MIRE',145,25],
- sailing:['TIDEWRACK OCEAN',520,100]};
+ sailing:['TIDEWRACK OCEAN',250,65]};
 const custom=new Map();
 const W=220,C=110,N=112;
 const css=[
@@ -66,7 +66,7 @@ export function createMiniMap(getState,getZone,env={}){
  const ring=document.createElement('i');ring.className='vn-mini-ring';ring.setAttribute('aria-hidden','true');
  const title=document.createElement('span');title.className='vn-mini-zone';
  const controls=document.createElement('div');controls.className='vn-mini-controls';
- const detail=document.createElement('span');detail.className='vn-mini-detail';detail.textContent='NORTH UP · GOLD YOU · BLUE PARTY · RED BOSSES';
+ const detail=document.createElement('span');detail.className='vn-mini-detail';detail.textContent='NORTH UP · GOLD ARROW = YOU';
  button.append(canvas,ring);root.append(button,title,controls,detail);document.body.appendChild(root);
  const ctx=canvas.getContext('2d',{alpha:false}),bgCanvas=document.createElement('canvas');
  bgCanvas.width=bgCanvas.height=N;

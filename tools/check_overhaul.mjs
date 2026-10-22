@@ -17,6 +17,8 @@ const camera=source('www/proto3d/camrig.js');
 const building=source('www/proto3d/buildings.js');
 const marine=source('www/proto3d/water-realms.js');
 assert(main.includes('zoneTransitionQueue.then(()=>setZoneNow(name))'),'travel requests must be serialized');
+assert(main.includes("if(name==='town'&&lastZone==='sailing'&&FIGHT)FIGHT.startAuto();"),
+ 'combat HUD must be restored when walking off the sailing ship');
 assert(main.includes("await setZoneNow('town');return setZoneNow(name);"),'nested world travel must not reenter the queued promise');
 assert(main.includes('zonePending(){return zoneTransitionCount;}'),'test runner can verify all travel requests have finished');
 assert(marine.includes('cachedRockMaterials.has(m)'), 'streamed ocean tiles must not dispose shared rock materials');

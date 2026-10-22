@@ -42,11 +42,11 @@ export function createMiniMap(getState,getZone){
  let last=-Infinity;
  function update(now=0){
   if(!ctx||now-last<180)return;last=now;
-  const s=getState(),z=getZone(),zone=z?.name||'town',name=zone==='town'?'VARNETHRYL':zone==='frost'?'FROST CAVE':'THE WILDS';
+  const s=getState(),z=getZone(),zone=z?.name||'town',name=zone==='town'?'VARNETHRYL':zone==='frost'?'FROST CAVE':zone==='hydra'?'HYDRA MIRE':zone==='sailing'?'TIDEWRACK OCEAN':'THE WILDS';
   zoneName.textContent=name;
   const W=220,c=110,R=109,scale=0.51;
   ctx.save();ctx.beginPath();ctx.arc(c,c,R,0,Math.PI*2);ctx.clip();
-  ctx.fillStyle=zone==='frost'?'#182536':zone==='wilds'?'#202d22':'#322b22';ctx.fillRect(0,0,W,W);
+  ctx.fillStyle=zone==='frost'?'#182536':zone==='hydra'?'#22373d':zone==='sailing'?'#1a4250':zone==='wilds'?'#202d22':'#322b22';ctx.fillRect(0,0,W,W);
   // Paper-like terrain grid helps read the direction without pretending to
   // know where exact 3D walls sit. Center stays on the hero's real position.
   const grid=28;

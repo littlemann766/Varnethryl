@@ -636,7 +636,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.4.5';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.4.6';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1781,6 +1781,10 @@ async function setZoneNow(name) {
   }
   state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
   updateZoneAmbience(.1,true);
+  // Ship steering intentionally disarms attacks, but arriving back at the
+  // kingdom must restore the normal combat HUD for the selected hero. The
+  // village remains protected because its PvE spawner checks inWilds().
+  if(name==='town'&&lastZone==='sailing'&&FIGHT)FIGHT.startAuto();
   if(name==='wilds'||name==='frost'||name==='hydra'){const f=await fightToggle(true);f.startAuto();if(name==='frost')f.startRegionBosses('frost');if(name==='hydra')f.startRegionBosses('hydra');}
   return true;
 }

@@ -1234,6 +1234,8 @@ function resolve(p, ghost, who) {
 const tmp = { x: 0, z: 0 };
 // multi-level floors (buildings.js): the hero has a level + y; upper floors only walkable where a floor/stair exists
 function surfaceAt(x, z, level) {
+  // Isolated PvP map must not inherit the town building floors at matching coordinates.
+  if(ZONE.name==='coliseum')return level===0?{y:coliseumHeight(x,z)}:null;
   for (const b of ectx.multi) { { const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
   if (LAD && level >= 10) { const ls = LAD.surface(x, z, level); if (ls) return ls; }
   return level === 0 ? { y: ZONE.name === 'coliseum' ? coliseumHeight(x,z) : ZONE.name === 'hydra' && HM ? HM.heightAt(x,z) : ZONE.name === 'frost' ? frostElevation(x,z) : ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : 0 } : null;

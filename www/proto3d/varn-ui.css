@@ -464,3 +464,10 @@ body.vn-settings-open #settingsPanel input{
 /* In Edit HUD mode, otherwise noninteractive readouts may be selected and dragged. */
 body.vn-hud-editing #staminaHud,
 body.vn-hud-editing #cb .vn-exp{pointer-events:auto!important}
+
+/* Sailing controls: joystick steers the ship, magic combat and human WALK/JUMP
+   buttons are withheld until the player returns to shore. */
+body.vn-sailing-zone #moveActions,
+body.vn-sailing-zone #cinderFlyControls,
+body.vn-sailing-zone #staminaHud,
+body.vn-sailing-zone #cb{display:none!important;pointer-events:none!important}

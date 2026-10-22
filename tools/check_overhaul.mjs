@@ -26,6 +26,12 @@ assert(main.includes("if(name==='town'&&lastZone==='sailing'&&FIGHT)FIGHT.startA
  'combat HUD must be restored when walking off the sailing ship');
 assert(main.includes("await setZoneNow('town');return setZoneNow(name);"),'nested world travel must not reenter the queued promise');
 assert(main.includes('zonePending(){return zoneTransitionCount;}'),'test runner can verify all travel requests have finished');
+assert(main.includes("if(ZONE.name==='town' && totalFrames%9===0)hideInactiveHeroModels()"),'town must suppress inactive cached heroes');
+assert(main.includes('!w || rec.retired || !crowd.includes(rec)'), 'retired follower downloads must never spawn ghost people');
+assert(marine.includes("const vessel=new THREE.Group();vessel.name='player-sailing-ship'"),'sailing uses empty container with only the supplied GLB');
+assert(!marine.includes('buildSailingShip('),'the procedural stand-in cannot appear on the sailing map');
+assert(marine.includes("foam.name='tapered-foam-streak'"),'sailing uses irregular tapered foam geometry');
+assert(!marine.includes('new THREE.PlaneGeometry(5.5,23)'),'legacy white rectangle wake removed');
 assert(marine.includes('cachedRockMaterials.has(m)'), 'streamed ocean tiles must not dispose shared rock materials');
 assert(marine.includes('nav.heading-=rudder*step*.64*steering*'), 'right rudder must turn starboard, not port');
 assert(marine.includes('if(disposed){dispose(model);return;}'), 'late Hydra model loads must be discarded after exit');

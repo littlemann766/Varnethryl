@@ -636,7 +636,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.4.9';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.0';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -687,7 +687,9 @@ function loadGlbHero(gi) {
         const w = wrapGLB(g, id), old = HEROES[gi];
         w.visible = false; scene.add(w);
         if (old) { w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); scene.remove(old); if (hero === old) hero = w; }
-        (VAR[gi] || (VAR[gi] = {})).glb = w; HEROES[gi] = w; glbInfo.loaded.push(id); glbInfo.kb[id] = Math.round(buf.byteLength / 1024);
+        (VAR[gi] || (VAR[gi] = {})).glb = w; HEROES[gi] = w;
+        if(ZONE.name==='town')hideInactiveHeroModels();
+        glbInfo.loaded.push(id); glbInfo.kb[id] = Math.round(buf.byteLength / 1024);
         glbInfo.pending = glbInfo.pending.filter(x => x !== id); diag('3D model "' + id + '" loaded (' + Math.round(buf.byteLength / 1024) + ' KB, build ' + ASSET_V + ')'); res(HEROES[gi]);
       } catch (e) { res(fail('wrap: ' + (e && e.message || e))); }
     }, err => res(fail('parse: ' + (err && err.message || err))));
@@ -706,11 +708,20 @@ function modeFor(id) {
   return DEFAULT_MODEL;
 }
 function makeBlocky(id) { const rig = CHARS[bk(id)].build(); const w = wrapGLB({ scene: rig.root, animations: rig.clips() }, id, true); w.userData.blocky = true; return w; }
+function hideInactiveHeroModels() {
+  // Model downloads, saved-skin swaps and roster selection may settle out of
+  // order. Cached but unselected roots must never appear as a second knight.
+  const roots=new Set(HEROES);
+  for(const pair of Object.values(VAR))for(const candidate of Object.values(pair))
+    if(candidate?.isObject3D)roots.add(candidate);
+  for(const actor of roots)if(actor && actor!==hero && actor.visible)actor.visible=false;
+}
 function showVariant(gi, w) {
   const old = HEROES[gi]; if (old === w) return;
   if (!w.parent) scene.add(w); w.visible = old.visible; w.position.copy(old.position); w.rotation.copy(old.rotation); old.visible = false;
   if (!old.userData.glb) scene.remove(old);                 // procedural stand-ins / empty placeholders are dropped, cached variants stay (hidden)
   if (hero === old) hero = w; HEROES[gi] = w;
+  if (ZONE.name === 'town') hideInactiveHeroModels();
 }
 function loadHero(gi) {
   const id = GLB_IDS[gi];
@@ -1014,14 +1025,14 @@ async function selectVariant(g, v) {
 async function toggleModel(i) {
   const id = GLB_IDS[i], next = modeFor(id) === 'blocky' ? 'glb' : 'blocky'; try { localStorage.setItem('vn_model_' + id, next); } catch (_) {}
   if (HEROES.indexOf(hero) === i) { await loadHero(i); }
-  for (const r of crowd) if (r.a.id === id) { if (r.root) { scene.remove(r.root); r.root = null; r.nd = null; } loadActorModel(id).then(w => { if (!w || r.root) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); r.root = w; r.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(r.a.x, 0, r.a.z); w.rotation.y = r.a.yaw; scene.add(w); }); }
+  for (const r of crowd) if (r.a.id === id) { if (r.root) { scene.remove(r.root); r.root = null; r.nd = null; } loadActorModel(id).then(w => { if (!w || r.retired || !crowd.includes(r) || r.root) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); r.root = w; r.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(r.a.x, 0, r.a.z); w.rotation.y = r.a.yaw; scene.add(w); }); }
 }
 function toggleFollower(i) {
   if (!playableSlot(i)) return;
   const id = GLB_IDS[i], cur = crowd.find(c => c.kind === 'party' && SLOT_G[GLB_IDS.indexOf(c.a.id)] === SLOT_G[i]), btn = fbtn(i);
-  if (cur) { crowd.splice(crowd.indexOf(cur), 1); bumpSys.remove(cur.a); if (cur.root) scene.remove(cur.root); if (btn) btn.classList.remove('on'); return; }
+  if (cur) { cur.retired=true; crowd.splice(crowd.indexOf(cur), 1); bumpSys.remove(cur.a); if (cur.root) scene.remove(cur.root); if (btn) btn.classList.remove('on'); return; }
   if (SLOT_G[HEROES.indexOf(hero)] === SLOT_G[i]) return;
-  const pm = crowd.filter(c => c.kind === 'party'); if (pm.length >= 3) { const o = pm[0], oi = GLB_IDS.indexOf(o.a.id); crowd.splice(crowd.indexOf(o), 1); bumpSys.remove(o.a); if (o.root) scene.remove(o.root); const ob = fbtn(oi); if (ob) ob.classList.remove('on'); }
+  const pm = crowd.filter(c => c.kind === 'party'); if (pm.length >= 3) { const o = pm[0], oi = GLB_IDS.indexOf(o.a.id); o.retired=true; crowd.splice(crowd.indexOf(o), 1); bumpSys.remove(o.a); if (o.root) scene.remove(o.root); const ob = fbtn(oi); if (ob) ob.classList.remove('on'); }
   spawnCrowd(id, 'party', state.heroX + (Math.random() - 0.5) * 2 * HS, state.heroZ + 2.2 * HS, (2.6 + pm.length * 0.5) * HS, 0); if (btn) btn.classList.add('on');
 }
 { const q = qp0.get('hero'); const qi = activeSlot(q != null && HEROES[+q] ? +q : savedPlan ? savedPlan.hero : 0); startHero = qi; if (qi) HEROES[0].visible = false; loadHero(qi).then(() => { if (qi && HEROES[qi].children.length) setHero(qi); else HEROES[0].visible = true; }); }
@@ -1239,9 +1250,9 @@ async function loadActorModel(id) {
 }
 function spawnCrowd(id, kind, x, z, leash, yaw) {
   const a = makeActor(id, { str: undefined, group: kind === 'party' ? 'party' : null }); a.x = x; a.z = z; a.yaw = yaw || 0;
-  const rec = { id, a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0, level: state.level, y: surfaceAt(x,z,state.level)?.y ?? (state.heroY || 0), ti: null, lvT: 0 };
+  const rec = { id, a, root: null, nd: null, kind, leash, hx: x, hz: z, vxs: 0, vzs: 0, level: state.level, y: surfaceAt(x,z,state.level)?.y ?? (state.heroY || 0), ti: null, lvT: 0, retired:false };
   crowd.push(rec); bumpSys.add(a);
-  loadActorModel(id).then(w => { if (!w) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, rec.y, a.z); w.rotation.y = a.yaw; scene.add(w); });
+  loadActorModel(id).then(w => { if (!w || rec.retired || !crowd.includes(rec)) return; w.traverse(o => { if (o.isMesh) o.castShadow = false; }); const bl = new THREE.Mesh(BLOB_GEO, BLOB_MAT); bl.rotation.x = -Math.PI / 2; bl.position.y = 0.03; w.add(bl); rec.root = w; rec.nd = findNodes(w); w.rotation.order = 'YXZ'; w.position.set(a.x, rec.y, a.z); w.rotation.y = a.yaw; scene.add(w); });
   return rec;
 }
 {
@@ -1876,6 +1887,7 @@ function frame(now) {
   updateCrowd(dt); updateHero(dt); updateZone(dt); updateZoneAmbience(dt); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if(HOB_CAMPS_WORLD){HOB_CAMPS_WORLD.group.visible=ZONE.name==='town';if(ZONE.name==='town')HOB_CAMPS_WORLD.cull(state.heroX,state.heroZ);} if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
   simTime += dt; if (SMOKE) SMOKE.update(simTime); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateWater?.(simTime,state.heroX,state.heroZ); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateVolcano?.(simTime,state.heroX,state.heroZ);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
+  if(ZONE.name==='town' && totalFrames%9===0)hideInactiveHeroModels();
   renderer.render(scene, camera);
   totalFrames++; fpsAcc += dt; fpsFrames++;
   if (fpsAcc >= 0.5) { fps = fpsFrames / fpsAcc; fpsAcc = 0; fpsFrames = 0; fpsEl.textContent = fps.toFixed(0) + ' fps · ' + renderer.info.render.calls + ' calls'; }
@@ -2019,7 +2031,13 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },
   toggleModel: i => toggleModel(i), groups: () => [...GROUPS.values()].map(g => ({ key: g.key, name: g.name, vars: g.vars.map(v => v.label) })),
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,
-  state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; }, THREE, renderer, scene, camera, enterables,
+  state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; },
+  get visibleHeroModelCount(){
+    const roots=new Set(HEROES);
+    for(const pair of Object.values(VAR))for(const candidate of Object.values(pair))if(candidate?.isObject3D)roots.add(candidate);
+    return [...roots].filter(actor=>actor.visible&&actor.parent).length;
+  },
+  THREE, renderer, scene, camera, enterables,
   enterables, get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   onRamp(x, z, level = 0) { const s = surfaceAt(x, z, level); return !!(s && s.ramp); },

@@ -502,3 +502,17 @@ body.vn-sailing-zone #cb{display:none!important;pointer-events:none!important}
  #vnQuickMenu .vn-quick-sections summary{padding:6px 9px;min-height:33px}
  #vnQuickMenu .vn-quick-version{padding:4px 0 0!important}
 }
+
+/* v1.5.11: restore WALK and JUMP next to the joystick, not above the fan.
+   Both buttons remain movable in Customize HUD. */
+#moveActions{
+ left:max(121px,calc(env(safe-area-inset-left) + 114px))!important;
+ right:auto!important;
+ bottom:calc(max(30px,env(safe-area-inset-bottom)) + 6px)!important;
+}
+@media(orientation:landscape) and (max-height:520px){
+ #moveActions{
+  left:max(121px,calc(env(safe-area-inset-left) + 114px))!important;
+  right:auto!important;bottom:max(15px,env(safe-area-inset-bottom))!important;
+ }
+}

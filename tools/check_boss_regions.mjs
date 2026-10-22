@@ -6,7 +6,7 @@ import {HERO_M,HERO_LORE_HEIGHTS,inchesToMeters,CHARS,profileFor,loadScale} from
 import {BOSS_PATTERNS,ENEMIES} from '../www/proto3d/combat/data.js';
 import {pickPattern} from '../www/proto3d/combat/ai.js';
 import {applyPose} from '../www/proto3d/bump.js';
-import {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_REALM,FROST_PORTAL,LAVA_POOLS,PORT_CENTER,isCitySafe,balthrixPosition,onLava,frostHill,lavaAmount} from '../www/proto3d/bossregions.js';
+import {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_REALM,FROST_PORTAL,LAVA_POOLS,PORT_CENTER,isCitySafe,balthrixPosition,nearestBalthrixPath,onLava,frostHill,lavaAmount} from '../www/proto3d/bossregions.js';
 const src=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const close=(a,b)=>Math.abs(a-b)<1e-8;
 assert(close(HERO_M,1.905),'Owner must be 1.905 m');
@@ -45,6 +45,15 @@ for(let t=0;t<900;t+=.5){
  if(Math.hypot(p.x-TITAN_CENTER.x,p.z-TITAN_CENTER.z)<32)roamerVisitsVolcano=true;
 }
 assert(roamerVisitsVolcano,'Balthrix patrol crosses Titan lava region');
+// Encounter discovery MUST use the spline's physical arc-length clock, not
+// straight chords connecting waypoints. Test positions including curves.
+for(let t=0;t<110;t+=.75){
+ const p=balthrixPosition(t),nearest=nearestBalthrixPath(p.x,p.z);
+ const phase=Math.abs(nearest.time-t);
+ assert(nearest.distance<0.15,'nearest Balthrix route should be on curved path');
+ assert(phase<0.3,'nearest route phase must match the spline patrol clock');
+}
+assert.equal(nearestBalthrixPath(NaN,10).distance,Infinity,'invalid roamer coordinates are rejected');
 // Regression: the serpent's arc-length patrol should maintain steady travel
 // speed and its heading should not snap as it rounds waypoint corners.
 let previous=balthrixPosition(0);

@@ -63,6 +63,9 @@ assert(main.includes("const ASSET_V = '"+appVersion+"'"),
   'model cache must match current '+appVersion+' Android/Web release');
 
 assert(fight.includes('14*Math.max(0,dt)'),'Balthrix patrol advances per frame instead of jerky time chunks');
+assert(fight.includes('nearestBalthrixPath(state.heroX,state.heroZ)'),'Balthrix encounter placement uses the same curved spline as its movement');
+assert(!fight.includes('nearestRoamTime('),'old straight-waypoint route estimate must not return');
+assert(fight.includes('roamer.roamSpeed=Math.min(14,'),'Balthrix eases into patrol without sudden full-speed sliding');
 assert(fight.includes('if (on) { if (isAuto === true) auto = true; return; }'),'existing active combat must be promotable');
 assert(main.includes("group.key === 'ssylthar'"),'unreleased Sslythar remains hidden');
 assert(main.includes('const hiddenSerpentSlot ='),'unreleased Sslythar saved/URL selection is guarded');

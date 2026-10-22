@@ -15,6 +15,10 @@ const ship=source('www/proto3d/port-ships.js');
 const trail=source('www/proto3d/balthrix-trail.js');
 const camera=source('www/proto3d/camrig.js');
 const building=source('www/proto3d/buildings.js');
+const marine=source('www/proto3d/water-realms.js');
+assert(marine.includes('cachedRockMaterials.has(m)'), 'streamed ocean tiles must not dispose shared rock materials');
+assert(marine.includes('if(disposed){dispose(model);return;}'), 'late Hydra model loads must be discarded after exit');
+assert(marine.includes('if(disposed){dispose(imported);return;}'), 'late sailing model loads must be discarded after exit');
 
 // Critical combat failure: querySelector returns ONE button, not an array.
 // Both slots and labels must use querySelectorAll's array wrapper.

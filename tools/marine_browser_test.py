@@ -61,6 +61,18 @@ with sync_playwright() as pw:
    check(tag+' combat menu clears expanded minimap',map_clearance())
    check(tag+' minimap zoom controls',pg.evaluate("!!document.querySelector('#vnMiniMap .vn-mini-control.full')"))
    pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.out').click()")
+   check(tag+' minimap zoom returns to following player',pg.evaluate(
+     "document.getElementById('vnMiniMap').dataset.view==='follow'"))
+   pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.full').click()")
+   pg.wait_for_function("document.getElementById('vnMiniMap').dataset.view==='full'",timeout=12000)
+   check(tag+' FULL town map anchors on zone centre',pg.evaluate("""()=>{
+     const n=document.getElementById('vnMiniMap');
+     return Number(n.dataset.centerX)===0&&Number(n.dataset.centerZ)===0
+       && Number(n.dataset.radius)>__p3d.ZONE.half*1.42;
+   }"""))
+   pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.in').click()")
+   check(tag+' zoom in re-centres on player',pg.evaluate(
+     "document.getElementById('vnMiniMap').dataset.view==='follow'"))
    pg.evaluate("document.querySelector('#vnMiniMap button').click()")
    check(tag+' no extra hero skin/model in town',pg.evaluate("__p3d.visibleHeroModelCount===1"))
    check(tag+' requested party count initialized',pg.evaluate(
@@ -87,6 +99,17 @@ with sync_playwright() as pw:
    check(tag+' 9x9 km size',pg.evaluate("Math.abs(__p3d.ZONE.half-6390)<1"))
    pg.wait_for_function("document.getElementById('vnMiniMap')?.dataset.zone==='sailing'",timeout=12000)
    check(tag+' live ocean chart replaces Mire',pg.evaluate("document.getElementById('vnMiniMap').dataset.zone==='sailing'"))
+   pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-open').click()")
+   pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.full').click()")
+   pg.wait_for_function("Number(document.getElementById('vnMiniMap').dataset.islandCount)>20",timeout=12000)
+   check(tag+' FULL ocean chart includes unloaded distant islands',pg.evaluate("""()=>{
+     const n=document.getElementById('vnMiniMap');
+     return n.dataset.view==='full'&&Number(n.dataset.centerX)===__p3d.ZONE.cx
+       && Number(n.dataset.radius)>__p3d.ZONE.half*1.42
+       && Number(n.dataset.islandCount)>20;
+   }"""))
+   pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.in').click()")
+   pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-open').click()")
    pg.wait_for_function("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')",timeout=35000)
    check(tag+' approved ship GLB visible',pg.evaluate("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')?.visible"))
    check(tag+' no procedural fallback hull, sails or duplicated vessel',pg.evaluate("""()=>{

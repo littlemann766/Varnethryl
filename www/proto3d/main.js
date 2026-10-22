@@ -636,7 +636,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.4';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.5';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1052,7 +1052,7 @@ const miniMap=createMiniMap(()=>state,()=>ZONE,{
  roads:()=>TOWN_MAP_ROADS,
  buildings:()=>BUILDING_DEFS.map(b=>({id:b.id,cx:b.cx*PK,cz:b.id==='gatehouse'?CITY_HALF-1.2:b.cz*PK,rot:b.rot,size:/keep|guildhall|port|colosseum/.test(b.id)?19:10})),
  lake:()=>WM?.mod?.LAKE?{x:WM.mod.WILDS.ox+WM.mod.LAKE.x,z:WM.mod.WILDS.oz+WM.mod.LAKE.z,r:WM.mod.LAKE.r}:null,
- islands:()=>SM?.mapFeatures?.()||[],
+ islands:(full=false)=>SM?.mapFeatures?.(full)||[],
  bosses:()=>FIGHT?.monsters||[],
  party:()=>crowd,
  revision:()=>ZONE.name+':'+colliders.length+':'+scene.children.length+':'+(SM?.shipReady?1:0)

@@ -151,6 +151,22 @@ assert(loader.includes('video.hidden=true; // prevent black video placeholder'),
 assert(loaderCss.includes('Cinematic loader layout'),'loader video has separate cinematic layout');
 
 const titlePage=src('www/proto3d.html'),menuScript=src('www/proto3d/varn-menu.js');
+
+const hudEditor=src('www/proto3d/hud-layout-editor.js');
+assert(titlePage.includes('id="vnEditHud"')&&titlePage.includes('proto3d/hud-layout-editor.js'),'HUD editor is accessible from the actual in-game menu');
+assert(hudEditor.includes("document.getElementById('vnEditHud')?.addEventListener('click',open)"),'HUD editor menu starts editable state');
+for(const selector of ["'#stick'","'#runBtn'","'#jumpBtn'","'#cb .sl.b'","'#cb .cl button[data-a=","'#cb .vn-exp'"]){
+ assert(hudEditor.includes(selector),'HUD editor missing a required input: '+selector);
+}
+assert(hudEditor.includes("localStorage.setItem(KEY,JSON.stringify(saved))"),'HUD edits survive reopening the app');
+assert(hudEditor.includes("orient=()=>innerWidth>=innerHeight?'landscape':'portrait'"),'portrait and landscape HUD positions saved independently');
+assert(hudEditor.includes("document.addEventListener('pointermove'"),'HUD buttons can be moved with touch drag');
+assert(hudEditor.includes("data-hud-action=\"larger\"")&&hudEditor.includes("data-hud-action=\"smaller\""),'HUD buttons have working resizing controls');
+assert(hudEditor.includes("new MutationObserver"),'newly loaded combat controls restore saved HUD placement');
+assert(main.includes('stick.offsetWidth,stick.offsetHeight'),'movement joystick range changes with user resize');
+const hudParse=spawnSync(process.execPath,['--check','www/proto3d/hud-layout-editor.js'],{encoding:'utf8'});
+assert.equal(hudParse.status,0,'HUD editor must be syntactically valid: '+hudParse.stderr);
+
 assert(!titlePage.includes('id="vnCamp"'),'hobgoblin camp removed from title menu');
 assert(!menuScript.includes("getElementById('vnCamp')"),'no menu teleport to hobgoblin camp');
 assert(fight.includes('function hobGrunt(distance)'),'camp grunts generated in combat world');

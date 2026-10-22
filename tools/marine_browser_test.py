@@ -89,6 +89,11 @@ with sync_playwright() as pw:
    pg.keyboard.up('a');pg.keyboard.up('w')
    y=pg.evaluate("__p3d.state.yaw")
    check(tag+' rudder steers',abs(y-c[2])>0.02,(y,c[2]))
+   check(tag+' port rudder turns the bow LEFT',y-c[2]>0.02,(y,c[2]))
+   pg.keyboard.down('w');pg.keyboard.down('d');pg.wait_for_timeout(1500)
+   pg.keyboard.up('d');pg.keyboard.up('w')
+   right_yaw=pg.evaluate("__p3d.state.yaw")
+   check(tag+' starboard rudder turns the bow RIGHT',right_yaw-y < -0.02,(right_yaw,y))
    deck_after=pg.evaluate(deck_js)
    check(tag+' crew follows the vessel while steering',deck_after['near'] and deck_after['visible'],deck_after)
 

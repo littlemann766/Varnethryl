@@ -1868,7 +1868,7 @@ document.getElementById('vnEnter')?.addEventListener('click',()=>{
 let ownerFlag = false;
 let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
 const cheatEnv = {
-  flags: cheat, bumpSys, storage: cheatStore, zones: ['village', 'wilds'],
+  flags: cheat, bumpSys, storage: cheatStore, zones: ['village', 'wilds', 'frost', 'hydra', 'sailing'],
   hooks: { fightTest: () => fightToggle(),
     godPref: () => { try { return cheatStore.getItem('vn_owner_god_v1') !== '0'; } catch (e) { return true; } },
     unlimPref: () => { try { return cheatStore.getItem('vn_owner_unlim_v1') !== '0'; } catch (e) { return true; } },
@@ -1881,7 +1881,22 @@ const cheatEnv = {
     spawnEnemy: (k) => { if (FIGHT && FIGHT.on) return FIGHT.cheatSpawn(k); fightToggle().then(() => setTimeout(() => FIGHT && FIGHT.on && FIGHT.cheatSpawn(k), 900)); return true; },
     onOwner: () => { if (window.__ownerRoster) window.__ownerRoster(); const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
-  teleport: (x, z, zone) => { if (zone === 'wilds') { setZone('wilds'); return; } const go = () => { state.heroX = x; state.heroZ = z; state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; updateLevel(); snapFollowers(); }; if (ZONE.name !== 'town') setZone('town').then(go); else go(); },
+  teleport: (x, z, zone) => {
+    // Owner travel shortcuts use the exact same zone lifecycle and cleanup as
+    // normal portals, never raw coordinates in unloaded maps.
+    if (['wilds','frost','hydra','sailing'].includes(zone)) {
+      setZone(zone).catch(e=>diag('Owner world travel failed: '+String(e?.message||e),true));
+      return;
+    }
+    const go = () => {
+      if (zone === 'village') { x = 0; z = 14; }
+      state.heroX=x;state.heroZ=z;state.level=0;state.target=null;
+      marker.visible=false;state.blockedFrames=0;updateLevel();snapFollowers();
+      camRig.snap=true;
+    };
+    if(ZONE.name!=='town')setZone('town').then(go).catch(e=>diag('Owner town teleport failed: '+String(e?.message||e),true));
+    else go();
+  },
   onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); settingsApi.ownerInit(); },
   onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); },
   onLocked: () => {

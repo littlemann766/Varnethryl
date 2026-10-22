@@ -8,7 +8,7 @@ const controls=[
  ['#staminaHud','Stamina'],['#cinderFlyControls','Flight'],
  ...[0,1,2,3,4].map((n)=>['#cb .sl.b'+n,n===0?'Basic Attack':n===4?'Ultimate':'Skill '+n]),
  ['#cb .cx','Combat pad'],['#cb .vn-exp','XP bar'],['#cb .vit','Vitals'],
- ['#cb .tp','Enemy health'],['#cb .top','Combat options']
+ ['#cb .tp','Enemy health']
 ];
 const css=document.createElement('style');css.id='vnHudEditorStyle';
 css.textContent=

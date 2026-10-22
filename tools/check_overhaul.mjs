@@ -6,6 +6,13 @@ import {spawnSync} from 'node:child_process';
 import {fallenTreeSites,balthrixPosition,isCitySafe,onLava,PORT_CENTER,FROST_SUMMIT,TITAN_CENTER} from '../www/proto3d/bossregions.js';
 const source=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const hud=source('www/proto3d/combat/hud.js');
+const editor=source('www/proto3d/hud-layout-editor.js');
+const cheatPanel=source('www/proto3d/cheatpanel.js');
+assert(!hud.includes('data-a="summon">Summon Titan')&&!hud.includes('data-a="exit">Exit fight'),
+  'remove the two obsolete top-screen combat buttons');
+assert(!hud.includes('<div class="top">'),'no empty combat top-control group');
+assert(!editor.includes("'#cb .top','Combat options'"),'HUD customization excludes deleted buttons');
+assert(cheatPanel.includes("act('spawn-titan', 'Spawn Ashen Titan'"),'owner still summons Titan from cheat menu');
 const main=source('www/proto3d/main.js');
 const fight=source('www/proto3d/fight.js');
 const terrain=source('www/proto3d/townlands.js');

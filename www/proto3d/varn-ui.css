@@ -417,3 +417,46 @@ body.vn-settings-open #settingsPanel input{
   bottom:max(4px,env(safe-area-inset-bottom))!important
  }
 }
+
+
+/* v1.4.0 HUD: only the left joystick occupies the lower-left action area.
+   Level / XP is top-centre; the purple stamina gauge sits directly beneath it. */
+#staminaHud{
+ position:fixed!important;
+ top:calc(max(7px,env(safe-area-inset-top)) + 77px)!important;
+ bottom:auto!important;
+ left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+ width:min(350px,44vw)!important;
+ z-index:99!important;pointer-events:none!important;
+}
+#staminaHud .vn-stamlabel{font-size:11px!important}
+#staminaHud .vn-stambar{height:12px!important}
+#moveActions{
+ position:fixed!important;left:auto!important;right:max(10px,env(safe-area-inset-right))!important;
+ bottom:calc(max(6px,env(safe-area-inset-bottom)) + 275px)!important;
+ flex-direction:column!important;gap:6px!important;
+ z-index:105!important;
+}
+#moveActions button{
+ min-width:65px!important;min-height:42px!important;
+ font-size:11px!important;
+}
+@media(orientation:portrait){
+ #staminaHud{
+  top:calc(max(6px,env(safe-area-inset-top)) + 73px)!important;
+  width:min(350px,44vw)!important;
+ }
+ #moveActions{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 273px)!important}
+}
+@media(orientation:portrait) and (max-width:560px){
+ #staminaHud{left:8px!important;right:auto!important;transform:none!important;
+  width:calc(100vw - 156px)!important}
+ #staminaHud .vn-stamlabel{font-size:9px!important}
+}
+@media(orientation:landscape) and (max-height:520px){
+ #staminaHud{top:calc(max(5px,env(safe-area-inset-top)) + 49px)!important;
+  width:min(250px,35vw)!important}
+ #moveActions{bottom:calc(max(6px,env(safe-area-inset-bottom)) + 120px)!important;
+  right:max(8px,env(safe-area-inset-right))!important}
+ #moveActions button{min-width:58px!important;min-height:37px!important;font-size:9px!important}
+}

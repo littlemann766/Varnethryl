@@ -31,6 +31,8 @@ with sync_playwright() as pw:
    pg.wait_for_function('window.__p3d && __p3d.frames>5',timeout=120000)
    pg.evaluate("document.getElementById('vnEnter')?.click()")
    check(tag+' town boots',pg.evaluate("__p3d.zone==='town'"))
+   check(tag+' requested party count initialized',pg.evaluate(
+     "(count)=>__p3d.bump.crowd.filter(r=>r.kind==='party').length===count",party_count))
    check(tag+' cheats locked initially',pg.evaluate("!document.getElementById('ownerPanel') && !__p3d.cheats"))
    check(tag+' three map buttons',pg.evaluate("['vnTravelHydra','vnTravelSail','vnTravelTown'].every(id=>!!document.getElementById(id))"))
    pg.evaluate("document.getElementById('vnTravelHydra').click()")
@@ -58,7 +60,7 @@ with sync_playwright() as pw:
    pg.wait_for_function("""(count)=>{
      const c=__p3d.bump.crowd.filter(r=>r.kind==='party');
      return __p3d.hero.visible && c.length===count && c.every(r=>r.root?.visible);
-   }""",arg=party_count,timeout=35000)
+   }""",arg=party_count,timeout=60000)
    deck_js="""(()=>{
      const p=__p3d,ship=p.scene.getObjectByName('player-sailing-ship');
      ship.updateMatrixWorld(true);

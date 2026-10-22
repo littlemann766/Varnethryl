@@ -1709,12 +1709,12 @@ async function setZone(name) {
   if(name==='wilds'||name==='frost'){const f=await fightToggle(true);f.startAuto();if(name==='frost')f.startRegionBosses('frost');}
   return true;
 }
-let outdoorCombatStarting=false;
+let outdoorCombatStarting=false, outdoorCombatRetryAt=0;
 function updateZone(dt) {
   // Automatically enter PvE beyond the walls; town interiors remain protected.
-  if(ZONE.name==='town' && (Math.abs(state.heroX)>CITY_HALF+14 || Math.abs(state.heroZ)>CITY_HALF+14) && !outdoorCombatStarting && (!FIGHT||!FIGHT.on||!FIGHT.auto)){
+  if(ZONE.name==='town' && (Math.abs(state.heroX)>CITY_HALF+14 || Math.abs(state.heroZ)>CITY_HALF+14) && !outdoorCombatStarting && performance.now()>=outdoorCombatRetryAt && (!FIGHT||!FIGHT.on||!FIGHT.auto)){
     outdoorCombatStarting=true;
-    fightToggle(true).then(f=>{if(ZONE.name==='town')f.startAuto();}).catch(err=>diag('Wilderness combat startup failed: '+err.message,true)).finally(()=>{outdoorCombatStarting=false;});
+    fightToggle(true).then(f=>{outdoorCombatRetryAt=0;if(ZONE.name==='town')f.startAuto();}).catch(err=>{outdoorCombatRetryAt=performance.now()+12000;diag('Wilderness combat startup failed: '+String(err&&err.message||err)+' (retry in 12s)',true);}).finally(()=>{outdoorCombatStarting=false;});
   }
   if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ, VIEWK);
   const t=performance.now()/1000;

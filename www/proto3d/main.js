@@ -1472,7 +1472,7 @@ function updateHero(dt) {
     if(Math.abs(throttle)<.12)throttle=0;
     const sailed=SM.sail(dt,rudder,throttle,state.heroX,state.heroZ);
     state.heroX=sailed.x;state.heroZ=sailed.z;
-    state.yaw=sailed.heading;state.camYaw=sailed.heading;
+    state.yaw=sailed.heading; // camera yaw stays independently orbitable
     state.speed=Math.abs(sailed.speed);
     state.vx=-Math.sin(state.yaw)*sailed.speed;
     state.vz=-Math.cos(state.yaw)*sailed.speed;

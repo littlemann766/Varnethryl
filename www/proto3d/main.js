@@ -1612,14 +1612,14 @@ function updateCamera(dt, snap) {
     const heading=state.camYaw;
     camera.position.set(state.heroX-Math.sin(heading)*39,22,state.heroZ-Math.cos(heading)*39);
     camera.lookAt(state.heroX,5.5,state.heroZ);
-    camRig.pos.copy(camera.position);camRig.look.set(state.heroX,5.5,state.heroZ);
+    camRig.pos.copy(camera.position);camRig.lookTarget.set(state.heroX,5.5,state.heroZ);
   }
   // Follow the actual elevated terrain on hills: don't let the third-person camera clip into a ridge.
   if (((ZONE.name === 'town' && TOWN_LANDS) || ZONE.name === 'frost') && !camRig.fp) {
     const floor = (ZONE.name === 'frost' ? frostElevation(camRig.pos.x,camRig.pos.z) : TOWN_LANDS.heightAt(camRig.pos.x,camRig.pos.z)) + 1.0 * HS;
-    if (camRig.pos.y < floor) { camRig.pos.y = floor; camera.position.y = floor; camera.lookAt(camRig.look); }
+    if (camRig.pos.y < floor) { camRig.pos.y = floor; camera.position.y = floor; camera.lookAt(camRig.lookTarget); }
   }
-  camPos.copy(camRig.pos); camLook.copy(camRig.look);
+  camPos.copy(camRig.pos); camLook.copy(camRig.lookTarget);
   camRig.syncHero(hero);
   sun.position.set(state.heroX + SUN_OFF.x * SUNK, (ZONE.name !== 'wilds' ? state.heroY : 0) + SUN_OFF.y * SUNK, state.heroZ + SUN_OFF.z * SUNK);
   sun.target.position.set(state.heroX, ZONE.name !== 'wilds' ? state.heroY : 0, state.heroZ);

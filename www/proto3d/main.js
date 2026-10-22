@@ -636,7 +636,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.4.8';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.4.9';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1761,6 +1761,9 @@ async function setZoneNow(name) {
     townCols=colliders.slice();colliders.length=0;for(const c of target.colliders)colliders.push(c);
     const region=name==='hydra'?marine.MIRE:marine.OCEAN;
     ZONE.name=name;ZONE.cx=region.cx;ZONE.cz=region.cz;ZONE.half=target.half;
+    // A delayed Enter-world combat start may have resolved while the ocean
+    // module loaded. Disarm again after publishing the sailing zone.
+    if(name==='sailing'&&FIGHT?.on)FIGHT.stop();
     hideTown();target.group.visible=true;
     if(portalT)portalT.visible=false;
     state.heroX=target.spawn.x;state.heroZ=target.spawn.z;state.yaw=0;state.camYaw=0;

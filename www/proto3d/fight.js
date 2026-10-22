@@ -500,6 +500,10 @@ export function createFight(env) {
   let lavaT=0;
   function update(dt) {
     if (!on) return;
+    // World streaming and character selection are asynchronous. A deferred
+    // combat-start callback must never leave skill keys, attacks or PvE
+    // running while the player is steering the galleon.
+    if (env.zone?.() === 'sailing') { stop(); return; }
     dt = Math.min(dt, 0.1); syncHero(); cc.god = !!(env.cheat && env.cheat.god) && cc.perkHero(); cc.res.unlimited = !!(env.cheat && env.cheat.unlimited) && cc.perkHero(); cc.noCooldown = !!(env.cheat && env.cheat.noCooldown); cc.ownerUnlocked = ownerGate();
     { const dx = state.heroX - A.lx, dz = state.heroZ - A.lz; A.lx = state.heroX; A.lz = state.heroZ; const l = Math.hypot(dx, dz); if (l > 0.005 && !A.dash) { A.vx = dx / l; A.vz = dz / l; } else if (l <= 0.005) { A.vx = 0; A.vz = 0; } }
     cc.setPlayer(state.heroX, state.heroZ, state.yaw);
@@ -586,6 +590,9 @@ export function createFight(env) {
     alive: b => { let n = 0; for (const e of cc.enemies) if (e.biome === b && e.state !== 'defeated') n++; return n; }, spawn: (key, x, z, b) => spawn(key, 0, { aggroR: AUTO_AGGRO, at: [x, z], biome: b }) };
   cc.on('defeat', e => { if(auto&&e.campId)campNext.set(e.campId,regionClock+20+Math.random()*10); else if (auto && !e.def.boss) RS.freeSlot(true); });
   function start(isAuto) {
+    // Combat is unavailable at sea, including late "Enter world" promises,
+    // owner fight toggles and loading callbacks that resolve after boarding.
+    if (env.zone?.() === 'sailing') { if (on) stop(); return; }
     if (on) { if (isAuto === true) auto = true; return; } auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
     if (auto) { syncHero(); equip(); const zone=env.zone?.(); hud.say(zone==='hydra'?'HYDRA MIRE — FIVE HEADS AWAIT':zone==='frost'?'FROST CAVE — THE BROTHERS AWAIT':zone==='town'?'OUTSKIRTS — DANGER AHEAD':'THE WILDS — MONSTERS ABOUT',1800); return; }

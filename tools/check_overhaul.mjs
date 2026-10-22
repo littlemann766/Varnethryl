@@ -19,6 +19,9 @@ const marine=source('www/proto3d/water-realms.js');
 assert(main.includes('zoneTransitionQueue.then(()=>setZoneNow(name))'),'travel requests must be serialized');
 assert(main.includes("if(qp.has('party'))for(const id of defaultFollowers)"),'explicit party override must fill missing saved follower berths');
 assert(main.includes("fromSave&&!qp.has('party')"),'ordinary saved party remains unchanged without a party override');
+assert(fight.includes("if (env.zone?.() === 'sailing') { if (on) stop(); return; }"),'combat cannot be enabled while sailing');
+assert(fight.includes("if (env.zone?.() === 'sailing') { stop(); return; }"),'in-flight combat is disarmed on ship frame');
+assert(main.includes("if(name==='sailing'&&FIGHT?.on)FIGHT.stop();"),'ocean entry forcibly disarms deferred combat');
 assert(main.includes("if(name==='town'&&lastZone==='sailing'&&FIGHT)FIGHT.startAuto();"),
  'combat HUD must be restored when walking off the sailing ship');
 assert(main.includes("await setZoneNow('town');return setZoneNow(name);"),'nested world travel must not reenter the queued promise');

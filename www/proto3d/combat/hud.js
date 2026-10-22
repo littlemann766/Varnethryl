@@ -271,6 +271,81 @@ const CSS = `
   #cb .tp,#cb .tp.boss{border-width:6px!important;border-image-width:6px 9px!important;padding:2px 7px 3px!important}
 }
 
+/* Varnethryl combat controls: one five-ability row with a compact anchored action strip.
+   Basic Attack → 1 → 2 → 3 → Ultimate. No event handlers or combat logic changed. */
+#cb .cx{
+ display:flex!important;flex-flow:row nowrap;align-items:center;justify-content:space-between;
+ gap:clamp(5px,.7vw,9px);width:min(430px,52vw)!important;height:auto!important;
+ aspect-ratio:auto!important;right:max(12px,env(safe-area-inset-right))!important;
+ bottom:calc(max(9px,env(safe-area-inset-bottom)) + 51px)!important;
+ padding:8px 9px 24px;border:1px solid #aa814b;border-radius:17px;
+ background:linear-gradient(155deg,#191024e8,#110f1dcc 58%,#191426c9);
+ box-shadow:inset 0 0 0 1px #804d9b66,0 6px 20px #000b;
+ filter:drop-shadow(0 5px 10px #0009)
+}
+#cb .cx>.sl{
+ position:relative!important;inset:auto!important;right:auto!important;bottom:auto!important;
+ display:block;flex:1 1 0;width:auto!important;height:auto!important;min-width:0;
+ aspect-ratio:1!important;margin:0!important;border-width:3px!important;transform-origin:center;
+ -webkit-tap-highlight-color:transparent
+}
+#cb .cx>.sl.b0{flex-grow:1.26;border-width:4px!important}
+#cb .cx>.sl.b4{flex-grow:1.18;border-width:4px!important}
+#cb .cx>.sl .nmL,#cb .cx>.sl.b4 .nmL{
+ left:50%;right:auto;top:auto;bottom:-17px;transform:translateX(-50%);
+ max-width:calc(100% + 15px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ font-size:9px!important;line-height:13px;text-align:center;letter-spacing:0;text-transform:none
+}
+#cb .cx>.sl .k{font-size:9px!important;bottom:3%}
+#cb .cl{
+ position:absolute!important;left:auto!important;right:2px!important;
+ bottom:calc(100% + 9px)!important;width:min(300px,100%)!important;
+ display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;
+ grid-auto-flow:row;gap:5px!important;z-index:3;pointer-events:none
+}
+#cb .cl button{
+ pointer-events:auto;position:relative;min-width:0;width:100%!important;height:45px!important;
+ min-height:40px;padding:5px 1px 3px!important;border-radius:10px!important;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ font:700 8px/1.05 VarnCinzel,Georgia,serif!important;text-transform:capitalize;
+ -webkit-tap-highlight-color:transparent
+}
+#cb .cl button .g{font:400 19px/21px system-ui!important;flex:none}
+#cb .cl button .q{display:none}
+/* Potion count must remain visible; all keyboard prompts are hidden on the touch strip. */
+#cb .cl button[data-a="potion"] .q{display:block;right:-3px;top:-6px;padding:2px 3px;
+ color:#ffe8b3;background:#291437;border:1px solid #cba367;border-radius:7px;
+ font:700 9px system-ui;line-height:1;z-index:2}
+#cb .cl button .cdv{pointer-events:none}
+#cb .ulp{right:0!important;bottom:calc(100% + 65px)!important;width:min(210px,70vw);gap:6px;z-index:6}
+#cb .ulp button{width:100%;min-height:44px!important;padding:8px!important;
+ font-size:11px!important;white-space:normal;line-height:1.3}
+@media(orientation:portrait){
+ #cb .cx{width:calc(100vw - 20px)!important;max-width:400px!important;
+  right:max(10px,env(safe-area-inset-right))!important;
+  bottom:calc(max(8px,env(safe-area-inset-bottom)) + 188px)!important;
+  gap:clamp(3px,1vw,7px);padding:7px 7px 22px}
+ #cb .cx>.sl .nmL,#cb .cx>.sl.b4 .nmL{font-size:8px!important;bottom:-15px}
+ #cb .cl{width:min(300px,92%)!important;bottom:calc(100% + 9px)!important;gap:4px!important}
+ #cb .cl button{height:43px!important;font-size:8px!important}
+ #cb .vn-exp{bottom:max(3px,env(safe-area-inset-bottom))!important;
+  width:min(355px,92vw)!important;height:43px!important}
+}
+@media(orientation:landscape) and (max-height:490px){
+ #cb .cx{width:min(380px,51vw)!important;height:auto!important;
+  bottom:calc(max(4px,env(safe-area-inset-bottom)) + 47px)!important;
+  gap:5px;padding:6px 7px 19px}
+ #cb .cx>.sl .nmL,#cb .cx>.sl.b4 .nmL{font-size:8px!important;bottom:-13px}
+ #cb .cl{width:min(288px,100%)!important;bottom:calc(100% + 7px)!important}
+ #cb .cl button{height:41px!important;min-height:40px;font-size:7px!important}
+ #cb .cl button .g{font-size:17px!important;line-height:18px!important}
+}
+@media(max-width:350px) and (orientation:portrait){
+ #cb .cx{gap:3px;padding:6px 5px 22px}
+ #cb .cx>.sl .nmL{font-size:7px!important;max-width:calc(100% + 8px)}
+ #cb .cl button{font-size:7px!important}
+}
+
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';
@@ -305,7 +380,9 @@ export class CombatHUD {
       '<button type="button" data-a="jump"><span class="g">\u2191</span>Jump<span class="q">J</span></button><button type="button" data-a="lock"><span class="g">\u25CE</span>Lock<span class="q">Q</span></button>' +
       '<button type="button" data-a="potion"><span class="g">\u2697</span>Potion<span class="q">R</span><span class="cdv"></span></button><button type="button" data-a="swap"><span class="g">\u2694</span>Weapon<span class="q">E</span></button></div><div class="msg"></div>';
     document.body.appendChild(r);
-    const $ = s => r.querySelector(s), $$ = s => Array.from(r.querySelectorAll(s));
+    // Anchor all six movement/defense buttons to the same responsive pad.
+    r.querySelector('.cx').appendChild(r.querySelector('.cl'));
+    const $ = s => r.querySelector(s), $ = s => Array.from(r.querySelectorAll(s));
     this.tp = $('.tp'); this.tpNm = $('.tp .nm'); this.tpSub = $('.tp .sub'); this.tpBar = $('.tp .bar i'); this.tpTxt = $('.tp .bar b');
     const vb = n => ({ i: $('.vit .' + n + ' i'), b: $('.vit .' + n + ' b') }); this.vhp = vb('hp'); this.vmp = vb('mp'); this.vsp = vb('sp'); this.vfy = vb('fy');
     this.exp = $('.vn-exp'); this.expFill = $('.vn-exp-fill'); this.expLevel = $('.vn-exp-level'); this.expValue = $('.vn-exp-value'); this.expKey = '';

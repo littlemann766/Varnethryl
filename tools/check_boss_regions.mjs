@@ -160,6 +160,7 @@ assert(settingsSrc.includes("getElementById('vnVersion')?.textContent"),'setting
 assert(settingsSrc.includes("document.body.classList.add('vn-settings-open')"),'opening settings enters gameplay-blocking modal state');
 assert(settingsSrc.includes("document.body.classList.remove('vn-settings-open')"),'closing settings restores the controls');
 assert(settingsStyles.includes('body.vn-settings-open #settingsPanel')&&settingsStyles.includes('z-index:7000!important'),'settings must sit above combat and touch controls');
+assert(settingsStyles.includes('body.vn-settings-open::before'),'settings backdrop captures touches outside the settings panel');
 for(const key of ['#staminaHud','#moveActions','#stick','#cb','#vnHudEditorPanel'])
  assert(settingsStyles.includes(key),'settings blocks gameplay control '+key);
 assert(settingsSrc.includes("const hudEd = () => window.__vnHudEditor || null;"),'settings HUD editor uses active custom layout editor');

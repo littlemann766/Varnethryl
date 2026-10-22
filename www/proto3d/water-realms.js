@@ -41,7 +41,14 @@ function island(parent,x,z,r,sizeSeed,colliders){
 async function glbFromGzip(url){
  if(!('DecompressionStream'in window))throw new Error('This Android WebView does not support compressed GLB models');
  const response=await fetch(url+'?v=1.4.1');if(!response.ok)throw new Error('GLB HTTP '+response.status);
- const decoded=await new Response(response.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+ const bytes=await response.arrayBuffer(),head=new Uint8Array(bytes,0,Math.min(4,bytes.byteLength));
+ // Some hosts decode .gz on the HTTP layer. Accept either raw GLB or gzip
+ // exactly once so the original ship and Hydra load on both web and Android.
+ const decoded=head[0]===0x67&&head[1]===0x6c&&head[2]===0x54&&head[3]===0x46
+   ?bytes:head[0]===0x1f&&head[1]===0x8b
+     ?await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer()
+     :null;
+ if(!decoded)throw new Error('Unrecognized compressed GLB format');
  const {GLTFLoader}=await import('./vendor/jsm/loaders/GLTFLoader.js');
  return await new Promise((ok,bad)=>new GLTFLoader().parse(decoded,'',ok,bad));
 }
@@ -64,8 +71,8 @@ export function buildHydraMire(scene){
  const ruin=new THREE.Group();ruin.position.set(-39,1.6,57);root.add(ruin);
  for(const a of [-1,1]){const p=new THREE.Mesh(new THREE.BoxGeometry(3,8,3),m);p.position.set(a*5,4,0);ruin.add(p);}
  const lintel=new THREE.Mesh(new THREE.BoxGeometry(14,2,4),m);lintel.position.set(0,8,0);ruin.add(lintel);
- // Five-headed Hydra: corrected 46,736-face body with intact chest. No
- // false claim of independent neck bones until the rig is completed.
+ // Five-headed Hydra: original mesh, selectively cleaned ground and intact
+ // chest; this remains an unrigged visual placeholder pending five-neck skinning.
  const hydraHolder=new THREE.Group();hydraHolder.name='hydra-unrigged-5-head';hydraHolder.position.set(0,2.3,-11);root.add(hydraHolder);
  let hydraReady=false;
  glbFromGzip('proto3d/models-new/hydra_restored_mobile.glb.gz').then(gltf=>{

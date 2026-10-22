@@ -1426,7 +1426,7 @@ function updateCrowd(dt) {
     w.position.set(a.x, r.y, a.z); const u = w.userData, ww = Math.min(1, sp / SPEED);
     restoreNodes(r.nd);
     if (u.glb) { const animDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.05)) : 0; locoAnim(u, sp, animDt); u.mixer.update(animDt); if (u.sb) u.sb.update(animDt); }
-    applyPose(a, w, r.nd, a.yaw);
+    applyPose(a, w, r.nd, a.yaw, r.y);
   }
 }
 // stair assist: touching a flight from the side or at an angle steers the hero toward its mouth (foot when on the lower floor, top end when on the upper floor)

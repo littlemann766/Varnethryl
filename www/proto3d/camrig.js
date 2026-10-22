@@ -14,7 +14,7 @@ export function createCamRig(env) {
   const pos = new THREE.Vector3(0, 8 * HS, 30), look = new THREE.Vector3(), want = new THREE.Vector3(), lk = new THREE.Vector3();
   let prof = worldProfile('', HS);   // active character real-size profile (charscale.js): camera distance/height multipliers + zoom clamp
   const zc = (z) => Math.max(prof.camMin, Math.min(prof.camMax, clampZoom(z)));
-  const r = { prefs, zoom: clampZoom(prefs.zoom), zoomTarget: clampZoom(prefs.zoom), pitch: 0, pinching: false, hidden: false, hideHero: false, pos, look, camDist: 0 };
+  const r = { prefs, zoom: clampZoom(prefs.zoom), zoomTarget: clampZoom(prefs.zoom), pitch: 0, pinching: false, hidden: false, hideHero: false, pos, lookTarget:look, camDist: 0 }; // look() is the pitch input method; expose its vector separately
   const changed = () => { prefs.zoom = r.zoomTarget; if (env.onPrefs) env.onPrefs(prefs); };
   Object.defineProperty(r, 'fp', { get: () => prefs.view === 'first' });
   r.setView = (v) => { const nv = v === 'first' ? 'first' : 'third'; if (prefs.view === nv) return nv; prefs.view = nv; r.snap = true; r.pitch = 0; changed(); return nv; };

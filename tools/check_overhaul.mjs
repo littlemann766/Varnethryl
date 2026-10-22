@@ -22,6 +22,7 @@ assert(main.includes("if(name==='town'&&lastZone==='sailing'&&FIGHT)FIGHT.startA
 assert(main.includes("await setZoneNow('town');return setZoneNow(name);"),'nested world travel must not reenter the queued promise');
 assert(main.includes('zonePending(){return zoneTransitionCount;}'),'test runner can verify all travel requests have finished');
 assert(marine.includes('cachedRockMaterials.has(m)'), 'streamed ocean tiles must not dispose shared rock materials');
+assert(marine.includes('nav.heading-=rudder*step*.64*steering*'), 'right rudder must turn starboard, not port');
 assert(marine.includes('if(disposed){dispose(model);return;}'), 'late Hydra model loads must be discarded after exit');
 assert(marine.includes('if(disposed){dispose(imported);return;}'), 'late sailing model loads must be discarded after exit');
 

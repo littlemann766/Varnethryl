@@ -7,7 +7,7 @@ const mk = () => { const c = new CombatController({ HS: 1.5, rng: rnd }); c.setH
 const go = (k, s) => { for (let i = 0; i < s * 60; i++) k.update(1 / 60); };
 T('vaelthryx enemy def is a boss with the 10x rig', ENEMIES.vaelthryx && ENEMIES.vaelthryx.boss && ENEMIES.vaelthryx.model === 'n:vaelthryx_straight_rig' && ENEMIES.vaelthryx.scale === 10);
 T('frost troll stays an elite (not a boss) but has patterns', !ENEMIES.frosttroll.boss && ENEMIES.frosttroll.patterns && BOSS_PATTERNS.frosttroll.length >= 3);
-for (const key of ['frosttroll', 'vaelthryx', 'titan']) {
+for (const key of ['frosttroll', 'vaelthryx', 'titan', 'hydra']) {
   const c = mk(); c.god = true; const e = c.addEnemy(key, 0, 3); const seen = new Set(); c.on('bossAttack', a => seen.add(a.pat.id));
   go(c, 40); const p1 = BOSS_PATTERNS[key].filter(p => !p.phase).map(p => p.id);
   T(key + ': rotates through all phase-1 patterns', p1.every(id => seen.has(id)));

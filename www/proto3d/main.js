@@ -25,7 +25,7 @@ import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
 import { worldProfile, loadScale } from './charscale.js';
 import { buildTownOutskirts } from './townlands.js';
 import { buildHobgoblinCamps } from './hobcamps.js';
-import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
+import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, PORT_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
 import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 import { createRosterPreview } from './roster-preview.js';

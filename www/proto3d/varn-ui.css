@@ -460,3 +460,7 @@ body.vn-settings-open #settingsPanel input{
   right:max(8px,env(safe-area-inset-right))!important}
  #moveActions button{min-width:58px!important;min-height:37px!important;font-size:9px!important}
 }
+
+/* In Edit HUD mode, otherwise noninteractive readouts may be selected and dragged. */
+body.vn-hud-editing #staminaHud,
+body.vn-hud-editing #cb .vn-exp{pointer-events:auto!important}

@@ -56,7 +56,7 @@ for(let t=.1;t<=60;t+=.1){
  previous=current;
 }
 const main=src('www/proto3d/main.js'),terrain=src('www/proto3d/townlands.js'),ice=src('www/proto3d/frostreach.js'),fight=src('www/proto3d/fight.js'),hud=src('www/proto3d/combat/hud.js');
-assert(main.includes("setZone(ZONE.name==='town'?(isFrostCave?'frost':'wilds'):'town')"),'bidirectional ice cave portal wired');
+assert(main.includes("const destination=ZONE.name==='town'?(isFrostCave?'frost':'wilds'):'town';")&&main.includes('Promise.resolve().then(()=>setZone(destination))')&&main.includes('portalTransitionPending=true;'),'bidirectional ice cave portal wired and guarded against overlapping transitions');
 assert(main.includes("r.level = state.level; r.ti = null; r.lvT = 0; r.stuckT = 0;"),'teleport followers match hero floor and reset stuck state');
 assert(main.includes("resolve(spot, false, 'npc')"),'teleported followers use collision resolution');
 assert(main.includes("r.y = surfaceAt(a.x, a.z, r.level)?.y ?? (state.heroY || 0)"),'revived and catch-up followers use surface height');

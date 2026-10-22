@@ -27,6 +27,7 @@ import { buildTownOutskirts, TOWN_MAP_ROADS } from './townlands.js';
 import { buildHobgoblinCamps } from './hobcamps.js';
 import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, PORT_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
 import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
+import { buildColiseum, buildTownColiseumPortal, coliseumHeight, isColiseumCombat, COLISEUM_TOWN_PORTAL, COLISEUM_RETURN, COLISEUM_REGION } from './coliseum-pvp.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 import { createRosterPreview } from './roster-preview.js';
 
@@ -108,6 +109,7 @@ function applyView() { const kf = Math.max(1, Math.min(5, CH.camDist)), k2 = Mat
 let SUNK = 1;
 function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; try { applyView(); } catch (e) {} try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
 const ZONE = { name: 'town', cx: 0, cz: 0, half: 0 };
+let COLISEUM_PVP=null, COLISEUM_TOWN_GATE=null;
 // Entering the ice cavern dims the REAL world lights, sky and fog.
 // Restore the original town sky on exit, with no texture replacement/leaks.
 const outdoorSky=scene.background;
@@ -1234,7 +1236,7 @@ const tmp = { x: 0, z: 0 };
 function surfaceAt(x, z, level) {
   for (const b of ectx.multi) { { const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
   if (LAD && level >= 10) { const ls = LAD.surface(x, z, level); if (ls) return ls; }
-  return level === 0 ? { y: ZONE.name === 'hydra' && HM ? HM.heightAt(x,z) : ZONE.name === 'frost' ? frostElevation(x,z) : ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : 0 } : null;
+  return level === 0 ? { y: ZONE.name === 'coliseum' ? coliseumHeight(x,z) : ZONE.name === 'hydra' && HM ? HM.heightAt(x,z) : ZONE.name === 'frost' ? frostElevation(x,z) : ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : 0 } : null;
 }
 function updateLevel() {
   if (state.climbing) return;
@@ -1745,7 +1747,7 @@ function snapFollowers() {
    Leaving the Wilds fully DISPOSES it (geometry, materials, textures, enemies via FIGHT.stop) and it is rebuilt on the next visit. */
 const townHidden = [];
 function hideTown() {
-  const keep = new Set([...HEROES, ...crowd.map(r => r.root), WM && WM.group, WM && WM.portalMesh, FM && FM.group, HM && HM.group, SM && SM.group, marker, sun, sun.target, camera, ...(FIGHT ? [] : [])]);
+  const keep = new Set([...HEROES, ...crowd.map(r => r.root), WM && WM.group, WM && WM.portalMesh, FM && FM.group, HM && HM.group, SM && SM.group, COLISEUM_PVP && COLISEUM_PVP.group, marker, sun, sun.target, camera, ...(FIGHT ? [] : [])]);
   for (const n of scene.children) { if (n.visible && !keep.has(n) && !n.isLight && !n.isCamera && !(FIGHT && n.userData && n.userData.fightFx) && Math.hypot(n.position.x - 1000, n.position.z) > 400 && !(n.userData && n.userData.keepAlways)) { n.visible = false; townHidden.push(n); } }
 }
 function unloadWilds() {
@@ -1807,6 +1809,12 @@ async function setZoneNow(name) {
     setTravelRun(false);
     document.body.classList.toggle('vn-sailing-zone',name==='sailing');
     camera.far=name==='sailing'?1800:700;camera.updateProjectionMatrix();
+  } else if (name === 'coliseum') {
+    COLISEUM_PVP=buildColiseum(scene);townCols=colliders.slice();
+    colliders.length=0; for(const c of COLISEUM_PVP.colliders)colliders.push(c);
+    ZONE.name='coliseum';ZONE.cx=COLISEUM_REGION.cx;ZONE.cz=COLISEUM_REGION.cz;ZONE.half=COLISEUM_REGION.half;
+    hideTown();COLISEUM_PVP.group.visible=true;
+    state.heroX=COLISEUM_PVP.spawn.x;state.heroZ=COLISEUM_PVP.spawn.z;state.yaw=Math.PI;
   } else if (name === 'frost') {
     FM=buildFrostRealm({scene}); townCols=colliders.slice();
     colliders.length=0;for(const c of FM.colliders)colliders.push(c);
@@ -1819,14 +1827,15 @@ async function setZoneNow(name) {
     unloadWilds();
     if(HM){HM.dispose();HM=null;}
     if(SM){SM.dispose();SM=null;}
+    if(COLISEUM_PVP){COLISEUM_PVP.dispose();COLISEUM_PVP=null;}
     document.body.classList.remove('vn-sailing-zone');
     hero.visible=true;
     applyView();
     if(FM){const old=FM;FM=null;scene.remove(old.group);old.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const mat of [].concat(o.material))mat.dispose();});}
     for(const n of townHidden)n.visible=true;townHidden.length=0;
     if(portalT)portalT.visible=true;if(mountainWildsPortal)mountainWildsPortal.visible=true;if(frostCave)frostCave.visible=true;
-    state.heroX=(lastZone==='hydra'||lastZone==='sailing')?PORT_CENTER.x:lastZone==='frost'?FROST_PORTAL.x:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.x:TOWN_PORTAL.x;
-    state.heroZ=(lastZone==='hydra'||lastZone==='sailing')?PORT_CENTER.z-12:lastZone==='frost'?FROST_PORTAL.z+6:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.z:TOWN_PORTAL.z+4;
+    state.heroX=(lastZone==='hydra'||lastZone==='sailing')?PORT_CENTER.x:lastZone==='frost'?FROST_PORTAL.x:lastZone==='coliseum'?COLISEUM_TOWN_PORTAL.x:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.x:TOWN_PORTAL.x;
+    state.heroZ=(lastZone==='hydra'||lastZone==='sailing')?PORT_CENTER.z-12:lastZone==='frost'?FROST_PORTAL.z+6:lastZone==='coliseum'?COLISEUM_TOWN_PORTAL.z+6:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.z:TOWN_PORTAL.z+4;
     state.yaw=lastZone==='wilds'&&lastWildsEntrance==='mountain'?-Math.PI/2:0;
   }
   state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
@@ -1839,6 +1848,8 @@ async function setZoneNow(name) {
   if(name==='wilds'||name==='frost'||name==='hydra'){const f=await fightToggle(true);f.startAuto();if(name==='frost')f.startRegionBosses('frost');if(name==='hydra')f.startRegionBosses('hydra');}
   return true;
 }
+// The portal is placed at the mini coliseum's town-side entrance.
+COLISEUM_TOWN_GATE=buildTownColiseumPortal(scene,(x,z)=>TOWN_LANDS?.heightAt(x,z) ?? 0);
 const sailingCrewSpot=new THREE.Vector3();
 let outdoorCombatStarting=false, outdoorCombatRetryAt=0;
 function updateZone(dt) {
@@ -1847,6 +1858,7 @@ function updateZone(dt) {
     outdoorCombatStarting=true;
     fightToggle(true).then(f=>{outdoorCombatRetryAt=0;if(ZONE.name==='town')f.startAuto();}).catch(err=>{outdoorCombatRetryAt=performance.now()+12000;diag('Wilderness combat startup failed: '+String(err&&err.message||err)+' (retry in 12s)',true);}).finally(()=>{outdoorCombatStarting=false;});
   }
+  if(ZONE.name==='coliseum'&&FIGHT?.on&&!isColiseumCombat(state.heroX,state.heroZ))FIGHT.stop();
   if (ZONE.name === 'wilds' && WM && WM.cull) WM.cull(state.heroX, state.heroZ, VIEWK);
   const t=performance.now()/1000;
   if(portalT?.userData.update)portalT.userData.update(t);
@@ -1888,14 +1900,15 @@ function updateZone(dt) {
     }
   }
   zoneCd = Math.max(0, zoneCd - dt); if (portalTransitionPending || zoneCd > 0 || state.level !== 0 || state.climbing) { if (!portalTransitionPending) portalDwell = 0; return; }
+  const isColiseumGate=ZONE.name==='town'&&Math.hypot(state.heroX-COLISEUM_TOWN_PORTAL.x,state.heroZ-COLISEUM_TOWN_PORTAL.z)<5;
   const isFrostCave=ZONE.name==='town'&&Math.hypot(state.heroX-FROST_PORTAL.x,state.heroZ-FROST_PORTAL.z)<7;
   const isMountainWilds=ZONE.name==='town'&&nearMountainWildsGate(state.heroX,state.heroZ,7);
-  const p=ZONE.name==='town'?(isFrostCave?FROST_PORTAL:isMountainWilds?MOUNTAIN_WILDS_GATE:TOWN_PORTAL):ZONE.name==='frost'?FROST_EXIT:WM?{x:WM.portal.x,z:WM.portal.z}:null;
+  const p=ZONE.name==='town'?(isColiseumGate?COLISEUM_TOWN_PORTAL:isFrostCave?FROST_PORTAL:isMountainWilds?MOUNTAIN_WILDS_GATE:TOWN_PORTAL):ZONE.name==='coliseum'?COLISEUM_RETURN:ZONE.name==='frost'?FROST_EXIT:ZONE.name==='wilds'&&WM?{x:WM.portal.x,z:WM.portal.z}:null;
   if(!p)return;
   if(Math.hypot(state.heroX-p.x,state.heroZ-p.z)<1.7+Math.max(0,HERO_R-0.75)){
     portalDwell+=dt;if(portalDwell>.35){
-      if(ZONE.name==='town'&&!isFrostCave)lastWildsEntrance=isMountainWilds?'mountain':'town';
-      const destination=ZONE.name==='town'?(isFrostCave?'frost':'wilds'):'town';
+      if(ZONE.name==='town'&&!isFrostCave&&!isColiseumGate)lastWildsEntrance=isMountainWilds?'mountain':'town';
+      const destination=ZONE.name==='town'?(isColiseumGate?'coliseum':isFrostCave?'frost':'wilds'):'town';
       portalDwell=-99;portalTransitionPending=true;
       Promise.resolve().then(()=>setZone(destination)).catch(err=>{
         zoneCd=2;portalDwell=0;
@@ -1980,7 +1993,7 @@ async function fightToggle(createOnly) {
         (ZONE.name==='wilds' && Math.abs(x-ZONE.cx)<ZONE.half-4 && Math.abs(z-ZONE.cz)<ZONE.half-4) ||
         (ZONE.name==='town' && (Math.abs(x)>CITY_HALF+22||Math.abs(z)>CITY_HALF+22) && Math.max(Math.abs(x),Math.abs(z))<WORLD-18 && Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z)>120 && Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)>92),
       biome: (x, z) => ZONE.name==='wilds'&&WM?WM.mod.biome(x - WM.mod.WILDS.ox,z - WM.mod.WILDS.oz):terrainBiome(x,z),
-      groundY:(x,z)=>ZONE.name==='hydra'&&HM?HM.heightAt(x,z):ZONE.name==='frost'?frostElevation(x,z):ZONE.name==='town'&&TOWN_LANDS?TOWN_LANDS.heightAt(x,z):0,
+      groundY:(x,z)=>ZONE.name==='coliseum'?coliseumHeight(x,z):ZONE.name==='hydra'&&HM?HM.heightAt(x,z):ZONE.name==='frost'?frostElevation(x,z):ZONE.name==='town'&&TOWN_LANDS?TOWN_LANDS.heightAt(x,z):0,
       loadGLTF: url => new Promise((res, rej) => gl.load(url, res, undefined, rej)),
       respawnPos:()=>ZONE.name==='hydra'&&HM?{x:HM.spawn.x,z:HM.spawn.z}:ZONE.name==='wilds'&&WM?{x:WM.spawn.x,z:WM.spawn.z}:ZONE.name==='frost'?{x:FROST_REALM.cx-8,z:FROST_REALM.cz+155}:{x:0,z:60} });
     return FIGHT;

@@ -381,3 +381,39 @@ body.vn-menu-open #vnDiagToast{display:none!important}
 #diagBtn,body.vn-diagnostic-error #diagBtn,body.vn-menu-open.vn-diagnostic-error #diagBtn{
   display:none!important;visibility:hidden!important;pointer-events:none!important
 }
+
+
+/* Settings are a modal screen, not a transparent HUD layer. Keep ALL gameplay
+   controls below it and non-interactive while open, including user-positioned
+   controls, the mini-map, boss actions, health/XP, joystick and stamina. */
+body.vn-settings-open::before{
+ content:'';position:fixed;inset:0;z-index:6900;
+ background:#06040fbd;pointer-events:auto;
+}
+body.vn-settings-open #settingsPanel{
+ position:fixed!important;z-index:7000!important;
+ top:max(16px,env(safe-area-inset-top))!important;
+ bottom:max(12px,env(safe-area-inset-bottom))!important;
+ left:max(8px,env(safe-area-inset-left))!important;
+ right:max(8px,env(safe-area-inset-right))!important;
+ width:auto!important;max-width:none!important;
+ height:auto!important;max-height:none!important;
+ overflow-x:hidden!important;overflow-y:auto!important;
+ overscroll-behavior:contain;
+}
+body.vn-settings-open :is(#stick,#moveActions,#runBtn,#jumpBtn,#staminaHud,
+ #cinderFlyControls,#cb,#heroes,#hud,#hint,#vnMenuBtn,#vnQuickMenu,
+ #vnSkinBubble,#diagBtn,#vnDiagToast,#vnHudEditorPanel){
+ visibility:hidden!important;pointer-events:none!important;
+}
+body.vn-settings-open #settingsPanel,#settingsPanel button,
+body.vn-settings-open #settingsPanel select,
+body.vn-settings-open #settingsPanel input{
+ visibility:visible!important;pointer-events:auto!important;
+}
+@media(orientation:landscape) and (max-height:490px){
+ body.vn-settings-open #settingsPanel{
+  top:max(4px,env(safe-area-inset-top))!important;
+  bottom:max(4px,env(safe-area-inset-bottom))!important
+ }
+}

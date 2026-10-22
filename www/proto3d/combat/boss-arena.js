@@ -8,6 +8,7 @@ export const BOSS_LEASH_RADII=Object.freeze({
  frosttroll_b:112,
  titan40:132,
  titan:132,
+ hydra:115, // Five-headed Mire boss stays in its arena.
 });
 export function bossHome(key,x,z){
  const r=BOSS_LEASH_RADII[key];

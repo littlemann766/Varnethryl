@@ -636,7 +636,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.4.4';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.4.5';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1720,12 +1720,24 @@ function unloadWilds() {
   const seen = new Set(); const dis = (o) => { if (o.geometry) o.geometry.dispose(); const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : []; for (const m of ms) { for (const k in m) { const v = m[k]; if (v && v.isTexture && !seen.has(v)) { seen.add(v); v.dispose(); } } m.dispose(); } };
   g.traverse(dis); pm.traverse(dis); window.__unloaded = (window.__unloaded || 0) + 1; WM = null;
 }
-async function setZone(name) {
+// Process travel requests in one queue. Portal, quick-menu and owner travel
+// all use this function: simultaneous button taps must never instantiate two
+// maps over the same town colliders or leave orphaned world groups behind.
+let zoneTransitionCount=0;
+let zoneTransitionQueue=Promise.resolve();
+function setZone(name) {
+  zoneTransitionCount++;
+  const current=zoneTransitionQueue.then(()=>setZoneNow(name));
+  // A failed transition should not permanently disable all later travel.
+  zoneTransitionQueue=current.then(()=>{},()=>{});
+  return current.finally(()=>{zoneTransitionCount--;});
+}
+async function setZoneNow(name) {
   if (name === ZONE.name) return true;
   const lastZone=ZONE.name;
   // Return via town when switching directly between self-contained maps.
   if(lastZone!=='town'&&name!=='town'){
-    await setZone('town');return setZone(name);
+    await setZoneNow('town');return setZoneNow(name);
   }
   if(FIGHT&&(FIGHT.auto||name==='sailing'))FIGHT.stop();
   if (name === 'wilds') {
@@ -1983,7 +1995,7 @@ const cheatBoot = initCheatBoot(cheatEnv);
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
 const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
-window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),running:travelRun,exhausted};}, setRunning:setTravelRun, jump, get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
+window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),running:travelRun,exhausted};}, setRunning:setTravelRun, jump, get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, get zonePending(){return zoneTransitionCount;}, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   teleportTo(x,z){if(!Number.isFinite(x)||!Number.isFinite(z))return false;state.heroX=x;state.heroZ=z;state.target=null;marker.visible=false;state.blockedFrames=0;state.level=0;updateLevel();snapFollowers();saver?.mark();return true;},
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; }, get guards() { return GUARDS; },

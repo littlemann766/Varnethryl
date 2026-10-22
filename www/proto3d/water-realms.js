@@ -175,6 +175,9 @@ export function buildSailingOcean(scene){
     const x=OCEAN.cx+(tx+r()-.5)*TILE,z=OCEAN.cz+(tz+r()-.5)*TILE;
     const half=OCEAN.half-45;
     if(Math.abs(x-OCEAN.cx)>half||Math.abs(z-OCEAN.cz)>half)continue;
+    // Start in an open sailing lane, not beneath oversized placeholder crags.
+    // Their outer tile can be far from spawn while the actual island is near.
+    if(Math.hypot(x-spawn.x,z-spawn.z)<310)continue;
     island(group,x,z,18+r()*35,seed+i*83,hits);
    }
   }

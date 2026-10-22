@@ -20,7 +20,7 @@ const minimap=source('www/proto3d/minimap.js');
 assert(minimap.includes("root.dataset.mode='live-topdown'"),'minimap uses real top-down terrain');
 assert(minimap.includes('e.height?.(zone,x,z)'),'minimap samples actual terrain elevation');
 assert(minimap.includes('e.water?.(zone,x,z)'),'minimap samples current water');
-assert(minimap.includes('env.islands?.()'),'minimap shows real streamed ocean islands');
+assert(minimap.includes('env.islands?.(overview)'),'minimap shows streamed islands locally and deterministic distant islands in FULL view');
 assert(main.includes('miniMap.invalidate(); // redraw the real top-down'),'zone travel refreshes the map');
 assert(marine.includes('if(!full)return [...obstacles.values()].flat();'),'local chart keeps streamed islands live');
 assert(marine.includes('for(const p of islandLayout(tx,tz))island('),'3D islands use same layout as map chart');

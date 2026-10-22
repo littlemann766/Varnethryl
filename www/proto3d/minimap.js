@@ -92,13 +92,13 @@ export function createMiniMap(getState,getZone,env={}){
  }
  for(const [action,label,aria] of [['in','+','Zoom in'],['out','−','Zoom out'],['full','FULL','Show full map']]){
   const b=document.createElement('button');b.type='button';b.className='vn-mini-control '+action;b.textContent=label;b.setAttribute('aria-label',aria);
-  b.addEventListener('click',event=>{event.stopPropagation();zoom(action);});controls.appendChild(b);
+  b.addEventListener('click',event=>{event.stopPropagation();zoom(action);update(performance.now());});controls.appendChild(b);
  }
  button.addEventListener('click',()=>{
   expanded=root.classList.toggle('expanded');
   button.setAttribute('aria-pressed',String(expanded));
   button.setAttribute('aria-label',expanded?'Collapse top-down minimap':'Expand top-down minimap');
-  invalidate();
+  invalidate();update(performance.now());
  });
  function raster(state,time){
   if(!pixels)return;

@@ -26,6 +26,7 @@ jobs:
         run: |
           python3 tools/check_assets.py
           python3 tools/verify_frost_troll_b.py
+          python3 tools/audit_wren_wings.py
       - name: Check overhaul, boss attacks, movement, owner maps and offline release
         run: |
           node tools/check_overhaul.mjs

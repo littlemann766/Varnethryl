@@ -1330,6 +1330,7 @@ function updateCrowd(dt) {
   for (let i = 0; i < crowd.length; i++) {
     const r = crowd[i], a = r.a;
     if (r.kind === 'npc' && ZONE.name !== 'town') continue;   // townsfolk wait in town while the hero is in the Wilds
+    if (r.kind === 'party' && ZONE.name === 'sailing') continue; // no pathfinding / swimming beside the ship
     if (r.down > 0) { tickDown(r, dt); if (r.down > 0) { r.vxs = r.vzs = 0; a.vx = a.vz = 0; continue; } }
     let tvx = 0, tvz = 0;
     if (r.kind === 'party') {
@@ -1396,6 +1397,7 @@ function updateCrowd(dt) {
   for (let i = 0; i < crowd.length; i++) {
     const r = crowd[i], a = r.a;
     if (r.kind === 'npc' && ZONE.name !== 'town') continue;
+    if (r.kind === 'party' && ZONE.name === 'sailing') continue; // ship controls all passenger transforms
     if (r.down > 0) continue;
     let mx = r.vxs * a.slowMul * dt + a.dx, mz = r.vzs * a.slowMul * dt + a.dz;
     if (r.kind === 'npc' && !a.svx && !a.svz && !a.bT) { const hx = r.hx - a.x, hz = r.hz - a.z, hd = Math.hypot(hx, hz); if (hd > 0.02) { const st = Math.min(hd, 1.0 * dt); mx += hx / hd * st; mz += hz / hd * st; } }
@@ -1478,7 +1480,13 @@ function updateHero(dt) {
     state.vz=-Math.cos(state.yaw)*sailed.speed;
     state.heroY=0;state.dispY=0;state.swimming=false;state.moving=state.speed>.3;
     state.target=null;marker.visible=false;state.blockedFrames=0;
-    hero.visible=false;
+    // Animate idle, not swimming/running, while standing at the helm.
+    if(hero.userData?.glb){
+      const u=hero.userData;
+      locoAnim(u,0,dt);
+      u.mixer?.update(Math.min(.05,Math.max(0,dt)));
+      u.sb?.update(Math.min(.05,Math.max(0,dt)));
+    }
     return;
   }
   // input vector in screen space (x right, y up)
@@ -1764,6 +1772,7 @@ async function setZone(name) {
   if(name==='wilds'||name==='frost'||name==='hydra'){const f=await fightToggle(true);f.startAuto();if(name==='frost')f.startRegionBosses('frost');if(name==='hydra')f.startRegionBosses('hydra');}
   return true;
 }
+const sailingCrewSpot=new THREE.Vector3();
 let outdoorCombatStarting=false, outdoorCombatRetryAt=0;
 function updateZone(dt) {
   // Automatically enter PvE beyond the walls; town interiors remain protected.
@@ -1780,7 +1789,37 @@ function updateZone(dt) {
   if(WM?.portalMesh?.userData.update)WM.portalMesh.userData.update(t);
   if(FM)FM.update(t);
   if(HM&&ZONE.name==='hydra')HM.update(t);
-  if(SM&&ZONE.name==='sailing') {SM.update(t,state.heroX,state.heroZ,state.yaw);hero.visible=false;}
+  if(SM&&ZONE.name==='sailing'){
+    SM.update(t,state.heroX,state.heroZ,state.yaw);
+    // Board the actual active playable hero and all equipped companions.
+    // Render the *existing* models on deck, rather than creating lookalikes.
+    // Keeping the actor roots in the scene avoids breaking hero switching,
+    // follower GLB swaps, skeleton animation mixers or town cleanup.
+    const deckPoint=sailingCrewSpot;
+    SM.crewSpot(0,deckPoint);
+    hero.position.copy(deckPoint);
+    hero.rotation.set(0,SM.ship.rotation.y,0);
+    hero.visible=true;
+    let berth=1;
+    for(const r of crowd){
+      if(r.kind!=='party')continue; // NPCs remain in their home kingdom
+      SM.crewSpot(berth++,deckPoint);
+      r.a.x=deckPoint.x;r.a.z=deckPoint.z;
+      r.a.vx=0;r.a.vz=0;r.vxs=0;r.vzs=0;
+      r.y=deckPoint.y;r.a.yaw=SM.ship.rotation.y;
+      r.level=0;r.stuckT=0;
+      if(!r.root)continue; // async player model load may finish at sea
+      r.root.position.copy(deckPoint);
+      r.root.rotation.set(0,SM.ship.rotation.y,0);
+      r.root.visible=!(r.down>0);
+      const u=r.root.userData;
+      if(u?.glb){
+        locoAnim(u,0,dt);
+        u.mixer?.update(Math.min(.05,Math.max(0,dt)));
+        u.sb?.update(Math.min(.05,Math.max(0,dt)));
+      }
+    }
+  }
   zoneCd = Math.max(0, zoneCd - dt); if (portalTransitionPending || zoneCd > 0 || state.level !== 0 || state.climbing) { if (!portalTransitionPending) portalDwell = 0; return; }
   const isFrostCave=ZONE.name==='town'&&Math.hypot(state.heroX-FROST_PORTAL.x,state.heroZ-FROST_PORTAL.z)<7;
   const isMountainWilds=ZONE.name==='town'&&nearMountainWildsGate(state.heroX,state.heroZ,7);

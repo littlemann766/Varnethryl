@@ -4,6 +4,22 @@
  * Do NOT add per-joint runtime Y rotations after those clips. The old overlay
  * accumulated off-axis deformation along the spine, visibly twisting the
  * model instead of propelling a snake naturally. Let the rigged clips play. */
+/* Keep a giant serpent's body turning no faster than its long spine can bend.
+ * The signed shortest-angle delta also avoids an abrupt full revolution when
+ * the patrol spline crosses the -pi / +pi compass boundary. This changes only
+ * the creature ROOT; never manipulate the model's skinned joints after its
+ * authored slither animation has played.
+ */
+export function serpentHeading(current,target,dt,maxRadiansPerSecond=1.15){
+  if(!Number.isFinite(target))return Number.isFinite(current)?current:0;
+  if(!Number.isFinite(current))return target;
+  const elapsed=Number.isFinite(dt)?Math.max(0,Math.min(.1,dt)):0;
+  const rate=Number.isFinite(maxRadiansPerSecond)?Math.max(0,maxRadiansPerSecond):0;
+  const delta=Math.atan2(Math.sin(target-current),Math.cos(target-current));
+  const step=Math.sign(delta)*Math.min(Math.abs(delta),rate*elapsed);
+  const angle=current+step;
+  return Math.atan2(Math.sin(angle),Math.cos(angle));
+}
 export function preferSerpentClips(id, act) {
   if (!/vaelthryx/i.test(String(id)) || !act) return act;
   const slither = act.slither || act.Slither || act.body_wave || act.BodyWave;

@@ -346,6 +346,61 @@ const CSS = `
  #cb .cl button{font-size:7px!important}
 }
 
+
+/* 1.3.7 portrait HUD: compact right-hand gamepad. Keep the player's center view
+   and the lower-left walk/run joystick unobstructed. Original ability art stays. */
+@media (orientation:portrait){
+ #cb .cx{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-template-rows:repeat(2,auto)!important;
+  justify-items:center!important;align-items:center!important;
+  column-gap:5px!important;row-gap:21px!important;
+  width:min(248px,46vw)!important;max-width:248px!important;height:auto!important;
+  min-height:0!important;aspect-ratio:auto!important;
+  right:max(7px,env(safe-area-inset-right))!important;
+  bottom:calc(max(6px,env(safe-area-inset-bottom)) + 73px)!important;
+  padding:7px 6px 20px!important;
+  border-radius:14px!important;
+ }
+ #cb .cx>.sl{position:relative!important;display:block!important;
+  width:clamp(44px,9vw,67px)!important;height:clamp(44px,9vw,67px)!important;
+  min-width:0!important;max-width:100%!important;aspect-ratio:1!important;
+  margin:0!important;flex:none!important}
+ #cb .cx>.sl.b0{grid-column:1 / span 2!important;grid-row:2!important;
+  width:clamp(54px,10.5vw,76px)!important;height:clamp(54px,10.5vw,76px)!important}
+ #cb .cx>.sl.b1{grid-column:1!important;grid-row:1!important}
+ #cb .cx>.sl.b2{grid-column:2!important;grid-row:1!important}
+ #cb .cx>.sl.b3{grid-column:3!important;grid-row:1!important}
+ #cb .cx>.sl.b4{grid-column:3!important;grid-row:2!important;
+  width:clamp(54px,10.5vw,76px)!important;height:clamp(54px,10.5vw,76px)!important}
+ #cb .cx>.sl .nmL,#cb .cx>.sl.b4 .nmL{
+  bottom:-15px!important;top:auto!important;left:50%!important;right:auto!important;
+  transform:translateX(-50%)!important;
+  max-width:min(76px,18vw)!important;
+  font-size:8px!important;line-height:12px!important;white-space:nowrap!important;
+  text-overflow:ellipsis!important;overflow:hidden!important;letter-spacing:0!important
+ }
+ #cb .cl{right:0!important;left:auto!important;bottom:calc(100% + 6px)!important;
+  width:100%!important;display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important}
+ #cb .cl button{height:43px!important;min-height:41px!important;padding:3px 0!important;
+  font-size:8px!important;line-height:1!important;border-radius:9px!important}
+ #cb .cl button .g{font-size:18px!important;line-height:20px!important}
+ #cb .ulp{right:0!important;bottom:calc(100% + 99px)!important;width:100%!important}
+ #cb .ulp button{min-height:44px!important}
+ /* The EXP frame remains unchanged; only its location/width are corrected so
+    it no longer runs beneath the joystick or the WALK/JUMP buttons. */
+ #cb .vn-exp{left:auto!important;right:max(8px,env(safe-area-inset-right))!important;
+  transform:none!important;bottom:max(4px,env(safe-area-inset-bottom))!important;
+  width:min(330px,55vw)!important;height:43px!important}
+}
+@media(orientation:landscape) and (max-height:490px){
+ #cb .cx{width:min(400px,49vw)!important;bottom:calc(max(4px,env(safe-area-inset-bottom)) + 47px)!important}
+ #cb .cx>.sl .nmL,#cb .cx>.sl.b4 .nmL{font-size:8px!important}
+ #cb .cl{width:min(295px,100%)!important}
+}
+
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';

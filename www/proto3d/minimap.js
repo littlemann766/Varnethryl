@@ -182,7 +182,7 @@ export function createMiniMap(getState,getZone,env={}){
   ctx.drawImage(bgCanvas,C-size/2+(originX-(state.heroX||0))*scale,C-size/2+(originZ-(state.heroZ||0))*scale,size,size);
   overlay(state);ctx.restore();
  }
- update(0);
+ // First draw belongs to the animation frame after all party/zone bindings exist.
  return {root,update,invalidate,registerZone:(name,config)=>{
    if(typeof name!=='string'||!Array.isArray(config)||config.length<3)return false;
    custom.set(name,config);invalidate();return true;

@@ -427,6 +427,36 @@ Builder.prototype.fullUpper = function (o) {
   return rects;
 };
 
+// Reject malformed oversized, brightly colored decoration triangles BEFORE the
+// town's exterior pieces are baked together. Without this guard, a corrupted
+// flower/awning vertex can stretch into a large yellow, blue or pink ground shard.
+// Stone walls, roofs, terrain and ordinary large meshes are never constrained.
+export function scrubDecorativeFaces(g, material, maxEdge = 9) {
+  if (!g || g.index || !g.attributes.position || !material?.color || material.map) return g;
+  const c = material.color, vivid = Math.max(c.r,c.g,c.b) - Math.min(c.r,c.g,c.b);
+  if (vivid < .30 || Math.max(c.r,c.g,c.b) < .46) return g;
+  const p=g.attributes.position.array, n=g.attributes.normal?.array, uv=g.attributes.uv?.array;
+  if (!n || !uv || g.attributes.position.count % 3) return g;
+  const keep=[], bound2=maxEdge*maxEdge;
+  const dist2=(i,j)=>{const dx=p[i]-p[j],dy=p[i+1]-p[j+1],dz=p[i+2]-p[j+2];return dx*dx+dy*dy+dz*dz;};
+  for(let i=0;i<p.length;i+=9){
+    const finite=p.slice(i,i+9).every(Number.isFinite);
+    const valid=finite&&dist2(i,i+3)<=bound2&&dist2(i+3,i+6)<=bound2&&dist2(i+6,i)<=bound2;
+    if(valid)keep.push(i);
+  }
+  if(keep.length*9===p.length)return g;
+  const pos=new Float32Array(keep.length*9),nor=new Float32Array(keep.length*9),tex=new Float32Array(keep.length*6);
+  for(let k=0;k<keep.length;k++){const i=keep[k],v=i/3;pos.set(p.subarray(i,i+9),k*9);
+    nor.set(n.subarray(i,i+9),k*9);tex.set(uv.subarray(v*2,v*2+6),k*6);}
+  const out=new THREE.BufferGeometry();
+  out.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  out.setAttribute('normal',new THREE.BufferAttribute(nor,3));
+  out.setAttribute('uv',new THREE.BufferAttribute(tex,2));
+  console.warn('Varnethryl: filtered',p.length/9-keep.length,
+    'oversized decorative triangles from',material.name||material.color.getHexString());
+  return out;
+}
+
 // Cross-building static merge: bake every building's merged exterior meshes (world space) into per-zone meshes, one per material.
 // Fewer draw calls (and fewer shadow-pass calls); frustum culling then works per zone chunk. Cutaway clone materials and animated parts stay put.
 export function chunkStatics(builders, scene, cell = 40) {
@@ -434,7 +464,11 @@ export function chunkStatics(builders, scene, cell = 40) {
   for (const B of builders) { if (!B || !B.G || !B.G.ext) continue; B.root.updateMatrixWorld(true); const zk = Math.floor(B.cx / cell) + ',' + Math.floor(B.cz / cell); const cut = new Set(B.cut || []);
     for (const m of [...B.G.ext.children]) { if (!m.isMesh || !m.userData.merged || cut.has(m.material)) continue; m.updateMatrixWorld(true); before++;
       const k = zk + '|' + m.material.uuid + (m.castShadow ? 'c' : '') + (m.receiveShadow ? 'r' : ''); let z = zones.get(k); if (!z) zones.set(k, z = { mat: m.material, c: m.castShadow, r: m.receiveShadow, list: [] });
-      const g = m.geometry.clone(); g.applyMatrix4(m.matrixWorld); z.list.push(g); B.G.ext.remove(m); m.geometry.dispose(); } }
+      const raw = m.geometry.clone(); raw.applyMatrix4(m.matrixWorld);
+      const g = scrubDecorativeFaces(raw, m.material);
+      if(g !== raw)raw.dispose();
+      if(g.attributes.position.count)z.list.push(g);
+      B.G.ext.remove(m); m.geometry.dispose(); } }
   for (const z of zones.values()) { let n = 0; for (const g of z.list) n += g.attributes.position.count; const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2); let a = 0, c = 0;
     for (const g of z.list) { pos.set(g.attributes.position.array, a); nor.set(g.attributes.normal.array, a); uv.set(g.attributes.uv.array, c); a += g.attributes.position.count * 3; c += g.attributes.position.count * 2; g.dispose(); }
     const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));

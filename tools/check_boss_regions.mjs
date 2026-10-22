@@ -170,7 +170,7 @@ assert(src('www/proto3d/hud-layout-editor.js').includes('window.__vnHudEditor={o
 const hudEditor=src('www/proto3d/hud-layout-editor.js');
 assert(titlePage.includes('id="vnEditHud"')&&titlePage.includes('proto3d/hud-layout-editor.js'),'HUD editor is accessible from the actual in-game menu');
 assert(hudEditor.includes("document.getElementById('vnEditHud')?.addEventListener('click',open)"),'HUD editor menu starts editable state');
-for(const selector of ["'#stick'","'#runBtn'","'#jumpBtn'","'#cb .sl.b'","'#cb .cl button[data-a=","'#cb .vn-exp'"]){
+for(const selector of ["'#stick'","'#runBtn'","'#jumpBtn'","'#cb .sl.b'","'#cb .vn-exp'"]){
  assert(hudEditor.includes(selector),'HUD editor missing a required input: '+selector);
 }
 assert(hudEditor.includes("localStorage.setItem(KEY,JSON.stringify(saved))"),'HUD edits survive reopening the app');
@@ -178,6 +178,19 @@ assert(hudEditor.includes("orient=()=>innerWidth>=innerHeight?'landscape':'portr
 assert(hudEditor.includes("document.addEventListener('pointermove'"),'HUD buttons can be moved with touch drag');
 assert(hudEditor.includes("data-hud-action=\"larger\"")&&hudEditor.includes("data-hud-action=\"smaller\""),'HUD buttons have working resizing controls');
 assert(hudEditor.includes("new MutationObserver"),'newly loaded combat controls restore saved HUD placement');
+
+assert(hud.includes('v1.4.0: quiet gameplay layout') && hud.includes('#cb .cx>.cl, #cb .cl'),'auxiliary combat controls remain in code but disappear visually');
+assert(!hudEditor.includes("...['dodge','block','jump','lock','potion','swap'].map"),'hidden utility strip is no longer editable or highlighted');
+assert(hudEditor.includes("const KEY='vn.hud.layout.v2'"),'old customized positions do not recreate superseded 6-button layout');
+assert(hud.includes('top:max(7px,env(safe-area-inset-top))!important;bottom:auto!important'),'XP frame is pinned to upper HUD');
+const screenCss=src('www/proto3d/varn-ui.css');
+assert(screenCss.includes('/* v1.4.0 HUD: only the left joystick'),'lower-left layout is reserved for joystick');
+assert(screenCss.includes("top:calc(max(7px,env(safe-area-inset-top)) + 77px)!important"),'stamina meter appears beneath top XP');
+assert(screenCss.includes('body.vn-hud-editing #staminaHud'),'stamina remains selectable in HUD editor');
+assert(screenCss.includes('#moveActions{')&&screenCss.includes('left:auto!important;right:max(10px'),'walk and jump move to right side');
+assert(fight.includes("document.getElementById('stick')?.addEventListener('pointerdown'"),'dodge remains available on touch without a second button bar');
+assert(fight.includes("const onKey = e =>"),'existing keyboard block, potion, weapon and lock commands remain supported');
+
 assert(main.includes('stick.offsetWidth,stick.offsetHeight'),'movement joystick range changes with user resize');
 const hudParse=spawnSync(process.execPath,['--check','www/proto3d/hud-layout-editor.js'],{encoding:'utf8'});
 assert.equal(hudParse.status,0,'HUD editor must be syntactically valid: '+hudParse.stderr);

@@ -86,6 +86,28 @@ export function balthrixPosition(t,speed=14){
  return {x:p.x,z:p.z,yaw:Math.atan2(ahead.x-behind.x,ahead.z-behind.z)};
 }
 
+/* Locate a nearby encounter on the SAME curved spline the serpent patrols.
+ * Earlier discovery projected onto straight waypoint chords, then placed the
+ * real model on a different Catmull-Rom curve. That forced immediate sideward
+ * corrections that looked like player-style sliding rather than slithering.
+ * Reuse the existing arc-length sample table to keep the world layout intact.
+ */
+export function nearestBalthrixPath(x,z,speed=14){
+ if(!Number.isFinite(x)||!Number.isFinite(z)||!Number.isFinite(speed)||speed<=0)
+   return {distance:Infinity,time:0};
+ const {samples}=BALTHRIX_ARC;
+ let best=Infinity,at=0,previous=balthrixPoint(0,0);
+ for(let i=1;i<samples.length;i++){
+   const a=samples[i-1],b=samples[i],point=balthrixPoint(b.seg,b.u);
+   const dx=point.x-previous.x,dz=point.z-previous.z;
+   const u=Math.max(0,Math.min(1,((x-previous.x)*dx+(z-previous.z)*dz)/(dx*dx+dz*dz||1)));
+   const px=previous.x+u*dx,pz=previous.z+u*dz,dist=Math.hypot(x-px,z-pz);
+   if(dist<best){best=dist;at=a.dist+u*(b.dist-a.dist);}
+   previous=point;
+ }
+ const time=at/speed;
+ return {distance:best,time};
+}
 /* Procedural, deterministic aftermath along Balthrix's existing curved patrol.
  * Positions are kept at least a giant body-width away from the route, so the
  * player can explore the wreckage without trapping the roaming serpent.

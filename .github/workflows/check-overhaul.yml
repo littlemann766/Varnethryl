@@ -29,6 +29,8 @@ jobs:
         run: node tools/check_boss_ai.mjs
       - name: Verify authored serpent gait selection without changing other heroes
         run: node tools/check_serpent_locomotion.mjs
+      - name: Verify Wren's 8 wing joints and baked animations remain intact
+        run: python3 tools/audit_wren_wings.py
       - name: Verify dark Frost Cave, lava atmosphere, and restoration
         run: node tools/check_zone_ambience.mjs
       - name: Verify Balthrix pitch follows terrain safely

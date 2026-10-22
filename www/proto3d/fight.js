@@ -13,7 +13,7 @@ import { createExperience } from './combat/experience.js';
 import { CompanionCombat } from './combat/companions.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 import { Respawner } from './combat/respawn.js';
-import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, BALTHRIX_ROUTE, balthrixPosition, onLava, isCitySafe } from './bossregions.js';
+import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, balthrixPosition, nearestBalthrixPath, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
 import { terrainBodyPitch } from './terrain-follow.js';
 import { bossHome, telegraphKey } from './combat/boss-arena.js';
@@ -344,18 +344,8 @@ export function createFight(env) {
     try{return await spawn(key,0,Object.assign({at:[x,z],aggroR:34},extra));}
     finally{bossPending.delete(key);}
   }
-  // Locate the player's nearest point along Balthrix's continuous world circuit.
-  // Spawn close enough to be encountered rather than waiting for a distant global timer.
-  function nearestRoamTime(x,z){
-    const p=BALTHRIX_ROUTE;let best=Infinity,elapsed=0,closest=0;
-    for(let i=0;i<p.length;i++){
-      const a=p[i],b=p[(i+1)%p.length],dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);
-      const u=Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(len*len||1)));
-      const d=Math.hypot(x-a[0]-dx*u,z-a[1]-dz*u);
-      if(d<best){best=d;closest=(elapsed+len*u)/14;}elapsed+=len;
-    }
-    return{distance:best,time:closest};
-  }
+  // Encounter discovery and patrol now share one curved, arc-length route.
+  // No separate straight-waypoint clock to push Balthrix sideways at spawn.
   let roamBusy=false;
   function startRegionBosses(zone){
     if(zone==='frost')for(const brother of FROST_BROTHERS)spawnRegion(brother.key,brother.x,brother.z,{aggroR:80});
@@ -401,7 +391,7 @@ export function createFight(env) {
       roamClock+=dt;
       if(roamClock>.22){
         roamClock=0;
-        const route=nearestRoamTime(state.heroX,state.heroZ);
+        const route=nearestBalthrixPath(state.heroX,state.heroZ);
         const hasRoamer=cc.enemies.some(e=>e.key==='vaelthryx'&&e.state!=='defeated');
         if(!hasRoamer&&route.distance<112&&!roamBusy){
           roamBusy=true;
@@ -419,9 +409,16 @@ export function createFight(env) {
           if(dist>.01){
             // Physical pursuit of the curve, not instant correction of the
             // mesh transform. Combat interrupts his patrol without teleporting.
-            const move=Math.min(dist,14*Math.max(0,dt));
+            const step=Math.max(0,Math.min(.05,Number.isFinite(dt)?dt:0));
+            // Ease into patrol speed instead of snapping a giant serpent to
+            // 14 world units/s on its first visible frame. Retain the original
+            // maximum and keep combat chase logic owned by the controller.
+            roamer.roamSpeed=Math.min(14,(Number.isFinite(roamer.roamSpeed)?roamer.roamSpeed:0)+25*step);
+            const move=Math.min(dist,14*Math.max(0,dt),roamer.roamSpeed*step);
             roamer.x+=dx/dist*move;roamer.z+=dz/dist*move;
-            const heading=Math.atan2(dx,dz);
+            // The spline's tangent is less jittery than the tiny corrective
+            // vector when the enemy is already close to its next path point.
+            const heading=dist<6?p.yaw:Math.atan2(dx,dz);
             roamer.yaw=yawLerp(Number.isFinite(roamer.yaw)?roamer.yaw:heading,heading,Math.min(1,Math.max(0,dt)*3.5));
           }
         }

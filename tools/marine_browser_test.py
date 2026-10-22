@@ -8,7 +8,7 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
  def log_message(self,*a):pass
 s=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=BASE))
 threading.Thread(target=s.serve_forever,daemon=True).start()
-URL=f'http://127.0.0.1:{s.server_address[1]}/proto3d.html?party=0&npcs=0&nosave=1'
+URL=f'http://127.0.0.1:{s.server_address[1]}/proto3d.html?party=2&npcs=0&nosave=1'
 fails=0
 def check(label,ok,detail=''):
  global fails
@@ -50,6 +50,22 @@ with sync_playwright() as pw:
    pg.wait_for_function("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')",timeout=35000)
    check(tag+' approved ship GLB visible',pg.evaluate("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')?.visible"))
    check(tag+' real water mesh',pg.evaluate("!!__p3d.scene.getObjectByName('sailing-water-window')"))
+   # Passengers must genuinely board: verify the real model roots occupy the
+   # deck in ship-local coordinates, not world-space water to either side.
+   pg.wait_for_function("(()=>{const c=__p3d.bump.crowd.filter(r=>r.kind==='party');return __p3d.hero.visible&&c.length===2&&c.every(r=>r.root?.visible)})()",timeout=35000)
+   deck_js="""(()=>{
+     const p=__p3d,ship=p.scene.getObjectByName('player-sailing-ship');
+     ship.updateMatrixWorld(true);
+     const slots=[[0,2.35,-3],[-1.28,1.95,-.65],[1.28,1.95,-.65]];
+     const roots=[p.hero,...p.bump.crowd.filter(r=>r.kind==='party').map(r=>r.root)];
+     const local=roots.map(o=>ship.worldToLocal(o.getWorldPosition(new p.THREE.Vector3())));
+     return {near:local.every((v,i)=>v.distanceTo(new p.THREE.Vector3(...slots[i]))<.65),
+             visible:roots.every(o=>o.visible),coords:local.map(v=>v.toArray())};
+   })()"""
+   aboard=pg.evaluate(deck_js)
+   check(tag+' hero and companions stand ON deck',aboard['near'] and aboard['visible'],aboard)
+   check(tag+' two companions aboard',pg.evaluate("__p3d.bump.crowd.filter(r=>r.kind==='party'&&r.root?.visible).length===2"))
+
    a=pg.evaluate("[__p3d.state.heroX,__p3d.state.heroZ,__p3d.state.yaw]")
    pg.keyboard.down('w');pg.wait_for_timeout(1700);pg.keyboard.up('w')
    c=pg.evaluate("[__p3d.state.heroX,__p3d.state.heroZ,__p3d.state.yaw]")
@@ -58,11 +74,15 @@ with sync_playwright() as pw:
    pg.keyboard.up('a');pg.keyboard.up('w')
    y=pg.evaluate("__p3d.state.yaw")
    check(tag+' rudder steers',abs(y-c[2])>0.02,(y,c[2]))
+   deck_after=pg.evaluate(deck_js)
+   check(tag+' crew follows the vessel while steering',deck_after['near'] and deck_after['visible'],deck_after)
+
    check(tag+' streaming tiles bounded',pg.evaluate("__p3d.scene.getObjectByName('tidewrack-open-ocean').children.filter(x=>x.name.startsWith('ocean-island-tile-')).length<=25"))
    pg.screenshot(path=f'/tmp/marine-{tag}-sailing.png')
    pg.evaluate("document.getElementById('vnTravelTown').click()")
    pg.wait_for_function("__p3d.zone==='town'",timeout=35000)
    check(tag+' town restored, no ghost ocean',pg.evaluate("!__p3d.scene.getObjectByName('tidewrack-open-ocean')&&__p3d.hero.visible"))
+   check(tag+' companions returned to walking world',pg.evaluate("__p3d.bump.crowd.filter(r=>r.kind==='party').every(r=>r.root?.visible && Math.hypot(r.a.x-__p3d.state.heroX,r.a.z-__p3d.state.heroZ)<18)"))
    check(tag+' mobile walking HUD restored',pg.evaluate("!document.body.classList.contains('vn-sailing-zone')"))
    check(tag+' no missing marine assets',not failedAssets,failedAssets[:5])
    major=[e for e in errs if any(t in e for t in ['Uncaught','hydra_restored','tidewrack_sailing','TypeError','GLB','camRig.look.set','camRig.lookTarget','is not a function'])]

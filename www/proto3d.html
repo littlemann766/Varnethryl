@@ -44,37 +44,35 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
     <div class="vn-bottom">Your adventure continues from the existing local save. Nothing is reset.</div>
   </div>
 </div>
-<div id="hud" hidden><div><b>VARNETHRYL</b> <span id="ver">v1.5.6</span><span id="fps">-- fps</span></div><a id="mdlBtn" href="#">Models</a><a id="fightBtn" href="#" style="display:none">Fight test</a></div>
+<div id="hud" hidden><div><b>VARNETHRYL</b> <span id="ver">v1.5.7</span><span id="fps">-- fps</span></div><a id="mdlBtn" href="#">Models</a><a id="fightBtn" href="#" style="display:none">Fight test</a></div>
 <button id="vnMenuBtn" type="button" aria-expanded="false" aria-controls="vnQuickMenu" aria-label="Open game menu">☰ Menu</button>
 <nav id="vnQuickMenu" aria-label="Game menu" hidden>
-  <div class="vn-qhead"><strong>VARNETHRYL</strong><button id="vnQuickClose" aria-label="Close menu">✕</button></div>
-  <details><summary>Game</summary><div class="vn-opts">
-    <button id="vnTitleBtn">Return to title</button>
-    <button id="vnOpenSettings">Settings</button>
-    <small>3D build <span id="vnVersion">1.5.6</span></small>
-  </div></details>
-  <details><summary>Characters</summary><div class="vn-opts">
-    <button id="vnChooseCharacter">Choose character</button>
-    <button id="vnApprovedBosses" type="button">New Boss Approved Models</button>
-    <a href="proto3d/model-viewer.html">View 3D character lineup</a>
-  </div></details>
-  <details><summary>Combat &amp; movement</summary><div class="vn-opts">
-    <button id="vnCombatToggle">Toggle fight mode</button>
-    <button id="vnEditHud" type="button">✥ Edit HUD — Move &amp; Resize Buttons</button>
-    <small>Customize button locations and sizes. Saved separately for portrait and landscape.</small>
-    <small>Walk / Run: R · Jump: Space</small>
-  </div></details>
-  <details><summary>World travel</summary><div class="vn-opts">
-    <button id="vnTravelSail" type="button">⛵ Sail the Tidewrack Ocean (9 × 9 km)</button>
-    <button id="vnTravelHydra" type="button">🐉 Enter Hydra Mire</button>
-    <button id="vnTravelTown" type="button">↩ Return to Kingdom</button>
-    <small>Sailing uses the real 3D ship. Hydra Mire is a separate rocky, water-filled boss arena. These are preview routes; saves and character selection remain unchanged.</small>
-  </div></details>
-  <details><summary>Advanced tools</summary><div class="vn-opts">
-    <button id="vnModelsToggle">Change character model style</button>
-    <button id="vnStatusOpen">View model and game diagnostics</button>
-    <small>Model and diagnostic tools are optional; normal gameplay does not require them.</small>
-  </div></details>
+  <div class="vn-qhead"><strong>VARNETHRYL</strong><button id="vnQuickClose" type="button" aria-label="Close menu">✕</button></div>
+  <div class="vn-quick-actions" role="group" aria-label="Main game actions">
+    <button id="vnQuickResume" type="button">▶ Resume</button>
+    <button id="vnChooseCharacter" type="button">⚔ Heroes</button>
+    <button id="vnOpenSettings" type="button">⚙ Settings</button>
+    <button id="vnQuickTravel" type="button" aria-expanded="false" aria-controls="vnQuickWorld">⌖ Travel</button>
+  </div>
+  <div class="vn-quick-sections">
+    <details id="vnQuickWorld"><summary>World travel</summary><div class="vn-opts">
+      <button id="vnTravelTown" type="button">↩ Kingdom</button>
+      <button id="vnTravelSail" type="button">⛵ Tidewrack Ocean</button>
+      <button id="vnTravelHydra" type="button">🐉 Hydra Mire</button>
+    </div></details>
+    <details id="vnQuickCombat"><summary>Combat &amp; controls</summary><div class="vn-opts">
+      <button id="vnCombatToggle" type="button">Toggle combat</button>
+      <button id="vnEditHud" type="button">Customize HUD</button>
+    </div></details>
+    <details id="vnQuickMore"><summary>More options</summary><div class="vn-opts">
+      <button id="vnTitleBtn" type="button">Return to title</button>
+      <button id="vnApprovedBosses" type="button">Approved boss models</button>
+      <a href="proto3d/model-viewer.html">3D model gallery</a>
+      <button id="vnModelsToggle" type="button">Character model style</button>
+      <button id="vnStatusOpen" type="button">Diagnostics</button>
+    </div></details>
+  </div>
+  <small class="vn-quick-version">3D build <span id="vnVersion">1.5.7</span></small>
 </nav>
 <div id="moveActions" aria-label="Movement">
  <button type="button" id="runBtn" aria-pressed="false" title="Walk or run">WALK</button>

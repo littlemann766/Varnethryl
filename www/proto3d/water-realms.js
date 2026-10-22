@@ -118,6 +118,20 @@ export function buildSailingOcean(scene){
   imported.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
   const fallback=vessel.children.slice();vessel.add(imported);for(const o of fallback)o.visible=false;shipReady=true;
  }).catch(e=>console.warn('Original sailing ship not loaded; retaining temporary fallback',e));
+ // Deck positions are ship-local and therefore follow the hull's position,
+ // turning and wave-induced roll. Slot 0 is the helmsman, 1-3 companions.
+ // Separate Y values account for the raised stern of the medieval galleon.
+ const crewSlots=[
+   new THREE.Vector3(0,2.35,-3.0),
+   new THREE.Vector3(-1.28,1.95,-.65),
+   new THREE.Vector3(1.28,1.95,-.65),
+   new THREE.Vector3(0,1.95,2.4)
+ ];
+ function crewSpot(slot,out=new THREE.Vector3()){
+   const pos=crewSlots[Math.max(0,Math.min(3,slot|0))];
+   vessel.updateMatrixWorld(true);
+   return vessel.localToWorld(out.copy(pos));
+ }
  const tiles=new Map(),obstacles=new Map(),TILE=420,VIEW_RADIUS=2,colliders=[];
  const spawn={x:OCEAN.cx,z:OCEAN.cz+OCEAN.half-175};
  // Rudder steering: left/right rotates the hull; forward/reverse controls sail
@@ -183,6 +197,6 @@ export function buildSailingOcean(scene){
  }
  update(0,spawn.x,spawn.z,0);
  return{group:root,ship:vessel,colliders,spawn,half:OCEAN.half,get shipReady(){return shipReady;},
-   get navigation(){return {...nav};},sail,blocked,
+   get navigation(){return {...nav};},crewSpot,sail,blocked,
    update,dispose(){scene.remove(root);dispose(root);}};
 }

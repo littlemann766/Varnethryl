@@ -199,6 +199,11 @@ assert(water.includes('const TILE=420') || water.includes('TILE=420'),'ocean isl
 assert(water.includes('tiles.delete(k)')&&water.includes('obstacles.delete(k)'),'ocean tiles unload outside view');
 assert(water.includes('hydra_restored_mobile.glb.gz'),'Hydra model path points to restored chest and rock cleanup');
 assert(water.includes('tidewrack_sailing_ship.glb.gz'),'sailing world uses owner-supplied vessel');
+const offline=src('www/sw.js');
+for(const asset of ['water-realms.js','hydra_restored_mobile.glb.gz','tidewrack_sailing_ship.glb.gz']){
+ assert(offline.includes(asset),'release offline cache includes water realm asset '+asset);
+}
+assert.equal(offline.match(/const CACHE = PREFIX \+ '([^']+)'/)[1],pkg.version,'offline cache matches the installed APK version');
 assert(water.includes('glbFromGzip')&&water.includes('DecompressionStream'),'compressed models are loaded into Three.js');
 assert(water.includes('hydra-unrigged-5-head'),'Hydra is not inaccurately labelled fully rigged');
 for(const btn of ['vnTravelSail','vnTravelHydra','vnTravelTown']) assert(titlePage.includes('id="'+btn+'"')&&main.includes("'"+btn+"'"),'menu and game must wire travel button: '+btn);

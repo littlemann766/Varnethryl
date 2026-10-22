@@ -212,6 +212,7 @@ assert(main.includes("ZONE.name==='sailing'&&SM?.blocked"),'sailing boat collide
 assert(main.includes("ZONE.name==='hydra'&&HM?.waterAt"),'Hydra water and terrain are part of player movement');
 assert(screenCss.includes('body.vn-sailing-zone #moveActions'),'sailing hides irrelevant walking controls');
 const ownerPanelSrc=src('www/proto3d/cheatpanel.js');
+assert(ownerPanelSrc.includes('z-index:8100'),'Owner map cheats must appear above world/HUD overlays');
 assert(main.includes("zones: ['village', 'wilds', 'frost', 'hydra', 'sailing']"),'owner teleport includes all five maps');
 for(const id of ["'hydra'","'sailing'","'frost'","'village'"]){
  assert(ownerPanelSrc.includes(id),'owner travel shortcut visible for '+id);

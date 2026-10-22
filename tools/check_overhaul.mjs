@@ -51,6 +51,8 @@ assert(main.includes("!FIGHT.on||!FIGHT.auto"),'wilderness promotes training mod
 assert(camera.includes('const orbitAngle ='),'third-person camera uses real spherical pitch orbit');
 assert(main.includes('camRig.look(0, -(e.clientY - t.ly) * 0.005'),'vertical touch orbit is actually connected');
 assert(!fight.includes('u.serpentWave(dt,mv'),'Balthrix must not corkscrew his 29 animated spine/tail joints with a post-mixer overlay');
+assert(fight.includes('serpentHeading(r.rotation.y,heading,dt)'),'serpent root yaw uses frame-rate independent turn limit');
+assert(fight.includes("import { serpentHeading } from './serpent-locomotion.js';"),'shared serpent turning is testable');
 
 const wrenCloth=JSON.parse(source('www/proto3d/models-new/wren_cl_arms.cloth.json'));
 const wrenWings=wrenCloth.groups.filter(g=>g.kind==='wing');

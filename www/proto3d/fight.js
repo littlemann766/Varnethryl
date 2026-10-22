@@ -16,6 +16,7 @@ import { Respawner } from './combat/respawn.js';
 import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, balthrixPosition, nearestBalthrixPath, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
 import { terrainBodyPitch } from './terrain-follow.js';
+import { serpentHeading } from './serpent-locomotion.js';
 import { bossHome, telegraphKey } from './combat/boss-arena.js';
 import { HOB_CAMPS } from './hobcamps.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
@@ -545,7 +546,12 @@ export function createFight(env) {
       // Imported bosses can start without a finite yaw. Keep the rendered
       // heading valid so the serpent never disappears into NaN transforms.
       const heading=Number.isFinite(e.yaw)?e.yaw:0;
-      r.rotation.y = yawLerp(Number.isFinite(r.rotation.y)?r.rotation.y:heading, heading, Math.min(1,Math.max(0,dt)*(e.key==='vaelthryx'?3.5:10)));
+      // A 6x-scale serpent cannot instantly swivel its entire body around
+      // tight corners. Restrict visible root rotation; its 29 joint native
+      // slither clips supply the undulation independently.
+      r.rotation.y = e.key==='vaelthryx'
+        ? serpentHeading(r.rotation.y,heading,dt)
+        : yawLerp(Number.isFinite(r.rotation.y)?r.rotation.y:heading,heading,Math.min(1,Math.max(0,dt)*10));
       if (e.state !== e.ls) { if(e.key==='hydra'&&e.state==='telegraph'&&e.pat)hud.say(e.pat.name.toUpperCase(),950); if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
       let lean = 0; if (e.state === 'telegraph') lean = -0.35 * Math.min(1, e.tStateT / e.def.tele); else if (e.state === 'attack') lean = 0.45; else if (e.state === 'stagger') lean = -0.5; else if (e.flinch > 0) lean = -0.25 * (e.flinch / 0.18);

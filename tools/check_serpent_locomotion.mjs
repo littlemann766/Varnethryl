@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {preferSerpentClips,serpentBodyChain,serpentAnimatedBody} from '../www/proto3d/serpent-locomotion.js';
+import {preferSerpentClips,serpentBodyChain,serpentAnimatedBody,serpentHeading} from '../www/proto3d/serpent-locomotion.js';
 const clip=n=>({name:n,tracks:[]});
 const idle=clip('idle'),walk=clip('walk'),run=clip('run'),slow=clip('slither'),fast=clip('slither_fast');
 const snake={idle,walk,run,slither:slow,slither_fast:fast,attack:clip('strike')};
@@ -40,7 +40,28 @@ assert(main.includes("'n:vaelthryx_straight_rig': { walk: 0.30, run: 0.80 }"),
 assert(!main.includes('createSerpentWave(m)'),'no additive twist may be layered on native body animation');
 assert(!main.includes('u.serpentWave(animDt'),'companions must not re-aim serpent bones after the mixer');
 assert(!fight.includes('u.serpentWave(dt,mv'),'boss must not re-aim serpent bones after the mixer');
-assert(fight.includes("e.key==='vaelthryx'?3.5:10"),'Balthrix turns smoothly without rapid rigid snapping');
+assert(fight.includes("e.key==='vaelthryx'") && fight.includes('serpentHeading(r.rotation.y,heading,dt)'),
+  'Balthrix body heading must use bounded serpentine turning');
+for(const fps of [24,30,60,120]){
+  let a=0;const dt=1/fps;
+  for(let i=0;i<fps;i++){
+    const b=serpentHeading(a,Math.PI,dt);
+    assert(Math.abs(Math.atan2(Math.sin(b-a),Math.cos(b-a)))<=1.15*dt+1e-9,
+      'giant serpent must not rotate faster than max angular speed');
+    a=b;
+  }
+  assert(Math.abs(a+1.15)<.035 || Math.abs(a-1.15)<.035,
+    'one second turns at roughly constant angular speed, independent of FPS');
+}
+{
+  const before=Math.PI-.015,after=-Math.PI+.015;
+  const next=serpentHeading(before,after,.05);
+  const delta=Math.atan2(Math.sin(next-before),Math.cos(next-before));
+  assert(delta>0&&delta<.04,'wraparound must take short heading path instead of full-body spin');
+}
+assert.equal(serpentHeading(NaN,0,.05),0,'invalid starting yaw resets safely');
+assert.equal(serpentHeading(1,NaN,.05),1,'invalid target does not poison the boss transform');
+assert.equal(serpentHeading(1,2,NaN),1,'bad frame delta leaves the model stable');
 assert(preview.includes('actions.slither || actions.walk || actions.idle'),
   '3D preview must show authored slither, not fake body twisting over idle');
 assert(main.includes("group.key === 'ssylthar'"),'Sslythar stays hidden');

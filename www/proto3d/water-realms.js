@@ -40,7 +40,7 @@ function island(parent,x,z,r,sizeSeed,colliders){
 }
 async function glbFromGzip(url){
  if(!('DecompressionStream'in window))throw new Error('This Android WebView does not support compressed GLB models');
- const response=await fetch(url+'?v=1.4.2');if(!response.ok)throw new Error('GLB HTTP '+response.status);
+ const response=await fetch(url+'?v=1.4.3');if(!response.ok)throw new Error('GLB HTTP '+response.status);
  const bytes=await response.arrayBuffer(),head=new Uint8Array(bytes,0,Math.min(4,bytes.byteLength));
  // Some hosts decode .gz on the HTTP layer. Accept either raw GLB or gzip
  // exactly once so the original ship and Hydra load on both web and Android.

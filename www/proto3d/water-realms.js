@@ -42,7 +42,7 @@ function island(parent,x,z,r,sizeSeed,colliders){
 }
 async function glbFromGzip(url){
  if(!('DecompressionStream'in window))throw new Error('This Android WebView does not support compressed GLB models');
- const response=await fetch(url+'?v=1.5.3');if(!response.ok)throw new Error('GLB HTTP '+response.status);
+ const response=await fetch(url+'?v=1.5.4');if(!response.ok)throw new Error('GLB HTTP '+response.status);
  const bytes=await response.arrayBuffer(),head=new Uint8Array(bytes,0,Math.min(4,bytes.byteLength));
  // Some hosts decode .gz on the HTTP layer. Accept either raw GLB or gzip
  // exactly once so the original ship and Hydra load on both web and Android.
@@ -238,6 +238,8 @@ export function buildSailingOcean(scene){
  update(0,spawn.x,spawn.z,0);
  return{group:root,ship:vessel,colliders,spawn,half:OCEAN.half,
    get shipReady(){return shipReady;},get shipLoadError(){return shipLoadError;},
-   get navigation(){return {...nav};},crewSpot,sail,blocked,
+   get navigation(){return {...nav};},
+   // Same positions as the streamed 3D island collision geometry.
+   mapFeatures(){return [...obstacles.values()].flat();},crewSpot,sail,blocked,
    update,dispose(){disposed=true;scene.remove(root);dispose(root);}};
 }

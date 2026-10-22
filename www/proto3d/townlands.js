@@ -9,6 +9,12 @@ import { buildSailingShip,animateMooredShip,installImportedShip } from './port-s
 import { MOUNTAIN_APPROACH, MOUNTAIN_WILDS_GATE, buildMountainWildsGateway } from './wilds-gateway.js';
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
+// Shared by the 3D road meshes and live top-down minimap: edit paths once.
+export const TOWN_MAP_ROADS=Object.freeze([
+ {points:[[0,CITY_HALF+8],[-82,210],[-165,247],[-245,285],[-325,332],[-365,379],[-403,382],[PORT_CENTER.x,PORT_CENTER.z-15]],width:9.2,color:'#b4a891'},
+ {points:[[0,-CITY_HALF-12],[-45,-231],[-80,-285],[-57,-337],[-18,-386],[30,-374],[25,-348],[FROST_PORTAL.x,FROST_PORTAL.z+7]],width:7.4,color:'#9a9e9c'},
+ {points:MOUNTAIN_APPROACH,width:8.4,color:'#999094'}
+]);
 const CHUNK = 64;
 const CORE = 164;           // original town wall was at +/-168 world units
 const RING = 194; // preserved level carriageway, with a new mountainous countryside beyond           // scenic carriageway linking the outer districts
@@ -182,11 +188,11 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(indices);g.computeVertexNormals();
     const m=new THREE.Mesh(g,mat);m.receiveShadow=true;m.userData.keep=true;group.add(m);return m;
   }
-  const harborRoad=path([[0,CITY_HALF+8],[-82,210],[-165,247],[-245,285],[-325,332],[-365,379],[-403,382],[PORT_CENTER.x,PORT_CENTER.z-15]],9.2);
-  const mountainRoad=path([[0,-CITY_HALF-12],[-45,-231],[-80,-285],[-57,-337],[-18,-386],[30,-374],[25,-348],[FROST_PORTAL.x,FROST_PORTAL.z+7]],7.4,new THREE.MeshLambertMaterial({color:0x7b847f,side:THREE.DoubleSide}));
+  const harborRoad=path(TOWN_MAP_ROADS[0].points,TOWN_MAP_ROADS[0].width);
+  const mountainRoad=path(TOWN_MAP_ROADS[1].points,TOWN_MAP_ROADS[1].width,new THREE.MeshLambertMaterial({color:0x7b847f,side:THREE.DoubleSide}));
   // Separate westward branch from the established frost road. Stone paving follows
   // the real mountain terrain: no floating staircase and no Frost portal changes.
-  const brokenSealRoad=path(MOUNTAIN_APPROACH,8.4,new THREE.MeshLambertMaterial({color:0x756b6b,side:THREE.DoubleSide}));
+  const brokenSealRoad=path(TOWN_MAP_ROADS[2].points,TOWN_MAP_ROADS[2].width,new THREE.MeshLambertMaterial({color:0x756b6b,side:THREE.DoubleSide}));
   const ruinedGateway=buildMountainWildsGateway(group,(x,z)=>townElevation(x,z,world));
   for(const c of ruinedGateway.colliders)colliders.push(c);
   // Summit approach: an actual rocky ice tunnel. Enter from the southern road

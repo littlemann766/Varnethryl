@@ -31,6 +31,31 @@ with sync_playwright() as pw:
    pg.wait_for_function('window.__p3d && __p3d.frames>5',timeout=120000)
    pg.evaluate("document.getElementById('vnEnter')?.click()")
    check(tag+' town boots',pg.evaluate("__p3d.zone==='town'"))
+   pg.wait_for_function("!!__p3d.fight?.on && !!document.querySelector('#cb .sl.b4')",timeout=30000)
+   check(tag+' skill buttons retain five named attacks',pg.evaluate("""()=>{
+     const buttons=[...document.querySelectorAll('#cb .cx>.sl')];
+     return buttons.length===5 && buttons.every(b=>!!b.getAttribute('aria-label') && !!b.title);
+   }"""))
+   if mob:
+    check(tag+' compact portrait skill names do not collide',pg.evaluate("""()=>{
+      return [...document.querySelectorAll('#cb .cx>.sl .nmL')]
+        .every(n=>getComputedStyle(n).display==='none');
+    }"""))
+    pg.focus('#cb .sl.b1')
+    check(tag+' focused attack shows full skill name',pg.evaluate("""()=>{
+      const b=document.querySelector('#cb .sl.b1'),hint=document.querySelector('#cb .skill-name-callout');
+      return !!hint && hint.textContent===b.getAttribute('aria-label') && getComputedStyle(hint).display!=='none';
+    }"""))
+   def map_clearance():
+    return pg.evaluate("""()=>{
+      const a=document.querySelector('#cb .top').getBoundingClientRect(),
+            b=document.getElementById('vnMiniMap').getBoundingClientRect();
+      return a.top >= b.bottom && a.left < innerWidth && a.bottom <= innerHeight;
+    }""")
+   check(tag+' combat menu clears minimap',map_clearance())
+   pg.evaluate("document.querySelector('#vnMiniMap button').click()")
+   check(tag+' combat menu clears expanded minimap',map_clearance())
+   pg.evaluate("document.querySelector('#vnMiniMap button').click()")
    check(tag+' no extra hero skin/model in town',pg.evaluate("__p3d.visibleHeroModelCount===1"))
    check(tag+' requested party count initialized',pg.evaluate(
      "(count)=>__p3d.bump.crowd.filter(r=>r.kind==='party').length===count",party_count))

@@ -95,7 +95,7 @@ function shipAsset(){
   // Harbor and open-ocean both reuse the user's approved textured GLB.
   // A compressed asset is deployed to keep APK size and cellular data low.
   if(!approvedShipPromise)approvedShipPromise=(async()=>{
-    const response=await fetch(TIDEWRACK_SHIP_GLB+'?v=1.5.0');
+    const response=await fetch(TIDEWRACK_SHIP_GLB+'?v=1.5.1');
     if(!response.ok)throw Error('Ship HTTP '+response.status);
     const bytes=await response.arrayBuffer(),head=new Uint8Array(bytes,0,Math.min(4,bytes.byteLength));
     let glb=bytes;

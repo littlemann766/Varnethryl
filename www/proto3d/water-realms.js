@@ -139,7 +139,7 @@ export function buildSailingOcean(scene){
    // A galleon takes time to accelerate and coasts when sails are furled.
    const target=power>=0?power*19:power*5;
    nav.speed+=(target-nav.speed)*Math.min(1,step*(power===0?1.5:.65));
-   const steering=Math.min(1,.25+Math.abs(nav.speed)/9);
+   const steering=Math.min(1,Math.abs(nav.speed)/9);
    nav.heading+=rudder*step*.64*steering*(nav.speed<-.2?-1:1);
    const dd=nav.speed*step;
    const mx=-Math.sin(nav.heading)*dd,mz=-Math.cos(nav.heading)*dd;

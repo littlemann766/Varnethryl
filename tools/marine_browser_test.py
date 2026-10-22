@@ -70,6 +70,8 @@ with sync_playwright() as pw:
    print('CREW_BOUNDS',tag,metrics,flush=True)
    aboard=pg.evaluate(deck_js)
    check(tag+' hero and companions stand ON deck',aboard['near'] and aboard['visible'],aboard)
+   check(tag+' rendered character sizes fit the galleon',
+     all(m and 1.1 <= m['size'][1] <= 3.6 for m in metrics[2:]),metrics)
    check(tag+' two companions aboard',pg.evaluate("__p3d.bump.crowd.filter(r=>r.kind==='party'&&r.root?.visible).length===2"))
 
    a=pg.evaluate("[__p3d.state.heroX,__p3d.state.heroZ,__p3d.state.yaw]")

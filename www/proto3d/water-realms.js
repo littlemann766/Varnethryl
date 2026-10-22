@@ -43,7 +43,7 @@ function island(parent,x,z,r,sizeSeed,colliders){
 }
 async function glbFromGzip(url){
  if(!('DecompressionStream'in window))throw new Error('This Android WebView does not support compressed GLB models');
- const response=await fetch(url+'?v=1.4.6');if(!response.ok)throw new Error('GLB HTTP '+response.status);
+ const response=await fetch(url+'?v=1.4.7');if(!response.ok)throw new Error('GLB HTTP '+response.status);
  const bytes=await response.arrayBuffer(),head=new Uint8Array(bytes,0,Math.min(4,bytes.byteLength));
  // Some hosts decode .gz on the HTTP layer. Accept either raw GLB or gzip
  // exactly once so the original ship and Hydra load on both web and Android.
@@ -164,7 +164,10 @@ export function buildSailingOcean(scene){
    const target=power>=0?power*19:power*5;
    nav.speed+=(target-nav.speed)*Math.min(1,step*(power===0?1.5:.65));
    const steering=Math.min(1,Math.abs(nav.speed)/9);
-   nav.heading+=rudder*step*.64*steering*(nav.speed<-.2?-1:1);
+   // The hull faces -Z at heading zero. Starboard rudder should turn
+   // the bow toward +X (negative yaw), port toward -X (positive yaw).
+   // Inverting in reverse preserves realistic helm pivot behavior.
+   nav.heading-=rudder*step*.64*steering*(nav.speed<-.2?-1:1);
    const dd=nav.speed*step;
    const mx=-Math.sin(nav.heading)*dd,mz=-Math.cos(nav.heading)*dd;
    const nx=x+mx,nz=z+mz,edge=OCEAN.half-12;

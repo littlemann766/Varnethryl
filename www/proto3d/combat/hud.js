@@ -401,6 +401,52 @@ const CSS = `
  #cb .cl{width:min(295px,100%)!important}
 }
 
+
+/* v1.4.0: quiet gameplay layout. Extra defensive/utility moves remain in
+   CombatController and keyboard/gesture handlers; they are not a second action
+   bar occupying the left-hand movement zone. */
+#cb .cx>.cl, #cb .cl, body.vn-hud-editing #cb .cl{display:none!important;pointer-events:none!important}
+#cb .vn-exp{
+  top:max(7px,env(safe-area-inset-top))!important;bottom:auto!important;
+  left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+  width:min(440px,56vw)!important;height:71px!important;
+  max-height:none!important;z-index:70!important;
+}
+#cb .vn-exp .vn-exp-level{font-size:11px!important}
+#cb .vn-exp .vn-exp-value{font-size:11px!important}
+#cb .vit{
+  top:calc(max(8px,env(safe-area-inset-top)) + 137px)!important;
+  bottom:auto!important;
+}
+#cb .stat{top:calc(max(8px,env(safe-area-inset-top)) + 258px)!important}
+#cb .cx{
+  right:max(10px,env(safe-area-inset-right))!important;
+  bottom:calc(max(8px,env(safe-area-inset-bottom)) + 10px)!important;
+}
+@media(orientation:portrait){
+ #cb .vn-exp{
+  top:max(4px,env(safe-area-inset-top))!important;bottom:auto!important;
+  left:50%!important;right:auto!important;
+  width:min(440px,56vw)!important;height:70px!important;
+  transform:translateX(-50%)!important;
+ }
+ #cb .vit{top:calc(max(9px,env(safe-area-inset-top)) + 139px)!important}
+ #cb .stat{top:calc(max(10px,env(safe-area-inset-top)) + 258px)!important}
+ #cb .cx{bottom:calc(max(6px,env(safe-area-inset-bottom)) + 21px)!important}
+}
+@media(orientation:portrait) and (max-width:560px){
+ #cb .vn-exp{left:8px!important;right:auto!important;
+  transform:none!important;width:calc(100vw - 156px)!important;height:66px!important}
+ #cb .vn-exp .vn-exp-level,#cb .vn-exp .vn-exp-value{font-size:9px!important}
+}
+@media(orientation:landscape) and (max-height:520px){
+ #cb .vn-exp{top:max(3px,env(safe-area-inset-top))!important;height:45px!important;
+  width:min(330px,40vw)!important}
+ #cb .vit{top:calc(max(6px,env(safe-area-inset-top)) + 56px)!important}
+ #cb .stat{top:calc(max(6px,env(safe-area-inset-top)) + 136px)!important}
+ #cb .cx{bottom:calc(max(6px,env(safe-area-inset-bottom)) + 22px)!important}
+}
+
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */
 const SV = p => '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>';

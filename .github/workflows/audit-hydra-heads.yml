@@ -1,0 +1,24 @@
+name: Inspect Hydra Head Rig
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/audit_hydra_heads.py'
+      - '.github/workflows/audit-hydra-heads.yml'
+      - 'www/proto3d/models-new/hydra_restored_mobile.glb.gz'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  model-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect all actual Hydra head, neck and animation nodes
+        run: python3 tools/audit_hydra_heads.py --report hydra-rig-audit.json
+      - name: Attach inspectable five-head rig report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Varnethryl-Hydra-Five-Head-Rig-Audit
+          path: hydra-rig-audit.json
+          if-no-files-found: error

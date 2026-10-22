@@ -61,6 +61,19 @@ export function createFight(env) {
     else if (k === 'q' || k === 'Q') api.lock(); else if (k === 'Tab') { e.preventDefault(); api.switchTarget(); } else if (k === 'r' || k === 'R') api.potion(); else if (k === 'e' || k === 'E') api.swap(); else if (k === 'j' || k === 'J') api.jump();
   };
   const onMd = e => { if (on && e.button === 2) cc.block(true); }, onMu = e => { if (on && e.button === 2) cc.block(false); }, onCtx = e => { if (on) e.preventDefault(); };
+  // Touch dodge without an extra HUD button: double tap the movement joystick.
+  // The player keeps normal tap/drag movement and existing PC key bindings.
+  let lastJoystickTap = 0, lastJoystickPointer = null;
+  document.getElementById('stick')?.addEventListener('pointerdown',e=>{
+    if(!on||window.__vnHudEditor?.isEditing?.()||document.body.classList.contains('vn-settings-open'))return;
+    if(e.pointerType==='mouse')return;
+    const now=performance.now();
+    if(now-lastJoystickTap<300&&lastJoystickPointer!==e.pointerId){
+      api.dodge();lastJoystickTap=0;
+    }else lastJoystickTap=now;
+    lastJoystickPointer=e.pointerId;
+  });
+
 
   /* ---- lightsaber: Owner only. Beth's saber_owner.glb (root 'saber'): drawn = under weapon_R (+ *_saber clips), sheathed = under weapon_back, blade/glow hidden ---- */
   const SABER_URL = 'proto3d/models-new/saber_owner.glb';

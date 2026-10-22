@@ -13,6 +13,16 @@ assert(!hud.includes('data-a="summon">Summon Titan')&&!hud.includes('data-a="exi
 assert(!hud.includes('<div class="top">'),'no empty combat top-control group');
 assert(!editor.includes("'#cb .top','Combat options'"),'HUD customization excludes deleted buttons');
 assert(cheatPanel.includes("act('spawn-titan', 'Spawn Ashen Titan'"),'owner still summons Titan from cheat menu');
+const nav=source('www/proto3d.html');
+const menu=source('www/proto3d/varn-menu.js');
+const ui=source('www/proto3d/varn-ui.css');
+assert(nav.includes('class="vn-quick-actions"'),'game menu has compact primary actions');
+for(const id of ['vnQuickResume','vnChooseCharacter','vnOpenSettings','vnQuickTravel','vnCombatToggle','vnEditHud','vnTravelSail','vnTravelHydra','vnTravelTown','vnApprovedBosses','vnModelsToggle','vnStatusOpen','vnTitleBtn']){
+  assert(nav.includes('id="'+id+'"'),'existing game menu command preserved: '+id);
+}
+assert(menu.includes('if(section.open)for(const other of sections)'),'game menu accordion closes other categories');
+assert(menu.includes("document.getElementById('vnQuickResume')?.addEventListener('click',closeQuick)"),'resume action closes cluttered menu');
+assert(ui.includes('#vnQuickMenu .vn-quick-actions{display:grid'),'main game menu is two-column and compact');
 const main=source('www/proto3d/main.js');
 const fight=source('www/proto3d/fight.js');
 const terrain=source('www/proto3d/townlands.js');

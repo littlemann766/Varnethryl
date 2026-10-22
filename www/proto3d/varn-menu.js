@@ -6,9 +6,28 @@
   const hide = () => { panel.hidden = true; document.body.classList.remove('vn-menu-open'); };
   document.getElementById('vnEnter')?.addEventListener('click', hide);
   const quick=document.getElementById('vnQuickMenu');
-  const toggleQuick=(v=!quick.hidden)=>{quick.hidden=!v;document.getElementById('vnMenuBtn')?.setAttribute('aria-expanded',String(v));};
+  const sections=[...quick.querySelectorAll('details')];
+  const travelSection=document.getElementById('vnQuickWorld');
+  const travelButton=document.getElementById('vnQuickTravel');
+  // A compact accordion: only one submenu can be open at a time.
+  for(const section of sections)section.addEventListener('toggle',()=>{
+    if(section.open)for(const other of sections)if(other!==section)other.open=false;
+    if(travelButton)travelButton.setAttribute('aria-expanded',String(!!travelSection?.open));
+  });
+  const toggleQuick=(v=!quick.hidden)=>{
+    quick.hidden=!v;
+    document.getElementById('vnMenuBtn')?.setAttribute('aria-expanded',String(v));
+    if(!v){for(const section of sections)section.open=false;
+      if(travelButton)travelButton.setAttribute('aria-expanded','false');}
+  };
   const closeQuick=()=>toggleQuick(false);
   document.getElementById('vnMenuBtn')?.addEventListener('click',()=>toggleQuick(quick.hidden));
+  document.getElementById('vnQuickResume')?.addEventListener('click',closeQuick);
+  travelButton?.addEventListener('click',()=>{
+    if(quick.hidden||!travelSection)return;
+    travelSection.open=!travelSection.open;
+    if(travelSection.open)travelSection.scrollIntoView({block:'nearest'});
+  });
   document.getElementById('vnQuickClose')?.addEventListener('click',closeQuick);
   document.getElementById('vnTitleBtn')?.addEventListener('click',()=>{closeQuick();show();});
   document.getElementById('vnChooseCharacter')?.addEventListener('click',()=>{closeQuick();document.querySelector('#heroes button.cur')?.click();});

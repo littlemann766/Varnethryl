@@ -263,6 +263,7 @@ export function createFight(env) {
       bossDue.set(e.key,regionClock+100);
       bossOn=cc.enemies.some(v=>v!==e&&v.def.boss&&v.state!=='defeated');
       hud.say(e.def.name.toUpperCase()+' DEFEATED',2600);
+      if(e.key==='hydra')env.onHydraDefeat?.();
       if(e.key==='frosttroll_a'||e.key==='frosttroll_b'){
         const sibling=cc.enemies.find(v=>v.key===(e.key==='frosttroll_a'?'frosttroll_b':'frosttroll_a')&&v.state!=='defeated');
         if(sibling){sibling.phase=2;sibling.pat=null;sibling.atkCd=0;hud.say("THE SURVIVING BROTHER ENRAGES",2400);}
@@ -297,6 +298,7 @@ export function createFight(env) {
     const tele = new THREE.Mesh(ring.geometry, new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false })); tele.rotation.x = -Math.PI / 2; tele.visible = false; scene.add(tele);
     const e = cc.addEnemy(key, x, z, Object.assign({ view: w, top:top+terrainY(x,z), heightAbove:top, ems, tele, flashOn: false, px: x, pz: z }, bossHome(key,x,z)||{}, extra));
     if(def.boss){bossOn=true;
+      if(key==='hydra')env.onHydraSpawn?.();
       if(Math.hypot(x-state.heroX,z-state.heroZ)<65){
         hud.say(def.name.toUpperCase()+' APPEARS',1250);
         cc.tgt.target=e;cc.tgt.locked=false;cc.lastTarget=e;
@@ -357,9 +359,20 @@ export function createFight(env) {
   let roamBusy=false;
   function startRegionBosses(zone){
     if(zone==='frost')for(const brother of FROST_BROTHERS)spawnRegion(brother.key,brother.x,brother.z,{aggroR:80});
+    if(zone==='hydra'&&env.hydraBossAt){const at=env.hydraBossAt();if(at)spawnRegion('hydra',at.x,at.z,{aggroR:115});}
   }
   function regionUpdate(dt){
     const zone=env.zone?env.zone():'town';regionClock+=dt;
+    if(zone==='hydra'){
+      // Five attack patterns belong to one stationary boss. Restart only when
+      // its defeat cooldown expires, not for every frame of the fight.
+      if(cc.dead<=0&&regionClock>=frostSpawnT&&env.hydraBossAt){
+        frostSpawnT=regionClock+2.5;
+        const at=env.hydraBossAt();
+        if(at)spawnRegion('hydra',at.x,at.z,{aggroR:115});
+      }
+      return;
+    }
     if(zone==='frost'){
       // Dying clears all enemies. Repopulate the brothers once the player
       // respawns, without needing to exit and re-enter the cave portal.
@@ -532,7 +545,7 @@ export function createFight(env) {
       // heading valid so the serpent never disappears into NaN transforms.
       const heading=Number.isFinite(e.yaw)?e.yaw:0;
       r.rotation.y = yawLerp(Number.isFinite(r.rotation.y)?r.rotation.y:heading, heading, Math.min(1,Math.max(0,dt)*(e.key==='vaelthryx'?3.5:10)));
-      if (e.state !== e.ls) { if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
+      if (e.state !== e.ls) { if(e.key==='hydra'&&e.state==='telegraph'&&e.pat)hud.say(e.pat.name.toUpperCase(),950); if (e.state === 'telegraph') { e.alt = !e.alt; oneShot(r, e.def.boss && e.alt ? 'attack2' : 'attack', e.def.tele + 0.3, false); } else if (e.state === 'stagger') oneShot(r, 'hit', 0.5, false); e.ls = e.state; }
       if (e.flinch > 0) e.flinch -= dt; tickOS(r, dt);
       let lean = 0; if (e.state === 'telegraph') lean = -0.35 * Math.min(1, e.tStateT / e.def.tele); else if (e.state === 'attack') lean = 0.45; else if (e.state === 'stagger') lean = -0.5; else if (e.flinch > 0) lean = -0.25 * (e.flinch / 0.18);
       // Balthrix's ROOT gently matches hill inclination, while authored
@@ -575,7 +588,7 @@ export function createFight(env) {
   function start(isAuto) {
     if (on) { if (isAuto === true) auto = true; return; } auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
-    if (auto) { syncHero(); equip(); const zone=env.zone?.(); hud.say(zone==='frost'?'FROST CAVE — THE BROTHERS AWAIT':zone==='town'?'OUTSKIRTS — DANGER AHEAD':'THE WILDS — MONSTERS ABOUT',1800); return; }
+    if (auto) { syncHero(); equip(); const zone=env.zone?.(); hud.say(zone==='hydra'?'HYDRA MIRE — FIVE HEADS AWAIT':zone==='frost'?'FROST CAVE — THE BROTHERS AWAIT':zone==='town'?'OUTSKIRTS — DANGER AHEAD':'THE WILDS — MONSTERS ABOUT',1800); return; }
     // Normal combat is available to every playable hero. Do not silently
     // replace the chosen character with the Owner when fight mode is toggled.
     syncHero(); equip(); hud.say('COMBAT READY', 1800);

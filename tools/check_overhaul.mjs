@@ -6,10 +6,13 @@ import {spawnSync} from 'node:child_process';
 import {fallenTreeSites,balthrixPosition,isCitySafe,onLava,PORT_CENTER,FROST_SUMMIT,TITAN_CENTER} from '../www/proto3d/bossregions.js';
 const source=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const hud=source('www/proto3d/combat/hud.js');
-assert(hud.includes('/* 1.5.9: display ONLY five individual circular skills.'),'transparent skill tray regression marker');
+assert(hud.includes('/* 1.5.10: five-button bottom-right fan'),'transparent skill tray regression marker');
 assert(hud.includes('background:none!important;')&&hud.includes('border:0!important;')&&hud.includes('box-shadow:none!important;')&&hud.includes('filter:none!important;'),
  'shared combat skill tray has no painted box');
 assert(hud.includes("class=\"sl b' + i"),'individual five ability buttons remain in skill group');
+assert(hud.includes('#cb .cx>.sl.b0{width:30.5%!important;right:0!important;bottom:0!important}'),'Basic attack stays in lower-right fan anchor');
+assert(hud.includes('#cb .cx>.sl.b4{width:29%!important;right:5.5%!important;bottom:51%!important}'),'Ultimate sits at the upper-right of fan');
+assert(hud.includes('aspect-ratio:252 / 212!important;'),'Combat fan keeps proportions on phones and tablets');
 const editor=source('www/proto3d/hud-layout-editor.js');
 const cheatPanel=source('www/proto3d/cheatpanel.js');
 assert(!hud.includes('data-a="summon">Summon Titan')&&!hud.includes('data-a="exit">Exit fight'),

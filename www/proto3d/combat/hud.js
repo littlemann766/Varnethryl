@@ -479,10 +479,22 @@ body:has(#vnMiniMap.expanded) #cb .top{
   top:calc(max(54px,env(safe-area-inset-top) + 48px) + 182px)!important
  }
 }
-/* 1.5.9: display ONLY five individual circular skills. The .cx element
-   remains a transparent layout/touch anchor; never paint a common tray.
-   Keep positions, individual gold borders, cooldown masks and controls. */
+/* 1.5.10: five-button bottom-right fan. No shared box/tray.
+   Keep the existing individual circular controls, artwork, cooldowns and input handlers. */
 #cb .cx{
+ position:absolute!important;
+ display:block!important;
+ grid-template-columns:none!important;
+ grid-template-rows:none!important;
+ flex-flow:initial!important;
+ align-items:initial!important;
+ justify-content:initial!important;
+ gap:0!important;
+ width:min(252px,64vw,66vh)!important;
+ height:auto!important;
+ aspect-ratio:252 / 212!important;
+ right:max(10px,env(safe-area-inset-right))!important;
+ bottom:calc(max(8px,env(safe-area-inset-bottom)) + 18px)!important;
  background:none!important;
  background-color:transparent!important;
  background-image:none!important;
@@ -495,6 +507,28 @@ body:has(#vnMiniMap.expanded) #cb .top{
  padding:0!important;
 }
 #cb .cx::before,#cb .cx::after{content:none!important;display:none!important}
+#cb .cx>.sl{
+ position:absolute!important;
+ inset:auto!important;
+ left:auto!important;
+ top:auto!important;
+ display:block!important;
+ margin:0!important;
+ padding:0!important;
+ flex:none!important;
+ grid-column:auto!important;
+ grid-row:auto!important;
+ min-width:0!important;
+ max-width:none!important;
+ height:auto!important;
+ aspect-ratio:1!important;
+}
+/* Follow the fan from bottom right: Basic -> 1 -> 2 -> 3 -> Ultimate. */
+#cb .cx>.sl.b0{width:30.5%!important;right:0!important;bottom:0!important}
+#cb .cx>.sl.b1{width:24%!important;right:31.5%!important;bottom:7.5%!important}
+#cb .cx>.sl.b2{width:23.5%!important;right:56%!important;bottom:30.5%!important}
+#cb .cx>.sl.b3{width:23%!important;right:40%!important;bottom:63%!important}
+#cb .cx>.sl.b4{width:29%!important;right:5.5%!important;bottom:51%!important}
 
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */

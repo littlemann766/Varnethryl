@@ -18,6 +18,8 @@ with sync_playwright() as pw:
  b=pw.chromium.launch(args=['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
  for w,h,mob in [(412,915,True),(1280,800,False)]:
   tag='mobile' if mob else 'desktop'
+  party_count=2 if mob else 3  # Verify the full ship manifest on desktop.
+  page_url=URL.replace('party=2',f'party={party_count}')
   ctx=b.new_context(viewport={'width':w,'height':h},is_mobile=mob,has_touch=mob,service_workers='block')
   pg=ctx.new_page()
   errs=[];failedAssets=[]
@@ -25,7 +27,7 @@ with sync_playwright() as pw:
   pg.on('console',lambda m:errs.append(m.text) if m.type=='error' else None)
   pg.on('response',lambda r:failedAssets.append((r.status,r.url)) if r.status>=400 and any(t in r.url for t in ['hydra_restored','tidewrack_sailing','water-realms']) else None)
   try:
-   pg.goto(URL,wait_until='domcontentloaded',timeout=60000)
+   pg.goto(page_url,wait_until='domcontentloaded',timeout=60000)
    pg.wait_for_function('window.__p3d && __p3d.frames>5',timeout=120000)
    pg.evaluate("document.getElementById('vnEnter')?.click()")
    check(tag+' town boots',pg.evaluate("__p3d.zone==='town'"))
@@ -50,13 +52,17 @@ with sync_playwright() as pw:
    pg.wait_for_function("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')",timeout=35000)
    check(tag+' approved ship GLB visible',pg.evaluate("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')?.visible"))
    check(tag+' real water mesh',pg.evaluate("!!__p3d.scene.getObjectByName('sailing-water-window')"))
+   check(tag+' shipboard combat safely disarmed',pg.evaluate("__p3d.fight && !__p3d.fight.on"))
    # Passengers must genuinely board: verify the real model roots occupy the
    # deck in ship-local coordinates, not world-space water to either side.
-   pg.wait_for_function("(()=>{const c=__p3d.bump.crowd.filter(r=>r.kind==='party');return __p3d.hero.visible&&c.length===2&&c.every(r=>r.root?.visible)})()",timeout=35000)
+   pg.wait_for_function("""(count)=>{
+     const c=__p3d.bump.crowd.filter(r=>r.kind==='party');
+     return __p3d.hero.visible && c.length===count && c.every(r=>r.root?.visible);
+   }""",arg=party_count,timeout=35000)
    deck_js="""(()=>{
      const p=__p3d,ship=p.scene.getObjectByName('player-sailing-ship');
      ship.updateMatrixWorld(true);
-     const slots=[[0,2.35,-3],[-1.28,1.95,-.65],[1.28,1.95,-.65]];
+     const slots=[[0,2.35,-3],[-1.28,1.95,-.65],[1.28,1.95,-.65],[0,1.95,2.4]];
      const roots=[p.hero,...p.bump.crowd.filter(r=>r.kind==='party').map(r=>r.root)];
      const local=roots.map(o=>ship.worldToLocal(o.getWorldPosition(new p.THREE.Vector3())));
      return {near:local.every((v,i)=>v.distanceTo(new p.THREE.Vector3(...slots[i]))<.65),
@@ -72,7 +78,8 @@ with sync_playwright() as pw:
    check(tag+' hero and companions stand ON deck',aboard['near'] and aboard['visible'],aboard)
    check(tag+' rendered character sizes fit the galleon',
      all(m and 1.1 <= m['size'][1] <= 3.6 for m in metrics[2:]),metrics)
-   check(tag+' two companions aboard',pg.evaluate("__p3d.bump.crowd.filter(r=>r.kind==='party'&&r.root?.visible).length===2"))
+   check(tag+' all '+str(party_count)+' companions aboard',
+     pg.evaluate("(count)=>__p3d.bump.crowd.filter(r=>r.kind==='party'&&r.root?.visible).length===count",party_count))
 
    a=pg.evaluate("[__p3d.state.heroX,__p3d.state.heroZ,__p3d.state.yaw]")
    pg.keyboard.down('w');pg.wait_for_timeout(1700);pg.keyboard.up('w')
@@ -92,6 +99,9 @@ with sync_playwright() as pw:
    check(tag+' town restored, no ghost ocean',pg.evaluate("!__p3d.scene.getObjectByName('tidewrack-open-ocean')&&__p3d.hero.visible"))
    check(tag+' companions returned to walking world',pg.evaluate("__p3d.bump.crowd.filter(r=>r.kind==='party').every(r=>r.root?.visible && Math.hypot(r.a.x-__p3d.state.heroX,r.a.z-__p3d.state.heroZ)<18)"))
    check(tag+' mobile walking HUD restored',pg.evaluate("!document.body.classList.contains('vn-sailing-zone')"))
+   pg.wait_for_function("__p3d.fight && __p3d.fight.on && __p3d.fight.auto",timeout=15000)
+   check(tag+' hero combat and abilities restored after disembarking',
+     pg.evaluate("__p3d.fight.on && __p3d.fight.auto"))
    # Switching before asynchronous GLB imports settle must not resurrect a
    # retired Hydra or ship in the town scene. Repeat without awaiting models.
    for button,zone in [('vnTravelHydra','hydra'),('vnTravelSail','sailing'),('vnTravelTown','town')]:

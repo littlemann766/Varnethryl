@@ -1761,7 +1761,7 @@ async function setZone(name) {
   }
   state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
   updateZoneAmbience(.1,true);
-  if(name==='wilds'||name==='frost'){const f=await fightToggle(true);f.startAuto();if(name==='frost')f.startRegionBosses('frost');}
+  if(name==='wilds'||name==='frost'||name==='hydra'){const f=await fightToggle(true);f.startAuto();if(name==='frost')f.startRegionBosses('frost');if(name==='hydra')f.startRegionBosses('hydra');}
   return true;
 }
 let outdoorCombatStarting=false, outdoorCombatRetryAt=0;
@@ -1856,15 +1856,26 @@ async function fightToggle(createOnly) {
     const mod = await import('./fight.js');
     FIGHT = mod.createFight({ THREE, scene, camera, state, HS, cheat, downAllies, followers: () => crowd.filter(r => r.kind === 'party'), bystanders, killCrowd, hero: () => hero, heroId: () => GLB_IDS[HEROES.indexOf(hero)] || '',
       selectOwner: async () => { const i = GLB_IDS.indexOf('n:owner'); if (i >= 0 && GLB_IDS[HEROES.indexOf(hero)] !== 'n:owner') await selectVariant(SLOT_G[i], curVar(SLOT_G[i])); },
-      makeModel: async id => { try { return modeFor(id) === 'blocky' ? makeBlocky(id) : await loadActorModel(id); } catch (e) { return null; } },
+      makeModel: async id => {
+        if(id==='hydra:mire'){
+          // The arena owns the real restored Hydra mesh. The combat controller
+          // needs only a positional hit target, not a second fake Hydra model.
+          const anchor=new THREE.Group();anchor.name='hydra-combat-hitbox';
+          anchor.userData.heightW=18;return anchor;
+        }
+        try { return modeFor(id) === 'blocky' ? makeBlocky(id) : await loadActorModel(id); } catch (e) { return null; }
+      },
+      hydraBossAt:()=>HM?{x:HM.group.position.x,z:HM.group.position.z-11}:null,
+      onHydraDefeat:()=>HM?.defeatBoss?.(),
+      onHydraSpawn:()=>HM?.resetBoss?.(),
       loco: locoAnim, resolve: p => resolve(p), resolveMob: p => resolve(p, false, 'npc'), free: (x, z) => window.__p3d.free(x, z, 0),
       zone: () => ZONE.name, inWilds:(x,z)=>
         (ZONE.name==='wilds' && Math.abs(x-ZONE.cx)<ZONE.half-4 && Math.abs(z-ZONE.cz)<ZONE.half-4) ||
         (ZONE.name==='town' && (Math.abs(x)>CITY_HALF+22||Math.abs(z)>CITY_HALF+22) && Math.max(Math.abs(x),Math.abs(z))<WORLD-18 && Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z)>120 && Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)>92),
       biome: (x, z) => ZONE.name==='wilds'&&WM?WM.mod.biome(x - WM.mod.WILDS.ox,z - WM.mod.WILDS.oz):terrainBiome(x,z),
-      groundY:(x,z)=>ZONE.name==='frost'?frostElevation(x,z):ZONE.name==='town'&&TOWN_LANDS?TOWN_LANDS.heightAt(x,z):0,
+      groundY:(x,z)=>ZONE.name==='hydra'&&HM?HM.heightAt(x,z):ZONE.name==='frost'?frostElevation(x,z):ZONE.name==='town'&&TOWN_LANDS?TOWN_LANDS.heightAt(x,z):0,
       loadGLTF: url => new Promise((res, rej) => gl.load(url, res, undefined, rej)),
-      respawnPos:()=>ZONE.name==='wilds'&&WM?{x:WM.spawn.x,z:WM.spawn.z}:ZONE.name==='frost'?{x:FROST_REALM.cx-8,z:FROST_REALM.cz+155}:{x:0,z:60} });
+      respawnPos:()=>ZONE.name==='hydra'&&HM?{x:HM.spawn.x,z:HM.spawn.z}:ZONE.name==='wilds'&&WM?{x:WM.spawn.x,z:WM.spawn.z}:ZONE.name==='frost'?{x:FROST_REALM.cx-8,z:FROST_REALM.cz+155}:{x:0,z:60} });
     return FIGHT;
   })().catch(err=>{fightInitPromise=null;throw err;});
   if (fightInitPromise) await fightInitPromise;

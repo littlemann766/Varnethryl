@@ -62,6 +62,12 @@ with sync_playwright() as pw:
      return {near:local.every((v,i)=>v.distanceTo(new p.THREE.Vector3(...slots[i]))<.65),
              visible:roots.every(o=>o.visible),coords:local.map(v=>v.toArray())};
    })()"""
+   metrics=pg.evaluate("""(()=>{
+     const p=__p3d,T=p.THREE,s=p.scene.getObjectByName('player-sailing-ship');
+     const items=[s,s.getObjectByName('user-supplied-sailing-ship'),p.hero,...p.bump.crowd.filter(r=>r.kind==='party').map(r=>r.root)];
+     return items.map(o=>{if(!o)return null;const box=new T.Box3().setFromObject(o),v=new T.Vector3(),v2=new T.Vector3();return {name:o.name,scale:o.scale.toArray(),size:box.getSize(v).toArray().map(n=>+n.toFixed(2)),center:box.getCenter(v2).toArray().map(n=>+n.toFixed(2)),pos:o.getWorldPosition(new T.Vector3()).toArray().map(n=>+n.toFixed(2))};});
+   })()""")
+   print('CREW_BOUNDS',tag,metrics,flush=True)
    aboard=pg.evaluate(deck_js)
    check(tag+' hero and companions stand ON deck',aboard['near'] and aboard['visible'],aboard)
    check(tag+' two companions aboard',pg.evaluate("__p3d.bump.crowd.filter(r=>r.kind==='party'&&r.root?.visible).length===2"))

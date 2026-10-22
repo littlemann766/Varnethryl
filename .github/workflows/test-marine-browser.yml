@@ -16,6 +16,7 @@ on:
       - 'www/proto3d/camrig.js'
       - 'www/proto3d/port-ships.js'
       - 'tools/boss_patterns_test.mjs'
+      - 'tools/check_boss_regions.mjs'
       - 'www/proto3d/cheats.js'
       - 'www/proto3d/models-new/hydra_restored_mobile.glb.gz'
       - 'www/proto3d/models-new/tidewrack_sailing_ship.glb.gz'

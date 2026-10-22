@@ -107,6 +107,8 @@ assert(controller.includes('if (e.state === \'defeated\') return;'),'defeated en
 assert(controller.includes("pt.shape === 'cone'")&&controller.includes("pt.shape === 'line'"),'boss hit detection checks directional telegraphs');
 assert(fight.includes('groundY: terrainY')&&lightning.includes('this.groundY(x,z)'),'boss lightning impacts use actual terrain height');
 assert(hud.includes('#cb .sl:focus-visible')&&hud.includes('border:2px solid #caa35c'),'medieval combat controls remain keyboard accessible');
+assert(hud.includes("const $ = s => r.querySelector(s), $$ = s => Array.from(r.querySelectorAll(s));"),'combat selectors must be unique: $ for single and $$ for multiple elements');
+assert(main.includes('performance.now()>=outdoorCombatRetryAt'),'combat startup import errors must not re-trigger every frame');
 const armory=src('www/proto3d/combat/armory.js'),menu=src('www/proto3d/varn-menu.js'),settings=src('www/proto3d/settings3d.js');
 assert(armory.includes('seen.has(id)')&&armory.includes('used.has(id)'),'equipment load and presets reject duplicate items');
 assert(armory.includes('(!it.ownerOnly || this.ownerOk())'),'saved owner equipment remains gated');

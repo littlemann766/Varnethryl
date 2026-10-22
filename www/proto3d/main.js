@@ -1636,6 +1636,7 @@ const SMOKE = (() => {
 const TOWN_PORTAL = { x: -6, z: 38 };
 let WM = null, FM = null, wildsP = null, townCols = null, portalT = null, mountainWildsPortal = null, frostCave = null, zoneCd = 1.5, portalDwell = 0;
 let lastWildsEntrance = 'town'; // return to the town entrance actually used
+let portalTransitionPending=false; // prevent overlapping async portal crossings
 const wildsMod = import('./wilds.js').then(m => { portalT = m.makeGate(0x9a6bff); portalT.position.set(TOWN_PORTAL.x, 0, TOWN_PORTAL.z); scene.add(portalT);
   for (const dx of [-1.9, 1.9]) colliders.push({ type: 'circle', x: TOWN_PORTAL.x + dx, z: TOWN_PORTAL.z, r: .75 });   /* old gate retained for save compatibility */
   mountainWildsPortal=m.makePortal(0xa86bff);
@@ -1723,7 +1724,7 @@ function updateZone(dt) {
   if(frostCave?.userData.update)frostCave.userData.update(t);
   if(WM?.portalMesh?.userData.update)WM.portalMesh.userData.update(t);
   if(FM)FM.update(t);
-  zoneCd = Math.max(0, zoneCd - dt); if (zoneCd > 0 || state.level !== 0 || state.climbing) { portalDwell = 0; return; }
+  zoneCd = Math.max(0, zoneCd - dt); if (portalTransitionPending || zoneCd > 0 || state.level !== 0 || state.climbing) { if (!portalTransitionPending) portalDwell = 0; return; }
   const isFrostCave=ZONE.name==='town'&&Math.hypot(state.heroX-FROST_PORTAL.x,state.heroZ-FROST_PORTAL.z)<7;
   const isMountainWilds=ZONE.name==='town'&&nearMountainWildsGate(state.heroX,state.heroZ,7);
   const p=ZONE.name==='town'?(isFrostCave?FROST_PORTAL:isMountainWilds?MOUNTAIN_WILDS_GATE:TOWN_PORTAL):ZONE.name==='frost'?FROST_EXIT:WM?{x:WM.portal.x,z:WM.portal.z}:null;
@@ -1731,7 +1732,12 @@ function updateZone(dt) {
   if(Math.hypot(state.heroX-p.x,state.heroZ-p.z)<1.7+Math.max(0,HERO_R-0.75)){
     portalDwell+=dt;if(portalDwell>.35){
       if(ZONE.name==='town'&&!isFrostCave)lastWildsEntrance=isMountainWilds?'mountain':'town';
-      portalDwell=-99;setZone(ZONE.name==='town'?(isFrostCave?'frost':'wilds'):'town');}
+      const destination=ZONE.name==='town'?(isFrostCave?'frost':'wilds'):'town';
+      portalDwell=-99;portalTransitionPending=true;
+      Promise.resolve().then(()=>setZone(destination)).catch(err=>{
+        zoneCd=2;portalDwell=0;
+        diag('Portal transition to '+destination+' failed: '+String(err&&err.message||err),true);
+      }).finally(()=>{portalTransitionPending=false;});}
   }else if(portalDwell>-50)portalDwell=0;
 }
 

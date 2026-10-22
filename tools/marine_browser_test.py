@@ -30,6 +30,29 @@ with sync_playwright() as pw:
    pg.goto(page_url,wait_until='domcontentloaded',timeout=60000)
    pg.wait_for_function('window.__p3d && __p3d.frames>5',timeout=120000)
    pg.evaluate("document.getElementById('vnEnter')?.click()")
+   pg.evaluate("document.getElementById('vnMenuBtn').click()")
+   check(tag+' compact four-button menu',pg.evaluate("""()=>{
+     const m=document.getElementById('vnQuickMenu');
+     return !m.hidden&&m.querySelectorAll('.vn-quick-actions button').length===4
+       && [...m.querySelectorAll('details')].every(d=>!d.open);
+   }"""))
+   pg.evaluate("document.getElementById('vnQuickTravel').click()")
+   check(tag+' travel can expand without exposing extras',pg.evaluate("""()=>{
+     return document.getElementById('vnQuickWorld').open
+       && !document.getElementById('vnQuickMore').open
+       && document.getElementById('vnQuickTravel').getAttribute('aria-expanded')==='true'
+       && ['vnTravelTown','vnTravelSail','vnTravelHydra'].every(id=>!!document.getElementById(id));
+   }"""))
+   pg.evaluate("document.querySelector('#vnQuickCombat summary').click()")
+   pg.wait_for_function("document.getElementById('vnQuickCombat').open && !document.getElementById('vnQuickWorld').open",timeout=5000)
+   check(tag+' accordion shows only one section',pg.evaluate("""()=>{
+     return [...document.querySelectorAll('#vnQuickMenu details')].filter(d=>d.open).length===1;
+   }"""))
+   pg.evaluate("document.getElementById('vnQuickResume').click()")
+   check(tag+' resume closes menu without changing gameplay',pg.evaluate("""()=>{
+     const m=document.getElementById('vnQuickMenu');
+     return m.hidden && [...m.querySelectorAll('details')].every(d=>!d.open);
+   }"""))
    check(tag+' town boots',pg.evaluate("__p3d.zone==='town'"))
    check(tag+' true top-down town map renders',pg.evaluate("""()=>{
      const n=document.getElementById('vnMiniMap');

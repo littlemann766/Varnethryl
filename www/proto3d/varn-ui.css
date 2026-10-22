@@ -471,3 +471,34 @@ body.vn-sailing-zone #moveActions,
 body.vn-sailing-zone #cinderFlyControls,
 body.vn-sailing-zone #staminaHud,
 body.vn-sailing-zone #cb{display:none!important;pointer-events:none!important}
+
+/* 1.5.7 compact game menu: four immediate actions; everything else collapsed.
+   Preserve each existing feature behind a clear section instead of stacking
+   fifteen large buttons on a small landscape Android screen. */
+#vnQuickMenu{width:min(286px,calc(100vw - 20px));padding:9px!important}
+#vnQuickMenu .vn-qhead{padding:2px 3px 7px}
+#vnQuickMenu .vn-quick-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+#vnQuickMenu .vn-quick-actions button{min-width:0;min-height:42px;text-align:center;
+  padding:7px 4px!important;line-height:1.2;white-space:normal;
+  border:1px solid #c7a16a;background:linear-gradient(145deg,#3b244c,#141e34);
+  font:700 11px VarnCinzel,Georgia,serif}
+#vnQuickMenu .vn-quick-actions button:first-child{color:#fff1ce;background:linear-gradient(150deg,#66427a,#232139)}
+#vnQuickMenu .vn-quick-sections{margin-top:9px;display:grid;gap:5px}
+#vnQuickMenu .vn-quick-sections details{margin:0}
+#vnQuickMenu .vn-quick-sections summary{padding:9px 10px;min-height:38px;
+  box-sizing:border-box;font-size:12px;line-height:1.6}
+#vnQuickMenu .vn-quick-sections .vn-opts{gap:5px;padding:7px}
+#vnQuickMenu .vn-quick-sections .vn-opts button,
+#vnQuickMenu .vn-quick-sections .vn-opts a{padding:7px 9px;min-height:40px;font-size:11px}
+#vnQuickMenu .vn-quick-version{display:block;padding:8px 2px 1px!important;
+  text-align:center;font-size:9px;color:#a4a6b7}
+@media(orientation:landscape) and (max-height:480px){
+ #vnQuickMenu{top:max(37px,calc(env(safe-area-inset-top) + 35px));
+   max-height:calc(100dvh - 43px);padding:5px 8px!important}
+ #vnQuickMenu .vn-qhead{font-size:12px}
+ #vnQuickMenu .vn-quick-actions{gap:5px}
+ #vnQuickMenu .vn-quick-actions button{min-height:36px;font-size:10px;padding:5px 3px!important}
+ #vnQuickMenu .vn-quick-sections{margin-top:5px;gap:3px}
+ #vnQuickMenu .vn-quick-sections summary{padding:6px 9px;min-height:33px}
+ #vnQuickMenu .vn-quick-version{padding:4px 0 0!important}
+}

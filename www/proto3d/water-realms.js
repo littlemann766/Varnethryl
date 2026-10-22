@@ -11,6 +11,9 @@ const TWOPI=Math.PI*2;
 function rnd(seed){let a=seed|0;return ()=>{a=(a+0x6d2b79f5)|0;let t=Math.imul(a^(a>>>15),1|a);t^=t+Math.imul(t^(t>>>7),61|t);return ((t^(t>>>14))>>>0)/4294967296;};}
 const material=(color,roughness=1)=>new THREE.MeshStandardMaterial({color,roughness,metalness:0.02});
 const dark=material(0x444b50),cliff=material(0x677278),moss=material(0x566657),shore=material(0x898d84);
+// Rock materials are shared by every streamed island and both maps. Never
+// dispose one while an adjacent island (or a future map visit) still uses it.
+const cachedRockMaterials=new Set([dark,cliff,moss,shore]);
 function makeSpire(parent,x,z,height,radius,angle=0){
  const g=new THREE.ConeGeometry(radius,height,5,1);
  const o=new THREE.Mesh(g,Math.round(height)%3===0?cliff:dark);
@@ -52,7 +55,7 @@ async function glbFromGzip(url){
  const {GLTFLoader}=await import('./vendor/jsm/loaders/GLTFLoader.js');
  return await new Promise((ok,bad)=>new GLTFLoader().parse(decoded,'',ok,bad));
 }
-function dispose(root){const seen=new Set();root.traverse(o=>{if(o.geometry&&!seen.has(o.geometry)){seen.add(o.geometry);o.geometry.dispose();}const ms=Array.isArray(o.material)?o.material:o.material?[o.material]:[];for(const m of ms){if(seen.has(m))continue;seen.add(m);for(const k of Object.keys(m)){const t=m[k];if(t?.isTexture&&!seen.has(t)){seen.add(t);t.dispose();}}m.dispose();}});}
+function dispose(root){const seen=new Set();root.traverse(o=>{if(o.geometry&&!seen.has(o.geometry)){seen.add(o.geometry);o.geometry.dispose();}const ms=Array.isArray(o.material)?o.material:o.material?[o.material]:[];for(const m of ms){if(seen.has(m)||cachedRockMaterials.has(m))continue;seen.add(m);for(const k of Object.keys(m)){const t=m[k];if(t?.isTexture&&!seen.has(t)){seen.add(t);t.dispose();}}m.dispose();}});}
 export function buildHydraMire(scene){
  const root=new THREE.Group();root.name='hydra-mire-zone';root.position.set(MIRE.cx,0,MIRE.cz);scene.add(root);
  const colliders=[],m=material(0x53656b),walk=material(0x737975);
@@ -74,15 +77,19 @@ export function buildHydraMire(scene){
  // Five-headed Hydra: original mesh, selectively cleaned ground and intact
  // chest; this remains an unrigged visual placeholder pending five-neck skinning.
  const hydraHolder=new THREE.Group();hydraHolder.name='hydra-unrigged-5-head';hydraHolder.position.set(0,2.3,-11);root.add(hydraHolder);
- let hydraReady=false,hydraDefeated=false,hydraDeathTime=null;
+ let hydraReady=false,hydraDefeated=false,hydraDeathTime=null,disposed=false;
  glbFromGzip('proto3d/models-new/hydra_restored_mobile.glb.gz').then(gltf=>{
-  const model=gltf.scene;const b=new THREE.Box3().setFromObject(model);const ht=b.max.y-b.min.y;
+  const model=gltf.scene;
+   // Exit can happen while a large compressed model is still loading.
+   // Drop the late result rather than attaching it to an abandoned arena.
+   if(disposed){dispose(model);return;}
+   const b=new THREE.Box3().setFromObject(model);const ht=b.max.y-b.min.y;
   if(!Number.isFinite(ht)||ht<.01)throw new Error('Hydra model bounds are invalid');
   const scalar=18/ht;model.scale.setScalar(scalar);
   model.position.set(-(b.min.x+b.max.x)*scalar/2,-b.min.y*scalar,-(b.min.z+b.max.z)*scalar/2);
   model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
   hydraHolder.add(model);hydraReady=true;
- }).catch(e=>console.warn('Hydra Mire model could not load',e));
+ }).catch(e=>{if(!disposed)console.warn('Hydra Mire model could not load',e);});
  colliders.push({type:'circle',x:MIRE.cx,z:MIRE.cz-11,r:11}); // Hydra torso collision
  const exit={x:MIRE.cx,z:MIRE.cz+117},spawn={x:MIRE.cx,z:MIRE.cz+105};
  return{group:root,colliders,spawn,exit,half:MIRE.half,updates:0,get hydraReady(){return hydraReady;},
@@ -91,6 +98,7 @@ export function buildHydraMire(scene){
    defeatBoss(){hydraDefeated=true;hydraDeathTime=null;},
   resetBoss(){hydraDefeated=false;hydraDeathTime=null;hydraHolder.visible=true;},
   update(t){
+    if(disposed)return;
     if(hydraDefeated){
       if(hydraDeathTime===null)hydraDeathTime=t;
       const age=Math.max(0,t-hydraDeathTime);
@@ -100,15 +108,17 @@ export function buildHydraMire(scene){
       hydraHolder.visible=true;
       hydraHolder.position.y=2.3+.035*Math.sin(t*.8);
     }
-  },dispose(){scene.remove(root);dispose(root);}};
+  },dispose(){disposed=true;scene.remove(root);dispose(root);}};
 }
 export function buildSailingOcean(scene){
  const root=new THREE.Group();root.name='tidewrack-open-ocean';scene.add(root);
  const water=seaWater();root.add(water.mesh);
  const vessel=buildSailingShip(1,true);vessel.name='player-sailing-ship';vessel.position.set(OCEAN.cx,0,OCEAN.cz+OCEAN.half-180);root.add(vessel);
- let shipReady=false;
+ let shipReady=false,disposed=false;
  glbFromGzip('proto3d/models-new/tidewrack_sailing_ship.glb.gz').then(gltf=>{
-  const imported=gltf.scene;const bounds=new THREE.Box3().setFromObject(imported);const dim=bounds.getSize(new THREE.Vector3());
+  const imported=gltf.scene;
+   if(disposed){dispose(imported);return;}
+   const bounds=new THREE.Box3().setFromObject(imported);const dim=bounds.getSize(new THREE.Vector3());
   if(!Number.isFinite(dim.y)||dim.y<.005)throw Error('Ship model has invalid vertical dimensions');
   const scale=13.5/dim.y;
   imported.scale.setScalar(scale);
@@ -117,7 +127,7 @@ export function buildSailingOcean(scene){
   imported.name='user-supplied-sailing-ship';
   imported.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
   const fallback=vessel.children.slice();vessel.add(imported);for(const o of fallback)o.visible=false;shipReady=true;
- }).catch(e=>console.warn('Original sailing ship not loaded; retaining temporary fallback',e));
+ }).catch(e=>{if(!disposed)console.warn('Original sailing ship not loaded; retaining temporary fallback',e);});
  // Deck positions are ship-local and therefore follow the hull's position,
  // turning and wave-induced roll. Slot 0 is the helmsman, 1-3 companions.
  // Separate Y values account for the raised stern of the medieval galleon.
@@ -184,6 +194,7 @@ export function buildSailingOcean(scene){
   tiles.set(k,group);obstacles.set(k,hits);
  }
  function update(t,x,z,yaw){
+  if(disposed)return;
   vessel.position.set(x,.35+.19*Math.sin(t*1.1),z);
   vessel.rotation.set(.027*Math.sin(t*.67),yaw+Math.PI,.034*Math.sin(t*.91));
   water.mesh.position.x=x;water.mesh.position.z=z;water.tex.offset.set(t*.0017,t*.0009);
@@ -201,5 +212,5 @@ export function buildSailingOcean(scene){
  update(0,spawn.x,spawn.z,0);
  return{group:root,ship:vessel,colliders,spawn,half:OCEAN.half,get shipReady(){return shipReady;},
    get navigation(){return {...nav};},crewSpot,sail,blocked,
-   update,dispose(){scene.remove(root);dispose(root);}};
+   update,dispose(){disposed=true;scene.remove(root);dispose(root);}};
 }

@@ -1,5 +1,7 @@
 name: Smoke test expanded town in browser
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
     paths:

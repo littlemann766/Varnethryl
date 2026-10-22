@@ -89,18 +89,25 @@ export function animateMooredShip(ship,t){
  * Separate source/model uploader is needed when the binary isn't yet present
  * on the deployed branch. Do not claim a GLB loaded unless success is true.
  */
-export const TIDEWRACK_SHIP_GLB='proto3d/models-new/tidewrack_sailing_ship.glb';
+export const TIDEWRACK_SHIP_GLB='proto3d/models-new/tidewrack_sailing_ship.glb.gz';
 let approvedShipPromise=null;
 function shipAsset(){
-  // Lazy import: only browsers need GLTFLoader. Static loader imports fail in
-  // Node.js-only terrain audits because the vendored loader expects the
-  // browser's three.js importmap, not an installed npm 'three' package.
+  // Harbor and open-ocean both reuse the user's approved textured GLB.
+  // A compressed asset is deployed to keep APK size and cellular data low.
   if(!approvedShipPromise)approvedShipPromise=(async()=>{
+    const response=await fetch(TIDEWRACK_SHIP_GLB+'?v=1.4.2');
+    if(!response.ok)throw Error('Ship HTTP '+response.status);
+    const bytes=await response.arrayBuffer(),head=new Uint8Array(bytes,0,Math.min(4,bytes.byteLength));
+    let glb=bytes;
+    if(head[0]===0x1f&&head[1]===0x8b){
+      if(!('DecompressionStream'in window))throw Error('Gzip GLB unsupported by this browser');
+      glb=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+    }else if(!(head[0]===0x67&&head[1]===0x6c&&head[2]===0x54&&head[3]===0x46)){
+      throw Error('Invalid original ship GLB header');
+    }
     const {GLTFLoader}=await import('./vendor/jsm/loaders/GLTFLoader.js');
-    return await new Promise((resolve,reject)=>{
-      new GLTFLoader().load(TIDEWRACK_SHIP_GLB+'?v=1.3.3',resolve,undefined,reject);
-    });
-  })();
+    return await new Promise((resolve,reject)=>new GLTFLoader().parse(glb,'',resolve,reject));
+  })().catch(e=>{approvedShipPromise=null;throw e;});
   return approvedShipPromise;
 }
 export async function installImportedShip(ship,{large=true}={}){

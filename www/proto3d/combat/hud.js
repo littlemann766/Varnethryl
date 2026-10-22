@@ -522,7 +522,7 @@ export class CombatHUD {
     this.exp = $('.vn-exp'); this.expFill = $('.vn-exp-fill'); this.expLevel = $('.vn-exp-level'); this.expValue = $('.vn-exp-value'); this.expKey = '';
     this.por = $('.por span'); this.lab = $('.vit .lab'); this.lvl = $('.por small'); this.stat = $('.stat'); this.msg = $('.msg'); this.flash = $('.flash'); this.sumBtn = $('[data-a=summon]');
     $$('.sl').forEach((b, i) => { b.setAttribute('aria-label', i === 0 ? 'Basic attack' : i === 4 ? 'Ultimate ability' : 'Skill ' + i); b.title = b.getAttribute('aria-label'); });
-    this.slots = $('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), nm: b.querySelector('.nmL'), cd: -1, st: '', key: '' }));
+    this.slots = $$('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), nm: b.querySelector('.nmL'), cd: -1, st: '', key: '' }));
     const skillNameCallout = $('.skill-name-callout');
     const showSkillName = b => {
       if (!b || !skillNameCallout) return;

@@ -23,7 +23,7 @@ import { initSettings } from './settingsboot.js';
 import { createMiniMap } from './minimap.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
 import { worldProfile, loadScale } from './charscale.js';
-import { buildTownOutskirts } from './townlands.js';
+import { buildTownOutskirts, TOWN_MAP_ROADS } from './townlands.js';
 import { buildHobgoblinCamps } from './hobcamps.js';
 import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, PORT_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
 import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
@@ -636,7 +636,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.3';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.4';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1044,7 +1044,19 @@ marker.rotation.x = -Math.PI / 2; marker.position.y = 0.06; marker.visible = fal
 
 // ---------- input ----------
 const state = { swimming:false, level: 0, heroY: 0, inside: null, zoom: 1, heroX: 0, heroZ: START_Z, moving: false, speed: 0, target: null, yaw: 0, camYaw: 0, blockedFrames: 0, collisions: 0, vx: 0, vz: 0 };
-const miniMap=createMiniMap(()=>state,()=>ZONE);
+const miniMap=createMiniMap(()=>state,()=>ZONE,{
+ height:(zone,x,z)=>zone==='town'?(TOWN_LANDS?.heightAt(x,z)??0):zone==='frost'?frostElevation(x,z):zone==='hydra'?(HM?.heightAt(x,z)??0):0,
+ biome:(zone,x,z)=>zone==='wilds'&&WM?.mod?WM.mod.biome(x-WM.mod.WILDS.ox,z-WM.mod.WILDS.oz):terrainBiome(x,z),
+ water:(zone,x,z)=>zone==='town'?!!TOWN_LANDS?.waterAt(x,z):zone==='hydra'?!!HM?.waterAt(x,z):zone==='sailing',
+ obstacles:()=>colliders,
+ roads:()=>TOWN_MAP_ROADS,
+ buildings:()=>BUILDING_DEFS.map(b=>({id:b.id,cx:b.cx*PK,cz:b.id==='gatehouse'?CITY_HALF-1.2:b.cz*PK,rot:b.rot,size:/keep|guildhall|port|colosseum/.test(b.id)?19:10})),
+ lake:()=>WM?.mod?.LAKE?{x:WM.mod.WILDS.ox+WM.mod.LAKE.x,z:WM.mod.WILDS.oz+WM.mod.LAKE.z,r:WM.mod.LAKE.r}:null,
+ islands:()=>SM?.mapFeatures?.()||[],
+ bosses:()=>FIGHT?.monsters||[],
+ party:()=>crowd,
+ revision:()=>ZONE.name+':'+colliders.length+':'+scene.children.length+':'+(SM?.shipReady?1:0)
+});
 const posOk = (x, z) => { const r = 0.5 * HS + 0.3; for (const c of colliders) { if (c.type === 'box' ? (x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r) : Math.hypot(x - c.x, z - c.z) < c.r + r) return false; } return Math.abs(x) < WORLD - 3 && Math.abs(z) < WORLD - 3; };   // a save from the smaller village may sit inside a (now bigger) building
 if (savedPlan && savedPlan.pos && qp0.get('hero') == null && posOk(savedPlan.pos.x, savedPlan.pos.z)) { state.heroX = savedPlan.pos.x; state.heroZ = savedPlan.pos.z; state.yaw = savedPlan.pos.yaw; }
 const keys = new Set();
@@ -1805,6 +1817,7 @@ async function setZoneNow(name) {
   }
   state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
   updateZoneAmbience(.1,true);
+  miniMap.invalidate(); // redraw the real top-down layer after every zone change
   // Ship steering intentionally disarms attacks, but arriving back at the
   // kingdom must restore the normal combat HUD for the selected hero. The
   // village remains protected because its PvE spawner checks inWilds().

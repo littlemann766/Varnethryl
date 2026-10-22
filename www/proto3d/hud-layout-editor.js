@@ -19,7 +19,7 @@ css.textContent=
  +'#vnHudEditorPanel button{min-width:38px;min-height:40px;padding:6px 9px;color:#fff0ce;background:linear-gradient(#492c58,#21162c);border:1px solid #b78c50;border-radius:7px;font:700 12px VarnCinzel,Georgia,serif}'
  +'#vnHudEditorPanel button[data-hud-action="save"]{background:linear-gradient(#956c36,#4b2e20);border-color:#f1ca84}'
  +'body.vn-hud-editing{touch-action:none!important}'
- +'body.vn-hud-editing .vn-hud-movable{outline:2px dashed #d2a6f5!important;outline-offset:3px!important;touch-action:none!important}'
+ +'body.vn-hud-editing .vn-hud-movable{outline:2px dashed #d2a6f5!important;outline-offset:3px!important;touch-action:none!important;pointer-events:auto!important}'
  +'body.vn-hud-editing .vn-hud-selected{outline:3px solid #ffdc78!important;outline-offset:4px!important}'
  +'@media(orientation:landscape) and (max-height:470px){#vnHudEditorPanel{top:max(3px,env(safe-area-inset-top));padding:4px}#vnHudEditorPanel .hed-row{margin-top:3px}#vnHudEditorPanel button{min-height:34px}}';
 document.head.appendChild(css);

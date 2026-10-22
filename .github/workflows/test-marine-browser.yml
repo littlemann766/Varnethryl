@@ -5,6 +5,11 @@ on:
     paths:
       - 'www/proto3d/water-realms.js'
       - 'www/proto3d/main.js'
+      - 'www/proto3d.html'
+      - 'www/sw.js'
+      - 'www/proto3d/minimap.js'
+      - 'www/proto3d/varn-ui.css'
+      - 'package.json'
       - 'www/proto3d/fight.js'
       - 'www/proto3d/combat/**'
       - 'www/proto3d/cheatpanel.js'

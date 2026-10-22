@@ -114,6 +114,12 @@ panel.addEventListener('click',e=>{
  c.s=clamp(Math.round((c.s+(act==='larger'?.1:-.1))*100)/100,.65,1.8);
  refresh();info();
 });
+function reset(){
+ if(on)close(false);
+ saved=empty();staged=clone(saved);chosen=null;drag=null;
+ try{localStorage.removeItem(KEY);}catch(e){console.warn('Could not clear HUD layout',e);}
+ refresh();
+}
 document.getElementById('vnEditHud')?.addEventListener('click',open);
 addEventListener('resize',()=>{drag=null;refresh();info();});
 document.addEventListener('keydown',e=>{
@@ -128,5 +134,5 @@ new MutationObserver(list=>{
  requestAnimationFrame(()=>{queued=false;refresh();});
 }).observe(document.body,{childList:true});
 refresh();
-window.__vnHudEditor={open,close,refresh,isEditing:()=>on};
+window.__vnHudEditor={open,close,refresh,reset,isEditing:()=>on};
 })();

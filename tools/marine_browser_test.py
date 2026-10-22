@@ -65,7 +65,7 @@ with sync_playwright() as pw:
    check(tag+' town restored, no ghost ocean',pg.evaluate("!__p3d.scene.getObjectByName('tidewrack-open-ocean')&&__p3d.hero.visible"))
    check(tag+' mobile walking HUD restored',pg.evaluate("!document.body.classList.contains('vn-sailing-zone')"))
    check(tag+' no missing marine assets',not failedAssets,failedAssets[:5])
-   major=[e for e in errs if any(t in e for t in ['Uncaught','hydra_restored','tidewrack_sailing','TypeError','GLB'])]
+   major=[e for e in errs if any(t in e for t in ['Uncaught','hydra_restored','tidewrack_sailing','TypeError','GLB','camRig.look.set','camRig.lookTarget','is not a function'])]
    check(tag+' no runtime errors for marine gameplay',not major,major[:5])
   except Exception as e:
    fails+=1;print('FAIL '+tag+' exception:',str(e),flush=True)

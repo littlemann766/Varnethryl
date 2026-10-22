@@ -168,10 +168,10 @@ function rotAxis(q, saved, ax, ang) {
   q.x = x * c + w * ox + y * oz - z * oy; q.y = y * c + w * oy + z * ox - x * oz; q.z = z * c + w * oz + x * oy - y * ox; q.w = w * c - x * ox - y * oy - z * oz;
 }
 /* root: the hero group (rotation.order must be 'YXZ'); baseY/yaw are what the caller already set */
-export function applyPose(a, root, nd, yaw) {
+export function applyPose(a, root, nd, yaw, baseY = 0) {
   if (!root) return;
   if (root.rotation.order !== 'YXZ') root.rotation.order = 'YXZ';
-  root.rotation.x = a.ptx; root.rotation.z = a.ptz; root.rotation.y = fin(yaw, 0) + a.pyaw; root.position.y = a.phop;
+  root.rotation.x = a.ptx; root.rotation.z = a.ptz; root.rotation.y = fin(yaw, 0) + a.pyaw; root.position.y = baseY + fin(a.phop, 0);
   if (!nd || !nd.list.length) return;
   if (a.pfl === 0 && a.pfr === 0 && a.phead === 0) return;
   nd.dirty = true;

@@ -14,6 +14,15 @@ export const UNARMED = { min: TUNING.normal.dmg[0], max: TUNING.normal.dmg[1] };
 /* ---- Boss attack patterns (data-driven). reach/len/width are in hero-scale units (x HS at runtime, like def.reach). shape: ring | cone | line.
    Patterns rotate in order (learnable); phase 2 (HP < TUNING.boss.enrageAt) adds the phase-2 moves, shortens telegraphs and speeds the boss up. Damage still goes through calc.js (atk x dmg). ---- */
 export const BOSS_PATTERNS = {
+  // Five identifiable head attacks. Their warning shapes are independent of
+  // physical neck rigging; the restored single-mesh Hydra stays untouched.
+  hydra: [
+    {id:'leftsnap',name:'Left Head — Snap Bite',shape:'cone',reach:15,cos:.7,tele:.9,dmg:1.0},
+    {id:'acidbreath',name:'Second Head — Acid Breath',shape:'line',reach:23,width:3.4,tele:1.5,dmg:1.15,slow:.2},
+    {id:'kinglunge',name:'Center Head — Crushing Lunge',shape:'cone',reach:20,cos:.4,tele:1.3,dmg:1.5},
+    {id:'tailsweep',name:'Fourth Head — Sweeping Strike',shape:'ring',reach:18,tele:1.2,dmg:1.1},
+    {id:'venomburst',name:'Fifth Head — Venom Burst',shape:'ring',reach:24,tele:1.55,dmg:1.75,phase:2}
+  ],
   titan: [
     { id: 'stomp', name: 'Titan Stomp', shape: 'ring', reach: 6.5, tele: 1.1, dmg: 1.0 },
     { id: 'sweep', name: 'Cleaving Sweep', shape: 'cone', reach: 8.4, cos: 0.35, tele: 1.0, dmg: 1.1 },
@@ -84,6 +93,7 @@ export const ENEMIES = {
   titan40: E('Ashen Titan — 15×',80,'Volcanic Boss',11500000,3200,990,4.1,{model:'n:ashentitan_20',atkMs:3400,tele:2.2,reach:12,r:7,scale:15,aggro:75,boss:true,stagger:.25,poise:.95,xp:54000,gold:13000}),
   titan:    E('Ashen Titan', 60, 'Boss', 5000000, 2100, 600, 7.3, { model: 'n:ashentitan_new', atkMs: 2300, tele: 1.1, reach: 8.4, r: 5, scale: 6, aggro: 60, boss: true, stagger: 0.3, poise: 0.85, xp: 20000, gold: 4000 }),
   vaelthryx: E('Balthrix the Crystal Sovereign', 70, 'Boss', 8000000, 2600, 700, 7.0, { model: 'n:vaelthryx_straight_rig', atkMs: 2400, tele: 1.1, reach: 9.5, r: 5.2, scale: 10, aggro: 70, boss: true, stagger: 0.25, poise: 0.9, xp: 30000, gold: 6000 }),
+  hydra: E('Five-Headed Hydra',72,'Mire Boss',4500000,1680,690,0,{model:'hydra:mire',atkMs:2700,tele:1.25,reach:18,r:9,scale:10,aggro:115,boss:true,stagger:.35,poise:.8,xp:32000,gold:6700}),
 };
 export const WAVE_TABLE = ['wolf', 'raider', 'wraith', 'skeleton'];
 

@@ -31,6 +31,10 @@ with sync_playwright() as pw:
    pg.wait_for_function('window.__p3d && __p3d.frames>5',timeout=120000)
    pg.evaluate("document.getElementById('vnEnter')?.click()")
    check(tag+' town boots',pg.evaluate("__p3d.zone==='town'"))
+   check(tag+' true top-down town map renders',pg.evaluate("""()=>{
+     const n=document.getElementById('vnMiniMap');
+     return n?.dataset.mode==='live-topdown'&&n.dataset.zone==='town'&&Number(n.dataset.paintCount)>0;
+   }"""))
    pg.wait_for_function("!!__p3d.fight?.on && !!document.querySelector('#cb .sl.b4')",timeout=30000)
    check(tag+' skill buttons retain five named attacks',pg.evaluate("""()=>{
      const buttons=[...document.querySelectorAll('#cb .cx>.sl')];
@@ -55,6 +59,8 @@ with sync_playwright() as pw:
    check(tag+' combat menu clears minimap',map_clearance())
    pg.evaluate("document.querySelector('#vnMiniMap button').click()")
    check(tag+' combat menu clears expanded minimap',map_clearance())
+   check(tag+' minimap zoom controls',pg.evaluate("!!document.querySelector('#vnMiniMap .vn-mini-control.full')"))
+   pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.out').click()")
    pg.evaluate("document.querySelector('#vnMiniMap button').click()")
    check(tag+' no extra hero skin/model in town',pg.evaluate("__p3d.visibleHeroModelCount===1"))
    check(tag+' requested party count initialized',pg.evaluate(
@@ -64,6 +70,8 @@ with sync_playwright() as pw:
    pg.evaluate("document.getElementById('vnTravelHydra').click()")
    pg.wait_for_function("__p3d.zone==='hydra'",timeout=30000)
    check(tag+' Mire terrain created',pg.evaluate("!!__p3d.scene.getObjectByName('walkable-hydra-ground')"))
+   pg.wait_for_function("document.getElementById('vnMiniMap')?.dataset.zone==='hydra'",timeout=12000)
+   check(tag+' Mire map replaces town topdown',pg.evaluate("document.getElementById('vnMiniMap').dataset.zone==='hydra'"))
    pg.wait_for_function("!!__p3d.scene.getObjectByName('hydra-unrigged-5-head')?.children?.length",timeout=35000)
    check(tag+' real Hydra model present',pg.evaluate("__p3d.scene.getObjectByName('hydra-unrigged-5-head').children.length>0"))
    pg.wait_for_function("!!__p3d.fight?.monsters?.find(e=>e.key==='hydra')",timeout=30000)
@@ -77,6 +85,8 @@ with sync_playwright() as pw:
    pg.evaluate("document.getElementById('vnTravelSail').click()")
    pg.wait_for_function("__p3d.zone==='sailing'",timeout=35000)
    check(tag+' 9x9 km size',pg.evaluate("Math.abs(__p3d.ZONE.half-6390)<1"))
+   pg.wait_for_function("document.getElementById('vnMiniMap')?.dataset.zone==='sailing'",timeout=12000)
+   check(tag+' live ocean chart replaces Mire',pg.evaluate("document.getElementById('vnMiniMap').dataset.zone==='sailing'"))
    pg.wait_for_function("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')",timeout=35000)
    check(tag+' approved ship GLB visible',pg.evaluate("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')?.visible"))
    check(tag+' no procedural fallback hull, sails or duplicated vessel',pg.evaluate("""()=>{

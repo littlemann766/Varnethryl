@@ -63,6 +63,17 @@ with sync_playwright() as pw:
      const buttons=[...document.querySelectorAll('#cb .cx>.sl')];
      return buttons.length===5 && buttons.every(b=>!!b.getAttribute('aria-label') && !!b.title);
    }"""))
+   check(tag+' no skill tray box behind five round buttons',pg.evaluate("""()=>{
+     const tray=document.querySelector('#cb .cx'),css=getComputedStyle(tray);
+     const buttons=[...tray.querySelectorAll(':scope>.sl')];
+     return css.backgroundImage==='none' &&
+       (css.backgroundColor==='transparent'||css.backgroundColor==='rgba(0, 0, 0, 0)') &&
+       css.borderTopWidth==='0px' && css.boxShadow==='none' && css.filter==='none' &&
+       buttons.length===5 && buttons.every(b=>{
+         const r=b.getBoundingClientRect(),s=getComputedStyle(b);
+         return r.width>=38 && r.height>=38 && s.borderTopWidth!=='0px'&&s.pointerEvents!=='none';
+       });
+   }"""))
    if mob:
     check(tag+' compact portrait skill names do not collide',pg.evaluate("""()=>{
       return [...document.querySelectorAll('#cb .cx>.sl .nmL')]

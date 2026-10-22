@@ -6,6 +6,10 @@ import {spawnSync} from 'node:child_process';
 import {fallenTreeSites,balthrixPosition,isCitySafe,onLava,PORT_CENTER,FROST_SUMMIT,TITAN_CENTER} from '../www/proto3d/bossregions.js';
 const source=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const hud=source('www/proto3d/combat/hud.js');
+assert(hud.includes('/* 1.5.9: display ONLY five individual circular skills.'),'transparent skill tray regression marker');
+assert(hud.includes('background:none!important;')&&hud.includes('border:0!important;')&&hud.includes('box-shadow:none!important;')&&hud.includes('filter:none!important;'),
+ 'shared combat skill tray has no painted box');
+assert(hud.includes("class=\"sl b' + i"),'individual five ability buttons remain in skill group');
 const editor=source('www/proto3d/hud-layout-editor.js');
 const cheatPanel=source('www/proto3d/cheatpanel.js');
 assert(!hud.includes('data-a="summon">Summon Titan')&&!hud.includes('data-a="exit">Exit fight'),

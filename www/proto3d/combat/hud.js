@@ -479,6 +479,22 @@ body:has(#vnMiniMap.expanded) #cb .top{
   top:calc(max(54px,env(safe-area-inset-top) + 48px) + 182px)!important
  }
 }
+/* 1.5.9: display ONLY five individual circular skills. The .cx element
+   remains a transparent layout/touch anchor; never paint a common tray.
+   Keep positions, individual gold borders, cooldown masks and controls. */
+#cb .cx{
+ background:none!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ border:0!important;
+ border-image:none!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ filter:none!important;
+ outline:none!important;
+ padding:0!important;
+}
+#cb .cx::before,#cb .cx::after{content:none!important;display:none!important}
 
 `;
 /* simple SVG icons (no emoji): 24x24 stroke paths */

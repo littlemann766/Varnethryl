@@ -1,5 +1,7 @@
 name: Validate staged Varnethryl overhaul
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
     paths:

@@ -26,6 +26,13 @@ jobs:
         run: |
           python3 tools/check_assets.py
           python3 tools/verify_frost_troll_b.py
+      - name: Check overhaul, boss attacks, movement, owner maps and offline release
+        run: |
+          node tools/check_overhaul.mjs
+          node tools/check_serpent_locomotion.mjs
+          node tools/boss_patterns_test.mjs
+          node tools/owner_cheats_test.mjs
+          node tools/check_release_cache.mjs
       - name: Check JavaScript syntax
         run: |
           find www -type f -name "*.js" -not -path "*/vendor/*" -print0 | xargs -0 -n1 node --check

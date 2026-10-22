@@ -92,6 +92,13 @@ with sync_playwright() as pw:
    check(tag+' town restored, no ghost ocean',pg.evaluate("!__p3d.scene.getObjectByName('tidewrack-open-ocean')&&__p3d.hero.visible"))
    check(tag+' companions returned to walking world',pg.evaluate("__p3d.bump.crowd.filter(r=>r.kind==='party').every(r=>r.root?.visible && Math.hypot(r.a.x-__p3d.state.heroX,r.a.z-__p3d.state.heroZ)<18)"))
    check(tag+' mobile walking HUD restored',pg.evaluate("!document.body.classList.contains('vn-sailing-zone')"))
+   # Switching before asynchronous GLB imports settle must not resurrect a
+   # retired Hydra or ship in the town scene. Repeat without awaiting models.
+   for button,zone in [('vnTravelHydra','hydra'),('vnTravelSail','sailing'),('vnTravelTown','town')]:
+    pg.evaluate(f"document.getElementById('{button}').click()")
+    pg.wait_for_function(f"__p3d.zone==='{zone}'",timeout=35000)
+   pg.wait_for_timeout(1500)
+   check(tag+' rapid map changes leave no ghost marine zones',pg.evaluate("!__p3d.scene.getObjectByName('hydra-mire-zone') && !__p3d.scene.getObjectByName('tidewrack-open-ocean') && __p3d.hero.visible"))
    check(tag+' no missing marine assets',not failedAssets,failedAssets[:5])
    major=[e for e in errs if any(t in e for t in ['Uncaught','hydra_restored','tidewrack_sailing','TypeError','GLB','camRig.look.set','camRig.lookTarget','is not a function'])]
    check(tag+' no runtime errors for marine gameplay',not major,major[:5])

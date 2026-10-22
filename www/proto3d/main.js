@@ -1096,7 +1096,7 @@ function tapMoveTo(clientX, clientY) {
   ray.setFromCamera(ndc, camera);
   // Raycast against the actual sculpted ground; the old y=0 plane failed on
   // volcano slopes, causing taps to send companions into raised terrain.
-  const walkableTerrain=ZONE.name==='town'?TOWN_LANDS?.terrain:ZONE.name==='frost'?FM?.group?.getObjectByName('walkable-frost-terrain'):null;
+  const walkableTerrain=ZONE.name==='town'?TOWN_LANDS?.terrain:ZONE.name==='frost'?FM?.group?.getObjectByName('walkable-frost-terrain'):ZONE.name==='hydra'?HM?.group?.getObjectByName('walkable-hydra-ground'):null;
   // The ice realm mesh is parented to an offset group: update world transforms
   // before raycasting so tap-to-move lands on its real walkable surface.
   if(walkableTerrain)walkableTerrain.updateWorldMatrix(true,false);
@@ -1200,6 +1200,7 @@ function resolve(p, ghost, who) {
       if (d < min) { hitAny = true; const k = d > 1e-6 ? 1 / d : 0; p.x = c.x + (k ? dx * k : 1) * min; p.z = c.z + (k ? dz * k : 0) * min; }
     }
   }
+  if(ZONE.name==='sailing'&&SM?.blocked(p.x,p.z,7)){p.x=state.heroX;p.z=state.heroZ;hitAny=true;}
   const lim = ZONE.half - 1.3; p.x = THREE.MathUtils.clamp(p.x, ZONE.cx - lim, ZONE.cx + lim);
   p.z = THREE.MathUtils.clamp(p.z, ZONE.cz - lim, ZONE.cz + ZONE.half + (ZONE.name === 'town' ? 8 : -1.3)); // town: can walk out the gate a bit
   return hitAny;
@@ -1210,7 +1211,7 @@ const tmp = { x: 0, z: 0 };
 function surfaceAt(x, z, level) {
   for (const b of ectx.multi) { { const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
   if (LAD && level >= 10) { const ls = LAD.surface(x, z, level); if (ls) return ls; }
-  return level === 0 ? { y: ZONE.name === 'frost' ? frostElevation(x,z) : ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : 0 } : null;
+  return level === 0 ? { y: ZONE.name === 'hydra' && HM ? HM.heightAt(x,z) : ZONE.name === 'frost' ? frostElevation(x,z) : ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : 0 } : null;
 }
 function updateLevel() {
   if (state.climbing) return;
@@ -1482,7 +1483,7 @@ function updateHero(dt) {
   if (!state.climbing) { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
   const moving = (vx || vz);
   if (moving) {
-    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = travelScale() * (state.swimming?0.62:1) * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
+    const ghost = passesWalls(cheat) || (isCinder() && cinderFlight.alt > 3.5), step = travelScale() * (ZONE.name==='sailing'?4.8:state.swimming?0.62:1) * SPEED * CH.speed * cheat.speedMul * mag * playerAct.slowMul * (window.__fightMove ? window.__fightMove() : 1) * dt, n = Math.max(1, Math.ceil(step / 0.25)), px = state.heroX, pz = state.heroZ;
     tmp.x = state.heroX; tmp.z = state.heroZ; let blocked = false;
     for (let i = 0; i < n; i++) {
       const ox = tmp.x, oz = tmp.z; tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp, ghost)) blocked = true;
@@ -1505,7 +1506,7 @@ function updateHero(dt) {
   state.moving = state.speed > 0.5;
   updateStamina(dt, Math.max(0,state.speed*dt));
   updateLevel();
-  state.swimming=!!(ZONE.name==='town'&&TOWN_LANDS?.waterAt(state.heroX,state.heroZ)&&state.level===0);
+  state.swimming=!!(state.level===0&&((ZONE.name==='town'&&TOWN_LANDS?.waterAt(state.heroX,state.heroZ))||(ZONE.name==='hydra'&&HM?.waterAt(state.heroX,state.heroZ))));
   if(state.swimming)state.heroY=Math.max(state.heroY,.2);
   if (cheat.fly || cheat.alt > 0) stepAltitude(cheat, ((cheat.up || keys.has(' ') || keys.has('e')) ? 1 : 0) - ((cheat.down || keys.has('q') || keys.has('c') || keys.has('shift')) ? 1 : 0), dt);
   if (isCinder()) cinderFlight.step(dt, flyTouch.up || keys.has(' ') || keys.has('e'), flyTouch.down || keys.has('q') || keys.has('c'));
@@ -1585,6 +1586,13 @@ function updateCamera(dt, snap) {
   const tgt = FIGHT?.on && FIGHT.cc?.tgt?.locked ? FIGHT.cc.tgt.target : null;
   ci.bossFocus = camRig.fp ? null : bossCameraFocus(state.heroX,state.heroZ,tgt,!!tgt,ci.portrait);
   camRig.update(ci);
+  // Sail aboard the user's galleon, with a raised chase view following its heading.
+  if(ZONE.name==='sailing'&&SM){
+    const heading=state.camYaw;
+    camera.position.set(state.heroX-Math.sin(heading)*39,22,state.heroZ-Math.cos(heading)*39);
+    camera.lookAt(state.heroX,5.5,state.heroZ);
+    camRig.pos.copy(camera.position);camRig.look.set(state.heroX,5.5,state.heroZ);
+  }
   // Follow the actual elevated terrain on hills: don't let the third-person camera clip into a ridge.
   if (((ZONE.name === 'town' && TOWN_LANDS) || ZONE.name === 'frost') && !camRig.fp) {
     const floor = (ZONE.name === 'frost' ? frostElevation(camRig.pos.x,camRig.pos.z) : TOWN_LANDS.heightAt(camRig.pos.x,camRig.pos.z)) + 1.0 * HS;
@@ -1638,7 +1646,7 @@ const SMOKE = (() => {
 })();
 /* ---------- the Wilds (1.1.9): second map at x=1000, reached by the portal in town; a portal there leads back. Monsters spawn only there (fight layer, auto mode). ---------- */
 const TOWN_PORTAL = { x: -6, z: 38 };
-let WM = null, FM = null, wildsP = null, townCols = null, portalT = null, mountainWildsPortal = null, frostCave = null, zoneCd = 1.5, portalDwell = 0;
+let WM = null, FM = null, HM = null, SM = null, wildsP = null, townCols = null, portalT = null, mountainWildsPortal = null, frostCave = null, zoneCd = 1.5, portalDwell = 0;
 let lastWildsEntrance = 'town'; // return to the town entrance actually used
 let portalTransitionPending=false; // prevent overlapping async portal crossings
 const wildsMod = import('./wilds.js').then(m => { portalT = m.makeGate(0x9a6bff); portalT.position.set(TOWN_PORTAL.x, 0, TOWN_PORTAL.z); scene.add(portalT);
@@ -1675,7 +1683,7 @@ function snapFollowers() {
    Leaving the Wilds fully DISPOSES it (geometry, materials, textures, enemies via FIGHT.stop) and it is rebuilt on the next visit. */
 const townHidden = [];
 function hideTown() {
-  const keep = new Set([...HEROES, ...crowd.map(r => r.root), WM && WM.group, WM && WM.portalMesh, marker, sun, sun.target, camera, ...(FIGHT ? [] : [])]);
+  const keep = new Set([...HEROES, ...crowd.map(r => r.root), WM && WM.group, WM && WM.portalMesh, FM && FM.group, HM && HM.group, SM && SM.group, marker, sun, sun.target, camera, ...(FIGHT ? [] : [])]);
   for (const n of scene.children) { if (n.visible && !keep.has(n) && !n.isLight && !n.isCamera && !(FIGHT && n.userData && n.userData.fightFx) && Math.hypot(n.position.x - 1000, n.position.z) > 400 && !(n.userData && n.userData.keepAlways)) { n.visible = false; townHidden.push(n); } }
 }
 function unloadWilds() {
@@ -1686,11 +1694,28 @@ function unloadWilds() {
 async function setZone(name) {
   if (name === ZONE.name) return true;
   const lastZone=ZONE.name;
+  // Return via town when switching directly between self-contained maps.
+  if((lastZone==='hydra'||lastZone==='sailing')&&name!=='town'){
+    await setZone('town');return setZone(name);
+  }
   if(FIGHT&&FIGHT.auto)FIGHT.stop();
   if (name === 'wilds') {
     await ensureWilds(); const W = WM.mod.WILDS; townCols = colliders.slice(); colliders.length = 0; for (const c of WM.colliders) colliders.push(c);
     ZONE.name = 'wilds'; ZONE.cx = W.ox; ZONE.cz = W.oz; ZONE.half = W.half; WM.group.visible = true; WM.portalMesh.visible = true; hideTown();
     state.heroX = WM.spawn.x; state.heroZ = WM.spawn.z; state.yaw = Math.PI;
+  } else if (name === 'hydra' || name === 'sailing') {
+    const marine=await import('./water-realms.js');
+    const target=name==='hydra'?marine.buildHydraMire(scene):marine.buildSailingOcean(scene);
+    if(name==='hydra')HM=target;else SM=target;
+    townCols=colliders.slice();colliders.length=0;for(const c of target.colliders)colliders.push(c);
+    const region=name==='hydra'?marine.MIRE:marine.OCEAN;
+    ZONE.name=name;ZONE.cx=region.cx;ZONE.cz=region.cz;ZONE.half=target.half;
+    hideTown();target.group.visible=true;
+    if(portalT)portalT.visible=false;
+    state.heroX=target.spawn.x;state.heroZ=target.spawn.z;state.yaw=0;state.camYaw=0;
+    setTravelRun(false);
+    document.body.classList.toggle('vn-sailing-zone',name==='sailing');
+    camera.far=name==='sailing'?1800:700;camera.updateProjectionMatrix();
   } else if (name === 'frost') {
     FM=buildFrostRealm({scene}); townCols=colliders.slice();
     colliders.length=0;for(const c of FM.colliders)colliders.push(c);
@@ -1701,11 +1726,16 @@ async function setZone(name) {
     colliders.length = 0; for (const c of townCols) colliders.push(c); ZONE.name = 'town'; ZONE.cx = 0; ZONE.cz = 0; ZONE.half = WORLD;
     if (FIGHT && FIGHT.auto) FIGHT.stop();   /* enemies are disposed first */
     unloadWilds();
+    if(HM){HM.dispose();HM=null;}
+    if(SM){SM.dispose();SM=null;}
+    document.body.classList.remove('vn-sailing-zone');
+    hero.visible=true;
+    applyView();
     if(FM){const old=FM;FM=null;scene.remove(old.group);old.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const mat of [].concat(o.material))mat.dispose();});}
     for(const n of townHidden)n.visible=true;townHidden.length=0;
     if(portalT)portalT.visible=true;if(mountainWildsPortal)mountainWildsPortal.visible=true;if(frostCave)frostCave.visible=true;
-    state.heroX=lastZone==='frost'?FROST_PORTAL.x:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.x:TOWN_PORTAL.x;
-    state.heroZ=lastZone==='frost'?FROST_PORTAL.z+6:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.z:TOWN_PORTAL.z+4;
+    state.heroX=(lastZone==='hydra'||lastZone==='sailing')?PORT_CENTER.x:lastZone==='frost'?FROST_PORTAL.x:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.x:TOWN_PORTAL.x;
+    state.heroZ=(lastZone==='hydra'||lastZone==='sailing')?PORT_CENTER.z-12:lastZone==='frost'?FROST_PORTAL.z+6:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.z:TOWN_PORTAL.z+4;
     state.yaw=lastZone==='wilds'&&lastWildsEntrance==='mountain'?-Math.PI/2:0;
   }
   state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
@@ -1728,6 +1758,8 @@ function updateZone(dt) {
   if(frostCave?.userData.update)frostCave.userData.update(t);
   if(WM?.portalMesh?.userData.update)WM.portalMesh.userData.update(t);
   if(FM)FM.update(t);
+  if(HM&&ZONE.name==='hydra')HM.update(t);
+  if(SM&&ZONE.name==='sailing') {SM.update(t,state.heroX,state.heroZ,state.yaw);hero.visible=false;}
   zoneCd = Math.max(0, zoneCd - dt); if (portalTransitionPending || zoneCd > 0 || state.level !== 0 || state.climbing) { if (!portalTransitionPending) portalDwell = 0; return; }
   const isFrostCave=ZONE.name==='town'&&Math.hypot(state.heroX-FROST_PORTAL.x,state.heroZ-FROST_PORTAL.z)<7;
   const isMountainWilds=ZONE.name==='town'&&nearMountainWildsGate(state.heroX,state.heroZ,7);
@@ -1820,6 +1852,14 @@ async function fightToggle(createOnly) {
   FIGHT.toggle(); return FIGHT;
 }
 { const fb = document.getElementById('fightBtn'); if (fb) fb.addEventListener('click', e => { e.preventDefault(); fightToggle().catch(err=>diag('Combat startup failed: '+err.message,true)); }); }
+// World travel preview: separate instance locations; preserve the active hero/save.
+for(const [button,destination] of [['vnTravelSail','sailing'],['vnTravelHydra','hydra'],['vnTravelTown','town']]){
+  document.getElementById(button)?.addEventListener('click',()=>{
+    document.getElementById('vnQuickClose')?.click();
+    setZone(destination).catch(e=>diag('Unable to travel to '+destination+': '+String(e?.message||e),true));
+  });
+}
+
 // Entering the world arms normal attacks and the skill HUD for EVERY hero.
 // Auto mode keeps the protected village peaceful; enemies spawn outside the walls.
 document.getElementById('vnEnter')?.addEventListener('click',()=>{

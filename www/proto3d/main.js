@@ -1071,12 +1071,16 @@ addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 
 const stick = document.getElementById('stick'), knob = document.getElementById('knob');
 const joy = { id: null, x: 0, y: 0 };
-const STICK_R = 39;
 function joyUpdate(e) {
   const r = stick.getBoundingClientRect();
-  let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
-  const l = Math.hypot(dx, dy); if (l > STICK_R) { dx *= STICK_R / l; dy *= STICK_R / l; }
-  joy.x = dx / STICK_R; joy.y = dy / STICK_R;
+  // Scale touch distance back into local joystick coordinates. Resizing the HUD
+  // must resize its effective movement circle as well, not just its picture.
+  const scale = Math.max(0.1,r.width / Math.max(1,stick.offsetWidth));
+  const radius = Math.max(20,Math.min(stick.offsetWidth,stick.offsetHeight)*0.40);
+  let dx = (e.clientX - (r.left + r.width / 2)) / scale;
+  let dy = (e.clientY - (r.top + r.height / 2)) / scale;
+  const l = Math.hypot(dx,dy);if(l > radius){dx *= radius/l;dy *= radius/l;}
+  joy.x = dx / radius;joy.y = dy / radius;
   knob.style.transform = `translate(${dx}px,${dy}px)`;
 }
 stick.addEventListener('pointerdown', e => { joy.id = e.pointerId; try { stick.setPointerCapture(e.pointerId); } catch (_) {} state.target = null; marker.visible = false; joyUpdate(e); e.preventDefault(); });

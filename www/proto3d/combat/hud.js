@@ -506,7 +506,7 @@ export class CombatHUD {
     const st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     const r = this.root = document.createElement('div'); r.id = 'cb';
     r.innerHTML = '<div class="flash"></div><div class="tp"><div class="nm"></div><div class="sub"></div><div class="bar hp"><i></i><b></b></div></div>' +
-      '<div class="stat"></div><div class="top"><button type="button" data-a="summon">Summon Titan</button><button type="button" data-a="exit">Exit fight</button></div>' +
+      '<div class="stat"></div>' +
       '<div class="vit"><div class="lab"></div><div class="por"><span>?</span><small>1</small></div><div class="bars"><div class="bar hp"><i></i><b></b></div><div class="bar mp"><i></i><b></b></div><div class="bar sp"><i></i><b></b></div><div class="bar fy"><i></i><b></b></div></div></div>' +
       '<div class="vn-exp" role="progressbar" aria-label="Experience to next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="vn-exp-track"><i class="vn-exp-fill"></i></div><i class="vn-exp-art" aria-hidden="true"></i><span class="vn-exp-level">LV 40</span><span class="vn-exp-value">0 / 0 XP</span></div>' +
       '<div class="cx"><div class="skill-name-callout" role="status" aria-live="polite"></div><div class="ulp"><button type="button" data-u="holy">Holy Destruction</button><button type="button" data-u="unholy">Unholy Destruction</button></div>' + [0, 1, 2, 3, 4].map(i => '<button type="button" class="sl b' + i + '" data-s="' + i + '"><span class="ic"></span><span class="k">' + (i ? (i === 4 ? 'ULT' : i) : '') + '</span><span class="rg"></span><span class="ct"></span><span class="nmL"></span></button>').join('') + '</div>' +
@@ -520,7 +520,7 @@ export class CombatHUD {
     this.tp = $('.tp'); this.tpNm = $('.tp .nm'); this.tpSub = $('.tp .sub'); this.tpBar = $('.tp .bar i'); this.tpTxt = $('.tp .bar b');
     const vb = n => ({ i: $('.vit .' + n + ' i'), b: $('.vit .' + n + ' b') }); this.vhp = vb('hp'); this.vmp = vb('mp'); this.vsp = vb('sp'); this.vfy = vb('fy');
     this.exp = $('.vn-exp'); this.expFill = $('.vn-exp-fill'); this.expLevel = $('.vn-exp-level'); this.expValue = $('.vn-exp-value'); this.expKey = '';
-    this.por = $('.por span'); this.lab = $('.vit .lab'); this.lvl = $('.por small'); this.stat = $('.stat'); this.msg = $('.msg'); this.flash = $('.flash'); this.sumBtn = $('[data-a=summon]');
+    this.por = $('.por span'); this.lab = $('.vit .lab'); this.lvl = $('.por small'); this.stat = $('.stat'); this.msg = $('.msg'); this.flash = $('.flash');
     $$('.sl').forEach((b, i) => { b.setAttribute('aria-label', i === 0 ? 'Basic attack' : i === 4 ? 'Ultimate ability' : 'Skill ' + i); b.title = b.getAttribute('aria-label'); });
     this.slots = $$('.sl').map(b => ({ b, ic: b.querySelector('.ic'), rg: b.querySelector('.rg'), ct: b.querySelector('.ct'), nm: b.querySelector('.nmL'), cd: -1, st: '', key: '' }));
     const skillNameCallout = $('.skill-name-callout');

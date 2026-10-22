@@ -50,15 +50,17 @@ with sync_playwright() as pw:
       const b=document.querySelector('#cb .sl.b1'),hint=document.querySelector('#cb .skill-name-callout');
       return !!hint && hint.textContent===b.getAttribute('aria-label') && getComputedStyle(hint).display!=='none';
     }"""))
-   def map_clearance():
-    return pg.evaluate("""()=>{
-      const a=document.querySelector('#cb .top').getBoundingClientRect(),
-            b=document.getElementById('vnMiniMap').getBoundingClientRect();
-      return a.top >= b.bottom && a.left < innerWidth && a.bottom <= innerHeight;
-    }""")
-   check(tag+' combat menu clears minimap',map_clearance())
+   check(tag+' top Summon Titan and Exit Fight buttons removed',pg.evaluate("""()=>{
+     return !document.querySelector('#cb .top')
+       && !document.querySelector('#cb button[data-a="summon"]')
+       && !document.querySelector('#cb button[data-a="exit"]');
+   }"""))
    pg.evaluate("document.querySelector('#vnMiniMap button').click()")
-   check(tag+' combat menu clears expanded minimap',map_clearance())
+   check(tag+' minimap still expands without combat shortcut clutter',pg.evaluate("""()=>{
+     const n=document.getElementById('vnMiniMap');
+     return n?.classList.contains('expanded')&&getComputedStyle(n).visibility!=='hidden'
+       && !document.querySelector('#cb .top');
+   }"""))
    check(tag+' minimap zoom controls',pg.evaluate("!!document.querySelector('#vnMiniMap .vn-mini-control.full')"))
    pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.out').click()")
    check(tag+' minimap zoom returns to following player',pg.evaluate(

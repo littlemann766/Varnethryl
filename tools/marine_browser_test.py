@@ -31,6 +31,7 @@ with sync_playwright() as pw:
    pg.wait_for_function('window.__p3d && __p3d.frames>5',timeout=120000)
    pg.evaluate("document.getElementById('vnEnter')?.click()")
    check(tag+' town boots',pg.evaluate("__p3d.zone==='town'"))
+   check(tag+' no extra hero skin/model in town',pg.evaluate("__p3d.visibleHeroModelCount===1"))
    check(tag+' requested party count initialized',pg.evaluate(
      "(count)=>__p3d.bump.crowd.filter(r=>r.kind==='party').length===count",party_count))
    check(tag+' cheats locked initially',pg.evaluate("!document.getElementById('ownerPanel') && !__p3d.cheats"))
@@ -53,6 +54,16 @@ with sync_playwright() as pw:
    check(tag+' 9x9 km size',pg.evaluate("Math.abs(__p3d.ZONE.half-6390)<1"))
    pg.wait_for_function("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')",timeout=35000)
    check(tag+' approved ship GLB visible',pg.evaluate("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')?.visible"))
+   check(tag+' no procedural fallback hull, sails or duplicated vessel',pg.evaluate("""()=>{
+     const s=__p3d.scene.getObjectByName('player-sailing-ship');
+     return s?.children.length===1 && s.children[0].name==='user-supplied-sailing-ship';
+   }"""))
+   check(tag+' tapered wake with no rectangle plane',pg.evaluate("""()=>{
+     const w=__p3d.scene.getObjectByName('player-ship-wake');
+     return w?.isGroup && w.children.length>=3
+       && w.children.every(c=>c.name==='tapered-foam-streak')
+       && !w.children.some(c=>c.geometry?.type==='PlaneGeometry');
+   }"""))
    check(tag+' real water mesh',pg.evaluate("!!__p3d.scene.getObjectByName('sailing-water-window')"))
    # Enter-world fight initialization can complete after the ocean begins
    # streaming. Never accept a single transient frame with active combat.
@@ -116,6 +127,8 @@ with sync_playwright() as pw:
    check(tag+' town restored, no ghost ocean',pg.evaluate("!__p3d.scene.getObjectByName('tidewrack-open-ocean')&&__p3d.hero.visible"))
    check(tag+' companions returned to walking world',pg.evaluate("__p3d.bump.crowd.filter(r=>r.kind==='party').every(r=>r.root?.visible && Math.hypot(r.a.x-__p3d.state.heroX,r.a.z-__p3d.state.heroZ)<18)"))
    check(tag+' mobile walking HUD restored',pg.evaluate("!document.body.classList.contains('vn-sailing-zone')"))
+   check(tag+' single selected hero on return to town',
+     pg.evaluate("__p3d.visibleHeroModelCount===1"))
    pg.wait_for_function("__p3d.fight && __p3d.fight.on && __p3d.fight.auto",timeout=15000)
    check(tag+' hero combat and abilities restored after disembarking',
      pg.evaluate("__p3d.fight.on && __p3d.fight.auto"))

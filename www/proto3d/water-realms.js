@@ -2,7 +2,6 @@
    1 game unit ~= .704 m (1 m ~= 1.42 units). Only the nearby ocean terrain
    is instantiated, so the complete 81 km^2 world does not load at once. */
 import * as THREE from './vendor/three.module.js';
-import { buildSailingShip } from './port-ships.js';
 export const WORLD_UNITS_PER_METER=1.42;
 export const OCEAN_METERS=9000; // CHANGE THIS to 6000 or 3000 to shrink the world later
 export const OCEAN=Object.freeze({cx:17500,cz:0,half:OCEAN_METERS*WORLD_UNITS_PER_METER/2});
@@ -43,7 +42,7 @@ function island(parent,x,z,r,sizeSeed,colliders){
 }
 async function glbFromGzip(url){
  if(!('DecompressionStream'in window))throw new Error('This Android WebView does not support compressed GLB models');
- const response=await fetch(url+'?v=1.4.9');if(!response.ok)throw new Error('GLB HTTP '+response.status);
+ const response=await fetch(url+'?v=1.5.0');if(!response.ok)throw new Error('GLB HTTP '+response.status);
  const bytes=await response.arrayBuffer(),head=new Uint8Array(bytes,0,Math.min(4,bytes.byteLength));
  // Some hosts decode .gz on the HTTP layer. Accept either raw GLB or gzip
  // exactly once so the original ship and Hydra load on both web and Android.
@@ -113,8 +112,8 @@ export function buildHydraMire(scene){
 export function buildSailingOcean(scene){
  const root=new THREE.Group();root.name='tidewrack-open-ocean';scene.add(root);
  const water=seaWater();root.add(water.mesh);
- const vessel=buildSailingShip(1,true);vessel.name='player-sailing-ship';vessel.position.set(OCEAN.cx,0,OCEAN.cz+OCEAN.half-180);root.add(vessel);
- let shipReady=false,disposed=false;
+ const vessel=new THREE.Group();vessel.name='player-sailing-ship';vessel.position.set(OCEAN.cx,0,OCEAN.cz+OCEAN.half-180);root.add(vessel);
+ let shipReady=false,shipLoadError='',disposed=false;
  glbFromGzip('proto3d/models-new/tidewrack_sailing_ship.glb.gz').then(gltf=>{
   const imported=gltf.scene;
    if(disposed){dispose(imported);return;}
@@ -126,8 +125,8 @@ export function buildSailingOcean(scene){
   imported.rotation.y=Math.PI*.5;
   imported.name='user-supplied-sailing-ship';
   imported.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
-  const fallback=vessel.children.slice();vessel.add(imported);for(const o of fallback)o.visible=false;shipReady=true;
- }).catch(e=>{if(!disposed)console.warn('Original sailing ship not loaded; retaining temporary fallback',e);});
+  vessel.add(imported);shipReady=true;
+ }).catch(e=>{if(!disposed){shipLoadError=String(e?.message||e);console.error('Approved 3D sailing ship failed to load; no substitute ship will be displayed',e);}});
  // Deck positions are ship-local and therefore follow the hull's position,
  // turning and wave-induced roll. Slot 0 is the helmsman, 1-3 companions.
  // Separate Y values account for the raised stern of the medieval galleon.
@@ -147,15 +146,38 @@ export function buildSailingOcean(scene){
  // Rudder steering: left/right rotates the hull; forward/reverse controls sail
  // speed. This avoids the previous sideways character-strafing boat movement.
  const nav={heading:0,speed:0,throttle:0};
- const wakeMat=new THREE.MeshBasicMaterial({color:0xd5f3e9,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide});
- const wake=new THREE.Mesh(new THREE.PlaneGeometry(5.5,23),wakeMat);
- wake.rotation.x=-Math.PI/2;wake.name='player-ship-wake';root.add(wake);
+ // A real tapered, broken V-shaped foam trail: multiple narrow ribbon strips
+ // with fading foam colors. No solid plane, sprite, or giant white rectangle.
+ const wake=new THREE.Group();wake.name='player-ship-wake';root.add(wake);
+ const wakeMat=new THREE.MeshBasicMaterial({color:0xd9f2ef,vertexColors:true,transparent:true,
+   opacity:0,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1});
+ for(const [start,drift,len,phase] of [[0,0,30,.8],[-1.2,-4.6,32,1.9],[1.2,4.6,32,2.7],[-1.9,-2.2,18,3.5],[1.9,2.2,18,4.6]]){
+   const vertices=[],colors=[],indices=[],n=24;
+   for(let j=0;j<=n;j++){
+     const p=j/n,z=6+len*p;
+     const x=start+drift*p+.23*Math.sin(phase+p*14)*p;
+     const thickness=(.12+.31*p)*(1-.73*p);
+     const fade=Math.max(0,1-p)*(.73+.27*Math.cos(j*.8+phase)**2);
+     for(const edge of [-1,1]){
+       vertices.push(x+edge*thickness,0,z);
+       colors.push(.55*fade,.9*fade,fade);
+     }
+     if(j<n&&j%6!==4){const a=2*j;indices.push(a,a+2,a+1,a+1,a+2,a+3);}
+   }
+   const geo=new THREE.BufferGeometry();
+   geo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+   geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+   geo.setIndex(indices);geo.computeVertexNormals();
+   const foam=new THREE.Mesh(geo,wakeMat);foam.name='tapered-foam-streak';foam.frustumCulled=false;wake.add(foam);
+ }
+ wake.visible=false;
  function blocked(x,z,pad=5){
    for(const arr of obstacles.values())for(const c of arr)
      if(Math.hypot(x-c.x,z-c.z)<c.r+pad)return true;
    return false;
  }
  function sail(dt,turn,throttle,x,z){
+   if(!shipReady)return{x,z,heading:nav.heading,speed:0,blocked:true};
    const step=Math.max(0,Math.min(.05,Number(dt)||0));
    const rudder=THREE.MathUtils.clamp(Number(turn)||0,-1,1);
    const power=THREE.MathUtils.clamp(Number(throttle)||0,-1,1);
@@ -201,9 +223,10 @@ export function buildSailingOcean(scene){
   vessel.position.set(x,.35+.19*Math.sin(t*1.1),z);
   vessel.rotation.set(.027*Math.sin(t*.67),yaw+Math.PI,.034*Math.sin(t*.91));
   water.mesh.position.x=x;water.mesh.position.z=z;water.tex.offset.set(t*.0017,t*.0009);
-  wake.position.set(x+Math.sin(yaw)*14,.05,z+Math.cos(yaw)*14);
-  wake.rotation.set(-Math.PI/2,0,-yaw);
-  wakeMat.opacity=Math.min(.4,Math.max(0,Math.abs(nav.speed)/19*.34));
+  wake.position.set(x,.075,z);
+  wake.rotation.set(0,yaw,0);
+  wakeMat.opacity=Math.min(.62,Math.max(0,Math.abs(nav.speed)/19*.52));
+  wake.visible=shipReady&&Math.abs(nav.speed)>.55;
   const ix=Math.floor((x-OCEAN.cx)/TILE),iz=Math.floor((z-OCEAN.cz)/TILE);
   const keys=new Set();
   for(let dz=-VIEW_RADIUS;dz<=VIEW_RADIUS;dz++)for(let dx=-VIEW_RADIUS;dx<=VIEW_RADIUS;dx++){
@@ -213,7 +236,8 @@ export function buildSailingOcean(scene){
   for(const [k,g] of tiles)if(!keys.has(k)){root.remove(g);dispose(g);tiles.delete(k);obstacles.delete(k);}
  }
  update(0,spawn.x,spawn.z,0);
- return{group:root,ship:vessel,colliders,spawn,half:OCEAN.half,get shipReady(){return shipReady;},
+ return{group:root,ship:vessel,colliders,spawn,half:OCEAN.half,
+   get shipReady(){return shipReady;},get shipLoadError(){return shipLoadError;},
    get navigation(){return {...nav};},crewSpot,sail,blocked,
    update,dispose(){disposed=true;scene.remove(root);dispose(root);}};
 }

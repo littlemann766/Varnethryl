@@ -639,7 +639,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.23';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.24';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -2112,6 +2112,7 @@ const cheatEnv = {
   onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); settingsApi.ownerInit(); },
   onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); },
   onLocked: () => {
+    MULTIPLAYER?.ownerLock?.();
     if (window.__p3d) { window.__p3d.cheats = null; window.__p3d.owner = false; }
     if (window.__ownerRoster) window.__ownerRoster(false);
     const b = document.getElementById('fightBtn'); if (b) b.style.display = 'none';
@@ -2180,11 +2181,16 @@ MULTIPLAYER=createMultiplayer({THREE,scene,state,getZone:()=>ZONE.name,setZone,
    if(ZONE.name!==target.zone){
      const ok=await setZone(target.zone);if(!ok)return false;
    }
+   // Use destination zone colliders, avoiding portal walls and quest blockers.
+   // The server verifies the selected player and never moves the target.
    const spot={x:target.x+2,z:target.z+2};
    resolve(spot,false);
+   if(!Number.isFinite(spot.x)||!Number.isFinite(spot.z))return false;
    state.heroX=spot.x;state.heroZ=spot.z;
    state.level=0;state.target=null;state.blockedFrames=0;state.climbing=false;
-   marker.visible=false;state.yaw=Number.isFinite(target.yaw)?target.yaw:0;
+   marker.visible=false;
+   state.yaw=Number.isFinite(target.yaw)?target.yaw:0;
+   state.camYaw=state.yaw;
    jumpHeight=0;jumpVelocity=0;updateLevel();snapFollowers();
    camRig.snap=true;miniMap.invalidate();saver?.mark();
    return true;

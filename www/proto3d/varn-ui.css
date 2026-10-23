@@ -618,3 +618,43 @@ body.vn-menu-open #vnChatBtn{visibility:hidden}
  #vnChatPanel .vn-chat-private-feed{flex-basis:75px;min-height:48px}
  #vnChatBtn{top:max(79px,env(safe-area-inset-top))}
 }
+
+/* CoOwner is a distinct, server-verified role. Credentials never touch game saves. */
+#vnQuickMenu .vn-quick-actions #vnCoOwnerTools{grid-column:1/-1;min-height:40px!important;
+ background:linear-gradient(140deg,#382854,#171c34)!important;
+ border:1px solid #b886ed!important;color:#f1dcff!important;font-size:12px!important}
+#vnCoOwnerPanel[hidden],#vnCoOwnerPanel .vn-coowner-tools[hidden],
+#vnCoOwnerPanel .vn-coowner-login[hidden]{display:none!important}
+#vnCoOwnerPanel{position:fixed;z-index:8310;right:10px;top:max(12px,env(safe-area-inset-top));
+ width:min(360px,calc(100vw - 20px));max-height:calc(100dvh - 24px);
+ box-sizing:border-box;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:14px;
+ color:#f1e3ff;background:linear-gradient(152deg,#302049,#121b32);border:2px ridge #c693ff;
+ border-radius:13px;box-shadow:0 12px 36px #000e;font:13px system-ui,sans-serif}
+#vnCoOwnerPanel .vn-coowner-heading{display:flex;align-items:center;justify-content:space-between;
+ color:#f9d3ff;font:700 16px VarnCinzel,Georgia,serif}
+#vnCoOwnerPanel button,#vnCoOwnerPanel input,#vnCoOwnerPanel select{border:1px solid #bd98ef;
+ border-radius:7px;background:#19263d;color:#f6e8ff;padding:8px;min-height:40px;
+ box-sizing:border-box;font:inherit}
+#vnCoOwnerPanel button{cursor:pointer;font-weight:700}
+#vnCoOwnerPanel button:disabled{opacity:.5;cursor:not-allowed}
+#vnCoOwnerPanel .vn-coowner-login,#vnCoOwnerPanel .vn-coowner-tools{display:grid;gap:9px}
+#vnCoOwnerPanel .vn-coowner-desc{margin:0;line-height:1.5;color:#d9c7ef}
+#vnCoOwnerPanel .vn-coowner-status{color:#ffe0ac;line-height:1.45}
+#vnCoOwnerPanel .vn-coowner-lock{background:#50253a;border-color:#dfa0b6}
+
+/* Keep chat compose visible in mobile landscape and above Android IME. */
+#vnChatBtn{top:max(57px,calc(env(safe-area-inset-top) + 52px));
+ right:max(100px,calc(env(safe-area-inset-right) + 94px));
+ min-width:80px;white-space:nowrap}
+#vnChatPanel{max-height:calc(100dvh - 14px);height:min(600px,calc(100dvh - 28px));
+ bottom:max(6px,env(safe-area-inset-bottom));overflow:auto}
+#vnChatPanel .vn-chat-compose{position:sticky;bottom:0;background:#17233b;
+ padding:5px;border:1px solid #c5a4f3;border-radius:7px;z-index:2}
+#vnChatPanel .vn-chat-private-feed{flex-shrink:1}
+#vnChatPanel .vn-chat-input{font-size:16px;min-height:40px}
+@media (orientation:landscape) and (max-height:540px){
+ #vnChatBtn{top:max(52px,env(safe-area-inset-top) + 50px)}
+ #vnChatPanel{height:calc(100dvh - 12px);padding:9px;gap:4px}
+ #vnChatPanel .vn-chat-feed{min-height:32px}
+ #vnChatPanel .vn-chat-private-feed{min-height:46px;flex-basis:65px}
+}

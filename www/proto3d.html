@@ -47,10 +47,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
     <div class="vn-bottom">Your adventure continues from the existing local save. Nothing is reset.</div>
   </div>
 </div>
-<div id="hud" hidden><div><b>VARNETHRYL</b> <span id="ver">v1.5.23</span><span id="fps">-- fps</span></div><a id="mdlBtn" href="#">Models</a><a id="fightBtn" href="#" style="display:none">Fight test</a></div>
+<div id="hud" hidden><div><b>VARNETHRYL</b> <span id="ver">v1.5.24</span><span id="fps">-- fps</span></div><a id="mdlBtn" href="#">Models</a><a id="fightBtn" href="#" style="display:none">Fight test</a></div>
 <button id="vnMenuBtn" type="button" aria-expanded="false" aria-controls="vnQuickMenu" aria-label="Open game menu">☰ Menu</button>
 <button id="vnChatBtn" type="button" aria-expanded="false" aria-controls="vnChatPanel" aria-label="Open multiplayer chat and friends">💬 Chat</button>
 <aside id="vnChatPanel" hidden aria-label="Varnethryl multiplayer chat and friends"></aside>
+<section id="vnCoOwnerPanel" hidden aria-label="Private CoOwner tools" role="dialog"></section>
 <nav id="vnQuickMenu" aria-label="Game menu" hidden>
   <div class="vn-qhead"><strong>VARNETHRYL</strong><button id="vnQuickClose" type="button" aria-label="Close menu">✕</button></div>
   <div class="vn-quick-actions" role="group" aria-label="Main game actions">
@@ -59,6 +60,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
     <button id="vnOpenSettings" type="button">⚙ Settings</button>
     <button id="vnQuickTravel" type="button" aria-expanded="false" aria-controls="vnQuickWorld">⌖ Travel</button>
     <button id="vnOwnerTools" type="button" aria-label="Open password-protected Owner cheats">🔒 Owner Cheats</button>
+    <button id="vnCoOwnerTools" type="button" aria-expanded="false" aria-controls="vnCoOwnerPanel" aria-label="Open password-protected CoOwner tools">🔒 CoOwner Tools</button>
   </div>
   <div class="vn-quick-sections">
     <details id="vnQuickWorld"><summary>World travel</summary><div class="vn-opts">
@@ -79,7 +81,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
       <button id="vnStatusOpen" type="button">Diagnostics</button>
     </div></details>
   </div>
-  <small class="vn-quick-version">3D build <span id="vnVersion">1.5.23</span></small>
+  <small class="vn-quick-version">3D build <span id="vnVersion">1.5.24</span></small>
 </nav>
 <div id="moveActions" aria-label="Movement">
  <button type="button" id="runBtn" aria-pressed="false" title="Walk or run">WALK</button>

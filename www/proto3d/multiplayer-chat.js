@@ -124,7 +124,8 @@ export function createMultiplayerChat({sendChat,isOnline}){
    const privateMsg=m.kind==='private';
    const dest=privateMsg?privateFeed:worldFeed;
    const line=create('div',privateMsg?'vn-chat-line vn-chat-dm':'vn-chat-line');
-   const sender=m.from===selfId?'You':String(m.name||'Player').slice(0,20);
+   const role=m.role==='coowner'?' · CoOwner':m.role==='owner'?' · Owner':'';
+   const sender=(m.from===selfId?'You':String(m.name||'Player').slice(0,20))+role;
    const stamp=Number.isFinite(m.time)?new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'';
    line.appendChild(create('strong','',sender+(privateMsg?' · PRIVATE':'')),
      create('span','vn-chat-time',stamp),

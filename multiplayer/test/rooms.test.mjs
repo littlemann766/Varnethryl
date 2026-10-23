@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { once } from 'node:events';
 import { WebSocket } from 'ws';
 import { createWorldServer } from '../server.mjs';
+import { nextRemoteYaw } from '../../www/proto3d/multiplayer-client.js';
 
 function recv(ws,type){
  return new Promise((resolve,reject)=>{
@@ -245,4 +246,119 @@ test('chat validates empty, oversized and rapid messages before broadcasting',as
  const good=recv(a,'chat');a.send(JSON.stringify({type:'chat',text:'Hello'}));await good;
  const rapid=recv(a,'chat-error');a.send(JSON.stringify({type:'chat',text:'Too fast'}));
  assert.match((await rapid).message,/slow down/i);
+});
+
+test('CoOwner password authentication is separate from Owner, private, server-authorized and manually revoked',async t=>{
+ const srv=createWorldServer({verifyCoOwner:pass=>pass==='coowner-test-password'});
+ srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');t.after(()=>srv.close());
+ const url='ws://127.0.0.1:'+srv.server.address().port;
+ const ws=await connected(url),other=await connected(url);t.after(()=>{ws.terminate();other.terminate();});
+ const state={zone:'frost',x:211,y:13,z:245,yaw:.3,hero:'Selene',skin:'n:selene'};
+ async function join(sock,code,name){
+   const welcome=recv(sock,'welcome');
+   sock.send(JSON.stringify({type:'join',code,name,entry:'game',state}));
+   return welcome;
+ }
+ const co=await join(ws,'WORLD1','TestCoOwner');
+ const player=await join(other,'WORLD2','TestPlayer');
+ const forbidden=recv(ws,'coowner-error');
+ ws.send(JSON.stringify({type:'coowner-list'}));
+ assert.match((await forbidden).message,/unlock/i);
+ const wrong=recv(ws,'coowner-auth');
+ ws.send(JSON.stringify({type:'coowner-auth',pass:'incorrect-password'}));
+ assert.equal((await wrong).ok,false);
+ const valid=recv(ws,'coowner-auth'),firstList=recv(ws,'coowner-players');
+ ws.send(JSON.stringify({type:'coowner-auth',pass:'coowner-test-password'}));
+ const auth=await valid;assert.equal(auth.ok,true);
+ assert.match(auth.token,/^[0-9a-f]{64}$/);
+ assert.equal((await firstList).players.find(p=>p.id===player.id)?.world,'WORLD2');
+ assert.equal(srv.rooms.get('WORLD1').get(co.id).socket.coOwnerAuthorized,true);
+ assert.equal(srv.rooms.get('WORLD1').get(co.id).socket.ownerAuthorized,undefined);
+ const rejectedOwner=recv(ws,'owner-error');ws.send(JSON.stringify({type:'owner-list'}));
+ assert.match((await rejectedOwner).message,/owner/i);
+ const notify=recv(other,'joined'),teleport=recv(ws,'coowner-jump');
+ ws.send(JSON.stringify({type:'coowner-jump',id:player.id}));
+ const arrival=await teleport;
+ assert.equal(arrival.world,'WORLD2');
+ assert.equal(arrival.target.name,'TestPlayer');
+ assert.equal((await notify).player.id,co.id);
+ assert.equal(srv.rooms.get('WORLD2').get(co.id).x,211+2);
+ assert.equal(srv.rooms.get('WORLD2').get(player.id).x,211);
+ const locked=recv(ws,'coowner-locked');
+ ws.send(JSON.stringify({type:'coowner-lock'}));
+ assert.equal((await locked).ok,true);
+ const denied=recv(ws,'coowner-error');ws.send(JSON.stringify({type:'coowner-jump',id:player.id}));
+ assert.match((await denied).message,/unlock/i);
+ const untrusted=await connected(url);t.after(()=>untrusted.terminate());
+ await join(untrusted,'WORLD1','OtherTester');
+ const rejectedResume=recv(untrusted,'coowner-auth');
+ untrusted.send(JSON.stringify({type:'coowner-resume',token:auth.token}));
+ assert.equal((await rejectedResume).ok,false,'manual lock revokes bearer token on server');
+});
+test('CoOwner session token resumes across reconnect until explicit manual lock',async t=>{
+ const srv=createWorldServer({verifyCoOwner:pass=>pass==='coowner-test-password'});
+ srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');t.after(()=>srv.close());
+ const url='ws://127.0.0.1:'+srv.server.address().port;
+ const a=await connected(url);t.after(()=>a.terminate());
+ const state={zone:'town',x:0,y:0,z:14,yaw:0,hero:'Aldric'};
+ let welcome=recv(a,'welcome');
+ a.send(JSON.stringify({type:'join',code:'WORLD1',name:'CoOwnerTester',state}));
+ await welcome;
+ let auth=recv(a,'coowner-auth');
+ a.send(JSON.stringify({type:'coowner-auth',pass:'coowner-test-password'}));
+ const token=(await auth).token;assert.ok(token);
+ a.close();await once(a,'close');
+ const b=await connected(url);t.after(()=>b.terminate());
+ welcome=recv(b,'welcome');
+ b.send(JSON.stringify({type:'join',code:'WORLD1',name:'CoOwnerTester',entry:'resume',state}));
+ const p=await welcome;
+ auth=recv(b,'coowner-auth');
+ b.send(JSON.stringify({type:'coowner-resume',token}));
+ const resumed=await auth;
+ assert.equal(resumed.ok,true);assert.equal(resumed.resumed,true);
+ assert.equal(srv.rooms.get('WORLD1').get(p.id).socket.coOwnerAuthorized,true);
+});
+
+test('3D multiplayer players turn through angle wrap and preserve idle facing',()=>{
+ assert.ok(Math.abs(nextRemoteYaw(Math.PI-.05,-Math.PI+.05,.05)-Math.PI)<.12,'heading crosses -pi / pi seam');
+ assert.ok(nextRemoteYaw(0,Math.PI/2,.1)>1,'remote player visibly turns toward transmitted heading');
+ assert.equal(nextRemoteYaw(1.2,1.2,.05),1.2,'idle character holds its facing');
+ assert.equal(nextRemoteYaw(0,NaN,.05),0,'invalid network heading does not corrupt rig');
+});
+test('world chat sender role is determined on server, not claimed in message',async t=>{
+ const srv=createWorldServer({verifyCoOwner:pass=>pass==='test-only-pass'});
+ srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');t.after(()=>srv.close());
+ const url='ws://127.0.0.1:'+srv.server.address().port;
+ const a=await connected(url),b=await connected(url);
+ t.after(()=>{a.terminate();b.terminate();});
+ const state={zone:'town',x:0,y:0,z:14,yaw:0,hero:'Aldric'};
+ const wa=recv(a,'welcome');a.send(JSON.stringify({type:'join',code:'WORLD1',name:'Deputy',state}));await wa;
+ const wb=recv(b,'welcome');b.send(JSON.stringify({type:'join',code:'WORLD1',name:'Friend',state}));await wb;
+ const verify=recv(a,'coowner-auth');a.send(JSON.stringify({type:'coowner-auth',pass:'test-only-pass'}));assert.equal((await verify).ok,true);
+ const delivered=recv(b,'chat');
+ a.send(JSON.stringify({type:'chat',text:'Meeting in town',role:'owner'}));
+ const message=await delivered;
+ assert.equal(message.role,'coowner');
+ assert.equal(message.text,'Meeting in town');
+ const unauthorized=recv(b,'chat-error');
+ b.send(JSON.stringify({type:'chat',text:'\u0000hidden'}));
+ assert.match((await unauthorized).message,/characters|text/i);
+});
+test('Owner server access token persists across reconnect and Lock Owner revokes it',async t=>{
+ const srv=createWorldServer({verifyOwner:pass=>pass==='test-owner-secret'});
+ srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');t.after(()=>srv.close());
+ const url='ws://127.0.0.1:'+srv.server.address().port;
+ const state={zone:'town',x:0,y:0,z:14,yaw:0,hero:'Aldric'};
+ const a=await connected(url);t.after(()=>a.terminate());
+ let welcome=recv(a,'welcome');a.send(JSON.stringify({type:'join',code:'WORLD1',name:'VerifiedOwner',state}));await welcome;
+ let auth=recv(a,'owner-auth');a.send(JSON.stringify({type:'owner-auth',pass:'test-owner-secret'}));
+ const token=(await auth).token;assert.match(token,/^[a-f0-9]{64}$/);
+ a.close();await once(a,'close');
+ const b=await connected(url);t.after(()=>b.terminate());
+ welcome=recv(b,'welcome');b.send(JSON.stringify({type:'join',code:'WORLD1',name:'VerifiedOwner',entry:'resume',state}));await welcome;
+ auth=recv(b,'owner-auth');b.send(JSON.stringify({type:'owner-resume',token}));
+ assert.equal((await auth).ok,true);
+ const locked=recv(b,'owner-locked');b.send(JSON.stringify({type:'owner-lock'}));assert.equal((await locked).ok,true);
+ const refused=recv(b,'owner-auth');b.send(JSON.stringify({type:'owner-resume',token}));
+ assert.equal((await refused).ok,false);
 });

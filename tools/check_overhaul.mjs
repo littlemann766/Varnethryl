@@ -291,3 +291,16 @@ assert(chatUi.includes("trigger?.classList.remove('vn-chat-unread')"),'opening c
 
 assert(chatUi.lastIndexOf(' showFriends(false);')>chatUi.indexOf(' const option='),
   'initial chat render runs after private recipient option helper is initialized');
+
+// CoOwner password never ships in client assets or GitHub files.
+const coOwnerPanel=source('www/proto3d/coowner-panel.js');
+assert(nav.includes('id="vnCoOwnerTools"')&&nav.includes('id="vnCoOwnerPanel"'),'CoOwner unlock is accessible in the in-game menu');
+assert(coOwnerPanel.includes('type=\'password\'')||coOwnerPanel.includes("field.type='password'"),'CoOwner unlock input is masked');
+assert(coOwnerPanel.includes("Lock CoOwner"),'CoOwner access remains until manual lock');
+assert(coOwnerPanel.includes('lock()'),'CoOwner lock sends a server-side revoke request');
+assert(worldServer.includes("process.env.VARNETHRYL_COOWNER_HASH"),'CoOwner verifier is server-only environment configuration');
+assert(worldServer.includes("if(m.type==='coowner-auth')"),'CoOwner password is independently verified by relay');
+assert(worldServer.includes("if(m.type==='coowner-lock')"),'CoOwner manual lock revokes tokens');
+assert(worldServer.includes("if(m.type==='coowner-jump'")||worldServer.includes("m.type==='coowner-jump'"),'CoOwner can teleport without getting Owner privileges');
+assert(mpLobby.includes("coOwner.onConnected(true)"),'CoOwner unlock survives temporary reconnection through server token');
+assert(source('www/sw.js').includes("./proto3d/coowner-panel.js"),'CoOwner UI included in Android web asset cache');

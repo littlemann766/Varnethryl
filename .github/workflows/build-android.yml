@@ -30,6 +30,7 @@ jobs:
       - name: Check overhaul, boss attacks, movement, owner maps and offline release
         run: |
           node tools/check_overhaul.mjs
+          node tools/check_multiplayer_ocean_arena.mjs
           node tools/check_serpent_locomotion.mjs
           node tools/boss_patterns_test.mjs
           node tools/owner_cheats_test.mjs

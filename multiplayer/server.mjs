@@ -6,7 +6,11 @@ import { WebSocketServer, WebSocket } from 'ws';
 // Ephemeral multiplayer presence server (world-wide room, map-local visibility).
 // No client-authoritative damage, currency, or inventory messages are accepted.
 const ZONES=new Set(['town','wilds','frost','hydra','sailing','coliseum']);
-const MAX_PLAYERS=12, MAX_BYTES=2048, RATE_MS=80;
+const MAX_PLAYERS=12, MAX_BYTES=2048, RATE_MS=80, CHAT_INTERVAL_MS=700;
+const SKIN_RE=/^(?:[nop]:)?[a-z0-9_]{2,48}$/;
+const CODE_RE=/^[A-Z0-9]{10,20}$/;
+const skin=s=>typeof s==='string'&&SKIN_RE.test(s)?s:'aldric';
+const friendCode=s=>typeof s==='string'&&CODE_RE.test(s)?s:'';
 // The same salted verifier as the existing Owner unlock in ownergate.js.
 // Never place the actual passphrase in code, logs, URLs, or localStorage.
 const OWNER_SALT='150a1c54ab232044870dcb521f1468ba';
@@ -22,9 +26,19 @@ export const PUBLIC_WORLDS=Object.freeze([
 const clean=(value,max)=>String(value??'').replace(/[^\p{L}\p{N} _-]/gu,'').trim().slice(0,max);
 const finite=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
 const validState=m=>!!m&&typeof m==='object'&&ZONES.has(m.zone)&&finite(m.x,-10000,10000)&&finite(m.z,-10000,10000)&&finite(m.y,-1000,5000)&&finite(m.yaw,-1000,1000);
-const visible=p=>({id:p.id,name:p.name,slot:p.slot,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,hero:p.hero});
+const visible=p=>({id:p.id,name:p.name,slot:p.slot,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,hero:p.hero,skin:p.skin,friendCode:p.friendCode,moving:p.moving});
 export function createWorldServer(options={}){
  const rooms=new Map(),ownerAttempts=new Map();
+ const isPublic=code=>PUBLIC_WORLDS.some(w=>w.code===code);
+ const chatVisible=(p,q)=>p.code===q.code||(isPublic(p.code)&&isPublic(q.code));
+ const chatPeers=()=>[...rooms.values()].flatMap(r=>[...r.values()]);
+ function publishRoster(){
+   const online=chatPeers();
+   for(const p of online)send(p.socket,{type:'chat-roster',players:online
+     .filter(q=>q.socket!==p.socket&&chatVisible(p,q))
+     .map(q=>({id:q.id,name:q.name,world:q.code,friendCode:q.friendCode}))});
+ }
+
  const allOnline=()=>[...rooms.values()].flatMap(room=>[...room.values()]);
  const ownerVisible=p=>({...visible(p),world:p.code});
  const ownerPlayers=socket=>allOnline().filter(p=>p.socket!==socket).map(ownerVisible);
@@ -67,6 +81,7 @@ export function createWorldServer(options={}){
   const room=rooms.get(p.code);if(!room)return;
   room.delete(p.id);broadcast(room,{type:'left',id:p.id},sock);
   if(room.size===0)rooms.delete(p.code);
+  publishRoster();
  }
  wss.on('connection',(socket,request)=>{
   const origin=request.headers.origin;
@@ -99,9 +114,12 @@ export function createWorldServer(options={}){
     const shouldSpawn=!reconnecting&&(enterFromTitle||!first);
     const p={id:randomUUID(),socket,code,name,slot,
       zone:initial?.zone||'town',x:initial?.x??spawn.x,z:initial?.z??spawn.z,
-      y:initial?.y??0,yaw:initial?.yaw??0,hero:clean(initial?.hero,30)||'Adventurer',lastUpdate:0};
+      y:initial?.y??0,yaw:initial?.yaw??0,hero:clean(initial?.hero,30)||'Adventurer',
+      skin:skin(initial?.skin),friendCode:friendCode(m.friendCode),
+      moving:false,lastChat:0,lastUpdate:0};
     send(socket,{type:'welcome',id:p.id,code,slot,first,spawn:shouldSpawn?spawn:null,players:[...room.values()].map(visible),maxPlayers:MAX_PLAYERS});
     socket.player=p;room.set(p.id,p);broadcast(room,{type:'joined',player:visible(p)},socket);
+    publishRoster();
     return;
    }
    const p=socket.player;if(!p)return;
@@ -137,13 +155,34 @@ export function createWorldServer(options={}){
      p.zone=target.zone;p.x=target.x+2;p.y=target.y;p.z=target.z+2;p.yaw=target.yaw;
      const current=rooms.get(p.code);
      broadcast(current,{type:movedWorld?'joined':'state',player:visible(p)},socket);
+     publishRoster();
      send(socket,{type:'owner-jump',world:p.code,target:ownerVisible(target),
        players:[...current.values()].filter(q=>q.socket!==socket).map(visible)});
      return;
    }
+   if(m.type==='chat'){
+     const now=Date.now();
+     if(now-p.lastChat<CHAT_INTERVAL_MS){send(socket,{type:'chat-error',message:'Please slow down before sending another message.'});return;}
+     if(typeof m.text!=='string'){send(socket,{type:'chat-error',message:'Message must be text.'});return;}
+     const text=m.text.trim();
+     if(!text||text.length>280||/[\x00-\x08\x0b\x0e-\x1f]/.test(text)){
+       send(socket,{type:'chat-error',message:'Messages must be 1–280 characters.'});return;
+     }
+     const target=typeof m.to==='string'&&m.to?chatPeers().find(q=>q.id===m.to):null;
+     if(m.to&&(!target||!chatVisible(p,target))){
+       send(socket,{type:'chat-error',message:'Recipient is offline or unavailable.'});return;
+     }
+     p.lastChat=now;
+     const event={type:'chat',kind:target?'private':'world',id:randomUUID(),from:p.id,
+       name:p.name,to:target?.id||null,text,world:p.code,time:now};
+     if(target){send(target.socket,event);send(socket,event);}
+     else broadcast(rooms.get(p.code),event,null);
+     return;
+   }
    if(m.type==='state'){
     if(Date.now()-p.lastUpdate<RATE_MS||!validState(m))return;
-    p.lastUpdate=Date.now();p.zone=m.zone;p.x=m.x;p.y=m.y;p.z=m.z;p.yaw=m.yaw;p.hero=clean(m.hero,30)||'Adventurer';
+    p.lastUpdate=Date.now();p.zone=m.zone;p.x=m.x;p.y=m.y;p.z=m.z;p.yaw=m.y;
+    p.hero=clean(m.hero,30)||'Adventurer';p.skin=skin(m.skin);p.moving=m.moving===true;
     broadcast(rooms.get(p.code),{type:'state',player:visible(p)},socket);
    }
   });

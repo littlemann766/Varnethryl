@@ -288,3 +288,6 @@ assert(source('www/sw.js').includes('./proto3d/multiplayer-chat.js'),'chat bundl
 
 assert(chatUi.includes("['keydown','keyup','pointerdown']"),'chat input traps movement and skill controls');
 assert(chatUi.includes("trigger?.classList.remove('vn-chat-unread')"),'opening chat clears private message alert');
+
+assert(chatUi.lastIndexOf(' showFriends(false);')>chatUi.indexOf(' const option='),
+  'initial chat render runs after private recipient option helper is initialized');

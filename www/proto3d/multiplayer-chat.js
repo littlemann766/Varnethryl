@@ -76,7 +76,6 @@ export function createMultiplayerChat({sendChat,isOnline}){
  }
  worldTab.addEventListener('click',()=>showFriends(false));
  friendTab.addEventListener('click',()=>showFriends(true));
- showFriends(false);
  const addFriend=(code,name)=>{
    code=String(code||'').trim().toUpperCase();
    if(!validCode(code)){sayStatus('Friend codes must contain 10–20 letters/numbers.');return;}
@@ -141,6 +140,8 @@ export function createMultiplayerChat({sendChat,isOnline}){
    const to=recipient.value||null;
    if(sendChat(text,to)){input.value='';sayStatus(to?'Private message sent.':'World message sent.');}
  });
+ // Initialize chat only after recipient-option helper and roster are ready.
+ showFriends(false);
  return {
   getFriendCode:()=>myCode,
   setOnline:(online,code,id)=>{connected=!!online;worldCode=code||'';selfId=id||'';

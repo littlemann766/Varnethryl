@@ -239,7 +239,12 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   // Compare successive SERVER headings, not the visually derived heading.
   // Otherwise frozen-yaw legacy clients would oscillate back and forth.
   e.zone=p.zone;e.x=p.x;e.y=p.y;e.z=p.z;
-  e.yaw=remoteFacing(prevYaw,incomingYaw,deltaX,deltaZ,p.moving===true);
+  // Preserve the actual last walking direction on the first idle packet when
+   // an older client never sent a new body heading. Without this the visible
+   // avatar snaps back to its original heading as soon as it stops walking.
+   const networkTurn=Math.abs(Math.atan2(Math.sin(incomingYaw-prevYaw),Math.cos(incomingYaw-prevYaw)));
+   const idleNoTurn=p.moving!==true&&Math.hypot(deltaX,deltaZ)<.17&&networkTurn<.025;
+   e.yaw=idleNoTurn?e.yaw:remoteFacing(prevYaw,incomingYaw,deltaX,deltaZ,p.moving===true);
   e.networkYaw=incomingYaw;
   e.moving=p.moving===true;
   if(p.role){e.role=p.role;e.coAura.visible=p.role==='coowner';}

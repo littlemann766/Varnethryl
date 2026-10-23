@@ -47,7 +47,7 @@ with sync_playwright() as p:
         assert not page.locator('#heroes').evaluate("(el)=>el.classList.contains('open')")
         # Both brothers must be listed individually and show the distinct approved GLB.
         page.locator('#vnMenuBtn').click()
-        page.locator('#vnQuickMenu summary').filter(has_text='Characters').click()
+        # Heroes is now one of the four direct quick-menu actions; no Characters accordion.
         page.locator('#vnChooseCharacter').click()
         page.get_by_role('tab',name='Enemies & Bosses').click()
         assert page.locator('#hlist button[title="Frost Troll A (3.5×)"]').count()==1

@@ -1,6 +1,7 @@
 /* Safety tests for the staged 3D overhaul. Run with node tools/check_overhaul.mjs.
  * Tests are read-only; do not require an APK, credentials or a WebGL display. */
 import assert from 'node:assert/strict';
+import {landmarks,terrainColor} from '../www/proto3d/minimap.js';
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {fallenTreeSites,balthrixPosition,isCitySafe,onLava,PORT_CENTER,FROST_SUMMIT,TITAN_CENTER} from '../www/proto3d/bossregions.js';
@@ -45,6 +46,21 @@ const building=source('www/proto3d/buildings.js');
 const marine=source('www/proto3d/water-realms.js');
 const minimap=source('www/proto3d/minimap.js');
 assert(minimap.includes("root.dataset.mode='live-topdown'"),'minimap uses real top-down terrain');
+// Regression: Coliseum landmarks must be marker arrays, never a terrain-color
+// computation using undeclared x/z. Exercise every supported map as actual code.
+const mapEnv={water:()=>false,height:()=>0,biome:()=> 'meadow'};
+for(const zone of ['town','wilds','frost','hydra','sailing','coliseum']){
+  const marks=landmarks(zone,{cx:0,cz:0,half:180});
+  assert(Array.isArray(marks)&&marks.every(m=>Array.isArray(m)&&m.length>=4),'valid '+zone+' landmarks');
+  assert.match(terrainColor(zone,0,0,mapEnv,0,0),/^#[0-9a-f]{6}$/i,'valid '+zone+' raster color');
+}
+assert.deepEqual(landmarks('coliseum',{cx:0,cz:0,half:180}),[
+  [0,145,'Return to Varnethryl','portal'],[0,0,'PvP Battle Floor','boss']
+],'Coliseum portal and arena markers render without a ReferenceError');
+for(const [r,expected] of [[0,'#a38c69'],[59,'#a38c69'],[65,'#8b8580'],[100,'#645e58'],[125,'#9c8d78'],[160,'#675c4a']]){
+  assert.equal(terrainColor('coliseum',r,0,mapEnv,0,0),expected,'Coliseum terrain ring '+r);
+}
+
 assert(minimap.includes('e.height?.(zone,x,z)'),'minimap samples actual terrain elevation');
 assert(minimap.includes('e.water?.(zone,x,z)'),'minimap samples current water');
 assert(minimap.includes('env.islands?.(overview)'),'minimap shows streamed islands locally and deterministic distant islands in FULL view');

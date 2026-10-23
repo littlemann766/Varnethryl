@@ -47,3 +47,57 @@ test('room code validation does not create game progress or a playable session',
  const err=recv(s,'error');s.send(JSON.stringify({type:'join',code:'A',name:'x'}));
  assert.match((await err).message,/code/i);assert.equal(srv.rooms.size,0);
 });
+
+test('public world browser shows three stable world names and truthful player counts',async t=>{
+ const srv=createWorldServer();srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');
+ t.after(()=>srv.close());const base='http://127.0.0.1:'+srv.server.address().port;
+ const getRooms=async()=>{const res=await fetch(base+'/rooms');assert.equal(res.status,200);
+  assert.equal(res.headers.get('access-control-allow-origin'),'*');return (await res.json()).worlds;};
+ const initial=await getRooms();
+ assert.deepEqual(initial.map(w=>w.code),['WORLD1','WORLD2','WORLD3']);
+ assert.deepEqual(initial.map(w=>w.players),[0,0,0]);
+ assert.ok(initial.every(w=>w.capacity===12));
+ const a=await connected(base.replace('http:','ws:'));t.after(()=>a.terminate());
+ let welcome=recv(a,'welcome');
+ a.send(JSON.stringify({type:'join',entry:'title',code:'WORLD1',name:'TesterOne',
+   state:{zone:'frost',x:777,y:100,z:222,yaw:0,hero:'Selene'}}));
+ const first=await welcome;
+ assert.equal(first.first,true);
+ assert.ok(first.spawn,'entering from the start menu must spawn in town, even with a cave save');
+ assert.equal(srv.rooms.get('WORLD1').get(first.id).zone,'town');
+ assert.equal((await getRooms()).find(w=>w.code==='WORLD1').players,1);
+ const b=await connected(base.replace('http:','ws:'));t.after(()=>b.terminate());
+ welcome=recv(b,'welcome');
+ b.send(JSON.stringify({type:'join',code:'PRIVATE7',name:'PrivateTester',
+   state:{zone:'hydra',x:3,y:0,z:4,yaw:0,hero:'Aldric'}}));
+ await welcome;
+ assert.ok(!(await getRooms()).some(w=>w.code==='PRIVATE7'),'private codes must not be advertised publicly');
+ assert.equal((await getRooms()).find(w=>w.code==='WORLD1').players,1);
+});
+test('late arrivals join the same public world without moving cave players',async t=>{
+ const srv=createWorldServer();srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');
+ t.after(()=>srv.close());const url='ws://127.0.0.1:'+srv.server.address().port;
+ const a=await connected(url);t.after(()=>a.terminate());
+ let response=recv(a,'welcome');a.send(JSON.stringify({type:'join',entry:'game',code:'WORLD2',name:'AlreadyInCave',
+  state:{zone:'frost',x:1600,y:60,z:1700,yaw:1,hero:'Selene'}}));
+ const first=await response;
+ assert.equal(first.spawn,null);assert.equal(srv.rooms.get('WORLD2').get(first.id).zone,'frost');
+ const b=await connected(url);t.after(()=>b.terminate());
+ response=recv(b,'welcome');b.send(JSON.stringify({type:'join',entry:'title',code:'WORLD2',name:'JoinedFromTitle',
+  state:{zone:'coliseum',x:50,y:0,z:70,yaw:1,hero:'Orin'}}));
+ const second=await response;
+ assert.equal(second.players.length,1);assert.equal(second.players[0].zone,'frost');
+ assert.ok(second.spawn);assert.equal(srv.rooms.get('WORLD2').get(second.id).zone,'town');
+ assert.equal(srv.rooms.get('WORLD2').get(first.id).x,1600);
+});
+
+test('missing movement state cannot crash the public Varnethryl server',async t=>{
+ const srv=createWorldServer();srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');
+ t.after(()=>srv.close());const base='ws://127.0.0.1:'+srv.server.address().port;
+ const sock=await connected(base);t.after(()=>sock.terminate());
+ const reply=recv(sock,'welcome');
+ sock.send(JSON.stringify({type:'join',code:'WORLD3',name:'NoState'}));
+ const msg=await reply;
+ assert.equal(msg.first,true);assert.equal(srv.rooms.get('WORLD3').get(msg.id).zone,'town');
+ assert.equal(sock.readyState,WebSocket.OPEN);
+});

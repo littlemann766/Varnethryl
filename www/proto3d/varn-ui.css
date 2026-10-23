@@ -516,3 +516,30 @@ body.vn-sailing-zone #cb{display:none!important;pointer-events:none!important}
   right:auto!important;bottom:max(15px,env(safe-area-inset-bottom))!important;
  }
 }
+
+/* Multiplayer world selection uses the existing medieval menu palette. */
+#vnMenu.vn-multiplayer-selecting .vn-actions{display:none}
+#vnMenu #vnMpTitleLobby[hidden],#vnMenu #vnMpEnterGame{display:none!important}
+#vnMenu #vnMpTitleLobby{margin:5px auto;max-width:400px;text-align:left}
+.vn-mp-lobby{display:grid;gap:9px;color:#e8d3ac}
+.vn-mp-lobby label{display:grid;gap:5px;color:#dfc28d;font:700 12px VarnCinzel,Georgia,serif}
+.vn-mp-lobby input{width:100%;box-sizing:border-box;min-width:0;min-height:37px;padding:7px 10px;
+ border:1px solid #aa864d;background:#0d1727;color:#f9e9c8;border-radius:5px;font:13px system-ui,sans-serif}
+.vn-mp-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 12px VarnCinzel,Georgia,serif}
+#vnMenu .vn-mp-heading button,#vnQuickMenu .vn-mp-heading button{width:auto;min-height:30px;font-size:10px;padding:5px 10px}
+.vnMpWorlds{display:grid;gap:5px}
+#vnMenu .vn-mp-world,#vnQuickMenu .vn-mp-world{width:100%;text-align:left;min-height:39px;padding:8px 10px}
+#vnMenu .vn-mp-world[aria-current=true],#vnQuickMenu .vn-mp-world[aria-current=true]{border-color:#f2d48b;background:#2d3f59}
+#vnMenu .vn-mp-world:disabled,#vnQuickMenu .vn-mp-world:disabled{opacity:.45;cursor:not-allowed}
+.vn-mp-private-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#vnMenu .vn-mp-private-actions button,#vnQuickMenu .vn-mp-private-actions button{width:100%;min-height:35px;font-size:10px;padding:5px}
+#vnMenu .vn-mp-private-actions .vnMpJoin,#vnQuickMenu .vn-mp-private-actions .vnMpJoin{grid-column:1/-1}
+.vn-mp-lobby .vnMpStatus{display:block;border-top:1px solid #6e5c42;padding-top:7px;color:#f4d799;line-height:1.45}
+#vnMenu #vnMpTitleLobby button{font-size:12px;min-height:34px}
+#vnQuickMenu .vn-mp-lobby button{text-align:center}
+#vnQuickMenu .vn-mp-lobby{gap:7px}
+#vnQuickMenu .vn-mp-lobby label{font-size:11px}
+@media (orientation:landscape) and (max-height:540px){
+  #vnMenu.vn-multiplayer-selecting .vn-card{max-height:calc(100dvh - 30px);overflow:auto}
+  #vnMenu #vnMpTitleLobby{max-width:390px}
+}

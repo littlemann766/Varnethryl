@@ -19,7 +19,7 @@ export function createExperience(storage,baseLevel=START_LEVEL){
   if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&raw.version===1&&raw.heroes&&typeof raw.heroes==='object'){
     for(const [id,p] of Object.entries(raw.heroes)){
      if(!id||id==='__proto__'||!p||typeof p!=='object')continue;
-     const level=clamp(p.level,starting,MAX_LEVEL,starting);
+     const level=clamp(p.level,1,MAX_LEVEL,starting);
      const xp=clamp(p.xp,0,level>=MAX_LEVEL?0:Math.max(0,xpToNext(level)-1),0);
      all[cleanId(id)]={level,xp,total:clamp(p.total,0,MAX_XP,0)};
     }
@@ -44,5 +44,12 @@ export function createExperience(storage,baseLevel=START_LEVEL){
   save();
   return {...get(id),gained:n,levels};
  };
- return {get,award,save};
+ const setLevel=(id,level)=>{
+  const prev=get(id),p=all[prev.id];
+  p.level=clamp(level,1,MAX_LEVEL,prev.level);
+  p.xp=0;
+  save();
+  return get(id);
+ };
+ return {get,award,setLevel,save};
 }

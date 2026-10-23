@@ -639,7 +639,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.27';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.28';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -2087,6 +2087,19 @@ const cheatEnv = {
     nocdMode: (on) => { try { cheatStore.setItem('vn_owner_nocd_v1', on ? '1' : '0'); } catch (e) { /* ignore */ } return true; },
     unlimMode: (on) => { try { cheatStore.setItem('vn_owner_unlim_v1', on ? '1' : '0'); } catch (e) { /* ignore */ } return true; },
     godMode: (on) => { try { cheatStore.setItem('vn_owner_god_v1', on ? '1' : '0'); } catch (e) { /* ignore */ } return true; },
+    addCombatXp: async amount=>{
+      const f=await fightToggle(true);
+      return !!f?.cheatAddXp?.(amount);
+    },
+    setCombatLevel: async (level,scope)=>{
+      const f=await fightToggle(true);
+      if(!f)return false;
+      const active=GLB_IDS[HEROES.indexOf(hero)];
+      const ids=scope==='party'
+        ?[active,...crowd.filter(r=>r.kind==='party').map(r=>r.a.id)]
+        :[active];
+      return !!f.cheatSetLevel?.(level,ids);
+    },
     healParty: async () => {
       if(ZONE.name==='sailing')return false;
       const f=await fightToggle(true);

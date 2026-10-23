@@ -326,3 +326,11 @@ assert(source('www/proto3d/coowner-panel.js').includes("className:'vn-rank-fold'
        'CoOwner controls use matching medieval sections');
 assert(mpLobby.includes('remoteFacing(prevYaw,incomingYaw,deltaX,deltaZ,p.moving===true)')&&mpLobby.includes('e.networkYaw=incomingYaw'),
  'remote heading falls back to movement direction and never oscillates between derived and server yaw');
+
+/* 1.5.28 skill labels and live 3D owner progression. */
+assert(source('www/proto3d/combat/hud.js').includes("skillNameCallout.style.display='block'"),'mobile skill callout remains visible on WebView focus');
+assert(source('www/proto3d/combat/hud.js').includes("hint.textContent=a.name"),'focused combat names follow late kit changes');
+assert(source('www/proto3d/cheats.js').includes("hooks.addCombatXp(gained)"),'Owner XP updates live 3D progression');
+assert(source('www/proto3d/cheats.js').includes("hooks.setCombatLevel(L,scope)"),'Owner level controls update 3D heroes');
+assert(source('www/proto3d/fight.js').includes('cheatAddXp, cheatSetLevel'),'3D combat exposes Owner-gated progression hooks');
+assert(source('www/proto3d/combat/experience.js').includes('return {get,award,setLevel,save}'),'3D progression levels can be persisted');

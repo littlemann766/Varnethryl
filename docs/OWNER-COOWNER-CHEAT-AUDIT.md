@@ -14,8 +14,8 @@ The Owner and CoOwner are **separate roles**. Only the Owner can use full gamepl
 | Unlimited MP/SP | Combat resource flag | Wired and persisted |
 | No cooldowns | Combat cooldown override | Wired and persisted |
 | Infinite / +1M gold | Shared profile save mutations | Save state verified; **not** equivalent to 3D Armory wallet |
-| +1k / +50k XP | Shared profile XP and levels | Save state verified; 3D combat uses a **separate** per-hero XP store |
-| Active / party level | Shared profile levels | Save state verified; 3D combat progression is separate |
+| +1k / +50k XP | Shared profile AND live 3D combat experience | Both saves are updated; 3D HUD refreshes immediately |
+| Active / party level | Shared profile AND 3D active/companion levels | Persists across reloads; 3D levels range 1–200 while the existing Owner control caps 80 |
 | Spawn gear | Shared profile inventory | Item verified by unit tests; **3D Armory is a distinct equipment store** |
 | Heal | Actual 3D CombatController restore | Initializes fight controller when needed; unavailable at sea |
 | Kill enemies | Defeats live 3D fight targets | Reports failure if no live enemies |
@@ -49,3 +49,9 @@ At build time, `tools/prepare_marine_assets.py` decompresses the **approved orig
 - `python tools/marine_browser_test.py` — mobile WebView emulation with `DecompressionStream` unavailable and desktop sailing.
 
 These tests do not substitute for confirming the APK on the actual Android model, especially Ocean loading and two-device multiplayer.
+
+## v1.5.28 additions
+
+- The mobile focused-skill callout is explicitly visible even when WebView focus timing races skill naming, and updates if the hero's current ability changes.
+- The Owner profile XP/level actions also update the real 3D combat experience store and refresh the active hero's skill HUD. These are not CoOwner commands.
+- `node tools/owner_3d_progression_test.mjs` checks 3D experience, levels, persistence, and the original save's cheat marker.

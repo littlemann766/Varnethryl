@@ -43,6 +43,7 @@ jobs:
           node tools/check_boss_regions.mjs
           node tools/boss_patterns_test.mjs
           node tools/owner_cheats_test.mjs
+          node tools/owner_3d_progression_test.mjs
       - name: Prepare original raw marine models for fallback path
         run: python3 tools/prepare_marine_assets.py
       - name: Install headless mobile and desktop Chromium

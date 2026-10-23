@@ -467,7 +467,7 @@ body:has(#vnMiniMap.expanded) #cb .top{
  z-index:8}
 @media(orientation:portrait) and (max-width:560px){
  #cb .cx>.sl .nmL{display:none!important}
- #cb .skill-name-callout.show{display:block}
+ #cb .skill-name-callout.show{display:block!important}
  #cb .top{top:calc(max(12px,env(safe-area-inset-top)) + 187px)!important}
  body:has(#vnMiniMap.expanded) #cb .top{
    top:calc(max(12px,env(safe-area-inset-top)) + 269px)!important
@@ -577,11 +577,18 @@ export class CombatHUD {
       if (!b || !skillNameCallout) return;
       skillNameCallout.textContent = b.getAttribute('aria-label') || b.title || '';
       skillNameCallout.classList.add('show');
+      // WebView can deliver focus before hero skill names finish loading.
+      // Force the callout visible and keep its text in sync with the HUD.
+      skillNameCallout.style.display='block';
       clearTimeout(this._skillLabelTimer);
-      this._skillLabelTimer = setTimeout(() => skillNameCallout.classList.remove('show'), 1600);
+      this._skillLabelTimer = setTimeout(() => {
+        skillNameCallout.classList.remove('show');
+        skillNameCallout.style.display='';
+      }, 2400);
     };
     r.addEventListener('focusin', e => showSkillName(e.target.closest?.('.sl')));
     r.addEventListener('pointerdown', e => showSkillName(e.target.closest?.('.sl')));
+    this.slots.forEach(slot=>slot.b.addEventListener('focus',()=>showSkillName(slot.b)));
     this.btn = {}; $$('.cl button').forEach(b => { this.btn[b.dataset.a] = { b, cdv: b.querySelector('.cdv'), cd: -1 }; });
     for (let i = 0; i < NUM_POOL; i++) { const e = document.createElement('div'); e.className = 'fn'; r.appendChild(e); this.nums.push({ e, t: 9 }); }
     for (let i = 0; i < OH_POOL; i++) { const e = document.createElement('div'); e.className = 'oh'; e.innerHTML = '<i></i>'; r.appendChild(e); this.ohs.push({ e, f: e.firstChild, on: false, last: -1 }); }
@@ -670,7 +677,10 @@ export class CombatHUD {
     const own = cc.ownerOk(); this.setv(null, 'own', own, v => { this.root.classList.toggle('own', v); });
     for (let i = 0; i < 5; i++) {
       const s = this.slots[i], key = this.slotAbility(i), a = cc.skillDef(key);
-      const kk = String(key) + (own ? 'o' : '') + (cc.kit ? 'k' : ''); if (kk !== s.key) { s.key = kk; s.ic.innerHTML = own && ownerIconKey(key, a) ? OWNER_ICON[ownerIconKey(key, a)] : (ICONS[a.kit || a.owner ? a.icon : LEGACY_ICON[key]] || ICONS.basic); s.b.style.borderColor = a.kit && cc.kit ? cc.kit.color : ''; s.b.style.color = a.kit && cc.kit ? cc.kit.color : ''; s.b.title = a.name; s.b.setAttribute('aria-label', a.name); s.nm.textContent = i === 0 ? 'Basic Attack' : a.name; s.cd = -1; }
+      const kk = String(key) + (own ? 'o' : '') + (cc.kit ? 'k' : ''); if (kk !== s.key) { s.key = kk; s.ic.innerHTML = own && ownerIconKey(key, a) ? OWNER_ICON[ownerIconKey(key, a)] : (ICONS[a.kit || a.owner ? a.icon : LEGACY_ICON[key]] || ICONS.basic); s.b.style.borderColor = a.kit && cc.kit ? cc.kit.color : ''; s.b.style.color = a.kit && cc.kit ? cc.kit.color : ''; s.b.title = a.name; s.b.setAttribute('aria-label', a.name);
+        const hint=this.root.querySelector('.skill-name-callout.show');
+        if(document.activeElement===s.b&&hint)hint.textContent=a.name;
+        s.nm.textContent = i === 0 ? 'Basic Attack' : a.name; s.cd = -1; }
       const left = cc.cd.left(a.id), use = cc.slotUsable(key), noRes = !R.can(a.cost), isUlt = a.fury, fr = isUlt && use && left <= 0 && !cc.furyReady();
       const q = Math.round(left * 10) / 10 + (fr ? Math.round(cc.fury) / 1000 : 0); if (q !== s.cd) { s.cd = q; const p = left > 0 ? Math.round(cc.cd.frac(a.id) * 100) : fr ? Math.round(cc.fury) : 0; s.rg.style.setProperty('--p', p + '%'); s.ct.textContent = left > 0.05 ? (left >= 10 ? Math.ceil(left) : left.toFixed(1)) : ''; }
       const lock = !use && i === 4, oi = own && ownerIconKey(key, a), st = (i === 4 && own ? 'u-' + key + ' ' : '') + (oi ? 'oi ' : '') + (use ? '' : 'off ') + (fr && left <= 0 ? 'fr ' : '') + (use && noRes && left <= 0 ? 'nores ' : '') + (isUlt && use && left <= 0 && !fr ? 'rdy' : ''); if (st !== s.st) { s.st = st; s.b.className = 'sl b' + i + ' ' + st; if (lock) s.ic.innerHTML = ICONS.lock; }

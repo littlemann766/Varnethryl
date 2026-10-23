@@ -34,6 +34,7 @@ jobs:
           node tools/boss_patterns_test.mjs
           node tools/owner_cheats_test.mjs
           node tools/owner_async_cheats_test.mjs
+          node tools/owner_3d_progression_test.mjs
           node tools/check_release_cache.mjs
       - name: Check JavaScript syntax
         run: |

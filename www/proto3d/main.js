@@ -1817,7 +1817,7 @@ async function setZoneNow(name) {
         diag('Tidewrack ship could not load. Still in the Kingdom; retry from Menu → Travel. '+String(err?.message||err),true);
         return false;
       }
-      if(!target.shipReady || !target.ship.getObjectByName('user-supplied-sailing-ship')){
+      if(!target.shipReady || !target.ship.getObjectByName('tidewrack-sailing-ship-hull')){
         target.dispose();
         diag('Tidewrack ship is unavailable; remaining in the Kingdom.',true);
         return false;

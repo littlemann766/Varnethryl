@@ -40,19 +40,40 @@ function island(parent,x,z,r,sizeSeed,colliders){
  // Visible reefs and islands stop a sailing ship; leave plenty of open ocean.
  colliders.push({type:'circle',x,z,r:r*.83});
 }
+// Prefer the artist's existing compressed file, but support Android WebViews
+// without DecompressionStream using the raw GLB generated from that SAME file
+// by tools/prepare_marine_assets.py during the APK/web builds.
 async function glbFromGzip(url){
- if(!('DecompressionStream'in window))throw new Error('This Android WebView does not support compressed GLB models');
- const response=await fetch(url+'?v=1.5.9');if(!response.ok)throw new Error('GLB HTTP '+response.status);
- const bytes=await response.arrayBuffer(),head=new Uint8Array(bytes,0,Math.min(4,bytes.byteLength));
- // Some hosts decode .gz on the HTTP layer. Accept either raw GLB or gzip
- // exactly once so the original ship and Hydra load on both web and Android.
- const decoded=head[0]===0x67&&head[1]===0x6c&&head[2]===0x54&&head[3]===0x46
-   ?bytes:head[0]===0x1f&&head[1]===0x8b
-     ?await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer()
-     :null;
- if(!decoded)throw new Error('Unrecognized compressed GLB format');
- const {GLTFLoader}=await import('./vendor/jsm/loaders/GLTFLoader.js');
- return await new Promise((ok,bad)=>new GLTFLoader().parse(decoded,'',ok,bad));
+ const gzipUrl=new URL('./models-new/'+url.split('/').pop(),import.meta.url);
+ const glbUrl=new URL(gzipUrl.href.slice(0,-3));
+ const canDecompress=typeof DecompressionStream==='function';
+ const sources=canDecompress?[gzipUrl,glbUrl]:[glbUrl,gzipUrl];
+ const errors=[];
+ for(const source of sources){
+  try{
+   // Explicit no-cache on retry: a stale service-worker HTTP 404 or a failed
+   // partial download must not prevent loading the bundled raw copy.
+   const response=await fetch(source,{cache:'no-store'});
+   if(!response.ok)throw Error('HTTP '+response.status);
+   const bytes=await response.arrayBuffer();
+   if(bytes.byteLength<128)throw Error('Asset truncated ('+bytes.byteLength+' bytes)');
+   const head=new Uint8Array(bytes,0,4);
+   let decoded=bytes;
+   if(head[0]===0x1f&&head[1]===0x8b){
+     if(!canDecompress)throw Error('Gzip unsupported; raw GLB is required on this WebView');
+     decoded=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+   }else if(!(head[0]===0x67&&head[1]===0x6c&&head[2]===0x54&&head[3]===0x46))
+     throw Error('Unrecognized GLB header');
+   const magic=new Uint8Array(decoded,0,4);
+   if(magic[0]!==0x67||magic[1]!==0x6c||magic[2]!==0x54||magic[3]!==0x46)
+     throw Error('GLB magic missing after decompression');
+   const {GLTFLoader}=await import('./vendor/jsm/loaders/GLTFLoader.js');
+   return await new Promise((ok,bad)=>new GLTFLoader().parse(decoded,'',ok,bad));
+  }catch(e){
+    errors.push(source.pathname.split('/').pop()+': '+String(e?.message||e));
+  }
+ }
+ throw Error('Approved marine model unavailable. '+errors.join(' | '));
 }
 function dispose(root){const seen=new Set();root.traverse(o=>{if(o.geometry&&!seen.has(o.geometry)){seen.add(o.geometry);o.geometry.dispose();}const ms=Array.isArray(o.material)?o.material:o.material?[o.material]:[];for(const m of ms){if(seen.has(m)||cachedRockMaterials.has(m))continue;seen.add(m);for(const k of Object.keys(m)){const t=m[k];if(t?.isTexture&&!seen.has(t)){seen.add(t);t.dispose();}}m.dispose();}});}
 export function buildHydraMire(scene){

@@ -227,7 +227,15 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   if(!['town','wilds','frost','hydra','sailing','coliseum'].includes(p.zone))return;
   let e=peers.get(p.id);
   if(!e){e=createGhost(p);peers.set(p.id,e);}
-  e.zone=p.zone;e.x=p.x;e.y=p.y;e.z=p.z;e.yaw=Number.isFinite(p.yaw)?p.yaw:0;
+  const prevX=e.x,prevZ=e.z,prevYaw=e.yaw;
+  const incomingYaw=Number.isFinite(p.yaw)?p.yaw:prevYaw;
+  const deltaX=p.x-prevX,deltaZ=p.z-prevZ;
+  const walking=p.moving===true&&Math.hypot(deltaX,deltaZ)>.17;
+  const yawChanged=Math.abs(Math.atan2(Math.sin(incomingYaw-prevYaw),Math.cos(incomingYaw-prevYaw)))>.025;
+  // Follow network yaw when available; fall back to travel direction for
+  // legacy clients that move but keep broadcasting a frozen heading.
+  e.zone=p.zone;e.x=p.x;e.y=p.y;e.z=p.z;
+  e.yaw=walking&&!yawChanged?Math.atan2(deltaX,deltaZ):incomingYaw;
   e.moving=p.moving===true;
   if(p.role){e.role=p.role;e.coAura.visible=p.role==='coowner';}
   const incoming=typeof p.skin==='string'?p.skin:'aldric';

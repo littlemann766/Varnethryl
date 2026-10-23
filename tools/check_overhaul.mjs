@@ -304,3 +304,21 @@ assert(worldServer.includes("if(m.type==='coowner-lock')"),'CoOwner manual lock 
 assert(worldServer.includes("if(m.type==='coowner-jump'")||worldServer.includes("m.type==='coowner-jump'"),'CoOwner can teleport without getting Owner privileges');
 assert(mpLobby.includes("coOwner.onConnected(true)"),'CoOwner unlock survives temporary reconnection through server token');
 assert(source('www/sw.js').includes("./proto3d/coowner-panel.js"),'CoOwner UI included in Android web asset cache');
+
+// v1.5.25: ocean fallback, actual Owner asynchronous actions and menus.
+const assetBuilder=source('tools/prepare_marine_assets.py');
+const marineLoader=source('www/proto3d/water-realms.js');
+const asyncOwnerActions=source('www/proto3d/cheats.js');
+assert(assetBuilder.includes("gzip.decompress")&&assetBuilder.includes("tidewrack_sailing_ship"),'original ship raw GLB is derived from approved gzip');
+assert(marineLoader.includes("typeof DecompressionStream==='function'"),'ocean supports Android WebViews without native gzip API');
+assert(marineLoader.includes("glbUrl,gzipUrl"),'raw GLB is preferred where decompression is unavailable');
+assert(source('.github/workflows/build-android.yml').includes('tools/prepare_marine_assets.py'),'Android APK includes raw GLB fallback');
+assert(source('.github/workflows/deploy-pages.yml').includes('tools/prepare_marine_assets.py'),'GitHub Pages includes raw GLB fallback');
+assert(asyncOwnerActions.includes("return result===undefined?true:result"),'Owner travel reports real queued-zone result');
+assert(cheatPanel.includes("const result=await fn()"),'Owner buttons wait for actual asynchronous results');
+assert(cheatPanel.includes("questUnavailable"),'unfinished quest skip is disabled, not fake success');
+assert(cheatPanel.includes("className:'owner-fold'"),'Owner tools are grouped in medieval accordions');
+assert(source('www/proto3d/coowner-panel.js').includes("className:'vn-rank-fold'")||
+       source('www/proto3d/coowner-panel.js').includes("make('details','vn-rank-fold')"),
+       'CoOwner controls use matching medieval sections');
+assert(mpLobby.includes("const walking=p.moving===true"),'remote heading falls back to movement direction if network yaw freezes');

@@ -44,6 +44,17 @@ jobs:
         run: python3 tools/prepare_marine_assets.py
       - name: Copy web assets
         run: npx cap sync android
+      - name: Remove Android asset aliases for original gzip copies
+        run: |
+          # Android strips the final ".gz" when merging assets, causing
+          # Tidewrack raw+gzip to collide as one resource name. Retain the
+          # prepared ORIGINAL raw ship and Hydra GLBs for Android playback.
+          DIR=android/app/src/main/assets/public/proto3d/models-new
+          test -s "$DIR/tidewrack_sailing_ship.glb"
+          test -s "$DIR/hydra_restored_mobile.glb"
+          rm -f "$DIR/tidewrack_sailing_ship.glb.gz" "$DIR/hydra_restored_mobile.glb.gz"
+          echo "Android ship/Hydra assets: approved raw GLBs only"
+
       - name: Apply Varnethryl launcher icon and splash
         run: python3 tools/apply_android_icons.py
       - name: Configure stable signing and versionCode

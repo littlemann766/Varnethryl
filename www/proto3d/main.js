@@ -639,7 +639,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.16';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.17';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -2034,6 +2034,10 @@ for(const [button,destination] of [['vnTravelSail','sailing'],['vnTravelHydra','
 // Entering the world arms normal attacks and the skill HUD for EVERY hero.
 // Auto mode keeps the protected village peaceful; enemies spawn outside the walls.
 document.getElementById('vnEnter')?.addEventListener('click',()=>{
+  fightToggle(true).then(f=>f.startAuto()).catch(err=>diag('Combat startup failed: '+err.message,true));
+});
+// Multiplayer title entry arms the same gameplay without invoking Solo mode.
+document.getElementById('vnMpEnterGame')?.addEventListener('click',()=>{
   fightToggle(true).then(f=>f.startAuto()).catch(err=>diag('Combat startup failed: '+err.message,true));
 });
 let ownerFlag = false;

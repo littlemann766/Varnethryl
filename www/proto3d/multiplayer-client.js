@@ -8,24 +8,101 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
  const get=k=>{try{return localStorage.getItem(k)||'';}catch{return '';}};
  const put=(k,v)=>{try{localStorage.setItem(k,v);}catch{}};
  const DEFAULT_SERVER='wss://varnethryl-world-server-production.up.railway.app';
- const section=document.createElement('details');section.id='vnQuickMultiplayer';
- section.innerHTML=`<summary>Multiplayer · Test rooms</summary><div class="vn-opts" style="display:grid;gap:7px">
- <label for="vnMpName">Your nickname</label><input id="vnMpName" maxlength="20" autocomplete="nickname" placeholder="Adventurer">
- <label for="vnMpRoom">Room code — share with friends</label>
- <div style="display:flex;gap:5px"><input id="vnMpRoom" maxlength="12" style="min-width:0;flex:1" placeholder="ROOMCODE"><button id="vnMpCopy" type="button">Copy</button></div>
- <small>Varnethryl World Server · automatic connection</small>
- <div style="display:flex;gap:5px"><button id="vnMpJoin" type="button">Join room</button><button id="vnMpLeave" type="button">Leave</button></div>
- <small id="vnMpStatus" role="status" aria-live="polite">Offline — single-player still works.</small>
- <small>Up to 12 testers per room. A newcomer starts in town; existing players are never teleported. Same-map players appear together. PvP damage and shared enemies are not online yet.</small>
- </div>`;
- const host=document.querySelector('#vnQuickMenu .vn-quick-sections');
- if(host)host.insertBefore(section,host.children[1]||null);else document.body.appendChild(section);
- const $=s=>section.querySelector(s),nameEl=$('#vnMpName'),roomEl=$('#vnMpRoom'),statusEl=$('#vnMpStatus');
+ const PUBLIC_WORLDS=[
+   {code:'WORLD1',name:'Kingdom One'},
+   {code:'WORLD2',name:'Kingdom Two'},
+   {code:'WORLD3',name:'Kingdom Three'}
+ ];
+ const HTTP_SERVER='https://varnethryl-world-server-production.up.railway.app';
+ const section=document.getElementById('vnQuickMultiplayer');
+ const quickHost=document.getElementById('vnMpQuickLobby');
+ const titleHost=document.getElementById('vnMpTitleLobby');
+ const lobbies=[];
  const makeRoom=()=>Math.random().toString(36).slice(2,8).toUpperCase().padEnd(6,'X');
- nameEl.value=get('vn.mp.name')||'Adventurer';roomEl.value=get('vn.mp.room')||makeRoom();
- // The game controls its own server address; never use a saved address from a different project.
- const status=s=>{statusEl.textContent=s;};
- const validUrl=url=>{try{const u=new URL(url);return (u.protocol==='wss:'||(u.protocol==='ws:'&&['localhost','127.0.0.1'].includes(u.hostname)))&&Boolean(u.host);}catch{return false;}};
+ let worlds=PUBLIC_WORLDS.map(w=>({...w,players:null,capacity:12})),refreshBusy=false;
+ let currentName=get('vn.mp.name')||'Adventurer',currentCode=get('vn.mp.room')||'WORLD1';
+ let currentStatus='Offline — single-player is available.';
+ const status=message=>{currentStatus=message;for(const l of lobbies)l.status.textContent=message;};
+ const makeLobby=(host,isTitle)=>{
+   if(!host)return;
+   host.innerHTML=`<div class="vn-mp-lobby">
+    <label>Adventurer name<input class="vnMpName" maxlength="20" autocomplete="nickname" placeholder="Adventurer"></label>
+    <div class="vn-mp-heading"><strong>Public worlds</strong><button type="button" class="vnMpRefresh">Refresh</button></div>
+    <div class="vnMpWorlds" role="group" aria-label="Choose a Varnethryl multiplayer world"></div>
+    <label>Private world code<input class="vnMpRoom" maxlength="12" autocapitalize="characters" placeholder="Your friend's code"></label>
+    <div class="vn-mp-private-actions">
+      <button type="button" class="vnMpJoin">Join code</button>
+      <button type="button" class="vnMpCreate">Create private world</button>
+      <button type="button" class="vnMpCopy">Copy code</button>
+    </div>
+    <button type="button" class="vnMpLeave">Leave multiplayer</button>
+    <small class="vnMpStatus" aria-live="polite" role="status"></small>
+    <small>One Varnethryl server, separate world instances. Select the SAME public world or private code to meet. Players already exploring are never moved.</small>
+    ${isTitle?'<button type="button" class="vnMpBack">← Back to title</button>':''}
+   </div>`;
+   const l={host,isTitle,name:host.querySelector('.vnMpName'),room:host.querySelector('.vnMpRoom'),
+     list:host.querySelector('.vnMpWorlds'),status:host.querySelector('.vnMpStatus')};
+   l.name.value=currentName;l.room.value=currentCode;l.status.textContent=currentStatus;lobbies.push(l);
+   l.name.addEventListener('input',()=>{currentName=l.name.value;});
+   l.room.addEventListener('input',()=>{currentCode=l.room.value;});
+   host.querySelector('.vnMpRefresh').addEventListener('click',refresh);
+   host.querySelector('.vnMpJoin').addEventListener('click',()=>join(l.room.value,l));
+   host.querySelector('.vnMpCreate').addEventListener('click',()=>join(makeRoom(),l));
+   host.querySelector('.vnMpLeave').addEventListener('click',disconnect);
+   host.querySelector('.vnMpCopy').addEventListener('click',()=>{
+     const code=joined?room:l.room.value.trim().toUpperCase();
+     if(navigator.clipboard?.writeText)
+       navigator.clipboard.writeText(code).then(()=>status('Copied world code '+code+'.')).catch(()=>status('Copy unavailable — share the code shown.'));
+     else status('Share the world code shown in the box.');
+   });
+   host.querySelector('.vnMpBack')?.addEventListener('click',closeTitleLobby);
+ };
+ function closeTitleLobby(){
+   if(titleHost)titleHost.hidden=true;
+   document.getElementById('vnMenu')?.classList.remove('vn-multiplayer-selecting');
+ }
+ const showTitleLobby=()=>{
+   if(!titleHost)return;
+   titleHost.hidden=false;
+   document.getElementById('vnMenu')?.classList.add('vn-multiplayer-selecting');
+   refresh();
+ };
+ const selectCode=code=>{currentCode=code;for(const l of lobbies)l.room.value=code;};
+ function drawWorlds(){
+   for(const l of lobbies){
+     l.list.replaceChildren();
+     for(const w of worlds){
+       const btn=document.createElement('button');btn.type='button';btn.className='vn-mp-world';
+       const full=w.players!==null&&w.players>=w.capacity;
+       btn.disabled=full;
+       const desc=w.players===null?'Count unavailable':w.players+'/'+w.capacity+' online';
+       btn.textContent=w.name+' · '+desc+(full?' · Full':'');
+       if(joined&&room===w.code){btn.textContent+=' · Joined';btn.setAttribute('aria-current','true');}
+       btn.addEventListener('click',()=>join(w.code,l));l.list.appendChild(btn);
+     }
+   }
+ }
+ async function refresh(){
+   if(refreshBusy)return;refreshBusy=true;
+   try{
+     const resp=await fetch(HTTP_SERVER+'/rooms',{cache:'no-store'});
+     if(!resp.ok)throw Error('HTTP '+resp.status);
+     const data=await resp.json();
+     if(!Array.isArray(data.worlds))throw Error('World list unavailable');
+     const entries=new Map(data.worlds.filter(w=>typeof w.code==='string').map(w=>[w.code,w]));
+     worlds=PUBLIC_WORLDS.map(w=>{
+       const found=entries.get(w.code);
+       return {...w,players:Number.isInteger(found?.players)?found.players:null,capacity:12};
+     });
+   }catch(e){
+     worlds=PUBLIC_WORLDS.map(w=>({...w,players:null,capacity:12}));
+     if(!joined)status('Server list unavailable. You may still try joining a world.');
+   }finally{refreshBusy=false;drawWorlds();}
+ }
+ makeLobby(quickHost,false);makeLobby(titleHost,true);drawWorlds();
+ document.getElementById('vnMultiplayer')?.addEventListener('click',showTitleLobby);
+ section?.addEventListener('toggle',()=>{if(section.open)refresh();});
+ document.getElementById('vnEnter')?.addEventListener('click',()=>{disconnect();closeTitleLobby();});
  function createGhost(p){
   const obj=new THREE.Group();obj.name='Other Player '+p.name;root.add(obj);
   const color=[0x638ce4,0x68c5aa,0xd4ad69,0xb181dd,0xdf8185,0x70b5ce][p.slot%6];
@@ -64,35 +141,42 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
  function resetPeers(){for(const id of [...peers.keys()])removePeer(id);}
  function disconnect(){
   epoch++;joined=false;selfId='';room='';onlineCount=0;
-  const prev=socket;socket=null;if(prev)try{prev.close(1000,'Leave room');}catch{}
-  resetPeers();status('Offline — single-player still works.');
+  const prev=socket;socket=null;if(prev)try{prev.close(1000,'Leave world');}catch{}
+  resetPeers();status('Offline — single-player is available.');drawWorlds();
  }
  function sendState(){
   if(!joined||!socket||socket.readyState!==WebSocket.OPEN)return;
   const zone=getZone();if(!['town','wilds','frost','hydra','sailing','coliseum'].includes(zone))return;
   socket.send(JSON.stringify({type:'state',zone,x:state.heroX,y:state.dispY||state.heroY||0,z:state.heroZ,yaw:state.yaw||0,hero:getHeroName()}));
  }
- async function join(){
-  disconnect();const url=DEFAULT_SERVER,code=roomEl.value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
-  const name=nameEl.value.trim().replace(/[^\p{L}\p{N} _-]/gu,'').slice(0,20);
-  if(!validUrl(url)){status('Set a secure wss:// server address first.');return;}
-  if(code.length<4||name.length<2){status('Use a room code (4–12 characters) and nickname (2+ characters).');return;}
-  roomEl.value=code;nameEl.value=name;
+ async function join(rawCode,lobby){
+  const fromTitle=!!lobby?.isTitle&&!document.getElementById('vnMenu')?.hidden;
+  const code=String(rawCode||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
+  const name=String(lobby?.name.value||currentName).trim().replace(/[^\p{L}\p{N} _-]/gu,'').slice(0,20);
+  if(code.length<4||name.length<2){status('Enter a nickname (2+ letters) and a world code (4–12 characters).');return;}
+  // Joining the selected world intentionally replaces the previous session;
+  // it never changes game maps until the server confirms the new admission.
+  disconnect();currentName=name;selectCode(code);
+  for(const l of lobbies)l.name.value=name;
   put('vn.mp.name',name);put('vn.mp.room',code);
   const seq=++epoch;let s;
-  try{s=new WebSocket(url);}catch{status('Server address is invalid.');return;}
-  socket=s;status('Connecting to multiplayer server…');
-  s.onopen=()=>{if(seq!==epoch)return;s.send(JSON.stringify({type:'join',code,name,state:{
-    zone:getZone(),x:state.heroX,y:state.heroY||0,z:state.heroZ,yaw:state.yaw||0,hero:getHeroName()
-  }}));};
+  try{s=new WebSocket(DEFAULT_SERVER);}catch{status('Could not reach the Varnethryl world server.');return;}
+  socket=s;status('Connecting to '+code+'…');
+  s.onopen=()=>{
+   if(seq!==epoch)return;
+   s.send(JSON.stringify({type:'join',entry:fromTitle?'title':'game',code,name,state:{
+     zone:getZone(),x:state.heroX,y:state.heroY||0,z:state.heroZ,yaw:state.yaw||0,hero:getHeroName()
+   }}));
+  };
   s.onmessage=async event=>{
    if(seq!==epoch)return;
    let m;try{m=JSON.parse(event.data);}catch{return;}
-   if(m.type==='error'){status('Server: '+String(m.message||'Cannot join room'));return;}
+   if(m.type==='error'){status('World unavailable: '+String(m.message||'cannot join'));s.close();return;}
    if(m.type==='welcome'){
     selfId=m.id;room=m.code;resetPeers();
-    // Only newcomers are moved to the town. Existing connected players never move.
-    if(!m.first&&m.spawn){
+    // Only this newcomer is sent to town; a player already in a cave,
+    // on a boat, or in combat remains untouched by somebody else joining.
+    if(m.spawn){
      try{
       if(getZone()!=='town')await setZone('town');
       if(seq!==epoch)return;
@@ -100,21 +184,27 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
       state.target=null;updateLevel();snapFollowers();camRig.snap=true;miniMap.invalidate();
      }catch(e){status('Town travel failed: '+String(e?.message||e));s.close();return;}
     }
-    if(seq!==epoch)return;joined=true;onlineCount=(m.players?.length||0)+1;
+    if(seq!==epoch)return;
+    joined=true;onlineCount=(m.players?.length||0)+1;
     for(const p of m.players||[])sync(p);
-    status('Room '+room+' · '+onlineCount+'/12 players · '+(m.first?'You stayed in your current map.':'Joined at town.'));
-    sendState();return;
+    status('In '+room+' · '+onlineCount+'/12 players. '+(m.spawn?'You entered town.':'Your location was preserved.'));
+    refresh();
+    if(fromTitle){
+      closeTitleLobby();
+      document.getElementById('vnMpEnterGame')?.click();
+    }else document.getElementById('vnQuickClose')?.click();
+    return;
    }
-   if(m.type==='joined'){onlineCount++;sync(m.player);status('Room '+room+' · '+onlineCount+'/12 players');}
+   if(m.type==='joined'){onlineCount++;sync(m.player);status('World '+room+' · '+onlineCount+'/12 players');}
    if(m.type==='state')sync(m.player);
-   if(m.type==='left'){onlineCount=Math.max(1,onlineCount-1);removePeer(m.id);status('Room '+room+' · '+onlineCount+'/12 players');}
+   if(m.type==='left'){onlineCount=Math.max(1,onlineCount-1);removePeer(m.id);status('World '+room+' · '+onlineCount+'/12 players');}
   };
-  s.onerror=()=>{if(seq===epoch)status('Connection failed — check server URL or hosting.');};
-  s.onclose=()=>{if(seq===epoch){joined=false;selfId='';socket=null;resetPeers();status('Disconnected. You can keep playing solo or rejoin.');}};
+  s.onerror=()=>{if(seq===epoch)status('Unable to reach Varnethryl World Server. Retry from the menu.');};
+  s.onclose=()=>{
+    if(seq===epoch){joined=false;selfId='';socket=null;resetPeers();
+      status('Disconnected. Solo play still works; choose a world to rejoin.');refresh();}
+  };
  }
- $('#vnMpJoin').addEventListener('click',join);
- $('#vnMpLeave').addEventListener('click',disconnect);
- $('#vnMpCopy').addEventListener('click',()=>{if(navigator.clipboard?.writeText)navigator.clipboard.writeText(roomEl.value).then(()=>status('Room code copied. Then join inside Varnethryl.')).catch(()=>status('Copy failed; select the room code.'));else status('Select and copy the room code.');});
  function update(dt,now){
   if(joined&&now-lastSend>=95){lastSend=now;sendState();}
   for(const p of peers.values()){
@@ -128,5 +218,5 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
    p.legB.rotation.x=-p.legA.rotation.x;
   }
  }
- return {join,disconnect,update,get online(){return joined;},get room(){return room;},get playerCount(){return onlineCount;},dispose(){disconnect();section.remove();root.parent?.remove(root);}};
+ return {join,disconnect,refresh,update,get online(){return joined;},get room(){return room;},get playerCount(){return onlineCount;},dispose(){disconnect();root.parent?.remove(root);}};
 }

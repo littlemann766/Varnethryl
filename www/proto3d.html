@@ -36,15 +36,18 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
     <p class="vn-legend">Legends Are Forged. Kingdoms Are Conquered.</p>
     <div class="vn-rule"></div>
     <div class="vn-actions">
-      <button class="vn-primary" id="vnEnter" type="button">Enter the Kingdom</button>
+      <button class="vn-primary" id="vnEnter" type="button">Play Solo</button>
+      <button id="vnMultiplayer" type="button">⚔ Multiplayer · Join World</button>
       <button id="vnHero" type="button">Choose a Hero</button>
       <button id="vnOptions" type="button">Settings</button>
     </div>
+    <div id="vnMpTitleLobby" hidden aria-label="Multiplayer world selection"></div>
+    <button id="vnMpEnterGame" type="button" hidden aria-hidden="true" tabindex="-1">Enter multiplayer world</button>
     <div class="vn-links"><a href="proto3d/model-viewer.html">3D Model Gallery</a></div>
     <div class="vn-bottom">Your adventure continues from the existing local save. Nothing is reset.</div>
   </div>
 </div>
-<div id="hud" hidden><div><b>VARNETHRYL</b> <span id="ver">v1.5.16</span><span id="fps">-- fps</span></div><a id="mdlBtn" href="#">Models</a><a id="fightBtn" href="#" style="display:none">Fight test</a></div>
+<div id="hud" hidden><div><b>VARNETHRYL</b> <span id="ver">v1.5.17</span><span id="fps">-- fps</span></div><a id="mdlBtn" href="#">Models</a><a id="fightBtn" href="#" style="display:none">Fight test</a></div>
 <button id="vnMenuBtn" type="button" aria-expanded="false" aria-controls="vnQuickMenu" aria-label="Open game menu">☰ Menu</button>
 <nav id="vnQuickMenu" aria-label="Game menu" hidden>
   <div class="vn-qhead"><strong>VARNETHRYL</strong><button id="vnQuickClose" type="button" aria-label="Close menu">✕</button></div>
@@ -64,6 +67,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
       <button id="vnCombatToggle" type="button">Toggle combat</button>
       <button id="vnEditHud" type="button">Customize HUD</button>
     </div></details>
+    <details id="vnQuickMultiplayer"><summary>Multiplayer · Worlds</summary><div class="vn-opts" id="vnMpQuickLobby"></div></details>
     <details id="vnQuickMore"><summary>More options</summary><div class="vn-opts">
       <button id="vnTitleBtn" type="button">Return to title</button>
       <button id="vnApprovedBosses" type="button">Approved boss models</button>
@@ -72,7 +76,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
       <button id="vnStatusOpen" type="button">Diagnostics</button>
     </div></details>
   </div>
-  <small class="vn-quick-version">3D build <span id="vnVersion">1.5.16</span></small>
+  <small class="vn-quick-version">3D build <span id="vnVersion">1.5.17</span></small>
 </nav>
 <div id="moveActions" aria-label="Movement">
  <button type="button" id="runBtn" aria-pressed="false" title="Walk or run">WALK</button>

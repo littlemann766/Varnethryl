@@ -7,13 +7,28 @@ import { WebSocketServer, WebSocket } from 'ws';
 // No client-authoritative damage, currency, or inventory messages are accepted.
 const ZONES=new Set(['town','wilds','frost','hydra','sailing','coliseum']);
 const MAX_PLAYERS=12, MAX_BYTES=2048, RATE_MS=80;
+// Three stable public world instances live on this one dedicated Varnethryl
+// server. Unlike private invite codes, these worlds are discoverable in-game.
+export const PUBLIC_WORLDS=Object.freeze([
+ {code:'WORLD1',name:'Kingdom One'},
+ {code:'WORLD2',name:'Kingdom Two'},
+ {code:'WORLD3',name:'Kingdom Three'}
+]);
 const clean=(value,max)=>String(value??'').replace(/[^\p{L}\p{N} _-]/gu,'').trim().slice(0,max);
 const finite=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
-const validState=m=>ZONES.has(m.zone)&&finite(m.x,-10000,10000)&&finite(m.z,-10000,10000)&&finite(m.y,-1000,5000)&&finite(m.yaw,-1000,1000);
+const validState=m=>!!m&&typeof m==='object'&&ZONES.has(m.zone)&&finite(m.x,-10000,10000)&&finite(m.z,-10000,10000)&&finite(m.y,-1000,5000)&&finite(m.yaw,-1000,1000);
 const visible=p=>({id:p.id,name:p.name,slot:p.slot,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,hero:p.hero});
 export function createWorldServer(){
  const rooms=new Map();
  const server=http.createServer((req,res)=>{
+  // Only room counts and names are published; never reveal private invite
+  // codes, player nicknames, session IDs, or positions to unauthenticated GETs.
+  if(req.method==='GET'&&req.url?.split('?')[0]==='/rooms'){
+   const worlds=PUBLIC_WORLDS.map(({code,name})=>({code,name,
+      players:rooms.get(code)?.size||0,capacity:MAX_PLAYERS}));
+   res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'});
+   res.end(JSON.stringify({ok:true,worlds,maxPlayers:MAX_PLAYERS}));return;
+  }
   if(req.method==='GET'&&req.url?.split('?')[0]==='/health'){
    res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});
    res.end(JSON.stringify({ok:true,rooms:rooms.size,players:[...rooms.values()].reduce((n,r)=>n+r.size,0)}));return;
@@ -48,11 +63,17 @@ export function createWorldServer(){
     const angle=slot*Math.PI*2/12,spawn={x:Math.sin(angle)*4,z:14+Math.cos(angle)*4};
     // The first member keeps their EXISTING game location, even if deep in a cave.
     // Later members enter at town. Nobody else is teleported or interrupted.
-    const first=room.size===0,initial=first&&validState(m.state)?m.state:null;
+    const first=room.size===0;
+    // Joining from the START SCREEN always enters town, even when an older
+    // local save last exited in a cave. Existing live players never move.
+    // Joining mid-game to an empty world preserves that player's current map.
+    const enterFromTitle=m.entry==='title';
+    const initial=first&&!enterFromTitle&&validState(m.state)?m.state:null;
+    const shouldSpawn=enterFromTitle||!first;
     const p={id:randomUUID(),socket,code,name,slot,
       zone:initial?.zone||'town',x:initial?.x??spawn.x,z:initial?.z??spawn.z,
       y:initial?.y??0,yaw:initial?.yaw??0,hero:clean(initial?.hero,30)||'Adventurer',lastUpdate:0};
-    send(socket,{type:'welcome',id:p.id,code,slot,first,spawn:first?null:spawn,players:[...room.values()].map(visible),maxPlayers:MAX_PLAYERS});
+    send(socket,{type:'welcome',id:p.id,code,slot,first,spawn:shouldSpawn?spawn:null,players:[...room.values()].map(visible),maxPlayers:MAX_PLAYERS});
     socket.player=p;room.set(p.id,p);broadcast(room,{type:'joined',player:visible(p)},socket);
     return;
    }

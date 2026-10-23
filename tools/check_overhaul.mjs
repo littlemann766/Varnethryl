@@ -214,3 +214,17 @@ assert(mpClient.includes('e.zone===getZone()'),'players in other zones are not d
 assert(mpServer.includes("zone:initial?.zone||'town'"),'first connected player remains in their current map');
 assert(mpServer.includes("if(room.size>=MAX_PLAYERS)"),'room capacity is enforced');
 assert(source('www/sw.js').includes('./proto3d/multiplayer-client.js'),'multiplayer client is cached for installed Android web app');
+
+// Main menu: Solo is explicit and Multiplayer opens a discoverable world list.
+// Room selection must be opt-in; joining does not reset unrelated game saves.
+assert(nav.includes('id="vnMultiplayer"')&&nav.includes('id="vnMpTitleLobby"'),'multiplayer world browser appears on game title screen');
+assert(nav.includes('id="vnMpQuickLobby"'),'the same world choices remain available from in-game menu');
+assert(nav.includes('id="vnMpEnterGame"'),'successful online admission enters game without clicking Solo');
+assert(main.includes("document.getElementById('vnMpEnterGame')?.addEventListener('click'"),'multiplayer title entry arms combat HUD');
+assert(menu.includes("document.getElementById('vnMpEnterGame')?.addEventListener('click', hide)"),'multiplayer join closes title screen');
+const mpLobby=source('www/proto3d/multiplayer-client.js');
+assert(mpLobby.includes('PUBLIC_WORLDS')&&mpLobby.includes("HTTP_SERVER+'/rooms'"),'public worlds are listed from live server');
+assert(mpLobby.includes("entry:fromTitle?'title':'game'"),'joiner town spawn differs from mid-game entry');
+assert(mpLobby.includes("if(m.spawn)"),'only joining client with assigned spawn changes location');
+assert(mpLobby.includes("document.getElementById('vnMpEnterGame')?.click()"),'successful multiplayer entry activates gameplay');
+assert(!mpLobby.includes('vnMpServer'),'server connection is automatic with no pasted URL');

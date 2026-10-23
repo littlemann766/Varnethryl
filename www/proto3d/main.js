@@ -5,7 +5,7 @@ import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { CHARS } from './chars.js';
 import { preload as preloadChars } from './texgen.js';
-import { makeEnterable } from './interiors.js';
+import { makeEnterable, updateTownEnterables } from './interiors.js';
 import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
 import { fx, zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { readSave, planFromState, createSaver } from './save3d.js';
@@ -639,7 +639,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.14';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.15';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1582,7 +1582,7 @@ function updateHero(dt) {
   if(jumpVelocity>0||jumpHeight>0){jumpHeight=Math.max(0,jumpHeight+jumpVelocity*dt);jumpVelocity-=20*HS*dt;if(jumpHeight===0)jumpVelocity=0;}
   state.dispY = state.dispY === undefined || Math.abs(state.heroY - state.dispY) > 3 ? state.heroY : state.dispY + (state.heroY - state.dispY) * Math.min(1, dt * 16);
   hero.position.set(state.heroX, state.dispY + jumpHeight + cheat.alt + cinderFlight.alt - (state.swimming?0.75*HS:0), state.heroZ); hero.rotation.y = state.yaw;
-  let ins = null; for (const e of enterables) { const r = e.update(state.heroX, state.heroZ, dt, state.level); if (r) ins = typeof r === 'string' ? r : e.id; }
+  const ins = updateTownEnterables(ZONE.name,enterables,state.heroX,state.heroZ,dt,state.level);
   if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
     try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }
   animateHero(dt); cullSkins(); heroGhost();
@@ -1750,8 +1750,24 @@ function snapFollowers() {
    Leaving the Wilds fully DISPOSES it (geometry, materials, textures, enemies via FIGHT.stop) and it is rebuilt on the next visit. */
 const townHidden = [];
 function hideTown() {
-  const keep = new Set([...HEROES, ...crowd.map(r => r.root), WM && WM.group, WM && WM.portalMesh, FM && FM.group, HM && HM.group, SM && SM.group, COLISEUM_PVP && COLISEUM_PVP.group, marker, sun, sun.target, camera, ...(FIGHT ? [] : [])]);
-  for (const n of scene.children) { if (n.visible && !keep.has(n) && !n.isLight && !n.isCamera && !(FIGHT && n.userData && n.userData.fightFx) && Math.hypot(n.position.x - 1000, n.position.z) > 400 && !(n.userData && n.userData.keepAlways)) { n.visible = false; townHidden.push(n); } }
+  // Town interiors must not remain in cutaway mode when we enter a different
+  // map: otherwise their shared roof/wall buffers can leak into the arena.
+  for (const e of enterables) for (const b of e.parts || [e])
+    if (b?.inside && typeof b.setInside === 'function') b.setInside(false);
+  state.inside = null;
+  // Keep active zone geometry, characters, lights and live multiplayer peers.
+  // Do NOT keep city NPCs or use the old x=1000 distance shortcut: town scene
+  // batches contain geometry in world coordinates and must ALL be isolated.
+  const keep = new Set([...HEROES, ...crowd.filter(r=>r.kind==='party').map(r=>r.root),
+    WM && WM.group, WM && WM.portalMesh, FM && FM.group, HM && HM.group,
+    SM && SM.group, COLISEUM_PVP && COLISEUM_PVP.group,
+    marker, sun, sun.target, camera]);
+  for (const n of scene.children) {
+    if (!n.visible || keep.has(n) || n.isLight || n.isCamera ||
+        (FIGHT && n.userData?.fightFx) || n.userData?.keepAlways) continue;
+    n.visible = false;
+    townHidden.push(n);
+  }
 }
 function unloadWilds() {
   if (!WM) return; const g = WM.group, pm = WM.portalMesh; scene.remove(g); scene.remove(pm);

@@ -5,6 +5,7 @@ import {landmarks,terrainColor} from '../www/proto3d/minimap.js';
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {fallenTreeSites,balthrixPosition,isCitySafe,onLava,PORT_CENTER,FROST_SUMMIT,TITAN_CENTER} from '../www/proto3d/bossregions.js';
+import {updateTownEnterables} from '../www/proto3d/interiors.js';
 const source=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const hud=source('www/proto3d/combat/hud.js');
 assert(hud.includes('/* 1.5.11: compact five-button combat fan'),'round combat fan marker');
@@ -65,6 +66,21 @@ assert(minimap.includes('e.height?.(zone,x,z)'),'minimap samples actual terrain 
 assert(minimap.includes('e.water?.(zone,x,z)'),'minimap samples current water');
 assert(minimap.includes('env.islands?.(overview)'),'minimap shows streamed islands locally and deterministic distant islands in FULL view');
 assert(main.includes('miniMap.invalidate(); // redraw the real top-down'),'zone travel refreshes the map');
+assert(main.includes("updateTownEnterables(ZONE.name,enterables,state.heroX,state.heroZ,dt,state.level)"),'all town building activity must be gated to the Kingdom');
+assert(!main.includes('Math.hypot(n.position.x - 1000, n.position.z) > 400'),'zone isolation cannot use an old world-coordinate distance exemption');
+assert(main.includes("crowd.filter(r=>r.kind==='party').map(r=>r.root)"),'city NPCs do not render in the Coliseum');
+assert(main.includes("COLISEUM_PVP && COLISEUM_PVP.group"),'active Coliseum geometry remains visible during town unloading');
+assert(main.includes('for (const n of townHidden)n.visible=true;townHidden.length=0;'),'town scene visibility is restored on return');
+const villageRoot={visible:false};
+const villageBuilding={id:'guildhall',update:()=>{villageRoot.visible=true;return true;}};
+for(const zone of ['wilds','frost','hydra','sailing','coliseum']){
+  villageRoot.visible=false;
+  assert.equal(updateTownEnterables(zone,[villageBuilding],0,133,0.016,0),null,zone+' must not enter or reveal the Guild Hall');
+  assert.equal(villageRoot.visible,false,zone+' leaves town buildings hidden');
+}
+assert.equal(updateTownEnterables('town',[villageBuilding],0,0,0.016,0),'guildhall','town interior interactions still function');
+assert.equal(villageRoot.visible,true,'returning to town restores normal building updates');
+
 assert(marine.includes('if(!full)return [...obstacles.values()].flat();'),'local chart keeps streamed islands live');
 assert(marine.includes('for(const p of islandLayout(tx,tz))island('),'3D islands use same layout as map chart');
 assert(marine.includes('function mapFeatures(full=false)'),'full-ocean chart computes future unloaded islands');

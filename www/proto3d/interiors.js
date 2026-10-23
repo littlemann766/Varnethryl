@@ -112,3 +112,15 @@ export function makeEnterable(ctx, c) {
     door: { x: cx, z: cz + d / 2 },
   };
 }
+
+// These buildings belong to the Kingdom only. Running their update functions
+// while in the Coliseum re-enables culled town geometry every animation frame.
+export function updateTownEnterables(zone,enterables,x,z,dt,level=0){
+  if(zone!=='town')return null;
+  let inside=null;
+  for(const e of enterables){
+    const result=e.update(x,z,dt,level);
+    if(result)inside=typeof result==='string'?result:e.id;
+  }
+  return inside;
+}

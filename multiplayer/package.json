@@ -1,0 +1,17 @@
+{
+  "name": "varnethryl-multiplayer-relay",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Optional presence relay for Varnethryl shared-world test rooms",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}

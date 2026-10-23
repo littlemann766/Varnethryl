@@ -1,5 +1,6 @@
 // Varnethryl 3D prototype: Liongate-style village. Standalone, does not touch the 2D game.
 import * as THREE from './vendor/three.module.js';
+import { createMultiplayer } from './multiplayer-client.js';
 import { makeAldricTextures, buildAldric } from './aldric.js';
 import { makeHeroTextures, buildUmbral, buildSelene } from './heroes2.js';
 import { CHARS } from './chars.js';
@@ -109,7 +110,7 @@ function applyView() { const kf = Math.max(1, Math.min(5, CH.camDist)), k2 = Mat
 let SUNK = 1;
 function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; try { applyView(); } catch (e) {} try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
 const ZONE = { name: 'town', cx: 0, cz: 0, half: 0 };
-let COLISEUM_PVP=null, COLISEUM_TOWN_GATE=null;
+let COLISEUM_PVP=null, COLISEUM_TOWN_GATE=null, MULTIPLAYER=null;
 // Entering the ice cavern dims the REAL world lights, sky and fog.
 // Restore the original town sky on exit, with no texture replacement/leaks.
 const outdoorSky=scene.background;
@@ -638,7 +639,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.11';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.12';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1926,7 +1927,7 @@ function frame(now) {
   if (now - lastDraw < 11.5) return;            // cap at ~72 fps on 120/144 Hz monitors (75 Hz and below untouched)
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  updateCrowd(dt); updateHero(dt); updateZone(dt); updateZoneAmbience(dt); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if(HOB_CAMPS_WORLD){HOB_CAMPS_WORLD.group.visible=ZONE.name==='town';if(ZONE.name==='town')HOB_CAMPS_WORLD.cull(state.heroX,state.heroZ);} if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
+  updateCrowd(dt); updateHero(dt); updateZone(dt); updateZoneAmbience(dt); if(MULTIPLAYER)MULTIPLAYER.update(dt,now); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if(HOB_CAMPS_WORLD){HOB_CAMPS_WORLD.group.visible=ZONE.name==='town';if(ZONE.name==='town')HOB_CAMPS_WORLD.cull(state.heroX,state.heroZ);} if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
   simTime += dt; if (SMOKE) SMOKE.update(simTime); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateWater?.(simTime,state.heroX,state.heroZ); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateVolcano?.(simTime,state.heroX,state.heroZ);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   if(ZONE.name==='town' && totalFrames%9===0)hideInactiveHeroModels();
@@ -2091,3 +2092,10 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
   setHero, get heroIndex() { return HEROES.indexOf(hero); },
   tapAt: tapMoveTo,
 };
+
+// Multiplayer is strictly opt-in; starting or joining a session never resets a
+// player's existing game. Newcomer town travel applies only to that client.
+MULTIPLAYER=createMultiplayer({THREE,scene,state,getZone:()=>ZONE.name,setZone,
+ getHeroName:()=>HERO_NAMES[HEROES.indexOf(hero)]||'Adventurer',
+ updateLevel,snapFollowers,camRig,miniMap});
+window.__p3d.multiplayer=MULTIPLAYER;

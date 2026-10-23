@@ -1,0 +1,27 @@
+name: Test Varnethryl Multiplayer
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'multiplayer/**'
+      - 'www/proto3d/multiplayer-client.js'
+      - '.github/workflows/test-multiplayer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  multiplayer-relay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check client code syntax
+        run: node --check www/proto3d/multiplayer-client.js
+      - name: Install multiplayer relay dependencies
+        working-directory: multiplayer
+        run: npm install --no-audit --no-fund
+      - name: Test room joins, late arrivals, cave isolation and disconnects
+        working-directory: multiplayer
+        run: npm test

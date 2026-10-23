@@ -2038,7 +2038,15 @@ async function fightToggle(createOnly) {
       hydraBossAt:()=>HM?{x:HM.group.position.x,z:HM.group.position.z-11}:null,
       onHydraDefeat:()=>HM?.defeatBoss?.(),
       onHydraSpawn:()=>HM?.resetBoss?.(),
-      loco: locoAnim, resolve: p => resolve(p), resolveMob: p => resolve(p, false, 'npc'), free: (x, z) => window.__p3d.free(x, z, 0),
+      loco: locoAnim, resolve: p => resolve(p), resolveMob: p => {
+        // Coliseum enemies stay on the lower combat floor even while the
+        // player approaches the spectators' stairs or upper concourse.
+        if(ZONE.name==='coliseum'&&!isColiseumCombat(p.x,p.z)){
+          const r=Math.hypot(p.x,p.z);
+          if(r>0){p.x*=58/r;p.z*=58/r;}
+        }
+        return resolve(p,false,'npc');
+      }, free: (x, z) => window.__p3d.free(x, z, 0),
       zone: () => ZONE.name, inWilds:(x,z)=>
         (ZONE.name==='wilds' && Math.abs(x-ZONE.cx)<ZONE.half-4 && Math.abs(z-ZONE.cz)<ZONE.half-4) ||
         (ZONE.name==='town' && (Math.abs(x)>CITY_HALF+22||Math.abs(z)>CITY_HALF+22) && Math.max(Math.abs(x),Math.abs(z))<WORLD-18 && Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z)>120 && Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)>92),

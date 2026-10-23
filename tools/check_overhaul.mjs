@@ -247,3 +247,19 @@ assert(sessionMenu.includes("vn.active3d.v1")&&sessionMenu.includes('varn:game-r
 assert(mpLobby.includes("entryMode='game'")&&mpLobby.includes("reconnectTimer"),'multiplayer reconnect preserves game session');
 assert(source('www/proto3d/fight.js').includes('hud.show(true); cc.block(false);'),'combat HUD remains visible even when fight mode stops');
 assert(!source('www/proto3d/varn-ui.css').includes('body.vn-sailing-zone #cb{display:none'),'combat HUD remains visible at sea');
+
+// Owner menu regression: HTML dataset is read-only. Passing dataset via
+// Object.assign when building the multiplayer player selector crashes the
+// whole Owner panel after local unlock. Set .dataset.cheat explicitly.
+assert(!cheatPanel.includes("dataset:{cheat:'player-auth'}") &&
+       !cheatPanel.includes("dataset:{cheat:'player-refresh'}") &&
+       !cheatPanel.includes("dataset:{cheat:'player-jump'}"),
+  'Owner teleport controls must not assign read-only HTMLElement.dataset');
+for(const action of ['player-auth','player-refresh','player-jump'])
+  assert(cheatPanel.includes(".dataset.cheat='"+action+"'"),
+    'Owner teleport button must use a writable dataset property');
+assert(nav.includes('id="vnOwnerTools"'),'Owner tools access is discoverable in More options');
+assert(main.includes("document.getElementById('vnOwnerTools')?.addEventListener('click'"),
+  'Owner tools button opens password-gated panel');
+assert(source('www/proto3d/cheatboot.js').includes("import('./cheatpanel.js')"),
+  'Owner tools load through existing password gate, not an unguarded menu');

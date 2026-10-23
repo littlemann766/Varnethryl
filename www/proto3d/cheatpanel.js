@@ -199,6 +199,16 @@ async function ensureUi(env) {
   if (!ui) {
     document.head.appendChild(el('style', { textContent: CSS }));
     ui = { gate, login: null, main: null, fly: buildFly(env.flags), badge: el('div', { id: 'ownerBadge' }) };
+    // Existing Owner badge doubles as the one-tap way back to the cheat
+    // menu. Do not add a new HUD button or an automatic Owner logout.
+    ui.badge.setAttribute('role','button');
+    ui.badge.tabIndex=0;
+    ui.badge.setAttribute('aria-label','Open Owner cheat menu');
+    ui.badge.title='Owner Cheats — tap to open';
+    ui.badge.addEventListener('click',()=>togglePanel(env));
+    ui.badge.addEventListener('keydown',e=>{
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();togglePanel(env);}
+    });
     document.body.appendChild(ui.badge);
   }
   return ui;

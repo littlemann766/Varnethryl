@@ -78,6 +78,23 @@ ok('gate object has no plaintext field', !('pass' in GATE) && !('passphrase' in 
   const t2 = createTapCounter(5, 2500); ok('slow taps never fire', [0, 1000, 2000, 3000, 4000, 5000, 6000].every((t) => !t2(t)));
 }
 
+/* ----- manual-only Owner lock / no five-minute timeout ----- */
+{
+  let current=1000000;
+  const store=mem();
+  // Token is safely generated from the public verifier, never a secret.
+  const { unlockToken }=await import('../www/proto3d/ownergate.js');
+  store.setItem(UNLOCK_KEY,await unlockToken(GATE));
+  let g=createGate({storage:store,now:()=>current});
+  ok('Owner stays unlocked initially',await g.isOwner());
+  current+=5*60*1000+1000;
+  ok('Owner remains unlocked beyond five minutes without reentering passphrase',await g.isOwner());
+  current+=3*60*60*1000;
+  const fresh=createGate({storage:store,now:()=>current});
+  ok('Owner unlock persists through app recreation and hours of play',await fresh.isOwner());
+  fresh.lock();
+  ok('Lock Owner immediately revokes the authorization',!(await g.isOwner())&&!store.getItem(UNLOCK_KEY));
+}
 /* ---------- cheats ---------- */
 const mk = (extra) => {
   const st = mem(), flags = createFlags(), calls = []; const bumpSys = createBump();

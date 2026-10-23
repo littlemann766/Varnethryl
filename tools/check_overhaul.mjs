@@ -311,7 +311,9 @@ const marineLoader=source('www/proto3d/water-realms.js');
 const asyncOwnerActions=source('www/proto3d/cheats.js');
 assert(assetBuilder.includes("gzip.decompress")&&assetBuilder.includes("tidewrack_sailing_ship"),'original ship raw GLB is derived from approved gzip');
 assert(marineLoader.includes("typeof DecompressionStream==='function'"),'ocean supports Android WebViews without native gzip API');
-assert(marineLoader.includes("glbUrl,gzipUrl"),'raw GLB is preferred where decompression is unavailable');
+assert(marineLoader.includes("const sources=[glbUrl,gzipUrl]"),'raw GLB is preferred in Android and the web, avoiding duplicate gz fetch');
+assert(source('.github/workflows/build-android.yml').includes('rm -f "$DIR/tidewrack_sailing_ship.glb.gz"'),'Android removes only compiled gzip aliases after Capacitor sync');
+
 assert(source('.github/workflows/build-android.yml').includes('tools/prepare_marine_assets.py'),'Android APK includes raw GLB fallback');
 assert(source('.github/workflows/deploy-pages.yml').includes('tools/prepare_marine_assets.py'),'GitHub Pages includes raw GLB fallback');
 assert(asyncOwnerActions.includes("return result===undefined?true:result"),'Owner travel reports real queued-zone result');

@@ -47,7 +47,9 @@ async function glbFromGzip(url){
  const gzipUrl=new URL('./models-new/'+url.split('/').pop(),import.meta.url);
  const glbUrl=new URL(gzipUrl.href.slice(0,-3));
  const canDecompress=typeof DecompressionStream==='function';
- const sources=canDecompress?[gzipUrl,glbUrl]:[glbUrl,gzipUrl];
+ // Raw GLB is present in both packaged Android and deployed web builds.
+ // Prefer it to prevent Android .gz alias requests and unnecessary decompression.
+ const sources=[glbUrl,gzipUrl];
  const errors=[];
  for(const source of sources){
   try{

@@ -231,11 +231,11 @@ export function createWorldServer(options={}){
          message:isCoOwner?'Unlock CoOwner first.':'Verify Owner server access first.'});return;
      }
      const target=allOnline().find(q=>q.id===m.id&&q.socket!==socket);
-     if(!target){send(socket,{type:'owner-error',message:'That player has left the server.'});return;}
+     if(!target){send(socket,{type:isCoOwner?'coowner-error':'owner-error',message:'That player has left the server.'});return;}
      let movedWorld=false;
      if(p.code!==target.code){movedWorld=true;
        const next=rooms.get(target.code);
-       if(!next||next.size>=MAX_PLAYERS){send(socket,{type:'owner-error',message:'That world is full.'});return;}
+       if(!next||next.size>=MAX_PLAYERS){send(socket,{type:isCoOwner?'coowner-error':'owner-error',message:'That world is full.'});return;}
        const old=rooms.get(p.code),oldCode=p.code;
        old.delete(p.id);broadcast(old,{type:'left',id:p.id},socket);
        if(old.size===0)rooms.delete(oldCode);

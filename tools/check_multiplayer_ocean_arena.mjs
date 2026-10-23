@@ -41,4 +41,17 @@ assert.match(ocean,/water\.tex\?\.offset\.set/,'water texture animation is null-
 assert.match(ocean,/const assembled=buildSailingShip\(1,true\)/,'approved existing ship fallback preserved');
 const arena=src('www/proto3d/coliseum-pvp.js');
 assert.match(arena,/new THREE\.InstancedMesh\(new THREE\.ConeGeometry/,'spectator torches are instanced');
+// Every combat entry point must agree about the spectator safety boundary.
+const combat=src('www/proto3d/fight.js');
+assert.equal((combat.match(/env\.zone\?\.\(\) === 'coliseum' && !isColiseumCombat\(state\.heroX,state\.heroZ\)/g)||[]).length,2,
+  'Coliseum spectators cannot start combat or remain in a fight');
+assert.match(combat,/if \(env\.free\(px, pz\) && \(env\.zone\?\.\(\) !== 'coliseum'/,
+  'arena enemies spawn only on the battle floor');
+assert.match(combat,/ownerBossSpawnPending=true/,'only one Owner boss asset may load at a time');
+assert.match(combat,/return !!\(await spawn\(key,10\)\)/,'normal Owner enemy spawn reports the loaded model result');
+const main=src('www/proto3d/main.js');
+assert.match(main,/return !!\(await f\.cheatSpawn\(key\)\)/,'Owner menu waits for the real enemy spawn');
+assert.match(main,/if\(ZONE\.name==='coliseum'&&!isColiseumCombat\(p\.x,p\.z\)\)/,
+  'Coliseum enemy movement stays off spectator tiers');
+console.log('Coliseum combat boundaries and asynchronous Owner spawn checks passed.');
 console.log('Multiplayer, chat, ocean and Coliseum regression checks passed.');

@@ -271,3 +271,17 @@ assert(ownerPanel.includes("ui.badge.addEventListener('click',()=>togglePanel(en
 assert(ownerPanel.includes("gate.lock(); c.reset()"),'Lock Owner is still the sole explicit local sign-out path');
 assert(!source('www/proto3d/ownergate.js').includes('UNLOCK_TTL'),'Owner authorization has no automatic timeout');
 assert(source('www/proto3d/varn-ui.css').includes('#ownerBadge[role="button"]'),'gold Owner badge accepts touches');
+
+// Real multiplayer skins and in-game world/private chat with saved friends.
+const chatUi=source('www/proto3d/multiplayer-chat.js');
+const serverChat=source('multiplayer/server.mjs');
+assert(nav.includes('id="vnChatBtn"')&&nav.includes('id="vnChatPanel"'),'chat and Friends interface exists inside the game');
+assert(main.includes('loadRemoteSkin:async id=>'),'remote players use actual GLB models');
+assert(main.includes('return loadActorModel(id,{forceGLB:true})'),'remote character selection bypasses blocky-only local preference');
+assert(source('www/proto3d/multiplayer-client.js').includes('showSkin(p)'),'remote skin updates without world reloading');
+assert(serverChat.includes("if(m.type==='chat')"),'server relays world and private messages');
+assert(serverChat.includes("chatVisible(p,target)"),'private message target must be available to sender');
+assert(chatUi.includes('vn-chat-private-feed')&&chatUi.includes('vn-chat-compose'),'private message area appears above chat input');
+assert(chatUi.includes("textContent=txt")&&chatUi.includes("const line=create('div',privateMsg"),'messages render as safe text');
+assert(chatUi.includes('vn.multiplayer.friends.v1'),'friends survive app session using device storage');
+assert(source('www/sw.js').includes('./proto3d/multiplayer-chat.js'),'chat bundled with the Android offline assets');

@@ -639,7 +639,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.20';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.21';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1266,8 +1266,8 @@ const tmp2 = { x: 0, z: 0 };
 /* crowd members skip the shadow-map pass (halves their draw calls); one shared blob decal each instead */
 const BLOB_GEO = new THREE.CircleGeometry(0.55 * HS, 14), BLOB_MAT = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.28, depthWrite: false });
 const HERO_GLB_ID = i => GLB_IDS[i] || 'aldric';
-async function loadActorModel(id) {
-  if (modeFor(id) === 'blocky') { try { return makeBlocky(id); } catch (e) { console.warn('blocky follower failed', id, e); } }
+async function loadActorModel(id,{forceGLB=false}={}) {
+  if (!forceGLB && modeFor(id) === 'blocky') { try { return makeBlocky(id); } catch (e) { console.warn('blocky follower failed', id, e); } }
   try { const buf = await fetchGLB(id); return await new Promise(res => gl.parse(buf, '', g => { try { res(wrapGLB(g, id)); } catch (e) { res(null); } }, () => res(null))); }
   catch (e) { return null; }
 }
@@ -2161,6 +2161,15 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
 // player's existing game. Newcomer town travel applies only to that client.
 MULTIPLAYER=createMultiplayer({THREE,scene,state,getZone:()=>ZONE.name,setZone,
  getHeroName:()=>HERO_NAMES[HEROES.indexOf(hero)]||'Adventurer',
+ getSkinId:()=>GLB_IDS[HEROES.indexOf(hero)]||'aldric',
+ // Load from this game's own approved GLB manifest, never arbitrary network URLs.
+ // Other players' selected skins are always displayed as detailed 3D models,
+ // even if local blocky mode was previously used on the device.
+ loadRemoteSkin:async id=>{
+   const slot=GLB_IDS.indexOf(id);
+   if(slot<0||hiddenSerpentSlot(slot)||id.startsWith('p:'))return null;
+   return loadActorModel(id,{forceGLB:true});
+ },
  updateLevel,snapFollowers,camRig,miniMap,
  teleportNearPlayer:async(target)=>{
    if(!target||!['town','wilds','frost','hydra','sailing','coliseum'].includes(target.zone)||

@@ -34,3 +34,13 @@ This is opt-in shared-player **presence, positions, orientation and basic test-a
 4. B leaves the world. A continues playing uninterrupted.
 5. Both choose **Play Solo** to verify their local saves, quest progress, inventory, and controls remain intact.
 6. Repeat with Kingdom Two and a private code to confirm separation.
+
+## v1.5.21 — Actual remote 3D skins, world chat, private messages & friends
+
+The game now advertises its **selected character skin ID** when joining, moving and changing skins. A peer resolves that ID strictly against the local `GLB_IDS` asset manifest and loads the actual existing `.glb` (including the currently selected Owner model). Arbitrary remote URLs and unreleased hidden Sslythar assets are not loaded. While a peer's GLB downloads, the older simple figure is only a temporary fallback. A loaded remote rig uses its own embedded idle/walk animation clips where available.
+
+**Chat panel:** use **💬 Chat** within the world. The panel has World chat, Friends, a private-message area with contrasting purple styling **directly above the input**, a target selector and Send. Each message shows sender, time and text. The relay validates 1–280 characters, enforces a short per-player cooldown and broadcasts World chat only to the same world. A Private message is delivered only to the sender and intended recipient, including recipients across the three public worlds. Private-room participants do not appear in public-world chat rosters. HTML from other players is never rendered as markup.
+
+**Friends:** add a player from the online directory or by their displayed Friend Code. Saved friends survive browser/app restarts on the same device, with online detection among users visible in your chat roster. They do not yet sync across devices. The Friend Code is **not account authentication**; it is a convenience test identifier and must never authorize Owner/CoOwner privileges or identify someone as a verified administrator. CoOwner ranks, permanent accounts, friend requests/approval, message history and offline messaging are later features.
+
+**Testing:** two devices join WORLD1, select different GLB skins, meet in town, change one skin, and observe the remote 3D model update. Send a world message and a private message; verify only the intended player sees the private reply. Add another player as a friend, disconnect and reconnect, and verify the saved friend list. Repeat the private chat from WORLD1 to WORLD2, then ensure a private invite room is not exposed in the public chat roster.

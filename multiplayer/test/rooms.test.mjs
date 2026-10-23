@@ -163,3 +163,86 @@ test('automatic reconnect resumes cave location even when other players remain i
  assert.equal(actual.zone,'frost');assert.equal(actual.x,551);
  assert.equal(srv.rooms.get('WORLD1').get(friendInfo.id).zone,'town');
 });
+
+test('selected 3D skin is broadcast at join and updated as players switch skins',async t=>{
+ const srv=createWorldServer();srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');
+ t.after(()=>srv.close());const url='ws://127.0.0.1:'+srv.server.address().port;
+ const a=await connected(url),b=await connected(url);
+ t.after(()=>{a.terminate();b.terminate();});
+ const first=recv(a,'welcome');
+ a.send(JSON.stringify({type:'join',code:'WORLD1',name:'SkinTester',friendCode:'AAAABBBBCCCCDDDDEEEE',
+ state:{zone:'town',x:1,y:0,z:2,yaw:0,skin:'n:owner',hero:'Owner'}}));
+ const info=await first;
+ const second=recv(b,'welcome');
+ b.send(JSON.stringify({type:'join',code:'WORLD1',name:'SecondPlayer',friendCode:'FFFF0000111122223333'}));
+ const incoming=await second;
+ assert.equal(incoming.players[0].skin,'n:owner');
+ assert.equal(incoming.players[0].friendCode,'AAAABBBBCCCCDDDDEEEE');
+ const next=recv(b,'state');
+ a.send(JSON.stringify({type:'state',zone:'town',x:4,y:0,z:6,yaw:1,
+  moving:true,skin:'n:selene_new',hero:'Selene'}));
+ const changed=await next;
+ assert.equal(changed.player.skin,'n:selene_new');
+ assert.equal(changed.player.moving,true);
+ assert.equal(srv.rooms.get('WORLD1').get(info.id).skin,'n:selene_new');
+});
+test('world chat is limited to current world; private messages only reach recipient',async t=>{
+ const srv=createWorldServer();srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');
+ t.after(()=>srv.close());const url='ws://127.0.0.1:'+srv.server.address().port;
+ const a=await connected(url),b=await connected(url),c=await connected(url),d=await connected(url);
+ t.after(()=>[a,b,c,d].forEach(w=>w.terminate()));
+ async function join(ws,code,name,fc){
+  const r=recv(ws,'welcome');
+  ws.send(JSON.stringify({type:'join',code,name,friendCode:fc}));return r;
+ }
+ const p=await join(a,'WORLD1','OwnerTester','AAAABBBBCCCCDDDDEEEE');
+ const q=await join(b,'WORLD1','CoOwnerTester','FFFF0000111122223333');
+ const stranger=await join(c,'WORLD1','OtherTester','1234567890ABCDEF1234');
+ const remote=await join(d,'WORLD2','InSecondWorld','55556666777788889999');
+ const roster=recv(a,'chat-roster');
+ // A new recipient joining refreshes available players across public worlds.
+ const temp=await connected(url);t.after(()=>temp.terminate());
+ await join(temp,'WORLD2','NewFriend','66667777888899990000');
+ const available=await roster;
+ assert.ok(available.players.some(v=>v.id===remote.id));
+ assert.ok(available.players.some(v=>v.id===q.id&&v.friendCode==='FFFF0000111122223333'));
+ const recipient=recv(b,'chat'),self=recv(a,'chat');
+ a.send(JSON.stringify({type:'chat',text:'Meet in the town square',to:q.id}));
+ const priv=await recipient;
+ assert.equal(priv.kind,'private');assert.equal(priv.name,'OwnerTester');
+ assert.equal(priv.text,'Meet in the town square');assert.equal(priv.to,q.id);
+ assert.equal((await self).id,priv.id);
+ const publicMsg=recv(c,'chat');
+ // The next message is artificially outside rate limit; no real-world delay.
+ srv.rooms.get('WORLD1').get(p.id).lastChat=0;
+ a.send(JSON.stringify({type:'chat',text:'Public world hello'}));
+ const world=await publicMsg;
+ assert.equal(world.kind,'world');assert.equal(world.text,'Public world hello');
+ assert.equal(world.world,'WORLD1');
+ // A cross-public-world private message reaches the intended player, not a world broadcast.
+ srv.rooms.get('WORLD1').get(p.id).lastChat=0;
+ const across=recv(d,'chat');
+ a.send(JSON.stringify({type:'chat',text:'Other world whisper',to:remote.id}));
+ const dm=await across;
+ assert.equal(dm.kind,'private');assert.equal(dm.to,remote.id);
+ // Private room membership never leaks to public chat directory.
+ const privatePlayer=await connected(url);t.after(()=>privatePlayer.terminate());
+ const hidden=await join(privatePlayer,'SECRETROOM','PrivateGuest','AAAABBBB000099998888');
+ srv.rooms.get('WORLD1').get(p.id).lastChat=0;
+ const err=recv(a,'chat-error');
+ a.send(JSON.stringify({type:'chat',text:'Cannot enter private room',to:hidden.id}));
+ assert.match((await err).message,/unavailable/i);
+});
+test('chat validates empty, oversized and rapid messages before broadcasting',async t=>{
+ const srv=createWorldServer();srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');
+ t.after(()=>srv.close());const url='ws://127.0.0.1:'+srv.server.address().port;
+ const a=await connected(url);t.after(()=>a.terminate());
+ const wel=recv(a,'welcome');a.send(JSON.stringify({type:'join',name:'Tester',code:'WORLD3'}));await wel;
+ const empty=recv(a,'chat-error');a.send(JSON.stringify({type:'chat',text:'   '}));
+ assert.match((await empty).message,/1–280/i);
+ const oversized=recv(a,'chat-error');a.send(JSON.stringify({type:'chat',text:'A'.repeat(281)}));
+ assert.match((await oversized).message,/1–280/i);
+ const good=recv(a,'chat');a.send(JSON.stringify({type:'chat',text:'Hello'}));await good;
+ const rapid=recv(a,'chat-error');a.send(JSON.stringify({type:'chat',text:'Too fast'}));
+ assert.match((await rapid).message,/slow down/i);
+});

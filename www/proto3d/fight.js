@@ -19,6 +19,7 @@ import { terrainBodyPitch } from './terrain-follow.js';
 import { serpentHeading } from './serpent-locomotion.js';
 import { bossHome, telegraphKey } from './combat/boss-arena.js';
 import { HOB_CAMPS } from './hobcamps.js';
+import { isColiseumCombat } from './coliseum-pvp.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
 export const SABER_GLB = null;             // URL (or fight.setSaberModel(url)) for Beth's saber: hilt at origin, blade along +Y, ~1 m
 const MAX_ALIVE = 5, AUTO_MAX = (typeof matchMedia==='function' && matchMedia('(pointer:coarse)').matches) ? 12 : 15, AUTO_AGGRO = 3; // Lively world with mobile cap; wild mobs remain passive
@@ -502,6 +503,8 @@ export function createFight(env) {
     // combat-start callback must never leave skill keys, attacks or PvE
     // running while the player is steering the galleon.
     if (env.zone?.() === 'sailing') { stop(); return; }
+    // Spectator terraces are a walkable safe zone, not a combat arena.
+    if (env.zone?.() === 'coliseum' && !isColiseumCombat(state.heroX,state.heroZ)) { stop(); return; }
     dt = Math.min(dt, 0.1); syncHero(); cc.god = !!(env.cheat && env.cheat.god) && cc.perkHero(); cc.res.unlimited = !!(env.cheat && env.cheat.unlimited) && cc.perkHero(); cc.noCooldown = !!(env.cheat && env.cheat.noCooldown); cc.ownerUnlocked = ownerGate();
     { const dx = state.heroX - A.lx, dz = state.heroZ - A.lz; A.lx = state.heroX; A.lz = state.heroZ; const l = Math.hypot(dx, dz); if (l > 0.005 && !A.dash) { A.vx = dx / l; A.vz = dz / l; } else if (l <= 0.005) { A.vx = 0; A.vz = 0; } }
     cc.setPlayer(state.heroX, state.heroZ, state.yaw);
@@ -609,11 +612,19 @@ export function createFight(env) {
   /* owner cheat hooks (cheats.js -> main.js) */
   const cheatHeal = () => { cc.res.full(); cc.potions = cc.P.potion.charges; if (cc.dead > 0) { cc.dead = 0; cc.act = null; env.hero().rotation.x = 0; } hud.say('Party healed', 1200); return true; };
   const cheatKill = () => { let n = 0; for (const e of cc.enemies.slice()) if (e.state !== 'defeated') { e.hp = 0; cc.defeat(e); n++; } if (n) hud.say(n + ' slain', 1200); return n > 0; };
-  const cheatSpawn = (key) => {
-    if (!ENEMIES[key]) return false;
-    if (ENEMIES[key].boss) { if (bossOn) return false; spawn(key, key === 'vaelthryx' ? 60 : 26); return true; }
+  let ownerBossSpawnPending=false;
+  const cheatSpawn = async (key) => {
+    if (!on || !ENEMIES[key]) return false;
+    // Boss assets load asynchronously. A second tap must not launch a
+    // second boss while the first model is still loading into the world.
+    if (ENEMIES[key].boss) {
+      if (bossOn || ownerBossSpawnPending) return false;
+      ownerBossSpawnPending=true;
+      try { return !!(await spawn(key,key === 'vaelthryx' ? 60 : 26)); }
+      finally { ownerBossSpawnPending=false; }
+    }
     for (const e of cc.enemies.slice()) if (e.state === 'defeated' && !e.def.boss) cc.removeEnemy(e);
-    spawn(key, 10); return true;
+    return !!(await spawn(key,10));
   };
   let auto = false;
   const RS = new Respawner({ max: AUTO_MAX, maxDist: 60 * (env.wildsScale || 280 / 170) /* enlarged Wilds: biomes are WS x farther apart */ }), RH = { hero: { x: 0, z: 0 }, zone: () => env.zone ? env.zone() : 'wilds', inWilds: (x, z) => env.inWilds ? env.inWilds(x, z) : true,
@@ -624,6 +635,7 @@ export function createFight(env) {
     // Combat is unavailable at sea, including late "Enter world" promises,
     // owner fight toggles and loading callbacks that resolve after boarding.
     if (env.zone?.() === 'sailing') { if (on) stop(); return; }
+    if (env.zone?.() === 'coliseum' && !isColiseumCombat(state.heroX,state.heroZ)) { if (on) stop(); return; }
     if (on) { if (isAuto === true) auto = true; return; } auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
     if (auto) { syncHero(); equip(); const zone=env.zone?.(); hud.say(zone==='hydra'?'HYDRA MIRE — FIVE HEADS AWAIT':zone==='frost'?'FROST CAVE — THE BROTHERS AWAIT':zone==='town'?'OUTSKIRTS — DANGER AHEAD':'THE WILDS — MONSTERS ABOUT',1800); return; }

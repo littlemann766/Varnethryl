@@ -45,14 +45,26 @@ function buildPanel(c, gate, env) {
   const panel = el('div', { id: 'ownerPanel' }), msg = el('div', { id: 'ownerMsg' }), btns = {};
   const say = (t) => { msg.textContent = t; };
   const toggle = (key, label, fn, get) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.cheat = key; b.addEventListener('click', () => { fn(!get()); sync(); }); btns[key] = { b, get }; return b; };
-  const act = (key, label, fn, noMsg) => { const b = el('button', { type: 'button', textContent: label }); b.dataset.cheat = key; b.addEventListener('click', () => { const r = fn(); say(label + (r === false ? ': ' + (noMsg || 'nothing to do (is Fight mode on?)') : ': done')); sync(); }); return b; };
-  const sec = (t) => el('div', { className: 'sec', textContent: t });
+  const act=(key,label,fn,noMsg)=>{
+    const b=el('button',{type:'button',textContent:label});b.dataset.cheat=key;
+    b.addEventListener('click',async()=>{
+      b.disabled=true;say(label+': working…');
+      try{
+        const result=await fn();
+        say(label+(result===false?': '+(noMsg||'unavailable in the current zone/session'):': complete'));
+      }catch(e){say(label+': failed — '+String(e?.message||e));}
+      finally{b.disabled=false;sync();}
+    });return b;
+  };
+  const sec=(t)=>el('div',{className:'sec',textContent:t});
   const row = (...k) => el('div', { className: 'row' }, k);
   const f = c.flags;
   const close = el('button', { type: 'button', textContent: '✕', style: 'min-height:36px' }); close.addEventListener('click', () => hide());
   panel.appendChild(el('h3', null, [el('span', { textContent: 'Owner cheats (save will be marked cheated)' }), close]));
   panel.appendChild(sec('Movement'));
   panel.appendChild(row(toggle('god', 'God', c.setGod, () => f.god), toggle('fly', 'Fly', c.setFly, () => f.fly), toggle('noclip', 'Noclip', c.setNoclip, () => f.noclip), toggle('bump', 'Bumps', c.setBump, () => f.bump)));
+  panel.appendChild(row(toggle('unlimited','∞ MP / SP',c.setUnlimited,()=>f.unlimited),
+    toggle('cooldown','No cooldowns',c.setNoCooldown,()=>f.noCooldown)));
   const spd = el('select', { id: 'ownerSpeed' }); for (const m of [0.5, 1, 2, 4, 8]) spd.appendChild(el('option', { value: m, textContent: m + '×', selected: m === 1 }));
   spd.addEventListener('change', () => { c.setSpeed(+spd.value); sync(); }); isolateKeys(spd);
   panel.appendChild(row(el('span', { textContent: 'Speed' }), spd));
@@ -67,10 +79,18 @@ function buildPanel(c, gate, env) {
   const il = el('select', { id: 'ownerItemLv' }); for (let i = 0; i <= MAX_ITEM_LEVEL; i++) il.appendChild(el('option', { value: i, textContent: 'Lv ' + i, selected: i === MAX_ITEM_LEVEL })); isolateKeys(il);
   panel.appendChild(row(kind, il, act('item', 'Spawn', () => c.spawnItem(kind.value, +il.value))));
   panel.appendChild(sec('Party / enemies / quests'));
-  panel.appendChild(row(act('heal', 'Heal party', c.healParty), act('kill', 'Kill enemies', c.killEnemies, 'no live enemies'), act('skipq', 'Skip quest', c.skipQuest, 'there are no quests in the 3D game yet, nothing changed')));
+  panel.appendChild(row(act('heal','Heal party',c.healParty),
+    act('kill','Kill enemies',c.killEnemies,'no active enemies')));
+  // There is no 3D quest-skip operation. Don't display a fake working cheat.
+  const questUnavailable=el('button',{type:'button',disabled:true,
+    textContent:'Quest skip · not implemented in 3D',
+    title:'Unavailable until Varnethryl has a quest-advance API'});
+  panel.appendChild(row(questUnavailable));
   const foe = el('select', { id: 'ownerFoe' }); for (const k of ['wolf', 'raider', 'wraith', 'skeleton']) foe.appendChild(el('option', { value: k, textContent: k })); isolateKeys(foe);
   panel.appendChild(row(foe, act('spawn', 'Spawn enemy', () => c.spawnEnemy(foe.value), 'fight mode is full'), act('spawn-titan', 'Spawn Ashen Titan', () => c.spawnTitan(), 'a Titan is already alive')));
-  if (env.hooks && env.hooks.fightTest) { panel.appendChild(sec('Fight test')); panel.appendChild(row(act('fight', 'Start / stop fight test', () => { env.hooks.fightTest(); hide(); return true; }))); panel.appendChild(el('div', { textContent: 'Owner + lightsaber vs chasing monsters. Attack: button or F/J.', style: 'font-size:11px;opacity:.7' })); }
+  if (env.hooks && env.hooks.fightTest) { panel.appendChild(sec('Fight test')); panel.appendChild(row(act('fight', 'Start / stop fight test', async () => {
+    const ok=await env.hooks.fightTest();if(ok!==false)hide();return ok;
+  }))); panel.appendChild(el('div', { textContent: 'Owner + lightsaber vs chasing monsters. Attack: button or F/J.', style: 'font-size:11px;opacity:.7' })); }
   panel.appendChild(sec('Teleport'));
   const zone = el('select', { id: 'ownerZone', ariaLabel: 'Select map destination' });
   const zoneNames={village:'Kingdom / Main Overworld',wilds:'The Wilds',frost:'Frost Troll Ice Cave',hydra:'Hydra Mire — Five-Headed Boss',sailing:'Tidewrack Ocean — 1 × 1 km'};
@@ -79,14 +99,20 @@ function buildPanel(c, gate, env) {
   const travel=(key,label,z)=>{
     const b=el('button',{type:'button',textContent:label});
     b.dataset.cheat=key;
-    b.addEventListener('click',()=>{
-      const ok=c.teleportZone(z);
-      say(ok?'Entering '+(zoneNames[z]||z)+'…':'Destination unavailable');
-      if(ok)hide();
+    b.addEventListener('click',async()=>{
+      b.disabled=true;say('Loading '+(zoneNames[z]||z)+'…');
+      try{
+        const ok=await c.teleportZone(z);
+        say(ok?'Arrived in '+(zoneNames[z]||z):'Travel failed. See 3D status for the ship/model error.');
+        if(ok)hide();
+      }catch(e){say('Travel failed: '+String(e?.message||e));}
+      finally{b.disabled=false;}
     });
     return b;
   };
-  panel.appendChild(row(zone, act('tpz', 'Go zone', () => {const ok=c.teleportZone(zone.value);if(ok)hide();return ok;})));
+  panel.appendChild(row(zone, act('tpz','Go zone',async()=>{
+    const ok=await c.teleportZone(zone.value);if(ok)hide();return ok;
+  })));
   // Dedicated owner-only shortcuts in addition to the dropdown.
   panel.appendChild(row(
     travel('tp-hydra','🐉 Hydra Mire','hydra'),
@@ -160,7 +186,7 @@ function buildPanel(c, gate, env) {
       }
     });
   }
-  panel.appendChild(row(act('reset', 'Reset cheats', () => { c.reset(); return true; }), act('lock', 'Lock owner', () => {
+  const footer=row(act('reset', 'Reset cheats', () => c.reset()), act('lock', 'Lock owner', () => {
     gate.lock(); c.reset();
     // reset() restores saved owner preferences; a true lock must override all of them.
     Object.assign(c.flags, createFlags());
@@ -169,8 +195,24 @@ function buildPanel(c, gate, env) {
     ui.main?.dispose?.(); ui.main?.panel.remove(); ui.main = null; cheats = null;
     ui.fly.style.display = 'none'; ui.badge.style.display = 'none';
     hide(); return true;
-  })));
-  panel.appendChild(msg); isolateKeys(panel);
+  }));
+  footer.classList.add('owner-footer');panel.appendChild(footer);
+  msg.classList.add('owner-status');panel.appendChild(msg);
+  // Compact medieval accordions keep all cheats available without turning
+  // the Android menu into a tall, overlapping wall of buttons.
+  for(const h of [...panel.querySelectorAll(':scope > .sec')]){
+    const fold=el('details',{className:'owner-fold'});
+    const label=el('summary',{textContent:h.textContent});
+    const body=el('div',{className:'owner-fold-body'});
+    while(h.nextElementSibling&&!h.nextElementSibling.classList.contains('sec')&&
+          !h.nextElementSibling.classList.contains('owner-footer')&&
+          !h.nextElementSibling.classList.contains('owner-status')){
+      body.appendChild(h.nextElementSibling);
+    }
+    fold.append(label,body);panel.insertBefore(fold,h);h.remove();
+  }
+  panel.querySelectorAll('.owner-fold').forEach((f,i)=>{f.open=i<2;});
+  isolateKeys(panel);
   function sync() {
     for (const k in btns) btns[k].b.classList.toggle('on', !!btns[k].get());
     spd.value = String(f.speedMul);

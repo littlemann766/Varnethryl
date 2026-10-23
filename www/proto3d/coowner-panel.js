@@ -8,7 +8,7 @@ export function createCoOwnerPanel({login,resume,lock,list,jump,isOnline,getSave
  const make=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;
    if(text!==undefined)el.textContent=text;return el;};
  const heading=make('div','vn-coowner-heading');
- const title=make('strong','','✦ CoOwner Tools');
+ const title=make('strong','','✦ Varnethryl · CoOwner');
  const close=make('button','','✕');close.type='button';close.setAttribute('aria-label','Close CoOwner tools');
  heading.append(title,close);
  const info=make('p','vn-coowner-desc','Private CoOwner access. Separate from the Owner password and cheats. No automatic logout — Lock CoOwner when finished.');
@@ -25,7 +25,21 @@ export function createCoOwnerPanel({login,resume,lock,list,jump,isOnline,getSave
  const player=make('select','');player.setAttribute('aria-label','Select online player');
  const jumpBtn=make('button','','Teleport beside player');jumpBtn.type='button';
  const lockBtn=make('button','vn-coowner-lock','🔒 Lock CoOwner');lockBtn.type='button';
- tools.append(abilities,refresh,player,jumpBtn,lockBtn);
+ const travelGroup=make('details','vn-rank-fold');
+ travelGroup.open=true;
+ const travelTitle=make('summary','','⌖ Player travel');
+ const travelBody=make('div','vn-rank-fold-body');
+ travelBody.append(refresh,player,jumpBtn);
+ travelGroup.append(travelTitle,travelBody);
+ const infoGroup=make('details','vn-rank-fold');
+ const infoTitle=make('summary','','⚔ Rank privileges');
+ const infoBody=make('div','vn-rank-fold-body');
+ infoBody.append(abilities);
+ const codeNote=make('p','vn-coowner-desc',
+   'CoOwner sees online testers and may travel beside them. Owner-only commands and server settings are not available.');
+ infoBody.appendChild(codeNote);
+ infoGroup.append(infoTitle,infoBody);
+ tools.append(travelGroup,infoGroup,lockBtn);
  panel.replaceChildren(heading,info,loginRow,status,tools);
  let authorized=false;
  function setAuthorized(value){

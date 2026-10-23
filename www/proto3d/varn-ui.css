@@ -658,3 +658,68 @@ body.vn-menu-open #vnChatBtn{visibility:hidden}
  #vnChatPanel .vn-chat-feed{min-height:32px}
  #vnChatPanel .vn-chat-private-feed{min-height:46px;flex-basis:65px}
 }
+
+/* ---------- Varnethryl royal control-panel language ----------
+ * Owner and CoOwner share the game's Cinzel/royal-purple parchment aesthetic
+ * without sharing permissions, credentials or actions.                  */
+#ownerPanel,#ownerLogin,#vnCoOwnerPanel{
+ background:linear-gradient(155deg,rgba(46,31,68,.97),rgba(14,23,42,.98) 70%,rgba(36,21,55,.98))!important;
+ border:2px ridge #d7af6a!important;border-radius:15px!important;
+ color:#f7e9d2!important;box-shadow:0 10px 34px #000d,inset 0 0 0 1px #fbd48522!important;
+}
+#ownerPanel{width:min(410px,calc(100vw - 16px))!important;padding:11px 12px 14px!important}
+#ownerPanel h3,#vnCoOwnerPanel .vn-coowner-heading{
+ font:700 15px VarnCinzel,Georgia,serif!important;color:#ffe0a4!important;
+ border-bottom:1px solid #a88664;padding:4px 0 10px;gap:8px;
+ text-shadow:0 2px 5px #0009;
+}
+#ownerPanel .owner-fold,#vnCoOwnerPanel .vn-rank-fold{
+ border:1px solid #8a7099;border-radius:9px;
+ background:linear-gradient(145deg,#23253e,#151d30);margin:7px 0;
+ overflow:hidden;
+}
+#ownerPanel .owner-fold summary,#vnCoOwnerPanel .vn-rank-fold summary{
+ display:block;cursor:pointer;padding:12px 13px;min-height:43px;
+ box-sizing:border-box;font:700 12px VarnCinzel,Georgia,serif;
+ text-transform:uppercase;letter-spacing:.06em;color:#f0ce9c;
+ background:linear-gradient(120deg,#493157,#202943);
+ touch-action:manipulation;
+}
+#ownerPanel .owner-fold summary::before,#vnCoOwnerPanel .vn-rank-fold summary::before{
+ content:'✦';color:#bf91ff;margin-right:8px;
+}
+#ownerPanel .owner-fold[open] summary,#vnCoOwnerPanel .vn-rank-fold[open] summary{
+ border-bottom:1px solid #9476a2;
+}
+#ownerPanel .owner-fold-body,#vnCoOwnerPanel .vn-rank-fold-body{
+ display:grid;gap:8px;padding:9px;
+}
+#ownerPanel .row{display:flex;flex-wrap:wrap;gap:7px}
+#ownerPanel .row>*{flex:1 1 105px;max-width:100%;min-width:0}
+#ownerPanel button,#ownerPanel select,#ownerPanel input,
+#vnCoOwnerPanel button,#vnCoOwnerPanel select,#vnCoOwnerPanel input{
+ background:linear-gradient(160deg,#443355,#222840)!important;
+ border:1px solid #ba9b72!important;color:#fff1d8!important;
+ border-radius:7px!important;box-sizing:border-box;
+ font-size:12px!important;min-height:42px!important;
+}
+#ownerPanel button.on{background:#d1a85e!important;color:#172039!important}
+#ownerPanel button:disabled,#vnCoOwnerPanel button:disabled{opacity:.52;cursor:not-allowed}
+#ownerPanel .owner-footer{border-top:1px solid #ad8c64;padding-top:10px;margin-top:10px}
+#ownerPanel .owner-footer button:last-child,#vnCoOwnerPanel .vn-coowner-lock{
+ background:linear-gradient(130deg,#63324b,#291c31)!important;border-color:#e6a1a1!important;
+}
+#ownerPanel .owner-status{display:block;position:sticky;bottom:-10px;
+ padding:9px;background:#18243bef;border:1px solid #72598b;
+ border-radius:7px;min-height:22px;margin-top:10px;
+ font-size:12px;color:#ffe2a5;z-index:1;
+}
+#vnCoOwnerPanel .vn-coowner-tools{display:grid;gap:8px}
+#vnCoOwnerPanel .vn-coowner-status{
+ background:#1f2742;border-left:3px solid #c6a1ff;border-radius:5px;
+ padding:9px;font-size:12px;color:#f2d8ff;line-height:1.5
+}
+@media(orientation:landscape) and (max-height:540px){
+ #ownerPanel,#vnCoOwnerPanel{top:5px!important;right:7px!important;
+   max-height:calc(100dvh - 10px)!important}
+}

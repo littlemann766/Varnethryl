@@ -21,6 +21,10 @@ with sync_playwright() as pw:
   party_count=2 if mob else 3  # Verify the full ship manifest on desktop.
   page_url=URL.replace('party=2',f'party={party_count}')
   ctx=b.new_context(viewport={'width':w,'height':h},is_mobile=mob,has_touch=mob,service_workers='block')
+  # Simulate older Android WebViews missing DecompressionStream. Their
+  # original raw GLB fallback must load both Hydra and Tidewrack models.
+  if mob:
+   ctx.add_init_script("Object.defineProperty(window,'DecompressionStream',{value:undefined,configurable:true})")
   pg=ctx.new_page()
   errs=[];failedAssets=[]
   pg.on('pageerror',lambda e:errs.append(str(e)))
@@ -31,9 +35,11 @@ with sync_playwright() as pw:
    pg.wait_for_function('window.__p3d && __p3d.frames>5',timeout=120000)
    pg.evaluate("document.getElementById('vnEnter')?.click()")
    pg.evaluate("document.getElementById('vnMenuBtn').click()")
-   check(tag+' compact four-button menu',pg.evaluate("""()=>{
+   check(tag+' accessible compact game menu',pg.evaluate("""()=>{
      const m=document.getElementById('vnQuickMenu');
-     return !m.hidden&&m.querySelectorAll('.vn-quick-actions button').length===4
+     return !m.hidden&&m.querySelectorAll('.vn-quick-actions button').length>=4
+       && !!m.querySelector('#vnOwnerTools')
+       && !!m.querySelector('#vnCoOwnerTools')
        && [...m.querySelectorAll('details')].every(d=>!d.open);
    }"""))
    pg.evaluate("document.getElementById('vnQuickTravel').click()")

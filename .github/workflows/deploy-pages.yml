@@ -32,6 +32,8 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           find www -type f -name "*.js" -not -path "*/vendor/*" -print0 | xargs -0 -n1 node --check
+      - name: Include raw marine GLBs for Android/WebView compatibility
+        run: python3 tools/prepare_marine_assets.py
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload web app

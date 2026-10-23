@@ -7,22 +7,23 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
  const peers=new Map();let socket=null,joined=false,selfId='',room='',lastSend=0,epoch=0,onlineCount=0;
  const get=k=>{try{return localStorage.getItem(k)||'';}catch{return '';}};
  const put=(k,v)=>{try{localStorage.setItem(k,v);}catch{}};
+ const DEFAULT_SERVER='wss://varnethryl-world-server-production.up.railway.app';
  const section=document.createElement('details');section.id='vnQuickMultiplayer';
  section.innerHTML=`<summary>Multiplayer · Test rooms</summary><div class="vn-opts" style="display:grid;gap:7px">
  <label for="vnMpName">Your nickname</label><input id="vnMpName" maxlength="20" autocomplete="nickname" placeholder="Adventurer">
  <label for="vnMpRoom">Room code — share with friends</label>
  <div style="display:flex;gap:5px"><input id="vnMpRoom" maxlength="12" style="min-width:0;flex:1" placeholder="ROOMCODE"><button id="vnMpCopy" type="button">Copy</button></div>
- <label for="vnMpServer">Multiplayer server (wss://)</label><input id="vnMpServer" inputmode="url" autocomplete="url" placeholder="wss://your-server.example.com">
+ <small>Varnethryl World Server · automatic connection</small>
  <div style="display:flex;gap:5px"><button id="vnMpJoin" type="button">Join room</button><button id="vnMpLeave" type="button">Leave</button></div>
  <small id="vnMpStatus" role="status" aria-live="polite">Offline — single-player still works.</small>
  <small>Up to 12 testers per room. A newcomer starts in town; existing players are never teleported. Same-map players appear together. PvP damage and shared enemies are not online yet.</small>
  </div>`;
  const host=document.querySelector('#vnQuickMenu .vn-quick-sections');
  if(host)host.insertBefore(section,host.children[1]||null);else document.body.appendChild(section);
- const $=s=>section.querySelector(s),nameEl=$('#vnMpName'),roomEl=$('#vnMpRoom'),serverEl=$('#vnMpServer'),statusEl=$('#vnMpStatus');
+ const $=s=>section.querySelector(s),nameEl=$('#vnMpName'),roomEl=$('#vnMpRoom'),statusEl=$('#vnMpStatus');
  const makeRoom=()=>Math.random().toString(36).slice(2,8).toUpperCase().padEnd(6,'X');
  nameEl.value=get('vn.mp.name')||'Adventurer';roomEl.value=get('vn.mp.room')||makeRoom();
- serverEl.value=get('vn.mp.server');
+ // The game controls its own server address; never use a saved address from a different project.
  const status=s=>{statusEl.textContent=s;};
  const validUrl=url=>{try{const u=new URL(url);return (u.protocol==='wss:'||(u.protocol==='ws:'&&['localhost','127.0.0.1'].includes(u.hostname)))&&Boolean(u.host);}catch{return false;}};
  function createGhost(p){
@@ -72,12 +73,12 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   socket.send(JSON.stringify({type:'state',zone,x:state.heroX,y:state.dispY||state.heroY||0,z:state.heroZ,yaw:state.yaw||0,hero:getHeroName()}));
  }
  async function join(){
-  disconnect();const url=serverEl.value.trim(),code=roomEl.value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
+  disconnect();const url=DEFAULT_SERVER,code=roomEl.value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
   const name=nameEl.value.trim().replace(/[^\p{L}\p{N} _-]/gu,'').slice(0,20);
   if(!validUrl(url)){status('Set a secure wss:// server address first.');return;}
   if(code.length<4||name.length<2){status('Use a room code (4–12 characters) and nickname (2+ characters).');return;}
   roomEl.value=code;nameEl.value=name;
-  put('vn.mp.name',name);put('vn.mp.room',code);put('vn.mp.server',url);
+  put('vn.mp.name',name);put('vn.mp.room',code);
   const seq=++epoch;let s;
   try{s=new WebSocket(url);}catch{status('Server address is invalid.');return;}
   socket=s;status('Connecting to multiplayer server…');
@@ -113,7 +114,7 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
  }
  $('#vnMpJoin').addEventListener('click',join);
  $('#vnMpLeave').addEventListener('click',disconnect);
- $('#vnMpCopy').addEventListener('click',()=>{if(navigator.clipboard?.writeText)navigator.clipboard.writeText(roomEl.value).then(()=>status('Room code copied. Share the same server URL too.')).catch(()=>status('Copy failed; select the room code.'));else status('Select and copy the room code.');});
+ $('#vnMpCopy').addEventListener('click',()=>{if(navigator.clipboard?.writeText)navigator.clipboard.writeText(roomEl.value).then(()=>status('Room code copied. Then join inside Varnethryl.')).catch(()=>status('Copy failed; select the room code.'));else status('Select and copy the room code.');});
  function update(dt,now){
   if(joined&&now-lastSend>=95){lastSend=now;sendState();}
   for(const p of peers.values()){

@@ -2113,7 +2113,7 @@ const cheatEnv = {
         if(!f)return false;
         if(!f.on)f.startAuto();
         if(!f.on)return false;
-        return !!f.cheatSpawn(key);
+        return !!(await f.cheatSpawn(key));
       }catch(e){diag('Owner summon failed: '+String(e?.message||e),true);return false;}
     },
     // Never expose the Owner directory or teleport controls to ordinary players.

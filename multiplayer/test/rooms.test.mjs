@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { once } from 'node:events';
 import { WebSocket } from 'ws';
 import { createWorldServer } from '../server.mjs';
-import { nextRemoteYaw } from '../../www/proto3d/multiplayer-client.js';
+import { nextRemoteYaw,remoteFacing } from '../../www/proto3d/multiplayer-client.js';
 
 function recv(ws,type){
  return new Promise((resolve,reject)=>{
@@ -361,4 +361,11 @@ test('Owner server access token persists across reconnect and Lock Owner revokes
  const locked=recv(b,'owner-locked');b.send(JSON.stringify({type:'owner-lock'}));assert.equal((await locked).ok,true);
  const refused=recv(b,'owner-auth');b.send(JSON.stringify({type:'owner-resume',token}));
  assert.equal((await refused).ok,false);
+});
+
+test('legacy multiplayer orientation uses stable transmitted yaw before fallback',()=>{
+ assert.equal(remoteFacing(0,0,1,0,true),Math.PI/2,'moving east faces east when legacy heading is frozen');
+ assert.equal(remoteFacing(0,0,1,0,true),Math.PI/2,'does not oscillate when next frozen frame arrives');
+ assert.equal(remoteFacing(0,1.1,1,0,true),1.1,'a real in-place yaw change wins over fallback');
+ assert.equal(remoteFacing(0,0,1,0,false),0,'idle skin holds its facing');
 });

@@ -283,7 +283,7 @@ export function createFight(env) {
     // Never allow it to spawn into a different zone's new combat session.
     if (!w || !on || generation!==spawnEpoch || spawnZone!==env.zone?.()) return null;
     let x = state.heroX + 12, z = state.heroZ;
-    if (extra && extra.at) { x = extra.at[0]; z = extra.at[1]; } else for (let k = 0; k < 20; k++) { const a = Math.random() * 6.283, r = (atPlayerDist || (14 + Math.random() * 14)) * HS / 1.5 * Math.max(1, cc.RM * 0.7), px = state.heroX + Math.cos(a) * r, pz = state.heroZ + Math.sin(a) * r; if (env.free(px, pz)) { x = px; z = pz; break; } }
+    if (extra && extra.at) { x = extra.at[0]; z = extra.at[1]; } else for (let k = 0; k < 20; k++) { const a = Math.random() * 6.283, r = (atPlayerDist || (14 + Math.random() * 14)) * HS / 1.5 * Math.max(1, cc.RM * 0.7), px = state.heroX + Math.cos(a) * r, pz = state.heroZ + Math.sin(a) * r; if (env.free(px, pz) && (env.zone?.() !== 'coliseum' || isColiseumCombat(px,pz))) { x = px; z = pz; break; } }
     w.position.set(x, terrainY(x,z), z); let top;
     if (def.boss || def.scale > 1) { top = (w.userData.heightW || 1.8 * HS * def.scale) + 0.5; }   // the GLB is already 6x the hero (11.4 m vs 1.9 m): no extra scaling in game
     else { w.updateMatrixWorld(true); top = Math.max(1.5, new THREE.Box3().setFromObject(w).max.y) + 0.3; }

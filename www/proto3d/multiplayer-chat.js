@@ -58,10 +58,13 @@ export function createMultiplayerChat({sendChat,isOnline}){
  sendRow.append(recipient,input,sendBtn);
  const note=create('small','vn-chat-note','Private messages go only to the selected online player. Friends are saved locally; they are not verified identities.');
  root.replaceChildren(header,tabs,status,worldTitle,worldFeed,friendsPane,privateTitle,privateFeed,sendRow,note);
+ // Typing messages must not make the hero run, jump, cast skills or move the
+ // camera. Stop chat events before the game's window keyboard shortcuts.
+ for(const type of ['keydown','keyup','pointerdown'])root.addEventListener(type,e=>e.stopPropagation());
  let roster=[],worldCode='',connected=false,selfId='';
  const persist=()=>save(STORE,JSON.stringify(friends));
  const sayStatus=s=>{status.textContent=s;};
- const open=()=>{root.hidden=false;trigger?.setAttribute('aria-expanded','true');refresh();};
+ const open=()=>{root.hidden=false;trigger?.setAttribute('aria-expanded','true');trigger?.classList.remove('vn-chat-unread');refresh();};
  const closeChat=()=>{root.hidden=true;trigger?.setAttribute('aria-expanded','false');};
  trigger?.addEventListener('click',()=>root.hidden?open():closeChat());
  close.addEventListener('click',closeChat);

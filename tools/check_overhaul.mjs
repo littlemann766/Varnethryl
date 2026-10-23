@@ -263,3 +263,11 @@ assert(main.includes("document.getElementById('vnOwnerTools')?.addEventListener(
   'Owner tools button opens password-gated panel');
 assert(source('www/proto3d/cheatboot.js').includes("import('./cheatpanel.js')"),
   'Owner tools load through existing password gate, not an unguarded menu');
+
+// Owner Cheats must remain immediately accessible, without auto-logout.
+assert(nav.includes('id="vnOwnerTools"'),'Owner cheats shortcut is visible in the first menu row');
+assert(nav.indexOf('id="vnOwnerTools"')<nav.indexOf('id="vnQuickMore"'),'Owner cheats must not be buried in More options');
+assert(ownerPanel.includes("ui.badge.addEventListener('click',()=>togglePanel(env))"),'gold Owner badge can reopen cheats in one tap');
+assert(ownerPanel.includes("gate.lock(); c.reset()"),'Lock Owner is still the sole explicit local sign-out path');
+assert(!source('www/proto3d/ownergate.js').includes('UNLOCK_TTL'),'Owner authorization has no automatic timeout');
+assert(source('www/proto3d/varn-ui.css').includes('#ownerBadge[role="button"]'),'gold Owner badge accepts touches');

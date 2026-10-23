@@ -26,6 +26,7 @@ export function buildColiseum(scene){
  path:new THREE.MeshLambertMaterial({color:0x948b78,side:THREE.DoubleSide}),
  banner:new THREE.MeshLambertMaterial({color:0x8d2630,side:THREE.DoubleSide}),
  gold:new THREE.MeshLambertMaterial({color:0xb98b4e}),
+ flame:new THREE.MeshBasicMaterial({color:0xffb35e}),
  portal:new THREE.MeshBasicMaterial({color:0x955afa,transparent:true,opacity:.69,depthWrite:false,side:THREE.DoubleSide})
  };
  const add=(geometry,mat,name,x=0,y=0,z=0)=>{const o=new THREE.Mesh(geometry,mat);o.name=name;o.position.set(x,y,z);o.receiveShadow=true;group.add(o);return o;};
@@ -59,6 +60,16 @@ export function buildColiseum(scene){
    dummy.position.y=28.4;dummy.updateMatrix();tops.setMatrixAt(i,dummy.matrix);
  }
  pillars.name='Colonnade_columns';tops.name='Colonnade_capitals';group.add(pillars,tops);
+ // Upper spectator torches use two instanced draw calls, not expensive lights.
+ const torchCount=24,shaft=new THREE.InstancedMesh(new THREE.CylinderGeometry(.18,.25,1.6,6),m.dark,torchCount);
+ const flames=new THREE.InstancedMesh(new THREE.ConeGeometry(.35,.85,7),m.flame,torchCount);
+ shaft.name='Spectator_torch_stands';flames.name='Spectator_torch_flames';
+ for(let i=0;i<torchCount;i++){
+   const a=(i+.5)/torchCount*TAU,r=103,x=Math.sin(a)*r,z=Math.cos(a)*r,y=coliseumHeight(x,z);
+   dummy.position.set(x,y+1,z);dummy.rotation.set(0,a,0);dummy.updateMatrix();shaft.setMatrixAt(i,dummy.matrix);
+   dummy.position.y=y+2.1;dummy.updateMatrix();flames.setMatrixAt(i,dummy.matrix);
+ }
+ group.add(shaft,flames);
  // Arena platform remains at ground floor. No obstacles in spectator circulation.
  add(new THREE.CylinderGeometry(9,9,.42,40),m.dark,'CENTER_ARENA_PLATFORM',0,.18,0);
  add(new THREE.CylinderGeometry(8.2,8.2,.45,40),m.stone,'CENTER_ARENA_DAIS',0,.58,0);

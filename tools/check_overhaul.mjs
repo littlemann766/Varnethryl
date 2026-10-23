@@ -70,7 +70,7 @@ assert(main.includes("updateTownEnterables(ZONE.name,enterables,state.heroX,stat
 assert(!main.includes('Math.hypot(n.position.x - 1000, n.position.z) > 400'),'zone isolation cannot use an old world-coordinate distance exemption');
 assert(main.includes("crowd.filter(r=>r.kind==='party').map(r=>r.root)"),'city NPCs do not render in the Coliseum');
 assert(main.includes("COLISEUM_PVP && COLISEUM_PVP.group"),'active Coliseum geometry remains visible during town unloading');
-assert(main.includes('for (const n of townHidden)n.visible=true;townHidden.length=0;'),'town scene visibility is restored on return');
+assert(main.includes('for(const n of townHidden)n.visible=true;townHidden.length=0;'),'town scene visibility is restored on return');
 const villageRoot={visible:false};
 const villageBuilding={id:'guildhall',update:()=>{villageRoot.visible=true;return true;}};
 for(const zone of ['wilds','frost','hydra','sailing','coliseum']){

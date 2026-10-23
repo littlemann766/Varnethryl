@@ -87,6 +87,7 @@ with sync_playwright() as pw:
         .every(n=>getComputedStyle(n).display==='none');
     }"""))
     pg.focus('#cb .sl.b1')
+    pg.wait_for_timeout(120) # allow animated ability names to settle after focus
     check(tag+' focused attack shows full skill name',pg.evaluate("""()=>{
       const b=document.querySelector('#cb .sl.b1'),hint=document.querySelector('#cb .skill-name-callout');
       return !!hint && hint.textContent===b.getAttribute('aria-label') && getComputedStyle(hint).display!=='none';

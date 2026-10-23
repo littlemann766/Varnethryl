@@ -578,6 +578,34 @@ export function createFight(env) {
     hud.update(dt, cc.enemies);
     bambooSync(); heroWeaponSync(); sumSync(); if (!saber && canWield() && !sheathed && cc.dead <= 0 && !cc.bambooOn()) equip(); if (saber && (!canWield() || sheathed)) unequip(); if (saber) saber.visible = !cc.bambooOn();
   }
+  /* Owner progression cheats update the same 3D combat experience store used
+     by actual monster rewards. Existing heroes and the original 2D save are
+     preserved; these handlers are called only from the Owner-gated panel. */
+  const cheatAddXp=(amount)=>{
+    const id=env.heroId(),earned=progress.award(id,amount);
+    if(earned.gained<=0)return false;
+    if(cc.hero.id===id){
+      cc.hero.level=earned.level;cc.experience=earned;
+      cc.emit('experience',earned);cc.emit('hero',cc.hero);
+    }
+    hud.say('+'+earned.gained.toLocaleString()+' XP',1500);
+    return true;
+  };
+  const cheatSetLevel=(level,ids)=>{
+    if(!Array.isArray(ids)||!ids.length)return false;
+    const currentId=env.heroId();
+    let newProgress=null;
+    for(const id of new Set(ids.filter(Boolean))){
+      const info=progress.setLevel(id,level);
+      if(id===currentId)newProgress=info;
+    }
+    if(newProgress&&cc.hero.id===currentId){
+      cc.hero.level=newProgress.level;cc.experience=newProgress;
+      cc.emit('experience',newProgress);cc.emit('hero',cc.hero);
+    }
+    hud.say('Set '+ids.length+' hero level'+(ids.length===1?'':'s')+' to '+level,1600);
+    return true;
+  };
   /* owner cheat hooks (cheats.js -> main.js) */
   const cheatHeal = () => { cc.res.full(); cc.potions = cc.P.potion.charges; if (cc.dead > 0) { cc.dead = 0; cc.act = null; env.hero().rotation.x = 0; } hud.say('Party healed', 1200); return true; };
   const cheatKill = () => { let n = 0; for (const e of cc.enemies.slice()) if (e.state !== 'defeated') { e.hp = 0; cc.defeat(e); n++; } if (n) hud.say(n + ' slain', 1200); return n > 0; };
@@ -608,6 +636,6 @@ export function createFight(env) {
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
   const moveMul = () => (on && cc.chill > 0 && !cc.hero.owner) ? Math.max(0.3, 1 - (cc.chillAmt || 0)) : 1; if (typeof window !== 'undefined') window.__fightMove = moveMul;
-  return { moveMul, armory, startRegionBosses, get heroWeapon() { return HW; }, setBamboo(v) { if (!ownerGate()) { cc.bamboo = false; return false; } cc.bamboo = !!v; bambooSync(); return cc.bamboo; }, bambooOn: () => cc.bambooOn(), useUltimate2: () => cc.useUltimate2(), get lightning() { return lfx; }, companions, cheatHeal, cheatKill, cheatSpawn, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
+  return { moveMul, armory, startRegionBosses, get heroWeapon() { return HW; }, setBamboo(v) { if (!ownerGate()) { cc.bamboo = false; return false; } cc.bamboo = !!v; bambooSync(); return cc.bamboo; }, bambooOn: () => cc.bambooOn(), useUltimate2: () => cc.useUltimate2(), get lightning() { return lfx; }, companions, cheatHeal, cheatKill, cheatSpawn, cheatAddXp, cheatSetLevel, shake, start, stop, startAuto: () => start(true), get auto() { return auto; }, toggle() { on ? stop() : start(); }, update, attack: () => api.use(0), use: api.use, dodge: api.dodge, lock: api.lock, potion: api.potion, spawnBoss, spawn, cc, hud, setSaberModel(u) { saberUrl = u; if (saber) loadModel(u); },
     get on() { return on; }, get hp() { return cc.res.hp; }, get kills() { return cc.kills; }, get monsters() { return cc.enemies; }, get respawner() { return RS; }, get hasSaber() { return !!saber; }, hurt(n) { cc.res.hp = Math.max(0, cc.res.hp - n); if (cc.res.hp <= 0 && cc.dead <= 0) { cc.dead = cc.P.respawn; cc.emit('playerDown'); } } };
 }

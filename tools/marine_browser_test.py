@@ -22,7 +22,8 @@ with sync_playwright() as pw:
   page_url=URL.replace('party=2',f'party={party_count}')
   ctx=b.new_context(viewport={'width':w,'height':h},is_mobile=mob,has_touch=mob,service_workers='block')
   # Simulate older Android WebViews missing DecompressionStream. Their
-  # original raw GLB fallback must load both Hydra and Tidewrack models.
+  # raw GLB fallback remains required for the Hydra; the sailing ship now
+  # uses the intact curved-hull 3D asset while its broken imported GLB is repaired.
   if mob:
    ctx.add_init_script("Object.defineProperty(window,'DecompressionStream',{value:undefined,configurable:true})")
   pg=ctx.new_page()
@@ -145,8 +146,8 @@ with sync_playwright() as pw:
    check(tag+' 1000 x 1000 meter sea',pg.evaluate("Math.abs(__p3d.ZONE.half-710)<.1"))
    check(tag+' ship loaded BEFORE entering sailing',pg.evaluate("""()=>{
      const ship=__p3d.scene.getObjectByName('player-sailing-ship'),
-           approved=ship?.getObjectByName('user-supplied-sailing-ship');
-     return !!approved && approved.visible && ship.children.length===1;
+           hull=ship?.getObjectByName('tidewrack-sailing-ship-hull');
+     return !!hull && hull.visible && hull.children.length>20 && ship.children.length===1;
    }"""))
    pg.wait_for_function("document.getElementById('vnMiniMap')?.dataset.zone==='sailing'",timeout=12000)
    check(tag+' live ocean chart replaces Mire',pg.evaluate("document.getElementById('vnMiniMap').dataset.zone==='sailing'"))
@@ -161,11 +162,19 @@ with sync_playwright() as pw:
    }"""))
    pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-control.in').click()")
    pg.evaluate("document.querySelector('#vnMiniMap .vn-mini-open').click()")
-   pg.wait_for_function("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')",timeout=35000)
-   check(tag+' approved ship GLB visible',pg.evaluate("!!__p3d.scene.getObjectByName('user-supplied-sailing-ship')?.visible"))
-   check(tag+' no procedural fallback hull, sails or duplicated vessel',pg.evaluate("""()=>{
+   pg.wait_for_function("!!__p3d.scene.getObjectByName('tidewrack-sailing-ship-hull')",timeout=35000)
+   check(tag+' coherent curved-hull 3D galleon visible',pg.evaluate("""()=>{
+     const vessel=__p3d.scene.getObjectByName('player-sailing-ship'),
+           hull=vessel?.getObjectByName('tidewrack-sailing-ship-hull');
+     const geometry=hull?.children.filter(c=>c.isMesh)||[];
+     const curvedHull=geometry.some(c=>c.geometry?.type==='BufferGeometry' && c.geometry.attributes?.position?.count>100);
+     const sails=geometry.filter(c=>c.geometry?.type==='BufferGeometry' && c.geometry.attributes?.position?.count>30);
+     return vessel?.children.length===1 && !!hull && hull.visible && curvedHull && sails.length>=5;
+   }"""))
+   check(tag+' no exploded imported mesh or duplicate vessel',pg.evaluate("""()=>{
      const s=__p3d.scene.getObjectByName('player-sailing-ship');
-     return s?.children.length===1 && s.children[0].name==='user-supplied-sailing-ship';
+     return s?.children.length===1 && s.children[0].name==='tidewrack-sailing-ship-hull'
+       && !__p3d.scene.getObjectByName('user-supplied-sailing-ship');
    }"""))
    check(tag+' tapered wake with no rectangle plane',pg.evaluate("""()=>{
      const w=__p3d.scene.getObjectByName('player-ship-wake');
@@ -202,7 +211,7 @@ with sync_playwright() as pw:
    })()"""
    metrics=pg.evaluate("""(()=>{
      const p=__p3d,T=p.THREE,s=p.scene.getObjectByName('player-sailing-ship');
-     const items=[s,s.getObjectByName('user-supplied-sailing-ship'),p.hero,...p.bump.crowd.filter(r=>r.kind==='party').map(r=>r.root)];
+     const items=[s,s.getObjectByName('tidewrack-sailing-ship-hull'),p.hero,...p.bump.crowd.filter(r=>r.kind==='party').map(r=>r.root)];
      return items.map(o=>{if(!o)return null;const box=new T.Box3().setFromObject(o),v=new T.Vector3(),v2=new T.Vector3();return {name:o.name,scale:o.scale.toArray(),size:box.getSize(v).toArray().map(n=>+n.toFixed(2)),center:box.getCenter(v2).toArray().map(n=>+n.toFixed(2)),pos:o.getWorldPosition(new T.Vector3()).toArray().map(n=>+n.toFixed(2))};});
    })()""")
    print('CREW_BOUNDS',tag,metrics,flush=True)
@@ -241,8 +250,8 @@ with sync_playwright() as pw:
    pg.wait_for_function("__p3d.fight && __p3d.fight.on && __p3d.fight.auto",timeout=15000)
    check(tag+' hero combat and abilities restored after disembarking',
      pg.evaluate("__p3d.fight.on && __p3d.fight.auto"))
-   # Switching before asynchronous GLB imports settle must not resurrect a
-   # retired Hydra or ship in the town scene. Repeat without awaiting models.
+   # Switching before a Hydra model import settles must not resurrect a
+   # retired marine scene in town. Repeat without awaiting models.
    for button,zone in [('vnTravelHydra','hydra'),('vnTravelSail','sailing'),('vnTravelTown','town')]:
     pg.evaluate(f"document.getElementById('{button}').click()")
     pg.wait_for_function(f"__p3d.zone==='{zone}'",timeout=35000)

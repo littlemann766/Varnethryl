@@ -639,7 +639,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.17';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.18';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1063,7 +1063,13 @@ const miniMap=createMiniMap(()=>state,()=>ZONE,{
 const posOk = (x, z) => { const r = 0.5 * HS + 0.3; for (const c of colliders) { if (c.type === 'box' ? (x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r) : Math.hypot(x - c.x, z - c.z) < c.r + r) return false; } return Math.abs(x) < WORLD - 3 && Math.abs(z) < WORLD - 3; };   // a save from the smaller village may sit inside a (now bigger) building
 if (savedPlan && savedPlan.pos && qp0.get('hero') == null && posOk(savedPlan.pos.x, savedPlan.pos.z)) { state.heroX = savedPlan.pos.x; state.heroZ = savedPlan.pos.z; state.yaw = savedPlan.pos.yaw; }
 const keys = new Set();
-import('./ladders.js').then(m => { LAD = m.createLadders({ THREE, scene, colliders, state, keys, HS }); for (const d of LADDER_SITES) LAD.add(d); });
+import('./ladders.js').then(m => {
+  LAD=m.createLadders({THREE,scene,colliders,state,keys,HS});
+  for(const d of LADDER_SITES)LAD.add(d);
+  // Async ladder loading must not inject town towers into an already-open arena.
+  for(const L of LAD.list)L.group.visible=ZONE.name==='town';
+  if(ZONE.name!=='town')LAD.btn.style.display='none';
+});
 const LADDER_SITES = [{ id: 'watchtower', x: -18, z: 32, half: 1.8, H: 5.0 }, { id: 'lookout', x: -30, z: 14, half: 1.5, H: 3.2, roofed: false }, { id: 'belltower', x: -24, z: -16, half: 2.0, H: 7.0 }];
 /* owner cheat flags (cheatflags.js): all defaults are no-ops; only the owner-gated panel ever changes them */
 const cheat = createFlags();
@@ -1238,7 +1244,7 @@ function surfaceAt(x, z, level) {
   // Isolated PvP map must not inherit the town building floors at matching coordinates.
   if(ZONE.name==='coliseum')return level===0?{y:coliseumHeight(x,z)}:null;
   for (const b of ectx.multi) { { const rc = (b.reach || 40) * (b.K || 1); if (Math.abs(x - b.cx) > rc || Math.abs(z - b.cz) > rc) continue; } const s = b.surface(x, z, level); if (s) return s; }
-  if (LAD && level >= 10) { const ls = LAD.surface(x, z, level); if (ls) return ls; }
+  if (ZONE.name==='town' && LAD && level >= 10) { const ls = LAD.surface(x, z, level); if (ls) return ls; }
   return level === 0 ? { y: ZONE.name === 'coliseum' ? coliseumHeight(x,z) : ZONE.name === 'hydra' && HM ? HM.heightAt(x,z) : ZONE.name === 'frost' ? frostElevation(x,z) : ZONE.name === 'town' && TOWN_LANDS ? TOWN_LANDS.heightAt(x,z) : 0 } : null;
 }
 function updateLevel() {
@@ -1546,7 +1552,9 @@ function updateHero(dt) {
     if (d < 0.25 || state.blockedFrames > 25) { state.target = null; marker.visible = false; state.blockedFrames = 0; }
     else { vx = dx / d; vz = dz / d; mag = Math.min(1, d / 1.2 + 0.4); }
   }
-  if (LAD && LAD.update(dt, vx, vz)) { vx = 0; vz = 0; mag = 0; }
+  // Town wooden ladders cannot be triggered by positions inside other zones.
+  if (ZONE.name==='town' && LAD && LAD.update(dt, vx, vz)) { vx = 0; vz = 0; mag = 0; }
+  if (ZONE.name!=='town' && LAD?.btn) LAD.btn.style.display='none';
   if (!state.climbing) { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
   const moving = (vx || vz);
   if (moving) {
@@ -1857,6 +1865,8 @@ async function setZoneNow(name) {
     state.heroZ=(lastZone==='hydra'||lastZone==='sailing')?PORT_CENTER.z-12:lastZone==='frost'?FROST_PORTAL.z+6:lastZone==='coliseum'?COLISEUM_TOWN_PORTAL.z+6:lastZone==='wilds'&&lastWildsEntrance==='mountain'?MOUNTAIN_WILDS_RETURN.z:TOWN_PORTAL.z+4;
     state.yaw=lastZone==='wilds'&&lastWildsEntrance==='mountain'?-Math.PI/2:0;
   }
+  for(const L of LAD?.list||[])L.group.visible=ZONE.name==='town';
+  if(ZONE.name!=='town'&&LAD?.btn)LAD.btn.style.display='none';
   state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
   updateZoneAmbience(.1,true);
   miniMap.invalidate(); // redraw the real top-down layer after every zone change
@@ -1963,6 +1973,27 @@ requestAnimationFrame(frame);
 // ---------- save bridge (save3d.js): shared guildbound_rpg_save_v1; only state.active and the p3d field are written ----------
 const lastSave = { x: NaN, z: NaN, hero: -1 };
 function snapNow() { return { x: state.heroX, z: state.heroZ, yaw: state.yaw, heroGlb: HEROES.indexOf(hero) }; }
+function sessionSnapshot(){
+  return {zone:ZONE.name,x:state.heroX,z:state.heroZ,yaw:state.yaw};
+}
+async function restoreSession(bookmark){
+  if(!bookmark||!['town','wilds','frost','hydra','sailing','coliseum'].includes(bookmark.zone)||
+    !Number.isFinite(bookmark.x)||!Number.isFinite(bookmark.z)||
+    Math.abs(bookmark.x)>10000||Math.abs(bookmark.z)>10000)return false;
+  if(ZONE.name!==bookmark.zone){
+    if(!(await setZone(bookmark.zone)))return false;
+  }
+  const lim=ZONE.half-3;
+  const point={x:THREE.MathUtils.clamp(bookmark.x,ZONE.cx-lim,ZONE.cx+lim),
+    z:THREE.MathUtils.clamp(bookmark.z,ZONE.cz-lim,ZONE.cz+lim)};
+  resolve(point,false);
+  state.heroX=point.x;state.heroZ=point.z;state.level=0;
+  state.target=null;state.climbing=false;state.blockedFrames=0;
+  state.yaw=Number.isFinite(bookmark.yaw)?bookmark.yaw:0;
+  jumpHeight=0;jumpVelocity=0;
+  updateLevel();snapFollowers();camRig.snap=true;miniMap.invalidate();
+  return true;
+}
 if (savedOn) {
   let store = null; try { store = localStorage; } catch (e) {}
   if (store) {
@@ -2054,6 +2085,12 @@ const cheatEnv = {
     healParty: () => !!(FIGHT && FIGHT.on && FIGHT.cheatHeal()),
     killEnemies: () => !!(FIGHT && FIGHT.on && FIGHT.cheatKill()),
     spawnEnemy: (k) => { if (FIGHT && FIGHT.on) return FIGHT.cheatSpawn(k); fightToggle().then(() => setTimeout(() => FIGHT && FIGHT.on && FIGHT.cheatSpawn(k), 900)); return true; },
+    // Never expose the Owner directory or teleport controls to ordinary players.
+    // This hook is wired only to the already owner-gated cheat panel.
+    ownerLoginPlayer: pass => MULTIPLAYER?.ownerLogin(pass) || false,
+    ownerListPlayers: () => MULTIPLAYER?.ownerList() || false,
+    ownerJumpToPlayer: id => MULTIPLAYER?.ownerJump(id) || false,
+    ownerPlayerEvents: callback => MULTIPLAYER?.onOwnerEvent(callback) || (()=>{}),
     onOwner: () => { if (window.__ownerRoster) window.__ownerRoster(); const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
   teleport: (x, z, zone) => {
@@ -2094,6 +2131,7 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
   loco: v => { LOCO_FORCE = v; }, actState: () => { const u = hero.userData; return u.act ? Object.fromEntries(Object.entries(u.act).map(([k, a]) => [k, [+a.getEffectiveWeight().toFixed(2), +a.timeScale.toFixed(2)]])) : null; },
   toggleModel: i => toggleModel(i), groups: () => [...GROUPS.values()].map(g => ({ key: g.key, name: g.name, vars: g.vars.map(v => v.label) })),
   saver, flushSave: () => saver ? saver.flush() : false, savedPlan,
+  sessionSnapshot,restoreSession,
   state, glbInfo, colliders, multi: ectx.multi, get hero() { return hero; },
   get visibleHeroModelCount(){
     const roots=new Set(HEROES);
@@ -2117,5 +2155,26 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
 // player's existing game. Newcomer town travel applies only to that client.
 MULTIPLAYER=createMultiplayer({THREE,scene,state,getZone:()=>ZONE.name,setZone,
  getHeroName:()=>HERO_NAMES[HEROES.indexOf(hero)]||'Adventurer',
- updateLevel,snapFollowers,camRig,miniMap});
+ updateLevel,snapFollowers,camRig,miniMap,
+ teleportNearPlayer:async(target)=>{
+   if(!target||!['town','wilds','frost','hydra','sailing','coliseum'].includes(target.zone)||
+      !Number.isFinite(target.x)||!Number.isFinite(target.z))return false;
+   // Load/unload the actual destination map using the same portal pipeline.
+   // Only the owner's local character moves; no network move request is sent
+   // to the target. Do not reset inventory, hero selection, or any other save.
+   if(ZONE.name!==target.zone){
+     const ok=await setZone(target.zone);if(!ok)return false;
+   }
+   const spot={x:target.x+2,z:target.z+2};
+   resolve(spot,false);
+   state.heroX=spot.x;state.heroZ=spot.z;
+   state.level=0;state.target=null;state.blockedFrames=0;state.climbing=false;
+   marker.visible=false;state.yaw=Number.isFinite(target.yaw)?target.yaw:0;
+   jumpHeight=0;jumpVelocity=0;updateLevel();snapFollowers();
+   camRig.snap=true;miniMap.invalidate();saver?.mark();
+   return true;
+ },
+ onOwnerTeleport:()=>window.__p3d?.cheats?.markCheated?.()
+});
 window.__p3d.multiplayer=MULTIPLAYER;
+document.dispatchEvent(new Event('varn:game-ready'));

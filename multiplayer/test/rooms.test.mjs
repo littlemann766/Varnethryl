@@ -101,3 +101,65 @@ test('missing movement state cannot crash the public Varnethryl server',async t=
  assert.equal(msg.first,true);assert.equal(srv.rooms.get('WORLD3').get(msg.id).zone,'town');
  assert.equal(sock.readyState,WebSocket.OPEN);
 });
+
+test('server verifies Owner access and teleports the Owner between worlds without moving the target',async t=>{
+ const srv=createWorldServer({verifyOwner:pass=>pass==='test-only-owner-pass'});
+ srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');
+ t.after(()=>srv.close());const url='ws://127.0.0.1:'+srv.server.address().port;
+ const owner=await connected(url),target=await connected(url),visitor=await connected(url);
+ t.after(()=>{owner.terminate();target.terminate();visitor.terminate();});
+ async function enter(ws,code,name){
+   const reply=recv(ws,'welcome');
+   ws.send(JSON.stringify({type:'join',entry:'game',code,name,
+      state:{zone:'town',x:7,y:0,z:8,yaw:0,hero:'Adventurer'}}));
+   return reply;
+ }
+ const a=await enter(owner,'WORLD1','OwnerTester');
+ const b=await enter(target,'WORLD2','OtherPlayer');
+ await enter(visitor,'WORLD3','Unverified');
+ let forbidden=recv(visitor,'owner-error');
+ visitor.send(JSON.stringify({type:'owner-list'}));
+ assert.match((await forbidden).message,/verify/i);
+ forbidden=recv(visitor,'owner-error');
+ visitor.send(JSON.stringify({type:'owner-jump',id:b.id}));
+ assert.match((await forbidden).message,/verify/i);
+ const denied=recv(owner,'owner-auth');
+ owner.send(JSON.stringify({type:'owner-auth',pass:'not-the-pass'}));
+ assert.equal((await denied).ok,false);
+ const auth=recv(owner,'owner-auth'),listing=recv(owner,'owner-players');
+ owner.send(JSON.stringify({type:'owner-auth',pass:'test-only-owner-pass'}));
+ assert.equal((await auth).ok,true);
+ const directory=await listing;
+ assert.ok(directory.players.some(p=>p.id===b.id&&p.world==='WORLD2'));
+ const targetOriginal={...srv.rooms.get('WORLD2').get(b.id)};
+ const targetSeesOwner=recv(target,'joined'),ownerJump=recv(owner,'owner-jump');
+ owner.send(JSON.stringify({type:'owner-jump',id:b.id}));
+ const jump=await ownerJump;
+ assert.equal(jump.world,'WORLD2');assert.equal(jump.target.id,b.id);
+ assert.equal((await targetSeesOwner).player.id,a.id);
+ assert.equal(srv.rooms.get('WORLD2').get(a.id).zone,targetOriginal.zone);
+ assert.equal(srv.rooms.get('WORLD2').get(a.id).x,targetOriginal.x+2);
+ assert.equal(srv.rooms.get('WORLD2').get(b.id).x,targetOriginal.x);
+ assert.equal(srv.rooms.get('WORLD2').get(b.id).z,targetOriginal.z);
+ assert.equal(srv.rooms.get('WORLD1'),undefined);
+});
+test('automatic reconnect resumes cave location even when other players remain in the world',async t=>{
+ const srv=createWorldServer();srv.server.listen(0,'127.0.0.1');await once(srv.server,'listening');
+ t.after(()=>srv.close());const url='ws://127.0.0.1:'+srv.server.address().port;
+ const player=await connected(url),friend=await connected(url);
+ t.after(()=>{player.terminate();friend.terminate();});
+ const first=recv(player,'welcome');player.send(JSON.stringify({type:'join',code:'WORLD1',entry:'game',
+    name:'CavePlayer',state:{zone:'frost',x:550,y:20,z:580,yaw:0,hero:'Selene'}}));await first;
+ const second=recv(friend,'welcome');friend.send(JSON.stringify({type:'join',code:'WORLD1',entry:'title',
+    name:'FriendInTown',state:{zone:'town',x:0,y:0,z:0,yaw:0,hero:'Aldric'}}));
+ const friendInfo=await second;assert.equal(friendInfo.first,false);
+ player.close();await once(player,'close');
+ const reconnect=await connected(url);t.after(()=>reconnect.terminate());
+ const welcome=recv(reconnect,'welcome');reconnect.send(JSON.stringify({type:'join',code:'WORLD1',entry:'resume',
+    name:'CavePlayer',state:{zone:'frost',x:551,y:20,z:581,yaw:0,hero:'Selene'}}));
+ const result=await welcome;
+ assert.equal(result.first,false);assert.equal(result.spawn,null);
+ const actual=srv.rooms.get('WORLD1').get(result.id);
+ assert.equal(actual.zone,'frost');assert.equal(actual.x,551);
+ assert.equal(srv.rooms.get('WORLD1').get(friendInfo.id).zone,'town');
+});

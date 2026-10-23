@@ -2,9 +2,19 @@
  * Town welcomes newcomers; the room's first player remains exactly where they were.
  * Remote movement is visual only. Damage, quests, loot and NPC AI stay single-player.
  */
-export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName,updateLevel,snapFollowers,camRig,miniMap}){
+export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName,updateLevel,snapFollowers,camRig,miniMap,teleportNearPlayer,onOwnerTeleport}){
  const root=new THREE.Group();root.name='Varnethryl-Remote-Players';root.userData.keepAlways=true;scene.add(root);
  const peers=new Map();let socket=null,joined=false,selfId='',room='',lastSend=0,epoch=0,onlineCount=0;
+ let reconnectTimer=null,reconnectAttempts=0,keepConnected=false;
+ const ownerListeners=new Set();
+ const tellOwner=event=>{for(const cb of ownerListeners){try{cb(event);}catch(e){console.warn('Owner player selection listener failed',e);}}};
+ const ownerCommand=(type,payload={})=>{
+  if(!joined||!socket||socket.readyState!==WebSocket.OPEN){
+    tellOwner({type:'owner-error',message:'Join a multiplayer world before using Owner teleport.'});
+    return false;
+  }
+  socket.send(JSON.stringify({type,...payload}));return true;
+ };
  const get=k=>{try{return localStorage.getItem(k)||'';}catch{return '';}};
  const put=(k,v)=>{try{localStorage.setItem(k,v);}catch{}};
  const DEFAULT_SERVER='wss://varnethryl-world-server-production.up.railway.app';
@@ -48,7 +58,9 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
    host.querySelector('.vnMpRefresh').addEventListener('click',refresh);
    host.querySelector('.vnMpJoin').addEventListener('click',()=>join(l.room.value,l));
    host.querySelector('.vnMpCreate').addEventListener('click',()=>join(makeRoom(),l));
-   host.querySelector('.vnMpLeave').addEventListener('click',disconnect);
+   host.querySelector('.vnMpLeave').addEventListener('click',()=>{
+     disconnect();document.dispatchEvent(new Event('varn:world-left'));
+   });
    host.querySelector('.vnMpCopy').addEventListener('click',()=>{
      const code=joined?room:l.room.value.trim().toUpperCase();
      if(navigator.clipboard?.writeText)
@@ -140,23 +152,26 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
  }
  function resetPeers(){for(const id of [...peers.keys()])removePeer(id);}
  function disconnect(){
+  keepConnected=false;clearTimeout(reconnectTimer);reconnectTimer=null;
   epoch++;joined=false;selfId='';room='';onlineCount=0;
   const prev=socket;socket=null;if(prev)try{prev.close(1000,'Leave world');}catch{}
   resetPeers();status('Offline — single-player is available.');drawWorlds();
+  tellOwner({type:'owner-players',players:[]});
  }
  function sendState(){
   if(!joined||!socket||socket.readyState!==WebSocket.OPEN)return;
   const zone=getZone();if(!['town','wilds','frost','hydra','sailing','coliseum'].includes(zone))return;
   socket.send(JSON.stringify({type:'state',zone,x:state.heroX,y:state.dispY||state.heroY||0,z:state.heroZ,yaw:state.yaw||0,hero:getHeroName()}));
  }
- async function join(rawCode,lobby){
-  const fromTitle=!!lobby?.isTitle&&!document.getElementById('vnMenu')?.hidden;
+ async function join(rawCode,lobby,entryMode='game'){
+  const resuming=entryMode==='resume';
+  const fromTitle=entryMode==='title'||(!resuming&&!!lobby?.isTitle&&!document.getElementById('vnMenu')?.hidden);
   const code=String(rawCode||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
   const name=String(lobby?.name.value||currentName).trim().replace(/[^\p{L}\p{N} _-]/gu,'').slice(0,20);
   if(code.length<4||name.length<2){status('Enter a nickname (2+ letters) and a world code (4–12 characters).');return;}
   // Joining the selected world intentionally replaces the previous session;
   // it never changes game maps until the server confirms the new admission.
-  disconnect();currentName=name;selectCode(code);
+  disconnect();keepConnected=true;currentName=name;selectCode(code);
   for(const l of lobbies)l.name.value=name;
   put('vn.mp.name',name);put('vn.mp.room',code);
   const seq=++epoch;let s;
@@ -164,14 +179,33 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   socket=s;status('Connecting to '+code+'…');
   s.onopen=()=>{
    if(seq!==epoch)return;
-   s.send(JSON.stringify({type:'join',entry:fromTitle?'title':'game',code,name,state:{
+   s.send(JSON.stringify({type:'join',entry:resuming?'resume':fromTitle?'title':'game',code,name,state:{
      zone:getZone(),x:state.heroX,y:state.heroY||0,z:state.heroZ,yaw:state.yaw||0,hero:getHeroName()
    }}));
   };
   s.onmessage=async event=>{
    if(seq!==epoch)return;
    let m;try{m=JSON.parse(event.data);}catch{return;}
-   if(m.type==='error'){status('World unavailable: '+String(m.message||'cannot join'));s.close();return;}
+   if(m.type==='owner-auth'||m.type==='owner-players'||m.type==='owner-error'){
+     tellOwner(m);return;
+   }
+   if(m.type==='owner-jump'){
+     // Only our avatar moves. Target player's zone, camera, combat and save
+     // are unaffected; the server already changed this Owner's room.
+     try{
+       const ok=await teleportNearPlayer(m.target);
+       if(seq!==epoch)return;
+       if(!ok){status('Unable to teleport beside this player.');tellOwner({type:'owner-error',message:'Could not load the player map.'});return;}
+       room=m.world;resetPeers();for(const peer of m.players||[])sync(peer);
+       onlineCount=(m.players?.length||0)+1;
+       sendState();status('Owner arrived beside '+m.target.name+' in '+room+'.');
+       onOwnerTeleport?.();
+       tellOwner({type:'owner-arrived',target:m.target});
+       refresh();
+     }catch(e){tellOwner({type:'owner-error',message:'Teleport failed: '+String(e?.message||e)});}
+     return;
+   }
+   if(m.type==='error'){keepConnected=false;status('World unavailable: '+String(m.message||'cannot join'));s.close();return;}
    if(m.type==='welcome'){
     selfId=m.id;room=m.code;resetPeers();
     // Only this newcomer is sent to town; a player already in a cave,
@@ -185,9 +219,10 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
      }catch(e){status('Town travel failed: '+String(e?.message||e));s.close();return;}
     }
     if(seq!==epoch)return;
-    joined=true;onlineCount=(m.players?.length||0)+1;
+    joined=true;reconnectAttempts=0;onlineCount=(m.players?.length||0)+1;
     for(const p of m.players||[])sync(p);
     status('In '+room+' · '+onlineCount+'/12 players. '+(m.spawn?'You entered town.':'Your location was preserved.'));
+    document.dispatchEvent(new CustomEvent('varn:world-connected',{detail:{room,name}}));
     refresh();
     if(fromTitle){
       closeTitleLobby();
@@ -201,8 +236,18 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   };
   s.onerror=()=>{if(seq===epoch)status('Unable to reach Varnethryl World Server. Retry from the menu.');};
   s.onclose=()=>{
-    if(seq===epoch){joined=false;selfId='';socket=null;resetPeers();
-      status('Disconnected. Solo play still works; choose a world to rejoin.');refresh();}
+    if(seq!==epoch)return;
+    joined=false;selfId='';socket=null;resetPeers();
+    tellOwner({type:'owner-players',players:[]});
+    status('Connection lost. Continuing your game; reconnecting to '+code+'…');
+    if(keepConnected){
+      const delay=Math.min(30000,1200*2**Math.min(5,reconnectAttempts++));
+      reconnectTimer=setTimeout(()=>{
+        if(seq!==epoch||!keepConnected)return;
+        join(code,{name:{value:name},isTitle:false},'resume');
+      },delay);
+    }else status('Disconnected. Solo play still works; choose a world to rejoin.');
+    refresh();
   };
  }
  function update(dt,now){
@@ -218,5 +263,14 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
    p.legB.rotation.x=-p.legA.rotation.x;
   }
  }
- return {join,disconnect,refresh,update,get online(){return joined;},get room(){return room;},get playerCount(){return onlineCount;},dispose(){disconnect();root.parent?.remove(root);}};
+ return {
+  join,disconnect,refresh,update,
+  resume:(code,name)=>join(code||currentCode,{name:{value:name||currentName},isTitle:false},'resume'),
+  ownerLogin:pass=>ownerCommand('owner-auth',{pass}),
+  ownerList:()=>ownerCommand('owner-list'),
+  ownerJump:id=>ownerCommand('owner-jump',{id}),
+  onOwnerEvent:callback=>{ownerListeners.add(callback);return ()=>ownerListeners.delete(callback);},
+  get online(){return joined;},get room(){return room;},get playerCount(){return onlineCount;},
+  dispose(){disconnect();ownerListeners.clear();root.parent?.remove(root);}
+ };
 }

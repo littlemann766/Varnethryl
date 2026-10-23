@@ -225,7 +225,25 @@ assert(main.includes("document.getElementById('vnMpEnterGame')?.addEventListener
 assert(menu.includes("document.getElementById('vnMpEnterGame')?.addEventListener('click', hide)"),'multiplayer join closes title screen');
 const mpLobby=source('www/proto3d/multiplayer-client.js');
 assert(mpLobby.includes('PUBLIC_WORLDS')&&mpLobby.includes("HTTP_SERVER+'/rooms'"),'public worlds are listed from live server');
-assert(mpLobby.includes("entry:fromTitle?'title':'game'"),'joiner town spawn differs from mid-game entry');
+assert(mpLobby.includes("entry:resuming?'resume':fromTitle?'title':'game'"),'resume bypasses newcomer town teleport while title join starts in town');
 assert(mpLobby.includes("if(m.spawn)"),'only joining client with assigned spawn changes location');
 assert(mpLobby.includes("document.getElementById('vnMpEnterGame')?.click()"),'successful multiplayer entry activates gameplay');
 assert(!mpLobby.includes('vnMpServer'),'server connection is automatic with no pasted URL');
+
+// Owner-only multiplayer teleport, session return, map HUD and ladder isolation.
+const ownerPanel=source('www/proto3d/cheatpanel.js');
+const worldServer=source('multiplayer/server.mjs');
+const sessionMenu=source('www/proto3d/varn-menu.js');
+assert(ownerPanel.includes("sec('Teleport to online player (Owner only)')"),'owner-gated player teleport selector is present');
+assert(ownerPanel.includes("ownerPlayerEvents"),'owner player directory can refresh');
+assert(worldServer.includes("if(!socket.ownerAuthorized)"),'server refuses Owner commands without verified credentials');
+assert(worldServer.includes("type:'owner-jump'"),'owner travel reply includes target and destination');
+assert(mpLobby.includes("ownerJump:id=>ownerCommand('owner-jump',{id})"),'only authenticated multiplayer relay performs owner jump');
+assert(main.includes("teleportNearPlayer:async(target)=>"),'remote travel uses zone-loading lifecycle');
+assert(main.includes("if (ZONE.name==='town' && LAD && LAD.update"),'ladder triggers belong to town and never spawn inside Coliseum');
+assert(main.includes("for(const L of LAD?.list||[])L.group.visible=ZONE.name==='town'"),'town-only ladder meshes are isolated from arena');
+assert(main.includes("sessionSnapshot,restoreSession"),'saved world snapshot is exposed to session-resume logic');
+assert(sessionMenu.includes("vn.active3d.v1")&&sessionMenu.includes('varn:game-ready'),'returning app resumes last game without title screen');
+assert(mpLobby.includes("entryMode='game'")&&mpLobby.includes("reconnectTimer"),'multiplayer reconnect preserves game session');
+assert(source('www/proto3d/fight.js').includes('hud.show(true); cc.block(false);'),'combat HUD remains visible even when fight mode stops');
+assert(!source('www/proto3d/varn-ui.css').includes('body.vn-sailing-zone #cb{display:none'),'combat HUD remains visible at sea');

@@ -21,6 +21,7 @@ on:
       - 'www/proto3d/models-new/hydra_restored_mobile.glb.gz'
       - 'www/proto3d/models-new/tidewrack_sailing_ship.glb.gz'
       - 'tools/marine_browser_test.py'
+      - 'tools/prepare_marine_assets.py'
       - '.github/workflows/test-marine-browser.yml'
   workflow_dispatch:
 permissions:
@@ -42,6 +43,8 @@ jobs:
           node tools/check_boss_regions.mjs
           node tools/boss_patterns_test.mjs
           node tools/owner_cheats_test.mjs
+      - name: Prepare original raw marine models for fallback path
+        run: python3 tools/prepare_marine_assets.py
       - name: Install headless mobile and desktop Chromium
         run: |
           python -m pip install playwright

@@ -639,7 +639,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.24';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.25';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -2075,16 +2075,34 @@ let ownerFlag = false;
 let cheatStore = null; try { cheatStore = localStorage; } catch (e) { cheatStore = null; }
 const cheatEnv = {
   flags: cheat, bumpSys, storage: cheatStore, zones: ['village', 'wilds', 'frost', 'hydra', 'sailing'],
-  hooks: { fightTest: () => fightToggle(),
+  hooks: { fightTest: async () => {
+    if(ZONE.name==='sailing')return false;
+    const before=!!FIGHT?.on;
+    const f=await fightToggle();
+    return !!f&&f.on!==before;
+  },
     godPref: () => { try { return cheatStore.getItem('vn_owner_god_v1') !== '0'; } catch (e) { return true; } },
     unlimPref: () => { try { return cheatStore.getItem('vn_owner_unlim_v1') !== '0'; } catch (e) { return true; } },
     nocdPref: () => { try { return cheatStore.getItem('vn_owner_nocd_v1') !== '0'; } catch (e) { return true; } },
     nocdMode: (on) => { try { cheatStore.setItem('vn_owner_nocd_v1', on ? '1' : '0'); } catch (e) { /* ignore */ } return true; },
     unlimMode: (on) => { try { cheatStore.setItem('vn_owner_unlim_v1', on ? '1' : '0'); } catch (e) { /* ignore */ } return true; },
     godMode: (on) => { try { cheatStore.setItem('vn_owner_god_v1', on ? '1' : '0'); } catch (e) { /* ignore */ } return true; },
-    healParty: () => !!(FIGHT && FIGHT.on && FIGHT.cheatHeal()),
-    killEnemies: () => !!(FIGHT && FIGHT.on && FIGHT.cheatKill()),
-    spawnEnemy: (k) => { if (FIGHT && FIGHT.on) return FIGHT.cheatSpawn(k); fightToggle().then(() => setTimeout(() => FIGHT && FIGHT.on && FIGHT.cheatSpawn(k), 900)); return true; },
+    healParty: async () => {
+      if(ZONE.name==='sailing')return false;
+      const f=await fightToggle(true);
+      return !!f?.cheatHeal();
+    },
+    killEnemies: () => !!(FIGHT?.on&&FIGHT.cheatKill()),
+    spawnEnemy: async key => {
+      if(ZONE.name==='sailing')return false;
+      try{
+        const f=await fightToggle(true);
+        if(!f)return false;
+        if(!f.on)f.startAuto();
+        if(!f.on)return false;
+        return !!f.cheatSpawn(key);
+      }catch(e){diag('Owner summon failed: '+String(e?.message||e),true);return false;}
+    },
     // Never expose the Owner directory or teleport controls to ordinary players.
     // This hook is wired only to the already owner-gated cheat panel.
     ownerLoginPlayer: pass => MULTIPLAYER?.ownerLogin(pass) || false,
@@ -2093,21 +2111,26 @@ const cheatEnv = {
     ownerPlayerEvents: callback => MULTIPLAYER?.onOwnerEvent(callback) || (()=>{}),
     onOwner: () => { if (window.__ownerRoster) window.__ownerRoster(); const b = document.getElementById('fightBtn'); if (b) b.style.display = ''; } },   // owner-gated: only the owner panel calls these
   places: () => BUILDING_DEFS.map(d => { const p = entrySpot(d); return { id: d.id, name: d.name, x: p.x, z: p.z }; }),
-  teleport: (x, z, zone) => {
-    // Owner travel shortcuts use the exact same zone lifecycle and cleanup as
-    // normal portals, never raw coordinates in unloaded maps.
-    if (['wilds','frost','hydra','sailing'].includes(zone)) {
-      setZone(zone).catch(e=>diag('Owner world travel failed: '+String(e?.message||e),true));
-      return;
-    }
-    const go = () => {
-      if (zone === 'village') { x = 0; z = 14; }
-      state.heroX=x;state.heroZ=z;state.level=0;state.target=null;
-      marker.visible=false;state.blockedFrames=0;updateLevel();snapFollowers();
-      camRig.snap=true;
-    };
-    if(ZONE.name!=='town')setZone('town').then(go).catch(e=>diag('Owner town teleport failed: '+String(e?.message||e),true));
-    else go();
+  teleport: async (x,z,zone) => {
+    // Every travel control awaits the REAL map transition. Returning true
+    // prematurely previously hid the panel even when Tidewrack failed to load.
+    try{
+      const destination=zone==='village'?'town':zone;
+      if(destination&&['town','wilds','frost','hydra','sailing','coliseum'].includes(destination)){
+        const ok=await setZone(destination);
+        if(!ok)return false;
+        if(destination!=='town')return true;
+      }else if(destination)return false;
+      else if(ZONE.name!=='town'&&!(await setZone('town')))return false;
+      if(zone==='village'){x=0;z=14;}
+      if(!Number.isFinite(x)||!Number.isFinite(z))return false;
+      const point={x,z};
+      resolve(point,false);
+      state.heroX=point.x;state.heroZ=point.z;state.level=0;state.target=null;
+      marker.visible=false;state.blockedFrames=0;
+      updateLevel();snapFollowers();camRig.snap=true;miniMap.invalidate();saver?.mark();
+      return true;
+    }catch(e){diag('Owner world travel failed: '+String(e?.message||e),true);return false;}
   },
   onReady: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); settingsApi.ownerInit(); },
   onOwner: (c) => { window.__p3d.cheats = c; window.__p3d.owner = true; if (window.__ownerRoster) window.__ownerRoster(); },

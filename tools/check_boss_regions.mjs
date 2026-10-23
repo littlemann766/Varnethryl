@@ -229,7 +229,8 @@ for(const id of ["'hydra'","'sailing'","'frost'","'village'"]){
 for(const id of ['tp-hydra','tp-sailing','tp-frost','tp-main']){
  assert(ownerPanelSrc.includes(id),'owner cheats direct map button '+id);
 }
-assert(main.includes("['wilds','frost','hydra','sailing'].includes(zone)"),'owner map shortcuts use zone lifecycle instead of unloaded coordinates');
+assert(main.includes("const ok=await setZone(destination)")&&main.includes("if(!ok)return false"),
+  'owner map shortcuts await zone lifecycle and report actual loading results');
 assert(main.includes("lastZone!=='town'&&name!=='town'"),'travel between any non-town maps safely returns through main overworld');
 assert(water.includes("function sail(dt,turn,throttle,x,z)"),'ship rudder/throttle is distinct from walking movement');
 assert(water.includes("nav.speed+=(target-nav.speed)"),'ship acceleration is smooth rather than instant');

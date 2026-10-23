@@ -40,6 +40,8 @@ jobs:
           find www -type f -name "*.js" -not -path "*/vendor/*" -print0 | xargs -0 -n1 node --check
       - name: Add Android project
         run: npx cap add android
+      - name: Bundle approved raw marine GLBs for Android WebViews
+        run: python3 tools/prepare_marine_assets.py
       - name: Copy web assets
         run: npx cap sync android
       - name: Apply Varnethryl launcher icon and splash

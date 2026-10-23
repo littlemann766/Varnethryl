@@ -25,7 +25,7 @@ const css=[
  '@media(orientation:portrait){#vnMiniMap{top:calc(max(12px,env(safe-area-inset-top)) + 58px);width:108px;height:120px}#vnMiniMap .vn-mini-open{width:108px;height:108px}#vnMiniMap.expanded{width:188px;height:202px}#vnMiniMap.expanded .vn-mini-open{width:188px;height:188px}}',
  '@media(orientation:landscape) and (max-height:450px){#vnMiniMap{top:max(54px,calc(env(safe-area-inset-top) + 48px));width:105px;height:115px}#vnMiniMap .vn-mini-open{width:105px;height:105px}#vnMiniMap.expanded{width:162px;height:175px}#vnMiniMap.expanded .vn-mini-open{width:162px;height:162px}}'
 ].join('');
-function landmarks(zone,z){
+export function landmarks(zone,z){
  const cx=z.cx||0,cz=z.cz||0,h=z.half||560;
  if(zone==='town')return [
   [0,0,'Village','town'],[0,-134.4,'Castle Keep','town'],
@@ -35,14 +35,20 @@ function landmarks(zone,z){
   [PORT_CENTER.x,PORT_CENTER.z,'Harbor','port'],[117.6,126.4,'Coliseum PvP Portal','portal'],[0,CITY_HALF-1.2,'Town Gate','portal']];
  if(zone==='frost')return [[cx-7,cz+177,'Exit','portal'],[cx-37,cz-66,'Frost Troll A','boss'],[cx+37,cz-66,'Frost Troll B','boss'],[cx+91,cz+18,'Frozen Lake','water']];
  if(zone==='hydra')return [[cx,cz-11,'Hydra','boss'],[cx,cz+117,'Exit','portal']];
- if(zone==='coliseum'){const r=Math.hypot(x-cx,z-cz);return r<60?'#a38c69':r<95?'#8b8580':r<112?'#645e58':r<140?'#9c8d78':'#675c4a';}
+
  if(zone==='wilds')return [[cx-6,cz-2,'Return Ruins','portal'],[cx,cz+85*(h/280),'Standing Stones','ruin']];
  if(zone==='sailing')return [[cx,cz+h-175,'Departure','port']];
  if(zone==='coliseum')return [[0,145,'Return to Varnethryl','portal'],[0,0,'PvP Battle Floor','boss']];
  return [];
 }
 const markerColors={town:'#ead39e',boss:'#ff8064',portal:'#c199fe',port:'#e4b881',water:'#5bcae6',ruin:'#c9b99e',party:'#8fddff'};
-function terrainColor(zone,x,z,e,cx,cz){
+export function terrainColor(zone,x,z,e,cx,cz){
+  // Coliseum rings are colored from world coordinates, not from landmark metadata.
+  // This branch must live in terrainColor where x/z are defined.
+  if(zone==='coliseum'){
+    const r=Math.hypot(x-cx,z-cz);
+    return r<60?'#a38c69':r<95?'#8b8580':r<112?'#645e58':r<140?'#9c8d78':'#675c4a';
+  }
  if(zone==='sailing'||e.water?.(zone,x,z))return zone==='sailing'?'#25536d':'#316b82';
  const height=e.height?.(zone,x,z)||0,biome=e.biome?.(zone,x,z)||'meadow';
  if(zone==='hydra')return Math.hypot(x-cx,z-cz)<69?'#7b857b':'#53636b';

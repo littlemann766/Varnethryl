@@ -207,7 +207,7 @@ assert(water.includes('OCEAN_METERS*WORLD_UNITS_PER_METER/2'),'ocean world size 
 assert(water.includes('TILE=240,VIEW_RADIUS=2'),'compact ocean islands stream by 240-world-unit tiles');
 assert(water.includes('tiles.delete(k)')&&water.includes('obstacles.delete(k)'),'ocean tiles unload outside view');
 assert(water.includes('hydra_restored_mobile.glb.gz'),'Hydra model path points to restored chest and rock cleanup');
-assert(water.includes('tidewrack_sailing_ship.glb.gz'),'sailing world uses owner-supplied vessel');
+assert(water.includes("buildSailingShip(1,true)")&&water.includes("tidewrack-sailing-ship-hull"),'ocean renders one coherent curved-hull vessel while original GLB is under repair');
 const offline=src('www/sw.js');
 for(const asset of ['water-realms.js','hydra_restored_mobile.glb.gz','tidewrack_sailing_ship.glb.gz']){
  assert(offline.includes(asset),'release offline cache includes water realm asset '+asset);

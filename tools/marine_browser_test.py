@@ -275,6 +275,37 @@ with sync_playwright() as pw:
    check(tag+' no missing marine assets',not failedAssets,failedAssets[:5])
    major=[e for e in errs if any(t in e for t in ['Uncaught','hydra_restored','tidewrack_sailing','TypeError','GLB','camRig.look.set','camRig.lookTarget','is not a function'])]
    check(tag+' no runtime errors for marine gameplay',not major,major[:5])
+   # Chat UI regression: sending must immediately show the player's text;
+   # the server echo confirms delivery without duplicating that line.
+   # Peer replies remain readable on the screen with the panel closed.
+   chat_ui=pg.evaluate("""async()=>{
+     const {createMultiplayerChat}=await import('./proto3d/multiplayer-chat.js');
+     const root=document.getElementById('vnChatPanel');
+     const widget=createMultiplayerChat({sendChat:()=>true,isOnline:()=>true});
+     widget.setOnline(true,'WORLD1','test-me');root.hidden=false;
+     const input=root.querySelector('.vn-chat-input'),form=root.querySelector('form');
+     input.value='Ahoy Tidewrack!';
+     form.requestSubmit();
+     const feed=root.querySelector('.vn-chat-feed');
+     const pending=feed.querySelectorAll('.vn-chat-line').length===1
+       &&feed.textContent.includes('Ahoy Tidewrack!')
+       &&feed.textContent.includes('Sending');
+     widget.receiveChat({type:'chat',kind:'world',from:'test-me',name:'Me',
+       to:null,text:'Ahoy Tidewrack!',time:Date.now()});
+     const confirmed=feed.querySelectorAll('.vn-chat-line').length===1
+       &&feed.textContent.includes('Delivered');
+     root.hidden=true;
+     widget.receiveChat({type:'chat',kind:'world',from:'friend',name:'Guest',
+       to:null,text:'I can read you!',time:Date.now()});
+     const live=document.getElementById('vnChatLive');
+     const received=feed.textContent.includes('I can read you!')
+       &&!!live&&!live.hidden&&live.textContent.includes('I can read you!');
+     widget.dispose();return {pending,confirmed,received};
+   }""")
+   check(tag+' local chat message appears instantly',chat_ui['pending'],chat_ui)
+   check(tag+' echoed chat confirms without duplicate',chat_ui['confirmed'],chat_ui)
+   check(tag+' friend message visible with chat closed',chat_ui['received'],chat_ui)
+
   except Exception as e:
    fails+=1;print('FAIL '+tag+' exception:',str(e),flush=True)
    try: print('STATE:',pg.evaluate("({zone:__p3d?.zone,frames:__p3d?.frames,diag:document.getElementById('diag')?.innerText?.slice(-1200)})"),flush=True)

@@ -321,4 +321,5 @@ assert(cheatPanel.includes("className:'owner-fold'"),'Owner tools are grouped in
 assert(source('www/proto3d/coowner-panel.js').includes("className:'vn-rank-fold'")||
        source('www/proto3d/coowner-panel.js').includes("make('details','vn-rank-fold')"),
        'CoOwner controls use matching medieval sections');
-assert(mpLobby.includes("const walking=p.moving===true"),'remote heading falls back to movement direction if network yaw freezes');
+assert(mpLobby.includes('remoteFacing(prevYaw,incomingYaw,deltaX,deltaZ,p.moving===true)')&&mpLobby.includes('e.networkYaw=incomingYaw'),
+ 'remote heading falls back to movement direction and never oscillates between derived and server yaw');

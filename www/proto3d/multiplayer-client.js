@@ -2,6 +2,12 @@ import { createMultiplayerChat } from './multiplayer-chat.js';
 import { createCoOwnerPanel } from './coowner-panel.js';
 // Interpolate across the -π/π seam. Animation clips never override this
 // world-facing heading, including when a remote player turns while idle.
+export function remoteFacing(previousYaw,receivedYaw,deltaX,deltaZ,moving){
+ const received=Number.isFinite(receivedYaw)?receivedYaw:previousYaw;
+ const changed=Math.abs(Math.atan2(Math.sin(received-previousYaw),Math.cos(received-previousYaw)))>.025;
+ return moving&&Math.hypot(deltaX,deltaZ)>.17&&!changed
+   ?Math.atan2(deltaX,deltaZ):received;
+}
 export function nextRemoteYaw(current,target,dt){
  if(!Number.isFinite(target)||!Number.isFinite(current))return Number.isFinite(target)?target:0;
  const delta=Math.atan2(Math.sin(target-current),Math.cos(target-current));
@@ -180,7 +186,7 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   obj.add(fallback);
   const peer={id:p.id,obj,legA,legB,fallback,model:null,loadedSkin:'',pendingSkin:'',
     failedSkin:'',skinId:p.skin||'aldric',role:p.role||'player',coAura,moving:!!p.moving,
-    zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,walk:0,materials:[tunic,armor,skin,mat],tex};
+    zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,networkYaw:p.yaw,walk:0,materials:[tunic,armor,skin,mat],tex};
   obj.rotation.order='YXZ';obj.position.set(p.x,p.y,p.z);obj.rotation.y=p.yaw;obj.visible=p.zone===getZone();return peer;
  }
  function disposeRemote(model){
@@ -227,15 +233,14 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   if(!['town','wilds','frost','hydra','sailing','coliseum'].includes(p.zone))return;
   let e=peers.get(p.id);
   if(!e){e=createGhost(p);peers.set(p.id,e);}
-  const prevX=e.x,prevZ=e.z,prevYaw=e.yaw;
+  const prevX=e.x,prevZ=e.z,prevYaw=Number.isFinite(e.networkYaw)?e.networkYaw:e.yaw;
   const incomingYaw=Number.isFinite(p.yaw)?p.yaw:prevYaw;
   const deltaX=p.x-prevX,deltaZ=p.z-prevZ;
-  const walking=p.moving===true&&Math.hypot(deltaX,deltaZ)>.17;
-  const yawChanged=Math.abs(Math.atan2(Math.sin(incomingYaw-prevYaw),Math.cos(incomingYaw-prevYaw)))>.025;
-  // Follow network yaw when available; fall back to travel direction for
-  // legacy clients that move but keep broadcasting a frozen heading.
+  // Compare successive SERVER headings, not the visually derived heading.
+  // Otherwise frozen-yaw legacy clients would oscillate back and forth.
   e.zone=p.zone;e.x=p.x;e.y=p.y;e.z=p.z;
-  e.yaw=walking&&!yawChanged?Math.atan2(deltaX,deltaZ):incomingYaw;
+  e.yaw=remoteFacing(prevYaw,incomingYaw,deltaX,deltaZ,p.moving===true);
+  e.networkYaw=incomingYaw;
   e.moving=p.moving===true;
   if(p.role){e.role=p.role;e.coAura.visible=p.role==='coowner';}
   const incoming=typeof p.skin==='string'?p.skin:'aldric';

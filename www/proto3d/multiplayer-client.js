@@ -1,11 +1,19 @@
 import { createMultiplayerChat } from './multiplayer-chat.js';
+import { createCoOwnerPanel } from './coowner-panel.js';
+// Interpolate across the -π/π seam. Animation clips never override this
+// world-facing heading, including when a remote player turns while idle.
+export function nextRemoteYaw(current,target,dt){
+ if(!Number.isFinite(target)||!Number.isFinite(current))return Number.isFinite(target)?target:0;
+ const delta=Math.atan2(Math.sin(target-current),Math.cos(target-current));
+ return current+delta*Math.min(1,Math.max(0,dt)*20);
+}
 /* Optional multiplayer test presence for ALL Varnethryl world zones.
  * Town welcomes newcomers; the room's first player remains exactly where they were.
  * Remote movement is visual only. Damage, quests, loot and NPC AI stay single-player.
  */
 export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName,getSkinId,loadRemoteSkin,updateLevel,snapFollowers,camRig,miniMap,teleportNearPlayer,onOwnerTeleport}){
  const root=new THREE.Group();root.name='Varnethryl-Remote-Players';root.userData.keepAlways=true;scene.add(root);
- const peers=new Map();let socket=null,joined=false,selfId='',room='',lastSend=0,epoch=0,onlineCount=0;
+ const peers=new Map();let socket=null,joined=false,selfId='',room='',lastSend=0,epoch=0,onlineCount=0,teleporting=false;
  let reconnectTimer=null,reconnectAttempts=0,keepConnected=false;
  const ownerListeners=new Set();
  const tellOwner=event=>{for(const cb of ownerListeners){try{cb(event);}catch(e){console.warn('Owner player selection listener failed',e);}}};
@@ -17,6 +25,8 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   socket.send(JSON.stringify({type,...payload}));return true;
  };
  const get=k=>{try{return localStorage.getItem(k)||'';}catch{return '';}};
+ const del=k=>{try{localStorage.removeItem(k);}catch{};};
+ const COOWNER_TOKEN_KEY='vn.coowner.session.v1',OWNER_TOKEN_KEY='vn.owner.server.token.v1';
  const put=(k,v)=>{try{localStorage.setItem(k,v);}catch{}};
  const DEFAULT_SERVER='wss://varnethryl-world-server-production.up.railway.app';
  const PUBLIC_WORLDS=[
@@ -34,6 +44,21 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
  let currentName=get('vn.mp.name')||'Adventurer',currentCode=get('vn.mp.room')||'WORLD1';
  let currentStatus='Offline — single-player is available.';
  const status=message=>{currentStatus=message;for(const l of lobbies)l.status.textContent=message;};
+ const coOwnerCommand=(type,payload={})=>{
+   if(!joined||!socket||socket.readyState!==WebSocket.OPEN)return false;
+   socket.send(JSON.stringify({type,...payload}));return true;
+ };
+ const coOwner=createCoOwnerPanel({
+   login:pass=>coOwnerCommand('coowner-auth',{pass}),
+   resume:()=>{const token=get(COOWNER_TOKEN_KEY);
+     return /^[0-9a-f]{64}$/.test(token)&&coOwnerCommand('coowner-resume',{token});},
+   lock:()=>coOwnerCommand('coowner-lock'),
+   list:()=>coOwnerCommand('coowner-list'),
+   jump:id=>coOwnerCommand('coowner-jump',{id}),
+   isOnline:()=>joined&&socket?.readyState===WebSocket.OPEN,
+   getSavedToken:()=>get(COOWNER_TOKEN_KEY),
+   clearSavedToken:()=>del(COOWNER_TOKEN_KEY)
+ });
  const chat=createMultiplayerChat({
    isOnline:()=>joined&&socket?.readyState===WebSocket.OPEN,
    sendChat:(text,to)=>{
@@ -142,15 +167,21 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
    ctx.font='bold 25px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff0cd';ctx.fillText(String(p.name||'Player').slice(0,20),128,40,242);}
   const tex=new THREE.CanvasTexture(canvas),mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});
   const label=new THREE.Sprite(mat);label.scale.set(3.6,.9,1);label.position.y=2.65;obj.add(label);
+  // Only the Varnethryl SERVER can assign CoOwner status. Client-provided
+  // nicknames and local storage never affect this rank indicator.
+  const coAura=new THREE.Mesh(new THREE.TorusGeometry(.65,.048,8,44),
+    new THREE.MeshBasicMaterial({color:0xa967ff,transparent:true,opacity:.78,depthWrite:false}));
+  coAura.rotation.x=Math.PI/2;coAura.position.y=1.96;coAura.visible=p.role==='coowner';
+  obj.add(coAura);
   const fallback=new THREE.Group();fallback.name='Loading fallback';
   for(const part of [legA,legB,...obj.children.filter(o=>o.isMesh)]){
     if(part.parent===obj)fallback.add(part);
   }
   obj.add(fallback);
   const peer={id:p.id,obj,legA,legB,fallback,model:null,loadedSkin:'',pendingSkin:'',
-    failedSkin:'',skinId:p.skin||'aldric',moving:!!p.moving,
+    failedSkin:'',skinId:p.skin||'aldric',role:p.role||'player',coAura,moving:!!p.moving,
     zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,walk:0,materials:[tunic,armor,skin,mat],tex};
-  obj.position.set(p.x,p.y,p.z);obj.rotation.y=p.yaw;obj.visible=p.zone===getZone();return peer;
+  obj.rotation.order='YXZ';obj.position.set(p.x,p.y,p.z);obj.rotation.y=p.yaw;obj.visible=p.zone===getZone();return peer;
  }
  function disposeRemote(model){
    if(!model)return;
@@ -198,6 +229,7 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   if(!e){e=createGhost(p);peers.set(p.id,e);}
   e.zone=p.zone;e.x=p.x;e.y=p.y;e.z=p.z;e.yaw=Number.isFinite(p.yaw)?p.yaw:0;
   e.moving=p.moving===true;
+  if(p.role){e.role=p.role;e.coAura.visible=p.role==='coowner';}
   const incoming=typeof p.skin==='string'?p.skin:'aldric';
   if(e.skinId!==incoming){
     e.skinId=incoming;e.failedSkin='';
@@ -212,11 +244,12 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   keepConnected=false;clearTimeout(reconnectTimer);reconnectTimer=null;
   epoch++;joined=false;selfId='';room='';onlineCount=0;
   const prev=socket;socket=null;if(prev)try{prev.close(1000,'Leave world');}catch{}
-  resetPeers();chat.setOnline(false);status('Offline — single-player is available.');drawWorlds();
+  resetPeers();chat.setOnline(false);coOwner.onConnected(false);
+  status('Offline — single-player is available.');drawWorlds();
   tellOwner({type:'owner-players',players:[]});
  }
  function sendState(){
-  if(!joined||!socket||socket.readyState!==WebSocket.OPEN)return;
+  if(!joined||teleporting||!socket||socket.readyState!==WebSocket.OPEN)return;
   const zone=getZone();if(!['town','wilds','frost','hydra','sailing','coliseum'].includes(zone))return;
   socket.send(JSON.stringify({type:'state',zone,x:state.heroX,y:state.dispY||state.heroY||0,
     z:state.heroZ,yaw:state.yaw||0,hero:getHeroName(),skin:getSkinId(),moving:state.moving===true}));
@@ -245,26 +278,53 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   s.onmessage=async event=>{
    if(seq!==epoch)return;
    let m;try{m=JSON.parse(event.data);}catch{return;}
+   if(m.type==='role-state'){
+     const peer=peers.get(m.id);
+     if(peer){peer.role=m.role==='coowner'?'coowner':m.role==='owner'?'owner':'player';
+       peer.coAura.visible=peer.role==='coowner';}
+     return;
+   }
+   if(m.type==='coowner-auth'){
+     if(m.ok&&typeof m.token==='string'&&/^[a-f0-9]{64}$/.test(m.token))put(COOWNER_TOKEN_KEY,m.token);
+     if(m.resumed&&!m.ok)del(COOWNER_TOKEN_KEY);
+     coOwner.onEvent(m);return;
+   }
+   if(m.type==='coowner-players'||m.type==='coowner-error'||m.type==='coowner-locked'){
+     if(m.type==='coowner-locked')del(COOWNER_TOKEN_KEY);
+     coOwner.onEvent(m);return;
+   }
    if(m.type==='chat-roster'){chat.setRoster(m.players);return;}
    if(m.type==='chat'){chat.receiveChat(m);return;}
    if(m.type==='chat-error'){chat.error(m.message);return;}
-   if(m.type==='owner-auth'||m.type==='owner-players'||m.type==='owner-error'){
+   if(m.type==='owner-auth'){
+     if(m.ok&&typeof m.token==='string'&&/^[a-f0-9]{64}$/.test(m.token))put(OWNER_TOKEN_KEY,m.token);
+     if(m.resumed&&!m.ok)del(OWNER_TOKEN_KEY);
      tellOwner(m);return;
    }
-   if(m.type==='owner-jump'){
+   if(m.type==='owner-locked'){del(OWNER_TOKEN_KEY);
+     tellOwner({type:'owner-error',message:'Owner server access locked.'});return;}
+   if(m.type==='owner-players'||m.type==='owner-error'){tellOwner(m);return;}
+   if(m.type==='owner-jump'||m.type==='coowner-jump'){
+     const coJump=m.type==='coowner-jump';
+     teleporting=true;
      // Only our avatar moves. Target player's zone, camera, combat and save
      // are unaffected; the server already changed this Owner's room.
      try{
        const ok=await teleportNearPlayer(m.target);
        if(seq!==epoch)return;
-       if(!ok){status('Unable to teleport beside this player.');tellOwner({type:'owner-error',message:'Could not load the player map.'});return;}
+       if(!ok){status('Unable to teleport beside this player.');
+         if(coJump)coOwner.onEvent({type:'coowner-error',message:'Could not load the player map.'});
+         else tellOwner({type:'owner-error',message:'Could not load the player map.'});return;}
        room=m.world;resetPeers();for(const peer of m.players||[])sync(peer);
        onlineCount=(m.players?.length||0)+1;
-       sendState();status('Owner arrived beside '+m.target.name+' in '+room+'.');
-       onOwnerTeleport?.();
-       tellOwner({type:'owner-arrived',target:m.target});
+       teleporting=false;sendState();status((coJump?'CoOwner':'Owner')+' arrived beside '+m.target.name+' in '+room+'.');
+       if(coJump)coOwner.onEvent({type:'coowner-arrived',target:m.target});
+       else{onOwnerTeleport?.();tellOwner({type:'owner-arrived',target:m.target});}
        refresh();
-     }catch(e){tellOwner({type:'owner-error',message:'Teleport failed: '+String(e?.message||e)});}
+      }catch(e){
+         const error={type:coJump?'coowner-error':'owner-error',message:'Teleport failed: '+String(e?.message||e)};
+         if(coJump)coOwner.onEvent(error);else tellOwner(error);
+       }finally{teleporting=false;}
      return;
    }
    if(m.type==='error'){keepConnected=false;status('World unavailable: '+String(m.message||'cannot join'));s.close();return;}
@@ -282,6 +342,9 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
     }
     if(seq!==epoch)return;
     joined=true;reconnectAttempts=0;onlineCount=(m.players?.length||0)+1;
+    coOwner.onConnected(true);
+    const ownerToken=get(OWNER_TOKEN_KEY);
+    if(/^[a-f0-9]{64}$/.test(ownerToken))ownerCommand('owner-resume',{token:ownerToken});
     for(const p of m.players||[])sync(p);
     status('In '+room+' · '+onlineCount+'/12 players. '+(m.spawn?'You entered town.':'Your location was preserved.'));
     document.dispatchEvent(new CustomEvent('varn:world-connected',{detail:{room,name}}));
@@ -299,7 +362,7 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   s.onerror=()=>{if(seq===epoch)status('Unable to reach Varnethryl World Server. Retry from the menu.');};
   s.onclose=()=>{
     if(seq!==epoch)return;
-    joined=false;selfId='';socket=null;resetPeers();chat.setOnline(false);
+    joined=false;selfId='';socket=null;resetPeers();chat.setOnline(false);coOwner.onConnected(false);teleporting=false;
     tellOwner({type:'owner-players',players:[]});
     status('Connection lost. Continuing your game; reconnecting to '+code+'…');
     if(keepConnected){
@@ -320,7 +383,7 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
    showSkin(p);
    const dx=p.x-p.obj.position.x,dz=p.z-p.obj.position.z,dist=Math.hypot(dx,dz);
    if(dist>45)p.obj.position.set(p.x,p.y,p.z);else p.obj.position.lerp(new THREE.Vector3(p.x,p.y,p.z),Math.min(1,dt*9));
-   p.obj.rotation.y+=Math.atan2(Math.sin(p.yaw-p.obj.rotation.y),Math.cos(p.yaw-p.obj.rotation.y))*Math.min(1,dt*10);
+   p.obj.rotation.y=nextRemoteYaw(p.obj.rotation.y,p.yaw,dt);
    p.walk+=dt*(dist>.035?11:4);
    p.legA.rotation.x=dist>.035?Math.sin(p.walk)*.28:0;
    p.legB.rotation.x=-p.legA.rotation.x;
@@ -337,10 +400,11 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   join,disconnect,refresh,update,
   resume:(code,name)=>join(code||currentCode,{name:{value:name||currentName},isTitle:false},'resume'),
   ownerLogin:pass=>ownerCommand('owner-auth',{pass}),
+  ownerLock:()=>{del(OWNER_TOKEN_KEY);return ownerCommand('owner-lock');},
   ownerList:()=>ownerCommand('owner-list'),
   ownerJump:id=>ownerCommand('owner-jump',{id}),
   onOwnerEvent:callback=>{ownerListeners.add(callback);return ()=>ownerListeners.delete(callback);},
   get online(){return joined;},get room(){return room;},get playerCount(){return onlineCount;},
-  dispose(){disconnect();chat.dispose();ownerListeners.clear();root.parent?.remove(root);}
+  dispose(){disconnect();chat.dispose();coOwner.dispose();ownerListeners.clear();root.parent?.remove(root);}
  };
 }

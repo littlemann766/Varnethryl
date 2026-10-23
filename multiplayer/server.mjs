@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { randomUUID, pbkdf2Sync, timingSafeEqual } from 'node:crypto';
+import { randomUUID, randomBytes, pbkdf2Sync, timingSafeEqual } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { WebSocketServer, WebSocket } from 'ws';
 
@@ -7,6 +7,17 @@ import { WebSocketServer, WebSocket } from 'ws';
 // No client-authoritative damage, currency, or inventory messages are accepted.
 const ZONES=new Set(['town','wilds','frost','hydra','sailing','coliseum']);
 const MAX_PLAYERS=12, MAX_BYTES=2048, RATE_MS=80, CHAT_INTERVAL_MS=700;
+const COOWNER_ITER=260000, COOWNER_MAX_ATTEMPTS=4, COOWNER_LOCK_MS=15*60*1000;
+// CoOwner verifier exists ONLY in Railway environment variables, never in
+// GitHub source, APK, JavaScript assets or the public multiplayer protocol.
+function verifyCoOwnerPass(pass,options){
+ if(typeof options.verifyCoOwner==='function')return !!options.verifyCoOwner(pass);
+ const salt=process.env.VARNETHRYL_COOWNER_SALT||'';
+ const hash=process.env.VARNETHRYL_COOWNER_HASH||'';
+ if(!/^[0-9a-f]{40}$/.test(salt)||!/^[0-9a-f]{64}$/.test(hash))return false;
+ const derived=pbkdf2Sync(pass,Buffer.from(salt,'hex'),COOWNER_ITER,32,'sha256');
+ return timingSafeEqual(derived,Buffer.from(hash,'hex'));
+}
 const SKIN_RE=/^(?:[nop]:)?[a-z0-9_]{2,48}$/;
 const CODE_RE=/^[A-Z0-9]{10,20}$/;
 const skin=s=>typeof s==='string'&&SKIN_RE.test(s)?s:'aldric';
@@ -26,9 +37,39 @@ export const PUBLIC_WORLDS=Object.freeze([
 const clean=(value,max)=>String(value??'').replace(/[^\p{L}\p{N} _-]/gu,'').trim().slice(0,max);
 const finite=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
 const validState=m=>!!m&&typeof m==='object'&&ZONES.has(m.zone)&&finite(m.x,-10000,10000)&&finite(m.z,-10000,10000)&&finite(m.y,-1000,5000)&&finite(m.yaw,-1000,1000);
-const visible=p=>({id:p.id,name:p.name,slot:p.slot,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,hero:p.hero,skin:p.skin,friendCode:p.friendCode,moving:p.moving});
+const currentRole=p=>p.socket.ownerAuthorized?'owner':p.socket.coOwnerAuthorized?'coowner':'player';
+const visible=p=>({id:p.id,name:p.name,slot:p.slot,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,
+  hero:p.hero,skin:p.skin,friendCode:p.friendCode,moving:p.moving,role:currentRole(p)});
 export function createWorldServer(options={}){
- const rooms=new Map(),ownerAttempts=new Map();
+ const rooms=new Map(),ownerAttempts=new Map(),coOwnerAttempts=new Map(),coOwnerTokens=new Map(),ownerTokens=new Map();
+ function publishRole(p){
+  const room=rooms.get(p.code);if(room)broadcast(room,{type:'role-state',id:p.id,role:currentRole(p)});
+  publishRoster();
+ }
+ function coOwnerAuth(socket,pass){
+  const ip=socket._socket?.remoteAddress||'unknown',now=Date.now();
+  const record=coOwnerAttempts.get(ip)||{fails:0,lockedUntil:0};
+  if(record.lockedUntil>now)return {ok:false,message:'CoOwner sign-in temporarily locked after repeated attempts.'};
+  if(typeof pass!=='string'||pass.length<8||pass.length>128)
+   return {ok:false,message:'CoOwner password must be 8–128 characters.'};
+  let valid=false;
+  try{valid=verifyCoOwnerPass(pass,options);}catch{valid=false;}
+  if(!valid){
+   record.fails++;
+   if(record.fails>=COOWNER_MAX_ATTEMPTS){record.fails=0;record.lockedUntil=now+COOWNER_LOCK_MS;}
+   coOwnerAttempts.set(ip,record);
+   return {ok:false,message:record.lockedUntil>now?'CoOwner sign-in temporarily locked after repeated attempts.':'Incorrect CoOwner password.'};
+  }
+  coOwnerAttempts.delete(ip);
+  // Opaque random bearer for this device. Never place the password in local
+  // storage. Reconnect stays signed in until manual Lock CoOwner or server
+  // restart; only a server-side token can grant CoOwner permissions.
+  const token=randomBytes(32).toString('hex');
+  coOwnerTokens.set(token,true);
+  socket.coOwnerToken=token;socket.coOwnerAuthorized=true;
+  return {ok:true,token,message:'CoOwner unlocked. Use Lock CoOwner to revoke access.'};
+ }
+
  const isPublic=code=>PUBLIC_WORLDS.some(w=>w.code===code);
  const chatVisible=(p,q)=>p.code===q.code||(isPublic(p.code)&&isPublic(q.code));
  const chatPeers=()=>[...rooms.values()].flatMap(r=>[...r.values()]);
@@ -36,7 +77,7 @@ export function createWorldServer(options={}){
    const online=chatPeers();
    for(const p of online)send(p.socket,{type:'chat-roster',players:online
      .filter(q=>q.socket!==p.socket&&chatVisible(p,q))
-     .map(q=>({id:q.id,name:q.name,world:q.code,friendCode:q.friendCode}))});
+     .map(q=>({id:q.id,name:q.name,world:q.code,friendCode:q.friendCode,role:currentRole(q)}))});
  }
 
  const allOnline=()=>[...rooms.values()].flatMap(room=>[...room.values()]);
@@ -123,21 +164,72 @@ export function createWorldServer(options={}){
     return;
    }
    const p=socket.player;if(!p)return;
+   if(m.type==='coowner-auth'){
+     const result=coOwnerAuth(socket,m.pass);
+     send(socket,{type:'coowner-auth',...result});
+     if(result.ok){publishRole(p);send(socket,{type:'coowner-players',players:ownerPlayers(socket)});}
+     return;
+   }
+   if(m.type==='coowner-resume'){
+     const token=typeof m.token==='string'?m.token:'';
+     const ok=/^[a-f0-9]{64}$/.test(token)&&coOwnerTokens.has(token);
+     socket.coOwnerAuthorized=ok;
+     if(ok){socket.coOwnerToken=token;publishRole(p);}
+     send(socket,{type:'coowner-auth',ok,resumed:true,
+       message:ok?'CoOwner session restored.':'CoOwner session unavailable. Enter your password to unlock.'});
+     if(ok)send(socket,{type:'coowner-players',players:ownerPlayers(socket)});
+     return;
+   }
+   if(m.type==='coowner-lock'){
+     if(socket.coOwnerToken)coOwnerTokens.delete(socket.coOwnerToken);
+     socket.coOwnerToken=null;socket.coOwnerAuthorized=false;
+     send(socket,{type:'coowner-locked',ok:true});
+     publishRole(p);return;
+   }
+   if(m.type==='coowner-list'){
+     if(!socket.coOwnerAuthorized){send(socket,{type:'coowner-error',message:'Unlock CoOwner first.'});return;}
+     send(socket,{type:'coowner-players',players:ownerPlayers(socket)});return;
+   }
    if(m.type==='owner-auth'){
-     // A locally unlocked owner panel is NOT proof. Verify independently
-     // on the multiplayer server over TLS before revealing online players.
+     // Owner and CoOwner are independent, server-verified ranks.
      const result=checkOwnerPass(socket,m.pass);
-     if(result.ok)socket.ownerAuthorized=true;
-     send(socket,{type:'owner-auth',ok:result.ok,message:result.ok?'Owner access verified.':result.message});
+     let token=null;
+     if(result.ok){
+       token=randomBytes(32).toString('hex');ownerTokens.set(token,true);
+       socket.ownerToken=token;socket.ownerAuthorized=true;publishRole(p);
+     }
+     send(socket,{type:'owner-auth',ok:result.ok,
+       ...(token?{token}:{}),
+       message:result.ok?'Owner access verified.':result.message});
      if(result.ok)send(socket,{type:'owner-players',players:ownerPlayers(socket)});
      return;
+   }
+   if(m.type==='owner-resume'){
+     const token=typeof m.token==='string'?m.token:'';
+     const ok=/^[0-9a-f]{64}$/.test(token)&&ownerTokens.has(token);
+     socket.ownerAuthorized=ok;
+     if(ok){socket.ownerToken=token;publishRole(p);}
+     send(socket,{type:'owner-auth',ok,resumed:true,
+       message:ok?'Owner server access restored.':'Owner verification required for player teleport.'});
+     if(ok)send(socket,{type:'owner-players',players:ownerPlayers(socket)});
+     return;
+   }
+   if(m.type==='owner-lock'){
+     if(socket.ownerToken)ownerTokens.delete(socket.ownerToken);
+     socket.ownerToken=null;socket.ownerAuthorized=false;
+     send(socket,{type:'owner-locked',ok:true});
+     publishRole(p);return;
    }
    if(m.type==='owner-list'){
      if(!socket.ownerAuthorized){send(socket,{type:'owner-error',message:'Verify Owner server access first.'});return;}
      send(socket,{type:'owner-players',players:ownerPlayers(socket)});return;
    }
-   if(m.type==='owner-jump'){
-     if(!socket.ownerAuthorized){send(socket,{type:'owner-error',message:'Verify Owner server access first.'});return;}
+   if(m.type==='owner-jump'||m.type==='coowner-jump'){
+     const isCoOwner=m.type==='coowner-jump';
+     if(isCoOwner?!socket.coOwnerAuthorized:!socket.ownerAuthorized){
+       send(socket,{type:isCoOwner?'coowner-error':'owner-error',
+         message:isCoOwner?'Unlock CoOwner first.':'Verify Owner server access first.'});return;
+     }
      const target=allOnline().find(q=>q.id===m.id&&q.socket!==socket);
      if(!target){send(socket,{type:'owner-error',message:'That player has left the server.'});return;}
      let movedWorld=false;
@@ -156,7 +248,7 @@ export function createWorldServer(options={}){
      const current=rooms.get(p.code);
      broadcast(current,{type:movedWorld?'joined':'state',player:visible(p)},socket);
      publishRoster();
-     send(socket,{type:'owner-jump',world:p.code,target:ownerVisible(target),
+     send(socket,{type:m.type,world:p.code,target:ownerVisible(target),
        players:[...current.values()].filter(q=>q.socket!==socket).map(visible)});
      return;
    }
@@ -174,7 +266,7 @@ export function createWorldServer(options={}){
      }
      p.lastChat=now;
      const event={type:'chat',kind:target?'private':'world',id:randomUUID(),from:p.id,
-       name:p.name,to:target?.id||null,text,world:p.code,time:now};
+       name:p.name,role:currentRole(p),to:target?.id||null,text,world:p.code,time:now};
      if(target){send(target.socket,event);send(socket,event);}
      else broadcast(rooms.get(p.code),event,null);
      return;

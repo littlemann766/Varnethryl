@@ -2,6 +2,7 @@
    1 game unit ~= .704 m (1 m ~= 1.42 units). Only the nearby ocean terrain
    is instantiated, and the full chart uses deterministic island positions. */
 import * as THREE from './vendor/three.module.js';
+import { buildSailingShip } from './port-ships.js';
 export const WORLD_UNITS_PER_METER=1.42;
 export const OCEAN_METERS=1000; // 1 km by 1 km while sailing gameplay is refined
 export const OCEAN=Object.freeze({cx:17500,cz:0,half:OCEAN_METERS*WORLD_UNITS_PER_METER/2});
@@ -136,30 +137,15 @@ export function buildSailingOcean(scene){
  const root=new THREE.Group();root.name='tidewrack-open-ocean';scene.add(root);
  const water=seaWater();root.add(water.mesh);
  const vessel=new THREE.Group();vessel.name='player-sailing-ship';vessel.position.set(OCEAN.cx,0,OCEAN.cz+OCEAN.half-180);root.add(vessel);
- let shipReady=false,shipLoadError='',disposed=false;
- const ready=glbFromGzip('proto3d/models-new/tidewrack_sailing_ship.glb.gz').then(gltf=>{
-  const imported=gltf.scene;
-   if(disposed){dispose(imported);throw Error('Sailing realm unloaded before ship was ready');}
-   // Refuse to board an empty or non-renderable GLB scene. A valid parser
-   // response isn't proof that the file contains visible ship geometry.
-   let meshCount=0;
-   imported.traverse(o=>{if(o.isMesh && o.geometry?.attributes?.position?.count>0)meshCount++;});
-   if(meshCount===0)throw Error('Approved sailing GLB contains no renderable ship meshes');
-   const bounds=new THREE.Box3().setFromObject(imported);const dim=bounds.getSize(new THREE.Vector3());
-  if(![dim.x,dim.y,dim.z].every(Number.isFinite)||dim.y<.005||dim.x<.005||dim.z<.005)
-    throw Error('Ship model has invalid dimensions');
-  const scale=13.5/dim.y;
-  imported.scale.setScalar(scale);
-  imported.position.set(-(bounds.min.x+bounds.max.x)/2*scale,-bounds.min.y*scale-.7,-(bounds.min.z+bounds.max.z)/2*scale);
-  imported.rotation.y=Math.PI*.5;
-  imported.name='user-supplied-sailing-ship';
-  imported.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
-  vessel.add(imported);shipReady=true;
- }).catch(e=>{
-   shipLoadError=String(e?.message||e);
-   if(!disposed)console.error('Approved sailing ship failed to load; stay in town',e);
-   throw e; // Realm transition awaits this: no crew stranded on empty ocean.
- });
+ // The approved external GLB has disconnected/exploded mesh parts on phones.
+ // Keep that original asset untouched, but render one coherent curved-hull
+ // three-mast 3D vessel until the source mesh itself has been repaired.
+ // The boat's physics, crew positions, foam and world navigation are unchanged.
+ const assembled=buildSailingShip(1,true);
+ assembled.name='tidewrack-sailing-ship-hull';
+ vessel.add(assembled);
+ let shipReady=true,shipLoadError='',disposed=false;
+ const ready=Promise.resolve(true);
  // Deck positions are ship-local and therefore follow the hull's position,
  // turning and wave-induced roll. Slot 0 is the helmsman, 1-3 companions.
  // Separate Y values account for the raised stern of the medieval galleon.

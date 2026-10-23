@@ -474,6 +474,13 @@ body.vn-sailing-zone #staminaHud{display:none!important;pointer-events:none!impo
    attacks wherever combat is disallowed. */
 body.vn-sailing-zone #cb .cx>.sl{pointer-events:none!important}
 
+/* The existing gold Owner badge is a shortcut to the same password-gated
+   menu. It becomes clickable only while its cheat flags display it. */
+#ownerBadge[role="button"]{pointer-events:auto!important;touch-action:manipulation;cursor:pointer;user-select:none}
+#ownerBadge[role="button"]:focus-visible{outline:2px solid #fff3bb;outline-offset:3px}
+#vnQuickMenu .vn-quick-actions #vnOwnerTools{grid-column:1/-1;min-height:40px!important;
+  background:linear-gradient(145deg,#423055,#1d172e)!important;border:1px solid #c6a166!important;
+  color:#f5d89c!important;font-size:12px!important;text-align:center}
 /* 1.5.7 compact game menu: four immediate actions; everything else collapsed.
    Preserve each existing feature behind a clear section instead of stacking
    fifteen large buttons on a small landscape Android screen. */

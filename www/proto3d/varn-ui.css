@@ -619,6 +619,29 @@ body.vn-menu-open #vnChatBtn{visibility:hidden}
  #vnChatBtn{top:max(79px,env(safe-area-inset-top))}
 }
 
+/* Recent spoken world chat: always visible briefly over the 3D scene. */
+#vnChatLive[hidden]{display:none!important}
+#vnChatLive{position:fixed;z-index:520;pointer-events:none;
+ right:max(10px,env(safe-area-inset-right));
+ bottom:max(280px,calc(env(safe-area-inset-bottom) + 280px));
+ width:min(340px,calc(100vw - 25px));max-height:130px;overflow:hidden;
+ display:flex;flex-direction:column;gap:4px;
+ color:#fff4dc;font:12px/1.35 system-ui,sans-serif;
+ text-shadow:0 1px 2px #000b}
+#vnChatLive .vn-chat-live-entry{padding:6px 8px;overflow-wrap:anywhere;
+ background:rgba(12,22,39,.86);border-left:3px solid #e5bd75;
+ border-radius:6px;box-shadow:0 2px 10px #0008}
+#vnChatLive .vn-chat-live-entry strong{color:#fce2a5}
+#vnChatLive .vn-chat-live-private{background:rgba(62,34,80,.92);
+ border-color:#efbfff}
+#vnChatPanel .vn-chat-delivery{display:block;font-size:10px;color:#a4edd5;margin-top:2px}
+#vnChatPanel .vn-chat-failed{border-color:#ff8d90!important}
+#vnChatPanel .vn-chat-failed .vn-chat-delivery{color:#ffadb1}
+@media (orientation:landscape) and (max-height:540px){
+ #vnChatLive{bottom:125px;width:min(250px,calc(100vw - 24px));max-height:95px;
+ font-size:11px}
+}
+
 /* CoOwner is a distinct, server-verified role. Credentials never touch game saves. */
 #vnQuickMenu .vn-quick-actions #vnCoOwnerTools{grid-column:1/-1;min-height:40px!important;
  background:linear-gradient(140deg,#382854,#171c34)!important;

@@ -639,7 +639,7 @@ export function createFight(env) {
     // Combat is unavailable at sea, including late "Enter world" promises,
     // owner fight toggles and loading callbacks that resolve after boarding.
     if (env.zone?.() === 'sailing') { if (on) stop(); return; }
-    if (env.zone?.() === 'coliseum' && !isColiseumCombat(state.heroX,state.heroZ)) { if (on) stop(); return; }
+    if (env.zone?.() === 'coliseum' && !isColiseumCombat(state.heroX,state.heroZ)) { if (on) stop(); hud.say('SPECTATOR TIERS — FIGHT ON THE ARENA FLOOR',1800); return; }
     if (on) { if (isAuto === true) auto = true; return; } auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
     if (auto) { syncHero(); equip(); const zone=env.zone?.(); hud.say(zone==='hydra'?'HYDRA MIRE — FIVE HEADS AWAIT':zone==='frost'?'FROST CAVE — THE BROTHERS AWAIT':zone==='town'?'OUTSKIRTS — DANGER AHEAD':'THE WILDS — MONSTERS ABOUT',1800); return; }

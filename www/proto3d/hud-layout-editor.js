@@ -135,6 +135,9 @@ function reset(){
 }
 document.getElementById('vnEditHud')?.addEventListener('click',open);
 addEventListener('resize',()=>{drag=null;refresh();info();});
+addEventListener('orientationchange',()=>{drag=null;refresh();info();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();info();}});
+addEventListener('pageshow',()=>{refresh();info();});
 document.addEventListener('keydown',e=>{
  if(on&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close(false);}
 },true);

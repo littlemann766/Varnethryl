@@ -469,8 +469,10 @@ body.vn-hud-editing #cb .vn-exp{pointer-events:auto!important}
    buttons are withheld until the player returns to shore. */
 body.vn-sailing-zone #moveActions,
 body.vn-sailing-zone #cinderFlyControls,
-body.vn-sailing-zone #staminaHud,
-body.vn-sailing-zone #cb{display:none!important;pointer-events:none!important}
+body.vn-sailing-zone #staminaHud{display:none!important;pointer-events:none!important}
+/* Preserve the full combat HUD on boats and spectator levels while disabling
+   attacks wherever combat is disallowed. */
+body.vn-sailing-zone #cb .cx>.sl{pointer-events:none!important}
 
 /* 1.5.7 compact game menu: four immediate actions; everything else collapsed.
    Preserve each existing feature behind a clear section instead of stacking

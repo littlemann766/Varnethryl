@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, pbkdf2Sync, timingSafeEqual } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { WebSocketServer, WebSocket } from 'ws';
 
@@ -7,6 +7,11 @@ import { WebSocketServer, WebSocket } from 'ws';
 // No client-authoritative damage, currency, or inventory messages are accepted.
 const ZONES=new Set(['town','wilds','frost','hydra','sailing','coliseum']);
 const MAX_PLAYERS=12, MAX_BYTES=2048, RATE_MS=80;
+// The same salted verifier as the existing Owner unlock in ownergate.js.
+// Never place the actual passphrase in code, logs, URLs, or localStorage.
+const OWNER_SALT='150a1c54ab232044870dcb521f1468ba';
+const OWNER_HASH='6a14971cd36e613ecebccedf46344f1fcf74bef61c0be542baad29048733c480';
+const OWNER_ITER=210000, MAX_OWNER_ATTEMPTS=4, LOCK_MS=15*60*1000;
 // Three stable public world instances live on this one dedicated Varnethryl
 // server. Unlike private invite codes, these worlds are discoverable in-game.
 export const PUBLIC_WORLDS=Object.freeze([
@@ -18,8 +23,27 @@ const clean=(value,max)=>String(value??'').replace(/[^\p{L}\p{N} _-]/gu,'').trim
 const finite=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
 const validState=m=>!!m&&typeof m==='object'&&ZONES.has(m.zone)&&finite(m.x,-10000,10000)&&finite(m.z,-10000,10000)&&finite(m.y,-1000,5000)&&finite(m.yaw,-1000,1000);
 const visible=p=>({id:p.id,name:p.name,slot:p.slot,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,hero:p.hero});
-export function createWorldServer(){
- const rooms=new Map();
+export function createWorldServer(options={}){
+ const rooms=new Map(),ownerAttempts=new Map();
+ const allOnline=()=>[...rooms.values()].flatMap(room=>[...room.values()]);
+ const ownerVisible=p=>({...visible(p),world:p.code});
+ const ownerPlayers=socket=>allOnline().filter(p=>p.socket!==socket).map(ownerVisible);
+ function checkOwnerPass(socket,pass){
+   const ip=socket._socket?.remoteAddress||'unknown', now=Date.now();
+   const rec=ownerAttempts.get(ip)||{fails:0,lockedUntil:0};
+   if(rec.lockedUntil>now)return {ok:false,message:'Owner access locked. Try later.'};
+   // Never allow clients to submit the derived digest as their credential.
+   if(typeof pass!=='string'||pass.length<1||pass.length>128)return {ok:false,message:'Owner passphrase required.'};
+   const ok=typeof options.verifyOwner==='function' ? !!options.verifyOwner(pass) : (()=>{
+     const key=pbkdf2Sync(pass.trim(),Buffer.from(OWNER_SALT,'hex'),OWNER_ITER,32,'sha256');
+     const expected=Buffer.from(OWNER_HASH,'hex');return key.length===expected.length&&timingSafeEqual(key,expected);
+   })();
+   if(!ok){
+     rec.fails++;if(rec.fails>=MAX_OWNER_ATTEMPTS){rec.lockedUntil=now+LOCK_MS;rec.fails=0;}
+     ownerAttempts.set(ip,rec);return {ok:false,message:rec.lockedUntil>now?'Owner access temporarily locked.':'Owner passphrase incorrect.'};
+   }
+   ownerAttempts.delete(ip);return {ok:true};
+ }
  const server=http.createServer((req,res)=>{
   // Only room counts and names are published; never reveal private invite
   // codes, player nicknames, session IDs, or positions to unauthenticated GETs.
@@ -64,12 +88,15 @@ export function createWorldServer(){
     // The first member keeps their EXISTING game location, even if deep in a cave.
     // Later members enter at town. Nobody else is teleported or interrupted.
     const first=room.size===0;
+    // An automatic reconnect retains the local hero's actual zone and position,
+    // even when the room already contains other players.
+    const reconnecting=m.entry==='resume';
     // Joining from the START SCREEN always enters town, even when an older
     // local save last exited in a cave. Existing live players never move.
     // Joining mid-game to an empty world preserves that player's current map.
     const enterFromTitle=m.entry==='title';
-    const initial=first&&!enterFromTitle&&validState(m.state)?m.state:null;
-    const shouldSpawn=enterFromTitle||!first;
+    const initial=(first&&!enterFromTitle||reconnecting)&&validState(m.state)?m.state:null;
+    const shouldSpawn=!reconnecting&&(enterFromTitle||!first);
     const p={id:randomUUID(),socket,code,name,slot,
       zone:initial?.zone||'town',x:initial?.x??spawn.x,z:initial?.z??spawn.z,
       y:initial?.y??0,yaw:initial?.yaw??0,hero:clean(initial?.hero,30)||'Adventurer',lastUpdate:0};
@@ -78,6 +105,42 @@ export function createWorldServer(){
     return;
    }
    const p=socket.player;if(!p)return;
+   if(m.type==='owner-auth'){
+     // A locally unlocked owner panel is NOT proof. Verify independently
+     // on the multiplayer server over TLS before revealing online players.
+     const result=checkOwnerPass(socket,m.pass);
+     if(result.ok)socket.ownerAuthorized=true;
+     send(socket,{type:'owner-auth',ok:result.ok,message:result.ok?'Owner access verified.':result.message});
+     if(result.ok)send(socket,{type:'owner-players',players:ownerPlayers(socket)});
+     return;
+   }
+   if(m.type==='owner-list'){
+     if(!socket.ownerAuthorized){send(socket,{type:'owner-error',message:'Verify Owner server access first.'});return;}
+     send(socket,{type:'owner-players',players:ownerPlayers(socket)});return;
+   }
+   if(m.type==='owner-jump'){
+     if(!socket.ownerAuthorized){send(socket,{type:'owner-error',message:'Verify Owner server access first.'});return;}
+     const target=allOnline().find(q=>q.id===m.id&&q.socket!==socket);
+     if(!target){send(socket,{type:'owner-error',message:'That player has left the server.'});return;}
+     let movedWorld=false;
+     if(p.code!==target.code){movedWorld=true;
+       const next=rooms.get(target.code);
+       if(!next||next.size>=MAX_PLAYERS){send(socket,{type:'owner-error',message:'That world is full.'});return;}
+       const old=rooms.get(p.code),oldCode=p.code;
+       old.delete(p.id);broadcast(old,{type:'left',id:p.id},socket);
+       if(old.size===0)rooms.delete(oldCode);
+       const taken=new Set([...next.values()].map(q=>q.slot));
+       let slot=0;while(taken.has(slot))slot++;
+       p.code=target.code;p.slot=slot;next.set(p.id,p);
+     }
+     // Never modify the target. Only assign the Owner position beside them.
+     p.zone=target.zone;p.x=target.x+2;p.y=target.y;p.z=target.z+2;p.yaw=target.yaw;
+     const current=rooms.get(p.code);
+     broadcast(current,{type:movedWorld?'joined':'state',player:visible(p)},socket);
+     send(socket,{type:'owner-jump',world:p.code,target:ownerVisible(target),
+       players:[...current.values()].filter(q=>q.socket!==socket).map(visible)});
+     return;
+   }
    if(m.type==='state'){
     if(Date.now()-p.lastUpdate<RATE_MS||!validState(m))return;
     p.lastUpdate=Date.now();p.zone=m.zone;p.x=m.x;p.y=m.y;p.z=m.z;p.yaw=m.yaw;p.hero=clean(m.hero,30)||'Adventurer';

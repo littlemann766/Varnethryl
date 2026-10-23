@@ -1,45 +1,36 @@
-# Varnethryl shared-world test rooms (v1.5.12)
+# Varnethryl Multiplayer v1.5.17 — Solo & World Browser
 
-## Scope and joining
-This is the first **online presence and movement test**, available across the Kingdom, Wilds, Frost Cave, Hydra Mire, Tidewrack Ocean, and Coliseum, rather than PvP restricted to the Coliseum.
+On the 3D title screen choose **Play Solo** (no server connection) or **Multiplayer · Join World**. Multiplayer opens the in-game server browser with three discoverable public instances:
 
-**The first person connecting creates the room without being moved** (even when already exploring a cave or fighting a boss). The next person who connects to the same server address and room code enters the kingdom's town. Joining, reconnecting, or leaving does **not** send commands to relocate anyone already connected. Players remain in the same online room while entering different zones. When two people are in the same zone they see each other's lightweight test character and name.
+| World | Room code | Capacity |
+|---|---|---|
+| Kingdom One | WORLD1 | 12 |
+| Kingdom Two | WORLD2 | 12 |
+| Kingdom Three | WORLD3 | 12 |
 
-The user-facing menu is **Menu → Multiplayer · Test rooms**, with fields for nickname, room code, and server URL. Both players use the same server and room code. It currently allows up to 12 connected testers per room.
+These are room instances **on one dedicated Varnethryl World Server**, not different hosts and not any PayAviator service. The current number of connected players is retrieved from `GET /rooms`, with a Refresh control. If counts cannot be retrieved, the game says they are unavailable instead of inventing availability. An invite-only test session can still be created or joined with a private room code. These private codes are NOT published by `GET /rooms`.
 
-## Server
-GitHub Pages alone cannot host live multiplayer. The relay is in `multiplayer/server.mjs` (Node.js, package in `multiplayer/package.json`).
+A player joining from the **title screen** always enters the town (even if a local save last exited in another zone). A player already adventuring who chooses the in-game Multiplayer menu and connects to an *empty* world stays in their current map. When a second player joins, **only the arriving client** is placed in town, never the incumbent. Other players are visible by nickname when they enter the same zone.
 
-To host on Railway, create a new Node service for this repository with **root directory `multiplayer`**. It uses the included `railway.json`, installs npm dependencies, and runs `npm start`. Generate a public hostname on the service. The game accepts its **`wss://hostname`** URL (not `https://`). The service provides `GET /health` for health checks. Optionally set `ALLOWED_ORIGINS` to the comma-separated URLs of your hosted game; set an allowlist for external testers. `PORT` is supplied by the host.
+The multiplayer controls remain in **Menu → Multiplayer · Worlds**, including switching public worlds, private world creation, leaving multiplayer, copying invite codes, and refreshing online counts. Each room has a 12-player limit. An instance is removed from server memory when its last member disconnects; public listings remain visible at 0 players.
 
-Do not confuse the health check with a room API. Room joins and position updates use a persistent WebSocket connection, which requires a host supporting WebSocket upgrades.
+## Deployment
 
-For local testing:
+The dedicated Varnethryl-Multiplayer Railway project hosts the `multiplayer/` Node.js server from the Varnethryl GitHub repository. Its production domain is `varnethryl-world-server-production.up.railway.app`. The game uses that public endpoint automatically. It should remain independent of the PayAviator-Backend/Postgres Railway project.
 
-```bash
-cd multiplayer
-npm install
-npm test
-npm start
-```
+Server health: `GET /health`. Public worlds: `GET /rooms`. WebSocket room join: `wss://varnethryl-world-server-production.up.railway.app`.
 
-Connect game clients to `ws://localhost:3001` only when actually running on the same computer. Devices outside localhost need the publicly hosted secure `wss://` URL.
+Tests: `cd multiplayer && npm install && npm test`. CI runs the same tests on changes under `multiplayer/`.
 
-## Reliability and safety
-- Room membership and positions live in memory and reset when the server restarts. Players can rejoin manually.
-- Distinct room codes isolate different parties. Codes alone are not user authentication; avoid sensitive nicknames.
-- The server rate-limits updates, validates zone/position values and only relays display data. It rejects damage, items, experience, gold and cheats.
-- The game stores the last server address and room code as local preferences. Multiplayer is off unless the user explicitly presses Join.
-- Existing single-player saves, inventory, XP, owner access, camera state and companions are not synchronized or reset.
-- Other players currently appear as lightweight **test avatars**, not their finished 3D character model. Their names, positions, facing and basic walk motion are shown only on the same map.
+## Current limits
 
-## Not yet multiplayer
-This does **not** synchronize boss health, damage, loot, NPC AI, quests, PvP hits, shared interiors, mounting someone else's boat, or accounts/identity. Those need authoritative world simulation and anti-cheat validation. The server never accepts a client assertion that another user has taken damage. These systems must be developed and tested before public multiplayer release.
+This is opt-in shared-player **presence, positions, orientation and basic test-avatar movement**, not yet authoritative shared AI, synchronized monster health, player damage, shared loot, quests or authenticated accounts. Do not present it as fully functional multiplayer PvP. Rooms are ephemeral and online counts can briefly lag while devices reconnect.
 
-## Live test checklist
-1. Start service and verify `/health` returns `ok:true`.
-2. On device A, enter a frost cave and then join room `FROST7`; device A must **stay inside the cave**, with its current health/gameplay untouched.
-3. On device B, connect to the same server and `FROST7`; device B should spawn in town, while A remains in the cave.
-4. Walk B to the same map (or have A return to town voluntarily). Both test avatars must appear on the same map and move.
-5. Disconnect B; A must remain where it was, and multiplayer should continue.
-6. Return both to solo play to verify that original quest/save data remains intact.
+## Two-device smoke test
+
+1. A starts in the frost cave, opens **Menu → Multiplayer · Worlds**, and joins **Kingdom One**. A stays in the cave.
+2. B selects **Multiplayer** from the title screen, chooses **Kingdom One**, and spawns in town. A remains in the cave.
+3. A returns to town voluntarily (or B travels into the frost cave). Both see each other's test avatars and movement.
+4. B leaves the world. A continues playing uninterrupted.
+5. Both choose **Play Solo** to verify their local saves, quest progress, inventory, and controls remain intact.
+6. Repeat with Kingdom Two and a private code to confirm separation.

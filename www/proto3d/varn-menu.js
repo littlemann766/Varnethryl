@@ -2,9 +2,10 @@
 (function () {
   const panel = document.getElementById('vnMenu');
   if (!panel) return;
-  const show = () => { document.getElementById('vnQuickMenu')?.setAttribute('hidden', ''); document.getElementById('vnMenuBtn')?.setAttribute('aria-expanded', 'false'); panel.hidden = false; document.body.classList.add('vn-menu-open'); document.getElementById('vnEnter')?.focus(); };
+  const show = () => { document.getElementById('vnQuickMenu')?.setAttribute('hidden', ''); document.getElementById('vnMenuBtn')?.setAttribute('aria-expanded', 'false'); panel.classList.remove('vn-multiplayer-selecting'); const mp=document.getElementById('vnMpTitleLobby');if(mp)mp.hidden=true;panel.hidden = false; document.body.classList.add('vn-menu-open'); document.getElementById('vnEnter')?.focus(); };
   const hide = () => { panel.hidden = true; document.body.classList.remove('vn-menu-open'); };
   document.getElementById('vnEnter')?.addEventListener('click', hide);
+  document.getElementById('vnMpEnterGame')?.addEventListener('click', hide);
   const quick=document.getElementById('vnQuickMenu');
   const sections=[...quick.querySelectorAll('details')];
   const travelSection=document.getElementById('vnQuickWorld');
@@ -47,7 +48,10 @@
       if((e.key==='p'||e.key==='P')&&!/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||'')){e.preventDefault();show();}
       return;
     }
-    if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); hide(); return; }
+    if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation();
+      const lobby=document.getElementById('vnMpTitleLobby');
+      if(lobby&&!lobby.hidden){lobby.hidden=true;panel.classList.remove('vn-multiplayer-selecting');return;}
+      hide(); return; }
     // Let Enter and Space activate the focused menu button naturally.
     if (e.key === 'Enter' || e.key === ' ') return;
     if (e.key !== 'Tab') { e.preventDefault(); e.stopImmediatePropagation(); }

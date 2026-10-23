@@ -208,10 +208,11 @@ const mpClient=source('www/proto3d/multiplayer-client.js');
 const mpServer=source('multiplayer/server.mjs');
 assert(main.includes("import { createMultiplayer } from './multiplayer-client.js'"),'3D game loads multiplayer presence');
 assert(main.includes('MULTIPLAYER.update(dt,now)'),'multiplayer peers update from the 3D frame');
-assert(mpClient.includes('if(!m.first&&m.spawn)'),'only a newcomer travels to the town lobby');
+assert(mpClient.includes('if(m.spawn)'),'only the current client follows a server-assigned town spawn');
 assert(mpClient.includes("if(getZone()!=='town')await setZone('town')"),'newcomers alone travel to town');
 assert(mpClient.includes('e.zone===getZone()'),'players in other zones are not drawn on the active map');
 assert(mpServer.includes("zone:initial?.zone||'town'"),'first connected player remains in their current map');
+assert(mpServer.includes("const enterFromTitle=m.entry==='title'"),'a title-screen join starts in town without moving existing players');
 assert(mpServer.includes("if(room.size>=MAX_PLAYERS)"),'room capacity is enforced');
 assert(source('www/sw.js').includes('./proto3d/multiplayer-client.js'),'multiplayer client is cached for installed Android web app');
 

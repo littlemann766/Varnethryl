@@ -243,7 +243,7 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
    // an older client never sent a new body heading. Without this the visible
    // avatar snaps back to its original heading as soon as it stops walking.
    const networkTurn=Math.abs(Math.atan2(Math.sin(incomingYaw-prevYaw),Math.cos(incomingYaw-prevYaw)));
-   const idleNoTurn=p.moving!==true&&Math.hypot(deltaX,deltaZ)<.17&&networkTurn<.025;
+   const idleNoTurn=p.moving!==true&&Math.hypot(deltaX,deltaZ)<.17&&networkTurn<.0001;
    e.yaw=idleNoTurn?e.yaw:remoteFacing(prevYaw,incomingYaw,deltaX,deltaZ,p.moving===true);
   e.networkYaw=incomingYaw;
   e.moving=p.moving===true;

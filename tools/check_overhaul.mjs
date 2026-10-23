@@ -99,20 +99,20 @@ assert(main.includes("await setZoneNow('town');return setZoneNow(name);"),'neste
 assert(main.includes('zonePending(){return zoneTransitionCount;}'),'test runner can verify all travel requests have finished');
 assert(main.includes("if(ZONE.name==='town' && totalFrames%9===0)hideInactiveHeroModels()"),'town must suppress inactive cached heroes');
 assert(main.includes('!w || rec.retired || !crowd.includes(rec)'), 'retired follower downloads must never spawn ghost people');
-assert(marine.includes("const vessel=new THREE.Group();vessel.name='player-sailing-ship'"),'sailing uses empty container with only the supplied GLB');
+assert(marine.includes("const vessel=new THREE.Group();vessel.name='player-sailing-ship'"),'sailing uses one animated 3D vessel container');
 assert(marine.includes('export const OCEAN_METERS=1000'),'sailing zone resized to 1 km square');
 assert(marine.includes('TILE=240,VIEW_RADIUS=2'),'island stream spans the smaller sea');
-assert(marine.includes('const ready=glbFromGzip('),'sailing realm exposes approved-ship ready promise');
-assert(main.includes('try{await target.ready;}catch(err)'),'sailing portal waits for original ship to load');
+assert(marine.includes('const ready=Promise.resolve(true)'),'sailing realm exposes ready promise for intact bundled hull');
+assert(main.includes('try{await target.ready;}catch(err)'),'sailing portal checks ready before entering ocean');
 assert(main.includes('target.dispose();')&&main.includes('Tidewrack ship could not load'),'a failed ship leaves player safely in town');
-assert(!marine.includes('buildSailingShip('),'the procedural stand-in cannot appear on the sailing map');
+assert(marine.includes('const assembled=buildSailingShip(1,true)') && marine.includes("assembled.name='tidewrack-sailing-ship-hull'"),'damaged GLB is replaced by one coherent curved-hull galleon');
 assert(marine.includes("foam.name='tapered-foam-streak'"),'sailing uses irregular tapered foam geometry');
 assert(!marine.includes('new THREE.PlaneGeometry(5.5,23)'),'legacy white rectangle wake removed');
 assert(marine.includes('cachedRockMaterials.has(m)'), 'streamed ocean tiles must not dispose shared rock materials');
 assert(marine.includes('nav.heading-=rudder*step*.64*steering*'), 'right rudder must turn starboard, not port');
 assert(marine.includes('if(disposed){dispose(model);return;}'), 'late Hydra model loads must be discarded after exit');
-assert(marine.includes("if(disposed){dispose(imported);throw Error('Sailing realm unloaded before ship was ready');}"),
-  'late sailing model loads must be discarded after exit');
+assert(marine.includes('const ready=Promise.resolve(true)') && marine.includes('if(disposed)return;'),
+  'sailing hull is synchronous and disposed ocean updates are ignored');
 
 // Critical combat failure: querySelector returns ONE button, not an array.
 // Both slots and labels must use querySelectorAll's array wrapper.
@@ -187,7 +187,8 @@ assert(ship.includes('hullGeo.computeVertexNormals()'),'ship uses true curved me
 assert(ship.includes('tidewrack_sailing_ship.glb'),'Tidewrack loads the uploaded original 3D ship');
 assert(ship.includes('export async function installImportedShip('),'Tidewrack can switch ships on GLB load');
 assert(ship.includes('ship.userData.originalShipFallback=fallbackChildren'),'Tidewrack procedural ship is kept as fallback');
-assert(terrain.includes('installImportedShip(ships[0],{large:true})'),'actual ship attached to main mooring');
+assert(terrain.includes('harborShips.add(ship)')&&!terrain.includes('installImportedShip(ships[0],{large:true})'),
+  'harbor keeps coherent 3D ship while damaged imported mesh is withheld');
 assert(ship.includes('const billow='),'sails have three-dimensional billow');
 assert(building.includes('buildSailingShip(.8,true)'),'harbor visibly uses large 3D ship');
 assert(building.includes('buildSailingShip(.38*sc,false)'),'small boats also use 3D hulls');

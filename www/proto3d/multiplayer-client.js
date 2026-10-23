@@ -267,6 +267,19 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   socket.send(JSON.stringify({type:'state',zone,x:state.heroX,y:state.dispY||state.heroY||0,
     z:state.heroZ,yaw:state.yaw||0,hero:getHeroName(),skin:getSkinId(),moving:state.moving===true}));
  }
+ // A failed cross-map teleport must not strand the client in the relay's
+ // destination world after its local zone loader has rejected that map.
+ async function recoverFailedJump(before,session){
+  if(session!==epoch)return;
+  try{
+   if(getZone()!==before.zone)await setZone(before.zone);
+   if(getZone()===before.zone){
+    state.heroX=before.x;state.heroZ=before.z;state.yaw=before.yaw;
+    state.target=null;updateLevel();snapFollowers();camRig.snap=true;miniMap.invalidate();
+   }
+  }catch(e){console.warn('Unable to restore source map after teleport',e);}
+  if(session===epoch)await join(before.code,{name:{value:currentName},isTitle:false},'resume');
+ }
  async function join(rawCode,lobby,entryMode='game'){
   const resuming=entryMode==='resume';
   const fromTitle=entryMode==='title'||(!resuming&&!!lobby?.isTitle&&!document.getElementById('vnMenu')?.hidden);
@@ -319,15 +332,18 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
    if(m.type==='owner-players'||m.type==='owner-error'){tellOwner(m);return;}
    if(m.type==='owner-jump'||m.type==='coowner-jump'){
      const coJump=m.type==='coowner-jump';
+     const before={code:room,zone:getZone(),x:state.heroX,z:state.heroZ,yaw:state.yaw};
      teleporting=true;
      // Only our avatar moves. Target player's zone, camera, combat and save
      // are unaffected; the server already changed this Owner's room.
      try{
        const ok=await teleportNearPlayer(m.target);
        if(seq!==epoch)return;
-       if(!ok){status('Unable to teleport beside this player.');
-         if(coJump)coOwner.onEvent({type:'coowner-error',message:'Could not load the player map.'});
-         else tellOwner({type:'owner-error',message:'Could not load the player map.'});return;}
+       if(!ok){
+         if(coJump)coOwner.onEvent({type:'coowner-error',message:'Could not load that map. Returning to the previous world.'});
+         else tellOwner({type:'owner-error',message:'Could not load that map. Returning to the previous world.'});
+         await recoverFailedJump(before,seq);return;
+       }
        room=m.world;resetPeers();for(const peer of m.players||[])sync(peer);
        onlineCount=(m.players?.length||0)+1;
        teleporting=false;sendState();status((coJump?'CoOwner':'Owner')+' arrived beside '+m.target.name+' in '+room+'.');
@@ -337,6 +353,7 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
       }catch(e){
          const error={type:coJump?'coowner-error':'owner-error',message:'Teleport failed: '+String(e?.message||e)};
          if(coJump)coOwner.onEvent(error);else tellOwner(error);
+         await recoverFailedJump(before,seq);
        }finally{teleporting=false;}
      return;
    }
@@ -395,7 +412,8 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
    if(!same)continue;
    showSkin(p);
    const dx=p.x-p.obj.position.x,dz=p.z-p.obj.position.z,dist=Math.hypot(dx,dz);
-   if(dist>45)p.obj.position.set(p.x,p.y,p.z);else p.obj.position.lerp(new THREE.Vector3(p.x,p.y,p.z),Math.min(1,dt*9));
+   if(dist>45)p.obj.position.set(p.x,p.y,p.z);
+   else{const a=Math.min(1,Math.max(0,dt)*9);p.obj.position.x+=dx*a;p.obj.position.y+=(p.y-p.obj.position.y)*a;p.obj.position.z+=dz*a;}
    p.obj.rotation.y=nextRemoteYaw(p.obj.rotation.y,p.yaw,dt);
    p.walk+=dt*(dist>.035?11:4);
    p.legA.rotation.x=dist>.035?Math.sin(p.walk)*.28:0;

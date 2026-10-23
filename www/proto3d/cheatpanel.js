@@ -96,13 +96,77 @@ function buildPanel(c, gate, env) {
   ));
   const place = el('select', { id: 'ownerPlace' }); for (const p of c.places()) place.appendChild(el('option', { value: p.id, textContent: p.name })); isolateKeys(place);
   panel.appendChild(row(place, act('tpb', 'Go building', () => c.teleportPlace(place.value))));
+  // Cross-world teleport is Owner-only. Unlike local cheat gating, the
+  // multiplayer relay ALSO validates the passphrase before listing anyone.
+  // Password is never stored, echoed to logs, or embedded into network URLs.
+  let unsubscribeOwner=()=>{};
+  if(env.hooks?.ownerPlayerEvents){
+    panel.appendChild(sec('Teleport to online player (Owner only)'));
+    const ownerPass=el('input',{id:'ownerServerPass',type:'password',
+      autocomplete:'off',maxLength:128,placeholder:'Owner server passphrase',
+      ariaLabel:'Owner server passphrase'});
+    isolateKeys(ownerPass);
+    const connect=el('button',{type:'button',textContent:'Verify Owner access',dataset:{cheat:'player-auth'}});
+    const refresh=el('button',{type:'button',textContent:'Refresh players',dataset:{cheat:'player-refresh'}});
+    const playerSelect=el('select',{id:'ownerOnlinePlayer',ariaLabel:'Choose online player'});isolateKeys(playerSelect);
+    const goPlayer=el('button',{type:'button',textContent:'Teleport beside player',dataset:{cheat:'player-jump'}});
+    playerSelect.disabled=true;goPlayer.disabled=true;
+    const hint=el('div',{textContent:'Join any multiplayer world first. After verification, select a player from any public or private world. Only your character moves.',
+      style:'font-size:11px;opacity:.75;line-height:1.4'});
+    const ownerHelp=el('div',{style:'font-size:11px;color:#e8c868',textContent:'Owner server verification required to see online players.'});
+    panel.appendChild(row(ownerPass,connect));
+    panel.appendChild(row(refresh));
+    panel.appendChild(row(playerSelect,goPlayer));
+    panel.appendChild(hint);panel.appendChild(ownerHelp);
+    const renderPlayers=players=>{
+      const prior=playerSelect.value;
+      playerSelect.replaceChildren();
+      const valid=Array.isArray(players)?players.filter(p=>p&&typeof p.id==='string'&&p.id&&typeof p.world==='string'):[];
+      if(!valid.length)playerSelect.appendChild(el('option',{value:'',textContent:'No other players online'}));
+      for(const p of valid){
+        const label=(p.name||'Player')+' · '+p.world+' · '+p.zone;
+        playerSelect.appendChild(el('option',{value:p.id,textContent:label}));
+      }
+      if(valid.some(p=>p.id===prior))playerSelect.value=prior;
+      playerSelect.disabled=!valid.length;goPlayer.disabled=!valid.length;
+      ownerHelp.textContent=valid.length?valid.length+' player(s) available across Varnethryl.':'No other players online or Owner list not loaded.';
+    };
+    connect.addEventListener('click',()=>{
+      const pass=ownerPass.value;ownerPass.value='';
+      if(!pass){ownerHelp.textContent='Enter your Owner passphrase to verify with the game server.';return;}
+      if(env.hooks.ownerLoginPlayer?.(pass))ownerHelp.textContent='Verifying with Varnethryl World Server…';
+      else ownerHelp.textContent='Join a multiplayer world before verifying Owner access.';
+    });
+    refresh.addEventListener('click',()=>{
+      if(env.hooks.ownerListPlayers?.())ownerHelp.textContent='Refreshing online player list…';
+      else ownerHelp.textContent='Join a multiplayer world first.';
+    });
+    goPlayer.addEventListener('click',()=>{
+      const id=playerSelect.value;
+      if(!id){ownerHelp.textContent='Select an online player.';return;}
+      if(env.hooks.ownerJumpToPlayer?.(id))ownerHelp.textContent='Traveling to selected player…';
+      else ownerHelp.textContent='Join and verify Owner access first.';
+    });
+    unsubscribeOwner=env.hooks.ownerPlayerEvents(message=>{
+      if(message?.type==='owner-auth'){
+        ownerHelp.textContent=message.message||'Owner access response received.';
+        if(message.ok)env.hooks.ownerListPlayers?.();
+      }else if(message?.type==='owner-players')renderPlayers(message.players);
+      else if(message?.type==='owner-error')ownerHelp.textContent=message.message||'Owner teleport unavailable.';
+      else if(message?.type==='owner-arrived'){
+        say('Arrived beside '+(message.target?.name||'player')+'.');
+        ownerHelp.textContent='Teleport complete.';
+        hide();
+      }
+    });
+  }
   panel.appendChild(row(act('reset', 'Reset cheats', () => { c.reset(); return true; }), act('lock', 'Lock owner', () => {
     gate.lock(); c.reset();
     // reset() restores saved owner preferences; a true lock must override all of them.
     Object.assign(c.flags, createFlags());
     if (typeof env.onLocked === 'function') env.onLocked();
     // Do not retain an unlocked cheats object/DOM after signing out.
-    ui.main?.panel.remove(); ui.main = null; cheats = null;
+    ui.main?.dispose?.(); ui.main?.panel.remove(); ui.main = null; cheats = null;
     ui.fly.style.display = 'none'; ui.badge.style.display = 'none';
     hide(); return true;
   })));
@@ -116,7 +180,7 @@ function buildPanel(c, gate, env) {
   }
   function hide() { panel.style.display = 'none'; }
   document.body.appendChild(panel);
-  return { panel, sync, hide, show() { sync(); panel.style.display = 'block'; } };
+  return { panel, sync, hide, dispose(){unsubscribeOwner();}, show() { sync(); panel.style.display = 'block'; } };
 }
 
 function buildFly(flags) {

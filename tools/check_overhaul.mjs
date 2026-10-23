@@ -222,7 +222,7 @@ assert(nav.includes('id="vnMultiplayer"')&&nav.includes('id="vnMpTitleLobby"'),'
 assert(nav.includes('id="vnMpQuickLobby"'),'the same world choices remain available from in-game menu');
 assert(nav.includes('id="vnMpEnterGame"'),'successful online admission enters game without clicking Solo');
 assert(main.includes("document.getElementById('vnMpEnterGame')?.addEventListener('click'"),'multiplayer title entry arms combat HUD');
-assert(menu.includes("document.getElementById('vnMpEnterGame')?.addEventListener('click', hide)"),'multiplayer join closes title screen');
+assert(menu.includes("document.getElementById('vnMpEnterGame')?.addEventListener('click',()=>{hide();setMode('multi');save();})"),'multiplayer join closes title screen and saves session mode');
 const mpLobby=source('www/proto3d/multiplayer-client.js');
 assert(mpLobby.includes('PUBLIC_WORLDS')&&mpLobby.includes("HTTP_SERVER+'/rooms'"),'public worlds are listed from live server');
 assert(mpLobby.includes("entry:resuming?'resume':fromTitle?'title':'game'"),'resume bypasses newcomer town teleport while title join starts in town');

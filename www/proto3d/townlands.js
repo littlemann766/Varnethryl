@@ -5,7 +5,7 @@ import * as THREE from './vendor/three.module.js';
 import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
 import { buildBalthrixTrail } from './balthrix-trail.js';
 import { makeVolcanoEffects } from './volcano-effects.js';
-import { buildSailingShip,animateMooredShip,installImportedShip } from './port-ships.js';
+import { buildSailingShip,animateMooredShip } from './port-ships.js';
 import { MOUNTAIN_APPROACH, MOUNTAIN_WILDS_GATE, buildMountainWildsGateway } from './wilds-gateway.js';
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
@@ -337,8 +337,9 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
     if(!near)return;
     if(!shipAssetLoadStarted){
       shipAssetLoadStarted=true;
-      installImportedShip(ships[0],{large:true}).catch(err=>
-        console.warn('Tidewrack original ship unavailable, using fallback',err));
+      // The external ship mesh is fragmented in-game; keep the existing
+      // coherent curved-hull 3D ship at the harbor until its GLB is rebuilt.
+      // Never replace this visible hull with the broken imported scene.
     }
     for(let i=0;i<ships.length;i++){
       animateMooredShip(ships[i],t);

@@ -285,3 +285,6 @@ assert(chatUi.includes('vn-chat-private-feed')&&chatUi.includes('vn-chat-compose
 assert(chatUi.includes("textContent=txt")&&chatUi.includes("const line=create('div',privateMsg"),'messages render as safe text');
 assert(chatUi.includes('vn.multiplayer.friends.v1'),'friends survive app session using device storage');
 assert(source('www/sw.js').includes('./proto3d/multiplayer-chat.js'),'chat bundled with the Android offline assets');
+
+assert(chatUi.includes("['keydown','keyup','pointerdown']"),'chat input traps movement and skill controls');
+assert(chatUi.includes("trigger?.classList.remove('vn-chat-unread')"),'opening chat clears private message alert');

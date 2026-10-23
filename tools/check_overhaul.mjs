@@ -237,7 +237,7 @@ const sessionMenu=source('www/proto3d/varn-menu.js');
 assert(ownerPanel.includes("sec('Teleport to online player (Owner only)')"),'owner-gated player teleport selector is present');
 assert(ownerPanel.includes("ownerPlayerEvents"),'owner player directory can refresh');
 assert(worldServer.includes("if(!socket.ownerAuthorized)"),'server refuses Owner commands without verified credentials');
-assert(worldServer.includes("type:'owner-jump'"),'owner travel reply includes target and destination');
+assert(worldServer.includes("m.type==='owner-jump'")&&worldServer.includes('target:ownerVisible(target)'),'owner travel reply includes target and destination');
 assert(mpLobby.includes("ownerJump:id=>ownerCommand('owner-jump',{id})"),'only authenticated multiplayer relay performs owner jump');
 assert(main.includes("teleportNearPlayer:async(target)=>"),'remote travel uses zone-loading lifecycle');
 assert(main.includes("if (ZONE.name==='town' && LAD && LAD.update"),'ladder triggers belong to town and never spawn inside Coliseum');

@@ -60,13 +60,24 @@ export function createCheats(env) {
   c.spendGold = (s, cost) => { if (flags.infGold) return true; if (s.gold < cost) return false; s.gold -= cost; return true; };
   c.setGold = (n) => edit((s) => { s.gold = clamp(Math.floor(fin(+n, 0)), 0, GOLD_CAP); });
   c.addGold = (n) => edit((s) => { s.gold = clamp(Math.floor(s.gold + fin(+n, 0)), 0, GOLD_CAP); });
-  c.addXp = (n) => edit((s) => { const a = Math.floor(fin(+n, 0)); if (a <= 0) return false; applyExperience(s, a); });
+  c.addXp = (n) => {
+    const gained=Math.floor(fin(+n,0));
+    if(gained<=0)return false;
+    const saved=edit(s=>{applyExperience(s,gained);});
+    if(!saved||typeof hooks.addCombatXp!=='function')return saved;
+    return Promise.resolve(hooks.addCombatXp(gained)).then(ok=>ok!==false);
+  };
   /* scope 'active' (default) or 'party' */
-  c.setLevel = (lv, scope) => edit((s) => {
-    const L = clamp(Math.floor(fin(+lv, 1)), 1, MAX_LEVEL), ids = scope === 'party' ? s.party : [s.active];
-    for (const id of ids) { s.heroLevels[id] = L; s.heroXp[id] = 0; if (!s.unlocked.includes(id)) s.unlocked.push(id); }
-    if (scope === 'party') s.accountLevel = Math.max(s.accountLevel, L);
-  });
+  c.setLevel = (lv, scope) => {
+    const L=clamp(Math.floor(fin(+lv,1)),1,MAX_LEVEL);
+    const saved=edit(s=>{
+      const ids=scope==='party'?s.party:[s.active];
+      for(const id of ids){s.heroLevels[id]=L;s.heroXp[id]=0;if(!s.unlocked.includes(id))s.unlocked.push(id);}
+      if(scope==='party')s.accountLevel=Math.max(s.accountLevel,L);
+    });
+    if(!saved||typeof hooks.setCombatLevel!=='function')return saved;
+    return Promise.resolve(hooks.setCombatLevel(L,scope)).then(ok=>ok!==false);
+  };
   /* Adds a gear item to the inventory (not auto-equipped). heroId defaults to the active hero. */
   c.spawnItem = (kind, level, heroId) => {
     if (!ITEM_KINDS.includes(kind)) return false;

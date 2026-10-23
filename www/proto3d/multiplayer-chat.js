@@ -67,6 +67,16 @@ export function createMultiplayerChat({sendChat,isOnline}){
  // camera. Stop chat events before the game's window keyboard shortcuts.
  for(const type of ['keydown','keyup','pointerdown'])root.addEventListener(type,e=>e.stopPropagation());
  let roster=[],worldCode='',connected=false,selfId='';
+ // Relay message IDs are used to avoid duplicate displays after reconnects.
+ // Keep the memory cost bounded during long multiplayer sessions.
+ const messageIds=new Set(),idOrder=[];
+ function firstDelivery(id){
+  if(typeof id!=='string'||!id)return true;
+  if(messageIds.has(id))return false;
+  messageIds.add(id);idOrder.push(id);
+  if(idOrder.length>300)messageIds.delete(idOrder.shift());
+  return true;
+ }
  const pending=[];let liveTimer=null;
  const markDelivery=(p,label,failed=false)=>{
    if(!p)return;
@@ -163,11 +173,11 @@ export function createMultiplayerChat({sendChat,isOnline}){
    while(dest.children.length>60)dest.firstElementChild.remove();
    dest.scrollTop=dest.scrollHeight;
    showLive(m);
-   if(privateMsg&&root.hidden)trigger?.classList.add('vn-chat-unread');
+   if(root.hidden)trigger?.classList.add('vn-chat-unread');
    return {line,delivery};
  }
  function receiveChat(m){
-   if(!m||typeof m.text!=='string')return;
+   if(!m||typeof m.text!=='string'||!firstDelivery(m.id))return;
    if(m.from===selfId){
      const index=pending.findIndex(p=>p.text===m.text && p.kind===m.kind &&
        p.to===(m.to||null));

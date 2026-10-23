@@ -24,10 +24,15 @@ function seaWater(){
  // The water follows the camera/boat. Waves shift UVs without thousands of
  // per-frame mesh updates or an immense 9km square allocation on mobile.
  const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;
- const c=canvas.getContext('2d');const im=c.createImageData(128,128),r=rnd(9234);
- for(let i=0;i<im.data.length;i+=4){let w=r();im.data[i]=25+w*12;im.data[i+1]=70+w*25;im.data[i+2]=95+w*26;im.data[i+3]=255;}
- c.putImageData(im,0,0);
- const tex=new THREE.CanvasTexture(canvas);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(42,42);tex.colorSpace=THREE.SRGBColorSpace;
+ const c=canvas.getContext('2d');
+ // If a low-memory Android WebView refuses Canvas2D, retain solid ocean color.
+ let tex=null;
+ if(c){
+   const im=c.createImageData(128,128),r=rnd(9234);
+   for(let i=0;i<im.data.length;i+=4){let w=r();im.data[i]=25+w*12;im.data[i+1]=70+w*25;im.data[i+2]=95+w*26;im.data[i+3]=255;}
+   c.putImageData(im,0,0);
+   tex=new THREE.CanvasTexture(canvas);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(42,42);tex.colorSpace=THREE.SRGBColorSpace;
+ }
  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1800,1800,1,1),new THREE.MeshStandardMaterial({color:0x529db1,map:tex,roughness:.31,metalness:.12,transparent:true,opacity:.95,side:THREE.DoubleSide}));
  mesh.rotation.x=-Math.PI/2;mesh.position.y=0;mesh.receiveShadow=true;mesh.name='sailing-water-window';return {mesh,tex};
 }
@@ -258,7 +263,7 @@ export function buildSailingOcean(scene){
   if(disposed)return;
   vessel.position.set(x,.35+.19*Math.sin(t*1.1),z);
   vessel.rotation.set(.027*Math.sin(t*.67),yaw+Math.PI,.034*Math.sin(t*.91));
-  water.mesh.position.x=x;water.mesh.position.z=z;water.tex.offset.set(t*.0017,t*.0009);
+  water.mesh.position.x=x;water.mesh.position.z=z;water.tex?.offset.set(t*.0017,t*.0009);
   wake.position.set(x,.075,z);
   wake.rotation.set(0,yaw,0);
   wakeMat.opacity=Math.min(.62,Math.max(0,Math.abs(nav.speed)/19*.52));

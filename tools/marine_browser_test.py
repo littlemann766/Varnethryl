@@ -281,6 +281,7 @@ with sync_playwright() as pw:
    chat_ui=pg.evaluate("""async()=>{
      const {createMultiplayerChat}=await import('./proto3d/multiplayer-chat.js');
      const root=document.getElementById('vnChatPanel');
+     document.getElementById('vnChatLive')?.remove(); // Discard real widget's old overlay for isolated test.
      const widget=createMultiplayerChat({sendChat:()=>true,isOnline:()=>true});
      widget.setOnline(true,'WORLD1','test-me');root.hidden=false;
      const input=root.querySelector('.vn-chat-input'),form=root.querySelector('form');

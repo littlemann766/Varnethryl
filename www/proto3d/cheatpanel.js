@@ -106,10 +106,10 @@ function buildPanel(c, gate, env) {
       autocomplete:'off',maxLength:128,placeholder:'Owner server passphrase',
       ariaLabel:'Owner server passphrase'});
     isolateKeys(ownerPass);
-    const connect=el('button',{type:'button',textContent:'Verify Owner access',dataset:{cheat:'player-auth'}});
-    const refresh=el('button',{type:'button',textContent:'Refresh players',dataset:{cheat:'player-refresh'}});
+    const connect=el('button',{type:'button',textContent:'Verify Owner access'});connect.dataset.cheat='player-auth';
+    const refresh=el('button',{type:'button',textContent:'Refresh players'});refresh.dataset.cheat='player-refresh';
     const playerSelect=el('select',{id:'ownerOnlinePlayer',ariaLabel:'Choose online player'});isolateKeys(playerSelect);
-    const goPlayer=el('button',{type:'button',textContent:'Teleport beside player',dataset:{cheat:'player-jump'}});
+    const goPlayer=el('button',{type:'button',textContent:'Teleport beside player'});goPlayer.dataset.cheat='player-jump';
     playerSelect.disabled=true;goPlayer.disabled=true;
     const hint=el('div',{textContent:'Join any multiplayer world first. After verification, select a player from any public or private world. Only your character moves.',
       style:'font-size:11px;opacity:.75;line-height:1.4'});

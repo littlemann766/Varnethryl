@@ -27,6 +27,7 @@ assert.equal(coliseumHeight(145,0),0);
 const client=src('www/proto3d/multiplayer-client.js');
 assert.match(client,/async function recoverFailedJump\(/,'failed teleport restores previous room');
 assert.match(client,/await recoverFailedJump\(before,seq\)/,'teleport recovery used');
+assert.match(client,/const idleNoTurn=p\.moving!==true/,'idle turning does not reset remote walking orientation');
 assert.doesNotMatch(client,/new THREE\.Vector3\(p\.x,p\.y,p\.z\)/,'avoid allocation per remote avatar per frame');
 const relay=src('multiplayer/server.mjs');
 assert.match(relay,/if\(!target\)\{send\(socket,\{type:isCoOwner\?'coowner-error':'owner-error'/,'CoOwner receives private rank error');

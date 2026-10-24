@@ -651,6 +651,7 @@ function hollowTower(ctx, id, x, z, rot, R = 4.4, K = 1) { // climbable round to
 export function buildWalls(ctx, WORLD_W, GATE_W) {
   const KW = KB, WORLD = WORLD_W / KW;   // the wall builder works in local units (uniformly scaled by KW like every building)
   const tmpl = { id: 'walls', cx: 0, cz: 0, rot: 0, K: KW }; const B = new Builder(ctx, tmpl); B.name = 'Town Walls & Watchtowers'; B.insideTest = null; B.radius = 9999;
+   const wallLadderSites=[];
   B.reach = 9999; const WH = 4.2, WT = 2.6;   // wall height / thickness (wide enough for a wall walk)
   const Q = WORLD * 0.5, DECO = [[0, -WORLD], [-Q, -WORLD], [Q, -WORLD], [-WORLD, 0], [WORLD, 0], [-WORLD, Q], [WORLD, Q], [-WORLD, -Q], [WORLD, -Q], [-Q, WORLD], [Q, WORLD]];
   const run = (x1, z1, x2, z2) => { const len = Math.hypot(x2 - x1, z2 - z1), horiz = Math.abs(z2 - z1) < .01, h = WH, t = WT, cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
@@ -661,7 +662,8 @@ export function buildWalls(ctx, WORLD_W, GATE_W) {
     B.bx(horiz ? len : .3, .12, horiz ? .3 : len, 'stoneD', cx + nx * (t / 2 - .15), h + .06, cz + nz * (t / 2 - .15), B.G.ext);
     const bu = []; const nb = Math.floor(len / 9); for (let i = 1; i < nb; i++) { const f = i / nb, px = x1 + (x2 - x1) * f, pz = z1 + (z2 - z1) * f; bu.push(horiz ? px : pz); B.bx(1.1, 4.8, 1.1, 'stoneD', px + nx * (t / 2 + .3), 2.4, pz + nz * (t / 2 + .3), B.G.ext); if (i % 2) B.banner(px + nx * (t / 2 + .02), 2.6, pz + nz * (t / 2 + .02), horiz ? (z1 < 0 ? 0 : Math.PI) : (x1 < 0 ? Math.PI / 2 : -Math.PI / 2), 1.1, 2.6); }
     const lt = B.lvTag; B.lvTag = 0; B.col(cx, cz, horiz ? len : t, horiz ? t : len); B.lvTag = lt;   // solid at street level only; the wall top is walkable
-    // wall walk: split into segments between the decorative towers / corner towers / gate, each with its own stair
+    // Wall walk: preserve level-1 floor and towers but replace all exterior
+     // staircase flights with compact vertical ladders on the city side.
     const u0 = horiz ? Math.min(x1, x2) : Math.min(z1, z2), u1 = horiz ? Math.max(x1, x2) : Math.max(z1, z2), ax = horiz ? 'x' : 'z', wl = horiz ? cz : cx;
     const cuts = DECO.filter(([x, z]) => horiz ? Math.abs(z - cz) < .01 : Math.abs(x - cx) < .01).map(([x, z]) => horiz ? x : z).filter(c => c > u0 + 1 && c < u1 - 1); const segs = []; let a = u0 + 6.6;
     for (const c of cuts.sort((p, q) => p - q)) { if (c - 3.4 > a) segs.push([a, c - 3.4]); a = Math.max(a, c + 3.4); } if (u1 - 6.6 > a) segs.push([a, u1 - 6.6]);
@@ -670,9 +672,14 @@ export function buildWalls(ctx, WORLD_W, GATE_W) {
       B.floors.push({ level: 1, y: h, rects: [rect] }); B.levelGroup(1);
       let mid = (sa + sb) / 2; if (!horiz && cx < 0 && mid > 70 / KW && mid < 135 / KW) mid = Math.max(sa + 1.9, mid);   // keep clear of the port basin
       for (let d = 0; d < 6; d += .25) { let ok = false; for (const s of [mid + d, mid - d]) if (s - 1.4 > sa && s + 1.4 < sb && bu.every(b => Math.abs(b - s) > 1.7)) { mid = s; ok = true; break; } if (ok) break; }
-      const LEN = h / Math.tan(26 * Math.PI / 180), cxs = horiz ? mid : cx + nx * (t / 2 + LEN / 2), czs = horiz ? cz + nz * (t / 2 + LEN / 2) : mid;
-      const ang = horiz ? (nz > 0 ? Math.PI : 0) : (nx > 0 ? -Math.PI / 2 : Math.PI / 2);   // climbs toward the wall
-      B.stairs({ cx: cxs, cz: czs, ang, len: LEN, w: 1.7, l0: 0, y0: 0, l1: 1, y1: h, key: 'stoneD', flipUp: .7 }); } };
+      // Ladder base on the ground inside the city; exit on the walkable wall.
+      const mx=horiz?mid:cx,mz=horiz?cz:mid;
+      const [baseX,baseZ]=B.toW(mx+nx*(t/2+1.6),mz+nz*(t/2+1.6));
+      const [topX,topZ]=B.toW(mx+nx*(t/2-.65),mz+nz*(t/2-.65));
+      const [rungX,rungZ]=B.toW(mx+nx*(t/2+.16),mz+nz*(t/2+.16));
+      wallLadderSites.push({id:'wall-'+wallLadderSites.length,level:1,H:h*KW,
+        baseX,baseZ,topX,topZ,rungX,rungZ,nx,nz});
+      } };
   const g = GATE_W;
   run(-WORLD, -WORLD, -10.4, -WORLD); run(10.4, -WORLD, WORLD, -WORLD); run(-WORLD, -WORLD, -WORLD, WORLD); run(WORLD, -WORLD, WORLD, WORLD); run(-WORLD, WORLD, -10.4, WORLD); run(10.4, WORLD, WORLD, WORLD);
   const towers = []; const tw = (x, z, enter) => { if (!enter) { B.tower(x, z, 2.4, 7.6, { coneH: 5.4, windows: 3, wa: x + z }); B.banner(x, 4.2, z + (z < 0 ? 2.5 : -2.5), z < 0 ? 0 : Math.PI, 1, 2.2); return; }
@@ -680,7 +687,7 @@ export function buildWalls(ctx, WORLD_W, GATE_W) {
   const E = WORLD - 6;
   tw(-E, -E, true); tw(E, -E, true); tw(-E, E, true); tw(E, E, true);
   for (const [x, z] of DECO) tw(x, z, false);
-  B.finish(); return { id: 'walls', parts: [B, ...towers], update(hx, hz, dt, lv) { let ins = null; for (const p of towers) if (p.update(hx, hz, dt, lv)) ins = p.id; return ins; } };
+  B.finish(); return { id: 'walls', ladderSites:wallLadderSites, parts: [B, ...towers], update(hx, hz, dt, lv) { let ins = null; for (const p of towers) if (p.update(hx, hz, dt, lv)) ins = p.id; return ins; } };
 }
 
 // ---------- registry + village layout ----------

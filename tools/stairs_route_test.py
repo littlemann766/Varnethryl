@@ -29,11 +29,14 @@ with sync_playwright() as p:
     cdp = pg.context.new_cdp_session(pg)
     if THROTTLE > 1: cdp.send('Emulation.setCPUThrottlingRate', {'rate': THROTTLE})
     pg.goto(f'{BASE or "http://127.0.0.1:%d" % port}/proto3d.html?party={PARTY}&npcs={1 if PARTY != "0" else 0}'); pg.wait_for_function('window.__p3d && window.__p3d.frames>5', timeout=120000); pg.wait_for_timeout(2500)
+    # v1.5.33 opens on its title menu, which takes the keyboard/joystick: press Play Solo first
+    try: pg.click('#vnEnter', timeout=15000); pg.wait_for_timeout(1500)
+    except Exception: pass
     if os.environ.get('HERO'): import heroscale; print('HERO', heroscale.apply(pg, os.environ['HERO']), flush=True); pg.wait_for_timeout(500)   # HERO=pip|phoenix|wren|owner|troll|vaelthryx (sizes from charscale.js)
     if PARTY != '0':   # companions load asynchronously: wait until they exist before the first run (a late spawn would start at the town gate)
         try: pg.wait_for_function("__p3d.bump.crowd.filter(c=>c.kind==='party' && c.root).length>=%d" % int(PARTY), timeout=90000)
         except Exception: print('    warn: companions not all loaded', flush=True)
-    info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.filter(b=>b.id!=='walls'&&!/^(wt|gt)/.test(b.id)).map(b=>({id:b.id,K:b.K,ramps:b.ramps,d:b.footprint?b.footprint.d:2*(b.radius||4)/b.K,round:!b.footprint,r:b.radius/b.K})))"))
+    info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.filter(b=>b.id!=='walls'&&!/^(wt|gt)/.test(b.id)).map(b=>({id:b.id,K:b.K,ramps:b.ramps,d:b.footprint?b.footprint.d:2*(b.radius||4)/b.K,round:!b.footprint,r:b.radius/b.K,ladders:(b.ladderSites||[]).map(L=>({l0:L.baseLevel,l1:L.level,y0:L.y0/b.K,y1:L.y1/b.K,baseX:L.baseX,baseZ:L.baseZ,topX:L.topX,topZ:L.topZ,ladder:1}))})))"))
     def W(bid, lx, lz): return pg.evaluate("([id,lx,lz])=>__p3d.multi.find(b=>b.id===id).toW(lx,lz)", [bid, lx, lz])
     box = pg.evaluate("(()=>{const r=document.getElementById('stick').getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2,r.width/2]})()")
     def drive(via, top, mode, l1, y1, secs=22, tag='', near=None):
@@ -84,15 +87,23 @@ with sync_playwright() as p:
         except Exception:
             print('    followers did NOT reach the hero floor (%s):' % tag, pg.evaluate("__p3d.bump.crowd.filter(c=>c.kind==='party').map(c=>[c.level,+c.y.toFixed(1),+c.a.x.toFixed(1),+c.a.z.toFixed(1)])"), 'hero', pg.evaluate("[__p3d.state.level,__p3d.state.heroY]"), flush=True); fails += 1; return False
     print('buildings', len(info), flush=True)
-    if os.environ.get('LIST'): print('IDS', ','.join(b['id'] for b in info if any(m['l0'] == 0 for m in b['ramps']))); sys.exit(0)
+    if os.environ.get('LIST'): print('IDS', ','.join(b['id'] for b in info if any(m['l0'] == 0 for m in (b['ramps'] or b['ladders'])))); sys.exit(0)
     for bi in info:
         if ONLY and bi['id'] not in ONLY: continue
-        for m in bi['ramps']:
+        # v1.5.33 (owner rule 23 Oct, docs/BUILDING-TRAVERSAL-RULES.md): buildings use free-climb ladders instead of stair flights.
+        # Ramps are empty now, so the route runs over each building's ladderSites: door -> ladder foot -> push toward the top -> upper room -> back down.
+        for m in (bi['ramps'] or bi['ladders']):
             if m['l0'] != 0 and not os.environ.get('UPPER'): continue
-            s, c = math.sin(m['ang']), math.cos(m['ang']); h = m['len'] / 2
             front = bi['r'] + 2.5 if bi['round'] else bi['d'] / 2 + 2.8
-            start = W(bi['id'], 0, front); door = W(bi['id'], 0, (bi['r'] - 2.2) if bi['round'] else bi['d'] / 2 - 1.9); via = [door, W(bi['id'], m['cx'], m['cz'])] if os.environ.get('VIA', 'centre') == 'centre' else [door, W(bi['id'], m['cx'] - s * (h + 1.0), m['cz'] - c * (h + 1.0))]; top = W(bi['id'], m['cx'] + s * (h + 1.4), m['cz'] + c * (h + 1.4))
-            if m['l0'] != 0:   # upper flights: start on the floor below the foot, walk up, then back down
+            start = W(bi['id'], 0, front); door = W(bi['id'], 0, (bi['r'] - 2.2) if bi['round'] else bi['d'] / 2 - 1.9)
+            if m.get('ladder'):
+                ax, az = m['topX'] - m['baseX'], m['topZ'] - m['baseZ']; al = math.hypot(ax, az) or 1; ax /= al; az /= al
+                via = [door, [m['baseX'], m['baseZ']]]; top = [m['topX'] + ax * 0.8, m['topZ'] + az * 0.8]; s = c = h = 0
+            else:
+                s, c = math.sin(m['ang']), math.cos(m['ang']); h = m['len'] / 2
+                via = [door, W(bi['id'], m['cx'], m['cz'])] if os.environ.get('VIA', 'centre') == 'centre' else [door, W(bi['id'], m['cx'] - s * (h + 1.0), m['cz'] - c * (h + 1.0))]; top = W(bi['id'], m['cx'] + s * (h + 1.4), m['cz'] + c * (h + 1.4))
+            if m['l0'] != 0 and m.get('ladder'): start = [m['baseX'], m['baseZ']]; via = []
+            elif m['l0'] != 0:   # upper flights: start on the floor below the foot, walk up, then back down
                 start = W(bi['id'], m['cx'] - s * (h - 0.5), m['cz'] - c * (h - 0.5)); via = []
             res = []
             for mode in MODES:
@@ -117,7 +128,8 @@ with sync_playwright() as p:
                         if not ok3 and os.environ.get('EXITSTRICT'): fails += 1; ok = False
                         if True: pg.evaluate("([x,z,l])=>__p3d.teleport(x,z,l)", [cur[0], cur[1], m['l1']]); pg.wait_for_timeout(200)
                     if ok and os.environ.get('DOWN', '1') == '1':   # now turn around at the top and walk back down to the street
-                        foot = W(bi['id'], m['cx'] - s * (h + 2.0), m['cz'] - c * (h + 2.0)); total += 1
+                        foot = [m['baseX'] - ax * 1.2, m['baseZ'] - az * 1.2] if m.get('ladder') else W(bi['id'], m['cx'] - s * (h + 2.0), m['cz'] - c * (h + 2.0)); total += 1
+                        if m.get('ladder'): pg.evaluate("([x,z,l])=>__p3d.teleport(x,z,l)", [m['topX'], m['topZ'], m['l1']]); pg.wait_for_timeout(300)
                         r2, ms2, ok2 = drive([], foot, mode, m['l0'], m['y0']*bi['K']); fails += 0 if ok2 else 1
                         if not ok2: print('    descent stuck at', {k: round(v, 1) if isinstance(v, float) else v for k, v in r2.items()}, flush=True)
                         if ok2 and os.environ.get('FOLLOW', '1') == '1' and not followers_arrive('down'): ok2 = False

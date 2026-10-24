@@ -1066,6 +1066,9 @@ const keys = new Set();
 import('./ladders.js').then(m => {
   LAD=m.createLadders({THREE,scene,colliders,state,keys,HS});
   for(const d of LADDER_SITES)LAD.add(d);
+  // The shared builder registers both existing and future multi-floor ladders.
+  for(const d of enterables.find(e=>e.id==='walls')?.ladderSites||[])LAD.addWall(d);
+  for(const b of ectx.multi)for(const d of b.ladderSites||[])LAD.addBuilding(d);
   // Async ladder loading must not inject town towers into an already-open arena.
   for(const L of LAD.list)L.group.visible=ZONE.name==='town';
   if(ZONE.name!=='town')LAD.btn.style.display='none';

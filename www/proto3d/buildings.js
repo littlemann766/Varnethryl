@@ -61,7 +61,7 @@ const inn = (spec, ctx) => std(spec, ctx, { name: 'Inn of Varnethryl', w: 12.5, 
     B.crossGable(-w / 2 + 3.4, 4.8, 3.8, 3.8, 'slate', 'timber', h - .3);                                   // front-left cross gable
     B.gable(4.4, 4.6, 2.9, w / 2 - 1.2, h - .5, d / 2 - 3.6, 'slate', B.G.roof, true, .5, 'timber');       // right wing gable (ridge across x), end faces the side
     B.chimney(3.6, h + .6, -1.6, 3.2); B.chimney(w / 2 - 1.4, h + .4, d / 2 - 4.6, 2.6);
-    for (let i = 0; i < 3; i++) B.bx(2.6 - i * .1, .1, .5, 'stoneL', 0, .05 + i * .1, d / 2 + .3 + (2 - i) * .45, g, { shadow: false });     // stone steps
+    B.bx(2.6,.10,1.55,'stoneL',0,.05,d/2+.85,g,{shadow:false});     // level entrance apron (no steps)
     B.bx(.25, 5.2, .25, 'darkWood', -w / 2 - .9, 2.6, d / 2 + 1.0, g); B.bx(2.2, .18, .18, 'iron', -w / 2 + .15, 4.9, d / 2 + 1.0, g);          // sign post + arm
     const sg = B.sign('The Gilded Hearth', '🍺', -w / 2 - .3, 4.2, d / 2 + 1.0, Math.PI / 2); sg.scale.set(1.5, 1.5, 1.5);
     B.bx(.3, .45, .3, 'gold', -w / 2 - .9, 3.4, d / 2 + 1.35, g, { shadow: false });

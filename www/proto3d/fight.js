@@ -39,8 +39,19 @@ export function createFight(env) {
   const canWield = () => ownerGate();
   const isOwner = () => /(^|:)owner/.test(env.heroId());
   const A = { vx: 0, vz: 0, lx: 0, lz: 0, dash: null, jump: -1, spin: 0, swing: null, fx: null };   // player-side animation state
+  // A tap during the previous swing should not be lost. Buffer one command
+  // briefly while an action animation finishes; movement stays independent.
+  let bufferedSkill=null;
+  const useWhileMoving=i=>{
+    if(!on)return false;
+    if(cc.busy()&&cc.dead<=0){
+      bufferedSkill={key:i,remaining:1.3};
+      return true;
+    }
+    return cc.use(i);
+  };
   const api = {
-    use: i => { if (on) cc.use(i); }, dodge: () => { if (on) cc.dodge(A.vx, A.vz); }, block: b => { if (on) cc.block(b); }, jump: () => { if (on) return window.__p3d?.jump?.() ?? cc.jump(); },
+    use: useWhileMoving, dodge: () => { if (on) cc.dodge(A.vx, A.vz); }, block: b => { if (on) cc.block(b); }, jump: () => { if (on) return window.__p3d?.jump?.() ?? cc.jump(); },
     lock: () => on && cc.lock(), switchTarget: () => on && cc.switchTarget(), potion: () => on && cc.potion(), swap: () => { if (on) swapWeapon(); }, exit: () => stop(), summon: () => spawnBoss(),
   };
   const hud = new CombatHUD(cc, api, project);
@@ -515,7 +526,15 @@ export function createFight(env) {
     const h = env.hero();
     // lock-on: face the target
     if (cc.tgt.locked && cc.tgt.target && cc.dead <= 0) state.yaw = yawLerp(state.yaw, Math.atan2(cc.tgt.target.x - state.heroX, cc.tgt.target.z - state.heroZ), Math.min(1, dt * 9));
-    cc.update(dt); if (lfx) lfx.update(dt); updateCompanions(dt); regionUpdate(dt); updateHobCamps(dt);
+    cc.update(dt);
+    if(bufferedSkill){
+      bufferedSkill.remaining-=dt;
+      if(bufferedSkill.remaining<=0||cc.dead>0)bufferedSkill=null;
+      else if(!cc.busy()){
+        const key=bufferedSkill.key;bufferedSkill=null;cc.use(key);
+      }
+    }
+    if (lfx) lfx.update(dt); updateCompanions(dt); regionUpdate(dt); updateHobCamps(dt);
     // spawner (bad guys): small waves of regular enemies
     spawnT -= dt; const reg = cc.enemies.filter(e => !e.def.boss && e.state !== 'defeated').length;
     if (auto && (env.zone?.()==='wilds'||env.zone?.()==='town')) {   // Wilds + wilderness beyond the walls: scattered, passive mobs (they stand off until you come within 3 m or hit them first); far ones are recycled
@@ -640,7 +659,7 @@ export function createFight(env) {
     // owner fight toggles and loading callbacks that resolve after boarding.
     if (env.zone?.() === 'sailing') { if (on) stop(); return; }
     if (env.zone?.() === 'coliseum' && !isColiseumCombat(state.heroX,state.heroZ)) { if (on) stop(); hud.say('SPECTATOR TIERS — FIGHT ON THE ARENA FLOOR',1800); return; }
-    if (on) { if (isAuto === true) auto = true; return; } auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
+    if (on) { if (isAuto === true) auto = true; return; } bufferedSkill=null;auto = isAuto === true; on = true; wave = 1; sheathed = false; bossOn = false; cc.kills = 0; cc.xp = 0; cc.gold = 0; cc.res.full(); cc.cd.reset(); cc.dead = 0; cc.potions = cc.P.potion.charges; hud.show(true);
     addEventListener('keydown', onKey); addEventListener('mousedown', onMd); addEventListener('mouseup', onMu); addEventListener('contextmenu', onCtx);
     if (auto) { syncHero(); equip(); const zone=env.zone?.(); hud.say(zone==='hydra'?'HYDRA MIRE — FIVE HEADS AWAIT':zone==='frost'?'FROST CAVE — THE BROTHERS AWAIT':zone==='town'?'OUTSKIRTS — DANGER AHEAD':'THE WILDS — MONSTERS ABOUT',1800); return; }
     // Normal combat is available to every playable hero. Do not silently
@@ -648,7 +667,7 @@ export function createFight(env) {
     syncHero(); equip(); hud.say('COMBAT READY', 1800);
   }
   function stop() { heroWeaponClear(); for (const s of cc.summons.slice()) cc.removeSummon(s, 'stop'); cc.buffs.length = 0; sumSync();
-    if (!on) return; on = false; spawnEpoch++; metHide(); metDispose(); cc.meteors.length = 0; hud.show(true); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
+    if (!on) return; bufferedSkill=null;on = false; spawnEpoch++; metHide(); metDispose(); cc.meteors.length = 0; hud.show(true); cc.block(false); cc.clearEnemies(); clearOS(env.hero()); unequip(); ring.visible = orb.visible = aura.visible = false; A.dash = null; A.swing = null; A.jump = -1;
     removeEventListener('keydown', onKey); removeEventListener('mousedown', onMd); removeEventListener('mouseup', onMu); removeEventListener('contextmenu', onCtx); env.hero().rotation.x = 0;
   }
   const moveMul = () => (on && cc.chill > 0 && !cc.hero.owner) ? Math.max(0.3, 1 - (cc.chillAmt || 0)) : 1; if (typeof window !== 'undefined') window.__fightMove = moveMul;

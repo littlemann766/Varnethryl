@@ -32,7 +32,7 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
   if (o.flowers !== false && B.h - hs > 1.8) for (const x of frontWinXs(B, o.wn || 1)) B.flowers(x, gy - .65, B.d / 2 + .2, 1.0);
   if (o.post) { B.lanternPost(B.w / 2 + 1.0, B.d / 2 + 1.2); B.lanternPost(-B.w / 2 - 1.0, B.d / 2 + 1.2); }
   if (o.extra) o.extra(B);
-  if (o.details !== false) B.shutY = gy + .1, B.details({ upper: o.upper, hs });
+  if (o.details !== false) B.shutY = gy + .1, B.details({ upper: o.upper, hs, noClutter: o.noClutter });
   if (o.interior) o.interior(B);
   if (/^house|farmhouse/.test(B.id)) B.laundry();
   { const pk = { inn: 'inn', smithy: 'smithy', bakery: 'bakery', market: 'market', apothecary: 'apothecary', thieves: 'thieves', house1: 'house', house2: 'house', house3: 'house', house4: 'house', farmhouse: 'house', guildhall: 'guildhall' }[B.id]; if (pk) B.props2(pk); }
@@ -42,7 +42,7 @@ function std(spec, ctx, o) { // rect shell + gable roof + chimney + windows + ba
 // themed full upper storey with a real flight on one side (free column), furniture on the back strip and opposite wall
 function upperStd(B, o) {
   const iw = B.iw, id_ = B.id_, len = Math.min(o.len || 3.4, id_ * 2 - 1.3), sd = o.side === 'L' ? -1 : 1, th = o.theme || 'bed', y = o.y || 3.0;
-  B.fullUpper({ y, stair: { cx: sd * (iw - .9), cz: id_ - .45 - len / 2, dir: '-z', len, w: 1.5 }, rooms(U) {
+  B.fullUpper({ y, topRoom: 1.15, stair: { cx: sd * (iw - .9), cz: id_ - .45 - len / 2, dir: '-z', len, w: 1.5 }, rooms(U) {   // topRoom: >= 1.15 m of landing past the top step (any hero radius steps off forward, not into the back wall)
     const x0 = -sd * (iw - 1.1), span = iw * 2 - 2.2;
     if (th === 'bed') { U.bed(x0, -id_ + 1.3); U.bed(x0 + sd * 1.5, -id_ + 1.3); U.chest(0, -id_ + .6, .8); U.tableR(-sd * 1.0, .2, 1.4, .9); U.rugAt(-sd * 1.0, .2, 2.2, 1.8); U.lamp(0, 2.2, 0); }
     if (th === 'lab') { U.shelf(0, -id_ + .3, Math.min(span, 4.4), 0); U.tableR(-sd * 1.2, -.3, 2.2, 1.0); U.crystal(-sd * 1.2 + 1.0, -.3, 1.2, 'a07aff', .25); U.cyl(.5, .4, .6, 'iron', -sd * (iw - 1.2), .3, -id_ + 1.2, U.G.int, 10); U.ccol(-sd * (iw - 1.2), -id_ + 1.2, .6); U.lamp(0, 2.2, 0); U.barrel(-sd * (iw - .5), id_ - .6); }
@@ -175,12 +175,28 @@ function temple(spec, ctx) {
   for (const z of [-8.5, -5.5]) for (const s of [-1, 1]) B.pillar(s * 4.2, z, .4, h - .6, 'stoneL');
   B.bx(5, .5, 2.4, 'stoneL', 0, .25, -id_ + 1.4, B.G.int); B.bx(3.2, 1.1, 1, 'gold', 0, 1.0, -id_ + 1.3, B.G.int); B.col(0, -id_ + 1.4, 5, 2.4); B.banner(0, 4.2, -id_ + .3, 0, 2.2, 4.4); B.win(-2.8, 5, -id_ + .1, 0, 1.2, 3, 'stained'); B.win(2.8, 5, -id_ + .1, 0, 1.2, 3, 'stained');
   B.crystal(-5.6, -id_ + 1.6, 1.5, '6aa8ff', .35); B.crystal(5.6, -id_ + 1.6, 1.5, '6aa8ff', .35);
+  { const G = B.G.int, z0 = -id_ + 1.3;   // card temple (pass 4): high altar dressing - altar cloth, candles, gold reredos frame, candelabra, communion rail
+    B.bx(3.3, .04, 1.06, 'carpet', 0, 1.57, z0, G, { shadow: false, lite: true }); for (let i = 0; i < 6; i++) { const x = -1.25 + i * .5; B.cyl(.04, .04, .22, '#e8dcc0', x, 1.7, z0 - .3, G, 4, { shadow: false }); B.add(new THREE.ConeGeometry(.04, .1, 4), GLOW('ffb040', 2.0), x, 1.86, z0 - .3, G, { shadow: false }); }
+    for (const [x, y, w, hh] of [[0, 6.95, 5.0, .18], [-2.45, 4.95, .18, 4.1], [2.45, 4.95, .18, 4.1]]) B.bx(w, hh, .12, 'gold', x, y, -id_ + .2, G, { shadow: false, lite: true });
+    for (const s of [-1, 1]) { const x = s * 3.2, z = -id_ + 2.0; B.cyl(.05, .09, 1.6, 'gold', x, .8, z, G, 6, { shadow: false }); B.bx(.7, .04, .04, 'gold', x, 1.6, z, G, { shadow: false, lite: true }); for (const dx of [-.33, 0, .33]) B.add(new THREE.ConeGeometry(.04, .1, 4), GLOW('ffb040', 2.0), x + dx, 1.72, z, G, { shadow: false }); B.ccol(x, z, .25); }
+    B.bx(4.2, .1, .1, 'gold', 0, .75, -id_ + 3.1, G, { shadow: false, lite: true }); for (const x of [-2, -1, 1, 2]) B.bx(.06, .7, .06, 'gold', x, .37, -id_ + 3.1, G, { shadow: false, lite: true }); }
   B.cyl(1.1, 1.3, .5, 'stoneL', 0, .25, 4.5, B.G.int, 16); B.add(new THREE.CylinderGeometry(.9, .9, .06, 16), M('water'), 0, .55, 4.5, B.G.int, { shadow: false }); B.cyl(.12, .12, 1.2, 'stoneL', 0, 1.1, 4.5, B.G.int, 8); B.ccol(0, 4.5, 1.35);
   // real upper galleries: side balconies over the aisles + choir loft across the back, reached by a flight on each side of the entrance
   { const GY = 4.0, gx = 4.0, GL = GY / Math.tan(26 * Math.PI / 180); const S = s => ({ cx: s * (iw - .75), cz: -.4 + GL / 2, ang: Math.PI, len: GL, w: 1.5, l0: 0, y0: 0, l1: 1, y1: GY });
     B.stairs(S(-1)); B.stairs(S(1));
     B.upperFloor(1, GY, [[-iw, -gx, -id_, 0.0], [gx, iw, -id_, 0.0], [-iw, iw, -id_, -id_ + 2.4]], { key: 'floorPlank' });
     B.onFloor(1, GY, U => { for (const s of [-1, 1]) { U.pew(s * 5.4, -4, 1.8); U.pew(s * 5.4, -1.5, 1.8); U.lamp(s * 4.6, 2.6, 2.0); } U.banner(0, 1.8, -id_ + .4, 0, 2.0, 2.4); U.chest(0, -id_ + 1.0, .9); }); }
+  { // card temple (pass 5): rose-window tracery, healing chamber around the font, crypt-adjacent candle shrine, reliquary
+    const G = B.G.int, g = B.G.ext;
+    for (let i = 0; i < 8; i++) { const a = i * Math.PI / 8, m = B.bx(.07, 3.0, .05, 'gold', 0, 6.7, d / 2 + .12, g, { shadow: false, lite: true }); m.rotation.z = a; }
+    B.add(new THREE.TorusGeometry(.55, .05, 4, 12), M('gold'), 0, 6.7, d / 2 + .13, g, { shadow: false });
+    B.add(new THREE.RingGeometry(1.55, 1.75, 24), M('gold', { side: THREE.DoubleSide }), 0, .1, 4.5, G, { shadow: false }).rotation.x = -Math.PI / 2;
+    for (let i = 0; i < 3; i++) { const a = i * 2.094 + .5, x = Math.sin(a) * 1.1, z = 4.5 + Math.cos(a) * 1.1; B.bx(.02, 1.6, .02, 'iron', x, 4.0, z, G, { shadow: false, lite: true }); B.add(new THREE.OctahedronGeometry(.16, 0), GLOW('6aa8ff', 1.6), x, 3.1, z, G, { shadow: false }); }
+    { const x = -iw + .7, z = -3.0; B.bx(1.0, .8, .45, 'darkWood', x, .4, z, G); B.bx(1.0, .04, .5, 'gold', x, .82, z, G, { shadow: false, lite: true }); B.col(x, z, 1.0, .5);
+      for (let i = 0; i < 8; i++) { const cx = x - .38 + (i % 4) * .25, cz = z - .1 + Math.floor(i / 4) * .2, hh = .1 + (i % 3) * .05; B.cyl(.03, .03, hh, '#e8dcc0', cx, .84 + hh / 2, cz, G, 4, { shadow: false }); B.add(new THREE.ConeGeometry(.03, .08, 4), GLOW('ffb040', 2.0), cx, .9 + hh, cz, G, { shadow: false }); }
+      B.bx(.9, .2, .4, 'carpet', x + .9, .1, z, G, { shadow: false, lite: true }); B.statue(-iw + .45, z - 1.3, .7, G); B.banner(-iw + .1, 3.0, z - .6, Math.PI / 2, .8, 1.6, G); }
+    { const x = iw - .7, z = -3.0; B.chest(x, z, .9); B.bx(.7, .5, .45, 'gold', x, 1.1, z, G, { lite: true }); B.add(new THREE.ConeGeometry(.3, .3, 4), M('gold'), x, 1.5, z, G, { shadow: false }); }
+  }
   B.props2('hall'); B.radius = 20; return B.finish();
 }
 
@@ -198,11 +214,17 @@ const training = (spec, ctx) => std(spec, ctx, { name: 'Training Hall of Varneth
 
 // ---------- 6. Stables ----------
 const stables = (spec, ctx) => std(spec, ctx, { name: 'Stables of Varnethryl', noScale: true, w: 18, d: 9, h: 4.6, hs: 1.4, upper: 'timber', lower: 'stone', rh: 3.6, ridge: 'x', over: .9, DW: 3.2, DH: 3.4, floor: 'floorStone', wn: 2, banners: [[-4, 3, .8, 1.8], [4, 3, .8, 1.8]], dormers: [-4, 4], dormY: 1.6, dormZ: 0, windows: false,
+  extra(B) { const { w, d, h } = B, top = h + 3.6, g = B.G.roof;   // card b: ridge cupola with louvres + weather vane, hay bales and a cart wheel by the doors
+    B.bx(1.5, 1.2, 1.5, 'timber', 0, top + .45, 0, g); for (let i = 0; i < 3; i++) for (const z of [-.76, .76]) B.bx(1.1, .07, .05, 'darkWood', 0, top + .2 + i * .3, z, g, { shadow: false, lite: true });
+    B.gable(1.9, 1.9, 1.0, 0, top + 1.05, 0, 'slate', g, true, .15); B.cyl(.03, .03, 1.0, 'iron', 0, top + 2.4, 0, g, 4, { shadow: false }); B.bx(.7, .12, .02, 'gold', .15, top + 2.7, 0, g, { shadow: false, lite: true }); B.cone(.07, .2, 'gold', 0, top + 2.95, 0, g, 4, { shadow: false });
+    for (const [x, z, k] of [[-w / 2 + 1.2, d / 2 + 1.2, 1], [-w / 2 + 2.6, d / 2 + 1.0, 1], [w / 2 - 1.4, d / 2 + 1.2, 0]]) { B.bx(1.1, .7, .8, '#c9a65a', x, .35, z, B.G.ext); if (k) B.bx(.9, .6, .7, '#d4b468', x + .1, 1.0, z, B.G.ext, { lite: true }); B.col(x, z, 1.1, .8); }
+    { const wh = B.add(new THREE.TorusGeometry(.55, .06, 4, 10), M('darkWood'), w / 2 - 2.8, .6, d / 2 + .25, B.G.ext, { shadow: false }); for (let i = 0; i < 3; i++) B.bx(.04, 1.05, .04, 'darkWood', w / 2 - 2.8, .6, d / 2 + .25, B.G.ext, { shadow: false, lite: true }).rotation.z = i * 1.05; } },
   interior(B) { const iw = B.iw, id_ = B.id_;
     for (const s of [-1, 1]) for (let i = 0; i < 4; i++) { const x = -iw + 2.4 + i * 3.6; B.bx(.1, 1.6, 2.6, 'darkWood', x + 1.8, .8, -id_ + 1.5 + (s > 0 ? 0 : 0), B.G.int); B.col(x + 1.8, -id_ + 1.5, .15, 2.6); }
     for (let i = 0; i < 4; i++) { const x = -iw + 1.3 + i * 3.6; B.hay(x, -id_ + 1.0, 1.4, 1.2, .5); const hz = B.add(new THREE.SphereGeometry(.4, 8, 6), M('#6a4a2a'), x + .5, 1.1, -id_ + 1.6, B.G.int); hz.scale.set(1.5, 1, .8); B.bx(.12, 1.1, .12, 'darkWood', x + .5, .45, -id_ + 1.6, B.G.int, { shadow: false }); }
     B.tableR(iw - 2.0, id_ - 1.4, 2.2, 1, 'darkWood');  B.barrel(iw - .5, id_ - .4); B.barrel(iw - .5, id_ - 3.6);
     B.rack(0, id_ - .3, 5); for (let i = 0; i < 5; i++) B.banner(-6 + i * 3, 2.9, id_ - .1, Math.PI, .6, 1.2);
+    for (let i = 0; i < 4; i++) { const x = -iw + 3.0 + i * 3.6; B.bx(.5, .05, .05, 'iron', x, 1.35, -id_ + .2, B.G.int, { shadow: false, lite: true }); const sd = B.add(new THREE.SphereGeometry(.28, 6, 4, 0, 6.3, 0, 1.4), M('#6a3a1e'), x, 1.3, -id_ + .32, B.G.int, { shadow: false }); sd.scale.set(1, .7, 1.3); B.banner(x - 1.8, 2.5, -id_ + 2.85, 0, .5, .9); }   // tack: saddles on wall pegs, blue stall pennants
     upperStd(B, { theme: 'store', y: 3.0, side: 'L', len: 3.4 });
     for (const x of [-5, 0, 5]) B.lamp(x, 3.6, 0);
   } });
@@ -378,7 +400,7 @@ function keep(spec, ctx) {
   B.bx(10, 5, 8, 'stone', 0, h + 2.9, -1, B.G.roof); B.cone(6.4, 8, 'slate', 0, h + 5.4, -1, B.G.roof, 4).rotation.y = .78;
   for (const [sx, sz, r] of [[-1, 1, 3.3], [1, 1, 3.3], [-1, -1, 3.0], [1, -1, 3.0]]) B.tower(sx * (w / 2 + r * .8 - .2), sz * (d / 2 + r * .8 - .2), r, h + 4, { coneH: 8, windows: 3, key: 'stoneL', wa: sx * 1.3 + sz });
   for (const s of [-1, 1]) B.banner(s * 4.6, 6, d / 2 + .08, 0, 1.5, 4.2);
-  for (const [x, z, r, up] of [[-5, -3, 2.5, 8], [5, -4, 2.2, 10], [0, -6.2, 2.7, 6]]) B.tower(x, z, r, h + up, { coneH: 8 + up * .3, windows: 3, collide: false, wa: x });
+  for (const [x, z, r, up] of [[-5, -3, 2.5, 8], [5, -4, 2.2, 10], [0, -6.2, 2.7, 6]]) B.tower(x, z, r, h + up, { coneH: 8 + up * .3, windows: 0, collide: false, wa: x, flag: false, y0: h + .6, roofGroup: B.G.ext });
   B.rocks([[-w / 2 - 2.6, d / 2 - 1, 2.0], [w / 2 + 2.8, d / 2 - 2, 2.3], [-w / 2 - 3.2, -2, 2.8, .9], [w / 2 + 3.4, -3, 2.6, .9], [-6, -d / 2 - 2.2, 2.4], [5, -d / 2 - 2.6, 2.8], [0, -d / 2 - 3.4, 3.0, 1], [-w / 2 - 1.6, d / 2 + 2.4, 1.3], [w / 2 + 1.8, d / 2 + 2.6, 1.5]]);
   B.guard(-2.6, d / 2 + 2.6); B.guard(2.6, d / 2 + 2.6); B.apron(w * .5, d * .4, 4);
   { // ornate gold double door (cropped from the reference), swung open, under a big pointed-arch surround with a tracery tympanum
@@ -398,6 +420,13 @@ function keep(spec, ctx) {
   B.tableR(-iw + 2.6, 1.5, 1.6, 7, 'darkWood'); B.tableR(iw - 2.6, 1.5, 1.6, 7, 'darkWood'); for (const s of [-1, 1]) B.hearth(s * (iw - .5), -3.6, -s * Math.PI / 2, 2.2);
   for (let i = 0; i < 3; i++) for (const s of [-1, 1]) B.banner(s * (iw - .4), 5, -2 + i * 3.6, -s * Math.PI / 2, 1, 2.6);
   for (const z of [-2, 2.5]) for (const x of [-2.6, 2.6]) B.lamp(x, 6.2, z);
+  { const G = B.G.int;   // card e (pass 4): great-hall benches + place settings, war-room map table, arrow slits on the curtain walls
+    for (const s of [-1, 1]) { const x = s * (iw - 2.6); for (const dx of [-1.15, 1.15]) { B.bx(.4, .45, 6.2, 'darkWood', x + dx, .23, 1.5, G, { lite: true }); B.col(x + dx, 1.5, .4, 6.2); }
+      for (let i = 0; i < 6; i++) { const z = -1.2 + i * 1.1; for (const dx of [-.5, .5]) { B.cyl(.18, .18, .02, '#d8d0c0', x + dx, .86, z, G, 8, { shadow: false }); B.cyl(.05, .04, .16, 'gold', x + dx * .7, .93, z + .25, G, 5, { shadow: false }); } } }
+    { const x = iw - 3.2, z = id_ - 2.6; B.cyl(1.1, 1.1, .1, 'darkWood', x, .82, z, G, 12); B.cyl(.18, .3, .8, 'darkWood', x, .4, z, G, 6); B.ccol(x, z, 1.15);
+      B.cyl(1.0, 1.0, .01, 'parchment', x, .88, z, G, 12, { shadow: false }); for (let i = 0; i < 5; i++) B.cone(.06, .18, i % 2 ? '#2f56a8' : '#a82f2f', x - .5 + i * .25, .97, z + Math.sin(i * 2.3) * .4, G, 4, { shadow: false }); }
+    for (const z of [-d / 2 - .02, d / 2 + .02]) for (const x of [-9, -3, 3, 9]) { if (z > 0 && Math.abs(x) < 4) continue; B.bx(.16, 1.0, .06, '#0e0f12', x, 8.2, z, B.G.ext, { shadow: false, lite: true }); }
+  }
   B.dress('hall');
   B.fullUpper({ level: 1, y: 5.0, stair: { cx: iw - .9, cz: 1.4, dir: '-z', len: 4.5, w: 1.6 }, rooms(U) { const Z = -3.2;
     U.partition(0, Z, iw * 2, 'x', [[-5.5, 1.4], [0, 1.6], [5.5, 1.4], [iw - .9, 2.6], [-(iw - .9), 2.6]]); U.partition(-3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7); U.partition(3.4, (Z - id_) / 2, id_ + Z, 'z', null, 2.7);
@@ -561,7 +590,7 @@ function lighthouse(spec, ctx) {
 // ---------- 23. Port of Varnethryl (simplified: harbour pond, pier, boats, dock warehouse/tavern, harbour sign) ----------
 function port(spec, ctx) {
   const parts = []; const mk = (s, f) => { const b = f({ ...s }, ctx); parts.push(b); return b; };
-  const KK = spec.K || 1, warehouse = mk({ id: 'port', cx: spec.cx + 3 * KK, cz: spec.cz - 7.6 * KK, rot: 0, K: KK }, (s, c) => std(s, c, { name: 'Port Tavern & Dockmaster', w: 11, d: 8, h: 6, hs: 2.6, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 3.2, ridge: 'x', over: .8, endKey: 'darkWood', sign: ['Port Tavern', '⚓', 5.9, 3.6], banners: [[-4, 4.4, .8, 1.8], [4, 4.4, .8, 1.8]], chimneys: [[-3, -2]], floor: 'floorPlank', wn: 2,
+  const KK = spec.K || 1, warehouse = mk({ id: 'port', cx: spec.cx + 3 * KK, cz: spec.cz - 7.6 * KK, rot: 0, K: KK }, (s, c) => std(s, c, { noClutter: true, name: 'Port Tavern & Dockmaster', w: 11, d: 8, h: 6, hs: 2.6, upper: 'darkWood', lower: 'stone', postKey: 'darkWood', rh: 3.2, ridge: 'x', over: .8, endKey: 'darkWood', sign: ['Port Tavern', '⚓', 5.9, 3.6], banners: [[-4, 4.4, .8, 1.8], [4, 4.4, .8, 1.8]], chimneys: [[-3, -2]], floor: 'floorPlank', wn: 2,
     interior(B) { const iw = B.iw, id_ = B.id_;
       B.counter(1.5, -id_ + 1.1, 4, .8); B.shelf(1.5, -id_ + .35, 3.2); B.table(-2.0, .2); B.table(-.6, 2.0); B.table(-2.4, 2.6); B.barrel(iw - .5, 0); B.barrel(iw - .5, 1); B.crate(iw - 1.2, 2.2, .9); B.tableR(-iw + 1.6, -id_ + 1.3, 2.4, 1.2, 'darkWood'); B.bx(2.6, 1.7, .1, 'parchment', -iw + 1.7, 2.3, -id_ + .2, B.G.int, { shadow: false });
       B.banner(-.4, 3.0, -id_ + .3, 0, .9, 1.8); B.lamp(-2, 3.6, 1); B.lamp(2, 3.6, 1); B.rugAt(-1.4, 1.4, 3.2, 2.8); B.hay(iw - 1.2, -id_ + .8, 1.4, 1, .8); upperStd(B, { theme: 'bed', y: 3.0, side: 'L' });
@@ -582,7 +611,7 @@ function port(spec, ctx) {
   }
   B.col(-5.5, Z0 + 4, 2, 4.4); B.col(5.8, Z0 + 6.2, 1.8, 3.6);
   let t = 0; B.tick = dt => { t += dt; boats.forEach((g, i) => { g.position.y = .2 + Math.sin(t * 1.4 + i * 2) * .05; g.rotation.z = Math.sin(t * 1.1 + i) * .04; }); };
-  for (const [x, z] of [[-6.5, -1.2], [-8, -1.0], [7.5, -1.1], [8.4, -1.6]]) { B.col(x, z, .9, .9); B.bx(.9, .9, .9, 'wood', x, .45, z, B.G.ext); }
+  /* east crate pair removed: it closed the strip in front of the tavern door (roads) */ for (const [x, z] of [[-6.5, -1.2], [-8, -1.0]]) { B.col(x, z, .9, .9); B.bx(.9, .9, .9, 'wood', x, .45, z, B.G.ext); }
   B.barrel; B.bx(.25, 3.2, .25, 'darkWood', -4, 1.6, -1.0, B.G.ext); B.add(new THREE.PlaneGeometry(2.4, 1.1), new THREE.MeshLambertMaterial({ map: signTex() , side: THREE.DoubleSide }), -4, 3.0, -.85, B.G.ext, { shadow: false, keep: true });
   for (const [x, z] of [[-9, Z0 + 9.8], [9, Z0 + 9.8]]) { B.cyl(.35, .5, 2.4, 'stone', x, 1.2, z, B.G.ext, 8); B.add(new THREE.SphereGeometry(.28, 6, 5), GLOW('ffc060', 1.5), x, 2.6, z, B.G.ext, { shadow: false }); }
   for (const x of [-8, 8]) B.banner(x, 2.4, -1.1, 0, .8, 1.8);

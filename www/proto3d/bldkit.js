@@ -129,19 +129,19 @@ export class Builder {
     for (const sx of [-1, 1]) { this.cyl(.12, .15, .38, 'iron', x + sx * w * .2, y + h + .27, z, this.G.roof, 6); this.cyl(.17, .12, .08, 'iron', x + sx * w * .2, y + h + .5, z, this.G.roof, 6); } }
   dormer(x, y, z, w = 1.4, h = 1.2) { this.bx(w, h, 1, 'timber', x, y + h / 2, z, this.G.roof); this.gable(w, 1.0, .8, x, y + h, z, 'slate', this.G.roof, false, .2); this.win(x, y + h / 2, z + .52, 0, .6, .7, 'glass', this.G.roof); }
   tower(x, z, r, h, o = {}) { // round stone tower with corbelled crenel ring and conical slate roof (roof in G.roof when o.roofGroup)
-    const key = o.key || 'stone'; this.cyl(r, r * 1.06, h, key, x, h / 2, z, this.G.ext, 14);
-    this.ring(r * 1.18, .5, 'stoneD', x, h + .25, z, this.G.ext, 14);
-    for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283; this.bx(.5, .5, .5, key, x + Math.cos(a) * r * 1.12, h + .75, z + Math.sin(a) * r * 1.12, this.G.ext); }
-    if (o.cone !== false) this.cone(r * 1.3, o.coneH || r * 2.2, o.roofKey || 'slate', x, h + .5, z, o.roofGroup || this.G.ext, 14);
-    if (o.flag !== false && o.cone !== false) this.flag(x, h + .5 + (o.coneH || r * 2.2) - .1, z, .9, o.roofGroup || this.G.ext);
+    const key = o.key || 'stone', y0 = o.y0 || 0, sg = y0 ? (o.roofGroup || this.G.roof) : this.G.ext; this.cyl(r, r * 1.06, h - y0, key, x, y0 + (h - y0) / 2, z, sg, 14);   // o.y0: turret standing on a roof (shaft hidden with the roof)
+    this.ring(r * 1.18, .5, 'stoneD', x, h + .25, z, sg, 14);
+    for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283; this.bx(.5, .5, .5, key, x + Math.cos(a) * r * 1.12, h + .75, z + Math.sin(a) * r * 1.12, sg); }
+    if (o.cone !== false) this.cone(r * 1.3, o.coneH || r * 2.2, o.roofKey || 'slate', x, h + .5, z, o.roofGroup || sg, 14);
+    if (o.flag !== false && o.cone !== false) this.flag(x, h + .5 + (o.coneH || r * 2.2) - .1, z, .9, o.roofGroup || sg);
     if (o.collide !== false) this.ccol(x, z, r * 1.08);
-    if (o.windows) for (let i = 0; i < o.windows; i++) { const a = i / o.windows * 6.283 + (o.wa || .8); this.win(x + Math.cos(a) * (r * 1.05), h * .62, z + Math.sin(a) * (r * 1.05), Math.PI / 2 - a, .35, .8, 'glass'); }
+    if (o.windows) for (let i = 0; i < o.windows; i++) { const a = i / o.windows * 6.283 + (o.wa || .8); this.win(x + Math.cos(a) * (r * 1.05), y0 + (h - y0) * .62, z + Math.sin(a) * (r * 1.05), Math.PI / 2 - a, .35, .8, 'glass', y0 ? sg : undefined); }
   }
   // ---- standard rectangular shell: stone base + upper storey, hollow, door gap at +z ----
   rectShell(o) { const _lv = this.lvTag; this.lvTag = undefined; try { return this._rectShell(o); } finally { this.lvTag = _lv; } }
   _rectShell(o) {
     const { w, d, h } = o, T = this.T, DW = Math.min(o.DW || 2.2, DOOR_MAXW), DH = Math.min(o.DH || 2.6, DOOR_MAXH), hs = o.hs === undefined ? h * .42 : o.hs;
-    const lo = o.lower || 'stone', up = o.upper || 'timber'; this.w = w; this.d = d; this.h = h; this.DW = DW;
+    const lo = o.lower || 'stone', up = o.upper || 'timber'; this.w = w; this.d = d; this.h = h; this.DW = DW; this.loKey = lo;
     const seg = (bw, bh, bd, x, y, z) => { // stacked: stone base to hs, upper above
       if (hs > 0 && hs < y + bh / 2 + .01 && y - bh / 2 < hs - .01 && bh > .01) { /* split below */ }
       const yb = y - bh / 2, yt = y + bh / 2; const cuts = hs > yb + .01 && hs < yt - .01;
@@ -214,6 +214,7 @@ export class Builder {
     if (this.footprint && !this.noDoorLane) this.clearZone({ cx: 0, cz: this.d / 2 - 2.6, ang: 0, len: 5.2, w: (this.DW || 2.2) + .8 }, 0, -2.6, 2.6, 0);   // keep the entrance lane free of props
     for (const z of this.stairZones || []) this.clearZone(z.m, z.level, z.du0, z.du1, z.fy);
     for (const c of [...this.G.frame.children]) this.G.roof.add(c);   // frame + roof always toggle together: one merged group
+    this.sideWalls();   // walls split by side (own cutaway material per side) so only the walls between camera and hero fade
     for (const k of Object.keys(this.G)) {
       const interior = k === 'int' || k.startsWith('up');
       if (interior) this.G[k].children.forEach(o => { if (o.isMesh) o.castShadow = false; });   // interior casters only switched on while the hero is inside (setInside)
@@ -227,19 +228,82 @@ export class Builder {
     if (this.wallRanges) { this.G.walls.visible = v; for (const r of this.wallRanges) { const at = r.mesh.geometry.attributes.position, a = at.array; if (v) a.fill(0, r.start * 3, (r.start + r.count) * 3); else a.set(r.orig, r.start * 3); at.needsUpdate = true; } }   // walls: opaque copy lives in one world mesh per material; the cutaway (see-through) copy is only drawn while inside
     if (this.roofRanges) for (const r of this.roofRanges) { const at = r.mesh.geometry.attributes.position, a = at.array; if (v) a.fill(0, r.start * 3, (r.start + r.count) * 3); else a.set(r.orig, r.start * 3); at.needsUpdate = true; }   // roofs live in one world mesh per material: collapse/restore this building's slice
     for (const k of Object.keys(this.G)) if (k === 'int' || k.startsWith('up')) this.G[k].traverse(o => { if (o.isMesh && o.userData.interior) o.castShadow = v && !!o.material.map; });
-    for (const m of this.cut) { m.transparent = v; m.opacity = v ? .2 : 1; m.depthWrite = !v; m.needsUpdate = true; }
+    for (const m of this.cut) m.visible = !v;   // remaining cutaway pieces outside the walls group (gable fronts ...): hidden while inside, no see-through
+    if (this.extRanges) for (const r of this.extRanges) { const at = r.mesh.geometry.attributes.position, a = at.array; if (v) a.fill(0, r.start * 3, (r.start + r.count) * 3); else a.set(r.orig, r.start * 3); at.needsUpdate = true; }
+    if (this.sideMats) { for (const m of this.sideMats) { m.userData.op = 1; m.visible = true; } if (v) this.edgeLines(); for (const k in this.edges || {}) this.edges[k].visible = false; }   // start shown; update() hides the camera-side walls
+    this.roofFadeStart(v);
     for (const m of this.G.walls.children) m.castShadow = !v;
   }
   update(hx, hz, dt, level = 0) {
     const [lx, lz] = this.toL(hx, hz), dist = Math.hypot(hx - this.cx, hz - this.cz), R = (this.radius || Math.max(this.w || 10, this.d || 10)) + 22;
     const vis = dist < R + 20; if (this.root.visible !== vis) this.root.visible = vis;
     const nearInt = this.inside || dist < (this.radius || 12) + 9; if (this.G.int.visible !== nearInt) this.G.int.visible = nearInt;   // interiors only drawn when close (fewer draw calls)
-    const v = this.insideTest ? this.insideTest(lx, lz) : false; if (v !== this.inside) this.setInside(v);
+    let v = this.insideTest ? this.insideTest(lx, lz) : false; if (v && HERO_FIT.fits && !HERO_FIT.fits(this)) v = false;   // a hero that cannot fit (giant) keeps the outside view: roof/walls stay, no cutaway
+    if (v !== this.inside) this.setInside(v);
     if (this.lvGroups) for (const l in this.lvGroups) { const g = this.lvGroups[l], sv = v && level >= +l; if (g.visible !== sv) g.visible = sv; }
+    if (this.inside && this.sideMats) this.viewCut(lx, lz, dt || 0.016);
+    if (this.roofFade) this.roofFadeTick(dt || 0.016);
     if (this.tick && vis) this.tick(dt || 0.016);
     return v;
   }
 }
+
+// ===== inside view: camera-side walls fade, roof fades out/in (per-building toggle; nothing per-mesh per-frame) =====
+function setOp(m, op) { const tr = op < .99; m.opacity = tr ? op : 1; if (m.transparent !== tr) { m.transparent = tr; m.depthWrite = !tr; m.needsUpdate = true; } }
+const FADE_OP = .14, FADE_IN = .35;   // camera-side wall opacity, interior partitions opacity
+Builder.prototype.sideWalls = function () {
+  const round = !this.footprint, T = this.T, cache = {}; this.sideMats = []; this.sideOf = {};
+  const hw = (this.w || 0) / 2, hd = (this.d || 0) / 2, R = this.radius ? (this.radius / (this._rs ? this.K : 1)) : hw;
+  for (const m of this.G.walls.children) {
+    if (!m.isMesh) continue; const { x, z } = m.position; let side;
+    if (round) side = Math.hypot(x, z) > R - T * 2.2 ? ['f', 'r', 'b', 'l'][((Math.round(Math.atan2(x, z) / (Math.PI / 2)) % 4) + 4) % 4] : 'in';
+    else side = Math.abs(z) >= hd - T - .06 ? (z > 0 ? 'f' : 'b') : Math.abs(x) >= hw - T - .06 ? (x > 0 ? 'r' : 'l') : 'in';
+    const k = m.material.uuid + side; let mt = cache[k];
+    if (!mt) { mt = cache[k] = m.material.clone(); mt.userData = { side, op: 1 }; this.sideMats.push(mt); }
+    m.material = mt;
+  }
+};
+Builder.prototype.viewCut = function (lx, lz, dt) {
+  const cam = this.ctx.cam; if (!cam) return; const [cx, cz] = this.toL(cam.position.x, cam.position.z), round = !this.footprint;
+  const iw = this.iw || 1, id_ = this.id_ || 1; let hide;
+  if (round) { const rr = Math.hypot(cx, cz), ca = Math.atan2(cx, cz); hide = sd => { if (rr < iw * .7) return false; const a = { f: 0, r: Math.PI / 2, b: Math.PI, l: -Math.PI / 2 }[sd]; let d = Math.abs(ca - a) % (2 * Math.PI); if (d > Math.PI) d = 2 * Math.PI - d; return d < 1.25; }; }
+  else hide = sd => sd === 'f' ? cz > id_ - .25 : sd === 'b' ? cz < -id_ + .25 : sd === 'r' ? cx > iw - .25 : cx < -iw + .25;
+  const st = this._hid || (this._hid = {});
+  for (const sd of ['f', 'b', 'l', 'r', 'in']) { const h = sd === 'in' ? true : hide(sd); if (st[sd] === h) continue; st[sd] = h;
+    for (const m of this.sideMats) if (m.userData.side === sd) { m.visible = !h; m.userData.op = h ? 0 : 1; }
+    if (this.edges && this.edges[sd]) this.edges[sd].visible = h; }
+};
+// thin outline of hidden walls: one EdgesGeometry LineSegments per side (shared line material), built on first entry, drawn only while that side is hidden
+const EDGE_MAT = new THREE.LineBasicMaterial({ color: 0x2a2a30, transparent: true, opacity: .55, depthWrite: false });
+Builder.prototype.edgeLines = function () {
+  if (this.edges) { this._hid = {}; return; } this.edges = {}; this._hid = {};
+  const per = {};
+  for (const m of this.G.walls.children) { if (!m.isMesh) continue; const sd = m.material.userData && m.material.userData.side; if (!sd) continue; m.updateMatrix(); const e = new THREE.EdgesGeometry(m.geometry, 35); e.applyMatrix4(m.matrix); (per[sd] || (per[sd] = [])).push(e); }
+  for (const sd in per) { let n = 0; for (const e of per[sd]) n += e.attributes.position.count; const pos = new Float32Array(n * 3); let o = 0; for (const e of per[sd]) { pos.set(e.attributes.position.array, o); o += e.attributes.position.count * 3; e.dispose(); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); const ls = new THREE.LineSegments(g, EDGE_MAT); ls.visible = false; ls.userData.keep = true; ls.renderOrder = 5; this.G.walls.add(ls); this.edges[sd] = ls; }
+};
+// roof: the building's slice of the shared world roof meshes collapses at once (draw calls stay merged); a per-building transparent copy
+// is drawn only for the ~0.3 s fade (built lazily on first entry)
+Builder.prototype.roofFadeStart = function (inside) {
+  if (!this.roofRanges || !this.roofRanges.length) return;
+  if (!this.fadeG) { const g = new THREE.Group(); g.visible = false; g.userData.keep = true;
+    for (const r of this.roofRanges) { const src = r.mesh.geometry, geo = new THREE.BufferGeometry(), n = r.count;
+      geo.setAttribute('position', new THREE.BufferAttribute(r.orig.slice(), 3));
+      for (const [nm, sz] of [['normal', 3], ['uv', 2], ['color', 3]]) { const a = src.attributes[nm]; if (a) geo.setAttribute(nm, new THREE.BufferAttribute(a.array.slice(r.start * sz, (r.start + n) * sz), sz)); }
+      const mt = r.mesh.material.clone(); mt.transparent = true; mt.depthWrite = false; const fm = new THREE.Mesh(geo, mt); fm.userData.keep = true; fm.castShadow = false; fm.matrixAutoUpdate = false; g.add(fm); }
+    (this.ctx.scene || this.root.parent).add(g); this.fadeG = g; }
+  this.roofFade = { dir: inside ? -1 : 1, op: inside ? 1 : 0 };
+  if (!inside) for (const r of this.roofRanges) { const at = r.mesh.geometry.attributes.position; at.array.fill(0, r.start * 3, (r.start + r.count) * 3); at.needsUpdate = true; }   // exit: keep the slice collapsed until the copy has faded in
+  this.fadeG.visible = true; for (const fm of this.fadeG.children) fm.material.opacity = this.roofFade.op;
+};
+Builder.prototype.roofFadeTick = function (dt) {
+  const f = this.roofFade; f.op = Math.max(0, Math.min(1, f.op + f.dir * dt / .3)); for (const fm of this.fadeG.children) fm.material.opacity = f.op;
+  if ((f.dir < 0 && f.op <= 0) || (f.dir > 0 && f.op >= 1)) { this.fadeG.visible = false; this.roofFade = null;
+    if (f.dir > 0 && !this.inside) for (const r of this.roofRanges) { const at = r.mesh.geometry.attributes.position; at.array.set(r.orig, r.start * 3); at.needsUpdate = true; } }
+};
+Builder.prototype.viewState = function () { const r = this.roofRanges && this.roofRanges[0]; let shown = null; if (r) { const a = r.mesh.geometry.attributes.position.array; shown = false; for (let i = r.start * 3; i < (r.start + r.count) * 3; i++) if (a[i] !== 0) { shown = true; break; } }
+  const sides = {}; for (const m of this.sideMats || []) { const sd = m.userData.side; sides[sd] = Math.min(sides[sd] === undefined ? 1 : sides[sd], m.userData.op); }
+  return { inside: this.inside, roofShown: shown, roofGroupVisible: this.G.roof.visible, fading: !!this.roofFade, fadeOp: this.roofFade ? this.roofFade.op : null, sides, up: Object.fromEntries(Object.entries(this.lvGroups || {}).map(([l, g]) => [l, g.visible])) }; };
 
 // ===== multi-level support: real walkable upper floors, stairs (ramps), partitions, railings =====
 // Hero state: level (0 ground, 1.. upper) + y from surface(). Colliders carry lv (undefined = every level). Upper content lives in per-level groups that are
@@ -290,16 +354,27 @@ Builder.prototype.details = function (o = {}) {
   for (const sx of [-1, 1]) { const x = sx * (DW / 2 + .85), z = d / 2 + .12; this.bx(.3, .06, .06, 'iron', x - sx * .12, 2.45, z, g, { shadow: false }); this.add(new THREE.SphereGeometry(.13, 6, 5), GLOW('ffc060', 1.7), x, 2.25, z + .08, g, { shadow: false }); this.bx(.05, .3, .05, 'iron', x, 2.35, z, g, { shadow: false }); }
   // clutter beside the door (collides lightly): barrels / crates / sacks
   const cx = side * (DW / 2 + 1.7), cz = d / 2 + .75;
-  if (w > 7) { if (v === 0 || v === 3) { this.cyl(.38, .38, .85, 'wood', cx, .43, cz, g, 10); this.cyl(.4, .4, .06, 'iron', cx, .25, cz, g, 10); this.cyl(.4, .4, .06, 'iron', cx, .62, cz, g, 10); this.cyl(.38, .38, .85, 'wood', cx + side * .8, .43, cz + .1, g, 10); this.ccol(cx, cz, .42); this.ccol(cx + side * .8, cz + .1, .42); }
+  if (w > 7 && !o.noClutter) {   // noClutter: door opens onto a narrow strip (port tavern on the dock) if (v === 0 || v === 3) { this.cyl(.38, .38, .85, 'wood', cx, .43, cz, g, 10); this.cyl(.4, .4, .06, 'iron', cx, .25, cz, g, 10); this.cyl(.4, .4, .06, 'iron', cx, .62, cz, g, 10); this.cyl(.38, .38, .85, 'wood', cx + side * .8, .43, cz + .1, g, 10); this.ccol(cx, cz, .42); this.ccol(cx + side * .8, cz + .1, .42); }
     if (v === 1 || v === 3) { this.bx(.8, .8, .8, 'wood', cx + side * .1, .4, cz + .1, g); this.bx(.6, .6, .6, 'wood', cx + side * .2, 1.1, cz + .1, g); this.col(cx + side * .1, cz + .1, .8, .8); }
     if (v === 2) { this.bx(1.6, .5, .5, 'darkWood', cx, .25, cz, g); this.bx(1.6, .08, .6, 'wood', cx, .52, cz, g); this.col(cx, cz, 1.6, .5); for (let i = 0; i < 4; i++) this.add(new THREE.SphereGeometry(.16, 5, 4), M(['#c8452d', '#e3b341', '#6fae45', '#c8452d'][i]), cx - .6 + i * .4, .72, cz, g, { shadow: false }); } }
   // shutters beside the front windows (lower storey)
   for (const x of frontXs(this)) for (const sx of [-1, 1]) this.bx(.34, 1.05, .06, this.shutKey, x + sx * .78, this.shutY || 1.7, d / 2 + .05, g, { shadow: false });
-  this.details2(o);
+  this.details2(o); this.details3(o);
   // corner stone quoins every ~1.2 m on the front corners
   for (const sx of [-1, 1]) for (let i = 0; i < 3; i++) this.bx(i % 2 ? .46 : .6, .38, .46, 'stoneD', sx * (w / 2 - .02), .55 + i * .9, d / 2 - .02, g, { shadow: false });
 };
 // second detail layer: storey band + timber studs, door-side bench, potted plants, wall tufts of swaying grass, hanging lantern bracket
+// passes 4-6 on every standard building: (4) corner quoins on stone bases, (5) weathering - grime band along the wall foot,
+// (6) life - firewood stack and crates on one side. Flat colours / shared keys only (no new draw calls), lite boxes (8 tris).
+Builder.prototype.details3 = function (o) {
+  const w = this.w, d = this.d, g = this.G.ext, hs = o.hs || 0, lo = this.loKey || 'stone'; let hh = 0; for (const ch of String(this.id)) hh = (hh * 31 + ch.charCodeAt(0)) | 0; const rnd = k => { const x = Math.sin(hh * 7.13 + k * 41.7) * 24634.6345; return x - Math.floor(x); };
+  if (/stone|rock/.test(lo)) { const qk = lo === 'stoneL' ? 'stoneD' : 'stoneL', top = Math.min(hs > 1.2 ? hs : this.h, 4.2);
+    for (const sx of [-1, 1]) for (let k = 0, y = .2; y < top - .2; k++, y += .5) { const a = k % 2 === 0; this.bx(a ? .5 : .3, .42, a ? .16 : .3, qk, sx * (w / 2 - (a ? .2 : .1)), y + .21, d / 2 + .06, g, { shadow: false, lite: true }); } }
+  { const gm = M('#4f4a3c'); for (const [pw, x, z, ry] of [[w, 0, d / 2 + .035, 0], [d, -w / 2 - .035, 0, -Math.PI / 2], [d, w / 2 + .035, 0, Math.PI / 2]]) { const m = this.add(new THREE.PlaneGeometry(pw, .32), gm, x, .16, z, g, { shadow: false }); m.rotation.y = ry; } }
+  if (w > 6 && w < 16 && rnd(1) < .8) { const sx = rnd(2) < .5 ? -1 : 1, x = sx * (w / 2 + .45), z = -d / 2 + 1.4;
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 3 - r; i++) { const c = this.cyl(.13, .13, 1.1, i % 2 ? 'wood' : 'darkWood', x, .14 + r * .25, z + (i - (2 - r) / 2) * .27, g, 6, { shadow: false }); c.rotation.x = Math.PI / 2; }
+    this.bx(.6, .5, .6, 'wood', x, .25, z + 1.3, g, { lite: true }); if (rnd(3) < .6) this.bx(.45, .4, .45, 'wood', x + .02, .7, z + 1.3, g, { shadow: false, lite: true }); this.col(x, z + .6, .7, 2.2); }
+};
 Builder.prototype.details2 = function (o) {
   const w = this.w, d = this.d, DW = this.DW || 2.2, g = this.G.ext, hs = o.hs || 0, h = this.h, tim = o.upper === 'timber' || o.upper === 'plaster' || o.upper === 'darkWood'; let hh = 0; for (const ch of String(this.id)) hh = (hh * 17 + ch.charCodeAt(0)) | 0; const rnd = k => { const x = Math.sin(hh * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
   if (hs > 1.2 && hs < h - 1) { const key = tim ? 'darkWood' : 'stoneL', th = tim ? .2 : .16;   // storey string course / jetty beam on all four sides
@@ -366,11 +441,13 @@ Builder.prototype.partition = function (x, z, len, axis, gap, h = 2.7, key = 'pl
   for (const g of gaps) this.bx(axis === 'x' ? g[1] + .2 : T + .06, .25, axis === 'x' ? T + .06 : g[1] + .2, 'darkWood', axis === 'x' ? x + g[0] : x, h - .12, axis === 'x' ? z : z + g[0], this.G.int);
 };
 // mezzanine / gallery along the back wall with a real stair run
+// gallery: the slab reaches .12 m past its front edge into the ramp top (ramp wins where they overlap), so there is no walk gap between the last step and the landing
 Builder.prototype.gallery = function (o = {}) {
-  const y = o.y || 3.1, iw = this.iw, id_ = this.id_, dp = Math.max(o.depth || 2.2, 3.0), rects = [[-iw, iw, -id_, -id_ + dp]]; if (o.side) rects.push(o.side > 0 ? [iw - dp, iw, -id_ + dp, id_ - 2.5] : [-iw, -iw + dp, -id_ + dp, id_ - 2.5]);
+  const y = o.y || 3.1, iw = this.iw, id_ = this.id_, dp = Math.max(o.depth || 2.2, 3.0), rects = [[-iw, iw, -id_, -id_ + dp + (o.topOverlap === undefined ? .12 : o.topOverlap)]]; if (o.side) rects.push(o.side > 0 ? [iw - dp, iw, -id_ + dp, id_ - 2.5] : [-iw, -iw + dp, -id_ + dp, id_ - 2.5]);
   const sx = o.stairX === undefined ? iw - 1.0 : o.stairX, len = Math.min(Math.max(o.run || 3.6, y / Math.tan((o.maxSlope || 26) * Math.PI / 180)), Math.max(3.6, id_ * 2 - dp - 3.0));
   this.stairs({ cx: sx, cz: -id_ + dp + len / 2, ang: Math.PI, len, w: 1.7, l0: 0, y0: 0, l1: 1, y1: y });
   this.upperFloor(1, y, rects, o);
+  { const e = -id_ + dp; this.floors.push({ level: 1, y, rects: [[sx - 1.4, sx + 1.4, e - .5, e + .25]] }); }   // walk-only lip around the ramp top corners (no mesh): stepping off the last step diagonally never meets a no-floor sliver
   if (o.rooms) this.onFloor(1, y, o.rooms);
   this.col(0, -id_ + .4, iw * 2, .6);
 };
@@ -477,6 +554,8 @@ export function scrubDecorativeFaces(g, material, maxEdge = 9) {
 
 // Cross-building static merge: bake every building's merged exterior meshes (world space) into per-zone meshes, one per material.
 // Fewer draw calls (and fewer shadow-pass calls); frustum culling then works per zone chunk. Cutaway clone materials and animated parts stay put.
+/* main.js sets HERO_FIT.fits = B => bool from the active charscale profile (giant fallback to the outside view) */
+export const HERO_FIT = { fits: null };
 export function chunkStatics(builders, scene, cell = 40) {
   const zones = new Map(); let before = 0;
   for (const B of builders) { if (!B || !B.G || !B.G.ext) continue; B.root.updateMatrixWorld(true); const zk = Math.floor(B.cx / cell) + ',' + Math.floor(B.cz / cell); const cut = new Set(B.cut || []);
@@ -485,12 +564,14 @@ export function chunkStatics(builders, scene, cell = 40) {
       const raw = m.geometry.clone(); raw.applyMatrix4(m.matrixWorld);
       const g = scrubDecorativeFaces(raw, m.material);
       if(g !== raw)raw.dispose();
-      if(g.attributes.position.count)z.list.push(g);
+      g.userData.B = B; if(g.attributes.position.count)z.list.push(g);
       B.G.ext.remove(m); m.geometry.dispose(); } }
   for (const z of zones.values()) { let n = 0; for (const g of z.list) n += g.attributes.position.count; const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2); let a = 0, c = 0;
-    for (const g of z.list) { pos.set(g.attributes.position.array, a); nor.set(g.attributes.normal.array, a); uv.set(g.attributes.uv.array, c); a += g.attributes.position.count * 3; c += g.attributes.position.count * 2; g.dispose(); }
-    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-    const m = new THREE.Mesh(geo, z.mat); m.castShadow = z.c; m.receiveShadow = z.r; m.userData.chunk = true; scene.add(m); }
+    const rec = [];
+    for (const g of z.list) { const cnt = g.attributes.position.count; pos.set(g.attributes.position.array, a); nor.set(g.attributes.normal.array, a); uv.set(g.attributes.uv.array, c); rec.push({ B: g.userData.B, start: a / 3, count: cnt, orig: g.attributes.position.array.slice() }); a += cnt * 3; c += cnt * 2; g.dispose(); }
+    const geo = new THREE.BufferGeometry(); { const pa = new THREE.BufferAttribute(pos, 3); pa.setUsage(THREE.DynamicDrawUsage); geo.setAttribute('position', pa); } geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    const m = new THREE.Mesh(geo, z.mat); m.castShadow = z.c; m.receiveShadow = z.r; m.userData.chunk = true; scene.add(m);
+    m.userData.rng = rec; for (const r of rec) (r.B.extRanges || (r.B.extRanges = [])).push({ mesh: m, start: r.start, count: r.count, orig: r.orig }); }   // inside view: a building's exterior dressing (studs, door frame, lanterns ...) collapses while the hero is inside so nothing outside blocks the view
   return { before, after: zones.size };
 }
 
@@ -594,6 +675,19 @@ Builder.prototype.props2 = function (kind) {
     for (const z of [-1.5, 1.5]) for (const sx of [-1, 1]) this.banner(sx * 1.6, 4.0, z, Math.PI / 2, .9, 2.0, G); }
   if (kind === 'hall') { const n = Math.max(1, Math.round(id_ / 4)); for (let i = 0; i < n; i++) chand(0, Math.min((this.h || 6) - 1.6, 5.2), -id_ + (i + .5) * (2 * id_) / n - .5, 1.0); }
   if (kind === 'inn') chand(-1.8, 2.45, 1.4, .7);
+  if (kind === 'inn') {   // card gaps (pass 4): kitchen corner, bar-side shelving + kegs, private rumor corner
+    { const x = -iw + 1.0, z = -id_ + 2.9; if (F(x, z, .8)) { this.bx(.9, .9, 1.3, 'stone', x, .45, z, G); this.bx(1.0, .08, 1.4, 'stoneD', x, .94, z, G, { lite: true }); this.add(new THREE.PlaneGeometry(.5, .3), GLOW('ffb040', 2.0), x + .46, .4, z, G, { shadow: false }).rotation.y = Math.PI / 2;
+      this.cyl(.16, .13, .2, 'iron', x, 1.08, z - .3, G, 6, { shadow: false }); this.cyl(.2, .2, .08, 'iron', x, 1.02, z + .3, G, 8, { shadow: false }); this.col(x, z, .9, 1.3); } }
+    for (const [x, z] of [[-iw + 2.6, -id_ + 1.1], [-iw + 3.0, -id_ + 1.3], [-iw + .9, -id_ + 4.6], [-iw + 4.4, -id_ + 1.1]]) { if (F(x, z, .7)) { this.bx(1.4, .08, .7, 'wood', x, .82, z, G, { lite: true }); for (const a of [-1, 1]) for (const b of [-1, 1]) this.bx(.07, .8, .07, 'darkWood', x + a * .62, .4, z + b * .28, G, { lite: true });
+      for (let i = 0; i < 3; i++) this.add(new THREE.SphereGeometry(.13, 6, 4), M('#d8a85a'), x - .4 + i * .3, .92, z, G, { shadow: false }).scale.y = .6; this.bx(.4, .04, .25, 'darkWood', x + .45, .88, z, G, { lite: true }); this.col(x, z, 1.4, .7); hang(x, z, 3); break; } }
+    { const z = -id_ + .25; for (const y of [1.5, 2.0]) { this.bx(1.6, .05, .3, 'darkWood', iw - 1.6, y, z, G, { lite: true }); bottles(iw - 2.2, y + .02, z, 5, .28); } }
+    for (let i = 0; i < 3; i++) { const x = iw - 2.6 + i * .7, z = -id_ + 1.0; if (!F(x, z, .4)) continue; const k = this.cyl(.28, .28, .55, 'wood', x, .3, z, G, 8); k.rotation.x = Math.PI / 2; this.bx(.58, .05, .05, 'iron', x, .3, z, G, { shadow: false, lite: true }); this.ccol(x, z, .32); }
+    { const x = -iw + 1.5, z = id_ - 1.7; if (F(x, z, .9)) { this.cyl(.45, .45, .06, 'darkWood', x, .74, z, G, 10); this.cyl(.07, .1, .72, 'darkWood', x, .37, z, G, 6); this.ccol(x, z, .5);
+      this.cyl(.04, .04, .12, '#e8dcc0', x + .1, .83, z, G, 4, { shadow: false }); this.add(new THREE.ConeGeometry(.04, .1, 4), GLOW('ffb040', 2.0), x + .1, .94, z, G, { shadow: false }); this.bx(.5, .01, .35, 'parchment', x - .1, .775, z, G, { shadow: false, lite: true });
+      chair(x + .98, z, -Math.PI / 2); chair(x, z - .98, 0);
+      this.bx(.02, .9, 1.3, 'parchment', -iw + .07, 1.7, z - .2, G, { shadow: false, lite: true }); this.bx(.02, .08, 1.36, 'darkWood', -iw + .08, 2.18, z - .2, G, { shadow: false, lite: true });
+      this.banner(-iw + .1, 2.6, z + .9, Math.PI / 2, .7, 1.4, G); } }
+  }
   if (kind === 'thieves') { for (let i = 0; i < 3; i++) stool(-2.6 + i * .9, 1.8, .5); bottles(-.8, 1.0, .6, 6, .45); hang(0, -.3, 3); }
 };
 

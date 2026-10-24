@@ -7,7 +7,8 @@ import { CHARS } from './chars.js';
 import { preload as preloadChars } from './texgen.js';
 import { makeEnterable, updateTownEnterables } from './interiors.js';
 import { buildVillage, buildWalls, BUILDING_DEFS, WORLD_B, PK, KB } from './buildings.js';
-import { fx, zoneKey, chunkStatics, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
+import { planRoads, nearRoad, roadGeometry } from './roads.js';
+import { fx, zoneKey, chunkStatics, HERO_FIT, mergeRoofs, mergeWalls, matClass, colorFill } from './bldkit.js';
 import { readSave, planFromState, createSaver } from './save3d.js';
 import { SpringBones } from './spring_bones.js';
 import { SpringBones as SpringBonesV2 } from './spring_bones_v2.js';
@@ -108,7 +109,7 @@ let HERO_R = CH.radiusW;
 let VIEWK = 1;
 function applyView() { const kf = Math.max(1, Math.min(5, CH.camDist)), k2 = Math.min(2.2, kf), sk = Math.min(3, kf); VIEWK = k2; scene.fog.near = 70 * k2; scene.fog.far = 180 * k2; camera.far = 320 * k2 * (kf > 2.2 ? 1.5 : 1); camera.updateProjectionMatrix(); const R = 24 * sk; Object.assign(sun.shadow.camera, { left: -R, right: R, top: R, bottom: -R, far: 110 * sk }); sun.shadow.camera.updateProjectionMatrix(); SUNK = sk; }
 let SUNK = 1;
-function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; try { applyView(); } catch (e) {} try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
+function applyChar(id) { CH = worldProfile(id || '', HS); HERO_R = CH.radiusW; HERO_FIT.fits = B => !(CH.heightW > (B.h || 6) * (B.K || 1) || 2 * HERO_R > (B.DW || 2.2) * (B.K || 1)); try { applyView(); } catch (e) {} try { camRig.setProfile(CH); } catch (e) {} try { if (typeof FIGHT !== 'undefined' && FIGHT && FIGHT.cc && FIGHT.cc.setScale) FIGHT.cc.setScale(CH); } catch (e) {} }
 const ZONE = { name: 'town', cx: 0, cz: 0, half: 0 };
 let COLISEUM_PVP=null, COLISEUM_TOWN_GATE=null, MULTIPLAYER=null;
 // Entering the ice cavern dims the REAL world lights, sky and fog.
@@ -145,10 +146,11 @@ const cobble = canvasTex(256, (g, s) => {
     g.fillRect(x * 32 + (y % 2) * 16 + 1, y * 32 + 1, 30, 30);
   }
 }, 1);
+let ROADMAT = null, ROADS = [];
 const ground = mesh(new THREE.PlaneGeometry(new URLSearchParams(location.search).has('oldvillage') ? WORLD * 4 : CITY_HALF * 2, new URLSearchParams(location.search).has('oldvillage') ? WORLD * 4 : CITY_HALF * 2), new THREE.MeshLambertMaterial({ map: grass }), 0, 0, 0, null, false);
 ground.rotation.x = -Math.PI / 2;
 { // plaza + paths (cobble)
-  const cm = new THREE.MeshLambertMaterial({ map: cobble.clone() });
+  const cm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); ROADMAT = cm;
   cm.map.repeat.set(11 * PK, 11 * PK); cm.map.needsUpdate = true;
   const plaza = mesh(new THREE.CircleGeometry(13 * PK, 64), cm, 0, 0.02, 0, null, false); plaza.rotation.x = -Math.PI / 2;
   const pm = new THREE.MeshLambertMaterial({ map: cobble.clone() }); pm.map.repeat.set(1, 22 * PK * 2 * WORLD / (60 * PK)); pm.map.needsUpdate = true;
@@ -195,7 +197,7 @@ function building(cx, cz, w, d, h, opt = {}) {
   return g;
 }
 const enterables = [];
-const ectx = { scene, mats, colliders, multi: [] };
+const ectx = { scene, mats, colliders, multi: [], cam: camera };   // cam: inside view fades the walls between camera and hero
 let LAD = null;   // ladders (ladders.js), created after the key set exists
 // 26 sheet-based 3D buildings (guild, inn, smithy, temple, colosseum, keep ... see docs/proto3d-buildings/README.md). ?oldvillage keeps the original blocky village.
 const SKINS = [];
@@ -204,6 +206,13 @@ const drops = []; let dropMade = 0;
 if (BLD_ON) {
   enterables.push(buildWalls(ectx, CITY_HALF, GATE_W));
   for (const b of buildVillage(ectx)) enterables.push(b);
+  { // road/path network: every entrance -> lane -> main street -> gate (one merged mesh, plaza material)
+    ROADS = planRoads(enterables.flatMap(e => e.parts || [e]), { world: WORLD, colliders, gate: [0, WORLD - 3], mainX: 2.5 * KB, mainZ: 2 * KB, plazaR: 13 * PK - 1 });
+    const rg = roadGeometry(ROADS, 26 * PK, 0.024), g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(rg.pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(rg.uv, 2)); g.setIndex(rg.idx); g.computeVertexNormals();
+    const rm = new THREE.Mesh(g, ROADMAT); rm.receiveShadow = true; rm.name = 'roads'; scene.add(rm);
+    const bad = ROADS.filter(r => r.fail).map(r => r.id); diag('roads: ' + ROADS.length + ' lanes gate ' + ROADS.gate + ' blk ' + ROADS.blockedFrac.toFixed(3) + (bad.length ? ' NO ROUTE: ' + bad.join(',') : ''));
+  }
   if (new URLSearchParams(location.search).get('nochunk') == null) { try { const r = chunkStatics(enterables.flatMap(e => e.parts || [e]), scene, 64); diag('static chunks: ' + r.before + ' -> ' + r.after); const rr = mergeRoofs(enterables.flatMap(e => e.parts || [e]), scene); diag('roofs: ' + rr.before + ' -> ' + rr.after); const rw = mergeWalls(enterables.flatMap(e => e.parts || [e]), scene); diag('walls: ' + rw.before + ' -> ' + rw.after); } catch (e) { console.error('chunkStatics', e.message, e.stack); } }
 } else {
   wallSeg(-WORLD, -WORLD, WORLD, -WORLD); wallSeg(-WORLD, -WORLD, -WORLD, WORLD); wallSeg(WORLD, -WORLD, WORLD, WORLD); wallSeg(-WORLD, WORLD, -GATE_W - 3, WORLD); wallSeg(GATE_W + 3, WORLD, WORLD, WORLD);
@@ -243,6 +252,7 @@ if(BLD_ON){try{
     if (Math.hypot(x, z) < 12 * PK) return true;
     for (const bd of BUILDING_DEFS) { if (Math.hypot(x - bd.cx * PK, z - bd.cz * PK) < (bd.id === 'temple' ? 30 : 16)) return true; const fr = Math.hypot(x - (bd.cx * PK + Math.sin(bd.rot || 0) * 22), z - (bd.cz * PK + Math.cos(bd.rot || 0) * 22)); if (fr < 22) return true; }   // keep building fronts (and the camera spot behind a hero at the door) clear of trees
     if (Math.abs(x) < 3.5 * KB) return true;                   // main road
+    if (nearRoad(ROADS, x, z, 2.2)) return true;                // side lanes
     if (Math.abs(z) < 3 * KB) return true;
     for (const c of colliders) {
       if (c.type === 'box' && x > c.minX - 9 && x < c.maxX + 9 && z > c.minZ - 9 && z < c.maxZ + 9) return true;
@@ -288,13 +298,16 @@ function mergeStatic() {
     const parts = b.list.map(o => { const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()); g.applyMatrix4(o.matrixWorld); return g; });
     let n = 0, cv = 0; parts.forEach((g, i) => { const c = g.attributes.position.count; n += c; if (b.list[i].castShadow) cv += c; });
     const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2), col = b.cl.vc ? new Float32Array(n * 3) : null; let o3 = 0, o2 = 0;
+    const moved = [];
     parts.forEach((g, i) => {
+      if (b.list[i].userData.rng) moved.push([b.list[i], o3 / 3]);   // building ext slices (inside view) follow the geometry into the merged mesh
       const cnt = g.attributes.position.count; pos.set(g.attributes.position.array, o3); nor.set(g.attributes.normal.array, o3); if (g.attributes.uv) uv.set(g.attributes.uv.array, o2); if (col) colorFill(col, cnt, o3, b.list[i].material.color);
       o3 += cnt * 3; o2 += cnt * 2; g.dispose();
     });
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); if (col) geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
     const m = new THREE.Mesh(geo, b.cl.mat); m.castShadow = cv * 2 > n; m.receiveShadow = true; scene.add(m);
+    for (const [o, base] of moved) for (const r of o.userData.rng) for (const e of r.B.extRanges || []) if (e.mesh === o && e.start === r.start) { e.mesh = m; e.start = base + r.start; }
   }
   for (const o of remove) { o.parent.remove(o); o.geometry.dispose(); }
 }
@@ -1374,7 +1387,7 @@ function recordTrail() {
 const SE = { x: 0, z: 0 };
 function stairEntry(r, a, t) {
   for (const b of ectx.multi) {
-    if (!b.ramps || !b.ramps.length || !b.toL) continue; const [fx, fz] = b.toL(a.x, a.z); if (Math.abs(fx) > 40 || Math.abs(fz) > 40) continue;
+    if (!b.ramps || !b.ramps.length || !b.toL) continue; const [fx, fz] = b.toL(a.x, a.z); if (Math.abs(fx) > 40 || Math.abs(fz) > 40 || (b.insideTest && !b.insideTest(fx, fz))) continue;   // only inside the building: from outside the trail leads through the door first
     const [tx, tz] = b.toL(t.x, t.z);
     for (const m of b.ramps) {
       const up = m.l0 === r.level && state.level > r.level, dn = m.l1 === r.level && state.level < r.level; if (!up && !dn) continue;
@@ -1387,9 +1400,12 @@ function stairEntry(r, a, t) {
   }
   return null;
 }
+function lineClear(x0, z0, x1, z1, l) { const d = Math.hypot(x1 - x0, z1 - z0), n = Math.ceil(d / 0.4); if (n > 60) return true; const F = window.__p3d && window.__p3d.free; if (!F) return true;
+  for (let k = 1; k < n; k++) { const t = k / n; if (!F(x0 + (x1 - x0) * t, z0 + (z1 - z0) * t, l)) return false; } return true; }
 function trailTarget(r, a) {
   if (r.ti === null) {
-    let best = -1, bd = 1e9; for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01) { bd = d; best = i; } }
+    let best = -1, bd = 1e9; for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01 && lineClear(a.x, a.z, p.x, p.z, r.level)) { bd = d; best = i; } }   // nearest trail point the companion can actually walk to (not one behind a wall)
+    if (best < 0) for (let i = TRAIL.length - 1; i >= 0; i--) { const p = TRAIL[i]; if (p.l !== r.level) continue; const d = Math.hypot(p.x - a.x, p.z - a.z); if (d < bd - 0.01) { bd = d; best = i; } }   // nothing in clear sight: plain nearest
     if (best < 0) return null; r.ti = best + trailBase;
   }
   if (r.ti < trailBase) r.ti = trailBase;
@@ -1404,6 +1420,7 @@ function trailTarget(r, a) {
 function crowdSurface(r, a, dt) {
   let s = surfaceAt(a.x, a.z, r.level);
   if (s && s.ramp) { const m = s.ramp; if (r.level === m.l0 && s.t > (m.flipUp || 0.93)) r.level = m.l1; else if (r.level === m.l1 && s.t < 0.25) r.level = m.l0; s = surfaceAt(a.x, a.z, r.level) || s; }
+  if (!s && r.level > 0 && r.level < 10) { r.level = 0; r.ti = null; s = surfaceAt(a.x, a.z, 0); }   // stepped off an upper slab (no floor here): drop to the ground level instead of hovering on 'level 1' at ground height
   const ty = s ? s.y : (r.level >= 10 && LAD ? LAD.heightOf(r.level) : 0);
   // Follow the same terrain height as the player on ALL outdoor hills (including
   // slopes inside the town map), not just beyond CITY_HALF. Teleports/steep
@@ -1680,8 +1697,8 @@ function cullSkins() { // characters: skinned meshes skip frustum culling, so cu
 
 // x-ray: inside a building the hero is also drawn as a faint silhouette wherever banners, door leaves, rails or walls cover him
 const GHOST_MAT = new THREE.MeshBasicMaterial({ color: 0xbfe0ff, transparent: true, opacity: 0.38, depthFunc: THREE.GreaterDepth, depthWrite: false });
-function heroGhost() {
-  const want = !!state.inside, u = hero.userData;
+function heroGhost() {   // boss 9:05: no glowing see-through body; blocking walls are hidden (outlined) instead, so the silhouette is off
+  const want = false, u = hero.userData;
   if (!want && !u.ghosts) return;
   if (want) { const sk = []; hero.traverse(o => { if (o.isSkinnedMesh && !o.userData.isGhost) sk.push(o); });
     if (!u.ghosts || u.ghostN !== sk.length) { (u.ghosts || []).forEach(g => g.parent && g.parent.remove(g)); u.ghosts = sk.map(o => { const g = new THREE.SkinnedMesh(o.geometry, GHOST_MAT); g.userData.isGhost = true; g.frustumCulled = false; g.renderOrder = 20; g.position.copy(o.position); g.quaternion.copy(o.quaternion); g.scale.copy(o.scale); o.parent.add(g); g.bind(o.skeleton, o.bindMatrix); return g; }); u.ghostN = sk.length; } }
@@ -2250,7 +2267,7 @@ document.getElementById('vnOwnerTools')?.addEventListener('click',()=>{
 async function setFight(on) { const f = await fightToggle(true); if (on !== f.on) f.toggle(); return !!f.on; }
 const fpsEl2 = fpsEl;
 const settingsApi = initSettings({ rig: camRig, prefs: camRig.prefs, storage: prefStore || { getItem() { return null; }, setItem() {} }, applyQuality: setQuality, setShadows: (on) => { sun.castShadow = !!on; }, fpsEl: fpsEl2, cheatEnv, openCheatPanel: () => cheatBoot.open(), setCombat: setFight, combatOn: () => !!(FIGHT && FIGHT.on) });
-window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),running:travelRun,exhausted};}, setRunning:setTravelRun, jump, get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, get zonePending(){return zoneTransitionCount;}, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
+window.__p3d = { applyChar, get stamina(){return {percent:Math.round(staminaLevel()*100),running:travelRun,exhausted};}, setRunning:setTravelRun, jump, get townLands() { return TOWN_LANDS; }, get frostRealm(){return FM;}, get bossRegions(){return {CITY_HALF,TITAN_CENTER,FROST_SUMMIT,FROST_PORTAL};},  killCrowd, bystanders, charScale: () => ({ id: GLB_IDS[HEROES.indexOf(hero)], CH, HERO_R, heroH: (() => { const b = new THREE.Box3().setFromObject(hero); return b.max.y - b.min.y; })(), dims: (() => { const b = new THREE.Box3().setFromObject(hero), v = new THREE.Vector3(); b.getSize(v); return [v.x, v.y, v.z]; })() }), downAllies, get crowd() { return crowd; }, camRig, settings: settingsApi, setQuality, get owner() { return ownerFlag; }, set owner(v) { ownerFlag = !!v; }, get zone() { return ZONE.name; }, get zonePending(){return zoneTransitionCount;}, setZone, get wilds() { return WM; }, ZONE, THREE, selectHero, get ladders() { return LAD; },
   teleportTo(x,z){if(!Number.isFinite(x)||!Number.isFinite(z))return false;state.heroX=x;state.heroZ=z;state.target=null;marker.visible=false;state.blockedFrames=0;state.level=0;updateLevel();snapFollowers();saver?.mark();return true;},
   modelStatus() { const e = glbInfo.errors || {}; return { build: ASSET_V, loaded: glbInfo.loaded.length, failed: glbInfo.failed.length, models: GLB_IDS.map(id => ({ id, state: glbInfo.loaded.includes(id) ? 'loaded' : glbInfo.failed.includes(id) ? 'failed' : glbInfo.pending.includes(id) ? 'loading' : 'not loaded yet', kb: glbInfo.kb[id] || 0, mode: modeFor(id), error: e[id] || '' })) }; },
   cheat, fightToggle, get fight() { return FIGHT; }, get guards() { return GUARDS; },
@@ -2265,6 +2282,7 @@ window.__p3d = { get stamina(){return {percent:Math.round(staminaLevel()*100),ru
     return [...roots].filter(actor=>actor.visible&&actor.parent).length;
   },
   THREE, renderer, scene, camera, enterables,
+  get roads() { return ROADS; }, roadInfo: { W: WORLD, KB, PK, ROAD_W: 2.4 },
   enterables, get fps() { return fps; }, get frames() { return totalFrames; },
   info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   onRamp(x, z, level = 0) { const s = surfaceAt(x, z, level); return !!(s && s.ramp); },

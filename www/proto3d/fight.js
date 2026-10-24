@@ -450,6 +450,8 @@ export function createFight(env) {
     for(const e of cc.enemies.slice())if(e.def.boss&&!e.roaming&&Math.hypot(e.x-state.heroX,e.z-state.heroZ)>210){
       cc.removeEnemy(e);bossDue.set(e.key,regionClock+4);
     }
+    // Expired encounters must not leave the global boss-occupied flag set.
+    bossOn=cc.enemies.some(e=>e.def.boss&&e.state!=='defeated');
   }
   /* Fixed encampments: groups of hobgoblins defend their tents, with a global cap and
      per-camp reinforcement delay. They recycle when out of range; no surprise spawns in town. */
@@ -647,7 +649,7 @@ export function createFight(env) {
     // Boss assets load asynchronously. A second tap must not launch a
     // second boss while the first model is still loading into the world.
     if (ENEMIES[key].boss) {
-      if (bossOn || ownerBossSpawnPending) return false;
+      if (bossOn || ownerBossSpawnPending || bossPending.size>0) return false;
       if(key==='vaelthryx'&&env.zone?.()!=='town')return false;
       if(key==='hydra'&&env.zone?.()!=='hydra')return false;
       ownerBossSpawnPending=true;

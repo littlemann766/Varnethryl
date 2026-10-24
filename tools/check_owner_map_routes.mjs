@@ -9,7 +9,6 @@ import {
  balthrixPosition,nearestBalthrixPath,balthrixCorridorDistance,balthrixBermHeight,
  balthrixSpawnWindow,fallenTreeSites,PORT_CENTER,CITY_HALF
 } from '../www/proto3d/bossregions.js';
-import {TOWN_MAP_ROADS,townElevation} from '../www/proto3d/townlands.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 assert.ok(BALTHRIX_ROUTE.length>=35,'hand-drawn perimeter has detailed waypoints');
 assert.ok(BALTHRIX_ROUTE_LENGTH>3000&&BALTHRIX_ROUTE_LENGTH<5000,'route length is sensible');
@@ -35,14 +34,16 @@ assert.ok(balthrixBermHeight(shoulderX,shoulderZ)>0,'raised edge is represented 
 const sites=fallenTreeSites();
 assert.ok(sites.length>=8&&sites.length<=22,'bounded tree destruction on Android');
 for(const s of sites)assert.ok(Math.hypot(s.x-PORT_CENTER.x,s.z-PORT_CENTER.z)>107);
-assert.ok(TOWN_MAP_ROADS.length>=8,'new brown road network surfaced and on minimap');
-assert.ok(TOWN_MAP_ROADS.some(p=>p.id==='frost-spiral'&&p.points.length>12),'spiraling road to frost cave');
-for(const road of TOWN_MAP_ROADS){
- assert.ok(road.points.length>=2,'route has endpoints');
- for(const [x,z] of road.points)assert.ok(Number.isFinite(x)&&Number.isFinite(z));
-}
-assert.ok(Number.isFinite(townElevation(-425,392)),'port terrain accessible');
 const terrain=read('www/proto3d/townlands.js');
+// Keep the road registry inspectable without importing the full GPU-dependent
+// Three.js world builder in a Node-only release check.
+for(const roadId of ['tidewrack-road','frost-spiral','broken-seal-connector',
+ 'western-carriageway','wilds-west-spur','eastern-carriageway',
+ 'east-meadow-loop','south-gate-road']){
+ assert.ok(terrain.includes("id:'"+roadId+"'"),'missing owner road '+roadId);
+}
+assert.match(terrain,/id:'frost-spiral',points:\[\[/,'frost spiral is a real waypoint road');
+assert.match(terrain,/export const TOWN_MAP_ROADS=Object\.freeze/,'roads available to minimap');
 assert.match(terrain,/TOWN_MAP_ROADS\.slice\(3\)\.map/,'additional roads built as geometry');
 assert.match(terrain,/balthrixCorridorDistance\(x,z\)>25\+pad/,'scenery cannot grow on trail');
 assert.match(terrain,/return terrain\+balthrixBermHeight\(x,z\)/,'terrain physics and berm visually align');

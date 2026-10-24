@@ -17,7 +17,7 @@ export function nextRemoteYaw(current,target,dt){
  * Town welcomes newcomers; the room's first player remains exactly where they were.
  * Remote movement is visual only. Damage, quests, loot and NPC AI stay single-player.
  */
-export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName,getSkinId,loadRemoteSkin,updateLevel,snapFollowers,camRig,miniMap,teleportNearPlayer,onOwnerTeleport}){
+export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName,getSkinId,loadRemoteSkin,updateLevel,snapFollowers,camRig,miniMap,teleportNearPlayer,onOwnerTeleport,onRankBossSpawn}){
  const root=new THREE.Group();root.name='Varnethryl-Remote-Players';root.userData.keepAlways=true;scene.add(root);
  const peers=new Map();let socket=null,joined=false,selfId='',room='',lastSend=0,epoch=0,onlineCount=0,teleporting=false;
  let reconnectTimer=null,reconnectAttempts=0,keepConnected=false;
@@ -61,6 +61,7 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
    lock:()=>coOwnerCommand('coowner-lock'),
    list:()=>coOwnerCommand('coowner-list'),
    jump:id=>coOwnerCommand('coowner-jump',{id}),
+   summonBoss:boss=>coOwnerCommand('coowner-boss',{boss}),
    isOnline:()=>joined&&socket?.readyState===WebSocket.OPEN,
    getSavedToken:()=>get(COOWNER_TOKEN_KEY),
    clearSavedToken:()=>del(COOWNER_TOKEN_KEY)
@@ -319,6 +320,15 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
      if(m.ok&&typeof m.token==='string'&&/^[a-f0-9]{64}$/.test(m.token))put(COOWNER_TOKEN_KEY,m.token);
      if(m.resumed&&!m.ok)del(COOWNER_TOKEN_KEY);
      coOwner.onEvent(m);return;
+   }
+   if(m.type==='coowner-boss-approved'){
+     // Approval is server-verified; a UI flag never grants summon rights.
+     Promise.resolve().then(()=>onRankBossSpawn?.(m.boss)).then(ok=>{
+       coOwner.onEvent({type:'coowner-boss-result',boss:m.boss,ok:ok===true});
+     }).catch(err=>{
+       console.warn('Approved CoOwner boss could not load',err);
+       coOwner.onEvent({type:'coowner-boss-result',boss:m.boss,ok:false});
+     });return;
    }
    if(m.type==='coowner-players'||m.type==='coowner-error'||m.type==='coowner-locked'){
      if(m.type==='coowner-locked')del(COOWNER_TOKEN_KEY);

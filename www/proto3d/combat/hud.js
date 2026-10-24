@@ -500,6 +500,13 @@ body:has(#vnMiniMap.expanded) #cb .top{
  box-shadow:none!important;filter:none!important;outline:none!important;padding:0!important;
 }
 #cb .cx::before,#cb .cx::after{content:none!important;display:none!important}
+/* The movement stick and all five skill circles accept distinct touch pointers. */
+#cb .cx>.sl,#cb .ulp button{touch-action:none!important;
+ pointer-events:auto!important;-webkit-user-select:none!important;user-select:none!important;
+ -webkit-tap-highlight-color:transparent!important}
+#cb .cx>.sl .ic,#cb .cx>.sl .rg,#cb .cx>.sl .ct,#cb .cx>.sl .k,#cb .cx>.sl .nmL{
+ pointer-events:none!important
+}
 #cb .cx>.sl{
  position:absolute!important;inset:auto!important;left:auto!important;top:auto!important;
  display:block!important;flex:none!important;grid-column:auto!important;grid-row:auto!important;
@@ -592,18 +599,62 @@ export class CombatHUD {
     this.btn = {}; $$('.cl button').forEach(b => { this.btn[b.dataset.a] = { b, cdv: b.querySelector('.cdv'), cd: -1 }; });
     for (let i = 0; i < NUM_POOL; i++) { const e = document.createElement('div'); e.className = 'fn'; r.appendChild(e); this.nums.push({ e, t: 9 }); }
     for (let i = 0; i < OH_POOL; i++) { const e = document.createElement('div'); e.className = 'oh'; e.innerHTML = '<i></i>'; r.appendChild(e); this.ohs.push({ e, f: e.firstChild, on: false, last: -1 }); }
-    const stop = e => { e.preventDefault(); e.stopPropagation(); };
-    r.addEventListener('pointerdown', e => {
-      const b = e.target.closest('button'); if (!b) return; stop(e);
-      if (b.dataset.u) { if (this.cc.ownerOk()) { this.cc.ultSel = b.dataset.u; try { localStorage.setItem('varn.ultsel', b.dataset.u); } catch (x) {} } r.querySelector('.ulp').classList.remove('open'); return; }
-      if (b.dataset.s === '4' && this.cc.ownerOk()) {   // ONE ultimate button: tap = fire selected, long-press (0.45 s) = popup to switch Holy/Unholy
-        const pop = r.querySelector('.ulp'); pop.classList.remove('open'); this.ultP = { id: e.pointerId, long: false, t: setTimeout(() => { if (this.ultP) { this.ultP.long = true; pop.classList.add('open'); } }, 450) }; return;
+    // Every attack/skill button retains its OWN touch pointer. A different
+    // finger can stay captured by the movement stick while attacks fire here.
+    this.actionPointers=new Set();
+    const stop=e=>{e.preventDefault();e.stopPropagation();};
+    r.addEventListener('pointerdown',e=>{
+      const b=e.target.closest('button');
+      if(!b||!r.contains(b)||(e.pointerType==='mouse'&&e.button!==0))return;
+      if(this.actionPointers.has(e.pointerId))return;
+      this.actionPointers.add(e.pointerId);
+      stop(e);
+      // Do not steal capture from the joystick's unrelated pointerId.
+      try{b.setPointerCapture(e.pointerId);}catch(_){}
+      if(b.dataset.u){
+        if(this.cc.ownerOk()){
+          this.cc.ultSel=b.dataset.u;
+          try{localStorage.setItem('varn.ultsel',b.dataset.u);}catch(_){}
+        }
+        r.querySelector('.ulp').classList.remove('open');
+        return;
+      }
+      if(b.dataset.s==='4'&&this.cc.ownerOk()){
+        // Preserve hold-to-choose Holy/Unholy. A quick tap works while
+        // moving; releasing this skill pointer fires without moving input loss.
+        const pop=r.querySelector('.ulp');pop.classList.remove('open');
+        if(this.ultP){clearTimeout(this.ultP.t);this.ultP=null;}
+        const hold={id:e.pointerId,long:false,t:null};
+        hold.t=setTimeout(()=>{
+          if(this.ultP!==hold)return;
+          hold.long=true;pop.classList.add('open');
+        },450);
+        this.ultP=hold;
+        return;
       }
       r.querySelector('.ulp').classList.remove('open');
-      if (b.dataset.s !== undefined) { const k = this.slotAbility(+b.dataset.s); if (k !== null) api.use(k); } else { const a = b.dataset.a; if (a === 'block') { this.blockPtr = e.pointerId; api.block(true); } else api[a] && api[a](); }
+      if(b.dataset.s!==undefined){
+        const key=this.slotAbility(+b.dataset.s);
+        if(key!==null)api.use(key);
+      }else{
+        const a=b.dataset.a;
+        if(a==='block'){this.blockPtr=e.pointerId;api.block(true);}
+        else if(typeof api[a]==='function')api[a]();
+      }
     });
-    const up = e => { if (this.ultP && this.ultP.id === e.pointerId) { const u = this.ultP; this.ultP = null; clearTimeout(u.t); if (!u.long && e.type === 'pointerup') { const k = this.slotAbility(4); if (k !== null) api.use(k); } } if (this.blockPtr === e.pointerId) { this.blockPtr = null; api.block(false); } };
-    addEventListener('pointerup', up); addEventListener('pointercancel', up);
+    const up=e=>{
+      this.actionPointers.delete(e.pointerId);
+      if(this.ultP&&this.ultP.id===e.pointerId){
+        const u=this.ultP;this.ultP=null;clearTimeout(u.t);
+        if(!u.long&&e.type==='pointerup'){
+          const key=this.slotAbility(4);if(key!==null)api.use(key);
+        }
+      }
+      if(this.blockPtr===e.pointerId){this.blockPtr=null;api.block(false);}
+    };
+    addEventListener('pointerup',up);
+    addEventListener('pointercancel',up);
+    addEventListener('blur',()=>this.actionPointers.clear());
     addEventListener('blur', () => { if (this.ultP) { clearTimeout(this.ultP.t); this.ultP = null; } if (this.blockPtr !== undefined && this.blockPtr !== null) { this.blockPtr = null; api.block(false); } r.querySelector('.ulp')?.classList.remove('open'); });
     r.addEventListener('contextmenu', e => e.preventDefault());
     cc.on('damage', d => this.onDamage(d)).on('heal', h => this.floatAt(h.x, 2.4 * cc.HS, h.z, '+' + h.n, 'heal')).on('hero', () => this.heroInfo())

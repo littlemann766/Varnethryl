@@ -85,7 +85,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1b2433;font-family:sy
 </nav>
 <div id="moveActions" aria-label="Movement">
  <button type="button" id="runBtn" aria-pressed="false" title="Walk or run">WALK</button>
- <button type="button" id="jumpBtn" title="Jump">JUMP</button>
+ <button type="button" id="jumpBtn" aria-label="Jump" title="Jump (double jump, Owner and CoOwner four jumps)"><span aria-hidden="true" class="vn-jump-arrow">↑</span><small>JUMP</small></button>
 </div>
 <div id="staminaHud" role="meter" aria-label="Running stamina" aria-valuemin="0" aria-valuemax="100"><div class="vn-stamlabel"><b>STAMINA</b><span id="staminaValue">100%</span></div><div class="vn-stambar"><i id="staminaMeter"></i></div></div>
 <div id="cinderFlyControls" aria-label="Cinder flight controls" style="display:none"><button type="button" id="cinderFlyBtn">Take off</button><button type="button" id="cinderFlyUp" aria-label="Ascend">↑</button><button type="button" id="cinderFlyDown" aria-label="Descend">↓</button></div>

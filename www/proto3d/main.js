@@ -1118,10 +1118,29 @@ function joyUpdate(e) {
   joy.x = dx / radius;joy.y = dy / radius;
   knob.style.transform = `translate(${dx}px,${dy}px)`;
 }
-stick.addEventListener('pointerdown', e => { joy.id = e.pointerId; try { stick.setPointerCapture(e.pointerId); } catch (_) {} state.target = null; marker.visible = false; joyUpdate(e); e.preventDefault(); });
-stick.addEventListener('pointermove', e => { if (e.pointerId === joy.id) joyUpdate(e); });
-const joyEnd = e => { if (e.pointerId === joy.id) { joy.id = null; joy.x = joy.y = 0; knob.style.transform = ''; } };
-stick.addEventListener('pointerup', joyEnd); stick.addEventListener('pointercancel', joyEnd);
+// Every finger has its own pointerId. The joystick owns only the first
+// active pointer, so touching Jump/Attack can never replace the moving finger.
+stick.addEventListener('pointerdown', e => {
+  if(joy.id!==null||(e.pointerType==='mouse'&&e.button!==0))return;
+  joy.id=e.pointerId;
+  try{stick.setPointerCapture(e.pointerId);}catch(_){}
+  state.target=null;marker.visible=false;joyUpdate(e);
+  e.preventDefault();e.stopPropagation();
+});
+stick.addEventListener('pointermove',e=>{
+  if(e.pointerId!==joy.id)return;
+  joyUpdate(e);e.preventDefault();
+});
+const joyEnd=e=>{
+  if(e.pointerId!==joy.id)return;
+  joy.id=null;joy.x=joy.y=0;knob.style.transform='';
+};
+stick.addEventListener('pointerup',joyEnd);
+stick.addEventListener('pointercancel',joyEnd);
+stick.addEventListener('lostpointercapture',joyEnd);
+addEventListener('blur',()=>{
+  joy.id=null;joy.x=joy.y=0;knob.style.transform='';
+});
 
 // canvas: tap = move there, drag = rotate camera
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
@@ -1215,7 +1234,31 @@ function jump(){
   jumpsUsed++;jumpVelocity=7.5*HS;
   return true;
 }
-document.getElementById('jumpBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();jump();});
+// Action fires on pointerDOWN, not a synthesized click on release. Android
+// browsers may suppress that click during a simultaneous joystick drag.
+const jumpButton=document.getElementById('jumpBtn');
+let jumpPointer=null;
+jumpButton?.addEventListener('pointerdown',e=>{
+  if(jumpPointer!==null||(e.pointerType==='mouse'&&e.button!==0))return;
+  jumpPointer=e.pointerId;
+  e.preventDefault();e.stopPropagation();
+  try{jumpButton.setPointerCapture(e.pointerId);}catch(_){}
+  jumpButton.classList.add('vn-pressed');
+  jump();
+});
+const jumpRelease=e=>{
+  if(e.pointerId!==jumpPointer)return;
+  jumpPointer=null;jumpButton?.classList.remove('vn-pressed');
+};
+for(const kind of ['pointerup','pointercancel','lostpointercapture'])
+  jumpButton?.addEventListener(kind,jumpRelease);
+// Keyboard and accessibility activation still use click, without executing
+// a second jump after the touch pointerdown.
+jumpButton?.addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();
+  if(e.detail===0)jump();
+});
+addEventListener('blur',()=>{jumpPointer=null;jumpButton?.classList.remove('vn-pressed');});
 addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.code==='Space'&&!cheat.fly&&!isCinder()&&!window.__p3d?.fight?.on){e.preventDefault();jump();}});
 setTravelRun(false);
 // buildings only playable characters may enter (companions, townsfolk and monsters are kept out by npcOnly door colliders)

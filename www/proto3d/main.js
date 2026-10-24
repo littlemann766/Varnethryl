@@ -1203,8 +1203,18 @@ function setTravelRun(v){
 }
 document.getElementById('runBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setTravelRun(!travelRun);});
 addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.key.toLowerCase()==='capslock'||e.key.toLowerCase()==='r'&&!window.__p3d?.fight?.on){setTravelRun(!travelRun);}});
-let jumpVelocity=0,jumpHeight=0;
-function jump(){if(jumpHeight>0||jumpVelocity>0||state.swimming||state.climbing||cheat.fly||isCinder()&&cinderFlight.active)return false;jumpVelocity=7.5*HS;return true;}
+// Normal heroes double-jump. Privately authenticated Owner/CoOwner receive
+// four jumps per landing. World-height motion keeps wall-edge leaps physical.
+let jumpVelocity=0,jumpHeight=0,jumpY=null,jumpsUsed=0;
+const jumpLimit=()=>window.__p3d?.owner===true||MULTIPLAYER?.isCoOwnerVerified?.()?4:2;
+function resetJump(){jumpVelocity=0;jumpHeight=0;jumpY=null;jumpsUsed=0;}
+function jump(){
+  if(ZONE.name==='sailing'||state.swimming||state.climbing||(isCinder()&&cinderFlight.active))return false;
+  if(jumpsUsed>=jumpLimit())return false;
+  if(jumpY===null)jumpY=state.heroY;
+  jumpsUsed++;jumpVelocity=7.5*HS;
+  return true;
+}
 document.getElementById('jumpBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();jump();});
 addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.code==='Space'&&!cheat.fly&&!isCinder()&&!window.__p3d?.fight?.on){e.preventDefault();jump();}});
 setTravelRun(false);
@@ -1217,6 +1227,8 @@ function resolve(p, ghost, who) {
   const LV = state.level;
   for (const c of colliders) {
     if (ghost) break;
+    // A hero physically above the battlements may leap over the main wall.
+    if(c.b==='walls'&&jumpY!==null&&jumpY>=4.2*KB+.4)continue;
     if (c.npcOnly && who !== 'npc') continue;   // door blockers for hero-only buildings (guild hall): only companions / townsfolk collide
     if (c.lv !== undefined && (Array.isArray(c.lv) ? !c.lv.includes(LV) : c.lv !== LV)) continue;
     if (c.type === 'box') {
@@ -1556,7 +1568,7 @@ function updateHero(dt) {
     else { vx = dx / d; vz = dz / d; mag = Math.min(1, d / 1.2 + 0.4); }
   }
   // Town wooden ladders cannot be triggered by positions inside other zones.
-  if (ZONE.name==='town' && LAD && LAD.update(dt, vx, vz)) { vx = 0; vz = 0; mag = 0; }
+  if (ZONE.name==='town' && LAD && jumpY===null && LAD.update(dt, vx, vz)) { vx = 0; vz = 0; mag = 0; }
   if (ZONE.name!=='town' && LAD?.btn) LAD.btn.style.display='none';
   if (!state.climbing) { const g = stairGuide(vx, vz); vx = g.x; vz = g.z; }
   const moving = (vx || vz);
@@ -1565,8 +1577,18 @@ function updateHero(dt) {
     tmp.x = state.heroX; tmp.z = state.heroZ; let blocked = false;
     for (let i = 0; i < n; i++) {
       const ox = tmp.x, oz = tmp.z; tmp.x += vx * step / n; tmp.z += vz * step / n; if (resolve(tmp, ghost)) blocked = true;
-      if (!cheat.noclip && state.level > 0 && !surfaceAt(tmp.x, tmp.z, state.level)) { // edge of an upper floor: slide or stop
-        if (surfaceAt(tmp.x, oz, state.level)) tmp.z = oz; else if (surfaceAt(ox, tmp.z, state.level)) tmp.x = ox; else { tmp.x = ox; tmp.z = oz; } blocked = true; }
+      if (!cheat.noclip && state.level > 0 && !surfaceAt(tmp.x, tmp.z, state.level)) {
+        if(jumpY!==null){
+          // While jumping, clearing a battlement/roof edge initiates a real
+          // fall toward the ground, retaining momentum and remaining jumps.
+          state.level=0;
+        }else{
+          if(surfaceAt(tmp.x,oz,state.level))tmp.z=oz;
+          else if(surfaceAt(ox,tmp.z,state.level))tmp.x=ox;
+          else{tmp.x=ox;tmp.z=oz;}
+          blocked=true;
+        }
+      }
       state.heroX = tmp.x; state.heroZ = tmp.z; updateLevel();
     }
     state.heroX = tmp.x; state.heroZ = tmp.z;
@@ -1590,14 +1612,21 @@ function updateHero(dt) {
   if (isCinder()) cinderFlight.step(dt, flyTouch.up || keys.has(' ') || keys.has('e'), flyTouch.down || keys.has('q') || keys.has('c'));
   else if (cinderFlight.active || cinderFlight.alt) cinderFlight.reset();
   syncCinderControls();
-  if(jumpVelocity>0||jumpHeight>0){jumpHeight=Math.max(0,jumpHeight+jumpVelocity*dt);jumpVelocity-=20*HS*dt;if(jumpHeight===0)jumpVelocity=0;}
+  if(jumpY!==null){
+    jumpY+=jumpVelocity*dt;
+    jumpVelocity-=20*HS*dt;
+    const floorY=surfaceAt(state.heroX,state.heroZ,state.level)?.y??state.heroY;
+    if(jumpVelocity<=0&&jumpY<=floorY){
+      resetJump();state.dispY=floorY;
+    }else jumpHeight=Math.max(0,jumpY-state.heroY);
+  }
   state.dispY = state.dispY === undefined || Math.abs(state.heroY - state.dispY) > 3 ? state.heroY : state.dispY + (state.heroY - state.dispY) * Math.min(1, dt * 16);
-  hero.position.set(state.heroX, state.dispY + jumpHeight + cheat.alt + cinderFlight.alt - (state.swimming?0.75*HS:0), state.heroZ); hero.rotation.y = state.yaw;
+  hero.position.set(state.heroX, (jumpY??state.dispY) + cheat.alt + cinderFlight.alt - (state.swimming?0.75*HS:0), state.heroZ); hero.rotation.y = state.yaw;
   const ins = updateTownEnterables(ZONE.name,enterables,state.heroX,state.heroZ,dt,state.level);
   if (ins !== state.inside) { state.inside = ins; const eq = enterables.find(e => e.id === ins), quest = eq && (eq.quest || (eq.parts && (eq.parts.find(p => p.quest) || {}).quest)) || null;
     try { dispatchEvent(new CustomEvent('p3d-enter', { detail: { id: ins, quest } })); if (ins && quest) dispatchEvent(new CustomEvent('p3d-quest', { detail: { id: ins, quest } })); } catch (_) {} }
   animateHero(dt); cullSkins(); heroGhost();
-  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); hero.position.y = state.dispY + jumpHeight + cheat.alt + cinderFlight.alt + playerAct.phop + (hero.userData.cinderHop || 0) + (state.swimming?-.75*HS+.07*Math.sin(simTime*3.5):0); }
+  { const bn = hero.userData.bumpNodes || (hero.userData.bumpNodes = findNodes(hero)); applyPose(playerAct, hero, bn, state.yaw); hero.position.y = (jumpY??state.dispY) + cheat.alt + cinderFlight.alt + playerAct.phop + (hero.userData.cinderHop || 0) + (state.swimming?-.75*HS+.07*Math.sin(simTime*3.5):0); }
 }
 
 const _sp = new THREE.Vector3();
@@ -1870,7 +1899,7 @@ async function setZoneNow(name) {
   }
   for(const L of LAD?.list||[])L.group.visible=ZONE.name==='town';
   if(ZONE.name!=='town'&&LAD?.btn)LAD.btn.style.display='none';
-  state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
+  state.level = 0; state.target = null; marker.visible = false; state.blockedFrames = 0; state.climbing = false; resetJump(); updateLevel(); snapFollowers(); camRig.snap = true; zoneCd = 1.5; portalDwell = 0;
   updateZoneAmbience(.1,true);
   miniMap.invalidate(); // redraw the real top-down layer after every zone change
   // Ship steering intentionally disarms attacks, but arriving back at the
@@ -1993,7 +2022,7 @@ async function restoreSession(bookmark){
   state.heroX=point.x;state.heroZ=point.z;state.level=0;
   state.target=null;state.climbing=false;state.blockedFrames=0;
   state.yaw=Number.isFinite(bookmark.yaw)?bookmark.yaw:0;
-  jumpHeight=0;jumpVelocity=0;
+  resetJump();
   updateLevel();snapFollowers();camRig.snap=true;miniMap.invalidate();
   return true;
 }
@@ -2238,7 +2267,7 @@ MULTIPLAYER=createMultiplayer({THREE,scene,state,getZone:()=>ZONE.name,setZone,
    marker.visible=false;
    state.yaw=Number.isFinite(target.yaw)?target.yaw:0;
    state.camYaw=state.yaw;
-   jumpHeight=0;jumpVelocity=0;updateLevel();snapFollowers();
+   resetJump();updateLevel();snapFollowers();
    camRig.snap=true;miniMap.invalidate();saver?.mark();
    return true;
  },

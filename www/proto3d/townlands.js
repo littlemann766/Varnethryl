@@ -7,7 +7,7 @@ import { buildBalthrixTrail } from './balthrix-trail.js';
 import { makeVolcanoEffects } from './volcano-effects.js';
 import { buildSailingShip,animateMooredShip } from './port-ships.js';
 import { MOUNTAIN_APPROACH, MOUNTAIN_WILDS_GATE, buildMountainWildsGateway } from './wilds-gateway.js';
-import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
+import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount, balthrixBermHeight, balthrixCorridorDistance } from './bossregions.js';
 
 // Shared by the 3D road meshes and live top-down minimap: edit paths once.
 // Brown routes traced from the user's 24 Oct map and smoothed into real roads.
@@ -84,7 +84,7 @@ export function townElevation(x,z,world=560){
   const seaX=x-PORT_CENTER.x,seaZ=Math.abs(z-PORT_CENTER.z);
   const seaMask=smooth(-104,-96,seaX)*(1-smooth(-26,-19,seaX))*(1-smooth(51,57,seaZ));
   terrain=terrain*(1-seaMask)-1.75*seaMask;
-  return terrain;
+  return terrain+balthrixBermHeight(x,z);
 }
 // ~41K triangles, one draw call; not a distant prop: heroes can traverse this actual mesh.
 function buildWalkableTerrain(world){
@@ -374,11 +374,12 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   const possible=(x,z,pad=0)=>Math.max(Math.abs(x),Math.abs(z))>CORE+pad &&
     Math.max(Math.abs(x),Math.abs(z))<usable-pad &&
     !route(x,z,pad) && !nearBrokenSealPath(x,z,pad) &&
+    balthrixCorridorDistance(x,z)>25+pad &&
     Math.hypot(x-MOUNTAIN_WILDS_GATE.x,z-MOUNTAIN_WILDS_GATE.z)>34+pad &&
     !insideField(x,z,pad) && !nearBuilding(x,z,pad) &&
     Math.hypot(x-FROST_SUMMIT.x,z-FROST_SUMMIT.z)>46+pad &&
     Math.hypot(x-TITAN_CENTER.x,z-TITAN_CENTER.z)>76+pad &&
-    Math.hypot(x-PORT_CENTER.x,z-PORT_CENTER.z)>65+pad;
+    Math.hypot(x-PORT_CENTER.x,z-PORT_CENTER.z)>137+pad;
   const clear=(x,z,rad)=>occupied.every(p=>Math.hypot(p[0]-x,p[1]-z)>rad+p[2]);
   const acc=(layer,x,z)=>{
     const key=layer+':'+Math.floor(x/CHUNK)+':'+Math.floor(z/CHUNK);

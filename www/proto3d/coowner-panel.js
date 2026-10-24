@@ -115,5 +115,5 @@ export function createCoOwnerPanel({login,resume,lock,list,jump,isOnline,getSave
    }
  }
  setAuthorized(false);setPlayers([]);
- return {onEvent,onConnected,dispose:closePanel};
+ return {onEvent,onConnected,isAuthorized:()=>authorized,dispose:closePanel};
 }

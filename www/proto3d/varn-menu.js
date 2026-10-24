@@ -51,7 +51,7 @@
     quick.hidden=!v;
     document.getElementById('vnMenuBtn')?.setAttribute('aria-expanded',String(v));
     if(!v){for(const section of sections)section.open=false;
-      if(travelButton)travelButton.setAttribute('aria-expanded','false');}
+      if(travelButton)travelButton.setAttribute('aria-expanded','false');document.getElementById('vnQuickMp')?.setAttribute('aria-expanded','false');}
   };
   const closeQuick=()=>toggleQuick(false);
   document.getElementById('vnMenuBtn')?.addEventListener('click',()=>toggleQuick(quick.hidden));
@@ -60,6 +60,26 @@
     if(quick.hidden||!travelSection)return;
     travelSection.open=!travelSection.open;
     if(travelSection.open)travelSection.scrollIntoView({block:'nearest'});
+  });
+  const mpSection=document.getElementById('vnQuickMultiplayer'),mpButton=document.getElementById('vnQuickMp');
+  mpButton?.addEventListener('click',()=>{
+    if(quick.hidden||!mpSection)return;
+    mpSection.open=!mpSection.open;mpButton.setAttribute('aria-expanded',String(mpSection.open));
+    if(mpSection.open)mpSection.scrollIntoView({block:'nearest'});
+  });
+  // Gear readout + Armory (moved here from Settings).
+  const gearSection=document.getElementById('vnQuickGear'),gearOut=document.getElementById('vnGearReadout');
+  const gearSync=()=>{if(!gearOut)return;const F=window.__p3d&&window.__p3d.fight,kit=F&&F.cc&&F.cc.kit;
+    if(!kit||!kit.weapon){gearOut.textContent=F&&F.on?'This hero uses the generic kit.':'Start Fight mode to see the active hero\u2019s weapon, armor and skills.';return;}
+    const w=kit.weapon,a=kit.armor||{},pc=v=>'+'+Math.round(v*100)+'%';
+    const st=[a.hpPct&&'HP '+pc(a.hpPct),a.mpPct&&'MP '+pc(a.mpPct),a.spPct&&'SP '+pc(a.spPct),a.defPct&&'DEF '+pc(a.defPct)].filter(Boolean).join(' \u00b7 ');
+    gearOut.textContent='';for(const [h,t] of [['Weapon',w.name+' (damage '+pc(w.dmgPct)+')'],['Armor',(a.name||'')+(st?' \u2014 '+st:'')],['Skills',(kit.skills||[]).map(x=>x.name).join(' \u00b7 ')]]){
+      const d=document.createElement('div'),b=document.createElement('b');b.textContent=h+': ';d.append(b,t);gearOut.appendChild(d);}};
+  gearSection?.addEventListener('toggle',()=>{if(gearSection.open)gearSync();});
+  document.getElementById('vnOpenArmory')?.addEventListener('click',async()=>{
+    const F=window.__p3d&&window.__p3d.fight;
+    if(!F||!F.armory){if(gearOut)gearOut.textContent='Start Fight mode first to open the Armory (Settings \u203a Gameplay \u203a Combat).';return;}
+    closeQuick();const m=await import('./armoryui.js');m.openArmory(F.armory);
   });
   document.getElementById('vnQuickClose')?.addEventListener('click',closeQuick);
   document.getElementById('vnTitleBtn')?.addEventListener('click',()=>{

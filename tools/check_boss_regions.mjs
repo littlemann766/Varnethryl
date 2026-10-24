@@ -177,8 +177,8 @@ assert(src('www/proto3d/hud-layout-editor.js').includes('window.__vnHudEditor={o
 
 
 const hudEditor=src('www/proto3d/hud-layout-editor.js');
-assert(titlePage.includes('id="vnEditHud"')&&titlePage.includes('proto3d/hud-layout-editor.js'),'HUD editor is accessible from the actual in-game menu');
-assert(hudEditor.includes("document.getElementById('vnEditHud')?.addEventListener('click',open)"),'HUD editor menu starts editable state');
+assert(settingsSrc.includes("hudEd()?.open?.()")&&titlePage.includes('proto3d/hud-layout-editor.js'),'HUD editor is accessible from Settings > Controls');
+assert(hudEditor.includes('window.__vnHudEditor={open,close,refresh,reset'),'HUD editor exposes open for Settings');
 for(const selector of ["'#stick'","'#runBtn'","'#jumpBtn'","'#cb .sl.b'","'#cb .vn-exp'"]){
  assert(hudEditor.includes(selector),'HUD editor missing a required input: '+selector);
 }

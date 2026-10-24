@@ -81,11 +81,6 @@ function buildPanel(c, gate, env) {
   panel.appendChild(sec('Party / enemies / quests'));
   panel.appendChild(row(act('heal','Heal party',c.healParty),
     act('kill','Kill enemies',c.killEnemies,'no active enemies')));
-  // There is no 3D quest-skip operation. Don't display a fake working cheat.
-  const questUnavailable=el('button',{type:'button',disabled:true,
-    textContent:'Quest skip · not implemented in 3D',
-    title:'Unavailable until Varnethryl has a quest-advance API'});
-  panel.appendChild(row(questUnavailable));
   const foe = el('select', { id: 'ownerFoe' }); for (const k of ['wolf', 'raider', 'wraith', 'skeleton']) foe.appendChild(el('option', { value: k, textContent: k })); isolateKeys(foe);
   panel.appendChild(row(foe, act('spawn', 'Spawn enemy', () => c.spawnEnemy(foe.value), 'fight mode is full'), act('spawn-titan', 'Spawn Ashen Titan', () => c.spawnTitan(), 'a Titan is already alive')));
   panel.appendChild(sec('Summon bosses (Owner)'));

@@ -1,0 +1,45 @@
+/* Varnethryl wall/building ladder and moving multi-jump regression checks.
+ * No Android SDK, DOM or server required.
+ */
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {ladderAxis,ladderIntent} from '../www/proto3d/ladders.js';
+const source=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const L={baseX:0,baseZ:0,topX:3,topZ:4};
+assert.ok(Math.abs(ladderAxis(L).x-.6)<1e-9,'ladder axis X');
+assert.ok(Math.abs(ladderAxis(L).z-.8)<1e-9,'ladder axis Z');
+assert.ok(ladderIntent(L,3,4)>.99,'forward movement climbs');
+assert.ok(ladderIntent(L,-3,-4)<-.99,'reverse movement descends');
+assert.equal(ladderIntent(L,0,0),0,'releasing controls pauses climbing');
+assert.ok(Math.abs(ladderIntent(L,-4,3))<.01,'side movement does not climb');
+const ladders=source('www/proto3d/ladders.js');
+assert.doesNotMatch(ladders,/document\.createElement\('button'\)/,'no visible Climb prompt is created');
+assert.doesNotMatch(ladders,/btn\.addEventListener/,'climb button is never needed');
+assert.match(ladders,/Math\.abs\(delta\)>\.22/,'movement controls ladder progress');
+assert.match(ladders,/const inT=Math\.min\(1,t\/\.14\)/,'vertical climb holds character close to the rails');
+assert.match(ladders,/function addBuilding\(def\)/,'indoor multi-floor ladders share same model');
+const kit=source('www/proto3d/bldkit.js');
+assert.match(kit,/Builder\.prototype\.stairs = function \(o\)/,'every future builder uses the ladder-aware former stair entry point');
+assert.match(kit,/\(this\.ladderSites\|\|\(this\.ladderSites=\[\]\)\)\.push\(L\)/,'building access is registered as ladder links');
+assert.match(kit,/Every former stairwell is now a narrow ladder hatch/,'upper-storey floor no longer contains long staircase wells');
+assert.match(kit,/Galleries built with upperFloor\(\) also need a real ladder hatch/,'galleries remain reachable');
+assert.doesNotMatch(kit,/this\.bx\(w, hh, len \/ n \+ \.01, key/,'shared builder no longer creates a stepped staircase mesh');
+const buildings=source('www/proto3d/buildings.js');
+assert.match(buildings,/wallLadderSites\.push/,'every perimeter wall walk registers ladder sites');
+assert.match(buildings,/ladderSites:wallLadderSites/,'walls expose sites for interactive climb');
+assert.doesNotMatch(buildings,/B\.stairs\(\{ cx: cxs, cz: czs, ang, len: LEN/,'main wall stair flights removed');
+const main=source('www/proto3d/main.js');
+assert.match(main,/LAD\.addWall\(d\)/,'wall ladders instantiated');
+assert.match(main,/LAD\.addBuilding\(d\)/,'all building ladders instantiated');
+assert.match(main,/const jumpLimit=\(\)=>window\.__p3d\?\.owner===true\|\|MULTIPLAYER\?\.isCoOwnerVerified\?\.\(\)\?4:2/,'two normal jumps or four authenticated jumps');
+assert.match(main,/jumpsUsed\+\+;jumpVelocity=/,'each jump consumes one charge');
+assert.match(main,/if\(jumpY!==null\)\{/,'physical jump and fall state');
+assert.match(main,/state\.level=0;/,'upper-floor jump transitions to ground level');
+assert.match(main,/if \(ZONE\.name==='town' && LAD && jumpY===null && LAD\.update/,'climbing cannot steal airborne input');
+const peers=source('www/proto3d/multiplayer-client.js');
+assert.match(peers,/isCoOwnerVerified:\(\)=>joined&&coOwner\.isAuthorized\?\.\(\)===true/,'CoOwner quadruple jump requires server-approved multiplayer rank');
+const co=source('www/proto3d/coowner-panel.js');
+assert.match(co,/isAuthorized:\(\)=>authorized/,'CoOwner rank comes from server approval');
+const fight=source('www/proto3d/fight.js');
+assert.match(fight,/window\.__p3d\?\.jump\?\.\(\)/,'combat jump uses the same multi-jump');
+console.log('PASS: prompt-free ladders, all building levels, wall access, moving double/verified quadruple jump.');

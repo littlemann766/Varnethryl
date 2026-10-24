@@ -88,6 +88,18 @@ function buildPanel(c, gate, env) {
   panel.appendChild(row(questUnavailable));
   const foe = el('select', { id: 'ownerFoe' }); for (const k of ['wolf', 'raider', 'wraith', 'skeleton']) foe.appendChild(el('option', { value: k, textContent: k })); isolateKeys(foe);
   panel.appendChild(row(foe, act('spawn', 'Spawn enemy', () => c.spawnEnemy(foe.value), 'fight mode is full'), act('spawn-titan', 'Spawn Ashen Titan', () => c.spawnTitan(), 'a Titan is already alive')));
+  panel.appendChild(sec('Summon bosses (Owner)'));
+  const bossPick=el('select',{id:'ownerBossPick',ariaLabel:'Select boss to summon'});
+  for(const [key,label] of [
+    ['titan','Ashen Titan'],['titan40','Ashen Titan — Giant'],
+    ['vaelthryx','Balthrix — perimeter trail'],
+    ['frosttroll_a','Frost Troll — Krag'],['frosttroll_b','Frost Troll — Mog'],
+    ['hydra','Hydra — Mire only']
+  ])bossPick.appendChild(el('option',{value:key,textContent:label}));
+  isolateKeys(bossPick);
+  panel.appendChild(row(bossPick,act('spawn-boss','Summon selected boss',
+    ()=>c.spawnEnemy(bossPick.value),
+    'Only one boss at a time. Balthrix requires Town; Hydra requires Mire.')));
   if (env.hooks && env.hooks.fightTest) { panel.appendChild(sec('Fight test')); panel.appendChild(row(act('fight', 'Start / stop fight test', async () => {
     const ok=await env.hooks.fightTest();if(ok!==false)hide();return ok;
   }))); panel.appendChild(el('div', { textContent: 'Owner + lightsaber vs chasing monsters. Attack: button or F/J.', style: 'font-size:11px;opacity:.7' })); }

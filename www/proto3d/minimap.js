@@ -129,7 +129,17 @@ export function createMiniMap(getState,getZone,env={}){
   const onscreen=(p,r=0)=>p[0]>-r&&p[0]<W+r&&p[1]>-r&&p[1]<W+r;
   if(active==='town'){
    for(const road of env.roads?.()||[]){
-    ctx.beginPath();(road.points||[]).forEach((p,i)=>{const q=at(p[0],p[1]);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);});
+    // Curve the drawn roads to match their actual 3D terrain ribbons.
+    const pts=(road.points||[]).map(([x,z])=>at(x,z));
+    ctx.beginPath();
+    if(pts.length){
+     ctx.moveTo(pts[0][0],pts[0][1]);
+     for(let i=1;i<pts.length-1;i++){
+      const p=pts[i],q=pts[i+1];
+      ctx.quadraticCurveTo(p[0],p[1],(p[0]+q[0])*.5,(p[1]+q[1])*.5);
+     }
+     if(pts.length>1){const p=pts[pts.length-1];ctx.lineTo(p[0],p[1]);}
+    }
     ctx.strokeStyle=road.color||'#a79d8b';ctx.lineWidth=Math.max(1,(road.width||8)*scale);ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
    }
    const p=at(-CITY_HALF,-CITY_HALF);ctx.strokeStyle='#d1c297';ctx.lineWidth=2;

@@ -29,7 +29,9 @@ const nav=source('www/proto3d.html');
 const menu=source('www/proto3d/varn-menu.js');
 const ui=source('www/proto3d/varn-ui.css');
 assert(nav.includes('class="vn-quick-actions"'),'game menu has compact primary actions');
-for(const id of ['vnQuickResume','vnChooseCharacter','vnOpenSettings','vnQuickTravel','vnCombatToggle','vnEditHud','vnTravelSail','vnTravelHydra','vnTravelTown','vnApprovedBosses','vnModelsToggle','vnStatusOpen','vnTitleBtn']){
+// Settings cleanup (boss-approved): the menu is Resume, Heroes, Travel, Multiplayer, Settings, Return to title.
+// Combat/HUD moved into Settings; model style, boss models and diagnostics moved to the hidden Owner & Dev tab.
+for(const id of ['vnQuickResume','vnChooseCharacter','vnOpenSettings','vnQuickTravel','vnQuickMp','vnTravelSail','vnTravelHydra','vnTravelTown','vnTitleBtn']){
   assert(nav.includes('id="'+id+'"'),'existing game menu command preserved: '+id);
 }
 assert(menu.includes('if(section.open)for(const other of sections)'),'game menu accordion closes other categories');
@@ -259,15 +261,14 @@ assert(!cheatPanel.includes("dataset:{cheat:'player-auth'}") &&
 for(const action of ['player-auth','player-refresh','player-jump'])
   assert(cheatPanel.includes(".dataset.cheat='"+action+"'"),
     'Owner teleport button must use a writable dataset property');
-assert(nav.includes('id="vnOwnerTools"'),'Owner tools access is discoverable in More options');
+assert(nav.includes('id="vnOwnerTools"'),'Owner gate button still exists (hidden; reached from Owner & Dev tab)');
 assert(main.includes("document.getElementById('vnOwnerTools')?.addEventListener('click'"),
   'Owner tools button opens password-gated panel');
 assert(source('www/proto3d/cheatboot.js').includes("import('./cheatpanel.js')"),
   'Owner tools load through existing password gate, not an unguarded menu');
 
 // Owner Cheats must remain immediately accessible, without auto-logout.
-assert(nav.includes('id="vnOwnerTools"'),'Owner cheats shortcut is visible in the first menu row');
-assert(nav.indexOf('id="vnOwnerTools"')<nav.indexOf('id="vnQuickMore"'),'Owner cheats must not be buried in More options');
+assert(nav.indexOf('id="vnOwnerTools"')>nav.indexOf('id="vnHiddenTools"'),'Owner cheats button lives in the never-shown hidden tools block');
 assert(ownerPanel.includes("ui.badge.addEventListener('click',()=>togglePanel(env))"),'gold Owner badge can reopen cheats in one tap');
 assert(ownerPanel.includes("gate.lock(); c.reset()"),'Lock Owner is still the sole explicit local sign-out path');
 assert(!source('www/proto3d/ownergate.js').includes('UNLOCK_TTL'),'Owner authorization has no automatic timeout');
@@ -319,7 +320,7 @@ assert(source('.github/workflows/build-android.yml').includes('tools/prepare_mar
 assert(source('.github/workflows/deploy-pages.yml').includes('tools/prepare_marine_assets.py'),'GitHub Pages includes raw GLB fallback');
 assert(asyncOwnerActions.includes("return result===undefined?true:result"),'Owner travel reports real queued-zone result');
 assert(cheatPanel.includes("const result=await fn()"),'Owner buttons wait for actual asynchronous results');
-assert(cheatPanel.includes("questUnavailable"),'unfinished quest skip is disabled, not fake success');
+assert(!cheatPanel.includes('Quest skip'),'quest skip no-op removed (settings cleanup)');
 assert(cheatPanel.includes("className:'owner-fold'"),'Owner tools are grouped in medieval accordions');
 assert(source('www/proto3d/coowner-panel.js').includes("className:'vn-rank-fold'")||
        source('www/proto3d/coowner-panel.js').includes("make('details','vn-rank-fold')"),

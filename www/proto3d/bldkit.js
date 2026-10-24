@@ -248,19 +248,36 @@ Builder.prototype.levelGroup = function (l) { this.lvGroups = this.lvGroups || {
 Builder.prototype.onFloor = function (level, y, fn) { // run fn with furniture helpers redirected to this upper level (coords stay local, y is relative to the floor)
   const sv = [this.curUp, this.lvTag]; this.curUp = level ? { level, y, group: this.levelGroup(level) } : null; this.lvTag = level; try { fn(this); } finally { [this.curUp, this.lvTag] = sv; } };
 Builder.prototype.upperFloor = function (level, y, rects, o = {}) { // rects: [[x0,x1,z0,z1]] local; creates slab + registers walkable area
-  const g = this.levelGroup(level), key = o.key || 'floorPlank';
-  for (const [x0, x1, z0, z1] of rects) this.bx(x1 - x0, .22, z1 - z0, key, (x0 + x1) / 2, y - .11, (z0 + z1) / 2, g);
-  this.floors.push({ level, y, rects }); if (o.rails !== false) this.autoRails(level, y, rects, o);
+  const g=this.levelGroup(level),key=o.key||'floorPlank';
+  // Galleries built with upperFloor() also need a real ladder hatch,
+  // otherwise their solid floor would cover the rung and block the climb.
+  let walkRects=rects;
+  for(const L of this.ladderSites||[]){
+    if(L.level!==level||Math.abs(L.y1-y*this.K)>.1)continue;
+    const [lx,lz]=this.toL(L.rungX,L.rungZ),hole=[lx-.65,lx+.65,lz-.65,lz+.65];
+    walkRects=walkRects.flatMap(r=>{
+      if(Math.min(r[1],hole[1])-Math.max(r[0],hole[0])<=.05||
+         Math.min(r[3],hole[3])-Math.max(r[2],hole[2])<=.05)return [r];
+      return subRect(r,hole);
+    });
+  }
+  for(const [x0,x1,z0,z1] of walkRects)this.bx(x1-x0,.22,z1-z0,key,(x0+x1)/2,y-.11,(z0+z1)/2,g);
+  this.floors.push({level,y,rects:walkRects});if(o.rails!==false)this.autoRails(level,y,walkRects,o);
 };
 Builder.prototype.autoRails = function (level, y, rects, o = {}) {
   const g = this.levelGroup(level), R = this.radius || 0, round = !this.footprint, lim = round ? R - this.T : 0;
   const inside = (x, z, e = .12) => rects.some(r => x > r[0] - e && x < r[1] + e && z > r[2] - e && z < r[3] + e);
   const nearWall = (x, z) => round ? Math.hypot(x, z) > lim - .5 : (Math.abs(x) > this.iw - .35 || Math.abs(z) > this.id_ - .35);
   const nearRamp = (x, z) => this.ramps.some(m => { const [u, v] = this.rampUV(m, x, z); return Math.abs(u) < m.len / 2 + .5 && Math.abs(v) < m.w / 2 + .5; });
+  const nearLadder=(x,z)=>this.ladderSites?.some(L=>{
+    if(L.level!==level)return false;
+    const [lx,lz]=this.toL(L.rungX,L.rungZ);
+    return Math.hypot(x-lx,z-lz)<1.55;
+  });
   for (const [x0, x1, z0, z1] of rects) for (const [ax, az, bx_, bz, nx, nz] of [[x0, z0, x1, z0, 0, -1], [x0, z1, x1, z1, 0, 1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
     const len = Math.hypot(bx_ - ax, bz - az), n = Math.max(1, Math.round(len / .8)); let run = null;
     const flush = (t1) => { if (!run) return; const [sx, sz] = run, ex = ax + (bx_ - ax) * t1, ez = az + (bz - az) * t1, l = Math.hypot(ex - sx, ez - sz); if (l > .2) { this.bx(Math.abs(nx) ? .07 : l, .07, Math.abs(nx) ? l : .07, 'darkWood', (sx + ex) / 2, y + .95, (sz + ez) / 2, g); for (let k = 0; k <= Math.max(1, Math.round(l / 1.1)); k++) { const f = k / Math.max(1, Math.round(l / 1.1)); this.bx(.08, .95, .08, 'darkWood', sx + (ex - sx) * f, y + .48, sz + (ez - sz) * f, g); } } run = null; };
-    for (let i = 0; i < n; i++) { const t = (i + .5) / n, px = ax + (bx_ - ax) * t, pz = az + (bz - az) * t, qx = px + nx * .3, qz = pz + nz * .3; const open = !inside(qx, qz) && !nearWall(px, pz) && !nearRamp(px + nx * .2, pz + nz * .2); if (open && !run) run = [ax + (bx_ - ax) * i / n, az + (bz - az) * i / n]; if (!open && run) flush(i / n); }
+    for (let i = 0; i < n; i++) { const t = (i + .5) / n, px = ax + (bx_ - ax) * t, pz = az + (bz - az) * t, qx = px + nx * .3, qz = pz + nz * .3; const open = !inside(qx, qz) && !nearWall(px, pz) && !nearRamp(px + nx * .2, pz + nz * .2) && !nearLadder(px,pz); if (open && !run) run = [ax + (bx_ - ax) * i / n, az + (bz - az) * i / n]; if (!open && run) flush(i / n); }
     flush(1);
   }
 };

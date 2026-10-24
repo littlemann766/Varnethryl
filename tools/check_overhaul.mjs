@@ -241,7 +241,7 @@ assert(worldServer.includes("if(!socket.ownerAuthorized)"),'server refuses Owner
 assert(worldServer.includes("m.type==='owner-jump'")&&worldServer.includes('target:ownerVisible(target)'),'owner travel reply includes target and destination');
 assert(mpLobby.includes("ownerJump:id=>ownerCommand('owner-jump',{id})"),'only authenticated multiplayer relay performs owner jump');
 assert(main.includes("teleportNearPlayer:async(target)=>"),'remote travel uses zone-loading lifecycle');
-assert(main.includes("if (ZONE.name==='town' && LAD && LAD.update"),'ladder triggers belong to town and never spawn inside Coliseum');
+assert(main.includes("if (ZONE.name==='town' && LAD && jumpY===null && LAD.update"),'ladder triggers belong to town and never spawn inside Coliseum');
 assert(main.includes("for(const L of LAD?.list||[])L.group.visible=ZONE.name==='town'"),'town-only ladder meshes are isolated from arena');
 assert(main.includes("sessionSnapshot,restoreSession"),'saved world snapshot is exposed to session-resume logic');
 assert(sessionMenu.includes("vn.active3d.v1")&&sessionMenu.includes('varn:game-ready'),'returning app resumes last game without title screen');

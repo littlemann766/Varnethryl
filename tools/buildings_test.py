@@ -20,6 +20,9 @@ with sync_playwright() as p:
     ONLY = os.environ.get('ONLY', '').split(',') if os.environ.get('ONLY') else None
     for bi in infos:
         if ONLY and bi['id'] not in ONLY: continue
+        # v1.5.33: some doors are portals (the colosseum entrance opens the PvP coliseum map); always restart each building in the town zone
+        if pg.evaluate('__p3d.zone') != 'town':
+            pg.evaluate("__p3d.setZone('town')"); pg.wait_for_function("__p3d.zone==='town' && !__p3d.zonePending", timeout=60000); pg.wait_for_timeout(800)
         # local -> world helper executed in page
         def W(lx, lz): return pg.evaluate("([id,lx,lz])=>{for(const e of __p3d.enterables){for(const b of (e.parts||[e])){if(b.id===id)return b.toW(lx,lz)}}}", [bi['id'], lx, lz])
         def walk(src, dst, ms):
@@ -30,15 +33,19 @@ with sync_playwright() as p:
             return pg.evaluate("({x:__p3d.state.heroX,z:__p3d.state.heroZ,ins:__p3d.state.inside})")
         front = (bi['r'] if bi['round'] else bi['d'] / 2)
         if bi['id'] == 'gatehouse':
-            s = W(0, front + 0); a = W(0, 8); c = W(0, -8); r = walk(a, c, int(os.environ.get('GATE_MS', 9000))); ok = abs(r['x'] - c[0]) < 2 and abs(r['z'] - c[1]) < 2
-            # a solid wall: try to cross the tower line
-            a2 = W(7.0, 8); c2 = W(7.0, -8); r2 = walk(a2, c2, 6000); ok2 = abs(r2['z'] - c2[1]) > 3
+            # v1.5.33 walks (not runs) by default at ~1.5 m/s in headless, and the gate is 27 m deep at its new scale: allow 30 s
+            s = W(0, front + 0); a = W(0, 8); c = W(0, -8); r = walk(a, c, int(os.environ.get('GATE_MS', 30000))); ok = abs(r['x'] - c[0]) < 2 and abs(r['z'] - c[1]) < 2
+            # a solid wall: walk at the tower for the same time; the hero must never get past the wall line (old check passed trivially when the walk was slow)
+            a2 = W(7.0, 8); c2 = W(7.0, -8); mid2 = W(7.0, 0); r2 = walk(a2, c2, int(os.environ.get('GATE_MS', 30000))); ok2 = (r2['z'] - mid2[1]) * (a2[1] - mid2[1]) > 0
             print('PASS' if ok and ok2 else 'FAIL', 'gatehouse walk-through', ok, 'tower solid', ok2, '' if ok else ('stopped at %s, wanted %s' % ({k: (round(v, 1) if isinstance(v, float) else v) for k, v in r.items()}, [round(q, 1) for q in c]))); fails += 0 if ok and ok2 else 1; continue
         if not bi['hasIn']: continue
         if bi['id'].startswith(('wt','gt')): front = 4.4
         inner = (0.5 if bi['id'].startswith(('wt','gt')) else bi['r'] - 3.0) if bi['round'] else (bi['id_'] - 1.4)
         if bi['id']=='colosseum': inner = 0
         out_ = W(0, front + 3.5); tgt = W(0, inner)
+        if bi['id'] == 'colosseum':   # v1.5.33 design: the town colosseum entrance is the portal to the PvP coliseum map
+            r = walk(out_, tgt, 9000); z = pg.evaluate('__p3d.zone'); ok = z == 'coliseum' or r['ins'] == 'colosseum'; fails += 0 if ok else 1
+            print('PASS' if ok else 'FAIL', f"colosseum    portal-to-coliseum zone={z} ins={r['ins']} ({bi['name']})"); continue
         r = walk(out_, tgt, 9000); walked_in = r['ins'] is not None and (bi['id']!='colosseum' or True) and (r['ins'] == bi['id'] or r['ins'] == 'port' or r['ins'].startswith('wt') or r['ins'].startswith('gt'))
         # solid: approach the side wall, should not get inside
         side = W((bi['r'] if bi['round'] else bi['w'] / 2) + 3, 0); mid = W(0, 0)

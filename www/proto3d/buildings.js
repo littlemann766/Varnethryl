@@ -136,12 +136,9 @@ function templeFront(B, w, d, h) {
     B.win(OX, h - 2.2, OZ + .88, 0, .6, 2, 'stained');
     B.bx(1.6, 1.8, 1.6, 'stoneL', sx * (w / 2 + 6.0), .9, zf + 3.4, g);                       // statue plinth
   }
-  // grand stair: broad, low-rise (decorative, flush with the walkable apron) with cheek walls
-  for (let i = 0; i < 7; i++) B.bx(11.6 - i * .55 + 2.4, .08, .85, 'stoneL', 0, .04 + i * .08, zf + 5.2 - i * .85 + .4, g, { shadow: false });
+  // Flat Temple approach: stairs are no longer used on building exteriors.
+  B.bx(12.6,.10,6.0,'stoneL',0,.05,zf+3.0,g,{shadow:false});
   for (const s of [-1, 1]) {
-    B.bx(.5, .9, 5.4, 'stoneL', s * 6.0, .45, zf + 2.9, g);                                   // cheek wall
-    for (let i = 0; i < 7; i++) B.bx(.16, .5, .16, 'stoneL', s * 6.0, 1.15, zf + .5 + i * .8, g);   // balusters
-    B.bx(.3, .12, 5.6, 'stoneL', s * 6.0, 1.45, zf + 2.9, g);
     const lx = s * 4.6, lz = zf + 1.6;                                                       // lion plinths at the stair head
     B.bx(2.0, 2.0, 1.9, 'stoneL', lx, 1.0, lz, g); B.bx(1.3, .8, .08, 'gold', lx, 1.1, lz + .98, g); B.ccol(lx, lz, 1.2); lionFig(B, lx, lz - .3, 1.35);
     B.bx(.6, 1.4, .6, 'stoneL', s * 2.9, .7, zf + 1.2, g); B.bx(.35, .6, .35, 'gold', s * 2.9, 1.7, zf + 1.2, g);   // gilded finials by the portal

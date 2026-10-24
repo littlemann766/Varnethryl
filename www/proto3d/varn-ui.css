@@ -746,3 +746,27 @@ body.vn-menu-open #vnChatBtn{visibility:hidden}
  #ownerPanel,#vnCoOwnerPanel{top:5px!important;right:7px!important;
    max-height:calc(100dvh - 10px)!important}
 }
+
+/* v1.5.32 · Independent two-thumb controls. Jump remains a separate movable
+   HUD control; it never blocks the joystick or the attack fan. */
+#moveActions{pointer-events:none!important;gap:8px!important}
+#moveActions button{pointer-events:auto!important;touch-action:none!important;
+ -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#moveActions #jumpBtn{
+ width:65px!important;height:65px!important;min-width:65px!important;min-height:65px!important;
+ aspect-ratio:1!important;padding:0!important;border:3px ridge #e4bc74!important;
+ border-radius:50%!important;
+ background:radial-gradient(circle at 38% 25%,#8252b5,#42235d 58%,#160f29)!important;
+ color:#ffebbf!important;box-shadow:inset 0 0 0 3px #301739,0 0 12px #a85fff9c,0 4px 11px #0009!important;
+ display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0;
+ font:700 10px VarnCinzel,Georgia,serif!important;line-height:1!important;
+ position:relative;z-index:1;isolation:isolate;
+}
+#jumpBtn .vn-jump-arrow{font:900 27px/26px system-ui,sans-serif;pointer-events:none}
+#jumpBtn small{font:700 9px/13px VarnCinzel,Georgia,serif;letter-spacing:.04em;pointer-events:none}
+#jumpBtn.vn-pressed{filter:brightness(1.22);box-shadow:inset 0 0 0 3px #7c3daf,0 0 20px #c78cff,0 3px 9px #0009!important}
+#stick,#stick #knob{touch-action:none!important;-webkit-user-select:none;user-select:none}
+@media (orientation:landscape) and (max-height:520px){
+ #moveActions #jumpBtn{width:53px!important;height:53px!important;min-width:53px!important;min-height:53px!important}
+ #jumpBtn .vn-jump-arrow{font-size:23px;line-height:23px}
+}

@@ -38,6 +38,7 @@ const clean=(value,max)=>String(value??'').replace(/[^\p{L}\p{N} _-]/gu,'').trim
 const finite=(n,min,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max;
 const validState=m=>!!m&&typeof m==='object'&&ZONES.has(m.zone)&&finite(m.x,-10000,10000)&&finite(m.z,-10000,10000)&&finite(m.y,-1000,5000)&&finite(m.yaw,-1000,1000);
 const currentRole=p=>p.socket.ownerAuthorized?'owner':p.socket.coOwnerAuthorized?'coowner':'player';
+const COOWNER_BOSSES=new Set(['titan','titan40','vaelthryx','frosttroll_a','frosttroll_b','hydra']);
 const visible=p=>({id:p.id,name:p.name,slot:p.slot,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,
   hero:p.hero,skin:p.skin,friendCode:p.friendCode,moving:p.moving,role:currentRole(p)});
 export function createWorldServer(options={}){
@@ -189,6 +190,22 @@ export function createWorldServer(options={}){
    if(m.type==='coowner-list'){
      if(!socket.coOwnerAuthorized){send(socket,{type:'coowner-error',message:'Unlock CoOwner first.'});return;}
      send(socket,{type:'coowner-players',players:ownerPlayers(socket)});return;
+   }
+   if(m.type==='coowner-boss'){
+     if(!socket.coOwnerAuthorized){
+       send(socket,{type:'coowner-error',message:'Unlock CoOwner to summon bosses.'});return;
+     }
+     if(typeof m.boss!=='string'||!COOWNER_BOSSES.has(m.boss)){
+       send(socket,{type:'coowner-error',message:'Unsupported boss.'});return;
+     }
+     const now=Date.now();
+     if(now-(socket.lastBossSummonAt||0)<4500){
+       send(socket,{type:'coowner-error',message:'Boss summon cooldown: try again shortly.'});return;
+     }
+     socket.lastBossSummonAt=now;
+     // Local approved test summon only; multiplayer damage is not synchronized.
+     send(socket,{type:'coowner-boss-approved',boss:m.boss});
+     return;
    }
    if(m.type==='owner-auth'){
      // Owner and CoOwner are independent, server-verified ranks.

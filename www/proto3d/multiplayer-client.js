@@ -441,6 +441,7 @@ export function createMultiplayer({THREE,scene,state,getZone,setZone,getHeroName
   ownerJump:id=>ownerCommand('owner-jump',{id}),
   onOwnerEvent:callback=>{ownerListeners.add(callback);return ()=>ownerListeners.delete(callback);},
   get online(){return joined;},get room(){return room;},get playerCount(){return onlineCount;},
+  isCoOwnerVerified:()=>joined&&coOwner.isAuthorized(),
   dispose(){disconnect();chat.dispose();coOwner.dispose();ownerListeners.clear();root.parent?.remove(root);}
  };
 }

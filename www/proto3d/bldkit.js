@@ -313,21 +313,24 @@ Builder.prototype.clearZone = function (m, level, du0, du1, floorY) {
       if (q.shell === 1) { const dx = q.x - this.cx, dz = q.z - this.cz, d = Math.hypot(dx, dz) || 1, k = (q.r + .12) / d; q.x += dx * k; q.z += dz * k; q.shell = 2; continue; }   // a stair along a round wall: push the wall circle outward (stair stays clear, the outside stays sealed)
       this.colliders.splice(i, 1); } }
 };
+// Varnethryl building traversal policy: vertical ladders, no stair flights.
+// stairs(), gallery() and fullUpper() all register the same climbable link.
 Builder.prototype.stairs = function (o) {
-  const { cx, cz, ang = 0, len, w = 1.8, l0 = 0, y0 = 0, l1, y1 } = o;
-  (globalThis.__stairLog = globalThis.__stairLog || []).push({ n: this.name, len, w, rise: y1 - y0, deg: Math.round(Math.atan2(y1 - y0, len) * 180 / Math.PI) });
-  { const mm = { cx, cz, ang, len, w }; (this.stairZones = this.stairZones || []).push({ m: mm, level: l0, du0: -len / 2 - 1.5, du1: len / 2, fy: y0 }, { m: mm, level: l1, du0: len / 2 - .3, du1: len / 2 + 1.5, fy: y1 }); for (const z of this.stairZones.slice(-2)) this.clearZone(z.m, z.level, z.du0, z.du1, z.fy); } const m = { cx, cz, ang, len, w, l0, y0, l1, y1, flipUp: o.flipUp }; this.ramps.push(m); this.levelGroup(l1);
-  this._st = true;
-  const n = Math.max(4, Math.ceil((y1 - y0) / .2)), s = Math.sin(ang), c = Math.cos(ang), grp = l0 ? this.levelGroup(l0) : this.G.int, key = o.key || 'wood';
-  for (let i = 0; i < n; i++) { const u = -len / 2 + (i + .5) * len / n, top = y0 + (i + 1) * (y1 - y0) / n, hh = top - y0 + (l0 ? 0 : 0); const b = this.bx(w, hh, len / n + .01, key, 0, 0, 0, grp); b.position.set(cx + s * u, y0 + hh / 2, cz + c * u); b.rotation.y = ang; }
-  for (const sd of [-1, 1]) { const px = cx + c * sd * (w / 2 + .05), pz = cz - s * sd * (w / 2 + .05); const b = this.bx(.1, .12, len + .3, 'darkWood', px, (y0 + y1) / 2 + .95, pz, grp); b.position.set(px + s * 0, (y0 + y1) / 2 + .95, pz); b.rotation.y = ang; b.rotation.x = 0;
-    b.rotateX(-Math.atan2(y1 - y0, len)); // sloped handrail
-    const k = Math.max(2, Math.round(len / 1.0)); for (let q = 0; q <= k; q++) { const u = -len / 2 + q * len / k, yy = y0 + (y1 - y0) * (q / k); this.bx(.07, .9, .07, 'darkWood', cx + s * u + c * sd * (w / 2 + .05), yy + .45, cz + c * u - s * sd * (w / 2 + .05), grp); }
-    // side colliders (row of circles, all levels): hero cannot leave the flight sideways
-    const ln = Math.max(.5, len - .9), nn = Math.ceil(ln / .3); for (let q = 0; q <= nn; q++) { const u = -len / 2 + q * ln / nn, lx = cx + s * u + c * sd * (w / 2 + .22), lz = cz + c * u - s * sd * (w / 2 + .22); const [wx, wz] = this.toW(lx, lz); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: u > len / 2 - 2.6 ? [l0] : [l0, l1], stair: 1 }); } }  // top 2.6 m: open to the upper floor (no rail barrier when stepping off/onto the flight sideways)
-  // keep ground-level walkers from slipping past the top end underneath the slab
-  { const lx = cx + s * (len / 2 + 1.1), lz = cz + c * (len / 2 + 1.1); const nn = Math.ceil(w / .35); for (let q = 0; q <= nn; q++) { const t = -w / 2 + q * w / nn; const [wx, wz] = this.toW(lx + c * t, lz - s * t); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: l0, stair: 1 }); } }
-  this._st = false; return m;
+  const {cx,cz,ang=0,len=3.6,l0=0,y0=0,l1,y1}=o;
+  if(!Number.isFinite(y1)||y1<=y0||!Number.isInteger(l1)||l1<=l0)return null;
+  const sn=Math.sin(ang),cs=Math.cos(ang);
+  const lx=cx+sn*(len/2-.48),lz=cz+cs*(len/2-.48);
+  const [baseX,baseZ]=this.toW(lx-sn*.85,lz-cs*.85),
+    [topX,topZ]=this.toW(cx+sn*(len/2+.68),cz+cs*(len/2+.68)),
+    [rungX,rungZ]=this.toW(lx,lz),
+    [outerX,outerZ]=this.toW(lx-sn,lz-cs);
+  const dx=rungX-outerX,dz=rungZ-outerZ,n=Math.hypot(dx,dz)||1;
+  const L={id:this.id+'-ladder-'+(this.ladderSites?.length||0),baseLevel:l0,level:l1,
+    y0:y0*this.K,y1:y1*this.K,H:(y1-y0)*this.K,
+    baseX,baseZ,topX,topZ,rungX,rungZ,nx:dx/n,nz:dz/n};
+  (this.ladderSites||(this.ladderSites=[])).push(L);
+  this.levelGroup(l1);
+  return L;
 };
 // query: surface height for a local-frame hero position at the given level -> {y, ramp, t} or null if there is no floor there
 Builder.prototype.surface = function (wx, wz, level) {
@@ -405,20 +408,18 @@ Builder.prototype.fullUpper = function (o) {
   const level = o.level || 1, l0 = o.l0 === undefined ? level - 1 : o.l0, y0 = o.y0 || 0, y = o.y, round = !this.footprint;
   const rect = o.rect || (round ? [-(this.radius - this.T - .1), this.radius - this.T - .1, -(this.radius - this.T - .1), this.radius - this.T - .1] : [-this.iw, this.iw, -this.id_, this.id_]);
   let rects = [rect], hole = null;
-  if (o.stair) { const st0 = o.stair, ang = { '-z': Math.PI, '+z': 0, '-x': -Math.PI / 2, '+x': Math.PI / 2 }[st0.dir || '-z'], w = st0.w || 1.7, ax = Math.abs(Math.sin(ang)) > .5;
-    // the foot of every flight needs a free approach: keep >= FOOT m of open floor behind it (shift the flight into the room, shorten only if the room is too small)
-    const st = Object.assign({}, st0); const len0 = st0.len || 3.6; let len = round ? len0 : Math.max(len0, (y - y0) / Math.tan((o.maxSlope || 26) * Math.PI / 180));   // gentle: <= ~26 degrees where the room allows
-    if (!round) { const k = ax ? 'cx' : 'cz', sg = (ax ? Math.sin(ang) : Math.cos(ang)) > 0 ? 1 : -1, lo = ax ? rect[0] : rect[2], hi = ax ? rect[1] : rect[3], FOOT = o.foot || 1.7;
-      const foot0 = st[k] - sg * len0 / 2, nf = sg > 0 ? Math.max(foot0, lo + FOOT) : Math.min(foot0, hi - FOOT), far = sg > 0 ? hi - .5 : lo + .5; const nl = Math.min(len, Math.abs(far - nf)); st[k] = nf + sg * nl / 2; len = Math.max(nl, Math.min(len0, Math.abs(far - nf))); st[k] = nf + sg * len / 2; }
-    hole = ax ? [st.cx - len / 2, st.cx + len / 2, st.cz - w / 2, st.cz + w / 2] : [st.cx - w / 2, st.cx + w / 2, st.cz - len / 2, st.cz + len / 2];
-    { const sgn = (ax ? Math.sin(ang) : Math.cos(ang)) > 0 ? 1 : -1, ov = o.topOverlap === undefined ? .12 : o.topOverlap, hf = hole.slice();   // top end of the flight: the slab reaches .12 m into the ramp so there is never a gap between ramp and floor
-      if (ax) { if (sgn > 0) hf[1] -= ov; else hf[0] += ov; } else { if (sgn > 0) hf[3] -= ov; else hf[2] += ov; } rects = subRect(rect, hf); }
-    this.stairs({ cx: st.cx, cz: st.cz, ang, len, w, l0, y0, l1: level, y1: y });
-    // low end of the opening: block + rail so an upstairs hero cannot step off the slab into the stairwell
-    const s = Math.sin(ang), c = Math.cos(ang), lx = st.cx - s * (len / 2 + .15), lz = st.cz - c * (len / 2 + .15), nn = Math.ceil(w / .35);
-    for (let q = 0; q <= nn; q++) { const t = -w / 2 + q * w / nn; const [wx, wz] = this.toW(lx + c * t, lz - s * t); this.colliders.push({ type: 'circle', x: wx, z: wz, r: .2, b: this.id, lv: level, stair: 1 }); }
-    this._st = true; const g = this.levelGroup(level), rl = this.bx(ax ? .07 : w, .07, ax ? w : .07, 'darkWood', st.cx - s * (len / 2 + .02), y + .95, st.cz - c * (len / 2 + .02), g);
-    for (let q = 0; q <= 3; q++) { const t = -w / 2 + q * w / 3; this.bx(.08, .95, .08, 'darkWood', st.cx - s * (len / 2 + .02) + c * t, y + .48, st.cz - c * (len / 2 + .02) - s * t, g); } this._st = false; }
+  if(o.stair){
+    const st=o.stair,ang={'-z':Math.PI,'+z':0,'-x':-Math.PI/2,'+x':Math.PI/2}[st.dir||'-z'];
+    const len=st.len||3.6,sn=Math.sin(ang),cs=Math.cos(ang);
+    // Every former stairwell is now a narrow ladder hatch.
+    const rx=st.cx+sn*(len/2-.48),rz=st.cz+cs*(len/2-.48),hw=.70;
+    hole=[Math.max(rect[0],rx-hw),Math.min(rect[1],rx+hw),
+      Math.max(rect[2],rz-hw),Math.min(rect[3],rz+hw)];
+    if(hole[1]>hole[0]+.1&&hole[3]>hole[2]+.1){
+      if(!o.disc)rects=subRect(rect,hole);
+    }else hole=null;
+    this.stairs({cx:st.cx,cz:st.cz,ang,len,w:st.w||1.7,l0,y0,l1:level,y1:y});
+  }
   if (o.disc) { const g = this.levelGroup(level), r = o.disc, sh = new THREE.Shape(); sh.absarc(0, 0, r, 0, Math.PI * 2, false); if (hole) { const hp = new THREE.Path(); hp.moveTo(hole[0], -hole[2]); hp.lineTo(hole[1], -hole[2]); hp.lineTo(hole[1], -hole[3]); hp.lineTo(hole[0], -hole[3]); hp.closePath(); sh.holes.push(hp); }
     const eg = new THREE.ExtrudeGeometry(sh, { depth: .22, bevelEnabled: false, curveSegments: 20 }); eg.rotateX(-Math.PI / 2); uvScale(eg, 1 / (TILE[o.key || 'floorPlank'] || 3), 1 / (TILE[o.key || 'floorPlank'] || 3));
     const m = this.add(eg, M(o.key || 'floorPlank'), 0, y - .22, 0, g); this.floors.push({ level, y, disc: r, holes: hole ? [hole] : [] }); }

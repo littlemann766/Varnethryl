@@ -8,10 +8,10 @@ import {BALTHRIX_ROUTE_LENGTH,balthrixPosition,PORT_CENTER,FROST_SUMMIT,
 
 export function buildBalthrixCorridor(group,heightAt,colliders){
  const count=Math.ceil(BALTHRIX_ROUTE_LENGTH/4);
- const sections=[-15,-12,-9,-7,-4,0,4,7,9,12,15],positions=[],colors=[],indices=[];
+ const sections=[-24,-20,-17,-14,-11,-8,-5,0,5,8,11,14,17,20,24],positions=[],colors=[],indices=[];
  const dirt=new THREE.Color('#55412e'),track=new THREE.Color('#443425'),
    shoulder=new THREE.Color('#7c6244'),outer=new THREE.Color('#526048');
- const colorAt=d=>d<6?track:d<10?dirt:d<13?shoulder:outer;
+ const colorAt=d=>d<6?track:d<10?dirt:d<21?shoulder:outer;
  for(let i=0;i<=count;i++){
   const p=balthrixPosition(i*BALTHRIX_ROUTE_LENGTH/count/14),nX=Math.cos(p.yaw),nZ=-Math.sin(p.yaw);
   for(let j=0;j<sections.length;j++){

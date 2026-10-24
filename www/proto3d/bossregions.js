@@ -69,6 +69,45 @@ const BALTHRIX_ARC = (() => {
  }
  return {samples,total:dist};
 })();
+// A world-clock schedule: players being near his trail NEVER trigger a spawn.
+// Windows repeat every 15 minutes; Balthrix patrols for at most six minutes.
+// Date.now is shared by offline saves and online players; server-authoritative
+// encounters can reuse the same slot ID when damage becomes networked.
+export const BALTHRIX_CYCLE_MS=15*60*1000;
+export const BALTHRIX_ACTIVE_MS=6*60*1000;
+export function balthrixSpawnWindow(now=Date.now()){
+ if(!Number.isFinite(now))return {slot:-1,active:false,elapsed:0};
+ const slot=Math.floor(now/BALTHRIX_CYCLE_MS);
+ const elapsed=now-slot*BALTHRIX_CYCLE_MS;
+ return {slot,active:elapsed<BALTHRIX_ACTIVE_MS,elapsed,remaining:Math.max(0,BALTHRIX_CYCLE_MS-elapsed)};
+}
+export const BALTHRIX_ROUTE_LENGTH=BALTHRIX_ARC.total;
+// Cell-indexed spline positions reserve a continuous corridor for the large
+// serpent without O(whole route) work at every terrain or scenery vertex.
+const BALTHRIX_GRID=(()=>{
+ const buckets=new Map(),size=40;
+ for(let j=0;j<BALTHRIX_ARC.samples.length;j+=4){
+  const p=balthrixPoint(BALTHRIX_ARC.samples[j].seg,BALTHRIX_ARC.samples[j].u),
+    x=Math.floor(p.x/size),z=Math.floor(p.z/size),key=x+':'+z;
+  if(!buckets.has(key))buckets.set(key,[]);
+  buckets.get(key).push(p);
+ }
+ return {buckets,size};
+})();
+export function balthrixCorridorDistance(x,z){
+ const {buckets,size}=BALTHRIX_GRID,cx=Math.floor(x/size),cz=Math.floor(z/size);
+ let best=Infinity;
+ for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){
+  for(const p of buckets.get((cx+dx)+':'+(cz+dz))||[]){
+   const d=Math.hypot(x-p.x,z-p.z);if(d<best)best=d;
+  }
+ }
+ return best;
+}
+export function balthrixBermHeight(x,z){
+ const d=balthrixCorridorDistance(x,z);
+ return d>=8&&d<=24 ? 2.15*smooth01((d-8)/4)*(1-smooth01((d-20)/4)) : 0;
+}
 export function balthrixPosition(t,speed=14){
  const {samples,total}=BALTHRIX_ARC;
  if(!Number.isFinite(t)||!Number.isFinite(speed)||total<=0)

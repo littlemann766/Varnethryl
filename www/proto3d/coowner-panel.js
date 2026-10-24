@@ -1,7 +1,7 @@
 /* CoOwner rank controls. Verification is strictly server-side. This UI cannot
  * grant a role by changing a nickname, localStorage or a JavaScript flag.
  */
-export function createCoOwnerPanel({login,resume,lock,list,jump,isOnline,getSavedToken,clearSavedToken}){
+export function createCoOwnerPanel({login,resume,lock,list,jump,summonBoss,isOnline,getSavedToken,clearSavedToken}){
  const panel=document.getElementById('vnCoOwnerPanel');
  const openButton=document.getElementById('vnCoOwnerTools');
  if(!panel||!openButton)return {onEvent(){},onConnected(){},dispose(){}};
@@ -20,7 +20,7 @@ export function createCoOwnerPanel({login,resume,lock,list,jump,isOnline,getSave
  const status=make('div','vn-coowner-status','Locked. Join a Varnethryl multiplayer world to unlock.');
  status.setAttribute('role','status');
  const tools=make('div','vn-coowner-tools');tools.hidden=true;
- const abilities=make('p','vn-coowner-desc','CoOwner can find online testers, teleport beside them across worlds, and use world/private chat. Owner-only controls remain restricted.');
+ const abilities=make('p','vn-coowner-desc','CoOwner can summon all available bosses for local tests, find online testers, teleport, and use chat. Other Owner-only cheats remain restricted.');
  const refresh=make('button','','Refresh online players');refresh.type='button';
  const player=make('select','');player.setAttribute('aria-label','Select online player');
  const jumpBtn=make('button','','Teleport beside player');jumpBtn.type='button';
@@ -39,7 +39,22 @@ export function createCoOwnerPanel({login,resume,lock,list,jump,isOnline,getSave
    'CoOwner sees online testers and may travel beside them. Owner-only commands and server settings are not available.');
  infoBody.appendChild(codeNote);
  infoGroup.append(infoTitle,infoBody);
- tools.append(travelGroup,infoGroup,lockBtn);
+ const bossGroup=make('details','vn-rank-fold');
+ const bossTitle=make('summary','','⚔ Summon boss');
+ const bossBody=make('div','vn-rank-fold-body');
+ const bossChoice=make('select','');
+ bossChoice.setAttribute('aria-label','Select boss to summon');
+ for(const [key,label] of [
+   ['titan','Ashen Titan'],['titan40','Ashen Titan — Giant'],
+   ['vaelthryx','Balthrix — perimeter only'],['frosttroll_a','Frost Troll — Krag'],
+   ['frosttroll_b','Frost Troll — Mog'],['hydra','Hydra — Mire only']
+ ]){const opt=make('option','',label);opt.value=key;bossChoice.appendChild(opt);}
+ const bossBtn=make('button','','Spawn selected boss');bossBtn.type='button';
+ const bossNote=make('p','vn-coowner-desc',
+   'Verified local test. One active boss at a time; Hydra requires Mire and Balthrix requires Town.');
+ bossBody.append(bossChoice,bossBtn,bossNote);
+ bossGroup.append(bossTitle,bossBody);
+ tools.append(travelGroup,bossGroup,infoGroup,lockBtn);
  panel.replaceChildren(heading,info,loginRow,status,tools);
  let authorized=false;
  function setAuthorized(value){
@@ -80,6 +95,12 @@ export function createCoOwnerPanel({login,resume,lock,list,jump,isOnline,getSave
    if(!login(pass))status.textContent='Cannot reach the Varnethryl server.';
  });
  refresh.addEventListener('click',()=>{if(!list())status.textContent='No CoOwner server connection.';});
+ bossChoice.addEventListener('keydown',e=>e.stopPropagation());
+ bossBtn.addEventListener('click',()=>{
+   if(!authorized){status.textContent='Unlock CoOwner first.';return;}
+   status.textContent='Requesting verified boss summon…';
+   if(!summonBoss(bossChoice.value))status.textContent='Connect to the game server first.';
+ });
  jumpBtn.addEventListener('click',()=>{
    const id=player.value;if(!authorized||!id)return;
    status.textContent='Traveling to selected player…';
@@ -99,6 +120,10 @@ export function createCoOwnerPanel({login,resume,lock,list,jump,isOnline,getSave
      if(message.ok)list();
    }else if(message.type==='coowner-players')setPlayers(message.players);
    else if(message.type==='coowner-error')status.textContent=String(message.message||'CoOwner action unavailable.');
+   else if(message.type==='coowner-boss-result'){
+     status.textContent=message.ok?'Boss summoned for local testing.':
+       'Boss unavailable: one active at once; Hydra requires Mire and Balthrix requires Town.';
+   }
    else if(message.type==='coowner-locked'){
      setAuthorized(false);setPlayers([]);status.textContent='CoOwner locked manually.';
    }else if(message.type==='coowner-arrived'){

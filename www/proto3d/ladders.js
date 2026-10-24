@@ -32,27 +32,50 @@ export function createLadders(env) {
     L.topX = L.x; L.topZ = L.z + h - 0.45;         // where the hero stands on the platform
     scene.add(g); L.group = g; list.push(L); return L;
   }
-  const surface = (x, z, level) => { for (const L of list) if (L.level === level && Math.abs(x - L.x) <= L.half + 0.1 && Math.abs(z - L.z) <= L.half + 0.1) return { y: L.H, ladder: L }; return null; };
+  // Perimeter ladders connect the actual wall-walk surface (level 1) to
+  // ground without any new platform or floor collision over the masonry.
+  function addWall(def){
+    const L={...def,wall:true},g=new THREE.Group();
+    g.position.set(L.rungX,0,L.rungZ);g.rotation.y=Math.atan2(L.nx,L.nz);
+    const H=L.H;
+    for(const side of [-1,1])box(g,.085,H+.9,.085,wood,side*.35,(H+.9)/2,0);
+    for(let y=.3;y<H+.78;y+=.34)box(g,.78,.065,.09,rope,0,y,0);
+    for(const y of [.7,H-.2])box(g,.82,.095,.3,dark,0,y,-.2);
+    scene.add(g);L.group=g;list.push(L);return L;
+  }
+  const surface = (x, z, level) => { for (const L of list) if (!L.wall && L.level === level && Math.abs(x - L.x) <= L.half + 0.1 && Math.abs(z - L.z) <= L.half + 0.1) return { y: L.H, ladder: L }; return null; };
   const heightOf = level => { for (const L of list) if (L.level === level) return L.H; return 0; };
   function start(L, dir) {
     if (climb) return; const up = dir > 0;
-    climb = { L, dir, y: up ? 0 : L.H, x: L.x, z: L.z + L.half + 0.1 + 0.55 }; state.climbing = true; state.target = null;
-    state.heroX = climb.x; state.heroZ = L.z + L.half + 1.1; if (!up) { state.heroX = L.x; state.heroZ = L.topZ; state.level = L.level; }
+    climb = { L, dir, y: up ? 0 : L.H, x: L.wall ? L.rungX : L.x, z: L.wall ? L.rungZ : L.z + L.half + .65 }; state.climbing = true; state.target = null;
+    if(L.wall){
+      state.heroX=up?L.baseX:L.topX;state.heroZ=up?L.baseZ:L.topZ;
+      if(!up)state.level=L.level;
+    }else{
+      state.heroX=climb.x;state.heroZ=L.z+L.half+1.1;
+      if(!up){state.heroX=L.x;state.heroZ=L.topZ;state.level=L.level;}
+    }
   }
   /* once per frame, before the normal movement. vx,vz = input direction (world). Returns true while the hero is on the ladder. */
   function update(dt, vx, vz) {
     const e = keys.has('e'), ePress = e && !ePrev; ePrev = e;
     if (climb) {
       const L = climb.L, up = climb.dir > 0; climb.y += climb.dir * SPEED * dt;
-      state.heroX = L.x; state.heroZ = L.z + L.half + 0.55; state.yaw = Math.PI; state.heroY = Math.max(0, Math.min(L.H, climb.y)); state.speed = 2.5; state.dispY = state.heroY;
+      if(L.wall){
+        const progress=Math.max(0,Math.min(1,climb.y/L.H));
+        state.heroX=L.baseX+(L.topX-L.baseX)*progress;
+        state.heroZ=L.baseZ+(L.topZ-L.baseZ)*progress;
+        state.yaw=Math.atan2(-L.nx,-L.nz);
+      }else{state.heroX=L.x;state.heroZ=L.z+L.half+.55;state.yaw=Math.PI;}
+      state.heroY=Math.max(0,Math.min(L.H,climb.y));state.speed=2.5;state.dispY=state.heroY;
       if ((up && climb.y >= L.H) || (!up && climb.y <= 0)) { state.climbing = false; climb = null; state.level = up ? L.level : 0; state.heroX = up ? L.topX : L.baseX; state.heroZ = up ? L.topZ : L.baseZ; state.heroY = up ? L.H : 0; state.speed = 0; hold = -0.7; btn.style.display = 'none'; near = null; }
       return !!climb;
     }
     // proximity: ground level -> up, on a ladder platform -> down
     let best = null;
     for (const L of list) {
-      if (state.level === 0) { const d = Math.hypot(state.heroX - L.baseX, state.heroZ - L.baseZ); if (d < 2.0) { best = { L, dir: 1, d, ax: 0, az: -1 }; break; } }
-      else if (state.level === L.level) { const d = Math.hypot(state.heroX - L.topX, state.heroZ - L.topZ); if (d < 1.6) { best = { L, dir: -1, d, ax: 0, az: 1 }; break; } }
+      if (state.level === 0) { const d = Math.hypot(state.heroX - L.baseX, state.heroZ - L.baseZ); if (d < (L.wall?2.7:2.0)) { best = { L, dir: 1, d, ax: L.wall?-L.nx:0, az: L.wall?-L.nz:-1 }; break; } }
+      else if (state.level === L.level) { const d = Math.hypot(state.heroX - L.topX, state.heroZ - L.topZ); if (d < (L.wall?2.1:1.6)) { best = { L, dir: -1, d, ax: L.wall?L.nx:0, az: L.wall?L.nz:1 }; break; } }
     }
     near = best; const sh = best ? 'block' : 'none'; if (btn.style.display !== sh) { btn.style.display = sh; if (best) btn.textContent = best.dir > 0 ? 'Climb \u25B2' : 'Down \u25BC'; }
     if (best) {
@@ -62,5 +85,5 @@ export function createLadders(env) {
     } else hold = 0;
     return false;
   }
-  return { list, add, surface, heightOf, update, get climbing() { return !!climb; }, btn };
+  return { list, add, addWall, surface, heightOf, update, get climbing() { return !!climb; }, btn };
 }

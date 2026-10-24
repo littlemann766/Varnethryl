@@ -1,0 +1,36 @@
+diff --git a/www/proto3d/main.js b/www/proto3d/main.js
+index e10fef6..a589428 100644
+--- a/www/proto3d/main.js
++++ b/www/proto3d/main.js
+@@ -25,6 +25,7 @@ import { createMiniMap } from './minimap.js';
+ import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
+ import { worldProfile, loadScale } from './charscale.js';
+ import { buildTownOutskirts, TOWN_MAP_ROADS } from './townlands.js';
++import { KIT as BETH_KIT } from './beth-kit.js'; /*PREVIEW-ONLY*/
+ import { buildHobgoblinCamps } from './hobcamps.js';
+ import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, PORT_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
+ import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
+@@ -267,6 +268,9 @@ if(BLD_ON){try{
+   });
+   for (const m of [IT, IL, IL2]) { m.castShadow = true; m.receiveShadow = true; scene.add(m); }
+   window.__treeCount = pts.length;
++  /*PREVIEW-ONLY (proposed for Lucky): swap the 3 instanced cone meshes for ONE merged kit-tree mesh at the same spots*/
++  if (BETH_KIT.ready && !/nokit/.test(location.search)) { const A = new BETH_KIT.Acc(); pts.forEach((p, i) => { const g = BETH_KIT.geo(i % 4 === 3 ? (i % 8 === 7 ? 'tree_birch_a_lod1' : 'tree_oak_a_lod1') : i % 2 ? 'tree_pine_a_lod1' : 'tree_pine_b_lod1'); A.add(g, p.x, 0, p.z, i * 2.1, p.s * 0.75); });
++    for (const m of [IT, IL, IL2]) scene.remove(m); const km = new THREE.Mesh(A.geo(), BETH_KIT.material); km.name = 'beth-town-trees'; km.castShadow = km.receiveShadow = true; km.userData.keep = true; scene.add(km); }
+ }
+ // a few crates/barrels (solid props)
+ for (const [x, z] of (BLD_ON ? [] : [[-8.2, -4.2], [-8.6, -3.2], [9.2, -5.8], [8.4, 6.6]])) {
+@@ -2032,6 +2036,7 @@ function frame(now) {
+   simTime += dt; if (SMOKE) SMOKE.update(simTime); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateWater?.(simTime,state.heroX,state.heroZ); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateVolcano?.(simTime,state.heroX,state.heroZ);
+   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
+   if(ZONE.name==='town' && totalFrames%9===0)hideInactiveHeroModels();
++  if(window.__PV_HOOK)window.__PV_HOOK();
+   renderer.render(scene, camera);
+   totalFrames++; fpsAcc += dt; fpsFrames++;
+   if (fpsAcc >= 0.5) { fps = fpsFrames / fpsAcc; fpsAcc = 0; fpsFrames = 0; fpsEl.textContent = fps.toFixed(0) + ' fps · ' + renderer.info.render.calls + ' calls'; }
+@@ -2333,3 +2338,5 @@ MULTIPLAYER=createMultiplayer({THREE,scene,state,getZone:()=>ZONE.name,setZone,
+ });
+ window.__p3d.multiplayer=MULTIPLAYER;
+ document.dispatchEvent(new Event('varn:game-ready'));
++
++/*PREVIEW-ONLY*/window.__P={renderer,scene,camera,get state(){return state},get TL(){return TOWN_LANDS},THREE};

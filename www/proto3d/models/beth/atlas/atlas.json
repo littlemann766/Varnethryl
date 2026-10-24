@@ -1,0 +1,22 @@
+{
+ "tile": 256,
+ "grid": 4,
+ "tiles": [
+  "bark",
+  "leaf",
+  "pinecard",
+  "grass",
+  "flower",
+  "rock",
+  "wood",
+  "iron",
+  "snow",
+  "ice",
+  "basalt",
+  "lavacrust",
+  "cloth",
+  "cobble",
+  "imp_oak",
+  "imp_pine"
+ ]
+}

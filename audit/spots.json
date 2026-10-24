@@ -1,0 +1,3 @@
+[{"id":"town_start","x":0,"z":39.2},{"id":"town_center","x":0,"z":4},{"id":"town_east","x":70,"z":40},
+{"id":"outskirts_east","x":260,"z":20},{"id":"outskirts_north","x":20,"z":-260},{"id":"outskirts_sw","x":-250,"z":180},
+{"id":"port_edge","x":-340,"z":320},{"id":"volcano_edge","x":300,"z":-300}]

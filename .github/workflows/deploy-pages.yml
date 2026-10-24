@@ -30,7 +30,9 @@ jobs:
           python3 tools/check_assets.py
           python3 tools/verify_frost_troll_b.py
       - name: Check multiplayer, ocean and Coliseum regressions
-        run: node tools/check_multiplayer_ocean_arena.mjs
+        run: |
+          node tools/check_multiplayer_ocean_arena.mjs
+          node tools/check_ladders_jump.mjs
       - name: Check JavaScript syntax
         run: |
           find www -type f -name "*.js" -not -path "*/vendor/*" -print0 | xargs -0 -n1 node --check

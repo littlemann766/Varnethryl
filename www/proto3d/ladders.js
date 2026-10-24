@@ -1,15 +1,24 @@
-/* Climbable ladders (1.1.8): small wooden towers/lofts you climb with a ladder instead of stairs.
-   Each structure has its own level number (10+i) with a platform surface at height H. Walk into the ladder (keyboard / joystick), or press E / the Climb button
-   when close, to climb up; do the same at the top edge to climb down. Vertical movement + walk animation. Followers use the hero's breadcrumb trail (see main.js). */
+/* Climbable ladders: keyboard/joystick movement only, no prompt/button.
+   Walk into a ladder to grab it; hold toward the top to ascend, hold back
+   to descend, release to pause. Works on perimeter walls and every building.
+   The ladder links existing floor levels without adding new floating floors. */
+export function ladderAxis(L) {
+  const dx=L.topX-L.baseX,dz=L.topZ-L.baseZ,dist=Math.hypot(dx,dz)||1;
+  return {x:dx/dist,z:dz/dist};
+}
+export function ladderIntent(L,vx,vz) {
+  const axis=ladderAxis(L),mag=Math.hypot(vx,vz);
+  return mag>.1 ? (vx*axis.x+vz*axis.z)/mag : 0;
+}
 export function createLadders(env) {
   const { THREE, scene, colliders, state, keys } = env, HS = env.HS;
   const mat = (c, r = 0.9) => new THREE.MeshStandardMaterial({ color: c, roughness: r });
   const wood = mat(0x8a5a2b), dark = mat(0x5a3a1c), plank = mat(0xa8793f), roof = mat(0x7a2e22), rope = mat(0xcfc09a);
   const list = [], SPEED = 2.4;
-  let climb = null, hold = 0, ePrev = false, near = null;
-  const btn = document.createElement('button'); btn.id = 'climbBtn'; btn.type = 'button'; btn.textContent = 'Climb';
-  btn.style.cssText = 'position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(250px,calc(env(safe-area-inset-bottom) + 244px));z-index:45;display:none;min-width:76px;height:44px;border-radius:22px;border:2px solid #ffe9a8;background:#6a3d12e6;color:#fff;font:700 14px system-ui;touch-action:none';
-  document.body.appendChild(btn); btn.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (near) start(near.L, near.dir); });
+  let climb = null, hold = 0, near = null;
+  // Legacy caller still hides this control when changing zones, but no
+  // button is created or attached to the DOM. Climbing is fully hands-free.
+  const btn={style:{display:'none'}};
   function box(g, w, h, d, m, x, y, z) { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); o.castShadow = true; g.add(o); return o; }
   /* def: {id, x, z, half, H, roof} ladder on the +z face. */
   function add(def) {
@@ -71,32 +80,58 @@ export function createLadders(env) {
     }
   }
   /* once per frame, before the normal movement. vx,vz = input direction (world). Returns true while the hero is on the ladder. */
-  function update(dt, vx, vz) {
-    const e = keys.has('e'), ePress = e && !ePrev; ePrev = e;
-    if (climb) {
-      const L = climb.L, up = climb.dir > 0; climb.y += climb.dir * SPEED * dt;
+  function update(dt,vx,vz) {
+    if(climb){
+      const L=climb.L,delta=ladderIntent(L,vx,vz);
+      // Hold the joystick/keyboard toward either end. Neutral input pauses
+      // at the current rung; reversing moves back down the SAME ladder.
+      if(Math.abs(delta)>.22)climb.y+=Math.sign(delta)*SPEED*dt;
+      const lo=L.y0??0,hi=L.y1??L.H;
+      climb.y=Math.max(lo,Math.min(hi,climb.y));
+      const t=Math.max(0,Math.min(1,(climb.y-lo)/(hi-lo||1)));
       if(L.wall){
-        const progress=Math.max(0,Math.min(1,(climb.y-(L.y0??0))/((L.y1??L.H)-(L.y0??0)||1)));
-        state.heroX=L.baseX+(L.topX-L.baseX)*progress;
-        state.heroZ=L.baseZ+(L.topZ-L.baseZ)*progress;
+        state.heroX=L.baseX+(L.topX-L.baseX)*t;
+        state.heroZ=L.baseZ+(L.topZ-L.baseZ)*t;
         state.yaw=Math.atan2(-L.nx,-L.nz);
-      }else{state.heroX=L.x;state.heroZ=L.z+L.half+.55;state.yaw=Math.PI;}
-      state.heroY=Math.max(L.y0??0,Math.min(L.y1??L.H,climb.y));state.speed=2.5;state.dispY=state.heroY;
-      if ((up && climb.y >= (L.y1??L.H)) || (!up && climb.y <= (L.y0??0))) { state.climbing = false; climb = null; state.level = up ? L.level : (L.baseLevel??0); state.heroX = up ? L.topX : L.baseX; state.heroZ = up ? L.topZ : L.baseZ; state.heroY = up ? (L.y1??L.H) : (L.y0??0); state.speed = 0; hold = -0.7; btn.style.display = 'none'; near = null; }
-      return !!climb;
+      }else{
+        // Original independent lookout ladders also follow movement input.
+        state.heroX=L.baseX+(L.topX-L.baseX)*t;
+        state.heroZ=L.baseZ+(L.topZ-L.baseZ)*t;
+        state.yaw=Math.PI;
+      }
+      state.heroY=climb.y;state.dispY=climb.y;
+      state.speed=Math.abs(delta)>.22?SPEED:0;
+      if((t>=1 && delta>.22)||(t<=0 && delta<-.22)){
+        state.climbing=false;climb=null;
+        state.level=t>=1?L.level:(L.baseLevel??0);
+        state.heroX=t>=1?L.topX:L.baseX;
+        state.heroZ=t>=1?L.topZ:L.baseZ;
+        state.speed=0;hold=0;near=null;
+      }
+      return true;
     }
-    // proximity: ground level -> up, on a ladder platform -> down
-    let best = null;
-    for (const L of list) {
-      if (state.level === (L.baseLevel??0)) { const d = Math.hypot(state.heroX - L.baseX, state.heroZ - L.baseZ); if (d < (L.wall?2.7:2.0)) { best = { L, dir: 1, d, ax: L.wall?-L.nx:0, az: L.wall?-L.nz:-1 }; break; } }
-      else if (state.level === L.level) { const d = Math.hypot(state.heroX - L.topX, state.heroZ - L.topZ); if (d < (L.wall?2.1:1.6)) { best = { L, dir: -1, d, ax: L.wall?L.nx:0, az: L.wall?L.nz:1 }; break; } }
+    // Prefer a valid aligned ladder, rather than grabbing an unrelated
+    // ladder at the same height or an adjacent building's upper floor.
+    let best=null,score=-Infinity;
+    for(const L of list){
+      const up=state.level===(L.baseLevel??0);
+      if(!up&&state.level!==L.level)continue;
+      const px=up?L.baseX:L.topX,pz=up?L.baseZ:L.topZ;
+      const d=Math.hypot(state.heroX-px,state.heroZ-pz);
+      const limit=L.wall?2.15:1.6;
+      if(d>limit)continue;
+      const intent=ladderIntent(L,vx,vz)*(up?1:-1);
+      if(intent<.55)continue;
+      const candidate=intent-d*.1;
+      if(candidate>score){score=candidate;best={L,dir:up?1:-1};}
     }
-    near = best; const sh = best ? 'block' : 'none'; if (btn.style.display !== sh) { btn.style.display = sh; if (best) btn.textContent = best.dir > 0 ? 'Climb \u25B2' : 'Down \u25BC'; }
-    if (best) {
-      const mag = Math.hypot(vx, vz), into = mag > 0.1 && (vx * best.ax + vz * best.az) / mag > 0.45 && best.d < 1.5;
-      hold = into ? hold + dt : 0;
-      if (hold > 0.18 || (ePress && best.d < 2.0)) { start(best.L, best.dir); hold = 0; }
-    } else hold = 0;
+    near=best;
+    if(best){
+      // ~one movement frame of deliberate approach avoids an involuntary
+      // grab when someone merely brushes past the rails.
+      hold+=dt;
+      if(hold>=.08){start(best.L,best.dir);hold=0;return true;}
+    }else hold=0;
     return false;
   }
   return { list, add, addWall, addBuilding, surface, heightOf, update, get climbing() { return !!climb; }, btn };

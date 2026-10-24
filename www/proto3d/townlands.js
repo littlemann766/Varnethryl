@@ -10,10 +10,16 @@ import { MOUNTAIN_APPROACH, MOUNTAIN_WILDS_GATE, buildMountainWildsGateway } fro
 import { CITY_HALF, FROST_SUMMIT, FROST_PORTAL, TITAN_CENTER, PORT_CENTER, LAVA_POOLS, smooth01, frostHill, lavaAmount } from './bossregions.js';
 
 // Shared by the 3D road meshes and live top-down minimap: edit paths once.
+// Brown routes traced from the user's 24 Oct map and smoothed into real roads.
 export const TOWN_MAP_ROADS=Object.freeze([
- {points:[[0,CITY_HALF+8],[-82,210],[-165,247],[-245,285],[-325,332],[-365,379],[-403,382],[PORT_CENTER.x,PORT_CENTER.z-15]],width:9.2,color:'#b4a891'},
- {points:[[0,-CITY_HALF-12],[-45,-231],[-80,-285],[-57,-337],[-18,-386],[30,-374],[25,-348],[FROST_PORTAL.x,FROST_PORTAL.z+7]],width:7.4,color:'#9a9e9c'},
- {points:MOUNTAIN_APPROACH,width:8.4,color:'#999094'}
+ {id:'tidewrack-road',points:[[0,CITY_HALF+9],[-65,204],[-145,219],[-211,220],[-269,231],[-336,269],[-387,322],[PORT_CENTER.x,PORT_CENTER.z-17]],width:9.2,color:'#b4a891'},
+ {id:'frost-spiral',points:[[0,-CITY_HALF-9],[-10,-247],[-42,-283],[-101,-327],[-99,-391],[-68,-439],[-8,-463],[62,-446],[95,-412],[105,-360],[80,-319],[26,-302],[-25,-317],[-47,-357],[-28,-383],[11,-383],[34,-359],[15,-339],[FROST_PORTAL.x,FROST_PORTAL.z]],width:7.6,color:'#a4a6a5'},
+ {id:'broken-seal-connector',points:MOUNTAIN_APPROACH,width:8.4,color:'#999094'},
+ {id:'western-carriageway',points:[[-558,-6],[-474,-12],[-398,-7],[-322,0],[-270,6],[-232,4],[-CITY_HALF,0]],width:8.8,color:'#998875'},
+ {id:'wilds-west-spur',points:[[-315,0],[-305,-67],[-313,-132],[-330,-203],[-366,-273],[MOUNTAIN_WILDS_GATE.x,MOUNTAIN_WILDS_GATE.z]],width:7.6,color:'#8d806b'},
+ {id:'eastern-carriageway',points:[[CITY_HALF,0],[264,-3],[335,0],[421,-2],[500,0],[558,-7]],width:8.9,color:'#998875'},
+ {id:'east-meadow-loop',points:[[345,0],[377,62],[387,127],[354,190],[309,247],[285,311],[304,356],[269,315],[214,259],[150,225],[76,200],[0,CITY_HALF+9]],width:7.6,color:'#99816a'},
+ {id:'south-gate-road',points:[[0,CITY_HALF+9],[5,265],[9,344],[0,440],[-6,558]],width:9.1,color:'#9d8b76'}
 ]);
 const CHUNK = 64;
 const CORE = 164;           // original town wall was at +/-168 world units
@@ -29,8 +35,8 @@ const FIELDS = [
 // This is the ONLY outdoor height function: mesh, scenery, player and followers share it.
 const smooth=(a,b,v)=>{const t=Math.max(0,Math.min(1,(v-a)/(b-a)));return t*t*(3-2*t);};
 const ridges=[
-  [-386,-292,43,96],[-412,337,55,108],[359,-345,53,102],
-  [395,304,46,95],[-328,388,26,73],[306,414,24,72],
+  [-386,-292,43,96],[359,-345,53,102],
+  [395,304,46,95],[306,414,24,72],
   [-443,24,29,87],[456,-38,32,92]
 ];
 const valleys=[[-295,258,19,88],[340,-242,16,80],[-377,-170,13,67],[271,313,12,77]];
@@ -41,7 +47,7 @@ export function townElevation(x,z,world=560){
   if(radius<=220)return 0;
   const nearPort=Math.hypot(x-PORT_CENTER.x,z-PORT_CENTER.z);
   const nearLight=Math.hypot(x+157*2.8,z-119*2.8);
-  const flatten=Math.min(smooth01((nearPort-59)/28),smooth01((nearLight-26)/22));
+  const flatten=Math.min(smooth01((nearPort-122)/55),smooth01((nearLight-26)/22));
   const corridor=smooth01((Math.min(ax,az)-12)/29);
   for(const f of FIELDS)if(ax>=0&&Math.abs(x-f.x)<f.w/2+6&&Math.abs(z-f.z)<f.d/2+6)return 0;
   const inner=smooth(220,305,radius),edge=1-smooth(world-105,world-15,Math.max(ax,az));
@@ -149,6 +155,8 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   for(let i=0;i<16;i++){
     const a=i*2*Math.PI/16,offset=world+50+(i%3)*31;
     const x=Math.cos(a)*offset,z=Math.sin(a)*offset;
+    // Remove the artificial backdrop cone behind Tidewrack's harbor.
+    if(Math.hypot(x-PORT_CENTER.x,z-PORT_CENTER.z)<260)continue;
     const height=72+(i*37%61),radius=53+(i*19%34);
     const mountain=new THREE.Mesh(farRock,farStone);
     mountain.position.set(x,height*.5-8,z);mountain.scale.set(radius,height,radius*.82);
@@ -193,6 +201,9 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   // Separate westward branch from the established frost road. Stone paving follows
   // the real mountain terrain: no floating staircase and no Frost portal changes.
   const brokenSealRoad=path(TOWN_MAP_ROADS[2].points,TOWN_MAP_ROADS[2].width,new THREE.MeshLambertMaterial({color:0x756b6b,side:THREE.DoubleSide}));
+  // Additional brown lines form traversable, height-following roads, not flat drawings.
+  const newCarriageways=TOWN_MAP_ROADS.slice(3).map(r=>path(r.points,r.width,
+    new THREE.MeshLambertMaterial({color:r.color,side:THREE.DoubleSide})));
   const ruinedGateway=buildMountainWildsGateway(group,(x,z)=>townElevation(x,z,world));
   for(const c of ruinedGateway.colliders)colliders.push(c);
   // Summit approach: an actual rocky ice tunnel. Enter from the southern road
@@ -353,11 +364,13 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   // Clear avenues across the centre, the old village, gatehouse approach and a ring road.
   const route=(x,z,pad=0)=>Math.abs(x)<15+pad||Math.abs(z)<10+pad||
     Math.abs(Math.hypot(x,z)-RING)<8+pad;
-  const nearBrokenSealPath=(x,z,pad=0)=>MOUNTAIN_APPROACH.some((p,i)=>{if(i===0)return false;
-    const [ax,az]=MOUNTAIN_APPROACH[i-1],[bx,bz]=p,dx=bx-ax,dz=bz-az;
+  // Reserve the entire road network, not just the legacy Wilds connector.
+  const nearBrokenSealPath=(x,z,pad=0)=>TOWN_MAP_ROADS.some(road=>road.points.some((p,i)=>{
+    if(i===0)return false;
+    const [ax,az]=road.points[i-1],[bx,bz]=p,dx=bx-ax,dz=bz-az;
     const t=Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/(dx*dx+dz*dz||1)));
-    return Math.hypot(x-ax-t*dx,z-az-t*dz)<9+pad;
-  });
+    return Math.hypot(x-ax-t*dx,z-az-t*dz)<road.width/2+4+pad;
+  }));
   const possible=(x,z,pad=0)=>Math.max(Math.abs(x),Math.abs(z))>CORE+pad &&
     Math.max(Math.abs(x),Math.abs(z))<usable-pad &&
     !route(x,z,pad) && !nearBrokenSealPath(x,z,pad) &&

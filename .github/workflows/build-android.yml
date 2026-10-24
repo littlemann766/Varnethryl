@@ -31,6 +31,7 @@ jobs:
         run: |
           node tools/check_overhaul.mjs
           node tools/check_multiplayer_ocean_arena.mjs
+          node tools/check_ladders_jump.mjs
           node tools/check_serpent_locomotion.mjs
           node tools/boss_patterns_test.mjs
           node tools/owner_cheats_test.mjs

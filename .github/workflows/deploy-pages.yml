@@ -34,6 +34,7 @@ jobs:
           node tools/check_multiplayer_ocean_arena.mjs
           node tools/check_ladders_jump.mjs
           node tools/check_multitouch_controls.mjs
+          node tools/check_owner_map_routes.mjs
       - name: Check JavaScript syntax
         run: |
           find www -type f -name "*.js" -not -path "*/vendor/*" -print0 | xargs -0 -n1 node --check

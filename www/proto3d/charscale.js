@@ -26,6 +26,10 @@ const HERO_LORE=Object.fromEntries(Object.entries(HERO_LORE_HEIGHTS).map(([name,
   [name,{height:inchesToMeters(inches),fitMeasuredHeight:true}]));
 export const CHARS = {
   ...HERO_LORE,
+  // Boss-approved real heights (19 Oct): Pip 0.52 m, Phoenix 0.756 m, Wren 1.35 m. Step stays at the 0.35 m minimum (Lucian, v1.1.15) so the tiny heroes can climb.
+  'n:pip_new2': {height:0.52,fitMeasuredHeight:true,radius:0.2,step:0.35,camDist:0.55,camHeight:0.45,camMin:0.3,camMax:1.4},
+  'n:phoenix_new3': {height:0.756,fitMeasuredHeight:true,radius:0.25,step:0.35,camDist:0.6,camHeight:0.5,camMin:0.3,camMax:1.4},
+  'n:wren_new3': {height:1.35,fitMeasuredHeight:true,radius:0.42,step:0.35,camDist:0.85,camHeight:0.8,camMin:0.35,camMax:1.6},
   'n:owner': {height:HERO_M,fitMeasuredHeight:true},
   'n:owner_pika1': {height:HERO_M,fitMeasuredHeight:true},
   'n:garruk_new4': {height:inchesToMeters(82),fitMeasuredHeight:true},

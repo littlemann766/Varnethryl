@@ -3,8 +3,10 @@
  * handful of draw calls on Android. All positions share the walkable heightmap. */
 import * as THREE from './vendor/three.module.js';
 import { fallenTreeSites } from './bossregions.js';
+import { buildBalthrixCorridor } from './balthrix-corridor.js';
 
 export function buildBalthrixTrail(parent, heightAt, colliders) {
+  const corridor=buildBalthrixCorridor(parent,heightAt,colliders);
   const sites=fallenTreeSites();
   const bark=new THREE.MeshLambertMaterial({color:0x59402a,flatShading:true});
   const charred=new THREE.MeshLambertMaterial({color:0x242022,flatShading:true});
@@ -58,5 +60,5 @@ export function buildBalthrixTrail(parent, heightAt, colliders) {
     colliders.push({type:'circle',x:ax,z:az,r:.8});
   }
   for(const mesh of [...logs,stumps,splinters,branches])mesh.instanceMatrix.needsUpdate=true;
-  return {sites,count:sites.length,meshes:[...logs,stumps,splinters,branches]};
+  return {sites,count:sites.length,meshes:[...corridor.meshes,...logs,stumps,splinters,branches],corridor};
 }

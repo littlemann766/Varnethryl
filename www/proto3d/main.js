@@ -2291,6 +2291,21 @@ MULTIPLAYER=createMultiplayer({THREE,scene,state,getZone:()=>ZONE.name,setZone,
    return loadActorModel(id,{forceGLB:true});
  },
  updateLevel,snapFollowers,camRig,miniMap,
+ onRankBossSpawn:async boss=>{
+   // Called only after server-approved CoOwner command.
+   // Local 3D boss test until multiplayer combat state is authoritative.
+   if(!['titan','titan40','vaelthryx','frosttroll_a','frosttroll_b','hydra'].includes(boss))return false;
+   if(ZONE.name==='sailing'||ZONE.name==='coliseum')return false;
+   if(boss==='vaelthryx'&&ZONE.name!=='town')return false;
+   if(boss==='hydra'&&ZONE.name!=='hydra')return false;
+   try{
+     const f=await fightToggle(true);
+     if(!f)return false;
+     if(!f.on)f.startAuto();
+     if(!f.on)return false;
+     return !!(await f.cheatSpawn(boss));
+   }catch(e){diag('CoOwner approved boss failed: '+String(e?.message||e),true);return false;}
+ },
  teleportNearPlayer:async(target)=>{
    if(!target||!['town','wilds','frost','hydra','sailing','coliseum'].includes(target.zone)||
       !Number.isFinite(target.x)||!Number.isFinite(target.z))return false;

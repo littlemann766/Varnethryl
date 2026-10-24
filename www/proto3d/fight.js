@@ -420,7 +420,10 @@ export function createFight(env) {
     }
     const roamer=cc.enemies.find(e=>e.key==='vaelthryx'&&e.state!=='defeated'&&e.roaming);
     if(roamer){
-      if(!window.active&&!roamer.manuallySummoned){
+      if(!window.active&&!roamer.manuallySummoned&&
+         (roamer.state==='idle'||Math.hypot(roamer.x-state.heroX,roamer.z-state.heroZ)>100)){
+        // Let an in-progress close-range boss fight finish after the six-
+        // minute natural window; retire only once the player disengages.
         cc.removeEnemy(roamer);
         bossOn=cc.enemies.some(e=>e.def.boss&&e.state!=='defeated');
       }else{
@@ -651,8 +654,10 @@ export function createFight(env) {
       try {
         if(key==='vaelthryx'){
           const near=nearestBalthrixPath(state.heroX,state.heroZ),at=balthrixPosition(near.time);
-          return !!(await spawn(key,0,{at:[at.x,at.z],roaming:true,
-            manuallySummoned:true,routePhase:near.time-regionClock,aggroR:44}));
+          const result=await spawn(key,0,{at:[at.x,at.z],roaming:true,
+            manuallySummoned:true,routePhase:near.time-regionClock,aggroR:44});
+          if(result)roamerSpawnedSlot=balthrixSpawnWindow().slot;
+          return !!result;
         }
         return !!(await spawn(key,26));
       } finally { ownerBossSpawnPending=false; }

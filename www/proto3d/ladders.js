@@ -90,8 +90,11 @@ export function createLadders(env) {
       climb.y=Math.max(lo,Math.min(hi,climb.y));
       const t=Math.max(0,Math.min(1,(climb.y-lo)/(hi-lo||1)));
       if(L.wall){
-        state.heroX=L.baseX+(L.topX-L.baseX)*t;
-        state.heroZ=L.baseZ+(L.topZ-L.baseZ)*t;
+        // Horizontal entry and exit blend into a vertical climb up the rails.
+        // Never slide diagonally through a building or masonry wall.
+        const inT=Math.min(1,t/.14),outT=Math.max(0,Math.min(1,(t-.86)/.14));
+        state.heroX=L.baseX+(L.rungX-L.baseX)*inT+(L.topX-L.rungX)*outT;
+        state.heroZ=L.baseZ+(L.rungZ-L.baseZ)*inT+(L.topZ-L.rungZ)*outT;
         state.yaw=Math.atan2(-L.nx,-L.nz);
       }else{
         // Original independent lookout ladders also follow movement input.

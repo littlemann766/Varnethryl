@@ -13,7 +13,7 @@ import { createExperience } from './combat/experience.js';
 import { CompanionCombat } from './combat/companions.js';
 import { SABER, ENEMIES, WAVE_TABLE, ABILITIES, OWNER_CLUSTER, TUNING } from './combat/data.js';
 import { Respawner } from './combat/respawn.js';
-import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, balthrixPosition, nearestBalthrixPath, onLava, isCitySafe } from './bossregions.js';
+import { TITAN_CENTER, FROST_REALM, FROST_SUMMIT, CITY_HALF, balthrixPosition, nearestBalthrixPath, balthrixSpawnWindow, onLava, isCitySafe } from './bossregions.js';
 import { FROST_BROTHERS } from './frostreach.js';
 import { terrainBodyPitch } from './terrain-follow.js';
 import { serpentHeading } from './serpent-locomotion.js';
@@ -27,7 +27,7 @@ export function createFight(env) {
   const { THREE, scene, camera, state, HS } = env;
   let on = false, saber = null, saberUrl = SABER_GLB, wave = 1, sheathed = false, spawnT = 0, bossOn = false;
   const terrainY=(x,z)=>env.groundY?env.groundY(x,z):0;
-  const bossDue=new Map();const bossPending=new Set();let regionClock=0,roamClock=0,frostSpawnT=0,spawnEpoch=0;
+  const bossDue=new Map();const bossPending=new Set();let regionClock=0,roamClock=0,frostSpawnT=0,spawnEpoch=0,roamerSpawnedSlot=-1;
   const v3 = new THREE.Vector3(), sc = [0, 0];
   const project = (x, y, z, out) => { v3.set(x, y, z).project(camera); if (v3.z > 1 || Math.abs(v3.x) > 1.3 || Math.abs(v3.y) > 1.3) return false; out[0] = (v3.x * 0.5 + 0.5) * innerWidth; out[1] = (-v3.y * 0.5 + 0.5) * innerHeight; return true; };
   const armory = new Armory({ ownerOk: () => !!(window.__p3d && window.__p3d.owner && window.__p3d.cheats), wallet: null });   // engine-side validation of every Armory UI request
@@ -402,46 +402,49 @@ export function createFight(env) {
           }
         }
       }else lavaT=0;
-      // Only discovery uses a slow timer. Once the serpent is visible its
-      // location is integrated EVERY frame; moving it every .22 seconds caused
-      // visible snapping and made its skeleton look like a sliding player.
-      roamClock+=dt;
-      if(roamClock>.22){
-        roamClock=0;
-        const route=nearestBalthrixPath(state.heroX,state.heroZ);
-        const hasRoamer=cc.enemies.some(e=>e.key==='vaelthryx'&&e.state!=='defeated');
-        if(!hasRoamer&&route.distance<112&&!roamBusy){
-          roamBusy=true;
-          const phase=route.time+2-regionClock,where=balthrixPosition(regionClock+phase);
-          Promise.resolve(spawnRegion('vaelthryx',where.x,where.z,{aggroR:48,roaming:true,routePhase:phase}))
-            .finally(()=>{roamBusy=false;});
-        }
+      // Balthrix is an event boss: no proximity-triggered spawn or re-spawn.
+      // The shared wall-clock slot prevents a rejoin from resetting the timer.
+    }
+    const window=balthrixSpawnWindow();
+    roamClock+=dt;
+    if(roamClock>=.75){
+      roamClock=0;
+      const present=cc.enemies.some(e=>e.key==='vaelthryx'&&e.state!=='defeated');
+      if(window.active&&window.slot!==roamerSpawnedSlot&&!present&&!roamBusy&&cc.dead<=0){
+        roamBusy=true;roamerSpawnedSlot=window.slot;
+        const patrolTime=window.elapsed/1000,at=balthrixPosition(patrolTime);
+        Promise.resolve(spawnRegion('vaelthryx',at.x,at.z,
+          {aggroR:44,roaming:true,routePhase:patrolTime-regionClock,spawnWindow:window.slot}))
+          .finally(()=>{roamBusy=false;});
       }
-      const roamer=cc.enemies.find(e=>e.key==='vaelthryx'&&e.state!=='defeated'&&e.roaming);
-      if(roamer){
-        const dHero=Math.hypot(roamer.x-state.heroX,roamer.z-state.heroZ);
-        if(dHero>52&&roamer.state==='idle'){
-          const p=balthrixPosition(regionClock+(roamer.routePhase||0));
-          const dx=p.x-roamer.x,dz=p.z-roamer.z,dist=Math.hypot(dx,dz);
+    }
+    const roamer=cc.enemies.find(e=>e.key==='vaelthryx'&&e.state!=='defeated'&&e.roaming);
+    if(roamer){
+      if(!window.active&&!roamer.manuallySummoned){
+        cc.removeEnemy(roamer);
+        bossOn=cc.enemies.some(e=>e.def.boss&&e.state!=='defeated');
+      }else{
+        const route=nearestBalthrixPath(roamer.x,roamer.z);
+        if(route.distance>11){
+          // AI aggression cannot carry him into the port or the castle.
+          const nearest=balthrixPosition(route.time);
+          roamer.x=nearest.x;roamer.z=nearest.z;roamer.state='idle';
+        }
+        if(roamer.state==='idle'){
+          const dest=balthrixPosition(regionClock+(roamer.routePhase||0));
+          const dx=dest.x-roamer.x,dz=dest.z-roamer.z,dist=Math.hypot(dx,dz);
           if(dist>.01){
-            // Physical pursuit of the curve, not instant correction of the
-            // mesh transform. Combat interrupts his patrol without teleporting.
             const step=Math.max(0,Math.min(.05,Number.isFinite(dt)?dt:0));
-            // Ease into patrol speed instead of snapping a giant serpent to
-            // 14 world units/s on its first visible frame. Retain the original
-            // maximum and keep combat chase logic owned by the controller.
             roamer.roamSpeed=Math.min(14,(Number.isFinite(roamer.roamSpeed)?roamer.roamSpeed:0)+25*step);
             const move=Math.min(dist,14*Math.max(0,dt),roamer.roamSpeed*step);
             roamer.x+=dx/dist*move;roamer.z+=dz/dist*move;
-            // The spline's tangent is less jittery than the tiny corrective
-            // vector when the enemy is already close to its next path point.
-            const heading=dist<6?p.yaw:Math.atan2(dx,dz);
+            const heading=dist<6?dest.yaw:Math.atan2(dx,dz);
             roamer.yaw=yawLerp(Number.isFinite(roamer.yaw)?roamer.yaw:heading,heading,Math.min(1,Math.max(0,dt)*3.5));
           }
         }
       }
     }
-    for(const e of cc.enemies.slice())if(e.def.boss&&Math.hypot(e.x-state.heroX,e.z-state.heroZ)>210){
+    for(const e of cc.enemies.slice())if(e.def.boss&&!e.roaming&&Math.hypot(e.x-state.heroX,e.z-state.heroZ)>210){
       cc.removeEnemy(e);bossDue.set(e.key,regionClock+4);
     }
   }
@@ -642,9 +645,17 @@ export function createFight(env) {
     // second boss while the first model is still loading into the world.
     if (ENEMIES[key].boss) {
       if (bossOn || ownerBossSpawnPending) return false;
+      if(key==='vaelthryx'&&env.zone?.()!=='town')return false;
+      if(key==='hydra'&&env.zone?.()!=='hydra')return false;
       ownerBossSpawnPending=true;
-      try { return !!(await spawn(key,key === 'vaelthryx' ? 60 : 26)); }
-      finally { ownerBossSpawnPending=false; }
+      try {
+        if(key==='vaelthryx'){
+          const near=nearestBalthrixPath(state.heroX,state.heroZ),at=balthrixPosition(near.time);
+          return !!(await spawn(key,0,{at:[at.x,at.z],roaming:true,
+            manuallySummoned:true,routePhase:near.time-regionClock,aggroR:44}));
+        }
+        return !!(await spawn(key,26));
+      } finally { ownerBossSpawnPending=false; }
     }
     for (const e of cc.enemies.slice()) if (e.state === 'defeated' && !e.def.boss) cc.removeEnemy(e);
     return !!(await spawn(key,10));

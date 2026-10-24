@@ -66,5 +66,22 @@ export function buildBalthrixCorridor(group,heightAt,colliders){
  rock.castShadow=shard.castShadow=true;
  rock.instanceMatrix.needsUpdate=shard.instanceMatrix.needsUpdate=true;
  group.add(rock,shard);
- return {meshes:[ribbon,rock,shard],rockCount:sites.length,length:BALTHRIX_ROUTE_LENGTH};
+ // Light broken branches and crushed splinters cross the scuffed middle, but
+ // no invisible wall collider blocks the monster's 20-unit movement channel.
+ const scraps=new THREE.InstancedMesh(new THREE.CylinderGeometry(.14,.2,1,5),
+   new THREE.MeshLambertMaterial({color:0x393026,flatShading:true}),44);
+ scraps.name='BALTHRIX_CRUSHED_PATH_DEBRIS';
+ scraps.userData.keep=true;scraps.castShadow=false;
+ const dummy=new THREE.Object3D();
+ for(let i=0;i<44;i++){
+   const p=balthrixPosition((i+.5)*BALTHRIX_ROUTE_LENGTH/44/14),
+     lateral=((i*7)%13)-6,x=p.x+Math.cos(p.yaw)*lateral,
+     z=p.z-Math.sin(p.yaw)*lateral;
+   dummy.position.set(x,heightAt(x,z)+.19,z);
+   dummy.rotation.set(Math.PI/2,p.yaw+(i%4)*.44,0);
+   dummy.scale.set(.7,2.1+(i%4)*.55,.9);dummy.updateMatrix();
+   scraps.setMatrixAt(i,dummy.matrix);
+ }
+ scraps.instanceMatrix.needsUpdate=true;group.add(scraps);
+ return {meshes:[ribbon,rock,shard,scraps],rockCount:sites.length,length:BALTHRIX_ROUTE_LENGTH};
 }

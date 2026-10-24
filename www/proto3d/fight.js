@@ -40,7 +40,7 @@ export function createFight(env) {
   const isOwner = () => /(^|:)owner/.test(env.heroId());
   const A = { vx: 0, vz: 0, lx: 0, lz: 0, dash: null, jump: -1, spin: 0, swing: null, fx: null };   // player-side animation state
   const api = {
-    use: i => { if (on) cc.use(i); }, dodge: () => { if (on) cc.dodge(A.vx, A.vz); }, block: b => { if (on) cc.block(b); }, jump: () => { if (on) cc.jump(); },
+    use: i => { if (on) cc.use(i); }, dodge: () => { if (on) cc.dodge(A.vx, A.vz); }, block: b => { if (on) cc.block(b); }, jump: () => { if (on) return window.__p3d?.jump?.() ?? cc.jump(); },
     lock: () => on && cc.lock(), switchTarget: () => on && cc.switchTarget(), potion: () => on && cc.potion(), swap: () => { if (on) swapWeapon(); }, exit: () => stop(), summon: () => spawnBoss(),
   };
   const hud = new CombatHUD(cc, api, project);
@@ -59,7 +59,7 @@ export function createFight(env) {
   const onKey = e => {
     if (!on || e.repeat || /input|textarea/i.test((e.target && e.target.tagName) || '')) return;
     const k = e.key;
-    if (k >= '1' && k <= '4') api.use(hud.slotAbility(+k)); else if (k >= '5' && k <= '8' && k !== '7') api.use(+k - 3); else if (k === '7' || k === 't' || k === 'T') api.use('unholy'); else if (k === 'x' || k === 'X') api.use(1); else if (k === 'f' || k === 'F') api.use(0); else if (k === ' ') { e.preventDefault(); api.dodge(); }
+    if (k >= '1' && k <= '4') api.use(hud.slotAbility(+k)); else if (k >= '5' && k <= '8' && k !== '7') api.use(+k - 3); else if (k === '7' || k === 't' || k === 'T') api.use('unholy'); else if (k === 'x' || k === 'X') api.use(1); else if (k === 'f' || k === 'F') api.use(0); else if (k === ' ') { e.preventDefault(); api.jump(); } else if (k === 'Shift') api.dodge();
     else if (k === 'q' || k === 'Q') api.lock(); else if (k === 'Tab') { e.preventDefault(); api.switchTarget(); } else if (k === 'r' || k === 'R') api.potion(); else if (k === 'e' || k === 'E') api.swap(); else if (k === 'j' || k === 'J') api.jump();
   };
   const onMd = e => { if (on && e.button === 2) cc.block(true); }, onMu = e => { if (on && e.button === 2) cc.block(false); }, onCtx = e => { if (on) e.preventDefault(); };

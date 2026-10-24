@@ -39,7 +39,7 @@ with sync_playwright() as p:
     info = json.loads(pg.evaluate("JSON.stringify(__p3d.multi.filter(b=>b.id!=='walls'&&!/^(wt|gt)/.test(b.id)).map(b=>({id:b.id,K:b.K,ramps:b.ramps,d:b.footprint?b.footprint.d:2*(b.radius||4)/b.K,round:!b.footprint,r:b.radius/b.K,ladders:(b.ladderSites||[]).map(L=>({l0:L.baseLevel,l1:L.level,y0:L.y0/b.K,y1:L.y1/b.K,baseX:L.baseX,baseZ:L.baseZ,topX:L.topX,topZ:L.topZ,ladder:1}))})))"))
     def W(bid, lx, lz): return pg.evaluate("([id,lx,lz])=>__p3d.multi.find(b=>b.id===id).toW(lx,lz)", [bid, lx, lz])
     box = pg.evaluate("(()=>{const r=document.getElementById('stick').getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2,r.width/2]})()")
-    def drive(via, top, mode, l1, y1, secs=22, tag='', near=None):
+    def drive(via, top, mode, l1, y1, secs=int(os.environ.get('SECS', 60)), tag='', near=None):   # v1.5.33 walks by default (~1.5 m/s headless) and ladders climb at 2.4 m/s: 22 s was too short
         held = set(); joy = False; t = 0; trace = []
         try:
             while t < secs * 1000:

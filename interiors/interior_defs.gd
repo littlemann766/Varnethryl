@@ -320,15 +320,16 @@ const D := {
 	"rooms": [["Main Room", 0, -0.25, 0.15], ["Kitchen & Dining", 0, -0.25, -0.15], ["Pantry", 0, 0.3, -0.25], ["Bedroom", 0, 0.3, 0.2], ["Loft / Storage", 1, 0.1, -0.3]]},
 
 # ---- BARN: livestock stalls, hay storage & feed room, loft
-"barn": {"name": "Barn",
-	"floors": [{"h": 4.5, "mat": "darkoak", "wall": "darkoak", "win": 0.0}, {"h": 3.0, "mat": "oak", "wall": "darkoak", "win": 0.0, "slab": [[-0.5, -0.5, 0.5, -0.15]]}],
+"barn": {"name": "Barn", "scale": [0.42, 0.42],
+	"fill": [[1, ["keg", "chest", "keg", "keg"], 0.1]],
+	"floors": [{"h": 4.5, "mat": "darkoak", "wall": "darkoak", "win": 0.0}, {"h": 3.0, "mat": "oak", "wall": "darkoak", "win": 0.0, "slab": [[-0.5, -0.5, 0.5, 0.1]]}],
 	"walls": [[0, -0.5, 0.1, -0.2, 0.1, [], "darkoak"], [0, -0.5, -0.1, -0.2, -0.1, [], "darkoak"], [0, 0.2, 0.1, 0.5, 0.1, [], "darkoak"], [0, 0.2, -0.1, 0.5, -0.1, [], "darkoak"]],
-	"ladders": [[0, 0.0, -0.15, 0]],
-	"rails": [[1, 0.1, -0.15, 0, 3]],
+	"ladders": [[0, -0.4, 0.1, 0]],
+	"rails": [[1, -0.12, 0.1, 0, 2], [1, 0.375, 0.1, 0, 1]],
 	"props": [["keg", 0, -0.4, 0.3, 0], ["chest", 0, 0.4, 0.3, 0], ["keg", 0, -0.4, -0.3, 0], ["bench", 0, 0.38, -0.3, 0], ["chest", 0, -0.35, -0.42, 0],
 		["keg", 1, -0.3, -0.35, 0], ["keg", 1, -0.25, -0.38, 0], ["chest", 1, 0.3, -0.38, 0]],
 	"lights": [["lantern", 0, 0.0, 0.49, 180, 1.4, 10.0, true], ["lantern", 0, 0.0, -0.49, 0, 1.2, 9.0], ["lantern", 1, 0.3, -0.49, 0, 1.0, 8.0]],
-	"rooms": [["Livestock Stalls", 0, 0.0, 0.3], ["Feed Room", 0, -0.35, -0.3], ["Hay Storage", 0, 0.35, -0.3], ["Loft", 1, -0.2, -0.3]]},
+	"rooms": [["Livestock Stalls", 0, 0.0, 0.3], ["Feed Room", 0, -0.25, -0.2], ["Hay Storage", 0, 0.25, -0.2], ["Loft", 1, -0.2, -0.1]]},
 
 # ---- STABLES: stall rows, tack room, feed storage, loft (above)
 "stables": {"name": "Stables of Varnethryl", "scale": [0.40, 0.40],

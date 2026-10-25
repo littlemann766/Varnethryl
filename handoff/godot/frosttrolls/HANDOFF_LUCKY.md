@@ -25,3 +25,8 @@ Zero torso penetration on all clips.
 - Source: varn-core ae85eee:www/proto3d/models-new/frosttroll_b.glb ("corrected, animated Frost Troll B"). The 9e6ad07 frosttroll_b.glb is a frost SERPENT (removed in 58bfdc1), so not used.
 - Prep: Body mesh only (Icosphere + old rig removed), 5.715 m, feet at origin. Hand/body fused edges split (--cut). Fresh fitted skeleton (joints_b_orig.json), mace on weapon_R, same clips; attack2 hit 1.6 s.
 - lod1 = same body mesh (no original lod1) with the lod1 mace.
+
+## Trolls v5 grips (2026-10-25 2:30 PM ET)
+- Beth's thick-grip weapons (club ~0.31 m, mace ~0.27 m grip, origin = grip centre, +Y up, scale 1.0) on weapon_R.
+- weapon_R now seated at the palm centre; fingers_R keyed curled around the handle in every clip (B also got finger weights).
+- Hit frames checked in Godot 4 headless (weapon lowest point): A attack1 1.1 s 0.16 m, attack2 1.5 s -0.17, attack3 1.3 s -0.18; B attack1 1.1 s -0.52, attack2 1.6 s -0.10, attack3 1.3 s -0.60.

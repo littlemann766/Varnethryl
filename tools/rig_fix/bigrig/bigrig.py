@@ -41,7 +41,7 @@ mw = mesh.matrix_world.copy()
 proxy = mesh.copy(); proxy.data = mesh.data.copy(); sc.collection.objects.link(proxy)
 proxy.parent = None; proxy.modifiers.clear(); proxy.data.transform(mw); proxy.matrix_world = Matrix.Identity(4)
 for vg in list(proxy.vertex_groups): proxy.vertex_groups.remove(vg)
-rm = proxy.modifiers.new('rm', 'REMESH'); rm.mode = 'VOXEL'; rm.voxel_size = 0.04 if BUILD else H/160; rm.use_smooth_shade = True
+rm = proxy.modifiers.new('rm', 'REMESH'); rm.mode = 'VOXEL'; rm.voxel_size = float(opt('--voxel', 0.04 if BUILD else H/160)); rm.use_smooth_shade = True
 bpy.context.view_layer.objects.active = proxy; bpy.ops.object.select_all(action='DESELECT'); proxy.select_set(True); bpy.ops.object.modifier_apply(modifier='rm')
 bm = bmesh.new(); bm.from_mesh(proxy.data); bm.verts.ensure_lookup_table(); lab = {}; isl = []
 for v in bm.verts:
@@ -207,7 +207,7 @@ if LOWER:
     for a in list(bpy.data.actions): bpy.data.actions.remove(a)
     print('BIGRIG rebind arms lowered', LOWER)
 # ---- 3. weapon socket in the right hand (+Z of socket = weapon +Y glTF = shaft toward the head) ----
-SOCK = None
+SOCK = None; CURL = 0.0; CURLAX = Vector((0,0,1))
 if WEAPON or STYLE.startswith('troll'):
     hb = arm.data.bones['hand_R']; fb = arm.data.bones.get('fingers_R')
     h0 = arm.matrix_world @ hb.head_local; f0 = arm.matrix_world @ (fb.head_local if fb else hb.tail_local)
@@ -221,6 +221,38 @@ if WEAPON or STYLE.startswith('troll'):
     if SOCK.name not in sc.collection.objects and not SOCK.users_collection: sc.collection.objects.link(SOCK)
     SOCK.parent = arm; SOCK.parent_type = 'BONE'; SOCK.parent_bone = 'hand_R'
     SOCK.matrix_world = Matrix.Translation(grip) @ Matrix((xa, ya, shaft)).transposed().to_4x4()
+    CURL = 0.0; GRIPINFO = {}
+    if '--fist' in sys.argv:
+        GN0 = {g.index: g.name for g in mesh.vertex_groups}; mw0 = mesh.matrix_world
+        HV = [mw0 @ v.co for v in mesh.data.vertices if v.groups and GN0[max(v.groups, key=lambda g: g.weight).group] in ('hand_R', 'fingers_R')]
+        FI = [v.index for v in mesh.data.vertices if v.groups and GN0[max(v.groups, key=lambda g: g.weight).group] == 'fingers_R']
+        if len(FI) < 20:   # no finger weights (B): give the verts past the knuckle line to fingers_R, blended over 0.12 m
+            vgF = mesh.vertex_groups.get('fingers_R') or mesh.vertex_groups.new(name='fingers_R'); vgH = mesh.vertex_groups['hand_R']; dd = (f0 - h0).normalized(); FI = []
+            for v in mesh.data.vertices:
+                if v.groups and GN0[max(v.groups, key=lambda g: g.weight).group] == 'hand_R':
+                    k = ((mw0 @ v.co) - f0).dot(dd)
+                    if k > -0.06:
+                        w = min(1.0, (k + 0.06)/0.12); vgF.add([v.index], w, 'REPLACE'); vgH.add([v.index], 1 - w, 'REPLACE')
+                        if w > 0.5: FI.append(v.index)
+            print('BIGRIG fingers weighted', len(FI))
+        cen = sum(HV, Vector())/len(HV); grip = cen.lerp(h0.lerp(f0, 0.75), 0.3) + fore*float(opt('--gripdown', 0.0))
+        SOCK.matrix_world = Matrix.Translation(grip) @ Matrix((xa, ya, shaft)).transposed().to_4x4()
+        GR = float(opt('--gripr', 0.14)); bpy.context.view_layer.update()
+        def fdist(a):
+            setL(P['fingers_R'], Quaternion(shaft, D(a))); bpy.context.view_layer.update()
+            me = mesh.evaluated_get(bpy.context.evaluated_depsgraph_get()); md = me.to_mesh()
+            ds = []
+            for i in FI:
+                w = mw0 @ md.vertices[i].co - grip; ds.append((w - w.dot(shaft)*shaft).length)
+            me.to_mesh_clear(); import statistics; return statistics.median(ds), min(ds)
+        best = None
+        for a in range(-110, 111, 5):
+            md_, mn_ = fdist(a); c = abs(md_ - (GR + 0.10)) + (5 if mn_ < GR*0.85 else 0)
+            if best is None or c < best[0]: best = (c, a, md_, mn_)
+        CURL = best[1]; setL(P['fingers_R'], Quaternion()); bpy.context.view_layer.update()
+        CURLAX = shaft.copy(); GRIPINFO = {'curl_deg': CURL, 'finger_median_dist_m': round(best[2], 3), 'finger_min_dist_m': round(best[3], 3), 'grip_r': GR, 'rest_dist': [round(x, 3) for x in fdist(0)]}
+        setL(P['fingers_R'], Quaternion()); bpy.context.view_layer.update()
+        print('BIGRIG GRIP', GRIPINFO)
     if WEAPON:
         before = set(bpy.data.objects); bpy.ops.import_scene.gltf(filepath=WEAPON)
         for o in set(bpy.data.objects) - before:
@@ -246,6 +278,8 @@ FK = ['hips'] + SP + ['neck','head'] + [f'{b}_{s}' for s in 'LR' for b in ('shou
 def key(t, hips=(0,0,0), rot=None, ik=None, jaw=0, wrist=0):
     f = 1 + round(t*FPS); rot = dict(rot or {})
     if wrist: rot['hand_R'] = q(X, -wrist)
+    if 'fingers_R' in P and CURL:
+        setL(P['fingers_R'], Quaternion(CURLAX, D(CURL))); P['fingers_R'].keyframe_insert('rotation_quaternion', frame=f)
     off = Vector(hips)*H; hb = P['hips']; hq = hb.bone.matrix_local.to_quaternion()
     hb.location = hq.inverted() @ (off / S); hb.keyframe_insert('location', frame=f)
     for bn in FK:

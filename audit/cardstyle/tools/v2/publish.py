@@ -14,8 +14,13 @@ def info(f):
     return dict(file=os.path.basename(f),tris=t,bbox_min=[round(v,2) for v in a['min']],bbox_max=[round(v,2) for v in a['max']])
 os.makedirs(DST+'/atlas',exist_ok=True)
 for f in glob.glob(SRC+'/atlas/card2_*.jpg'): shutil.copy2(f,DST+'/atlas/')
+SKIP={'lighthouse','farmhouse','barn','stables'}   # replaced by the user's Tripo models (tripo/)
+for k in SKIP:
+    for suf in('','_lod1','_lod2'):
+        p=f'{DST}/bld_{k}_card2{suf}.glb'
+        if os.path.exists(p): os.remove(p)
 B=[]
-for k in sorted(CARDS):
+for k in sorted(set(CARDS)-SKIP):
     e=dict(id=k,card=CARDS[k])
     for lv,suf in(('high',''),('medium','_lod1'),('low','_lod2')):
         f=f'{SRC}/bld_{k}_card2{suf}.glb'; shutil.copy2(f,DST); e[lv]=info(f)
@@ -24,4 +29,13 @@ idx=json.load(open(DST+'/index.json')); idx['buildings']=B
 idx['note']=("Beth card2 buildings. One shared material/atlas (atlas/card2_*.jpg, 2048) for ALL buildings; GLBs reference it by relative uri. "
  "Origin = footprint centre at ground, +Z = front, metres. LOD: no suffix=High, _lod1=Medium, _lod2=Low (Medium/Low are rebuilt with fewer "
  "segments/merlons/tower windows, not just culled). Atlas v4 adds cream ashlar, statue and rock strips: re-copy the atlas with these GLBs.")
+TR=[]
+for k,card,note in(('lighthouse_full','card_lighthouse_tidewrack.jpg','tower+rock island; x0.72 so door ~2.2 m'),('lighthouse_tower','card_lighthouse_tidewrack.jpg','stray railing posts removed; same origin as full/island'),
+                   ('lighthouse_rock_island','card_lighthouse_tidewrack.jpg','x0.72'),('farmhouse','card_farmhouse_barn.jpg','cut face capped (+X side)'),('barn_stable','card_farmhouse_barn.jpg','barn/stables; cut face capped (-X side)')):
+    e=dict(id=k+'_tripo',card=card,note=note,source='user Tripo upload, own 4096->2048 texture (not on card2 atlas)')
+    for lv,suf in(('high',''),('medium','_lod1'),('low','_lod2')):
+        import trimesh; f=f'{DST}/tripo/bld_{k}_tripo{suf}.glb'; m=trimesh.load(f,force='mesh')
+        e[lv]=dict(file='tripo/'+os.path.basename(f),tris=len(m.faces),bbox_min=m.bounds[0].round(2).tolist(),bbox_max=m.bounds[1].round(2).tolist())
+    TR.append(e)
+idx['tripo_buildings']=TR
 json.dump(idx,open(DST+'/index.json','w'),indent=1); print(len(B),'buildings')

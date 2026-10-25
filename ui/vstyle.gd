@@ -10,7 +10,13 @@ static var _font: Font
 
 static func font() -> Font:
 	if _font == null:
-		_font = load("res://ui/fonts/Cinzel.woff") if ResourceLoader.exists("res://ui/fonts/Cinzel.woff") else ThemeDB.fallback_font
+		var base: Font = load("res://ui/fonts/Cinzel.woff") if ResourceLoader.exists("res://ui/fonts/Cinzel.woff") else ThemeDB.fallback_font
+		# bundled fallbacks so ☰ ✕ ⚔ ⚙ ⛵ 🔒 🐉 render on every phone (Android has no system emoji for Godot)
+		var fb: Array[Font] = []
+		for f in ["res://ui/fonts/NotoSansSymbols2.ttf", "res://ui/fonts/NotoEmoji.ttf"]:
+			if ResourceLoader.exists(f): fb.append(load(f))
+		var fv := FontVariation.new(); fv.base_font = base; fv.fallbacks = fb
+		_font = fv
 	return _font
 
 static func box(bg: Color, border: Color, bw := 1, radius := 6, pad := 10) -> StyleBoxFlat:

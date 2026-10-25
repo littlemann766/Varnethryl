@@ -4,7 +4,7 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "3"
+const VERSION := "4"
 const DEFS := [
 	["guildhall",0,-21,0.0,"Guild Hall"], ["library",-24,-27,0.0,"Grand Library"], ["townhall",23,-26,0.0,"Town Hall"],
 	["mage",-44,-31,0.0,"Mage Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
@@ -92,6 +92,13 @@ var fx_any := []
 var tree_mmis := []
 var terrain_lods := []       # [node, lod]
 var shot_dir := "user://"
+var menu_open := false
+var lamp_shadow_t := 0.0
+var cheat := {"speed": 1.0, "fly": false, "noclip": false, "god": false}
+var remotes := {}            # Net peer id -> {node, target, yaw}
+var net_send_t := 0.0
+var warmed := false
+const MAP_RECT := Rect2(-260, -260, 520, 520)
 
 func _ready() -> void:
 	rng.seed = 1905
@@ -114,8 +121,11 @@ func _ready() -> void:
 	_hero()
 	_fx()
 	_hud()
+	if not bench: tier = VPrefs.tier()
 	apply_quality()
+	_hook_ui()
 	if bench: _run_bench()
+	else: _warm_up()
 
 # ---------- settings ----------
 func _load_settings() -> void:
@@ -261,7 +271,7 @@ func _set_time(h: float) -> void:
 	var lamp_on := em > 0.3
 	for l in lamp_lights:
 		l[0].visible = lamp_on and tier >= l[1]
-		l[0].shadow_enabled = false
+		if not (tier == 3 and lamp_on): l[0].shadow_enabled = false
 	for f in fx_night: f[0].emitting = night and tier >= f[1]; f[0].visible = f[0].emitting
 	for f in fx_day: f[0].emitting = not night and tier >= f[1]; f[0].visible = f[0].emitting
 
@@ -271,14 +281,15 @@ func apply_quality() -> void:
 	var vp := get_viewport()
 	Engine.max_fps = fps_cap
 	RenderingServer.directional_shadow_atlas_set_size([1024, 2048, 2048, 4096][tier], true)
+	var prefs_shadows: bool = bench or bool(VPrefs.prefs.get("shadows", true))
 	RenderingServer.directional_soft_shadow_filter_set_quality([RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_SOFT_VERY_LOW, RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM][tier])
-	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = [30.0, 45.0, 60.0, 100.0][tier]
-	sun.directional_shadow_mode = [DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS][tier]
+	sun.shadow_enabled = prefs_shadows
+	sun.directional_shadow_max_distance = [30.0, 45.0, 60.0, 140.0][tier]
+	sun.directional_shadow_mode = [DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS][tier]
 	sun.light_angular_distance = 0.0
 	sun.shadow_blur = [0.5, 1.0, 1.5, 1.5][tier]
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR   # FSR1 is Forward+-only in 4.7
-	vp.scaling_3d_scale = [0.5, 0.6, 0.7, 0.85][tier]
+	vp.scaling_3d_scale = [0.5, 0.6, 0.7, 1.0][tier]
 	vp.fsr_sharpness = 0.3
 	vp.msaa_3d = Viewport.MSAA_2X if tier == 3 else Viewport.MSAA_DISABLED
 	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED if tier == 3 else Viewport.SCREEN_SPACE_AA_FXAA
@@ -288,9 +299,9 @@ func apply_quality() -> void:
 	env.fog_enabled = true; env.fog_density = 0.0028
 	if probe: probe.visible = tier >= 1
 	for c in grass_chunks:
-		var cap := int(c.multimesh.instance_count * [0.0, 0.2, 0.35, 0.7][tier])
+		var cap := int(c.multimesh.instance_count * [0.0, 0.2, 0.35, 1.0][tier])
 		c.multimesh.visible_instance_count = cap; c.visible = cap > 0
-		c.visibility_range_end = [0.0, 30.0, 40.0, 70.0][tier]
+		c.visibility_range_end = [0.0, 30.0, 40.0, 95.0][tier]
 		c.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 	for f in fx_any: f[0].visible = tier >= f[1]; f[0].emitting = tier >= f[1]
 	_swap_buildings()
@@ -308,8 +319,6 @@ func apply_quality() -> void:
 		n3.visible = r[0] >= 0
 		n3.visibility_range_begin = max(r[0], 0); n3.visibility_range_end = max(r[1], 0)
 		n3.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if (t[1] == 0) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	if q_btn: q_btn.text = "Quality: " + TIERS[tier]
-	if f_btn: f_btn.text = "FPS cap: %d" % fps_cap
 	_set_time(tod)
 
 func _mat(c: Color, rough := 0.85) -> StandardMaterial3D:
@@ -758,7 +767,7 @@ func _fx() -> void:
 	var petal := _soft_quad(Color(1.0, 0.72, 0.85, 1.0), 0.09, false)
 	for i in blossom_xf.size():
 		var t: Transform3D = blossom_xf[i]
-		var p := _particles(30, 7.0, petal, 0)
+		var p := _particles(60, 7.0, petal, 0)
 		var pm: ParticleProcessMaterial = p.process_material
 		pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE; pm.emission_sphere_radius = 2.0
 		pm.gravity = Vector3(0.3, -0.35, 0.1); pm.initial_velocity_min = 0.1; pm.initial_velocity_max = 0.4
@@ -775,9 +784,9 @@ func _fx() -> void:
 		var crt := GradientTexture1D.new(); crt.gradient = cr; pm.color_ramp = crt
 		p.position = c; add_child(p); fx_night.append([p, 1])
 	# sunlit dust motes around the hero (day)
-	var dust := _particles(120, 6.0, _soft_quad(Color(1.0, 0.95, 0.8, 0.5), 0.04, true), 0)
+	var dust := _particles(260, 6.0, _soft_quad(Color(1.0, 0.95, 0.8, 0.5), 0.04, true), 0)
 	var dm: ParticleProcessMaterial = dust.process_material
-	dm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX; dm.emission_box_extents = Vector3(10, 3, 10)
+	dm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX; dm.emission_box_extents = Vector3(16, 4, 16)
 	dm.gravity = Vector3(0.05, -0.02, 0); dm.turbulence_enabled = true; dm.turbulence_noise_strength = 0.4
 	dust.position = Vector3(0, 2, 0); dust.local_coords = false; hero_vis.get_parent().add_child(dust); fx_day.append([dust, 3])
 
@@ -822,17 +831,10 @@ func _hero() -> void:
 
 func _hud() -> void:
 	var cl := CanvasLayer.new(); add_child(cl)
-	hud_label = Label.new(); hud_label.position = Vector2(12, 8); hud_label.add_theme_font_size_override("font_size", 20)
+	hud_label = Label.new(); hud_label.position = Vector2(12, 64); hud_label.add_theme_font_size_override("font_size", 16)
 	hud_label.add_theme_color_override("font_outline_color", Color.BLACK); hud_label.add_theme_constant_override("outline_size", 6); cl.add_child(hud_label)
 	where_label = Label.new(); where_label.position = Vector2(500, 44); where_label.add_theme_font_size_override("font_size", 30)
 	where_label.add_theme_color_override("font_outline_color", Color.BLACK); where_label.add_theme_constant_override("outline_size", 8); cl.add_child(where_label)
-	q_btn = _btn(cl, Vector2(1040, 12), func(): tier = (tier + 1) % 4; _save_settings(); apply_quality())
-	t_btn = _btn(cl, Vector2(1040, 80), func(): time_mode = (time_mode + 1) % 4; _save_settings(); _apply_time_mode())
-	s_btn = _btn(cl, Vector2(1040, 148), func(): speed_x = 10.0 if speed_x == 1.0 else 1.0; s_btn.text = "Speed: %dx" % int(speed_x))
-	s_btn.text = "Speed: 1x"
-	f_btn = _btn(cl, Vector2(1040, 216), func(): fps_cap = 120 if fps_cap == 60 else 60; _save_settings(); apply_quality())
-	b_btn = _btn(cl, Vector2(1040, 284), func(): if not bench_running: _flythrough_all())
-	b_btn.text = "Benchmark"
 	bench_label = Label.new(); bench_label.position = Vector2(330, 120); bench_label.add_theme_font_size_override("font_size", 26)
 	bench_label.add_theme_color_override("font_outline_color", Color.BLACK); bench_label.add_theme_constant_override("outline_size", 8); cl.add_child(bench_label)
 	_apply_time_mode()
@@ -851,9 +853,14 @@ func _btn(cl: CanvasLayer, pos: Vector2, cb: Callable) -> Button:
 
 func _apply_time_mode() -> void:
 	_set_time(TIME_PRESETS[time_mode][1])
-	t_btn.text = "Time: " + TIME_PRESETS[time_mode][0]
+
+func _input_blocked() -> bool:
+	return menu_open or (VUI.title != null and VUI.title.visible)
 
 func _unhandled_input(e: InputEvent) -> void:
+	if _input_blocked():
+		joy_touch = -1; cam_touch = -1; joy_vec = Vector2.ZERO
+		return
 	var vw := get_viewport().get_visible_rect().size
 	if e is InputEventScreenTouch:
 		if e.pressed:
@@ -867,7 +874,17 @@ func _unhandled_input(e: InputEvent) -> void:
 	elif e is InputEventScreenDrag:
 		if e.index == joy_touch: _joy(e.position)
 		elif e.index == cam_touch:
-			yaw -= e.relative.x * 0.006; pitch = clamp(pitch - e.relative.y * 0.004, -1.2, 0.35)
+			var ls := float(VPrefs.prefs.get("lookSens", 1.0))
+			yaw -= e.relative.x * 0.006 * ls; pitch = clamp(pitch - e.relative.y * 0.004 * ls, -1.2, 0.35)
+	elif e is InputEventMagnifyGesture:
+		_zoom_by(1.0 / e.factor)
+	elif e is InputEventMouseButton and e.pressed and e.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+		_zoom_by(0.9 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 1.1)
+
+func _zoom_by(f: float) -> void:
+	var zs := float(VPrefs.prefs.get("zoomSens", 1.0))
+	var z := clampf(float(VPrefs.prefs.get("zoom", 1.0)) * pow(f, zs), 0.5, 2.0)
+	VPrefs.prefs["zoom"] = z   # live; persisted on next set_pref/save
 
 func _joy(p: Vector2) -> void:
 	var d := (p - joy_center).limit_length(100.0)
@@ -875,15 +892,16 @@ func _joy(p: Vector2) -> void:
 
 func _physics_process(dt: float) -> void:
 	if hero == null: return
-	var inp := joy_vec
+	var inp := joy_vec if not _input_blocked() else Vector2.ZERO
 	var k := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	if k.length() > 0.1: inp = k
 	var fwd := Vector3(-sin(yaw), 0, -cos(yaw)); var right := Vector3(cos(yaw), 0, -sin(yaw))
 	var dir := right * inp.x + fwd * -inp.y
-	var speed: float = 6.0 * clamp(inp.length(), 0.0, 1.0)
+	var speed: float = (6.0 * float(cheat.speed)) * clamp(inp.length(), 0.0, 1.0)
 	if dir.length() > 0.05: dir = dir.normalized()
 	hero.velocity.x = dir.x * speed; hero.velocity.z = dir.z * speed
 	hero.velocity.y = -1.0 if hero.is_on_floor() else hero.velocity.y - 20.0 * dt
+	if cheat.fly: hero.velocity.y = maxf(0.0, (height(hero.position.x, hero.position.z) + 6.0 - hero.position.y) * 2.0)
 	hero.floor_snap_length = 0.6
 	hero.move_and_slide()
 	if speed > 0.1:
@@ -917,13 +935,19 @@ func _process(dt: float) -> void:
 		var ins: bool = lp.x > a.position.x and lp.x < a.end.x and lp.z > a.position.z and lp.z < a.end.z
 		for rf in b.roofs: rf.visible = not ins
 		if ins: inside = b.name
-	cam_arm.spring_length = 3.5 if inside != "" else 6.0
+	_camera_prefs(inside != "", dt)
+	if VUI.hud and VUI.hud.minimap: VUI.hud.minimap.set_player(Vector2(hero.position.x, hero.position.z), hero_vis.rotation.y)
+	VUI.set_fps(Engine.get_frames_per_second())
+	lamp_shadow_t -= dt
+	if lamp_shadow_t <= 0.0: lamp_shadow_t = 0.5; _update_lamp_shadows()
+	_net_tick(dt)
 	where_label.text = inside
 	ft_acc += dt; ft_n += 1; ft_max = max(ft_max, dt)
 	if ft_acc >= 0.5:
 		ft_txt = "%.1f ms avg / %.1f ms worst" % [ft_acc / ft_n * 1000.0, ft_max * 1000.0]
 		ft_acc = 0.0; ft_n = 0; ft_max = 0.0
-	hud_label.text = "Varnethryl test %s | %s | FPS %d | %s | dc %d | %dk tris | %02d:%02d" % [VERSION, TIERS[tier], Engine.get_frames_per_second(), ft_txt,
+	hud_label.visible = bool(VPrefs.prefs.get("showFps", false)) or bench_running
+	hud_label.text = "test %s | %s | FPS %d | %s | dc %d | %dk tris | %02d:%02d" % [VERSION, TIERS[tier], Engine.get_frames_per_second(), ft_txt,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000), int(tod), int(fmod(tod, 1.0) * 60)]
 
 # ---------- in-app benchmark: 10 s fly-through per tier ----------
@@ -989,6 +1013,22 @@ func _run_bench() -> void:
 	if only == "night":
 		await _shot("high_u6_night_plaza", Vector3(-6, 0, 30), 0.25, -0.25, 22.5, 2, 40)
 		await _shot("high_u7_night_street", Vector3(0, 0, -20), PI, -0.15, 22.5, 2, 40)
+	if only == "ui":
+		var sv := func(n: String):
+			for i in 20: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_%s.png" % n)
+		tier = 3; apply_quality(); _set_time(10.5); _teleport(Vector3(-6, 0, 30), 0.25); pitch = -0.28
+		VUI.show_title(); await sv.call("t4_title")
+		VUI._enter("solo"); VUI.play_solo.emit(); _teleport(Vector3(-6, 0, 30), 0.25); VPrefs.prefs["showFps"] = true
+		await sv.call("t4_hud_minimap")
+		VUI.open_settings(); await sv.call("t4_settings")
+		VUI.settings.hide(); VUI.open_settings(true); await sv.call("t4_settings_dev")
+		VUI.settings.hide()
+		bench = false
+		await _shot("t4_ultra_day", Vector3(-6, 0, 30), 0.25, -0.28, 10.5, 3, 30)
+		await _shot("t4_ultra_day_cherry", Vector3(-114, 0, 176), 0.0, -0.05, 12.0, 3, 30)
+		await _shot("t4_ultra_night", Vector3(-6, 0, 30), 0.25, -0.25, 22.5, 3, 40)
+		await _shot("t4_ultra_night_street", Vector3(0, 0, -20), PI, -0.15, 22.5, 3, 40)
 	if only == "fly":
 		await _flythrough_all()
 	if only == "" or only == "shots":
@@ -1005,3 +1045,189 @@ func _run_bench() -> void:
 		await _shot(pre + "u8_inside", Vector3(-25.2, 0, 52), PI * 0.1, -0.55, 12.0, ST)
 		await _shot("low_day_plaza", Vector3(-6, 0, 30), 0.25, -0.28, 10.5, 0)
 	get_tree().quit()
+
+
+# ---------- test 4: UI / prefs / save / net hooks ----------
+func _hook_ui() -> void:
+	VPrefs.changed.connect(func(_p):
+		if bench_running: return
+		var t := VPrefs.tier()
+		if t != tier: tier = t
+		apply_quality())
+	VUI.menu_toggled.connect(func(o): menu_open = o)
+	VUI.get_snapshot = func() -> Dictionary:
+		return {"x": hero.position.x, "z": hero.position.z, "yaw": yaw, "zone": "village", "hero": int(VSave.state.get("active", 0))}
+	VUI.play_solo.connect(_on_play_solo)
+	VUI.multiplayer_requested.connect(_on_multiplayer)
+	VUI.travel_requested.connect(_on_travel)
+	VUI.returned_to_title.connect(func(): Net.leave(); _clear_remotes(); menu_open = false)
+	VUI.dev_action.connect(_on_dev_action)
+	VUI.owner_cheat.connect(func(k, v):
+		if cheat.has(k): cheat[k] = v
+		if k == "noclip": hero.collision_mask = 0 if v else 1
+		if k == "panel" or k == "remax" or k == "titan" or k == "unlimited" or k == "nocd" or k == "bamboo" or k == "bump":
+			pass  # TODO(port-heroes/combat): hero stats, weapons, boss spawn
+	)
+	Net.state_provider = func() -> Dictionary:
+		return {"zone": "village", "x": hero.position.x, "y": hero.position.y, "z": hero.position.z, "yaw": hero_vis.rotation.y,
+			"hero": int(VSave.state.get("active", 0)), "skin": str(VSave.state.get("skin", "")), "moving": Vector2(hero.velocity.x, hero.velocity.z).length() > 0.3}
+	Net.peer_joined.connect(_remote_upsert)
+	Net.peer_state.connect(_remote_upsert)
+	Net.peer_left.connect(func(id):
+		if remotes.has(id): remotes[id].node.queue_free(); remotes.erase(id))
+	Net.welcomed.connect(func(info):
+		for pl in info.get("players", []): _remote_upsert(pl)
+		var sp = info.get("spawn")
+		if typeof(sp) == TYPE_DICTIONARY and sp.has("x"): _teleport(Vector3(float(sp.x), 0, float(sp.get("z", 0))), float(sp.get("yaw", yaw))))
+	Net.disconnected.connect(func(_c, _r): _clear_remotes())
+	_build_minimap()
+
+func _teleport(p: Vector3, yw: float) -> void:
+	hero.position = Vector3(p.x, height(p.x, p.z) + 0.2, p.z); hero.velocity = Vector3.ZERO
+	yaw = yw; hero_vis.rotation.y = yw; pip.position = hero.position + Vector3(1, 0, 1)
+
+func _on_play_solo() -> void:
+	Net.leave(); _clear_remotes()
+	var pos = VSave.read_pos(VSave.read_save().get("state"), CITY_HALF * 3.0)
+	if pos != null: _teleport(Vector3(pos.x, 0, pos.z), pos.yaw)
+
+func _on_multiplayer(world: String) -> void:
+	var w := world if world != "" else "Liongate-1"
+	var nick := str(VSave.state.get("nickname", VSave.state.get("name", "Hero")))
+	if nick.length() < 2: nick = "Hero"
+	Net.join(w, nick)
+
+func _on_travel(dest: String) -> void:
+	match dest:
+		"town": _teleport(Vector3(-6, 0, 26), 0.0)
+		"sail":  # TODO(port-zones): sailing scene; stand-in = lake shore
+			_teleport(Vector3(LAKE.x, 0, LAKE.y + 80), 0.0); _toast("Sailing is coming in a later build — here is the lake.")
+		"hydra":  # TODO(port-zones): hydra arena
+			_teleport(Vector3(0, 0, 175), PI); _toast("Hydra lair is coming in a later build.")
+		_: _toast("Unknown destination: " + dest)
+
+func _toast(t: String) -> void:
+	bench_label.text = t
+	get_tree().create_timer(3.0).timeout.connect(func(): if bench_label.text == t: bench_label.text = "")
+
+func _on_dev_action(k: String) -> void:
+	match k:
+		"time": time_mode = (time_mode + 1) % 4; _save_settings(); _apply_time_mode(); _toast("Time: " + TIME_PRESETS[time_mode][0])
+		"speed": speed_x = 10.0 if speed_x == 1.0 else 1.0; _toast("Day speed: %dx" % int(speed_x))
+		"fps_cap": fps_cap = 120 if fps_cap == 60 else 60; _save_settings(); apply_quality(); _toast("FPS cap: %d" % fps_cap)
+		"benchmark":
+			if not bench_running:
+				VUI.settings.hide(); VUI.toggle_menu(false); _flythrough_all()
+		_: _toast("Dev action '%s' lands with a later branch." % k)
+
+func _camera_prefs(inside: bool, dt: float) -> void:
+	var P: Dictionary = VPrefs.prefs
+	var first: bool = P.get("view", "third") == "first"
+	var base := 6.0 * float(P.get("zoom", 1.0))
+	var want: float = 0.0 if first else (min(3.5, base) if inside else base)
+	cam_arm.spring_length = lerpf(cam_arm.spring_length, want, min(1.0, 10.0 * dt))
+	hero_vis.visible = not first or bench_running
+	# follow mode: drift yaw behind the hero while walking (unless the player is dragging the camera)
+	if P.get("camMode", "follow") == "follow" and not first and cam_touch == -1 and joy_vec.length() > 0.2 and not bench_running:
+		yaw = lerp_angle(yaw, hero_vis.rotation.y, min(1.0, 1.5 * dt))
+
+func _update_lamp_shadows() -> void:
+	# Ultra only: the 3 nearest lit lamps within 28 m cast shadows (Mobile renderer handles a few omni shadows fine).
+	if tier != 3:
+		return
+	var lit := []
+	for l in lamp_lights:
+		var n: OmniLight3D = l[0]
+		if n.visible: lit.append([n.global_position.distance_squared_to(hero.global_position), n])
+	lit.sort_custom(func(a, b): return a[0] < b[0])
+	for i in lit.size():
+		var on: bool = i < 3 and lit[i][0] < 28.0 * 28.0
+		lit[i][1].shadow_enabled = on
+		if on: lit[i][1].shadow_bias = 0.05; lit[i][1].omni_shadow_mode = OmniLight3D.SHADOW_DUAL_PARABOLOID
+
+# --- remote players (simple stand-in) ---
+# TODO(port-heroes): replace capsule with the real hero model/skin + animation once port-heroes merges.
+func _remote_upsert(pl: Dictionary) -> void:
+	var id := str(pl.get("id", ""))
+	if id == "" or id == Net.self_id: return
+	var r: Dictionary
+	if not remotes.has(id):
+		var n := Node3D.new(); add_child(n)
+		var body := MeshInstance3D.new(); var cm := CapsuleMesh.new(); cm.radius = 0.35; cm.height = 1.7; body.mesh = cm
+		body.position.y = 0.85; body.material_override = _mat(Color.from_hsv(float(id.hash() % 360) / 360.0, 0.6, 0.85)); n.add_child(body)
+		var tag := Label3D.new(); tag.text = str(pl.get("name", "Player")); tag.position.y = 2.1; tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		tag.font_size = 48; tag.outline_size = 10; tag.font = VStyle.font(); n.add_child(tag)
+		r = {"node": n, "target": Vector3.ZERO, "yaw": 0.0}; remotes[id] = r
+		n.position = Vector3(float(pl.get("x", 0)), float(pl.get("y", 0)), float(pl.get("z", 0)))
+	r = remotes[id]
+	if pl.get("zone", "village") != "village": r.node.visible = false; return
+	r.node.visible = true
+	if pl.has("x"): r.target = Vector3(float(pl.x), float(pl.get("y", height(float(pl.x), float(pl.get("z", 0))))), float(pl.get("z", 0)))
+	if pl.has("yaw"): r.yaw = float(pl.yaw)
+
+func _clear_remotes() -> void:
+	for id in remotes: remotes[id].node.queue_free()
+	remotes.clear()
+
+func _net_tick(dt: float) -> void:
+	for id in remotes:
+		var r: Dictionary = remotes[id]; var n: Node3D = r.node
+		n.position = n.position.lerp(r.target, min(1.0, 10.0 * dt)); n.rotation.y = lerp_angle(n.rotation.y, r.yaw, min(1.0, 10.0 * dt))
+	if Net.is_online():
+		net_send_t -= dt
+		if net_send_t <= 0.0: net_send_t = 0.1; Net.send_state(Net.state_provider.call())
+
+# --- minimap texture from the town layout ---
+func _build_minimap() -> void:
+	var N := 256
+	var img := Image.create(N, N, false, Image.FORMAT_RGBA8)
+	var px := MAP_RECT.size.x / N
+	for y in N:
+		for x in N:
+			var w := MAP_RECT.position + Vector2(x + 0.5, y + 0.5) * px
+			var c := Color(0.30, 0.42, 0.22).lerp(Color(0.36, 0.48, 0.26), noise.get_noise_2d(w.x, w.y) * 0.5 + 0.5)
+			if w.distance_to(LAKE) < 60.0: c = Color(0.22, 0.42, 0.6)
+			var inside_wall := absf(w.x) < CITY_HALF and absf(w.y) < CITY_HALF
+			if inside_wall: c = c.lerp(Color(0.45, 0.43, 0.36), 0.35)
+			if absf(maxf(absf(w.x), absf(w.y)) - CITY_HALF) < 2.5: c = Color(0.55, 0.52, 0.47)
+			if _road_dist(w) < 4.4: c = Color(0.62, 0.55, 0.42)
+			if w.distance_to(Vector2(0, 0)) < 18.0: c = Color(0.68, 0.64, 0.56)
+			if w.distance_to(Vector2(0, 0)) < 5.0: c = Color(0.35, 0.6, 0.8)
+			img.set_pixel(x, y, c)
+	for b in buildings:
+		var a: AABB = b.aabb; var xf: Transform3D = b.node.global_transform
+		var pts := []
+		for cx in [a.position.x, a.end.x]:
+			for cz in [a.position.z, a.end.z]: var g := xf * Vector3(cx, 0, cz); pts.append(Vector2(g.x, g.z))
+		var mn: Vector2 = pts[0]; var mx: Vector2 = pts[0]
+		for q in pts: mn = mn.min(q); mx = mx.max(q)
+		var r0 := ((mn - MAP_RECT.position) / px).floor(); var r1 := ((mx - MAP_RECT.position) / px).ceil()
+		for y in range(maxi(0, int(r0.y)), mini(N, int(r1.y))):
+			for x in range(maxi(0, int(r0.x)), mini(N, int(r1.x))):
+				var edge: bool = x == int(r0.x) or y == int(r0.y) or x == int(r1.x) - 1 or y == int(r1.y) - 1
+				img.set_pixel(x, y, Color(0.32, 0.2, 0.14) if edge else Color(0.62, 0.32, 0.22))
+	var tex := ImageTexture.create_from_image(img)
+	if VUI.hud and VUI.hud.minimap:
+		VUI.hud.minimap.set_map_texture(tex, MAP_RECT)
+		VUI.hud.minimap.set_markers([{"pos": Vector2(0, CITY_HALF), "color": Color(1, 0.85, 0.3), "label": "Gate"}, {"pos": Vector2(0, 0), "color": Color(0.5, 0.8, 1.0), "label": "Plaza"}])
+
+# --- shader warm-up: draw every LOD / tier variant once behind the title screen ---
+func _warm_up() -> void:
+	var saved := tier; var saved_t := tod
+	var veil := ColorRect.new(); veil.color = Color(0.05, 0.04, 0.06); veil.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var cl := CanvasLayer.new(); cl.layer = 100; add_child(cl); cl.add_child(veil)
+	var lbl := VStyle.label("Preparing shaders…", 22, Color(0.9, 0.85, 0.7)); lbl.set_anchors_preset(Control.PRESET_CENTER); cl.add_child(lbl)
+	var cam_far := cam.far
+	for q in [3, 0, 1, 2]:
+		tier = q; apply_quality()
+		for h in [12.0, 22.5]:
+			_set_time(h)
+			# force every LOD band visible for a frame so its pipeline compiles now instead of mid-walk
+			for t in tree_lods + hi_terrain: t[0].visibility_range_begin = 0; t[0].visibility_range_end = 0; t[0].visible = true
+			for b in buildings: for m in _meshes(b.node, []): m.visibility_range_begin = 0; m.visibility_range_end = 0
+			for f in fx_any + fx_day + fx_night: f[0].visible = true; f[0].emitting = true
+			for l in lamp_lights: l[0].visible = true; l[0].shadow_enabled = q == 3
+			await get_tree().process_frame; await get_tree().process_frame
+	cam.far = cam_far; tier = saved; _set_time(saved_t); apply_quality(); _apply_time_mode()
+	warmed = true
+	cl.queue_free()

@@ -128,6 +128,9 @@ func build() -> void:
 			dc.add_child(_row([_toggle("Show FPS", "showFps", func(): return VPrefs.prefs.showFps, func(v): VPrefs.prefs.fpsSet = true; VPrefs.set_pref("showFps", v))]))
 			dc.add_child(_row([_btn("Switch model style", "model-style", func(): dev_action.emit("model_style")), _btn("3D model gallery", "gallery", func(): dev_action.emit("gallery"))]))
 			dc.add_child(_row([_btn("Approved boss models", "boss-models", func(): dev_action.emit("boss_models")), _btn("Diagnostics", "diagnostics", func(): dev_action.emit("diagnostics"))]))
+			# render dev tools (moved off the HUD in test 4): handled by scripts/main.gd via VUI.dev_action
+			dc.add_child(_row([_btn("Time of day (cycle)", "dev-time", func(): dev_action.emit("time")), _btn("Day speed 1×/10×", "dev-speed", func(): dev_action.emit("speed"))]))
+			dc.add_child(_row([_btn("FPS cap 60/120", "dev-fps", func(): dev_action.emit("fps_cap")), _btn("Run benchmark", "dev-bench", func(): dev_action.emit("benchmark"))]))
 			if is_owner: _owner_cards()
 
 func _owner_cards() -> void:

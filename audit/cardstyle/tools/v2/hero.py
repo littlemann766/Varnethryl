@@ -72,14 +72,28 @@ def inn(c):
 SIGNSIZE=dict(inn=1.3,bakery=1.4,smithy=1.2,market=1.2,guildhall=1.3,townhall=1.1)
 def market(c):
     m=c['m']; from kit3 import stall, awning; from kit2 import crate
-    D=c['D']; z=D/2
-    # crowded card front: striped awnings over every bay, a row of loaded stalls, sacks/crates/barrels/flowers (door at x=-1.8 kept clear)
-    awning(m,-5.6,-4.0,c['g']-0.15,z+0.5,1.4,0.6,6)
-    for x in(-5.0,3.4,5.4): stall(m,x,z+3.4,1.6)
-    for x in(-4.6,-3.4,0.4,2.0,3.2,4.6):
-        m.LOD=1; barrel(m,(x,0,z+1.0+0.3*(x%2)),0.28,0.7) if x<0.5 else crate(m,(x,0,z+1.2),0.55); m.LOD=99
-    for x in(-5.6,0.0,1.0,5.8): pot_plant(m,(x,0,z+0.5),0.4)
-    for x in(-5.3,4.0): m.box((x-0.5,0,z+4.4),(x+0.5,0.6,z+5.0),'oak'); m.blob((x,0.75,z+4.7),0.4,'flowers',6,0.6)
+    D=c['D']; z=D/2; g=c['g']; E=c['E']; zf=D/2+0.45+0.5
+    # shop front: two-level striped awnings across the whole front
+    awning(m,-5.6,-4.1,g-0.15,z+0.05,1.5,0.6,6)
+    awning(m,-4.1,0.5,E-0.25,zf+0.05,1.1,0.45,8); awning(m,1.2,5.4,E-0.25,z+0.5,1.1,0.45,8); awning(m,-5.6,-4.1,E-0.25,z+0.5,1.1,0.45,6)
+    # full-width tiered display shelves loaded with goods (door bay x=-2.55..-1.05 left clear)
+    rng=np.random.default_rng(3)
+    for x0,x1,zz in((-5.6,-2.9,z+0.1),(-0.7,0.4,zf+0.05),(1.1,5.5,z+0.1)):
+        for k,(y,dz) in enumerate(((0.55,1.15),(0.95,0.8),(1.35,0.45))):
+            m.box((x0,y-0.06,zz+dz-0.2),(x1,y,zz+dz+0.2),'oak')
+            for xx in np.arange(x0+0.2,x1-0.1,0.38):
+                r=rng.random(); p=(xx,y,zz+dz)
+                if r<0.35: m.LOD=1; m.blob((xx,y+0.14,zz+dz),0.17,'flowers',5,0.7); m.LOD=99
+                elif r<0.6: cyl(m,p,0.09,0,0.26,'gold' if r<0.48 else 'iron',6,cap='beam')
+                elif r<0.8: crate(m,(xx,y,zz+dz),0.3)
+                else: cyl(m,p,0.14,0,0.3,'plaster',7,cap='plaster',r1=0.1)
+        for xe in(x0,x1): m.box((xe-0.05,0,zz+0.3),(xe+0.05,1.4,zz+1.4),'beam')
+    # crowded street front
+    for x in(-5.0,3.0,5.2): stall(m,x,z+3.5,1.7)
+    for x in(-4.6,0.9,2.4,4.2): m.LOD=1; barrel(m,(x,0,z+2.2),0.3,0.75); m.LOD=99
+    for x in(-3.6,1.7,3.4): crate(m,(x,0,z+2.4),0.55); crate(m,(x+0.1,0.55,z+2.4),0.45)
+    for x in(-5.8,0.2,5.8): pot_plant(m,(x,0,z+1.8),0.4)
+    for x in(-3.8,4.4): m.box((x-0.5,0,z+4.6),(x+0.5,0.6,z+5.2),'oak'); m.blob((x,0.75,z+4.9),0.4,'flowers',6,0.6)
     return c
 def smithy(c):
     m=c['m']; X1=c['X1']

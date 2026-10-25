@@ -173,10 +173,10 @@ def banner(c,face,a,y,w=0.9,h=1.9):
     for s in(-1,1): m.obox(p+n*0.75+t*s*(w/2+0.12),t,up,n,(0.09,0.09,0.09),'gold')
     cloth(m,p+n*0.75-up*0.04,t,n,w,h,'banner')
 def sign(c,face,a,y,name,w=0.9,h=0.9):
-    m=c['m']; p,t,n=facepos(c,face,a,y); up=np.array([0,1.0,0]); L=1.25
+    m=c['m']; p,t,n=facepos(c,face,a,y); up=np.array([0,1.0,0]); L=max(1.25,w*0.6+0.5)
     m.beam(p,p+n*L,0.07,'iron'); m.beam(p-up*0.55,p+n*L*0.7,0.05,'iron')
     m.obox(p+n*L,t,up,n,(0.1,0.1,0.1),'gold')
-    bc=p+n*(L*0.55)-up*(0.2+h/2)
+    bc=p+n*max(L*0.55,w/2+0.3)-up*(0.2+h/2)
     for s in(-1,1): m.beam(p+n*(L*0.55+s*w*0.35),bc+n*s*w*0.35+up*h/2,0.025,'iron')
     # board: plane spanned by n (width) and up; thickness along t
     th=0.07

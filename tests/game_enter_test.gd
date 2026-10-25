@@ -7,7 +7,7 @@ func _run() -> void:
 	var m = load("res://main.tscn").instantiate(); root.add_child(m)
 	for i in 30: await process_frame
 	var fails := 0; var n := 0
-	for b in m.buildings:
+	for b in m.buildings + m.extra_doors:
 		if not m.interiors.has_interior(b.id): continue
 		n += 1
 		m.interiors.enter(b)

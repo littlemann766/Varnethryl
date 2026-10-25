@@ -2267,57 +2267,57 @@
   {
    "id": "farmhouse_tripo",
    "card": "card_farmhouse_barn.jpg",
-   "note": "cut face capped (+X side)",
+   "note": "whole farmhouse+barn building (one welded Tripo mesh, as on the card); fence_paddock separate",
    "source": "user Tripo upload, own 4096->2048 texture (not on card2 atlas)",
    "high": {
     "file": "tripo/bld_farmhouse_tripo.glb",
-    "tris": 16614,
+    "tris": 47678,
     "bbox_min": [
-     -5.26,
-     -0.02,
-     -5.27
+     -17.16,
+     0.0,
+     -12.18
     ],
     "bbox_max": [
-     5.26,
-     10.54,
-     11.84
+     17.16,
+     14.55,
+     12.18
     ]
    },
    "medium": {
     "file": "tripo/bld_farmhouse_tripo_lod1.glb",
-    "tris": 8134,
+    "tris": 23112,
     "bbox_min": [
-     -5.27,
-     -0.02,
-     -5.27
+     -17.16,
+     0.0,
+     -12.18
     ],
     "bbox_max": [
-     5.27,
-     10.54,
-     11.84
+     17.16,
+     14.55,
+     12.18
     ]
    },
    "low": {
     "file": "tripo/bld_farmhouse_tripo_lod2.glb",
-    "tris": 3252,
+    "tris": 9245,
     "bbox_min": [
-     -5.29,
-     0.03,
-     -5.26
+     -17.16,
+     0.0,
+     -12.18
     ],
     "bbox_max": [
-     5.3,
-     10.51,
-     11.84
+     17.16,
+     14.55,
+     12.18
     ]
    },
    "col": "tripo/bld_farmhouse_tripo_col.glb",
    "door_points": [
     {
      "pos": [
-      -0.25,
-      1.0,
-      8.7
+      -1.9,
+      0.9,
+      10.9
      ],
      "normal": [
       0.0,
@@ -2325,71 +2325,20 @@
       1.0
      ],
      "yaw_deg": 0.0,
-     "width": 1.3,
-     "height": 3.0,
-     "source": "measured from ortho render",
+     "width": 1.4,
+     "height": 2.3,
+     "source": "house door between the two lanterns, from geometry",
+     "label": "house door",
      "opening": [
       1.4,
-      3.0
+      2.3
      ]
-    }
-   ],
-   "phone_high_lod": "lod1"
-  },
-  {
-   "id": "barn_stable_tripo",
-   "card": "card_farmhouse_barn.jpg",
-   "note": "barn/stables; cut face capped (-X side)",
-   "source": "user Tripo upload, own 4096->2048 texture (not on card2 atlas)",
-   "high": {
-    "file": "tripo/bld_barn_stable_tripo.glb",
-    "tris": 32622,
-    "bbox_min": [
-     -11.9,
-     0.0,
-     -11.74
-    ],
-    "bbox_max": [
-     11.9,
-     14.55,
-     11.74
-    ]
-   },
-   "medium": {
-    "file": "tripo/bld_barn_stable_tripo_lod1.glb",
-    "tris": 15978,
-    "bbox_min": [
-     -11.9,
-     0.01,
-     -11.74
-    ],
-    "bbox_max": [
-     11.9,
-     14.55,
-     11.74
-    ]
-   },
-   "low": {
-    "file": "tripo/bld_barn_stable_tripo_lod2.glb",
-    "tris": 6392,
-    "bbox_min": [
-     -11.95,
-     0.01,
-     -11.73
-    ],
-    "bbox_max": [
-     11.9,
-     14.52,
-     11.74
-    ]
-   },
-   "col": "tripo/bld_barn_stable_tripo_col.glb",
-   "door_points": [
+    },
     {
      "pos": [
+      5.2,
       0.0,
-      1.0,
-      10.53
+      10.2
      ],
      "normal": [
       0.0,
@@ -2399,7 +2348,7 @@
      "yaw_deg": 0.0,
      "width": 4.0,
      "height": 5.0,
-     "source": "measured from ortho render",
+     "source": "barn opening, from geometry",
      "label": "barn doors",
      "opening": [
       4.0,
@@ -2408,6 +2357,101 @@
     }
    ],
    "phone_high_lod": "lod1"
+  },
+  {
+   "id": "barn_stable_tripo",
+   "card": "card_farmhouse_barn.jpg",
+   "note": "DEPRECATED duplicate: now the same whole farmhouse+barn as farmhouse_tripo. Place only farmhouse_tripo.",
+   "source": "user Tripo upload, own 4096->2048 texture (not on card2 atlas)",
+   "high": {
+    "file": "tripo/bld_barn_stable_tripo.glb",
+    "tris": 47678,
+    "bbox_min": [
+     -17.16,
+     0.0,
+     -12.18
+    ],
+    "bbox_max": [
+     17.16,
+     14.55,
+     12.18
+    ]
+   },
+   "medium": {
+    "file": "tripo/bld_barn_stable_tripo_lod1.glb",
+    "tris": 23112,
+    "bbox_min": [
+     -17.16,
+     0.0,
+     -12.18
+    ],
+    "bbox_max": [
+     17.16,
+     14.55,
+     12.18
+    ]
+   },
+   "low": {
+    "file": "tripo/bld_barn_stable_tripo_lod2.glb",
+    "tris": 9245,
+    "bbox_min": [
+     -17.16,
+     0.0,
+     -12.18
+    ],
+    "bbox_max": [
+     17.16,
+     14.55,
+     12.18
+    ]
+   },
+   "col": "tripo/bld_barn_stable_tripo_col.glb",
+   "door_points": [
+    {
+     "pos": [
+      -1.9,
+      0.9,
+      10.9
+     ],
+     "normal": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "yaw_deg": 0.0,
+     "width": 1.4,
+     "height": 2.3,
+     "source": "house door between the two lanterns, from geometry",
+     "label": "house door",
+     "opening": [
+      1.4,
+      2.3
+     ]
+    },
+    {
+     "pos": [
+      5.2,
+      0.0,
+      10.2
+     ],
+     "normal": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "yaw_deg": 0.0,
+     "width": 4.0,
+     "height": 5.0,
+     "source": "barn opening, from geometry",
+     "label": "barn doors",
+     "opening": [
+      4.0,
+      5.0
+     ]
+    }
+   ],
+   "phone_high_lod": "lod1",
+   "deprecated": true
   }
  ],
  "col_note": "<id>_col.glb: collision only, nodes named colNNNN-colonly (Godot imports StaticBody3D + shape, no mesh). Same origin as the visual GLB. Built from a 0.5 m column grid (heights snapped to 0.25 m), roofed interiors solid, each door has a walk-in opening >=1.4 m wide x >=2.3 m tall (see door_points[].opening) cut ~1.5 m deep, with low steps in front removed. door_points: pos (door threshold, metres, building space), normal/yaw_deg = outward facing (yaw 0 = +Z).",

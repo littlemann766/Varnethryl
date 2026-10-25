@@ -5,22 +5,27 @@ extends Node3D
 const PK := 2.8
 const CITY_HALF := 185.0
 const VERSION := "11"
+## test 11 layout (boss: buildings on the gate road / walkways through buildings): positions in METRES, solved by
+## /workspace/layout/solve.py from Beth's collision footprints (+1 m margin): every building sits beside a STREET with its
+## front (+Z, all door_points) facing it, a short spur path from each front door to the street, nothing on a street,
+## no overlaps, walls/gates clear (|x|,|z| <= 172). Closest free slot to the v1.5.33 spot (BUILDING_DEFS * 2.8).
+## The barn is gone: Beth's farmhouse_tripo is the whole farmstead; its barn doors lead into the barn interior.
 const DEFS := [
-	["guildhall",0,-21,0.0,"Guild Hall"], ["library",-24,-27,0.0,"Grand Library"], ["townhall",23,-26,0.0,"Town Hall"],
-	["mage",-44,-31,0.0,"Arcane Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
-	["observatory",-41,-46,0.0,"Observatory"], ["crypt",43,-45,0.0,"Crypt"], ["market",-24,-6,PI/2,"Market Provisioner"],
-	["apothecary",-24,9,PI/2,"Apothecary"], ["bakery",-24,21.5,PI/2,"Bakery"], ["inn",24,-8,-PI/2,"Inn"],
-	["smithy",24,7,-PI/2,"Blacksmith"], ["temple",46,-8,-PI/2,"Temple"], ["training",45,11,-PI/2,"Training Hall"],
-	["colosseum",42,38,0.0,"Colosseum"], ["thieves",-36.5,8,0.0,"Thieves' Den"], ["farmhouse",-42,-9,0.0,"Farmhouse"],
-	["barn",-51,21,PI/2,"Barn"], ["stables",-24,42,0.0,"Stables"], ["windmill",20,46,0.0,"Windmill"],
-	["house1",-9,19,PI,"Village House"], ["house2",9,19,PI,"Village House"], ["house3",-9,31,PI,"Village House"], ["house4",9,31,PI,"Village House"],
+	["colosseum",118.0,100.5,PI,"Colosseum"], ["keep",-29.0,-105.0,PI/2,"Castle Keep"], ["farmhouse",-132.0,48.4,-PI/2,"Farmhouse"],
+	["temple",129.5,-22.0,PI/2,"Temple"], ["mage",-124.0,-87.5,0.0,"Arcane Academy"], ["stables",-59.1,108.0,-PI/2,"Stables"],
+	["observatory",-114.0,-111.5,PI,"Observatory"], ["windmill",56.0,112.8,0.0,"Windmill"], ["training",127.0,30.0,PI/2,"Training Hall"],
+	["library",-57.5,-56.0,-PI/2,"Grand Library"], ["treasury",114.0,-84.0,0.0,"Treasury"], ["market",-63.2,-22.6,0.0,"Market Provisioner"],
+	["thieves",-101.2,13.6,PI,"Thieves' Den"], ["townhall",59.5,-84.0,PI/2,"Town Hall"], ["guildhall",-14.0,-54.5,PI,"Guild Hall"],
+	["crypt",120.0,-114.0,PI,"Crypt"], ["inn",59.5,-23.4,PI/2,"Inn"], ["bakery",-64.2,56.0,0.0,"Bakery"],
+	["smithy",62.5,20.0,PI/2,"Blacksmith"], ["house3",-25.4,83.0,PI,"Village House"], ["apothecary",-62.5,25.4,-PI/2,"Apothecary"],
+	["house1",-25.7,58.5,0.0,"Village House"], ["house2",25.0,57.5,0.0,"Village House"], ["house4",26.0,80.5,PI,"Village House"],
 ]
 ## Test 6: Beth's Godot "card2" buildings (metres, footprint-centred, +Z front, shared 2048 atlas) replace these.
 const CARD2 := {"guildhall": "guildhall", "library": "library", "townhall": "townhall", "mage": "mage_academy", "treasury": "treasury",
 	"keep": "keep", "observatory": "observatory", "crypt": "crypt", "market": "market", "apothecary": "apothecary", "bakery": "bakery",
 	"inn": "inn", "smithy": "smithy", "temple": "temple", "training": "training_hall", "colosseum": "colosseum", "thieves": "thieves_den",
 	"house1": "house1", "house2": "house2", "house3": "house3", "house4": "house4",
-	"farmhouse": "tripo/bld_farmhouse_tripo", "barn": "tripo/bld_barn_stable_tripo"}
+	"farmhouse": "tripo/bld_farmhouse_tripo"}
 ## Heavy pieces ship and render LOD1 as their best tier (phone High): colosseum, library, mage academy, Tripo models.
 func _add_col(path: String, pos: Vector3, rot: float) -> Node3D:
 	var c: Node3D = load(path).instantiate(); c.position = pos; c.rotation.y = rot; add_child(c)
@@ -49,6 +54,37 @@ static func card2_door(id: String) -> Variant:
 	var key: String = String(CARD2[id]).get_file().trim_prefix("bld_")
 	return _c2_doors.get(key, null)
 
+## every front door of a card2/Tripo building (building-local), from index.json door_points (z > 0 = front)
+static var _c2_all_doors := {}
+static func card2_doors(id: String) -> Array:
+	if not CARD2.has(id): return []
+	if _c2_all_doors.is_empty():
+		var j = JSON.parse_string(FileAccess.get_file_as_string("res://assets/card2/index.json"))
+		for b in (j.get("buildings", []) + j.get("tripo_buildings", [])):
+			var arr := []
+			for d in b.get("door_points", []):
+				if float(d.pos[2]) > 0.0: arr.append(Vector3(d.pos[0], d.pos[1], d.pos[2]))
+			_c2_all_doors[str(b.id)] = arr
+	return _c2_all_doors.get(String(CARD2[id]).get_file().trim_prefix("bld_"), [])
+
+static func _world_rect(a: AABB, pos: Vector3, rot: float) -> Rect2:
+	var bs := Basis(Vector3.UP, rot); var r := Rect2(); var first := true
+	for lx in [a.position.x, a.end.x]:
+		for lz in [a.position.z, a.end.z]:
+			var w: Vector3 = pos + bs * Vector3(lx, 0, lz)
+			if first: r = Rect2(w.x, w.z, 0, 0); first = false
+			else: r = r.expand(Vector2(w.x, w.z))
+	return r
+
+## distance from p to the nearest in-town street edge (negative inside); plaza disc included
+static func street_edge_dist(p: Vector2) -> float:
+	var best := p.length() - PLAZA_R
+	for r in STREETS:
+		var a := Vector2(r[0], r[1]); var b := Vector2(r[2], r[3]); var ab := b - a
+		var t: float = clampf((p - a).dot(ab) / maxf(ab.length_squared(), 0.001), 0.0, 1.0)
+		best = minf(best, p.distance_to(a + ab * t) - float(r[4]))
+	return best
+
 static func _card2_path(id: String, suf: String) -> String:
 	var v: String = CARD2[id]
 	if suf == "" and card2_lod1_top(id): suf = "_lod1"
@@ -63,10 +99,27 @@ const ROADS := [
 	[[185,0],[264,-3],[335,0],[421,-2],[500,0],[558,-7]],
 	[[345,0],[377,62],[387,127],[354,190],[309,247],[285,311],[304,356],[269,315],[214,259],[150,225],[76,200],[0,194]],
 	[[0,194],[5,265],[9,344],[0,440],[-6,558]],
-	[[0,-140],[0,-194]],           # north avenue through the north gate
-	[[-200,0],[-185,0],[-160,0]],  # west avenue stub through the gate
-	[[160,0],[185,0],[200,0]],     # east avenue stub through the gate
+	# (test 11) the in-town avenue stubs are gone: ground.gdshader draws the streets; their road mesh rendered as the
+	# boss's black strip between the north gate towers (back-facing quads under CULL_DISABLED)
 ]
+## in-town streets (test 11): [x0, z0, x1, z1, half width], axis-aligned; drawn by ground.gdshader, plus the plaza disc
+## (r 36.4) and the ring road outside the walls (r 194). Buildings + door spurs are laid out against these.
+const STREETS := [
+	[0, -194, 0, 194, 4.5],
+	[-194, 0, 194, 0, 3.6],
+	[-150, -70, 150, -70, 3.0],
+	[-150, 70, 150, 70, 3.0],
+	[-150, -130, 150, -130, 3.0],
+	[-150, 130, 150, 130, 3.0],
+	[-75, -150, -75, 150, 3.0],
+	[75, -150, 75, 150, 3.0],
+	[-150, -150, -150, 150, 3.0],
+	[150, -150, 150, 150, 3.0]]
+const PLAZA_R := 36.4
+const SPUR_GAP := 3.1     # m from a front door to the street edge (solver GAP 2.5 + 0.6)
+var terrain_mat: ShaderMaterial
+var spurs := []           # [door Vector2, end Vector2, half width, building id]
+var extra_doors := []     # second entrances that lead to their own interior (the farmstead's barn doors)
 const GATES := [[Vector2(0, 1), PI, "South Gate"], [Vector2(0, -1), 0.0, "North Gate"], [Vector2(1, 0), -PI / 2, "East Gate"], [Vector2(-1, 0), PI / 2, "West Gate"]]
 const TIERS := ["Low", "Medium", "High", "Ultra"]
 
@@ -170,6 +223,7 @@ func _ready() -> void:
 	_walls_and_gate()
 	for d in DEFS: _building(d)
 	_street_kit()
+	_streets_to_shader()
 	# test 10: boss "Fix the castle and or get rid of it" - the Tripo backdrop castle reads as shredded/floating, removed
 	_harbour()
 	_ships()
@@ -252,6 +306,7 @@ func _terrain() -> void:
 	st.generate_normals()
 	var mi := MeshInstance3D.new(); mi.mesh = st.commit()
 	var m := ShaderMaterial.new(); m.shader = load("res://scripts/ground.gdshader"); mi.material_override = m
+	terrain_mat = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(mi)
 	var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var hm := HeightMapShape3D.new()
 	hm.map_width = N + 1; hm.map_depth = N + 1; hm.map_data = hs; cs.shape = hm; cs.scale = Vector3(step, 1, step)
@@ -272,10 +327,10 @@ func _roads() -> void:
 			var q := [a - side, a + side, b + side, b - side]
 			var v := []
 			for p in q: v.append(Vector3(p.x, height(p.x, p.y) + 0.12, p.y))
-			for idx in [0, 1, 2, 0, 2, 3]:
+			for idx in [0, 2, 1, 0, 3, 2]:   # clockwise from above = front face (was back-facing: black on phones)
 				st.set_normal(Vector3.UP); st.set_uv(Vector2(v[idx].x, v[idx].z) * 0.25); st.add_vertex(v[idx])
 	var mi := MeshInstance3D.new(); mi.mesh = st.commit()
-	var m := _mat(Color(0.55, 0.49, 0.40), 0.9); m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var m := _mat(Color(0.55, 0.49, 0.40), 0.9)
 	mi.material_override = m; mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(mi)
 
 # ---------- environment / lighting ----------
@@ -484,8 +539,21 @@ const STREET := {"inn": ["barrel_group", "lantern_post"], "smithy": ["crate_stac
 	"thieves": ["barrel_group", "crate_stack"], "training": ["barrel_group", "signpost"], "house1": ["bench", "flower_planter"],
 	"house2": ["flower_planter", "barrel_group"], "house3": ["bench", "lantern_post"], "house4": ["flower_planter", "crate_stack"],
 	"crypt": ["lantern_post", "lantern_post"], "observatory": ["bench", "lantern_post"], "keep": ["lantern_post", "lantern_post"],
-	"farmhouse": ["hay_bale", "fence"], "barn": ["hay_bale", "hay_bale"], "library": ["bench", "lantern_post"], "mage": ["lantern_post", "flower_planter"]}
+	"farmhouse": ["hay_bale", "fence"], "library": ["bench", "lantern_post"], "mage": ["lantern_post", "flower_planter"]}
 const PROP_FLAT := ["cobble_edge"]
+func _streets_to_shader() -> void:
+	var segs := PackedVector4Array(); var hws := PackedFloat32Array()
+	for r in STREETS: segs.append(Vector4(r[0], r[1], r[2], r[3])); hws.append(r[4])
+	for sp in spurs: segs.append(Vector4(sp[0].x, sp[0].y, sp[1].x, sp[1].y)); hws.append(sp[2])
+	segs.resize(64); hws.resize(64)
+	terrain_mat.set_shader_parameter("segs", segs); terrain_mat.set_shader_parameter("seg_hw", hws)
+	terrain_mat.set_shader_parameter("seg_n", mini(STREETS.size() + spurs.size(), 64)); terrain_mat.set_shader_parameter("street_n", STREETS.size())
+
+func _in_building(p: Vector2, pad: float) -> bool:
+	for b in buildings:
+		if (b.rect as Rect2).grow(pad).has_point(p): return true
+	return false
+
 func _street_prop(kind: String, pos: Vector3, rot: float) -> void:
 	var root := Node3D.new(); root.name = "prop_" + kind; root.position = pos; root.rotation.y = rot; add_child(root)
 	var bands := [[0.0, 30.0], [30.0, 70.0], [70.0, 160.0]]
@@ -682,7 +750,7 @@ func _add_trimesh(n: Node3D, skip := "roof") -> void:
 		mi.create_trimesh_collision()
 
 func _building(d: Array) -> void:
-	var id: String = d[0]; var pos := Vector3(float(d[1]) * PK, 0, float(d[2]) * PK); var rot: float = d[3]
+	var id: String = d[0]; var pos := Vector3(float(d[1]), 0, float(d[2])); var rot: float = d[3]
 	var card := CARD2.has(id)
 	var n := _place_glb(_card2_path(id, "_lod1") if card else "res://assets/buildings/bld_%s.glb" % id, pos, rot)
 	if card: _add_col(_card2_path(id, "_col"), pos, rot)   # Beth's -colonly collision: walls + walkable door openings
@@ -693,7 +761,21 @@ func _building(d: Array) -> void:
 		if first: aabb = a; first = false
 		else: aabb = aabb.merge(a)
 	for mi in _meshes(n, []): mi.visible = false      # r3 shell = collision proxy; visuals come from Beth r4 hi tiers
-	buildings.append({"id": id, "name": d[4], "node": n, "roof": null, "roofs": [], "lods": [], "vis": null, "aabb": aabb})
+	var fpa := aabb
+	if card:
+		var colp: Node3D = load(_card2_path(id, "_col")).instantiate()
+		for mi in _meshes(colp, []): fpa = fpa.merge(mi.transform * mi.get_aabb())
+		colp.free()
+	var fr := _world_rect(fpa, pos, rot)
+	buildings.append({"id": id, "name": d[4], "node": n, "roof": null, "roofs": [], "lods": [], "vis": null, "aabb": aabb, "rect": fr})
+	# short spur path from every front door to its street (test 11, boss: walkways end at doors)
+	var fwd := Vector2(sin(rot), cos(rot))
+	for dp in card2_doors(id) if card else [Vector3(0, 0, aabb.end.z)]:
+		var w: Vector3 = n.global_transform * dp
+		spurs.append([Vector2(w.x, w.z), Vector2(w.x, w.z) + fwd * (SPUR_GAP + 0.8), 1.0 if dp.x > 3.0 and id == "farmhouse" else 0.85, id])   # narrow footpaths: 1.7 m (2 m to the barn doors)
+	if id == "farmhouse":
+		# the barn half of the welded farmstead: its 4 m doors enter the barn interior (InteriorManager.extra_doors)
+		extra_doors.append({"id": "barn", "name": "Barn", "node": n, "aabb": aabb, "door": card2_doors(id)[1], "rect": fr})
 	blockers.append([Vector2(pos.x, pos.z), max(aabb.size.x, aabb.size.z) * 0.55 + 2.0])
 	# test 9: warm door lantern light at Beth's door_point (lantern height, beside the doorway), pooled + culled
 	var dp = card2_door(id) if card else null
@@ -775,6 +857,7 @@ func _dressing() -> void:
 		if file.contains("wall_cap") or file.contains("puddle"): continue
 		var p: Array = it["position"]; var r: Array = it["rotation"]; var s: Array = it["scale"]
 		if _in_gate_path(Vector2(p[0], p[2]), 1.0) and not file.contains("decals/"): continue
+		if absf(p[0]) < CITY_HALF and absf(p[2]) < CITY_HALF and _in_building(Vector2(p[0], p[2]), 0.5): continue   # test 11 relayout
 		var y: float = height(p[0], p[2]) if p[1] == null else float(p[1])
 		if file.contains("decals/") and (file.contains("ground") or file.contains("puddle") or file.contains("leaves")): y += 0.03
 		var b := Basis.from_euler(Vector3(r[0], r[1], r[2])).scaled(Vector3(s[0], s[1], s[2]))
@@ -921,8 +1004,10 @@ func _ok_spot(p: Vector2, pad: float) -> bool:
 	if _in_gate_path(p, pad): return false
 	if p.length() < 40 + pad: return false
 	if abs(p.length() - 194.0) < 7 + pad: return false
-	if abs(p.y - 38) < 4 + pad or abs(p.y - 71) < 4 + pad: return false
-	if (abs(p.x - 67) < 4 + pad or abs(p.x + 67) < 4 + pad) and abs(p.y) < 120: return false
+	if street_edge_dist(p) < 1.5 + pad: return false
+	if _in_building(p, 1.0 + pad): return false
+	for sp in spurs:
+		if Geometry2D.get_closest_point_to_segment(p, sp[0], sp[1]).distance_to(p) < sp[2] + 0.5 + pad: return false
 	if abs(p.x) > CITY_HALF - 4 and abs(p.x) < CITY_HALF + 4: return false
 	if abs(p.y) > CITY_HALF - 4 and abs(p.y) < CITY_HALF + 4: return false
 	for b in blockers:
@@ -1415,10 +1500,29 @@ func _run_bench() -> void:
 		print("FLY on=%s alt=%.1f hero_y=%.1f ground=%.1f" % [cheats.flags.fly, fly_alt, hero.position.y, height(hero.position.x, hero.position.z)])
 		get_tree().quit()
 		return
+	if only == "t11city":
+		VUI._enter("solo"); bench = true
+		var tag := OS.get_environment("CITY_TAG")
+		var oc := Camera3D.new(); oc.projection = Camera3D.PROJECTION_ORTHOGONAL; oc.size = 400.0; oc.far = 1500; add_child(oc)
+		oc.position = Vector3(0, 700, 0); oc.rotation = Vector3(-PI / 2, 0, 0); oc.current = true
+		hero.position = Vector3(0, height(0, 120) + 0.2, 120)
+		await _shot_here("t11_city_%s_top" % tag)
+		oc.projection = Camera3D.PROJECTION_PERSPECTIVE; oc.fov = 60
+		oc.look_at_from_position(Vector3(0, 45, 120), Vector3(0, 0, 185)); await _shot_here("t11_city_%s_southgate" % tag)
+		oc.look_at_from_position(Vector3(0, 45, -120), Vector3(0, 0, -185)); await _shot_here("t11_city_%s_northgate" % tag)
+		oc.current = false; cam.current = true
+		get_tree().quit()
+		return
 	if only == "t11volcano":
 		VUI._enter("solo"); bench = true
-		await _shot("t11_volcano_far", Vector3(300, 0, -300), -PI * 0.75, 0.25, 11.0, 2, 60)
-		await _shot("t11_volcano_close", Vector3(360, 0, -350), -PI * 0.78, 0.45, 11.0, 2, 60)
+		await _shot("t11_volcano_far", Vector3(260, 0, -260), -PI / 4, 0.12, 11.0, 2, 60)
+		var vc := Camera3D.new(); vc.far = 2000; add_child(vc)
+		var vb := Vector3(405, height(405, -402) - 3.0, -402); var crater := vb + Vector3(-2.3, 38.0, 1.3) * 1.6
+		vc.look_at_from_position(crater + Vector3(-70, 40, 70), crater); vc.current = true
+		await _shot_here("t11_volcano_crater")
+		vc.look_at_from_position(vb + Vector3(-150, 12, 150), vb + Vector3(0, 30, 0))
+		await _shot_here("t11_volcano_base")
+		vc.current = false; cam.current = true
 		get_tree().quit()
 		return
 	if only == "t11mage":

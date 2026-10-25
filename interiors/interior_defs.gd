@@ -11,19 +11,25 @@ const CARD := {"inn": "card_inn.jpg", "guildhall": "card_guild_hall.png", "townh
 	"barn": "card_farmhouse_barn.jpg", "stables": "card_stables.jpg", "windmill": "card_windmill.jpg", "house1": "card_village_houses.jpg",
 	"house2": "card_village_houses.jpg", "house3": "card_village_houses.jpg", "house4": "card_village_houses.jpg"}
 
-## exterior r3 shell AABB sizes (assets/buildings/bld_<id>.glb) for tests/screenshots; runtime uses the live AABB.
-const SIZE := {"apothecary": Vector3(25.6, 18.5, 21.9), "bakery": Vector3(25.6, 17.5, 22.0), "barn": Vector3(19.7, 19.2, 24.4),
+## exterior AABB sizes as main.gd computes them (card2 LOD1 for CARD2 ids, else r3 shell) for tests/screenshots; runtime uses the live AABB.
+const SIZE := {"apothecary": Vector3(9.1, 13.0, 9.5), "bakery": Vector3(11.1, 15.0, 11.0), "barn": Vector3(19.7, 19.2, 24.4),
 	"colosseum": Vector3(44.2, 13.3, 44.2), "crypt": Vector3(19.7, 15.6, 27.8), "farmhouse": Vector3(31.3, 18.4, 25.7),
-	"guildhall": Vector3(40.8, 24.1, 32.1), "house1": Vector3(22.8, 17.8, 24.5), "house2": Vector3(24.1, 17.6, 25.5),
-	"house3": Vector3(21.5, 17.1, 24.5), "house4": Vector3(23.0, 18.5, 27.0), "inn": Vector3(38.8, 21.8, 28.3),
+	"guildhall": Vector3(16.5, 24.9, 14.8), "house1": Vector3(9.1, 13.6, 10.2), "house2": Vector3(8.6, 13.2, 9.2),
+	"house3": Vector3(11.6, 13.3, 10.0), "house4": Vector3(8.7, 16.1, 8.9), "inn": Vector3(13.1, 18.8, 12.3),
 	"keep": Vector3(45.9, 26.7, 35.7), "library": Vector3(38.2, 27.2, 39.7), "mage": Vector3(29.9, 23.5, 27.8),
-	"market": Vector3(33.2, 21.3, 27.0), "observatory": Vector3(22.7, 27.3, 25.0), "smithy": Vector3(25.5, 18.1, 24.4),
+	"market": Vector3(33.2, 21.3, 27.0), "observatory": Vector3(22.7, 27.3, 25.0), "smithy": Vector3(11.4, 13.5, 9.9),
 	"stables": Vector3(35.1, 13.6, 19.3), "temple": Vector3(26.5, 24.1, 44.5), "thieves": Vector3(25.6, 18.9, 21.9),
 	"townhall": Vector3(30.1, 22.7, 26.1), "training": Vector3(43.3, 22.4, 32.1), "treasury": Vector3(23.0, 18.3, 21.0),
 	"windmill": Vector3(27.1, 28.5, 21.2), "gatehouse": Vector3(21.1, 28.9, 22.4)}
 
+## card2 exteriors (re-exported with the card2 atlas): front facade z per tests/door_probe.gd; doors sit centred (+-1.3 m)
+const DOORS := {"inn": Vector3(0, 0, 5.42), "bakery": Vector3(0, 0, 4.45), "house1": Vector3(0, 0, 4.27), "house2": Vector3(0, 0, 3.75),
+	"house3": Vector3(0, 0, 3.52), "house4": Vector3(0, 0, 3.52), "smithy": Vector3(0, 0, 4.02), "apothecary": Vector3(0, 0, 3.6), "guildhall": Vector3(0, 0, 6.57)}
+## fractional (legacy) defs were tuned against the r3 shells; keep those footprints until they are rewritten in metres
+const LEGACY_SIZE := {"inn": Vector3(38.8, 21.8, 28.3), "guildhall": Vector3(40.8, 24.1, 32.1), "house1": Vector3(22.8, 17.8, 24.5), "house2": Vector3(24.1, 17.6, 25.5), "house3": Vector3(21.5, 17.1, 24.5), "house4": Vector3(23.0, 18.5, 27.0)}
 const D := {
-# ---------------- INN: ground = entrance, common room, bar, kitchen, pantry, storage; upper = hall, bedrooms A-C, sitting (rumor) room, balcony
+# ===== card2 exteriors (card scale). All coords in metres ("m": true) from the interior centre; front wall/door at +z.
+# ---- INN 10.7 x 10.1: common room + hearth (W), bar, kitchen (back R), pantry & storage (back L); up: bedrooms A-C, rumor corner, balcony
 "inn": {"name": "Inn of Varnethryl",
 	"floors": [{"h": 4.2, "mat": "oak", "wall": "stone", "win": 4.5}, {"h": 3.6, "mat": "oak", "wall": "plaster", "win": 4.5}],
 	"walls": [
@@ -64,6 +70,7 @@ const D := {
 		["Hallway", 1, 0.0, 0.05], ["Bedroom A", 1, -0.33, -0.25], ["Bedroom B", 1, 0.0, -0.22], ["Bedroom C", 1, 0.33, -0.25], ["Rumor Corner", 1, -0.33, 0.1], ["Balcony", 1, 0.2, 0.4]]},
 
 # ---------------- GUILD HALL: foyer, main hall w/ quest board, meeting table, stair & upper balcony overlooking hall
+# ---- GUILD HALL 13.5 x 12.1: foyer, main hall (runner, hearth, banners), meeting table (W room), quest boards; stair -> balcony ring over the hall
 "guildhall": {"name": "Guild Hall of Varnethryl",
 	"floors": [{"h": 5.2, "mat": "oak", "wall": "stone", "win": 4.0},
 		{"h": 4.0, "mat": "oak", "wall": "plaster", "win": 4.0, "slab": [[-0.5, -0.5, -0.24, 0.5], [0.24, -0.5, 0.5, 0.5], [-0.24, 0.3, 0.24, 0.5]]}],
@@ -93,6 +100,46 @@ const D := {
 		["Upper Balcony", 1, 0.0, 0.4], ["Library Archive", 1, -0.37, 0.1], ["Storage", 1, 0.37, -0.3], ["Balcony Overlook", 1, -0.37, -0.3]]},
 
 # ---------------- TOWN HALL: great court hall (checker floor), quest board area, tower stairs; upper: council room (round table), archives
+# ---- BLACKSMITH 9.3 x 8.1: forge room (forge, anvil, quench, hanging tools), armor display (W), weapon wall & workshop (E); storage loft by ladder
+"smithy": {"name": "Blacksmith of Varnethryl", "m": true,
+	"floors": [{"h": 3.6, "mat": "flag", "wall": "stone", "win": 3.5}, {"h": 2.6, "mat": "darkoak", "wall": "stone", "win": 0.0, "slab": [[-4.65, -4.05, 4.65, -1.0]]}],
+	"ladders": [[0, -3.0, -1.0, 0]],
+	"rails": [[1, -1.4, -1.0, 0, 3]],
+	"props": [["forge", 0, 1.0, -3.03, 0], ["anvil", 0, 1.0, -1.5, 0], ["keg", 0, 2.4, -1.7, 0], ["_tools", 0, -1.4, -3.87, 0, [1.8]], ["_tools", 0, 1.6, 3.87, 180, [1.4]],
+		["weapon_rack", 0, 4.25, -1.6, -90], ["weapon_rack", 0, 4.25, 0.3, -90], ["weapon_rack", 0, 4.25, 2.1, -90], ["table", 0, 2.8, 1.0, 90], ["table", 0, -1.0, -2.2, 0],
+		["armor_stand", 0, -4.2, 0.3, 90], ["armor_stand", 0, -4.2, 1.5, 90], ["lion_banner", 0, -4.43, 0.9, 90, [0.9, false]], ["table", 0, -3.0, 2.8, 0], ["chest", 0, -3.6, 3.55, 180],
+		["chest", 1, -2.0, -3.5, 0], ["keg", 1, 0.3, -3.6, 0], ["keg", 1, -0.4, -3.6, 0], ["wardrobe", 1, 3.3, -3.52, 0], ["chest", 1, 3.9, -2.0, -90], ["weapon_rack", 1, -4.25, -2.6, 90]],
+	"lights": [["fire", 0, 1.0, -2.4, 0, 3.5, 9.0, true], ["chandelier", 0, -0.5, 1.0, 0, 1.6, 7.0], ["lantern", 0, -4.47, 2.6, 90, 1.0, 6.0], ["lantern", 0, 2.6, 3.87, 180, 1.0, 6.0],
+		["lantern", 0, 4.47, -0.7, -90, 0.9, 5.0], ["lantern", 1, 0.0, -3.87, 0, 0.9, 6.0]],
+	"rooms": [["Forge Room", 0, -0.3, -0.6], ["Armor Display", 0, -3.0, 1.0], ["Weapon Wall", 0, 3.4, -0.6], ["Storage Loft", 1, -0.8, -2.2]]},
+
+# ---- BAKERY 9.1 x 9.0: front shop (blue tile, bread racks & display counters), stairs E; up: kitchen + oven, seating area, storage
+"bakery": {"name": "Bakery of Varnethryl", "m": true,
+	"floors": [{"h": 3.4, "mat": "bluecheck", "wall": "plaster", "win": 3.0}, {"h": 3.0, "mat": "bluecheck", "wall": "plaster", "win": 3.0}],
+	"walls": [[1, -4.55, -0.6, 1.8, -0.6, [[0.56, 1.4]]]],
+	"stairs": [[0, 3.0, 2.5, 0, 1.4]],
+	"props": [["bread_rack", 0, -2.8, -4.1, 0], ["bread_rack", 0, -1.4, -4.1, 0], ["bread_rack", 0, 0.0, -4.1, 0], ["bread_rack", 0, -4.13, -2.0, 90], ["bread_rack", 0, -4.13, -0.6, 90],
+		["_counter", 0, -1.2, -1.8, 0, [3.0, 1.0, 0.8]], ["_bread", 0, -1.2, -1.8, 0, [2.8, 0.6, 1.06]], ["_counter", 0, -3.6, 2.3, 90, [2.0, 0.9, 0.7]], ["_bread", 0, -3.6, 2.3, 90, [1.8, 0.5, 0.96]],
+		["keg", 0, 3.6, -3.8, 0], ["chest", 0, 1.6, 3.9, 180], ["lion_banner", 0, -1.4, 4.33, 180, [0.5, false]],
+		["bakery_oven", 1, -2.9, -2.9, 0], ["table", 1, -0.4, -3.0, 0], ["_bread", 1, -0.4, -3.0, 0, [1.2, 0.6, 0.92]], ["_pots", 1, -0.4, -3.0, 0, [1.4]], ["apothecary_shelf", 1, 1.4, -4.1, 0],
+		["keg", 1, -4.1, -0.1, 0], ["keg", 1, -4.1, 0.6, 0], ["_round_table", 1, -2.4, 2.3, 0, [0.6, 3]], ["bench", 1, -4.2, 2.3, 90], ["_round_table", 1, 0.5, 2.3, 0, [0.55, 3]]],
+	"lights": [["chandelier", 0, -1.2, 0.6, 0, 2.0, 8.0, true], ["lantern", 0, -1.4, -4.37, 0, 1.0, 6.0], ["lantern", 0, 4.37, 0.0, -90, 0.8, 5.0], ["lantern", 0, -4.37, 2.3, 90, 0.8, 5.0],
+		["fire", 1, -2.9, -2.4, 0, 2.2, 7.0, true], ["lantern", 1, -1.0, 4.37, 180, 1.0, 6.0], ["lantern", 1, 4.37, -2.8, -90, 0.8, 5.0]],
+	"rooms": [["Front Shop", 0, -1.0, 1.5], ["Display Counters", 0, -1.2, -0.9], ["Kitchen", 1, -0.4, -1.8], ["Seating Area", 1, -1.0, 1.0], ["Storage", 1, -3.4, 0.2]]},
+
+# ---- APOTHECARY 7.5 x 7.8: main shop floor (herb shelves, counter, bottles); back storage
+"apothecary": {"name": "Apothecary of Varnethryl", "m": true,
+	"floors": [{"h": 3.4, "mat": "flag", "wall": "plaster", "win": 3.0}],
+	"walls": [[0, -3.75, -1.6, 3.75, -1.6, [[0.847, 1.4]]]],
+	"props": [["apothecary_shelf", 0, -3.36, -0.3, 90], ["apothecary_shelf", 0, -3.36, 1.4, 90], ["apothecary_shelf", 0, 3.36, -0.3, -90], ["apothecary_shelf", 0, 3.36, 1.4, -90],
+		["_counter", 0, -0.6, -0.5, 0, [2.6, 1.0, 0.8]], ["bottles", 0, -1.2, -0.5, 0, [1.03, false]], ["bottles", 0, 0.0, -0.5, 0, [1.03, false]],
+		["table", 0, -1.6, 1.8, 90], ["crystal_orb", 0, 1.9, 2.6, 0], ["rug", 0, 0.0, 1.5, 0], ["lion_banner", 0, -0.6, -1.37, 0, [0.5, false]],
+		["apothecary_shelf", 0, -2.4, -3.5, 0], ["apothecary_shelf", 0, -0.8, -3.5, 0], ["table", 0, 1.2, -2.8, 0], ["keg", 0, 3.0, -3.3, 0]],
+	"lights": [["chandelier", 0, 0.0, 1.0, 0, 2.0, 8.0, true], ["lantern", 0, -3.57, 0.6, 90, 0.8, 5.0], ["lantern", 0, 3.57, 0.6, -90, 0.8, 5.0], ["lantern", 0, 0.0, -3.72, 0, 1.0, 6.0]],
+	"rooms": [["Main Shop Floor", 0, 0.0, 1.6], ["Back Storage", 0, 2.4, -2.4]]},
+
+# ===== r3 shells (not yet card2): interiors at card scale (0.42 of the shell AABB)
+# ---- TOWN HALL 12.6 x 11.0: great court hall (checker, banners, dais), twin tower stairs, quest board & records corners; up: council room, archives
 "townhall": {"name": "Town Hall of Varnethryl",
 	"floors": [{"h": 5.0, "mat": "checker", "wall": "palestone", "win": 3.5, "glass": "stained"}, {"h": 4.5, "mat": "checker", "wall": "palestone", "win": 3.5}],
 	"walls": [
@@ -121,40 +168,7 @@ const D := {
 		["Council Room", 1, 0.0, -0.15], ["Archives", 1, -0.4, -0.15], ["East Archives", 1, 0.4, -0.15], ["Upper Gallery", 1, 0.0, 0.3]]},
 
 # ---------------- BLACKSMITH: forge room, armor display, weapon wall & workshop; upper floor storage loft via ladder
-"smithy": {"name": "Blacksmith of Varnethryl", "scale": [0.52, 0.52],
-	"floors": [{"h": 4.0, "mat": "flag", "wall": "stone", "win": 5.0, "stairmat": "darkoak"}, {"h": 3.0, "mat": "darkoak", "wall": "stone", "win": 0.0, "slab": [[-0.5, -0.5, 0.5, -0.05]]}],
-	"ladders": [[0, -0.3, -0.05, 0]],
-	"rails": [[1, -0.18, -0.05, 0, 4]],
-	"props": [
-		["forge", 0, 0.15, -0.44, 0], ["anvil", 0, 0.15, -0.22, 0], ["keg", 0, 0.32, -0.25, 0], ["weapon_rack", 0, 0.48, -0.25, -90], ["weapon_rack", 0, 0.48, 0.0, -90],
-		["weapon_rack", 0, 0.48, 0.25, -90], ["table", 0, 0.3, 0.1, 90], ["table", 0, -0.05, -0.2, 0],
-		["armor_stand", 0, -0.45, 0.1, 90], ["armor_stand", 0, -0.45, 0.25, 90], ["lion_banner", 0, -0.49, 0.18, 90, [1.2, false]], ["chest", 0, -0.35, 0.4, 0],
-		["table", 0, -0.32, 0.25, 90], ["keg", 0, -0.45, -0.4, 0], ["chest", 0, -0.42, -0.25, 90],
-		["chest", 1, -0.4, -0.4, 0], ["chest", 1, -0.25, -0.42, 0], ["keg", 1, 0.0, -0.42, 0], ["keg", 1, 0.06, -0.42, 0], ["wardrobe", 1, 0.3, -0.45, 0], ["weapon_rack", 1, 0.45, -0.25, -90],
-	],
-	"lights": [["fire", 0, 0.15, -0.4, 0, 5.0, 14.0, true], ["chandelier", 0, -0.1, 0.1, 0, 2.0, 10.0], ["lantern", 0, -0.49, -0.1, 90, 1.6, 9.0], ["lantern", 0, 0.3, 0.49, 180, 1.0, 8.0], ["lantern", 1, 0.0, -0.49, 0, 1.0, 8.0]],
-	"rooms": [["Forge Room", 0, 0.1, -0.1], ["Armor Display", 0, -0.3, 0.1], ["Weapon Wall", 0, 0.35, 0.3], ["Storage Loft", 1, 0.0, -0.3]]},
-
-# ---------------- BAKERY: ground front shop (blue tile) + stairs; upper kitchen (oven), storage, seating area
-"bakery": {"name": "Bakery of Varnethryl",
-	"floors": [{"h": 3.8, "mat": "bluecheck", "wall": "plaster", "win": 4.0}, {"h": 3.4, "mat": "bluecheck", "wall": "plaster", "win": 4.0}],
-	"walls": [[0, 0.25, -0.5, 0.25, 0.5, [[0.85, 2.0]]],
-		[1, -0.5, 0.0, 0.25, 0.0, [[0.3, 2.0]]], [1, 0.25, -0.5, 0.25, 0.5, [[0.12, 1.8]]]],
-	"stairs": [[0, 0.38, 0.35, 0, 2.0]],
-	"props": [
-		["bread_rack", 0, -0.3, -0.47, 0], ["bread_rack", 0, -0.12, -0.47, 0], ["bread_rack", 0, -0.47, -0.25, 90], ["bread_rack", 0, -0.47, 0.0, 90],
-		["_counter", 0, -0.2, -0.15, 0, [4.0, 1.0, 0.8]], ["_counter", 0, -0.47, 0.3, 90, [2.4, 0.9, 0.7]], ["_counter", 0, 0.05, 0.1, 90, [2.0, 0.9, 0.7]],
-		["keg", 0, 0.15, -0.4, 0], ["chest", 0, 0.12, 0.35, 0], ["lion_banner", 0, -0.2, -0.49, 0, [1.0, false]],
-		["apothecary_shelf", 0, 0.47, -0.35, -90], ["apothecary_shelf", 0, 0.47, -0.15, -90], ["keg", 0, 0.32, -0.45, 0],
-		["bakery_oven", 1, -0.3, -0.42, 0], ["table", 1, -0.25, -0.15, 0], ["_pots", 1, -0.05, -0.2, 0, [1.6]], ["apothecary_shelf", 1, 0.0, -0.47, 0], ["keg", 1, -0.47, -0.1, 0],
-		["apothecary_shelf", 1, 0.47, -0.4, -90], ["keg", 1, 0.32, -0.45, 0], ["keg", 1, 0.38, -0.45, 0], ["chest", 1, 0.45, -0.15, -90],
-		["_round_table", 1, -0.25, 0.25, 0, [0.7, 4]], ["bench", 1, -0.47, 0.25, 90], ["bench", 1, -0.25, 0.47, 180], ["_round_table", 1, 0.05, 0.3, 0, [0.6, 3]],
-	],
-	"lights": [["lantern", 0, -0.2, -0.49, 0, 1.5, 9.0], ["chandelier", 0, -0.15, 0.1, 0, 2.6, 12.0, true], ["lantern", 0, 0.4, 0.0, -90, 1.0, 7.0],
-		["fire", 1, -0.3, -0.35, 0, 2.5, 9.0, true], ["lantern", 1, -0.2, 0.49, 180, 1.2, 8.0], ["lantern", 1, 0.4, -0.2, -90, 0.9, 6.0]],
-	"rooms": [["Front Shop", 0, -0.2, 0.25], ["Stair Hall", 0, 0.38, 0.45], ["Kitchen", 1, -0.25, -0.25], ["Seating Area", 1, -0.25, 0.1], ["Storage", 1, 0.38, -0.3]]},
-
-# ---------------- TEMPLE: nave w/ pews + high altar, healing chambers (E, fountain), crypt-adjacent shrine (W), upper gallery overlooking nave
+# ---- TEMPLE 11.1 x 18.7: nave (pews, runner, pillars), high altar + stained glass, healing chambers E (fountain), crypt-adjacent shrine W; side galleries above
 "temple": {"name": "Temple of Varnethryl", "scale": [0.8, 0.7],
 	"floors": [{"h": 6.0, "mat": "palestone", "wall": "palestone", "win": 3.5, "glass": "stained"},
 		{"h": 5.0, "mat": "palestone", "wall": "palestone", "win": 3.5, "glass": "stained", "slab": [[-0.5, -0.5, -0.2, 0.5], [0.2, -0.5, 0.5, 0.5]]}],
@@ -290,17 +304,6 @@ const D := {
 	"rooms": [["Sales Floor", 0, -0.12, 0.3], ["Merchant Counter", 0, -0.12, 0.0], ["Bulk Displays", 0, 0.38, -0.3], ["Back Room / Stock", 0, -0.25, -0.33], ["Upstairs Loft", 1, -0.15, 0.0]]},
 
 # ---- APOTHECARY: main shop floor (herb shelves, counter); back storage
-"apothecary": {"name": "Apothecary of Varnethryl",
-	"floors": [{"h": 4.2, "mat": "flag", "wall": "plaster", "win": 4.0}],
-	"walls": [[0, -0.5, -0.15, 0.5, -0.15, [[0.5, 1.8]]]],
-	"props": [["apothecary_shelf", 0, -0.49, 0.0, 90], ["apothecary_shelf", 0, -0.49, 0.25, 90], ["apothecary_shelf", 0, 0.49, 0.0, -90], ["apothecary_shelf", 0, 0.49, 0.25, -90],
-		["apothecary_shelf", 0, -0.25, -0.14, 180], ["apothecary_shelf", 0, 0.25, -0.14, 180], ["_counter", 0, 0.0, 0.05, 0, [4.0, 1.0, 0.9]], ["bottles", 0, -0.08, 0.05, 0, [1.03, false]], ["bottles", 0, 0.1, 0.05, 0, [1.03, false]],
-		["table", 0, -0.2, 0.3, 0], ["crystal_orb", 0, 0.25, 0.32, 0], ["rug", 0, 0.0, 0.3, 0],
-		["apothecary_shelf", 0, -0.3, -0.48, 0], ["apothecary_shelf", 0, -0.1, -0.48, 0], ["table", 0, 0.2, -0.33, 0], ["keg", 0, 0.42, -0.42, 0], ["keg", 0, 0.37, -0.44, 0], ["chest", 0, -0.42, -0.3, 90]],
-	"lights": [["chandelier", 0, 0.0, 0.15, 0, 2.8, 12.0, true], ["lantern", 0, -0.49, 0.12, 90, 1.0, 7.0], ["lantern", 0, 0.49, 0.12, -90, 1.0, 7.0], ["lantern", 0, 0.0, -0.49, 0, 1.2, 8.0]],
-	"rooms": [["Main Shop Floor", 0, 0.0, 0.3], ["Back Storage", 0, 0.0, -0.3]]},
-
-# ---- TRAINING HALL: main sparring floor (lion crest), weapon storage, instructor area; upper viewing gallery ring
 "training": {"name": "Training Hall of Varnethryl",
 	"floors": [{"h": 6.0, "mat": "oak", "wall": "stone", "win": 4.0}, {"h": 3.5, "mat": "oak", "wall": "stone", "win": 4.0, "slab": [[-0.5, -0.5, 0.5, -0.32], [-0.5, 0.32, 0.5, 0.5], [-0.5, -0.32, -0.32, 0.32], [0.32, -0.32, 0.5, 0.32]]}],
 	"stairs": [["auto", 0, -1, 2.0]],

@@ -10,7 +10,9 @@ const STAIR_SLOPE := 1.45       # run = rise * 1.45 (~34.6 deg; capsules of ever
 
 ## size = exterior AABB size. Returns {node, W, D, floors:[{y,h,node,outline}], stairs, ladders, rooms, spawn, door}
 static func build(id: String, def: Dictionary, size: Vector3) -> Dictionary:
-	var sc: Array = def.get("scale", [0.62, 0.62])
+	# metre-mode defs are laid out at card scale (0.82 of the card2 shell); legacy fractional defs keep their tuned r3 footprint
+	var sc: Array = def.get("scale", ([0.82, 0.82] if InteriorDefs.DOORS.has(id) else [0.42, 0.42]) if def.get("m", false) else [0.62, 0.62])
+	if not def.get("m", false): size = InteriorDefs.LEGACY_SIZE.get(id, size)
 	var W: float = snappedf(size.x * sc[0], 0.1); var D: float = snappedf(size.z * sc[1], 0.1)
 	var root := Node3D.new(); root.name = "Interior_" + id
 	var info := {"id": id, "node": root, "W": W, "D": D, "floors": [], "stairs": [], "ladders": [], "rooms": [], "name": def.get("name", id)}
@@ -21,7 +23,10 @@ static func build(id: String, def: Dictionary, size: Vector3) -> Dictionary:
 		var fn := Node3D.new(); fn.name = "F%d" % i; root.add_child(fn)
 		info.floors.append({"y": y, "h": float(f.h), "node": fn, "outline": null, "lines": []})
 		y += float(f.h)
-	var P := func(u: float, v: float, fy: float) -> Vector3: return Vector3(u * W, fy, v * D)
+	var MM: bool = def.get("m", false)   # true: def coords are metres from the centre instead of fractions
+	var kx: float = 1.0 if MM else W; var kz: float = 1.0 if MM else D
+	info.kx = kx; info.kz = kz
+	var P := func(u: float, v: float, fy: float) -> Vector3: return Vector3(u * kx, fy, v * kz)
 	# holes from stairs / ladders, per floor above
 	var holes := {}
 	for s0 in def.get("stairs", []):
@@ -29,7 +34,7 @@ static func build(id: String, def: Dictionary, size: Vector3) -> Dictionary:
 		if s0[0] is String:   # ["auto", floor, side(-1 left/+1 right), width]: along a side wall, foot 1.8 m inside the front wall
 			var fa: Dictionary = info.floors[s0[1]]; var wa: float = s0[3]
 			var x: float = s0[2] * (W / 2 - WALL_T - wa / 2 - 0.15); var zf: float = D / 2 - 1.8 - (fa.h * STAIR_SLOPE + 1.6) * float(s0[4] if s0.size() > 4 else 0)
-			s = [s0[1], x / W, zf / D, 0, wa]
+			s = [s0[1], x / kx, zf / kz, 0, wa]
 		var f0: Dictionary = info.floors[s[0]]; var a := deg_to_rad(float(s[3])); var w: float = s[4]
 		var d := Vector3(-sin(a), 0, -cos(a)); var L: float = f0.h * STAIR_SLOPE
 		var base: Vector3 = P.call(s[1], s[2], f0.y)
@@ -44,7 +49,7 @@ static func build(id: String, def: Dictionary, size: Vector3) -> Dictionary:
 	for i in fl.size():
 		var f: Dictionary = fl[i]; var F: Dictionary = info.floors[i]; var fn: Node3D = F.node
 		var regions: Array = []
-		for r in f.get("slab", [[-0.5, -0.5, 0.5, 0.5]]): regions.append(Rect2(Vector2(r[0] * W, r[1] * D), Vector2((r[2] - r[0]) * W, (r[3] - r[1]) * D)))
+		for r in f.get("slab", [[-W / 2 / kx, -D / 2 / kz, W / 2 / kx, D / 2 / kz]]): regions.append(Rect2(Vector2(r[0] * kx, r[1] * kz), Vector2((r[2] - r[0]) * kx, (r[3] - r[1]) * kz)))
 		for reg in regions:
 			for c in _subtract(reg, holes.get(i, [])):
 				K.box(fn, Vector3(c.get_center().x, F.y - SLAB_T / 2, c.get_center().y), Vector3(c.size.x, SLAB_T, c.size.y), f.get("mat", "flag"))
@@ -77,8 +82,8 @@ static func build(id: String, def: Dictionary, size: Vector3) -> Dictionary:
 					K.box(fn, wp + Vector3(0, wh / 2 + 0.06, 0), Vector3(1.1, 0.12, 0.08), "darkoak", false, rot)
 		for wdef in def.get("walls", []):
 			if wdef[0] != i: continue
-			_wall(fn, Vector2(wdef[1] * W, wdef[2] * D), Vector2(wdef[3] * W, wdef[4] * D), F.y, h, wdef[5] if wdef.size() > 5 else [], wdef[6] if wdef.size() > 6 else wm)
-			F.lines.append([Vector2(wdef[1] * W, wdef[2] * D), Vector2(wdef[3] * W, wdef[4] * D)])
+			_wall(fn, Vector2(wdef[1] * kx, wdef[2] * kz), Vector2(wdef[3] * kx, wdef[4] * kz), F.y, h, wdef[5] if wdef.size() > 5 else [], wdef[6] if wdef.size() > 6 else wm)
+			F.lines.append([Vector2(wdef[1] * kx, wdef[2] * kz), Vector2(wdef[3] * kx, wdef[4] * kz)])
 	for s in info.stairs: _stair(info.floors[s.floor].node, s, fl[s.floor].get("stairmat", "oak"))
 	for l in info.ladders:
 		var fnode: Node3D = info.floors[l.floor].node
@@ -177,8 +182,8 @@ static func _prop(info: Dictionary, p: Array, P: Callable) -> void:
 	var ex: Array = p[5] if p.size() > 5 else []
 	match name:
 		"_runner":   # carpet runner [len_v, width_m, mat]
-			var bm := K.box(fn, pos + Vector3(0, 0.012, 0), Vector3(ex[1], 0.02, ex[0] * info.D), ex[2] if ex.size() > 2 else "blue", false, deg_to_rad(rot))
-			K.box(fn, pos + Vector3(0, 0.01, 0), Vector3(ex[1] + 0.3, 0.015, ex[0] * info.D + 0.3), "gold", false, deg_to_rad(rot))
+			var bm := K.box(fn, pos + Vector3(0, 0.012, 0), Vector3(ex[1], 0.02, ex[0] * (info.D if info.kz != 1.0 else 1.0)), ex[2] if ex.size() > 2 else "blue", false, deg_to_rad(rot))
+			K.box(fn, pos + Vector3(0, 0.01, 0), Vector3(ex[1] + 0.3, 0.015, ex[0] * (info.D if info.kz != 1.0 else 1.0) + 0.3), "gold", false, deg_to_rad(rot))
 			bm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		"_area":     # floor inlay [w_m, d_m, mat]
 			K.box(fn, pos + Vector3(0, 0.01, 0), Vector3(ex[0], 0.02, ex[1]), ex[2], false, deg_to_rad(rot))
@@ -212,6 +217,28 @@ static func _prop(info: Dictionary, p: Array, P: Callable) -> void:
 		"_pots":   # hanging pots/rack over kitchen [w]
 			K.box(fn, pos + Vector3(0, 2.6, 0), Vector3(ex[0], 0.06, 0.06), "iron", false, deg_to_rad(rot))
 			for k in 5: K.box(fn, pos + Vector3((k - 2) * ex[0] / 5.0, 2.3, 0).rotated(Vector3.UP, deg_to_rad(rot)), Vector3(0.3, 0.25, 0.3), "gold", false)
+		"_tools":   # wall board of hanging smith tools (tongs, hammers, files) [width]
+			var r := deg_to_rad(rot); var fw := Vector3(sin(r), 0, cos(r)); var rt := Vector3(cos(r), 0, -sin(r))
+			K.box(fn, pos + Vector3(0, 1.9, 0) + fw * 0.03, Vector3(ex[0], 0.9, 0.05), "darkoak", false, r)
+			K.box(fn, pos + Vector3(0, 2.3, 0) + fw * 0.08, Vector3(ex[0], 0.04, 0.04), "iron", false, r)
+			var n := int(ex[0] / 0.22)
+			for k in n:
+				var L := 0.35 + 0.25 * float((k * 7) % 3)
+				K.box(fn, pos + rt * ((k - (n - 1) / 2.0) * 0.22) + Vector3(0, 2.28 - L / 2, 0) + fw * 0.1, Vector3(0.035, L, 0.035), "iron", false, r)
+				if k % 2 == 0: K.box(fn, pos + rt * ((k - (n - 1) / 2.0) * 0.22) + Vector3(0, 2.28 - L, 0) + fw * 0.1, Vector3(0.12, 0.07, 0.07), "iron", false, r)
+		"_bread":   # loaves heaped on a counter/display [w, d, y]
+			var r2 := deg_to_rad(rot)
+			for k in int(ex[0] / 0.25) * 2:
+				var o := Vector3(-ex[0] / 2 + 0.12 + (k / 2) * 0.25, 0, (-0.12 if k % 2 == 0 else 0.12) * ex[1] / 0.5).rotated(Vector3.UP, r2)
+				var mi := MeshInstance3D.new(); var sm := SphereMesh.new(); sm.radius = 0.1; sm.height = 0.12; mi.mesh = sm
+				var bm := K.mat("bread"); mi.material_override = bm; mi.position = pos + o + Vector3(0, ex[2] + 0.05, 0); mi.scale = Vector3(1.4, 1, 1); mi.layers = K.LAYER; fn.add_child(mi)
+		"_gear":   # standing wooden gear wheel with iron axle [radius, y]
+			var mi := MeshInstance3D.new(); var cm := CylinderMesh.new(); cm.top_radius = ex[0]; cm.bottom_radius = ex[0]; cm.height = 0.25
+			mi.mesh = cm; mi.material_override = K.mat("darkoak"); mi.position = pos + Vector3(0, ex[1], 0); mi.rotation = Vector3(PI / 2, deg_to_rad(rot), 0); mi.layers = K.LAYER; fn.add_child(mi)
+			for k in 12:
+				var a := TAU * k / 12.0
+				K.box(fn, pos + Vector3(0, ex[1], 0) + Vector3(cos(a) * ex[0], sin(a) * ex[0], 0).rotated(Vector3.UP, deg_to_rad(rot)), Vector3(0.18, 0.18, 0.3), "oak", false, deg_to_rad(rot))
+			K.box(fn, pos + Vector3(0, ex[1] / 2, 0), Vector3(0.2, ex[1], 0.2), "iron", true)
 		_:
 			var y_off: float = ex[0] if ex.size() > 0 else 0.0
 			K.prop(fn, name, pos + Vector3(0, y_off, 0), rot, not (ex.size() > 1 and ex[1] == false))
@@ -220,7 +247,7 @@ static func _light(info: Dictionary, l: Array, P: Callable) -> void:
 	# [kind, floor, u, v, rot, energy, range, shadow]
 	var kind: String = l[0]; var F: Dictionary = info.floors[l[1]]; var fn: Node3D = F.node
 	var pos: Vector3 = P.call(l[2], l[3], F.y); var rot: float = l[4]
-	var e: float = l[5] * 1.8; var rng: float = l[6] * 1.25; var sh: bool = l[7] if l.size() > 7 else false
+	var e: float = l[5] * 2.4; var rng: float = l[6] * 1.25; var sh: bool = l[7] if l.size() > 7 else false
 	var lp := pos
 	match kind:
 		"chandelier":
@@ -232,7 +259,7 @@ static func _light(info: Dictionary, l: Array, P: Callable) -> void:
 			K.prop(fn, "wall_lantern", pos + Vector3(0, 2.1, 0), rot, false); lp = pos + Vector3(0, 2.3, 0) + Vector3(sin(deg_to_rad(rot)), 0, cos(deg_to_rad(rot))) * 0.4
 		"fire": lp = pos + Vector3(0, 0.8, 0)
 		_: lp = pos + Vector3(0, 2.5, 0)
-	var o := OmniLight3D.new(); o.position = lp; o.light_color = Color(1.0, 0.8, 0.58) if kind != "fire" else Color(1.0, 0.6, 0.32)
+	var o := OmniLight3D.new(); o.position = lp; o.light_color = Color(1.0, 0.89, 0.74) if kind != "fire" else Color(1.0, 0.72, 0.45)
 	o.light_energy = e; o.omni_range = rng; o.omni_attenuation = 1.2; o.shadow_enabled = sh; o.light_cull_mask = K.LAYER | 1
 	o.light_specular = 0.3
 	fn.add_child(o)

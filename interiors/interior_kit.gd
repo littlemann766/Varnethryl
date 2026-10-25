@@ -21,8 +21,8 @@ static func mat(kind: String) -> Material:
 	if _mats.has(kind): return _mats[kind]
 	var m := StandardMaterial3D.new()
 	var T := {"oak": ["oak", Color(1, 0.92, 0.85), 1.2], "darkoak": ["oak", Color(0.55, 0.42, 0.33), 1.2],
-		"stone": ["fieldstone", Color(0.92, 0.86, 0.78), 0.9], "flag": ["cobblestone", Color(0.9, 0.85, 0.78), 0.9],
-		"palestone": ["cobblestone", Color(1.0, 0.97, 0.9), 1.0], "plaster": ["plaster_timber", Color(1, 0.95, 0.85), 1.8],
+		"stone": ["fieldstone", Color(0.95, 0.93, 0.9), 1.1], "flag": ["cobblestone", Color(0.95, 0.93, 0.9), 1.0],
+		"palestone": ["cobblestone", Color(1.0, 0.97, 0.9), 1.0], "plaster": ["plaster_timber", Color(1, 0.97, 0.92), 2.4],
 		"slate": ["slate", Color(0.7, 0.75, 0.85), 1.0]}
 	match kind:
 		"blue": m.albedo_color = Color("1f3a63")
@@ -42,12 +42,13 @@ static func mat(kind: String) -> Material:
 			m.albedo_texture = ImageTexture.create_from_image(img); m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 			m.uv1_triplanar = true; m.uv1_world_triplanar = true; m.uv1_scale = Vector3.ONE / (2.4 if kind == "checker" else 0.7); m.roughness = 0.45
 		"red": m.albedo_color = Color(0.45, 0.12, 0.1)
+		"bread": m.albedo_color = Color(0.78, 0.52, 0.25); m.roughness = 0.8
 		"banner":
 			m.albedo_texture = load(TEX + "banner_lion_albedo.jpg"); m.cull_mode = BaseMaterial3D.CULL_DISABLED
 		_:
 			var t: Array = T.get(kind, T.stone)
 			m.albedo_texture = load(TEX + t[0] + "_albedo.jpg"); m.albedo_color = t[1]
-			m.normal_enabled = true; m.normal_texture = load(TEX + t[0] + "_normal.png")
+			m.normal_enabled = true; m.normal_texture = load(TEX + t[0] + "_normal.png"); m.normal_scale = 0.5
 			m.uv1_triplanar = true; m.uv1_world_triplanar = true; m.uv1_scale = Vector3.ONE / t[2]
 			m.roughness = 0.85
 	_mats[kind] = m

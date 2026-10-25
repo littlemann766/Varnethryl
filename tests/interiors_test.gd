@@ -101,6 +101,7 @@ func walk_to(hero: CharacterBody3D, target: Vector3, map: RID, info: Dictionary,
 		for w in 120:
 			if path.size() > 0: break
 			await phys(1); NavigationServer3D.map_force_update(map); path = NavigationServer3D.map_get_path(map, hero.global_position, target, true)
+		if OS.has_environment("WDBG"): print("  try ", attempt, " from ", hero.global_position, " end ", path[-1] if path.size() else null, " n", path.size())
 		var reach := path.size() > 0 and Vector2(path[-1].x - target.x, path[-1].z - target.z).length() < 1.0 and absf(path[-1].y - target.y) < 0.8
 		if not reach and info.ladders.size() > 0:
 			# take the nearest ladder in the needed direction
@@ -142,22 +143,35 @@ func test_doors() -> void:
 	m.sun = DirectionalLight3D.new(); m.add_child(m.sun)
 	var hero := make_hero(1.905); m.add_child(hero); m.hero = hero
 	var mgr := InteriorManager.new(); m.add_child(mgr); mgr.setup(m)
+	# real exteriors exactly as main.gd loads them (card2 LOD1 trimesh or r3 shell without roof) -> doors must line up
+	var M = load("res://scripts/main.gd")
 	var i := 0
 	for id in DEF.D:
-		var n := Node3D.new(); n.position = Vector3(i * 200, 0, 0); n.rotation.y = [0.0, PI / 2, -PI / 2, PI][i % 4]; m.add_child(n)
-		var sz := size_of(id)
-		m.buildings.append({"id": id, "node": n, "aabb": AABB(Vector3(-sz.x / 2, 0, -sz.z / 2), sz), "name": id})
+		var path: String = "res://assets/card2/bld_%s_card2_lod1.glb" % id if M.CARD2.has(id) else "res://assets/buildings/bld_%s.glb" % id
+		var n: Node3D = load(path).instantiate(); n.position = Vector3(i * 200, 0, 0); n.rotation.y = [0.0, PI / 2, -PI / 2, PI][i % 4]; m.add_child(n)
+		for mi in n.find_children("*", "MeshInstance3D", true, false):
+			if not M.CARD2.has(id) and (String(mi.name).to_lower().contains("roof") or String(mi.get_parent().name).to_lower().contains("roof")): continue
+			mi.create_trimesh_collision()
+		var aabb := AABB(); var first := true
+		for mi in n.find_children("*", "MeshInstance3D", true, false):
+			var a2: AABB = (n.transform.affine_inverse() * mi.global_transform) * mi.get_aabb()
+			if first: aabb = a2; first = false
+			else: aabb = aabb.merge(a2)
+		m.buildings.append({"id": id, "node": n, "aabb": aabb, "name": id})
 		i += 1
 	var gfloor := StaticBody3D.new(); var gcs := CollisionShape3D.new(); var gb := BoxShape3D.new(); gb.size = Vector3(20000, 1, 20000); gcs.shape = gb; gcs.position.y = -0.5; gfloor.add_child(gcs); m.add_child(gfloor)
 	await phys(2)
 	for b in m.buildings:
 		var into: Vector3 = b.node.global_transform.basis * Vector3(0, 0, -1)
-		hero.global_position = b.node.global_transform * Vector3(0, 0.1, b.aabb.end.z + 3.0)
+		var dl: Vector3 = mgr.door_local(b)
+		hero.global_position = b.node.global_transform * Vector3(dl.x, 0.1, b.aabb.end.z + 3.0)
 		mgr.cooldown = 0.0
-		for k in 90:
+		for k in 360:
 			await step(hero, into, mgr)
 			if mgr.active(): break
+		if not mgr.active(): print("DOORMISS ", b.id, " local ", b.node.global_transform.affine_inverse() * hero.global_position, " door ", mgr.door_local(b), " end ", b.aabb.end.z)
 		ok(mgr.active() and mgr.cur_bld.id == b.id, "%s door enters interior" % b.id)
+		if not mgr.active(): continue
 		ok(not m.sun.visible, "%s sun hidden inside" % b.id)
 		var back: Vector3 = mgr.cur.node.global_transform.basis * Vector3(0, 0, 1)
 		await phys(50)

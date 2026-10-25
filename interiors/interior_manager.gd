@@ -32,8 +32,12 @@ func get_info(id: String, size: Vector3) -> Dictionary:
 		built[id] = info
 	return built[id]
 
+## door in building-local coords: card2 exteriors use the probed facade (tests/door_probe.gd), old shells the AABB front
+func door_local(b: Dictionary) -> Vector3:
+	return DEF.DOORS.get(b.id, Vector3(0, 0, b.aabb.end.z))
+
 func door_world(b: Dictionary) -> Vector3:
-	return b.node.global_transform * Vector3(0, 0, b.aabb.end.z)
+	return b.node.global_transform * door_local(b)
 
 func _physics_process(dt: float) -> void:
 	if main == null or main.hero == null: return
@@ -43,10 +47,10 @@ func _physics_process(dt: float) -> void:
 		if cooldown > 0: return
 		for b in main.buildings:
 			if not has_interior(b.id): continue
-			var dp: Vector3 = door_world(b); var lp: Vector3 = b.node.global_transform.affine_inverse() * hero.global_position
+			var dl: Vector3 = door_local(b); var lp: Vector3 = b.node.global_transform.affine_inverse() * hero.global_position
 			var hv := Vector2(hero.velocity.x, hero.velocity.z)
 			var into: Vector3 = b.node.global_transform.basis * Vector3(0, 0, -1)
-			if Vector2(hero.global_position.x - dp.x, hero.global_position.z - dp.z).length() < 2.2 and absf(lp.x) < 2.0 and hv.dot(Vector2(into.x, into.z)) > 0.5:
+			if absf(lp.x - dl.x) < 1.8 and lp.z < maxf(dl.z + 1.4, b.aabb.end.z + 0.8) and lp.z > dl.z - 1.0 and absf(lp.y) < 3.0 and hv.dot(Vector2(into.x, into.z)) > 0.5:
 				enter(b); return
 	else:
 		var lp2: Vector3 = cur.node.to_local(hero.global_position)
@@ -62,7 +66,8 @@ func enter(b: Dictionary) -> void:
 
 func exit() -> void:
 	var b := cur_bld; cur = {}; cur_bld = {}
-	var out: Vector3 = b.node.global_transform * Vector3(0, 0, b.aabb.end.z + 2.0)
+	var dl: Vector3 = door_local(b)
+	var out: Vector3 = b.node.global_transform * Vector3(dl.x, 0, maxf(dl.z + 2.0, b.aabb.end.z + 1.0))
 	out.y = main.height(out.x, out.z) + 0.1
 	_teleport(out, b.node.global_rotation.y + PI)
 	if main.sun: main.sun.visible = true
@@ -120,6 +125,10 @@ func _env_inside(on: bool) -> void:
 	if env == null: return
 	if on:
 		_env_saved = [env.ambient_light_source, env.ambient_light_color, env.fog_enabled]
-		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR; env.ambient_light_color = Color(0.46, 0.44, 0.42); env.fog_enabled = false
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR; env.ambient_light_color = Color(0.56, 0.54, 0.5); env.fog_enabled = false
 	elif _env_saved.size():
 		env.ambient_light_source = _env_saved[0]; env.ambient_light_color = _env_saved[1]; env.fog_enabled = _env_saved[2]
+
+func _process(_dt: float) -> void:
+	# main._set_time() dims ambient at night; interiors keep a steady indoor level (runs after main: child node)
+	if not cur.is_empty() and main and main.get("env"): main.env.ambient_light_energy = 0.9

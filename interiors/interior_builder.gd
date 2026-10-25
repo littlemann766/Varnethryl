@@ -24,7 +24,12 @@ static func build(id: String, def: Dictionary, size: Vector3) -> Dictionary:
 	var P := func(u: float, v: float, fy: float) -> Vector3: return Vector3(u * W, fy, v * D)
 	# holes from stairs / ladders, per floor above
 	var holes := {}
-	for s in def.get("stairs", []):
+	for s0 in def.get("stairs", []):
+		var s: Array = s0
+		if s0[0] is String:   # ["auto", floor, side(-1 left/+1 right), width]: along a side wall, foot 1.8 m inside the front wall
+			var fa: Dictionary = info.floors[s0[1]]; var wa: float = s0[3]
+			var x: float = s0[2] * (W / 2 - WALL_T - wa / 2 - 0.15); var zf: float = D / 2 - 1.8 - (fa.h * STAIR_SLOPE + 1.6) * float(s0[4] if s0.size() > 4 else 0)
+			s = [s0[1], x / W, zf / D, 0, wa]
 		var f0: Dictionary = info.floors[s[0]]; var a := deg_to_rad(float(s[3])); var w: float = s[4]
 		var d := Vector3(-sin(a), 0, -cos(a)); var L: float = f0.h * STAIR_SLOPE
 		var base: Vector3 = P.call(s[1], s[2], f0.y)
@@ -227,7 +232,7 @@ static func _light(info: Dictionary, l: Array, P: Callable) -> void:
 			K.prop(fn, "wall_lantern", pos + Vector3(0, 2.1, 0), rot, false); lp = pos + Vector3(0, 2.3, 0) + Vector3(sin(deg_to_rad(rot)), 0, cos(deg_to_rad(rot))) * 0.4
 		"fire": lp = pos + Vector3(0, 0.8, 0)
 		_: lp = pos + Vector3(0, 2.5, 0)
-	var o := OmniLight3D.new(); o.position = lp; o.light_color = Color(1.0, 0.68, 0.38) if kind != "fire" else Color(1.0, 0.5, 0.2)
+	var o := OmniLight3D.new(); o.position = lp; o.light_color = Color(1.0, 0.8, 0.58) if kind != "fire" else Color(1.0, 0.6, 0.32)
 	o.light_energy = e; o.omni_range = rng; o.omni_attenuation = 1.2; o.shadow_enabled = sh; o.light_cull_mask = K.LAYER | 1
 	o.light_specular = 0.3
 	fn.add_child(o)

@@ -120,6 +120,6 @@ func _env_inside(on: bool) -> void:
 	if env == null: return
 	if on:
 		_env_saved = [env.ambient_light_source, env.ambient_light_color, env.fog_enabled]
-		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR; env.ambient_light_color = Color(0.5, 0.45, 0.4); env.fog_enabled = false
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR; env.ambient_light_color = Color(0.46, 0.44, 0.42); env.fog_enabled = false
 	elif _env_saved.size():
 		env.ambient_light_source = _env_saved[0]; env.ambient_light_color = _env_saved[1]; env.fog_enabled = _env_saved[2]

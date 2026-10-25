@@ -142,11 +142,11 @@ func test_doors() -> void:
 	var mgr := InteriorManager.new(); m.add_child(mgr); mgr.setup(m)
 	var i := 0
 	for id in DEF.D:
-		var n := Node3D.new(); n.position = Vector3(i * 60, 0, 0); n.rotation.y = [0.0, PI / 2, -PI / 2, PI][i % 4]; m.add_child(n)
+		var n := Node3D.new(); n.position = Vector3(i * 200, 0, 0); n.rotation.y = [0.0, PI / 2, -PI / 2, PI][i % 4]; m.add_child(n)
 		var sz := size_of(id)
 		m.buildings.append({"id": id, "node": n, "aabb": AABB(Vector3(-sz.x / 2, 0, -sz.z / 2), sz), "name": id})
 		i += 1
-	var gfloor := StaticBody3D.new(); var gcs := CollisionShape3D.new(); var gb := BoxShape3D.new(); gb.size = Vector3(2000, 1, 2000); gcs.shape = gb; gcs.position.y = -0.5; gfloor.add_child(gcs); m.add_child(gfloor)
+	var gfloor := StaticBody3D.new(); var gcs := CollisionShape3D.new(); var gb := BoxShape3D.new(); gb.size = Vector3(20000, 1, 20000); gcs.shape = gb; gcs.position.y = -0.5; gfloor.add_child(gcs); m.add_child(gfloor)
 	await phys(2)
 	for b in m.buildings:
 		var into: Vector3 = b.node.global_transform.basis * Vector3(0, 0, -1)
@@ -155,6 +155,8 @@ func test_doors() -> void:
 		for k in 90:
 			await step(hero, into, mgr)
 			if mgr.active(): break
+		if not mgr.active(): print("DOORDBG ", b.id, " hero ", hero.global_position, " local ", b.node.global_transform.affine_inverse() * hero.global_position, " door ", mgr.door_world(b), " floor ", hero.is_on_floor())
+		else: print("DOORDBG2 ", b.id, " got ", mgr.cur_bld.id)
 		ok(mgr.active() and mgr.cur_bld.id == b.id, "%s door enters interior" % b.id)
 		ok(not m.sun.visible, "%s sun hidden inside" % b.id)
 		var back: Vector3 = mgr.cur.node.global_transform.basis * Vector3(0, 0, 1)

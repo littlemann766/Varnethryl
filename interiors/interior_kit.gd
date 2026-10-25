@@ -20,7 +20,7 @@ static func index() -> Dictionary:
 static func mat(kind: String) -> Material:
 	if _mats.has(kind): return _mats[kind]
 	var m := StandardMaterial3D.new()
-	var T := {"oak": ["oak", Color(0.78, 0.6, 0.45), 1.2], "darkoak": ["oak", Color(0.45, 0.32, 0.24), 1.2],
+	var T := {"oak": ["oak", Color(1, 0.92, 0.85), 1.2], "darkoak": ["oak", Color(0.55, 0.42, 0.33), 1.2],
 		"stone": ["fieldstone", Color(0.92, 0.86, 0.78), 0.9], "flag": ["cobblestone", Color(0.9, 0.85, 0.78), 0.9],
 		"palestone": ["cobblestone", Color(1.0, 0.97, 0.9), 1.0], "plaster": ["plaster_timber", Color(1, 0.95, 0.85), 1.8],
 		"slate": ["slate", Color(0.7, 0.75, 0.85), 1.0]}

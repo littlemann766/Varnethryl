@@ -740,6 +740,38 @@
     ]
    }
   },
+  "market_stall": {
+   "name": "market_stall",
+   "category": "shop",
+   "batch": 3,
+   "files": {
+    "high": "market_stall.glb",
+    "lod1": "market_stall_lod1.glb",
+    "lod2": "market_stall_lod2.glb"
+   },
+   "tris": {
+    "high": 2900,
+    "lod1": 1746,
+    "lod2": 864
+   },
+   "size_m": [
+    2.4,
+    2.576,
+    1.204
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.288,
+     0.0
+    ],
+    "extents": [
+     2.4,
+     2.576,
+     1.204
+    ]
+   }
+  },
   "altar": {
    "name": "altar",
    "category": "temple",
@@ -868,6 +900,70 @@
     ]
    }
   },
+  "crystal_orb": {
+   "name": "crystal_orb",
+   "category": "temple",
+   "batch": 4,
+   "files": {
+    "high": "crystal_orb.glb",
+    "lod1": "crystal_orb_lod1.glb",
+    "lod2": "crystal_orb_lod2.glb"
+   },
+   "tris": {
+    "high": 1808,
+    "lod1": 1616,
+    "lod2": 584
+   },
+   "size_m": [
+    0.6,
+    1.37,
+    0.6
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.685,
+     0.0
+    ],
+    "extents": [
+     0.6,
+     1.37,
+     0.6
+    ]
+   }
+  },
+  "telescope": {
+   "name": "telescope",
+   "category": "temple",
+   "batch": 4,
+   "files": {
+    "high": "telescope.glb",
+    "lod1": "telescope_lod1.glb",
+    "lod2": "telescope_lod2.glb"
+   },
+   "tris": {
+    "high": 724,
+    "lod1": 496,
+    "lod2": 220
+   },
+   "size_m": [
+    0.709,
+    1.83,
+    1.032
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.915,
+     0.0
+    ],
+    "extents": [
+     0.709,
+     1.83,
+     1.032
+    ]
+   }
+  },
   "chest": {
    "name": "chest",
    "category": "treasury",
@@ -897,6 +993,70 @@
      0.956,
      0.695,
      0.612
+    ]
+   }
+  },
+  "gold_pile": {
+   "name": "gold_pile",
+   "category": "treasury",
+   "batch": 5,
+   "files": {
+    "high": "gold_pile.glb",
+    "lod1": "gold_pile_lod1.glb",
+    "lod2": "gold_pile_lod2.glb"
+   },
+   "tris": {
+    "high": 3392,
+    "lod1": 862,
+    "lod2": 222
+   },
+   "size_m": [
+    1.24,
+    0.314,
+    1.265
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.157,
+     0.0
+    ],
+    "extents": [
+     1.24,
+     0.314,
+     1.265
+    ]
+   }
+  },
+  "vault_door": {
+   "name": "vault_door",
+   "category": "treasury",
+   "batch": 5,
+   "files": {
+    "high": "vault_door.glb",
+    "lod1": "vault_door_lod1.glb",
+    "lod2": "vault_door_lod2.glb"
+   },
+   "tris": {
+    "high": 4166,
+    "lod1": 2399,
+    "lod2": 738
+   },
+   "size_m": [
+    2.74,
+    2.81,
+    0.846
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.405,
+     0.0
+    ],
+    "extents": [
+     2.74,
+     2.81,
+     0.846
     ]
    }
   },

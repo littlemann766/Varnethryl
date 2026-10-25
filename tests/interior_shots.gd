@@ -21,7 +21,7 @@ func _run() -> void:
 	for a in OS.get_cmdline_user_args(): if a.begins_with("only="): only = a.substr(5).split(",")
 	var we := WorldEnvironment.new(); var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR; env.background_color = Color(0.03, 0.025, 0.02)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR; env.ambient_light_color = Color(0.5, 0.45, 0.4); env.ambient_light_energy = 0.9
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR; env.ambient_light_color = Color(0.46, 0.44, 0.42); env.ambient_light_energy = 0.9
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES; env.tonemap_white = 6.0
 	env.glow_enabled = true; env.glow_intensity = 0.6; env.glow_bloom = 0.08; env.glow_hdr_threshold = 1.0; env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
 	env.adjustment_enabled = true; env.adjustment_contrast = 1.08; env.adjustment_saturation = 1.12

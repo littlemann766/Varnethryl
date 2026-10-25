@@ -97,44 +97,44 @@
    "id": "well",
    "high": {
     "file": "prop_well.glb",
-    "tris": 280,
+    "tris": 1006,
     "bbox_min": [
      -1.4,
      0.0,
-     -1.02
+     -1.17
     ],
     "bbox_max": [
      1.4,
      3.2,
-     1.02
+     1.17
     ]
    },
    "medium": {
     "file": "prop_well_lod1.glb",
-    "tris": 135,
+    "tris": 486,
     "bbox_min": [
      -1.4,
      0.0,
-     -1.05
+     -1.17
     ],
     "bbox_max": [
      1.4,
      3.2,
-     1.05
+     1.17
     ]
    },
    "low": {
     "file": "prop_well_lod2.glb",
-    "tris": 53,
+    "tris": 194,
     "bbox_min": [
      -1.4,
      0.0,
-     -1.0
+     -1.17
     ],
     "bbox_max": [
      1.4,
      3.2,
-     1.0
+     1.17
     ]
    },
    "phone_high_lod": "high"
@@ -143,44 +143,44 @@
    "id": "bench",
    "high": {
     "file": "prop_bench.glb",
-    "tris": 128,
+    "tris": 364,
     "bbox_min": [
-     -0.9,
+     -0.91,
      0.0,
-     -0.24
+     -0.25
     ],
     "bbox_max": [
-     0.9,
-     1.0,
-     0.22
+     0.91,
+     1.06,
+     0.3
     ]
    },
    "medium": {
     "file": "prop_bench_lod1.glb",
-    "tris": 62,
+    "tris": 176,
     "bbox_min": [
-     -0.9,
+     -0.91,
      0.0,
-     -0.24
+     -0.25
     ],
     "bbox_max": [
-     0.9,
-     1.0,
-     0.22
+     0.91,
+     1.06,
+     0.25
     ]
    },
    "low": {
     "file": "prop_bench_lod2.glb",
-    "tris": 24,
+    "tris": 70,
     "bbox_min": [
      -0.9,
-     0.0,
-     -0.22
+     0.06,
+     -0.25
     ],
     "bbox_max": [
      0.9,
-     1.0,
-     0.22
+     1.06,
+     0.24
     ]
    },
    "phone_high_lod": "high"

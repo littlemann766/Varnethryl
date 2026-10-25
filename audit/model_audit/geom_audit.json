@@ -1,0 +1,1512 @@
+[
+ {
+  "file": "buildings/bld_apothecary_card2.glb",
+  "tris": 18973,
+  "min_y": -0.062,
+  "size": [
+   10.19,
+   14.57,
+   11.05
+  ],
+  "lod1": 0.321,
+  "lod2": 0.141,
+  "has_col": true,
+  "n_islands": 3166,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_bakery_card2.glb",
+  "tris": 19087,
+  "min_y": -0.055,
+  "size": [
+   11.96,
+   16.71,
+   13.11
+  ],
+  "lod1": 0.363,
+  "lod2": 0.132,
+  "has_col": true,
+  "n_islands": 2696,
+  "floating": [
+   {
+    "faces": 12,
+    "min": [
+     -0.62,
+     2.38,
+     4.8
+    ],
+    "max": [
+     -0.58,
+     2.42,
+     5.1
+    ]
+   }
+  ],
+  "n_floating": 1
+ },
+ {
+  "file": "buildings/bld_crypt_card2.glb",
+  "tris": 17442,
+  "min_y": -0.3,
+  "size": [
+   13.51,
+   15.31,
+   18.19
+  ],
+  "lod1": 0.441,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 1230,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_fountain_card2.glb",
+  "tris": 6644,
+  "min_y": -0.0,
+  "size": [
+   14.0,
+   6.25,
+   15.79
+  ],
+  "lod1": 0.441,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 728,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_gatehouse_card2.glb",
+  "tris": 9758,
+  "min_y": -0.034,
+  "size": [
+   24.0,
+   24.73,
+   8.81
+  ],
+  "lod1": 0.351,
+  "lod2": 0.169,
+  "has_col": true,
+  "n_islands": 714,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_guildhall_card2.glb",
+  "tris": 37251,
+  "min_y": -0.056,
+  "size": [
+   16.16,
+   24.28,
+   16.26
+  ],
+  "lod1": 0.409,
+  "lod2": 0.142,
+  "has_col": true,
+  "n_islands": 3628,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_house1_card2.glb",
+  "tris": 17443,
+  "min_y": -0.062,
+  "size": [
+   9.99,
+   15.28,
+   10.48
+  ],
+  "lod1": 0.299,
+  "lod2": 0.102,
+  "has_col": true,
+  "n_islands": 2561,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_house2_card2.glb",
+  "tris": 12716,
+  "min_y": -0.058,
+  "size": [
+   9.37,
+   14.88,
+   11.04
+  ],
+  "lod1": 0.275,
+  "lod2": 0.122,
+  "has_col": true,
+  "n_islands": 2046,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_house3_card2.glb",
+  "tris": 14779,
+  "min_y": -0.045,
+  "size": [
+   9.85,
+   14.91,
+   11.69
+  ],
+  "lod1": 0.273,
+  "lod2": 0.108,
+  "has_col": true,
+  "n_islands": 2403,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_house4_card2.glb",
+  "tris": 17034,
+  "min_y": -0.062,
+  "size": [
+   9.56,
+   17.74,
+   8.98
+  ],
+  "lod1": 0.281,
+  "lod2": 0.097,
+  "has_col": true,
+  "n_islands": 2659,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_inn_card2.glb",
+  "tris": 17782,
+  "min_y": -0.06,
+  "size": [
+   14.27,
+   20.46,
+   15.4
+  ],
+  "lod1": 0.425,
+  "lod2": 0.187,
+  "has_col": true,
+  "n_islands": 2779,
+  "floating": [
+   {
+    "faces": 12,
+    "min": [
+     -0.62,
+     2.58,
+     5.4
+    ],
+    "max": [
+     -0.58,
+     2.62,
+     5.7
+    ]
+   },
+   {
+    "faces": 12,
+    "min": [
+     1.78,
+     2.58,
+     5.4
+    ],
+    "max": [
+     1.82,
+     2.62,
+     5.7
+    ]
+   }
+  ],
+  "n_floating": 2
+ },
+ {
+  "file": "buildings/bld_keep_card2.glb",
+  "tris": 46032,
+  "min_y": -0.901,
+  "size": [
+   41.26,
+   35.1,
+   42.62
+  ],
+  "lod1": 0.484,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 1873,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_library_card2.glb",
+  "tris": 36686,
+  "min_y": -0.3,
+  "size": [
+   18.6,
+   21.36,
+   18.93
+  ],
+  "lod1": 0.364,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 2877,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_mage_academy_card2.glb",
+  "tris": 63278,
+  "min_y": -0.0,
+  "size": [
+   31.0,
+   32.89,
+   21.75
+  ],
+  "lod1": 0.454,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 5019,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_market_card2.glb",
+  "tris": 32632,
+  "min_y": -0.034,
+  "size": [
+   13.8,
+   16.5,
+   21.42
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 4544,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_observatory_card2.glb",
+  "tris": 19279,
+  "min_y": -0.502,
+  "size": [
+   23.8,
+   31.4,
+   24.59
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 1447,
+  "floating": [
+   {
+    "faces": 12,
+    "min": [
+     -1.32,
+     6.48,
+     3.35
+    ],
+    "max": [
+     -1.28,
+     6.52,
+     3.65
+    ]
+   },
+   {
+    "faces": 12,
+    "min": [
+     1.28,
+     6.48,
+     3.35
+    ],
+    "max": [
+     1.32,
+     6.52,
+     3.65
+    ]
+   }
+  ],
+  "n_floating": 2
+ },
+ {
+  "file": "buildings/bld_port_card2.glb",
+  "tris": 76222,
+  "min_y": -2.5,
+  "size": [
+   36.95,
+   22.51,
+   37.27
+  ],
+  "lod1": 0.471,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 7697,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_smithy_card2.glb",
+  "tris": 11859,
+  "min_y": -0.06,
+  "size": [
+   12.25,
+   15.38,
+   11.32
+  ],
+  "lod1": 0.435,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 2213,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_temple_card2.glb",
+  "tris": 37245,
+  "min_y": -0.3,
+  "size": [
+   28.2,
+   30.03,
+   25.01
+  ],
+  "lod1": 0.422,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 2620,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_thieves_den_card2.glb",
+  "tris": 32294,
+  "min_y": -0.056,
+  "size": [
+   23.22,
+   20.9,
+   11.9
+  ],
+  "lod1": 0.317,
+  "lod2": 0.164,
+  "has_col": true,
+  "n_islands": 4366,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_townhall_card2.glb",
+  "tris": 18405,
+  "min_y": -0.0,
+  "size": [
+   17.7,
+   20.22,
+   15.5
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 1672,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_training_hall_card2.glb",
+  "tris": 17401,
+  "min_y": -0.052,
+  "size": [
+   13.97,
+   15.6,
+   25.73
+  ],
+  "lod1": 0.479,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 2543,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_treasury_card2.glb",
+  "tris": 10890,
+  "min_y": 0.0,
+  "size": [
+   17.36,
+   24.6,
+   17.5
+  ],
+  "lod1": 0.358,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 624,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_wall_segment_card2.glb",
+  "tris": 816,
+  "min_y": 0.0,
+  "size": [
+   12.2,
+   8.4,
+   3.9
+  ],
+  "lod1": 0.482,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 263,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_walls_demo_card2.glb",
+  "tris": 3828,
+  "min_y": 0.0,
+  "size": [
+   37.2,
+   20.09,
+   7.2
+  ],
+  "lod1": 0.484,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 892,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_watchtower_card2.glb",
+  "tris": 1744,
+  "min_y": 0.0,
+  "size": [
+   7.2,
+   21.7,
+   7.32
+  ],
+  "lod1": 0.406,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 238,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/bld_windmill_card2.glb",
+  "tris": 5011,
+  "min_y": -0.034,
+  "size": [
+   14.16,
+   18.94,
+   11.52
+  ],
+  "lod1": 0.452,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 752,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/tripo/bld_barn_stable_tripo.glb",
+  "tris": 47678,
+  "min_y": 0.0,
+  "size": [
+   34.32,
+   14.55,
+   24.36
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 777,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/tripo/bld_farmhouse_tripo.glb",
+  "tris": 47678,
+  "min_y": 0.0,
+  "size": [
+   34.32,
+   14.55,
+   24.36
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 777,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/tripo/bld_lighthouse_full_tripo.glb",
+  "tris": 50853,
+  "min_y": 0.0,
+  "size": [
+   23.83,
+   25.91,
+   25.33
+  ],
+  "lod1": 0.49,
+  "lod2": 0.196,
+  "has_col": true,
+  "n_islands": 908,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/tripo/bld_lighthouse_rock_island_tripo.glb",
+  "tris": 43805,
+  "min_y": 0.0,
+  "size": [
+   23.83,
+   9.1,
+   25.33
+  ],
+  "lod1": 0.49,
+  "lod2": 0.196,
+  "has_col": true,
+  "n_islands": 657,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "buildings/tripo/bld_lighthouse_tower_tripo.glb",
+  "tris": 6760,
+  "min_y": 4.404,
+  "size": [
+   7.51,
+   18.33,
+   7.53
+  ],
+  "lod1": 0.49,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 227,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/altar.glb",
+  "tris": 4490,
+  "min_y": 0.0,
+  "size": [
+   2.6,
+   1.81,
+   1.7
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 228,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/anvil.glb",
+  "tris": 596,
+  "min_y": 0.0,
+  "size": [
+   0.83,
+   0.86,
+   0.58
+  ],
+  "lod1": 0.497,
+  "lod2": 0.191,
+  "has_col": false,
+  "n_islands": 31,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/apothecary_shelf.glb",
+  "tris": 5904,
+  "min_y": 0.0,
+  "size": [
+   1.5,
+   2.25,
+   0.42
+  ],
+  "lod1": 0.333,
+  "lod2": 0.057,
+  "has_col": false,
+  "n_islands": 83,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/armchair.glb",
+  "tris": 3063,
+  "min_y": 0.0,
+  "size": [
+   0.96,
+   1.24,
+   0.96
+  ],
+  "lod1": 0.456,
+  "lod2": 0.14,
+  "has_col": false,
+  "n_islands": 91,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/armor_stand.glb",
+  "tris": 3043,
+  "min_y": 0.0,
+  "size": [
+   0.74,
+   2.1,
+   0.5
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 64,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/bakery_oven.glb",
+  "tris": 1980,
+  "min_y": 0.0,
+  "size": [
+   2.24,
+   3.15,
+   2.95
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 127,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/balcony_railing.glb",
+  "tris": 752,
+  "min_y": 0.0,
+  "size": [
+   2.14,
+   1.22,
+   0.13
+  ],
+  "lod1": 0.484,
+  "lod2": 0.191,
+  "has_col": false,
+  "n_islands": 180,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/bar_counter.glb",
+  "tris": 5852,
+  "min_y": 0.0,
+  "size": [
+   3.14,
+   1.44,
+   0.71
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 157,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/bed.glb",
+  "tris": 4090,
+  "min_y": 0.0,
+  "size": [
+   1.57,
+   1.55,
+   2.16
+  ],
+  "lod1": 0.473,
+  "lod2": 0.179,
+  "has_col": false,
+  "n_islands": 102,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/bench.glb",
+  "tris": 344,
+  "min_y": 0.0,
+  "size": [
+   1.6,
+   0.47,
+   0.34
+  ],
+  "lod1": 0.326,
+  "lod2": 0.14,
+  "has_col": false,
+  "n_islands": 10,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/bookshelf.glb",
+  "tris": 3740,
+  "min_y": 0.0,
+  "size": [
+   1.42,
+   2.37,
+   0.44
+  ],
+  "lod1": 0.216,
+  "lod2": 0.039,
+  "has_col": false,
+  "n_islands": 85,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/bottles.glb",
+  "tris": 780,
+  "min_y": 0.0,
+  "size": [
+   0.34,
+   0.33,
+   0.27
+  ],
+  "lod1": 0.485,
+  "lod2": 0.192,
+  "has_col": false,
+  "n_islands": 10,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/bread_rack.glb",
+  "tris": 3224,
+  "min_y": 0.0,
+  "size": [
+   1.25,
+   1.81,
+   0.45
+  ],
+  "lod1": 0.484,
+  "lod2": 0.114,
+  "has_col": false,
+  "n_islands": 89,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/chair.glb",
+  "tris": 896,
+  "min_y": 0.0,
+  "size": [
+   0.5,
+   1.08,
+   0.5
+  ],
+  "lod1": 0.484,
+  "lod2": 0.192,
+  "has_col": false,
+  "n_islands": 47,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/chest.glb",
+  "tris": 776,
+  "min_y": 0.0,
+  "size": [
+   0.96,
+   0.7,
+   0.61
+  ],
+  "lod1": 0.482,
+  "lod2": 0.193,
+  "has_col": false,
+  "n_islands": 81,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/crystal_orb.glb",
+  "tris": 1808,
+  "min_y": 0.0,
+  "size": [
+   0.6,
+   1.37,
+   0.6
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 45,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/forge.glb",
+  "tris": 3172,
+  "min_y": 0.0,
+  "size": [
+   3.12,
+   3.5,
+   1.6
+  ],
+  "lod1": 0.5,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 355,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/gold_pile.glb",
+  "tris": 3392,
+  "min_y": 0.0,
+  "size": [
+   1.24,
+   0.31,
+   1.27
+  ],
+  "lod1": 0.254,
+  "lod2": 0.065,
+  "has_col": false,
+  "n_islands": 254,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/hearth.glb",
+  "tris": 8678,
+  "min_y": 0.0,
+  "size": [
+   2.71,
+   2.97,
+   1.22
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 560,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/iron_chandelier.glb",
+  "tris": 8252,
+  "min_y": 0.0,
+  "size": [
+   1.63,
+   2.23,
+   1.63
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 659,
+  "floating": [
+   {
+    "faces": 36,
+    "min": [
+     0.28,
+     0.8,
+     -0.0
+    ],
+    "max": [
+     0.31,
+     0.83,
+     0.0
+    ]
+   },
+   {
+    "faces": 36,
+    "min": [
+     0.19,
+     0.92,
+     -0.02
+    ],
+    "max": [
+     0.2,
+     0.95,
+     0.02
+    ]
+   },
+   {
+    "faces": 36,
+    "min": [
+     -0.02,
+     0.8,
+     0.29
+    ],
+    "max": [
+     0.02,
+     0.83,
+     0.3
+    ]
+   },
+   {
+    "faces": 36,
+    "min": [
+     -0.0,
+     0.92,
+     0.18
+    ],
+    "max": [
+     0.0,
+     0.95,
+     0.22
+    ]
+   },
+   {
+    "faces": 36,
+    "min": [
+     -0.31,
+     0.8,
+     -0.0
+    ],
+    "max": [
+     -0.28,
+     0.83,
+     0.0
+    ]
+   }
+  ],
+  "n_floating": 8
+ },
+ {
+  "file": "interiors/keg.glb",
+  "tris": 560,
+  "min_y": 0.0,
+  "size": [
+   0.61,
+   0.72,
+   0.65
+  ],
+  "lod1": 0.482,
+  "lod2": 0.186,
+  "has_col": false,
+  "n_islands": 43,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/ladder.glb",
+  "tris": 808,
+  "min_y": 0.0,
+  "size": [
+   0.5,
+   3.0,
+   0.06
+  ],
+  "lod1": 0.356,
+  "lod2": 0.193,
+  "has_col": false,
+  "n_islands": 32,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/lectern.glb",
+  "tris": 1307,
+  "min_y": 0.0,
+  "size": [
+   0.6,
+   1.23,
+   0.51
+  ],
+  "lod1": 0.445,
+  "lod2": 0.19,
+  "has_col": false,
+  "n_islands": 36,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/lion_banner.glb",
+  "tris": 2628,
+  "min_y": 0.0,
+  "size": [
+   1.28,
+   2.37,
+   0.1
+  ],
+  "lod1": 0.316,
+  "lod2": 0.139,
+  "has_col": false,
+  "n_islands": 146,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/market_stall.glb",
+  "tris": 2900,
+  "min_y": 0.0,
+  "size": [
+   2.4,
+   2.58,
+   1.2
+  ],
+  "lod1": 0.484,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 58,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/meeting_table.glb",
+  "tris": 3264,
+  "min_y": 0.0,
+  "size": [
+   3.6,
+   1.16,
+   1.1
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 260,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/pew.glb",
+  "tris": 556,
+  "min_y": 0.0,
+  "size": [
+   2.28,
+   1.08,
+   0.5
+  ],
+  "lod1": 0.482,
+  "lod2": 0.086,
+  "has_col": false,
+  "n_islands": 11,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/quest_board.glb",
+  "tris": 2335,
+  "min_y": 0.0,
+  "size": [
+   1.9,
+   2.13,
+   0.4
+  ],
+  "lod1": 0.484,
+  "lod2": 0.193,
+  "has_col": false,
+  "n_islands": 86,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/rug.glb",
+  "tris": 1532,
+  "min_y": 0.0,
+  "size": [
+   3.15,
+   0.02,
+   2.0
+  ],
+  "lod1": 0.279,
+  "lod2": 0.009,
+  "has_col": false,
+  "n_islands": 50,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/sarcophagus.glb",
+  "tris": 6386,
+  "min_y": 0.0,
+  "size": [
+   1.1,
+   1.27,
+   2.4
+  ],
+  "lod1": 0.392,
+  "lod2": 0.063,
+  "has_col": false,
+  "n_islands": 17,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/sofa.glb",
+  "tris": 3839,
+  "min_y": 0.0,
+  "size": [
+   2.06,
+   1.09,
+   0.98
+  ],
+  "lod1": 0.446,
+  "lod2": 0.116,
+  "has_col": false,
+  "n_islands": 84,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/stair_railing.glb",
+  "tris": 504,
+  "min_y": 0.0,
+  "size": [
+   3.14,
+   2.98,
+   0.13
+  ],
+  "lod1": 0.484,
+  "lod2": 0.19,
+  "has_col": false,
+  "n_islands": 53,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/stool.glb",
+  "tris": 660,
+  "min_y": 0.0,
+  "size": [
+   0.37,
+   0.73,
+   0.36
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 41,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/table.glb",
+  "tris": 1536,
+  "min_y": 0.0,
+  "size": [
+   1.4,
+   0.95,
+   0.85
+  ],
+  "lod1": 0.484,
+  "lod2": 0.193,
+  "has_col": false,
+  "n_islands": 74,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/telescope.glb",
+  "tris": 724,
+  "min_y": 0.0,
+  "size": [
+   0.71,
+   1.83,
+   1.03
+  ],
+  "lod1": 0.483,
+  "lod2": 0.193,
+  "has_col": false,
+  "n_islands": 79,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/throne_dais.glb",
+  "tris": 6386,
+  "min_y": 0.0,
+  "size": [
+   3.2,
+   3.58,
+   3.2
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": false,
+  "n_islands": 317,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/vault_door.glb",
+  "tris": 4166,
+  "min_y": 0.0,
+  "size": [
+   2.74,
+   2.81,
+   0.85
+  ],
+  "lod1": 0.485,
+  "lod2": 0.177,
+  "has_col": false,
+  "n_islands": 256,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/wall_lantern.glb",
+  "tris": 668,
+  "min_y": 0.0,
+  "size": [
+   0.2,
+   0.48,
+   0.41
+  ],
+  "lod1": 0.482,
+  "lod2": 0.192,
+  "has_col": false,
+  "n_islands": 48,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/wardrobe.glb",
+  "tris": 1623,
+  "min_y": 0.0,
+  "size": [
+   1.2,
+   2.1,
+   0.7
+  ],
+  "lod1": 0.304,
+  "lod2": 0.037,
+  "has_col": false,
+  "n_islands": 22,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "interiors/weapon_rack.glb",
+  "tris": 2714,
+  "min_y": 0.0,
+  "size": [
+   1.5,
+   2.05,
+   0.41
+  ],
+  "lod1": 0.431,
+  "lod2": 0.192,
+  "has_col": false,
+  "n_islands": 113,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_barrel_group.glb",
+  "tris": 517,
+  "min_y": 0.0,
+  "size": [
+   1.56,
+   0.95,
+   1.48
+  ],
+  "lod1": 0.453,
+  "lod2": 0.193,
+  "has_col": false,
+  "n_islands": 100,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_bench.glb",
+  "tris": 364,
+  "min_y": 0.0,
+  "size": [
+   1.82,
+   1.06,
+   0.55
+  ],
+  "lod1": 0.484,
+  "lod2": 0.192,
+  "has_col": false,
+  "n_islands": 25,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_cobble_edge.glb",
+  "tris": 96,
+  "min_y": -0.04,
+  "size": [
+   3.96,
+   0.24,
+   0.32
+  ],
+  "lod1": 0.479,
+  "lod2": 0.188,
+  "has_col": false,
+  "n_islands": 8,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_crate_stack.glb",
+  "tris": 200,
+  "min_y": 0.0,
+  "size": [
+   1.56,
+   1.35,
+   0.81
+  ],
+  "lod1": 0.48,
+  "lod2": 0.19,
+  "has_col": false,
+  "n_islands": 9,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_fence.glb",
+  "tris": 192,
+  "min_y": 0.0,
+  "size": [
+   4.18,
+   1.16,
+   0.18
+  ],
+  "lod1": 0.479,
+  "lod2": 0.188,
+  "has_col": false,
+  "n_islands": 8,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_flower_planter.glb",
+  "tris": 180,
+  "min_y": 0.0,
+  "size": [
+   1.28,
+   0.86,
+   0.68
+  ],
+  "lod1": 0.483,
+  "lod2": 0.189,
+  "has_col": false,
+  "n_islands": 54,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_hay_bale.glb",
+  "tris": 112,
+  "min_y": -0.01,
+  "size": [
+   1.2,
+   0.78,
+   0.84
+  ],
+  "lod1": 0.482,
+  "lod2": 0.179,
+  "has_col": false,
+  "n_islands": 3,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_lantern_post.glb",
+  "tris": 1096,
+  "min_y": 0.0,
+  "size": [
+   1.05,
+   4.43,
+   0.5
+  ],
+  "lod1": 0.484,
+  "lod2": 0.193,
+  "has_col": false,
+  "n_islands": 41,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_market_cart.glb",
+  "tris": 849,
+  "min_y": -0.034,
+  "size": [
+   3.85,
+   1.48,
+   1.6
+  ],
+  "lod1": 0.484,
+  "lod2": 0.192,
+  "has_col": false,
+  "n_islands": 157,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_signpost.glb",
+  "tris": 228,
+  "min_y": 0.0,
+  "size": [
+   2.38,
+   4.09,
+   1.02
+  ],
+  "lod1": 0.478,
+  "lod2": 0.189,
+  "has_col": false,
+  "n_islands": 24,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "props_street/prop_well.glb",
+  "tris": 1006,
+  "min_y": 0.0,
+  "size": [
+   2.8,
+   3.2,
+   2.33
+  ],
+  "lod1": 0.483,
+  "lod2": 0.193,
+  "has_col": false,
+  "n_islands": 170,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "ships/ship_boat_02.glb",
+  "tris": 1175,
+  "min_y": -0.856,
+  "size": [
+   2.41,
+   5.82,
+   6.4
+  ],
+  "lod1": 0.5,
+  "lod2": 0.2,
+  "has_col": true,
+  "n_islands": 33,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "ships/ship_boat_sail.glb",
+  "tris": 1449,
+  "min_y": -0.867,
+  "size": [
+   3.95,
+   5.9,
+   7.24
+  ],
+  "lod1": 0.5,
+  "lod2": 0.199,
+  "has_col": true,
+  "n_islands": 42,
+  "floating": [],
+  "n_floating": 0
+ },
+ {
+  "file": "ships/ship_tidewrack_sailing_ship.glb",
+  "tris": 21268,
+  "min_y": -1.853,
+  "size": [
+   8.18,
+   15.44,
+   30.0
+  ],
+  "lod1": 0.485,
+  "lod2": 0.194,
+  "has_col": true,
+  "n_islands": 645,
+  "floating": [],
+  "n_floating": 0
+ }
+]

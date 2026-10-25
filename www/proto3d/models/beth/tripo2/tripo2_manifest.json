@@ -1,0 +1,194 @@
+{
+ "yard_path": {
+  "tris": 5,
+  "scale": 40.0,
+  "game_size_m": [
+   13.28,
+   0.0,
+   26.31
+  ],
+  "tex": [
+   467,
+   894
+  ],
+  "tris_lod1": 5,
+  "tex_lod1": [
+   467,
+   894
+  ],
+  "tris_lod2": 5,
+  "tex_lod2": [
+   267,
+   512
+  ],
+  "source": "user_1025.glb"
+ },
+ "fence_paddock": {
+  "tris": 702,
+  "scale": 40.0,
+  "game_size_m": [
+   11.35,
+   2.38,
+   16.48
+  ],
+  "tex": [
+   2048,
+   2040
+  ],
+  "tris_lod1": 350,
+  "tex_lod1": [
+   1023,
+   1023
+  ],
+  "tris_lod2": 139,
+  "tex_lod2": [
+   512,
+   509
+  ],
+  "source": "user_1025.glb"
+ },
+ "farmhouse": {
+  "tris": 16565,
+  "scale": 40.0,
+  "game_size_m": [
+   10.53,
+   10.51,
+   23.67
+  ],
+  "tex": [
+   2047,
+   2048
+  ],
+  "tris_lod1": 8282,
+  "tex_lod1": [
+   1023,
+   1024
+  ],
+  "tris_lod2": 3312,
+  "tex_lod2": [
+   511,
+   512
+  ],
+  "source": "user_1025.glb"
+ },
+ "barn_stable": {
+  "tris": 32511,
+  "scale": 40.0,
+  "game_size_m": [
+   23.79,
+   14.55,
+   23.48
+  ],
+  "tex": [
+   2047,
+   2048
+  ],
+  "tris_lod1": 16254,
+  "tex_lod1": [
+   1023,
+   1024
+  ],
+  "tris_lod2": 6501,
+  "tex_lod2": [
+   511,
+   512
+  ],
+  "source": "user_1025.glb"
+ },
+ "farmstead_full": {
+  "tris": 48385,
+  "scale": 40.0,
+  "game_size_m": [
+   39.98,
+   14.55,
+   37.01
+  ],
+  "tex": [
+   2047,
+   2048
+  ],
+  "tris_lod1": 24192,
+  "tex_lod1": [
+   1023,
+   1024
+  ],
+  "tris_lod2": 9676,
+  "tex_lod2": [
+   511,
+   512
+  ],
+  "source": "user_1025.glb"
+ },
+ "lighthouse_tower": {
+  "tris": 7048,
+  "scale": 36.0,
+  "game_size_m": [
+   22.01,
+   31.57,
+   19.93
+  ],
+  "tex": [
+   2045,
+   2048
+  ],
+  "tris_lod1": 3524,
+  "tex_lod1": [
+   1023,
+   1023
+  ],
+  "tris_lod2": 1409,
+  "tex_lod2": [
+   510,
+   512
+  ],
+  "source": "user_1025b.glb"
+ },
+ "lighthouse_rock_island": {
+  "tris": 43805,
+  "scale": 36.0,
+  "game_size_m": [
+   33.1,
+   12.64,
+   35.17
+  ],
+  "tex": [
+   2045,
+   2048
+  ],
+  "tris_lod1": 21901,
+  "tex_lod1": [
+   1022,
+   1024
+  ],
+  "tris_lod2": 8761,
+  "tex_lod2": [
+   511,
+   512
+  ],
+  "source": "user_1025b.glb"
+ },
+ "lighthouse_full": {
+  "tris": 50853,
+  "scale": 36.0,
+  "game_size_m": [
+   33.1,
+   35.98,
+   35.17
+  ],
+  "tex": [
+   2045,
+   2048
+  ],
+  "tris_lod1": 25424,
+  "tex_lod1": [
+   1022,
+   1024
+  ],
+  "tris_lod2": 10170,
+  "tex_lod2": [
+   511,
+   512
+  ],
+  "source": "user_1025b.glb"
+ }
+}

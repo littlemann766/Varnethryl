@@ -1,0 +1,479 @@
+[
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.95,
+    "min_clear_m_from_2m_out": 3.45,
+    "side_wall_at_m": 0.95
+   },
+   {
+    "lintel_at_m": 1.75,
+    "min_clear_m_from_2m_out": 3.75,
+    "side_wall_at_m": 1.25
+   }
+  ],
+  "id": "apothecary",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.8,
+    "min_clear_m_from_2m_out": 3.3,
+    "side_wall_at_m": 1.3
+   }
+  ],
+  "id": "bakery",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 4.0,
+    "side_wall_at_m": 1.0
+   }
+  ],
+  "id": "colosseum",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.75,
+    "min_clear_m_from_2m_out": 3.75,
+    "side_wall_at_m": 1.25
+   }
+  ],
+  "id": "crypt",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [],
+  "id": "fountain",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 10.0,
+    "side_wall_at_m": 1.5
+   }
+  ],
+  "id": "gatehouse",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.05,
+    "min_clear_m_from_2m_out": 3.55,
+    "side_wall_at_m": 1.05
+   }
+  ],
+  "id": "guildhall",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.75,
+    "min_clear_m_from_2m_out": 3.75,
+    "side_wall_at_m": 1.25
+   }
+  ],
+  "id": "house1",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.75,
+    "min_clear_m_from_2m_out": 3.75,
+    "side_wall_at_m": 0.75
+   }
+  ],
+  "id": "house2",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.75,
+    "min_clear_m_from_2m_out": 3.75,
+    "side_wall_at_m": 1.25
+   }
+  ],
+  "id": "house3",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 1.0
+   }
+  ],
+  "id": "house4",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.9,
+    "min_clear_m_from_2m_out": 3.4,
+    "side_wall_at_m": 0.9
+   },
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 0.5
+   }
+  ],
+  "id": "inn",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.75,
+    "min_clear_m_from_2m_out": 10.0,
+    "side_wall_at_m": 0.25
+   },
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 1.5
+   }
+  ],
+  "id": "keep",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.2,
+    "min_clear_m_from_2m_out": 3.7,
+    "side_wall_at_m": 0.7
+   }
+  ],
+  "id": "library",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 1.5
+   }
+  ],
+  "id": "mage_academy",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.95,
+    "min_clear_m_from_2m_out": 3.45,
+    "side_wall_at_m": 0.45
+   }
+  ],
+  "id": "market",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.02,
+    "min_clear_m_from_2m_out": 3.52,
+    "side_wall_at_m": 0.02
+   }
+  ],
+  "id": "observatory",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 1.0
+   },
+   {
+    "lintel_at_m": 1.75,
+    "min_clear_m_from_2m_out": 3.75,
+    "side_wall_at_m": 0.25
+   },
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 0.5
+   },
+   {
+    "lintel_at_m": 1.75,
+    "min_clear_m_from_2m_out": 3.75,
+    "side_wall_at_m": 0.75
+   },
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 0.5
+   }
+  ],
+  "id": "port",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 1.0
+   }
+  ],
+  "id": "smithy",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 1.0
+   }
+  ],
+  "id": "temple",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 1.0
+   },
+   {
+    "lintel_at_m": 1.95,
+    "min_clear_m_from_2m_out": 3.45,
+    "side_wall_at_m": 1.45
+   },
+   {
+    "lintel_at_m": 2.1,
+    "min_clear_m_from_2m_out": 3.6,
+    "side_wall_at_m": 1.1
+   }
+  ],
+  "id": "thieves_den",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.8,
+    "min_clear_m_from_2m_out": 3.3,
+    "side_wall_at_m": 1.3
+   }
+  ],
+  "id": "townhall",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 1.0
+   }
+  ],
+  "id": "training_hall",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.0,
+    "min_clear_m_from_2m_out": 3.5,
+    "side_wall_at_m": 1.5
+   }
+  ],
+  "id": "treasury",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [],
+  "id": "wall_segment",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [],
+  "id": "walls_demo",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [],
+  "id": "watchtower",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.75,
+    "min_clear_m_from_2m_out": 3.75,
+    "side_wall_at_m": 1.25
+   }
+  ],
+  "id": "windmill",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 1.96,
+    "min_clear_m_from_2m_out": 3.29,
+    "side_wall_at_m": 1.28
+   }
+  ],
+  "id": "lighthouse_full_tripo",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 3.06,
+    "min_clear_m_from_2m_out": 3.29,
+    "side_wall_at_m": 3.28
+   }
+  ],
+  "id": "lighthouse_tower_tripo",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [],
+  "id": "lighthouse_rock_island_tripo",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.2,
+    "min_clear_m_from_2m_out": 3.7,
+    "side_wall_at_m": 1.2
+   }
+  ],
+  "id": "farmhouse_tripo",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ },
+ {
+  "any_shape_near_origin_1m": 0,
+  "doors": [
+   {
+    "lintel_at_m": 2.03,
+    "min_clear_m_from_2m_out": 3.53,
+    "side_wall_at_m": 1.53
+   }
+  ],
+  "id": "barn_stable_tripo",
+  "meshes": 0,
+  "shapes": 1,
+  "static_bodies": 1
+ }
+]

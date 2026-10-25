@@ -1,0 +1,3164 @@
+{
+ "generated": "2026-10-24 (ET)",
+ "units": "metres, Y up, size baked (do not rescale); where a rescale was needed it sits on the armature root node scale",
+ "required_clips": [
+  "idle",
+  "walk",
+  "run",
+  "attack1",
+  "attack2",
+  "attack3",
+  "skill",
+  "hit",
+  "death"
+ ],
+ "validation": "each file (all 3 LODs) imported into a copy of godot-proto (/tmp/gpchar, Godot 4.7.2 headless): loads, 1 mesh/1 surface, 1 skeleton, all 9 clips present, every clip seeked at 0/33/66/100% with all bone positions finite and in range",
+ "characters": [
+  {
+   "name": "owner",
+   "role": "hero",
+   "file": "owner.glb",
+   "height_m": 1.905,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/owner_new5_fight_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "owner.glb",
+     "tris": 14343,
+     "tex": 1536,
+     "kb": 2051
+    },
+    "lod1": {
+     "file": "owner_lod1.glb",
+     "tris": 7171,
+     "tex": 1024,
+     "kb": 1687
+    },
+    "lod2": {
+     "file": "owner_lod2.glb",
+     "tris": 2867,
+     "tex": 512,
+     "kb": 1394
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "idle_saber",
+    "run_saber",
+    "saber_ready",
+    "walk_saber",
+    "skill2",
+    "skill3",
+    "skill4"
+   ],
+   "derived_clips": {
+    "skill": "skill1 (Thunderfang Cascade) copied from owner_pika1 (same rig)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack",
+    "attack3": "saber_slash"
+   },
+   "sidecars": [
+    "sidecars/owner__owner_new5.cloth.json",
+    "sidecars/owner__owner_new5.cloth.class.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [
+    "retarget donor owner_pika1_refined2.glb: 86/86 bones matched",
+    "rescaled x1.00233 on armature root node (1.901 -> 1.905)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "owner_pika",
+   "role": "hero",
+   "file": "owner_pika.glb",
+   "height_m": 1.906,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/owner_pika1_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "owner_pika.glb",
+     "tris": 14343,
+     "tex": 1024,
+     "kb": 1893
+    },
+    "lod1": {
+     "file": "owner_pika_lod1.glb",
+     "tris": 7171,
+     "tex": 1024,
+     "kb": 1609
+    },
+    "lod2": {
+     "file": "owner_pika_lod2.glb",
+     "tris": 2868,
+     "tex": 512,
+     "kb": 1289
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "greeting",
+    "skill2",
+    "skill3",
+    "skill4"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x"
+   },
+   "renamed_from_source": {
+    "attack1": "attack",
+    "skill": "skill1"
+   },
+   "sidecars": [
+    "sidecars/owner_pika__owner_pika1_refined2.glb.speeds.json",
+    "sidecars/owner_pika__owner_pika1.cloth.class.json",
+    "sidecars/owner_pika__owner_pika1.cloth.json",
+    "sidecars/owner_pika__owner_pika1.json",
+    "sidecars/owner_pika__owner_pika1.glb.speeds.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "aldric",
+   "role": "hero",
+   "file": "aldric.glb",
+   "height_m": 1.914,
+   "source": "/workspace/rigged/test-bundle-1019/night2/aldric_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "aldric.glb",
+     "tris": 41089,
+     "tex": 2048,
+     "kb": 6394
+    },
+    "lod1": {
+     "file": "aldric_lod1.glb",
+     "tris": 20543,
+     "tex": 1024,
+     "kb": 3073
+    },
+    "lod2": {
+     "file": "aldric_lod2.glb",
+     "tris": 8217,
+     "tex": 512,
+     "kb": 1398
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 7 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "asha",
+   "role": "hero",
+   "file": "asha.glb",
+   "height_m": 1.71,
+   "source": "/workspace/rigged/test-bundle-1019/night2/asha_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "asha.glb",
+     "tris": 29578,
+     "tex": 2048,
+     "kb": 5857
+    },
+    "lod1": {
+     "file": "asha_lod1.glb",
+     "tris": 14789,
+     "tex": 1024,
+     "kb": 3304
+    },
+    "lod2": {
+     "file": "asha_lod2.glb",
+     "tris": 5915,
+     "tex": 512,
+     "kb": 1659
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "hit",
+    "death",
+    "attack3",
+    "skill"
+   ],
+   "derived_clips": {
+    "attack1": "retargeted from darius_armor2 attack",
+    "attack2": "retargeted from darius_armor2 attack2",
+    "hit": "retargeted from darius_armor2 hit",
+    "death": "retargeted from darius_armor2 death",
+    "attack3": "retargeted darius attack (same as attack1; placeholder)",
+    "skill": "retargeted darius attack2 (placeholder)"
+   },
+   "renamed_from_source": {},
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "retarget donor darius_armor2.glb: 78/78 bones matched",
+    "atlas-baked 8 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "brynn",
+   "role": "hero",
+   "file": "brynn.glb",
+   "height_m": 1.592,
+   "source": "/workspace/rigged/test-bundle-1019/night2/brynn_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "brynn.glb",
+     "tris": 37443,
+     "tex": 2048,
+     "kb": 6174
+    },
+    "lod1": {
+     "file": "brynn_lod1.glb",
+     "tris": 18720,
+     "tex": 1024,
+     "kb": 2956
+    },
+    "lod2": {
+     "file": "brynn_lod2.glb",
+     "tris": 7488,
+     "tex": 512,
+     "kb": 1349
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 7 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "cedric",
+   "role": "hero",
+   "file": "cedric.glb",
+   "height_m": 2.017,
+   "source": "/workspace/rigged/test-bundle-1019/night2/cedric_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "cedric.glb",
+     "tris": 29507,
+     "tex": 2048,
+     "kb": 5446
+    },
+    "lod1": {
+     "file": "cedric_lod1.glb",
+     "tris": 14752,
+     "tex": 1024,
+     "kb": 2546
+    },
+    "lod2": {
+     "file": "cedric_lod2.glb",
+     "tris": 5901,
+     "tex": 512,
+     "kb": 1147
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 6 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "darius",
+   "role": "hero",
+   "file": "darius.glb",
+   "height_m": 1.9,
+   "source": "/workspace/rigged/test-bundle-1019/night2/darius_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "darius.glb",
+     "tris": 41968,
+     "tex": 2048,
+     "kb": 6793
+    },
+    "lod1": {
+     "file": "darius_lod1.glb",
+     "tris": 20983,
+     "tex": 1024,
+     "kb": 3757
+    },
+    "lod2": {
+     "file": "darius_lod2.glb",
+     "tris": 8393,
+     "tex": 512,
+     "kb": 1919
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 8 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "elira",
+   "role": "hero",
+   "file": "elira.glb",
+   "height_m": 1.699,
+   "source": "/workspace/rigged/test-bundle-1019/night2/elira_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "elira.glb",
+     "tris": 35990,
+     "tex": 2048,
+     "kb": 5969
+    },
+    "lod1": {
+     "file": "elira_lod1.glb",
+     "tris": 17994,
+     "tex": 1024,
+     "kb": 2849
+    },
+    "lod2": {
+     "file": "elira_lod2.glb",
+     "tris": 7198,
+     "tex": 512,
+     "kb": 1299
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 5 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "finn",
+   "role": "hero",
+   "file": "finn.glb",
+   "height_m": 1.736,
+   "source": "/workspace/rigged/test-bundle-1019/night2/finn_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "finn.glb",
+     "tris": 38397,
+     "tex": 2048,
+     "kb": 6173
+    },
+    "lod1": {
+     "file": "finn_lod1.glb",
+     "tris": 19197,
+     "tex": 1024,
+     "kb": 2931
+    },
+    "lod2": {
+     "file": "finn_lod2.glb",
+     "tris": 7679,
+     "tex": 512,
+     "kb": 1337
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 8 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "garruk",
+   "role": "hero",
+   "file": "garruk.glb",
+   "height_m": 2.02,
+   "source": "/workspace/rigged/test-bundle-1019/night2/garruk_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "garruk.glb",
+     "tris": 29593,
+     "tex": 2048,
+     "kb": 6132
+    },
+    "lod1": {
+     "file": "garruk_lod1.glb",
+     "tris": 14796,
+     "tex": 1024,
+     "kb": 3477
+    },
+    "lod2": {
+     "file": "garruk_lod2.glb",
+     "tris": 5918,
+     "tex": 512,
+     "kb": 1744
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 10 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "kael",
+   "role": "hero",
+   "file": "kael.glb",
+   "height_m": 1.805,
+   "source": "/workspace/rigged/test-bundle-1019/night2/kael_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "kael.glb",
+     "tris": 32925,
+     "tex": 2048,
+     "kb": 5863
+    },
+    "lod1": {
+     "file": "kael_lod1.glb",
+     "tris": 16461,
+     "tex": 1024,
+     "kb": 2769
+    },
+    "lod2": {
+     "file": "kael_lod2.glb",
+     "tris": 6585,
+     "tex": 512,
+     "kb": 1245
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 6 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "mirelle",
+   "role": "hero",
+   "file": "mirelle.glb",
+   "height_m": 1.652,
+   "source": "/workspace/rigged/test-bundle-1019/night2/mirelle_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "mirelle.glb",
+     "tris": 34767,
+     "tex": 2048,
+     "kb": 5888
+    },
+    "lod1": {
+     "file": "mirelle_lod1.glb",
+     "tris": 17383,
+     "tex": 1024,
+     "kb": 2855
+    },
+    "lod2": {
+     "file": "mirelle_lod2.glb",
+     "tris": 6953,
+     "tex": 512,
+     "kb": 1290
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 8 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "morwen",
+   "role": "hero",
+   "file": "morwen.glb",
+   "height_m": 1.736,
+   "source": "/workspace/rigged/test-bundle-1019/night2/morwen_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "morwen.glb",
+     "tris": 31043,
+     "tex": 2048,
+     "kb": 5713
+    },
+    "lod1": {
+     "file": "morwen_lod1.glb",
+     "tris": 15521,
+     "tex": 1024,
+     "kb": 2831
+    },
+    "lod2": {
+     "file": "morwen_lod2.glb",
+     "tris": 6208,
+     "tex": 512,
+     "kb": 1255
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 6 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "nyx",
+   "role": "hero",
+   "file": "nyx.glb",
+   "height_m": 1.667,
+   "source": "/workspace/rigged/test-bundle-1019/night2/nyx_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "nyx.glb",
+     "tris": 35252,
+     "tex": 2048,
+     "kb": 5742
+    },
+    "lod1": {
+     "file": "nyx_lod1.glb",
+     "tris": 17626,
+     "tex": 1024,
+     "kb": 2832
+    },
+    "lod2": {
+     "file": "nyx_lod2.glb",
+     "tris": 7050,
+     "tex": 512,
+     "kb": 1286
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 8 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "orin",
+   "role": "hero",
+   "file": "orin.glb",
+   "height_m": 1.84,
+   "source": "/workspace/rigged/test-bundle-1019/night2/orin_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "orin.glb",
+     "tris": 34737,
+     "tex": 2048,
+     "kb": 6052
+    },
+    "lod1": {
+     "file": "orin_lod1.glb",
+     "tris": 17367,
+     "tex": 1024,
+     "kb": 2857
+    },
+    "lod2": {
+     "file": "orin_lod2.glb",
+     "tris": 6946,
+     "tex": 512,
+     "kb": 1294
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 8 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "rook",
+   "role": "hero",
+   "file": "rook.glb",
+   "height_m": 1.95,
+   "source": "/workspace/rigged/test-bundle-1019/night2/rook_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "rook.glb",
+     "tris": 31279,
+     "tex": 2048,
+     "kb": 5855
+    },
+    "lod1": {
+     "file": "rook_lod1.glb",
+     "tris": 15639,
+     "tex": 1024,
+     "kb": 2848
+    },
+    "lod2": {
+     "file": "rook_lod2.glb",
+     "tris": 6255,
+     "tex": 512,
+     "kb": 1296
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 6 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "rowan",
+   "role": "hero",
+   "file": "rowan.glb",
+   "height_m": 1.877,
+   "source": "/workspace/rigged/test-bundle-1019/night2/rowan_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "rowan.glb",
+     "tris": 30613,
+     "tex": 2048,
+     "kb": 5625
+    },
+    "lod1": {
+     "file": "rowan_lod1.glb",
+     "tris": 15306,
+     "tex": 1024,
+     "kb": 2622
+    },
+    "lod2": {
+     "file": "rowan_lod2.glb",
+     "tris": 6121,
+     "tex": 512,
+     "kb": 1183
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 7 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "selene",
+   "role": "hero",
+   "file": "selene.glb",
+   "height_m": 1.946,
+   "source": "/workspace/rigged/test-bundle-1019/night2/selene_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "selene.glb",
+     "tris": 21376,
+     "tex": 2048,
+     "kb": 5481
+    },
+    "lod1": {
+     "file": "selene_lod1.glb",
+     "tris": 10687,
+     "tex": 1024,
+     "kb": 2672
+    },
+    "lod2": {
+     "file": "selene_lod2.glb",
+     "tris": 4275,
+     "tex": 512,
+     "kb": 1224
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "hit",
+    "death",
+    "attack3",
+    "skill"
+   ],
+   "derived_clips": {
+    "attack1": "retargeted from darius_armor2 attack",
+    "attack2": "retargeted from darius_armor2 attack2",
+    "hit": "retargeted from darius_armor2 hit",
+    "death": "retargeted from darius_armor2 death",
+    "attack3": "retargeted darius attack (same as attack1; placeholder)",
+    "skill": "retargeted darius attack2 (placeholder)"
+   },
+   "renamed_from_source": {},
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "retarget donor darius_armor2.glb: 27/27 bones matched",
+    "atlas-baked 7 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "seraphine",
+   "role": "hero",
+   "file": "seraphine.glb",
+   "height_m": 1.77,
+   "source": "/workspace/rigged/test-bundle-1019/night2/seraphine_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "seraphine.glb",
+     "tris": 35382,
+     "tex": 2048,
+     "kb": 6182
+    },
+    "lod1": {
+     "file": "seraphine_lod1.glb",
+     "tris": 17691,
+     "tex": 1024,
+     "kb": 3042
+    },
+    "lod2": {
+     "file": "seraphine_lod2.glb",
+     "tris": 7076,
+     "tex": 512,
+     "kb": 1369
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 5 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "talia",
+   "role": "hero",
+   "file": "talia.glb",
+   "height_m": 1.772,
+   "source": "/workspace/rigged/test-bundle-1019/night2/talia_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "talia.glb",
+     "tris": 35569,
+     "tex": 2048,
+     "kb": 6355
+    },
+    "lod1": {
+     "file": "talia_lod1.glb",
+     "tris": 17783,
+     "tex": 1024,
+     "kb": 3243
+    },
+    "lod2": {
+     "file": "talia_lod2.glb",
+     "tris": 7113,
+     "tex": 512,
+     "kb": 1466
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 11 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "thorne",
+   "role": "hero",
+   "file": "thorne.glb",
+   "height_m": 1.877,
+   "source": "/workspace/rigged/test-bundle-1019/night2/thorne_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "thorne.glb",
+     "tris": 30540,
+     "tex": 2048,
+     "kb": 6090
+    },
+    "lod1": {
+     "file": "thorne_lod1.glb",
+     "tris": 15270,
+     "tex": 1024,
+     "kb": 2820
+    },
+    "lod2": {
+     "file": "thorne_lod2.glb",
+     "tris": 6108,
+     "tex": 512,
+     "kb": 1258
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 7 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "vesper",
+   "role": "hero",
+   "file": "vesper.glb",
+   "height_m": 1.768,
+   "source": "/workspace/rigged/test-bundle-1019/night2/vesper_armor2.glb",
+   "lods": {
+    "high": {
+     "file": "vesper.glb",
+     "tris": 39396,
+     "tex": 2048,
+     "kb": 6069
+    },
+    "lod1": {
+     "file": "vesper_lod1.glb",
+     "tris": 19698,
+     "tex": 1024,
+     "kb": 2878
+    },
+    "lod2": {
+     "file": "vesper_lod2.glb",
+     "tris": 7879,
+     "tex": 512,
+     "kb": 1313
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "atlas-baked 8 materials + vertex colours into one 2048px base+ORM (normal detail of sub-materials flattened)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "wren",
+   "role": "hero",
+   "file": "wren.glb",
+   "height_m": 1.35,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/wren_new6_fight_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "wren.glb",
+     "tris": 24498,
+     "tex": 1024,
+     "kb": 2615
+    },
+    "lod1": {
+     "file": "wren_lod1.glb",
+     "tris": 12249,
+     "tex": 1024,
+     "kb": 1928
+    },
+    "lod2": {
+     "file": "wren_lod2.glb",
+     "tris": 4899,
+     "tex": 512,
+     "kb": 1133
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/wren__wren_new6.cloth.json",
+    "sidecars/wren__wren_new6.class.json",
+    "sidecars/wren__wren_new6.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "thrain",
+   "role": "hero",
+   "file": "thrain.glb",
+   "height_m": 1.476,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/thrain_new6_fight_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "thrain.glb",
+     "tris": 20578,
+     "tex": 1376,
+     "kb": 2365
+    },
+    "lod1": {
+     "file": "thrain_lod1.glb",
+     "tris": 10289,
+     "tex": 1024,
+     "kb": 1618
+    },
+    "lod2": {
+     "file": "thrain_lod2.glb",
+     "tris": 4115,
+     "tex": 512,
+     "kb": 956
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/thrain__thrain_new6.class.json",
+    "sidecars/thrain__thrain_new6.cloth.json",
+    "sidecars/thrain__thrain_new6.json",
+    "sidecars/thrain__thrain_new6_fight.glb.info.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "lunara",
+   "role": "hero",
+   "file": "lunara.glb",
+   "height_m": 1.902,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/lunara_new_arms_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "lunara.glb",
+     "tris": 24007,
+     "tex": 1024,
+     "kb": 2402
+    },
+    "lod1": {
+     "file": "lunara_lod1.glb",
+     "tris": 12003,
+     "tex": 1024,
+     "kb": 1700
+    },
+    "lod2": {
+     "file": "lunara_lod2.glb",
+     "tris": 4801,
+     "tex": 512,
+     "kb": 1000
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "hit",
+    "death",
+    "attack3",
+    "skill"
+   ],
+   "derived_clips": {
+    "attack1": "retargeted from darius_armor2 attack",
+    "attack2": "retargeted from darius_armor2 attack2",
+    "hit": "retargeted from darius_armor2 hit",
+    "death": "retargeted from darius_armor2 death",
+    "attack3": "retargeted darius attack (same as attack1; placeholder)",
+    "skill": "retargeted darius attack2 (placeholder)"
+   },
+   "renamed_from_source": {},
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "retarget donor darius_armor2.glb: 78/81 bones matched"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "marella",
+   "role": "hero",
+   "file": "marella.glb",
+   "height_m": 1.98,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/marella_new_arms_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "marella.glb",
+     "tris": 15366,
+     "tex": 1024,
+     "kb": 2392
+    },
+    "lod1": {
+     "file": "marella_lod1.glb",
+     "tris": 7683,
+     "tex": 1024,
+     "kb": 1889
+    },
+    "lod2": {
+     "file": "marella_lod2.glb",
+     "tris": 3073,
+     "tex": 512,
+     "kb": 1306
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "dive",
+    "float",
+    "swim",
+    "swim_fast"
+   ],
+   "derived_clips": {
+    "attack1": "procedural root-bone motion on the idle pose (placeholder)",
+    "attack2": "procedural root-bone motion on the idle pose (placeholder)",
+    "attack3": "procedural root-bone motion on the idle pose (placeholder)",
+    "skill": "procedural root-bone motion on the idle pose (placeholder)",
+    "hit": "procedural root-bone motion on the idle pose (placeholder)",
+    "death": "procedural root-bone motion on the idle pose (placeholder)"
+   },
+   "renamed_from_source": {},
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "mortimer",
+   "role": "hero",
+   "file": "mortimer.glb",
+   "height_m": 1.903,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/mortimer_new_arms_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "mortimer.glb",
+     "tris": 24240,
+     "tex": 2048,
+     "kb": 2077
+    },
+    "lod1": {
+     "file": "mortimer_lod1.glb",
+     "tris": 12120,
+     "tex": 1024,
+     "kb": 1165
+    },
+    "lod2": {
+     "file": "mortimer_lod2.glb",
+     "tris": 4848,
+     "tex": 512,
+     "kb": 611
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "hit",
+    "death",
+    "attack3",
+    "skill"
+   ],
+   "derived_clips": {
+    "attack1": "retargeted from darius_armor2 attack",
+    "attack2": "retargeted from darius_armor2 attack2",
+    "hit": "retargeted from darius_armor2 hit",
+    "death": "retargeted from darius_armor2 death",
+    "attack3": "retargeted darius attack (same as attack1; placeholder)",
+    "skill": "retargeted darius attack2 (placeholder)"
+   },
+   "renamed_from_source": {},
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "retarget donor darius_armor2.glb: 27/27 bones matched"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "coral",
+   "role": "hero",
+   "file": "coral.glb",
+   "height_m": 1.874,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/coral_new_arms_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "coral.glb",
+     "tris": 17640,
+     "tex": 1280,
+     "kb": 2556
+    },
+    "lod1": {
+     "file": "coral_lod1.glb",
+     "tris": 8820,
+     "tex": 1024,
+     "kb": 1839
+    },
+    "lod2": {
+     "file": "coral_lod2.glb",
+     "tris": 3528,
+     "tex": 512,
+     "kb": 1325
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "dive",
+    "float",
+    "swim",
+    "swim_fast"
+   ],
+   "derived_clips": {
+    "attack1": "procedural root-bone motion on the idle pose (placeholder)",
+    "attack2": "procedural root-bone motion on the idle pose (placeholder)",
+    "attack3": "procedural root-bone motion on the idle pose (placeholder)",
+    "skill": "procedural root-bone motion on the idle pose (placeholder)",
+    "hit": "procedural root-bone motion on the idle pose (placeholder)",
+    "death": "procedural root-bone motion on the idle pose (placeholder)"
+   },
+   "renamed_from_source": {},
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "snowy",
+   "role": "hero",
+   "file": "snowy.glb",
+   "height_m": 1.511,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/snowy_new4_arms_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "snowy.glb",
+     "tris": 29043,
+     "tex": 896,
+     "kb": 2507
+    },
+    "lod1": {
+     "file": "snowy_lod1.glb",
+     "tris": 14521,
+     "tex": 896,
+     "kb": 1868
+    },
+    "lod2": {
+     "file": "snowy_lod2.glb",
+     "tris": 5808,
+     "tex": 512,
+     "kb": 1042
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "hit",
+    "death",
+    "attack3",
+    "skill"
+   ],
+   "derived_clips": {
+    "attack1": "retargeted from darius_armor2 attack",
+    "attack2": "retargeted from darius_armor2 attack2",
+    "hit": "retargeted from darius_armor2 hit",
+    "death": "retargeted from darius_armor2 death",
+    "attack3": "retargeted darius attack (same as attack1; placeholder)",
+    "skill": "retargeted darius attack2 (placeholder)"
+   },
+   "renamed_from_source": {},
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "retarget donor darius_armor2.glb: 69/73 bones matched"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "player_pikachu",
+   "role": "hero",
+   "file": "player_pikachu.glb",
+   "height_m": 0.801,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/player_pikachu_h_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "player_pikachu.glb",
+     "tris": 24500,
+     "tex": 2048,
+     "kb": 2299
+    },
+    "lod1": {
+     "file": "player_pikachu_lod1.glb",
+     "tris": 12250,
+     "tex": 1024,
+     "kb": 1418
+    },
+    "lod2": {
+     "file": "player_pikachu_lod2.glb",
+     "tris": 4900,
+     "tex": 512,
+     "kb": 928
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "hit",
+    "death",
+    "attack3",
+    "skill"
+   ],
+   "derived_clips": {
+    "attack1": "retargeted from darius_armor2 attack",
+    "attack2": "retargeted from darius_armor2 attack2",
+    "hit": "retargeted from darius_armor2 hit",
+    "death": "retargeted from darius_armor2 death",
+    "attack3": "retargeted darius attack (same as attack1; placeholder)",
+    "skill": "retargeted darius attack2 (placeholder)"
+   },
+   "renamed_from_source": {},
+   "sidecars": [
+    "sidecars/player_pikachu__player_pikachu_h_refined2.glb.speeds.json"
+   ],
+   "sidecar_note": "",
+   "notes": [
+    "retarget donor darius_armor2.glb: 69/78 bones matched"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "pip",
+   "role": "companion",
+   "file": "pip.glb",
+   "height_m": 0.52,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/pip_new3_fight_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "pip.glb",
+     "tris": 15482,
+     "tex": 1536,
+     "kb": 1600
+    },
+    "lod1": {
+     "file": "pip_lod1.glb",
+     "tris": 7741,
+     "tex": 1024,
+     "kb": 1115
+    },
+    "lod2": {
+     "file": "pip_lod2.glb",
+     "tris": 3096,
+     "tex": 512,
+     "kb": 790
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "jump",
+    "trot"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/pip__pip_new3.class.json",
+    "sidecars/pip__pip_new3.cloth.json",
+    "sidecars/pip__pip_new3.glb.speeds.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [
+    "rescaled x1.00087 on armature root node (0.520 -> 0.52)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "phoenix",
+   "role": "companion",
+   "file": "phoenix.glb",
+   "height_m": 0.756,
+   "source": "/workspace/rigged/test-bundle-1019/core/phoenix_new3.glb",
+   "lods": {
+    "high": {
+     "file": "phoenix.glb",
+     "tris": 9366,
+     "tex": 1024,
+     "kb": 1580
+    },
+    "lod1": {
+     "file": "phoenix_lod1.glb",
+     "tris": 4683,
+     "tex": 1024,
+     "kb": 1308
+    },
+    "lod2": {
+     "file": "phoenix_lod2.glb",
+     "tris": 1873,
+     "tex": 512,
+     "kb": 962
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "fly",
+    "glide",
+    "hover",
+    "land",
+    "takeoff"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/phoenix__phoenix_new3.cloth.json",
+    "sidecars/phoenix__phoenix_new3.class.json",
+    "sidecars/phoenix__phoenix_new3.glb.speeds.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "ember",
+   "role": "companion",
+   "file": "ember.glb",
+   "height_m": 1.296,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/ember_new4_fight2_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "ember.glb",
+     "tris": 14406,
+     "tex": 1024,
+     "kb": 2505
+    },
+    "lod1": {
+     "file": "ember_lod1.glb",
+     "tris": 7203,
+     "tex": 1024,
+     "kb": 2018
+    },
+    "lod2": {
+     "file": "ember_lod2.glb",
+     "tris": 2881,
+     "tex": 512,
+     "kb": 1578
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "dive",
+    "flap",
+    "gallop",
+    "glide",
+    "hover",
+    "land",
+    "trot"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "zephyr",
+   "role": "companion",
+   "file": "zephyr.glb",
+   "height_m": 1.899,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/zephyr_new3_fight_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "zephyr.glb",
+     "tris": 18620,
+     "tex": 1024,
+     "kb": 2812
+    },
+    "lod1": {
+     "file": "zephyr_lod1.glb",
+     "tris": 9310,
+     "tex": 1024,
+     "kb": 2105
+    },
+    "lod2": {
+     "file": "zephyr_lod2.glb",
+     "tris": 3724,
+     "tex": 512,
+     "kb": 1501
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "dive",
+    "flap",
+    "gallop",
+    "glide",
+    "hover",
+    "land",
+    "trot"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/zephyr__zephyr_new3.cloth.json",
+    "sidecars/zephyr__zephyr_new3.class.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "cinder",
+   "role": "companion",
+   "file": "cinder.glb",
+   "height_m": 1.216,
+   "source": "/workspace/rigged/cinder_new.glb",
+   "lods": {
+    "high": {
+     "file": "cinder.glb",
+     "tris": 9768,
+     "tex": 2048,
+     "kb": 1346
+    },
+    "lod1": {
+     "file": "cinder_lod1.glb",
+     "tris": 4884,
+     "tex": 1024,
+     "kb": 669
+    },
+    "lod2": {
+     "file": "cinder_lod2.glb",
+     "tris": 1953,
+     "tex": 512,
+     "kb": 347
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "dive",
+    "flap",
+    "glide",
+    "hover",
+    "land"
+   ],
+   "derived_clips": {
+    "attack1": "procedural root-bone motion on the idle pose (placeholder)",
+    "attack2": "procedural root-bone motion on the idle pose (placeholder)",
+    "attack3": "procedural root-bone motion on the idle pose (placeholder)",
+    "skill": "procedural root-bone motion on the idle pose (placeholder)",
+    "hit": "procedural root-bone motion on the idle pose (placeholder)",
+    "death": "procedural root-bone motion on the idle pose (placeholder)"
+   },
+   "renamed_from_source": {},
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "briar",
+   "role": "enemy",
+   "file": "briar.glb",
+   "height_m": 1.803,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/briar_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "briar.glb",
+     "tris": 25665,
+     "tex": 1024,
+     "kb": 1605
+    },
+    "lod1": {
+     "file": "briar_lod1.glb",
+     "tris": 12831,
+     "tex": 1024,
+     "kb": 1172
+    },
+    "lod2": {
+     "file": "briar_lod2.glb",
+     "tris": 5133,
+     "tex": 512,
+     "kb": 578
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "hearth",
+   "role": "enemy",
+   "file": "hearth.glb",
+   "height_m": 1.797,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/hearth_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "hearth.glb",
+     "tris": 25923,
+     "tex": 1024,
+     "kb": 1479
+    },
+    "lod1": {
+     "file": "hearth_lod1.glb",
+     "tris": 12961,
+     "tex": 1024,
+     "kb": 1065
+    },
+    "lod2": {
+     "file": "hearth_lod2.glb",
+     "tris": 5184,
+     "tex": 512,
+     "kb": 537
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "hobgoblin",
+   "role": "enemy",
+   "file": "hobgoblin.glb",
+   "height_m": 1.799,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/hobgoblin_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "hobgoblin.glb",
+     "tris": 25980,
+     "tex": 1024,
+     "kb": 1454
+    },
+    "lod1": {
+     "file": "hobgoblin_lod1.glb",
+     "tris": 12989,
+     "tex": 1024,
+     "kb": 1039
+    },
+    "lod2": {
+     "file": "hobgoblin_lod2.glb",
+     "tris": 5196,
+     "tex": 512,
+     "kb": 524
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "kestrel",
+   "role": "enemy",
+   "file": "kestrel.glb",
+   "height_m": 1.797,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/kestrel_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "kestrel.glb",
+     "tris": 25882,
+     "tex": 1024,
+     "kb": 1598
+    },
+    "lod1": {
+     "file": "kestrel_lod1.glb",
+     "tris": 12940,
+     "tex": 1024,
+     "kb": 1166
+    },
+    "lod2": {
+     "file": "kestrel_lod2.glb",
+     "tris": 5176,
+     "tex": 512,
+     "kb": 566
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "lorian",
+   "role": "enemy",
+   "file": "lorian.glb",
+   "height_m": 1.797,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/lorian_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "lorian.glb",
+     "tris": 25881,
+     "tex": 1024,
+     "kb": 1501
+    },
+    "lod1": {
+     "file": "lorian_lod1.glb",
+     "tris": 12940,
+     "tex": 1024,
+     "kb": 1087
+    },
+    "lod2": {
+     "file": "lorian_lod2.glb",
+     "tris": 5176,
+     "tex": 512,
+     "kb": 543
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "mossgut",
+   "role": "enemy",
+   "file": "mossgut.glb",
+   "height_m": 1.793,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/mossgut_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "mossgut.glb",
+     "tris": 25950,
+     "tex": 1024,
+     "kb": 1673
+    },
+    "lod1": {
+     "file": "mossgut_lod1.glb",
+     "tris": 12974,
+     "tex": 1024,
+     "kb": 1241
+    },
+    "lod2": {
+     "file": "mossgut_lod2.glb",
+     "tris": 5190,
+     "tex": 512,
+     "kb": 599
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "neris",
+   "role": "enemy",
+   "file": "neris.glb",
+   "height_m": 1.798,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/neris_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "neris.glb",
+     "tris": 25320,
+     "tex": 1024,
+     "kb": 1665
+    },
+    "lod1": {
+     "file": "neris_lod1.glb",
+     "tris": 12659,
+     "tex": 1024,
+     "kb": 1236
+    },
+    "lod2": {
+     "file": "neris_lod2.glb",
+     "tris": 5064,
+     "tex": 512,
+     "kb": 585
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "stonetroll",
+   "role": "enemy",
+   "file": "stonetroll.glb",
+   "height_m": 5.715,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/stonetroll_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "stonetroll.glb",
+     "tris": 25881,
+     "tex": 1024,
+     "kb": 1459
+    },
+    "lod1": {
+     "file": "stonetroll_lod1.glb",
+     "tris": 12940,
+     "tex": 1024,
+     "kb": 1048
+    },
+    "lod2": {
+     "file": "stonetroll_lod2.glb",
+     "tris": 5176,
+     "tex": 512,
+     "kb": 538
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "2026-10-25: armature-root scale re-baked per LOD so skinned rest height = 5.715 m (measured before: high 1.801, lod1 1.803, lod2 1.811)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "valen",
+   "role": "enemy",
+   "file": "valen.glb",
+   "height_m": 1.798,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/valen_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "valen.glb",
+     "tris": 24594,
+     "tex": 1024,
+     "kb": 1556
+    },
+    "lod1": {
+     "file": "valen_lod1.glb",
+     "tris": 12296,
+     "tex": 1024,
+     "kb": 1151
+    },
+    "lod2": {
+     "file": "valen_lod2.glb",
+     "tris": 4918,
+     "tex": 512,
+     "kb": 561
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "wolf",
+   "role": "enemy",
+   "file": "wolf.glb",
+   "height_m": 1.009,
+   "source": "Grab3D \"Wolf\" (CC0, realistic sculpt, 4K PBR) decimated 448k->48k tris, rigged + animated by Beth (rig_anim.py/spec_wolf.py)",
+   "lods": {
+    "high": {
+     "file": "wolf.glb",
+     "tris": 48000,
+     "tex": 2048,
+     "kb": 3651
+    },
+    "lod1": {
+     "file": "wolf_lod1.glb",
+     "tris": 24000,
+     "tex": 1024,
+     "kb": 1766
+    },
+    "lod2": {
+     "file": "wolf_lod2.glb",
+     "tris": 9600,
+     "tex": 512,
+     "kb": 793
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {},
+   "renamed_from_source": {},
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "rebuilt 2026-10-24: realistic sculpted grey wolf, 23-bone quadruped rig, distance-based weights",
+    "all 9 clips hand-keyed: walk = 4-beat lateral walk, run = rotary gallop with spine flex, attack1 lunge bite, attack2 side-swipe bite, attack3 pounce (root moves forward and returns), skill = standing howl, hit flinch, death collapse onto side",
+    "clips are in place (no root motion kept at the end)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "wyvern",
+   "role": "enemy",
+   "file": "wyvern.glb",
+   "height_m": 1.81,
+   "source": "/workspace/rigged/test-bundle-1019/refined2/wyvern_refined2.glb",
+   "lods": {
+    "high": {
+     "file": "wyvern.glb",
+     "tris": 25991,
+     "tex": 1024,
+     "kb": 1326
+    },
+    "lod1": {
+     "file": "wyvern_lod1.glb",
+     "tris": 12995,
+     "tex": 1024,
+     "kb": 915
+    },
+    "lod2": {
+     "file": "wyvern_lod2.glb",
+     "tris": 5198,
+     "tex": 512,
+     "kb": 436
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "frosttroll_a",
+   "role": "enemy",
+   "file": "frosttroll_a.glb",
+   "height_m": 5.715,
+   "source": "/workspace/rigged/test-bundle-1019/core/frosttroll_a4.glb",
+   "lods": {
+    "high": {
+     "file": "frosttroll_a.glb",
+     "tris": 14338,
+     "tex": 1024,
+     "kb": 1860
+    },
+    "lod1": {
+     "file": "frosttroll_a_lod1.glb",
+     "tris": 7169,
+     "tex": 1024,
+     "kb": 1547
+    },
+    "lod2": {
+     "file": "frosttroll_a_lod2.glb",
+     "tris": 2867,
+     "tex": 512,
+     "kb": 1006
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/frosttroll_a__frosttroll_a4.cloth.json",
+    "sidecars/frosttroll_a__frosttroll_a4.glb.speeds.json",
+    "sidecars/frosttroll_a__frosttroll_a4.speeds.json",
+    "sidecars/frosttroll_a__frosttroll_a4.cloth.class.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [
+    "rescaled x0.99849 on armature root node (5.724 -> 5.715)",
+    "2026-10-25: armature-root scale re-baked per LOD so skinned rest height = 5.715 m (measured before: high 5.714, lod1 5.74, lod2 5.896)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "frosttroll_b",
+   "role": "enemy",
+   "file": "frosttroll_b.glb",
+   "height_m": 5.715,
+   "source": "/workspace/rigged/test-bundle-1019/core/frosttrollB_1.glb",
+   "lods": {
+    "high": {
+     "file": "frosttroll_b.glb",
+     "tris": 14883,
+     "tex": 1024,
+     "kb": 2171
+    },
+    "lod1": {
+     "file": "frosttroll_b_lod1.glb",
+     "tris": 7441,
+     "tex": 1024,
+     "kb": 1829
+    },
+    "lod2": {
+     "file": "frosttroll_b_lod2.glb",
+     "tris": 2976,
+     "tex": 512,
+     "kb": 996
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "windup"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "windup 0-1.0 s then attack from 1.0 s (the documented windup->attack handoff)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/frosttroll_b__frosttrollB_1.speeds.json",
+    "sidecars/frosttroll_b__frosttrollB_1.glb.speeds.json",
+    "sidecars/frosttroll_b__frosttrollB_1.cloth.class.json",
+    "sidecars/frosttroll_b__frosttrollB_1.cloth.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [
+    "rescaled x0.99529 on armature root node (5.742 -> 5.715)",
+    "2026-10-25: armature-root scale re-baked per LOD so skinned rest height = 5.715 m (measured before: high 5.905, lod1 5.945, lod2 5.939)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "ashentitan",
+   "role": "boss",
+   "file": "ashentitan.glb",
+   "height_m": 11.43,
+   "source": "/workspace/rigged/test-bundle-1019/core/ashentitan_new4.glb",
+   "lods": {
+    "high": {
+     "file": "ashentitan.glb",
+     "tris": 24498,
+     "tex": 1792,
+     "kb": 2473
+    },
+    "lod1": {
+     "file": "ashentitan_lod1.glb",
+     "tris": 12249,
+     "tex": 1024,
+     "kb": 1613
+    },
+    "lod2": {
+     "file": "ashentitan_lod2.glb",
+     "tris": 4899,
+     "tex": 512,
+     "kb": 1046
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "rescaled x0.99870 on armature root node (11.445 -> 11.43)",
+    "2026-10-25: armature-root scale re-baked per LOD so skinned rest height = 11.43 m (measured before: high 11.219, lod1 11.282, lod2 11.27)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "ashentitan_volcano",
+   "role": "boss",
+   "file": "ashentitan_volcano.glb",
+   "height_m": 20.955,
+   "source": "/workspace/rigged/volcano/ashentitan_volcano_11x.glb",
+   "lods": {
+    "high": {
+     "file": "ashentitan_volcano.glb",
+     "tris": 24498,
+     "tex": 1024,
+     "kb": 2723
+    },
+    "lod1": {
+     "file": "ashentitan_volcano_lod1.glb",
+     "tris": 12249,
+     "tex": 1024,
+     "kb": 2021
+    },
+    "lod2": {
+     "file": "ashentitan_volcano_lod2.glb",
+     "tris": 4899,
+     "tex": 512,
+     "kb": 1301
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "boulder_hurl",
+    "volcano_roar",
+    "windup"
+   ],
+   "derived_clips": {},
+   "renamed_from_source": {
+    "attack1": "attack",
+    "attack3": "magma_sweep",
+    "skill": "eruption_slam"
+   },
+   "sidecars": [
+    "sidecars/ashentitan_volcano__ashentitan_volcano_11x.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [
+    "rescaled x0.99604 on armature root node (21.038 -> 20.955)",
+    "2026-10-25: armature-root scale re-baked per LOD so skinned rest height = 20.955 m (measured before: high 11.189, lod1 11.252, lod2 11.24)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "vaelthryx",
+   "role": "boss",
+   "file": "vaelthryx.glb",
+   "height_m": 14.716,
+   "source": "/workspace/rigged/test-bundle-1019/core/vaelthryx_new7.glb",
+   "lods": {
+    "high": {
+     "file": "vaelthryx.glb",
+     "tris": 13500,
+     "tex": 1024,
+     "kb": 2670
+    },
+    "lod1": {
+     "file": "vaelthryx_lod1.glb",
+     "tris": 6750,
+     "tex": 1024,
+     "kb": 2060
+    },
+    "lod2": {
+     "file": "vaelthryx_lod2.glb",
+     "tris": 2700,
+     "tex": 512,
+     "kb": 1498
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "coil",
+    "coil_idle",
+    "coil_windup",
+    "slither",
+    "slither_fast"
+   ],
+   "derived_clips": {
+    "skill": "coil_windup then strike"
+   },
+   "renamed_from_source": {
+    "attack1": "attack",
+    "attack3": "strike"
+   },
+   "sidecars": [
+    "sidecars/vaelthryx__vaelthryx_new7.glb.speeds.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "ssylthar",
+   "role": "boss",
+   "file": "ssylthar.glb",
+   "height_m": 2.044,
+   "source": "/workspace/rigged/test-bundle-1019/night3/ssylthar_coil.glb",
+   "lods": {
+    "high": {
+     "file": "ssylthar.glb",
+     "tris": 24500,
+     "tex": 1024,
+     "kb": 1882
+    },
+    "lod1": {
+     "file": "ssylthar_lod1.glb",
+     "tris": 12250,
+     "tex": 1024,
+     "kb": 1475
+    },
+    "lod2": {
+     "file": "ssylthar_lod2.glb",
+     "tris": 4900,
+     "tex": 512,
+     "kb": 967
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "coil",
+    "coil_hold",
+    "coil_legacy",
+    "slither",
+    "strike_lunge",
+    "strike_release"
+   ],
+   "derived_clips": {
+    "attack2": "strike_lunge + strike_release",
+    "attack3": "strike at 1.3x",
+    "skill": "coil + coil_hold + strike_release",
+    "hit": "procedural root-bone motion on the idle pose (placeholder)",
+    "death": "procedural root-bone motion on the idle pose (placeholder)"
+   },
+   "renamed_from_source": {
+    "attack1": "strike"
+   },
+   "sidecars": [
+    "sidecars/ssylthar__ssylthar_coil.coil.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "hydrella_coil",
+   "role": "boss",
+   "file": "hydrella_coil.glb",
+   "height_m": 1.928,
+   "source": "/workspace/rigged/test-bundle-1019/night3/hydrella_coil.glb",
+   "lods": {
+    "high": {
+     "file": "hydrella_coil.glb",
+     "tris": 25985,
+     "tex": 1024,
+     "kb": 1558
+    },
+    "lod1": {
+     "file": "hydrella_coil_lod1.glb",
+     "tris": 12992,
+     "tex": 1024,
+     "kb": 1140
+    },
+    "lod2": {
+     "file": "hydrella_coil_lod2.glb",
+     "tris": 5197,
+     "tex": 512,
+     "kb": 524
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "coil",
+    "coil_hold",
+    "strike_lunge",
+    "strike_release"
+   ],
+   "derived_clips": {
+    "run": "walk played 1.6x faster",
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "coil + coil_hold + strike_lunge + strike_release"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/hydrella_coil__hydrella_coil.coil.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "titan_giant_20x",
+   "role": "boss",
+   "file": "titan_giant_20x.glb",
+   "height_m": 38.151,
+   "source": "/workspace/rigged/test-bundle-1019/night3/titan_giant_20x.glb",
+   "lods": {
+    "high": {
+     "file": "titan_giant_20x.glb",
+     "tris": 24498,
+     "tex": 1792,
+     "kb": 2639
+    },
+    "lod1": {
+     "file": "titan_giant_20x_lod1.glb",
+     "tris": 12249,
+     "tex": 1024,
+     "kb": 1779
+    },
+    "lod2": {
+     "file": "titan_giant_20x_lod2.glb",
+     "tris": 4899,
+     "tex": 512,
+     "kb": 1212
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/titan_giant_20x__titan_giant_20x.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [
+    "2026-10-25: armature-root scale re-baked per LOD so skinned rest height = 38.151 m (measured before: high 11.234, lod1 11.297, lod2 11.284)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "titan_giant_40x",
+   "role": "boss",
+   "file": "titan_giant_40x.glb",
+   "height_m": 76.302,
+   "source": "/workspace/rigged/test-bundle-1019/night3/titan_giant_40x.glb",
+   "lods": {
+    "high": {
+     "file": "titan_giant_40x.glb",
+     "tris": 24498,
+     "tex": 1792,
+     "kb": 2766
+    },
+    "lod1": {
+     "file": "titan_giant_40x_lod1.glb",
+     "tris": 12249,
+     "tex": 1024,
+     "kb": 1906
+    },
+    "lod2": {
+     "file": "titan_giant_40x_lod2.glb",
+     "tris": 4899,
+     "tex": 512,
+     "kb": 1339
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/titan_giant_40x__titan_giant_40x.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [
+    "2026-10-25: armature-root scale re-baked per LOD so skinned rest height = 76.302 m (measured before: high 11.234, lod1 11.297, lod2 11.284)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "titan_giant_60x",
+   "role": "boss",
+   "file": "titan_giant_60x.glb",
+   "height_m": 114.453,
+   "source": "/workspace/rigged/test-bundle-1019/night3/titan_giant_60x.glb",
+   "lods": {
+    "high": {
+     "file": "titan_giant_60x.glb",
+     "tris": 24498,
+     "tex": 1792,
+     "kb": 2854
+    },
+    "lod1": {
+     "file": "titan_giant_60x_lod1.glb",
+     "tris": 12249,
+     "tex": 1024,
+     "kb": 1994
+    },
+    "lod2": {
+     "file": "titan_giant_60x_lod2.glb",
+     "tris": 4899,
+     "tex": 512,
+     "kb": 1427
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {
+    "attack3": "2-hit combo: attack1 then attack2 at 1.25x",
+    "skill": "attack2 with a 2.2x slowed windup (first 35%)"
+   },
+   "renamed_from_source": {
+    "attack1": "attack"
+   },
+   "sidecars": [
+    "sidecars/titan_giant_60x__titan_giant_60x.json"
+   ],
+   "sidecar_note": "sidecars use SOURCE clip names; apply renamed_from_source (e.g. attack->attack1)",
+   "notes": [
+    "2026-10-25: armature-root scale re-baked per LOD so skinned rest height = 114.453 m (measured before: high 11.234, lod1 11.297, lod2 11.284)"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  },
+  {
+   "name": "hawk",
+   "role": "enemy",
+   "file": "hawk.glb",
+   "height_m": 0.629,
+   "source": "Grab3D \"Eagle\" (bald eagle, CC0, realistic sculpt, 4K PBR) decimated 444k->42k tris, white head/tail retinted to hawk tan-brown, rigged + animated by Beth (spec_hawk.py)",
+   "lods": {
+    "high": {
+     "file": "hawk.glb",
+     "tris": 42000,
+     "tex": 2048,
+     "kb": 8623
+    },
+    "lod1": {
+     "file": "hawk_lod1.glb",
+     "tris": 21000,
+     "tex": 1024,
+     "kb": 3226
+    },
+    "lod2": {
+     "file": "hawk_lod2.glb",
+     "tris": 8400,
+     "tex": 512,
+     "kb": 1239
+    }
+   },
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "derived_clips": {},
+   "renamed_from_source": {},
+   "sidecars": [],
+   "sidecar_note": "",
+   "notes": [
+    "rebuilt 2026-10-24: realistic sculpted raptor (eagle sculpt retinted to read as a hawk/buzzard), 25-bone bird rig",
+    "idle perched head-turns, walk hop-steps, run = flapping flight loop (body horizontal, ~0.25 m up), attack1 wing-mantle + beak strike, attack2 jump + talon strike, attack3 = dive attack (tucked dive, flare, talons), skill = climb with flaps then dive strike, hit, death",
+    "CAVEAT: source sculpt is perched with folded wings; spread wings are the folded wing panel rotated out and stretched 1.35-1.6x, so they read narrower than a true open-wing sculpt from below"
+   ],
+   "tier_notes": "High = no suffix (full tris, <=2048 tex, 1 material), _lod1 = ~50% tris/1024, _lod2 = ~20% tris/512",
+   "blocky_primitive": false,
+   "rebuild_reason": ""
+  }
+ ]
+}

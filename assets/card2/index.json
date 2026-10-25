@@ -12,21 +12,21 @@
    "card": "card_apothecary.jpg",
    "high": {
     "file": "bld_apothecary_card2.glb",
-    "tris": 9969,
+    "tris": 16271,
     "bbox_min": [
-     -4.56,
+     -5.0,
      -0.06,
      -4.4
     ],
     "bbox_max": [
-     4.56,
+     5.05,
      12.89,
-     5.1
+     6.65
     ]
    },
    "medium": {
     "file": "bld_apothecary_card2_lod1.glb",
-    "tris": 6285,
+    "tris": 7159,
     "bbox_min": [
      -4.56,
      -0.06,
@@ -35,12 +35,12 @@
     "bbox_max": [
      4.56,
      12.89,
-     5.1
+     5.37
     ]
    },
    "low": {
     "file": "bld_apothecary_card2_lod2.glb",
-    "tris": 3005,
+    "tris": 2954,
     "bbox_min": [
      -4.56,
      -0.06,
@@ -102,35 +102,35 @@
    "card": "card_bakery.jpg",
    "high": {
     "file": "bld_bakery_card2.glb",
-    "tris": 10095,
+    "tris": 16693,
     "bbox_min": [
-     -5.56,
-     -0.0,
+     -5.94,
+     -0.05,
      -5.07
     ],
     "bbox_max": [
-     5.56,
+     6.02,
      15.05,
-     5.95
+     8.04
     ]
    },
    "medium": {
     "file": "bld_bakery_card2_lod1.glb",
-    "tris": 5793,
+    "tris": 6973,
     "bbox_min": [
      -5.56,
-     -0.0,
+     -0.03,
      -5.07
     ],
     "bbox_max": [
-     5.56,
+     5.66,
      15.05,
-     5.95
+     8.04
     ]
    },
    "low": {
     "file": "bld_bakery_card2_lod2.glb",
-    "tris": 2201,
+    "tris": 2573,
     "bbox_min": [
      -5.56,
      -0.0,
@@ -172,35 +172,35 @@
    "card": "card_colosseum.jpg",
    "high": {
     "file": "bld_colosseum_card2.glb",
-    "tris": 36707,
+    "tris": 39183,
     "bbox_min": [
      -26.89,
-     0.0,
+     -0.03,
      -21.82
     ],
     "bbox_max": [
      26.82,
      34.79,
-     22.66
+     24.57
     ]
    },
    "medium": {
     "file": "bld_colosseum_card2_lod1.glb",
-    "tris": 17014,
+    "tris": 18978,
     "bbox_min": [
      -26.81,
-     0.0,
+     -0.03,
      -21.82
     ],
     "bbox_max": [
      26.81,
      34.79,
-     22.66
+     24.5
     ]
    },
    "low": {
     "file": "bld_colosseum_card2_lod2.glb",
-    "tris": 6790,
+    "tris": 7601,
     "bbox_min": [
      -26.8,
      0.0,
@@ -243,7 +243,7 @@
    "card": "card_crypt.jpg",
    "high": {
     "file": "bld_crypt_card2.glb",
-    "tris": 10842,
+    "tris": 11700,
     "bbox_min": [
      -6.59,
      -0.2,
@@ -271,7 +271,7 @@
    },
    "low": {
     "file": "bld_crypt_card2_lod2.glb",
-    "tris": 3996,
+    "tris": 2268,
     "bbox_min": [
      -6.62,
      -0.2,
@@ -313,21 +313,21 @@
    "card": "card_fountain_monument.jpg",
    "high": {
     "file": "bld_fountain_card2.glb",
-    "tris": 5488,
+    "tris": 6644,
     "bbox_min": [
      -7.0,
-     0.0,
+     -0.0,
      -7.0
     ],
     "bbox_max": [
      7.0,
-     6.24,
-     7.0
+     6.25,
+     8.79
     ]
    },
    "medium": {
     "file": "bld_fountain_card2_lod1.glb",
-    "tris": 3359,
+    "tris": 2929,
     "bbox_min": [
      -7.0,
      0.0,
@@ -335,13 +335,13 @@
     ],
     "bbox_max": [
      7.0,
-     6.24,
+     6.23,
      7.0
     ]
    },
    "low": {
     "file": "bld_fountain_card2_lod2.glb",
-    "tris": 2331,
+    "tris": 1288,
     "bbox_min": [
      -7.0,
      0.0,
@@ -349,7 +349,7 @@
     ],
     "bbox_max": [
      7.0,
-     6.22,
+     6.21,
      7.0
     ]
    },
@@ -362,30 +362,30 @@
    "card": "card_gatehouse.jpg",
    "high": {
     "file": "bld_gatehouse_card2.glb",
-    "tris": 7812,
+    "tris": 11739,
     "bbox_min": [
-     -12.0,
-     0.0,
-     -3.42
+     -12.46,
+     -0.06,
+     -3.48
     ],
     "bbox_max": [
-     12.0,
+     12.14,
      19.09,
-     3.6
+     5.38
     ]
    },
    "medium": {
     "file": "bld_gatehouse_card2_lod1.glb",
-    "tris": 2642,
+    "tris": 3320,
     "bbox_min": [
      -13.0,
-     0.0,
+     -0.03,
      -3.42
     ],
     "bbox_max": [
      13.0,
      19.09,
-     3.6
+     5.38
     ]
    },
    "low": {
@@ -433,21 +433,21 @@
    "card": "card_guild_hall.png",
    "high": {
     "file": "bld_guildhall_card2.glb",
-    "tris": 22152,
+    "tris": 36212,
     "bbox_min": [
-     -7.71,
-     -0.0,
+     -8.15,
+     -0.05,
      -6.67
     ],
     "bbox_max": [
-     8.75,
+     9.2,
      24.91,
-     8.1
+     9.86
     ]
    },
    "medium": {
     "file": "bld_guildhall_card2_lod1.glb",
-    "tris": 10411,
+    "tris": 14408,
     "bbox_min": [
      -7.71,
      0.0,
@@ -503,21 +503,21 @@
    "card": "card_village_houses.jpg",
    "high": {
     "file": "bld_house1_card2.glb",
-    "tris": 8452,
+    "tris": 14998,
     "bbox_min": [
-     -4.57,
-     -0.0,
+     -5.0,
+     -0.06,
      -4.81
     ],
     "bbox_max": [
-     4.57,
+     4.99,
      13.61,
-     5.4
+     5.67
     ]
    },
    "medium": {
     "file": "bld_house1_card2_lod1.glb",
-    "tris": 4868,
+    "tris": 5742,
     "bbox_min": [
      -4.57,
      -0.0,
@@ -526,12 +526,12 @@
     "bbox_max": [
      4.57,
      13.61,
-     5.4
+     5.67
     ]
    },
    "low": {
     "file": "bld_house1_card2_lod2.glb",
-    "tris": 1556,
+    "tris": 2300,
     "bbox_min": [
      -4.57,
      -0.0,
@@ -573,21 +573,21 @@
    "card": "card_village_houses.jpg",
    "high": {
     "file": "bld_house2_card2.glb",
-    "tris": 6164,
+    "tris": 10645,
     "bbox_min": [
-     -4.32,
-     0.0,
+     -4.74,
+     -0.06,
      -4.31
     ],
     "bbox_max": [
-     4.32,
+     4.63,
      13.21,
-     4.9
+     6.73
     ]
    },
    "medium": {
     "file": "bld_house2_card2_lod1.glb",
-    "tris": 3275,
+    "tris": 4019,
     "bbox_min": [
      -4.32,
      0.0,
@@ -601,7 +601,7 @@
    },
    "low": {
     "file": "bld_house2_card2_lod2.glb",
-    "tris": 1323,
+    "tris": 1727,
     "bbox_min": [
      -4.32,
      0.0,
@@ -643,21 +643,21 @@
    "card": "card_village_houses.jpg",
    "high": {
     "file": "bld_house3_card2.glb",
-    "tris": 9523,
+    "tris": 16528,
     "bbox_min": [
-     -5.81,
-     -0.0,
+     -6.24,
+     -0.04,
      -4.57
     ],
     "bbox_max": [
-     5.81,
+     6.23,
      13.26,
-     5.4
+     7.12
     ]
    },
    "medium": {
     "file": "bld_house3_card2_lod1.glb",
-    "tris": 5020,
+    "tris": 6508,
     "bbox_min": [
      -5.81,
      -0.0,
@@ -671,7 +671,7 @@
    },
    "low": {
     "file": "bld_house3_card2_lod2.glb",
-    "tris": 1568,
+    "tris": 3056,
     "bbox_min": [
      -5.81,
      -0.0,
@@ -713,21 +713,21 @@
    "card": "card_village_houses.jpg",
    "high": {
     "file": "bld_house4_card2.glb",
-    "tris": 8242,
+    "tris": 14658,
     "bbox_min": [
-     -4.37,
-     -0.0,
+     -4.8,
+     -0.06,
      -4.06
     ],
     "bbox_max": [
-     4.37,
+     4.76,
      16.07,
-     4.8
+     4.92
     ]
    },
    "medium": {
     "file": "bld_house4_card2_lod1.glb",
-    "tris": 4433,
+    "tris": 5307,
     "bbox_min": [
      -4.37,
      -0.0,
@@ -736,12 +736,12 @@
     "bbox_max": [
      4.37,
      16.07,
-     4.8
+     4.92
     ]
    },
    "low": {
     "file": "bld_house4_card2_lod2.glb",
-    "tris": 1433,
+    "tris": 2177,
     "bbox_min": [
      -4.37,
      -0.0,
@@ -783,21 +783,21 @@
    "card": "card_inn.jpg",
    "high": {
     "file": "bld_inn_card2.glb",
-    "tris": 19169,
+    "tris": 31138,
     "bbox_min": [
-     -6.56,
-     -0.0,
+     -7.04,
+     -0.06,
      -5.65
     ],
     "bbox_max": [
-     6.56,
+     7.04,
      18.79,
-     6.66
+     8.41
     ]
    },
    "medium": {
     "file": "bld_inn_card2_lod1.glb",
-    "tris": 11481,
+    "tris": 12355,
     "bbox_min": [
      -6.56,
      -0.0,
@@ -806,12 +806,12 @@
     "bbox_max": [
      6.56,
      18.79,
-     6.63
+     6.82
     ]
    },
    "low": {
     "file": "bld_inn_card2_lod2.glb",
-    "tris": 3241,
+    "tris": 3985,
     "bbox_min": [
      -6.56,
      -0.0,
@@ -866,45 +866,45 @@
      ]
     }
    ],
-   "phone_high_lod": "high"
+   "phone_high_lod": "lod1"
   },
   {
    "id": "keep",
    "card": "card_castle_keep.jpg",
    "high": {
     "file": "bld_keep_card2.glb",
-    "tris": 16219,
+    "tris": 19336,
     "bbox_min": [
-     -16.1,
-     0.0,
+     -16.53,
+     -0.05,
      -16.1
     ],
     "bbox_max": [
-     16.1,
+     16.56,
      32.59,
-     16.1
+     17.94
     ]
    },
    "medium": {
     "file": "bld_keep_card2_lod1.glb",
-    "tris": 9704,
+    "tris": 9377,
     "bbox_min": [
      -15.91,
-     0.0,
+     -0.03,
      -16.05
     ],
     "bbox_max": [
      16.1,
      32.59,
-     16.05
+     17.89
     ]
    },
    "low": {
     "file": "bld_keep_card2_lod2.glb",
-    "tris": 5333,
+    "tris": 3750,
     "bbox_min": [
      -16.1,
-     0.0,
+     -0.0,
      -15.68
     ],
     "bbox_max": [
@@ -965,21 +965,21 @@
    "card": "card_grand_library.png",
    "high": {
     "file": "bld_library_card2.glb",
-    "tris": 32377,
+    "tris": 36030,
     "bbox_min": [
-     -9.3,
+     -9.78,
      -0.3,
      -7.0
     ],
     "bbox_max": [
-     9.3,
+     9.7,
      19.45,
-     10.1
+     11.93
     ]
    },
    "medium": {
     "file": "bld_library_card2_lod1.glb",
-    "tris": 12676,
+    "tris": 12804,
     "bbox_min": [
      -9.23,
      -0.0,
@@ -993,7 +993,7 @@
    },
    "low": {
     "file": "bld_library_card2_lod2.glb",
-    "tris": 5988,
+    "tris": 6989,
     "bbox_min": [
      -9.3,
      -0.0,
@@ -1035,21 +1035,21 @@
    "card": "card_mage_academy.jpg",
    "high": {
     "file": "bld_mage_academy_card2.glb",
-    "tris": 42950,
+    "tris": 46436,
     "bbox_min": [
-     -10.05,
-     -0.0,
+     -10.51,
+     -0.05,
      -9.95
     ],
     "bbox_max": [
-     10.05,
+     10.51,
      31.28,
-     10.1
+     11.8
     ]
    },
    "medium": {
     "file": "bld_mage_academy_card2_lod1.glb",
-    "tris": 20161,
+    "tris": 21759,
     "bbox_min": [
      -9.93,
      -0.0,
@@ -1063,7 +1063,7 @@
    },
    "low": {
     "file": "bld_mage_academy_card2_lod2.glb",
-    "tris": 7944,
+    "tris": 9008,
     "bbox_min": [
      -10.05,
      -0.0,
@@ -1105,21 +1105,21 @@
    "card": "card_market_provisioner.png",
    "high": {
     "file": "bld_market_card2.glb",
-    "tris": 13891,
+    "tris": 21058,
     "bbox_min": [
-     -6.06,
-     -0.02,
+     -6.53,
+     -0.06,
      -5.17
     ],
     "bbox_max": [
-     7.03,
+     7.37,
      14.85,
-     7.55
+     9.27
     ]
    },
    "medium": {
     "file": "bld_market_card2_lod1.glb",
-    "tris": 8764,
+    "tris": 9454,
     "bbox_min": [
      -6.06,
      -0.02,
@@ -1128,12 +1128,12 @@
     "bbox_max": [
      7.03,
      14.85,
-     7.55
+     9.08
     ]
    },
    "low": {
     "file": "bld_market_card2_lod2.glb",
-    "tris": 4656,
+    "tris": 4085,
     "bbox_min": [
      -6.06,
      -0.02,
@@ -1168,14 +1168,14 @@
      ]
     }
    ],
-   "phone_high_lod": "high"
+   "phone_high_lod": "lod1"
   },
   {
    "id": "observatory",
    "card": "card_observatory.jpg",
    "high": {
     "file": "bld_observatory_card2.glb",
-    "tris": 12567,
+    "tris": 13145,
     "bbox_min": [
      -8.2,
      -0.5,
@@ -1184,12 +1184,12 @@
     "bbox_max": [
      8.26,
      29.29,
-     8.49
+     10.32
     ]
    },
    "medium": {
     "file": "bld_observatory_card2_lod1.glb",
-    "tris": 8381,
+    "tris": 6375,
     "bbox_min": [
      -8.21,
      -0.5,
@@ -1203,7 +1203,7 @@
    },
    "low": {
     "file": "bld_observatory_card2_lod2.glb",
-    "tris": 6703,
+    "tris": 2549,
     "bbox_min": [
      -7.98,
      -0.5,
@@ -1245,7 +1245,7 @@
    "card": "card_port.jpg",
    "high": {
     "file": "bld_port_card2.glb",
-    "tris": 28546,
+    "tris": 37076,
     "bbox_min": [
      -18.9,
      -2.5,
@@ -1259,7 +1259,7 @@
    },
    "medium": {
     "file": "bld_port_card2_lod1.glb",
-    "tris": 13415,
+    "tris": 17981,
     "bbox_min": [
      -18.9,
      -2.5,
@@ -1273,7 +1273,7 @@
    },
    "low": {
     "file": "bld_port_card2_lod2.glb",
-    "tris": 5445,
+    "tris": 7192,
     "bbox_min": [
      -18.9,
      -2.5,
@@ -1395,21 +1395,21 @@
    "card": "card_blacksmith.jpg",
    "high": {
     "file": "bld_smithy_card2.glb",
-    "tris": 5307,
+    "tris": 9502,
     "bbox_min": [
-     -6.95,
-     0.0,
+     -7.38,
+     -0.06,
      -4.56
     ],
     "bbox_max": [
-     4.47,
+     4.87,
      13.51,
-     5.3
+     6.76
     ]
    },
    "medium": {
     "file": "bld_smithy_card2_lod1.glb",
-    "tris": 4174,
+    "tris": 4304,
     "bbox_min": [
      -6.95,
      0.0,
@@ -1418,12 +1418,12 @@
     "bbox_max": [
      4.47,
      13.51,
-     5.3
+     5.42
     ]
    },
    "low": {
     "file": "bld_smithy_card2_lod2.glb",
-    "tris": 3034,
+    "tris": 1843,
     "bbox_min": [
      -6.95,
      0.0,
@@ -1465,21 +1465,21 @@
    "card": "card_temple.jpg",
    "high": {
     "file": "bld_temple_card2.glb",
-    "tris": 25482,
+    "tris": 28838,
     "bbox_min": [
-     -8.45,
+     -8.87,
      -0.3,
      -10.45
     ],
     "bbox_max": [
-     8.45,
+     8.88,
      28.12,
-     12.42
+     14.38
     ]
    },
    "medium": {
     "file": "bld_temple_card2_lod1.glb",
-    "tris": 10137,
+    "tris": 10133,
     "bbox_min": [
      -8.41,
      0.0,
@@ -1488,15 +1488,15 @@
     "bbox_max": [
      8.41,
      28.12,
-     12.42
+     12.41
     ]
    },
    "low": {
     "file": "bld_temple_card2_lod2.glb",
-    "tris": 4714,
+    "tris": 5594,
     "bbox_min": [
      -8.21,
-     0.0,
+     -0.0,
      -10.45
     ],
     "bbox_max": [
@@ -1535,21 +1535,21 @@
    "card": "card_thieves_den.jpg",
    "high": {
     "file": "bld_thieves_den_card2.glb",
-    "tris": 16292,
+    "tris": 25883,
     "bbox_min": [
-     -11.39,
-     0.0,
+     -11.7,
+     -0.06,
      -4.76
     ],
     "bbox_max": [
-     11.1,
+     11.52,
      20.41,
-     5.02
+     6.81
     ]
    },
    "medium": {
     "file": "bld_thieves_den_card2_lod1.glb",
-    "tris": 8192,
+    "tris": 8322,
     "bbox_min": [
      -11.39,
      0.0,
@@ -1638,28 +1638,28 @@
      ]
     }
    ],
-   "phone_high_lod": "high"
+   "phone_high_lod": "lod1"
   },
   {
    "id": "townhall",
    "card": "card_town_hall.jpg",
    "high": {
     "file": "bld_townhall_card2.glb",
-    "tris": 13175,
+    "tris": 17839,
     "bbox_min": [
-     -8.85,
-     0.0,
+     -9.3,
+     -0.06,
      -7.35
     ],
     "bbox_max": [
-     8.85,
+     9.33,
      18.61,
-     7.72
+     9.7
     ]
    },
    "medium": {
     "file": "bld_townhall_card2_lod1.glb",
-    "tris": 9574,
+    "tris": 8651,
     "bbox_min": [
      -8.73,
      0.0,
@@ -1673,10 +1673,10 @@
    },
    "low": {
     "file": "bld_townhall_card2_lod2.glb",
-    "tris": 5209,
+    "tris": 3460,
     "bbox_min": [
      -8.85,
-     0.0,
+     -0.0,
      -7.09
     ],
     "bbox_max": [
@@ -1715,16 +1715,16 @@
    "card": "card_training_hall.jpg",
    "high": {
     "file": "bld_training_hall_card2.glb",
-    "tris": 12508,
+    "tris": 21589,
     "bbox_min": [
-     -6.58,
-     0.0,
-     -8.06
+     -6.98,
+     -0.05,
+     -8.31
     ],
     "bbox_max": [
-     6.58,
+     6.99,
      16.36,
-     15.58
+     17.42
     ]
    },
    "medium": {
@@ -1743,7 +1743,7 @@
    },
    "low": {
     "file": "bld_training_hall_card2_lod2.glb",
-    "tris": 4285,
+    "tris": 3965,
     "bbox_min": [
      -6.58,
      0.0,
@@ -1778,28 +1778,28 @@
      ]
     }
    ],
-   "phone_high_lod": "high"
+   "phone_high_lod": "lod1"
   },
   {
    "id": "treasury",
    "card": "card_treasury.jpg",
    "high": {
     "file": "bld_treasury_card2.glb",
-    "tris": 10221,
+    "tris": 13505,
     "bbox_min": [
-     -8.68,
-     0.0,
+     -9.13,
+     -0.05,
      -9.3
     ],
     "bbox_max": [
-     8.68,
+     9.12,
      24.49,
-     6.48
+     8.2
     ]
    },
    "medium": {
     "file": "bld_treasury_card2_lod1.glb",
-    "tris": 4208,
+    "tris": 4338,
     "bbox_min": [
      -9.3,
      0.0,
@@ -1813,10 +1813,10 @@
    },
    "low": {
     "file": "bld_treasury_card2_lod2.glb",
-    "tris": 2868,
+    "tris": 2618,
     "bbox_min": [
      -8.68,
-     0.0,
+     -0.0,
      -9.3
     ],
     "bbox_max": [
@@ -1855,14 +1855,14 @@
    "card": "card_town_walls_watchtowers.jpg",
    "high": {
     "file": "bld_wall_segment_card2.glb",
-    "tris": 816,
+    "tris": 2022,
     "bbox_min": [
-     -6.1,
-     0.0,
+     -6.58,
+     -0.06,
      -1.8
     ],
     "bbox_max": [
-     6.1,
+     6.56,
      8.4,
      2.1
     ]
@@ -1883,10 +1883,10 @@
    },
    "low": {
     "file": "bld_wall_segment_card2_lod2.glb",
-    "tris": 600,
+    "tris": 392,
     "bbox_min": [
      -6.1,
-     0.0,
+     -0.0,
      -1.8
     ],
     "bbox_max": [
@@ -1904,21 +1904,21 @@
    "card": "card_town_walls_watchtowers.jpg",
    "high": {
     "file": "bld_walls_demo_card2.glb",
-    "tris": 3828,
+    "tris": 5184,
     "bbox_min": [
-     -18.6,
-     0.0,
-     -3.6
+     -19.03,
+     -0.05,
+     -3.75
     ],
     "bbox_max": [
-     18.6,
+     19.02,
      20.09,
      3.6
     ]
    },
    "medium": {
     "file": "bld_walls_demo_card2_lod1.glb",
-    "tris": 2808,
+    "tris": 2514,
     "bbox_min": [
      -18.38,
      0.0,
@@ -1932,16 +1932,16 @@
    },
    "low": {
     "file": "bld_walls_demo_card2_lod2.glb",
-    "tris": 2082,
+    "tris": 1004,
     "bbox_min": [
      -18.6,
-     0.0,
+     -0.0,
      -3.12
     ],
     "bbox_max": [
      18.6,
      19.0,
-     3.35
+     3.34
     ]
    },
    "col": "bld_walls_demo_card2_col.glb",
@@ -1953,16 +1953,16 @@
    "card": "card_town_walls_watchtowers.jpg",
    "high": {
     "file": "bld_watchtower_card2.glb",
-    "tris": 1098,
+    "tris": 2726,
     "bbox_min": [
-     -3.6,
-     0.0,
+     -4.08,
+     -0.06,
      -3.6
     ],
     "bbox_max": [
-     3.6,
+     4.03,
      20.09,
-     3.6
+     3.72
     ]
    },
    "medium": {
@@ -2002,35 +2002,35 @@
    "card": "card_windmill.jpg",
    "high": {
     "file": "bld_windmill_card2.glb",
-    "tris": 3152,
+    "tris": 4521,
     "bbox_min": [
      -7.08,
-     0.0,
+     -0.03,
      -3.5
     ],
     "bbox_max": [
      7.08,
      17.3,
-     6.08
+     8.02
     ]
    },
    "medium": {
     "file": "bld_windmill_card2_lod1.glb",
-    "tris": 1549,
+    "tris": 2067,
     "bbox_min": [
      -7.08,
-     0.0,
+     -0.03,
      -3.03
     ],
     "bbox_max": [
      7.08,
      17.3,
-     6.08
+     8.02
     ]
    },
    "low": {
     "file": "bld_windmill_card2_lod2.glb",
-    "tris": 1463,
+    "tris": 876,
     "bbox_min": [
      -7.08,
      0.0,
@@ -2090,7 +2090,7 @@
    },
    "medium": {
     "file": "tripo/bld_lighthouse_full_tripo_lod1.glb",
-    "tris": 25424,
+    "tris": 24916,
     "bbox_min": [
      -11.92,
      -0.01,
@@ -2104,7 +2104,7 @@
    },
    "low": {
     "file": "tripo/bld_lighthouse_full_tripo_lod2.glb",
-    "tris": 10170,
+    "tris": 9967,
     "bbox_min": [
      -11.91,
      -0.01,
@@ -2112,7 +2112,7 @@
     ],
     "bbox_max": [
      11.93,
-     25.2,
+     25.09,
      12.66
     ]
    },
@@ -2162,7 +2162,7 @@
    },
    "medium": {
     "file": "tripo/bld_lighthouse_tower_tripo_lod1.glb",
-    "tris": 3382,
+    "tris": 3311,
     "bbox_min": [
      -6.15,
      4.4,
@@ -2170,7 +2170,7 @@
     ],
     "bbox_max": [
      1.35,
-     22.03,
+     21.91,
      1.99
     ]
    },
@@ -2234,7 +2234,7 @@
    },
    "medium": {
     "file": "tripo/bld_lighthouse_rock_island_tripo_lod1.glb",
-    "tris": 21901,
+    "tris": 21463,
     "bbox_min": [
      -11.92,
      -0.01,
@@ -2248,7 +2248,7 @@
    },
    "low": {
     "file": "tripo/bld_lighthouse_rock_island_tripo_lod2.glb",
-    "tris": 8761,
+    "tris": 8584,
     "bbox_min": [
      -11.9,
      -0.01,
@@ -2285,7 +2285,7 @@
    },
    "medium": {
     "file": "tripo/bld_farmhouse_tripo_lod1.glb",
-    "tris": 8345,
+    "tris": 8134,
     "bbox_min": [
      -5.27,
      -0.02,
@@ -2299,7 +2299,7 @@
    },
    "low": {
     "file": "tripo/bld_farmhouse_tripo_lod2.glb",
-    "tris": 3398,
+    "tris": 3252,
     "bbox_min": [
      -5.29,
      0.03,
@@ -2357,7 +2357,7 @@
    },
    "medium": {
     "file": "tripo/bld_barn_stable_tripo_lod1.glb",
-    "tris": 16362,
+    "tris": 15978,
     "bbox_min": [
      -11.9,
      0.01,
@@ -2371,7 +2371,7 @@
    },
    "low": {
     "file": "tripo/bld_barn_stable_tripo_lod2.glb",
-    "tris": 6618,
+    "tris": 6392,
     "bbox_min": [
      -11.95,
      0.01,

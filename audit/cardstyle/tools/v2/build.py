@@ -3,6 +3,7 @@ from house import *
 from writer import write_glb
 from kit2 import *
 from kit3 import *
+from bld4 import *
 OUT='/workspace/beth-world/www/proto3d/models/beth/hi/buildings_card2'
 def rot(P,N):
     R=np.array([[0,0,-1],[0,1,0],[1,0,0]],float)  # +x -> +z  (x'=-z, z'=x)
@@ -198,7 +199,7 @@ def market():
     steps(m,(-1.8,0,zf),(1,0,0),(0,0,1),2.0,k=2)
     return c
 def townhall():
-    c=house(dict(W=13,D=10,g=4.0,floors=2,fh=3.2,jetty=0.0,pitch=55,upper='stone',framing=False)); g,E,fh=c['g'],c['E'],c['fh']; m=c['m']
+    c=house(dict(W=13,D=10,g=4.0,floors=2,fh=3.2,jetty=0.0,pitch=55,upper='stone',framing=False,remap=CREAM)); g,E,fh=c['g'],c['E'],c['fh']; m=c['m']
     cg=cross_gable(c,0,5.4,pz=0.8,pitch=55,mat='stone',framed=False,attic=False); zf=cg['zf']
     door(c,'z+',0,2.0,3.4)
     t=np.array([1.0,0,0]); n=np.array([0,0,1.0])
@@ -219,22 +220,35 @@ def townhall():
     steps(m,(0,0,zf),(1,0,0),(0,0,1),4.5,k=6)
     return c
 def temple():
-    c=house(dict(W=18,D=11,g=5.0,floors=1,fh=3.5,jetty=0.0,pitch=60,upper='stone',framing=False)); g,E=c['g'],c['E']; m=c['m']
-    X1=c['X1']; t=np.array([0,0,-1.0]); n=np.array([1.0,0,0])
-    # front facade on +x (rotated to +z): big lancet door, rose window, flanking towers, pinnacles
-    door(c,'x+',0,2.6,4.6); rose(m,(X1,E+2.0,0),t,n,1.6)
-    for a in(-3.0,3.0): lancet(m,(X1,2.0,a),t,n,1.0,3.6)
-    for a in(-3.0,3.0): banner(c,'x+',a*1.25,E-0.2,1.1,4.0)
+    c=house(dict(W=18,D=11,g=5.0,floors=1,fh=3.5,jetty=0.0,pitch=60,upper='stone',framing=False,remap=CREAM)); g,E=c['g'],c['E']; m=c['m']
+    X1=c['X1']; t=np.array([0,0,-1.0]); n=np.array([1.0,0,0]); up=np.array([0,1.0,0])
+    # front facade on +x (rotated to +z): gold-framed portal, tall traceried lancet, rose in the gable, spired towers
+    door(c,'x+',0,2.6,4.6); gold_portal(m,(X1,0,0),t,n,2.6,4.6)
+    glancet(m,(X1,5.6,0),t,n,2.8,4.6); rose(m,(X1,E+4.4,0),t,n,1.25); gold_ring(m,(X1+0.2,E+4.4,0),t,n,1.45)
+    for a in(-3.0,3.0): glancet(m,(X1,2.0,a),t,n,1.0,3.6); glancet(m,(X1,7.4,a),t,n,0.9,2.6)
+    for a in(-4.6,4.6): banner(c,'x+',a,E-0.6,1.1,4.0)
     for sz in(-1,1): tower(m,(X1+0.3,0,sz*(c['D']/2+0.6)),1.9,E+3.0,6.0,wins=4)
     for z in(-2.2,2.2): pinnacle(m,(X1+0.2,E+0.2,z),2.4)
+    for z in(-1.4,1.4): pinnacle(m,(X1+0.25,E+2.6,z*0.7),1.8)
     pinnacle(m,(X1+0.45,c['Rh']+0.2,0),3.0)
-    # sides: lancets + buttresses
+    # statues on plinths flanking the steps + on the tower buttresses
+    for sz in(-1,1):
+        m.box((X1+2.2,0,sz*2.6-0.55),(X1+3.3,1.1,sz*2.6+0.55),'stone'); m.box((X1+2.1,1.1,sz*2.6-0.62),(X1+3.4,1.25,sz*2.6+0.62),'stone')
+        statue(m,'robed',(X1+2.75,1.25,sz*2.6),1.0,90)
+        m.obox((X1+0.25,4.9,sz*1.75),(0,0,1),(0,1,0),(1,0,0),(0.9,0.2,0.7),'stone'); statue(m,'robed',(X1+0.35,5.0,sz*1.75),0.8,90)
+    # sides: traceried lancets + buttresses topped by side spires
     for x in np.arange(-7,7.1,3.5):
         for sz,ts,ns in((1,(1,0,0),(0,0,1)),(-1,(-1,0,0),(0,0,-1))):
-            lancet(m,(x,1.6,sz*c['hs']),np.array(ts,float),np.array(ns,float),1.0,3.6)
-            if x<7: m.box((x+1.55,0,sz*c['hs']-0.5 if sz>0 else -c['hs']-0.6),(x+2.05,g+0.8,sz*c['hs']+0.6 if sz>0 else -c['hs']+0.5),'stone')
-    # crossing spire
+            glancet(m,(x,1.6,sz*c['hs']),np.array(ts,float),np.array(ns,float),1.0,3.6)
+            if x<7:
+                zc=sz*(c['hs']+0.05); m.box((x+1.55,0,zc-0.55),(x+2.05,g+0.8,zc+0.55),'stone')
+                pinnacle(m,(x+1.8,g+0.8,zc),2.8)
+    # rear corner spire turrets
+    for sz in(-1,1): tower(m,(c['X0']+0.2,0,sz*(c['D']/2+0.2)),1.2,E+0.5,4.2,wins=2)
+    # crossing spire with gold ridge trims
     m.box((-3.2,c['Rh']-2.5,-1.6),(-0.2,c['Rh']+1.5,1.6),'stone'); cone(m,(-1.7,0,0),2.3,c['Rh']+1.5,7.5,'slate',8)
+    for x in(-0.2,-3.2): m.beam((x,c['Rh']+1.5,-1.6),(x,c['Rh']+1.5,1.6),0.12,'gold')
+    m.beam((c['X0']-0.4,c['Rh']+0.32,0),(X1+0.4,c['Rh']+0.32,0),0.1,'gold')
     steps(m,(X1+0.4,0,0),(0,0,-1),(1,0,0),5.0,k=6)
     c['front_gable']=True; return c
 def gatehouse():
@@ -245,12 +259,16 @@ def gatehouse():
     for zz,nn,tt in((3.0,n,t),(-3.0,-n,-t)):
         p=np.array([0,0,zz]); b=p+nn*0.03
         m.cell([b-tt*1.9,b+tt*1.9,b+tt*1.9+up*5.4,b-tt*1.9+up*5.4],'door')
+        o=m.LOD; m.LOD=2
         for k in range(11):
             th=np.pi*k/10; q=p+tt*np.cos(th)*2.15+up*(3.4+np.sin(th)*2.15)+nn*0.2
             m.obox(q,tt*np.cos(th+np.pi/2)+up*np.sin(th+np.pi/2),-(tt*np.cos(th)+up*np.sin(th)),nn,(0.5,0.6,0.45),'stone',k*0.1)
+        m.LOD=o
         for s_ in(-1,1): m.obox(p+tt*s_*2.2+up*1.7+nn*0.2,tt,up,nn,(0.5,3.4,0.45),'stone')
+    m.LOD=1
     for x in np.linspace(-1.6,1.6,7): m.box((x-0.05,0.4,3.1),(x+0.05,4.9,3.2),'iron')   # portcullis
     for y in(1.5,3.0,4.4): m.box((-1.7,y-0.05,3.1),(1.7,y+0.05,3.22),'iron')
+    m.LOD=99
     for sx in(-1,1):
         tower(m,(sx*5.4,0,0.3),2.8,12.5,5.5,wins=3,cone_r=3.2)
         p=np.array([sx*5.4,7.5,0.3+2.85]); banner(dict(m=m,hs=0,g=0,D=0,X0=0,X1=0),'__',0,0) if False else None
@@ -282,7 +300,7 @@ def watchtower():
     return dict(m=m)
 def keep():
     from geo import Mesh
-    m=Mesh(); t=np.array([1.0,0,0]); n=np.array([0,0,1.0]); up=np.array([0,1.0,0])
+    m=Mesh(); m.remap=dict(CREAM); t=np.array([1.0,0,0]); n=np.array([0,0,1.0]); up=np.array([0,1.0,0])
     m.box((-6,0,-6),(6,16,6),'stone')
     for a,b in(((-6,0,6),(6,0,6)),((6,0,-6),(-6,0,-6)),((6,0,6),(6,0,-6)),((-6,0,-6),(-6,0,6))): crenels_line(m,a,b,16.0)
     for sx in(-1,1):
@@ -306,7 +324,7 @@ def keep():
     return dict(m=m)
 def fountain():
     from geo import Mesh
-    m=Mesh()
+    m=Mesh(); m.remap=dict(CREAM)
     m.box((-7,0,-7),(7,0.12,7),'stone')                               # plaza flagstones
     cyl(m,(0,0,0),4.6,0,0.9,'stone',28,cap=None); cyl(m,(0,0,0),4.15,0.0,0.9,'stone',28)
     cyl(m,(0,0.88,0),4.65,0,0.12,'stone',28,r1=4.65)
@@ -321,7 +339,7 @@ def fountain():
         m.obox(d*1.75+[0,1.25,0],np.cross(d,[0,1,0]),(0,1,0),d,(0.35,0.35,0.3),'gold')
         pts=[d*1.9+[0,1.25,0],d*2.6+[0,1.2,0],d*3.1+[0,0.9,0],d*3.3+[0,0.7,0]]
         for p,q in zip(pts[:-1],pts[1:]): m.beam(p,q,0.09,'slate')
-    lion_statue(m,(0,3.45,0),1.0,'slate')
+    statue(m,'lion',(0,3.42,0),1.05,0)
     for k in range(6):
         a=2*np.pi*(k+0.5)/6; pot_plant(m,(6.0*np.cos(a),0.12,6.0*np.sin(a)),0.45)
     return dict(m=m)
@@ -361,13 +379,15 @@ def walls_demo():
 
 SPECS={k:v for k,v in globals().items() if callable(v) and k not in('house','export','rot','fh_','cloth_b','write_glb') and not k[0].isupper()}
 def export(name):
-    c=SPECS[name](); m=c['m']; os.makedirs(OUT,exist_ok=True); info={}
-    for lod,suf in((99,''),(1,'_lod1'),(2,'_lod2')):
-        # lod: keep tris with lod-tag > threshold ; hi keeps all (threshold -1)
+    import kit2
+    os.makedirs(OUT,exist_ok=True); info={}
+    for q,(lod,suf) in enumerate(((99,''),(1,'_lod1'),(2,'_lod2'))):
+        # rebuild at quality q (fewer segments / merlons / tower windows), then drop tris tagged <= lod
+        kit2.Q=q; c=SPECS[name](); m=c['m']
         P,F,UV,N=m.arrays(-1 if lod==99 else lod)
         if c.get('front_gable'): P,N=rot(P,N)
         f=f'{OUT}/bld_{name}_card2{suf}.glb'; write_glb(f,P,F,UV,N,f'bld_{name}_card2','atlas')
         info[suf or '_hi']=dict(tris=len(F),kb=os.path.getsize(f)//1024)
-    print(name,info); return info
+    kit2.Q=0; print(name,info); return info
 if __name__=='__main__':
     for n in sys.argv[1:]: export(n)

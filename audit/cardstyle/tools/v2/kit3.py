@@ -1,13 +1,16 @@
 import numpy as np
 from geo import norm
+import kit2
 from kit2 import cyl,cone,crenels_ring,crenels_line,barrel,crate,pot_plant,steps,ivy
 def tower(m,c,r,h,roof_h=None,crenel=False,wins=3,cone_r=None,banner_dir=None):
     c=np.asarray(c,float); cyl(m,c,r,0,h,'stone',18)
     cyl(m,c,r+0.12,0,0.6,'stone',18)  # plinth
     if crenel: crenels_ring(m,c,r,h-0.2,n=10); top=h+1.4
     else:
-        cyl(m,c+[0,h-0.5,0],r,0,0.5,'stone',18,r1=r+0.3); top=h  # corbel ring
+        if kit2.Q<2: cyl(m,c+[0,h-0.5,0],r,0,0.5,'stone',18,r1=r+0.3)  # corbel ring
+        top=h
     if roof_h: cone(m,c+[0,0,0],(cone_r or r+0.45),top,roof_h)
+    if kit2.Q>=1: wins=min(wins,2) if kit2.Q==1 else min(wins,1)
     for k in range(wins):
         y=2.5+k*(h-3)/max(1,wins)
         a=np.pi/2+(k%2)*0.6; n=np.array([np.cos(a),0,np.sin(a)]); t=np.array([-np.sin(a),0,np.cos(a)])
@@ -16,7 +19,7 @@ def tower(m,c,r,h,roof_h=None,crenel=False,wins=3,cone_r=None,banner_dir=None):
         m.obox(p+up*1.05+n*0.08,t,up,n,(0.8,0.15,0.2),'stone')
     return top+(roof_h or 0)
 def pinnacle(m,p,h=1.6,w=0.35):
-    p=np.asarray(p,float); m.box(p+[-w/2,0,-w/2],p+[w/2,h*0.45,w/2],'stone'); cone(m,p,w*0.75,h*0.45,h*0.55,'slate',6)
+    p=np.asarray(p,float); m.box(p+[-w/2,0,-w/2],p+[w/2,h*0.45,w/2],'stone'); cone(m,p,w*0.75,h*0.45,h*0.55,'slate',6 if kit2.Q<2 else 4)
 def lancet(m,p,t,n,w=0.9,h=2.6):
     t=np.asarray(t,float); n=np.asarray(n,float); p=np.asarray(p,float); up=np.array([0,1.0,0]); b=p+n*0.03
     m.cell([b-t*w/2,b+t*w/2,b+t*w/2+up*h,b-t*w/2+up*h],'window')

@@ -3,12 +3,13 @@ import numpy as np
 from atlas import STRIPS, CELLS, S
 def norm(v): v=np.asarray(v,float); return v/np.linalg.norm(v)
 class Mesh:
-    def __init__(s): s.P=[]; s.UV=[]; s.lod=[]  # lod: min lod level that drops this tri (99 = never)
+    def __init__(s): s.P=[]; s.UV=[]; s.lod=[]; s.remap={}  # lod: min lod level that drops this tri (99 = never)
     LOD=99
     def tri(s,a,b,c,ua,ub,uc):
         s.P+= [a,b,c]; s.UV+=[ua,ub,uc]; s.lod.append(s.LOD)
     # ---- strip-mapped planar convex polygon ----
     def poly(s,pts,o,ua,va,strip,uoff=0.0,flip=False):
+        strip=s.remap.get(strip,strip)
         pts=[np.asarray(p,float) for p in pts]; ua=norm(ua); va=np.asarray(va,float); va=norm(va-ua*np.dot(va,ua)); o=np.asarray(o,float)
         nn=np.cross(ua,va); r=np.dot(pts[0]-o,nn); o=o+nn*r
         y0,h,wm,bh=STRIPS[strip]
@@ -64,6 +65,18 @@ class Mesh:
                 U=lambda jj:x0+(jj/seg)*0.9*256/S; V=lambda ii:1-(1536+ (ii/rings)*500+5)/S
                 s.tri(a,cc,b,(U(j),V(i)),(U(j+1),V(i+1)),(U(j),V(i+1)))
                 s.tri(a,d,cc,(U(j),V(i)),(U(j+1),V(i)),(U(j+1),V(i+1)))
+    def sculpt(s,V,F,strip='statue',off=(0,0,0),scale=1.0,rot=0):
+        # organic mesh (marching cubes) mapped into a strip by world position
+        strip=s.remap.get(strip,strip); y0,h,wm,bh=STRIPS[strip]
+        r=np.radians(rot); R=np.array([[np.cos(r),0,np.sin(r)],[0,1,0],[-np.sin(r),0,np.cos(r)]])
+        V=np.asarray(V,float)*scale@R.T+np.asarray(off,float)
+        for f in F:
+            P=V[f]; n=np.cross(P[1]-P[0],P[2]-P[0]); ax=np.argmax(np.abs(n))
+            uv=[]
+            for p in P:
+                a,b=[(p[1],p[2]),(p[0],p[2]),(p[0],p[1])][ax]
+                uv.append((a/wm,1-(y0+1.5+((b/bh)%1.0)*(h-3))/S))
+            s.tri(P[0],P[1],P[2],*uv)
     def merge(s,o,off=(0,0,0),rot=0):
         P=np.array(o.P).reshape(-1,3); r=np.radians(rot); R=np.array([[np.cos(r),0,np.sin(r)],[0,1,0],[-np.sin(r),0,np.cos(r)]])
         P=P@R.T+np.asarray(off,float); s.P+=list(P); s.UV+=list(o.UV); s.lod+=list(o.lod)

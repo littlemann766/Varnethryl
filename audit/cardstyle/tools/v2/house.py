@@ -2,7 +2,7 @@ import numpy as np
 from geo import Mesh, norm
 T=np.tan
 def house(sp):
-    m=Mesh(); W=sp['W'];D=sp['D'];g=sp.get('g',3.2);fl=sp.get('floors',1);fh=sp.get('fh',2.7);j=sp.get('jetty',0.35)
+    m=Mesh(); m.remap=dict(sp.get('remap',{})); W=sp['W'];D=sp['D'];g=sp.get('g',3.2);fl=sp.get('floors',1);fh=sp.get('fh',2.7);j=sp.get('jetty',0.35)
     pit=np.radians(sp.get('pitch',57)); oh=sp.get('oh',0.55); og=0.45
     E=g+fl*fh; hs=D/2+j; Rh=E+hs*T(pit)
     yroof=lambda z:E+(hs-abs(z))*T(pit)

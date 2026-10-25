@@ -5,7 +5,7 @@ T='/workspace/beth-world/www/proto3d/models/beth/textures/realmed'
 OUT='/workspace/beth-world/www/proto3d/models/beth/hi/buildings_card2/atlas'; os.makedirs(OUT,exist_ok=True)
 S=2048
 # strips: name -> (y0, h, metres covered by full width, band height m)
-STRIPS={'stone':(0,512,6.0,1.5),'plaster':(512,256,6.0,0.75),'slate':(768,256,3.5*2,0.875),'oak':(1024,256,4.0,0.5),
+STRIPS={'stone':(0,384,6.0,1.125),'ashlar':(384,96,12.0,0.8),'statue':(480,16,3.0,1.0),'rock':(496,16,4.0,1.5),'plaster':(512,256,6.0,0.75),'slate':(768,256,3.5*2,0.875),'oak':(1024,256,4.0,0.5),
         'beam':(1280,128,4.0,0.25),'iron':(1408,64,2.0,0.06),'gold':(1472,64,2.0,0.06)}
 CELLS=['window','door','banner','sign_inn','sign_bread','sign_anvil','flowers','sign_potion']  # 256x512 each at y=1536
 def hexc(h): return np.array([int(h[i:i+2],16) for i in(1,3,5)])/255
@@ -22,7 +22,26 @@ def build():
     def put_tile(name,ys,h,tint=1.0):
         a=L(name,'albedo.jpg'); hh=L(name,'height.png','L'); r=L(name,'rough.png','L')
         a2=np.tile(a,(1,2,1))[:h]; A[ys:ys+h]=a2*tint; H[ys:ys+h]=np.tile(hh,(1,2))[:h]; R[ys:ys+h]=np.tile(r,(1,2))[:h]
-    put_tile('fieldstone',0,512)
+    put_tile('fieldstone',0,384)
+    # cream cut-stone (ashlar) strip: 2 courses per band, staggered blocks, recessed mortar; U-periodic
+    r=np.random.default_rng(21); ys,h=384,96; cream=hexc('#DCCBA6'); nz=noise(h,S,1.4,31); nf=noise(h,S,0.8,32)
+    a=np.zeros((h,S,3),np.float32); hh=np.ones((h,S),np.float32)*0.7
+    for row in range(2):
+        y0,y1=row*48,row*48+48; x=int(r.integers(0,120)); xs=[]
+        while x<S+x: 
+            xs.append(x); x+=int(r.integers(90,175))
+            if x>=S: break
+        xs=[0]+[v for v in xs if 20<v<S-20]+[S]
+        for i in range(len(xs)-1):
+            tint=cream*(0.88+0.16*r.random())*np.array([1,0.99+0.02*r.random(),0.97+0.05*r.random()])
+            a[y0:y1,xs[i]:xs[i+1]]=tint
+            hh[y0:y1,xs[i]:xs[i]+3]=0.25; hh[y0:y1,xs[i+1]-2:xs[i+1]]=0.4
+        hh[y0:y0+3]=0.25; hh[y1-2:y1]=0.4; a[y0:y0+3]=hexc('#9C9078'); 
+        for i in range(len(xs)): a[y0:y1,max(0,xs[i]-1):xs[i]+3]=hexc('#9C9078')
+    a*= (0.82+0.25*nz[...,None])*(0.94+0.1*nf[...,None]); A[ys:ys+h]=a; H[ys:ys+h]=hh*(0.85+0.15*nf); R[ys:ys+h]=0.82
+    st=noise(16,S,1.2,41); A[480:496]=hexc('#BDB6A8')*(0.9+0.15*st[...,None]); H[480:496]=0.5+0.05*st; R[480:496]=0.6
+    rk=noise(16,S,1.0,43); rm=noise(16,S,1.6,44)
+    A[496:512]=hexc('#5E5850')*(0.65+0.6*rk[...,None]); moss=(rm>0.62)[...,None]; A[496:512]=np.where(moss,hexc('#4E5A30')*(0.8+0.3*rk[...,None]),A[496:512]); H[496:512]=0.3+0.5*rk; R[496:512]=0.92
     pn=noise(256,S,1.6,4); pf=noise(256,S,1.1,5)
     A[512:768]=hexc('#E2CFAA')*0.80*(0.85+0.15*pn[...,None])*(0.92+0.08*pf[...,None]); H[512:768]=0.4+0.1*pf; R[512:768]=0.9
     sl=L('slate','albedo.jpg'); put_tile('slate',768,256,(hexc('#46638F')/hexc('#4a5664')))
@@ -44,7 +63,7 @@ def build():
             d.rectangle([x0+118,y0,x0+138,y1],fill=OAK); d.rectangle([x0,y0+246,x1,y0+266],fill=OAK); de.rectangle([x0+118,y0,x0+138,y1],fill=0); de.rectangle([x0,y0+246,x1,y0+266],fill=0)
         elif c=='door':
             # stone surround (from stone strip) then arched oak door
-            st=im.crop((x0,0,x0+256,512)); im.paste(st,(x0,y0)); d=ImageDraw.Draw(im)
+            st=im.crop((x0,0,x0+256,384)).resize((256,512)); im.paste(st,(x0,y0)); d=ImageDraw.Draw(im)
             d.ellipse([x0+20,y0+20,x1-20,y0+236],fill=(150,140,125)); d.rectangle([x0+20,y0+128,x1-20,y1],fill=(150,140,125))
             d.ellipse([x0+40,y0+40,x1-40,y0+216],fill=OAK); d.rectangle([x0+40,y0+128,x1-40,y1],fill=OAK)
             for k in range(1,5): d.line([(x0+40+k*35,y0+40),(x0+40+k*35,y1)],fill=(45,30,20),width=4)

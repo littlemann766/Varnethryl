@@ -1,7 +1,10 @@
 import numpy as np
 from geo import norm
 from atlas import STRIPS
+Q=0  # build quality: 0 High, 1 Medium, 2 Low (set by export)
+def SG(seg): return seg if seg<=6 else max(6,int(round(seg*(1,0.55,0.34)[Q])))
 def cyl(m,c,r,y0,y1,strip,seg=16,cap=None,r1=None):
+    seg=SG(seg)
     c=np.asarray(c,float); r1=r if r1 is None else r1; wm=STRIPS[strip][2]
     for i in range(seg):
         a0=2*np.pi*i/seg; a1=2*np.pi*(i+1)/seg
@@ -14,15 +17,20 @@ def cyl(m,c,r,y0,y1,strip,seg=16,cap=None,r1=None):
             a0=2*np.pi*i/seg; a1=2*np.pi*(i+1)/seg
             m.poly([c+[0,y1,0],c+[r1*np.cos(a1),y1,r1*np.sin(a1)],c+[r1*np.cos(a0),y1,r1*np.sin(a0)]],c+[0,y1,0],(1,0,0),(0,0,-1),cap)
 def cone(m,c,r,y0,h,strip='slate',seg=16):
+    seg=SG(seg)
     c=np.asarray(c,float); ap=c+[0,y0+h,0]; wm=STRIPS[strip][2]
     for i in range(seg):
         a0=2*np.pi*i/seg; a1=2*np.pi*(i+1)/seg
         p0=c+[r*np.cos(a0),y0,r*np.sin(a0)]; p1=c+[r*np.cos(a1),y0,r*np.sin(a1)]
         m.poly([p1,p0,ap],p1,p0-p1,ap-(p0+p1)/2,strip,uoff=-(r*a1)/wm)
+    if Q>=2: return
     m.beam(ap-[0,0.1,0],ap+[0,1.0,0],0.08,'iron'); m.obox(ap+[0,1.0,0],(1,0,0),(0,1,0),(0,0,1),(0.18,0.18,0.18),'gold')
 def crenels_line(m,a,b,y,h=0.9,w=0.7,t=0.6,gap=0.6):
     a=np.asarray(a,float);b=np.asarray(b,float); d=b-a; L=np.linalg.norm(d); ax=d/L; az=np.cross(ax,[0,1,0])
     m.obox((a+b)/2+[0,y+0.25,0],ax,(0,1,0),az,(L,0.5,t),'stone')
+    n=int(L//(w+gap))
+    if Q>=2: return
+    if Q==1: w,gap=w*2+gap,gap*2
     n=int(L//(w+gap))
     for k in range(n+1):
         p=a+ax*(k*(w+gap)+w/2) if n>0 else (a+b)/2
@@ -30,6 +38,8 @@ def crenels_line(m,a,b,y,h=0.9,w=0.7,t=0.6,gap=0.6):
         m.obox(p+[0,y+0.5+h/2,0],ax,(0,1,0),az,(w,h,t),'stone',k*0.1)
 def crenels_ring(m,c,r,y,n=12,h=0.9,t=0.6):
     c=np.asarray(c,float); cyl(m,c,r+0.25,y,y+0.5,'stone',n*2,cap=None)
+    if Q>=2: cyl(m,c,r+0.2,y+0.5,y+1.0,'stone',n,cap=None); return
+    if Q==1: n=max(6,n//2)
     for k in range(n):
         a=2*np.pi*(k+0.25)/n; p=c+[ (r+0.1)*np.cos(a),y+0.5+h/2,(r+0.1)*np.sin(a)]
         ax=np.array([-np.sin(a),0,np.cos(a)]); m.obox(p,ax,(0,1,0),np.cross(ax,[0,1,0]),(2*np.pi*r/n*0.5,h,t),'stone',k*0.2)

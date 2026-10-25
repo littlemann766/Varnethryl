@@ -221,5 +221,325 @@
    "w_m": 3.74,
    "h_m": 3.31
   }
+ },
+ {
+  "file": "buildings/bld_guildhall.glb",
+  "tris": 5734,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "guildhall",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    8.25
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_library.glb",
+  "tris": 6344,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "library",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    10.5
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_townhall.glb",
+  "tris": 7290,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "townhall",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    6.5
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_mage.glb",
+  "tris": 4174,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "mage",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    7.0
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_treasury.glb",
+  "tris": 4504,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "treasury",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    5.0
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_crypt.glb",
+  "tris": 4500,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "crypt",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    7.0
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_market.glb",
+  "tris": 4732,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "market",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    6.75
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_apothecary.glb",
+  "tris": 6292,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "apothecary",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    5.25
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_bakery.glb",
+  "tris": 6216,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "bakery",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    5.25
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_inn.glb",
+  "tris": 7888,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "inn",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    7.125
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_smithy.glb",
+  "tris": 4134,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "smithy",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    6.0
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_training.glb",
+  "tris": 5690,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "training",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    8.25
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_keep.glb",
+  "tris": 5928,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "keep",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    8.0
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_temple.glb",
+  "tris": 5398,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "temple",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    11.0
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_observatory.glb",
+  "tris": 2218,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "observatory",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    6.4
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_colosseum.glb",
+  "tris": 4736,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "colosseum",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    12.4
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
  }
 ]

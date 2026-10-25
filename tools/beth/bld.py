@@ -6,7 +6,7 @@ import kit
 from kit import M,rot,write_glb,hexc as W,blob
 from bldgeo import face,rect,obox,wall,gable,ring_wall
 OUT=sys.argv[1];kit.OUT=OUT;BD=os.path.join(OUT,'buildings');kit.BTILES=json.load(open(os.path.join(BD,'atlas','atlas.json')))['tiles']
-K=1.7;DH=1.95;WH=np.ones(3)
+K=1.7;DH=1.95;WH=np.ones(3);WSP=[2.6]
 rng=np.random.default_rng(5);kit.rng=rng
 def window(m,x,y,z,yaw,w=.9,h=1.1,shutters=False,bars=False,frame='b_timber'):
   R=rot('y',yaw);n=R@np.array([0,0,1.]);u=R@np.array([1.,0,0]);c=np.array([x,y,z])
@@ -29,7 +29,7 @@ def door_surround(m,z,DW,tile='b_darkstone',steps=True,lantern=True,sign=None):
 def windows_on(m,w,d,y,door_side=True,skip_door=1.6,**kw):
   out=[]
   for (L,fn) in ((w,lambda u:(u,d/2,0)),(w,lambda u:(-u,-d/2,math.pi)),(d,lambda u:(w/2,-u,math.pi/2)),(d,lambda u:(-w/2,u,-math.pi/2))):
-    n=max(1,int((L-1.2)//2.6))
+    n=max(1,int((L-1.2)//WSP[0]))
     for i in range(n):
       u=(i+.5)*L/n-L/2;x,z,yw=fn(u)
       if yw==0 and abs(u)<skip_door:continue
@@ -178,4 +178,71 @@ rect(tw,np.array([-.5,3.2,R+.12]),np.array([1.,0,0]),np.array([0,1.,0]),1.0,2.4,
 kit.cyl(tr,'b_slate',R+.8,.05,6.2,16,t=(0,8.7,0));kit.cyl(tr,'b_iron',.06,.06,2.4,5,t=(0,14.6,0))
 rect(tr,np.array([.06,15.9,0]),np.array([1.,0,0]),np.array([0,1.,0]),1.4,.9,'b_red',WH,(1.4,.9))
 emit('bld_gate_tower',[('walls',tw,(0,0,0)),('roof',tr,(0,0,0))],{**meta('gt0'),'id':'gt0,gt1'})
+
+# ---------------- round 3: remaining sheet buildings ----------------
+def crenel(m,w,d,y,tile='b_stone',step=1.6):
+  for (L,fn) in ((w,lambda u:(u,d/2,0)),(w,lambda u:(-u,-d/2,math.pi)),(d,lambda u:(w/2,-u,math.pi/2)),(d,lambda u:(-w/2,u,-math.pi/2))):
+    n=int(L//step)
+    for i in range(n):
+      if i%2:continue
+      u=(i+.5)*L/n-L/2;x,z,yw=fn(u);obox(m,(x,y,z),(L/n*.95,.8,.6),tile,WH,yaw=yw)
+def flat_roof(m,w,d,h,tile='b_darkstone'):
+  obox(m,(0,h,0),(w+.5,.4,d+.5),tile,WH,faces=('front','back','left','right','top','bottom'));crenel(m,w+.3,d+.3,h+.4)
+def banner(m,x,y,z,yaw,col=0x8a2020,h=2.6):
+  R=rot('y',yaw);n=R@np.array([0,0,1.]);u=R@np.array([1.,0,0])
+  obox(m,np.array([x,y+.05,z])+n*.25,(1.1,.08,.08),'b_iron',WH,yaw=yaw)
+  rect(m,np.array([x,y-h,z])+n*.3-u*.5,u,np.array([0,1.,0]),1.0,h,'b_red',W(col)*1.6,(1,h))
+def columns(m,xs,z,h,r=.32,tile='b_white'):
+  for x in xs:kit.cyl(m,tile,r,r*.9,h,10,t=(x,0,z));obox(m,(x,h,z),(r*2.6,.3,r*2.6),tile,WH);obox(m,(x,0,z),(r*2.6,.3,r*2.6),tile,WH)
+R3={ # id: (h, hs, ridge, roof, lower, upper, kw)
+ 'guildhall':(7.2,3.4,'x','b_slate','b_stone','b_plaster',dict(frame=False,dormer=True,sign=0x3050a0,chimneys=((.3,-.25),(-.3,-.25)))),
+ 'library':(8.4,4.0,'x','b_slate','b_stone','b_stone',dict(frame=False,chimneys=())),
+ 'townhall':(7.6,3.6,'x','b_slate','b_stone','b_plaster',dict(dormer=True,balcony=True)),
+ 'mage':(8.0,3.8,'z','b_slate','b_darkstone','b_stone',dict(frame=False,quo=False,upcol=W(0xa0a0c8),chimneys=())),
+ 'treasury':(7.0,3.4,'x','b_slate','b_darkstone','b_stone',dict(frame=False,bars=True,shutters=False,quo=False,chimneys=())),
+ 'crypt':(5.4,2.6,'z','b_slate','b_darkstone','b_darkstone',dict(frame=False,shutters=False,bars=True,quo=False,chimneys=())),
+ 'market':(6.6,3.1,'x','b_shingle','b_stone','b_plaster',dict(sign=0x40a040,frame=False)),
+ 'apothecary':(6.0,2.8,'x','b_slate','b_stone','b_plaster',dict(sign=0x308060,balcony=True)),
+ 'bakery':(5.4,2.6,'x','b_thatch','b_stone','b_plaster',dict(thatch=True,sign=0xc08030,chimneys=((.3,-.2),))),
+ 'inn':(6.6,3.1,'x','b_slate','b_stone','b_plaster',dict(sign=0xa06020,chimneys=((.32,-.25),))),
+ 'smithy':(5.2,2.5,'x','b_shingle','b_darkstone','b_planks',dict(frame=False,sign=0x505050,quo=False,chimneys=((.3,-.2),))),
+ 'training':(6.2,2.9,'x','b_shingle','b_stone','b_planks',dict(frame=False,sign=0x803030)),
+ 'keep':(10.0,4.8,'x','b_slate','b_stone','b_stone',dict(frame=False,shutters=False,chimneys=())),
+ 'temple':(9.0,4.4,'z','b_slate','b_white','b_white',dict(frame=False,quo=False,shutters=False,chimneys=())),
+}
+for bid,(h,hs,ridge,rt,lo,up,kw) in R3.items():
+  sp=SPEC[bid];w,d=sp['w'],sp['d'];WSP[0]=2.6 if w*d<180 else 4.2 if w*d<260 else 5.6
+  if bid=='inn':WSP[0]=6.5
+  w_,r_=house_like(bid,w,d,h,hs,ridge,None,rt,lower=lo,upper=up,**kw)
+  if bid=='keep':
+    r_=M();flat_roof(r_,w,d,h)
+    for sx in (-1,1):
+      for sz in (-1,1):kit.cyl(w_,'b_stone',2.0,2.0,h+2.5,12,t=(sx*w/2,0,sz*d/2));kit.cyl(r_,'b_slate',2.5,.05,3.2,12,t=(sx*w/2,h+2.5,sz*d/2))
+    for x in (-w/4,w/4):banner(w_,x,h-.8,d/2+.05,0)
+  if bid=='temple':
+    columns(w_,np.linspace(-w/2+1,w/2-1,6)[[0,1,4,5]],d/2+1.8,h-.3);obox(w_,(0,0,d/2+1.4),(w+.4,.45,3.2),'b_white',WH)
+    sub=M();gable(sub,0,0,w+.6,3.4,h,.32*w,.1,'z','b_slate',W(0xb8c4ec),gtile='b_white',gcol=WH);r_.merge(sub,np.eye(3),(0,0,d/2+1.6))
+  if bid in('guildhall','townhall','training'):
+    for x in (-w/3,w/3):banner(w_,x,hs-.2,d/2+.05,0,col=0x2040a0 if bid!='training' else 0x902020)
+  emit('bld_'+bid,[('walls',w_,(0,0,0)),('roof',r_,(0,0,0))],meta(bid))
+# observatory: round tower + dome
+sp=SPEC['observatory'];Rr=sp['w']/2;ow=M();orf=M()
+ring_wall(ow,Rr,0,11,.55,18,'b_stone',WH,door=(2.2,DH))
+for y in (3.8,7.6):kit.cyl(ow,'b_darkstone',Rr+.2,Rr+.2,.35,18,t=(0,y,0),cap=False)
+for i in range(5):a=i*1.25+.6;window(ow,math.sin(a)*(Rr+.1),5.4,math.cos(a)*(Rr+.1),a,.6,1.2,frame='stone')
+door_surround(ow,Rr,2.2)
+for i in range(18):a=i/18*6.283;obox(orf,(math.sin(a)*Rr,11.2,math.cos(a)*Rr),(1.0,.6,.6),'b_stone',WH,yaw=a)
+blob(orf,'b_iron',Rr*.8,scale=(1,.75,1),sub=2,t=(0,11.2,0),col=W(0x80a0b0),uvs=1.0);obox(orf,(0,11.2+Rr*.7,Rr*.3),(1.0,.4,Rr*.9),'b_darkstone',WH)
+emit('bld_observatory',[('walls',ow,(0,0,0)),('roof',orf,(0,0,0))],meta('observatory'))
+# colosseum: arched ring wall
+sp=SPEC['colosseum'];Rr=sp['w']/2;cw=M();cr=M()
+ring_wall(cw,Rr,0,3.8,.7,32,'b_stone',WH,door=(2.2,DH));ring_wall(cw,Rr-.15,3.8,7.6,.6,32,'b_stone',W(0xd8ccb0))
+for y in (3.8,7.6):kit.cyl(cw,'b_darkstone',Rr+.25,Rr+.25,.35,32,t=(0,y-.1,0),cap=False)
+for i in range(32):
+  a=(i+.5)/32*6.283
+  if abs(((a+math.pi)%6.283)-math.pi)<.25:continue
+  for y0 in (.0,3.9):obox(cw,(math.sin(a)*(Rr+.05),y0+1.2,math.cos(a)*(Rr+.05)),(1.1,2.2 if y0 else 2.4,.12),'b_darkstone',W(0x282420),yaw=a)
+  obox(cw,(math.sin(a+.098)*(Rr+.25),0,math.cos(a+.098)*(Rr+.25)),(.5,7.4,.4),'b_stone',WH,yaw=a)
+for i in range(8):a=i/8*6.283;banner(cr,math.sin(a)*(Rr+.3),7.4,math.cos(a)*(Rr+.3),a,col=0x902020,h=2.2)
+emit('bld_colosseum',[('walls',cw,(0,0,0)),('roof',cr,(0,0,0))],meta('colosseum'))
 json.dump(REG,open(os.path.join(BD,'buildings_index.json'),'w'),indent=1)

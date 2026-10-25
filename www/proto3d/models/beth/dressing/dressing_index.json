@@ -1,0 +1,142 @@
+[
+ {
+  "file": "dressing/curb_2m.glb",
+  "tris": 40,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/cobble_edge_2m.glb",
+  "tris": 54,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/lantern_post.glb",
+  "tris": 68,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/wall_lantern.glb",
+  "tris": 48,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/signpost.glb",
+  "tris": 84,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/milestone.glb",
+  "tris": 80,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/well.glb",
+  "tris": 244,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/market_stall_red.glb",
+  "tris": 276,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/market_stall_blue.glb",
+  "tris": 276,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/market_stall_green.glb",
+  "tris": 276,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/banner_pole_blue.glb",
+  "tris": 36,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/banner_pole_red.glb",
+  "tris": 36,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/wall_cap_4m.glb",
+  "tris": 44,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/rubble.glb",
+  "tris": 120,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/bench.glb",
+  "tris": 44,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "dressing/flower_planter.glb",
+  "tris": 132,
+  "atlas": "buildings/atlas"
+ },
+ {
+  "file": "decals/decal_moss_wall.glb",
+  "tris": 2,
+  "atlas": "decals/atlas",
+  "mode": "wall"
+ },
+ {
+  "file": "decals/decal_moss_ground.glb",
+  "tris": 2,
+  "atlas": "decals/atlas",
+  "mode": "ground"
+ },
+ {
+  "file": "decals/decal_crack_wall.glb",
+  "tris": 2,
+  "atlas": "decals/atlas",
+  "mode": "wall"
+ },
+ {
+  "file": "decals/decal_crack_ground.glb",
+  "tris": 2,
+  "atlas": "decals/atlas",
+  "mode": "ground"
+ },
+ {
+  "file": "decals/decal_dirt_ground.glb",
+  "tris": 2,
+  "atlas": "decals/atlas",
+  "mode": "ground"
+ },
+ {
+  "file": "decals/decal_dirt_wall.glb",
+  "tris": 2,
+  "atlas": "decals/atlas",
+  "mode": "wall"
+ },
+ {
+  "file": "decals/decal_grime_wall.glb",
+  "tris": 2,
+  "atlas": "decals/atlas",
+  "mode": "wall"
+ },
+ {
+  "file": "decals/decal_leaves.glb",
+  "tris": 2,
+  "atlas": "decals/atlas",
+  "mode": "ground"
+ },
+ {
+  "file": "decals/decal_puddle.glb",
+  "tris": 2,
+  "atlas": "decals/atlas",
+  "mode": "ground"
+ },
+ {
+  "file": "decals/decal_soot_wall.glb",
+  "tris": 2,
+  "atlas": "decals/atlas",
+  "mode": "wall"
+ }
+]

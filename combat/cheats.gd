@@ -41,6 +41,11 @@ func setup(m: Node, p: Node) -> void:
 
 func role() -> String: return str(role_provider.call())
 
+## test 16 (boss: "fly even higher than the map as the owner"): owner has no practical ceiling; co-owner/others keep 60 m.
+const FLY_CAP := 60.0
+const OWNER_FLY_CAP := 100000.0
+func fly_cap() -> float: return OWNER_FLY_CAP if role() == "owner" else FLY_CAP
+
 func allowed(key: String, r := "") -> bool:
 	if r == "": r = role()
 	if r == "owner": return OWNER.has(key)
@@ -71,8 +76,8 @@ func _apply(key: String, v) -> bool:
 			flags[key] = bool(v)
 			if key == "inf_gold" and v: _vs().state.gold = GOLD_CAP; _vs().write_state()
 		"fly": flags.fly = bool(v); if main: main.cheat.fly = flags.fly
-		"fly_up": if main: main.fly_alt = clampf(main.fly_alt + 3.0, 0.0, 60.0)
-		"fly_down": if main: main.fly_alt = clampf(main.fly_alt - 3.0, 0.0, 60.0)
+		"fly_up": if main: main.fly_alt = clampf(main.fly_alt + 3.0, 0.0, fly_cap())
+		"fly_down": if main: main.fly_alt = clampf(main.fly_alt - 3.0, 0.0, fly_cap())
 		"noclip":
 			flags.noclip = bool(v)
 			if main: main.hero.collision_mask = 0 if flags.noclip else 1

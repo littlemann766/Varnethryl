@@ -151,7 +151,6 @@ func _update_fx(dt: float) -> void:
 	var cb := skel.find_bone("chest")
 	var cp := (skel.global_transform * skel.get_bone_global_pose(cb)).origin if cb >= 0 else global_position
 	embers.global_position = Vector3(cp.x, global_position.y, cp.z)
-	if wave.visible: _drape_wave()
 	if not scorch.has_meta("at") or (scorch.get_meta("at") as Vector3).distance_to(global_position) > 12.0:
 		scorch.global_position = Vector3(global_position.x, _gy(global_position.x, global_position.z), global_position.z)
 		scorch.set_meta("at", global_position); _drape(scorch, 32, 0.25)
@@ -272,6 +271,7 @@ func _telegraphs() -> void:
 	for i in 3: fissures.append(_plane((load(WB + "materials/wb_crack_fissure_mat.tres") as Material).duplicate(), Vector3(12, 1, 60)))
 	strip = _plane((load(WB + "materials/wb_lava_strip_mat.tres") as Material).duplicate(), Vector3(170, 1, 170))
 	wave = (load(WB + "wb_lava_wave.tscn") as PackedScene).instantiate()
+	wave.height_provider = func(w: Vector3) -> float: return _gy(w.x, w.z)   # v3.2: heightmap terrain, no raycasts
 	wave.top_level = true; wave.visible = false; add_child(wave)
 	var gm: Material = load(WB + "materials/wb_hand_glow_mat.tres")
 	for b in ["hand_L", "hand_R", "upperChest"]:
@@ -466,7 +466,7 @@ func _start_ritual() -> void:
 		wave.visible = true; wave.scale = Vector3.ONE
 		wave.global_position = Vector3(global_position.x, _gy(global_position.x, global_position.z), global_position.z)
 		wave.gap_count = 3 if wave_rng.randi() % 2 == 0 else 4; wave.randomize_gaps(wave_rng)   # new safe openings every cast
-		wave.rise = 0.0; _drape_wave()
+		wave.rise = 0.0; wave.sample_ground()   # v3.2: wall/crest/skirt/posts follow the hills
 		_warn("The Titan's core blazes: LAVA WAVE")
 
 ## Lava Wave wall: open cylinder whose base follows the terrain at every angle (was a flat cylinder that cut through

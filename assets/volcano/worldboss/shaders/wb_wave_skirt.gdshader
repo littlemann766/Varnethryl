@@ -21,7 +21,32 @@ float gap_dist(vec2 xz) {
 	float m = mod(a + step_deg * 0.5, step_deg) - step_deg * 0.5; // centred on a gap at 0
 	return abs(m) - gap_width_deg * 0.5;
 }
+// v3.2 terrain follow: wb_lava_wave.gd raycasts GH_N ground heights around the ring (world metres relative to the wave root,
+// index i at local angle i*360/GH_N, atan2(z,x)) and uploads them; vertex() lifts each vertex by the interpolated height.
+uniform bool follow_ground = false;
+uniform float ground_h[64];
+float gh_at(vec2 xz) {
+	float f = fract(atan(xz.y, xz.x) / 6.2831853 + 1.0) * 64.0;
+	int i0 = int(floor(f)) % 64; int i1 = (i0 + 1) % 64;
+	return mix(ground_h[i0], ground_h[i1], fract(f));
+}
+uniform float ground_h_m1[64];    // heights 1/3 of the way across the skirt
+uniform float ground_h_m2[64];    // 2/3 of the way
+uniform float ground_h_out[64];   // heights at the skirt's outer edge (r = skirt_out)
+uniform float ground_lift = 0.25; // m above the sampled ground so the additive glow does not z-fight / sink on slopes
 uniform float intensity : hint_range(0.0, 8.0) = 3.0;
+void vertex() {
+	if (follow_ground) {
+		float f = fract(atan(VERTEX.z, VERTEX.x) / 6.2831853 + 1.0) * 64.0;
+		int i0 = int(floor(f)) % 64; int i1 = (i0 + 1) % 64;
+		float fa = fract(f);
+		float h1 = mix(ground_h_m1[i0], ground_h_m1[i1], fa), h2 = mix(ground_h_m2[i0], ground_h_m2[i1], fa);
+		float ho = mix(ground_h_out[i0], ground_h_out[i1], fa);
+		float t = clamp((length(VERTEX.xz) * skirt_out - 1.0) / (skirt_out - 1.0), 0.0, 1.0) * 3.0;  // 4 rings: 0, 1/3, 2/3, 1
+		float h = t < 1.0 ? mix(gh_at(VERTEX.xz), h1, t) : (t < 2.0 ? mix(h1, h2, t - 1.0) : mix(h2, ho, t - 2.0));
+		VERTEX.y += (h + ground_lift) / max(length(MODEL_MATRIX[1].xyz), 0.001);
+	}
+}
 void fragment() {
 	vec2 p = (UV * 2.0 - 1.0) * skirt_out; float r = length(p); float a = atan(p.y, p.x);
 	if (r < 0.97 || r > skirt_out) discard;

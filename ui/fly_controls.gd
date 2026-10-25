@@ -67,6 +67,8 @@ func step(dt: float) -> void:
 	if not flying() or main == null: jump_hold = false; return
 	if not up_btn.visible: hold = 0.0
 	var d := hold if hold != 0.0 else (1.0 if jump_hold else 0.0)
-	if d != 0.0: main.fly_alt = clampf(main.fly_alt + d * CLIMB_RATE * dt, 0.0, 60.0)
+	# test 16: climb rate scales with altitude (8 m/s near the ground, ~0.6x altitude up high, max 900 m/s); owner has no ceiling
+	var rate := CLIMB_RATE if main.fly_alt < 60.0 else minf(CLIMB_RATE + (float(main.fly_alt) - 60.0) * 0.6, 900.0)
+	if d != 0.0: main.fly_alt = clampf(main.fly_alt + d * rate * dt, 0.0, cheats.fly_cap() if cheats else 60.0)
 
 func _process(dt: float) -> void: if fly_btn: step(dt)

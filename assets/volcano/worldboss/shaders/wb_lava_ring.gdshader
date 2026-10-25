@@ -22,8 +22,24 @@ float gap_dist(vec2 xz) {
 	float m = mod(a + step_deg * 0.5, step_deg) - step_deg * 0.5; // centred on a gap at 0
 	return abs(m) - gap_width_deg * 0.5;
 }
+// v3.2 terrain follow: wb_lava_wave.gd raycasts GH_N ground heights around the ring (world metres relative to the wave root,
+// index i at local angle i*360/GH_N, atan2(z,x)) and uploads them; vertex() lifts each vertex by the interpolated height.
+uniform bool follow_ground = false;
+uniform float ground_h[64];
+float gh_at(vec2 xz) {
+	float f = fract(atan(xz.y, xz.x) / 6.2831853 + 1.0) * 64.0;
+	int i0 = int(floor(f)) % 64; int i1 = (i0 + 1) % 64;
+	return mix(ground_h[i0], ground_h[i1], fract(f));
+}
+uniform float ground_sink = 1.0; // m the wall base is pushed below the sampled ground (hides seams between samples)
 varying vec3 lpos;
-void vertex() { lpos = VERTEX; }
+void vertex() {
+	lpos = VERTEX;
+	if (follow_ground && !ground_mode) {
+		float sy = max(length(MODEL_MATRIX[1].xyz), 0.001);
+		VERTEX.y += (gh_at(VERTEX.xz) - step(VERTEX.y, 0.0) * ground_sink) / sy;
+	}
+}
 float h21(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float vn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
 	return mix(mix(h21(i),h21(i+vec2(1,0)),f.x), mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x), f.y); }

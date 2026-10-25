@@ -66,10 +66,17 @@ func _set_companions(ids: Array) -> void:
 		n.global_position = main.hero.global_position + Vector3(1.0 + i, 0, 1.0)
 		companions.append({"id": companion_ids[i], "node": n, "rig": r, "swing": 0.0})
 
+var _fly_last_yaw := 0.0
 func _physics_process(dt: float) -> void:
 	if main == null or main.hero == null: return
 	var hp: Vector3 = main.hero.global_position
 	var v: Vector3 = main.hero.velocity; v.y = 0
+	var fly: bool = main.has_method("flying_now") and main.flying_now()
+	if fly or rig.fly_on:   # test 16: flying state instead of walk/run on air
+		var vv: Vector3 = main.hero.velocity
+		var vl: Vector3 = rig.global_basis.inverse() * vv
+		var yr: float = rig.global_rotation.y; var turn := wrapf(yr - _fly_last_yaw, -PI, PI) / maxf(dt, 0.001); _fly_last_yaw = yr
+		rig.set_flight(fly, vl, turn, maxf(main.move_speed * 2.0, 8.0))
 	rig.set_locomotion(v.length() / max(main.move_speed, 0.1) * 2.0)
 	# breadcrumb trail (stairs/ramps included because points carry the hero's real y)
 	if trail.is_empty() or trail[trail.size() - 1].distance_to(hp) > 8.0: trail = PackedVector3Array([hp])

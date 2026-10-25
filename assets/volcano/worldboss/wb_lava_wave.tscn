@@ -53,7 +53,7 @@ colors = PackedColorArray(1, 0.95, 0.6, 1, 1, 0.6, 0.15, 1, 0.85, 0.2, 0.04, 0.7
 
 [node name="WBLavaWave" type="Node3D"]
 script = ExtResource("0")
-metadata/_note = "World metres. Root position = boss feet. Drive: set rise (0..1 over the 10 s wind-up) on Wall/Crest/Skirt materials (duplicate them), then tween root scale x/z outward (start 1 = 80 m radius via the children). Wall height 24 m; keep Crest.position.y and CrestSpray.position.y = 24*rise (+3 for spray) so the crest rides the wall top. Spray particles follow the crest (local coords)."
+metadata/_note = "World metres. Root position = boss feet. Drive: set rise (0..1 over the 10 s wind-up) on Wall/Crest/Skirt materials (duplicate them), then tween root scale x/z outward (start 1 = 80 m radius via the children). Wall height 24 m; keep Crest.position.y and CrestSpray.position.y = 24*rise (+3 for spray) so the crest rides the wall top. Spray particles follow the crest (local coords). v3.2: follow_ground raycasts 4x64 ground heights around the ring (ground_mask) and drapes wall/crest/skirt/posts/spray on the terrain."
 
 [node name="Wall" type="MeshInstance3D" parent="."]
 transform = Transform3D(80, 0, 0, 0, 24, 0, 0, 0, 80, 0, 12, 0)
@@ -66,7 +66,7 @@ mesh = SubResource("crest")
 surface_material_override/0 = ExtResource("2")
 
 [node name="Skirt" type="MeshInstance3D" parent="."]
-transform = Transform3D(80, 0, 0, 0, 1, 0, 0, 0, 80, 0, 0.08, 0)
+transform = Transform3D(108, 0, 0, 0, 1, 0, 0, 0, 108, 0, 0.08, 0)
 mesh = SubResource("skirt")
 surface_material_override/0 = ExtResource("3")
 

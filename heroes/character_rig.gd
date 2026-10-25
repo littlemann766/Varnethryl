@@ -179,7 +179,48 @@ func _build_tree() -> void:
 
 ## speed_ratio: 0 idle, 1 walk, 2 run
 func set_locomotion(speed_ratio: float) -> void:
+	if fly_on: speed_ratio = 0.0   # test 16: never walk/run on air; flight pose rides on the idle clip
 	if tree: tree.set("parameters/loco/blend_position", clamp(speed_ratio, 0.0, 2.0))
+
+# ---------- test 16: procedural flying state (hover / forward / bank / climb), smooth blends ----------
+var fly_on := false
+var fly_pose: FlyPose
+var _fly := {"w": 0.0, "fwd": 0.0, "bank": 0.0, "climb": 0.0, "pitch": 0.0, "roll": 0.0}
+## v_local: velocity in rig space (forward = -Z); turn: yaw rate rad/s; max_speed: speed that counts as "fast"
+func set_flight(on: bool, v_local := Vector3.ZERO, turn := 0.0, max_speed := 12.0) -> void:
+	fly_on = on
+	if fly_pose == null and on:
+		var sk: Skeleton3D = null
+		for c in model.find_children("*", "Skeleton3D", true, false): sk = c; break
+		if sk == null: return
+		fly_pose = FlyPose.new(); fly_pose.name = "FlyPose"; fly_pose.rig = self; sk.add_child(fly_pose)
+	var h := Vector2(v_local.x, v_local.z).length()
+	_fly.tw = 1.0 if on else 0.0
+	_fly.tf = clampf(h / maxf(max_speed, 0.1), 0.0, 1.0) if on else 0.0
+	_fly.tb = clampf(-turn / 2.5, -1.0, 1.0) if on else 0.0
+	_fly.tc = clampf(v_local.y / 6.0, -1.0, 1.0) if on else 0.0
+
+func _fly_step(dt: float) -> void:
+	if fly_pose == null: return
+	var k := 1.0 - exp(-dt * 4.0)
+	_fly.w = lerpf(_fly.w, _fly.get("tw", 0.0), k); _fly.fwd = lerpf(_fly.fwd, _fly.get("tf", 0.0), k)
+	_fly.bank = lerpf(_fly.bank, _fly.get("tb", 0.0), k); _fly.climb = lerpf(_fly.climb, _fly.get("tc", 0.0), k)
+	fly_pose.w = _fly.w; fly_pose.fwd = _fly.fwd; fly_pose.bank = _fly.bank; fly_pose.climb = _fly.climb; fly_pose.t += dt
+	fly_pose.active = _fly.w > 0.001
+	# whole body: pitch forward with speed, nose up/down with climb, bank into turns, gentle hover bob (pivot at the hips)
+	var w: float = _fly.w
+	if not has_meta("model_base"): set_meta("model_base", model.transform)
+	var base: Transform3D = get_meta("model_base")
+	if w <= 0.001:
+		if _fly.get("posed", false): model.transform = base; _fly.posed = false
+		return
+	_fly.posed = true
+	var pitch: float = -w * (0.12 + 0.95 * float(_fly.fwd) - 0.35 * float(_fly.climb) * (1.0 - 0.5 * float(_fly.fwd)))
+	var roll: float = w * 0.45 * float(_fly.bank)
+	var c := Vector3(0, target_height * 0.55, 0)
+	var bob: float = w * sin(fly_pose.t * 2.2) * 0.08 * (1.0 - 0.7 * float(_fly.fwd)) * target_height / 1.905
+	var b := Basis(Vector3.BACK, roll) * Basis(Vector3.RIGHT, pitch)
+	model.transform = Transform3D(b, c - b * c + Vector3(0, bob, 0)) * base
 
 ## Fast, spammable: re-firing restarts the one-shot (no timing window). clip: optional explicit clip name.
 func play_attack(clip := "", speed := 1.6) -> void:
@@ -225,6 +266,7 @@ func _cloth_motion(dt: float) -> void:
 
 func _process(dt: float) -> void:
 	_cloth_motion(dt)
+	_fly_step(dt)
 	# procedural fallback for clips a model doesn't have (Selene / Asha have no attack or hit clips)
 	if _lunge > 0.0 or _flinch > 0.0:
 		_lunge = max(0.0, _lunge - dt); _flinch = max(0.0, _flinch - dt)

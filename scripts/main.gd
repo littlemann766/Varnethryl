@@ -246,7 +246,7 @@ func _ready() -> void:
 	_hi_terrain()
 	_showcase()
 	_foliage()
-	if not args.has("--wbshots"): _grass()   # shot capture on the shared box: skip grass to save RAM
+	if not args.has("--wbshots") and not args.has("--altshots"): _grass()   # shot capture on the shared box: skip grass to save RAM
 	_hero()
 	_fx()
 	_hud()
@@ -259,6 +259,7 @@ func _ready() -> void:
 	if bench: _run_bench()
 	else: _warm_up()
 	if args.has("--wbshots"): add_child(load("res://tests/wb_shots.gd").new())
+	if args.has("--altshots"): add_child(load("res://tests/alt_shots.gd").new())   # test 16
 
 # ---------- settings ----------
 func _load_settings() -> void:
@@ -1561,6 +1562,7 @@ func _physics_process(dt: float) -> void:
 	var fwd := Vector3(-sin(yaw), 0, -cos(yaw)); var right := Vector3(cos(yaw), 0, -sin(yaw))
 	var dir := right * inp.x + fwd * -inp.y
 	var speed: float = (move_speed * float(cheat.speed)) * clamp(inp.length(), 0.0, 1.0)
+	if flying_now() and fly_alt > 40.0: speed *= minf(1.0 + (fly_alt - 40.0) / 30.0, 120.0)   # test 16: fly faster up high (~100x at 3 km)
 	if dir.length() > 0.05: dir = dir.normalized()
 	hero.velocity.x = dir.x * speed; hero.velocity.z = dir.z * speed
 	hero.velocity.y = -1.0 if hero.is_on_floor() else hero.velocity.y - 20.0 * dt
@@ -1572,6 +1574,7 @@ func _physics_process(dt: float) -> void:
 	if flying_now(): hero.velocity.y = (height(hero.position.x, hero.position.z) + fly_alt - hero.position.y) * 2.0
 	elif landing and not hero.is_on_floor(): hero.velocity.y = maxf(hero.velocity.y, -7.0)   # fly turned off mid-air: soft landing
 	elif landing: landing = false
+	_altitude_view()
 	if cheats and cheats.flags.bump and party:   # Bumps: enemies' bodies push the hero; off = walk through them
 		for e in party.director.living():
 			var dv := Vector2(hero.position.x - e.global_position.x, hero.position.z - e.global_position.z)
@@ -2486,3 +2489,19 @@ func spawn_world_boss(near_hero := true) -> bool:
 		if party and party.combat: party.combat.used.connect(func(slot, sk): get_tree().create_timer(0.12).timeout.connect(func(): world_boss.on_hero_used(slot, sk)))
 	if near_hero and hero: world_boss.spawn_near(hero.global_position)
 	return true
+
+# ---------- test 16: high-altitude flight view (owner can fly far above the map) ----------
+var _alt_base := {}
+func _altitude_view() -> void:
+	if cam == null or env == null: return
+	var alt := fly_alt if flying_now() else 0.0
+	if alt < 150.0:
+		if not _alt_base.is_empty():
+			cam.far = _alt_base.far; env.fog_density = _alt_base.fog; env.fog_aerial_perspective = _alt_base.ap; env.fog_sky_affect = _alt_base.sa; _alt_base = {}
+		return
+	if _alt_base.is_empty(): _alt_base = {"far": cam.far, "fog": env.fog_density, "ap": env.fog_aerial_perspective, "sa": env.fog_sky_affect}
+	var y := hero.position.y
+	cam.far = maxf(float(_alt_base.far), y * 2.2 + 4500.0)            # whole map + sea stay inside the far plane from any height
+	var k := clampf((y - 150.0) / 350.0, 0.0, 1.0)
+	env.fog_density = float(_alt_base.fog) * lerpf(1.0, 0.03, k)   # thin the fog with height so the ground is not a white sheet
+	env.fog_aerial_perspective = lerpf(float(_alt_base.ap), 0.0, k); env.fog_sky_affect = lerpf(float(_alt_base.sa), 0.0, k)

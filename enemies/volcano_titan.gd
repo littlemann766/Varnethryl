@@ -80,6 +80,7 @@ func hand_pos(i: int) -> Vector3:
 	return skel.global_transform * skel.get_bone_global_pose(hands[i]).origin
 
 func reach_m() -> float: return REACH_M
+func bump_r() -> float: return body_r
 
 ## player hurtbox: body (torso/head above the lava, radius body_r) + the arms while an attack lifts them
 func _hurt_radius() -> float:

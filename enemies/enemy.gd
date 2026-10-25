@@ -54,6 +54,7 @@ func setup(tid: String, pos: Vector3, ground: Callable) -> Enemy:
 	name = "%s_%d" % [tid, get_instance_id()]
 	return self
 
+func bump_r() -> float: return radius   # body push radius (the volcano Titan's hurtbox can be wider)
 func is_boss() -> bool: return def.get("boss", false)
 func alive() -> bool: return state != "defeated"
 func reach_m() -> float: return float(pattern.get("reach", def.reach)) * CombatRules.UNIT_M + radius

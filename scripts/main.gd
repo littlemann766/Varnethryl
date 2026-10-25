@@ -200,6 +200,17 @@ var menu_open := false
 var lamp_shadow_t := 0.0
 var cheats: Cheats
 var fly_alt := 6.0
+const JUMP_H := 1.2
+var JUMP_V := sqrt(2.0 * 20.0 * JUMP_H)
+var jump_req := false
+var jump_count := 0
+var flight := false      # test 13: HUD ✈ toggles real flight; the menu "fly" cheat only unlocks the button
+var landing := false
+func flying_now() -> bool: return flight and bool(cheat.get("fly", false))
+func request_jump() -> void: jump_req = true
+func set_flight(on: bool) -> void:
+	if flight and not on: landing = true
+	flight = on
 var fly_controls: FlyControls
 var net_proxy: Node
 const JS_UNITS := 1.4205   # JS world units per metre (server/JS clients use world units)
@@ -1359,11 +1370,18 @@ func _physics_process(dt: float) -> void:
 	if dir.length() > 0.05: dir = dir.normalized()
 	hero.velocity.x = dir.x * speed; hero.velocity.z = dir.z * speed
 	hero.velocity.y = -1.0 if hero.is_on_floor() else hero.velocity.y - 20.0 * dt
-	if cheat.fly: hero.velocity.y = (height(hero.position.x, hero.position.z) + fly_alt - hero.position.y) * 2.0
+	# test 13 Jump: ~1.2 m apex (v = sqrt(2 g h), g 20), only from the floor -> no double jump
+	if jump_req and hero.is_on_floor() and not flying_now():
+		hero.velocity.y = JUMP_V; jump_count += 1
+		if party and party.get("rig") and party.rig.clips.has("jump"): party.rig.play_attack("jump", 1.0)
+	jump_req = false
+	if flying_now(): hero.velocity.y = (height(hero.position.x, hero.position.z) + fly_alt - hero.position.y) * 2.0
+	elif landing and not hero.is_on_floor(): hero.velocity.y = maxf(hero.velocity.y, -7.0)   # fly turned off mid-air: soft landing
+	elif landing: landing = false
 	if cheats and cheats.flags.bump and party:   # Bumps: enemies' bodies push the hero; off = walk through them
 		for e in party.director.living():
 			var dv := Vector2(hero.position.x - e.global_position.x, hero.position.z - e.global_position.z)
-			var mind: float = e.radius + 0.4
+			var mind: float = e.bump_r() + 0.4
 			if dv.length() < mind and dv.length() > 0.001:
 				var push := dv.normalized() * (mind - dv.length()); hero.position.x += push.x; hero.position.z += push.y
 	if interiors: interiors.climb(hero, dir, dt)   # ladders: only while pushing into them
@@ -1387,6 +1405,7 @@ var _tacc := 0.0
 func _process(dt: float) -> void:
 	for lm in lava_mats: lm.uv1_offset.x = fmod(lm.uv1_offset.x + dt * 0.02, 1.0); lm.uv1_offset.y = fmod(lm.uv1_offset.y + dt * 0.013, 1.0)
 	if fly_controls: fly_controls.visible = VUI.hud != null and VUI.hud.visible and not (VUI.title and VUI.title.visible)
+	if Input.is_key_pressed(KEY_SPACE) and hero and hero.is_on_floor(): request_jump()
 	_bob_ships(dt)
 	if hero == null: return
 	if titan_quest == null and party and party.director and volc_base != Vector3.ZERO:
@@ -1548,6 +1567,7 @@ func _run_bench() -> void:
 	if only == "t11fly":
 		VUI._enter("solo"); bench = true
 		cheats.role_provider = func() -> String: return "owner"
+		cheats.request("fly", true)   # test 13: the menu cheat unlocks the HUD button
 		await _shot("t11_hud_ground", Vector3(-6, 0, 60), PI / 2, -0.12, 11.0, 2, 30)
 		fly_controls.fly_btn.button_pressed = true
 		fly_controls.up_btn.button_down.emit()

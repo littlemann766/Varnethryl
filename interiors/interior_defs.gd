@@ -230,6 +230,7 @@ const D := {
 
 # ---- OBSERVATORY: 1 starforge entrance, 2 library of lore, 3 main observation room (telescope), 4 star chart library, 5 upper dome
 "observatory": {"name": "Observatory of Varnethryl", "scale": [0.40, 0.40],
+	"fill": [[0, ["bookshelf", "telescope", "lectern"], 0.15], [1, ["bookshelf", "telescope", "lectern"], 0.15], [2, ["bookshelf", "telescope", "lectern"], 0.15], [3, ["bookshelf", "telescope", "lectern"], 0.15], [4, ["bookshelf", "telescope", "lectern"], 0.15]],
 	"floors": [{"h": 3.4, "mat": "bluecheck", "wall": "stone", "win": 3.0}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 3.0},
 		{"h": 3.4, "mat": "bluecheck", "wall": "stone", "win": 3.0}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 3.0}, {"h": 3.0, "mat": "slate", "wall": "stone", "win": 2.0, "glass": "stained"}],
 	"stairs": [["auto", 0, -1, 1.8], ["auto", 1, 1, 1.8], ["auto", 2, -1, 1.8], ["auto", 3, 1, 1.8]],

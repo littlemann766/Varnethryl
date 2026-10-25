@@ -245,6 +245,7 @@ const D := {
 
 # ---- CRYPT: sarcophagus hall, restricted tomb, ritual chamber; upper crypt (stair down feel: entry floor is the upper crypt)
 "crypt": {"name": "Crypt of Varnethryl", "scale": [0.52, 0.52],
+	"fill": [[0, ["sarcophagus", "lectern"], 0.15], [1, ["sarcophagus", "lectern"], 0.15]],
 	"floors": [{"h": 3.8, "mat": "flag", "wall": "stone", "win": 0.0}, {"h": 3.0, "mat": "flag", "wall": "stone", "win": 0.0}],
 	"walls": [[0, -0.5, -0.15, 0.5, -0.15, [[0.3, 1.8], [0.7, 1.8]]], [0, 0.0, -0.5, 0.0, -0.15, []], [1, -0.5, -0.1, 0.5, -0.1, [[0.5, 1.8]]]],
 	"stairs": [["auto", 0, 1, 1.8]],

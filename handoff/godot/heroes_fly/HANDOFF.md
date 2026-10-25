@@ -103,3 +103,10 @@ Preview: /workspace/hero-motion/heroes_fly_v1.mp4 (Owner, every clip side and 3/
 
 Still over walk: asha (118 vs 99), nyx (95 vs 83), rook (232 vs 200), snowy (67 vs 33), wren (29 vs 20). Lunara is fixed (130 -> 51). What's left comes from the limb poses on those rigs' weights, not from the cloth.
 Preview: /workspace/hero-motion/heroes_fly_v2.mp4
+
+## v3 (Oct 25): flowing straight cape
+- Multi-bone capes (asha, darius, garruk, lunara, owner, player_pikachu, snowy, thrain, wren) keep the v2 straight trail in line with the body and now add a travelling wave from shoulders to tip. Amplitude grows as (depth/len)^1.5 toward the tip and moves only away from the body (0 to peak), so the cape never folds into the legs.
+- Peak tip angle and cycles per clip: hover 8° ×1 (gentle), forward and banks 12° ×2, ascend and descend 10° ×2, fast 15° ×3 (tighter phase lag 0.3/bone). Every wave is a whole number of cycles over the clip, so the loops are seamless.
+- Single-bone capes and coats stay rigid, and the coat chains are unchanged from v2.
+- Owner: leg clipping 0–2 verts, p99 stretch at most 40.9% (walk 60.6%). The full table is in stretch_p99_v3.json.
+- Preview: /workspace/hero-motion/heroes_fly_v3.mp4

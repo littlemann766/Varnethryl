@@ -124,6 +124,8 @@ def restvec(b):
 RV={b.name:restvec(b) for b in B}
 import os
 DBG=os.environ.get('DBG','')
+WAVE={'fly_hover':(8,1,0.12),'fly_forward':(12,2,0.2),'fly_fast':(15,3,0.3),'fly_ascend':(10,2,0.18),'fly_descend':(10,2,0.18),'fly_bank_L':(12,2,0.2),'fly_bank_R':(12,2,0.2)}
+CUR_CLIP=''
 def solve(p,t):
     if 'nosec' in DBG: p['bias']=0; p['flut']=0
     _k=float(os.environ.get('SECK','1')); p['bias']*=_k; p['flut']*=_k
@@ -176,7 +178,12 @@ def solve(p,t):
                     sd=Q@lft*(1 if n.endswith('_L') else -1)*sideL
                     tgt=(tv+sd*0.12+(Q@-f)*0.12).normalized()
                 else: tgt=Q@(-up)
-            fl=rot(Q@lft, (1.2 if tip else 0.0)*S2(t,2,-0.1*d))
+            if n.startswith('cape'):
+                pt=p['pitch']; W=WAVE.get(CUR_CLIP,(10,2,0.2))
+                Lc=chainlen(n); dd=depth(n); u_=(dd+1)/Lc
+                ang=W[0]*u_**1.5*0.5*(1+S2(t,W[1],-W[2]*dd))   # travelling wave root->tip, away from body only
+                fl=rot(Q@up.cross(f), ang)
+            else: fl=Quaternion()
             cur=((I@REST[n].inverted()).to_3x3()@RV[n]).normalized()
             q=cur.rotation_difference(fl@tgt)
             cl_=chainlen(n)
@@ -217,6 +224,7 @@ if os.environ.get('REWEIGHT'):
                     for g in v.groups: g.weight/=tot
     print('REWEIGHT verts',nfix)
 for name,dur,fn in CLIPS:
+    CUR_CLIP=name
     act=bpy.data.actions.new(name); arm.animation_data.action=act
     N=int(round(dur*FPS))
     for fr in range(N+1):

@@ -34,6 +34,7 @@ var hud: Control
 var owner_dlg: PanelContainer
 var gate := VOwnerGate.new()
 var is_owner := false
+var cheat_api = null   # combat/cheats.gd, set by scripts/main.gd (role-checked)
 var mode := "solo"
 var get_snapshot: Callable
 var _autosave_t := 0.0

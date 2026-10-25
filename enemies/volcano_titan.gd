@@ -20,7 +20,7 @@ var _proj_scenes := {}
 
 func setup_volcano(ground: Callable) -> VolcanoTitan:
 	setup("titan_volcano", CENTER, ground)
-	J = JSON.parse_string(FileAccess.get_file_as_string("res://enemies/models/ashentitan_volcano_11x.json"))
+	J = JSON.parse_string(FileAccess.get_file_as_string("res://characters/sidecars/ashentitan_volcano__ashentitan_volcano_11x.json"))
 	aggro_m = 90.0
 	speed_mps = float(J.clips.walk.get("groundSpeedMps", 5.47)) * 0.6
 	for k in ["volcanic_boulder", "lava_blob", "ember_rock_small"]:

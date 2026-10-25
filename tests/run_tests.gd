@@ -21,12 +21,15 @@ func _init() -> void:
 func test_heights() -> void:
 	for id in HeroRoster.APPROVED: ok(HeroRoster.height(id) == HeroRoster.APPROVED[id], "approved height table " + id)
 	ok(HeroRoster.height("pip") == 0.52 and HeroRoster.height("phoenix") == 0.756 and HeroRoster.height("wren") == 1.35 and HeroRoster.height("owner") == 1.905, "approved values")
-	ok(near(HeroRoster.height("garruk"), 82 * 0.0254, 1e-6), "garruk from charscale")
+	ok(near(HeroRoster.height("garruk"), 2.02, 1e-6), "garruk from Beth's index (test 6; charscale said 2.083)")
 	for id in HeroRoster.ORDER:
 		var r := CharacterRig.new().setup(HeroRoster.model(id), HeroRoster.height(id))
 		root.add_child(r)
 		var h := CharacterRig.measure(r) # skinned rest height of the rig incl. applied scale
-		ok(near(h, HeroRoster.height(id), 0.01 * HeroRoster.height(id)), "%s rendered height %.3f vs %.3f" % [id, h, HeroRoster.height(id)])
+		# test 6: Beth's models carry their size on the armature root -> never rescaled. Our skinned rest-pose
+		# measure includes hair/wings/props, so allow 6% vs Beth's height_m (deviations printed + reported).
+		ok(r.applied_scale == 1.0, "%s loaded at scale 1 (size baked)" % id)
+		ok(near(h, HeroRoster.height(id), 0.06 * HeroRoster.height(id)), "%s rendered height %.3f vs %.3f" % [id, h, HeroRoster.height(id)])
 		print("HEIGHT %-10s %.3f m (target %.3f, scale %.3f)" % [id, h, HeroRoster.height(id), r.applied_scale])
 		r.free()
 	var M := {"frosttroll_a": 5.715, "frosttroll_b": 5.715, "titan": 11.43, "titan_volcano": 20.955}
@@ -34,8 +37,9 @@ func test_heights() -> void:
 		var T: Dictionary = Enemy.TYPES[t]
 		var r2 := CharacterRig.new().setup(T.model, T.height)
 		root.add_child(r2)
-		var h2 := CharacterRig.measure(r2)
-		ok(near(h2, M[t], 0.01 * M[t]), "%s height %.3f vs %.3f" % [t, h2, M[t]])
+		var h2 := CharacterRig.measure(r2) * _idle_root_scale(r2)   # volcano titan's 20.955 m lives on the idle root-bone scale track
+		ok(r2.applied_scale == 1.0, "%s loaded at scale 1 (size baked)" % t)
+		ok(near(h2, M[t], 0.06 * M[t]), "%s height %.3f vs %.3f" % [t, h2, M[t]])
 		print("HEIGHT %-14s %.3f m (target %.3f, scale %.3f)" % [t, h2, M[t], r2.applied_scale])
 		if t == "titan_volcano": ok(r2.applied_scale == 1.0, "volcano titan loaded at scale 1")
 		r2.free()
@@ -105,3 +109,12 @@ func test_combat() -> void:
 
 func test_net() -> void:
 	ok(RemotePlayer.skin_id("n:owner_pika1") == "owner" and RemotePlayer.skin_id("wren") == "wren" and RemotePlayer.skin_id("zzz") == "aldric", "remote skin mapping")
+
+## Beth's volcano titan carries its size as a scale key on the root bone of every clip (rest pose = 11 m).
+func _idle_root_scale(r: CharacterRig) -> float:
+	if r.anim_player == null or not r.anim_player.has_animation("idle"): return 1.0
+	var a: Animation = r.anim_player.get_animation("idle")
+	for t in a.get_track_count():
+		if a.track_get_type(t) == Animation.TYPE_SCALE_3D and str(a.track_get_path(t)).ends_with(":root"):
+			return a.scale_track_interpolate(t, 0.0).y
+	return 1.0

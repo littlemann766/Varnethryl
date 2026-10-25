@@ -28,6 +28,7 @@ func setup(path: String, height_m: float) -> CharacterRig:
 	add_child(model)
 	model.rotation.y = PI    # glTF faces +Z; the game's visual node faces -Z
 	measured_height = measure(model, path)
+	if path.begins_with("res://characters/"): height_m = 0.0   # Beth's size is baked on the armature root: never rescale
 	if height_m > 0.0 and measured_height > 0.01:
 		applied_scale = height_m / measured_height
 		target_height = height_m
@@ -35,8 +36,35 @@ func setup(path: String, height_m: float) -> CharacterRig:
 		target_height = measured_height
 	model.scale = Vector3.ONE * applied_scale
 	anim_player = _find_player(model)
-	if anim_player: _build_tree()
+	if anim_player:
+		_alias_clips(path)
+		_build_tree()
 	return self
+
+static var _index = null
+static func index() -> Dictionary:
+	if _index == null:
+		_index = JSON.parse_string(FileAccess.get_file_as_string("res://characters/index.json")) if FileAccess.file_exists("res://characters/index.json") else {"characters": {}}
+	return _index
+
+static func char_path(id: String) -> String:
+	var c = index().characters.get(id)
+	return "res://characters/" + str(c.file) if c else ""
+
+## index.json renamed_from_source maps new clip -> source clip (attack1 <- attack). Game code and sidecars
+## (volcano attackEvents, cloth) use SOURCE names, so register each renamed clip under its source name too.
+func _alias_clips(path: String) -> void:
+	var fname := path.get_file()
+	for id in index().characters:
+		var c: Dictionary = index().characters[id]
+		if c.file != fname: continue
+		var lib: AnimationLibrary = anim_player.get_animation_library("")
+		if lib == null: return
+		for nw in c.renamed_from_source:
+			var src: String = c.renamed_from_source[nw]
+			if lib.has_animation(nw) and not lib.has_animation(src): lib.add_animation(src, lib.get_animation(nw))
+		if not lib.has_animation("attack") and lib.has_animation("attack1"): lib.add_animation("attack", lib.get_animation("attack1"))
+		return
 
 static var _measure_cache := {}
 ## Height of the SKINNED mesh in rest pose (CPU skinning of every vertex), so scale baked on bones

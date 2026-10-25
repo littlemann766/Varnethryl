@@ -1,0 +1,102 @@
+{
+ "file": "wren_new6.glb",
+ "size_bytes": 1328656,
+ "built_from": "wren_new5 pipeline (wing_rig2 hand-fan flood) + split6.mjs: per-vertex class (arm L / arm R / body); small leather-accessory islands (satchels, book, buckles) forced to body; coincident same-class verts get identical weights; every triangle gets ONE class (minority corners become vertex copies with identical rest pos/UV/normal, weighted like the other two corners) so no triangle spans arm and robe transforms -> no UV smearing",
+ "materials": "metallic 0, roughness 0.8, texture unchanged; NORMAL stored int8 (saves ~65 KB)",
+ "new_bones": [
+  "wing_L",
+  "wing2_L",
+  "wing3_L",
+  "wing4_L",
+  "wing_R",
+  "wing2_R",
+  "wing3_R",
+  "wing4_R (chain under foreArm_L/R, elbow -> past feather hand)"
+ ],
+ "baked_sway_deg_max_per_bone": {
+  "idle": 2.5,
+  "walk": 4.3,
+  "run": 10.2
+ },
+ "game_playback": {
+  "rule": "gait unchanged from wren_new3/_cl (not re-solved): timeScale = game_move_speed / clip_speed",
+  "idle": {
+   "cycle_s": 3.0,
+   "speed_mps": 0
+  },
+  "walk": {
+   "cycle_s": 0.8,
+   "speed_mps": 0.45,
+   "step_m": 0.18,
+   "speed_H_per_s": 0.333
+  },
+  "run": {
+   "cycle_s": 0.6,
+   "speed_mps": 1.23,
+   "step_m": 0.4,
+   "speed_H_per_s": 0.907
+  }
+ },
+ "model_height_m": 1.3546,
+ "cloth": "wren_new6.cloth.json (wing_L/wing_R groups + cape/coat/ears from wren_cl)",
+ "known_flaws": [
+  "seam between sleeve and robe now opens as a crack when the arm moves (max 13 cm walk, 20 cm run, ~65 cm arms-raised attack); one torso hole visible at the armpit in attack2",
+  "sleeve hem remains ragged (it is torn in the Tripo source mesh)",
+  "gait is a short-step shuffle (0.18 m step), unchanged",
+  "accessories (satchels, book) are now rigid on the hips/cape, no sway"
+ ],
+ "fix": "texture stretching at sleeves/cuffs/wrists: weld between feather fan/sleeve and robe split per triangle; wrist gap <0.05 cm; accessories no longer follow the arm",
+ "fight_file": "wren_new6_fight.glb",
+ "fight_size_bytes": 1504816,
+ "stretch_measure_vs_idle_rest_pose": {
+  "idle": {
+   "tris_edge_gt3x": 0,
+   "tris_area_gt3x": 0,
+   "max_coincident_gap_cm": 0.8
+  },
+  "walk": {
+   "tris_edge_gt3x": 3,
+   "tris_area_gt3x": 3,
+   "max_coincident_gap_cm": 12.9
+  },
+  "run": {
+   "tris_edge_gt3x": 12,
+   "tris_area_gt3x": 12,
+   "max_coincident_gap_cm": 19.8
+  },
+  "attack": {
+   "tris_edge_gt3x": 48,
+   "tris_area_gt3x": 19,
+   "max_coincident_gap_cm": 65.6
+  },
+  "attack2": {
+   "tris_edge_gt3x": 46,
+   "tris_area_gt3x": 25,
+   "max_coincident_gap_cm": 64.4
+  },
+  "hit": {
+   "tris_edge_gt3x": 40,
+   "tris_area_gt3x": 16,
+   "max_coincident_gap_cm": 27.5
+  },
+  "death": {
+   "tris_edge_gt3x": 91,
+   "tris_area_gt3x": 25,
+   "max_coincident_gap_cm": 44.9
+  }
+ },
+ "new5_stretch_for_comparison": {
+  "attack": {
+   "tris_edge_gt3x": 1080,
+   "tris_area_gt3x": 541
+  },
+  "attack2": {
+   "tris_edge_gt3x": 940,
+   "tris_area_gt3x": 494
+  },
+  "hit": 333,
+  "death": 685,
+  "walk": 21,
+  "run": 56
+ }
+}

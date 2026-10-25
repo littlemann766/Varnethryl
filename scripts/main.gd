@@ -4,7 +4,7 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "4"
+const VERSION := "6"
 const DEFS := [
 	["guildhall",0,-21,0.0,"Guild Hall"], ["library",-24,-27,0.0,"Grand Library"], ["townhall",23,-26,0.0,"Town Hall"],
 	["mage",-44,-31,0.0,"Mage Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
@@ -15,6 +15,8 @@ const DEFS := [
 	["barn",-51,21,PI/2,"Barn"], ["stables",-24,42,0.0,"Stables"], ["windmill",20,46,0.0,"Windmill"],
 	["house1",-9,19,PI,"Village House"], ["house2",9,19,PI,"Village House"], ["house3",-9,31,PI,"Village House"], ["house4",9,31,PI,"Village House"],
 ]
+## Test 6: Beth's Godot "card2" buildings (metres, footprint-centred, +Z front, shared 2048 atlas) replace these.
+const CARD2 := ["inn", "bakery", "house1", "house2", "house3", "house4", "smithy", "apothecary", "guildhall"]
 const CHIMNEYS := ["house1","house2","house3","house4","bakery","inn","smithy","farmhouse","thieves"]
 const PORT := Vector2(-425.6, 392)
 const ROADS := [
@@ -102,6 +104,10 @@ var terrain_lods := []       # [node, lod]
 var shot_dir := "user://"
 var menu_open := false
 var lamp_shadow_t := 0.0
+var cheats: Cheats
+var fly_alt := 6.0
+var net_proxy: Node
+const JS_UNITS := 1.4205   # JS world units per metre (server/JS clients use world units)
 var cheat := {"speed": 1.0, "fly": false, "noclip": false, "god": false}
 var remotes := {}            # Net peer id -> {node, target, yaw}
 var net_send_t := 0.0
@@ -417,13 +423,14 @@ func _meshes(n: Node, out: Array) -> Array:
 
 func _add_trimesh(n: Node3D, skip := "roof") -> void:
 	for mi in _meshes(n, []):
-		if String(mi.name).to_lower().contains(skip) or String(mi.get_parent().name).to_lower().contains(skip): continue
+		if skip != "" and (String(mi.name).to_lower().contains(skip) or String(mi.get_parent().name).to_lower().contains(skip)): continue
 		mi.create_trimesh_collision()
 
 func _building(d: Array) -> void:
 	var id: String = d[0]; var pos := Vector3(float(d[1]) * PK, 0, float(d[2]) * PK); var rot: float = d[3]
-	var n := _place_glb("res://assets/buildings/bld_%s.glb" % id, pos, rot)
-	_add_trimesh(n)
+	var card := CARD2.has(id)
+	var n := _place_glb("res://assets/card2/bld_%s_card2_lod1.glb" % id if card else "res://assets/buildings/bld_%s.glb" % id, pos, rot)
+	_add_trimesh(n, "" if card else "roof")   # card2: collision from Beth's own LOD1 mesh
 	var aabb := AABB(); var first := true
 	for mi in _meshes(n, []):
 		var a: AABB = (n.global_transform.affine_inverse() * mi.global_transform) * mi.get_aabb()
@@ -445,7 +452,8 @@ func _swap_buildings() -> void:
 		for b in buildings:
 			b.lods = []; b.roofs = []
 			for suf in ["", "_lod1", "_lod2"]:
-				var v: Node3D = load("res://assets/hi/buildings/bld_%s%s.glb" % [b.id, suf]).instantiate()
+				var vp := ("res://assets/card2/bld_%s_card2%s.glb" if CARD2.has(b.id) else "res://assets/hi/buildings/bld_%s%s.glb") % [b.id, suf]
+				var v: Node3D = load(vp).instantiate()
 				b.node.add_child(v); b.lods.append(v)
 				var rf = v.find_child("roof", true, false)
 				if rf: b.roofs.append(rf)
@@ -927,7 +935,13 @@ func _physics_process(dt: float) -> void:
 	if dir.length() > 0.05: dir = dir.normalized()
 	hero.velocity.x = dir.x * speed; hero.velocity.z = dir.z * speed
 	hero.velocity.y = -1.0 if hero.is_on_floor() else hero.velocity.y - 20.0 * dt
-	if cheat.fly: hero.velocity.y = maxf(0.0, (height(hero.position.x, hero.position.z) + 6.0 - hero.position.y) * 2.0)
+	if cheat.fly: hero.velocity.y = (height(hero.position.x, hero.position.z) + fly_alt - hero.position.y) * 2.0
+	if cheats and cheats.flags.bump and party:   # Bumps: enemies' bodies push the hero; off = walk through them
+		for e in party.director.living():
+			var dv := Vector2(hero.position.x - e.global_position.x, hero.position.z - e.global_position.z)
+			var mind: float = e.radius + 0.4
+			if dv.length() < mind and dv.length() > 0.001:
+				var push := dv.normalized() * (mind - dv.length()); hero.position.x += push.x; hero.position.z += push.y
 	if interiors: interiors.climb(hero, dir, dt)   # ladders: only while pushing into them
 	hero.floor_snap_length = 0.6
 	hero.move_and_slide()
@@ -1071,6 +1085,66 @@ func _run_bench() -> void:
 			await _shot("t5_gate_" + String(gd[2]).to_lower().replace(" ", "_"), pos, atan2(d2.x, d2.z), -0.12, 11.0, 2, 30)
 		get_tree().quit(1 if fails > 0 else 0)
 		return
+	if only == "t6":
+		VUI._enter("solo"); bench = true
+		var part := OS.get_environment("T6_PART")
+		if part != "enemies":
+			await _shot("t6_houses", Vector3(0, 0, 38), PI * 0.85, -0.12, 11.0, 2, 30)
+			await _shot("t6_inn_smithy", Vector3(42, 0, 0), -PI / 2, -0.1, 11.0, 2, 30)
+			await _shot("t6_apothecary_bakery", Vector3(-42, 0, 42), PI / 2 + 0.3, -0.1, 11.0, 2, 30)
+			await _shot("t6_guildhall", Vector3(0, 0, -28), 0.0, -0.05, 11.0, 2, 30)
+			await _shot("t6_party_plaza", Vector3(-6, 0, 30), 0.25, -0.28, 11.0, 2, 10)
+			for c in party.companions: c.node.global_position = hero.global_position + Vector3(1.6, 0, -2.0) * (1 + party.companions.find(c))
+			pitch = -0.2
+			for i in 20: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_t6_party_plaza.png")
+		if part == "buildings": get_tree().quit(); return
+		for sp in EnemyDirector.SPAWNS: party.director.spawn(sp[0], sp[1], hero)
+		for e in party.director.living(): e.set_process(false); e.set_physics_process(false)   # pose them for the photo
+		await _shot("t6_wolves", Vector3(-216, 0, 24), PI / 2, -0.2, 11.0, 2, 40)
+		await _shot("t6_frost_trolls", Vector3(46, 0, 218), PI, -0.05, 11.0, 2, 40)
+		await _shot("t6_ashen_titan", Vector3(-70, 0, 236), PI, 0.15, 11.0, 2, 40)
+		bench = false
+		_teleport(Vector3(-218, 0, 24), PI / 2); pitch = -0.2
+		for i in 30: await get_tree().process_frame
+		party.combat.use(1)
+		for i in 10: await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png("user://shot_t6_combat_hud.png")
+		get_tree().quit()
+		return
+	if only == "t5":
+		var sv := func(n: String, fr := 12):
+			for i in fr: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_%s.png" % n)
+		tier = 2; apply_quality(); _set_time(10.5)
+		VUI._enter("solo"); _teleport(Vector3(-6, 0, 30), 0.25); pitch = -0.28
+		bench = false
+		_warm_up(); await sv.call("t5_boot_label", 3)
+		while not warmed: await get_tree().process_frame
+		cheats.role_provider = func() -> String: return "owner"   # bench-only stand-in for the unlocked owner gate
+		_teleport(Vector3(0, 0, 60), 0.0); pitch = -0.2
+		party.director.spawn("frosttroll_a", Vector3(0, 0, 50), hero)
+		for i in 30: await get_tree().process_frame
+		party.combat.use(0); await sv.call("t5_combat", 8)
+		party.combat.use(1); await sv.call("t5_combat_skill", 10)
+		VUI._set_owner(true); VUI.open_settings(true)
+		var sc: ScrollContainer = VUI.settings.find_children("*", "ScrollContainer", true, false)[0]
+		for i in 8:
+			await sv.call("t5_owner_panel_%d" % i, 8)
+			var bar := sc.get_v_scroll_bar()
+			if sc.scroll_vertical >= bar.max_value - sc.size.y - 2: break
+			sc.scroll_vertical += int(sc.size.y * 0.85)
+		VUI.settings.hide(); VUI._set_owner(false)
+		cheats.role_provider = func() -> String: return "coowner"
+		VUI.open_settings(true)
+		sc = VUI.settings.find_children("*", "ScrollContainer", true, false)[0]
+		for i in 4:
+			await sv.call("t5_coowner_panel_%d" % i, 8)
+			var bar2 := sc.get_v_scroll_bar()
+			if sc.scroll_vertical >= bar2.max_value - sc.size.y - 2: break
+			sc.scroll_vertical += int(sc.size.y * 0.85)
+		get_tree().quit()
+		return
 	if only == "ui":
 		var sv := func(n: String):
 			for i in 20: await get_tree().process_frame
@@ -1120,23 +1194,48 @@ func _hook_ui() -> void:
 	VUI.travel_requested.connect(_on_travel)
 	VUI.returned_to_title.connect(func(): Net.leave(); _clear_remotes(); menu_open = false)
 	VUI.dev_action.connect(_on_dev_action)
+	cheats = Cheats.new(); cheats.name = "Cheats"; add_child(cheats); cheats.setup(self, party)
+	cheats.role_provider = func() -> String:
+		if VUI.gate and VUI.gate.is_owner(): return "owner"
+		if cheats.coowner_ok and Net.is_online(): return "coowner"
+		return ""
+	cheats.said.connect(_toast)
+	VUI.cheat_api = cheats
+	if cheats.role() == "owner" and not bench: cheats.request("god", true)   # JS: god starts ON for the owner
 	VUI.owner_cheat.connect(func(k, v):
-		if cheat.has(k): cheat[k] = v
-		if k == "noclip": hero.collision_mask = 0 if v else 1
-		if k == "panel" or k == "remax" or k == "titan" or k == "unlimited" or k == "nocd" or k == "bamboo" or k == "bump":
-			pass  # TODO(port-heroes/combat): hero stats, weapons, boss spawn
-	)
+		var key: String = {"titan": "titan", "remax": "remax", "nocd": "nocd"}.get(k, k)
+		if key == "lock": return
+		cheats.request(key, v))
+	Net.coowner_event.connect(func(m):
+		match str(m.get("type", "")):
+			"coowner-auth": cheats.coowner_ok = m.get("ok") == true
+			"coowner-locked": cheats.coowner_ok = false
+		if VUI.settings.visible: VUI.settings.build())
+	Net.disconnected.connect(func(_c, _r): cheats.coowner_ok = false)
+	VUI.hero_selected.connect(func(id: int):
+		var hid := _roster_id(id)
+		if hid != "" and party.hero_id != hid: party.set_hero(hid))
+	var act_id := _roster_id(int(VSave.state.get("active", 0)))
+	if act_id != "" and not bench: party.set_hero(act_id)
 	Net.state_provider = func() -> Dictionary:
-		return {"zone": "village", "x": hero.position.x, "y": hero.position.y, "z": hero.position.z, "yaw": hero_vis.rotation.y,
-			"hero": int(VSave.state.get("active", 0)), "skin": str(VSave.state.get("skin", "")), "moving": Vector2(hero.velocity.x, hero.velocity.z).length() > 0.3}
-	Net.peer_joined.connect(_remote_upsert)
-	Net.peer_state.connect(_remote_upsert)
-	Net.peer_left.connect(func(id):
-		if remotes.has(id): remotes[id].node.queue_free(); remotes.erase(id))
+		var st: Dictionary = party.net_state(); st.erase("position"); st.erase("heading")
+		for k in ["x", "y", "z"]: st[k] = float(st[k]) * JS_UNITS
+		return st
+	# RemotePlayer.bind expects Net-like signals: feed it a proxy that converts JS world units -> metres
+	net_proxy = load("res://net/net_unit_proxy.gd").new(); net_proxy.name = "NetUnitProxy"; add_child(net_proxy)
+	var conv := func(p: Dictionary) -> Dictionary:
+		var q := p.duplicate()
+		for k in ["x", "y", "z"]: if q.has(k): q[k] = float(q[k]) / JS_UNITS
+		if (q.has("zone") and str(q.zone) != "village" and str(q.zone) != "town"): q["x"] = 0.0; q["z"] = -10000.0   # other zone: park far away
+		return q
+	Net.peer_joined.connect(func(p): if str(p.get("id", "")) != Net.self_id: net_proxy.emit_signal("peer_joined", conv.call(p)))
+	Net.peer_state.connect(func(p): if str(p.get("id", "")) != Net.self_id: net_proxy.emit_signal("peer_state", conv.call(p)))
+	Net.peer_left.connect(func(i): net_proxy.emit_signal("peer_left", str(i)))
+	remotes = RemotePlayer.bind(net_proxy, self)
 	Net.welcomed.connect(func(info):
-		for pl in info.get("players", []): _remote_upsert(pl)
+		for pl in info.get("players", []): if str(pl.get("id", "")) != Net.self_id: net_proxy.emit_signal("peer_joined", conv.call(pl))
 		var sp = info.get("spawn")
-		if typeof(sp) == TYPE_DICTIONARY and sp.has("x"): _teleport(Vector3(float(sp.x), 0, float(sp.get("z", 0))), float(sp.get("yaw", yaw))))
+		if typeof(sp) == TYPE_DICTIONARY and sp.has("x"): _teleport(Vector3(float(sp.x) / JS_UNITS, 0, float(sp.get("z", 0)) / JS_UNITS), float(sp.get("yaw", yaw))))
 	Net.disconnected.connect(func(_c, _r): _clear_remotes())
 	_build_minimap()
 
@@ -1169,6 +1268,7 @@ func _toast(t: String) -> void:
 	get_tree().create_timer(3.0).timeout.connect(func(): if bench_label.text == t: bench_label.text = "")
 
 func _on_dev_action(k: String) -> void:
+	if not cheats.allowed("dev"): _toast("Developer tools are Owner-only."); return
 	match k:
 		"time": time_mode = (time_mode + 1) % 4; _save_settings(); _apply_time_mode(); _toast("Time: " + TIME_PRESETS[time_mode][0])
 		"speed": speed_x = 10.0 if speed_x == 1.0 else 1.0; _toast("Day speed: %dx" % int(speed_x))
@@ -1203,34 +1303,12 @@ func _update_lamp_shadows() -> void:
 		lit[i][1].shadow_enabled = on
 		if on: lit[i][1].shadow_bias = 0.05; lit[i][1].omni_shadow_mode = OmniLight3D.SHADOW_DUAL_PARABOLOID
 
-# --- remote players (simple stand-in) ---
-# TODO(port-heroes): replace capsule with the real hero model/skin + animation once port-heroes merges.
-func _remote_upsert(pl: Dictionary) -> void:
-	var id := str(pl.get("id", ""))
-	if id == "" or id == Net.self_id: return
-	var r: Dictionary
-	if not remotes.has(id):
-		var n := Node3D.new(); add_child(n)
-		var body := MeshInstance3D.new(); var cm := CapsuleMesh.new(); cm.radius = 0.35; cm.height = 1.7; body.mesh = cm
-		body.position.y = 0.85; body.material_override = _mat(Color.from_hsv(float(id.hash() % 360) / 360.0, 0.6, 0.85)); n.add_child(body)
-		var tag := Label3D.new(); tag.text = str(pl.get("name", "Player")); tag.position.y = 2.1; tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		tag.font_size = 48; tag.outline_size = 10; tag.font = VStyle.font(); n.add_child(tag)
-		r = {"node": n, "target": Vector3.ZERO, "yaw": 0.0}; remotes[id] = r
-		n.position = Vector3(float(pl.get("x", 0)), float(pl.get("y", 0)), float(pl.get("z", 0)))
-	r = remotes[id]
-	if pl.get("zone", "village") != "village": r.node.visible = false; return
-	r.node.visible = true
-	if pl.has("x"): r.target = Vector3(float(pl.x), float(pl.get("y", height(float(pl.x), float(pl.get("z", 0))))), float(pl.get("z", 0)))
-	if pl.has("yaw"): r.yaw = float(pl.yaw)
-
 func _clear_remotes() -> void:
-	for id in remotes: remotes[id].node.queue_free()
-	remotes.clear()
+	for id in remotes.keys():
+		if is_instance_valid(remotes[id]): remotes[id].queue_free()
+		remotes.erase(id)
 
 func _net_tick(dt: float) -> void:
-	for id in remotes:
-		var r: Dictionary = remotes[id]; var n: Node3D = r.node
-		n.position = n.position.lerp(r.target, min(1.0, 10.0 * dt)); n.rotation.y = lerp_angle(n.rotation.y, r.yaw, min(1.0, 10.0 * dt))
 	if Net.is_online():
 		net_send_t -= dt
 		if net_send_t <= 0.0: net_send_t = 0.1; Net.send_state(Net.state_provider.call())
@@ -1276,7 +1354,11 @@ func _warm_up() -> void:
 	var saved := tier; var saved_t := tod
 	var veil := ColorRect.new(); veil.color = Color(0.05, 0.04, 0.06); veil.set_anchors_preset(Control.PRESET_FULL_RECT)
 	var cl := CanvasLayer.new(); cl.layer = 100; add_child(cl); cl.add_child(veil)
-	var lbl := VStyle.label("Preparing shaders…", 22, Color(0.9, 0.85, 0.7)); lbl.set_anchors_preset(Control.PRESET_CENTER); cl.add_child(lbl)
+	var lbl := VStyle.label("Preparing shaders…", 22, Color(0.9, 0.85, 0.7))
+	lbl.autowrap_mode = TextServer.AUTOWRAP_OFF   # phone bug (test 4): autowrap + zero width = one letter per line
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	cl.add_child(lbl)
 	var cam_far := cam.far
 	for q in [3, 0, 1, 2]:
 		tier = q; apply_quality()
@@ -1291,3 +1373,22 @@ func _warm_up() -> void:
 	cam.far = cam_far; tier = saved; _set_time(saved_t); apply_quality(); _apply_time_mode()
 	warmed = true
 	cl.queue_free()
+
+func _roster_id(vid: int) -> String:
+	if vid < 0 or vid >= VHeroData.RAW.size(): return ""
+	for w in String(VHeroData.RAW[vid][0]).to_lower().split(" "):
+		if HeroRoster.ORDER.has(w): return w
+	return ""
+
+func cheat_tp_place(id: String) -> bool:
+	for b in buildings:
+		if b.id == id or b.name == id:
+			var p: Vector3 = b.node.global_position; _teleport(p + Vector3(0, 0, 6), 0.0); return true
+	return false
+
+func cheat_tp_zone(z: String) -> bool:
+	match z:
+		"village": _teleport(Vector3(-6, 0, 26), 0.0); return true
+		"sailing": _on_travel("sail"); return true
+		"hydra": _on_travel("hydra"); return true
+	_toast("%s is not ported yet." % z); return false

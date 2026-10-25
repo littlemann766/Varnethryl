@@ -18,11 +18,14 @@ const ORDER := ["owner", "pip", "phoenix", "wren", "aldric", "elira", "rowan", "
 	"mirelle", "cedric", "morwen", "kael", "vesper", "talia", "orin", "selene", "darius", "finn", "brynn", "asha", "rook"]
 
 static func height(id: String) -> float:
+	var c = CharacterRig.index().characters.get(id)
+	if c: return float(c.height_m)
 	if APPROVED.has(id): return APPROVED[id]
 	if LORE_IN.has(id): return LORE_IN[id] * 0.0254
 	return HERO_M
 
-static func model(id: String) -> String: return "res://heroes/models/%s.glb" % id
+## Test 6: Beth's characters (res://characters, LOD1 = ~50% tris / 1024 tex, size baked on the armature root).
+static func model(id: String) -> String: return CharacterRig.char_path(id)
 
 static func display_name(id: String) -> String: return id.capitalize()
 

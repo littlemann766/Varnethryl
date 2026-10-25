@@ -1,0 +1,41 @@
+{
+ "version": 2,
+ "model": "phoenix_new3",
+ "H": 0.757,
+ "groups": [
+  {
+   "name": "tail",
+   "kind": "rigid",
+   "match": "^tail\\d*$",
+   "enabled": false,
+   "reason": "tail is driven at runtime by runtime/tail_physics.js (see top-level \"tail\" block); no baked keys, no spring_bones"
+  },
+  {
+   "name": "crest",
+   "kind": "rigid",
+   "match": "^crest\\w*$",
+   "enabled": false,
+   "reason": "crest wisps are baked in the clips (small sway), no spring"
+  },
+  {
+   "name": "wing_feathers",
+   "kind": "rigid",
+   "match": "^(tert|sec|pri)\\w*$",
+   "enabled": false,
+   "reason": "feather rows are animated in the clips (lagged flap + baked flame ripple: outward-travelling layered waves, flickering amplitude, in every clip); no spring"
+  }
+ ],
+ "colliders": [],
+ "global": {
+  "note": "no cloth bones on this model; tail uses tail_physics.js (bird preset)"
+ },
+ "tail": {
+  "enabled": true,
+  "preset": "bird",
+  "match": "^tail\\d+$",
+  "restYaw": 0.0,
+  "latStabilize": 1.0,
+  "floorClearance": 0.01,
+  "note": "bird preset = light feather tail; the clips contain NO tail rotation tracks (tail stays at rest pose so tail_physics owns it): slow elegant trail, no side wag. Overrides allowed (freq, zeta, lift, accelDroop, yawLag, maxYaw ...)."
+ }
+}

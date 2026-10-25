@@ -7,8 +7,8 @@ MAN={'keep':[dp((0,0,14.25),(0,0,1),3.6,4.6,depth=4.0,label='curtain gate'),dp((
  'treasury':[dp((0,0,4.0),(0,0,1),3.6,5.0)],'windmill':[dp((0,0,3.25),(0,0,1),1.3,2.4)],
  'gatehouse':[dp((0,0,3.0),(0,0,1),3.8,5.4,depth=6.6,label='gate passage (through)')],
  'colosseum':[dp((0,0,21.0),(0,0,1),3.0,4.0,depth=2.0,label='main arch')],
- 'farmhouse_tripo':[dp((-0.25,1.0,8.7),(0,0,1),1.3,3.0,source='measured from ortho render')],
- 'barn_stable_tripo':[dp((0,1.0,10.53),(0,0,1),4.0,5.0,source='measured from ortho render',label='barn doors')],
+ 'farmhouse_tripo':[dp((-1.9,0.9,10.9),(0,0,1),1.4,2.3,source='house door between the two lanterns, from geometry',label='house door'),dp((5.2,0.0,10.2),(0,0,1),4.0,5.0,source='barn opening, from geometry',label='barn doors')],
+ 'barn_stable_tripo':[dp((-1.9,0.9,10.9),(0,0,1),1.4,2.3,source='house door between the two lanterns, from geometry',label='house door'),dp((5.2,0.0,10.2),(0,0,1),4.0,5.0,source='barn opening, from geometry',label='barn doors')],
  'lighthouse_full_tripo':[dp((0.97,7.59,1.2),(0.75,0,0.66),1.0,2.2,source='measured from ortho render')],
  'lighthouse_tower_tripo':[dp((0.97,7.59,1.2),(0.75,0,0.66),1.0,2.2,source='measured from ortho render')],
  'lighthouse_rock_island_tripo':[]}

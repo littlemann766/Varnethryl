@@ -13,13 +13,16 @@ for b in arm.data.bones:
     if b.parent is None: walk(b)
 for nm, frames in DUMP.items():
     act = bpy.data.actions.new(nm); act.use_fake_user = True; arm.animation_data.action = act
+    PREV = {}
     for fi, Fm in enumerate(frames):
         for bn in order:
             pb = P[bn]
             if bn in Fm: pb.matrix = Matrix(Fm[bn]) @ pb.bone.matrix_local
             bpy.context.view_layer.update()
         for bn in order:
-            pb = P[bn]; pb.keyframe_insert('location', frame=fi+1); pb.keyframe_insert('rotation_quaternion', frame=fi+1); pb.keyframe_insert('scale', frame=fi+1)
+            pb = P[bn]
+            if fi and bn in PREV: pb.rotation_quaternion.make_compatible(PREV[bn])
+            PREV[bn] = pb.rotation_quaternion.copy(); pb.keyframe_insert('location', frame=fi+1); pb.keyframe_insert('rotation_quaternion', frame=fi+1); pb.keyframe_insert('scale', frame=fi+1)
     for pb in P: pb.matrix_basis.identity()
 arm.animation_data.action = None
 bpy.ops.object.select_all(action='SELECT')

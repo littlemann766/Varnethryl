@@ -39,6 +39,7 @@ func get_info(id: String, size: Vector3) -> Dictionary:
 
 ## door in building-local coords: card2 exteriors use the probed facade (tests/door_probe.gd), old shells the AABB front
 func door_local(b: Dictionary) -> Vector3:
+	if b.has("door"): return b.door   # second entrance (farmstead barn doors)
 	var d = load("res://scripts/main.gd").card2_door(b.id)   # Beth's door_points for card2/Tripo exteriors
 	if d != null: return d
 	return DEF.DOORS.get(b.id, Vector3(0, 0, b.aabb.end.z))
@@ -52,7 +53,7 @@ func _physics_process(dt: float) -> void:
 	var hero: CharacterBody3D = main.hero
 	if cur.is_empty():
 		if cooldown > 0: return
-		for b in main.buildings:
+		for b in main.buildings + main.get("extra_doors"):
 			if not has_interior(b.id): continue
 			var dl: Vector3 = door_local(b); var lp: Vector3 = b.node.global_transform.affine_inverse() * hero.global_position
 			var hv := Vector2(hero.velocity.x, hero.velocity.z)

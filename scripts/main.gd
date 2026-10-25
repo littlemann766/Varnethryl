@@ -11,8 +11,8 @@ const DEFS := [
 	["observatory",-41,-46,0.0,"Observatory"], ["crypt",43,-45,0.0,"Crypt"], ["market",-24,-6,PI/2,"Market Provisioner"],
 	["apothecary",-24,9,PI/2,"Apothecary"], ["bakery",-24,21.5,PI/2,"Bakery"], ["inn",24,-8,-PI/2,"Inn"],
 	["smithy",24,7,-PI/2,"Blacksmith"], ["temple",46,-8,-PI/2,"Temple"], ["training",45,11,-PI/2,"Training Hall"],
-	["colosseum",42,38,0.0,"Colosseum"], ["thieves",-36.5,8,0.0,"Thieves' Den"], ["farmhouse",-42,-9,0.0,"Farmhouse"],
-	["barn",-51,21,PI/2,"Barn"], ["stables",-24,42,0.0,"Stables"], ["windmill",20,46,0.0,"Windmill"],
+	["colosseum",42,38,0.0,"Colosseum"], ["thieves",-36.5,8,0.0,"Thieves' Den"], ["farmhouse",-51,21,PI/2,"Farmhouse"],
+	["stables",-24,42,0.0,"Stables"], ["windmill",20,46,0.0,"Windmill"],
 	["house1",-9,19,PI,"Village House"], ["house2",9,19,PI,"Village House"], ["house3",-9,31,PI,"Village House"], ["house4",9,31,PI,"Village House"],
 ]
 ## Test 6: Beth's Godot "card2" buildings (metres, footprint-centred, +Z front, shared 2048 atlas) replace these.
@@ -20,7 +20,7 @@ const CARD2 := {"guildhall": "guildhall", "library": "library", "townhall": "tow
 	"keep": "keep", "observatory": "observatory", "crypt": "crypt", "market": "market", "apothecary": "apothecary", "bakery": "bakery",
 	"inn": "inn", "smithy": "smithy", "temple": "temple", "training": "training_hall", "colosseum": "colosseum", "thieves": "thieves_den",
 	"house1": "house1", "house2": "house2", "house3": "house3", "house4": "house4",
-	"farmhouse": "tripo/bld_farmhouse_tripo", "barn": "tripo/bld_barn_stable_tripo"}
+	"farmhouse": "tripo/bld_farmhouse_tripo"}
 ## Heavy pieces ship and render LOD1 as their best tier (phone High): colosseum, library, mage academy, Tripo models.
 func _add_col(path: String, pos: Vector3, rot: float) -> Node3D:
 	var c: Node3D = load(path).instantiate(); c.position = pos; c.rotation.y = rot; add_child(c)
@@ -63,7 +63,7 @@ const ROADS := [
 	[[185,0],[264,-3],[335,0],[421,-2],[500,0],[558,-7]],
 	[[345,0],[377,62],[387,127],[354,190],[309,247],[285,311],[304,356],[269,315],[214,259],[150,225],[76,200],[0,194]],
 	[[0,194],[5,265],[9,344],[0,440],[-6,558]],
-	[[0,-140],[0,-194]],           # north avenue through the north gate
+	[[0,-183],[0,-194]],           # north avenue through the north gate (test 11: no longer runs 43 m into town)
 	[[-200,0],[-185,0],[-160,0]],  # west avenue stub through the gate
 	[[160,0],[185,0],[200,0]],     # east avenue stub through the gate
 ]
@@ -148,6 +148,7 @@ var lamp_shadow_t := 0.0
 var cheats: Cheats
 var fly_alt := 6.0
 var fly_controls: FlyControls
+var extra_doors := []     # test 11: second entrances with their own interior (the farmstead's barn doors)
 var net_proxy: Node
 const JS_UNITS := 1.4205   # JS world units per metre (server/JS clients use world units)
 var cheat := {"speed": 1.0, "fly": false, "noclip": false, "god": false}
@@ -272,10 +273,10 @@ func _roads() -> void:
 			var q := [a - side, a + side, b + side, b - side]
 			var v := []
 			for p in q: v.append(Vector3(p.x, height(p.x, p.y) + 0.12, p.y))
-			for idx in [0, 1, 2, 0, 2, 3]:
+			for idx in [0, 2, 1, 0, 3, 2]:   # test 11: clockwise from above = front face (was back-facing: the black strip on phones)
 				st.set_normal(Vector3.UP); st.set_uv(Vector2(v[idx].x, v[idx].z) * 0.25); st.add_vertex(v[idx])
 	var mi := MeshInstance3D.new(); mi.mesh = st.commit()
-	var m := _mat(Color(0.55, 0.49, 0.40), 0.9); m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var m := _mat(Color(0.55, 0.49, 0.40), 0.9)
 	mi.material_override = m; mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(mi)
 
 # ---------- environment / lighting ----------
@@ -484,7 +485,7 @@ const STREET := {"inn": ["barrel_group", "lantern_post"], "smithy": ["crate_stac
 	"thieves": ["barrel_group", "crate_stack"], "training": ["barrel_group", "signpost"], "house1": ["bench", "flower_planter"],
 	"house2": ["flower_planter", "barrel_group"], "house3": ["bench", "lantern_post"], "house4": ["flower_planter", "crate_stack"],
 	"crypt": ["lantern_post", "lantern_post"], "observatory": ["bench", "lantern_post"], "keep": ["lantern_post", "lantern_post"],
-	"farmhouse": ["hay_bale", "fence"], "barn": ["hay_bale", "hay_bale"], "library": ["bench", "lantern_post"], "mage": ["lantern_post", "flower_planter"]}
+	"farmhouse": ["hay_bale", "fence"], "library": ["bench", "lantern_post"], "mage": ["lantern_post", "flower_planter"]}
 const PROP_FLAT := ["cobble_edge"]
 func _street_prop(kind: String, pos: Vector3, rot: float) -> void:
 	var root := Node3D.new(); root.name = "prop_" + kind; root.position = pos; root.rotation.y = rot; add_child(root)
@@ -694,6 +695,10 @@ func _building(d: Array) -> void:
 		else: aabb = aabb.merge(a)
 	for mi in _meshes(n, []): mi.visible = false      # r3 shell = collision proxy; visuals come from Beth r4 hi tiers
 	buildings.append({"id": id, "name": d[4], "node": n, "roof": null, "roofs": [], "lods": [], "vis": null, "aabb": aabb})
+	if id == "farmhouse":
+		# test 11 (Beth 843cd2b): farmhouse_tripo is the whole welded farmstead, so the separate barn is gone;
+		# its 4 x 5 m barn doors (index.json door_points[1]) lead into the barn interior
+		extra_doors.append({"id": "barn", "name": "Barn", "node": n, "aabb": aabb, "door": Vector3(5.2, 0.0, 10.2)})
 	blockers.append([Vector2(pos.x, pos.z), max(aabb.size.x, aabb.size.z) * 0.55 + 2.0])
 	# test 9: warm door lantern light at Beth's door_point (lantern height, beside the doorway), pooled + culled
 	var dp = card2_door(id) if card else null

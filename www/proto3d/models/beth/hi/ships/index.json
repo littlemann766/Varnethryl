@@ -1,0 +1,76 @@
+{
+ "units": "metres",
+ "waterline_y": 0.0,
+ "bow": "+Z",
+ "ships": {
+  "boat_sail": {
+   "desc": "Tripo small sailing boat (user model)",
+   "source": "models/beth/tripo/boat_sail_game.glb",
+   "high": "ship_boat_sail.glb",
+   "lod1": "ship_boat_sail_lod1.glb",
+   "lod2": "ship_boat_sail_lod2.glb",
+   "col": "ship_boat_sail_col.glb",
+   "tris": {
+    "high": 1449,
+    "lod1": 724,
+    "lod2": 289
+   },
+   "dims": {
+    "length_overall": 7.24,
+    "beam": 3.95,
+    "draft": 0.87,
+    "height_over_waterline": 5.03,
+    "deck_y": 1.61
+   },
+   "waterline_y": 0.0,
+   "bow": "+Z",
+   "phone_high_lod": "high"
+  },
+  "boat_02": {
+   "desc": "Tripo small boat (user model)",
+   "source": "models/beth/tripo/boat_02_game.glb",
+   "high": "ship_boat_02.glb",
+   "lod1": "ship_boat_02_lod1.glb",
+   "lod2": "ship_boat_02_lod2.glb",
+   "col": "ship_boat_02_col.glb",
+   "tris": {
+    "high": 1175,
+    "lod1": 587,
+    "lod2": 235
+   },
+   "dims": {
+    "length_overall": 6.4,
+    "beam": 2.41,
+    "draft": 0.86,
+    "height_over_waterline": 4.96,
+    "deck_y": 1.59
+   },
+   "waterline_y": 0.0,
+   "bow": "+Z",
+   "phone_high_lod": "high"
+  },
+  "tidewrack_sailing_ship": {
+   "desc": "Tidewrack sailing ship, extracted from the kit sheet (user model)",
+   "source": "models-new/tidewrack_sailing_ship.glb.gz",
+   "high": "ship_tidewrack_sailing_ship.glb",
+   "lod1": "ship_tidewrack_sailing_ship_lod1.glb",
+   "lod2": "ship_tidewrack_sailing_ship_lod2.glb",
+   "col": "ship_tidewrack_sailing_ship_col.glb",
+   "tris": {
+    "high": 21268,
+    "lod1": 10313,
+    "lod2": 4125
+   },
+   "dims": {
+    "length_overall": 30.0,
+    "beam": 8.18,
+    "draft": 1.85,
+    "height_over_waterline": 13.59,
+    "deck_y": 2.78
+   },
+   "waterline_y": 0.0,
+   "bow": "+Z",
+   "phone_high_lod": "lod1"
+  }
+ }
+}

@@ -30,3 +30,8 @@ Zero torso penetration on all clips.
 - Beth's thick-grip weapons (club ~0.31 m, mace ~0.27 m grip, origin = grip centre, +Y up, scale 1.0) on weapon_R.
 - weapon_R now seated at the palm centre; fingers_R keyed curled around the handle in every clip (B also got finger weights).
 - Hit frames checked in Godot 4 headless (weapon lowest point): A attack1 1.1 s 0.16 m, attack2 1.5 s -0.17, attack3 1.3 s -0.18; B attack1 1.1 s -0.52, attack2 1.6 s -0.10, attack3 1.3 s -0.60.
+
+## v6 (2026-10-25, 4:50 PM ET): Beth's socket and grip numbers, v7 weapons
+- v7 club and mace (hero-motion/weapons) on weapon_R.
+- B: weapon_R (child of hand_R) translation (-0.0863, -0.0086, -0.0964), rotation wxyz (0.1792, 0.146, -0.9578, -0.1707), Beth's measurement as given. Fingers unchanged.
+- A: fingers_R grip pose keyed (constant) in every clip, 90 deg about the bone's local -Z axis, local quat wxyz (0.7071, 0, 0, -0.7071). Fingers clear a 0.30 m cylinder centred 0.15 m off the palm (finger median 0.295 m, min 0.182 m from its axis). A's socket is unchanged and waiting for Beth to re-measure.

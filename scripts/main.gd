@@ -4,7 +4,7 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "4"
+const VERSION := "5"
 const DEFS := [
 	["guildhall",0,-21,0.0,"Guild Hall"], ["library",-24,-27,0.0,"Grand Library"], ["townhall",23,-26,0.0,"Town Hall"],
 	["mage",-44,-31,0.0,"Mage Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
@@ -1076,6 +1076,39 @@ func _run_bench() -> void:
 			var pos: Vector3 = d2 * (CITY_HALF + 30.0)
 			await _shot("t5_gate_" + String(gd[2]).to_lower().replace(" ", "_"), pos, atan2(d2.x, d2.z), -0.12, 11.0, 2, 30)
 		get_tree().quit(1 if fails > 0 else 0)
+		return
+	if only == "t5":
+		var sv := func(n: String, fr := 12):
+			for i in fr: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_%s.png" % n)
+		tier = 2; apply_quality(); _set_time(10.5)
+		VUI._enter("solo"); _teleport(Vector3(-6, 0, 30), 0.25); pitch = -0.28
+		bench = false
+		_warm_up(); await sv.call("t5_boot_label", 3)
+		while not warmed: await get_tree().process_frame
+		cheats.role_provider = func() -> String: return "owner"   # bench-only stand-in for the unlocked owner gate
+		_teleport(Vector3(0, 0, 60), 0.0); pitch = -0.2
+		party.director.spawn("frosttroll_a", Vector3(0, 0, 50), hero)
+		for i in 30: await get_tree().process_frame
+		party.combat.use(0); await sv.call("t5_combat", 8)
+		party.combat.use(1); await sv.call("t5_combat_skill", 10)
+		VUI._set_owner(true); VUI.open_settings(true)
+		var sc: ScrollContainer = VUI.settings.find_children("*", "ScrollContainer", true, false)[0]
+		for i in 8:
+			await sv.call("t5_owner_panel_%d" % i, 8)
+			var bar := sc.get_v_scroll_bar()
+			if sc.scroll_vertical >= bar.max_value - sc.size.y - 2: break
+			sc.scroll_vertical += int(sc.size.y * 0.85)
+		VUI.settings.hide(); VUI._set_owner(false)
+		cheats.role_provider = func() -> String: return "coowner"
+		VUI.open_settings(true)
+		sc = VUI.settings.find_children("*", "ScrollContainer", true, false)[0]
+		for i in 4:
+			await sv.call("t5_coowner_panel_%d" % i, 8)
+			var bar2 := sc.get_v_scroll_bar()
+			if sc.scroll_vertical >= bar2.max_value - sc.size.y - 2: break
+			sc.scroll_vertical += int(sc.size.y * 0.85)
+		get_tree().quit()
 		return
 	if only == "ui":
 		var sv := func(n: String):

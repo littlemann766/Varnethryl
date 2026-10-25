@@ -17,7 +17,7 @@ func setup(p: Party) -> void:
 		var b := Button.new(); var sz: int = lay[i][1]
 		b.anchor_left = 1; b.anchor_right = 1; b.anchor_top = 1; b.anchor_bottom = 1
 		b.offset_left = lay[i][0].x; b.offset_top = lay[i][0].y; b.offset_right = lay[i][0].x + sz; b.offset_bottom = lay[i][0].y + sz
-		b.focus_mode = Control.FOCUS_NONE; b.add_theme_font_size_override("font_size", 16 if i else 26)
+		b.focus_mode = Control.FOCUS_NONE; b.clip_text = true; b.add_theme_font_size_override("font_size", 16 if i else 26)
 		b.add_theme_font_override("font", VStyle.font())
 		b.button_down.connect(func(): party.combat.use(i))
 		add_child(b); btns.append(b)

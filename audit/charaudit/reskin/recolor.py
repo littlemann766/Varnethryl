@@ -27,8 +27,11 @@ def run(n):
         setc(leather,0.07,0.55,1.1)
     if n=='talia':
         m=body&~gold&~skin
-        w=smooth(V,0.22,0.5)
-        nH[m]=0.48; nS[m]=(0.5*(1-w)+0.07*w)[m]; nV[m]=np.clip(V*1.25+0.1,0,1)[m]
+        from scipy import ndimage
+        Vb=ndimage.gaussian_filter(V,4)
+        w=smooth(Vb,0.25,0.45)
+        Vs=0.55*V+0.45*Vb
+        nH[m]=0.48; nS[m]=(0.5*(1-w)+0.06*w)[m]; nV[m]=np.clip(Vs*1.2+0.12+0.12*w,0,1)[m]
     if n=='cedric':
         red=body&((H<0.03)|(H>0.93))&(S>0.2)
         setc(red,0.985,0.78,1.45,0.04)
@@ -48,6 +51,8 @@ def run(n):
     if n=='garruk':
         sk=skin&body
         setc(sk,0.055,None,1.12,0.02,smul=1.1)
+        fur=body&((L==4)|(L==2)|(L==3))&(S<0.22)&(V>0.25)&~sk
+        setc(fur,0.075,0.5,0.95)
         red=body&((H<0.03)|(H>0.93))&(S>0.3)
         setc(red,0.995,None,1.2,0.02,smul=1.1)
     out=tohsvimg(nH,nS,nV)

@@ -48,3 +48,11 @@ export function buildFrostRealm({scene}){
  group.visible=false;
  return{group,cave,portalMesh:arch,colliders:cols,spawn:FROST_SPAWN,exit:FROST_EXIT,brothers:FROST_BROTHERS,heightAt:frostElevation,update:t=>{arch.userData.update?.(t);cave.update(t);}};
 }
+
+/* Beth round 2 frost realm dressing: one merged kit mesh added to the realm group (async, after the realm is built). */
+export async function dressFrostRealmBeth(FM){
+  if(!FM||(typeof location!=='undefined'&&/nobeth/.test(location.search)))return 0;
+  const { placeZone, loadZonePlacement } = await import('./beth-zones.js');
+  const Z=placeZone(await loadZonePlacement('frost_realm'),{heightAt:frostElevation,origin:[FROST_REALM.cx,FROST_REALM.cz],name:'beth-frost-realm',chunk:1e4});
+  FM.group.add(Z.group);return Z.count;
+}

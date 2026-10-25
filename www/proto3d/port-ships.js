@@ -147,3 +147,15 @@ export async function installImportedShip(ship,{large=true}={}){
     return false;
   }
 }
+
+/* Beth round 2 harbour: dock dressing merged per chunk under the harbor group, and the moored ships swap their procedural
+   parts for Beth's galleon / sloop (same buildSailingShip frame: deck y~1.64, bow +z, so animateMooredShip keeps working). */
+export async function dressHarborBeth(TL,PORT_CENTER){
+  if(!TL||!TL.harbor||(typeof location!=='undefined'&&/nobeth/.test(location.search)))return 0;
+  const { placeZone, loadZonePlacement, kitMesh } = await import('./beth-zones.js');
+  const P=await loadZonePlacement('port'),h=TL.heightAt;
+  const Z=placeZone(P.filter(i=>!i.ship),{heightAt:(x,z)=>Math.max(0,h(x,z)),origin:[PORT_CENTER.x,PORT_CENTER.z],name:'beth-port'});TL.harbor.add(Z.group);
+  let n=0;for(const it of P.filter(i=>i.ship)){const sh=TL.ships?.[it.mooring];if(!sh)continue;const m=kitMesh(it.file);if(!m)continue;
+    sh.children.forEach(c=>c.visible=false);m.scale.setScalar(it.scale[0]/sh.scale.x);m.castShadow=false;sh.add(m);n++;}
+  return n;
+}

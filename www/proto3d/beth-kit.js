@@ -6,7 +6,6 @@
      KIT.forVariant(kind,name,pal,lod) -> kit geometry that replaces a scenery.js variant, or null
      KIT.placement            -> PLACEMENT.json entries (clusters for the empty land) or []            */
 import * as THREE from './vendor/three.module.js';
-import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 import { fx } from './fx.js';
 const BASE = new URL('./models/beth/', import.meta.url).href;
 const geos = new Map(); let material = null, placement = [], index = [];
@@ -14,7 +13,7 @@ async function load() {
   try {
     index = await (await fetch(BASE + 'kit_index.json')).json();
     try { placement = await (await fetch(BASE + 'PLACEMENT.json')).json(); placement = placement.items || placement; } catch (e) { placement = []; }
-    const L = new GLTFLoader();
+    const { GLTFLoader } = await import('./vendor/jsm/loaders/GLTFLoader.js'); const L = new GLTFLoader();   // dynamic: node checks import townlands.js without a browser
     await Promise.all(index.map(async e => {
       const g = await L.loadAsync(BASE + e.file); let mesh = null; g.scene.traverse(o => { if (o.isMesh && !mesh) mesh = o; });
       if (!mesh) return; const geo = mesh.geometry; geo.computeBoundingBox(); geo.computeBoundingSphere();
@@ -23,7 +22,7 @@ async function load() {
     }));
   } catch (e) { console.warn('beth kit unavailable, falling back to procedural scenery', e); }
 }
-if (!(typeof location !== 'undefined' && /nokit/.test(location.search))) await load();
+if (typeof window !== 'undefined' && !/nokit/.test(location.search)) await load();   // browser only (node regression checks see KIT.ready === false)
 class Acc { constructor() { this.p = []; this.n = []; this.u = []; this.c = []; }
   add(g, x, y, z, ry, s) { const P = g.attributes.position.array, N = g.attributes.normal.array, U = g.attributes.uv.array, C = g.attributes.color.array, I = g.index ? g.index.array : null, cs = Math.cos(ry), sn = Math.sin(ry);
     const cnt = I ? I.length : P.length / 3, cw = g.attributes.color.itemSize;

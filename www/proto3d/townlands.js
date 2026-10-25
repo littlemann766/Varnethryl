@@ -508,3 +508,17 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
   }
   return {group,cull,stats,terrain,poolMeshes,volcano,updateVolcano,harborRoad,mountainRoad,brokenSealRoad,ruinedGateway,cave,harbor,harborShips,ships,dockPlanks,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields,trail};
 }
+
+/* Beth round 2 zone kits for the town map: frost slopes (200 m chunks) and the volcano ring, merged by 8 angle
+   sectors around TITAN_CENTER (a square grid split the ring into many small chunks: 132 -> 221 calls in one view).
+   Call after buildTownOutskirts; wraps TL.cull so the zone meshes cull with the rest of the outskirts. ?nobeth skips. */
+export async function addBethTownZones(TL){
+  if(!TL||!KIT.ready||(typeof location!=='undefined'&&/nobeth/.test(location.search)))return null;
+  const { placeZone, loadZonePlacement } = await import('./beth-zones.js');
+  const h=TL.heightAt, zs=[];
+  zs.push(placeZone(await loadZonePlacement('frost_town'),{heightAt:h,name:'beth-frost_town',chunk:200}));
+  zs.push(placeZone(await loadZonePlacement('volcano'),{heightAt:h,name:'beth-volcano',sectors:{cx:TITAN_CENTER.x,cz:TITAN_CENTER.z,n:8}}));
+  for(const Z of zs)TL.group.add(Z.group);
+  const c0=TL.cull;TL.cull=(x,z,k)=>{c0(x,z,k);for(const Z of zs)Z.cull(x,z,170*Math.max(1,k||1));};
+  return zs.map(z=>z.count);
+}

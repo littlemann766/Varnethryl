@@ -25,11 +25,13 @@ import { initSettings } from './settingsboot.js';
 import { createMiniMap } from './minimap.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
 import { worldProfile, loadScale } from './charscale.js';
-import { buildTownOutskirts, TOWN_MAP_ROADS } from './townlands.js';
+import { buildTownOutskirts, TOWN_MAP_ROADS, addBethTownZones } from './townlands.js';
+import { dressHarborBeth } from './port-ships.js';
 import { KIT as BETH_KIT } from './beth-kit.js';
-import { buildHobgoblinCamps } from './hobcamps.js';
+import { applyBethExteriors } from './beth-buildings.js';
+import { buildHobgoblinCamps, dressHobCampsBeth } from './hobcamps.js';
 import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, PORT_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
-import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
+import { buildFrostRealm, frostElevation, FROST_EXIT, dressFrostRealmBeth } from './frostreach.js';
 import { buildColiseum, buildTownColiseumPortal, coliseumHeight, isColiseumCombat, COLISEUM_TOWN_PORTAL, COLISEUM_RETURN, COLISEUM_REGION } from './coliseum-pvp.js';
 import { GLTFLoader } from './vendor/jsm/loaders/GLTFLoader.js';
 import { createRosterPreview } from './roster-preview.js';
@@ -198,6 +200,7 @@ function building(cx, cz, w, d, h, opt = {}) {
   return g;
 }
 const enterables = [];
+let BETH_BLD = null;   // Beth building shells (windmill blades tick in frame())
 const ectx = { scene, mats, colliders, multi: [], cam: camera };   // cam: inside view fades the walls between camera and hero
 let LAD = null;   // ladders (ladders.js), created after the key set exists
 // 26 sheet-based 3D buildings (guild, inn, smithy, temple, colosseum, keep ... see docs/proto3d-buildings/README.md). ?oldvillage keeps the original blocky village.
@@ -207,6 +210,7 @@ const drops = []; let dropMade = 0;
 if (BLD_ON) {
   enterables.push(buildWalls(ectx, CITY_HALF, GATE_W));
   for (const b of buildVillage(ectx)) enterables.push(b);
+  try { BETH_BLD = await applyBethExteriors(enterables.flatMap(e => e.parts || [e])); diag('beth exteriors: ' + BETH_BLD.n); } catch (e) { console.warn('beth exteriors', e); }
   { // road/path network: every entrance -> lane -> main street -> gate (one merged mesh, plaza material)
     ROADS = planRoads(enterables.flatMap(e => e.parts || [e]), { world: WORLD, colliders, gate: [0, WORLD - 3], mainX: 2.5 * KB, mainZ: 2 * KB, plazaR: 13 * PK - 1 });
     const rg = roadGeometry(ROADS, 26 * PK, 0.024), g = new THREE.BufferGeometry();
@@ -246,6 +250,11 @@ if(BLD_ON){try{
   HOB_CAMPS_WORLD=buildHobgoblinCamps(scene,(x,z)=>TOWN_LANDS?.heightAt(x,z)??0);
   diag('Hobgoblin camps: '+HOB_CAMPS_WORLD.sites.length+' placed in the outer regions');
 }catch(e){console.warn('hobgoblin camp scenery unavailable',e);}}
+// Beth round 2 zone art (frost slopes, volcano ring, harbour + ships, hob camps); each module owns its own wiring. ?nobeth skips.
+if(BLD_ON&&TOWN_LANDS){try{
+  const zc=await addBethTownZones(TOWN_LANDS),hc=await dressHarborBeth(TOWN_LANDS,PORT_CENTER),bc=await dressHobCampsBeth(HOB_CAMPS_WORLD,(x,z)=>TOWN_LANDS.heightAt(x,z));
+  diag('Beth zones: '+JSON.stringify({zones:zc,ships:hc,hob:bc}));
+}catch(e){console.warn('beth zone art unavailable',e);}}
 // Original trees stay in the historic village/inner grounds; outer forests are chunked independently.
 {
   const pts = [];
@@ -1952,6 +1961,7 @@ async function setZoneNow(name) {
     state.heroX=COLISEUM_PVP.spawn.x;state.heroZ=COLISEUM_PVP.spawn.z;state.yaw=Math.PI;
   } else if (name === 'frost') {
     FM=buildFrostRealm({scene}); townCols=colliders.slice();
+    dressFrostRealmBeth(FM).catch(e=>console.warn('beth frost realm art',e));
     colliders.length=0;for(const c of FM.colliders)colliders.push(c);
     ZONE.name='frost';ZONE.cx=FROST_REALM.cx;ZONE.cz=FROST_REALM.cz;ZONE.half=FROST_REALM.half;
     hideTown();FM.group.visible=true;if(portalT)portalT.visible=false;
@@ -2062,6 +2072,7 @@ function frame(now) {
   adaptRes(now - lastDraw); lastDraw = now;
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   updateCrowd(dt); updateHero(dt); updateZone(dt); updateZoneAmbience(dt); if(MULTIPLAYER)MULTIPLAYER.update(dt,now); if (TOWN_LANDS && ZONE.name === 'town') TOWN_LANDS.cull(state.heroX, state.heroZ, VIEWK); if(HOB_CAMPS_WORLD){HOB_CAMPS_WORLD.group.visible=ZONE.name==='town';if(ZONE.name==='town')HOB_CAMPS_WORLD.cull(state.heroX,state.heroZ);} if (FIGHT) FIGHT.update(dt); if (GUARDS && FIGHT && FIGHT.on && ZONE.name === 'town') GUARDS.update(dt, FIGHT.cc); if (GB.visible && (GB.userData.t -= dt) <= 0) GB.visible = false; updateCamera(dt, totalFrames === 0); if (FIGHT && FIGHT.shake) FIGHT.shake(camera);
+  if (BETH_BLD && ZONE.name === 'town') BETH_BLD.tick(dt);
   simTime += dt; if (SMOKE) SMOKE.update(simTime); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateWater?.(simTime,state.heroX,state.heroZ); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateVolcano?.(simTime,state.heroX,state.heroZ);
   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
   if(ZONE.name==='town' && totalFrames%9===0)hideInactiveHeroModels();

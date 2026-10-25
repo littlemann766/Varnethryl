@@ -50,3 +50,15 @@ export function buildHobgoblinCamps(scene,heightAt=()=>0) {
   const cull=(x,z)=>{for(const {site,group} of sites)group.visible=Math.hypot(site.x-x,site.z-z)<170;};
   return {group:root,cull,sites};
 }
+
+/* Beth round 2 hob camps: replace the procedural tents/palisade of each camp (ground discs kept) with one merged kit mesh. */
+export async function dressHobCampsBeth(world,heightAt){
+  if(!world||(typeof location!=='undefined'&&/nobeth/.test(location.search)))return 0;
+  const { placeZone, loadZonePlacement } = await import('./beth-zones.js');
+  const H=await loadZonePlacement('hobcamps');let n=0;
+  for(const {site,group} of world.sites){const items=H.filter(i=>i.camp===site.id);if(!items.length)continue;
+    group.children.forEach(c=>{if(!(c.geometry&&c.geometry.type==='CircleGeometry'))c.visible=false;});
+    const Z=placeZone(items.map(i=>({...i,position:[i.position[0]-site.x,i.position[1],i.position[2]-site.z]})),{heightAt,origin:[site.x,site.z],name:'beth-hob-'+site.id,chunk:1e4});
+    Z.group.position.set(site.x-group.position.x,-group.position.y,site.z-group.position.z);group.add(Z.group);n+=Z.count;}
+  return n;
+}

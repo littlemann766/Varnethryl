@@ -12,7 +12,7 @@ assert.match(building,/run\(-WORLD,\s*-WORLD,\s*-10.4,\s*-WORLD\)/,'mountain tra
 assert.match(building,/d.id === 'gatehouse' \? CITY_HALF - 1.2/,'city gate follows town wall, not world edge');
 assert.match(game,/const WORLD = WORLD_B/,'movement clamps to expanded town');
 assert.match(game,/TOWN_LANDS\.heightAt\(x,z\)/,'players actually walk on terrain');
-assert.match(land,/acc\(shadow\?'cast':'plain',x,z\)\.add\(v\.geo,x,townElevation\(x,z,world\),z/,'scenery sits on the same terrain');
+assert.match(land,/const y=townElevation\(x,z,world\)[\s\S]{0,900}acc\(shadow\?'cast':'plain',x,z\)\.add\(v\.geo,x,y,z/,'scenery sits on the same terrain (procedural and Beth kit pieces share y)');
 assert.match(land,/const terrain=buildWalkableTerrain\(world\);group\.add\(terrain\)/,'physical terrain mesh in scene');
 const a=land.indexOf('const FIELDS ='),b=land.indexOf('// ~41K triangles');
 assert(a>=0&&b>a);

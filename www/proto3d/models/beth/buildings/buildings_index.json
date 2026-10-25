@@ -1,0 +1,225 @@
+[
+ {
+  "file": "buildings/bld_house1.glb",
+  "tris": 5362,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "house1",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    4.5
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_house2.glb",
+  "tris": 5972,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "house2",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    4.8
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_house3.glb",
+  "tris": 5238,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "house3",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    4.5
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_house4.glb",
+  "tris": 5982,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "house4",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    5.25
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_farmhouse.glb",
+  "tris": 7724,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "farmhouse",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    6.0
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_thieves.glb",
+  "tris": 6760,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "thieves",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    5.25
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_barn.glb",
+  "tris": 3570,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "barn",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    6.0
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_stables.glb",
+  "tris": 6868,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "stables",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    4.5
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ },
+ {
+  "file": "buildings/bld_windmill.glb",
+  "tris": 2676,
+  "nodes": [
+   "walls",
+   "roof",
+   "blades"
+  ],
+  "id": "windmill",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    5.2
+   ],
+   "w_m": 3.4,
+   "h_m": 3.31
+  },
+  "blades": "node \"blades\": rotate about its local Z (origin = hub)"
+ },
+ {
+  "file": "buildings/bld_lighthouse.glb",
+  "tris": 3644,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "lighthouse",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    5.2
+   ],
+   "w_m": 3.23,
+   "h_m": 3.31
+  },
+  "note": "lantern is pale glass albedo, no emissive; keep the game light/glow if wanted"
+ },
+ {
+  "file": "buildings/bld_gate_tower.glb",
+  "tris": 1340,
+  "nodes": [
+   "walls",
+   "roof"
+  ],
+  "id": "gt0,gt1",
+  "units": "metres (root-local x K=1.7)",
+  "K": 1.7,
+  "door": {
+   "center_local": [
+    0,
+    0,
+    5.4
+   ],
+   "w_m": 3.74,
+   "h_m": 3.31
+  }
+ }
+]

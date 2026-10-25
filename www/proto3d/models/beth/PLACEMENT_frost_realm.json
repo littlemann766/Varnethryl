@@ -1,0 +1,1526 @@
+{
+"zone": "frost_realm",
+"note": "LOCAL to frost-realm group (origin FROST_REALM cx=2250,cz=0). y=null -> frostElevation(OX+x,OZ+z).",
+"items": [
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-48.67,
+null,
+140.32
+],
+"rotation": [
+0,
+1.292,
+0
+],
+"scale": [
+1.43,
+1.43,
+1.43
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-37.19,
+null,
+64.16
+],
+"rotation": [
+0,
+3.835,
+0
+],
+"scale": [
+1.03,
+1.03,
+1.03
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+47.46,
+null,
+80.93
+],
+"rotation": [
+0,
+4.193,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+39.02,
+null,
+51.27
+],
+"rotation": [
+0,
+2.637,
+0
+],
+"scale": [
+1.68,
+1.68,
+1.68
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-80.68,
+null,
+186.86
+],
+"rotation": [
+0,
+4.743,
+0
+],
+"scale": [
+1.07,
+1.07,
+1.07
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-81.77,
+null,
+173.05
+],
+"rotation": [
+0,
+1.545,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+48.14,
+null,
+128.07
+],
+"rotation": [
+0,
+4.7,
+0
+],
+"scale": [
+0.96,
+0.96,
+0.96
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-6.41,
+null,
+39.81
+],
+"rotation": [
+0,
+4.847,
+0
+],
+"scale": [
+1.51,
+1.51,
+1.51
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+27.39,
+null,
+67.27
+],
+"rotation": [
+0,
+6.005,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+11.11,
+null,
+-42.86
+],
+"rotation": [
+0,
+1.318,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+20.8,
+null,
+121.51
+],
+"rotation": [
+0,
+1.184,
+0
+],
+"scale": [
+1.69,
+1.69,
+1.69
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+19.31,
+null,
+63.12
+],
+"rotation": [
+0,
+4.846,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-43.27,
+null,
+-18.33
+],
+"rotation": [
+0,
+0.884,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-44,
+null,
+-24.88
+],
+"rotation": [
+0,
+3.271,
+0
+],
+"scale": [
+1.68,
+1.68,
+1.68
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-0.85,
+null,
+3.65
+],
+"rotation": [
+0,
+1.632,
+0
+],
+"scale": [
+1.41,
+1.41,
+1.41
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-50.67,
+null,
+93.09
+],
+"rotation": [
+0,
+2.45,
+0
+],
+"scale": [
+1.41,
+1.41,
+1.41
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-36.94,
+null,
+-13.38
+],
+"rotation": [
+0,
+1.478,
+0
+],
+"scale": [
+1.36,
+1.36,
+1.36
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-89.39,
+null,
+-6.56
+],
+"rotation": [
+0,
+4.963,
+0
+],
+"scale": [
+0.96,
+0.96,
+0.96
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/frozen_pond.glb",
+"position": [
+16.12,
+null,
+36.02
+],
+"rotation": [
+0,
+5.939,
+0
+],
+"scale": [
+1.06,
+1.06,
+1.06
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-65.03,
+null,
+0.12
+],
+"rotation": [
+0,
+5.463,
+0
+],
+"scale": [
+1.25,
+1.25,
+1.25
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-65.98,
+null,
+166.68
+],
+"rotation": [
+0,
+1.319,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+5,
+null,
+9.77
+],
+"rotation": [
+0,
+1.54,
+0
+],
+"scale": [
+1.49,
+1.49,
+1.49
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-27.41,
+null,
+22.97
+],
+"rotation": [
+0,
+2.855,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+48.06,
+null,
+138.68
+],
+"rotation": [
+0,
+0.294,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-70.21,
+null,
+50.54
+],
+"rotation": [
+0,
+4.553,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+48.71,
+null,
+101.37
+],
+"rotation": [
+0,
+4.075,
+0
+],
+"scale": [
+1.65,
+1.65,
+1.65
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+11.74,
+null,
+-33.17
+],
+"rotation": [
+0,
+0.148,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-63.25,
+null,
+-40.27
+],
+"rotation": [
+0,
+4.409,
+0
+],
+"scale": [
+1.43,
+1.43,
+1.43
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-50.62,
+null,
+-32.44
+],
+"rotation": [
+0,
+1.453,
+0
+],
+"scale": [
+1.41,
+1.41,
+1.41
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+48.42,
+null,
+66.22
+],
+"rotation": [
+0,
+1.471,
+0
+],
+"scale": [
+1.35,
+1.35,
+1.35
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-74.15,
+null,
+-2.55
+],
+"rotation": [
+0,
+2.872,
+0
+],
+"scale": [
+1.48,
+1.48,
+1.48
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+27.82,
+null,
+88.02
+],
+"rotation": [
+0,
+1.933,
+0
+],
+"scale": [
+1.04,
+1.04,
+1.04
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-50.7,
+null,
+10.29
+],
+"rotation": [
+0,
+0.774,
+0
+],
+"scale": [
+1.17,
+1.17,
+1.17
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+27.38,
+null,
+27.23
+],
+"rotation": [
+0,
+2.068,
+0
+],
+"scale": [
+1.53,
+1.53,
+1.53
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-70.26,
+null,
+158.35
+],
+"rotation": [
+0,
+1.323,
+0
+],
+"scale": [
+1.24,
+1.24,
+1.24
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-42.59,
+null,
+92.26
+],
+"rotation": [
+0,
+1.907,
+0
+],
+"scale": [
+1.29,
+1.29,
+1.29
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-23.91,
+null,
+61.11
+],
+"rotation": [
+0,
+4.409,
+0
+],
+"scale": [
+1.67,
+1.67,
+1.67
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+22.69,
+null,
+76.41
+],
+"rotation": [
+0,
+4.277,
+0
+],
+"scale": [
+1.13,
+1.13,
+1.13
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-37.06,
+null,
+107.08
+],
+"rotation": [
+0,
+6.231,
+0
+],
+"scale": [
+1.47,
+1.47,
+1.47
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-61.25,
+null,
+-29.95
+],
+"rotation": [
+0,
+1.266,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+32.14,
+null,
+185.94
+],
+"rotation": [
+0,
+3.482,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-78.7,
+null,
+24.17
+],
+"rotation": [
+0,
+3.419,
+0
+],
+"scale": [
+1.35,
+1.35,
+1.35
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-38.45,
+null,
+77.47
+],
+"rotation": [
+0,
+0.844,
+0
+],
+"scale": [
+1.44,
+1.44,
+1.44
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-31.85,
+null,
+-16.14
+],
+"rotation": [
+0,
+4.736,
+0
+],
+"scale": [
+1.43,
+1.43,
+1.43
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-28.59,
+null,
+52.73
+],
+"rotation": [
+0,
+2.518,
+0
+],
+"scale": [
+1.65,
+1.65,
+1.65
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+25.65,
+null,
+49.69
+],
+"rotation": [
+0,
+6.119,
+0
+],
+"scale": [
+1.42,
+1.42,
+1.42
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-7.4,
+null,
+112.13
+],
+"rotation": [
+0,
+3.243,
+0
+],
+"scale": [
+1.55,
+1.55,
+1.55
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-72.32,
+null,
+45.3
+],
+"rotation": [
+0,
+2.321,
+0
+],
+"scale": [
+0.99,
+0.99,
+0.99
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+38.99,
+null,
+84.08
+],
+"rotation": [
+0,
+3.063,
+0
+],
+"scale": [
+1.69,
+1.69,
+1.69
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-70.47,
+null,
+-9.72
+],
+"rotation": [
+0,
+1.364,
+0
+],
+"scale": [
+1.58,
+1.58,
+1.58
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+37.17,
+null,
+185.72
+],
+"rotation": [
+0,
+5.189,
+0
+],
+"scale": [
+1.26,
+1.26,
+1.26
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+43.76,
+null,
+156.15
+],
+"rotation": [
+0,
+1.371,
+0
+],
+"scale": [
+1.29,
+1.29,
+1.29
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+26.4,
+null,
+42.89
+],
+"rotation": [
+0,
+0.869,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-1.51,
+null,
+25.48
+],
+"rotation": [
+0,
+4.734,
+0
+],
+"scale": [
+1.65,
+1.65,
+1.65
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-28.52,
+null,
+101.76
+],
+"rotation": [
+0,
+5.401,
+0
+],
+"scale": [
+1.68,
+1.68,
+1.68
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+3.08,
+null,
+71.48
+],
+"rotation": [
+0,
+0.404,
+0
+],
+"scale": [
+1.46,
+1.46,
+1.46
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+36.65,
+null,
+5.66
+],
+"rotation": [
+0,
+1.813,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-60.33,
+null,
+189.16
+],
+"rotation": [
+0,
+4.022,
+0
+],
+"scale": [
+1.35,
+1.35,
+1.35
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/frozen_pond.glb",
+"position": [
+39.49,
+null,
+46.19
+],
+"rotation": [
+0,
+6.03,
+0
+],
+"scale": [
+0.91,
+0.91,
+0.91
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-15.39,
+null,
+19.17
+],
+"rotation": [
+0,
+2.067,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-3.56,
+null,
+-14.1
+],
+"rotation": [
+0,
+3.448,
+0
+],
+"scale": [
+1.1,
+1.1,
+1.1
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+37.56,
+null,
+117.29
+],
+"rotation": [
+0,
+1.807,
+0
+],
+"scale": [
+1.62,
+1.62,
+1.62
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-13.62,
+null,
+23.92
+],
+"rotation": [
+0,
+0.616,
+0
+],
+"scale": [
+1.13,
+1.13,
+1.13
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-78.12,
+null,
+15.88
+],
+"rotation": [
+0,
+1.071,
+0
+],
+"scale": [
+1.51,
+1.51,
+1.51
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-14.39,
+null,
+109.46
+],
+"rotation": [
+0,
+0.979,
+0
+],
+"scale": [
+1.15,
+1.15,
+1.15
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-61.19,
+null,
+11.33
+],
+"rotation": [
+0,
+2.539,
+0
+],
+"scale": [
+1.63,
+1.63,
+1.63
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-19.99,
+null,
+-36.18
+],
+"rotation": [
+0,
+2.437,
+0
+],
+"scale": [
+1.68,
+1.68,
+1.68
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-26.27,
+null,
+95.1
+],
+"rotation": [
+0,
+4.352,
+0
+],
+"scale": [
+1.52,
+1.52,
+1.52
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+56,
+null,
+157.3
+],
+"rotation": [
+0,
+2,
+0
+],
+"scale": [
+1.67,
+1.67,
+1.67
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+60.11,
+null,
+177.65
+],
+"rotation": [
+0,
+2.76,
+0
+],
+"scale": [
+1.26,
+1.26,
+1.26
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+2.88,
+null,
+31.22
+],
+"rotation": [
+0,
+2.207,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+43.21,
+null,
+23.13
+],
+"rotation": [
+0,
+5.494,
+0
+],
+"scale": [
+1.41,
+1.41,
+1.41
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+24.58,
+null,
+-10.59
+],
+"rotation": [
+0,
+5.917,
+0
+],
+"scale": [
+1.49,
+1.49,
+1.49
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-37.5,
+null,
+13.54
+],
+"rotation": [
+0,
+0.397,
+0
+],
+"scale": [
+1.19,
+1.19,
+1.19
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-58.54,
+null,
+-6.25
+],
+"rotation": [
+0,
+3.691,
+0
+],
+"scale": [
+0.91,
+0.91,
+0.91
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-69.29,
+null,
+58.96
+],
+"rotation": [
+0,
+2.262,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-38.39,
+null,
+96.25
+],
+"rotation": [
+0,
+2.757,
+0
+],
+"scale": [
+1.43,
+1.43,
+1.43
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-37.16,
+null,
+-4.34
+],
+"rotation": [
+0,
+5.39,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-62.27,
+null,
+24.6
+],
+"rotation": [
+0,
+4.208,
+0
+],
+"scale": [
+0.91,
+0.91,
+0.91
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-32.84,
+null,
+92.95
+],
+"rotation": [
+0,
+3.695,
+0
+],
+"scale": [
+0.91,
+0.91,
+0.91
+],
+"replaces": "(new) cave-floor dressing; local to frost-realm group"
+}
+]
+}

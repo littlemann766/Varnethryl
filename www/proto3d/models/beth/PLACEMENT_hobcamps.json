@@ -1,0 +1,2166 @@
+{
+"zone": "hobcamps",
+"note": "World coords; same layout/angles as hobcamps.js (open approach at stakes i=1,2 kept).",
+"items": [
+{
+"file": "hobcamp/hob_tent2.glb",
+"camp": "blackbriar",
+"position": [
+-315.3,
+null,
+-175.19
+],
+"rotation": [
+0,
+-1.921,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "tent cone + door plane"
+},
+{
+"file": "hobcamp/hob_tent2_red.glb",
+"camp": "blackbriar",
+"position": [
+-329.29,
+null,
+-172.74
+],
+"rotation": [
+0,
+-4.015,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "tent cone + door plane"
+},
+{
+"file": "hobcamp/hob_tent2.glb",
+"camp": "blackbriar",
+"position": [
+-324.42,
+null,
+-186.08
+],
+"rotation": [
+0,
+-6.11,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "tent cone + door plane"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-310.7,
+null,
+-180.75
+],
+"rotation": [
+0,
+1.791,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-310.4,
+null,
+-178
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-310.7,
+null,
+-175.25
+],
+"rotation": [
+0,
+1.351,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-324.18,
+null,
+-165.46
+],
+"rotation": [
+0,
+-0.094,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-326.89,
+null,
+-166.02
+],
+"rotation": [
+0,
+-0.314,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-329.41,
+null,
+-167.16
+],
+"rotation": [
+0,
+-0.534,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-331.33,
+null,
+-168.55
+],
+"rotation": [
+0,
+-0.722,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-333.19,
+null,
+-170.59
+],
+"rotation": [
+0,
+-0.942,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-334.56,
+null,
+-173
+],
+"rotation": [
+0,
+-1.162,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-335.3,
+null,
+-175.25
+],
+"rotation": [
+0,
+-1.351,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-335.6,
+null,
+-178
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-335.3,
+null,
+-180.75
+],
+"rotation": [
+0,
+-1.791,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-334.56,
+null,
+-183
+],
+"rotation": [
+0,
+-1.979,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-333.19,
+null,
+-185.41
+],
+"rotation": [
+0,
+-2.199,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-331.33,
+null,
+-187.45
+],
+"rotation": [
+0,
+-2.419,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-329.41,
+null,
+-188.84
+],
+"rotation": [
+0,
+-2.607,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-326.89,
+null,
+-189.98
+],
+"rotation": [
+0,
+-2.827,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-324.18,
+null,
+-190.54
+],
+"rotation": [
+0,
+-3.047,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-321.82,
+null,
+-190.54
+],
+"rotation": [
+0,
+-3.236,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-319.11,
+null,
+-189.98
+],
+"rotation": [
+0,
+-3.456,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-316.59,
+null,
+-188.84
+],
+"rotation": [
+0,
+-3.676,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-314.67,
+null,
+-187.45
+],
+"rotation": [
+0,
+-3.864,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-312.81,
+null,
+-185.41
+],
+"rotation": [
+0,
+-4.084,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "blackbriar",
+"position": [
+-311.44,
+null,
+-183
+],
+"rotation": [
+0,
+-4.304,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_firepit.glb",
+"camp": "blackbriar",
+"position": [
+-323,
+null,
+-178
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "log ring + ember sphere (MeshBasic glow)"
+},
+{
+"file": "props/barrel.glb",
+"camp": "blackbriar",
+"position": [
+-321.53,
+null,
+-172.7
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "props/barrel.glb",
+"camp": "blackbriar",
+"position": [
+-328.33,
+null,
+-179.38
+],
+"rotation": [
+0,
+2.394,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "props/barrel.glb",
+"camp": "blackbriar",
+"position": [
+-319.15,
+null,
+-181.92
+],
+"rotation": [
+0,
+4.489,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "hobcamp/hob_banner.glb",
+"camp": "blackbriar",
+"position": [
+-313,
+null,
+-185
+],
+"rotation": [
+0,
+0.18,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "pole + flag"
+},
+{
+"file": "hobcamp/hob_totem.glb",
+"camp": "blackbriar",
+"position": [
+-315.15,
+null,
+-167.02
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) gate totem"
+},
+{
+"file": "hobcamp/hob_totem.glb",
+"camp": "blackbriar",
+"position": [
+-330.94,
+null,
+-167.09
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) gate totem"
+},
+{
+"file": "hobcamp/hob_rack.glb",
+"camp": "blackbriar",
+"position": [
+-327,
+null,
+-173
+],
+"rotation": [
+0,
+1.2,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "props/crate.glb",
+"camp": "blackbriar",
+"position": [
+-318.5,
+null,
+-182
+],
+"rotation": [
+0,
+0.4,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "hobcamp/hob_tent2.glb",
+"camp": "thornwatch",
+"position": [
+-310.3,
+null,
+278.81
+],
+"rotation": [
+0,
+-1.921,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "tent cone + door plane"
+},
+{
+"file": "hobcamp/hob_tent2_red.glb",
+"camp": "thornwatch",
+"position": [
+-324.29,
+null,
+281.26
+],
+"rotation": [
+0,
+-4.015,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "tent cone + door plane"
+},
+{
+"file": "hobcamp/hob_tent2.glb",
+"camp": "thornwatch",
+"position": [
+-319.42,
+null,
+267.92
+],
+"rotation": [
+0,
+-6.11,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "tent cone + door plane"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-305.7,
+null,
+273.25
+],
+"rotation": [
+0,
+1.791,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-305.4,
+null,
+276
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-305.7,
+null,
+278.75
+],
+"rotation": [
+0,
+1.351,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-319.18,
+null,
+288.54
+],
+"rotation": [
+0,
+-0.094,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-321.89,
+null,
+287.98
+],
+"rotation": [
+0,
+-0.314,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-324.41,
+null,
+286.84
+],
+"rotation": [
+0,
+-0.534,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-326.33,
+null,
+285.45
+],
+"rotation": [
+0,
+-0.722,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-328.19,
+null,
+283.41
+],
+"rotation": [
+0,
+-0.942,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-329.56,
+null,
+281
+],
+"rotation": [
+0,
+-1.162,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-330.3,
+null,
+278.75
+],
+"rotation": [
+0,
+-1.351,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-330.6,
+null,
+276
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-330.3,
+null,
+273.25
+],
+"rotation": [
+0,
+-1.791,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-329.56,
+null,
+271
+],
+"rotation": [
+0,
+-1.979,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-328.19,
+null,
+268.59
+],
+"rotation": [
+0,
+-2.199,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-326.33,
+null,
+266.55
+],
+"rotation": [
+0,
+-2.419,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-324.41,
+null,
+265.16
+],
+"rotation": [
+0,
+-2.607,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-321.89,
+null,
+264.02
+],
+"rotation": [
+0,
+-2.827,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-319.18,
+null,
+263.46
+],
+"rotation": [
+0,
+-3.047,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-316.82,
+null,
+263.46
+],
+"rotation": [
+0,
+-3.236,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-314.11,
+null,
+264.02
+],
+"rotation": [
+0,
+-3.456,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-311.59,
+null,
+265.16
+],
+"rotation": [
+0,
+-3.676,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-309.67,
+null,
+266.55
+],
+"rotation": [
+0,
+-3.864,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-307.81,
+null,
+268.59
+],
+"rotation": [
+0,
+-4.084,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "thornwatch",
+"position": [
+-306.44,
+null,
+271
+],
+"rotation": [
+0,
+-4.304,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_firepit.glb",
+"camp": "thornwatch",
+"position": [
+-318,
+null,
+276
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "log ring + ember sphere (MeshBasic glow)"
+},
+{
+"file": "props/barrel.glb",
+"camp": "thornwatch",
+"position": [
+-316.53,
+null,
+281.3
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "props/barrel.glb",
+"camp": "thornwatch",
+"position": [
+-323.33,
+null,
+274.62
+],
+"rotation": [
+0,
+2.394,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "props/barrel.glb",
+"camp": "thornwatch",
+"position": [
+-314.15,
+null,
+272.08
+],
+"rotation": [
+0,
+4.489,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "hobcamp/hob_banner.glb",
+"camp": "thornwatch",
+"position": [
+-308,
+null,
+269
+],
+"rotation": [
+0,
+0.18,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "pole + flag"
+},
+{
+"file": "hobcamp/hob_totem.glb",
+"camp": "thornwatch",
+"position": [
+-310.15,
+null,
+286.98
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) gate totem"
+},
+{
+"file": "hobcamp/hob_totem.glb",
+"camp": "thornwatch",
+"position": [
+-325.94,
+null,
+286.91
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) gate totem"
+},
+{
+"file": "hobcamp/hob_rack.glb",
+"camp": "thornwatch",
+"position": [
+-322,
+null,
+281
+],
+"rotation": [
+0,
+1.2,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "props/crate.glb",
+"camp": "thornwatch",
+"position": [
+-313.5,
+null,
+272
+],
+"rotation": [
+0,
+0.4,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "hobcamp/hob_tent2.glb",
+"camp": "ironfang",
+"position": [
+312.7,
+null,
+266.81
+],
+"rotation": [
+0,
+-1.921,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "tent cone + door plane"
+},
+{
+"file": "hobcamp/hob_tent2_red.glb",
+"camp": "ironfang",
+"position": [
+298.71,
+null,
+269.26
+],
+"rotation": [
+0,
+-4.015,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "tent cone + door plane"
+},
+{
+"file": "hobcamp/hob_tent2.glb",
+"camp": "ironfang",
+"position": [
+303.58,
+null,
+255.92
+],
+"rotation": [
+0,
+-6.11,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "tent cone + door plane"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+317.3,
+null,
+261.25
+],
+"rotation": [
+0,
+1.791,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+317.6,
+null,
+264
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+317.3,
+null,
+266.75
+],
+"rotation": [
+0,
+1.351,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+303.82,
+null,
+276.54
+],
+"rotation": [
+0,
+-0.094,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+301.11,
+null,
+275.98
+],
+"rotation": [
+0,
+-0.314,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+298.59,
+null,
+274.84
+],
+"rotation": [
+0,
+-0.534,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+296.67,
+null,
+273.45
+],
+"rotation": [
+0,
+-0.722,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+294.81,
+null,
+271.41
+],
+"rotation": [
+0,
+-0.942,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+293.44,
+null,
+269
+],
+"rotation": [
+0,
+-1.162,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+292.7,
+null,
+266.75
+],
+"rotation": [
+0,
+-1.351,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+292.4,
+null,
+264
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+292.7,
+null,
+261.25
+],
+"rotation": [
+0,
+-1.791,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+293.44,
+null,
+259
+],
+"rotation": [
+0,
+-1.979,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+294.81,
+null,
+256.59
+],
+"rotation": [
+0,
+-2.199,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+296.67,
+null,
+254.55
+],
+"rotation": [
+0,
+-2.419,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+298.59,
+null,
+253.16
+],
+"rotation": [
+0,
+-2.607,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+301.11,
+null,
+252.02
+],
+"rotation": [
+0,
+-2.827,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+303.82,
+null,
+251.46
+],
+"rotation": [
+0,
+-3.047,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+306.18,
+null,
+251.46
+],
+"rotation": [
+0,
+-3.236,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+308.89,
+null,
+252.02
+],
+"rotation": [
+0,
+-3.456,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+311.41,
+null,
+253.16
+],
+"rotation": [
+0,
+-3.676,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+313.33,
+null,
+254.55
+],
+"rotation": [
+0,
+-3.864,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+315.19,
+null,
+256.59
+],
+"rotation": [
+0,
+-4.084,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_palisade.glb",
+"camp": "ironfang",
+"position": [
+316.56,
+null,
+259
+],
+"rotation": [
+0,
+-4.304,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "palisade stakes"
+},
+{
+"file": "hobcamp/hob_firepit.glb",
+"camp": "ironfang",
+"position": [
+305,
+null,
+264
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "log ring + ember sphere (MeshBasic glow)"
+},
+{
+"file": "props/barrel.glb",
+"camp": "ironfang",
+"position": [
+306.47,
+null,
+269.3
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "props/barrel.glb",
+"camp": "ironfang",
+"position": [
+299.67,
+null,
+262.62
+],
+"rotation": [
+0,
+2.394,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "props/barrel.glb",
+"camp": "ironfang",
+"position": [
+308.85,
+null,
+260.08
+],
+"rotation": [
+0,
+4.489,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "hobcamp/hob_banner.glb",
+"camp": "ironfang",
+"position": [
+315,
+null,
+257
+],
+"rotation": [
+0,
+0.18,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "pole + flag"
+},
+{
+"file": "hobcamp/hob_totem.glb",
+"camp": "ironfang",
+"position": [
+312.85,
+null,
+274.98
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) gate totem"
+},
+{
+"file": "hobcamp/hob_totem.glb",
+"camp": "ironfang",
+"position": [
+297.06,
+null,
+274.91
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) gate totem"
+},
+{
+"file": "hobcamp/hob_rack.glb",
+"camp": "ironfang",
+"position": [
+301,
+null,
+269
+],
+"rotation": [
+0,
+1.2,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+},
+{
+"file": "props/crate.glb",
+"camp": "ironfang",
+"position": [
+309.5,
+null,
+260
+],
+"rotation": [
+0,
+0.4,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new)"
+}
+]
+}

@@ -26,7 +26,7 @@ for c,h in [('white',0xffffff),('yellow',0xf2cc2a),('purple',0x9c5fdf),('red',0x
 # rocks
 R={}
 R['rock_small']=emit('rock_small',rock(21,.5),'rocks','rocks/stone,cluster');R['rock_mossy']=emit('rock_mossy',rock(22,.8,top=W(0x8ab070)),'rocks','rocks/stone:mossy')
-R['boulder']=emit('boulder',rock(23,1.3,sub=2,top=W(0x9ab880)),'rocks','rocks/boulder');R['slab']=emit('rock_slab',rock(24,1.0,sq=(1.4,.3,1.1)),'rocks','rocks/slab')
+R['boulder']=emit('boulder',rock(23,1.3,sub=1,top=W(0x9ab880)),'rocks','rocks/boulder');R['slab']=emit('rock_slab',rock(24,1.0,sq=(1.4,.3,1.1)),'rocks','rocks/slab')
 R['standing']=emit('standing_stone',rock(25,.6,sq=(.7,2.2,.5)),'rocks','rocks/standing')
 R['cliff_a']=emit('cliff_a',cliff(26),'rocks');R['cliff_b']=emit('cliff_b',cliff(27,col=0xd0c4b0),'rocks')
 # props
@@ -42,6 +42,14 @@ Z['lava_rock']=emit('lavacrust_rock',rock(33,1.0,kind='lavacrust'),'volcano','to
 Z['dock']=emit('dock_10m',dock(),'port','harbor box piers');Z['ship']=emit('ship_cog',ship(),'port','(kept by Lucky: current curved-hull ship; offered as lighter alternative)')
 Z['tent']=emit('hob_tent',tent(),'hobcamp');Z['palisade']=emit('hob_palisade',palisade(),'hobcamp');Z['firepit']=emit('hob_firepit',firepit(),'hobcamp')
 Z['ruin_wall']=emit('ruin_wall',ruin_wall(41),'ruins');Z['ruin_arch']=emit('ruin_arch',ruin_arch(),'ruins');Z['path']=emit('path_stones',path_stones(42),'ruins')
+# ---- round 2 zone kits ----
+from zones import *
+Z['frozen_pond']=emit('frozen_pond',frozen_pond(),'frost','frostreach.js frozenLake (Phong transparent disc) + plain snow');Z['drift_a']=emit('snow_drift_a',snow_drift(1),'frost');Z['drift_b']=emit('snow_drift_b',snow_drift(2),'frost')
+Z['ice_spire']=emit('ice_spire',ice_spire(3),'frost','frost-cave.js emissive ice shards (proposal)')
+Z['ash_tree']=emit('ash_tree',ash_tree(4),'volcano');Z['steam_vent']=emit('steam_vent',steam_vent(5),'volcano','(new) steam as geometry, no particles/emissive');Z['basalt_boulder']=emit('basalt_boulder',basalt_boulder(6),'volcano')
+Z['pier_post']=emit('pier_post',pier_post(),'port','harbor bollards');Z['crate_stack']=emit('crate_stack',crate_stack(),'port');Z['net_rack']=emit('net_rack',net_rack(),'port')
+emit('ship_galleon',ship(True),'port','port-ships.js buildSailingShip(scale,true): ~28 meshes, 5 materials');emit('ship_sloop',ship(False),'port','port-ships.js buildSailingShip(scale,false)')
+Z['hob_tent2']=emit('hob_tent2',hob_tent2(),'hobcamp','hobcamps.js tent cone + door plane');Z['hob_tent2_red']=emit('hob_tent2_red',hob_tent2(0x7a3a34),'hobcamp');Z['hob_totem']=emit('hob_totem',hob_totem(),'hobcamp');Z['hob_banner']=emit('hob_banner',hob_banner(),'hobcamp','hobcamps.js pole + flag');Z['hob_rack']=emit('hob_rack',hob_rack(),'hobcamp')
 # ---- merged clusters (1 draw each) ----
 r=np.random.default_rng(99)
 def scat(dst,pool,n,rad,smin=.8,smax=1.3,minr=0):

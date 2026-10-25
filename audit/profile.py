@@ -27,6 +27,10 @@ with sync_playwright() as p:
   res={}
   pg.evaluate("()=>document.querySelectorAll('body > div').forEach(d=>{if(!d.querySelector('canvas'))d.style.visibility='hidden'})") if os.environ.get('NOHUD') else None
   for sp in SPOTS:
+    if sp.get('zone'):
+      pg.evaluate("z=>window.__P.setZone(z)",sp['zone']);time.sleep(6);sp=dict(sp);o=pg.evaluate('()=>{const s=window.__P.FM.spawn;return [s.x,s.z]}');sp['x']+=o[0];sp['z']+=o[1];sp['cam']=[sp['cam'][0]+o[0],sp['cam'][1],sp['cam'][2]+o[1]];sp['look']=[sp['look'][0]+o[0],sp['look'][1],sp['look'][2]+o[1]]
+    if sp.get('ground'):
+      gy=pg.evaluate("s=>{const P=window.__P,T=P.THREE,rc=new T.Raycaster(new T.Vector3(s.look[0],900,s.look[2]),new T.Vector3(0,-1,0));const h=rc.intersectObjects(P.scene.children,true).filter(i=>i.object.visible&&i.object.isMesh&&!i.object.isSprite);return h.length?h[0].point.y:0}",sp);sp=dict(sp);sp['cam']=[sp['cam'][0],sp['cam'][1]+gy,sp['cam'][2]];sp['look']=[sp['look'][0],sp['look'][1]+gy,sp['look'][2]];print('gy',gy)
     pg.evaluate("""s=>{const P=window.__P;P.state.heroX=s.x;P.state.heroZ=s.z;P.state.yaw=s.yaw||0;P.state.camYaw=s.yaw||0;
       window.__PV_HOOK=()=>{P.state.heroX=s.x;P.state.heroZ=s.z;if(s.cam){P.camera.position.set(...s.cam);P.camera.lookAt(...s.look);}}}""",sp)
     time.sleep(4)

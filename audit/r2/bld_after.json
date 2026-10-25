@@ -1,0 +1,68 @@
+{
+ "house1": {
+  "calls": 23,
+  "tris": 12578,
+  "bethMeshes": 2,
+  "bethTris": 5362
+ },
+ "house2": {
+  "calls": 22,
+  "tris": 13742,
+  "bethMeshes": 2,
+  "bethTris": 5972
+ },
+ "house3": {
+  "calls": 22,
+  "tris": 12348,
+  "bethMeshes": 2,
+  "bethTris": 5238
+ },
+ "house4": {
+  "calls": 25,
+  "tris": 13888,
+  "bethMeshes": 2,
+  "bethTris": 5982
+ },
+ "farmhouse": {
+  "calls": 24,
+  "tris": 17418,
+  "bethMeshes": 2,
+  "bethTris": 7724
+ },
+ "barn": {
+  "calls": 18,
+  "tris": 8472,
+  "bethMeshes": 2,
+  "bethTris": 3570
+ },
+ "stables": {
+  "calls": 19,
+  "tris": 15446,
+  "bethMeshes": 2,
+  "bethTris": 6868
+ },
+ "windmill": {
+  "calls": 13,
+  "tris": 5926,
+  "bethMeshes": 3,
+  "bethTris": 2676
+ },
+ "lighthouse": {
+  "calls": 12,
+  "tris": 7862,
+  "bethMeshes": 2,
+  "bethTris": 3644
+ },
+ "gt0": {
+  "calls": 49,
+  "tris": 6184,
+  "bethMeshes": 2,
+  "bethTris": 1340
+ },
+ "thieves": {
+  "calls": 24,
+  "tris": 15354,
+  "bethMeshes": 2,
+  "bethTris": 6760
+ }
+}

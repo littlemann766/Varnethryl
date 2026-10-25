@@ -1,10 +1,12 @@
 # VARNETHRYL world-art kit generator (Beth). One mesh + one shared atlas material per GLB. 1 unit = 1 m, Y-up.
 import numpy as np, json, struct, math, os, sys
 OUT=sys.argv[1] if len(sys.argv)>1 else '.'
-TILES=json.load(open(os.path.join(OUT,'atlas','atlas.json')))['tiles']
+TILES=json.load(open(os.path.join(OUT,'atlas','atlas.json')))['tiles'] if os.path.exists(os.path.join(OUT,'atlas','atlas.json')) else []
 rng=np.random.default_rng(42)
+BTILES=[]
 def tile_uv(name,u,v):
-  i=TILES.index(name);ty,tx=divmod(i,4);e=3/1024
+  i=TILES.index(name) if name in TILES else BTILES.index(name)
+  ty,tx=divmod(i,4);e=3/1024
   return (tx/4+e+u*(0.25-2*e), ty/4+e+v*(0.25-2*e))
 def hexc(h):return np.array([(h>>16)&255,(h>>8)&255,h&255])/255.
 def rot(ax,a):
@@ -81,27 +83,31 @@ def cards(m,tile,w,h,n,t=(0,0,0),col=(1,1,1),yaw=0,tilt=0,y0=0):
     pts=[R@np.array(v)+t for v in [(-w/2,y0,0),(w/2,y0,0),(w/2,y0+h,0),(-w/2,y0+h,0)]]
     m.quad(*pts,tile,np.asarray(col))
 # ---------- GLB writer ----------
-def write_glb(m,path,name,extras=None):
+def _pack(m):
   P=np.array(m.P,np.float32);N=np.array(m.N,np.float32);U=np.array(m.U,np.float32);C=np.clip(np.array(m.C,np.float32),0,1)
   N/=np.maximum(np.linalg.norm(N,axis=1,keepdims=True),1e-9)
-  # weld identical vertices -> indices
   key=np.concatenate([P,N,U,C],1).round(5);uq,inv=np.unique(key,axis=0,return_inverse=True);inv=inv.reshape(-1)
-  P,N,U,C=uq[:,:3].astype(np.float32),uq[:,3:6].astype(np.float32),uq[:,6:8].astype(np.float32),uq[:,8:11].astype(np.float32)
-  I=inv.astype(np.uint16 if len(uq)<65535 else np.uint32)
-  bufs=[I.tobytes(),P.tobytes(),N.tobytes(),U.tobytes(),C.tobytes()];views=[];off=0;blob=b''
-  for i,bb in enumerate(bufs):
-    pad=(4-len(bb)%4)%4;views.append({'buffer':0,'byteOffset':off,'byteLength':len(bb),'target':34963 if i==0 else 34962});blob+=bb+b'\0'*pad;off+=len(bb)+pad
-  acc=[{'bufferView':0,'componentType':5123 if I.dtype==np.uint16 else 5125,'count':int(len(I)),'type':'SCALAR'},
-       {'bufferView':1,'componentType':5126,'count':len(P),'type':'VEC3','min':P.min(0).tolist(),'max':P.max(0).tolist()},
-       {'bufferView':2,'componentType':5126,'count':len(P),'type':'VEC3'},{'bufferView':3,'componentType':5126,'count':len(P),'type':'VEC2'},
-       {'bufferView':4,'componentType':5126,'count':len(P),'type':'VEC3'}]
-  rel=os.path.relpath(os.path.join(OUT,'atlas'),os.path.dirname(path))
-  g={'asset':{'version':'2.0','generator':'beth-world-kit'},'extensionsUsed':['EXT_texture_webp'],'scene':0,'scenes':[{'nodes':[0]}],
-     'nodes':[{'name':name,'mesh':0,'extras':extras or {}}],'meshes':[{'name':name,'primitives':[{'attributes':{'POSITION':1,'NORMAL':2,'TEXCOORD_0':3,'COLOR_0':4},'indices':0,'material':0}]}],
-     'materials':[{'name':'beth_kit_atlas','pbrMetallicRoughness':{'baseColorTexture':{'index':0},'metallicFactor':0.0,'roughnessFactor':0.85},'alphaMode':'MASK','alphaCutoff':0.5,'doubleSided':True}],
+  P,N,U,C=[uq[:,a:b].astype(np.float32) for a,b in ((0,3),(3,6),(6,8),(8,11))]
+  I=inv.astype(np.uint16 if len(uq)<65535 else np.uint32);return I,P,N,U,C
+def write_glb(m,path,name,extras=None,atlas='atlas',nodes=None,mat_name='beth_kit_atlas'):
+  """nodes: list of (node_name, M, translation) -> one mesh per node, all sharing ONE material."""
+  nodes=nodes or [(name,m,(0,0,0))];blob=b'';views=[];acc=[];meshes=[];gn=[];tot=0
+  def view(bb,tgt):
+    nonlocal blob;pad=(4-len(bb)%4)%4;views.append({'buffer':0,'byteOffset':len(blob),'byteLength':len(bb),'target':tgt});blob+=bb+b'\0'*pad;return len(views)-1
+  for ni,(nn,mm,tr) in enumerate(nodes):
+    I,P,N,U,C=_pack(mm);tot+=len(I)//3;b0=len(acc)
+    acc+= [{'bufferView':view(I.tobytes(),34963),'componentType':5123 if I.dtype==np.uint16 else 5125,'count':int(len(I)),'type':'SCALAR'},
+       {'bufferView':view(P.tobytes(),34962),'componentType':5126,'count':len(P),'type':'VEC3','min':P.min(0).tolist(),'max':P.max(0).tolist()},
+       {'bufferView':view(N.tobytes(),34962),'componentType':5126,'count':len(P),'type':'VEC3'},{'bufferView':view(U.tobytes(),34962),'componentType':5126,'count':len(P),'type':'VEC2'},
+       {'bufferView':view(C.tobytes(),34962),'componentType':5126,'count':len(P),'type':'VEC3'}]
+    meshes.append({'name':nn,'primitives':[{'attributes':{'POSITION':b0+1,'NORMAL':b0+2,'TEXCOORD_0':b0+3,'COLOR_0':b0+4},'indices':b0,'material':0}]})
+    gn.append({'name':nn,'mesh':ni,'translation':list(map(float,tr))})
+  rel=os.path.relpath(os.path.join(OUT,atlas),os.path.dirname(path))
+  g={'asset':{'version':'2.0','generator':'beth-world-kit'},'extensionsUsed':['EXT_texture_webp'],'scene':0,'scenes':[{'nodes':[len(gn)]}],
+     'nodes':gn+[{'name':name,'children':list(range(len(gn))),'extras':extras or {}}],'meshes':meshes,
+     'materials':[{'name':mat_name,'pbrMetallicRoughness':{'baseColorTexture':{'index':0},'metallicFactor':0.0,'roughnessFactor':0.85},'alphaMode':'MASK','alphaCutoff':0.5,'doubleSided':True}],
      'textures':[{'sampler':0,'source':0,'extensions':{'EXT_texture_webp':{'source':1}}}],'samplers':[{'magFilter':9729,'minFilter':9987,'wrapS':33071,'wrapT':33071}],
-     'images':[{'uri':rel+'/atlas.png'},{'uri':rel+'/atlas.webp'}],
-     'accessors':acc,'bufferViews':views,'buffers':[{'byteLength':len(blob)}]}
+     'images':[{'uri':rel+'/atlas.png'},{'uri':rel+'/atlas.webp'}],'accessors':acc,'bufferViews':views,'buffers':[{'byteLength':len(blob)}]}
   js=json.dumps(g).encode();js+=b' '*((4-len(js)%4)%4)
   data=struct.pack('<III',0x46546C67,2,12+8+len(js)+8+len(blob))+struct.pack('<II',len(js),0x4E4F534A)+js+struct.pack('<II',len(blob),0x004E4942)+blob
-  open(path,'wb').write(data);return len(I)//3
+  open(path,'wb').write(data);return tot

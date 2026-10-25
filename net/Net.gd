@@ -64,7 +64,7 @@ func _ready() -> void:
 # ---------------- connection ----------------
 ## entry: "game" | "title" | "resume" (see server join rules).
 func join(code: String, nickname: String, entry := "game", state := {}, friend_code := "") -> bool:
-	var c := _clean(code, 12).to_upper().replace(" ", "")
+	var c := RegEx.create_from_string("[^A-Z0-9]").sub(_clean(code, 24).to_upper(), "", true).substr(0, 12)
 	var n := _clean(nickname, 20)
 	if c.length() < 4 or n.length() < 2:
 		join_failed.emit("Enter a nickname (2+ letters) and a world code (4–12 characters).")

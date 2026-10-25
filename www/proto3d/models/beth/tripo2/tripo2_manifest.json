@@ -190,5 +190,53 @@
    512
   ],
   "source": "user_1025b.glb"
+ },
+ "backdrop_castle": {
+  "source": "user_1025c.glb (castle 2 of 4)",
+  "scale": 372.36,
+  "tex": [
+   1024,
+   1024
+  ],
+  "tris_lod1": 3999,
+  "tex_lod1": [
+   512,
+   512
+  ],
+  "tris_lod2": 1599,
+  "tex_lod2": [
+   256,
+   256
+  ],
+  "game_size_m": [
+   71.64,
+   70.0,
+   67.64
+  ],
+  "tris": 7999
+ },
+ "prop_castle_model": {
+  "source": "user_1025c.glb (castle 2 of 4)",
+  "scale": 3.12,
+  "tex": [
+   2048,
+   2048
+  ],
+  "tris_lod1": 1999,
+  "tex_lod1": [
+   1024,
+   1024
+  ],
+  "tris_lod2": 800,
+  "tex_lod2": [
+   512,
+   512
+  ],
+  "game_size_m": [
+   0.6,
+   0.59,
+   0.57
+  ],
+  "tris": 4000
  }
 }

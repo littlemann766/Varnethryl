@@ -1722,6 +1722,7 @@ func _on_play_solo() -> void:
 
 func _on_multiplayer(world: String) -> void:
 	var w := world if world != "" else "Liongate-1"
+	w = {"Liongate-1": "WORLD1", "Liongate-2": "WORLD2", "Ashen-Ruins": "WORLD3"}.get(w, w)  # server codes: ^[A-Z0-9]{4,12}$
 	var nick := str(VSave.state.get("nickname", VSave.state.get("name", "Hero")))
 	if nick.length() < 2: nick = "Hero"
 	Net.join(w, nick)

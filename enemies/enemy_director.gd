@@ -52,4 +52,5 @@ func _aoe(e: Enemy, c: Vector3, r: float, mult: float) -> void:
 	if combat and Vector2(c.x - combat.body.global_position.x, c.z - combat.body.global_position.z).length() <= r:
 		combat.take_hit(float(e.def.atk), mult)
 
-func living() -> Array: return enemies.filter(func(e): return is_instance_valid(e) and e.alive())
+## a dormant volcano Titan (hidden in the lava until the quest intro) is not a living foe for cheats/AI
+func living() -> Array: return enemies.filter(func(e): return is_instance_valid(e) and e.alive() and not (e is VolcanoTitan and not e.visible))

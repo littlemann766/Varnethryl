@@ -196,6 +196,7 @@ const D := {
 
 # ---- TREASURY: front gate/guard post, main vault room (gold), item storage hall, secure office; upper overlook gallery + vault access
 "treasury": {"name": "Treasury of Varnethryl", "scale": [0.56, 0.56],
+	"fill": [[0, ["chest", "gold_pile", "chest", "weapon_rack"], 0.15]],
 	"floors": [{"h": 3.4, "mat": "palestone", "wall": "stone", "win": 0.0}, {"h": 3.0, "mat": "palestone", "wall": "stone", "win": 5.0, "slab": [[-0.5, -0.5, 0.5, -0.2], [-0.5, -0.2, -0.2, 0.5], [0.2, -0.2, 0.5, 0.5]]}],
 	"walls": [[0, -0.5, 0.25, 0.2, 0.25, [[0.714, 2.6]]], [0, -0.2, -0.5, -0.2, 0.25, [[0.6, 1.8]]], [0, 0.2, -0.5, 0.2, 0.25, [[0.6, 1.8]]]],
 	"stairs": [["auto", 0, 1, 1.8]],

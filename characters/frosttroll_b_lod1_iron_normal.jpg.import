@@ -2,25 +2,25 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://fan6awulwvr6"
-path="res://.godot/imported/frosttroll_b_lod1_Image_0.webp-79bf01d39c43fb13222bcd04416b846c.ctex"
+uid="uid://cx7uyyc0sg640"
+path="res://.godot/imported/frosttroll_b_lod1_iron_normal.jpg-2acd38ed38f7929311177a15f86561f8.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "58a3a68395a0bc1e043fb5992e1e9f9f"
+"md5": "32ee2f7e29ac5b71c9ca98f35a73d9a4"
 }
 
 [deps]
 
-source_file="res://characters/frosttroll_b_lod1_Image_0.webp"
-dest_files=["res://.godot/imported/frosttroll_b_lod1_Image_0.webp-79bf01d39c43fb13222bcd04416b846c.ctex"]
+source_file="res://characters/frosttroll_b_lod1_iron_normal.jpg"
+dest_files=["res://.godot/imported/frosttroll_b_lod1_iron_normal.jpg-2acd38ed38f7929311177a15f86561f8.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=0
 compress/high_quality=false
-compress/lossy_quality=0.8
+compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
@@ -39,5 +39,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=1024
+process/size_limit=0
 detect_3d/compress_to=1

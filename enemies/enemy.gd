@@ -73,6 +73,13 @@ func take_damage(dmg: int, from: Vector3) -> void:
 
 func set_state(s: String) -> void: state = s; t_state = 0.0
 
+## test 14: Lucian's v4 frost trolls (A 0986577, B 349a02f): hit frame (s into attack1/2/3) per BOSS_PATTERNS order
+const CLIP_HITS := {"frosttroll_a": [1.1, 1.5, 1.3], "frosttroll_b": [1.1, 1.6, 1.3]}
+func _pattern_index() -> int:
+	var L: Array = CombatData.patterns(TYPES[type_id].patterns)
+	for i in L.size(): if L[i].get("id") == pattern.get("id"): return mini(i, 2)
+	return 0
+
 func _pick_pattern() -> Dictionary:
 	var L: Array = CombatData.patterns(TYPES[type_id].patterns)
 	if L.is_empty(): return {}
@@ -102,12 +109,19 @@ func ai_step(dt: float, to: Vector3, d: float) -> void:
 			if pattern.is_empty(): pattern = _pick_pattern()
 			if d > reach_m() * 0.8:
 				position += dir * speed_mps * (1.25 if phase == 2 else 1.0) * dt; moving = 1.0
-			if d <= reach_m() and atk_cd <= 0.0: set_state("telegraph")
+			if d <= reach_m() and atk_cd <= 0.0:
+				set_state("telegraph")
+				if CLIP_HITS.has(type_id):   # test 14: Lucian's attackN plays from the wind-up; damage lands on its hit frame
+					var k := _pattern_index(); var sp := 1.0 / (0.75 if phase == 2 else 1.0)
+					rig.play_attack("attack%d" % (k + 1), sp)
 			_face(dir, dt)
 		"telegraph":
 			var tele: float = float(pattern.get("tele", def.tele)) * (0.75 if phase == 2 else 1.0)
+			if CLIP_HITS.has(type_id): tele = float(CLIP_HITS[type_id][_pattern_index()]) * (0.75 if phase == 2 else 1.0)
 			if t_state >= tele:
-				set_state("attack"); rig.play_attack("", 1.0); attacked.emit(self, pattern)
+				set_state("attack")
+				if not CLIP_HITS.has(type_id): rig.play_attack("", 1.0)
+				attacked.emit(self, pattern)
 		"attack":
 			if t_state >= 0.18:
 				atk_cd = float(def.atkMs) / 1000.0 * (0.8 if phase == 2 else 1.0); pattern = {}; set_state("recover")

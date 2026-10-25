@@ -47,6 +47,7 @@ func setup(main: Node) -> TitanQuest:
 	titan.telegraph.connect(_telegraph)
 	titan.died.connect(func(_e): _win())
 	_hide_titan()
+	titan.lava_veins(int(m.tier) >= 2)   # test 14: Beth's lava veins; fallback material on Low/Medium
 	titan.rig.set_death_clip("death_pool")   # Lucian v3: in-pool death (3.03 s, holds), instead of `death`
 	for n in 3: stages.append(_load_stage(n + 1))
 	_show_stage(1)
@@ -96,6 +97,7 @@ func _show_stage(n: int) -> void:
 		(s.haz as StaticBody3D).collision_layer = HAZARD_LAYER if on else 0
 	titan.stage = n
 	titan.set_glow(GLOW[n - 1])
+	titan.lava_stage(n)
 	if m.lava_mat(): m.lava_mat().set_shader_parameter("glow", LAVA_GLOW[n - 1])
 	if ring: ring.scale = Vector3(RING[n - 1], 1.0, RING[n - 1])
 	for s in smokes: (s[0] as CPUParticles3D).amount = int(s[1] * SMOKE[n - 1])
@@ -221,6 +223,7 @@ func _win() -> void:
 	for l in m.pool_lights: (l as OmniLight3D).light_energy = 0.5
 	for f in m.volc_fx: if f is OmniLight3D and not m.pool_lights.has(f): (f as OmniLight3D).light_energy *= 0.4
 	ring.visible = false
+	create_tween().tween_property(titan, "glow_strength", 0.25, 3.0)   # veins cool as he falls
 	var tw := create_tween(); tw.tween_interval(3.1); tw.tween_property(titan, "position:y", base.y + 2.0, 4.0).set_trans(Tween.TRANS_SINE)
 	tw.tween_callback(func(): titan.visible = false)
 	qlabel.text = "Quest complete: " + QUEST

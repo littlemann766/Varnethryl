@@ -43,8 +43,16 @@ void fragment(){
 	float fr = (1.0 - smoothstep(-0.15, 0.25, fd + (noise(p*1.7)-0.5)*0.35)) * (1.0 - r);
 	vec3 col = mix(g, rc, r);
 	col = mix(col, path_col.rgb * (0.85 + 0.3*noise(p*4.0)), fr);
-	col = mix(col, rock.rgb * (0.8 + 0.4*n), smoothstep(0.25, 0.45, slope));
-	col = mix(col, snow.rgb, smoothstep(48.0, 60.0, wp.y + n*6.0) * smoothstep(170.0, 240.0, length(p - volc_c)) * (1.0 - smoothstep(0.55, 0.75, slope)));
+	// test 14: mountain rock with layered strata + large-scale tone variation (no checker), snow cap with a ragged line
+	float big = noise(p*0.012);
+	float strata = 0.5 + 0.5*sin(wp.y*0.45 + noise(p*0.05)*5.0);
+	vec3 rk = mix(rock.rgb*0.72, rock.rgb*1.12, strata*0.6 + n*0.4) * mix(vec3(0.95,0.93,0.9), vec3(1.05,1.0,0.95), big);
+	rk *= 0.85 + 0.3*noise(p*1.9);
+	float hi_rock = smoothstep(70.0, 110.0, wp.y);   // bare rock above the tree line even on gentler slopes
+	col = mix(col, rk, max(smoothstep(0.25, 0.45, slope), hi_rock * smoothstep(0.08, 0.2, slope)));
+	float snow_line = 48.0 + smoothstep(600.0, 900.0, length(p)) * 92.0 + (noise(p*0.03) - 0.5) * 30.0;
+	float sn = smoothstep(snow_line, snow_line + 14.0, wp.y + n*6.0) * smoothstep(170.0, 240.0, length(p - volc_c)) * (1.0 - smoothstep(0.62, 0.8, slope));
+	col = mix(col, snow.rgb * (0.92 + 0.08*n), sn);
 	ALBEDO = col;
 	NORMAL_MAP = mix(vec3(0.5, 0.5, 1.0), texture(cobble_normal, uvc).rgb, r * (1.0 - smoothstep(0.25, 0.45, slope)));
 	ROUGHNESS = mix(0.95, 0.75, r);

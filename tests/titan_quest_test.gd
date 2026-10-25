@@ -37,6 +37,8 @@ func _run() -> void:
 			for j in a.track_get_key_count(k): var v: Vector3 = a.track_get_key_value(k, j); drift = maxf(drift, Vector2(v.x - v0.x, v.z - v0.z).length())
 	ok(drift < 1e-4, "walk root XZ motion removed (%.4f)" % drift)
 	# stage 1 shown, hazards
+	ok(t.lava_mat != null, "lava vein material on the Titan (%s)" % ("shader" if t.lava_hq else "fallback"))
+	ok(t.drips.filter(func(d): return d.emitting).size() == 8, "8 drips in stage 1")
 	ok(q.stage == 1 and q.stages[0].vis.visible and not q.stages[1].vis.visible, "stage 1 floor shown")
 	ok(q.stages[0].haz.collision_layer == q.HAZARD_LAYER and q.stages[1].haz.collision_layer == 0, "stage 1 hazard active only")
 	for i in 5: await physics_frame
@@ -83,6 +85,9 @@ func _run() -> void:
 	await create_timer(1.8).timeout
 	ok(near(t.position.y - B.y, 21.0, 0.05), "sunk to 21.0 (%.2f)" % (t.position.y - B.y))
 	ok(q.embers.amount == 24, "more embers in stage 2")
+	ok(t.lava_mat != null and near(t.glow_strength, 2.2, 0.05), "lava veins glow 2.2 in stage 2 (%.2f)" % t.glow_strength)
+	ok(t.drips.size() == 16 and t.drips.all(func(d): return d.emitting), "all 16 lava drips in stage 2")
+	ok(t.chest_light != null, "orange chest light")
 	# stage 3
 	t.hp = t.max_hp * 0.3
 	for i in 3: await physics_frame
@@ -92,7 +97,9 @@ func _run() -> void:
 	ok(near(q.ring.scale.x, 8.0, 0.01), "lava ring scale 8")
 	# stage 3 rain spawns telegraphed rocks
 	t.cds.rain = 0.0
-	for i in 10: await physics_frame
+	for i in 90:   # rain starts once his current attack (if any) finishes
+		await physics_frame
+		if t.projectiles.size() >= 4: break
 	ok(t.projectiles.size() >= 4, "stage 3 rock rain (%d rocks)" % t.projectiles.size())
 	# lava hurts
 	var c: HeroCombat = m.party.combat; c.hp = c.max_hp

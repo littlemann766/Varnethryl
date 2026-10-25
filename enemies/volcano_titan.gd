@@ -55,6 +55,51 @@ func setup_volcano(ground: Callable) -> VolcanoTitan:
 func set_glow(e: float) -> void:
 	for m in glow_mats: m.emission_energy_multiplier = e
 
+# ---------- test 14: Beth's lava veins (effects only; the GLB is untouched) ----------
+const LAVA_DIR := "res://assets/volcano/titan_lava/"
+const VEIN_SCALE := [0.85, 1.0, 1.2]
+const DRIPS_STAGE1 := 8
+var lava_mat: Material            # per-instance duplicate of titan_lava_material (High/Ultra) or titan_lava_fallback (Low/Medium)
+var lava_hq := false
+var drips: Array[GPUParticles3D] = []
+var chest_light: OmniLight3D
+var glow_strength := 1.0:
+	set(v):
+		glow_strength = v
+		if lava_mat is ShaderMaterial: (lava_mat as ShaderMaterial).set_shader_parameter("glow_strength", v)
+		elif lava_mat is StandardMaterial3D: (lava_mat as StandardMaterial3D).emission_energy_multiplier = 2.0 * v
+		if chest_light: chest_light.light_energy = 1.2 + 0.9 * v
+
+func lava_veins(hq: bool) -> void:
+	lava_hq = hq
+	lava_mat = (load(LAVA_DIR + ("titan_lava_material_volcano_glow_lod1.tres" if hq else "titan_lava_fallback_volcano_glow_lod1.tres")) as Material).duplicate()   # Beth 8d206c9 set (re-sculpted hands, new UVs)
+	for mi: MeshInstance3D in rig.find_children("*", "MeshInstance3D", true, false):
+		if String(mi.name).to_lower().contains("ashentitan") or mi.skin != null: mi.material_override = lava_mat
+	if skel == null: return
+	if drips.is_empty():
+		var j = JSON.parse_string(FileAccess.get_file_as_string(LAVA_DIR + "titan_drip_points.json"))
+		var scene: PackedScene = load(LAVA_DIR + "titan_drip_particles.tscn")
+		for p in j.points:
+			var bi := skel.find_bone(p.bone)
+			if bi < 0: continue
+			var ba := BoneAttachment3D.new(); ba.name = "Drip_" + p.name; ba.bone_name = p.bone; skel.add_child(ba)
+			var at := Node3D.new(); at.position = Vector3(p.offset[0], p.offset[1], p.offset[2]); ba.add_child(at)
+			var d: GPUParticles3D = scene.instantiate(); at.add_child(d); d.emitting = drips.size() < DRIPS_STAGE1; drips.append(d)
+		var cb := skel.find_bone("chest")
+		if cb >= 0:
+			var ca := BoneAttachment3D.new(); ca.name = "ChestGlow"; ca.bone_name = "chest"; skel.add_child(ca)
+			chest_light = OmniLight3D.new(); chest_light.light_color = Color(1.0, 0.5, 0.15); chest_light.omni_range = 16.0
+			chest_light.shadow_enabled = false; chest_light.position = Vector3(0, 0, 1.2); ca.add_child(chest_light)
+	glow_strength = glow_strength
+
+## stage 1/2/3: glow 1.0 / 2.2 / 4.0 tweened over 1.2 s, veins grow, 8 drips then all 16
+func lava_stage(n: int, tween := true) -> void:
+	var g: float = [1.0, 2.2, 4.0][n - 1]
+	if tween and is_inside_tree(): create_tween().tween_property(self, "glow_strength", g, 1.2).set_trans(Tween.TRANS_SINE)
+	else: glow_strength = g
+	if lava_mat is ShaderMaterial: (lava_mat as ShaderMaterial).set_shader_parameter("vein_scale", VEIN_SCALE[n - 1])
+	for i in drips.size(): drips[i].emitting = n >= 2 or i < DRIPS_STAGE1
+
 ## walk/run were authored with travel on root/hips: drop their XZ so he stays in the pool
 func _no_root_motion() -> void:
 	if rig.anim_player == null: return
@@ -95,8 +140,19 @@ func take_damage(dmg: int, from: Vector3) -> void:
 	if not active: return
 	super.take_damage(dmg, from)
 
+## test 14: Lucian v8 (75c0682) clip hit frames; Beth's events keep their spacing, re-anchored on his impact frame
+const LUCIAN_HIT := {"eruption_slam": 1.288, "magma_sweep": 0.976, "boulder_hurl": 2.383}
+const MELEE_HIT := {"attack1": 1.2, "attack2": 1.1, "attack3": 1.3}
+var _ev_cache := {}
 func _events(clip: String) -> Array:
-	return J.attackEvents.filter(func(e): return e.clip == clip)
+	if _ev_cache.has(clip): return _ev_cache[clip]
+	var ev: Array = J.attackEvents.filter(func(e): return e.clip == clip)
+	if LUCIAN_HIT.has(clip) and rig.clips.has(clip) and not ev.is_empty():
+		var t0 := float(ev[0].t); var out := []
+		for e in ev: var e2: Dictionary = e.duplicate(); e2.t = LUCIAN_HIT[clip] + float(e.t) - t0; out.append(e2)
+		ev = out
+	_ev_cache[clip] = ev
+	return ev
 
 func ai_step(dt: float, to: Vector3, d: float) -> void:
 	radius = _hurt_radius()
@@ -122,10 +178,14 @@ func ai_step(dt: float, to: Vector3, d: float) -> void:
 func _start(clip: String) -> void:
 	var cd: Dictionary = J.attackSequenceSuggestion.cooldownsSec
 	cds[clip] = float(cd.get(clip, 4)) * (0.75 if stage == 3 else 1.0)
-	var wind := {"eruption_slam": 1.2, "boulder_hurl": 0.8, "volcano_roar": 1.5}
+	# v8 clips carry their own anticipation: no separate windup for the slam / hurl
+	var wind := {"volcano_roar": 1.5}
 	seq = []
 	if wind.has(clip): seq.append(["windup", wind[clip] / (1.25 if stage == 3 else 1.0)])
-	var dur := float(J.clips[clip].durationSec) if J.clips.has(clip) else rig.clip_length(clip)
+	if clip == "attack":
+		var ms := MELEE_HIT.keys().filter(func(k): return rig.clips.has(k))
+		if not ms.is_empty(): clip = ms[randi() % ms.size()]
+	var dur := rig.clip_length(clip) if rig.clip_length(clip) > 0.0 else (float(J.clips[clip].durationSec) if J.clips.has(clip) else 2.0)
 	seq.append([clip, maxf(dur, 1.0) / (1.25 if stage == 3 else 1.0)])
 	cur_clip = ""; set_state("attack")
 
@@ -135,9 +195,9 @@ func _run_seq(dt: float) -> void:
 		cur_clip = seq[0][0]; clip_t = 0.0; fired = {}
 		rig.play_attack(cur_clip, spd)
 		if cur_clip != "windup": attacked.emit(self, {"id": cur_clip, "name": cur_clip.capitalize()})
-		if cur_clip == "attack": _telegraph_hand(0.9 / spd)
+		if cur_clip == "attack" or MELEE_HIT.has(cur_clip): _telegraph_hand(float(MELEE_HIT.get(cur_clip, 0.9)) / spd)
 	clip_t += dt * spd
-	if cur_clip == "attack" and not fired.has("melee") and clip_t >= 0.9:
+	if (cur_clip == "attack" or MELEE_HIT.has(cur_clip)) and not fired.has("melee") and clip_t >= float(MELEE_HIT.get(cur_clip, 0.9)):
 		fired["melee"] = true; _hand_hit(5.0, 1.6)
 	for i in _events(cur_clip).size():
 		var e: Dictionary = _events(cur_clip)[i]

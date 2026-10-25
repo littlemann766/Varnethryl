@@ -236,10 +236,11 @@ func _ready() -> void:
 	for d in DEFS: _building(d)
 	_street_kit()
 	_farm_fields()
-	fillers = TownFillers.build(self)   # test 14: rows of filler houses/shops from assets/town/fillers.json
+	if OS.get_environment("VARN_NO_FILLERS") == "": fillers = TownFillers.build(self)   # test 14: rows of filler houses/shops from assets/town/fillers.json
 	_streets_to_shader()
 	# test 10: boss "Fix the castle and or get rid of it" - the Tripo backdrop castle reads as shredded/floating, removed
 	_harbour()
+	if OS.get_environment("VARN_NO_HARBOR") == "": harbor = HarborDistrict.new().build(self)
 	_ships()
 	_dressing()
 	_hi_terrain()
@@ -277,7 +278,7 @@ func height(x: float, z: float) -> float:
 	# test 12: Beth's volcano_titan stands on a level pad (its base ring is flat at y=0, r 147 m)
 	var dv := Vector2(x, z).distance_to(VOLC)
 	if dv < 200.0:
-		if is_nan(_volc_h0): _volc_h0 = _height_raw(VOLC.x, VOLC.y, VOLC.length())
+		if is_nan(_volc_h0): _volc_h0 = _height_raw_v13(VOLC.x, VOLC.y, VOLC.length())
 		h = lerpf(_volc_h0, h, smoothstep(150.0, 200.0, dv))
 	# test 14 (boss: "put the farmstead here"): the farmstead moved out to the end of the west dirt road; level pad
 	var fd := Vector2(x, z).distance_to(FARM)
@@ -290,14 +291,38 @@ func height(x: float, z: float) -> float:
 	# hills fall away gently to the SW coast (no sheer wall at the sea edge)
 	var dsea := Vector2(maxf(0.0, x - SEA_COAST_X), maxf(0.0, SEA_NORTH_Z - z)).length()
 	if dsea < 160.0: h *= smoothstep(0.0, 160.0, dsea)
+	# test 14: big harbour district pad
+	var hw := HarborDistrict.pad_weight(x, z)
+	if hw > 0.0: h = lerpf(h, HARBOR_Y, hw)
 	var sm := sea_mask(x, z)
+	if x < SEA_COAST_X + 1.0 and z > SEA_NORTH_Z - 2.0: h = maxf(h, 0.7)   # over the sea plane: beach stays above the water
 	if sm > 0.0: h = lerpf(h, -4.0, sm)
 	return h
 
+## test 14 (boss: mountains were hollow shells, too close): the mountains are now part of the terrain heightfield
+## (closed, seamless, textured by ground.gdshader rock/snow) and stand far back at r 880-1150 m; the old 430-650 m
+## hill wall is lowered to gentle foothills so there is open country between the city and the range.
+const MTN_R0 := 880.0
+const MTN_R1 := 1120.0
 func _height_raw(x: float, z: float, r: float) -> float:
 	var t := smoothstep(215.0, 340.0, r)
 	var n := noise.get_noise_2d(x, z) * 0.5 + 0.5
-	var h := t * (4.0 + 30.0 * n) + smoothstep(430.0, 650.0, r) * 55.0 * (0.6 + n)
+	var h := t * (4.0 + 30.0 * n) + smoothstep(560.0, 840.0, r) * 26.0 * (0.6 + n)
+	var mr := smoothstep(MTN_R0, MTN_R1, r + (n - 0.5) * 160.0)
+	if mr > 0.0:
+		var rg := 1.0 - absf(noise.get_noise_2d(x * 2.3 + 900.0, z * 2.3 - 400.0))   # ridged peaks
+		var rg2 := 1.0 - absf(noise.get_noise_2d(x * 5.1 - 300.0, z * 5.1 + 700.0))
+		var massif := smoothstep(0.25, 0.75, noise.get_noise_2d(x * 0.45 + 1500.0, z * 0.45 - 800.0) * 0.5 + 0.5)   # separate massifs + saddles
+		h += mr * (60.0 + (40.0 + 230.0 * rg * rg) * (0.3 + 0.7 * massif) + 45.0 * rg2 * rg2 * mr)
+	return _road_soften(x, z, h)
+
+## the test 13 hills, kept only for the volcano pad height so the arena does not move
+func _height_raw_v13(x: float, z: float, r: float) -> float:
+	var t := smoothstep(215.0, 340.0, r)
+	var n := noise.get_noise_2d(x, z) * 0.5 + 0.5
+	return _road_soften(x, z, t * (4.0 + 30.0 * n) + smoothstep(430.0, 650.0, r) * 55.0 * (0.6 + n))
+
+func _road_soften(x: float, z: float, h: float) -> float:
 	# keep roads gentle: pull terrain down near outskirt roads
 	var rd := _road_dist(Vector2(x, z))
 	h *= lerp(0.35, 1.0, smoothstep(6.0, 40.0, rd))
@@ -313,7 +338,7 @@ func _road_dist(p: Vector2) -> float:
 	return best
 
 func _terrain() -> void:
-	var N := 140; var S := 1400.0; var step := S / N
+	var N := 240; var S := 2400.0; var step := S / N   # test 14: 2.4 km so the far range + its back slopes hide the edge
 	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var hs := PackedFloat32Array(); hs.resize((N + 1) * (N + 1))
 	for j in N + 1:
@@ -351,7 +376,7 @@ func _env() -> void:
 	env.ambient_light_color = Color(0.75, 0.68, 0.58); env.ambient_light_sky_contribution = 0.55
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES; env.tonemap_exposure = 1.0; env.tonemap_white = 6.0
-	env.fog_enabled = true; env.fog_density = 0.0022; env.fog_aerial_perspective = 0.5; env.fog_sky_affect = 0.25
+	env.fog_enabled = true; env.fog_density = 0.0011; env.fog_aerial_perspective = 0.5; env.fog_sky_affect = 0.25   # test 14: density was 0.0022 (far range read as a milky wall)
 	env.glow_enabled = true; env.glow_intensity = 0.6; env.glow_bloom = 0.08; env.glow_hdr_threshold = 1.0
 	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
 	env.adjustment_enabled = true; env.adjustment_contrast = 1.08; env.adjustment_saturation = 1.12
@@ -416,6 +441,8 @@ func _set_time(h: float) -> void:
 	for f in fx_day: f[0].emitting = not night and tier >= f[1]; f[0].visible = f[0].emitting
 
 func apply_quality() -> void:
+	if titan_quest and titan_quest.titan and titan_quest.titan.lava_mat and titan_quest.titan.lava_hq != (tier >= 2):   # test 14: veins shader on High/Ultra only
+		titan_quest.titan.lava_veins(tier >= 2); titan_quest.titan.lava_stage(maxi(1, titan_quest.stage), false)
 	if not ships.is_empty(): _ships_tier()
 	for f in volc_fx: f.visible = tier > 0   # volcano smoke + lava lights off on Low
 	# Test 3: Mobile renderer for every tier. Cost drivers kept in check: render scale + FSR,
@@ -438,7 +465,7 @@ func apply_quality() -> void:
 	env.glow_enabled = tier >= 1
 	env.ssao_enabled = false; env.ssil_enabled = false; env.ssr_enabled = false; env.sdfgi_enabled = false
 	env.volumetric_fog_enabled = false
-	env.fog_enabled = true; env.fog_density = 0.0028
+	env.fog_enabled = true; env.fog_density = 0.0011   # test 14 (was 0.0028: the far mountains read as a milky wall)
 	if probe: probe.visible = tier >= 1
 	for c in grass_chunks:
 		var cap := int(c.multimesh.instance_count * [0.0, 0.2, 0.35, 1.0][tier])
@@ -748,7 +775,7 @@ static func harbour_spot() -> Array:
 ## boat_02 (6.4 m) and boat_sail (7.2 m) at the two smaller piers, a second boat_sail out at sea.
 ## Harbour local (lx, lz) -> world (root.x - lz, root.z + lx); piers run along local +z (world -x) -> bow yaw -PI/2.
 ## Tier-capped (Low 2 / Medium 3 / High 4 / Ultra 4), gentle bob + roll, Beth's _col hulls (static, at rest pose).
-const SHIP_MAX := [2, 3, 4, 4]
+const SHIP_MAX := [3, 6, 10, 12]   # test 14: many ships (far ones are LOD2, no shadows)
 var ships := []   # [node, base_y, phase]
 func _ships() -> void:
 	var hs := harbour_spot(); var c: Vector2 = hs[0]
@@ -757,7 +784,16 @@ func _ships() -> void:
 	var spots := [[L.call(-23.0, 18.0), "tidewrack_sailing_ship", 120.0, -PI / 2 + 0.02, 0.0],
 		[L.call(4.5, 10.0), "boat_02", 60.0, -PI / 2 - 0.05, 2.2],
 		[L.call(20.5, 10.0), "boat_sail", 60.0, -PI / 2 + 0.06, 3.7],
-		[c + Vector2(-85.0, 35.0), "boat_sail", 60.0, 2.4, 1.3]]
+		[c + Vector2(-85.0, 35.0), "boat_sail", 60.0, 2.4, 1.3],
+		# test 14 harbour district: one moored at each new pier, two galleons + boats at anchor in the bay
+		[Vector2(HarborDistrict.PIERS[0] + 5.2, 348.0), "boat_02", 60.0, 0.03, 0.8],
+		[Vector2(HarborDistrict.PIERS[1] + 5.2, 350.0), "boat_sail", 60.0, -0.04, 2.9],
+		[Vector2(HarborDistrict.PIERS[2] - 9.0, 352.0), "tidewrack_sailing_ship", 120.0, 0.02, 4.1],
+		[Vector2(-520.0, 430.0), "tidewrack_sailing_ship", 120.0, 2.6, 1.7],
+		[Vector2(-600.0, 380.0), "boat_sail", 60.0, 1.1, 0.4],
+		[Vector2(-470.0, 520.0), "boat_02", 60.0, -0.7, 3.3],
+		[Vector2(-650.0, 470.0), "boat_sail", 60.0, 0.5, 5.0],
+		[Vector2(-560.0, 600.0), "tidewrack_sailing_ship", 120.0, -2.2, 2.4]]
 	for i in spots.size():
 		var sp: Array = spots[i]; var id: String = sp[1]
 		var root := Node3D.new(); root.name = "Ship%d_%s" % [i, id]; add_child(root)
@@ -1115,11 +1151,22 @@ func ground_y(x: float, z: float) -> float:
 ## The original harbour opens WEST onto sea (seaX -104..-19); here that sea is a coast filling the whole SW corner.
 const SEA_COAST_X := PORT.x - 14.0     # coastline (N-S) just west of the quay
 const SEA_NORTH_Z := PORT.y - 70.0     # sea's north shore
+## test 14 (boss: no square sea edge): the shore wiggles into bays and headlands away from the quays. The wiggle only
+## moves the waterline seaward of the old straight lines, so the flat sea plane never shows through land.
+static func shore_z(x: float) -> float:   # north shore (sea is south of it), straight along the harbour district quay
+	var f := smoothstep(HarborDistrict.X0 - 10.0, HarborDistrict.X0 - 90.0, x)
+	return SEA_NORTH_Z + f * (22.0 + 14.0 * sin(x * 0.012) + 8.0 * sin(x * 0.031 + 2.0))
+static func coast_x(z: float) -> float:   # west coast (sea is west of it), straight along the old port + lighthouse
+	var f := smoothstep(480.0, 560.0, z)
+	return SEA_COAST_X - f * (20.0 + 14.0 * sin(z * 0.011) + 8.0 * sin(z * 0.027 + 1.0))
 static func sea_mask(x: float, z: float) -> float:
-	return (1.0 - smoothstep(SEA_COAST_X - 8.0, SEA_COAST_X, x)) * smoothstep(SEA_NORTH_Z - 8.0, SEA_NORTH_Z, z)
+	var cx := coast_x(z); var sz := shore_z(x)
+	return (1.0 - smoothstep(cx - 8.0, cx, x)) * smoothstep(sz - 8.0, sz, z)
 static func near_port(p: Vector2, pad := 0.0) -> bool:
 	return p.distance_to(PORT) < 150.0 + pad or sea_mask(p.x, p.y) > 0.0 or (p.x < SEA_COAST_X + pad and p.y > SEA_NORTH_Z - 10.0 - pad)
 const SHORE_YAW := PI
+const HARBOR_Y := 0.25   # test 14: harbour district ground level
+var harbor: Node3D
 func _hi_terrain() -> void:
 	var T := "res://assets/hi/terrain/"
 	for i in 26:
@@ -1130,7 +1177,7 @@ func _hi_terrain() -> void:
 		var k: String = ["peak_snow_hi", "peak_bare_hi", "peak_snow_hi", "peak_bare_hi"][i % 4]
 		var sc := rng.randf_range(1.3, 2.0)
 		var ry := rng.randf() * TAU; var sy := rng.randf_range(0.9, 1.2)
-		if near_port(p, 60.0): continue   # after the rng draws so every other peak stays where it was
+		if near_port(p, 60.0) or true: continue   # test 14: the hollow peak shells are gone (terrain mountains); rng draws kept
 		_lod_instances(T + k, Transform3D(Basis(Vector3.UP, ry).scaled(Vector3(sc, sc * sy, sc)), Vector3(p.x, height(p.x, p.y) - 6.0, p.y)), true)
 	_volcano_titan()
 	for i in 18:
@@ -1143,7 +1190,7 @@ func _hi_terrain() -> void:
 	var w := MeshInstance3D.new(); var pm := CylinderMesh.new(); pm.top_radius = 66; pm.bottom_radius = 66; pm.height = 0.2; pm.radial_segments = 64; pm.rings = 1
 	pm.material = _water_mat(); w.mesh = pm; w.position = Vector3(LAKE.x, -0.1, LAKE.y); add_child(w)
 	# SW-corner sea (test 10): one big water quad from the coast to the world edge
-	var sw := MeshInstance3D.new(); var sp := PlaneMesh.new(); var x0 := -1600.0; var z1 := 1600.0
+	var sw := MeshInstance3D.new(); var sp := PlaneMesh.new(); var x0 := -4000.0; var z1 := 4000.0   # test 14: sea to the horizon
 	sp.size = Vector2(SEA_COAST_X - 1.0 - x0, z1 - (SEA_NORTH_Z - 2.0)); sp.material = _water_mat(); sw.mesh = sp; sw.name = "Sea"
 	sw.position = Vector3((x0 + SEA_COAST_X - 1.0) * 0.5, 0.0, (SEA_NORTH_Z - 2.0 + z1) * 0.5); sw.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(sw)
 	# the boss's Tripo lighthouse: rock island + tower share one origin (Beth). LOD1/LOD2 only.
@@ -1441,7 +1488,7 @@ func _hero() -> void:
 	var sph := SphereShape3D.new(); sph.radius = 0.25; cam_arm.shape = sph
 	cam_arm.add_excluded_object(hero.get_rid())
 	cam_pivot.add_child(cam_arm)
-	cam = Camera3D.new(); cam.fov = 62; cam.far = 1200; cam_arm.add_child(cam); cam.current = true
+	cam = Camera3D.new(); cam.fov = 62; cam.far = 2200; cam_arm.add_child(cam); cam.current = true
 
 func _hud() -> void:
 	var cl := CanvasLayer.new(); add_child(cl)
@@ -1745,6 +1792,13 @@ func _run_bench() -> void:
 			await _shot("t13_stage%d" % st, gp, yaw2, -0.22, 16.0, 2, 40)
 			vc.look_at_from_position(C + Vector3(26, 64, 22), C + Vector3(0, 42, 0)); vc.current = true
 			await _shot_here("t13_stage%d_wide" % st)
+			# test 14: close on the lava veins (chest height, in front of him)
+			var tp: Vector3 = q.titan.global_position; var fw: Vector3 = Vector3(gp.x - tp.x, 0, gp.z - tp.z).normalized()
+			vc.look_at_from_position(tp + fw * 20.0 + Vector3(0, 22, 0) + fw.cross(Vector3.UP) * 5.0, tp + Vector3(0, 19, 0)); vc.current = true
+			await _shot_here("t14_titan_close_stage%d" % st)
+			print("T14 stage %d veins=%s glow=%.2f drips=%d prims=%d draws=%d fps=%d" % [st, "shader" if q.titan.lava_hq else "fallback", q.titan.glow_strength,
+				q.titan.drips.filter(func(d): return d.emitting).size(), RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+				RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME), Engine.get_frames_per_second()])
 			vc.current = false; cam.current = true
 		q.titan.take_damage(int(q.titan.hp) + 1, C)
 		for i in 300: await get_tree().physics_frame
@@ -1762,13 +1816,25 @@ func _run_bench() -> void:
 			["wide_n", Vector3(0, 40, -150), Vector3(0, 60, -900)], ["wide_e", Vector3(150, 40, 0), Vector3(900, 60, 0)],
 			["wide_s", Vector3(0, 40, 150), Vector3(0, 60, 900)], ["wide_w", Vector3(-150, 40, 0), Vector3(-900, 60, 0)],
 			["aerial", Vector3(-300, 520, 700), Vector3(80, 0, -150)], ["volcano_view", Vector3(200, 40, -150), Vector3(405, 60, -402)],
-			["port_wide", Vector3(-250, 90, 250), Vector3(-500, 0, 450)]]
+			["port_wide", Vector3(-250, 90, 250), Vector3(-500, 0, 450)],
+			["harbor_aerial", Vector3(-380, 140, 470), Vector3(-490, 0, 320)], ["harbor_quay", Vector3(-455, 4, 330), Vector3(-540, 2, 320)],
+			["harbor_street", Vector3(-400, 3, 318), Vector3(-470, 4, 296)], ["harbor_cranes", Vector3(-500, 6, 372), Vector3(-530, 6, 322)],
+			["coast_w", Vector3(-700, 60, 300), Vector3(-700, 0, 520)],
+			["gate_n_aerial", Vector3(25, 45, -160), Vector3(0, 12, -185)], ["gate_e_ground", Vector3(170, 2, 20), Vector3(185, 12, 0)],
+			["farm_aerial", Vector3(-250, 60, -250), Vector3(-290, 0, -288)], ["farm_ground", Vector3(-325, 3, -300), Vector3(-290, 6, -288)],
+			["obs_aerial", Vector3(100, 70, -100), Vector3(130, 0, -149)], ["obs_ground", Vector3(130, 2, -124), Vector3(130, 10, -149)],
+			["street_n", Vector3(-110, 3, -66), Vector3(-30, 4, -66)], ["street_e", Vector3(78, 3, 100), Vector3(78, 4, 20)]]
 		for v in tv:
 			var a0: Vector3 = v[1]; var t0: Vector3 = v[2]
 			a0.y += height(a0.x, a0.z); t0.y += maxf(0.0, height(t0.x, t0.z)) * 0.0
 			hc.look_at_from_position(a0, t0, Vector3.UP if absf(a0.x - t0.x) + absf(a0.z - t0.z) > 0.1 else Vector3(0, 0, -1)); hc.current = true
 			for i in 40: await get_tree().process_frame
 			get_viewport().get_texture().get_image().save_png("user://shot_t14_%s_%s.png" % [tag, v[0]]); print("BENCH ", v[0])
+		var oc := hc; oc.projection = Camera3D.PROJECTION_ORTHOGONAL; oc.size = 390.0; oc.position = Vector3(0, 420, 0); oc.rotation = Vector3(-PI / 2, 0, 0)
+		env.fog_enabled = false; get_viewport().canvas_cull_mask = 0
+		for i in 40: await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png("user://shot_t14_%s_city_top.png" % tag)
+		get_viewport().canvas_cull_mask = 0xFFFFFFFF; env.fog_enabled = true; oc.projection = Camera3D.PROJECTION_PERSPECTIVE
 		hc.current = false; cam.current = true
 		cheats.role_provider = func() -> String: return "owner"
 		cheats.request("fly", true)

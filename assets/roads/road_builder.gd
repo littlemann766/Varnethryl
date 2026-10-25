@@ -7,8 +7,8 @@ extends RefCounted
 ##   cobble inside r<215 (vertex colour .r), 3 LODs per ~64 m chunk via visibility ranges.
 ## Usage (main.gd):  add_child(load("res://assets/roads/road_builder.gd").new().build(self, ROADS))
 
-const N := 140
-const S := 1400.0
+const N := 240   # test 14: matches main._terrain() (2.4 km, 10 m grid)
+const S := 2400.0
 const HALF := 4.4          # core half-width (matches old road / _road_dist)
 const SKIRT := 1.8         # grass blend beyond the core
 const LODS := [            # [step along m, across offsets (fraction of HALF, >1 = skirt), lift m, vis_begin, vis_end]

@@ -5,7 +5,7 @@ extends RefCounted
 ## produced once by tools/gen_fillers.gd (solve()) and then never moved, so an interior can be hooked up later
 ## (InteriorManager would just need the id in interior_defs + an entry in main.buildings). Doors are closed for now.
 ## Perf (S26 Ultra): Beth's card2 LOD1/LOD2 only (no hi tier), shared mesh + material resources (load() cache),
-## LOD1 to 70 m then LOD2 to 260 m, shadows from LOD1 only, Beth's -colonly collision per house.
+## LOD1 to 70 m then LOD2 to 300 m, shadows from LOD1 only, Beth's -colonly collision per house.
 
 const DATA := "res://assets/town/fillers.json"
 ## [card2 key, label] - Beth's small kit pieces (the big landmark models stay unique)
@@ -13,7 +13,7 @@ const KIT := [["house1", "Townhouse"], ["house2", "Townhouse"], ["house3", "Town
 	["bakery", "Shop"], ["apothecary", "Shop"], ["smithy", "Workshop"]]
 const GAP := 3.1          # front door -> street edge (same as the landmark buildings' SPUR_GAP)
 const ROW_GAP := 0.7      # between neighbours in a row (dense terrace)
-const LOD_BANDS := [[0.0, 70.0], [70.0, 260.0]]
+const LOD_BANDS := [[0.0, 70.0], [70.0, 300.0]]
 
 static func _bbox(key: String) -> AABB:
 	var j = JSON.parse_string(FileAccess.get_file_as_string("res://assets/card2/index.json"))

@@ -1,0 +1,149 @@
+{
+ "note": "Beth card2 buildings. One shared material/atlas (atlas/card2_*.jpg, 2048) for ALL buildings; GLBs reference it by relative uri. Origin = footprint centre at ground, +Z = front, metres. LOD: no suffix=High, _lod1=Medium, _lod2=Low.",
+ "atlas": [
+  "card2_albedo.jpg",
+  "card2_emissive.jpg",
+  "card2_normal.jpg",
+  "card2_orm.jpg"
+ ],
+ "buildings": [
+  {
+   "id": "bakery",
+   "card": "card_bakery.jpg",
+   "high": {
+    "file": "bld_bakery_card2.glb",
+    "tris": 7052,
+    "bbox_min": [
+     -5.559999942779541,
+     0.0,
+     -5.067093849182129
+    ],
+    "bbox_max": [
+     5.559999942779541,
+     15.048412322998047,
+     5.949999809265137
+    ]
+   },
+   "medium": {
+    "file": "bld_bakery_card2_lod1.glb",
+    "tris": 3960,
+    "bbox_min": [
+     -5.559999942779541,
+     0.0,
+     -5.067093849182129
+    ],
+    "bbox_max": [
+     5.559999942779541,
+     15.048412322998047,
+     5.949999809265137
+    ]
+   },
+   "low": {
+    "file": "bld_bakery_card2_lod2.glb",
+    "tris": 1560,
+    "bbox_min": [
+     -5.559999942779541,
+     0.0,
+     -5.067093849182129
+    ],
+    "bbox_max": [
+     5.559999942779541,
+     15.048412322998047,
+     5.949999809265137
+    ]
+   }
+  },
+  {
+   "id": "house1",
+   "card": "card_village_houses.jpg",
+   "high": {
+    "file": "bld_house1_card2.glb",
+    "tris": 5820,
+    "bbox_min": [
+     -4.567843914031982,
+     0.0,
+     -4.809999942779541
+    ],
+    "bbox_max": [
+     4.567843914031982,
+     13.611288070678711,
+     5.400000095367432
+    ]
+   },
+   "medium": {
+    "file": "bld_house1_card2_lod1.glb",
+    "tris": 3200,
+    "bbox_min": [
+     -4.567843914031982,
+     0.0,
+     -4.809999942779541
+    ],
+    "bbox_max": [
+     4.567843914031982,
+     13.611288070678711,
+     5.400000095367432
+    ]
+   },
+   "low": {
+    "file": "bld_house1_card2_lod2.glb",
+    "tris": 1024,
+    "bbox_min": [
+     -4.567843914031982,
+     0.0,
+     -4.809999942779541
+    ],
+    "bbox_max": [
+     4.567843914031982,
+     13.611288070678711,
+     5.400000095367432
+    ]
+   }
+  },
+  {
+   "id": "inn",
+   "card": "card_inn.jpg",
+   "high": {
+    "file": "bld_inn_card2.glb",
+    "tris": 12683,
+    "bbox_min": [
+     -6.559999942779541,
+     0.0,
+     -5.650000095367432
+    ],
+    "bbox_max": [
+     6.559999942779541,
+     18.79163932800293,
+     6.550000190734863
+    ]
+   },
+   "medium": {
+    "file": "bld_inn_card2_lod1.glb",
+    "tris": 7243,
+    "bbox_min": [
+     -6.559999942779541,
+     0.0,
+     -5.650000095367432
+    ],
+    "bbox_max": [
+     6.559999942779541,
+     18.79163932800293,
+     6.550000190734863
+    ]
+   },
+   "low": {
+    "file": "bld_inn_card2_lod2.glb",
+    "tris": 2299,
+    "bbox_min": [
+     -6.559999942779541,
+     0.0,
+     -5.650000095367432
+    ],
+    "bbox_max": [
+     6.559999942779541,
+     18.79163932800293,
+     6.550000190734863
+    ]
+   }
+  }
+ ]
+}

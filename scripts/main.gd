@@ -639,13 +639,19 @@ func _ships() -> void:
 		var sp: Array = spots[i]; var id: String = sp[1]
 		var root := Node3D.new(); root.name = "Ship%d_%s" % [i, id]; add_child(root)
 		root.position = Vector3(sp[0].x, 0.0, sp[0].y); root.rotation.y = sp[3]
-		for k in 2:
-			var v: Node3D = load("res://assets/ships/ship_%s_lod%d.glb" % [id, k + 1]).instantiate(); root.add_child(v)
+		# test 12: tidewrack gets Beth's High mesh up close (<40 m); its UVs were re-normalized in the project copy (see /workspace/layout/fix_uv.py)
+		var files := ["ship_%s_lod1" % id, "ship_%s_lod2" % id]; var bands := [[0.0, sp[2]], [sp[2], 600.0]]
+		if id == "tidewrack_sailing_ship": files = ["ship_%s" % id] + files; bands = [[0.0, 40.0], [40.0, sp[2]], [sp[2], 600.0]]
+		for k in files.size():
+			var v: Node3D = load("res://assets/ships/%s.glb" % files[k]).instantiate(); root.add_child(v)
 			for mi in _meshes(v, []):
-				mi.visibility_range_begin = 0.0 if k == 0 else sp[2]; mi.visibility_range_end = sp[2] if k == 0 else 600.0
-				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if k == 0 and i < 3 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				mi.visibility_range_begin = bands[k][0]; mi.visibility_range_end = bands[k][1]
+				# thin double-sided sails self-shadow into acne, and the sea doesn't show ship shadows: no casting
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var col := _add_col("res://assets/ships/ship_%s_col.glb" % id, root.position, root.rotation.y); col.name = "ShipCol%d" % i
-		ships.append([root, 0.0, float(sp[4]), col])
+		# hull draft: Beth's origin is ~1 m above the painted waterline on the galleon, ~0.3 m on the boats
+		var sink := -0.9 if id == "tidewrack_sailing_ship" else -0.3
+		root.position.y = sink; ships.append([root, sink, float(sp[4]), col])
 	_ships_tier()
 
 func _ships_tier() -> void:
@@ -992,7 +998,7 @@ func _hi_terrain() -> void:
 	# SW-corner sea (test 10): one big water quad from the coast to the world edge
 	var sw := MeshInstance3D.new(); var sp := PlaneMesh.new(); var x0 := -1600.0; var z1 := 1600.0
 	sp.size = Vector2(SEA_COAST_X - 1.0 - x0, z1 - (SEA_NORTH_Z - 2.0)); sp.material = _water_mat(); sw.mesh = sp; sw.name = "Sea"
-	sw.position = Vector3((x0 + SEA_COAST_X - 1.0) * 0.5, -0.1, (SEA_NORTH_Z - 2.0 + z1) * 0.5); sw.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(sw)
+	sw.position = Vector3((x0 + SEA_COAST_X - 1.0) * 0.5, 0.0, (SEA_NORTH_Z - 2.0 + z1) * 0.5); sw.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(sw)
 	# the boss's Tripo lighthouse: rock island + tower share one origin (Beth). LOD1/LOD2 only.
 	var lh := Node3D.new(); lh.name = "Lighthouse"; lh.position = Vector3(SEA_COAST_X - 2.0, -0.6, PORT.y + 62.0); lh.rotation.y = 1.34; add_child(lh)   # test 11: on the SW coast; island turned so its stair foot (model ~(3, 0.5, 13)) lands on the dry shore to the east
 	for part in ["lighthouse_rock_island", "lighthouse_tower"]:
@@ -1666,6 +1672,9 @@ func _run_bench() -> void:
 				["corner_map", Vector3(-200, 420, 200), Vector3(-430, 0, 400)],
 				["ships_moored", Vector3(hb.x - 30, 9, hb.y - 38), Vector3(hb.x - 25, 2, hb.y + 3)],
 				["ships_sea", Vector3(hb.x - 20, 14, hb.y + 70), Vector3(hb.x - 120, 2, hb.y)],
+				["ship_close", Vector3(hb.x - 18 + 16, 7, hb.y - 23 - 20), Vector3(hb.x - 18, 4, hb.y - 23)],
+				["ship_waterline", Vector3(hb.x - 18 + 14, 1.2, hb.y - 23 - 4), Vector3(hb.x - 18, 0.5, hb.y - 23)],
+				["boats_close", Vector3(hb.x - 2, 4, hb.y + 12), Vector3(hb.x - 10, 1, hb.y + 12)],
 				["castle_" + OS.get_environment("CASTLE_TAG"), Vector3(395, height(395, -40) + 4, -40), Vector3(480, 25, -110)]]:
 			hc.look_at_from_position(v[1], v[2]); hc.current = true
 			for i in 40: await get_tree().process_frame

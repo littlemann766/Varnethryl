@@ -295,6 +295,7 @@ const D := {
 
 # ---- THIEVES' DEN: main shop (rare goods), secret back room (hidden door), storage
 "thieves": {"name": "Thieves' Den", "scale": [0.44, 0.44],
+	"fill": [[0, ["chest", "keg", "weapon_rack", "table"], 0.15]],
 	"floors": [{"h": 3.0, "mat": "darkoak", "wall": "stone", "win": 5.0}],
 	"walls": [[0, -0.5, -0.1, 0.2, -0.1, [[0.75, 1.4]]], [0, 0.2, -0.5, 0.2, 0.5, [[0.3, 1.6]]]],
 	"props": [["_counter", 0, -0.15, 0.1, 0, [3.0, 1.0, 0.8]], ["apothecary_shelf", 0, -0.49, 0.2, 90], ["bookshelf", 0, -0.15, -0.09, 180], ["lion_banner", 0, -0.35, -0.09, 180, [1.0, false]],

@@ -2,19 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ubygii34s8bi"
-path="res://.godot/imported/ashentitan_volcano_glow_lod1_lava+golem+3d+model_rm.webp-953542365a25c169381f85d51f787ee4.ctex"
+uid="uid://b7am85u4q5ase"
+path="res://.godot/imported/titan_lava_mask_volcano_glow.png-c10fd4c35d5cb6c6f7e07d341bf61cd7.ctex"
 metadata={
 "vram_texture": false
-}
-generator_parameters={
-"md5": "92fa0036d4fe5eea8da9336bd7b52f4f"
 }
 
 [deps]
 
-source_file="res://assets/volcano/worldboss/titan/ashentitan_volcano_glow_lod1_lava+golem+3d+model_rm.webp"
-dest_files=["res://.godot/imported/ashentitan_volcano_glow_lod1_lava+golem+3d+model_rm.webp-953542365a25c169381f85d51f787ee4.ctex"]
+source_file="res://assets/volcano/worldboss/titan/titan_lava_mask_volcano_glow.png"
+dest_files=["res://.godot/imported/titan_lava_mask_volcano_glow.png-c10fd4c35d5cb6c6f7e07d341bf61cd7.ctex"]
 
 [params]
 
@@ -26,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

@@ -1,10 +1,10 @@
 [gd_resource type="ShaderMaterial" load_steps=6 format=3]
 
 [ext_resource type="Shader" path="res://assets/volcano/worldboss/titan/titan_lava.gdshader" id="1"]
-[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/titan/titan_basecolor_volcano_glow_lod1.png" id="2"]
-[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/titan/titan_normal_volcano_glow_lod1.png" id="3"]
-[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/titan/titan_rm_volcano_glow_lod1.png" id="4"]
-[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/titan/titan_lava_mask_volcano_glow_lod1.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/titan/titan_basecolor_volcano_glow.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/titan/titan_normal_volcano_glow.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/titan/titan_rm_volcano_glow.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/titan/titan_lava_mask_volcano_glow.png" id="5"]
 
 [resource]
 shader = ExtResource("1")

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://blfkicr1xqofr"
-path="res://.godot/imported/ashentitan_volcano_glow_lod1.glb-8d1b11ba2f6b25f783f086bd8d1a5832.scn"
+uid="uid://1flpvevbh27i"
+path="res://.godot/imported/ashentitan_worldboss.glb-8b31557f4bc62b194d25373950da0c20.scn"
 
 [deps]
 
-source_file="res://assets/volcano/worldboss/titan/ashentitan_volcano_glow_lod1.glb"
-dest_files=["res://.godot/imported/ashentitan_volcano_glow_lod1.glb-8d1b11ba2f6b25f783f086bd8d1a5832.scn"]
+source_file="res://assets/volcano/worldboss/titan/ashentitan_worldboss.glb"
+dest_files=["res://.godot/imported/ashentitan_worldboss.glb-8b31557f4bc62b194d25373950da0c20.scn"]
 
 [params]
 

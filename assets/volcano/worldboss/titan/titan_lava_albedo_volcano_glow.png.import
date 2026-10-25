@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cj1pyjfn3kw7x"
-path="res://.godot/imported/titan_emissive_volcano_glow_lod1.png-083a8d57ad963ea44110a388d6539ea1.ctex"
+uid="uid://duur85ic3nsvq"
+path="res://.godot/imported/titan_lava_albedo_volcano_glow.png-8acae271cd8201eb4c1f04c2363e0ff6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/volcano/worldboss/titan/titan_emissive_volcano_glow_lod1.png"
-dest_files=["res://.godot/imported/titan_emissive_volcano_glow_lod1.png-083a8d57ad963ea44110a388d6539ea1.ctex"]
+source_file="res://assets/volcano/worldboss/titan/titan_lava_albedo_volcano_glow.png"
+dest_files=["res://.godot/imported/titan_lava_albedo_volcano_glow.png-8acae271cd8201eb4c1f04c2363e0ff6.ctex"]
 
 [params]
 

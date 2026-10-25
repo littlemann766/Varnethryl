@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b5603hr3mkuny"
-path="res://.godot/imported/titan_normal_volcano_glow_lod1.png-05c7ff79af8493a21664c281a21b24d6.ctex"
+uid="uid://b4t8svqiga8e5"
+path="res://.godot/imported/titan_normal.png-3956e9dc206c8fd861bc914b6928bdc2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/volcano/worldboss/titan/titan_normal_volcano_glow_lod1.png"
-dest_files=["res://.godot/imported/titan_normal_volcano_glow_lod1.png-05c7ff79af8493a21664c281a21b24d6.ctex"]
+source_file="res://assets/volcano/worldboss/titan/titan_normal.png"
+dest_files=["res://.godot/imported/titan_normal.png-3956e9dc206c8fd861bc914b6928bdc2.ctex"]
 
 [params]
 

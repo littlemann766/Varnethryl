@@ -28,7 +28,7 @@ func _run() -> void:
 	look(-dir * 230.0 + Vector3(0, 95, 0) + dir.cross(Vector3.UP) * 60.0, b + Vector3(0, 50, 0), 55.0)
 	await frames(60); await shot("01_wide_city_scale")
 	hero_at(b - dir * 120.0)
-	var fwd := Vector3(sin(wb.rotation.y), 0, cos(wb.rotation.y))
+	var fwd := wb._fwd()
 	look(b + fwd * 210.0 + Vector3(0, 75, 0) + fwd.cross(Vector3.UP) * 70.0, b + Vector3(0, 60, 0), 45.0)
 	await frames(40); await shot("02_crystals_veins_front")
 	look(b + fwd * 130.0 + Vector3(0, 30, 0) - fwd.cross(Vector3.UP) * 60.0, b + Vector3(0, 35, 0), 50.0)
@@ -48,7 +48,7 @@ func _run() -> void:
 	var t0 := Time.get_ticks_msec()
 	while wb.footprints.size() < 3 and Time.get_ticks_msec() - t0 < 120000: await frames(5)
 	Engine.time_scale = 1.0
-	b = wb.global_position; fwd = Vector3(sin(wb.rotation.y), 0, cos(wb.rotation.y))
+	b = wb.global_position; fwd = wb._fwd()
 	print("prints ", wb.footprints.size())
 	hero_at(b - fwd * 100.0)
 	look(b - fwd * 170.0 + Vector3(0, 150, 0) + fwd.cross(Vector3.UP) * 60.0, b - fwd * 40.0, 55.0)

@@ -16,7 +16,8 @@ const INTERRUPT := 120.0           # 4 % (solo floor of 8% x sqrt(n)/2)
 const SHAKE_FULL := 120.0
 const SHAKE_ZERO := 250.0
 const BAR_RANGE := 400.0
-const STEP_FRAC := [0.475, 0.925]  # walk clip footfalls (L, R), measured from foot bone minima
+var steps: Array = []              # Lucian worldboss_events.json: wb_walk [[t, "L"|"R"], ...]
+var sub := ""                      # ritual sub-phase: in / loop / release
 
 var m: Node
 var body: Node3D
@@ -66,13 +67,17 @@ func setup(main: Node) -> WorldBoss:
 	for i in 6:
 		var a := i / 6.0 * TAU + 0.2
 		waypoints.append(Vector3(cos(a) * RING_R, 0, sin(a) * RING_R))
-	body = (load(WB + "titan/ashentitan_volcano_glow_lod1.glb") as PackedScene).instantiate()
+	body = (load(WB + "titan/ashentitan_worldboss.glb") as PackedScene).instantiate()
 	body.scale = Vector3.ONE * SCALE
 	add_child(body)
 	ap = body.find_children("*", "AnimationPlayer", true, false)[0]
 	skel = body.find_children("*", "Skeleton3D", true, false)[0]
-	for c in ["walk", "idle", "windup"]:
+	for c in ["wb_walk", "wb_idle", "wb_ritual_fissure_loop", "wb_ritual_lavawave_loop", "wb_stagger_loop", "wb_down_loop"]:
 		if ap.has_animation(c): ap.get_animation(c).loop_mode = Animation.LOOP_LINEAR
+	_strip_root_xz("wb_walk")
+	var ev = JSON.parse_string(FileAccess.get_file_as_string(WB + "titan/worldboss_events.json"))
+	steps = ev.events.wb_walk
+	ap.animation_finished.connect(_on_anim_done)
 	for mi: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
 		mi.extra_cull_margin = 40.0
 	_veins(); _crystals(); _telegraphs(); _ui()
@@ -102,7 +107,7 @@ func _gy(x: float, z: float) -> float:
 
 # ---------- art ----------
 func _veins() -> void:
-	lava_mat = (load(WB + "titan/" + ("titan_lava_material_volcano_glow_lod1.tres" if hq else "titan_lava_fallback_volcano_glow_lod1.tres")) as Material).duplicate()
+	lava_mat = (load(WB + "titan/" + ("titan_lava_material_volcano_glow.tres" if hq else "titan_lava_fallback_volcano_glow.tres")) as Material).duplicate()
 	for mi: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
 		mi.material_override = lava_mat
 	if lava_mat is ShaderMaterial: (lava_mat as ShaderMaterial).set_shader_parameter("glow_strength", 2.2)
@@ -231,14 +236,36 @@ func _warn(t: String) -> void:
 func _set_state(s: String) -> void:
 	state = s; t_state = 0.0
 	match s:
-		"walk": _play("walk", 0.3)
-		"idle", "cool": _play("idle", 0.6); _crystal_glow(1.0)
-		"windup": _play("windup", 0.5)
-		"release": _play("eruption_slam" if ritual == "fissure" else "volcano_roar", 0.6)
-		"stagger": _play("hit", 0.35)
+		"walk": _play("wb_walk")
+		"arrive": _play("wb_stomp")
+		"idle", "cool": _play("wb_idle"); _crystal_glow(1.0)
+		"windup": sub = "in"; _play("wb_ritual_%s_in" % _rid())
+		"release": _play("wb_ritual_%s_release" % _rid())
+		"stagger": _play("wb_stagger")
+		"knockdown": _play("wb_knockdown")
 
-func _play(c: String, sp: float) -> void:
-	if ap.has_animation(c): ap.play(c, 0.4); ap.speed_scale = sp
+func _rid() -> String: return "fissure" if ritual == "fissure" else "lavawave"
+
+func _on_anim_done(a: StringName) -> void:
+	match String(a):
+		"wb_stomp": if state == "arrive": _set_state("idle")
+		"wb_ritual_fissure_in", "wb_ritual_lavawave_in": if state == "windup": sub = "loop"; _play("wb_ritual_%s_loop" % _rid())
+		"wb_stagger": if state == "stagger": _play("wb_stagger_loop")
+		"wb_knockdown": if state == "knockdown": _play("wb_down_loop")
+		"wb_getup": if state == "knockdown": _set_state("cool")
+
+func _strip_root_xz(c: String) -> void:
+	if not ap.has_animation(c): return
+	var a := ap.get_animation(c)
+	for t in a.get_track_count():
+		if a.track_get_type(t) == Animation.TYPE_POSITION_3D and str(a.track_get_path(t)).ends_with(":root"):
+			var p0: Vector3 = a.track_get_key_value(t, 0)
+			for k in a.track_get_key_count(t):
+				var v: Vector3 = a.track_get_key_value(t, k); a.track_set_key_value(t, k, Vector3(p0.x, v.y, p0.z))
+
+func _play(c: String, _sp := 1.0) -> void:
+	if ap.has_animation(c): ap.play(c, 0.5); ap.speed_scale = 1.0
+	else: push_warning("WB: missing clip " + c)
 
 func _hero() -> Node3D: return m.get("hero") as Node3D
 func _hero_d() -> float:
@@ -252,10 +279,17 @@ func _process(dt: float) -> void:
 		"idle":
 			if t_state > 6.0: _start_ritual()
 		"windup": _windup(dt)
+		"arrive":
+			if t_state - dt < 2.4 and t_state >= 2.4: _stomp(1.0, true)
 		"release":
+			var hit_t := 0.9 if ritual == "fissure" else 1.3
+			if t_state - dt < hit_t and t_state >= hit_t: _complete()
 			if t_state > 4.0: _end_ritual_fx(); _set_state("cool")
 		"stagger":
-			if t_state > 8.0: _set_state("cool")
+			if t_state > 8.0: _play("wb_idle"); _set_state("cool")
+		"knockdown":
+			if t_state - dt < 2.4 and t_state >= 2.4: shake(0.8, 1.0)
+			if t_state > 22.0 and ap.current_animation != "wb_getup": _play("wb_getup")
 		"cool":
 			if t_state > 10.0: _set_state("walk")
 	_update_crystals(dt); _update_prints(dt); _update_adds(dt); _update_ui(); _do_shake(dt)
@@ -265,30 +299,32 @@ func _walk(dt: float) -> void:
 	var flat := Vector3(tgt.x - position.x, 0, tgt.z - position.z)
 	if flat.length() < 4.0:
 		wp = (wp + 1) % waypoints.size()
-		_stomp(1.0, true); _set_state("idle"); return
-	var want := atan2(flat.x, flat.z)           # Titan faces +Z
+		_set_state("arrive"); return
+	var want := atan2(-flat.x, -flat.z)         # Lucian's rig faces -Z
 	rotation.y = rotate_toward(rotation.y, want, deg_to_rad(8.0) * dt)
-	var fwd := Vector3(sin(rotation.y), 0, cos(rotation.y))
+	var fwd := _fwd()
 	var np := position + fwd * SPEED * dt
 	if maxf(absf(np.x), absf(np.z)) < 260.0: np = position     # hard rule: never enters the town
 	position = Vector3(np.x, _gy(np.x, np.z), np.z)
 	# footfalls from the clip phase
-	var a := ap.get_animation("walk")
-	var f := fmod(ap.current_animation_position, a.length) / a.length
-	for i in 2:
-		var s: float = STEP_FRAC[i]
-		if (last_frac < s and f >= s) or (last_frac > f and s > last_frac): _footfall(i)
+	if ap.current_animation != "wb_walk": return
+	var f := ap.current_animation_position
+	for e in steps:
+		var s: float = e[0]
+		if (last_frac < s and f >= s) or (f < last_frac and (s > last_frac or s <= f)): _footfall(0 if e[1] == "L" else 1)
 	last_frac = f
+
+func _fwd() -> Vector3: return -Vector3(sin(rotation.y), 0, cos(rotation.y))
 
 func _footfall(i: int) -> void:
 	var b := skel.find_bone(["foot_L", "foot_R"][i])
 	var p := (skel.global_transform * skel.get_bone_global_pose(b)).origin
-	_print_at(p); _stomp(0.55, false, p)
+	_print_at(p); _stomp(0.3, false, p)
 
 func _print_at(p: Vector3) -> void:
 	var mat: ShaderMaterial = (load(WB + "materials/wb_footprint_mat.tres") as Material).duplicate()
 	var fp := _plane(mat, Vector3(48, 1, 48)); fp.visible = true
-	fp.global_position = Vector3(p.x, _gy(p.x, p.z) + 0.4, p.z); fp.rotation.y = rotation.y
+	fp.global_position = Vector3(p.x, _gy(p.x, p.z) + 0.4, p.z); fp.rotation.y = rotation.y + PI   # plane toes = +Z, Titan faces -Z
 	footprints.append([fp, mat, 0.0])
 	while footprints.size() > 14: (footprints.pop_front()[0] as Node).queue_free()
 
@@ -320,12 +356,12 @@ func _start_ritual() -> void:
 	ritual = "fissure" if rituals_done % 2 == 0 else "wave"
 	dmg_window = 0.0
 	_set_state("windup"); _crystal_glow(2.0)
-	var fwd := Vector3(sin(rotation.y), 0, cos(rotation.y))
+	var fwd := _fwd()
 	if ritual == "fissure":
 		cast_icon.texture = load(WB + "tex/wb_icon_fissure_slam.png"); cast_lbl.text = "FISSURE SLAM"
 		_ground(crack, global_position + fwd * 6.0, rotation.y)
 		for i in 3:
-			var yw := rotation.y + deg_to_rad([-40.0, 0.0, 40.0][i])
+			var yw := rotation.y + PI + deg_to_rad([-40.0, 0.0, 40.0][i])
 			var d := Vector3(sin(yw), 0, cos(yw))
 			_ground(fissures[i], global_position + d * 30.0, yw)
 		_warn("The Titan gathers fire: FISSURE SLAM")
@@ -356,7 +392,7 @@ func _windup(_dt: float) -> void:
 	if t_state - _dt < _wind_len() - 3.0 and t_state >= _wind_len() - 3.0: _warn("3 SECONDS! Break his crystals!")
 	if dmg_window >= INTERRUPT:
 		_warn("INTERRUPTED! The Titan staggers"); _end_ritual_fx(); _set_glow_charge(0.0); _set_state("stagger"); return
-	if t_state >= _wind_len(): _complete()
+	if t_state >= _wind_len(): _set_glow_charge(0.0); _set_state("release")
 
 func _complete() -> void:
 	rituals_done += 1; pressure += 1
@@ -377,7 +413,6 @@ func _complete() -> void:
 	if hit and party and party.combat and not bool(m.get("cheat").get("god", false)):
 		var c = party.combat
 		c.hp = maxf(1.0, c.hp - c.max_hp * (0.4 if ritual == "fissure" else 0.5)); c.hero_hurt.emit(int(c.max_hp * 0.4))
-	_set_state("release")
 
 func _end_ritual_fx() -> void:
 	for mi in [crack, strip] + fissures:
@@ -404,7 +439,7 @@ func on_hero_used(slot: int, _sk: Dictionary) -> void:
 	elif Vector2(hp3.x - global_position.x, hp3.z - global_position.z).length() < 45.0: _damage(dmg * 0.1)
 
 func _hit_crystal(c: Dictionary, dmg: float) -> void:
-	var mult := 2.0 if state == "stagger" else 1.0
+	var mult := 3.0 if state == "knockdown" else (2.0 if state == "stagger" else 1.0)
 	c.hp -= dmg * mult
 	_damage(dmg * mult)
 	if state == "windup": dmg_window += dmg * mult
@@ -413,12 +448,12 @@ func _hit_crystal(c: Dictionary, dmg: float) -> void:
 	create_tween().tween_method(func(v): mat.set_shader_parameter("hit_flash", v), 1.0, 0.0, 0.15)
 	if c.hp <= 0.0:
 		c.broken = true; c.t_broken = 0.0; _crystal_meshes(c, true); _spawn_adds(c.node.global_position)
-		if crystals.all(func(x): return x.broken): _warn("ALL WEAK POINTS BROKEN - KNOCKDOWN"); _end_ritual_fx(); _set_state("stagger")
+		if crystals.all(func(x): return x.broken): _warn("ALL WEAK POINTS BROKEN - KNOCKDOWN"); _end_ritual_fx(); _set_glow_charge(0.0); _set_state("knockdown")
 
 func _damage(v: float) -> void:
 	hp = maxf(0.0, hp - v)
 	if hp <= 0.0:
-		_warn("THE ASHEN TITAN FALLS"); _play("death", 0.5); state = "dead"
+		_warn("THE ASHEN TITAN FALLS"); _play("death"); state = "dead"
 		get_tree().create_timer(20.0).timeout.connect(func(): place_at(wp))
 
 func _update_crystals(dt: float) -> void:
@@ -447,7 +482,7 @@ func _spawn_adds(at: Vector3) -> void:
 func _update_adds(dt: float) -> void:
 	if state != "walk" and _hero_d() < 200.0:
 		add_t -= dt
-		if add_t <= 0.0: add_t = 45.0; _spawn_adds(global_position + Vector3(sin(rotation.y), 0, cos(rotation.y)) * 50.0)
+		if add_t <= 0.0: add_t = 45.0; _spawn_adds(global_position + _fwd() * 50.0)
 	for a in adds:
 		if not is_instance_valid(a[0]): continue
 		a[2] += dt

@@ -9,7 +9,7 @@ MAP = {"inn": "card_inn.jpg", "guildhall": "card_guild_hall.png", "townhall": "c
        "treasury": "card_treasury.jpg", "keep": "card_castle_keep.jpg", "observatory": "card_observatory.jpg", "crypt": "card_crypt.jpg",
        "market": "card_market_provisioner.png", "apothecary": "card_apothecary.jpg", "training": "card_training_hall.jpg",
        "colosseum": "card_colosseum.jpg", "thieves": "card_thieves_den.jpg", "farmhouse": "card_farmhouse_barn.jpg", "barn": "card_farmhouse_barn.jpg",
-       "stables": "card_stables.jpg", "windmill": "card_windmill.jpg", "house1": "card_village_houses.jpg", "gatehouse": "card_gatehouse.jpg",
+       "stables": "card_stables.jpg", "windmill": "card_windmill.jpg", "house1": "card_village_houses.jpg", "house2": "card_village_houses.jpg", "house3": "card_village_houses.jpg", "house4": "card_village_houses.jpg", "gatehouse": "card_gatehouse.jpg",
        "lighthouse": "card_lighthouse_tidewrack.jpg", "port": "card_port.jpg", "watchtower": "card_town_walls_watchtowers.jpg", "fountain": "card_fountain_monument.jpg"}
 SH = os.path.join(ROOT, "shots/interiors")
 ids = sys.argv[1:] or sorted({re.match(r"(.+)_[fpr]\d+\.png", os.path.basename(p)).group(1) for p in glob.glob(SH + "/*_[fpr]*.png")})

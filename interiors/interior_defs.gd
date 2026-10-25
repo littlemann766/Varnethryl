@@ -65,7 +65,7 @@ const D := {
 
 # ---------------- GUILD HALL: foyer, main hall w/ quest board, meeting table, stair & upper balcony overlooking hall
 "guildhall": {"name": "Guild Hall of Varnethryl",
-	"floors": [{"h": 5.2, "mat": "flag", "wall": "stone", "win": 4.0},
+	"floors": [{"h": 5.2, "mat": "oak", "wall": "stone", "win": 4.0},
 		{"h": 4.0, "mat": "oak", "wall": "plaster", "win": 4.0, "slab": [[-0.5, -0.5, -0.24, 0.5], [0.24, -0.5, 0.5, 0.5], [-0.24, 0.3, 0.24, 0.5]]}],
 	"walls": [
 		[0, -0.5, 0.3, 0.5, 0.3, [[0.5, 5.0, 4.5], [0.15, 2.0], [0.85, 2.0]]],   # foyer
@@ -121,8 +121,8 @@ const D := {
 		["Council Room", 1, 0.0, -0.15], ["Archives", 1, -0.4, -0.15], ["East Archives", 1, 0.4, -0.15], ["Upper Gallery", 1, 0.0, 0.3]]},
 
 # ---------------- BLACKSMITH: forge room, armor display, weapon wall & workshop; upper floor storage loft via ladder
-"smithy": {"name": "Blacksmith of Varnethryl",
-	"floors": [{"h": 4.0, "mat": "stone", "wall": "stone", "win": 5.0, "stairmat": "darkoak"}, {"h": 3.0, "mat": "darkoak", "wall": "stone", "win": 0.0, "slab": [[-0.5, -0.5, 0.5, -0.05]]}],
+"smithy": {"name": "Blacksmith of Varnethryl", "scale": [0.52, 0.52],
+	"floors": [{"h": 4.0, "mat": "flag", "wall": "stone", "win": 5.0, "stairmat": "darkoak"}, {"h": 3.0, "mat": "darkoak", "wall": "stone", "win": 0.0, "slab": [[-0.5, -0.5, 0.5, -0.05]]}],
 	"ladders": [[0, -0.3, -0.05, 0]],
 	"rails": [[1, -0.18, -0.05, 0, 4]],
 	"props": [
@@ -132,12 +132,12 @@ const D := {
 		["table", 0, -0.32, 0.25, 90], ["keg", 0, -0.45, -0.4, 0], ["chest", 0, -0.42, -0.25, 90],
 		["chest", 1, -0.4, -0.4, 0], ["chest", 1, -0.25, -0.42, 0], ["keg", 1, 0.0, -0.42, 0], ["keg", 1, 0.06, -0.42, 0], ["wardrobe", 1, 0.3, -0.45, 0], ["weapon_rack", 1, 0.45, -0.25, -90],
 	],
-	"lights": [["fire", 0, 0.15, -0.4, 0, 4.0, 14.0, true], ["lantern", 0, -0.49, -0.1, 90, 1.2, 9.0], ["lantern", 0, 0.3, 0.49, 180, 1.0, 8.0], ["lantern", 1, 0.0, -0.49, 0, 1.0, 8.0]],
+	"lights": [["fire", 0, 0.15, -0.4, 0, 5.0, 14.0, true], ["chandelier", 0, -0.1, 0.1, 0, 2.0, 10.0], ["lantern", 0, -0.49, -0.1, 90, 1.6, 9.0], ["lantern", 0, 0.3, 0.49, 180, 1.0, 8.0], ["lantern", 1, 0.0, -0.49, 0, 1.0, 8.0]],
 	"rooms": [["Forge Room", 0, 0.1, -0.1], ["Armor Display", 0, -0.3, 0.1], ["Weapon Wall", 0, 0.35, 0.3], ["Storage Loft", 1, 0.0, -0.3]]},
 
 # ---------------- BAKERY: ground front shop (blue tile) + stairs; upper kitchen (oven), storage, seating area
 "bakery": {"name": "Bakery of Varnethryl",
-	"floors": [{"h": 3.8, "mat": "bluecheck", "wall": "plaster", "win": 4.0}, {"h": 3.4, "mat": "oak", "wall": "plaster", "win": 4.0}],
+	"floors": [{"h": 3.8, "mat": "bluecheck", "wall": "plaster", "win": 4.0}, {"h": 3.4, "mat": "bluecheck", "wall": "plaster", "win": 4.0}],
 	"walls": [[0, 0.25, -0.5, 0.25, 0.5, [[0.85, 2.0]]],
 		[1, -0.5, 0.0, 0.25, 0.0, [[0.3, 2.0]]], [1, 0.25, -0.5, 0.25, 0.5, [[0.12, 1.8]]]],
 	"stairs": [[0, 0.38, 0.35, 0, 2.0]],

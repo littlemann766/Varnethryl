@@ -1,12 +1,12 @@
 class_name InteriorKit
 ## Materials + props for interiors. Props load Beth's kit by file name from res://interiors/kit/<name>.glb
-## (copied from /workspace/godot-art/interiors: only props the defs use, High + Medium; re-run tools/sync_kit.py after
+## (copied from /workspace/godot-art/interiors: only props the defs use, Medium, textures VRAM-compressed and capped at 512; re-run tools/sync_kit.py after
 ## a new pass). Phones load Medium (_lod1) by default; set InteriorKit.lod = 0 for High. Unknown names
 ## fall back to a block-out box so a def never breaks while a prop is missing.
 const KIT := "res://interiors/kit/"
 const TEX := "res://interiors/tex/"
 const LAYER := 1 << 19          # interior render layer (sun excludes it)
-static var lod := 1 if OS.has_feature("mobile") else 0
+static var lod := 1   # Medium ships (APK size); tools/sync_kit.py --high adds High for desktop
 static var _index := {}
 static var _mats := {}
 static var _scenes := {}
@@ -40,7 +40,7 @@ static func mat(kind: String) -> Material:
 			var a := Color("e6dcc6") if kind == "checker" else Color("3d5f97"); var b := Color("1e3a6a") if kind == "checker" else Color("6d859c")
 			img.set_pixel(0, 0, a); img.set_pixel(1, 1, a); img.set_pixel(1, 0, b); img.set_pixel(0, 1, b)
 			m.albedo_texture = ImageTexture.create_from_image(img); m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-			m.uv1_triplanar = true; m.uv1_world_triplanar = true; m.uv1_scale = Vector3.ONE / (2.4 if kind == "checker" else 1.2); m.roughness = 0.45
+			m.uv1_triplanar = true; m.uv1_world_triplanar = true; m.uv1_scale = Vector3.ONE / (2.4 if kind == "checker" else 0.7); m.roughness = 0.45
 		"red": m.albedo_color = Color(0.45, 0.12, 0.1)
 		"banner":
 			m.albedo_texture = load(TEX + "banner_lion_albedo.jpg"); m.cull_mode = BaseMaterial3D.CULL_DISABLED

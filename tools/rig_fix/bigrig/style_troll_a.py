@@ -4,22 +4,22 @@ def rest():
     r = body(lean=8); armfk(r, 'L', 8, 4, 15); armfk(r, 'R', 25, 6, 35); return r
 def attack1():   # Winterhammer: overhead one-hand smash over the right shoulder into the ground in front
     key(0, rot=rest())
-    r = body(lean=-14, twist=-30, side=6, head=-6); armfk(r, 'R', 170, 30, 75, yaw=-15); armfk(r, 'L', 40, 20, 40); key(0.75, hips=(0, 0.02, 0.01), rot=r, ik={'legR': foot('R', 0.04)}, jaw=6, wrist=-55)
+    r = body(lean=-14, twist=-30, side=6, head=-6); armfk(r, 'R', 150, 30, 75, yaw=-15); armfk(r, 'L', 40, 20, 40); key(0.75, hips=(0, 0.02, 0.01), rot=r, ik={'legR': foot('R', 0.04)}, jaw=6, wrist=-55)
     key(0.88, hips=(0, 0.025, 0.015), rot=r, ik={'legR': foot('R', 0.04)}, jaw=8, wrist=-55)
-    r = body(lean=62, twist=12, side=-4, head=24, knees=18); armfk(r, 'R', 80, 18, 6, yaw=10); armfk(r, 'L', -25, 25, 30); key(1.1, hips=(0, -0.05, -0.16), rot=r, ik={'legR': foot('R', 0.04), 'legL': foot('L', -0.05)}, jaw=18, wrist=WR)
-    key(1.35, hips=(0, -0.05, -0.165), rot=r, ik={'legR': foot('R', 0.04), 'legL': foot('L', -0.05)}, jaw=8, wrist=WR)
+    r = body(lean=50, twist=12, side=-4, head=18, knees=10); armfk(r, 'R', 80, 18, 6, yaw=10); armfk(r, 'L', -25, 25, 30); key(1.1, hips=(0, -0.05, -0.12), rot=r, ik={'legR': foot('R', 0.04), 'legL': foot('L', -0.05)}, jaw=18, wrist=WR)
+    key(1.35, hips=(0, -0.05, -0.125), rot=r, ik={'legR': foot('R', 0.04), 'legL': foot('L', -0.05)}, jaw=8, wrist=WR)
     end = key(2.0, rot=rest()); CONTACT['attack1'] = (1.1, 'club'); return end
 def attack2():   # Glacier Breaker: two-step charge-up, then a huge straight-down cleave that drags a line forward
     key(0, rot=rest())
     r = body(lean=-4, twist=-18); armfk(r, 'R', 120, 15, 60); armfk(r, 'L', 30, 15, 30); key(0.55, hips=(0, 0, -0.02), rot=r, jaw=4)
-    r = body(lean=-20, twist=-8, head=-10); armfk(r, 'R', 185, 12, 80); armfk(r, 'L', 120, 20, 60); key(1.2, hips=(0, 0.03, 0.02), rot=r, ik={'legL': foot('L', -0.03, 0.03)}, jaw=10)
-    r = body(lean=64, twist=4, head=26, knees=18); armfk(r, 'R', 82, 8, 6); armfk(r, 'L', 30, 25, 30); key(1.5, hips=(0, -0.07, -0.16), rot=r, ik={'legL': foot('L', -0.09)}, jaw=22, wrist=WR)
-    key(1.8, hips=(0, -0.07, -0.165), rot=r, ik={'legL': foot('L', -0.09)}, jaw=10, wrist=WR)
+    r = body(lean=-20, twist=-8, head=-10); armfk(r, 'R', 150, 12, 80); armfk(r, 'L', 120, 20, 60); key(1.2, hips=(0, 0.03, 0.02), rot=r, ik={'legL': foot('L', -0.03, 0.03)}, jaw=10)
+    r = body(lean=52, twist=4, head=18, knees=10); armfk(r, 'R', 82, 8, 6); armfk(r, 'L', 30, 25, 30); key(1.5, hips=(0, -0.07, -0.12), rot=r, ik={'legL': foot('L', -0.09)}, jaw=22, wrist=WR)
+    key(1.8, hips=(0, -0.07, -0.125), rot=r, ik={'legL': foot('L', -0.09)}, jaw=10, wrist=WR)
     end = key(2.45, rot=rest(), ik={'legL': foot('L', -0.04)}); CONTACT['attack2'] = (1.5, 'club'); return end
 def attack3():   # Brother's Wrath: full-body horizontal ring sweep at knee height, right to left, torso fully wound
     key(0, rot=rest())
     r = body(lean=10, twist=-50, side=5); armfk(r, 'R', 30, 70, 30, yaw=-45); armfk(r, 'L', 30, 20, 40); key(0.9, hips=(0, 0, -0.06), rot=r, jaw=6)
-    r = body(lean=50, twist=10, knees=18); armfk(r, 'R', 55, 30, 12, yaw=10); armfk(r, 'L', -10, 30, 30); key(1.3, hips=(0, -0.02, -0.14), rot=r, jaw=20, wrist=WR)
+    r = body(lean=42, twist=10, knees=10); armfk(r, 'R', 55, 30, 12, yaw=10); armfk(r, 'L', -10, 30, 30); key(1.3, hips=(0, -0.02, -0.11), rot=r, jaw=20, wrist=WR)
     r = body(lean=18, twist=55, side=-5); armfk(r, 'R', 60, 55, 20, yaw=55); armfk(r, 'L', -25, 30, 30); key(1.6, hips=(0, -0.02, -0.08), rot=r, jaw=10, wrist=WR)
     end = key(2.3, rot=rest()); CONTACT['attack3'] = (1.3, 'club'); return end
 # fresh rig -> fresh loco: heavy rolling lumber, wide sway, knuckles swinging low

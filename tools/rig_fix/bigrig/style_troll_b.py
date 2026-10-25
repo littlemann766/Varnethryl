@@ -14,7 +14,7 @@ def idle():
 clip('idle', idle)
 def attack1():   # Frost Crash: snap the mace straight up, hard vertical spike into the ice (ring)
     key(0, rot=rest())
-    r = body(lean=-6); armfk(r, 'R', 175, 5, 40); armfk(r, 'L', 20, 15, 20); key(0.5, hips=(0, 0, 0.01), rot=r, jaw=6)
+    r = body(lean=-6); armfk(r, 'R', 150, 5, 40); armfk(r, 'L', 20, 15, 20); key(0.5, hips=(0, 0, 0.01), rot=r, jaw=6)
     key(0.85, hips=(0, 0, 0.012), rot=r, jaw=6)
     r = body(lean=30, head=8); armfk(r, 'R', 62, 4, 0); armfk(r, 'L', -10, 15, 20); key(1.1, hips=(0, -0.03, -0.07), rot=r, ik={'legR': foot('R', -0.04)}, jaw=16, wrist=WR)
     key(1.4, hips=(0, -0.03, -0.07), rot=r, ik={'legR': foot('R', -0.04)}, jaw=6, wrist=WR)

@@ -93,6 +93,105 @@ for v in mesh.data.vertices:
 bpy.data.objects.remove(proxy)
 bpy.context.view_layer.objects.active = mesh; bpy.ops.object.select_all(action='DESELECT'); mesh.select_set(True)
 bpy.ops.object.vertex_group_limit_total(limit=4); bpy.ops.object.vertex_group_normalize_all(lock_active=False)
+if '--rigid' in A:
+    # smooth body weights (shoulder/hip/elbow blends), then make every loose piece rigid on its dominant bone
+    import numpy as np
+    RB = {'hand': 0.32, 'fingers': 0.25, 'foreArm': 0.45, 'thigh': 0.8, 'shin': 0.65, 'foot': 0.5, 'toe': 0.4, 'hips': 0.9, 'spine': 1.0, 'chest': 1.1, 'neck': 0.7, 'head': 0.6, 'jaw': 0.4}
+    def labels(me):
+        Pw_ = np.array([(mesh.matrix_world @ v.co)[:] for v in me.vertices]); DA = []; DO = []
+        for b_ in arm.data.bones:
+            if not b_.use_deform: continue
+            a0 = np.array((arm.matrix_world @ b_.head_local)[:]); a1 = np.array((arm.matrix_world @ b_.tail_local)[:]); ab = a1 - a0
+            t_ = np.clip(((Pw_ - a0) @ ab)/max(ab @ ab, 1e-9), 0, 1); d = np.linalg.norm(Pw_ - (a0 + t_[:, None]*ab), axis=1)/(RB.get(b_.name.split('_')[0], 0.6)*H/5.7)
+            bt = b_.name.split('_')[0]
+            if bt in ('hand', 'fingers', 'foreArm'): DA.append(d)
+            elif bt not in ('upperArm', 'shoulder'): DO.append(d)
+        return (np.min(DA, 0) < 0.9*np.min(DO, 0)).astype(int)
+    if '--cut' in A:   # detach hand/forearm geometry fused to the thighs/belly: split edges between arm-faces and body-faces
+        L0_ = labels(mesh.data); bm = bmesh.new(); bm.from_mesh(mesh.data); bm.faces.ensure_lookup_table()
+        fl = [int(round(np.mean([L0_[v.index] for v in f.verts]))) for f in bm.faces]
+        cut = [e for e in bm.edges if len(e.link_faces) == 2 and fl[e.link_faces[0].index] != fl[e.link_faces[1].index]]
+        # only cut where the arm partition touches the leg/hip region (below the elbow height)
+        lay = bm.faces.layers.int.new('armlab')
+        for f in bm.faces: f[lay] = fl[f.index]
+        bmesh.ops.split(bm, geom=[f for f in bm.faces if fl[f.index] == 1], use_only_faces=False); bm.to_mesh(mesh.data); bm.free(); mesh.data.update()
+        print('BIGRIG cut edges', len(cut))
+        at = mesh.data.attributes['armlab']; VL = np.zeros(len(mesh.data.vertices), int)
+        for f in mesh.data.polygons:
+            if at.data[f.index].value == 1:
+                for vi in f.vertices: VL[vi] = 1
+        mesh.data.attributes.remove(at)
+    else:
+        VL = None
+    me_ = mesh.data; NV0 = len(me_.vertices)
+    # islands on POSITION-welded connectivity (glTF import splits verts at UV/normal seams)
+    par_ = list(range(NV0)); key_ = {}
+    def fd(i):
+        while par_[i] != i: par_[i] = par_[par_[i]]; i = par_[i]
+        return i
+    def un(a_, b_):
+        a_, b_ = fd(a_), fd(b_)
+        if a_ != b_: par_[a_] = b_
+    for v in me_.vertices:
+        k = tuple(round(x*2000) for x in v.co) + ((int(VL[v.index]),) if VL is not None else ())
+        if k in key_: un(v.index, key_[k])
+        else: key_[k] = v.index
+    for e in me_.edges: un(e.vertices[0], e.vertices[1])
+    grp = {}
+    for i in range(NV0): grp.setdefault(fd(i), []).append(i)
+    isl = list(grp.values()); bm = bmesh.new()
+    bm.free(); isl.sort(key=len, reverse=True)
+    import numpy as np
+    NV = len(me_.vertices); NG = len(mesh.vertex_groups); Wm = np.zeros((NV, NG))
+    for v in me_.vertices:
+        for g in v.groups: Wm[v.index, g.group] = g.weight
+    seam = {}
+    for v in me_.vertices: seam.setdefault(tuple(round(x*2000) for x in v.co) + ((int(VL[v.index]),) if VL is not None else ()), []).append(v.index)
+    E_ = np.array([e.vertices[:] for e in me_.edges] + [(l[0], j) for l in seam.values() if len(l) > 1 for j in l[1:]])
+    # limb masks: arm-chain bones only near the arm (stops hand/forearm bleeding into belly/thigh and vice versa)
+    gname = [g.name for g in mesh.vertex_groups]; mwm = mesh.matrix_world
+    Pw = np.array([(mwm @ v.co)[:] for v in me_.vertices])
+    def segd(bn):
+        b_ = arm.data.bones[bn]; a0 = np.array((arm.matrix_world @ b_.head_local)[:]); a1 = np.array((arm.matrix_world @ b_.tail_local)[:])
+        ab = a1 - a0; t_ = np.clip(((Pw - a0) @ ab)/max(ab @ ab, 1e-9), 0, 1); return np.linalg.norm(Pw - (a0 + t_[:, None]*ab), axis=1)
+    Dm = np.stack([segd(n) if n in arm.data.bones else np.full(NV, 1e9) for n in gname], 1)
+    isA = lambda n: n.split('_')[0] in ('hand', 'fingers', 'foreArm')
+    ac = [gi for gi, n in enumerate(gname) if isA(n)]; oc = [gi for gi, n in enumerate(gname) if not isA(n) and n.split('_')[0] not in ('upperArm', 'shoulder')]
+    LAB = np.zeros(NV, int)
+    if ac:
+        RB = {'hand': 0.32, 'fingers': 0.25, 'foreArm': 0.45, 'thigh': 0.8, 'shin': 0.65, 'foot': 0.5, 'toe': 0.4, 'hips': 0.9, 'spine': 1.0, 'chest': 1.1, 'neck': 0.7, 'head': 0.6, 'jaw': 0.4}
+        rad = np.array([RB.get(n.split('_')[0], 0.6)*H/5.7 for n in gname]); Dn = Dm/rad[None]
+        LAB = (Dn[:, ac].min(1) < 0.9*Dn[:, oc].min(1)).astype(int)       # 1 = forearm/hand/fingers partition (radius-normalised distance)
+        if VL is not None: LAB = VL
+        Wm[LAB == 1][:, oc] = 0; Wm[np.ix_(LAB == 1, oc)] = 0; Wm[np.ix_(LAB == 0, ac)] = 0
+    sm = Wm.sum(1); z_ = sm < 1e-6
+    Wm[z_] = 0; Wm[z_, np.argmin(Dm[z_], 1)] = 1; Wm /= Wm.sum(1, keepdims=True)
+    E_ = E_[LAB[E_[:,0]] == LAB[E_[:,1]]]
+    for i in range(int(opt('--smooth', 6))):
+        acc = np.zeros_like(Wm); cnt = np.zeros(NV)
+        np.add.at(acc, E_[:,0], Wm[E_[:,1]]); np.add.at(acc, E_[:,1], Wm[E_[:,0]]); np.add.at(cnt, E_[:,0], 1); np.add.at(cnt, E_[:,1], 1)
+        m_ = cnt > 0; Wm[m_] = 0.5*Wm[m_] + 0.5*acc[m_]/cnt[m_, None]
+    for gi in range(NG):
+        vg = mesh.vertex_groups[gi]; col = Wm[:, gi]
+        nz = np.nonzero(col > 1e-3)[0]; vg.remove(list(range(NV)))
+        for vi in nz: vg.add([int(vi)], float(col[vi]), 'REPLACE')
+    GN_ = {g.index: g.name for g in mesh.vertex_groups}; nr = 0
+    EXT = float(opt('--rigidext', 0.6)); nbig = 0
+    for c in isl:
+        cs = [me_.vertices[i].co for i in c]; ext = max((max(v[k] for v in cs) - min(v[k] for v in cs)) for k in range(3))
+        if ext > EXT: nbig += 1; continue          # spans joints: keep smoothed per-vertex weights
+        acc = {}
+        for vi in c:
+            for g in me_.vertices[vi].groups: acc[g.group] = acc.get(g.group, 0) + g.weight
+        if not acc: continue
+        tops = sorted(acc, key=acc.get, reverse=True)[:1]   # small pieces: 100% dominant bone
+        ws = {g: acc[g] for g in tops}; tw = sum(ws.values())
+        for vi in c:
+            for g in list(me_.vertices[vi].groups): mesh.vertex_groups[g.group].remove([vi])
+            for g, w_ in ws.items(): mesh.vertex_groups[g].add([vi], w_/tw, 'REPLACE')
+        nr += 1
+    bpy.ops.object.vertex_group_limit_total(limit=4); bpy.ops.object.vertex_group_normalize_all(lock_active=False)
+    print('BIGRIG rigid islands', nr, 'deforming', nbig, 'of', len(isl), 'body verts', len(isl[0]), len(me_.vertices))
 print('BIGRIG reweighted', len(mesh.data.vertices), 'unweighted', zero)
 D = math.radians; X, Y, Z = (1,0,0), (0,1,0), (0,0,1)
 def q(ax, d): return Quaternion(ax, D(d))
@@ -167,7 +266,7 @@ def body(lean=0, twist=0, side=0, head=0, knees=0):
     return r
 def armfk(r, s, fwd=0, out=0, elbow=10, yaw=0):
     sg = 1 if s == 'L' else -1
-    r['upperArm_'+s] = q(Z, sg*yaw) @ q(X, -fwd) @ q(Y, -sg*out); r['foreArm_'+s] = q(X, -elbow); r['shoulder_'+s] = q(X, -fwd*0.1) @ q(Y, -sg*out*0.15)
+    r['upperArm_'+s] = q(Z, sg*yaw) @ q(X, -fwd) @ q(Y, -sg*out); r['foreArm_'+s] = q(X, -elbow); SH = float(opt('--shshare', 0.1)); r['shoulder_'+s] = q(X, -fwd*SH) @ q(Y, -sg*out*0.15); r['upperArm_'+s] = q(Z, sg*yaw) @ q(X, -fwd*(1-SH)/0.9) @ q(Y, -sg*out) if SH > 0.1 else r['upperArm_'+s]
     return r
 def foot(s, dy=0, dz=0):   # planted foot target offset (fractions of H)
     t = IK['leg'+s][3]/H; return ((t.x, t.y+dy, t.z+dz), 1.0)
@@ -217,7 +316,24 @@ for a in list(bpy.data.actions):
 GN = {g.index: g.name for g in mesh.vertex_groups}; TORSO = set(['hips'] + SP)
 mw = mesh.matrix_world
 tv = [v.index for v in mesh.data.vertices if v.groups and GN[max(v.groups, key=lambda g: g.weight).group] in TORSO]
-REP = {}
+REP = {}; STR = {}; GN0 = {g.index: g.name for g in mesh.vertex_groups}
+import numpy as np
+EI = np.array([e.vertices[:] for e in mesh.data.edges]); R0 = np.array([v.co[:] for v in mesh.data.vertices]); L0 = np.linalg.norm(R0[EI[:,0]]-R0[EI[:,1]], axis=1); OK = L0 > 1e-4
+for nm in CLIPS:
+    arm.animation_data.action = bpy.data.actions[nm]; n = round(CLIPS[nm]*FPS); w = (0, 0, 0)
+    for f in range(1, n+2):
+        sc.frame_set(f); me = mesh.evaluated_get(bpy.context.evaluated_depsgraph_get()); md = me.to_mesh()
+        Rf = np.empty(len(md.vertices)*3); md.vertices.foreach_get('co', Rf); Rf = Rf.reshape(-1, 3); me.to_mesh_clear()
+        r_ = np.abs(np.linalg.norm(Rf[EI[:,0]]-Rf[EI[:,1]], axis=1)/np.where(OK, L0, 1) - 1)[OK]
+        p99 = float(np.percentile(r_, 99.9)); mx = float(r_.max())
+        if mx > w[0]:
+            w = (mx, p99, f)
+            if nm == 'idle' and '--dbg' in A:
+                ii = np.nonzero(OK)[0][np.argsort(-r_)[:5]]
+                for e_ in ii:
+                    a_, b_ = EI[e_]; tb = lambda vi: sorted(((round(g.weight,2), GN0[g.group]) for g in mesh.data.vertices[vi].groups), reverse=True)[:3]
+                    print('DBG', round(float(L0[e_]),3), [round(x,2) for x in R0[a_]], tb(a_), [round(x,2) for x in R0[b_]], tb(b_))
+    STR[nm] = [round(w[0], 3), round(w[1], 3), round((w[2]-1)/FPS, 2)]
 for nm in CLIPS:
     arm.animation_data.action = bpy.data.actions[nm]; n = round(CLIPS[nm]*FPS); worst = (0, None); minz = {}
     for f in range(1, n+2):
@@ -244,7 +360,7 @@ for nm in CLIPS:
                     pt = h0.lerp(h1, k/5); dep = min(-(pt-c0).dot(nn) for c0, nn in PL)
                     if dep > worst[0]: worst = (dep, f'{b0} f{f}')
             hz = (arm.matrix_world @ P['hand_'+s].head).z; minz[s] = min(minz.get(s, (1e9,0)), (hz, f))
-    rep = {'sec': round(CLIPS[nm], 3), 'inside_torso_m': round(worst[0], 3), 'at': worst[1], 'hand_min_z_m': {s: (round(v[0], 2), round((v[1]-1)/FPS, 3)) for s, v in minz.items()}}
+    rep = {'stretch_max': STR.get(nm), 'sec': round(CLIPS[nm], 3), 'inside_torso_m': round(worst[0], 3), 'at': worst[1], 'hand_min_z_m': {s: (round(v[0], 2), round((v[1]-1)/FPS, 3)) for s, v in minz.items()}}
     if nm in CONTACT:
         f = 1 + round(CONTACT[nm][0]*FPS); sc.frame_set(f)
         rep['contact'] = {s: [round(x, 2) for x in (arm.matrix_world @ P['hand_'+s].head)] for s in 'LR'}; rep['contact_t'] = CONTACT[nm][0]

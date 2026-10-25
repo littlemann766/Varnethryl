@@ -72,7 +72,22 @@ def house(sp):
         for x in(ox0,ox1): m.beam(np.array([x,ye,ze])+nrm*th/2,np.array([x,Rh,0])+nrm*th/2,0.22)
     m.beam((ox0,Rh+0.15,0),(ox1,Rh+0.15,0),0.3,'slate')
     for x in(ox0,ox1): m.beam((x,Rh+0.2,0),(x,Rh+1.0,0),0.06,'iron'); m.obox((x,Rh+1.0,0),(1,0,0),(0,1,0),(0,0,1),(0.14,0.14,0.14),'gold')
-    ctx=dict(m=m,W=W,D=D,g=g,E=E,hs=hs,Rh=Rh,pit=pit,yroof=yroof,X0=X0,X1=X1,fh=fh,fl=fl)
+    # ---- max-detail: jetty corbels with carved ends, gutters + downpipes ----
+    m.LOD=1
+    if j>0.15:
+        for x in np.arange(X0+0.9,X1-0.5,1.6):
+            for sz in(1,-1):
+                z0=sz*D/2; z1=sz*(hs-0.02)
+                m.beam((x,g-1.05,z0+sz*0.05),(x,g-0.32,z1),0.14,'beam')
+                m.obox((x,g-0.38,z1-sz*0.02),(1,0,0),(0,1,0),(0,0,1),(0.2,0.12,0.2),'beam')
+    for sz in(1,-1):
+        ze=sz*(hs+oh-0.05); ye=E-oh*T(pit)-0.12
+        m.beam((ox0+0.1,ye,ze),(ox1-0.1,ye-0.05,ze),0.13,'iron')
+        for x in(ox0+0.25,ox1-0.25):
+            m.beam((x,ye,ze),(x,ye-0.35,sz*(hs+0.12)),0.08,'iron'); m.beam((x,ye-0.35,sz*(hs+0.12)),(x,0.15,sz*(hs+0.12)),0.09,'iron')
+            m.obox((x,0.08,sz*(hs+0.25)),(1,0,0),(0,1,0),(0,0,1),(0.14,0.14,0.3),'iron')
+    m.LOD=99
+    ctx=dict(m=m,W=W,D=D,g=g,E=E,hs=hs,Rh=Rh,pit=pit,yroof=yroof,X0=X0,X1=X1,fh=fh,fl=fl,shutters=sp.get('shutters',FR))
     return ctx
 # ---------- details ----------
 def facepos(c,face,a,y,out=0.0):
@@ -95,6 +110,14 @@ def window(c,face,a,y,w=1.2,h=1.65,flowers=False,base=None):
     m.obox(p-up*fw/2+n*0.12,t,up,n,(w+0.35,fw,0.24),'stone' if y<c['g'] else 'beam')
     m.LOD=1
     m.obox(p+up*h/2+n*0.06,t,up,n,(0.06,h,0.06),'beam'); m.obox(p+up*h*0.5+n*0.06,t,up,n,(w,0.06,0.06),'beam')
+    if c.get('shutters') and base is None and w<=1.5:
+        m.LOD=1
+        for s in(-1,1):
+            sc_=p+t*s*(w/2+0.14+w*0.25)+up*h/2+n*0.06
+            m.obox(sc_,t,up,n,(w*0.48,h*0.96,0.06),'oak')
+            for yy in(0.2,0.8): m.obox(sc_+up*(yy-0.5)*h+n*0.04-t*s*w*0.12,t,up,n,(w*0.26,0.05,0.03),'iron')
+            m.obox(sc_+n*0.035,t,up,n,(w*0.04,h*0.8,0.02),'beam')
+        m.LOD=99
     if flowers:
         bc=p-up*0.38+n*0.26; m.obox(bc,t,up,n,(w+0.2,0.32,0.34),'oak')
         for k in np.linspace(-w/2,w/2,6): m.blob(bc+t*k+up*0.24,0.26,'flowers')

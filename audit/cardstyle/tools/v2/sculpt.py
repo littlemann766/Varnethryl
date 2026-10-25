@@ -52,10 +52,24 @@ def rock_sdf(seed):
         n=n+0.12*np.floor(P[...,1]*3.0+np.sin(P[...,0]*2+ph[0]))/3.0*0
         return np.maximum(d+n,-P[...,1])   # flat base
     return f
-SDF=dict(**{f'rock{i}':(rock_sdf(i),(-1.6,-0.05,-1.4),(1.6,1.4,1.4)) for i in range(4)},lion=(lion_sdf,(-0.9,-0.02,-1.2),(0.9,2.75,1.15)),robed=(robed_sdf,(-0.5,-0.02,-0.5),(0.5,2.1,0.5)))
+def lionrelief_sdf(P):
+    # lion head relief, faces +z, ~1.0 tall, 0.28 deep, back plane z=0
+    q=P-np.array([0,0.5,0]); a=np.arctan2(q[...,1],q[...,0])
+    lump=0.035*np.sin(a*14)+0.02*np.sin(a*23+1)
+    d=ell(P,(0,0.5,0.0),(0.47,0.49,0.14))-lump*0.8                          # mane disc
+    d=smin(d,ell(P,(0,0.47,0.09),(0.24,0.28,0.13)),0.05)                       # face
+    d=smin(d,ell(P,(0,0.36,0.19),(0.12,0.1,0.09)),0.04)                        # muzzle
+    d=smin(d,ell(P,(0,0.42,0.25),(0.05,0.035,0.035)),0.02)                     # nose
+    for s in(-1,1):
+        d=smin(d,ell(P,(s*0.2,0.78,0.06),(0.07,0.08,0.05)),0.03)               # ears
+        d=np.maximum(d,-ell(P,(s*0.08,0.53,0.2),(0.04,0.025,0.04)))           # eyes
+        d=smin(d,ell(P,(s*0.09,0.58,0.17),(0.07,0.025,0.04)),0.02)            # brows
+    d=smin(d,ell(P,(0,0.28,0.14),(0.07,0.04,0.05)),0.02)                       # chin
+    return np.maximum(d,-P[...,2])
+SDF=dict(lionrelief=(lionrelief_sdf,(-0.55,-0.05,-0.02),(0.55,1.0,0.36)),**{f'rock{i}':(rock_sdf(i),(-1.6,-0.05,-1.4),(1.6,1.4,1.4)) for i in range(4)},lion=(lion_sdf,(-0.9,-0.02,-1.2),(0.9,2.75,1.15)),robed=(robed_sdf,(-0.5,-0.02,-0.5),(0.5,2.1,0.5)))
 @functools.lru_cache(None)
 def get(name,tris):
-    f,lo,hi=SDF[name]; n=72 if name=='lion' else (32 if name.startswith('rock') else 48)
+    f,lo,hi=SDF[name]; n=72 if name in('lion','lionrelief') else (32 if name.startswith('rock') else 48)
     xs=[np.linspace(lo[i],hi[i],n) for i in range(3)]; G=np.stack(np.meshgrid(*xs,indexing='ij'),-1)
     vol=f(G); sp=[(hi[i]-lo[i])/(n-1) for i in range(3)]
     V,F,_,_=marching_cubes(vol,0.0,spacing=sp); V=V+np.array(lo)

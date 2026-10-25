@@ -7,7 +7,7 @@ S=2048
 # strips: name -> (y0, h, metres covered by full width, band height m)
 STRIPS={'stone':(0,384,6.0,1.125),'ashlar':(384,96,12.0,0.8),'statue':(480,16,3.0,1.0),'rock':(496,16,4.0,1.5),'plaster':(512,128,6.0,0.75),'bluestone':(640,16,3.0,1.0),'slate':(768,256,3.5*2,0.875),'oak':(1024,256,4.0,0.5),
         'beam':(1280,128,4.0,0.25),'iron':(1408,64,2.0,0.06),'gold':(1472,64,2.0,0.06)}
-RECTS={'bluewin':(0,656,128,112),'water':(256,656,1792,112)}  # extra detail rects (x,y,w,h)
+RECTS={'bluewin':(0,656,128,112),'water':(256,656,1792,112),'sign_book':(128,656,64,112),'sign_sword':(192,656,64,112)}  # extra detail rects (x,y,w,h)
 CELLS=['window','door','banner','sign_inn','sign_bread','sign_anvil','flowers','sign_potion']  # 256x512 each at y=1536
 def hexc(h): return np.array([int(h[i:i+2],16) for i in(1,3,5)])/255
 def noise(n,m,beta,seed):
@@ -65,6 +65,11 @@ def build():
     d.rectangle([x0,y0,x1,y1],fill=(60,62,70)); d.rectangle([x0+8,y0+8,x1-8,y1-8],fill=BL); de.rectangle([x0+8,y0+8,x1-8,y1-8],fill=(60,130,255))
     for k in range(-8,9): d.line([(x0+8+k*14,y0+8),(x0+8+k*14+100,y0+108)],fill=dB,width=2); d.line([(x1-8-k*14,y0+8),(x1-8-k*14-100,y0+108)],fill=dB,width=2)
     d.rectangle([x0+60,y0,x0+67,y1],fill=(60,62,70)); de.rectangle([x0+60,y0,x0+67,y1],fill=0); d.rectangle([x0,y0,x0+8,y1],fill=(60,62,70)); d.rectangle([x1-8,y0,x1,y1],fill=(60,62,70))
+    for nm in('sign_book','sign_sword'):
+        x0,y0,w,h=RECTS[nm]; x1,y1=x0+w-1,y0+h-1; cx,cy=x0+w//2,y0+h//2
+        d.rectangle([x0,y0,x1,y1],fill=NAVY); d.rectangle([x0+3,y0+3,x1-3,y1-3],outline=GOLD,width=4)
+        if nm=='sign_book': d.polygon([(cx-22,cy-14),(cx,cy-8),(cx+22,cy-14),(cx+22,cy+18),(cx,cy+24),(cx-22,cy+18)],fill=(236,226,200)); d.line([(cx,cy-8),(cx,cy+24)],fill=GOLD,width=3); d.rectangle([cx-24,cy+18,cx+24,cy+22],fill=GOLD)
+        else: d.line([(cx,cy-38),(cx,cy+26)],fill=(210,214,222),width=7); d.rectangle([cx-16,cy+20,cx+16,cy+26],fill=GOLD); d.rectangle([cx-3,cy+26,cx+3,cy+40],fill=(90,60,30)); d.polygon([(cx-4,cy-38),(cx,cy-46),(cx+4,cy-38)],fill=(210,214,222))
     for i,c in enumerate(CELLS):
         x0,y0=i*256,1536; x1,y1=x0+255,y0+511
         if c=='window':

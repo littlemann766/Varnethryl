@@ -399,16 +399,21 @@ def walls_demo():
     return dict(m=m)
 
 SPECS={k:v for k,v in globals().items() if callable(v) and k not in('house','export','rot','fh_','cloth_b','write_glb') and not k[0].isupper()}
-def export(name):
-    import kit2
-    os.makedirs(OUT,exist_ok=True); info={}
+def export(name,dress_on=True):
+    import kit2, detail, deci
+    os.makedirs(OUT,exist_ok=True); info={}; hi_n=None
     for q,(lod,suf) in enumerate(((99,''),(1,'_lod1'),(2,'_lod2'))):
-        # rebuild at quality q (fewer segments / merlons / tower windows), then drop tris tagged <= lod
+        # rebuild at quality q, add the detail dressing, drop tris tagged <= lod, then decimate to the ratio caps
         kit2.Q=q; c=SPECS[name](); m=c['m']
+        if dress_on: detail.dress(name,m,bool(c.get('front_gable')))
         P,F,UV,N=m.arrays(-1 if lod==99 else lod)
+        if q==0: hi_n=len(F)
+        else:
+            cap=int(hi_n*(0.5 if q==1 else 0.2)*0.97)
+            if len(F)>cap: P,F,UV=deci.decimate(P,F,UV,cap); N=deci.normals(P,F)
         if c.get('front_gable'): P,N=rot(P,N)
         f=f'{OUT}/bld_{name}_card2{suf}.glb'; write_glb(f,P,F,UV,N,f'bld_{name}_card2','atlas')
         info[suf or '_hi']=dict(tris=len(F),kb=os.path.getsize(f)//1024)
-    kit2.Q=0; print(name,info); return info
+    kit2.Q=0; print(name,info,flush=True); return info
 if __name__=='__main__':
     for n in sys.argv[1:]: export(n)

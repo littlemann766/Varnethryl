@@ -29,6 +29,9 @@ class Mesh:
                 s.tri(*(W[j] for j in ids),*((u[j],1-v[j]) for j in ids))
     def cell(s,corners,name,u0=0,u1=1,v0=0,v1=1):
         # corners: bl, br, tr, tl ; maps a sub-rect of a detail cell
+        if name=='door':
+            c_=np.mean(np.asarray(corners,float),0); s.__dict__.setdefault('doors',[]).append(c_)
+        if name=='banner' and u0==0.08 and u1==0.92 and v1==0.85 and not getattr(s,'no_relief',False): s._relief(corners)
         name=s.remap.get(name,name)
         if name in RECTS: rx,ry,rw,rh=RECTS[name]; x0,y0,cw,ch=rx/S,ry/S,rw/S,rh/S
         else: i=CELLS.index(name); x0=i*256/S; y0=1536/S; cw=256/S; ch=512/S
@@ -67,7 +70,7 @@ class Mesh:
                 U=lambda jj:x0+(jj/seg)*0.9*256/S; V=lambda ii:1-(1536+ (ii/rings)*500+5)/S
                 s.tri(a,cc,b,(U(j),V(i)),(U(j+1),V(i+1)),(U(j),V(i+1)))
                 s.tri(a,d,cc,(U(j),V(i)),(U(j+1),V(i)),(U(j+1),V(i+1)))
-    def sculpt(s,V,F,strip='statue',off=(0,0,0),scale=1.0,rot=0):
+    def _sculpt(s,V,F,strip='statue',off=(0,0,0),scale=1.0,rot=0):
         # organic mesh (marching cubes) mapped into a strip by world position
         strip=s.remap.get(strip,strip); y0,h,wm,bh=STRIPS[strip]
         r=np.radians(rot); R=np.array([[np.cos(r),0,np.sin(r)],[0,1,0],[-np.sin(r),0,np.cos(r)]])
@@ -79,9 +82,20 @@ class Mesh:
                 a,b=[(p[1],p[2]),(p[0],p[2]),(p[0],p[1])][ax]
                 uv.append((a/wm,1-(y0+1.5+((b/bh)%1.0)*(h-3))/S))
             s.tri(P[0],P[1],P[2],*uv)
+    def _relief(s,corners):
+        import sculpt, kit2
+        c=[np.asarray(p,float) for p in corners]; t=norm(c[1]-c[0]); up=norm(c[3]-c[0]); n=norm(np.cross(t,up)); h=np.linalg.norm(c[3]-c[0])
+        tris=(1100,380,0)[kit2.Q]
+        if not tris: return
+        V,F=sculpt.get('lionrelief',tris); sc=h*0.72; base=(c[0]+c[1])/2+up*h*0.12+n*0.02
+        W=base+V[:,[0]]*sc*t+V[:,[1]]*sc*up+V[:,[2]]*sc*n
+        o=s.LOD; s.LOD=1; s.sculpt(W,F,'gold'); s.LOD=o
+    def sculpt(s,V,F,strip='statue',off=(0,0,0),scale=1.0,rot=0,_k=None):
+        return s._sculpt(V,F,strip,off,scale,rot)
     def merge(s,o,off=(0,0,0),rot=0):
         P=np.array(o.P).reshape(-1,3); r=np.radians(rot); R=np.array([[np.cos(r),0,np.sin(r)],[0,1,0],[-np.sin(r),0,np.cos(r)]])
         P=P@R.T+np.asarray(off,float); s.P+=list(P); s.UV+=list(o.UV); s.lod+=list(o.lod)
+        for d_ in getattr(o,'doors',[]): s.__dict__.setdefault('doors',[]).append(R@d_+np.asarray(off,float))
     def arrays(s,maxlod=99):
         keep=np.array(s.lod)>maxlod
         P=np.array(s.P).reshape(-1,3,3)[keep].reshape(-1,3); UV=np.array(s.UV).reshape(-1,3,2)[keep].reshape(-1,2)

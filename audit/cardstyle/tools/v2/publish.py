@@ -19,11 +19,15 @@ for k in SKIP:
     for suf in('','_lod1','_lod2'):
         p=f'{DST}/bld_{k}_card2{suf}.glb'
         if os.path.exists(p): os.remove(p)
+old=json.load(open(DST+'/index.json')); OLD={e['id']:e for e in old.get('buildings',[])+old.get('tripo_buildings',[])}
 B=[]
 for k in sorted(set(CARDS)-SKIP):
     e=dict(id=k,card=CARDS[k])
     for lv,suf in(('high',''),('medium','_lod1'),('low','_lod2')):
         f=f'{SRC}/bld_{k}_card2{suf}.glb'; shutil.copy2(f,DST); e[lv]=info(f)
+    for kk in('col','door_points'):
+        if kk in OLD.get(k,{}): e[kk]=OLD[k][kk]
+    e['phone_high_lod']='high' if e['high']['tris']<=20000 else 'lod1'
     B.append(e)
 idx=json.load(open(DST+'/index.json')); idx['buildings']=B
 idx['note']=("Beth card2 buildings. One shared material/atlas (atlas/card2_*.jpg, 2048) for ALL buildings; GLBs reference it by relative uri. "
@@ -36,6 +40,9 @@ for k,card,note in(('lighthouse_full','card_lighthouse_tidewrack.jpg','tower+roc
     for lv,suf in(('high',''),('medium','_lod1'),('low','_lod2')):
         import trimesh; f=f'{DST}/tripo/bld_{k}_tripo{suf}.glb'; m=trimesh.load(f,force='mesh')
         e[lv]=dict(file='tripo/'+os.path.basename(f),tris=len(m.faces),bbox_min=m.bounds[0].round(2).tolist(),bbox_max=m.bounds[1].round(2).tolist())
+    for kk in('col','door_points','phone_high_lod'):
+        if kk in OLD.get(e['id'],{}): e[kk]=OLD[e['id']][kk]
     TR.append(e)
 idx['tripo_buildings']=TR
+idx.update({k:v for k,v in old.items() if k not in('buildings','tripo_buildings','note','atlas')})
 json.dump(idx,open(DST+'/index.json','w'),indent=1); print(len(B),'buildings')

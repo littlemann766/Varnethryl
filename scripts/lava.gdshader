@@ -3,6 +3,7 @@ render_mode cull_disabled;
 // test 13 (boss: flat tiled yellow floor): procedural molten rock in world space -> no tiling.
 // Dark cooled crust plates, bright cracks between them (cellular), slow two-layer flow, pulsing glow.
 uniform float glow = 1.0;          // TitanQuest: 1.0 / 1.4 / 1.9 per stage, 0.35 when calmed
+uniform float calm = 0.0;        // 1 after the Titan falls: cracks close, crust cools
 uniform vec2 flow = vec2(0.035, 0.02);
 uniform float scale = 0.11;
 varying vec3 wp;
@@ -26,7 +27,8 @@ void fragment() {
 	float edge = cells(q * 1.6);
 	float crack = 1.0 - smoothstep(0.0, 0.12 + 0.05 * fbm(q * 3.0), edge);
 	float fine = 1.0 - smoothstep(0.0, 0.06, cells(q * 4.3 + 3.1));
-	float heat = clamp(crack + fine * 0.45 + (fbm(q * 2.0 - t * flow * 4.0) - 0.55) * 0.9, 0.0, 1.0);
+	float heat0 = clamp(crack + fine * 0.45 + (fbm(q * 2.0 - t * flow * 4.0) - 0.55) * 0.9, 0.0, 1.0);
+	float heat = heat0 * mix(1.0, 0.35, calm);
 	float pulse = 0.85 + 0.15 * sin(t * 1.3 + fbm(p * 1.3) * 6.0);
 	vec3 crust = mix(vec3(0.045, 0.035, 0.03), vec3(0.13, 0.09, 0.07), fbm(q * 5.0));
 	vec3 hot = mix(vec3(0.9, 0.18, 0.02), vec3(1.0, 0.75, 0.25), heat * heat);

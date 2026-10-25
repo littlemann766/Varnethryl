@@ -200,12 +200,25 @@ func _spawn(kind: String, sc: float, from: Vector3, to: Vector3, mult: float, im
 	if projectiles.size() > 30: return
 	var node: Node3D = _proj_scenes[kind].instantiate()
 	node.scale = Vector3.ONE * sc
+	# Beth's projectile GLBs carry plain white materials (boss: "white low-poly blob"): dark rock / molten blob
+	for mi in node.find_children("*", "MeshInstance3D", true, false): (mi as MeshInstance3D).material_override = _proj_mat(kind)
 	get_parent().add_child(node); node.global_position = from
 	if T <= 0.0: T = clamp(Vector2(to.x - from.x, to.z - from.z).length() / 18.0, 1.0, 2.6)
 	var g := 9.81
 	var v := Vector3((to.x - from.x) / T, (to.y - from.y + 0.5 * g * T * T) / T, (to.z - from.z) / T)
 	projectiles.append({"node": node, "vel": v, "mult": mult, "r": impact_r, "life": T})
 	telegraph.emit(to, impact_r, T)
+
+static var _pm := {}
+static func _proj_mat(kind: String) -> StandardMaterial3D:
+	if not _pm.has(kind):
+		var m := StandardMaterial3D.new()
+		if kind == "lava_blob":
+			m.albedo_color = Color(0.9, 0.3, 0.05); m.emission_enabled = true; m.emission = Color(1.0, 0.42, 0.08); m.emission_energy_multiplier = 3.0
+		else:
+			m.albedo_color = Color(0.13, 0.1, 0.09); m.roughness = 0.95; m.emission_enabled = true; m.emission = Color(0.9, 0.25, 0.05); m.emission_energy_multiplier = 0.35
+		_pm[kind] = m
+	return _pm[kind]
 
 func _step_projectiles(dt: float) -> void:
 	for i in range(projectiles.size() - 1, -1, -1):

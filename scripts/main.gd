@@ -1481,7 +1481,7 @@ func _flythrough_all() -> void:
 # ---------- headless bench / screenshots ----------
 func _shot(name: String, pos: Vector3, yw: float, pt: float, hour: float, q: int, frames := 25) -> void:
 	tier = q; apply_quality(); _set_time(hour)
-	hero.position = pos; hero.position.y = height(pos.x, pos.z) + 0.1; yaw = yw; pitch = pt
+	hero.position = pos; hero.position.y = ground_y(pos.x, pos.z) + 0.1; yaw = yw; pitch = pt
 	hero_vis.rotation.y = yw
 	pip.position = hero.position + Vector3(1, 0, 1)
 	for i in frames: await get_tree().process_frame
@@ -1562,6 +1562,50 @@ func _run_bench() -> void:
 				joy_vec = Vector2(0, -1); await get_tree().process_frame
 			get_viewport().get_texture().get_image().save_png("user://shot_cape_%s_run_%s.png" % [tag, v[0]])
 			joy_vec = Vector2.ZERO
+		get_tree().quit()
+		return
+	if only == "t13":
+		VUI._enter("solo"); bench = true
+		cheats.role_provider = func() -> String: return "owner"
+		for i in 30: await get_tree().process_frame
+		var q = titan_quest; var C := VolcanoTitan.CENTER; var B: Vector3 = volc_base
+		_set_time(12.0)
+		# HUD with Jump (+ Fly unlocked by the menu cheat)
+		cheats.request("fly", true)
+		await _shot("t13_hud", Vector3(-6, 0, 60), PI / 2, -0.12, 11.0, 2, 30)
+		cheats.request("fly", false)
+		# boss-like view: high over the rim looking down into the crater (white blob check)
+		var vc := Camera3D.new(); vc.far = 1500; add_child(vc)
+		vc.look_at_from_position(C + Vector3(-30, 70, 34), C + Vector3(0, 39, 0)); vc.current = true
+		await _shot_here("t13_crater_top")
+		vc.current = false; cam.current = true
+		# intro: hero on a plate facing the pool
+		var plate := C + Vector3(20, 0, 8)
+		for r in range(14, 30, 2):
+			var y: float = ground_y(C.x + r, C.z + 6)
+			if y > B.y + 38.9 and y < B.y + 39.4: plate = Vector3(C.x + r, y, C.z + 6); break
+		hero.global_position = plate + Vector3(0, 0.5, 0)
+		q.accept(); q.start_intro()
+		for tt in [0.6, 2.0, 3.6, 4.8, 6.6, 8.4]:
+			while q.t_intro < tt: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_t13_intro_%02d.png" % int(tt * 10)); print("BENCH intro ", tt)
+		while q.state != "fight": await get_tree().process_frame
+		var gp := plate + Vector3(0, 0.5, 0); hero.global_position = gp
+		var yaw2 := atan2(-(C.x - gp.x), -(C.z - gp.z))
+		for st in [1, 2, 3]:
+			if st > 1:
+				q.titan.hp = q.titan.max_hp * (0.6 if st == 2 else 0.3)
+				for i in 150: await get_tree().physics_frame
+			hero.global_position = gp; party.combat.hp = party.combat.max_hp
+			await _shot("t13_stage%d" % st, gp, yaw2, -0.22, 16.0, 2, 40)
+			vc.look_at_from_position(C + Vector3(26, 64, 22), C + Vector3(0, 42, 0)); vc.current = true
+			await _shot_here("t13_stage%d_wide" % st)
+			vc.current = false; cam.current = true
+		q.titan.take_damage(int(q.titan.hp) + 1, C)
+		for i in 300: await get_tree().physics_frame
+		vc.look_at_from_position(C + Vector3(26, 64, 22), C + Vector3(0, 42, 0)); vc.current = true
+		await _shot_here("t13_win")
+		print("T13 state=%s stage=%d" % [q.state, q.stage])
 		get_tree().quit()
 		return
 	if only == "t11fly":

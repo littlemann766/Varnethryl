@@ -173,7 +173,7 @@ func start_intro() -> void:
 	var c := VolcanoTitan.CENTER
 	var hp: Vector3 = m.hero.global_position; var away := Vector2(hp.x - c.x, hp.z - c.z).normalized()
 	if away.length() < 0.5: away = Vector2(0.6, 0.8)
-	intro_cam.look_at_from_position(Vector3(c.x + away.x * 58.0, base.y + 62.0, c.z + away.y * 58.0), Vector3(c.x, base.y + 50.0, c.z))
+	intro_cam.look_at_from_position(Vector3(c.x + away.x * 27.0, base.y + 64.0, c.z + away.y * 27.0), Vector3(c.x, base.y + 44.0, c.z))
 	intro_cam.current = true
 	titan.rig.play_attack("intro", 1.0)
 	_splash(18); shake(0.5, 0.6)
@@ -214,7 +214,7 @@ func swap_stage(n: int) -> void:
 func _win() -> void:
 	if state == "won": return
 	state = "won"; bar.visible = false; embers.emitting = false
-	if m.lava_mat(): m.lava_mat().set_shader_parameter("glow", 0.35)
+	if m.lava_mat(): m.lava_mat().set_shader_parameter("glow", 0.12); m.lava_mat().set_shader_parameter("calm", 1.0)
 	for s in smokes: (s[0] as CPUParticles3D).amount = maxi(2, int(s[1] * 0.3))
 	for l in m.pool_lights: (l as OmniLight3D).light_energy = 0.5
 	for f in m.volc_fx: if f is OmniLight3D and not m.pool_lights.has(f): (f as OmniLight3D).light_energy *= 0.4
@@ -263,7 +263,7 @@ func _splash(n: int) -> void:
 func _telegraph(at: Vector3, r: float, sec: float) -> void:
 	var d := MeshInstance3D.new(); var cm := CylinderMesh.new(); cm.top_radius = r; cm.bottom_radius = r; cm.height = 0.05; cm.radial_segments = 32; d.mesh = cm
 	var s := StandardMaterial3D.new(); s.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED; s.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	s.albedo_color = Color(1, 0.15, 0.05, 0.35); s.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED; d.material_override = s
+	s.albedo_color = Color(1, 0.2, 0.05, 0.22); s.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED; d.material_override = s
 	d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(d); d.global_position = at + Vector3(0, 0.08, 0)
 	get_tree().create_timer(maxf(sec, 0.2)).timeout.connect(d.queue_free)
 
@@ -283,7 +283,7 @@ func _ui() -> void:
 	card.add_theme_font_size_override("font_size", 44); card.add_theme_color_override("font_color", Color(1, 0.6, 0.25))
 	card.add_theme_color_override("font_outline_color", Color(0.1, 0.02, 0)); card.add_theme_constant_override("outline_size", 10)
 	card.visible = false; cl.add_child(card)
-	qlabel = Label.new(); qlabel.position = Vector2(12, 150); qlabel.visible = false; qlabel.add_theme_font_size_override("font_size", 14)
+	qlabel = Label.new(); qlabel.position = Vector2(12, 205); qlabel.visible = false; qlabel.add_theme_font_size_override("font_size", 14)
 	qlabel.add_theme_color_override("font_color", Color(1, 0.85, 0.5)); qlabel.add_theme_constant_override("outline_size", 6); cl.add_child(qlabel)
 
 func _card(on: bool) -> void:

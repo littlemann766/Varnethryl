@@ -332,6 +332,7 @@ const D := {
 
 # ---- STABLES: stall rows, tack room, feed storage, loft (above)
 "stables": {"name": "Stables of Varnethryl", "scale": [0.40, 0.40],
+	"fill": [[0, ["keg", "chest", "keg"], 0.15], [1, ["keg", "chest", "keg"], 0.15]],
 	"floors": [{"h": 3.0, "mat": "flag", "wall": "darkoak", "win": 5.0}, {"h": 3.0, "mat": "oak", "wall": "darkoak", "win": 0.0, "slab": [[0.2, -0.5, 0.5, 0.5]]}],
 	"walls": [[0, -0.5, -0.15, 0.2, -0.15, [[0.1, 0.01], [0.3, 0.01], [0.5, 0.01], [0.7, 0.01], [0.9, 0.01]], "darkoak"],
 		[0, -0.3, -0.5, -0.3, -0.15, [], "darkoak"], [0, -0.1, -0.5, -0.1, -0.15, [], "darkoak"], [0, 0.2, -0.5, 0.2, 0.5, [[0.3, 1.8], [0.75, 1.8]], "darkoak"]],

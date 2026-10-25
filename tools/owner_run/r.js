@@ -36,10 +36,17 @@ let SQ=null;
 window.seqInit=(mode)=>{mixer.stopAllAction();const W=mixer.clipAction(G.animations.find(c=>c.name==='Walking')),Rn=mixer.clipAction(G.animations.find(c=>c.name==='Running'));W.reset().play();Rn.reset().play();
  SQ={mode,W,Rn,v:mode==='old'?3.04:2.0,ph:0,tW:0,tR:0,dist:0};return true;};
 window.seqFrame=(t,dt)=>{const s=SQ,old=s.mode==='old';const target=t<2.5?(old?3.04:2.0):6.08;s.v+=(target-s.v)*(1-Math.exp(-dt*11));const v=s.v;s.dist+=v*dt;
- const Sw=old?1.486:2.0,Sr=old?2.28:6.08,cl=x=>Math.max(.5,Math.min(2.4,x));const m=Math.max(0,Math.min(1,(v-Sw)/(Sr-Sw)));
+ const Sw=old?1.486:2.0,Sr=old?2.28:(window.SR||6.08),cl=x=>Math.max(.5,Math.min(2.4,x));const m=Math.max(0,Math.min(1,(v-Sw)/(Sr-Sw)));
  s.W.setEffectiveWeight(1-m);s.Rn.setEffectiveWeight(m);const tw=cl(v/Sw),tr=cl(v/Sr);
  if(old){s.tW+=dt*tw;s.tR+=dt*tr;s.W.time=s.tW%s.W.getClip().duration;s.Rn.time=s.tR%s.Rn.getClip().duration;}
  else{s.ph=(s.ph+dt*((1-m)*tw/s.W.getClip().duration+m*tr/s.Rn.getClip().duration))%1;s.W.time=s.ph*s.W.getClip().duration;s.Rn.time=s.ph*s.Rn.getClip().duration;}
  s.W.timeScale=0;s.Rn.timeScale=0;mixer.update(0);gtex.offset.y=(s.dist/2)%1;
  for(let i=0;i<2;i++){R.setViewport(i*640,0,640,540);R.setScissor(i*640,0,640,540);R.render(scene,cams[i]);}
  return [R.domElement.toDataURL('image/jpeg',0.92),+v.toFixed(2),+m.toFixed(2)];};
+// resample the ORIGINAL Running clip so phase 0 = left toe touchdown (matches the walk clip for phase-synced blending)
+window.shiftedOldRun=()=>{const c=G.animations.find(c=>c.name==='Running'),D=c.duration;mixer.stopAllAction();const a=mixer.clipAction(c);a.reset().play();
+ const N=200,ys=[];for(let i=0;i<N;i++){a.time=D*i/N;mixer.update(0);model.updateMatrixWorld(true);ys.push(bones.mixamorigLeftToeBase.getWorldPosition(new THREE.Vector3()).y);}
+ const ymin=Math.min(...ys);let td=0;for(let i=0;i<N;i++){const p=(i-1+N)%N;if(ys[i]<ymin+0.012&&ys[p]>=ymin+0.012){td=i/N;break;}}
+ const F=41,times=[],hipsPos=[],tracks={};const names=Object.keys(bones);names.forEach(n=>tracks[n]=[]);
+ for(let f=0;f<F;f++){const t=f/(F-1)*D;times.push(t);a.time=((t/D+td)%1)*D;mixer.update(0);names.forEach(n=>tracks[n].push(...bones[n].quaternion.toArray()));hipsPos.push(...bones.mixamorigHips.position.toArray());}
+ a.stop();return {times,hipsPos,tracks,td,P:{v:0,T:D}};};

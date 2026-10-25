@@ -13,3 +13,6 @@ Regenerate: `npm i puppeteer-core` here, `node serve.mjs &` (paths in serve.mjs)
 `Walking` clip is now also procedural (`PW` in gen.js): heel-strike/toe-roll IK walk, 2.0 native m/s, 140 steps/min,
 upright chest. Owner walk-mode travel speed is scaled by OWNER_WALK_MUL (2.0/3.04) because the generic walk speed is a jog
 for him. Walk<->run blend is phase-synced (`userData.phaseSync`). `node export.mjs walk` -> newwalk.json; splice.py writes both clips.
+
+## v2 (1.5.35, boss 9:40 AM)
+Running = the ORIGINAL Mixamo run clip, resampled so phase 0 = left touchdown (exportold.mjs) for the synced blend; SPEEDS run 4.63 (measured) so it plays 1.31x at run speed. Walking = procedural walk. `python3 splice.py orig.glb out.glb oldrun_shift.json=Running newwalk.json=Walking`

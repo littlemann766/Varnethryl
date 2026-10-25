@@ -42,6 +42,7 @@ static func mat(kind: String) -> Material:
 			m.albedo_texture = ImageTexture.create_from_image(img); m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 			m.uv1_triplanar = true; m.uv1_world_triplanar = true; m.uv1_scale = Vector3.ONE / (2.4 if kind == "checker" else 0.7); m.roughness = 0.45
 		"red": m.albedo_color = Color(0.45, 0.12, 0.1)
+		"sand": m.albedo_color = Color(0.86, 0.74, 0.52); m.roughness = 1.0
 		"bread": m.albedo_color = Color(0.78, 0.52, 0.25); m.roughness = 0.8
 		"banner":
 			m.albedo_texture = load(TEX + "banner_lion_albedo.jpg"); m.cull_mode = BaseMaterial3D.CULL_DISABLED

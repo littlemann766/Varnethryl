@@ -182,7 +182,7 @@ static func _foot(info: Dictionary, p: Array, P: Callable) -> Rect2:
 	var pos: Vector3 = P.call(p[2], p[3], 0.0); var c := Vector2(pos.x, pos.z); var ex: Array = p[5] if p.size() > 5 else []
 	var sz := Vector2(0.6, 0.6)
 	match p[0]:
-		"_runner", "_area", "_glasswall", "_bread", "_tools": return Rect2(c, Vector2.ZERO)
+		"_runner", "_area", "_glasswall", "_bread", "_tools", "_arena": return Rect2(c, Vector2.ZERO)
 		"_gear": sz = Vector2(ex[0] * 2.0, 0.4)
 		"_round_table": sz = Vector2.ONE * (ex[0] + 0.75) * 2.0
 		"_fountain": sz = Vector2.ONE * ex[0] * 2.0
@@ -281,6 +281,21 @@ static func _prop(info: Dictionary, p: Array, P: Callable) -> void:
 				var sp := K.box(g, Vector3.ZERO, Vector3(r * 2.0 - 0.1, 0.1, 0.1), "darkoak", false); sp.rotation.z = PI / 4 * k
 			var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var sh := BoxShape3D.new(); sh.size = Vector3(r * 2.0, hy + r, 0.4)
 			cs.shape = sh; cs.position.y = (hy + r) / 2.0; sb.add_child(cs); sb.position = pos; sb.rotation.y = deg_to_rad(rot); fn.add_child(sb)
+		"_arena":   # round sand pit + low barrier + stepped stands [r_sand, r_barrier, r_stand0, r_stand1, steps, gap_half]
+			var rs: float = ex[0]; var rb: float = ex[1]; var r0: float = ex[2]; var r1: float = ex[3]; var n: int = ex[4]; var gh: float = ex[5]
+			var mi := MeshInstance3D.new(); var cm := CylinderMesh.new(); cm.top_radius = rs; cm.bottom_radius = rs; cm.height = 0.04; cm.radial_segments = 48
+			mi.mesh = cm; mi.material_override = K.mat("sand"); mi.position = pos + Vector3(0, 0.02, 0); mi.layers = K.LAYER; fn.add_child(mi)
+			var ring := func(r: float, wd: float, h: float, y0: float, m: String, segs: int) -> void:
+				for k in segs:
+					var a: float = TAU * (k + 0.5) / segs; var c := Vector3(sin(a), 0, cos(a)) * r
+					if absf(c.x) < gh + wd * 0.5: continue   # front (+z) and back (-z) passages
+					var ln: float = TAU * r / segs + 0.06
+					K.box(fn, pos + c + Vector3(0, y0 + h / 2, 0), Vector3(ln, h, wd), m, true, a)
+			ring.call(rb, 0.3, 1.1, 0.0, "palestone", 40)
+			for k in n:   # stands: each tier a solid ring, rising outward
+				var w: float = (r1 - r0) / n; var r: float = r0 + w * (k + 0.5)
+				ring.call(r, w + 0.02, 1.1 + 0.45 * (k + 1), 0.0, "stone" if k % 2 == 0 else "palestone", 40)
+				ring.call(r, w * 0.5, 0.06, 1.1 + 0.45 * (k + 1), "blue" if k % 2 == 0 else "darkoak", 40)
 		"_round_table":  # [radius, chairs]
 			var mi := MeshInstance3D.new(); var cm := CylinderMesh.new(); cm.top_radius = ex[0]; cm.bottom_radius = ex[0]; cm.height = 0.1
 			mi.mesh = cm; mi.material_override = K.mat("darkoak"); mi.position = pos + Vector3(0, 0.78, 0); mi.layers = K.LAYER; fn.add_child(mi)

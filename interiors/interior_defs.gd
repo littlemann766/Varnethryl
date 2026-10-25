@@ -26,48 +26,32 @@ const SIZE := {"apothecary": Vector3(9.1, 13.0, 9.5), "bakery": Vector3(11.1, 15
 const DOORS := {"inn": Vector3(0, 0, 5.42), "bakery": Vector3(0, 0, 4.45), "house1": Vector3(0, 0, 4.27), "house2": Vector3(0, 0, 3.75),
 	"house3": Vector3(0, 0, 3.52), "house4": Vector3(0, 0, 3.52), "smithy": Vector3(0, 0, 4.02), "apothecary": Vector3(0, 0, 3.6), "guildhall": Vector3(0, 0, 6.57)}
 ## fractional (legacy) defs were tuned against the r3 shells; keep those footprints until they are rewritten in metres
-const LEGACY_SIZE := {"inn": Vector3(38.8, 21.8, 28.3), "house1": Vector3(22.8, 17.8, 24.5), "house2": Vector3(24.1, 17.6, 25.5), "house3": Vector3(21.5, 17.1, 24.5), "house4": Vector3(23.0, 18.5, 27.0)}
+const LEGACY_SIZE := {"house1": Vector3(22.8, 17.8, 24.5), "house2": Vector3(24.1, 17.6, 25.5), "house3": Vector3(21.5, 17.1, 24.5), "house4": Vector3(23.0, 18.5, 27.0)}
 const D := {
 # ===== card2 exteriors (card scale). All coords in metres ("m": true) from the interior centre; front wall/door at +z.
 # ---- INN 10.7 x 10.1: common room + hearth (W), bar, kitchen (back R), pantry & storage (back L); up: bedrooms A-C, rumor corner, balcony
-"inn": {"name": "Inn of Varnethryl",
-	"floors": [{"h": 4.2, "mat": "oak", "wall": "stone", "win": 4.5}, {"h": 3.6, "mat": "oak", "wall": "plaster", "win": 4.5}],
-	"walls": [
-		[0, 0.0, -0.08, 0.5, -0.08, [[0.85, 2.0]]],          # kitchen behind bar
-		[0, -0.5, -0.22, 0.0, -0.22, [[0.3, 1.6], [0.8, 1.6]]], # pantry/storage front wall
-		[0, -0.25, -0.5, -0.25, -0.22, []],
-		[0, 0.0, -0.5, 0.0, -0.08, [[0.6, 1.6]]],
-		[1, -0.5, -0.12, 0.5, -0.12, [[0.17, 1.4], [0.5, 1.4], [0.83, 1.4]]],  # bedrooms A B C
-		[1, -0.17, -0.5, -0.17, -0.12, []], [1, 0.17, -0.5, 0.17, -0.12, []],
-		[1, -0.15, -0.12, -0.15, 0.5, [[0.4, 1.4]]],          # sitting room (rumor corner)
-	],
-	"stairs": [[0, 0.42, 0.42, 0, 2.0]],
-	"rails": [[1, 0.36, 0.15, 90, 2]],
-	"props": [
-		["hearth", 0, -0.48, 0.12, 90], ["rug", 0, -0.33, 0.12, 90], ["_area", 0, 0.0, 0.42, 0, [4.0, 3.0, "flag"]], ["_area", 0, 0.25, -0.29, 0, [9.0, 7.0, "flag"]],
-		["table", 0, -0.33, 0.3, 0], ["bench", 0, -0.33, 0.37, 180], ["bench", 0, -0.33, 0.23, 0],
-		["table", 0, -0.14, 0.3, 0], ["chair", 0, -0.17, 0.38, 180], ["chair", 0, -0.11, 0.38, 180], ["chair", 0, -0.14, 0.22, 0],
-		["table", 0, -0.22, 0.0, 90], ["chair", 0, -0.25, 0.0, 90], ["chair", 0, -0.19, 0.0, -90],
-		["_round_table", 0, 0.12, 0.3, 0, [0.7, 4]],
-		["bar_counter", 0, 0.12, 0.02, 0], ["bar_counter", 0, 0.24, 0.02, 0], ["stool", 0, 0.08, 0.08, 0], ["stool", 0, 0.13, 0.08, 0],
-		["stool", 0, 0.19, 0.08, 0], ["stool", 0, 0.25, 0.08, 0], ["bottles", 0, 0.1, 0.02, 0, [1.42, false]], ["bottles", 0, 0.22, 0.02, 0, [1.42, false]],
-		["apothecary_shelf", 0, 0.12, -0.065, 0], ["apothecary_shelf", 0, 0.22, -0.065, 0], ["keg", 0, 0.3, -0.2, 0], ["keg", 0, 0.34, -0.2, 0],
-		["hearth", 0, 0.3, -0.48, 0], ["table", 0, 0.25, -0.3, 0], ["_pots", 0, 0.25, -0.3, 0, [1.4]], ["keg", 0, 0.45, -0.4, 0], ["chest", 0, 0.42, -0.2, -90],
-		["keg", 0, -0.45, -0.45, 0], ["keg", 0, -0.4, -0.45, 0], ["chest", 0, -0.35, -0.44, 0], ["apothecary_shelf", 0, -0.12, -0.47, 0], ["chest", 0, -0.18, -0.3, 0],
-		["lion_banner", 0, -0.05, 0.48, 180, [1.2, false]], ["lion_banner", 0, 0.05, -0.075, 0, [1.4, false]],
-		["bed", 1, -0.33, -0.4, 0], ["wardrobe", 1, -0.22, -0.47, 0], ["chest", 1, -0.33, -0.22, 180],
-		["bed", 1, 0.0, -0.4, 0], ["wardrobe", 1, 0.11, -0.47, 0], ["rug", 1, 0.0, -0.26, 0],
-		["bed", 1, 0.33, -0.4, 0], ["wardrobe", 1, 0.44, -0.47, 0], ["chest", 1, 0.33, -0.22, 180],
-		["_round_table", 1, -0.33, 0.22, 0, [0.6, 4]], ["lion_banner", 1, -0.49, 0.22, 90, [0.6, false]], ["quest_board", 1, -0.33, 0.48, 180],
-		["bookshelf", 1, -0.17, 0.32, -90], ["rug", 1, -0.33, 0.22, 0], ["lion_banner", 1, 0.0, 0.48, 180, [0.6, false]],
-		["bench", 1, 0.1, 0.45, 180],
-	],
-	"lights": [["chandelier", 0, -0.25, 0.18, 0, 3.0, 16.0, true], ["chandelier", 0, 0.15, 0.22, 0, 2.0, 12.0],
-		["fire", 0, -0.46, 0.12, 0, 1.8, 7.0], ["lantern", 0, 0.18, -0.075, 0, 1.2, 7.0], ["lantern", 0, 0.25, -0.49, 0, 1.0, 7.0], ["lantern", 0, -0.35, -0.49, 0, 0.8, 6.0],
-		["lantern", 1, -0.33, -0.12, 180, 0.9, 6.0], ["lantern", 1, 0.0, -0.12, 180, 0.9, 6.0], ["lantern", 1, 0.33, -0.12, 180, 0.9, 6.0],
-		["chandelier", 1, -0.33, 0.22, 0, 1.6, 9.0, true], ["lantern", 1, 0.2, 0.49, 180, 1.0, 8.0]],
-	"rooms": [["Common Room", 0, -0.3, 0.15], ["Bar", 0, 0.15, 0.15], ["Kitchen", 0, 0.25, -0.2], ["Pantry", 0, -0.38, -0.33], ["Storage", 0, -0.12, -0.38],
-		["Hallway", 1, 0.0, 0.05], ["Bedroom A", 1, -0.33, -0.25], ["Bedroom B", 1, 0.0, -0.22], ["Bedroom C", 1, 0.33, -0.25], ["Rumor Corner", 1, -0.33, 0.1], ["Balcony", 1, 0.2, 0.4]]},
+"inn": {"name": "Inn of Varnethryl", "m": true,
+	"floors": [{"h": 3.2, "mat": "oak", "wall": "stone", "win": 3.0}, {"h": 3.0, "mat": "oak", "wall": "plaster", "win": 3.0}],
+	"walls": [[0, -5.35, -2.2, 0.5, -2.2, [[0.248, 1.4], [0.61, 1.4]]], [0, -2.5, -5.05, -2.5, -2.2, []],
+		[1, -5.35, -2.3, 5.35, -2.3, [[0.238, 1.4], [0.556, 1.4], [0.724, 1.4]]], [1, -1.9, -5.05, -1.9, -2.3, []], [1, 1.4, -5.05, 1.4, -2.3, []],
+		[1, -1.2, -2.3, -1.2, 5.05, [[0.313, 1.4]]]],
+	"stairs": [[0, 4.15, 3.9, 0, 1.4]],
+	"props": [["hearth", 0, -4.69, 1.0, 90], ["rug", 0, -3.2, 1.0, 90], ["table", 0, -2.6, 3.2, 0], ["bench", 0, -2.6, 3.8, 180], ["bench", 0, -2.6, 2.6, 0],
+		["_round_table", 0, -2.4, 0.5, 0, [0.55, 3]],
+		["bar_counter", 0, 0.4, -0.9, 0], ["stool", 0, -0.6, -0.3, 0], ["stool", 0, 0.1, -0.3, 0], ["stool", 0, 0.8, -0.3, 0], ["stool", 0, 1.5, -0.3, 0],
+		["bottles", 0, -0.2, -0.9, 0, [1.42, false]], ["bottles", 0, 1.0, -0.9, 0, [1.42, false]],
+		["hearth", 0, 2.0, -4.56, 0], ["table", 0, 1.6, -3.3, 0], ["_pots", 0, 1.6, -3.3, 0, [1.3]], ["keg", 0, 4.6, -4.6, 0], ["chest", 0, 4.87, -3.4, -90],
+		["keg", 0, -4.8, -4.6, 0], ["keg", 0, -4.15, -4.6, 0], ["apothecary_shelf", 0, -3.4, -4.67, 0], ["chest", 0, -1.6, -4.55, 0], ["chest", 0, -0.4, -4.55, 0],
+		["lion_banner", 0, -2.6, 4.82, 180, [0.5, false]], ["lion_banner", 0, 2.3, 4.82, 180, [0.5, false]], ["lion_banner", 0, -5.12, -0.7, 90, [0.5, false]],
+		["bed", 1, -4.4, -3.8, 0], ["wardrobe", 1, -2.6, -4.52, 0], ["bed", 1, -1.0, -3.9, 0], ["chest", 1, 0.8, -4.6, 0], ["bed", 1, 4.4, -3.8, 0], ["wardrobe", 1, 2.5, -4.52, 0],
+		["_round_table", 1, -3.3, 1.5, 0, [0.6, 4]], ["lion_banner", 1, -5.12, 1.5, 90, [0.4, false]], ["quest_board", 1, -3.3, 4.65, 180], ["bookshelf", 1, -1.6, -1.2, -90],
+		["rug", 1, -3.3, 1.5, 0], ["bench", 1, 1.5, 4.66, 180], ["lion_banner", 1, 0.5, 4.82, 180, [0.4, false]]],
+	"lights": [["chandelier", 0, -2.6, 1.4, 0, 2.2, 9.0, true], ["chandelier", 0, 0.8, 0.6, 0, 1.6, 7.0], ["fire", 0, -4.5, 1.0, 0, 1.6, 6.0],
+		["lantern", 0, -5.17, 3.2, 90, 1.0, 6.0], ["lantern", 0, 5.17, 0.3, -90, 1.0, 6.0], ["lantern", 0, 3.2, -4.87, 0, 1.0, 6.0], ["lantern", 0, -4.0, -4.87, 0, 0.8, 5.0],
+		["lantern", 1, -3.6, -4.87, 0, 0.8, 5.0], ["lantern", 1, 0.0, -4.87, 0, 0.8, 5.0], ["lantern", 1, 3.4, -4.87, 0, 0.8, 5.0],
+		["chandelier", 1, -3.3, 1.5, 0, 1.4, 6.0, true], ["lantern", 1, 1.5, 4.87, 180, 0.9, 6.0], ["lantern", 1, 0.0, -2.12, 180, 0.8, 5.0]],
+	"rooms": [["Common Room", 0, -3.4, 1.6], ["Bar", 0, 0.5, 0.3], ["Kitchen", 0, 3.6, -2.6], ["Pantry", 0, -3.9, -3.2], ["Storage", 0, -1.4, -3.3],
+		["Hallway", 1, 0.5, -1.6], ["Bedroom A", 1, -2.8, -3.3], ["Bedroom B", 1, 0.5, -3.2], ["Bedroom C", 1, 2.6, -3.2], ["Rumor Corner", 1, -3.3, 0.0], ["Balcony", 1, 1.5, 3.6]]},
 
 # ---------------- GUILD HALL: foyer, main hall w/ quest board, meeting table, stair & upper balcony overlooking hall
 # ---- GUILD HALL 13.5 x 12.1: foyer, main hall (runner, hearth, banners), meeting table (W room), quest boards; stair -> balcony ring over the hall
@@ -150,31 +134,27 @@ const D := {
 
 # ---------------- BLACKSMITH: forge room, armor display, weapon wall & workshop; upper floor storage loft via ladder
 # ---- TEMPLE 11.1 x 18.7: nave (pews, runner, pillars), high altar + stained glass, healing chambers E (fountain), crypt-adjacent shrine W; side galleries above
-"temple": {"name": "Temple of Varnethryl", "scale": [0.8, 0.7],
-	"floors": [{"h": 6.0, "mat": "palestone", "wall": "palestone", "win": 3.5, "glass": "stained"},
-		{"h": 5.0, "mat": "palestone", "wall": "palestone", "win": 3.5, "glass": "stained", "slab": [[-0.5, -0.5, -0.2, 0.5], [0.2, -0.5, 0.5, 0.5]]}],
-	"walls": [[0, -0.2, -0.3, -0.2, 0.1, [[0.5, 3.0]]], [0, 0.2, -0.3, 0.2, 0.1, [[0.5, 3.0]]],
-		[0, -0.5, -0.3, -0.2, -0.3, []], [0, 0.2, -0.3, 0.5, -0.3, []], [0, -0.5, 0.1, -0.2, 0.1, []], [0, 0.2, 0.1, 0.5, 0.1, []]],
-	"stairs": [[0, -0.36, 0.42, 0, 2.2], [0, 0.36, 0.42, 0, 2.2]],
-	"rails": [[1, -0.2, -0.47, -90, 7], [1, 0.2, -0.47, -90, 7]],
-	"props": [
-		["_runner", 0, 0.0, 0.03, 0, [0.88, 2.4]], ["altar", 0, 0.0, -0.43, 0], ["_area", 0, 0.0, -0.43, 0, [6.0, 4.0, "blue"]],
-		["_glasswall", 0, 0.0, -0.495, 0, [3.0, 5.0, 1.8, "stained"]], ["lion_banner", 0, -0.12, -0.49, 0, [2.5, false]], ["lion_banner", 0, 0.12, -0.49, 0, [2.5, false]],
-		["pew", 0, -0.1, -0.2, 0], ["pew", 0, 0.1, -0.2, 0], ["pew", 0, -0.1, -0.12, 0], ["pew", 0, 0.1, -0.12, 0], ["pew", 0, -0.1, -0.04, 0], ["pew", 0, 0.1, -0.04, 0],
-		["pew", 0, -0.1, 0.04, 0], ["pew", 0, 0.1, 0.04, 0], ["pew", 0, -0.1, 0.12, 0], ["pew", 0, 0.1, 0.12, 0], ["pew", 0, -0.1, 0.2, 0], ["pew", 0, 0.1, 0.2, 0],
-		["_pillar", 0, -0.18, -0.38, 0, [7.0, 0.4]], ["_pillar", 0, 0.18, -0.38, 0, [7.0, 0.4]], ["_pillar", 0, -0.18, 0.3, 0, [7.0, 0.4]], ["_pillar", 0, 0.18, 0.3, 0, [7.0, 0.4]],
-		["_fountain", 0, 0.35, -0.05, 0, [1.6]], ["_area", 0, 0.35, -0.05, 0, [5.0, 5.0, "blue"]], ["bench", 0, 0.47, -0.05, -90], ["bench", 0, 0.35, -0.27, 0], ["bench", 0, 0.35, 0.17, 180],
-		["sarcophagus", 0, -0.35, -0.05, 0], ["altar", 0, -0.45, -0.05, 90], ["lion_banner", 0, -0.49, -0.2, 90, [2.0, false]], ["lion_banner", 0, -0.49, 0.1, 90, [2.0, false]],
-		["lectern", 0, -0.3, 0.15, 180],
-		["pew", 1, -0.35, -0.2, 90], ["pew", 1, 0.35, -0.2, -90], ["lion_banner", 1, -0.49, -0.1, 90, [1.0, false]], ["lion_banner", 1, 0.49, -0.1, -90, [1.0, false]],
-		["bookshelf", 1, -0.49, 0.2, 90], ["bookshelf", 1, 0.49, 0.2, -90],
-	],
-	"lights": [["chandelier", 0, 0.0, -0.1, 0, 4.0, 22.0, true], ["chandelier", 0, 0.0, 0.2, 0, 2.5, 14.0], ["lantern", 0, 0.0, -0.4, 0, 2.0, 10.0],
-		["chandelier", 0, 0.35, -0.05, 0, 2.2, 11.0], ["lantern", 0, -0.49, -0.05, 90, 1.5, 9.0], ["lantern", 0, -0.21, 0.4, -90, 1.0, 8.0], ["lantern", 0, 0.21, 0.4, 90, 1.0, 8.0],
-		["lantern", 1, -0.49, -0.3, 90, 1.0, 9.0], ["lantern", 1, 0.49, -0.3, -90, 1.0, 9.0], ["lantern", 1, -0.49, 0.35, 90, 1.0, 9.0], ["lantern", 1, 0.49, 0.35, -90, 1.0, 9.0]],
-	"rooms": [["Main Nave", 0, 0.0, 0.3], ["High Altar", 0, 0.0, -0.33], ["Healing Chambers", 0, 0.35, 0.1], ["Crypt-Adjacent Shrine", 0, -0.35, 0.1],
-		["West Gallery", 1, -0.35, -0.3], ["East Gallery", 1, 0.35, -0.3]]},
-
+"temple": {"name": "Temple of Varnethryl", "m": true,
+	"floors": [{"h": 5.0, "mat": "palestone", "wall": "palestone", "win": 2.8, "glass": "stained"},
+		{"h": 3.6, "mat": "palestone", "wall": "palestone", "win": 2.8, "glass": "stained", "slab": [[-5.55, -9.35, -3.0, 9.35], [3.0, -9.35, 5.55, 9.35]]}],
+	"stairs": [[0, -4.45, 7.55, 0, 1.2], [0, 4.45, 7.55, 0, 1.2]],
+	"rails": [[1, -3.0, -9.2, -90, 8], [1, 3.0, -9.2, -90, 8]],
+	"props": [["_runner", 0, 0.0, 0.3, 0, [16.0, 1.6]], ["altar", 0, 0.0, -8.45, 0], ["_area", 0, 0.0, -8.0, 0, [5.0, 2.6, "blue"]], ["_glasswall", 0, 0.0, -9.3, 0, [3.0, 3.6, 1.2, "stained"]],
+		["lion_banner", 0, -2.2, -9.17, 0, [1.8, false]], ["lion_banner", 0, 2.2, -9.17, 0, [1.8, false]],
+		["pew", 0, -1.85, -5.4, 0], ["pew", 0, 1.85, -5.4, 0], ["pew", 0, -1.85, -4.1, 0], ["pew", 0, 1.85, -4.1, 0], ["pew", 0, -1.85, -2.8, 0], ["pew", 0, 1.85, -2.8, 0],
+		["pew", 0, -1.85, -1.5, 0], ["pew", 0, 1.85, -1.5, 0], ["pew", 0, -1.85, -0.2, 0], ["pew", 0, 1.85, -0.2, 0], ["pew", 0, -1.85, 1.1, 0], ["pew", 0, 1.85, 1.1, 0],
+		["pew", 0, -1.85, 2.4, 0], ["pew", 0, 1.85, 2.4, 0], ["pew", 0, -1.85, 3.7, 0], ["pew", 0, 1.85, 3.7, 0],
+		["_pillar", 0, -3.1, -6.5, 0, [5.0, 0.3]], ["_pillar", 0, 3.1, -6.5, 0, [5.0, 0.3]], ["_pillar", 0, -3.1, -2.2, 0, [5.0, 0.3]], ["_pillar", 0, 3.1, -2.2, 0, [5.0, 0.3]],
+		["_pillar", 0, -3.1, 2.2, 0, [5.0, 0.3]], ["_pillar", 0, 3.1, 2.2, 0, [5.0, 0.3]],
+		["_fountain", 0, 4.45, -0.9, 0, [0.7]], ["_area", 0, 4.3, -2.6, 0, [2.2, 4.4, "blue"]], ["bench", 0, 5.15, -7.9, -90],
+		["sarcophagus", 0, -4.3, -4.3, 0], ["lectern", 0, -4.6, -8.6, 0], ["lion_banner", 0, -5.37, -5.8, 90, [1.4, false]], ["lion_banner", 0, -5.37, -2.6, 90, [1.4, false]],
+		["pew", 1, -4.3, -6.0, 90], ["pew", 1, 4.3, -6.0, -90], ["lion_banner", 1, -5.37, -3.0, 90, [0.6, false]], ["lion_banner", 1, 5.37, -3.0, -90, [0.6, false]],
+		["bookshelf", 1, -5.33, -8.0, 90], ["bookshelf", 1, 5.33, -8.0, -90]],
+	"lights": [["chandelier", 0, 0.0, -3.0, 0, 3.0, 14.0, true], ["chandelier", 0, 0.0, 3.0, 0, 2.0, 10.0], ["lantern", 0, 0.0, -9.17, 0, 1.6, 7.0],
+		["lantern", 0, 5.37, -4.3, -90, 1.4, 7.0], ["lantern", 0, -5.37, -4.3, 90, 1.4, 7.0], ["lantern", 0, -5.37, 4.0, 90, 0.9, 6.0], ["lantern", 0, 5.37, 4.0, -90, 0.9, 6.0],
+		["lantern", 1, -5.37, -6.5, 90, 0.9, 6.0], ["lantern", 1, 5.37, -6.5, -90, 0.9, 6.0], ["lantern", 1, -5.37, 5.0, 90, 0.9, 6.0], ["lantern", 1, 5.37, 5.0, -90, 0.9, 6.0]],
+	"rooms": [["Main Nave", 0, 0.0, 6.0], ["High Altar", 0, 0.0, -6.8], ["Healing Chambers", 0, 4.3, -3.2], ["Crypt-Adjacent Shrine", 0, -4.3, -6.0],
+		["West Gallery", 1, -4.3, -4.0], ["East Gallery", 1, 4.3, -4.0]]},
 # ================= the rest (cards read from card_<name>; one storey per card level, stairs via "auto")
 # ---- GRAND LIBRARY: main reading hall, archive stacks, librarian desk, restricted archive; upper balcony + stacks
 "library": {"name": "Grand Library of Varnethryl",

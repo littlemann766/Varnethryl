@@ -1187,6 +1187,26 @@
      0.059
     ]
    }
+  },
+  "castle_model": {
+   "size_m": [
+    0.6,
+    0.54,
+    0.566
+   ],
+   "collision_box": {
+    "center": [
+     0,
+     0.27,
+     0
+    ],
+    "extents": [
+     0.6,
+     0.54,
+     0.566
+    ]
+   },
+   "name": "castle_model"
   }
  }
 }

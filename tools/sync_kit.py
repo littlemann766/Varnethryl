@@ -15,5 +15,11 @@ idx = json.load(open(SRC + "index.json")); names &= set(idx["props"])
 os.makedirs(DST, exist_ok=True)
 for n in sorted(names):
     for suf in (["", "_lod1"] if "--high" in sys.argv else ["_lod1"]): shutil.copy(SRC + n + suf + ".glb", DST)
+# extra props from other kits (Beth's tripo2 set), copied under a kit name
+EXTRA = {"castle_model": ("/workspace/godot-art/tripo2/prop_castle_model", {"size_m": [0.6, 0.54, 0.566], "collision_box": {"center": [0, 0.27, 0], "extents": [0.6, 0.54, 0.566]}})}
+for n, (src, meta) in EXTRA.items():
+    if re.search(r'\["%s", \d' % n, s):
+        for suf in (["", "_lod1"] if "--high" in sys.argv else ["_lod1"]): shutil.copy(src + suf + ".glb", DST + n + suf + ".glb")
+        idx["props"][n] = dict(meta, name=n); names.add(n)
 idx["props"] = {k: v for k, v in idx["props"].items() if k in names}
 json.dump(idx, open(DST + "index.json", "w"), indent=1); print(len(names), "props")

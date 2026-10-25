@@ -1,6 +1,6 @@
 import json,struct,re,sys
 src,dst=sys.argv[1],sys.argv[2]
-jobs=[('newrun.json','Running'),('newwalk.json','Walking')]
+jobs=[tuple(x.split('=')) for x in sys.argv[3:]] or [('newrun.json','Running'),('newwalk.json','Walking')]
 b=open(src,'rb').read()
 jl=struct.unpack('<I',b[12:16])[0];j=json.loads(b[20:20+jl]);o=20+jl
 bl=struct.unpack('<I',b[o:o+4])[0];bin_=bytearray(b[o+8:o+8+bl])
@@ -26,7 +26,7 @@ for JS,NAME in jobs:
   for n,v in raw['tracks'].items(): ch(idx[n],'rotation',add(v,'VEC4'))
   an=[a for a in j['animations'] if a['name']==NAME][0]
   an['samplers']=samplers;an['channels']=channels
-  an.setdefault('extras',{})['varnethryl']='owner-run-rework 2026-10-25: procedural '+NAME+', native ground speed %.2f m/s, cycle %.2f s'%(raw['P']['v'],raw['P']['T'])
+  an.setdefault('extras',{})['varnethryl']='owner-run-rework 2026-10-25: '+NAME+' from '+JS
 while len(bin_)%4: bin_.append(0)
 j['buffers'][0]['byteLength']=len(bin_)
 js=json.dumps(j,separators=(',',':')).encode()

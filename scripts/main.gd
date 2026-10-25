@@ -25,7 +25,11 @@ const ROADS := [
 	[[185,0],[264,-3],[335,0],[421,-2],[500,0],[558,-7]],
 	[[345,0],[377,62],[387,127],[354,190],[309,247],[285,311],[304,356],[269,315],[214,259],[150,225],[76,200],[0,194]],
 	[[0,194],[5,265],[9,344],[0,440],[-6,558]],
+	[[0,-140],[0,-194]],           # north avenue through the north gate
+	[[-200,0],[-185,0],[-160,0]],  # west avenue stub through the gate
+	[[160,0],[185,0],[200,0]],     # east avenue stub through the gate
 ]
+const GATES := [[Vector2(0, 1), PI, "South Gate"], [Vector2(0, -1), 0.0, "North Gate"], [Vector2(1, 0), -PI / 2, "East Gate"], [Vector2(-1, 0), PI / 2, "West Gate"]]
 const TIERS := ["Low", "Medium", "High", "Ultra"]
 
 var tier := 2
@@ -376,18 +380,26 @@ func _pond() -> void:
 func _walls_and_gate() -> void:
 	var stone := _mat(Color(0.62, 0.6, 0.56))
 	var H := 8.0; var T := 3.0
-	var runs := [[Vector3(0, H/2, -CITY_HALF), Vector3(2*CITY_HALF, H, T)],
-		[Vector3(-CITY_HALF, H/2, 0), Vector3(T, H, 2*CITY_HALF)], [Vector3(CITY_HALF, H/2, 0), Vector3(T, H, 2*CITY_HALF)],
-		[Vector3(-(CITY_HALF+7)/2 - 3.5, H/2, CITY_HALF), Vector3(CITY_HALF - 7, H, T)], [Vector3((CITY_HALF+7)/2 + 3.5, H/2, CITY_HALF), Vector3(CITY_HALF - 7, H, T)]]
+	var G := 7.0   # half gate opening
+	var L := CITY_HALF - G; var cpos := (CITY_HALF + G) / 2.0
+	var runs := []
+	for sd in [-1, 1]:
+		for z in [-CITY_HALF, CITY_HALF]: runs.append([Vector3(sd * cpos, H/2, z), Vector3(L, H, T)])
+		for x in [-CITY_HALF, CITY_HALF]: runs.append([Vector3(x, H/2, sd * cpos), Vector3(T, H, L)])
 	for r in runs:
 		var mi := MeshInstance3D.new(); var bm := BoxMesh.new(); bm.size = r[1]; bm.material = stone; mi.mesh = bm; mi.position = r[0]; add_child(mi)
 		_static_box(r[0], r[1])
-	for s in [-1, 1]:
-		var g := _place_glb("res://assets/buildings/bld_gate_tower.glb", Vector3(s * 8.2 * 1.7, 0, CITY_HALF - 1.2), PI)
-		_add_trimesh(g)
-		for mi in _meshes(g, []): mi.visible = false
-		gate_towers.append(g)
-	var arch := MeshInstance3D.new(); var am := BoxMesh.new(); am.size = Vector3(18, 2.0, 4); am.material = stone; arch.mesh = am; arch.position = Vector3(0, 9, CITY_HALF); add_child(arch)
+	# 4 gates: [outward dir, tower yaw]
+	for gd in GATES:
+		var out := Vector3(gd[0].x, 0, gd[0].y); var along := Vector3(out.z, 0, -out.x)
+		for sd in [-1, 1]:
+			var g := _place_glb("res://assets/buildings/bld_gate_tower.glb", out * (CITY_HALF - 1.2) + along * (sd * 8.2 * 1.7), gd[1])
+			_add_trimesh(g)
+			for mi in _meshes(g, []): mi.visible = false
+			gate_towers.append(g)
+		var arch := MeshInstance3D.new(); var am := BoxMesh.new()
+		am.size = Vector3(18, 2.0, 4) if out.x == 0 else Vector3(4, 2.0, 18)
+		am.material = stone; arch.mesh = am; arch.position = out * CITY_HALF + Vector3(0, 9, 0); add_child(arch)
 
 func _place_glb(path: String, pos: Vector3, rot: float) -> Node3D:
 	var n: Node3D = load(path).instantiate(); n.position = pos; n.rotation.y = rot; add_child(n); return n
@@ -493,6 +505,7 @@ func _dressing() -> void:
 		var file: String = it["file"]
 		if file.contains("wall_cap") or file.contains("puddle"): continue
 		var p: Array = it["position"]; var r: Array = it["rotation"]; var s: Array = it["scale"]
+		if _in_gate_path(Vector2(p[0], p[2]), 1.0) and not file.contains("decals/"): continue
 		var y: float = height(p[0], p[2]) if p[1] == null else float(p[1])
 		if file.contains("decals/") and (file.contains("ground") or file.contains("puddle") or file.contains("leaves")): y += 0.03
 		var b := Basis.from_euler(Vector3(r[0], r[1], r[2])).scaled(Vector3(s[0], s[1], s[2]))
@@ -595,9 +608,16 @@ func _mountains_old() -> void:
 				terrain_lods.append([mmi, lod])
 
 # ---------- foliage ----------
+func _in_gate_path(p: Vector2, pad := 0.0) -> bool:
+	# 12 m-wide corridor from 30 m inside to 35 m outside each gate
+	if abs(p.x) < 6 + pad and abs(p.y) > CITY_HALF - 30 and abs(p.y) < CITY_HALF + 35: return true
+	if abs(p.y) < 6 + pad and abs(p.x) > CITY_HALF - 30 and abs(p.x) < CITY_HALF + 35: return true
+	return false
+
 func _ok_spot(p: Vector2, pad: float) -> bool:
-	if abs(p.x) < 7 + pad and p.y > -150 and p.y < 190: return false
-	if abs(p.y) < 6 + pad and abs(p.x) < 190: return false
+	if abs(p.x) < 7 + pad and p.y > -215 and p.y < 215: return false   # N-S avenue through both gates
+	if abs(p.y) < 7 + pad and abs(p.x) < 215: return false             # E-W avenue through both gates
+	if _in_gate_path(p, pad): return false
 	if p.length() < 40 + pad: return false
 	if abs(p.length() - 194.0) < 7 + pad: return false
 	if abs(p.y - 38) < 4 + pad or abs(p.y - 71) < 4 + pad: return false
@@ -1013,6 +1033,36 @@ func _run_bench() -> void:
 	if only == "night":
 		await _shot("high_u6_night_plaza", Vector3(-6, 0, 30), 0.25, -0.25, 22.5, 2, 40)
 		await _shot("high_u7_night_street", Vector3(0, 0, -20), PI, -0.15, 22.5, 2, 40)
+	if only == "gates":
+		var fails := 0
+		for gd in GATES:
+			var d := Vector3(gd[0].x, 0, gd[0].y)
+			for leg in [["out", 1.0], ["in", -1.0]]:
+				var start: Vector3 = d * (CITY_HALF - 25.0 if leg[1] > 0 else CITY_HALF + 25.0)
+				var dir: Vector3 = d * leg[1]
+				_teleport(start, atan2(-dir.x, -dir.z)); joy_vec = Vector2(0, -1)
+				var t := 0.0; var stuck := 0.0; var last := hero.position
+				while t < 14.0:
+					await get_tree().physics_frame; t += 1.0 / Engine.physics_ticks_per_second
+					yaw = atan2(-dir.x, -dir.z)
+					if hero.position.distance_to(last) < 0.02: stuck += 1.0 / Engine.physics_ticks_per_second
+					last = hero.position
+					var r: float = hero.position.dot(d)
+					if (leg[1] > 0 and r > CITY_HALF + 20.0) or (leg[1] < 0 and r < CITY_HALF - 20.0): break
+				var r2: float = hero.position.dot(d)
+				var ok: bool = (r2 > CITY_HALF + 20.0) if leg[1] > 0 else (r2 < CITY_HALF - 20.0)
+				var lateral: float = absf(hero.position.dot(Vector3(d.z, 0, -d.x)))
+				ok = ok and lateral < 1.5 and stuck < 0.5
+				if not ok: fails += 1
+				print("GATE %s %s %s t=%.1fs pos=(%.1f,%.1f,%.1f) lateral=%.2f stuck=%.2fs" % [gd[2], leg[0], "PASS" if ok else "FAIL", t, hero.position.x, hero.position.y, hero.position.z, lateral, stuck])
+		joy_vec = Vector2.ZERO
+		print("GATES RESULT: %s (%d failures)" % ["ALL PASS" if fails == 0 else "FAIL", fails])
+		for gd in GATES:
+			var d2 := Vector3(gd[0].x, 0, gd[0].y)
+			var pos: Vector3 = d2 * (CITY_HALF + 30.0)
+			await _shot("t5_gate_" + String(gd[2]).to_lower().replace(" ", "_"), pos, atan2(d2.x, d2.z), -0.12, 11.0, 2, 30)
+		get_tree().quit(1 if fails > 0 else 0)
+		return
 	if only == "ui":
 		var sv := func(n: String):
 			for i in 20: await get_tree().process_frame
@@ -1209,7 +1259,9 @@ func _build_minimap() -> void:
 	var tex := ImageTexture.create_from_image(img)
 	if VUI.hud and VUI.hud.minimap:
 		VUI.hud.minimap.set_map_texture(tex, MAP_RECT)
-		VUI.hud.minimap.set_markers([{"pos": Vector2(0, CITY_HALF), "color": Color(1, 0.85, 0.3), "label": "Gate"}, {"pos": Vector2(0, 0), "color": Color(0.5, 0.8, 1.0), "label": "Plaza"}])
+		var mk := [{"pos": Vector2(0, 0), "color": Color(0.5, 0.8, 1.0), "label": "Plaza"}]
+		for gd in GATES: mk.append({"pos": gd[0] * CITY_HALF, "color": Color(1, 0.85, 0.3), "label": gd[2]})
+		VUI.hud.minimap.set_markers(mk)
 
 # --- shader warm-up: draw every LOD / tier variant once behind the title screen ---
 func _warm_up() -> void:

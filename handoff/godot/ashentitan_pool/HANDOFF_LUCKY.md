@@ -11,3 +11,11 @@ Files: ashentitan_volcano_glow.glb, ashentitan_volcano_glow_lod1.glb (same path,
 Arms never move in sync. FK only (no IK poles), elbow one-way hinge 5-120 deg, quaternion continuity on every key; per-frame check: arm-vs-arm min gap 0.26 H (~7 m at 28 m), 0 elbow folds/inversions.
 ## `death_pool` 3.03 s, IN PLACE (new; use while he is in the lava instead of `death`)
 Shudder + roar 0-0.7, sag 1.2, collapses forward 1.8-2.45 with arms flopped out ahead over the surface; hips stay put so chest/head stay above the lava (stage 1-2); final pose holds at 3.0.
+
+## v8 (2026-10-25 2:00 PM ET)
+- intro (9.233 s): planted hands pinned per frame to the lava surface (linear rise y 10->26.8 over 0-3.5 s, scale 1.3362, lava y 38): R 2.0-5.1 s, L 3.3-5.1 s, max height error 0.028 m, slow slide <=1.15 m over the haul. Note: the hands are sculpted fists in the mesh (finger weights only on the tips), so finger keys cannot fully open them.
+- New attack clips (hit time; fist position in game metres, x, z-out, y height above the plate):
+  eruption_slam 3.0 s, impact 1.288 s, both fists at (+-6.1, 16.7 out, plate 12.2) -> spawn the wave here
+  magma_sweep 2.733 s, hit 0.976 s; boulder_hurl 3.6 s, rip 1.224 s, release 2.383 s
+  attack1 2.2 s hit 1.2 (R fist -6.0, 17.1 out, 12.1); attack2 2.0 s hit 1.1 (L 6.7, 17.1, 12.4); attack3 2.4 s hit 1.3
+- death_pool and the 12 original clips unchanged.

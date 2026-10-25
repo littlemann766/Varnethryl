@@ -25,6 +25,7 @@ func _ready() -> void:
 	var h := VStyle.label("VARNETHRYL", 46, VStyle.GOLD); h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	h.add_theme_color_override("font_shadow_color", Color.BLACK); h.add_theme_constant_override("shadow_offset_y", 3); v.add_child(h)
 	var lg := VStyle.label("Legends Are Forged. Kingdoms Are Conquered.", 15, VStyle.PARCH); lg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; v.add_child(lg)
+	var ver := VStyle.label("VARNETHRYL v" + str(ProjectSettings.get_setting("application/config/version", "1.9.3")), 12, VStyle.PARCH); ver.name = "Version"; ver.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; v.add_child(ver)
 	var rule := ColorRect.new(); rule.color = Color("#b48c4d"); rule.custom_minimum_size = Vector2(340, 1); rule.size_flags_horizontal = SIZE_SHRINK_CENTER; v.add_child(rule)
 	var acts := VBoxContainer.new(); acts.custom_minimum_size = Vector2(340, 0); acts.size_flags_horizontal = SIZE_SHRINK_CENTER; acts.add_theme_constant_override("separation", 10); v.add_child(acts)
 	for d in [["play", "Play Solo", "play_solo"], ["mp", "⚔ Multiplayer · Join World", "multiplayer_pressed"], ["hero", "Choose a Hero", "choose_hero"], ["settings", "Settings", "settings"]]:

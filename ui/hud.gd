@@ -9,7 +9,7 @@ var editing := false
 var drag_target: Control
 var drag_off := Vector2.ZERO
 var edit_bar: HBoxContainer
-var version := "1.5.33"
+var version: String = str(ProjectSettings.get_setting("application/config/version", "1.9.3"))
 var movable: Array[Control] = []
 var defaults := {}
 

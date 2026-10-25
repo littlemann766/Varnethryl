@@ -584,6 +584,18 @@ func _streets_to_shader() -> void:
 	terrain_mat.set_shader_parameter("segs", segs); terrain_mat.set_shader_parameter("seg_hw", hws)
 	terrain_mat.set_shader_parameter("seg_n", mini(STREETS.size() + spurs.size(), 64)); terrain_mat.set_shader_parameter("street_n", STREETS.size())
 
+## on a street, the plaza, a door footpath or an outside road (+pad)
+func _on_way(p: Vector2, pad: float) -> bool:
+	if absf(p.x) < CITY_HALF + 2 and absf(p.y) < CITY_HALF + 2 and street_edge_dist(p) < pad: return true
+	for sp in spurs:
+		if Geometry2D.get_closest_point_to_segment(p, sp[0], sp[1]).distance_to(p) < sp[2] + pad: return true
+	return _road_dist(p) < 4.4 + pad
+
+func _crosses_street(a: Vector2, b: Vector2) -> bool:
+	for k in 9:
+		if _on_way(a.lerp(b, k / 8.0), -0.35): return true
+	return false
+
 func _in_building(p: Vector2, pad: float) -> bool:
 	for b in buildings:
 		if (b.rect as Rect2).grow(pad).has_point(p): return true
@@ -885,6 +897,17 @@ func _dressing() -> void:
 		var y: float = height(p[0], p[2]) if p[1] == null else float(p[1])
 		if file.contains("decals/") and (file.contains("ground") or file.contains("puddle") or file.contains("leaves")): y += 0.03
 		var b := Basis.from_euler(Vector3(r[0], r[1], r[2])).scaled(Vector3(s[0], s[1], s[2]))
+		# test 13 city sweep (boss crossroads): these placements predate the test 11/12 relayout
+		var p2 := Vector2(p[0], p[2])
+		if file.contains("curb") or file.contains("cobble_edge"):
+			var ax: Vector3 = b.x.normalized(); var hl: float = 1.0 * float(s[0]) + 0.3
+			var a2: Vector2 = p2 + Vector2(ax.x, ax.z) * hl; var b2: Vector2 = p2 - Vector2(ax.x, ax.z) * hl
+			if _crosses_street(a2, b2): continue   # curbs stop at intersections/paths
+		elif file.contains("decals/"):
+			if not file.contains("road") and _on_way(p2, 0.6): continue   # green/leaf blobs off the roads
+		elif _on_way(p2, 0.6): continue                                 # no props standing on roads/paths
+		if file.contains("lantern") or file.contains("signpost") or file.contains("banner_pole") or file.contains("milestone"):
+			b = Basis(Vector3.UP, r[1]).scaled(Vector3(s[0], s[1], s[2]))   # always upright
 		if not groups.has(file): groups[file] = []
 		groups[file].append(Transform3D(b, Vector3(p[0], y, p[2])))
 	glow_mat = StandardMaterial3D.new(); glow_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -1642,6 +1665,32 @@ func _run_bench() -> void:
 		vc.look_at_from_position(C + Vector3(26, 64, 22), C + Vector3(0, 42, 0)); vc.current = true
 		await _shot_here("t13_win")
 		print("T13 state=%s stage=%d" % [q.state, q.stage])
+		get_tree().quit()
+		return
+	if only == "t13city":
+		VUI._enter("solo"); bench = true
+		var hc := Camera3D.new(); hc.far = 1500; add_child(hc)
+		_set_time(11.0); tier = 2; apply_quality()
+		var cviews := [["fountain_close", Vector3(14, 5, 14), Vector3(0, 2, 0)], ["fountain_top", Vector3(0.5, 60, 0.5), Vector3(0, 0, 0)]]
+		for b in buildings:
+			if b.id == "mage" or b.id == "farmhouse":
+				var f: Vector3 = b.node.global_transform.basis.z; var c: Vector3 = b.node.global_position
+				var r := 26.0 if b.id == "farmhouse" else 22.0
+				for k in 4:
+					var dir := f.rotated(Vector3.UP, k * PI / 2)
+					cviews.append(["%s_side%d" % [b.id, k], c + dir * r + Vector3(0, 2.2, 0), c + Vector3(0, 3.0, 0)])
+		for gd in GATES:
+			var out := Vector3(gd[0].x, 0, gd[0].y)
+			cviews.append(["gate_%d_%d_out" % [int(out.x), int(out.z)], out * (CITY_HALF + 22) + Vector3(0, 4, 0), out * CITY_HALF + Vector3(0, 4, 0)])
+			cviews.append(["gate_%d_%d_in" % [int(out.x), int(out.z)], out * (CITY_HALF - 18) + Vector3(0, 2.2, 0), out * CITY_HALF + Vector3(0, 1, 0)])
+		cviews.append(["crossroads", Vector3(75 - 12, 7, 70 + 12), Vector3(75, 0, 70)])
+		cviews.append(["crossroads2", Vector3(-75 + 12, 7, -70 - 12), Vector3(-75, 0, -70)])
+		for v in cviews:
+			var a: Vector3 = v[1]; var t: Vector3 = v[2]
+			a.y += height(a.x, a.z); t.y += height(t.x, t.z)
+			hc.look_at_from_position(a, t, Vector3.UP if absf(a.x - t.x) + absf(a.z - t.z) > 0.1 else Vector3(0, 0, -1)); hc.current = true
+			for i in 30: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_t13c_%s.png" % v[0]); print("BENCH ", v[0])
 		get_tree().quit()
 		return
 	if only == "t11fly":

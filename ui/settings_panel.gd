@@ -15,7 +15,7 @@ var selected_tab := "graphics"
 var hidden_unlocked := false
 var is_owner := false
 var cheats := {"god": true, "fly": false, "noclip": false, "bump": true, "unlimited": false, "nocd": false, "speed": 1.0, "bamboo": false}
-var version := "1.5.33"
+var version: String = str(ProjectSettings.get_setting("application/config/version", "1.9.3"))
 var tap := VTapCounter.new()
 var body: VBoxContainer
 var syncs: Array[Callable] = []

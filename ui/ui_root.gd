@@ -25,7 +25,8 @@ signal coowner_requested
 signal owner_set(on: bool)
 signal dev_action(key: String)
 
-const VERSION := "1.5.33"
+## test 13: one source of truth = project setting application/config/version (export versionName matches)
+static var VERSION: String = str(ProjectSettings.get_setting("application/config/version", "1.9.3"))
 var root: Control
 var title: Control
 var heroes: Control

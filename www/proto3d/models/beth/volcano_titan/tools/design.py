@@ -71,7 +71,12 @@ HALF=3.25; BL=5.0
 w=np.clip(1-(dist-HALF)/BL,0,1); w=w*w*(3-2*w); w[np.isinf(dist)]=0
 pathmask=(dist<=HALF)
 H=H*(1-w)+hpath*w
-H=np.where(pathmask,hpath+fbm(60,2,21)*0.06,H)
+mz=(dist<=HALF+1.5).astype(np.float32); hpath=np.where(mz>0,nd.gaussian_filter(hpath*mz,2.5)/np.maximum(nd.gaussian_filter(mz,2.5),1e-3),hpath)
+H=H*(1-w)+hpath*w
+H=np.where(dist<=HALF+0.9,hpath+fbm(60,2,21)*0.06,H)
+# soften shoulders
+sh=(dist>HALF+0.9)&(dist<HALF+4)
+Hs_=nd.gaussian_filter(H,1.5); H=np.where(sh,Hs_,H)
 # moat (lava ring) except the ramp landing bridge
 land=P[-1,:2]; dl=np.hypot(X-land[0],Y-land[1])
 moat=(r>MOAT_IN)&(r<MOAT_OUT-0.5)&(dl>9)&(dist>HALF+4)
@@ -101,7 +106,7 @@ for f in flows:
     dd=dd.reshape(N,N); ii=np.minimum(ii,L-1).reshape(N,N)
     FW=np.maximum(FW,np.clip(1-dd/wd[ii],0,1))
 H-=FW*0.9
-np.savez_compressed('design.npz',H=H.astype(np.float32),X=g,Cb=Cb,pathmask=pathmask,w=w,moat=moat,FW=FW,P=P,flows=np.array(flows,dtype=object),r=r)
+np.savez_compressed('design.npz',H=H.astype(np.float32),X=g,Cb=Cb,pathmask=pathmask,dist=np.where(np.isinf(dist),99,dist).astype(np.float32),w=w,moat=moat,FW=FW,P=P,flows=np.array(flows,dtype=object),r=r)
 # report path grade & cross slope
 gy,gx=np.gradient(H,D); slope=np.degrees(np.arctan(np.hypot(gx,gy)))
 print('path slope max/p99',slope[pathmask].max(),np.percentile(slope[pathmask],99))

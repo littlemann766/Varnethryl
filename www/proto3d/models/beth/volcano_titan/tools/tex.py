@@ -11,7 +11,7 @@ def fbm(n0,oct,seed,ridged=False):
         if ridged: a=(1-np.abs(2*a-1))**2
         out+=a*amp; tot+=amp; amp*=.5
     return out/tot
-Hh=z(H,3); Cb=np.stack([z(d['Cb'][...,k]) for k in range(3)],-1)
+Hh=z(H,3); Cb=np.stack([z(d['Cb'][...,k]) for k in range(3)],-1)**2.2
 pm=z(d['pathmask'].astype(np.float32))>0.5; moat=z(d['moat'].astype(np.float32)); FW=z(d['FW'])
 g=np.linspace(-R,R,T); X,Y=np.meshgrid(g,g); r=np.hypot(X,Y); del X,Y
 fine=fbm(64,5,1); cr=fbm(48,4,2,ridged=True); grain=np.random.default_rng(3).random((T,T)).astype(np.float32)
@@ -36,13 +36,17 @@ wg=(np.clip((14-Hh)/10,0,1)*np.clip((30-slope)/15,0,1))[...,None]
 grass=Cb*0.9*(0.8+0.4*fine[...,None]); col=col*(1-wg)+grass*wg
 lum=Cb.mean(-1,keepdims=True)+1e-3; col=col*(0.8+0.2*Cb/lum)
 # his model's mossy grey-green on the outer flanks (keeps his look); crater + crags stay basalt
-wh=(np.clip((r-56)/10,0,1)*np.clip((40-slope)/18,0,1)*0.75)[...,None]
-his=Cb*(0.7+0.6*fine[...,None])*(0.85+0.3*np.clip(cav,-1,1)[...,None]*0.5)
-col=col*(1-wh)+his*wh
+wh=(np.clip((r-62)/14,0,1)*np.clip((55-slope)/20,0,1)*0.97)[...,None]
+moss=C(.30,.36,.22)[None,None]; mf=np.clip(fbm(24,4,31)*1.6-0.45,0,1)[...,None]*np.clip((30-slope)/15,0,1)[...,None]
+his=(Cb*1.05*(1-mf*0.55)+moss*mf*0.55)*(0.72+0.56*fine[...,None])*(1+0.25*np.clip(cav,-1,1)[...,None])
+col=col*(1-wh)+his*1.25*wh
 # scorched rims around flows and moat, path gravel
 sc=np.clip(nd.gaussian_filter(np.maximum(FW,moat),8)*2.2,0,1)[...,None]; col=col*(1-0.75*sc)
-pg=C(.28,.255,.23)[None,None]*(0.85+0.3*grain[...,None]*0.5+0.2*fine[...,None])
-pmf=nd.gaussian_filter(pm.astype(np.float32),3)[...,None]; col=col*(1-pmf)+pg*pmf
+dist=z(d['dist']); pn=fbm(120,3,41)
+pg=C(.33,.27,.21)[None,None]*(0.8+0.25*pn[...,None]+0.1*grain[...,None])
+rut=np.clip(1-np.abs(np.abs(dist)-1.15)/0.35,0,1)*(0.6+0.4*pn); pg=pg*(1-0.35*rut[...,None])
+edge=np.clip((dist-2.4)/0.8,0,1); pg=pg*(1-edge[...,None])+C(.2,.19,.18)*(0.7+0.6*grain[...,None])*edge[...,None]
+pmf=np.clip((3.6-dist)/0.8,0,1)[...,None]; col=col*(1-pmf)+pg*pmf
 col=col*(0.75+0.25*np.clip(1-cav*0.4,0.4,1.3))[...,None]
 # glowing cracks
 crack=np.clip((cr-0.86)/0.06,0,1)
@@ -53,6 +57,7 @@ col=col*(1-glow[...,None])+C(.9,.35,.08)*glow[...,None]
 E=np.clip(glow[...,None]*C(1.0,.38,.06)*1.0,0,1)
 Image.fromarray((np.clip(np.flipud(col),0,1)**(1/2.2)*255).astype(np.uint8)).save('t_albedo.png')
 Image.fromarray((np.flipud(E)*255).astype(np.uint8)).save('t_emissive.png')
+Hd=Hd-np.clip(1-np.abs(z(d['dist'])-1.15)/0.35,0,1)*0.08*(z(d['dist'])<3)+np.where(z(d['dist'])<3.3,grain*0.04,0)
 gy,gx=np.gradient(Hd,px); n=np.dstack([-gx,-gy,np.ones_like(gx)*1.0]); n/=np.linalg.norm(n,axis=2,keepdims=True)
 # tangent space for planar UV (u=+x, v=+y after flip) -> OpenGL normal
 Image.fromarray(((np.flipud(n)*0.5+0.5)*255).astype(np.uint8)).save('t_normal.png')
@@ -75,3 +80,16 @@ lc=crust[...,None]*C(.08,.05,.04)+hot[...,None]*(C(1,.55,.12)*(0.6+0.4*h[...,Non
 Image.fromarray((np.clip(lc,0,1)**(1/2.2)*255).astype(np.uint8)).save('l_albedo.png')
 Image.fromarray((np.clip(hot[...,None]*C(1,.45,.08)*(0.5+0.6*h[...,None]),0,1)*255).astype(np.uint8)).save('l_emissive.png')
 print('ok')
+
+cc=f2(8,6,61,True); cs=f2(6,6,62); cj=f2(16,4,65,True)
+yy=np.linspace(0,1,L,endpoint=False)[:,None]; xx=np.linspace(0,1,L,endpoint=False)[None,:]
+strat=(np.sin(2*np.pi*(yy*7+cs*0.8))*0.5+0.5)**3
+joint=np.clip(1-np.abs(np.sin(np.pi*(xx*11+cs*1.5)))/0.06,0,1)
+ch=cs*0.8+cc*0.6-strat*0.35-joint*0.5-np.clip(cj-0.8,0,1)*2
+ch=(ch-ch.min())/(ch.max()-ch.min())
+ca=C(.04,.04,.035)+C(.20,.20,.18)*ch[...,None]**1.3
+moss2=np.clip(f2(6,4,64)*1.8-1.05,0,1)[...,None]*(1-strat[...,None]*0.5); ca=ca*(1-moss2*0.6)+C(.13,.17,.08)*moss2*0.6
+Image.fromarray((np.clip(ca,0,1)**(1/2.2)*255).astype(np.uint8)).save('c_albedo.png')
+gy,gx=np.gradient(ch*3.0,1.0/L*8); n=np.dstack([-gx,gy,np.ones_like(gx)*1.0]); n/=np.linalg.norm(n,axis=2,keepdims=True)
+Image.fromarray(((n*0.5+0.5)*255).astype(np.uint8)).save('c_normal.png')
+print('cliff ok')

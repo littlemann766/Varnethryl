@@ -16,17 +16,17 @@
  "lods": {
   "high": {
    "file": "volcano_titan.glb",
-   "tris": 636732,
+   "tris": 243782,
    "tex": 4096
   },
   "lod1": {
    "file": "volcano_titan_lod1.glb",
-   "tris": 270532,
+   "tris": 86850,
    "tex": 2048
   },
   "lod2": {
    "file": "volcano_titan_lod2.glb",
-   "tris": 93446,
+   "tris": 38260,
    "tex": 1024
   }
  },
@@ -34,8 +34,9 @@
  "col": "volcano_titan_col.glb",
  "col_tris": 36228,
  "materials": [
-  "volcano_basalt (albedo/normal/ORM/emissive cracks)",
-  "volcano_lava (emissive strength 6, UV world/12 m, tileable; scroll UV for flow)"
+  "volcano_basalt (top-down albedo 4096/normal/ORM/emissive cracks)",
+  "volcano_cliff (tileable basalt, box-projected on slopes >48 deg, rocks, vents)",
+  "volcano_lava (emissive 6, UV world/12 m)"
  ],
  "arena": {
   "center": [
@@ -503,14 +504,16 @@
     39.11,
     28.34
    ]
-  ]
+  ],
+  "max_surface_slope_deg": 14.9,
+  "edge_stones": "High only; ruts + dirt in texture on all LODs"
  },
  "vents": [
   {
    "name": "vent_0_crater",
    "pos": [
     -36.37,
-    53.83,
+    63.81,
     -21.0
    ],
    "kind": "crater"
@@ -519,7 +522,7 @@
    "name": "vent_1_crater",
    "pos": [
     -39.47,
-    55.67,
+    65.78,
     14.36
    ],
    "kind": "crater"
@@ -528,7 +531,7 @@
    "name": "vent_2_crater",
    "pos": [
     -14.36,
-    52.01,
+    60.11,
     39.47
    ],
    "kind": "crater"
@@ -537,7 +540,7 @@
    "name": "vent_3_flank",
    "pos": [
     47.5,
-    41.35,
+    44.08,
     82.27
    ],
    "kind": "flank"
@@ -546,7 +549,7 @@
    "name": "vent_4_flank",
    "pos": [
     55.0,
-    28.41,
+    30.56,
     -95.26
    ],
    "kind": "flank"
@@ -555,7 +558,7 @@
    "name": "vent_5_flank",
    "pos": [
     -73.86,
-    54.91,
+    56.9,
     -13.02
    ],
    "kind": "flank"
@@ -564,7 +567,7 @@
    "name": "vent_6_spill",
    "pos": [
     -43.66,
-    63.44,
+    71.31,
     36.64
    ],
    "kind": "spill"
@@ -583,7 +586,7 @@
  "scree": {
   "big_rocks": 75,
   "small_rocks": 520,
-  "note": "lod2 keeps only big rocks"
+  "note": "big crags clear of path edge by >=0.95 m (centreline clearance minus radius 4.2 m)"
  },
  "placement_suggestion": {
   "world_pos": [

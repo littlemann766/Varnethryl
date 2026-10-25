@@ -11,6 +11,7 @@ func _run() -> void:
 	m.cheats.role_provider = func() -> String: return "owner"
 	m.cheats.request("fly", true); m.set_flight(true); await frames(5)
 	var fails := 0
+	print("FLYCLIPS hero rig has_fly_clips=", m.party.rig.has_fly_clips)
 	# flight pose shots near the ground (side camera)
 	var sc := Camera3D.new(); sc.fov = 40; m.add_child(sc)
 	m.fly_alt = 8.0; m.hero.position = Vector3(200, m.height(200, 420) + 8.0, 420); m.yaw = 0.0

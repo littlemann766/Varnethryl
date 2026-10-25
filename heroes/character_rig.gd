@@ -40,6 +40,7 @@ func setup(path: String, height_m: float) -> CharacterRig:
 		_alias_clips(path)
 		if path.begins_with("res://characters/"): _strip_root_scale()
 		_add_cloth()
+		_load_fly(path)
 		_build_tree()
 	return self
 
@@ -137,6 +138,22 @@ func _clip(names: Array) -> String:
 		if clips.has(nm): return nm
 	return ""
 
+## test 16: Lucian's authored fly clips (varn-core 2e7093f heroes_fly/<hero>_fly.glb, imported as AnimationLibrary,
+## in place, same bone paths). Ember/Zephyr/Cinder keep their wing clips; heroes without a file (Pip) keep FlyPose.
+var has_fly_clips := false
+const FLY_CLIPS := ["fly_hover", "fly_forward", "fly_fast", "fly_ascend", "fly_descend", "fly_bank_L", "fly_bank_R"]
+func _load_fly(path: String) -> void:
+	var id := path.get_file().get_basename().trim_suffix("_lod1").trim_suffix("_lod2")
+	var fp := "res://assets/heroes_fly/%s_fly.glb" % id
+	if not ResourceLoader.exists(fp): return
+	var lib := load(fp) as AnimationLibrary
+	if lib == null: return
+	var dst: AnimationLibrary = anim_player.get_animation_library("")
+	for n in lib.get_animation_list():
+		var a: Animation = lib.get_animation(n).duplicate(); a.loop_mode = Animation.LOOP_LINEAR   # import has no _loop suffix
+		if not dst.has_animation(n): dst.add_animation(n, a)
+	has_fly_clips = FLY_CLIPS.all(func(c): return dst.has_animation(c))
+
 func _build_tree() -> void:
 	clips = anim_player.get_animation_list()
 	for c in clips:
@@ -151,6 +168,19 @@ func _build_tree() -> void:
 	for pt in [[idle, 0.0], [walk, 1.0], [run, 2.0]]:
 		var an := AnimationNodeAnimation.new(); an.animation = pt[0]; loco.add_blend_point(an, pt[1], -1, "p%d" % int(pt[1]))
 	bt.add_node("loco", loco)
+	var src := "loco"
+	if has_fly_clips:   # HANDOFF blend tips: BlendSpace2D (x turn: bank_L/forward/bank_R, y speed: hover/forward/fast) -> Blend3 vertical -> Blend2 with ground loco
+		var fs := AnimationNodeBlendSpace2D.new(); fs.min_space = Vector2(-1, 0); fs.max_space = Vector2(1, 2)
+		for pt in [["fly_hover", Vector2(0, 0)], ["fly_forward", Vector2(0, 1)], ["fly_fast", Vector2(0, 2)], ["fly_bank_L", Vector2(-1, 1)], ["fly_bank_R", Vector2(1, 1)], ["fly_bank_L", Vector2(-1, 2)], ["fly_bank_R", Vector2(1, 2)]]:
+			var an := AnimationNodeAnimation.new(); an.animation = pt[0]; fs.add_blend_point(an, pt[1])
+		bt.add_node("flyspace", fs)
+		var vb := AnimationNodeBlend3.new(); bt.add_node("flyvert", vb)
+		var dn := AnimationNodeAnimation.new(); dn.animation = "fly_descend"; bt.add_node("fly_down", dn)
+		var up := AnimationNodeAnimation.new(); up.animation = "fly_ascend"; bt.add_node("fly_up", up)
+		bt.connect_node("flyvert", 0, "fly_down"); bt.connect_node("flyvert", 1, "flyspace"); bt.connect_node("flyvert", 2, "fly_up")
+		var fm := AnimationNodeBlend2.new(); bt.add_node("flymix", fm)
+		bt.connect_node("flymix", 0, "loco"); bt.connect_node("flymix", 1, "flyvert")
+		src = "flymix"
 	var atk_anim := AnimationNodeAnimation.new(); atk_anim.animation = _clip(["attack", "idle"])
 	bt.add_node("atk_anim", atk_anim)
 	var ts := AnimationNodeTimeScale.new(); bt.add_node("atk_speed", ts)
@@ -164,7 +194,7 @@ func _build_tree() -> void:
 	bt.add_node("death_anim", death_anim)
 	var dead := AnimationNodeBlend2.new(); bt.add_node("dead", dead)
 	bt.connect_node("atk_speed", 0, "atk_anim")
-	bt.connect_node("attack", 0, "loco"); bt.connect_node("attack", 1, "atk_speed")
+	bt.connect_node("attack", 0, src); bt.connect_node("attack", 1, "atk_speed")
 	bt.connect_node("hit", 0, "attack"); bt.connect_node("hit", 1, "hit_anim")
 	bt.connect_node("dead", 0, "hit"); bt.connect_node("dead", 1, "death_anim")
 	bt.connect_node("output", 0, "dead")
@@ -205,6 +235,11 @@ func _fly_step(dt: float) -> void:
 	var k := 1.0 - exp(-dt * 4.0)
 	_fly.w = lerpf(_fly.w, _fly.get("tw", 0.0), k); _fly.fwd = lerpf(_fly.fwd, _fly.get("tf", 0.0), k)
 	_fly.bank = lerpf(_fly.bank, _fly.get("tb", 0.0), k); _fly.climb = lerpf(_fly.climb, _fly.get("tc", 0.0), k)
+	if has_fly_clips and tree:
+		tree.set("parameters/flymix/blend_amount", _fly.w)
+		tree.set("parameters/flyspace/blend_position", Vector2(float(_fly.bank), float(_fly.fwd) * 2.0))
+		tree.set("parameters/flyvert/blend_amount", float(_fly.climb))
+		return
 	fly_pose.w = _fly.w; fly_pose.fwd = _fly.fwd; fly_pose.bank = _fly.bank; fly_pose.climb = _fly.climb; fly_pose.t += dt
 	fly_pose.active = _fly.w > 0.001
 	# whole body: pitch forward with speed, nose up/down with climb, bank into turns, gentle hover bob (pivot at the hips)

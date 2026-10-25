@@ -306,6 +306,7 @@ const D := {
 
 # ---- FARMHOUSE: entry/porch, main room (hearth), kitchen & dining, pantry, bedrooms, loft/storage
 "farmhouse": {"name": "Farmhouse", "scale": [0.48, 0.48],
+	"fill": [[0, ["keg", "chest", "apothecary_shelf", "wardrobe"], 0.15], [1, ["keg", "chest", "apothecary_shelf", "wardrobe"], 0.15]],
 	"floors": [{"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "plaster", "win": 0.0, "slab": [[-0.5, -0.5, 0.5, -0.1]]}],
 	"walls": [[0, -0.5, 0.0, 0.1, 0.0, [[0.5, 1.8]]], [0, 0.1, -0.5, 0.1, 0.5, [[0.3, 1.6], [0.75, 1.6]]], [0, 0.1, 0.0, 0.5, 0.0, [[0.5, 1.4]]]],
 	"ladders": [[0, -0.35, -0.1, 0]],

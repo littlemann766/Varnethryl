@@ -15,19 +15,21 @@ World boss = **114 m** → put the Titan node at scale **5.440** (native mesh 20
 | Ritual / event | Node | Material | Size | Drive |
 |---|---|---|---|---|
 | Fissure Slam: radial cracks | PlaneMesh 1×1, y+0.05 | `wb_crack_radial_mat.tres` | scale **120** (60 m radius) | `progress` 0→1 over 12 s, `erupt`=1 on complete |
-| Fissure Slam: 3 lines | PlaneMesh 1×1 | `wb_crack_fissure_mat.tres` | scale (8, 1, 60), long axis = UV.y from the start point | `progress`, `erupt` |
+| Fissure Slam: 3 lines | PlaneMesh 1×1 | `wb_crack_fissure_mat.tres` | scale (12, 1, 60), chasm narrows from the start to the tip, long axis = UV.y from the start point | `progress`, `erupt` |
 | Meteor Call: target circles ×12 | PlaneMesh 1×1 | `wb_target_circle_mat.tres` | radius × 2 (e.g. 14 m) | `progress` 0→1 = time to impact (strobes after 0.85) |
 | Meteor Call: red sky | ColorRect full-screen in a CanvasLayer under the HUD | `wb_sky_tint_mat.tres` | — | `amount` 0→1 over 1.5 s. `tex/wb_sky_tint_lut.png` (16³ strip) is an alternative for `Environment.adjustment_color_correction` if you'd rather not read the screen |
-| Lava Wave: rising ring | CylinderMesh r1 h1, no caps, 48 segs | `wb_lava_ring_mat.tres` | scale (80, wall h ~12, 80) | `rise` 0→1 over 10 s, then tween scale outward |
+| Lava Wave: rising ring | CylinderMesh r1 h1, no caps, 48 segs | `wb_lava_ring_mat.tres` (whole wall is molten: flowing lava, drifting crust plates, hot crest, dark base; procedural, 0 textures) | scale (80, wall h ~12, 80) | `rise` 0→1 over 10 s, then tween scale outward |
 | Lava Wave: ground warning strip | PlaneMesh / ring strip | `wb_lava_strip_mat.tres` (`ground_mode`) | 80 m ring band | `rise` |
 | Wind-up hand / chest glow | QuadMesh 1×1 under BoneAttachment `hand_L/R` or `upperChest` (self-billboards) | `wb_hand_glow_mat.tres` | about 3–4 skeleton units | `charge` 0→1 over the wind-up |
-| Stomp footprint | PlaneMesh 1×1, y+0.05, yaw = foot | `wb_footprint_mat.tres` | scale **25** | `heat` 1→0 over 10 s, `fade` 1→0 from 100 to 120 s |
+| Stomp footprint | PlaneMesh 1×1, y+0.05, yaw = foot yaw (toes = +Z of the plane) | `wb_footprint_mat.tres` | scale **48** at 114 m (traced from his real sole: the texture covers 8.88 native m × 5.44, and the sole itself is about 35 m long). Spec said ~25 m, which would be smaller than his foot | `heat` 1→0 over 10 s, `fade` 1→0 from 100 to 120 s |
 | Stomp dust | `wb_dust_burst.tscn` (CPUParticles3D, 40 quads, one-shot, 30 fps) | — | ring r 8–12.5 m | `restart()` on footfall. Scale the node ×2 for the arrival stomp |
 | Cast bar + icons | TextureRect/NinePatchRect | `tex/wb_castbar_frame.png` (9-slice margin 48) + `wb_castbar_fill.png`, `tex/wb_icon_{fissure_slam,meteor_call,lava_wave}.png` (256) | — | — |
 Duplicate a material for every instance you drive separately.
 
-## 3. Adds (blockout)
-`wb_ash_fiend(.glb/_lod1)` (2.4 m melee, 9.5k / 0.9k tris) and `wb_ember_wisp(.glb/_lod1)` (floating, 1.3 m, emissive core). These are **static and unrigged blockouts**: Lucian needs to rig the fiend, and the wisp can just bob in code. They currently face -Z (rotate 180° if they spawn backwards).
+## 3. Adds
+Both use `shaders/wb_add_lava.gdshader` (Titan lava style, 0 textures, reads vertex colours: R = ember crack, G = ash variation, B = heat). Set `material_override` = `materials/wb_fiend_mat.tres` / `wb_wisp_mat.tres` (`spirit=true`: vertex flicker + bob). Uniforms are `glow_strength` and `hit_flash`. **+Z forward** (same as the Titan, whose toes point +Z).
+- `wb_ash_fiend.glb` (46k tris) / `_lod1` (7k): 2.45 m charred horned fiend in an **A-pose** (arms ~40° down, legs apart, 4-claw hands, 3-toe feet, back spikes). One watertight voxel-remeshed mesh with no floating parts, so it's ready for Lucian to rig. Ember cracks cover the whole body and are hottest on the chest.
+- `wb_ember_wisp.glb` (37k) / `_lod1` (10k): 1.3 m floating fire spirit with a white-hot core, a crown of flame tongues, side flares, glowing eyes facing +Z, an ember tail streaming behind (−Z) and 7 orbiting obsidian shards. No rig needed: bob/spin it in code and add a small CPUParticles trail if you want.
 
 ## 4. Climbable hulls
 `collision/wb_climb_{spine_back,upper_back,shoulder_L,shoulder_R}.tres` (ConvexPolygonShape3D, 23–34 pts, bone-local). See `climb_hulls.json` for the bones. Use BoneAttachment3D(bone) → AnimatableBody3D (climb layer) → CollisionShape3D. They're built from the rest pose, so they follow the bones. Recheck them after Lucian's hand re-sculpt and re-rig (re-run `tools/compute.gd`).

@@ -43,9 +43,18 @@ func _ready():
 	var dust=load("res://wb_dust_burst.tscn").instantiate(); dust.position=Vector3(-260,0,-60); add_child(dust); dust.emitting=true
 	for i in 2:
 		var f=load("res://wb_ash_fiend%s.glb"%["","_lod1"][i]).instantiate(); f.position=Vector3(400+i*3,0,0); add_child(f)
+		for mm in f.find_children("*","MeshInstance3D",true,false): mm.material_override=load("res://materials/wb_fiend_mat.tres")
 		var w=load("res://wb_ember_wisp%s.glb"%["","_lod1"][i]).instantiate(); w.position=Vector3(406+i*2.5,1.6,0); add_child(w)
+		for mm in w.find_children("*","MeshInstance3D",true,false): mm.material_override=load("res://materials/wb_wisp_mat.tres")
+	var wall=MeshInstance3D.new(); var cy2=CylinderMesh.new(); cy2.top_radius=1; cy2.bottom_radius=1; cy2.height=1; cy2.cap_top=false; cy2.cap_bottom=false; cy2.radial_segments=48; cy2.rings=1; wall.mesh=cy2
+	wall.material_override=load("res://materials/wb_lava_ring_mat.tres").duplicate(); wall.material_override.set_shader_parameter("rise",0.8); wall.scale=Vector3(80,12,80); wall.position=Vector3(600,6,0); add_child(wall)
+	var st2=quad(1,mat("res://materials/wb_lava_strip_mat.tres"),Vector3(600,0.06,70)); st2.scale=Vector3(60,1,8); st2.material_override.set_shader_parameter("rise",0.8)
+	for i in 2:
+		var fl2=quad(1,mat("res://materials/wb_crack_fissure_mat.tres"),Vector3(800+i*14,0.05,0)); fl2.scale=Vector3(10,1,60); fl2.material_override.set_shader_parameter("progress",[0.6,1.0][i]); fl2.material_override.set_shader_parameter("erupt",float(i))
+	var fp2=quad(38,mat("res://materials/wb_footprint_mat.tres"),Vector3(1000,0.04,0))
+	var fp3=quad(38,mat("res://materials/wb_footprint_mat.tres"),Vector3(1040,0.04,10)); fp3.material_override.set_shader_parameter("heat",0.0)
 	cam=Camera3D.new(); cam.fov=50; cam.far=3000; add_child(cam)
-	shots=[[Vector3(10,12,30),Vector3(0,10,0),"front"],[Vector3(-12,14,-26),Vector3(0,11,0),"back"],[Vector3(9,9,8),Vector3(4.5,8.5,0.5),"forearm_L"],[Vector3(-1,7,10),Vector3(-2,6.3,2.4),"knees"],[Vector3(205.5,2.2,6),Vector3(205.5,0.6,0),"states"],[Vector3(-300,70,60),Vector3(-300,0,-10),"telegraph_cracks"],[Vector3(-300,40,-10),Vector3(-300,2,-90),"telegraph_ring"],[Vector3(-245,25,-25),Vector3(-268,2,-60),"footprint_glow"],[Vector3(404,2,7),Vector3(404,1.2,0),"adds"]]
+	shots=[[Vector3(10,12,30),Vector3(0,10,0),"front"],[Vector3(-12,14,-26),Vector3(0,11,0),"back"],[Vector3(9,9,8),Vector3(4.5,8.5,0.5),"forearm_L"],[Vector3(-1,7,10),Vector3(-2,6.3,2.4),"knees"],[Vector3(205.5,2.2,6),Vector3(205.5,0.6,0),"states"],[Vector3(-300,70,60),Vector3(-300,0,-10),"telegraph_cracks"],[Vector3(-300,40,-10),Vector3(-300,2,-90),"telegraph_ring"],[Vector3(-245,25,-25),Vector3(-268,2,-60),"footprint_glow"],[Vector3(401.5,1.6,4.2),Vector3(401.5,1.3,0),"ash_fiend"],[Vector3(398.6,1.8,1.6),Vector3(400,1.4,0),"ash_fiend_34"],[Vector3(407.25,1.9,3.0),Vector3(407.25,1.6,0),"ember_wisp"],[Vector3(600,10,-50),Vector3(600,8,-80),"lava_wall"],[Vector3(807,45,40),Vector3(807,0,0),"fissure"],[Vector3(1020,60,30),Vector3(1020,0,3),"footprint"]]
 	if ap.size()>0: pass
 func _process(d):
 	fr+=1

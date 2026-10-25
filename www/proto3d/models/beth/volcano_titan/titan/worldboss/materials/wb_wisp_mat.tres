@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://shaders/wb_add_lava.gdshader" id="1"]
+
+[resource]
+shader = ExtResource("1")
+shader_parameter/spirit = true
+shader_parameter/glow_strength = 1.3

@@ -25,6 +25,13 @@ func setup(hero: Node3D, hc: HeroCombat, ground_fn: Callable, spawn_defaults := 
 func spawn(tid: String, pos: Vector3, hero: Node3D) -> Enemy:
 	var e := Enemy.new()
 	add_child(e)
+	# never spawn on top of the player: keep (radius + 5 m) clear of the hero
+	var r: float = float(Enemy.TYPES[tid].r) if Enemy.TYPES.has(tid) else 2.0
+	var d := Vector2(pos.x - hero.global_position.x, pos.z - hero.global_position.z)
+	if d.length() < r + 5.0:
+		var dir2 := d.normalized() if d.length() > 0.01 else Vector2(0, -1)
+		var np := Vector2(hero.global_position.x, hero.global_position.z) + dir2 * (r + 5.0)
+		pos.x = np.x; pos.z = np.y
 	if ground.is_valid(): pos.y = ground.call(pos.x, pos.z)
 	e.setup(tid, pos, ground)
 	_wire(e, hero)

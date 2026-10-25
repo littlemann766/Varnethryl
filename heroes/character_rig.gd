@@ -38,6 +38,7 @@ func setup(path: String, height_m: float) -> CharacterRig:
 	anim_player = _find_player(model)
 	if anim_player:
 		_alias_clips(path)
+		_add_cloth()
 		_build_tree()
 	return self
 
@@ -204,3 +205,123 @@ func _process(dt: float) -> void:
 		if not has_attack: z -= sin(_lunge / 0.18 * PI) * 0.25 * target_height / 1.905
 		if not has_hit: z += sin(_flinch / 0.15 * PI) * 0.12 * target_height / 1.905
 		model.position.z = z
+
+
+## Test 7: real cape. Bone chains named cape, cape2.. / hood, hood2.. (Beth's cloth sidecar groups) are driven by a
+## SpringBoneSimulator3D instead of baked clip keys: the baked cape keys are what twisted and flared the cape, so
+## they are stripped and the chain hangs from its straight rest pose, swaying and trailing with movement.
+## Cost: 5+3 joints and 5 capsule colliders per caped character, all native code. Cheap on mobile.
+const CLOTH := {"cape": {"stiffness": 0.9, "drag": 0.55, "gravity": 2.2, "radius": 0.035},
+	"hood": {"stiffness": 2.0, "drag": 0.6, "gravity": 0.8, "radius": 0.03}}
+var cloth: SpringBoneSimulator3D
+
+func _add_cloth() -> void:
+	var sk: Skeleton3D = null
+	for c in model.find_children("*", "Skeleton3D", true, false): sk = c; break
+	if sk == null: return
+	var chains := []
+	for g in CLOTH:
+		if sk.find_bone(g) < 0: continue
+		var last: String = g; var i := 2
+		while sk.find_bone("%s%d" % [g, i]) >= 0: last = "%s%d" % [g, i]; i += 1
+		chains.append([g, last])
+	if chains.is_empty(): return
+	# strip baked keys on the chain bones so the simulation starts from the straight rest pose
+	var names := {}
+	for ch in chains:
+		var b := sk.find_bone(ch[1])
+		while b >= 0:
+			names[sk.get_bone_name(b)] = true
+			if sk.get_bone_name(b) == ch[0]: break
+			b = sk.get_bone_parent(b)
+	for an in anim_player.get_animation_list():
+		var a := anim_player.get_animation(an)
+		for t in range(a.get_track_count() - 1, -1, -1):
+			var tp := str(a.track_get_path(t))
+			if names.has(tp.get_slice(":", 1)): a.remove_track(t)
+	for bn in names: sk.reset_bone_pose(sk.find_bone(bn))
+	if chains[0][0] == "cape": _reshape_cape(sk)
+	cloth = SpringBoneSimulator3D.new(); cloth.name = "Cloth"; sk.add_child(cloth)
+	cloth.set_setting_count(chains.size())
+	for i in chains.size():
+		var P: Dictionary = CLOTH[chains[i][0]]
+		cloth.set_root_bone_name(i, chains[i][0]); cloth.set_end_bone_name(i, chains[i][1])
+		cloth.set_extend_end_bone(i, true); cloth.set_end_bone_length(i, 0.22)
+		cloth.set_end_bone_direction(i, SpringBoneSimulator3D.BONE_DIRECTION_FROM_PARENT)
+		cloth.set_stiffness(i, P.stiffness); cloth.set_drag(i, P.drag); cloth.set_gravity(i, P.gravity)
+		cloth.set_gravity_direction(i, Vector3.DOWN); cloth.set_radius(i, P.radius)
+		cloth.set_enable_all_child_collisions(i, true)
+	# body colliders (from the cloth sidecar's capsule list): torso + legs, so the cape never sinks into the body
+	for c in [["hips", 0.17, 0.75, Vector3(0, 0.3, 0)], ["thigh_L", 0.11, 0.5, Vector3(0, 0.22, 0)], ["thigh_R", 0.11, 0.5, Vector3(0, 0.22, 0)],
+			["shin_L", 0.08, 0.45, Vector3(0, 0.2, 0)], ["shin_R", 0.08, 0.45, Vector3(0, 0.2, 0)]]:
+		if sk.find_bone(c[0]) < 0: continue
+		var col := SpringBoneCollisionCapsule3D.new(); col.bone_name = c[0]
+		col.radius = c[1]; col.height = c[2]; col.position_offset = c[3]
+		cloth.add_child(col)
+
+
+## The source cape mesh is a wide stiff bell (flares to ~3x shoulder width, down to the ground). Reshape it once
+## per mesh (cached): vertices skinned to the cape chain are pulled into a flat, shoulder-width sheet that hangs
+## just behind the chain bones and ends at calf height. The spring chain then gives it sway/trail.
+const CAPE_HALF_W := 0.25      # m, half shoulder width at the hem (0.19 at the collar)
+const CAPE_HEM_Y := 0.40       # m, calf
+static var _cape_cache := {}
+
+func _reshape_cape(sk: Skeleton3D) -> void:
+	for mi: MeshInstance3D in _meshes(model, []):
+		if mi.skin == null or mi.mesh == null: continue
+		if _cape_cache.has(mi.mesh.resource_path) and mi.mesh.resource_path != "":
+			mi.mesh = _cape_cache[mi.mesh.resource_path]; continue
+		# skin bind index -> is cape bone, and the cape chain's z at each height (rest, skeleton space)
+		var is_cape := {}
+		for b in mi.skin.get_bind_count():
+			var bn := mi.skin.get_bind_name(b)
+			if bn == "" and mi.skin.get_bind_bone(b) >= 0: bn = sk.get_bone_name(mi.skin.get_bind_bone(b))
+			if bn.begins_with("cape"): is_cape[b] = true
+		if is_cape.is_empty(): continue
+		var top: Vector3 = sk.get_bone_global_rest(sk.find_bone("cape")).origin
+		var am := ArrayMesh.new()
+		var changed := 0
+		for si in mi.mesh.get_surface_count():
+			var arr: Array = mi.mesh.surface_get_arrays(si)
+			var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var bones = arr[Mesh.ARRAY_BONES]; var w: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
+			var nrm: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+			if bones != null and vs.size() > 0:
+				var k: int = bones.size() / vs.size()
+				# cape extent (only verts mostly on the cape)
+				var lo := INF; var maxw := 0.0
+				var cw := PackedFloat32Array(); cw.resize(vs.size())
+				for i in vs.size():
+					var s := 0.0
+					for j in k: if is_cape.has(bones[i * k + j]): s += w[i * k + j]
+					cw[i] = s
+					if s > 0.5: lo = minf(lo, vs[i].y); maxw = maxf(maxw, absf(vs[i].x))
+				if lo < INF:
+					var span := maxf(top.y - lo, 0.01)
+					for i in vs.size():
+						if cw[i] <= 0.0: continue
+						var v := vs[i]
+						var t := clampf((top.y - v.y) / span, 0.0, 1.0)            # 0 collar .. 1 hem
+						var ny := top.y - t * (top.y - CAPE_HEM_Y)                   # shorten to calf
+						var half := lerpf(0.19, CAPE_HALF_W, t)
+						var nx := v.x / maxf(maxw, 0.01) * half * 1.0 if absf(v.x) > 0.0 else 0.0
+						nx = clampf(v.x * half / maxf(maxw * lerpf(0.5, 1.0, t), 0.01), -half, half)
+						var back := top.z - 0.03 - 0.02 * t                          # sheet just behind the chain
+						var nz := back + 0.025 * pow(absf(nx) / half, 2.0)          # slight wrap at the edges
+						# drape over the fox tail (rigid, sticks out to z=-0.33 around y=0.76): bulge back below the hips
+						nz -= 0.17 * smoothstep(1.0, 0.8, ny) * (1.0 - smoothstep(0.6, 0.4, ny) * 0.4)
+						var tgt := Vector3(nx, ny, nz)
+						vs[i] = v.lerp(tgt, clampf(cw[i] * 1.25, 0.0, 1.0) if t > 0.08 else cw[i] * 0.5)
+						if nrm.size() == vs.size():
+							var outward := Vector3(0, 0, -1) if nrm[i].z <= 0.0 else Vector3(0, 0, 1)
+							nrm[i] = nrm[i].lerp(outward, cw[i]).normalized()
+						changed += 1
+				arr[Mesh.ARRAY_VERTEX] = vs; arr[Mesh.ARRAY_NORMAL] = nrm
+				arr[Mesh.ARRAY_TANGENT] = null
+			var fmt: int = mi.mesh.surface_get_format(si)
+			am.add_surface_from_arrays(mi.mesh.surface_get_primitive_type(si), arr, [], {}, (fmt & ~Mesh.ARRAY_FORMAT_TANGENT) & ~Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES)
+			am.surface_set_material(am.get_surface_count() - 1, mi.mesh.surface_get_material(si))
+		if changed > 0:
+			if mi.mesh.resource_path != "": _cape_cache[mi.mesh.resource_path] = am
+			mi.mesh = am

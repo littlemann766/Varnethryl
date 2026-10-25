@@ -89,9 +89,30 @@ func trail_point(gap: float) -> Vector3:
 		acc += seg; p = trail[j]
 	return p
 
+## Test 7: companions walk BESIDE/behind the hero at ground level (never on the camera line behind him);
+## flyers (phoenix) hover at shoulder height off to the side. Side alternates per companion slot.
+const FLYERS := ["phoenix"]
+const SIDE_M := 1.1
+func follow_goal(c: Dictionary, gap: float) -> Vector3:
+	var idx := companions.find(c)
+	var goal := trail_point(gap)
+	var fwd: Vector3 = -main.hero_vis.global_transform.basis.z; fwd.y = 0
+	if fwd.length() < 0.01: fwd = Vector3(0, 0, -1)
+	var side := fwd.normalized().cross(Vector3.UP) * (SIDE_M if idx % 2 == 0 else -SIDE_M)
+	goal += side
+	# stay out of the camera's line of sight: push sideways if the goal is near the camera->hero segment
+	if main.cam:
+		var a: Vector3 = main.cam.global_position; var b: Vector3 = main.hero.global_position + Vector3(0, 0.8, 0)
+		var ab := b - a; var t := clampf((goal - a).dot(ab) / maxf(ab.length_squared(), 0.001), 0.0, 1.0)
+		var near_pt := a + ab * t
+		var off := Vector3(goal.x - near_pt.x, 0, goal.z - near_pt.z)
+		if off.length() < 0.9: goal += (off.normalized() if off.length() > 0.01 else side.normalized()) * (0.9 - off.length())
+	if FLYERS.has(c.id): goal.y += HeroRoster.height("owner") * 0.75   # shoulder height
+	return goal
+
 func _follow(c: Dictionary, gap: float, dt: float) -> void:
 	var n: Node3D = c.node
-	var goal := trail_point(gap)
+	var goal := follow_goal(c, gap)
 	var to := goal - n.global_position
 	var flat := Vector2(to.x, to.z).length()
 	var spd: float = HeroRoster.speed(c.id) * 1.15

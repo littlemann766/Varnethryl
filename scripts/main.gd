@@ -974,6 +974,7 @@ func _process(dt: float) -> void:
 		for rf in b.roofs: rf.visible = not ins
 		if ins: inside = b.name
 	_camera_prefs(inside != "", dt)
+	_camera_occlusion()
 	if VUI.hud and VUI.hud.minimap: VUI.hud.minimap.set_player(Vector2(hero.position.x, hero.position.z), hero_vis.rotation.y)
 	VUI.set_fps(Engine.get_frames_per_second())
 	lamp_shadow_t -= dt
@@ -1080,6 +1081,31 @@ func _run_bench() -> void:
 			var pos: Vector3 = d2 * (CITY_HALF + 30.0)
 			await _shot("t5_gate_" + String(gd[2]).to_lower().replace(" ", "_"), pos, atan2(d2.x, d2.z), -0.12, 11.0, 2, 30)
 		get_tree().quit(1 if fails > 0 else 0)
+		return
+	if only == "cape":
+		var tag := OS.get_environment("CAPE_TAG")
+		VUI._enter("solo"); tier = 2; apply_quality(); _set_time(11.0); bench = false
+		var cl = get_tree().root.get_node("VUI").hud; cl.visible = false
+		VPrefs.prefs["zoom"] = 0.55; VPrefs.prefs["camMode"] = "free"; party.hud.visible = false
+		for v in [["back", 0.0], ["side", PI / 2]]:
+			# idle: hero faces -Z (yaw 0); camera orbits around it
+			_teleport(Vector3(-6, 0, 60), 0.0); joy_vec = Vector2.ZERO; cam_arm.spring_length = 3.2
+			for i in 120: await get_tree().physics_frame
+			yaw = v[1]; pitch = -0.15
+			for i in 6: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_cape_%s_idle_%s.png" % [tag, v[0]])
+			# running forward along -Z for 1.2 s; camera keeps the same relative angle
+			_teleport(Vector3(-6, 0, 60), 0.0)
+			yaw = 0.0
+			for i in 72:
+				joy_vec = Vector2(0, -1); yaw = 0.0
+				await get_tree().physics_frame
+			yaw = v[1]
+			for i in 3:
+				joy_vec = Vector2(0, -1); await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_cape_%s_run_%s.png" % [tag, v[0]])
+			joy_vec = Vector2.ZERO
+		get_tree().quit()
 		return
 	if only == "t6":
 		VUI._enter("solo"); bench = true
@@ -1238,6 +1264,7 @@ func _hook_ui() -> void:
 func _teleport(p: Vector3, yw: float) -> void:
 	hero.position = Vector3(p.x, height(p.x, p.z) + 0.2, p.z); hero.velocity = Vector3.ZERO
 	yaw = yw; hero_vis.rotation.y = yw; pip.position = hero.position + Vector3(1, 0, 1)
+	if party and party.rig and party.rig.cloth: party.rig.cloth.call_deferred("reset")   # no cape fling on teleport
 
 func _on_play_solo() -> void:
 	Net.leave(); _clear_remotes()
@@ -1388,3 +1415,53 @@ func cheat_tp_zone(z: String) -> bool:
 		"sailing": _on_travel("sail"); return true
 		"hydra": _on_travel("hydra"); return true
 	_toast("%s is not ported yet." % z); return false
+
+
+# ---------- test 7: camera vs big characters / companions ----------
+## Anything (companions, enemies, remote players) between the camera and the hero fades out; if the camera
+## would sit inside a big creature, the arm pulls in in front of it.
+var _faded := {}
+func _occluders() -> Array:
+	var out := []
+	if party:
+		for c in party.companions: out.append([c.node, c.rig, 0.45])
+		for e in party.director.living(): out.append([e, e.rig, float(e.radius)])
+	for id in remotes:
+		var rp = remotes[id]
+		if is_instance_valid(rp) and rp.rig: out.append([rp, rp.rig, 0.5])
+	return out
+
+func _camera_occlusion() -> void:
+	if cam == null or hero == null: return
+	var head := hero.global_position + Vector3(0, cam_h, 0)
+	var cp := cam.global_position
+	var seg := cp - head; var L := seg.length()
+	if L < 0.01: return
+	var dir := seg / L
+	var pull := L
+	var now := {}
+	for o in _occluders():
+		var n: Node3D = o[0]; var rig: CharacterRig = o[1]; var r: float = o[2]
+		if not is_instance_valid(n) or rig == null: continue
+		var h: float = maxf(rig.target_height, 0.3)
+		var base := n.global_position
+		# closest point on the camera ray to the creature's vertical axis (cylinder r, height h)
+		var t := clampf((base - head).dot(dir), 0.0, L)
+		var p := head + dir * t
+		var flat := Vector2(p.x - base.x, p.z - base.z).length()
+		var inside_h := p.y > base.y - 0.2 and p.y < base.y + h + 0.3
+		if flat < r + 0.35 and inside_h and t > 0.2:
+			now[rig.get_instance_id()] = rig
+			# big creature behind the hero, camera would be inside/behind it: pull the arm in front of it
+			if r > 1.0: pull = minf(pull, maxf(1.2, t - r - 0.3))
+	for k in now:
+		if not _faded.has(k): _set_fade(now[k], 0.8)
+	for k in _faded:
+		if not now.has(k) and is_instance_valid(_faded[k]): _set_fade(_faded[k], 0.0)
+	_faded = now
+	if pull < L - 0.05:
+		cam_arm.spring_length = minf(cam_arm.spring_length, pull)
+
+func _set_fade(rig: Node, a: float) -> void:
+	for mi in rig.find_children("*", "GeometryInstance3D", true, false):
+		(mi as GeometryInstance3D).transparency = a

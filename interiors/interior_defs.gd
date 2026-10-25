@@ -272,6 +272,7 @@ const D := {
 
 # ---- APOTHECARY: main shop floor (herb shelves, counter); back storage
 "training": {"name": "Training Hall of Varnethryl", "scale": [0.44, 0.44],
+	"fill": [[0, ["weapon_rack", "armor_stand", "bench", "weapon_rack"], 0.15]],
 	"floors": [{"h": 4.5, "mat": "oak", "wall": "stone", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 4.0, "slab": [[-0.5, -0.5, 0.5, -0.32], [-0.5, 0.32, 0.5, 0.5], [-0.5, -0.32, -0.32, 0.32], [0.32, -0.32, 0.5, 0.32]]}],
 	"stairs": [["auto", 0, -1, 2.0]],
 	"rails": [[1, -0.3, -0.32, 0, 7], [1, -0.3, 0.32, 0, 6], [1, 0.32, -0.32, -90, 4]],

@@ -4,7 +4,7 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "8"
+const VERSION := "9"
 const DEFS := [
 	["guildhall",0,-21,0.0,"Guild Hall"], ["library",-24,-27,0.0,"Grand Library"], ["townhall",23,-26,0.0,"Town Hall"],
 	["mage",-44,-31,0.0,"Mage Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
@@ -515,9 +515,9 @@ func _street_kit() -> void:
 ## test 9: Beth's port is a whole harbour (77k High / 37k lod1). No coast in the world, so it sits on the lake's
 ## town-side shore, piers (-Z) out over the water. lod1 on phone High (phone_high_lod), lod2 beyond 120 m.
 func _harbour() -> void:
-	var dir := (Vector2.ZERO - LAKE).normalized()
-	var c := LAKE + dir * 60.0
-	var root := Node3D.new(); root.name = "Harbour"; root.position = Vector3(c.x, 0.0, c.y); root.rotation.y = atan2(dir.x, dir.y); add_child(root)
+	var c: Vector2 = harbour_spot()[0]; var inward: Vector2 = harbour_spot()[1]
+	# model: shops/warehouses along z=-5 (doors face +z), quay + piers out to z=+17 -> +z points into the lake
+	var root := Node3D.new(); root.name = "Harbour"; root.position = Vector3(c.x, 0.0, c.y); root.rotation.y = atan2(inward.x, inward.y); add_child(root)
 	var sufs := ["_lod1", "_lod2"]; var bands := [[0.0, 120.0], [120.0, 600.0]]
 	for k in 2:
 		var v: Node3D = load("res://assets/card2/bld_port_card2%s.glb" % sufs[k]).instantiate(); root.add_child(v)
@@ -527,6 +527,13 @@ func _harbour() -> void:
 	_add_col("res://assets/card2/bld_port_card2_col.glb", root.position, root.rotation.y)
 	var d = _c2_door_raw("port")
 	if d != null: _door_light(root.global_transform * (d + Vector3(0.9, 2.6, 0.7)))
+
+## Harbour on the lake shore 70 deg round from the town-facing side, so from town the quay and piers are seen
+## side-on over the water instead of the warehouses' back wall. Returns [centre, unit vector into the lake].
+static func harbour_spot() -> Array:
+	var a := atan2(-LAKE.y, -LAKE.x) + deg_to_rad(70.0)
+	var out := Vector2(cos(a), sin(a))
+	return [LAKE + out * 58.0, -out]
 
 static func _c2_door_raw(key: String) -> Variant:
 	if _c2_doors.is_empty(): card2_door("inn")
@@ -1293,8 +1300,18 @@ func _run_bench() -> void:
 		get_viewport().get_texture().get_image().save_png("user://shot_t9_backdrop_castle.png")
 		c.current = false; cam.current = true; c.queue_free()
 		# harbour on the lake + night door lights
-		var dir := (Vector2.ZERO - LAKE).normalized(); var hb := LAKE + dir * 60.0
-		await _shot("t9_harbour_day", Vector3(hb.x + dir.x * 30, 0, hb.y + dir.y * 30), atan2(dir.x, dir.y), -0.05, 11.0, 2, 40)
+		var hs := harbour_spot(); var hb: Vector2 = hs[0]
+		var tv := (Vector2.ZERO - hb).normalized()   # look at the harbour from the town side
+		var hp2 := hb + tv * 45.0
+		await _shot("t9_harbour_day", Vector3(hp2.x, 0, hp2.y), atan2(tv.x, tv.y), -0.05, 14.0, 2, 40)
+		# overview from the shore side-on (lake on the right): quay, piers and boats should face the water
+		var hin: Vector2 = hs[1]; var side := Vector2(-hin.y, hin.x)
+		var hc := Camera3D.new(); hc.far = 800; add_child(hc)
+		var eye := hb + side * 55.0 + hin * 25.0
+		hc.look_at_from_position(Vector3(eye.x, 22, eye.y), Vector3(hb.x + hin.x * 6.0, 1, hb.y + hin.y * 6.0)); hc.current = true
+		for i in 30: await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png("user://shot_t9_harbour_overview.png")
+		hc.current = false; cam.current = true; hc.queue_free()
 		await _shot("t9_door_lights_night", Vector3(0, 0, 38), PI * 0.85, -0.12, 22.5, 2, 40)
 		print("DOORLIGHTS on=%d total=%d" % [active_door_lights(), door_lights.size()])
 		for q in 4:
@@ -1676,18 +1693,38 @@ func _camera_occlusion() -> void:
 		# camera itself inside the creature's cylinder also counts (after a pull-in the ray can be shorter than it)
 		var cam_in := Vector2(cp.x - base.x, cp.z - base.z).length() < r + 0.6 and cp.y > base.y - 0.2 and cp.y < base.y + h + 0.3
 		if (flat < r + 0.35 and inside_h and t > 0.2) or cam_in:
-			now[rig.get_instance_id()] = rig
+			now[n.get_instance_id()] = n
 			# big creature behind the hero: pull the arm in front of it only if that leaves the camera clear of it;
 			# otherwise keep the arm and just fade the creature (pulling into its body showed only its mesh)
 			if r > 1.0 and t - r - 0.6 >= 1.5: pull = minf(pull, t - r - 0.6)
 	for k in now:
-		if not _faded.has(k): _set_fade(now[k], 0.8)
+		if not _faded.has(k): _set_fade(now[k], true)
 	for k in _faded:
-		if not now.has(k) and is_instance_valid(_faded[k]): _set_fade(_faded[k], 0.0)
+		if not now.has(k) and is_instance_valid(_faded[k]): _set_fade(_faded[k], false)
 	_faded = now
 	if pull < L - 0.05:
 		cam_arm.spring_length = minf(cam_arm.spring_length, pull)
 
-func _set_fade(rig: Node, a: float) -> void:
-	for mi in rig.find_children("*", "GeometryInstance3D", true, false):
-		(mi as GeometryInstance3D).transparency = a
+## Fade to ~30% visible with an alpha-hash dither (works on Mobile, keeps depth sorting sane): duplicate each
+## surface's material once with transparency ALPHA_HASH and albedo alpha 0.3; restore the originals on unfade.
+const FADE_ALPHA := 0.3
+func _set_fade(node: Node, on: bool) -> void:
+	for mi in node.find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if m.mesh == null: continue
+		if on:
+			if m.has_meta("fade_orig"): continue
+			var orig := []
+			for i in m.mesh.get_surface_count():
+				orig.append(m.get_surface_override_material(i))
+				var src: Material = m.get_active_material(i)
+				if src is BaseMaterial3D:
+					var d := (src as BaseMaterial3D).duplicate() as BaseMaterial3D
+					d.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA; d.cull_mode = BaseMaterial3D.CULL_BACK
+					d.albedo_color.a = FADE_ALPHA; m.set_surface_override_material(i, d)
+			m.set_meta("fade_orig", orig)
+			if not (m.get_active_material(0) is BaseMaterial3D): m.transparency = 1.0 - FADE_ALPHA
+		elif m.has_meta("fade_orig"):
+			var orig: Array = m.get_meta("fade_orig")
+			for i in orig.size(): m.set_surface_override_material(i, orig[i])
+			m.remove_meta("fade_orig"); m.transparency = 0.0

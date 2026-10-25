@@ -214,9 +214,10 @@ func _cloth_motion(dt: float) -> void:
 	var p := global_position
 	var v := 0.0 if _cloth_last == Vector3.INF else Vector2(p.x - _cloth_last.x, p.z - _cloth_last.z).length() / dt
 	_cloth_last = p
-	var target := 1.0   # test 9: always simulate; strong gravity + low stiffness = hangs plumb down the back at rest
+	var target := clampf(v / 1.5, 0.0, 1.0)   # test 9: at rest show the reshaped flat calf-length sheet; spring (clamped) only while moving
 	cloth.influence = move_toward(cloth.influence, target, dt * (3.0 if target > cloth.influence else 1.5))
 	cloth.active = cloth.influence > 0.001
+	if _cape_clamp: _cape_clamp.level = 1.0 - cloth.influence
 
 func _process(dt: float) -> void:
 	_cloth_motion(dt)
@@ -236,6 +237,7 @@ func _process(dt: float) -> void:
 const CLOTH := {"cape": {"stiffness": 0.08, "drag": 0.85, "gravity": 9.0, "radius": 0.035},
 	"hood": {"stiffness": 2.0, "drag": 0.6, "gravity": 0.8, "radius": 0.03}}
 var cloth: SpringBoneSimulator3D
+var _cape_clamp: CapeClamp
 
 func _add_cloth() -> void:
 	var sk: Skeleton3D = null
@@ -274,6 +276,7 @@ func _add_cloth() -> void:
 		cloth.set_stiffness(i, P.stiffness); cloth.set_drag(i, P.drag); cloth.set_gravity(i, P.gravity)
 		cloth.set_gravity_direction(i, Vector3.DOWN); cloth.set_radius(i, P.radius)
 		cloth.set_enable_all_child_collisions(i, true)
+		if chains[i][0] == "cape": cloth.set_rotation_axis(i, SkeletonModifier3D.ROTATION_AXIS_X)   # swing fore/aft only: no twist/narrowing
 	# body colliders (from the cloth sidecar's capsule list): torso + legs, so the cape never sinks into the body
 	for c in [["hips", 0.17, 0.75, Vector3(0, 0.3, 0)], ["thigh_L", 0.11, 0.5, Vector3(0, 0.22, 0)], ["thigh_R", 0.11, 0.5, Vector3(0, 0.22, 0)],
 			["shin_L", 0.08, 0.45, Vector3(0, 0.2, 0)], ["shin_R", 0.08, 0.45, Vector3(0, 0.2, 0)]]:
@@ -281,6 +284,13 @@ func _add_cloth() -> void:
 		var col := SpringBoneCollisionCapsule3D.new(); col.bone_name = c[0]
 		col.radius = c[1]; col.height = c[2]; col.position_offset = c[3]
 		cloth.add_child(col)
+	# test 9: clamp the cape chain's swing (upper 35 deg .. lower 18 deg) so running never flares it out
+	if sk.find_bone("cape") >= 0:
+		var cc := CapeClamp.new(); cc.name = "CapeClamp"; sk.add_child(cc); _cape_clamp = cc
+		var chain := ["cape"]; var j := 2
+		while sk.find_bone("cape%d" % j) >= 0: chain.append("cape%d" % j); j += 1
+		for n in chain.size():
+			cc.bones.append(sk.find_bone(chain[n])); cc.max_deg.append(lerpf(35.0, 18.0, float(n) / maxf(chain.size() - 1, 1)))
 
 
 ## Beth's export leaves the cape/hood bone rests at identity (only the clips placed them). Rebuild each chain
@@ -305,7 +315,7 @@ func _fix_chain_rest(sk: Skeleton3D, names: Dictionary) -> void:
 ## per mesh (cached): vertices skinned to the cape chain are pulled into a flat, shoulder-width sheet that hangs
 ## just behind the chain bones and ends at calf height. The spring chain then gives it sway/trail.
 const CAPE_HALF_W := 0.25      # m, half shoulder width at the hem (0.19 at the collar)
-const CAPE_HEM_Y := 0.30       # m, calf
+const CAPE_HEM_Y := 0.20       # m, calf (test 9: lower so the idle hem matches the running look)
 static var _cape_cache := {}
 
 func _reshape_cape(sk: Skeleton3D) -> void:
@@ -339,17 +349,17 @@ func _reshape_cape(sk: Skeleton3D) -> void:
 					for j in k: if is_cape.has(bones[i * k + j]): s += w[i * k + j]
 					cw[i] = s
 					if s > 0.5: lo = minf(lo, vs[i].y); maxw = maxf(maxw, absf(vs[i].x))
-				# back profile of the body (incl. the fox tail) under the cape: min z per 5 cm height band
-				var prof := {}
-				for i in vs.size():
-					if cw[i] < 0.05 and absf(vs[i].x) < 0.24 and vs[i].y > 0.3:
-						var bi := int(vs[i].y / 0.05); prof[bi] = minf(prof.get(bi, 0.0), vs[i].z)
 				# test 8: the rigid fox tail stuck out through the flat cape at idle; with a cape on it is folded
 				# away inside the hips (vertices skinned to tail bones collapse to a point under the cape)
 				for i in vs.size():
 					var tw := 0.0
 					for j in k: if is_tail.has(bones[i * k + j]): tw += w[i * k + j]
 					if tw > 0.02 or (cw[i] < 0.05 and vs[i].z < -0.22 and vs[i].y > 0.15 and vs[i].y < 0.95): vs[i] = Vector3(0.0, 0.9, -0.05); changed += 1
+				# back profile of the body (incl. the fox tail) under the cape: min z per 5 cm height band
+				var prof := {}
+				for i in vs.size():
+					if cw[i] < 0.05 and absf(vs[i].x) < 0.24 and vs[i].y > 0.3 and vs[i] != Vector3(0.0, 0.9, -0.05):
+						var bi := int(vs[i].y / 0.05); prof[bi] = minf(prof.get(bi, 0.0), vs[i].z)
 				var run := PackedFloat32Array(); run.resize(64)
 				var acc := 0.0
 				for bi in range(mini(int(top.y / 0.05), 63), -1, -1):

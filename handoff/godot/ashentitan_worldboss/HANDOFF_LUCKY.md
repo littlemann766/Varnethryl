@@ -31,8 +31,7 @@ Machine-readable events: worldboss_events.json ({"events": footsteps per clip, "
 ## Weak-point bones (attach Beth's crystals as BoneAttachment3D)
 - forearm L / R: foreArm_L / foreArm_R (mid-bone)
 - knee L / R: shin_L / shin_R (bone head = knee)
-- chest: upperChest (front)
-- back: chest (rear; spine2 as a fallback)
+- chest (front plate, +Z): bone `chest`, back plates (-Z): bone `upperChest` - use Beth's attach_points.json offsets, which match this (my v1 note had the two swapped)
 
 ## Server / sync sketch (for Lucian)
 - Server-authoritative WorldBoss state: hp, max_hp, weak_points[6]{hp, broken_until}, waypoint index, phase (moving/arrive/idle/ritual/stagger/knockdown/cooldown), ritual id plus start time, cooldown_until, pressure 0-3, respawn_at (kill + 2 h), contribution map (player -> damage).
@@ -42,3 +41,6 @@ Machine-readable events: worldboss_events.json ({"events": footsteps per clip, "
 - Footprint decals: spawned client-side from the footstep events at the foot bone position, ~25 m, fade at 120 s. The server does not track them.
 - Distance-scaled shake: amp = base x clamp(1 - (d - 120)/(250 - 120), 0, 1) for stomps (full inside 120 m, 0 at 250 m); walking footsteps use ~0.3x base and a 60/150 m falloff.
 - Respawn: the server persists respawn_at; on boot it restores state, and the timer survives restarts.
+
+## v2 (2026-10-25 3:30 PM ET): knee fix
+All wb_* clips and grow: the knees now bend forward (toward the toes) on every frame. A per-frame check puts the knee in front of the hip-ankle line on all 25 wb clips. Root motion: Lucky strips it, so wb_walk/wb_run play in place, and the planted feet only hold still if the node moves at 2.96 m/s (walk) / 8.1 m/s (run) at 114 m.

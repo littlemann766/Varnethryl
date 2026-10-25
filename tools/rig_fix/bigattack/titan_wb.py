@@ -1,7 +1,7 @@
 # Ashen Titan 'intro': climbs out of the lava ring, hauls over the arena edge, stands, roars. Root motion on 'root' bone.
 # Local frame (model space, Blender Z-up, model faces -Y): arena rim edge at y=0 on the floor z=0, arena centre toward -Y, lava toward +Y.
 # Clip ends with root at (0,0,0) = standing on the floor ENDY in front of the rim, so end transform == the placement transform.
-import bpy, sys, math, json
+import bpy, sys, math, json, os
 from mathutils import Vector, Quaternion, Matrix
 src, dst = sys.argv[-2], sys.argv[-1]
 bpy.ops.wm.read_factory_settings(use_empty=True); bpy.ops.import_scene.gltf(filepath=src, bone_heuristic='TEMPERANCE')
@@ -22,7 +22,7 @@ for s in 'LR':
     for limb, tip, chain, pole in (('leg', 'foot_'+s, 'shin_'+s, Vector((0,-1,0.3))), ('arm', 'hand_'+s, 'foreArm_'+s, Vector((0.6 if s=='L' else -0.6, 1, 0)))):
         t = empty(f'ik_{limb}_{s}', W(tip)); p = empty(f'pole_{limb}_{s}', W(chain) + pole*H*0.3)
         if limb == 'leg':
-            c = P[tip].constraints.new('IK'); c.target = t; c.pole_target = p; c.chain_count = 3; c.use_tail = False; c.pole_angle = D(-90); c.name = 'ik'
+            c = P[tip].constraints.new('IK'); c.target = t; c.pole_target = p; c.chain_count = 3; c.use_tail = False; c.pole_angle = D(float(os.environ.get("LEGPOLE", 90))); c.name = 'ik'
             fe = bpy.data.objects.new('frot_'+s, None); bpy.context.scene.collection.objects.link(fe); fe.rotation_mode = 'QUATERNION'
             fe.rotation_quaternion = (arm.matrix_world @ arm.data.bones[tip].matrix_local).to_quaternion(); FROT[s] = (fe, fe.rotation_quaternion.copy())
             cr = P[tip].constraints.new('COPY_ROTATION'); cr.target = fe; cr.name = 'flat'
@@ -97,7 +97,8 @@ def clip(name, fn):
 EACT = {}
 def smooth(x): x = max(0.0, min(1.0, x)); return x*x*(3 - 2*x)
 def legs_free(r):
-    for s_ in 'LR': r.setdefault('thigh_'+s_, Quaternion()); r.setdefault('shin_'+s_, Quaternion())
+    KS = float(os.environ.get('KSIGN', 1))
+    for s_ in 'LR': r.setdefault('thigh_'+s_, q(X, -12*KS)); r.setdefault('shin_'+s_, q(X, 24*KS))
     return r
 def foot_track(t, T, s, ph, duty, lift):
     """returns (y offset, z lift, planted?) for foot s; body travels -2s per cycle T; ph = phase offset"""

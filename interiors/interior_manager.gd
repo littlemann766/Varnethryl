@@ -19,16 +19,18 @@ func setup(m: Node) -> void:
 	main = m
 	if main.sun: main.sun.light_cull_mask &= ~InteriorKit.LAYER
 
-## test 7: library + farmhouse interiors trap the hero at the entry spot against the re-exported exteriors
-## (walk-out test fails), so they stay closed until port-interiors refits them.
-const CLOSED := ["library", "farmhouse"]
+## library/farmhouse (and mage/colosseum) report a zero AABB in the game (lazy-loaded shells); interiors now build from
+## DEF.SIZE (see get_info), so nothing is closed any more. Keep the list for emergencies.
+const CLOSED := []
 func has_interior(id: String) -> bool: return DEF.D.has(id) and not CLOSED.has(id)
 func active() -> bool: return not cur.is_empty()
 func current_name() -> String: return cur.get("name", "")
 
 func get_info(id: String, size: Vector3) -> Dictionary:
 	if not built.has(id):
-		var info := B.build(id, DEF.D[id], size)
+		# always build from the tested size table: the live exterior AABB can change when a shell is re-exported
+		# (e.g. library/farmhouse), which re-laid the interior around an untested footprint and trapped the hero at spawn
+		var info := B.build(id, DEF.D[id], DEF.SIZE.get(id, size))
 		var i := DEF.D.keys().find(id)
 		info.node.position = FAR + Vector3(i * STEP, 0, 0)
 		add_child(info.node)
@@ -55,7 +57,9 @@ func _physics_process(dt: float) -> void:
 			var dl: Vector3 = door_local(b); var lp: Vector3 = b.node.global_transform.affine_inverse() * hero.global_position
 			var hv := Vector2(hero.velocity.x, hero.velocity.z)
 			var into: Vector3 = b.node.global_transform.basis * Vector3(0, 0, -1)
-			if absf(lp.x - dl.x) < 1.8 and lp.z < maxf(dl.z + 1.4, b.aabb.end.z + 0.8) and lp.z > dl.z - 1.0 and absf(lp.y) < 3.0 and (hv.dot(Vector2(into.x, into.z)) > 0.5 or (hero.is_on_wall() and hero.get_wall_normal().dot(into) < -0.5)):
+			# blocked by porch steps/colliders in front of the facade (training hall): accept up to 2.5 m out when pressed against them
+			var reach_z: float = maxf(dl.z + 1.4, b.aabb.end.z + (2.5 if hero.is_on_wall() else 0.8))
+			if absf(lp.x - dl.x) < 1.8 and lp.z < reach_z and lp.z > dl.z - 1.0 and absf(lp.y) < 3.0 and (hv.dot(Vector2(into.x, into.z)) > 0.5 or (hero.is_on_wall() and hero.get_wall_normal().dot(into) < -0.5)):
 				enter(b); return
 	else:
 		var lp2: Vector3 = cur.node.to_local(hero.global_position)

@@ -129,6 +129,10 @@ var interiors: InteriorManager   # res://interiors (walk-in interiors)
 var sky_mat: ProceduralSkyMaterial
 var emissive_mats := []
 var hero_fill: OmniLight3D
+var door_lights: Array[OmniLight3D] = []   # door + street lanterns; only the nearest few are on (per tier)
+var _dl_t := 0.0
+const DOOR_LIGHTS_MAX := [3, 5, 8, 14]      # Low, Medium, High, Ultra
+const DOOR_LIGHT_RANGE := 45.0
 var lamp_lights := []        # [OmniLight3D, min_tier]
 var glow_mm: Array = []      # lantern glow multimeshes
 var glow_mat: StandardMaterial3D
@@ -166,6 +170,7 @@ func _ready() -> void:
 	for d in DEFS: _building(d)
 	_street_kit()
 	_backdrop_castle()
+	_harbour()
 	_dressing()
 	_hi_terrain()
 	_showcase()
@@ -479,6 +484,7 @@ func _street_prop(kind: String, pos: Vector3, rot: float) -> void:
 			mi.visibility_range_begin = bands[k][0]; mi.visibility_range_end = bands[k][1]
 			if k == 0: hi = mi.get_aabb() if hi.size == Vector3.ZERO else hi.merge(mi.get_aabb())
 			if k > 0: mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if kind == "lantern_post": _door_light(root.global_transform * Vector3(0.6, hi.end.y - 0.5, 0))
 	if not PROP_FLAT.has(kind) and hi.size.y > 0.3:
 		var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var bx := BoxShape3D.new()
 		bx.size = hi.size; cs.shape = bx; cs.position = hi.get_center(); sb.add_child(cs); root.add_child(sb)
@@ -506,6 +512,26 @@ func _street_kit() -> void:
 		_street_prop("signpost", gp, g[1])
 
 ## test 8: Beth's tripo2 backdrop castle (70 m silhouette, already metres) on the northern horizon; no collision.
+## test 9: Beth's port is a whole harbour (77k High / 37k lod1). No coast in the world, so it sits on the lake's
+## town-side shore, piers (-Z) out over the water. lod1 on phone High (phone_high_lod), lod2 beyond 120 m.
+func _harbour() -> void:
+	var dir := (Vector2.ZERO - LAKE).normalized()
+	var c := LAKE + dir * 60.0
+	var root := Node3D.new(); root.name = "Harbour"; root.position = Vector3(c.x, 0.0, c.y); root.rotation.y = atan2(dir.x, dir.y); add_child(root)
+	var sufs := ["_lod1", "_lod2"]; var bands := [[0.0, 120.0], [120.0, 600.0]]
+	for k in 2:
+		var v: Node3D = load("res://assets/card2/bld_port_card2%s.glb" % sufs[k]).instantiate(); root.add_child(v)
+		for mi in _meshes(v, []):
+			mi.visibility_range_begin = bands[k][0]; mi.visibility_range_end = bands[k][1]
+			if k == 1: mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_add_col("res://assets/card2/bld_port_card2_col.glb", root.position, root.rotation.y)
+	var d = _c2_door_raw("port")
+	if d != null: _door_light(root.global_transform * (d + Vector3(0.9, 2.6, 0.7)))
+
+static func _c2_door_raw(key: String) -> Variant:
+	if _c2_doors.is_empty(): card2_door("inn")
+	return _c2_doors.get(key, null)
+
 func _backdrop_castle() -> void:
 	var root := Node3D.new(); root.name = "BackdropCastle"; root.position = Vector3(480, 0, -110); root.position.y = height(480, -110) - 1.0
 	root.rotation.y = PI * 0.5; add_child(root)
@@ -515,6 +541,32 @@ func _backdrop_castle() -> void:
 		for mi in _meshes(v, []):
 			mi.visibility_range_begin = bands[k][0]; mi.visibility_range_end = bands[k][1]; mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			if OS.get_environment("T8_PART") == "c": print("CASTLE ", root.position, " ", mi.get_aabb())
+
+func _door_light(p: Vector3) -> void:
+	var l := OmniLight3D.new(); l.name = "DoorLight"; l.position = p; l.light_color = Color(1.0, 0.72, 0.42)
+	l.light_energy = 1.6; l.omni_range = 7.5; l.omni_attenuation = 1.2; l.shadow_enabled = false
+	l.distance_fade_enabled = true; l.distance_fade_begin = DOOR_LIGHT_RANGE - 12.0; l.distance_fade_length = 12.0
+	l.visible = false; add_child(l); door_lights.append(l)
+
+## Mobile-safe door lights: at night only the N nearest within 45 m are enabled (N by tier), refreshed 4x/s.
+func _update_door_lights(dt: float) -> void:
+	_dl_t -= dt
+	if _dl_t > 0.0 or hero == null: return
+	_dl_t = 0.25
+	var night := lamp_lights.size() > 0 and (lamp_lights[0][0] as OmniLight3D).visible or (hero_fill != null and hero_fill.visible)
+	var hp := hero.global_position; var near := []
+	for l in door_lights:
+		var d := l.global_position.distance_to(hp)
+		if night and d < DOOR_LIGHT_RANGE: near.append([d, l])
+		else: l.visible = false
+	near.sort_custom(func(a, b): return a[0] < b[0])
+	var cap: int = DOOR_LIGHTS_MAX[clampi(tier, 0, 3)]
+	for i in near.size(): near[i][1].visible = i < cap
+
+func active_door_lights() -> int:
+	var c := 0
+	for l in door_lights: c += int(l.visible)
+	return c
 
 func _place_glb(path: String, pos: Vector3, rot: float) -> Node3D:
 	var n: Node3D = load(path).instantiate(); n.position = pos; n.rotation.y = rot; add_child(n); return n
@@ -543,11 +595,10 @@ func _building(d: Array) -> void:
 	for mi in _meshes(n, []): mi.visible = false      # r3 shell = collision proxy; visuals come from Beth r4 hi tiers
 	buildings.append({"id": id, "name": d[4], "node": n, "roof": null, "roofs": [], "lods": [], "vis": null, "aabb": aabb})
 	blockers.append([Vector2(pos.x, pos.z), max(aabb.size.x, aabb.size.z) * 0.55 + 2.0])
-	# warm interior light by the door, night only (Ultra)
-	var door_w: Vector3 = n.global_transform * Vector3(0, 2.6, aabb.end.z + 0.8)
-	var l := OmniLight3D.new(); l.position = door_w; l.light_color = Color(1.0, 0.7, 0.4); l.light_energy = 2.0; l.omni_range = 9.0
-	l.shadow_enabled = false; l.distance_fade_enabled = true; l.distance_fade_begin = 60; l.distance_fade_length = 20
-	add_child(l); lamp_lights.append([l, 3])
+	# test 9: warm door lantern light at Beth's door_point (lantern height, beside the doorway), pooled + culled
+	var dp = card2_door(id) if card else null
+	var dl: Vector3 = dp if dp != null else Vector3(0, 0, aabb.end.z)
+	_door_light(n.global_transform * Vector3(dl.x + 0.9, dl.y + 2.6, dl.z + 0.7))
 
 func _swap_buildings() -> void:
 	# HLOD: every building carries all three of Beth's tiers; the tier only changes the distance bands.
@@ -1074,6 +1125,7 @@ func _physics_process(dt: float) -> void:
 var _tacc := 0.0
 func _process(dt: float) -> void:
 	if hero == null: return
+	_update_door_lights(dt)
 	if not bench and not bench_running:
 		_tacc += dt
 		if _tacc > 0.2: _set_time(tod + _tacc * speed_x * 24.0 / DAY_SECONDS); _tacc = 0.0
@@ -1221,6 +1273,33 @@ func _run_bench() -> void:
 				joy_vec = Vector2(0, -1); await get_tree().process_frame
 			get_viewport().get_texture().get_image().save_png("user://shot_cape_%s_run_%s.png" % [tag, v[0]])
 			joy_vec = Vector2.ZERO
+		get_tree().quit()
+		return
+	if only == "t9":
+		VUI._enter("solo"); bench = true
+		# camera fade: a frost troll parked between the camera and the hero (camera sits behind the hero, +Z at yaw 0)
+		var hp := Vector3(30, 0, 120)
+		var tr: Enemy = party.director.spawn("frosttroll_a", hp + Vector3(0, 0, 9), hero)
+		tr.set_process(false); tr.set_physics_process(false)
+		tr.global_position = Vector3(hp.x + 0.6, height(hp.x, hp.z + 3.2), hp.z + 3.2)
+		await _shot("t9_camera_fade_troll", hp, 0.0, -0.12, 11.0, 2, 30)
+		print("FADE faded=%d arm=%.2f cam=%s hero=%s troll=%s" % [_faded.size(), cam_arm.spring_length, cam.global_position, hero.global_position, tr.global_position])
+		tr.queue_free()
+		# backdrop castle seen from the east gate road (temporary camera aimed at it)
+		_set_time(16.0)
+		var c := Camera3D.new(); c.far = 1500; add_child(c)
+		c.global_position = Vector3(200, 14, -20); c.look_at(Vector3(480, height(480, -110) + 30, -110)); c.current = true
+		for i in 30: await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png("user://shot_t9_backdrop_castle.png")
+		c.current = false; cam.current = true; c.queue_free()
+		# harbour on the lake + night door lights
+		var dir := (Vector2.ZERO - LAKE).normalized(); var hb := LAKE + dir * 60.0
+		await _shot("t9_harbour_day", Vector3(hb.x + dir.x * 30, 0, hb.y + dir.y * 30), atan2(dir.x, dir.y), -0.05, 11.0, 2, 40)
+		await _shot("t9_door_lights_night", Vector3(0, 0, 38), PI * 0.85, -0.12, 22.5, 2, 40)
+		print("DOORLIGHTS on=%d total=%d" % [active_door_lights(), door_lights.size()])
+		for q in 4:
+			await _shot("dc_t9_town_night_q%d" % q, Vector3(0, 0, 38), PI * 0.85, -0.12, 22.5, q, 20)
+			print("DOORLIGHTS tier=%d on=%d" % [q, active_door_lights()])
 		get_tree().quit()
 		return
 	if only == "t8":
@@ -1594,10 +1673,13 @@ func _camera_occlusion() -> void:
 		var p := head + dir * t
 		var flat := Vector2(p.x - base.x, p.z - base.z).length()
 		var inside_h := p.y > base.y - 0.2 and p.y < base.y + h + 0.3
-		if flat < r + 0.35 and inside_h and t > 0.2:
+		# camera itself inside the creature's cylinder also counts (after a pull-in the ray can be shorter than it)
+		var cam_in := Vector2(cp.x - base.x, cp.z - base.z).length() < r + 0.6 and cp.y > base.y - 0.2 and cp.y < base.y + h + 0.3
+		if (flat < r + 0.35 and inside_h and t > 0.2) or cam_in:
 			now[rig.get_instance_id()] = rig
-			# big creature behind the hero, camera would be inside/behind it: pull the arm in front of it
-			if r > 1.0: pull = minf(pull, maxf(1.2, t - r - 0.3))
+			# big creature behind the hero: pull the arm in front of it only if that leaves the camera clear of it;
+			# otherwise keep the arm and just fade the creature (pulling into its body showed only its mesh)
+			if r > 1.0 and t - r - 0.6 >= 1.5: pull = minf(pull, t - r - 0.6)
 	for k in now:
 		if not _faded.has(k): _set_fade(now[k], 0.8)
 	for k in _faded:

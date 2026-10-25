@@ -214,7 +214,7 @@ func _cloth_motion(dt: float) -> void:
 	var p := global_position
 	var v := 0.0 if _cloth_last == Vector3.INF else Vector2(p.x - _cloth_last.x, p.z - _cloth_last.z).length() / dt
 	_cloth_last = p
-	var target := smoothstep(0.4, 3.0, v)
+	var target := 1.0   # test 9: always simulate; strong gravity + low stiffness = hangs plumb down the back at rest
 	cloth.influence = move_toward(cloth.influence, target, dt * (3.0 if target > cloth.influence else 1.5))
 	cloth.active = cloth.influence > 0.001
 
@@ -233,7 +233,7 @@ func _process(dt: float) -> void:
 ## SpringBoneSimulator3D instead of baked clip keys: the baked cape keys are what twisted and flared the cape, so
 ## they are stripped and the chain hangs from its straight rest pose, swaying and trailing with movement.
 ## Cost: 5+3 joints and 5 capsule colliders per caped character, all native code. Cheap on mobile.
-const CLOTH := {"cape": {"stiffness": 0.9, "drag": 0.55, "gravity": 2.2, "radius": 0.035},
+const CLOTH := {"cape": {"stiffness": 0.08, "drag": 0.85, "gravity": 9.0, "radius": 0.035},
 	"hood": {"stiffness": 2.0, "drag": 0.6, "gravity": 0.8, "radius": 0.03}}
 var cloth: SpringBoneSimulator3D
 
@@ -305,7 +305,7 @@ func _fix_chain_rest(sk: Skeleton3D, names: Dictionary) -> void:
 ## per mesh (cached): vertices skinned to the cape chain are pulled into a flat, shoulder-width sheet that hangs
 ## just behind the chain bones and ends at calf height. The spring chain then gives it sway/trail.
 const CAPE_HALF_W := 0.25      # m, half shoulder width at the hem (0.19 at the collar)
-const CAPE_HEM_Y := 0.40       # m, calf
+const CAPE_HEM_Y := 0.30       # m, calf
 static var _cape_cache := {}
 
 func _reshape_cape(sk: Skeleton3D) -> void:
@@ -350,6 +350,10 @@ func _reshape_cape(sk: Skeleton3D) -> void:
 					var tw := 0.0
 					for j in k: if is_tail.has(bones[i * k + j]): tw += w[i * k + j]
 					if tw > 0.02 or (cw[i] < 0.05 and vs[i].z < -0.22 and vs[i].y > 0.15 and vs[i].y < 0.95): vs[i] = Vector3(0.0, 0.9, -0.05); changed += 1
+				var run := PackedFloat32Array(); run.resize(64)
+				var acc := 0.0
+				for bi in range(mini(int(top.y / 0.05), 63), -1, -1):
+					acc = minf(acc, prof.get(bi, 0.0)); run[bi] = acc
 				if lo < INF:
 					var span := maxf(top.y - lo, 0.01)
 					for i in vs.size():
@@ -360,12 +364,12 @@ func _reshape_cape(sk: Skeleton3D) -> void:
 						var half := lerpf(0.19, CAPE_HALF_W, t)
 						var nx := v.x / maxf(maxw, 0.01) * half * 1.0 if absf(v.x) > 0.0 else 0.0
 						nx = clampf(v.x * half / maxf(maxw * lerpf(0.5, 1.0, t), 0.01), -half, half)
-						var back := top.z - 0.03 - 0.02 * t                          # sheet just behind the chain
-						var nz := back + 0.025 * pow(absf(nx) / half, 2.0)          # slight wrap at the edges
+						# test 9 (boss: lay flat on the back): 4.5 cm off the back contour, then straight down below the
+						# fullest point (running min from the collar down), so there is no tent or backward angle
+						var wrap := 0.03 * pow(absf(nx) / half, 2.0)               # slight wrap round the sides
 						# drape over the fox tail (rigid, sticks out to z=-0.33 around y=0.76): bulge back below the hips
-						var bb := int(ny / 0.05); var pz := 0.0
-						for d in range(-2, 3): pz = minf(pz, prof.get(bb + d, 0.0))
-						nz = minf(nz, pz - 0.035 + 0.025 * pow(absf(nx) / half, 2.0))   # always outside body/tail
+						var bb := clampi(int(ny / 0.05), 0, 63)
+						var nz: float = run[bb] - 0.045 + wrap
 						var tgt := Vector3(nx, ny, nz)
 						vs[i] = v.lerp(tgt, clampf(cw[i] * 1.25, 0.0, 1.0) if t > 0.08 else cw[i] * 0.5)
 						if nrm.size() == vs.size():

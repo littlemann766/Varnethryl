@@ -260,6 +260,11 @@ func height(x: float, z: float) -> float:
 	var ld := Vector2(x, z).distance_to(LAKE)
 	if ld < 100.0: return lerp(-4.0, _height_raw(x, z, r), smoothstep(45.0, 100.0, ld))
 	var h := _height_raw(x, z, r)
+	# test 12: Beth's volcano_titan stands on a level pad (its base ring is flat at y=0, r 147 m)
+	var dv := Vector2(x, z).distance_to(VOLC)
+	if dv < 200.0:
+		if is_nan(_volc_h0): _volc_h0 = _height_raw(VOLC.x, VOLC.y, VOLC.length())
+		h = lerpf(_volc_h0, h, smoothstep(150.0, 200.0, dv))
 	# SW-corner port: level harbour platform (+0.6) blending out to the hills by 170 m, then the sea floor
 	var pd := Vector2(x, z).distance_to(PORT)
 	if pd < 260.0: h = lerpf(0.05, h, smoothstep(80.0, 260.0, pd))
@@ -409,7 +414,7 @@ func _set_time(h: float) -> void:
 
 func apply_quality() -> void:
 	if not ships.is_empty(): _ships_tier()
-	if volcano_smoke: volcano_smoke.emitting = tier > 0; volcano_smoke.visible = tier > 0
+	for f in volc_fx: f.visible = tier > 0   # volcano smoke + lava lights off on Low
 	# Test 3: Mobile renderer for every tier. Cost drivers kept in check: render scale + FSR,
 	# one shadowed light (the sun) with short distance, no shadowed lamps, LOD/HLOD everywhere.
 	var vp := get_viewport()
@@ -651,30 +656,6 @@ func _ships_tier() -> void:
 		for sb in col.find_children("*", "CollisionObject3D", true, false): (sb as CollisionObject3D).collision_layer = 1 if i < n else 0
 
 var _ship_t := 0.0
-## test 11 (boss: volcano looks unfinished; Beth's high-detail replacement not in yet): cheap life for the current cone.
-## Crater = model (-2.3, 38, 1.3), rim r ~13 (x scale). Emissive lava pool + flicker-free crater glow (no shadow) + a
-## slow CPU smoke column (24 billboards, Medium+ only via tier visibility). No collision changes.
-var volcano_smoke: CPUParticles3D
-func _volcano_fx(base: Vector3, sc: float) -> void:
-	var c := base + Vector3(-2.3, 38.0, 1.3) * sc
-	var pool := MeshInstance3D.new(); var cm := CylinderMesh.new(); cm.top_radius = 9.5 * sc; cm.bottom_radius = 9.5 * sc; cm.height = 0.4; cm.radial_segments = 32; cm.rings = 1
-	var lm := StandardMaterial3D.new(); lm.albedo_color = Color(1.0, 0.35, 0.05); lm.emission_enabled = true; lm.emission = Color(1.0, 0.42, 0.08); lm.emission_energy_multiplier = 4.0
-	lm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED; cm.material = lm; pool.mesh = cm; pool.name = "VolcanoLava"
-	pool.position = c + Vector3(0, 1.2 * sc, 0); pool.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(pool)
-	var gl := OmniLight3D.new(); gl.name = "VolcanoGlow"; gl.light_color = Color(1.0, 0.45, 0.15); gl.light_energy = 6.0; gl.omni_range = 30.0 * sc
-	gl.shadow_enabled = false; gl.position = c + Vector3(0, 8.0 * sc, 0); add_child(gl)
-	var sm := CPUParticles3D.new(); sm.name = "VolcanoSmoke"; sm.amount = 24; sm.lifetime = 14.0; sm.preprocess = 14.0
-	sm.position = c + Vector3(0, 4.0 * sc, 0); sm.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; sm.emission_sphere_radius = 6.0 * sc
-	sm.direction = Vector3(0.15, 1, 0); sm.spread = 12.0; sm.gravity = Vector3(0.6, 0.8, 0); sm.initial_velocity_min = 3.0; sm.initial_velocity_max = 5.0
-	sm.scale_amount_min = 1.0; sm.scale_amount_max = 1.6
-	var cv := Curve.new(); cv.add_point(Vector2(0, 0.4)); cv.add_point(Vector2(1, 1.0)); sm.scale_amount_curve = cv
-	var gr := Gradient.new(); gr.set_color(0, Color(0.32, 0.3, 0.3, 0.0)); gr.set_color(1, Color(0.55, 0.53, 0.52, 0.0)); gr.add_point(0.12, Color(0.3, 0.28, 0.28, 0.75)); sm.color_ramp = gr
-	var q := QuadMesh.new(); q.size = Vector2(16, 16)
-	var smat := StandardMaterial3D.new(); smat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA; smat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	smat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES; smat.vertex_color_use_as_albedo = true; smat.albedo_texture = _soft_dot()
-	smat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED; q.material = smat; sm.mesh = q; sm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	sm.visibility_range_end = 1400.0; add_child(sm); volcano_smoke = sm
-
 func _soft_dot() -> ImageTexture:
 	var n := 64; var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
 	for y in n:
@@ -910,6 +891,72 @@ func _lod_instances(base: String, xf: Transform3D, shadow: bool) -> void:
 			hi_terrain.append([mi, lod])
 
 const LAKE := Vector2(250, -200)
+## test 12: Beth's volcano_titan (godot-art/volcano, built on the boss's volcano_game): 296 m across, 77 m tall, origin =
+## cone centre at ground level, scale 1. Phone High = lod1 (87k tris); caldera arena r 33 m at y 39 ringed by a lava moat;
+## 6.5 m spiral path from path_start (SW foot) to path_end (arena). The Ashen Titan stands at titan_spawn.
+const VOLC := Vector2(405, -402)
+var _volc_h0 := NAN
+var volc_base := Vector3.ZERO
+var lava_mats: Array[BaseMaterial3D] = []
+var volc_fx: Array[Node3D] = []
+var volc_vj := {}
+func _volcano_titan() -> void:
+	volc_vj = JSON.parse_string(FileAccess.get_file_as_string("res://assets/volcano/index.json"))
+	volc_base = Vector3(VOLC.x, height(VOLC.x, VOLC.y) - 0.3, VOLC.y)
+	var root := Node3D.new(); root.name = "VolcanoTitan"; root.position = volc_base; add_child(root)
+	for k in 2:
+		var v: Node3D = load("res://assets/volcano/volcano_titan_lod%d.glb" % (k + 1)).instantiate(); root.add_child(v)
+		for mi in _meshes(v, []):
+			mi.visibility_range_begin = 0.0 if k == 0 else 420.0; mi.visibility_range_end = 420.0 if k == 0 else 0.0
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if k == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			for si in mi.mesh.get_surface_count():
+				var m := mi.get_active_material(si) as BaseMaterial3D
+				if m and m.resource_name.begins_with("volcano_lava"):
+					m = m.duplicate(); m.emission_enabled = true; m.emission_energy_multiplier = maxf(m.emission_energy_multiplier, 3.0)
+					m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+					mi.set_surface_override_material(si, m); lava_mats.append(m)
+				hi_terrain.append([mi, k + 1])
+	_add_col("res://assets/volcano/volcano_titan_col.glb", volc_base, 0.0)
+	# warm light over the lava moat + the caldera floor, no shadows
+	var aj: Array = volc_vj.arena.center
+	var arena := volc_base + Vector3(aj[0], aj[1], aj[2])
+	for i in 3:
+		var a := i / 3.0 * TAU
+		var gl := OmniLight3D.new(); gl.light_color = Color(1.0, 0.45, 0.15); gl.light_energy = 3.0; gl.omni_range = 26.0
+		gl.position = arena + Vector3(cos(a) * 36.0, 2.0, sin(a) * 36.0); gl.shadow_enabled = false; add_child(gl); volc_fx.append(gl)
+	var cg := OmniLight3D.new(); cg.light_color = Color(1.0, 0.5, 0.2); cg.light_energy = 2.0; cg.omni_range = 45.0
+	cg.position = arena + Vector3(0, 14, 0); add_child(cg); volc_fx.append(cg)
+	# smoke plume + ash at Beth's vent markers
+	for vt in volc_vj.vents:
+		var vp: Array = vt.pos
+		var big: bool = vt.kind == "crater_plume"
+		volc_fx.append(_smoke(volc_base + Vector3(vp[0], vp[1], vp[2]), 26 if big else 6, 16.0 if big else 6.0, 14.0 if big else 8.0,
+			Color(0.3, 0.28, 0.28, 0.75) if big else Color(0.22, 0.2, 0.2, 0.6)))
+	# Titan arena: the boss stands at titan_spawn and is leashed to the caldera
+	var ts: Array = volc_vj.titan_spawn.pos
+	VolcanoTitan.CENTER = volc_base + Vector3(ts[0], ts[1], ts[2])
+	VolcanoTitan.BODY_LEASH = float(volc_vj.arena.radius_m) - 6.0
+	VolcanoTitan.CHASE_BREAK = float(volc_vj.arena.radius_m) + 40.0
+	blockers.append([VOLC, 155.0])
+
+func _smoke(at: Vector3, amount: int, size: float, life: float, col: Color) -> CPUParticles3D:
+	var sm := CPUParticles3D.new(); sm.amount = amount; sm.lifetime = life; sm.preprocess = life
+	sm.position = at; sm.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; sm.emission_sphere_radius = size * 0.3
+	sm.direction = Vector3(0.15, 1, 0); sm.spread = 12.0; sm.gravity = Vector3(0.6, 0.8, 0); sm.initial_velocity_min = size * 0.2; sm.initial_velocity_max = size * 0.32
+	var cv := Curve.new(); cv.add_point(Vector2(0, 0.4)); cv.add_point(Vector2(1, 1.0)); sm.scale_amount_curve = cv
+	var gr := Gradient.new(); gr.set_color(0, Color(col.r, col.g, col.b, 0.0)); gr.set_color(1, Color(col.r + 0.2, col.g + 0.2, col.b + 0.2, 0.0)); gr.add_point(0.12, col); sm.color_ramp = gr
+	var q := QuadMesh.new(); q.size = Vector2(size, size)
+	var smat := StandardMaterial3D.new(); smat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA; smat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	smat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES; smat.vertex_color_use_as_albedo = true; smat.albedo_texture = _soft_dot()
+	smat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED; q.material = smat; sm.mesh = q; sm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	sm.visibility_range_end = 1400.0; add_child(sm); return sm
+
+## enemies' ground: terrain, or the volcano's collision inside its footprint (the Titan's caldera at y ~39)
+func ground_y(x: float, z: float) -> float:
+	if Vector2(x, z).distance_to(VOLC) > 150.0 or not is_inside_tree(): return height(x, z)
+	var q := PhysicsRayQueryParameters3D.create(Vector3(x, volc_base.y + 120.0, z), Vector3(x, volc_base.y - 5.0, z), 1)
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	return float(hit.position.y) if hit else height(x, z)
 ## test 10 (boss: "Port is supposed to be in the corner"): Tidewrack harbour sits in the SOUTH-WEST corner exactly as in
 ## v1.5.33 (bossregions.js PORT_CENTER = (-425.6, 392); the Tidewrack road already ends at its gate, (-425.6, 375)).
 ## The original harbour opens WEST onto sea (seaX -104..-19); here that sea is a coast filling the whole SW corner.
@@ -932,11 +979,10 @@ func _hi_terrain() -> void:
 		var ry := rng.randf() * TAU; var sy := rng.randf_range(0.9, 1.2)
 		if near_port(p, 60.0): continue   # after the rng draws so every other peak stays where it was
 		_lod_instances(T + k, Transform3D(Basis(Vector3.UP, ry).scaled(Vector3(sc, sc * sy, sc)), Vector3(p.x, height(p.x, p.y) - 6.0, p.y)), true)
-	_lod_instances(T + "volcano_flank_hi", Transform3D(Basis().scaled(Vector3(1.6, 1.6, 1.6)), Vector3(405, height(405, -402) - 3.0, -402)), true)
-	_volcano_fx(Vector3(405, height(405, -402) - 3.0, -402), 1.6)
+	_volcano_titan()
 	for i in 18:
 		var a2 := rng.randf() * TAU; var r2 := rng.randf_range(250, 460); var p2 := Vector2(cos(a2), sin(a2)) * r2
-		if _road_dist(p2) < 30 or p2.distance_to(LAKE) < 70 or near_port(p2, 10.0): continue
+		if _road_dist(p2) < 30 or p2.distance_to(LAKE) < 70 or near_port(p2, 10.0) or p2.distance_to(VOLC) < 160.0: continue
 		var k2: String = "boulder_strata_hi"
 		var s2 := rng.randf_range(0.5, 1.0) if k2.begins_with("cliff") else rng.randf_range(0.8, 1.6)
 		_lod_instances(T + k2, Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s2, s2, s2)), Vector3(p2.x, height(p2.x, p2.y) - 1.0, p2.y)), true)
@@ -1342,6 +1388,7 @@ func _physics_process(dt: float) -> void:
 
 var _tacc := 0.0
 func _process(dt: float) -> void:
+	for lm in lava_mats: lm.uv1_offset.x = fmod(lm.uv1_offset.x + dt * 0.02, 1.0); lm.uv1_offset.y = fmod(lm.uv1_offset.y + dt * 0.013, 1.0)
 	if fly_controls: fly_controls.visible = VUI.hud != null and VUI.hud.visible and not (VUI.title and VUI.title.visible)
 	_bob_ships(dt)
 	if hero == null: return
@@ -1350,7 +1397,11 @@ func _process(dt: float) -> void:
 		_tacc += dt
 		if _tacc > 0.2: _set_time(tod + _tacc * speed_x * 24.0 / DAY_SECONDS); _tacc = 0.0
 	cam_pivot.position = hero.position + Vector3(0, cam_h, 0)
-	cam_pivot.rotation = Vector3(pitch, yaw, 0)
+	# test 12 (boss: can't see the Arcane Academy stairs): in walk-in interiors the camera rides high over the walls
+	# (floors above are hidden) instead of colliding with them and jamming into the hero's face
+	var in_int: bool = interiors != null and interiors.active()
+	cam_arm.collision_mask = 0 if in_int else 1
+	cam_pivot.rotation = Vector3(minf(pitch, -0.95) if in_int and P_view_third() else pitch, yaw, 0)
 	for bl in windmill_blades:
 		if bl: bl.rotate_object_local(Vector3(0, 0, 1), dt * 0.8)
 	var inside := ""
@@ -1523,16 +1574,36 @@ func _run_bench() -> void:
 		oc.current = false; cam.current = true
 		get_tree().quit()
 		return
-	if only == "t11volcano":
-		VUI._enter("solo"); bench = true
-		await _shot("t11_volcano_far", Vector3(260, 0, -260), -PI / 4, 0.12, 11.0, 2, 60)
-		var vc := Camera3D.new(); vc.far = 2000; add_child(vc)
-		var vb := Vector3(405, height(405, -402) - 3.0, -402); var crater := vb + Vector3(-2.3, 38.0, 1.3) * 1.6
-		vc.look_at_from_position(crater + Vector3(-70, 40, 70), crater); vc.current = true
-		await _shot_here("t11_volcano_crater")
-		vc.look_at_from_position(vb + Vector3(-150, 12, 150), vb + Vector3(0, 30, 0))
-		await _shot_here("t11_volcano_base")
+	if only == "t12volcano":
+		VUI._enter("solo"); bench = true; _set_time(12.0)
+		var vt0 := VolcanoTitan.new(); party.director.add_child(vt0); vt0.setup_volcano(Callable(self, "ground_y"))
+		for i in 10: await get_tree().physics_frame
+		var vc := Camera3D.new(); vc.far = 2500; add_child(vc); vc.current = true
+		var aj: Array = volc_vj.arena.center; var ar := volc_base + Vector3(aj[0], aj[1], aj[2])
+		vc.look_at_from_position(volc_base + Vector3(-330, 60, 260), volc_base + Vector3(0, 30, 0)); await _shot_here("t12_volcano_far")
+		vc.look_at_from_position(ar + Vector3(-60, 60, 70), ar); await _shot_here("t12_volcano_caldera")
+		var ps: Array = volc_vj.path.start
+		vc.look_at_from_position(volc_base + Vector3(ps[0] - 30, ps[1] + 14, ps[2] + 30), volc_base + Vector3(ps[0] + 20, ps[1] + 8, ps[2] - 10)); await _shot_here("t12_volcano_path_foot")
+		var titan: Node3D = null
+		titan = vt0
+		if titan: vc.look_at_from_position(titan.global_position + Vector3(-35, 25, 35), titan.global_position + Vector3(0, 10, 0)); await _shot_here("t12_volcano_titan")
+		print("TITAN at %s (arena %s, ground %.1f)" % [titan.global_position if titan else null, ar, ground_y(ar.x, ar.z)])
+		# walk the path from the foot: the hero must climb it on the collision
 		vc.current = false; cam.current = true
+		var cl: Array = volc_vj.path.centerline; var w0: Array = cl[0]
+		hero.global_position = volc_base + Vector3(w0[0], w0[1] + 1.0, w0[2])
+		var best := 0.0; var wi := 1; var stuck := 0
+		for i in 9000:
+			if wi >= cl.size(): break
+			var wp: Array = cl[wi]; var tg := volc_base + Vector3(wp[0], wp[1], wp[2])
+			var d := Vector3(tg.x - hero.global_position.x, 0, tg.z - hero.global_position.z)
+			if d.length() < 2.0: wi += 1; continue
+			yaw = atan2(-d.x, -d.z); joy_vec = Vector2(0, -1)
+			await get_tree().physics_frame
+			best = maxf(best, hero.global_position.y - volc_base.y)
+		joy_vec = Vector2.ZERO
+		print("VOLCANO_PATH reached %d/%d waypoints, max height %.1f m above the base, end %s" % [wi, cl.size(), best, hero.global_position - volc_base])
+		await _shot("t12_volcano_hero_arena", hero.global_position, yaw, -0.3, 11.0, 2, 10)
 		get_tree().quit()
 		return
 	if only == "t11mage":
@@ -1547,6 +1618,7 @@ func _run_bench() -> void:
 			yaw = atan2(st.dir.x, st.dir.z)
 			for i in 30: await get_tree().physics_frame
 			# detached view (the follow cam hugs the hero in the narrow tower): from the stair top, back toward the hero
+			await _shot_here("t12_mage_stair%d_gamecam" % k)
 			var vc := Camera3D.new(); vc.fov = 80; add_child(vc)
 			var ntop: Vector3 = (info.node as Node3D).to_global(st.base + st.dir * (st.run + 0.6) + Vector3(0, st.rise + 1.7, 0))
 			vc.look_at_from_position(ntop, hero.global_position + Vector3(0, 0.6, 0)); vc.current = true
@@ -1865,11 +1937,14 @@ func _on_dev_action(k: String) -> void:
 				VUI.settings.hide(); VUI.toggle_menu(false); _flythrough_all()
 		_: _toast("Dev action '%s' lands with a later branch." % k)
 
+func P_view_third() -> bool: return VPrefs.prefs.get("view", "third") != "first"
+
 func _camera_prefs(inside: bool, dt: float) -> void:
 	var P: Dictionary = VPrefs.prefs
 	var first: bool = P.get("view", "third") == "first"
 	var base := 6.0 * float(P.get("zoom", 1.0))
 	var want: float = 0.0 if first else (min(3.5, base) if inside else base)
+	if interiors and interiors.active() and not first: want = clampf(base, 5.0, 6.5)   # high over-the-walls view
 	cam_arm.spring_length = lerpf(cam_arm.spring_length, want, min(1.0, 10.0 * dt))
 	hero_vis.visible = not first or bench_running
 	# follow mode: drift yaw behind the hero while walking (unless the player is dragging the camera)

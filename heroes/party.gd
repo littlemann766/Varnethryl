@@ -28,7 +28,7 @@ func setup(m: Node, spawn_enemies := true) -> void:
 	combat = HeroCombat.new(); combat.name = "HeroCombat"; add_child(combat)
 	combat.body = m.hero; combat.facing = m.hero_vis
 	director = EnemyDirector.new(); director.name = "Enemies"; m.add_child(director)
-	director.setup(m.hero, combat, Callable(m, "height"), spawn_enemies)
+	director.setup(m.hero, combat, Callable(m, "ground_y") if m.has_method("ground_y") else Callable(m, "height"), spawn_enemies)
 	combat.enemies = director.living
 	set_hero(hero_id)
 	_set_companions(companion_ids)

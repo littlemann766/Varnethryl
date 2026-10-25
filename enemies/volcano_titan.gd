@@ -6,9 +6,9 @@ extends Enemy
 
 signal aoe(center: Vector3, radius: float, dmg_mult: float)
 
-const CENTER := Vector3(405, 0, -402)
-const BODY_LEASH := 107.0      # titan centre stays within this of CENTER
-const CHASE_BREAK := 162.0     # player further than this from CENTER -> go home, keep hurling boulders
+static var CENTER := Vector3(405, 0, -402)   # test 12: main sets the caldera arena centre (Beth volcano_titan index.json)
+static var BODY_LEASH := 107.0   # test 12: main narrows this to the 33 m caldera
+static var CHASE_BREAK := 162.0  # player further than this from CENTER -> go home, keep hurling boulders
 var J: Dictionary
 var cds := {"eruption_slam": 0.0, "boulder_hurl": 0.0, "magma_sweep": 0.0, "volcano_roar": 0.0}
 var seq: Array = []            # [[clip, duration]]

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b3f4vf5chqy82"
-path="res://.godot/imported/volcano_flank_hi.glb-6d24d816c18da2aa2fd042c5cb4157c3.scn"
+uid="uid://dv43d3wgdf0e5"
+path="res://.godot/imported/volcano_titan_lod1.glb-cbbad87ad288ed7a238d04f6c50fa2cb.scn"
 
 [deps]
 
-source_file="res://assets/hi/terrain/volcano_flank_hi.glb"
-dest_files=["res://.godot/imported/volcano_flank_hi.glb-6d24d816c18da2aa2fd042c5cb4157c3.scn"]
+source_file="res://assets/volcano/volcano_titan_lod1.glb"
+dest_files=["res://.godot/imported/volcano_titan_lod1.glb-cbbad87ad288ed7a238d04f6c50fa2cb.scn"]
 
 [params]
 

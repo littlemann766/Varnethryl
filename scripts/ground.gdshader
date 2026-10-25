@@ -5,6 +5,7 @@ uniform vec4 road : source_color = vec4(0.60,0.54,0.44,1.0);
 uniform vec4 rock : source_color = vec4(0.45,0.42,0.38,1.0);
 uniform vec4 snow : source_color = vec4(0.93,0.95,1.0,1.0);
 uniform float ring_r = 194.0;
+uniform vec2 volc_c = vec2(405.0, -402.0);   // test 12: no snow on the volcano pad (it sits ~56 m up in the hills)
 uniform vec4 segs[64];
 uniform float seg_hw[64];
 uniform int seg_n = 0;
@@ -40,7 +41,7 @@ void fragment(){
 	vec3 col = mix(g, rc, r);
 	col = mix(col, path_col.rgb * (0.85 + 0.3*noise(p*4.0)), fr);
 	col = mix(col, rock.rgb * (0.8 + 0.4*n), smoothstep(0.25, 0.45, slope));
-	col = mix(col, snow.rgb, smoothstep(48.0, 60.0, wp.y + n*6.0) * (1.0 - smoothstep(0.55, 0.75, slope)));
+	col = mix(col, snow.rgb, smoothstep(48.0, 60.0, wp.y + n*6.0) * smoothstep(170.0, 240.0, length(p - volc_c)) * (1.0 - smoothstep(0.55, 0.75, slope)));
 	ALBEDO = col;
 	ROUGHNESS = mix(0.95, 0.75, r);
 }

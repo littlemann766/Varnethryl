@@ -164,6 +164,8 @@ func _ready() -> void:
 	_pond()
 	_walls_and_gate()
 	for d in DEFS: _building(d)
+	_street_kit()
+	_backdrop_castle()
 	_dressing()
 	_hi_terrain()
 	_showcase()
@@ -455,6 +457,64 @@ func _walls_and_gate() -> void:
 		var arch := MeshInstance3D.new(); var am := BoxMesh.new()
 		am.size = Vector3(18, 2.0, 4) if out.x == 0 else Vector3(4, 2.0, 18)
 		am.material = stone; arch.mesh = am; arch.position = out * CITY_HALF + Vector3(0, 9, 0); add_child(arch)
+
+## test 8: Beth's street kit (assets/card2/prop_*, shared card2 atlas, 3 LODs). Dressed by each building's door,
+## kept 2.4 m+ to the side of the doorway so door lanes and interior triggers stay clear.
+const STREET := {"inn": ["barrel_group", "lantern_post"], "smithy": ["crate_stack", "barrel_group"], "bakery": ["flower_planter", "bench"],
+	"market": ["market_cart", "crate_stack"], "apothecary": ["flower_planter", "signpost"], "guildhall": ["lantern_post", "lantern_post"],
+	"townhall": ["flower_planter", "flower_planter"], "temple": ["lantern_post", "bench"], "treasury": ["lantern_post", "crate_stack"],
+	"thieves": ["barrel_group", "crate_stack"], "training": ["barrel_group", "signpost"], "house1": ["bench", "flower_planter"],
+	"house2": ["flower_planter", "barrel_group"], "house3": ["bench", "lantern_post"], "house4": ["flower_planter", "crate_stack"],
+	"crypt": ["lantern_post", "lantern_post"], "observatory": ["bench", "lantern_post"], "keep": ["lantern_post", "lantern_post"],
+	"farmhouse": ["hay_bale", "fence"], "barn": ["hay_bale", "hay_bale"], "library": ["bench", "lantern_post"], "mage": ["lantern_post", "flower_planter"]}
+const PROP_FLAT := ["cobble_edge"]
+func _street_prop(kind: String, pos: Vector3, rot: float) -> void:
+	var root := Node3D.new(); root.name = "prop_" + kind; root.position = pos; root.rotation.y = rot; add_child(root)
+	var bands := [[0.0, 30.0], [30.0, 70.0], [70.0, 160.0]]
+	var sufs := ["", "_lod1", "_lod2"]
+	var hi: AABB
+	for k in 3:
+		var v: Node3D = load("res://assets/card2/prop_%s%s.glb" % [kind, sufs[k]]).instantiate(); root.add_child(v)
+		for mi in _meshes(v, []):
+			mi.visibility_range_begin = bands[k][0]; mi.visibility_range_end = bands[k][1]
+			if k == 0: hi = mi.get_aabb() if hi.size == Vector3.ZERO else hi.merge(mi.get_aabb())
+			if k > 0: mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if not PROP_FLAT.has(kind) and hi.size.y > 0.3:
+		var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var bx := BoxShape3D.new()
+		bx.size = hi.size; cs.shape = bx; cs.position = hi.get_center(); sb.add_child(cs); root.add_child(sb)
+
+func _street_kit() -> void:
+	for b in buildings:
+		if not STREET.has(b.id): continue
+		var n: Node3D = b.node
+		var d = card2_door(b.id)
+		var dl: Vector3 = d if d != null else Vector3(0, 0, b.aabb.end.z)
+		var kinds: Array = STREET[b.id]
+		for k in kinds.size():
+			var side := -1.0 if k == 0 else 1.0
+			var lp := Vector3(dl.x + side * 2.6, 0, dl.z + 1.2)
+			var wp: Vector3 = n.global_transform * lp; wp.y = height(wp.x, wp.z)
+			if _in_gate_path(Vector2(wp.x, wp.z), 2.0): continue
+			_street_prop(kinds[k], wp, n.rotation.y + (PI / 2 if kinds[k] in ["bench", "fence"] else 0.0))
+		# cobble kerb under the doorway
+		var cw: Vector3 = n.global_transform * Vector3(dl.x, 0, dl.z + 0.4); cw.y = height(cw.x, cw.z) + 0.01
+		_street_prop("cobble_edge", cw, n.rotation.y)
+	# signposts + well at the plaza edge and by each gate road
+	_street_prop("well", Vector3(18, height(18, -18), -18), 0.0)
+	for g in [[Vector3(0, 0, 150), PI], [Vector3(0, 0, -150), 0.0], [Vector3(150, 0, 0), -PI / 2], [Vector3(-150, 0, 0), PI / 2]]:
+		var gp: Vector3 = g[0] + Vector3(4, 0, 4); gp.y = height(gp.x, gp.z)
+		_street_prop("signpost", gp, g[1])
+
+## test 8: Beth's tripo2 backdrop castle (70 m silhouette, already metres) on the northern horizon; no collision.
+func _backdrop_castle() -> void:
+	var root := Node3D.new(); root.name = "BackdropCastle"; root.position = Vector3(480, 0, -110); root.position.y = height(480, -110) - 1.0
+	root.rotation.y = PI * 0.5; add_child(root)
+	var sufs := ["_lod1", "_lod2"]; var bands := [[0.0, 300.0], [300.0, 0.0]]
+	for k in 2:
+		var v: Node3D = load("res://assets/backdrop/backdrop_castle%s.glb" % sufs[k]).instantiate(); root.add_child(v)
+		for mi in _meshes(v, []):
+			mi.visibility_range_begin = bands[k][0]; mi.visibility_range_end = bands[k][1]; mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			if OS.get_environment("T8_PART") == "c": print("CASTLE ", root.position, " ", mi.get_aabb())
 
 func _place_glb(path: String, pos: Vector3, rot: float) -> Node3D:
 	var n: Node3D = load(path).instantiate(); n.position = pos; n.rotation.y = rot; add_child(n); return n
@@ -1143,10 +1203,10 @@ func _run_bench() -> void:
 		VUI._enter("solo"); tier = 2; apply_quality(); _set_time(11.0); bench = false
 		var cl = get_tree().root.get_node("VUI").hud; cl.visible = false
 		VPrefs.prefs["zoom"] = 0.55; VPrefs.prefs["camMode"] = "free"; party.hud.visible = false
-		for v in [["back", 0.0], ["side", PI / 2]]:
+		for v in [["back", 0.0], ["side", PI / 2], ["q34", PI / 4]]:
 			# idle: hero faces -Z (yaw 0); camera orbits around it
 			_teleport(Vector3(-6, 0, 60), 0.0); joy_vec = Vector2.ZERO; cam_arm.spring_length = 3.2
-			for i in 120: await get_tree().physics_frame
+			for i in 240: await get_tree().physics_frame
 			yaw = v[1]; pitch = -0.15
 			for i in 6: await get_tree().process_frame
 			get_viewport().get_texture().get_image().save_png("user://shot_cape_%s_idle_%s.png" % [tag, v[0]])
@@ -1161,6 +1221,31 @@ func _run_bench() -> void:
 				joy_vec = Vector2(0, -1); await get_tree().process_frame
 			get_viewport().get_texture().get_image().save_png("user://shot_cape_%s_run_%s.png" % [tag, v[0]])
 			joy_vec = Vector2.ZERO
+		get_tree().quit()
+		return
+	if only == "t8":
+		VUI._enter("solo"); bench = true
+		var part := OS.get_environment("T8_PART")
+		if part == "" or part == "a":
+			VPrefs.prefs["zoom"] = 0.5
+			await _shot("t8_pip_owner", Vector3(-6, 0, 60), PI / 2, -0.12, 11.0, 2, 40)
+			VPrefs.prefs["zoom"] = 1.0
+			await _shot("t8_camera_troll_behind", Vector3(52, 0, 241), 0.0, -0.15, 11.0, 2, 40)
+			await _shot("t8_night_plaza", Vector3(0, 0, -20), PI, -0.12, 22.5, 2, 40)
+			await _shot("t8_night_street", Vector3(0, 0, 38), PI * 0.85, -0.12, 22.5, 2, 40)
+			await _shot("t8_street_kit_day", Vector3(42, 0, 0), -PI / 2, -0.1, 11.0, 2, 30)
+			await _shot("t8_backdrop_castle", Vector3(150, 0, 0), -PI / 2, 0.04, 17.0, 2, 40)
+		if part == "c":
+			await _shot("t8_backdrop_castle", Vector3(150, 0, 0), -PI / 2, 0.04, 17.0, 2, 40)
+		if part == "" or part == "b":
+			for id in ["inn", "library", "farmhouse", "colosseum", "house2"]:
+				for b in buildings:
+					if b.id != id: continue
+					_set_time(11.0); interiors.enter(b)
+					for i in 40: await get_tree().process_frame
+					get_viewport().get_texture().get_image().save_png("user://shot_t8_interior_%s.png" % id)
+					interiors.exit()
+					for i in 5: await get_tree().process_frame
 		get_tree().quit()
 		return
 	if only == "t6":

@@ -206,7 +206,20 @@ func set_active(on: bool) -> void:
 func clip_length(nm: String) -> float:
 	return anim_player.get_animation(nm).length if anim_player and clips.has(nm) else 0.0
 
+## test 8 (boss: idle cape drifted sideways off one shoulder): the spring only acts while moving. At rest its
+## influence fades to 0 so the cape hangs exactly at its rest pose (straight down the back, centred, flat).
+var _cloth_last := Vector3.INF
+func _cloth_motion(dt: float) -> void:
+	if cloth == null or dt <= 0.0: return
+	var p := global_position
+	var v := 0.0 if _cloth_last == Vector3.INF else Vector2(p.x - _cloth_last.x, p.z - _cloth_last.z).length() / dt
+	_cloth_last = p
+	var target := smoothstep(0.4, 3.0, v)
+	cloth.influence = move_toward(cloth.influence, target, dt * (3.0 if target > cloth.influence else 1.5))
+	cloth.active = cloth.influence > 0.001
+
 func _process(dt: float) -> void:
+	_cloth_motion(dt)
 	# procedural fallback for clips a model doesn't have (Selene / Asha have no attack or hit clips)
 	if _lunge > 0.0 or _flinch > 0.0:
 		_lunge = max(0.0, _lunge - dt); _flinch = max(0.0, _flinch - dt)
@@ -352,7 +365,6 @@ func _reshape_cape(sk: Skeleton3D) -> void:
 						# drape over the fox tail (rigid, sticks out to z=-0.33 around y=0.76): bulge back below the hips
 						var bb := int(ny / 0.05); var pz := 0.0
 						for d in range(-2, 3): pz = minf(pz, prof.get(bb + d, 0.0))
-						pz = minf(pz, lerpf(0.0, -0.46, smoothstep(1.1, 0.85, ny)))   # the animated fox tail swings out to ~-0.35: drape over it
 						nz = minf(nz, pz - 0.035 + 0.025 * pow(absf(nx) / half, 2.0))   # always outside body/tail
 						var tgt := Vector3(nx, ny, nz)
 						vs[i] = v.lerp(tgt, clampf(cw[i] * 1.25, 0.0, 1.0) if t > 0.08 else cw[i] * 0.5)

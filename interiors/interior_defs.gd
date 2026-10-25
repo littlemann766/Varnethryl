@@ -178,6 +178,7 @@ const D := {
 
 # ---- MAGE ACADEMY: L1 entry/library access, L2 classroom+workshop, L3 lecture halls, L4 restricted archive/observatory
 "mage": {"name": "Mage Academy of Varnethryl", "scale": [0.48, 0.48],
+	"fill": [[0, ["bookshelf", "crystal_orb", "apothecary_shelf", "lectern"], 0.15], [1, ["bookshelf", "crystal_orb", "apothecary_shelf", "lectern"], 0.15], [2, ["bookshelf", "crystal_orb", "apothecary_shelf", "lectern"], 0.15], [3, ["bookshelf", "crystal_orb", "apothecary_shelf", "lectern"], 0.15]],
 	"floors": [{"h": 3.4, "mat": "bluecheck", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"},
 		{"h": 3.0, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 3.0, "mat": "bluecheck", "wall": "stone", "win": 3.5, "glass": "stained"}],
 	"stairs": [["auto", 0, -1, 2.0], ["auto", 1, 1, 2.0], ["auto", 2, -1, 2.0]],

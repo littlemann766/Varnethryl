@@ -44,26 +44,29 @@ export function createLadders(env) {
   // Perimeter ladders connect the actual wall-walk surface (level 1) to
   // ground without any new platform or floor collision over the masonry.
   function addWall(def){
-    const L={baseLevel:0,y0:0,y1:def.H,...def,wall:true},g=new THREE.Group();
-    g.position.set(L.rungX,L.y0,L.rungZ);g.rotation.y=Math.atan2(L.nx,L.nz);
+    const L={baseLevel:0,y0:0,y1:def.H,...def,wall:true},g=null;
     const H=L.y1-L.y0;
-    // Three instanced batches replace dozens of separate draw calls per ladder.
-    const cube=new THREE.BoxGeometry(1,1,1),dummy=new THREE.Object3D();
-    const batch=(material,parts,name)=>{
-      const mesh=new THREE.InstancedMesh(cube,material,parts.length);
-      mesh.name=name;mesh.castShadow=true;
-      for(let i=0;i<parts.length;i++){
-        const [x,y,z,w,h,d]=parts[i];
-        dummy.position.set(x,y,z);dummy.scale.set(w,h,d);dummy.updateMatrix();
-        mesh.setMatrixAt(i,dummy.matrix);
-      }
-      g.add(mesh);
-    };
-    batch(wood,[[-.35,H/2,0,.085,H+.9,.085],[.35,H/2,0,.085,H+.9,.085]],'ladder-rails');
+    // Shared instancing: every wall/building ladder adds its parts to THREE InstancedMeshes shared by ALL ladders
+    // (rails, rungs, anchors), instead of 3 per ladder (59 ladders = 177 meshes, ~21 draw calls in town, ~61 in the east outskirts).
+    const place=new THREE.Object3D();place.position.set(L.rungX,L.y0,L.rungZ);place.rotation.y=Math.atan2(L.nx,L.nz);place.updateMatrix();
+    const put=(key,parts)=>{for(const [x,y,z,w,h,d] of parts){const o=new THREE.Object3D();o.position.set(x,y,z);o.scale.set(w,h,d);o.updateMatrix();SH.parts[key].push(new THREE.Matrix4().multiplyMatrices(place.matrix,o.matrix));}};
+    put('rails',[[-.35,H/2,0,.085,H+.9,.085],[.35,H/2,0,.085,H+.9,.085]]);
     const rungs=[];for(let y=.3;y<H+.78;y+=.34)rungs.push([0,y,0,.78,.065,.09]);
-    batch(rope,rungs,'ladder-rungs');
-    batch(dark,[[0,.7,-.2,.82,.095,.3],[0,H-.2,-.2,.82,.095,.3]],'ladder-anchors');
-    scene.add(g);L.group=g;list.push(L);return L;
+    put('rungs',rungs);
+    put('anchors',[[0,.7,-.2,.82,.095,.3],[0,H-.2,-.2,.82,.095,.3]]);
+    SH.dirty=true;L.group=SH.group;list.push(L);return L;
+  }
+  // one group + three InstancedMeshes for all wall/building ladders; rebuilt lazily (next update) after ladders are added
+  const SH={group:new THREE.Group(),parts:{rails:[],rungs:[],anchors:[]},meshes:{},dirty:false};SH.group.name='ladders-shared';scene.add(SH.group);
+  function flushShared(){
+    if(!SH.dirty)return;SH.dirty=false;const cube=new THREE.BoxGeometry(1,1,1);
+    for(const [key,material] of [['rails',wood],['rungs',rope],['anchors',dark]]){
+      const old=SH.meshes[key];if(old){SH.group.remove(old);old.dispose?.();}
+      const list=SH.parts[key];if(!list.length)continue;
+      const mesh=new THREE.InstancedMesh(cube,material,list.length);mesh.name='ladder-'+key;mesh.castShadow=true;
+      for(let i=0;i<list.length;i++)mesh.setMatrixAt(i,list[i]);mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();
+      SH.group.add(mesh);SH.meshes[key]=mesh;
+    }
   }
   function addBuilding(def){return addWall(def);}
   const surface = (x, z, level) => { for (const L of list) if (!L.wall && L.level === level && Math.abs(x - L.x) <= L.half + 0.1 && Math.abs(z - L.z) <= L.half + 0.1) return { y: L.H, ladder: L }; return null; };
@@ -81,6 +84,7 @@ export function createLadders(env) {
   }
   /* once per frame, before the normal movement. vx,vz = input direction (world). Returns true while the hero is on the ladder. */
   function update(dt,vx,vz) {
+    flushShared();
     if(climb){
       const L=climb.L,delta=ladderIntent(L,vx,vz);
       // Hold the joystick/keyboard toward either end. Neutral input pauses

@@ -72,7 +72,7 @@ var glow_strength := 1.0:
 
 func lava_veins(hq: bool) -> void:
 	lava_hq = hq
-	lava_mat = (load(LAVA_DIR + ("titan_lava_material_volcano_glow_lod1.tres" if hq else "titan_lava_fallback_volcano_glow_lod1.tres")) as Material).duplicate()   # Beth 8d206c9 set (re-sculpted hands, new UVs)
+	lava_mat = (load(LAVA_DIR + ("titan_lava_material_volcano_glow_lod1.tres" if hq else "titan_lava_fallback_volcano_glow_lod1.tres")) as Material).duplicate()   # Beth remapped set (75c0682 fist UVs)
 	for mi: MeshInstance3D in rig.find_children("*", "MeshInstance3D", true, false):
 		if String(mi.name).to_lower().contains("ashentitan") or mi.skin != null: mi.material_override = lava_mat
 	if skel == null: return

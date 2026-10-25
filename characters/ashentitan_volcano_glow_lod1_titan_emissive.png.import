@@ -2,13 +2,13 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ce6dwdide2hyd"
+uid="uid://f3wu6nhlfk0f"
 path="res://.godot/imported/ashentitan_volcano_glow_lod1_titan_emissive.png-8b507a6c9e0bfbd3b87b667e48a82ed0.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "2bd5a9174d9798f67d12c71bb74af4e9"
+"md5": "fc31066f9ca772cf60c2e581821321a4"
 }
 
 [deps]
@@ -18,9 +18,9 @@ dest_files=["res://.godot/imported/ashentitan_volcano_glow_lod1_titan_emissive.p
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.8
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
@@ -39,5 +39,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=1024
 detect_3d/compress_to=1

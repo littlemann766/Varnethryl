@@ -19,7 +19,10 @@ func setup(m: Node) -> void:
 	main = m
 	if main.sun: main.sun.light_cull_mask &= ~InteriorKit.LAYER
 
-func has_interior(id: String) -> bool: return DEF.D.has(id)
+## test 7: library + farmhouse interiors trap the hero at the entry spot against the re-exported exteriors
+## (walk-out test fails), so they stay closed until port-interiors refits them.
+const CLOSED := ["library", "farmhouse"]
+func has_interior(id: String) -> bool: return DEF.D.has(id) and not CLOSED.has(id)
 func active() -> bool: return not cur.is_empty()
 func current_name() -> String: return cur.get("name", "")
 
@@ -34,6 +37,8 @@ func get_info(id: String, size: Vector3) -> Dictionary:
 
 ## door in building-local coords: card2 exteriors use the probed facade (tests/door_probe.gd), old shells the AABB front
 func door_local(b: Dictionary) -> Vector3:
+	var d = load("res://scripts/main.gd").card2_door(b.id)   # Beth's door_points for card2/Tripo exteriors
+	if d != null: return d
 	return DEF.DOORS.get(b.id, Vector3(0, 0, b.aabb.end.z))
 
 func door_world(b: Dictionary) -> Vector3:
@@ -50,11 +55,14 @@ func _physics_process(dt: float) -> void:
 			var dl: Vector3 = door_local(b); var lp: Vector3 = b.node.global_transform.affine_inverse() * hero.global_position
 			var hv := Vector2(hero.velocity.x, hero.velocity.z)
 			var into: Vector3 = b.node.global_transform.basis * Vector3(0, 0, -1)
-			if absf(lp.x - dl.x) < 1.8 and lp.z < maxf(dl.z + 1.4, b.aabb.end.z + 0.8) and lp.z > dl.z - 1.0 and absf(lp.y) < 3.0 and hv.dot(Vector2(into.x, into.z)) > 0.5:
+			if absf(lp.x - dl.x) < 1.8 and lp.z < maxf(dl.z + 1.4, b.aabb.end.z + 0.8) and lp.z > dl.z - 1.0 and absf(lp.y) < 3.0 and (hv.dot(Vector2(into.x, into.z)) > 0.5 or (hero.is_on_wall() and hero.get_wall_normal().dot(into) < -0.5)):
 				enter(b); return
 	else:
 		var lp2: Vector3 = cur.node.to_local(hero.global_position)
-		if cooldown <= 0 and lp2.z > cur.exit_z and absf(lp2.x) < 2.0: exit(); return
+		# leave through the door; also when walking back onto the entry spot (some refit rooms put props by exit_z)
+		var back_z: float = minf(cur.exit_z, cur.spawn.z + 0.6)
+		var hv2: Vector3 = cur.node.global_transform.basis.inverse() * hero.velocity
+		if cooldown <= 0 and absf(lp2.x - cur.spawn.x * float(lp2.z <= cur.exit_z)) < 2.0 and (lp2.z > cur.exit_z or (lp2.z > back_z and hv2.z > 0.5)): exit(); return
 		_update_floors(lp2.y)
 
 func enter(b: Dictionary) -> void:

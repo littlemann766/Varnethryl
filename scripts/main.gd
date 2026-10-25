@@ -22,8 +22,26 @@ const CARD2 := {"guildhall": "guildhall", "library": "library", "townhall": "tow
 	"house1": "house1", "house2": "house2", "house3": "house3", "house4": "house4",
 	"farmhouse": "tripo/bld_farmhouse_tripo", "barn": "tripo/bld_barn_stable_tripo"}
 ## Heavy pieces ship and render LOD1 as their best tier (phone High): colosseum, library, mage academy, Tripo models.
-const CARD2_HEAVY := ["colosseum", "library", "mage", "farmhouse", "barn"]
-func _card2_path(id: String, suf: String) -> String:
+const CARD2_HEAVY := ["colosseum", "library", "mage", "guildhall", "temple", "farmhouse", "barn"]   # index.json phone_high_lod = lod1
+func _add_col(path: String, pos: Vector3, rot: float) -> Node3D:
+	var c: Node3D = load(path).instantiate(); c.position = pos; c.rotation.y = rot; add_child(c)
+	for m in _meshes(c, []): m.visible = false
+	return c
+
+static var _c2_doors := {}
+## Beth's buildings/index.json door_points (threshold in the building's local space) for the card2/Tripo
+## exteriors, so interior door triggers sit in the real door openings of the _col.glb walls.
+static func card2_door(id: String) -> Variant:
+	if not CARD2.has(id): return null
+	if _c2_doors.is_empty():
+		var j = JSON.parse_string(FileAccess.get_file_as_string("res://assets/card2/index.json"))
+		for b in (j.get("buildings", []) + j.get("tripo_buildings", [])):
+			if b.get("door_points", []).size() > 0:
+				var p: Array = b.door_points[0].pos; _c2_doors[str(b.id)] = Vector3(p[0], p[1], p[2])
+	var key: String = String(CARD2[id]).get_file().trim_prefix("bld_")
+	return _c2_doors.get(key, null)
+
+static func _card2_path(id: String, suf: String) -> String:
 	var v: String = CARD2[id]
 	if CARD2_HEAVY.has(id) and suf == "": suf = "_lod1"
 	return ("res://assets/card2/%s%s.glb" % [v, suf]) if v.begins_with("tripo/") else ("res://assets/card2/bld_%s_card2%s.glb" % [v, suf])
@@ -447,7 +465,8 @@ func _building(d: Array) -> void:
 	var id: String = d[0]; var pos := Vector3(float(d[1]) * PK, 0, float(d[2]) * PK); var rot: float = d[3]
 	var card := CARD2.has(id)
 	var n := _place_glb(_card2_path(id, "_lod1") if card else "res://assets/buildings/bld_%s.glb" % id, pos, rot)
-	_add_trimesh(n, "" if card else "roof")   # card2: collision from Beth's own LOD1 mesh
+	if card: _add_col(_card2_path(id, "_col"), pos, rot)   # Beth's -colonly collision: walls + walkable door openings
+	else: _add_trimesh(n, "roof")
 	var aabb := AABB(); var first := true
 	for mi in _meshes(n, []):
 		var a: AABB = (n.global_transform.affine_inverse() * mi.global_transform) * mi.get_aabb()
@@ -610,7 +629,7 @@ func _hi_terrain() -> void:
 			var v: Node3D = load("res://assets/card2/tripo/bld_%s_tripo%s.glb" % [part, ["_lod1", "_lod2"][k]]).instantiate(); lh.add_child(v)
 			for mi in _meshes(v, []):
 				mi.visibility_range_begin = [0.0, 160.0][k]; mi.visibility_range_end = [160.0, 0.0][k]
-			if k == 0 and part == "lighthouse_rock_island": _add_trimesh(v, "")
+		_add_col("res://assets/card2/tripo/bld_%s_tripo_col.glb" % part, lh.position, 0.0)
 	for i in 12:
 		var a3 := i / 12.0 * TAU
 		var p3 := LAKE + Vector2(cos(a3), sin(a3)) * 60.0

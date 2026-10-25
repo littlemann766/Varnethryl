@@ -22,16 +22,13 @@ var _atk_i := 0
 const LOOPS := ["idle", "walk", "run", "trot", "hover", "fly", "glide"]
 
 ## height_m <= 0 means "load at scale 1" (Beth's baked-size boss).
-## Exports Beth flagged as loading at the wrong size: these use the approved height from the caller (stonetroll: 3x Owner = 5.715 m).
-const APPROVED_SCALE := {"stonetroll": 5.715}
-
 func setup(path: String, height_m: float) -> CharacterRig:
 	var ps: PackedScene = load(path)
 	model = ps.instantiate()
 	add_child(model)
 	model.rotation.y = PI    # glTF faces +Z; the game's visual node faces -Z
 	measured_height = measure(model, path)
-	if path.begins_with("res://characters/") and not APPROVED_SCALE.has(path.get_file().get_basename().trim_suffix("_lod1")): height_m = 0.0   # Beth's size is baked on the armature root: never rescale
+	if path.begins_with("res://characters/"): height_m = 0.0   # Beth's size is baked on the armature root: never rescale
 	if height_m > 0.0 and measured_height > 0.01:
 		applied_scale = height_m / measured_height
 		target_height = height_m
@@ -41,6 +38,7 @@ func setup(path: String, height_m: float) -> CharacterRig:
 	anim_player = _find_player(model)
 	if anim_player:
 		_alias_clips(path)
+		if path.begins_with("res://characters/"): _strip_root_scale()
 		_add_cloth()
 		_build_tree()
 	return self
@@ -57,6 +55,14 @@ static func char_path(id: String) -> String:
 
 ## index.json renamed_from_source maps new clip -> source clip (attack1 <- attack). Game code and sidecars
 ## (volcano attackEvents, cloth) use SOURCE names, so register each renamed clip under its source name too.
+## Beth re-baked every size onto the armature root (2026-10-25): a leftover root-bone scale key in a clip
+## (the volcano Titan's idle had x1.84) would double it, so drop root scale tracks.
+func _strip_root_scale() -> void:
+	for an in anim_player.get_animation_list():
+		var a := anim_player.get_animation(an)
+		for t in range(a.get_track_count() - 1, -1, -1):
+			if a.track_get_type(t) == Animation.TYPE_SCALE_3D and str(a.track_get_path(t)).ends_with(":root"): a.remove_track(t)
+
 func _alias_clips(path: String) -> void:
 	var fname := path.get_file()
 	for id in index().characters:

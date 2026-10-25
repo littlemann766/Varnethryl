@@ -37,9 +37,8 @@ func test_heights() -> void:
 		var T: Dictionary = Enemy.TYPES[t]
 		var r2 := CharacterRig.new().setup(T.model, T.height)
 		root.add_child(r2)
-		var h2 := CharacterRig.measure(r2) * _idle_root_scale(r2)   # volcano titan's 20.955 m lives on the idle root-bone scale track
-		if t == "stonetroll": ok(r2.applied_scale > 2.0, "stonetroll export (~1.8 m) scaled up to the approved 3x Owner (scale %.2f)" % r2.applied_scale)
-		else: ok(r2.applied_scale == 1.0, "%s loaded at scale 1 (size baked)" % t)
+		var h2 := CharacterRig.measure(r2) * _idle_root_scale(r2)   # root-bone scale tracks are stripped: size is on the armature root
+		ok(r2.applied_scale == 1.0, "%s loaded at scale 1 (size baked)" % t)
 		ok(near(h2, M[t], 0.06 * M[t]), "%s height %.3f vs %.3f" % [t, h2, M[t]])
 		print("HEIGHT %-14s %.3f m (target %.3f, scale %.3f)" % [t, h2, M[t], r2.applied_scale])
 		if t == "titan_volcano": ok(r2.applied_scale == 1.0, "volcano titan loaded at scale 1")

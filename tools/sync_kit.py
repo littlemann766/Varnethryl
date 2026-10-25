@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+"""Copy Beth's interior props used by interiors/interior_defs.gd (High + Medium) into res://interiors/kit.
+Never imports in /workspace/godot-art/interiors. Then: godot --headless --import && python3 tools/sync_kit.py --vram"""
+import re, shutil, json, sys, glob, os
+SRC = "/workspace/godot-art/interiors/"; DST = os.path.join(os.path.dirname(__file__), "../interiors/kit/")
+if "--vram" in sys.argv:   # force VRAM compression on textures extracted from the GLBs
+    for f in glob.glob(DST + "*.import"):
+        if f.endswith(".glb.import"): continue
+        t = open(f).read(); t2 = re.sub(r"compress/mode=\d", "compress/mode=2", t)
+        if t2 != t: open(f, "w").write(t2); print("vram", os.path.basename(f))
+    sys.exit()
+s = open(os.path.join(os.path.dirname(__file__), "../interiors/interior_defs.gd")).read()
+names = set(re.findall(r'\["([a-z][a-z_]+)", \d', s)) | {"ladder", "wall_lantern", "iron_chandelier", "chair", "balcony_railing"}
+idx = json.load(open(SRC + "index.json")); names &= set(idx["props"])
+os.makedirs(DST, exist_ok=True)
+for n in sorted(names):
+    for suf in ["", "_lod1"]: shutil.copy(SRC + n + suf + ".glb", DST)
+idx["props"] = {k: v for k, v in idx["props"].items() if k in names}
+json.dump(idx, open(DST + "index.json", "w"), indent=1); print(len(names), "props")

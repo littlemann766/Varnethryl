@@ -10,7 +10,7 @@ const STAIR_SLOPE := 1.3        # run = rise * 1.3  (~37.6 deg, under floor_max_
 
 ## size = exterior AABB size. Returns {node, W, D, floors:[{y,h,node,outline}], stairs, ladders, rooms, spawn, door}
 static func build(id: String, def: Dictionary, size: Vector3) -> Dictionary:
-	var sc: Array = def.get("scale", [0.8, 0.8])
+	var sc: Array = def.get("scale", [0.62, 0.62])
 	var W: float = snappedf(size.x * sc[0], 0.1); var D: float = snappedf(size.z * sc[1], 0.1)
 	var root := Node3D.new(); root.name = "Interior_" + id
 	var info := {"id": id, "node": root, "W": W, "D": D, "floors": [], "stairs": [], "ladders": [], "rooms": [], "name": def.get("name", id)}
@@ -29,7 +29,7 @@ static func build(id: String, def: Dictionary, size: Vector3) -> Dictionary:
 		var d := Vector3(-sin(a), 0, -cos(a)); var L: float = f0.h * STAIR_SLOPE
 		var base: Vector3 = P.call(s[1], s[2], f0.y)
 		info.stairs.append({"floor": s[0], "base": base, "dir": d, "run": L, "rise": f0.h, "w": w})
-		holes.get_or_add(s[0] + 1, []).append(_rect_along(base, d, 0.0, L + 0.05, w + 0.3))
+		holes.get_or_add(s[0] + 1, []).append(_rect_along(base, d, 0.0, L + 0.02, w + 0.04))
 	for l in def.get("ladders", []):
 		var f0: Dictionary = info.floors[l[0]]; var a := deg_to_rad(float(l[3]))
 		var d := Vector3(-sin(a), 0, -cos(a)); var p: Vector3 = P.call(l[1], l[2], f0.y)
@@ -151,6 +151,11 @@ static func _stair(fn: Node3D, s: Dictionary, sm: String) -> void:
 		var o: Vector3 = b + side * (w / 2 * sx)
 		pts.append(o); pts.append(o + d * L); pts.append(o + d * L + Vector3(0, H, 0))
 	cv.points = pts; cs.shape = cv; sb.add_child(cs); fn.add_child(sb)
+	# balustrade colliders along both sides (stairs are entered/left only at their ends, so tiny heroes never snag a side ledge)
+	for sx in [-1, 1]:
+		var sbb := StaticBody3D.new(); var cb := CollisionShape3D.new(); var bb := BoxShape3D.new(); bb.size = Vector3(0.1, H + 1.0, L)
+		cb.shape = bb; sbb.add_child(cb); sbb.position = b + side * ((w / 2 + 0.06) * sx) + d * (L / 2) + Vector3(0, (H + 1.0) / 2, 0); sbb.rotation.y = rot
+		fn.add_child(sbb)
 	# handrails (iron posts + oak rail) both sides
 	for sx in [-1, 1]:
 		var o: Vector3 = b + side * ((w / 2 + 0.06) * sx)
@@ -197,7 +202,7 @@ static func _prop(info: Dictionary, p: Array, P: Callable) -> void:
 			K.box(fn, pos + Vector3(0, ex[1] / 2, 0), Vector3(ex[0], ex[1], ex[2]), ex[3] if ex.size() > 3 else "darkoak", true, deg_to_rad(rot))
 			K.box(fn, pos + Vector3(0, ex[1] + 0.03, 0), Vector3(ex[0] + 0.1, 0.06, ex[2] + 0.1), "oak", false, deg_to_rad(rot))
 		"_glasswall":  # tall stained-glass window [w, h, y0]
-			K.box(fn, pos + Vector3(0, ex[2] + ex[1] / 2, 0), Vector3(ex[0], ex[1], 0.06), "glass", false, deg_to_rad(rot))
+			K.box(fn, pos + Vector3(0, ex[2] + ex[1] / 2, 0), Vector3(ex[0], ex[1], 0.06), ex[3] if ex.size() > 3 else "glass", false, deg_to_rad(rot))
 			K.box(fn, pos + Vector3(0, ex[2] + ex[1] / 2, 0), Vector3(0.08, ex[1], 0.1), "iron", false, deg_to_rad(rot))
 		"_pots":   # hanging pots/rack over kitchen [w]
 			K.box(fn, pos + Vector3(0, 2.6, 0), Vector3(ex[0], 0.06, 0.06), "iron", false, deg_to_rad(rot))
@@ -210,11 +215,11 @@ static func _light(info: Dictionary, l: Array, P: Callable) -> void:
 	# [kind, floor, u, v, rot, energy, range, shadow]
 	var kind: String = l[0]; var F: Dictionary = info.floors[l[1]]; var fn: Node3D = F.node
 	var pos: Vector3 = P.call(l[2], l[3], F.y); var rot: float = l[4]
-	var e: float = l[5]; var rng: float = l[6]; var sh: bool = l[7] if l.size() > 7 else false
+	var e: float = l[5] * 1.8; var rng: float = l[6] * 1.25; var sh: bool = l[7] if l.size() > 7 else false
 	var lp := pos
 	match kind:
 		"chandelier":
-			var cy: float = F.h - 2.4
+			var cy: float = maxf(F.h - 2.1, 2.2)
 			K.prop(fn, "iron_chandelier", pos + Vector3(0, cy, 0), rot, false)
 			K.box(fn, pos + Vector3(0, cy + 2.0 + (F.h - cy - 2.0) / 2, 0), Vector3(0.04, maxf(F.h - cy - 2.0, 0.01), 0.04), "iron", false)
 			lp = pos + Vector3(0, cy + 0.6, 0)

@@ -87,6 +87,7 @@ var rng := RandomNumberGenerator.new()
 var noise := FastNoiseLite.new()
 var env: Environment
 var sun: DirectionalLight3D
+var interiors: InteriorManager   # res://interiors (walk-in interiors)
 var sky_mat: ProceduralSkyMaterial
 var emissive_mats := []
 var lamp_lights := []        # [OmniLight3D, min_tier]
@@ -130,6 +131,7 @@ func _ready() -> void:
 	_hud()
 	if not bench: tier = VPrefs.tier()
 	party = load("res://heroes/party.gd").new(); add_child(party); party.setup(self, not bench)
+	interiors = InteriorManager.new(); add_child(interiors); interiors.setup(self)
 	apply_quality()
 	_hook_ui()
 	if bench: _run_bench()
@@ -926,6 +928,7 @@ func _physics_process(dt: float) -> void:
 	hero.velocity.x = dir.x * speed; hero.velocity.z = dir.z * speed
 	hero.velocity.y = -1.0 if hero.is_on_floor() else hero.velocity.y - 20.0 * dt
 	if cheat.fly: hero.velocity.y = maxf(0.0, (height(hero.position.x, hero.position.z) + 6.0 - hero.position.y) * 2.0)
+	if interiors: interiors.climb(hero, dir, dt)   # ladders: only while pushing into them
 	hero.floor_snap_length = 0.6
 	hero.move_and_slide()
 	if speed > 0.1:
@@ -935,7 +938,7 @@ func _physics_process(dt: float) -> void:
 	for l in limbs: l[0].rotation.x = sin(walk_t) * 0.6 * l[1]
 	var tgt := hero.position + hero_vis.global_transform.basis.z * 1.3 + hero_vis.global_transform.basis.x * 0.7
 	var dp := tgt - pip.position; dp.y = 0
-	var gy := height(pip.position.x, pip.position.z)
+	var gy := height(pip.position.x, pip.position.z) if not (interiors and interiors.active()) else hero.position.y
 	if dp.length() > 0.3:
 		pip.position += dp * min(1.0, 4.0 * dt)
 		pip.rotation.y = lerp_angle(pip.rotation.y, atan2(-dp.x, -dp.z), 8 * dt)
@@ -959,6 +962,7 @@ func _process(dt: float) -> void:
 		var ins: bool = lp.x > a.position.x and lp.x < a.end.x and lp.z > a.position.z and lp.z < a.end.z
 		for rf in b.roofs: rf.visible = not ins
 		if ins: inside = b.name
+	if interiors and interiors.active(): inside = interiors.current_name()
 	_camera_prefs(inside != "", dt)
 	if VUI.hud and VUI.hud.minimap: VUI.hud.minimap.set_player(Vector2(hero.position.x, hero.position.z), hero_vis.rotation.y)
 	VUI.set_fps(Engine.get_frames_per_second())

@@ -57,6 +57,7 @@ func enter(b: Dictionary) -> void:
 	cur_bld = b; cur = get_info(b.id, b.aabb.size)
 	_teleport(cur.node.to_global(cur.spawn), cur.node.global_rotation.y)
 	if main.sun: main.sun.visible = false
+	_env_inside(true)
 	cooldown = 0.8
 
 func exit() -> void:
@@ -65,6 +66,7 @@ func exit() -> void:
 	out.y = main.height(out.x, out.z) + 0.1
 	_teleport(out, b.node.global_rotation.y + PI)
 	if main.sun: main.sun.visible = true
+	_env_inside(false)
 	cooldown = 1.0
 
 func _teleport(p: Vector3, facing: float) -> void:
@@ -111,3 +113,13 @@ func climb(hero: CharacterBody3D, dir: Vector3, _dt: float) -> bool:
 			hero.velocity = Vector3.ZERO; return true                  # hang
 	climbing = false
 	return false
+
+var _env_saved := []
+func _env_inside(on: bool) -> void:
+	var env: Environment = main.get("env")
+	if env == null: return
+	if on:
+		_env_saved = [env.ambient_light_source, env.ambient_light_color, env.fog_enabled]
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR; env.ambient_light_color = Color(0.5, 0.45, 0.4); env.fog_enabled = false
+	elif _env_saved.size():
+		env.ambient_light_source = _env_saved[0]; env.ambient_light_color = _env_saved[1]; env.fog_enabled = _env_saved[2]

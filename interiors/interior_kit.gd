@@ -1,10 +1,12 @@
 class_name InteriorKit
 ## Materials + props for interiors. Props load Beth's kit by file name from res://interiors/kit/<name>.glb
-## (symlink to /workspace/godot-art/interiors, so her in-place detail pass flows through). Unknown names
+## (copied from /workspace/godot-art/interiors: only props the defs use, High + Medium; re-run tools/sync_kit.py after
+## a new pass). Phones load Medium (_lod1) by default; set InteriorKit.lod = 0 for High. Unknown names
 ## fall back to a block-out box so a def never breaks while a prop is missing.
 const KIT := "res://interiors/kit/"
 const TEX := "res://interiors/tex/"
 const LAYER := 1 << 19          # interior render layer (sun excludes it)
+static var lod := 1 if OS.has_feature("mobile") else 0
 static var _index := {}
 static var _mats := {}
 static var _scenes := {}
@@ -19,8 +21,8 @@ static func mat(kind: String) -> Material:
 	if _mats.has(kind): return _mats[kind]
 	var m := StandardMaterial3D.new()
 	var T := {"oak": ["oak", Color(0.78, 0.6, 0.45), 1.2], "darkoak": ["oak", Color(0.45, 0.32, 0.24), 1.2],
-		"stone": ["fieldstone", Color(0.92, 0.86, 0.78), 1.6], "flag": ["cobblestone", Color(0.9, 0.85, 0.78), 1.2],
-		"palestone": ["cobblestone", Color(1.0, 0.97, 0.9), 1.0], "plaster": ["plaster_timber", Color(1, 0.95, 0.85), 2.2],
+		"stone": ["fieldstone", Color(0.92, 0.86, 0.78), 0.9], "flag": ["cobblestone", Color(0.9, 0.85, 0.78), 0.9],
+		"palestone": ["cobblestone", Color(1.0, 0.97, 0.9), 1.0], "plaster": ["plaster_timber", Color(1, 0.95, 0.85), 1.8],
 		"slate": ["slate", Color(0.7, 0.75, 0.85), 1.0]}
 	match kind:
 		"blue": m.albedo_color = Color("1f3a63")
@@ -28,7 +30,8 @@ static func mat(kind: String) -> Material:
 		"gold": m.albedo_color = Color("c8a240"); m.metallic = 0.8; m.roughness = 0.35
 		"iron": m.albedo_color = Color(0.13, 0.13, 0.14); m.metallic = 0.7; m.roughness = 0.5
 		"flame": m.albedo_color = Color(1, 0.6, 0.25); m.emission_enabled = true; m.emission = Color(1, 0.55, 0.2); m.emission_energy_multiplier = 1.4; m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		"glass": m.albedo_color = Color(0.35, 0.55, 0.95); m.emission_enabled = true; m.emission = Color(0.3, 0.5, 0.95); m.emission_energy_multiplier = 0.7
+		"glass": m.albedo_color = Color(0.7, 0.75, 0.8); m.emission_enabled = true; m.emission = Color(0.75, 0.8, 0.85); m.emission_energy_multiplier = 0.45
+		"stained": m.albedo_color = Color(0.25, 0.42, 0.9); m.emission_enabled = true; m.emission = Color(0.25, 0.45, 1.0); m.emission_energy_multiplier = 0.8
 		"water": m.albedo_color = Color(0.3, 0.55, 0.75); m.roughness = 0.05; m.metallic = 0.3
 		"void": m.albedo_color = Color(0.03, 0.025, 0.02); m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED; m.cull_mode = BaseMaterial3D.CULL_FRONT
 		"outline": m.albedo_color = Color(0.85, 0.72, 0.5); m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED   # < glow threshold: no glow
@@ -69,7 +72,8 @@ static func prop(parent: Node3D, name: String, pos: Vector3, rot_deg := 0.0, col
 	var root := Node3D.new(); root.name = name; root.position = pos; root.rotation.y = deg_to_rad(rot_deg)
 	parent.add_child(root)
 	var info: Dictionary = index().get(name, {})
-	var path := KIT + name + ".glb"
+	var path := KIT + name + ("_lod1" if lod == 1 else "") + ".glb"
+	if not ResourceLoader.exists(path): path = KIT + name + ".glb"
 	if ResourceLoader.exists(path):
 		if not _scenes.has(name): _scenes[name] = load(path)
 		var v: Node3D = _scenes[name].instantiate(); root.add_child(v)

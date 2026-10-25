@@ -20,9 +20,7 @@ func phys(n := 1) -> void:
 	for i in n: await physics_frame
 
 func size_of(id: String) -> Vector3:
-	var M := {"inn": Vector3(38.8, 21.8, 28.3), "guildhall": Vector3(40.8, 24.1, 32.1), "townhall": Vector3(30.1, 22.7, 26.1),
-		"smithy": Vector3(25.5, 18.1, 24.4), "bakery": Vector3(25.6, 17.5, 22.0), "temple": Vector3(26.5, 24.1, 44.5)}
-	return M.get(id, Vector3(24, 18, 22))
+	return DEF.SIZE.get(id, Vector3(24, 18, 22))
 
 func make_hero(h: float) -> CharacterBody3D:
 	var cb := CharacterBody3D.new(); var cs := CollisionShape3D.new(); var cap := CapsuleShape3D.new()
@@ -66,6 +64,9 @@ func test_building(id: String) -> void:
 	NavigationServer3D.map_set_active(map, true)
 	var reg := NavigationServer3D.region_create(); NavigationServer3D.region_set_map(reg, map); NavigationServer3D.region_set_navigation_mesh(reg, nm)
 	await phys(3); NavigationServer3D.map_force_update(map)
+	for i in 600:
+		if NavigationServer3D.map_get_iteration_id(map) > 0 and NavigationServer3D.map_get_path(map, info.spawn, info.spawn + Vector3(0, 0, -2), true).size() > 0: break
+		await phys(1)
 	ok(nm.get_polygon_count() > 0, "%s navmesh baked (%d polys)" % [id, nm.get_polygon_count()])
 	for hn in HEROES:
 		var hero := make_hero(HEROES[hn]); root.add_child(hero)
@@ -97,6 +98,9 @@ func test_building(id: String) -> void:
 func walk_to(hero: CharacterBody3D, target: Vector3, map: RID, info: Dictionary, mgr: InteriorManager) -> bool:
 	for attempt in 3:
 		var path := NavigationServer3D.map_get_path(map, hero.global_position, target, true)
+		for w in 120:
+			if path.size() > 0: break
+			await phys(1); NavigationServer3D.map_force_update(map); path = NavigationServer3D.map_get_path(map, hero.global_position, target, true)
 		var reach := path.size() > 0 and Vector2(path[-1].x - target.x, path[-1].z - target.z).length() < 1.0 and absf(path[-1].y - target.y) < 0.8
 		if not reach and info.ladders.size() > 0:
 			# take the nearest ladder in the needed direction
@@ -112,6 +116,7 @@ func walk_to(hero: CharacterBody3D, target: Vector3, map: RID, info: Dictionary,
 		if await follow(hero, path, mgr):
 			var hp := hero.global_position
 			if Vector2(hp.x - target.x, hp.z - target.z).length() < 1.0 and absf(hp.y - target.y) < 0.8: return true
+	print("NOREACH ", hero.global_position, " -> ", target, " path ", NavigationServer3D.map_get_path(map, hero.global_position, target, true).size())
 	return false
 
 func follow(hero: CharacterBody3D, path: PackedVector3Array, mgr: InteriorManager) -> bool:

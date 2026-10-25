@@ -1,0 +1,172 @@
+{
+"trees/oak": [
+504,
+222,
+5.31
+],
+"trees/pine": [
+199,
+142,
+6.17
+],
+"trees/birch": [
+491,
+344,
+5.41
+],
+"trees/cypress": [
+276,
+114,
+6.4
+],
+"trees/apple": [
+478,
+244,
+4.01
+],
+"trees/dead": [
+259,
+234,
+4.29
+],
+"bushes/round": [
+224,
+164,
+1.03
+],
+"bushes/hedge": [
+212,
+152,
+1.08
+],
+"bushes/spiky": [
+64,
+64,
+0.92
+],
+"bushes/reeds": [
+57,
+57,
+1.52
+],
+"bushes/mushrooms": [
+236,
+236,
+0.31
+],
+"flowers/daisy": [
+214,
+214,
+0.53
+],
+"flowers/tulip": [
+78,
+78,
+0.47
+],
+"flowers/lavender": [
+102,
+102,
+0.74
+],
+"flowers/bellflower": [
+98,
+98,
+0.41
+],
+"flowers/sunflower": [
+150,
+150,
+1.12
+],
+"flowers/grass": [
+15,
+15,
+0.67
+],
+"rocks/boulder": [
+172,
+112,
+1.34
+],
+"rocks/stone": [
+172,
+112,
+0.79
+],
+"rocks/cluster": [
+240,
+60,
+0.67
+],
+"rocks/slab": [
+64,
+64,
+0.4
+],
+"rocks/standing": [
+108,
+108,
+2.36
+],
+"props/barrel": [
+232,
+232,
+1.08
+],
+"props/crate": [
+296,
+296,
+1.03
+],
+"props/lamp": [
+244,
+244,
+3.6
+],
+"props/well": [
+342,
+342,
+3.59
+],
+"props/signpost": [
+182,
+182,
+2.22
+],
+"props/noticeboard": [
+156,
+156,
+2.18
+],
+"props/fence": [
+64,
+64,
+1.21
+],
+"props/bench": [
+108,
+108,
+1.07
+],
+"props/haybale": [
+132,
+132,
+0.99
+],
+"props/logs": [
+296,
+296,
+1.01
+],
+"props/stump": [
+197,
+172,
+0.69
+],
+"props/cabbages": [
+152,
+152,
+0.5
+]
+}

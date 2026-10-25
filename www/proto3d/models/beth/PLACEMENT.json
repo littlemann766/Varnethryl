@@ -1,0 +1,1506 @@
+{
+ "note": "Between-zone landscape clusters. Positions are world metres (1 unit = 1 m). y = townElevation(x,z,world)-0.05. Generated with townlands possible()/clear() rules so roads, fields, building fronts, the Balthrix corridor, portal, Frost summit, Titan crater and port are avoided.",
+ "items": [
+  {
+   "file": "clusters/cluster_volcano.glb",
+   "position": [
+    432.42,
+    null,
+    -487.18
+   ],
+   "rotation": [
+    0,
+    3.695,
+    0
+   ],
+   "scale": [
+    1.08,
+    1.08,
+    1.08
+   ],
+   "radius": 7.8,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    225.92,
+    null,
+    -112.97
+   ],
+   "rotation": [
+    0,
+    5.473,
+    0
+   ],
+   "scale": [
+    0.93,
+    0.93,
+    0.93
+   ],
+   "radius": 8.1,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    420.03,
+    null,
+    404.45
+   ],
+   "rotation": [
+    0,
+    5,
+    0
+   ],
+   "scale": [
+    1.18,
+    1.18,
+    1.18
+   ],
+   "radius": 10.3,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_meadow.glb",
+   "position": [
+    -424.5,
+    null,
+    -81.82
+   ],
+   "rotation": [
+    0,
+    0.803,
+    0
+   ],
+   "scale": [
+    1.08,
+    1.08,
+    1.08
+   ],
+   "radius": 7.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    422.71,
+    null,
+    263.63
+   ],
+   "rotation": [
+    0,
+    0.274,
+    0
+   ],
+   "scale": [
+    1.09,
+    1.09,
+    1.09
+   ],
+   "radius": 9.5,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_frost.glb",
+   "position": [
+    47.37,
+    null,
+    -407.58
+   ],
+   "rotation": [
+    0,
+    0.743,
+    0
+   ],
+   "scale": [
+    0.91,
+    0.91,
+    0.91
+   ],
+   "radius": 9.4,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_roadside.glb",
+   "position": [
+    -396.84,
+    null,
+    -191.66
+   ],
+   "rotation": [
+    0,
+    5.525,
+    0
+   ],
+   "scale": [
+    1.18,
+    1.18,
+    1.18
+   ],
+   "radius": 4.8,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    389.86,
+    null,
+    -132.38
+   ],
+   "rotation": [
+    0,
+    5.726,
+    0
+   ],
+   "scale": [
+    1.24,
+    1.24,
+    1.24
+   ],
+   "radius": 10.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_frost.glb",
+   "position": [
+    126.7,
+    null,
+    -326.84
+   ],
+   "rotation": [
+    0,
+    1.653,
+    0
+   ],
+   "scale": [
+    0.92,
+    0.92,
+    0.92
+   ],
+   "radius": 9.5,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    536.19,
+    null,
+    -73.85
+   ],
+   "rotation": [
+    0,
+    1.601,
+    0
+   ],
+   "scale": [
+    1.13,
+    1.13,
+    1.13
+   ],
+   "radius": 9.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_b.glb",
+   "position": [
+    -354.06,
+    null,
+    -133.68
+   ],
+   "rotation": [
+    0,
+    4.253,
+    0
+   ],
+   "scale": [
+    0.9,
+    0.9,
+    0.9
+   ],
+   "radius": 5.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_b.glb",
+   "position": [
+    218.1,
+    null,
+    -478.41
+   ],
+   "rotation": [
+    0,
+    3.411,
+    0
+   ],
+   "scale": [
+    1.19,
+    1.19,
+    1.19
+   ],
+   "radius": 7.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_meadow.glb",
+   "position": [
+    -292.97,
+    null,
+    -210.78
+   ],
+   "rotation": [
+    0,
+    0.496,
+    0
+   ],
+   "scale": [
+    0.99,
+    0.99,
+    0.99
+   ],
+   "radius": 7.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_meadow.glb",
+   "position": [
+    517.6,
+    null,
+    533.28
+   ],
+   "rotation": [
+    0,
+    3.515,
+    0
+   ],
+   "scale": [
+    1.16,
+    1.16,
+    1.16
+   ],
+   "radius": 8.5,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_ruins.glb",
+   "position": [
+    286.22,
+    null,
+    187.23
+   ],
+   "rotation": [
+    0,
+    5.396,
+    0
+   ],
+   "scale": [
+    1.06,
+    1.06,
+    1.06
+   ],
+   "radius": 10.8,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_ruins.glb",
+   "position": [
+    -457.57,
+    null,
+    245.69
+   ],
+   "rotation": [
+    0,
+    4.87,
+    0
+   ],
+   "scale": [
+    1.09,
+    1.09,
+    1.09
+   ],
+   "radius": 11.1,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_roadside.glb",
+   "position": [
+    367.03,
+    null,
+    462.96
+   ],
+   "rotation": [
+    0,
+    3.878,
+    0
+   ],
+   "scale": [
+    1.25,
+    1.25,
+    1.25
+   ],
+   "radius": 5.1,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_volcano.glb",
+   "position": [
+    431.63,
+    null,
+    -319.14
+   ],
+   "rotation": [
+    0,
+    1.8,
+    0
+   ],
+   "scale": [
+    1.03,
+    1.03,
+    1.03
+   ],
+   "radius": 7.5,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_meadow.glb",
+   "position": [
+    325.29,
+    null,
+    118.28
+   ],
+   "rotation": [
+    0,
+    0.869,
+    0
+   ],
+   "scale": [
+    1.23,
+    1.23,
+    1.23
+   ],
+   "radius": 9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_frost.glb",
+   "position": [
+    -79.34,
+    null,
+    -391.19
+   ],
+   "rotation": [
+    0,
+    3.06,
+    0
+   ],
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "radius": 10.4,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_grove_mixed.glb",
+   "position": [
+    139.09,
+    null,
+    -176.38
+   ],
+   "rotation": [
+    0,
+    2.587,
+    0
+   ],
+   "scale": [
+    1.2,
+    1.2,
+    1.2
+   ],
+   "radius": 10.5,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_roadside.glb",
+   "position": [
+    434.71,
+    null,
+    52.06
+   ],
+   "rotation": [
+    0,
+    5.644,
+    0
+   ],
+   "scale": [
+    1.2,
+    1.2,
+    1.2
+   ],
+   "radius": 4.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_ruins.glb",
+   "position": [
+    -539.55,
+    null,
+    528.05
+   ],
+   "rotation": [
+    0,
+    0.329,
+    0
+   ],
+   "scale": [
+    1.21,
+    1.21,
+    1.21
+   ],
+   "radius": 12.3,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_b.glb",
+   "position": [
+    327.93,
+    null,
+    -499.12
+   ],
+   "rotation": [
+    0,
+    0.55,
+    0
+   ],
+   "scale": [
+    1.24,
+    1.24,
+    1.24
+   ],
+   "radius": 8.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_roadside.glb",
+   "position": [
+    -224.36,
+    null,
+    -225.2
+   ],
+   "rotation": [
+    0,
+    1.951,
+    0
+   ],
+   "scale": [
+    1.01,
+    1.01,
+    1.01
+   ],
+   "radius": 4.1,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_b.glb",
+   "position": [
+    292.81,
+    null,
+    -199.06
+   ],
+   "rotation": [
+    0,
+    0.675,
+    0
+   ],
+   "scale": [
+    1.18,
+    1.18,
+    1.18
+   ],
+   "radius": 7.8,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_ruins.glb",
+   "position": [
+    349.8,
+    null,
+    -48.9
+   ],
+   "rotation": [
+    0,
+    1.14,
+    0
+   ],
+   "scale": [
+    0.91,
+    0.91,
+    0.91
+   ],
+   "radius": 9.3,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_pine_stand.glb",
+   "position": [
+    -246.53,
+    null,
+    153.73
+   ],
+   "rotation": [
+    0,
+    1.023,
+    0
+   ],
+   "scale": [
+    1.07,
+    1.07,
+    1.07
+   ],
+   "radius": 12.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_pine_stand.glb",
+   "position": [
+    -458.61,
+    null,
+    35.79
+   ],
+   "rotation": [
+    0,
+    1.222,
+    0
+   ],
+   "scale": [
+    1.14,
+    1.14,
+    1.14
+   ],
+   "radius": 13,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    -338.43,
+    null,
+    -159.47
+   ],
+   "rotation": [
+    0,
+    0.024,
+    0
+   ],
+   "scale": [
+    1.21,
+    1.21,
+    1.21
+   ],
+   "radius": 10.6,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_meadow.glb",
+   "position": [
+    -162.8,
+    null,
+    -210.88
+   ],
+   "rotation": [
+    0,
+    4.894,
+    0
+   ],
+   "scale": [
+    1.1,
+    1.1,
+    1.1
+   ],
+   "radius": 8,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_roadside.glb",
+   "position": [
+    451.02,
+    null,
+    -67.63
+   ],
+   "rotation": [
+    0,
+    5.665,
+    0
+   ],
+   "scale": [
+    1.18,
+    1.18,
+    1.18
+   ],
+   "radius": 4.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    293.12,
+    null,
+    475.35
+   ],
+   "rotation": [
+    0,
+    0.9,
+    0
+   ],
+   "scale": [
+    0.96,
+    0.96,
+    0.96
+   ],
+   "radius": 8.4,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_pine_stand.glb",
+   "position": [
+    106.86,
+    null,
+    251.16
+   ],
+   "rotation": [
+    0,
+    1.396,
+    0
+   ],
+   "scale": [
+    1.07,
+    1.07,
+    1.07
+   ],
+   "radius": 12.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    415.05,
+    null,
+    169.46
+   ],
+   "rotation": [
+    0,
+    1.745,
+    0
+   ],
+   "scale": [
+    1.08,
+    1.08,
+    1.08
+   ],
+   "radius": 9.5,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_b.glb",
+   "position": [
+    -88.15,
+    null,
+    325.74
+   ],
+   "rotation": [
+    0,
+    5.058,
+    0
+   ],
+   "scale": [
+    1.01,
+    1.01,
+    1.01
+   ],
+   "radius": 6.7,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_grove_mixed.glb",
+   "position": [
+    -490.88,
+    null,
+    -369.62
+   ],
+   "rotation": [
+    0,
+    3.678,
+    0
+   ],
+   "scale": [
+    0.92,
+    0.92,
+    0.92
+   ],
+   "radius": 8.1,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_pine_stand.glb",
+   "position": [
+    218.91,
+    null,
+    222.1
+   ],
+   "rotation": [
+    0,
+    4.058,
+    0
+   ],
+   "scale": [
+    0.92,
+    0.92,
+    0.92
+   ],
+   "radius": 10.4,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_meadow.glb",
+   "position": [
+    279.36,
+    null,
+    95.25
+   ],
+   "rotation": [
+    0,
+    3.84,
+    0
+   ],
+   "scale": [
+    0.94,
+    0.94,
+    0.94
+   ],
+   "radius": 6.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_roadside.glb",
+   "position": [
+    74.25,
+    null,
+    272.14
+   ],
+   "rotation": [
+    0,
+    5.94,
+    0
+   ],
+   "scale": [
+    0.95,
+    0.95,
+    0.95
+   ],
+   "radius": 3.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_pine_stand.glb",
+   "position": [
+    269.68,
+    null,
+    -87.96
+   ],
+   "rotation": [
+    0,
+    2.707,
+    0
+   ],
+   "scale": [
+    1.09,
+    1.09,
+    1.09
+   ],
+   "radius": 12.4,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_roadside.glb",
+   "position": [
+    -294.81,
+    null,
+    -182.83
+   ],
+   "rotation": [
+    0,
+    4.559,
+    0
+   ],
+   "scale": [
+    0.96,
+    0.96,
+    0.96
+   ],
+   "radius": 3.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_ruins.glb",
+   "position": [
+    343.46,
+    null,
+    -183.45
+   ],
+   "rotation": [
+    0,
+    5.283,
+    0
+   ],
+   "scale": [
+    0.96,
+    0.96,
+    0.96
+   ],
+   "radius": 9.7,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_b.glb",
+   "position": [
+    -183.24,
+    null,
+    -223.17
+   ],
+   "rotation": [
+    0,
+    5.005,
+    0
+   ],
+   "scale": [
+    1.06,
+    1.06,
+    1.06
+   ],
+   "radius": 7,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_ruins.glb",
+   "position": [
+    -147.77,
+    null,
+    -194.49
+   ],
+   "rotation": [
+    0,
+    0.632,
+    0
+   ],
+   "scale": [
+    1.13,
+    1.13,
+    1.13
+   ],
+   "radius": 11.5,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    364.72,
+    null,
+    440.46
+   ],
+   "rotation": [
+    0,
+    4.487,
+    0
+   ],
+   "scale": [
+    1.05,
+    1.05,
+    1.05
+   ],
+   "radius": 9.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_grove_mixed.glb",
+   "position": [
+    424.19,
+    null,
+    217.64
+   ],
+   "rotation": [
+    0,
+    6.247,
+    0
+   ],
+   "scale": [
+    1.05,
+    1.05,
+    1.05
+   ],
+   "radius": 9.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    -74.08,
+    null,
+    459.39
+   ],
+   "rotation": [
+    0,
+    3.592,
+    0
+   ],
+   "scale": [
+    1.18,
+    1.18,
+    1.18
+   ],
+   "radius": 10.3,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_meadow.glb",
+   "position": [
+    -297.95,
+    null,
+    476.88
+   ],
+   "rotation": [
+    0,
+    4.529,
+    0
+   ],
+   "scale": [
+    1.2,
+    1.2,
+    1.2
+   ],
+   "radius": 8.8,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_ruins.glb",
+   "position": [
+    -241.58,
+    null,
+    -204.14
+   ],
+   "rotation": [
+    0,
+    0.347,
+    0
+   ],
+   "scale": [
+    1.13,
+    1.13,
+    1.13
+   ],
+   "radius": 11.5,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    -359.33,
+    null,
+    -177.78
+   ],
+   "rotation": [
+    0,
+    6.161,
+    0
+   ],
+   "scale": [
+    0.95,
+    0.95,
+    0.95
+   ],
+   "radius": 8.4,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_frost.glb",
+   "position": [
+    111.86,
+    null,
+    -440.36
+   ],
+   "rotation": [
+    0,
+    0.724,
+    0
+   ],
+   "scale": [
+    0.99,
+    0.99,
+    0.99
+   ],
+   "radius": 10.3,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_pine_stand.glb",
+   "position": [
+    -383.53,
+    null,
+    -358.4
+   ],
+   "rotation": [
+    0,
+    0.527,
+    0
+   ],
+   "scale": [
+    1.22,
+    1.22,
+    1.22
+   ],
+   "radius": 13.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    343.18,
+    null,
+    135.31
+   ],
+   "rotation": [
+    0,
+    2.9,
+    0
+   ],
+   "scale": [
+    1.14,
+    1.14,
+    1.14
+   ],
+   "radius": 10,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_pine_stand.glb",
+   "position": [
+    480.47,
+    null,
+    247.68
+   ],
+   "rotation": [
+    0,
+    3.261,
+    0
+   ],
+   "scale": [
+    1.18,
+    1.18,
+    1.18
+   ],
+   "radius": 13.5,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_frost.glb",
+   "position": [
+    -115.14,
+    null,
+    -237.04
+   ],
+   "rotation": [
+    0,
+    5.389,
+    0
+   ],
+   "scale": [
+    1.17,
+    1.17,
+    1.17
+   ],
+   "radius": 12.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_grove_mixed.glb",
+   "position": [
+    415.38,
+    null,
+    343.94
+   ],
+   "rotation": [
+    0,
+    1.774,
+    0
+   ],
+   "scale": [
+    1.16,
+    1.16,
+    1.16
+   ],
+   "radius": 10.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_meadow.glb",
+   "position": [
+    -389.34,
+    null,
+    -107.9
+   ],
+   "rotation": [
+    0,
+    6.019,
+    0
+   ],
+   "scale": [
+    1.2,
+    1.2,
+    1.2
+   ],
+   "radius": 8.8,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_frost.glb",
+   "position": [
+    54.49,
+    null,
+    -370.25
+   ],
+   "rotation": [
+    0,
+    4.97,
+    0
+   ],
+   "scale": [
+    1.07,
+    1.07,
+    1.07
+   ],
+   "radius": 11.1,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    462.46,
+    null,
+    -40.62
+   ],
+   "rotation": [
+    0,
+    1.859,
+    0
+   ],
+   "scale": [
+    0.94,
+    0.94,
+    0.94
+   ],
+   "radius": 8.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_roadside.glb",
+   "position": [
+    207.73,
+    null,
+    324.96
+   ],
+   "rotation": [
+    0,
+    0.657,
+    0
+   ],
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "radius": 4.1,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_grove_mixed.glb",
+   "position": [
+    -525.39,
+    null,
+    -540.83
+   ],
+   "rotation": [
+    0,
+    2.762,
+    0
+   ],
+   "scale": [
+    1.14,
+    1.14,
+    1.14
+   ],
+   "radius": 9.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_ruins.glb",
+   "position": [
+    -290.18,
+    null,
+    526.54
+   ],
+   "rotation": [
+    0,
+    2.536,
+    0
+   ],
+   "scale": [
+    1,
+    1,
+    1
+   ],
+   "radius": 10.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    -169.17,
+    null,
+    539.95
+   ],
+   "rotation": [
+    0,
+    3.26,
+    0
+   ],
+   "scale": [
+    1.1,
+    1.1,
+    1.1
+   ],
+   "radius": 9.6,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_roadside.glb",
+   "position": [
+    -423.77,
+    null,
+    214.59
+   ],
+   "rotation": [
+    0,
+    5.397,
+    0
+   ],
+   "scale": [
+    1.01,
+    1.01,
+    1.01
+   ],
+   "radius": 4.2,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    272.58,
+    null,
+    -512.55
+   ],
+   "rotation": [
+    0,
+    4.583,
+    0
+   ],
+   "scale": [
+    1.01,
+    1.01,
+    1.01
+   ],
+   "radius": 8.8,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_grove_mixed.glb",
+   "position": [
+    -330.8,
+    null,
+    -328.15
+   ],
+   "rotation": [
+    0,
+    2.558,
+    0
+   ],
+   "scale": [
+    0.91,
+    0.91,
+    0.91
+   ],
+   "radius": 7.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_pine_stand.glb",
+   "position": [
+    -254.89,
+    null,
+    -228.36
+   ],
+   "rotation": [
+    0,
+    4.71,
+    0
+   ],
+   "scale": [
+    1.09,
+    1.09,
+    1.09
+   ],
+   "radius": 12.4,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_frost.glb",
+   "position": [
+    -126.97,
+    null,
+    -436.88
+   ],
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    1.15,
+    1.15,
+    1.15
+   ],
+   "radius": 11.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  },
+  {
+   "file": "clusters/cluster_outcrop_a.glb",
+   "position": [
+    -471.14,
+    null,
+    18.69
+   ],
+   "rotation": [
+    0,
+    2.403,
+    0
+   ],
+   "scale": [
+    0.9,
+    0.9,
+    0.9
+   ],
+   "radius": 7.9,
+   "y": "snap: townElevation(x,z)-0.05",
+   "replaces": "nothing (empty land); merged into the existing kit chunk batch -> +0 draw calls"
+  }
+ ],
+ "replacement_rules": [
+  {
+   "replaces": "townlands.js scatter variants (trees/bushes/rocks/flowers/grass)",
+   "with": "KIT.forVariant(kind,name,pal,lod) \u2014 same positions, rotations, scales and colliders as today",
+   "where": "audit/proposed-townlands.diff"
+  },
+  {
+   "replaces": "main.js 230 instanced cone trees (IT, IL, IL2)",
+   "with": "one merged mesh from tree_pine_a_lod1 / tree_pine_b_lod1 / tree_oak_a_lod1 / tree_birch_a_lod1 at the same pts[] (x, z, scale*0.75)",
+   "where": "audit/preview-only-main.diff (lines after window.__treeCount)"
+  },
+  {
+   "replaces": "scatterWorld props lamp/barrel/crate/fence",
+   "with": "props/lamp_post, barrel, crate, fence_2m",
+   "where": "not wired (scenery.js scatterWorld is the old inner-village path)"
+  }
+ ],
+ "zone_kits_unplaced": [
+  "frost/ice_rock",
+  "frost/snow_rock",
+  "trees/tree_pine_snow",
+  "volcano/basalt_columns",
+  "volcano/lavacrust_rock",
+  "port/dock_10m",
+  "port/ship_cog",
+  "hobcamp/hob_tent",
+  "hobcamp/hob_palisade",
+  "hobcamp/hob_firepit",
+  "clusters/cluster_hobcamp",
+  "clusters/cluster_port_dock"
+ ]
+}

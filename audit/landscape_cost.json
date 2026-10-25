@@ -1,0 +1,118 @@
+{
+ "before": {
+  "town_start": {
+   "total_calls": 419,
+   "total_tris": 369190,
+   "landscape_calls": 6,
+   "landscape_tris": 23920,
+   "meshes": 521
+  },
+  "town_center": {
+   "total_calls": 383,
+   "total_tris": 367798,
+   "landscape_calls": 6,
+   "landscape_tris": 23920,
+   "meshes": 521
+  },
+  "town_east": {
+   "total_calls": 327,
+   "total_tris": 368960,
+   "landscape_calls": 6,
+   "landscape_tris": 23920,
+   "meshes": 521
+  },
+  "outskirts_east": {
+   "total_calls": 416,
+   "total_tris": 358282,
+   "landscape_calls": 21,
+   "landscape_tris": 34723,
+   "meshes": 521
+  },
+  "outskirts_north": {
+   "total_calls": 185,
+   "total_tris": 325262,
+   "landscape_calls": 20,
+   "landscape_tris": 36027,
+   "meshes": 521
+  },
+  "outskirts_sw": {
+   "total_calls": 395,
+   "total_tris": 346541,
+   "landscape_calls": 22,
+   "landscape_tris": 29465,
+   "meshes": 521
+  },
+  "port_edge": {
+   "total_calls": 245,
+   "total_tris": 316353,
+   "landscape_calls": 18,
+   "landscape_tris": 22921,
+   "meshes": 521
+  },
+  "volcano_edge": {
+   "total_calls": 179,
+   "total_tris": 181976,
+   "landscape_calls": 15,
+   "landscape_tris": 8182,
+   "meshes": 521
+  }
+ },
+ "after": {
+  "town_start": {
+   "total_calls": 415,
+   "total_tris": 374094,
+   "landscape_calls": 2,
+   "landscape_tris": 28824,
+   "meshes": 609
+  },
+  "town_center": {
+   "total_calls": 379,
+   "total_tris": 372726,
+   "landscape_calls": 3,
+   "landscape_tris": 28860,
+   "meshes": 609
+  },
+  "town_east": {
+   "total_calls": 324,
+   "total_tris": 373896,
+   "landscape_calls": 3,
+   "landscape_tris": 28856,
+   "meshes": 609
+  },
+  "outskirts_east": {
+   "total_calls": 314,
+   "total_tris": 360691,
+   "landscape_calls": 15,
+   "landscape_tris": 39626,
+   "meshes": 609
+  },
+  "outskirts_north": {
+   "total_calls": 131,
+   "total_tris": 299864,
+   "landscape_calls": 13,
+   "landscape_tris": 36480,
+   "meshes": 609
+  },
+  "outskirts_sw": {
+   "total_calls": 420,
+   "total_tris": 344304,
+   "landscape_calls": 15,
+   "landscape_tris": 26540,
+   "meshes": 609
+  },
+  "port_edge": {
+   "total_calls": 235,
+   "total_tris": 309550,
+   "landscape_calls": 8,
+   "landscape_tris": 16118,
+   "meshes": 609
+  },
+  "volcano_edge": {
+   "total_calls": 172,
+   "total_tris": 176174,
+   "landscape_calls": 11,
+   "landscape_tris": 2812,
+   "meshes": 609
+  }
+ }
+}

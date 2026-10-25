@@ -157,8 +157,8 @@ const D := {
 		["West Gallery", 1, -4.3, -4.0], ["East Gallery", 1, 4.3, -4.0]]},
 # ================= the rest (cards read from card_<name>; one storey per card level, stairs via "auto")
 # ---- GRAND LIBRARY: main reading hall, archive stacks, librarian desk, restricted archive; upper balcony + stacks
-"library": {"name": "Grand Library of Varnethryl",
-	"floors": [{"h": 6.0, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 4.5, "mat": "oak", "wall": "stone", "win": 3.5, "slab": [[-0.5, -0.5, -0.22, 0.5], [0.22, -0.5, 0.5, 0.5], [-0.22, -0.5, 0.22, -0.3]]}],
+"library": {"name": "Grand Library of Varnethryl", "scale": [0.40, 0.40],
+	"floors": [{"h": 4.5, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 3.4, "mat": "oak", "wall": "stone", "win": 3.5, "slab": [[-0.5, -0.5, -0.22, 0.5], [0.22, -0.5, 0.5, 0.5], [-0.22, -0.5, 0.22, -0.3]]}],
 	"walls": [[0, -0.5, -0.3, -0.22, -0.3, [[0.5, 1.8]]], [0, 0.22, -0.3, 0.5, -0.3, [[0.5, 1.8]]]],
 	"stairs": [["auto", 0, -1, 2.2]],
 	"rails": [[1, -0.22, 0.45, 90, 4], [1, 0.22, 0.45, 90, 4], [1, -0.2, -0.3, 0, 4]],
@@ -176,9 +176,9 @@ const D := {
 		["Upper Balcony", 1, -0.35, 0.0], ["Upper Stacks", 1, 0.0, -0.38], ["East Balcony", 1, 0.37, 0.2]]},
 
 # ---- MAGE ACADEMY: L1 entry/library access, L2 classroom+workshop, L3 lecture halls, L4 restricted archive/observatory
-"mage": {"name": "Mage Academy of Varnethryl",
-	"floors": [{"h": 4.5, "mat": "bluecheck", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 4.0, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"},
-		{"h": 4.0, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 4.0, "mat": "bluecheck", "wall": "stone", "win": 3.5, "glass": "stained"}],
+"mage": {"name": "Mage Academy of Varnethryl", "scale": [0.48, 0.48],
+	"floors": [{"h": 3.4, "mat": "bluecheck", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"},
+		{"h": 3.0, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 3.0, "mat": "bluecheck", "wall": "stone", "win": 3.5, "glass": "stained"}],
 	"stairs": [["auto", 0, -1, 2.0], ["auto", 1, 1, 2.0], ["auto", 2, -1, 2.0]],
 	"walls": [[1, -0.5, -0.1, 0.5, -0.1, [[0.5, 2.4]]], [2, -0.1, -0.5, -0.1, 0.0, [[0.5, 1.8]]]],
 	"props": [["_area", 0, 0.0, 0.0, 0, [6.0, 6.0, "blue"]], ["crystal_orb", 0, 0.0, 0.0, 0], ["bookshelf", 0, 0.49, 0.0, -90], ["bookshelf", 0, 0.49, -0.2, -90], ["_counter", 0, 0.2, -0.35, 0, [3.0, 1.0, 0.8]],
@@ -193,8 +193,8 @@ const D := {
 		["Lecture Hall", 2, 0.25, 0.3], ["Faculty Wing", 2, -0.3, -0.2], ["Restricted Archive", 3, -0.2, -0.3], ["Observatory", 3, 0.25, 0.25]]},
 
 # ---- TREASURY: front gate/guard post, main vault room (gold), item storage hall, secure office; upper overlook gallery + vault access
-"treasury": {"name": "Treasury of Varnethryl",
-	"floors": [{"h": 4.5, "mat": "palestone", "wall": "stone", "win": 0.0}, {"h": 4.0, "mat": "palestone", "wall": "stone", "win": 5.0, "slab": [[-0.5, -0.5, 0.5, -0.2], [-0.5, -0.2, -0.2, 0.5], [0.2, -0.2, 0.5, 0.5]]}],
+"treasury": {"name": "Treasury of Varnethryl", "scale": [0.56, 0.56],
+	"floors": [{"h": 3.4, "mat": "palestone", "wall": "stone", "win": 0.0}, {"h": 3.0, "mat": "palestone", "wall": "stone", "win": 5.0, "slab": [[-0.5, -0.5, 0.5, -0.2], [-0.5, -0.2, -0.2, 0.5], [0.2, -0.2, 0.5, 0.5]]}],
 	"walls": [[0, -0.5, 0.25, 0.2, 0.25, [[0.714, 2.6]]], [0, -0.2, -0.5, -0.2, 0.25, [[0.6, 1.8]]], [0, 0.2, -0.5, 0.2, 0.25, [[0.6, 1.8]]]],
 	"stairs": [["auto", 0, 1, 1.8]],
 	"rails": [[1, -0.2, -0.2, 0, 4], [1, -0.2, -0.2, -90, 3], [1, 0.2, -0.2, -90, 3]],
@@ -208,8 +208,8 @@ const D := {
 		["Overlook Gallery", 1, -0.35, 0.2], ["Upper Vault Access", 1, 0.0, -0.38]]},
 
 # ---- CASTLE KEEP: throne room, great hall, war room; upper royal chambers
-"keep": {"name": "Castle Keep of Varnethryl",
-	"floors": [{"h": 7.0, "mat": "flag", "wall": "stone", "win": 4.0}, {"h": 4.5, "mat": "oak", "wall": "stone", "win": 4.0}],
+"keep": {"name": "Castle Keep of Varnethryl", "scale": [0.48, 0.48],
+	"floors": [{"h": 5.2, "mat": "flag", "wall": "stone", "win": 4.0}, {"h": 3.4, "mat": "oak", "wall": "stone", "win": 4.0}],
 	"walls": [[0, -0.5, -0.1, -0.15, -0.1, [[0.6, 2.4]]], [0, -0.15, -0.5, -0.15, 0.5, [[0.3, 2.6], [0.75, 2.6]]], [0, 0.2, -0.5, 0.2, 0.5, [[0.3, 2.6], [0.75, 2.6]]],
 		[1, -0.5, -0.12, 0.5, -0.12, [[0.2, 1.8], [0.55, 1.8], [0.85, 1.8]]], [1, 0.0, -0.5, 0.0, -0.12, []]],
 	"stairs": [["auto", 0, 1, 2.4]],
@@ -226,9 +226,9 @@ const D := {
 		["Royal Chambers", 1, -0.3, -0.22], ["Guest Chamber", 1, 0.25, -0.22]]},
 
 # ---- OBSERVATORY: 1 starforge entrance, 2 library of lore, 3 main observation room (telescope), 4 star chart library, 5 upper dome
-"observatory": {"name": "Observatory of Varnethryl",
-	"floors": [{"h": 4.5, "mat": "bluecheck", "wall": "stone", "win": 3.0}, {"h": 4.0, "mat": "oak", "wall": "stone", "win": 3.0},
-		{"h": 4.5, "mat": "bluecheck", "wall": "stone", "win": 3.0}, {"h": 4.0, "mat": "oak", "wall": "stone", "win": 3.0}, {"h": 4.0, "mat": "slate", "wall": "stone", "win": 2.0, "glass": "stained"}],
+"observatory": {"name": "Observatory of Varnethryl", "scale": [0.40, 0.40],
+	"floors": [{"h": 3.4, "mat": "bluecheck", "wall": "stone", "win": 3.0}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 3.0},
+		{"h": 3.4, "mat": "bluecheck", "wall": "stone", "win": 3.0}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 3.0}, {"h": 3.0, "mat": "slate", "wall": "stone", "win": 2.0, "glass": "stained"}],
 	"stairs": [["auto", 0, -1, 1.8], ["auto", 1, 1, 1.8], ["auto", 2, -1, 1.8], ["auto", 3, 1, 1.8]],
 	"props": [["anvil", 0, 0.2, -0.3, 0], ["forge", 0, 0.2, -0.45, 0], ["chest", 0, -0.2, -0.4, 0], ["_area", 0, 0.0, 0.0, 0, [4.0, 4.0, "gold"]],
 		["bookshelf", 1, -0.49, -0.2, 90], ["bookshelf", 1, -0.3, -0.48, 0], ["bookshelf", 1, 0.0, -0.48, 0], ["table", 1, 0.0, -0.1, 0], ["lectern", 1, 0.2, 0.1, 0],
@@ -240,8 +240,8 @@ const D := {
 	"rooms": [["Starforge Entrance", 0, 0.0, 0.15], ["Library of Lore", 1, 0.0, 0.0], ["Main Observation Room", 2, 0.1, 0.0], ["Star Chart Library", 3, 0.0, -0.05], ["Upper Dome", 4, 0.0, 0.0]]},
 
 # ---- CRYPT: sarcophagus hall, restricted tomb, ritual chamber; upper crypt (stair down feel: entry floor is the upper crypt)
-"crypt": {"name": "Crypt of Varnethryl",
-	"floors": [{"h": 5.0, "mat": "flag", "wall": "stone", "win": 0.0}, {"h": 4.0, "mat": "flag", "wall": "stone", "win": 0.0}],
+"crypt": {"name": "Crypt of Varnethryl", "scale": [0.52, 0.52],
+	"floors": [{"h": 3.8, "mat": "flag", "wall": "stone", "win": 0.0}, {"h": 3.0, "mat": "flag", "wall": "stone", "win": 0.0}],
 	"walls": [[0, -0.5, -0.15, 0.5, -0.15, [[0.3, 1.8], [0.7, 1.8]]], [0, 0.0, -0.5, 0.0, -0.15, []], [1, -0.5, -0.1, 0.5, -0.1, [[0.5, 1.8]]]],
 	"stairs": [["auto", 0, 1, 1.8]],
 	"props": [["_runner", 0, -0.1, 0.17, 0, [0.6, 1.6]], ["sarcophagus", 0, -0.3, 0.05, 0], ["sarcophagus", 0, -0.3, 0.3, 0], ["sarcophagus", 0, 0.1, 0.05, 0], ["sarcophagus", 0, 0.1, 0.3, 0],
@@ -253,8 +253,8 @@ const D := {
 	"rooms": [["Sarcophagus Hall", 0, -0.1, 0.0], ["Restricted Tomb", 0, -0.25, -0.25], ["Ritual Chamber", 0, 0.2, -0.25], ["Upper Crypt", 1, 0.0, 0.2], ["Upper Tomb Gallery", 1, 0.0, -0.3]]},
 
 # ---- MARKET PROVISIONER: sales floor, merchant counter, bulk displays, back room/stock, upstairs loft/storage
-"market": {"name": "Market Provisioner",
-	"floors": [{"h": 4.5, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.5, "mat": "oak", "wall": "plaster", "win": 4.0}],
+"market": {"name": "Market Provisioner", "scale": [0.44, 0.44],
+	"floors": [{"h": 3.4, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}],
 	"walls": [[0, -0.5, -0.2, 0.25, -0.2, [[0.5, 2.2]]]],
 	"stairs": [["auto", 0, 1, 2.0]],
 	"props": [["_runner", 0, -0.12, 0.15, 0, [0.6, 2.0]], ["market_stall", 0, -0.3, 0.1, 90], ["market_stall", 0, 0.08, 0.1, -90], ["bread_rack", 0, -0.49, -0.05, 90], ["apothecary_shelf", 0, -0.49, 0.3, 90],
@@ -265,8 +265,8 @@ const D := {
 	"rooms": [["Sales Floor", 0, -0.12, 0.3], ["Merchant Counter", 0, -0.12, 0.0], ["Bulk Displays", 0, 0.38, -0.3], ["Back Room / Stock", 0, -0.25, -0.33], ["Upstairs Loft", 1, -0.15, 0.0]]},
 
 # ---- APOTHECARY: main shop floor (herb shelves, counter); back storage
-"training": {"name": "Training Hall of Varnethryl",
-	"floors": [{"h": 6.0, "mat": "oak", "wall": "stone", "win": 4.0}, {"h": 3.5, "mat": "oak", "wall": "stone", "win": 4.0, "slab": [[-0.5, -0.5, 0.5, -0.32], [-0.5, 0.32, 0.5, 0.5], [-0.5, -0.32, -0.32, 0.32], [0.32, -0.32, 0.5, 0.32]]}],
+"training": {"name": "Training Hall of Varnethryl", "scale": [0.44, 0.44],
+	"floors": [{"h": 4.5, "mat": "oak", "wall": "stone", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 4.0, "slab": [[-0.5, -0.5, 0.5, -0.32], [-0.5, 0.32, 0.5, 0.5], [-0.5, -0.32, -0.32, 0.32], [0.32, -0.32, 0.5, 0.32]]}],
 	"stairs": [["auto", 0, -1, 2.0]],
 	"rails": [[1, -0.3, -0.32, 0, 7], [1, -0.3, 0.32, 0, 6], [1, 0.32, -0.32, -90, 4]],
 	"props": [["_area", 0, 0.0, 0.0, 0, [9.0, 7.0, "blue"]], ["_area", 0, 0.0, 0.0, 0, [3.0, 3.0, "gold"]], ["weapon_rack", 0, 0.49, -0.2, -90], ["weapon_rack", 0, 0.49, 0.0, -90], ["weapon_rack", 0, 0.49, 0.2, -90],
@@ -277,8 +277,8 @@ const D := {
 	"rooms": [["Main Sparring Floor", 0, 0.0, 0.1], ["Weapon Storage", 0, 0.38, 0.1], ["Instructor Area", 0, -0.3, -0.12], ["Upper Viewing Gallery", 1, 0.0, -0.4], ["South Gallery", 1, 0.0, 0.4]]},
 
 # ---- COLOSSEUM: entered at ground: main gate, preparation rooms, champion hall, arena gate -> pit; armory, holding cells
-"colosseum": {"name": "Colosseum of Varnethryl", "scale": [0.7, 0.7],
-	"floors": [{"h": 6.0, "mat": "flag", "wall": "stone", "win": 0.0}],
+"colosseum": {"name": "Colosseum of Varnethryl", "scale": [0.44, 0.44],
+	"floors": [{"h": 4.5, "mat": "flag", "wall": "stone", "win": 0.0}],
 	"walls": [[0, -0.5, 0.2, 0.5, 0.2, [[0.5, 3.0], [0.15, 2.0], [0.85, 2.0]]], [0, -0.25, -0.5, -0.25, 0.2, [[0.5, 2.4]]], [0, 0.25, -0.5, 0.25, 0.2, [[0.5, 2.4]]], [0, -0.25, -0.15, 0.25, -0.15, [[0.5, 3.4]]]],
 	"props": [["_runner", 0, 0.0, 0.35, 0, [0.3, 2.4]], ["throne_dais", 0, 0.0, 0.0, 180], ["lion_banner", 0, -0.2, 0.0, 90, [2.5, false]], ["lion_banner", 0, 0.2, 0.0, -90, [2.5, false]],
 		["armor_stand", 0, -0.15, -0.1, 0], ["armor_stand", 0, 0.15, -0.1, 0], ["_area", 0, 0.0, -0.35, 0, [10.0, 6.0, "flag"]], ["vault_door", 0, 0.0, -0.49, 0],
@@ -288,8 +288,8 @@ const D := {
 	"rooms": [["Main Gate", 0, 0.0, 0.35], ["Champion Hall", 0, 0.0, 0.08], ["Arena Gate", 0, 0.0, -0.3], ["Preparation Rooms", 0, -0.37, -0.2], ["Medical Bay", 0, 0.37, -0.2]]},
 
 # ---- THIEVES' DEN: main shop (rare goods), secret back room (hidden door), storage
-"thieves": {"name": "Thieves' Den",
-	"floors": [{"h": 4.0, "mat": "darkoak", "wall": "stone", "win": 5.0}],
+"thieves": {"name": "Thieves' Den", "scale": [0.44, 0.44],
+	"floors": [{"h": 3.0, "mat": "darkoak", "wall": "stone", "win": 5.0}],
 	"walls": [[0, -0.5, -0.1, 0.2, -0.1, [[0.75, 1.4]]], [0, 0.2, -0.5, 0.2, 0.5, [[0.3, 1.6]]]],
 	"props": [["_counter", 0, -0.15, 0.1, 0, [3.0, 1.0, 0.8]], ["apothecary_shelf", 0, -0.49, 0.2, 90], ["bookshelf", 0, -0.15, -0.09, 180], ["lion_banner", 0, -0.35, -0.09, 180, [1.0, false]],
 		["chest", 0, -0.4, 0.4, 0], ["keg", 0, 0.1, 0.4, 0], ["_round_table", 0, -0.2, -0.3, 0, [0.7, 4]], ["lion_banner", 0, -0.49, -0.3, 90, [1.0, false]], ["chest", 0, 0.05, -0.45, 0],
@@ -298,8 +298,8 @@ const D := {
 	"rooms": [["Main Shop", 0, -0.15, 0.3], ["Secret Back Room", 0, -0.2, -0.15], ["Storage", 0, 0.35, -0.1]]},
 
 # ---- FARMHOUSE: entry/porch, main room (hearth), kitchen & dining, pantry, bedrooms, loft/storage
-"farmhouse": {"name": "Farmhouse",
-	"floors": [{"h": 3.8, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "plaster", "win": 0.0, "slab": [[-0.5, -0.5, 0.5, -0.1]]}],
+"farmhouse": {"name": "Farmhouse", "scale": [0.48, 0.48],
+	"floors": [{"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "plaster", "win": 0.0, "slab": [[-0.5, -0.5, 0.5, -0.1]]}],
 	"walls": [[0, -0.5, 0.0, 0.1, 0.0, [[0.5, 1.8]]], [0, 0.1, -0.5, 0.1, 0.5, [[0.3, 1.6], [0.75, 1.6]]], [0, 0.1, 0.0, 0.5, 0.0, [[0.5, 1.4]]]],
 	"ladders": [[0, -0.35, -0.1, 0]],
 	"rails": [[1, -0.25, -0.1, 0, 4]],
@@ -323,8 +323,8 @@ const D := {
 	"rooms": [["Livestock Stalls", 0, 0.0, 0.3], ["Feed Room", 0, -0.35, -0.3], ["Hay Storage", 0, 0.35, -0.3], ["Loft", 1, -0.2, -0.3]]},
 
 # ---- STABLES: stall rows, tack room, feed storage, loft (above)
-"stables": {"name": "Stables of Varnethryl",
-	"floors": [{"h": 4.0, "mat": "flag", "wall": "darkoak", "win": 5.0}, {"h": 3.0, "mat": "oak", "wall": "darkoak", "win": 0.0, "slab": [[0.2, -0.5, 0.5, 0.5]]}],
+"stables": {"name": "Stables of Varnethryl", "scale": [0.40, 0.40],
+	"floors": [{"h": 3.0, "mat": "flag", "wall": "darkoak", "win": 5.0}, {"h": 3.0, "mat": "oak", "wall": "darkoak", "win": 0.0, "slab": [[0.2, -0.5, 0.5, 0.5]]}],
 	"walls": [[0, -0.5, -0.15, 0.2, -0.15, [[0.1, 0.01], [0.3, 0.01], [0.5, 0.01], [0.7, 0.01], [0.9, 0.01]], "darkoak"],
 		[0, -0.3, -0.5, -0.3, -0.15, [], "darkoak"], [0, -0.1, -0.5, -0.1, -0.15, [], "darkoak"], [0, 0.2, -0.5, 0.2, 0.5, [[0.3, 1.8], [0.75, 1.8]], "darkoak"]],
 	"ladders": [[0, 0.19, 0.0, -90]],
@@ -336,8 +336,8 @@ const D := {
 	"rooms": [["Stall Rows", 0, -0.2, 0.25], ["Tack Room", 0, 0.35, -0.2], ["Feed Storage", 0, 0.35, 0.25], ["Loft", 1, 0.38, -0.2]]},
 
 # ---- WINDMILL: grinding floor (millstone), storage room, upper mechanism room
-"windmill": {"name": "Windmill",
-	"floors": [{"h": 4.0, "mat": "flag", "wall": "stone", "win": 4.0}, {"h": 3.5, "mat": "oak", "wall": "stone", "win": 4.0}, {"h": 3.5, "mat": "oak", "wall": "stone", "win": 4.0}],
+"windmill": {"name": "Windmill", "scale": [0.44, 0.44],
+	"floors": [{"h": 3.0, "mat": "flag", "wall": "stone", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 4.0}],
 	"stairs": [["auto", 0, -1, 1.6]],
 	"ladders": [[1, 0.35, -0.2, 0]],
 	"props": [["_fountain", 0, 0.1, -0.1, 0, [1.4]], ["keg", 0, 0.4, -0.35, 0], ["keg", 0, 0.42, -0.25, 0], ["chest", 0, 0.38, 0.3, 0],
@@ -345,8 +345,8 @@ const D := {
 		["anvil", 2, 0.0, -0.1, 0], ["forge", 2, -0.2, -0.45, 0], ["chest", 2, 0.3, 0.3, 0]],
 	"lights": [["lantern", 0, 0.49, 0.0, -90, 1.4, 9.0, true], ["lantern", 1, 0.0, -0.49, 0, 1.2, 8.0], ["lantern", 2, 0.0, 0.49, 180, 1.2, 8.0]],
 	"rooms": [["Grinding Floor", 0, 0.1, 0.2], ["Storage Room", 1, 0.0, -0.1], ["Upper Mechanism Room", 2, 0.0, 0.1]]},
-"house1": {"name": "Village House",
-	"floors": [{"h": 3.6, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.2, "mat": "oak", "wall": "plaster", "win": 4.0}],
+"house1": {"name": "Village House", "scale": [0.40, 0.40],
+	"floors": [{"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}],
 	"walls": [[0, 0.12, -0.5, 0.12, 0.5, [[0.3, 1.6], [0.7, 1.6]]], [0, 0.12, -0.1, 0.5, -0.1, [[0.5, 1.4]]], [1, 0.12, -0.5, 0.12, 0.1, [[0.3, 1.4], [0.8, 1.4]]]],
 	"stairs": [["auto", 0, -1, 1.6]],
 	"props": [["hearth", 0, -0.2, -0.49, 0], ["rug", 0, -0.2, -0.25, 0], ["bench", 0, -0.2, -0.1, 180], ["chair", 0, -0.08, -0.25, -90], ["lion_banner", 0, -0.49, -0.3, 90, [1.0, false]],
@@ -356,8 +356,8 @@ const D := {
 		["chest", 1, -0.3, -0.42, 0], ["keg", 1, -0.15, -0.42, 0]],
 	"lights": [["fire", 0, -0.2, -0.47, 0, 2.2, 8.0, true], ["lantern", 0, 0.25, 0.49, 180, 1.0, 7.0], ["lantern", 0, 0.3, -0.49, 0, 0.8, 6.0], ["lantern", 1, 0.25, -0.0, 90, 1.0, 7.0], ["lantern", 1, -0.25, -0.49, 0, 0.8, 6.0]],
 	"rooms": [["Living Room", 0, -0.2, -0.15], ["Kitchen", 0, 0.25, 0.1], ["Storage", 0, 0.3, -0.3], ["Hall", 1, -0.2, 0.0], ["Bedroom 1", 1, 0.25, -0.2], ["Bedroom 2", 1, 0.25, 0.15], ["Attic / Storage", 1, -0.3, -0.3]]},
-"house2": {"name": "Village House",
-	"floors": [{"h": 3.6, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.2, "mat": "oak", "wall": "plaster", "win": 4.0}],
+"house2": {"name": "Village House", "scale": [0.40, 0.40],
+	"floors": [{"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}],
 	"walls": [[0, 0.12, -0.5, 0.12, 0.5, [[0.3, 1.6], [0.7, 1.6]]], [0, 0.12, -0.1, 0.5, -0.1, [[0.5, 1.4]]], [1, 0.12, -0.5, 0.12, 0.1, [[0.3, 1.4], [0.8, 1.4]]]],
 	"stairs": [["auto", 0, -1, 1.6]],
 	"props": [["hearth", 0, -0.2, -0.49, 0], ["rug", 0, -0.2, -0.25, 0], ["bench", 0, -0.2, -0.1, 180], ["chair", 0, -0.08, -0.25, -90], ["lion_banner", 0, -0.49, -0.3, 90, [1.0, false]],
@@ -367,8 +367,8 @@ const D := {
 		["chest", 1, -0.3, -0.42, 0], ["keg", 1, -0.15, -0.42, 0]],
 	"lights": [["fire", 0, -0.2, -0.47, 0, 2.2, 8.0, true], ["lantern", 0, 0.25, 0.49, 180, 1.0, 7.0], ["lantern", 0, 0.3, -0.49, 0, 0.8, 6.0], ["lantern", 1, 0.25, -0.0, 90, 1.0, 7.0], ["lantern", 1, -0.25, -0.49, 0, 0.8, 6.0]],
 	"rooms": [["Living Room", 0, -0.2, -0.15], ["Kitchen", 0, 0.25, 0.1], ["Storage", 0, 0.3, -0.3], ["Hall", 1, -0.2, 0.0], ["Bedroom 1", 1, 0.25, -0.2], ["Bedroom 2", 1, 0.25, 0.15], ["Attic / Storage", 1, -0.3, -0.3]]},
-"house3": {"name": "Village House",
-	"floors": [{"h": 3.6, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.2, "mat": "oak", "wall": "plaster", "win": 4.0}],
+"house3": {"name": "Village House", "scale": [0.40, 0.40],
+	"floors": [{"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}],
 	"walls": [[0, 0.12, -0.5, 0.12, 0.5, [[0.3, 1.6], [0.7, 1.6]]], [0, 0.12, -0.1, 0.5, -0.1, [[0.5, 1.4]]], [1, 0.12, -0.5, 0.12, 0.1, [[0.3, 1.4], [0.8, 1.4]]]],
 	"stairs": [["auto", 0, -1, 1.6]],
 	"props": [["hearth", 0, -0.2, -0.49, 0], ["rug", 0, -0.2, -0.25, 0], ["bench", 0, -0.2, -0.1, 180], ["chair", 0, -0.08, -0.25, -90], ["lion_banner", 0, -0.49, -0.3, 90, [1.0, false]],
@@ -378,8 +378,8 @@ const D := {
 		["chest", 1, -0.3, -0.42, 0], ["keg", 1, -0.15, -0.42, 0]],
 	"lights": [["fire", 0, -0.2, -0.47, 0, 2.2, 8.0, true], ["lantern", 0, 0.25, 0.49, 180, 1.0, 7.0], ["lantern", 0, 0.3, -0.49, 0, 0.8, 6.0], ["lantern", 1, 0.25, -0.0, 90, 1.0, 7.0], ["lantern", 1, -0.25, -0.49, 0, 0.8, 6.0]],
 	"rooms": [["Living Room", 0, -0.2, -0.15], ["Kitchen", 0, 0.25, 0.1], ["Storage", 0, 0.3, -0.3], ["Hall", 1, -0.2, 0.0], ["Bedroom 1", 1, 0.25, -0.2], ["Bedroom 2", 1, 0.25, 0.15], ["Attic / Storage", 1, -0.3, -0.3]]},
-"house4": {"name": "Village House",
-	"floors": [{"h": 3.6, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.2, "mat": "oak", "wall": "plaster", "win": 4.0}],
+"house4": {"name": "Village House", "scale": [0.40, 0.40],
+	"floors": [{"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}],
 	"walls": [[0, 0.12, -0.5, 0.12, 0.5, [[0.3, 1.6], [0.7, 1.6]]], [0, 0.12, -0.1, 0.5, -0.1, [[0.5, 1.4]]], [1, 0.12, -0.5, 0.12, 0.1, [[0.3, 1.4], [0.8, 1.4]]]],
 	"stairs": [["auto", 0, -1, 1.6]],
 	"props": [["hearth", 0, -0.2, -0.49, 0], ["rug", 0, -0.2, -0.25, 0], ["bench", 0, -0.2, -0.1, 180], ["chair", 0, -0.08, -0.25, -90], ["lion_banner", 0, -0.49, -0.3, 90, [1.0, false]],

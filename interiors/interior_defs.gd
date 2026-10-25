@@ -212,6 +212,7 @@ const D := {
 
 # ---- CASTLE KEEP: throne room, great hall, war room; upper royal chambers
 "keep": {"name": "Castle Keep of Varnethryl", "scale": [0.48, 0.48],
+	"fill": [[0, ["weapon_rack", "armor_stand", "chest", "bookshelf"], 0.15], [1, ["weapon_rack", "armor_stand", "chest", "bookshelf"], 0.15]],
 	"floors": [{"h": 5.2, "mat": "flag", "wall": "stone", "win": 4.0}, {"h": 3.4, "mat": "oak", "wall": "stone", "win": 4.0}],
 	"walls": [[0, -0.5, -0.1, -0.15, -0.1, [[0.6, 2.4]]], [0, -0.15, -0.5, -0.15, 0.5, [[0.3, 2.6], [0.75, 2.6]]], [0, 0.2, -0.5, 0.2, 0.5, [[0.3, 2.6], [0.75, 2.6]]],
 		[1, -0.5, -0.12, 0.5, -0.12, [[0.2, 1.8], [0.55, 1.8], [0.85, 1.8]]], [1, 0.0, -0.5, 0.0, -0.12, []]],

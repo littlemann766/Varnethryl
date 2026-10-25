@@ -1,0 +1,149 @@
+diff --git a/www/proto3d/main.js b/www/proto3d/main.js
+index e10fef6..4295b27 100644
+--- a/www/proto3d/main.js
++++ b/www/proto3d/main.js
+@@ -25,6 +25,9 @@ import { createMiniMap } from './minimap.js';
+ import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
+ import { worldProfile, loadScale } from './charscale.js';
+ import { buildTownOutskirts, TOWN_MAP_ROADS } from './townlands.js';
++import { KIT as BETH_KIT } from './beth-kit.js'; /*PREVIEW-ONLY*/
++import { placeZone as BETH_placeZone, loadZonePlacement as BETH_loadZ, kitMesh as BETH_kitMesh } from './beth-zones.js'; /*PREVIEW-ONLY*/
++const BETH_ON = !/nobeth/.test(location.search); /*PREVIEW-ONLY*/
+ import { buildHobgoblinCamps } from './hobcamps.js';
+ import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, PORT_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
+ import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
+@@ -204,6 +207,17 @@ const drops = []; let dropMade = 0;
+ if (BLD_ON) {
+   enterables.push(buildWalls(ectx, CITY_HALF, GATE_W));
+   for (const b of buildVillage(ectx)) enterables.push(b);
++  /*PREVIEW-ONLY round 2: swap exterior shells of 11 buildings for Beth GLBs (textured ext meshes + roof/frame + cutaway walls removed; plants/laundry/lamps kept)*/
++  if (BETH_ON) { const MAP = { house1: 'bld_house1', house2: 'bld_house2', house3: 'bld_house3', house4: 'bld_house4', farmhouse: 'bld_farmhouse', barn: 'bld_barn', stables: 'bld_stables', windmill: 'bld_windmill', lighthouse: 'bld_lighthouse', gt0: 'bld_gate_tower', gt1: 'bld_gate_tower', thieves: 'bld_thieves' };
++    const L = new GLTFLoader(), cache = {}; const all = enterables.flatMap(e => e.parts || [e]);
++    for (const s of all) { const f = MAP[s.id]; if (!f || !s.G) continue; try { const g = await (cache[f] = cache[f] || L.loadAsync(new URL('./models/beth/buildings/' + f + '.glb', import.meta.url).href));
++      for (const m of [...s.G.ext.children]) if (m.isMesh && m.material.map) s.G.ext.remove(m); for (const k of ['roof', 'frame', 'walls']) for (const m of [...s.G[k].children]) s.G[k].remove(m);
++      for (const c of [...s.root.children]) if (!Object.values(s.G).includes(c)) c.visible = false;
++      const sc = g.scene.clone(true); sc.scale.setScalar(1 / s.K); sc.updateMatrixWorld(true); let blades = null;
++      for (const n of [...sc.children]) { const m = n; m.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.userData.keep = true; } });
++        m.scale.multiplyScalar(1 / s.K); m.position.multiplyScalar(1 / s.K); (n.name === 'roof' ? s.G.roof : s.root).add(m); if (n.name === 'blades') blades = m; }
++      if (blades) { const prev = s.tick; s.tick = dt => { if (prev) prev(dt); blades.rotation.z += dt * .5; }; }
++    } catch (e) { console.warn('beth bld', s.id, e); } } }
+   if (new URLSearchParams(location.search).get('nochunk') == null) { try { const r = chunkStatics(enterables.flatMap(e => e.parts || [e]), scene, 64); diag('static chunks: ' + r.before + ' -> ' + r.after); const rr = mergeRoofs(enterables.flatMap(e => e.parts || [e]), scene); diag('roofs: ' + rr.before + ' -> ' + rr.after); const rw = mergeWalls(enterables.flatMap(e => e.parts || [e]), scene); diag('walls: ' + rw.before + ' -> ' + rw.after); } catch (e) { console.error('chunkStatics', e.message, e.stack); } }
+ } else {
+   wallSeg(-WORLD, -WORLD, WORLD, -WORLD); wallSeg(-WORLD, -WORLD, -WORLD, WORLD); wallSeg(WORLD, -WORLD, WORLD, WORLD); wallSeg(-WORLD, WORLD, -GATE_W - 3, WORLD); wallSeg(GATE_W + 3, WORLD, WORLD, WORLD);
+@@ -236,6 +250,16 @@ if(BLD_ON){try{
+   HOB_CAMPS_WORLD=buildHobgoblinCamps(scene,(x,z)=>TOWN_LANDS?.heightAt(x,z)??0);
+   diag('Hobgoblin camps: '+HOB_CAMPS_WORLD.sites.length+' placed in the outer regions');
+ }catch(e){console.warn('hobgoblin camp scenery unavailable',e);}}
++/*PREVIEW-ONLY round 2: zone kits (frost slopes, volcano ring, harbor dressing + ships, hob camps)*/
++if (BLD_ON && BETH_ON && BETH_KIT.ready && TOWN_LANDS) { const h = TOWN_LANDS.heightAt, zs = [];
++  for (const z of ['frost_town', 'volcano']) { const Z = BETH_placeZone(await BETH_loadZ(z), { heightAt: h, name: 'beth-' + z, chunk: 200 }); scene.add(Z.group); zs.push(Z); }
++  const P = await BETH_loadZ('port'), PC = PORT_CENTER;
++  const PZ = BETH_placeZone(P.filter(i => !i.ship), { heightAt: (x, z) => Math.max(0.0, h(x, z)), origin: [PC.x, PC.z], name: 'beth-port' }); TOWN_LANDS.harbor.add(PZ.group);
++  for (const it of P.filter(i => i.ship)) { const sh = TOWN_LANDS.ships[it.mooring]; if (!sh) continue; sh.children.forEach(c => c.visible = false); const m = BETH_kitMesh(it.file); if (m) { m.scale.setScalar(it.scale[0] / sh.scale.x); m.castShadow = false; sh.add(m); } }
++  if (HOB_CAMPS_WORLD) { const H = await BETH_loadZ('hobcamps'); for (const { site, group } of HOB_CAMPS_WORLD.sites) { group.children.forEach(c => { if (!(c.geometry && c.geometry.type === 'CircleGeometry')) c.visible = false; });
++    const Z = BETH_placeZone(H.filter(i => i.camp === site.id).map(i => ({ ...i, position: [i.position[0] - site.x, i.position[1], i.position[2] - site.z] })), { heightAt: h, origin: [site.x, site.z], name: 'beth-hob-' + site.id, chunk: 1e4 }); Z.group.position.set(site.x, 0, site.z); group.add(Z.group); } }
++  const c0 = TOWN_LANDS.cull; TOWN_LANDS.cull = (x, z, k) => { c0(x, z, k); for (const Z of zs) Z.cull(x, z, 170 * Math.max(1, k || 1)); };
++  window.__BETH_ZONES = zs.map(z => z.count); }
+ // Original trees stay in the historic village/inner grounds; outer forests are chunked independently.
+ {
+   const pts = [];
+@@ -267,6 +291,9 @@ if(BLD_ON){try{
+   });
+   for (const m of [IT, IL, IL2]) { m.castShadow = true; m.receiveShadow = true; scene.add(m); }
+   window.__treeCount = pts.length;
++  /*PREVIEW-ONLY (proposed for Lucky): swap the 3 instanced cone meshes for ONE merged kit-tree mesh at the same spots*/
++  if (BETH_KIT.ready && !/nokit/.test(location.search)) { const A = new BETH_KIT.Acc(); pts.forEach((p, i) => { const g = BETH_KIT.geo(i % 4 === 3 ? (i % 8 === 7 ? 'tree_birch_a_lod1' : 'tree_oak_a_lod1') : i % 2 ? 'tree_pine_a_lod1' : 'tree_pine_b_lod1'); A.add(g, p.x, 0, p.z, i * 2.1, p.s * 0.75); });
++    for (const m of [IT, IL, IL2]) scene.remove(m); const km = new THREE.Mesh(A.geo(), BETH_KIT.material); km.name = 'beth-town-trees'; km.castShadow = km.receiveShadow = true; km.userData.keep = true; scene.add(km); }
+ }
+ // a few crates/barrels (solid props)
+ for (const [x, z] of (BLD_ON ? [] : [[-8.2, -4.2], [-8.6, -3.2], [9.2, -5.8], [8.4, 6.6]])) {
+@@ -1919,6 +1946,7 @@ async function setZoneNow(name) {
+     state.heroX=COLISEUM_PVP.spawn.x;state.heroZ=COLISEUM_PVP.spawn.z;state.yaw=Math.PI;
+   } else if (name === 'frost') {
+     FM=buildFrostRealm({scene}); townCols=colliders.slice();
++    if (BETH_ON && BETH_KIT.ready) { BETH_loadZ('frost_realm').then(items => { const Z = BETH_placeZone(items, { heightAt: (x, z) => frostElevation(x, z), origin: [FROST_REALM.cx, FROST_REALM.cz], name: 'beth-frost-realm', chunk: 1e4 }); FM.group.add(Z.group); }); } /*PREVIEW-ONLY*/
+     colliders.length=0;for(const c of FM.colliders)colliders.push(c);
+     ZONE.name='frost';ZONE.cx=FROST_REALM.cx;ZONE.cz=FROST_REALM.cz;ZONE.half=FROST_REALM.half;
+     hideTown();FM.group.visible=true;if(portalT)portalT.visible=false;
+@@ -2032,6 +2060,7 @@ function frame(now) {
+   simTime += dt; if (SMOKE) SMOKE.update(simTime); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateWater?.(simTime,state.heroX,state.heroZ); if(TOWN_LANDS&&ZONE.name==='town')TOWN_LANDS.updateVolcano?.(simTime,state.heroX,state.heroZ);
+   drops.forEach((m, i) => { const t = (simTime * 0.9 + i / drops.length) % 1; const a = i / drops.length * 6.28; m.position.set(Math.cos(a) * t * 1.6, 3.0 + Math.sin(t * 3.14) * 1.0 - t * 0.2, Math.sin(a) * t * 1.6); });
+   if(ZONE.name==='town' && totalFrames%9===0)hideInactiveHeroModels();
++  if(window.__PV_HOOK)window.__PV_HOOK();
+   renderer.render(scene, camera);
+   totalFrames++; fpsAcc += dt; fpsFrames++;
+   if (fpsAcc >= 0.5) { fps = fpsFrames / fpsAcc; fpsAcc = 0; fpsFrames = 0; fpsEl.textContent = fps.toFixed(0) + ' fps · ' + renderer.info.render.calls + ' calls'; }
+@@ -2333,3 +2362,5 @@ MULTIPLAYER=createMultiplayer({THREE,scene,state,getZone:()=>ZONE.name,setZone,
+ });
+ window.__p3d.multiplayer=MULTIPLAYER;
+ document.dispatchEvent(new Event('varn:game-ready'));
++
++/*PREVIEW-ONLY*/window.__P={renderer,scene,camera,get state(){return state},get TL(){return TOWN_LANDS},THREE,setZone:n=>setZone(n),get FM(){return FM},get HOB(){return HOB_CAMPS_WORLD}};
+diff --git a/www/proto3d/townlands.js b/www/proto3d/townlands.js
+index d2011f9..41b5764 100644
+--- a/www/proto3d/townlands.js
++++ b/www/proto3d/townlands.js
+@@ -2,6 +2,8 @@
+  * The established buildings/quests and their coordinates stay unchanged.
+  * All new scenery is batched per 64-world-unit chunk and culled by proximity. */
+ import * as THREE from './vendor/three.module.js';
++import { terrainBiome } from './bossregions.js';
++import { KIT } from './beth-kit.js';   // Beth art kit (shared atlas, one material)
+ import { makeVariant, makeDetailTexture, makeMaterials, Acc } from './scenery.js';
+ import { buildBalthrixTrail } from './balthrix-trail.js';
+ import { makeVolcanoEffects } from './volcano-effects.js';
+@@ -386,11 +388,18 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
+     if(!chunks.has(key))chunks.set(key,{layer,acc:new Acc()});
+     return chunks.get(key).acc;
+   };
++  const kacc=(layer,x,z)=>{const C=layer==='far'?CHUNK*2:CHUNK,key='kit|'+layer+':'+Math.floor(x/C)+':'+Math.floor(z/C);
++    if(!chunks.has(key))chunks.set(key,{layer,kit:true,acc:new KIT.Acc()});return chunks.get(key).acc;};
+   const put=(kind,name,pal,x,z,s=1,shadow=false)=>{
++    const y=townElevation(x,z,world),ry=rnd()*Math.PI*2;
++    if(KIT.ready){const near=KIT.forVariant(kind,name,pal,0,Math.round(x*7+z));
++      if(near){kacc(shadow?'cast':'plain',x,z).add(near,x,y-.04,z,ry,s);
++        if(kind==='trees'){const far=KIT.forVariant(kind,name,pal,2,Math.round(x*7+z));if(far)kacc('far',x,z).add(far,x,y-.04,z,ry,s);}
++        return;}}
+     const vkey=kind+'/'+name+'/'+pal;
+     let v=cache.get(vkey);
+     if(!v){v=makeVariant(kind,name,pal,4,true);cache.set(vkey,v);}
+-    acc(shadow?'cast':'plain',x,z).add(v.geo,x,townElevation(x,z,world),z,rnd()*Math.PI*2,s);
++    acc(shadow?'cast':'plain',x,z).add(v.geo,x,y,z,ry,s);
+   };
+   const claim=(x,z,r)=>occupied.push([x,z,r]);
+   // Balthrix's trail is positioned before tree scattering so standing trees
+@@ -467,11 +476,22 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
+     put('flowers',pick(rnd,['daisy','tulip','lavender','bellflower']),pick(rnd,['white','yellow','pink','purple','blue','red']),x,z,randRange(rnd,.7,1.15));stats.flowers++;
+   });
+   sample(1900,(x,z)=>{put('flowers','grass',pick(rnd,['green','lush','dry']),x,z,randRange(rnd,.75,1.3));stats.grass++;});
++  // Beth kit: merged landscape clusters for the empty land between zones (same chunk batches -> no extra draw calls).
++  if(KIT.ready){const placed=[];
++    const list=KIT.placement.length?KIT.placement:null;
++    const doPlace=(file,x,z,ry,s)=>{const g=KIT.geo(file);if(!g)return;kacc('cast',x,z).add(g,x,townElevation(x,z,world)-.05,z,ry,s);
++      const r=(g.boundingSphere?g.boundingSphere.radius:4)*s;placed.push({file,x:+x.toFixed(2),z:+z.toFixed(2),ry:+ry.toFixed(3),s:+s.toFixed(2),r:+r.toFixed(1)});
++      if(/outcrop|ruins|volcano/.test(file))colliders.push({type:'circle',x,z,r:Math.min(3.2,r*.35)*1});};
++    if(list)for(const p of list)doPlace(p.file.replace(/^.*\//,'').replace('.glb',''),p.position[0],p.position[2],p.rotation[1],p.scale[0]);
++    else{const pickC=(x,z)=>{const b=terrainBiome(x,z),r=rnd();return b==='snow'?'cluster_frost':b==='rock'?'cluster_volcano':
++        r<.2?'cluster_outcrop_a':r<.33?'cluster_outcrop_b':r<.5?'cluster_grove_mixed':r<.62?'cluster_pine_stand':r<.8?'cluster_meadow':r<.92?'cluster_ruins':'cluster_roadside';};
++      sample(70,(x,z)=>{if(!clear(x,z,9))return false;const f=pickC(x,z),s=randRange(rnd,.9,1.25);doPlace(f,x,z,rnd()*Math.PI*2,s);claim(x,z,9*s);},6);}
++    if(typeof window!=='undefined')window.__BETH_PLACED=placed;stats.bethClusters=placed.length;}
+   // Instanced-style batch: one vertex-colored mesh per chunk/layer, not thousands of draw calls.
+   const meshes=[];
+-  for(const {layer,acc:A} of chunks.values()){
+-    const geo=A.geo(true);if(!geo)continue;
+-    const mesh=new THREE.Mesh(geo,mats.solid);
++  for(const {layer,acc:A,kit} of chunks.values()){
++    const geo=kit?A.geo():A.geo(true);if(!geo)continue;
++    const mesh=new THREE.Mesh(geo,kit?KIT.material:mats.solid);mesh.userData.far=layer==='far';
+     mesh.castShadow=layer==='cast';mesh.receiveShadow=true;
+     mesh.frustumCulled=true;mesh.userData.keep=true;group.add(mesh);meshes.push(mesh);
+   }
+@@ -483,7 +503,7 @@ export function buildTownOutskirts({ scene, colliders, world, buildings, spacing
+     for(const mesh of meshes){
+       const sphere=mesh.geometry.boundingSphere;
+       const d=Math.hypot(sphere.center.x-x,sphere.center.z-z)-sphere.radius;
+-      mesh.visible=d<140*Math.max(1,k);
++      const K=Math.max(1,k);mesh.visible=mesh.userData.far?(d>=55*K&&d<170*K):d<(mesh.castShadow?90:60)*K;   // kit: near detail 0-90 m (grass/flowers 0-60 m), tree billboards 55-170 m
+     }
+   }
+   return {group,cull,stats,terrain,poolMeshes,volcano,updateVolcano,harborRoad,mountainRoad,brokenSealRoad,ruinedGateway,cave,harbor,harborShips,ships,dockPlanks,water,waterAt,updateWater,heightAt:(x,z)=>townElevation(x,z,world),chunkCount:meshes.length,fieldCount:stats.fields,trail};

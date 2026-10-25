@@ -1,0 +1,3236 @@
+{
+"zone": "frost_town",
+"note": "World coords (town map). y=null -> snap to townElevation(x,z). Merged per 64 m chunk with placeZone().",
+"items": [
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+142.24,
+null,
+-345.38
+],
+"rotation": [
+0,
+0.297,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-113.08,
+null,
+-377.42
+],
+"rotation": [
+0,
+5.52,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-46.56,
+null,
+-335.15
+],
+"rotation": [
+0,
+1.217,
+0
+],
+"scale": [
+1.17,
+1.17,
+1.17
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+49.12,
+null,
+-266.03
+],
+"rotation": [
+0,
+2.752,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+42.75,
+null,
+-208.24
+],
+"rotation": [
+0,
+3.969,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-101.67,
+null,
+-407.2
+],
+"rotation": [
+0,
+2.391,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+44.8,
+null,
+-341.5
+],
+"rotation": [
+0,
+3.426,
+0
+],
+"scale": [
+0.97,
+0.97,
+0.97
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+156.2,
+null,
+-411.94
+],
+"rotation": [
+0,
+3.892,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+30.91,
+null,
+-440.46
+],
+"rotation": [
+0,
+3.624,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-139.02,
+null,
+-362.19
+],
+"rotation": [
+0,
+5.05,
+0
+],
+"scale": [
+1.29,
+1.29,
+1.29
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+142.79,
+null,
+-407.28
+],
+"rotation": [
+0,
+2.01,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+10.83,
+null,
+-448.11
+],
+"rotation": [
+0,
+4.109,
+0
+],
+"scale": [
+0.9,
+0.9,
+0.9
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-113.38,
+null,
+-403.17
+],
+"rotation": [
+0,
+5.599,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-48.67,
+null,
+-241.95
+],
+"rotation": [
+0,
+1.307,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+153.16,
+null,
+-379.77
+],
+"rotation": [
+0,
+2.761,
+0
+],
+"scale": [
+1.38,
+1.38,
+1.38
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+64.48,
+null,
+-282.19
+],
+"rotation": [
+0,
+3.299,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+126.43,
+null,
+-337.4
+],
+"rotation": [
+0,
+5.587,
+0
+],
+"scale": [
+1.19,
+1.19,
+1.19
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/frozen_pond.glb",
+"position": [
+69.38,
+null,
+-198.15
+],
+"rotation": [
+0,
+3.184,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-66.9,
+null,
+-287.17
+],
+"rotation": [
+0,
+4.465,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+118.82,
+null,
+-339.69
+],
+"rotation": [
+0,
+0.398,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+67.48,
+null,
+-416.01
+],
+"rotation": [
+0,
+2.617,
+0
+],
+"scale": [
+1.07,
+1.07,
+1.07
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+92.91,
+null,
+-202.98
+],
+"rotation": [
+0,
+0.484,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+0.27,
+null,
+-501.22
+],
+"rotation": [
+0,
+0.381,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+64.57,
+null,
+-462.67
+],
+"rotation": [
+0,
+4.077,
+0
+],
+"scale": [
+1.05,
+1.05,
+1.05
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+48.18,
+null,
+-363.94
+],
+"rotation": [
+0,
+5.936,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-98.9,
+null,
+-312.2
+],
+"rotation": [
+0,
+1.01,
+0
+],
+"scale": [
+1.3,
+1.3,
+1.3
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+113.97,
+null,
+-368.39
+],
+"rotation": [
+0,
+4.761,
+0
+],
+"scale": [
+0.96,
+0.96,
+0.96
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-47.82,
+null,
+-416.78
+],
+"rotation": [
+0,
+0.558,
+0
+],
+"scale": [
+0.93,
+0.93,
+0.93
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-119.16,
+null,
+-359.36
+],
+"rotation": [
+0,
+5.329,
+0
+],
+"scale": [
+1.17,
+1.17,
+1.17
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-114.61,
+null,
+-275.08
+],
+"rotation": [
+0,
+5.064,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-48.79,
+null,
+-321.97
+],
+"rotation": [
+0,
+5.572,
+0
+],
+"scale": [
+1.06,
+1.06,
+1.06
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+67.28,
+null,
+-291.18
+],
+"rotation": [
+0,
+3.852,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+38.7,
+null,
+-369.91
+],
+"rotation": [
+0,
+2.027,
+0
+],
+"scale": [
+1.19,
+1.19,
+1.19
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-32.38,
+null,
+-248.9
+],
+"rotation": [
+0,
+2.081,
+0
+],
+"scale": [
+0.9,
+0.9,
+0.9
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+117.36,
+null,
+-315
+],
+"rotation": [
+0,
+3.473,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-74.03,
+null,
+-271.23
+],
+"rotation": [
+0,
+1.012,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+47.61,
+null,
+-246.46
+],
+"rotation": [
+0,
+0.656,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+79.98,
+null,
+-248.58
+],
+"rotation": [
+0,
+0.164,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-76.61,
+null,
+-393.01
+],
+"rotation": [
+0,
+1.982,
+0
+],
+"scale": [
+0.97,
+0.97,
+0.97
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+134.69,
+null,
+-385.82
+],
+"rotation": [
+0,
+4.6,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-119.55,
+null,
+-425.16
+],
+"rotation": [
+0,
+5.953,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-124.97,
+null,
+-302.76
+],
+"rotation": [
+0,
+5.316,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-142.68,
+null,
+-301.64
+],
+"rotation": [
+0,
+3.538,
+0
+],
+"scale": [
+1.29,
+1.29,
+1.29
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-19.31,
+null,
+-496.9
+],
+"rotation": [
+0,
+2.448,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-59.27,
+null,
+-392.51
+],
+"rotation": [
+0,
+5.72,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-156.26,
+null,
+-359.34
+],
+"rotation": [
+0,
+4.32,
+0
+],
+"scale": [
+0.87,
+0.87,
+0.87
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+51.84,
+null,
+-284.94
+],
+"rotation": [
+0,
+5.919,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-163.76,
+null,
+-389.06
+],
+"rotation": [
+0,
+2.197,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-49.93,
+null,
+-200.03
+],
+"rotation": [
+0,
+2.112,
+0
+],
+"scale": [
+1.06,
+1.06,
+1.06
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-52.19,
+null,
+-491.44
+],
+"rotation": [
+0,
+3.366,
+0
+],
+"scale": [
+0.82,
+0.82,
+0.82
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+54.17,
+null,
+-298.68
+],
+"rotation": [
+0,
+3.177,
+0
+],
+"scale": [
+1.09,
+1.09,
+1.09
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+109.2,
+null,
+-411.28
+],
+"rotation": [
+0,
+0.245,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-15.67,
+null,
+-301.74
+],
+"rotation": [
+0,
+4.724,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-28.11,
+null,
+-470.29
+],
+"rotation": [
+0,
+2.62,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+63.28,
+null,
+-301.05
+],
+"rotation": [
+0,
+3.06,
+0
+],
+"scale": [
+1.04,
+1.04,
+1.04
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+115.38,
+null,
+-411.62
+],
+"rotation": [
+0,
+4.151,
+0
+],
+"scale": [
+0.99,
+0.99,
+0.99
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-11.01,
+null,
+-448
+],
+"rotation": [
+0,
+2.715,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-118.57,
+null,
+-264.41
+],
+"rotation": [
+0,
+4.315,
+0
+],
+"scale": [
+0.82,
+0.82,
+0.82
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+125.22,
+null,
+-383.35
+],
+"rotation": [
+0,
+2.793,
+0
+],
+"scale": [
+0.99,
+0.99,
+0.99
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+72.09,
+null,
+-466.96
+],
+"rotation": [
+0,
+5.067,
+0
+],
+"scale": [
+0.85,
+0.85,
+0.85
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-111.88,
+null,
+-411.31
+],
+"rotation": [
+0,
+5.733,
+0
+],
+"scale": [
+1.25,
+1.25,
+1.25
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+64.29,
+null,
+-411.99
+],
+"rotation": [
+0,
+4.138,
+0
+],
+"scale": [
+0.81,
+0.81,
+0.81
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+8.77,
+null,
+-478.45
+],
+"rotation": [
+0,
+1.096,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+69.16,
+null,
+-491.02
+],
+"rotation": [
+0,
+6.153,
+0
+],
+"scale": [
+0.94,
+0.94,
+0.94
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+50.76,
+null,
+-418.31
+],
+"rotation": [
+0,
+2.716,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-53.06,
+null,
+-248.11
+],
+"rotation": [
+0,
+1.645,
+0
+],
+"scale": [
+1.36,
+1.36,
+1.36
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-40.66,
+null,
+-485.5
+],
+"rotation": [
+0,
+3.078,
+0
+],
+"scale": [
+0.93,
+0.93,
+0.93
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-68.48,
+null,
+-245.79
+],
+"rotation": [
+0,
+4.908,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+137.53,
+null,
+-406.04
+],
+"rotation": [
+0,
+5.192,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-156.68,
+null,
+-329.39
+],
+"rotation": [
+0,
+2.721,
+0
+],
+"scale": [
+1.17,
+1.17,
+1.17
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-125.78,
+null,
+-367.78
+],
+"rotation": [
+0,
+2.363,
+0
+],
+"scale": [
+0.89,
+0.89,
+0.89
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-3.05,
+null,
+-297.93
+],
+"rotation": [
+0,
+0.031,
+0
+],
+"scale": [
+0.9,
+0.9,
+0.9
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+58.05,
+null,
+-273.52
+],
+"rotation": [
+0,
+1.112,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+158.74,
+null,
+-402.95
+],
+"rotation": [
+0,
+3.279,
+0
+],
+"scale": [
+1.3,
+1.3,
+1.3
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+52.11,
+null,
+-464.4
+],
+"rotation": [
+0,
+2.129,
+0
+],
+"scale": [
+1.05,
+1.05,
+1.05
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-109.24,
+null,
+-400.78
+],
+"rotation": [
+0,
+0.765,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-113.62,
+null,
+-234.36
+],
+"rotation": [
+0,
+3.685,
+0
+],
+"scale": [
+0.85,
+0.85,
+0.85
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-101.12,
+null,
+-434.27
+],
+"rotation": [
+0,
+1.416,
+0
+],
+"scale": [
+1.34,
+1.34,
+1.34
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-69.4,
+null,
+-455.11
+],
+"rotation": [
+0,
+2.191,
+0
+],
+"scale": [
+0.87,
+0.87,
+0.87
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-82.79,
+null,
+-219.36
+],
+"rotation": [
+0,
+0.298,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+113.72,
+null,
+-330.01
+],
+"rotation": [
+0,
+4.04,
+0
+],
+"scale": [
+1.07,
+1.07,
+1.07
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+109.35,
+null,
+-261.86
+],
+"rotation": [
+0,
+0.094,
+0
+],
+"scale": [
+0.9,
+0.9,
+0.9
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+55.45,
+null,
+-505.01
+],
+"rotation": [
+0,
+2.949,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-164.39,
+null,
+-347.49
+],
+"rotation": [
+0,
+3.003,
+0
+],
+"scale": [
+1.34,
+1.34,
+1.34
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-57.1,
+null,
+-278.74
+],
+"rotation": [
+0,
+4.699,
+0
+],
+"scale": [
+0.8,
+0.8,
+0.8
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+91.8,
+null,
+-468.7
+],
+"rotation": [
+0,
+5.134,
+0
+],
+"scale": [
+0.82,
+0.82,
+0.82
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-53.48,
+null,
+-429.68
+],
+"rotation": [
+0,
+2.86,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+36.17,
+null,
+-384.11
+],
+"rotation": [
+0,
+4.865,
+0
+],
+"scale": [
+1.03,
+1.03,
+1.03
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-132.53,
+null,
+-268.78
+],
+"rotation": [
+0,
+5.448,
+0
+],
+"scale": [
+1.13,
+1.13,
+1.13
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+99.54,
+null,
+-439.51
+],
+"rotation": [
+0,
+3.201,
+0
+],
+"scale": [
+0.83,
+0.83,
+0.83
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-17.54,
+null,
+-480.26
+],
+"rotation": [
+0,
+4.615,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-83.34,
+null,
+-270.58
+],
+"rotation": [
+0,
+0.155,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-106.06,
+null,
+-435.25
+],
+"rotation": [
+0,
+3.098,
+0
+],
+"scale": [
+1.04,
+1.04,
+1.04
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+34.82,
+null,
+-509.52
+],
+"rotation": [
+0,
+5.775,
+0
+],
+"scale": [
+1.01,
+1.01,
+1.01
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+160.71,
+null,
+-319
+],
+"rotation": [
+0,
+5.869,
+0
+],
+"scale": [
+0.82,
+0.82,
+0.82
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+130.76,
+null,
+-321.17
+],
+"rotation": [
+0,
+2.238,
+0
+],
+"scale": [
+0.9,
+0.9,
+0.9
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-34.31,
+null,
+-308.59
+],
+"rotation": [
+0,
+1.246,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-98.74,
+null,
+-446.86
+],
+"rotation": [
+0,
+5.432,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-77.64,
+null,
+-268.5
+],
+"rotation": [
+0,
+4.841,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-121.97,
+null,
+-301.12
+],
+"rotation": [
+0,
+1.864,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+83.37,
+null,
+-461.42
+],
+"rotation": [
+0,
+3.45,
+0
+],
+"scale": [
+1.3,
+1.3,
+1.3
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+53.32,
+null,
+-380.14
+],
+"rotation": [
+0,
+1.871,
+0
+],
+"scale": [
+1.03,
+1.03,
+1.03
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-128.37,
+null,
+-331.78
+],
+"rotation": [
+0,
+2.952,
+0
+],
+"scale": [
+1.1,
+1.1,
+1.1
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+49.83,
+null,
+-434.93
+],
+"rotation": [
+0,
+3.532,
+0
+],
+"scale": [
+1.34,
+1.34,
+1.34
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+101.74,
+null,
+-280.38
+],
+"rotation": [
+0,
+0.265,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+149.12,
+null,
+-359.05
+],
+"rotation": [
+0,
+5.165,
+0
+],
+"scale": [
+0.81,
+0.81,
+0.81
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+55.75,
+null,
+-399.08
+],
+"rotation": [
+0,
+3.511,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+26.64,
+null,
+-214.34
+],
+"rotation": [
+0,
+4.537,
+0
+],
+"scale": [
+1.09,
+1.09,
+1.09
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-86.23,
+null,
+-298.58
+],
+"rotation": [
+0,
+5.65,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+67.17,
+null,
+-244.02
+],
+"rotation": [
+0,
+2.376,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-159.02,
+null,
+-308.8
+],
+"rotation": [
+0,
+2.351,
+0
+],
+"scale": [
+0.87,
+0.87,
+0.87
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+13.76,
+null,
+-229.16
+],
+"rotation": [
+0,
+0.964,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-122.99,
+null,
+-440.07
+],
+"rotation": [
+0,
+0.571,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+33.08,
+null,
+-290.96
+],
+"rotation": [
+0,
+5.204,
+0
+],
+"scale": [
+0.93,
+0.93,
+0.93
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-85.24,
+null,
+-203.42
+],
+"rotation": [
+0,
+5.944,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/frozen_pond.glb",
+"position": [
+18.97,
+null,
+-475.4
+],
+"rotation": [
+0,
+0.681,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-88.17,
+null,
+-469.27
+],
+"rotation": [
+0,
+4.06,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+105.01,
+null,
+-451.4
+],
+"rotation": [
+0,
+4.412,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+69.49,
+null,
+-268.08
+],
+"rotation": [
+0,
+0.917,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-133.22,
+null,
+-342.3
+],
+"rotation": [
+0,
+5.17,
+0
+],
+"scale": [
+1.29,
+1.29,
+1.29
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+110.12,
+null,
+-397.38
+],
+"rotation": [
+0,
+2.824,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+8.63,
+null,
+-220.07
+],
+"rotation": [
+0,
+1.92,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+58.3,
+null,
+-251.22
+],
+"rotation": [
+0,
+4.632,
+0
+],
+"scale": [
+0.87,
+0.87,
+0.87
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-135.48,
+null,
+-370.14
+],
+"rotation": [
+0,
+3.818,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-9.79,
+null,
+-300.12
+],
+"rotation": [
+0,
+0.274,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-142.96,
+null,
+-306.19
+],
+"rotation": [
+0,
+5.765,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+56.04,
+null,
+-205.03
+],
+"rotation": [
+0,
+5.577,
+0
+],
+"scale": [
+1.29,
+1.29,
+1.29
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+158.44,
+null,
+-382.02
+],
+"rotation": [
+0,
+1.355,
+0
+],
+"scale": [
+0.82,
+0.82,
+0.82
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-141.74,
+null,
+-273.45
+],
+"rotation": [
+0,
+0.425,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+-105.23,
+null,
+-410.38
+],
+"rotation": [
+0,
+2.012,
+0
+],
+"scale": [
+0.9,
+0.9,
+0.9
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/frozen_pond.glb",
+"position": [
+100.63,
+null,
+-261.76
+],
+"rotation": [
+0,
+2.48,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-125.79,
+null,
+-342.99
+],
+"rotation": [
+0,
+2.711,
+0
+],
+"scale": [
+1.25,
+1.25,
+1.25
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-53.14,
+null,
+-387.29
+],
+"rotation": [
+0,
+2.353,
+0
+],
+"scale": [
+0.89,
+0.89,
+0.89
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-125,
+null,
+-380.26
+],
+"rotation": [
+0,
+1.333,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-62.58,
+null,
+-282.78
+],
+"rotation": [
+0,
+4.75,
+0
+],
+"scale": [
+1.06,
+1.06,
+1.06
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+138.38,
+null,
+-352.81
+],
+"rotation": [
+0,
+1.969,
+0
+],
+"scale": [
+1.34,
+1.34,
+1.34
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-161.88,
+null,
+-323.09
+],
+"rotation": [
+0,
+2.929,
+0
+],
+"scale": [
+0.83,
+0.83,
+0.83
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-43.57,
+null,
+-386.42
+],
+"rotation": [
+0,
+2.462,
+0
+],
+"scale": [
+1.13,
+1.13,
+1.13
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+154,
+null,
+-374.2
+],
+"rotation": [
+0,
+0.77,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-34.85,
+null,
+-209.51
+],
+"rotation": [
+0,
+5.306,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-96.78,
+null,
+-240.25
+],
+"rotation": [
+0,
+1.695,
+0
+],
+"scale": [
+0.9,
+0.9,
+0.9
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+99.86,
+null,
+-327.17
+],
+"rotation": [
+0,
+2.849,
+0
+],
+"scale": [
+0.83,
+0.83,
+0.83
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-130.79,
+null,
+-429.06
+],
+"rotation": [
+0,
+2.426,
+0
+],
+"scale": [
+1.19,
+1.19,
+1.19
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+104.59,
+null,
+-272.26
+],
+"rotation": [
+0,
+6.129,
+0
+],
+"scale": [
+0.96,
+0.96,
+0.96
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/frozen_pond.glb",
+"position": [
+110.52,
+null,
+-236.88
+],
+"rotation": [
+0,
+0.585,
+0
+],
+"scale": [
+1.03,
+1.03,
+1.03
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-98.59,
+null,
+-259.44
+],
+"rotation": [
+0,
+0.375,
+0
+],
+"scale": [
+1.25,
+1.25,
+1.25
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+103.14,
+null,
+-296.64
+],
+"rotation": [
+0,
+1.787,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/frozen_pond.glb",
+"position": [
+86.44,
+null,
+-212.23
+],
+"rotation": [
+0,
+3.066,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+39.92,
+null,
+-466.82
+],
+"rotation": [
+0,
+2.4,
+0
+],
+"scale": [
+0.96,
+0.96,
+0.96
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-17.92,
+null,
+-394
+],
+"rotation": [
+0,
+4.741,
+0
+],
+"scale": [
+1.37,
+1.37,
+1.37
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+95.65,
+null,
+-208.04
+],
+"rotation": [
+0,
+1.685,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+143.87,
+null,
+-365.15
+],
+"rotation": [
+0,
+1.99,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+119.44,
+null,
+-333.15
+],
+"rotation": [
+0,
+3.185,
+0
+],
+"scale": [
+0.81,
+0.81,
+0.81
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+144.06,
+null,
+-279.64
+],
+"rotation": [
+0,
+0.479,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+-43.91,
+null,
+-425.25
+],
+"rotation": [
+0,
+2.464,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+125.04,
+null,
+-365.61
+],
+"rotation": [
+0,
+6.279,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+43.52,
+null,
+-235.35
+],
+"rotation": [
+0,
+5.525,
+0
+],
+"scale": [
+0.85,
+0.85,
+0.85
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+124.19,
+null,
+-408.35
+],
+"rotation": [
+0,
+0.686,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_rock.glb",
+"position": [
+-48.83,
+null,
+-429.03
+],
+"rotation": [
+0,
+2.44,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+159.33,
+null,
+-349.77
+],
+"rotation": [
+0,
+3.51,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-6.81,
+null,
+-296.03
+],
+"rotation": [
+0,
+4.945,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+77.71,
+null,
+-197.09
+],
+"rotation": [
+0,
+5.071,
+0
+],
+"scale": [
+0.89,
+0.89,
+0.89
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/frozen_pond.glb",
+"position": [
+-120.4,
+null,
+-399.94
+],
+"rotation": [
+0,
+3.122,
+0
+],
+"scale": [
+1.38,
+1.38,
+1.38
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+33.89,
+null,
+-378.7
+],
+"rotation": [
+0,
+1.423,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_rock.glb",
+"position": [
+35.79,
+null,
+-253.85
+],
+"rotation": [
+0,
+1.303,
+0
+],
+"scale": [
+0.96,
+0.96,
+0.96
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+41.31,
+null,
+-330.25
+],
+"rotation": [
+0,
+2.545,
+0
+],
+"scale": [
+1.19,
+1.19,
+1.19
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_a.glb",
+"position": [
+-111.51,
+null,
+-348.99
+],
+"rotation": [
+0,
+4.277,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/snow_drift_b.glb",
+"position": [
+-103.9,
+null,
+-244.03
+],
+"rotation": [
+0,
+4.79,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "frost/ice_spire.glb",
+"position": [
+-44.11,
+null,
+-242.22
+],
+"rotation": [
+0,
+2.688,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+},
+{
+"file": "trees/tree_pine_snow.glb",
+"position": [
+44.17,
+null,
+-318.25
+],
+"rotation": [
+0,
+0.502,
+0
+],
+"scale": [
+1.3,
+1.3,
+1.3
+],
+"replaces": "(new) adds detail on the bare frost slopes; merged per 64 m chunk"
+}
+]
+}

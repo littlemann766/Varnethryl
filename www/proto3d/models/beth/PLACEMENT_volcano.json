@@ -1,0 +1,2856 @@
+{
+"zone": "volcano",
+"note": "World coords. y=null -> townElevation. Lava pools (+5 m), roads, Balthrix corridor avoided.",
+"items": [
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+386.75,
+null,
+-511.24
+],
+"rotation": [
+0,
+2.841,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+487.18,
+null,
+-526.93
+],
+"rotation": [
+0,
+3.185,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+364.62,
+null,
+-485.06
+],
+"rotation": [
+0,
+0.126,
+0
+],
+"scale": [
+1.05,
+1.05,
+1.05
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+297.64,
+null,
+-436.6
+],
+"rotation": [
+0,
+0.199,
+0
+],
+"scale": [
+1.44,
+1.44,
+1.44
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+468.3,
+null,
+-453.8
+],
+"rotation": [
+0,
+2.247,
+0
+],
+"scale": [
+1.13,
+1.13,
+1.13
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+468.98,
+null,
+-513.58
+],
+"rotation": [
+0,
+1.099,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+401.03,
+null,
+-333.68
+],
+"rotation": [
+0,
+3.652,
+0
+],
+"scale": [
+0.9,
+0.9,
+0.9
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+442.21,
+null,
+-300.82
+],
+"rotation": [
+0,
+6.099,
+0
+],
+"scale": [
+1.01,
+1.01,
+1.01
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+292.45,
+null,
+-419.43
+],
+"rotation": [
+0,
+4.482,
+0
+],
+"scale": [
+0.85,
+0.85,
+0.85
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+488.66,
+null,
+-395.05
+],
+"rotation": [
+0,
+1.749,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+334.92,
+null,
+-486.7
+],
+"rotation": [
+0,
+1.756,
+0
+],
+"scale": [
+1.36,
+1.36,
+1.36
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+462.8,
+null,
+-274.51
+],
+"rotation": [
+0,
+4.092,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+423.25,
+null,
+-482.49
+],
+"rotation": [
+0,
+6.145,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+330.64,
+null,
+-494.5
+],
+"rotation": [
+0,
+0.561,
+0
+],
+"scale": [
+1.1,
+1.1,
+1.1
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+401.15,
+null,
+-508.94
+],
+"rotation": [
+0,
+4.456,
+0
+],
+"scale": [
+1.03,
+1.03,
+1.03
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+295.66,
+null,
+-448.95
+],
+"rotation": [
+0,
+3.861,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+476.2,
+null,
+-318.08
+],
+"rotation": [
+0,
+0.392,
+0
+],
+"scale": [
+0.87,
+0.87,
+0.87
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+427.97,
+null,
+-463.85
+],
+"rotation": [
+0,
+1.063,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+422.68,
+null,
+-499.11
+],
+"rotation": [
+0,
+4.957,
+0
+],
+"scale": [
+0.93,
+0.93,
+0.93
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+502.15,
+null,
+-293.08
+],
+"rotation": [
+0,
+0.843,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+501.62,
+null,
+-313.38
+],
+"rotation": [
+0,
+5.212,
+0
+],
+"scale": [
+0.94,
+0.94,
+0.94
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+371.88,
+null,
+-508.83
+],
+"rotation": [
+0,
+3.071,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+490.2,
+null,
+-283.08
+],
+"rotation": [
+0,
+6.188,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+478.12,
+null,
+-506.81
+],
+"rotation": [
+0,
+4.008,
+0
+],
+"scale": [
+1.19,
+1.19,
+1.19
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+332.43,
+null,
+-394.67
+],
+"rotation": [
+0,
+2.145,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+310.43,
+null,
+-495.6
+],
+"rotation": [
+0,
+1.725,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+352.34,
+null,
+-296.14
+],
+"rotation": [
+0,
+1.624,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+411,
+null,
+-491.83
+],
+"rotation": [
+0,
+4.314,
+0
+],
+"scale": [
+1.05,
+1.05,
+1.05
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+474.22,
+null,
+-271.73
+],
+"rotation": [
+0,
+2.074,
+0
+],
+"scale": [
+0.89,
+0.89,
+0.89
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+451.74,
+null,
+-513.4
+],
+"rotation": [
+0,
+3.643,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+454.46,
+null,
+-391.33
+],
+"rotation": [
+0,
+2.586,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+361.09,
+null,
+-529.33
+],
+"rotation": [
+0,
+0.167,
+0
+],
+"scale": [
+1.29,
+1.29,
+1.29
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+537.05,
+null,
+-422.01
+],
+"rotation": [
+0,
+4.672,
+0
+],
+"scale": [
+1.35,
+1.35,
+1.35
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+483.8,
+null,
+-452.32
+],
+"rotation": [
+0,
+5.98,
+0
+],
+"scale": [
+0.96,
+0.96,
+0.96
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+497.34,
+null,
+-393.54
+],
+"rotation": [
+0,
+3.55,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+268.23,
+null,
+-456.55
+],
+"rotation": [
+0,
+0.076,
+0
+],
+"scale": [
+1.04,
+1.04,
+1.04
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+362.34,
+null,
+-474.27
+],
+"rotation": [
+0,
+2.685,
+0
+],
+"scale": [
+1.15,
+1.15,
+1.15
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+516.53,
+null,
+-494.15
+],
+"rotation": [
+0,
+2.02,
+0
+],
+"scale": [
+0.9,
+0.9,
+0.9
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+422.83,
+null,
+-356.64
+],
+"rotation": [
+0,
+1.909,
+0
+],
+"scale": [
+1.44,
+1.44,
+1.44
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+444.56,
+null,
+-508.63
+],
+"rotation": [
+0,
+1.351,
+0
+],
+"scale": [
+1.24,
+1.24,
+1.24
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+500.63,
+null,
+-455.46
+],
+"rotation": [
+0,
+4.818,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+410.64,
+null,
+-328.71
+],
+"rotation": [
+0,
+4.262,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+534.42,
+null,
+-394.56
+],
+"rotation": [
+0,
+2.85,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+306.49,
+null,
+-341.07
+],
+"rotation": [
+0,
+0.331,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+342.91,
+null,
+-326.93
+],
+"rotation": [
+0,
+4.534,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+426.66,
+null,
+-503.48
+],
+"rotation": [
+0,
+5.667,
+0
+],
+"scale": [
+1.37,
+1.37,
+1.37
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+287.13,
+null,
+-487.66
+],
+"rotation": [
+0,
+2.933,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+405.62,
+null,
+-288.11
+],
+"rotation": [
+0,
+1.862,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+420.2,
+null,
+-292.65
+],
+"rotation": [
+0,
+2.942,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+481.38,
+null,
+-394.4
+],
+"rotation": [
+0,
+5.424,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+512.35,
+null,
+-444.53
+],
+"rotation": [
+0,
+0.091,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+415.29,
+null,
+-501.8
+],
+"rotation": [
+0,
+0.991,
+0
+],
+"scale": [
+1.38,
+1.38,
+1.38
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+505.71,
+null,
+-479.77
+],
+"rotation": [
+0,
+1.351,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+355.17,
+null,
+-504.4
+],
+"rotation": [
+0,
+2.626,
+0
+],
+"scale": [
+0.99,
+0.99,
+0.99
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+289.57,
+null,
+-475.74
+],
+"rotation": [
+0,
+5.028,
+0
+],
+"scale": [
+1.28,
+1.28,
+1.28
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+309.29,
+null,
+-484.31
+],
+"rotation": [
+0,
+6.15,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+538.06,
+null,
+-412.81
+],
+"rotation": [
+0,
+5.279,
+0
+],
+"scale": [
+0.87,
+0.87,
+0.87
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+403.77,
+null,
+-353.78
+],
+"rotation": [
+0,
+5.74,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+497.9,
+null,
+-295.52
+],
+"rotation": [
+0,
+4.993,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+378.67,
+null,
+-380.59
+],
+"rotation": [
+0,
+4.6,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+288.46,
+null,
+-435.06
+],
+"rotation": [
+0,
+1.675,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+524.1,
+null,
+-384.83
+],
+"rotation": [
+0,
+4.386,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+434,
+null,
+-261.86
+],
+"rotation": [
+0,
+0.532,
+0
+],
+"scale": [
+1.44,
+1.44,
+1.44
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+498.69,
+null,
+-409.81
+],
+"rotation": [
+0,
+1.28,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+489.3,
+null,
+-299.07
+],
+"rotation": [
+0,
+1.951,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+534.38,
+null,
+-445.48
+],
+"rotation": [
+0,
+4.125,
+0
+],
+"scale": [
+1.1,
+1.1,
+1.1
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+480.33,
+null,
+-454.67
+],
+"rotation": [
+0,
+3.541,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+374.95,
+null,
+-526.29
+],
+"rotation": [
+0,
+3.621,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+426.05,
+null,
+-443.37
+],
+"rotation": [
+0,
+2.178,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+316.12,
+null,
+-366.18
+],
+"rotation": [
+0,
+2.14,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+499.57,
+null,
+-285.96
+],
+"rotation": [
+0,
+1.361,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+419.38,
+null,
+-522.28
+],
+"rotation": [
+0,
+3.364,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+383.23,
+null,
+-526.28
+],
+"rotation": [
+0,
+3.406,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+448.5,
+null,
+-292.19
+],
+"rotation": [
+0,
+5.953,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+513.04,
+null,
+-430.76
+],
+"rotation": [
+0,
+5.006,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+523.57,
+null,
+-452.51
+],
+"rotation": [
+0,
+3.773,
+0
+],
+"scale": [
+0.94,
+0.94,
+0.94
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+424.71,
+null,
+-294.15
+],
+"rotation": [
+0,
+5.24,
+0
+],
+"scale": [
+0.93,
+0.93,
+0.93
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+457.82,
+null,
+-262.06
+],
+"rotation": [
+0,
+5.225,
+0
+],
+"scale": [
+1.28,
+1.28,
+1.28
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+473.02,
+null,
+-435.18
+],
+"rotation": [
+0,
+5.045,
+0
+],
+"scale": [
+1.13,
+1.13,
+1.13
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+430.13,
+null,
+-511.76
+],
+"rotation": [
+0,
+2.501,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+463.63,
+null,
+-420.95
+],
+"rotation": [
+0,
+3.99,
+0
+],
+"scale": [
+1.01,
+1.01,
+1.01
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+378.91,
+null,
+-523.35
+],
+"rotation": [
+0,
+4.751,
+0
+],
+"scale": [
+1.1,
+1.1,
+1.1
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+426.53,
+null,
+-489.66
+],
+"rotation": [
+0,
+0.422,
+0
+],
+"scale": [
+1.01,
+1.01,
+1.01
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+383.32,
+null,
+-459.43
+],
+"rotation": [
+0,
+3.075,
+0
+],
+"scale": [
+1.06,
+1.06,
+1.06
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+422.18,
+null,
+-310.14
+],
+"rotation": [
+0,
+1.879,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+507.13,
+null,
+-484.62
+],
+"rotation": [
+0,
+6.172,
+0
+],
+"scale": [
+0.89,
+0.89,
+0.89
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+498.97,
+null,
+-358.24
+],
+"rotation": [
+0,
+4.19,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+420.23,
+null,
+-534.52
+],
+"rotation": [
+0,
+2.416,
+0
+],
+"scale": [
+1.28,
+1.28,
+1.28
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+509.64,
+null,
+-395.2
+],
+"rotation": [
+0,
+1.169,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+480.53,
+null,
+-478.96
+],
+"rotation": [
+0,
+3.324,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+536.7,
+null,
+-336.65
+],
+"rotation": [
+0,
+3.261,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+433.12,
+null,
+-530.05
+],
+"rotation": [
+0,
+5.649,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+306.97,
+null,
+-354.05
+],
+"rotation": [
+0,
+4.9,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+316.85,
+null,
+-377.01
+],
+"rotation": [
+0,
+2.442,
+0
+],
+"scale": [
+1.34,
+1.34,
+1.34
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+529.08,
+null,
+-440.58
+],
+"rotation": [
+0,
+4.16,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+319.05,
+null,
+-505.66
+],
+"rotation": [
+0,
+1.738,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+449.46,
+null,
+-259.43
+],
+"rotation": [
+0,
+5.61,
+0
+],
+"scale": [
+1.38,
+1.38,
+1.38
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+510.65,
+null,
+-368.35
+],
+"rotation": [
+0,
+3.955,
+0
+],
+"scale": [
+1.1,
+1.1,
+1.1
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+411.2,
+null,
+-529.25
+],
+"rotation": [
+0,
+3.196,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+320.46,
+null,
+-479.02
+],
+"rotation": [
+0,
+4.529,
+0
+],
+"scale": [
+1.09,
+1.09,
+1.09
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+304.96,
+null,
+-442.13
+],
+"rotation": [
+0,
+4.639,
+0
+],
+"scale": [
+1.07,
+1.07,
+1.07
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+532.7,
+null,
+-411.08
+],
+"rotation": [
+0,
+3.776,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+498.81,
+null,
+-474.2
+],
+"rotation": [
+0,
+4.124,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+510.69,
+null,
+-471.56
+],
+"rotation": [
+0,
+0.187,
+0
+],
+"scale": [
+1.04,
+1.04,
+1.04
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+515.21,
+null,
+-373.51
+],
+"rotation": [
+0,
+1.351,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+356.02,
+null,
+-316.35
+],
+"rotation": [
+0,
+4.553,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+301.51,
+null,
+-361.65
+],
+"rotation": [
+0,
+5.556,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+385.33,
+null,
+-297.97
+],
+"rotation": [
+0,
+4.068,
+0
+],
+"scale": [
+1.35,
+1.35,
+1.35
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+287.64,
+null,
+-387.38
+],
+"rotation": [
+0,
+3.388,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+487.71,
+null,
+-455.43
+],
+"rotation": [
+0,
+1.474,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+462.28,
+null,
+-335.43
+],
+"rotation": [
+0,
+3.459,
+0
+],
+"scale": [
+1.05,
+1.05,
+1.05
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+516.78,
+null,
+-365.32
+],
+"rotation": [
+0,
+3.734,
+0
+],
+"scale": [
+1.37,
+1.37,
+1.37
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+412.91,
+null,
+-256.83
+],
+"rotation": [
+0,
+2.389,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+417.76,
+null,
+-484.35
+],
+"rotation": [
+0,
+1.498,
+0
+],
+"scale": [
+1.06,
+1.06,
+1.06
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+367.85,
+null,
+-508.62
+],
+"rotation": [
+0,
+1.173,
+0
+],
+"scale": [
+1.28,
+1.28,
+1.28
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+369.35,
+null,
+-335.42
+],
+"rotation": [
+0,
+2.324,
+0
+],
+"scale": [
+0.87,
+0.87,
+0.87
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+520.14,
+null,
+-440.61
+],
+"rotation": [
+0,
+2.711,
+0
+],
+"scale": [
+0.89,
+0.89,
+0.89
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+481.23,
+null,
+-496.34
+],
+"rotation": [
+0,
+3.939,
+0
+],
+"scale": [
+1.42,
+1.42,
+1.42
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+412.07,
+null,
+-284.53
+],
+"rotation": [
+0,
+5.8,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+402.73,
+null,
+-367.29
+],
+"rotation": [
+0,
+4.818,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+340.17,
+null,
+-503.54
+],
+"rotation": [
+0,
+2.95,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+427.1,
+null,
+-350.3
+],
+"rotation": [
+0,
+5.878,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+516.75,
+null,
+-426.68
+],
+"rotation": [
+0,
+4.579,
+0
+],
+"scale": [
+1.25,
+1.25,
+1.25
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+418.74,
+null,
+-281.71
+],
+"rotation": [
+0,
+4.242,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+526.09,
+null,
+-438.14
+],
+"rotation": [
+0,
+3.117,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+303.78,
+null,
+-448.21
+],
+"rotation": [
+0,
+0.135,
+0
+],
+"scale": [
+1.05,
+1.05,
+1.05
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+301.42,
+null,
+-487.79
+],
+"rotation": [
+0,
+5.27,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+410.42,
+null,
+-371.16
+],
+"rotation": [
+0,
+3.48,
+0
+],
+"scale": [
+1.03,
+1.03,
+1.03
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+362.76,
+null,
+-410.5
+],
+"rotation": [
+0,
+3.884,
+0
+],
+"scale": [
+1.03,
+1.03,
+1.03
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+463.04,
+null,
+-461.36
+],
+"rotation": [
+0,
+6.079,
+0
+],
+"scale": [
+1.25,
+1.25,
+1.25
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+330.19,
+null,
+-429.04
+],
+"rotation": [
+0,
+1.741,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+361.5,
+null,
+-376.62
+],
+"rotation": [
+0,
+1.674,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+307.01,
+null,
+-350.23
+],
+"rotation": [
+0,
+1.182,
+0
+],
+"scale": [
+0.91,
+0.91,
+0.91
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+472.03,
+null,
+-348.2
+],
+"rotation": [
+0,
+4.795,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+449.54,
+null,
+-407.68
+],
+"rotation": [
+0,
+3.439,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/lavacrust_rock.glb",
+"position": [
+475.99,
+null,
+-312.72
+],
+"rotation": [
+0,
+2.212,
+0
+],
+"scale": [
+1.36,
+1.36,
+1.36
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+334.49,
+null,
+-375.98
+],
+"rotation": [
+0,
+2.842,
+0
+],
+"scale": [
+1.09,
+1.09,
+1.09
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+280.65,
+null,
+-474.42
+],
+"rotation": [
+0,
+3.99,
+0
+],
+"scale": [
+1.28,
+1.28,
+1.28
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+279.87,
+null,
+-469.06
+],
+"rotation": [
+0,
+5.951,
+0
+],
+"scale": [
+1.43,
+1.43,
+1.43
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+355.61,
+null,
+-487.54
+],
+"rotation": [
+0,
+0.322,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "clusters/cluster_volcano.glb",
+"position": [
+528,
+null,
+-357.76
+],
+"rotation": [
+0,
+3.693,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+481.95,
+null,
+-462.68
+],
+"rotation": [
+0,
+2.354,
+0
+],
+"scale": [
+1.34,
+1.34,
+1.34
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+315.54,
+null,
+-466.16
+],
+"rotation": [
+0,
+2.661,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+525.34,
+null,
+-389.32
+],
+"rotation": [
+0,
+4.499,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+305.07,
+null,
+-435.05
+],
+"rotation": [
+0,
+1.706,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+351.48,
+null,
+-305.99
+],
+"rotation": [
+0,
+5.813,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_boulder.glb",
+"position": [
+364.31,
+null,
+-328.23
+],
+"rotation": [
+0,
+4.577,
+0
+],
+"scale": [
+1.2,
+1.2,
+1.2
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/steam_vent.glb",
+"position": [
+477.41,
+null,
+-396.31
+],
+"rotation": [
+0,
+2.276,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/ash_tree.glb",
+"position": [
+374.77,
+null,
+-513.31
+],
+"rotation": [
+0,
+3.341,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+},
+{
+"file": "volcano/basalt_columns.glb",
+"position": [
+512.86,
+null,
+-474.85
+],
+"rotation": [
+0,
+5.011,
+0
+],
+"scale": [
+1.01,
+1.01,
+1.01
+],
+"replaces": "(new) volcano ring dressing; replaces nothing, merged per chunk"
+}
+]
+}

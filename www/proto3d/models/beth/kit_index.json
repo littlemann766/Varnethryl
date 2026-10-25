@@ -1,23 +1,23 @@
 [
  {
   "file": "trees/tree_oak_a.glb",
-  "tris": 290,
-  "h": 5.93,
-  "w": 4.38,
+  "tris": 138,
+  "h": 5.88,
+  "w": 4.3,
   "cat": "trees",
   "replaces": "trees/oak (scenery.js) + main.js cone trees"
  },
  {
   "file": "trees/tree_oak_a_lod1.glb",
-  "tris": 176,
-  "h": 5.93,
-  "w": 4.15,
+  "tris": 60,
+  "h": 5.88,
+  "w": 3.98,
   "cat": "trees",
   "replaces": ""
  },
  {
   "file": "trees/tree_oak_a_bb.glb",
-  "tris": 4,
+  "tris": 6,
   "h": 5.6,
   "w": 4.6,
   "cat": "trees",
@@ -25,23 +25,23 @@
  },
  {
   "file": "trees/tree_oak_b.glb",
-  "tris": 290,
-  "h": 5.62,
-  "w": 4.6,
+  "tris": 138,
+  "h": 5.7,
+  "w": 4.52,
   "cat": "trees",
   "replaces": "trees/oak (scenery.js) + main.js cone trees"
  },
  {
   "file": "trees/tree_oak_b_lod1.glb",
-  "tris": 176,
+  "tris": 60,
   "h": 5.71,
-  "w": 3.86,
+  "w": 4.04,
   "cat": "trees",
   "replaces": ""
  },
  {
   "file": "trees/tree_oak_b_bb.glb",
-  "tris": 4,
+  "tris": 6,
   "h": 5.6,
   "w": 4.6,
   "cat": "trees",
@@ -49,23 +49,23 @@
  },
  {
   "file": "trees/tree_oak_autumn.glb",
-  "tris": 290,
-  "h": 5.6,
-  "w": 4.0,
+  "tris": 138,
+  "h": 5.51,
+  "w": 4.33,
   "cat": "trees",
   "replaces": "trees/oak (scenery.js) + main.js cone trees"
  },
  {
   "file": "trees/tree_oak_autumn_lod1.glb",
-  "tris": 176,
+  "tris": 60,
   "h": 5.29,
-  "w": 3.87,
+  "w": 4.22,
   "cat": "trees",
   "replaces": ""
  },
  {
   "file": "trees/tree_oak_autumn_bb.glb",
-  "tris": 4,
+  "tris": 6,
   "h": 5.6,
   "w": 4.6,
   "cat": "trees",
@@ -73,23 +73,23 @@
  },
  {
   "file": "trees/tree_oak_yellow.glb",
-  "tris": 290,
-  "h": 6.03,
-  "w": 4.26,
+  "tris": 138,
+  "h": 6.09,
+  "w": 4.2,
   "cat": "trees",
   "replaces": "trees/oak (scenery.js) + main.js cone trees"
  },
  {
   "file": "trees/tree_oak_yellow_lod1.glb",
-  "tris": 176,
-  "h": 6.02,
-  "w": 4.09,
+  "tris": 60,
+  "h": 6.04,
+  "w": 4.34,
   "cat": "trees",
   "replaces": ""
  },
  {
   "file": "trees/tree_oak_yellow_bb.glb",
-  "tris": 4,
+  "tris": 6,
   "h": 5.6,
   "w": 4.6,
   "cat": "trees",
@@ -97,23 +97,23 @@
  },
  {
   "file": "trees/tree_oak_red.glb",
-  "tris": 290,
-  "h": 5.59,
-  "w": 4.5,
+  "tris": 138,
+  "h": 5.67,
+  "w": 4.39,
   "cat": "trees",
   "replaces": "trees/oak (scenery.js) + main.js cone trees"
  },
  {
   "file": "trees/tree_oak_red_lod1.glb",
-  "tris": 176,
+  "tris": 60,
   "h": 5.42,
-  "w": 4.5,
+  "w": 3.83,
   "cat": "trees",
   "replaces": ""
  },
  {
   "file": "trees/tree_oak_red_bb.glb",
-  "tris": 4,
+  "tris": 6,
   "h": 5.6,
   "w": 4.6,
   "cat": "trees",
@@ -137,7 +137,7 @@
  },
  {
   "file": "trees/tree_pine_a_bb.glb",
-  "tris": 4,
+  "tris": 6,
   "h": 7.4,
   "w": 4.0,
   "cat": "trees",
@@ -161,7 +161,7 @@
  },
  {
   "file": "trees/tree_pine_b_bb.glb",
-  "tris": 4,
+  "tris": 6,
   "h": 7.4,
   "w": 4.0,
   "cat": "trees",
@@ -169,7 +169,7 @@
  },
  {
   "file": "trees/tree_birch_a.glb",
-  "tris": 278,
+  "tris": 98,
   "h": 6.62,
   "w": 4.11,
   "cat": "trees",
@@ -177,7 +177,7 @@
  },
  {
   "file": "trees/tree_birch_a_lod1.glb",
-  "tris": 110,
+  "tris": 50,
   "h": 6.45,
   "w": 3.58,
   "cat": "trees",
@@ -185,7 +185,7 @@
  },
  {
   "file": "trees/tree_birch_a_bb.glb",
-  "tris": 4,
+  "tris": 6,
   "h": 5.6,
   "w": 3.2,
   "cat": "trees",
@@ -225,7 +225,7 @@
  },
  {
   "file": "trees/tree_pine_snow_bb.glb",
-  "tris": 4,
+  "tris": 6,
   "h": 7.4,
   "w": 4.0,
   "cat": "trees",
@@ -233,23 +233,23 @@
  },
  {
   "file": "trees/tree_apple_blossom.glb",
-  "tris": 290,
-  "h": 5.93,
-  "w": 4.04,
+  "tris": 138,
+  "h": 6.02,
+  "w": 4.39,
   "cat": "trees",
   "replaces": "trees/apple (scenery.js) + main.js cone trees"
  },
  {
   "file": "trees/tree_apple_blossom_lod1.glb",
-  "tris": 176,
-  "h": 5.81,
-  "w": 3.58,
+  "tris": 60,
+  "h": 5.93,
+  "w": 3.68,
   "cat": "trees",
   "replaces": ""
  },
  {
   "file": "trees/tree_apple_blossom_bb.glb",
-  "tris": 4,
+  "tris": 6,
   "h": 5.0,
   "w": 4.2,
   "cat": "trees",
@@ -345,9 +345,9 @@
  },
  {
   "file": "rocks/boulder.glb",
-  "tris": 320,
-  "h": 1.73,
-  "w": 3.58,
+  "tris": 80,
+  "h": 1.53,
+  "w": 3.21,
   "cat": "rocks",
   "replaces": "rocks/boulder"
  },
@@ -520,9 +520,145 @@
   "replaces": ""
  },
  {
+  "file": "frost/frozen_pond.glb",
+  "tris": 1200,
+  "h": 0.38,
+  "w": 9.9,
+  "cat": "frost",
+  "replaces": "frostreach.js frozenLake (Phong transparent disc) + plain snow"
+ },
+ {
+  "file": "frost/snow_drift_a.glb",
+  "tris": 240,
+  "h": 0.61,
+  "w": 7.79,
+  "cat": "frost",
+  "replaces": ""
+ },
+ {
+  "file": "frost/snow_drift_b.glb",
+  "tris": 240,
+  "h": 0.66,
+  "w": 7.89,
+  "cat": "frost",
+  "replaces": ""
+ },
+ {
+  "file": "frost/ice_spire.glb",
+  "tris": 160,
+  "h": 2.22,
+  "w": 2.57,
+  "cat": "frost",
+  "replaces": "frost-cave.js emissive ice shards (proposal)"
+ },
+ {
+  "file": "volcano/ash_tree.glb",
+  "tris": 60,
+  "h": 4.52,
+  "w": 2.39,
+  "cat": "volcano",
+  "replaces": ""
+ },
+ {
+  "file": "volcano/steam_vent.glb",
+  "tris": 480,
+  "h": 4.96,
+  "w": 3.11,
+  "cat": "volcano",
+  "replaces": "(new) steam as geometry, no particles/emissive"
+ },
+ {
+  "file": "volcano/basalt_boulder.glb",
+  "tris": 80,
+  "h": 1.27,
+  "w": 3.21,
+  "cat": "volcano",
+  "replaces": ""
+ },
+ {
+  "file": "port/pier_post.glb",
+  "tris": 56,
+  "h": 1.6,
+  "w": 0.4,
+  "cat": "port",
+  "replaces": "harbor bollards"
+ },
+ {
+  "file": "port/crate_stack.glb",
+  "tris": 180,
+  "h": 1.84,
+  "w": 2.05,
+  "cat": "port",
+  "replaces": ""
+ },
+ {
+  "file": "port/net_rack.glb",
+  "tris": 828,
+  "h": 2.4,
+  "w": 3.4,
+  "cat": "port",
+  "replaces": ""
+ },
+ {
+  "file": "port/ship_galleon.glb",
+  "tris": 2984,
+  "h": 12.14,
+  "w": 16.07,
+  "cat": "port",
+  "replaces": "port-ships.js buildSailingShip(scale,true): ~28 meshes, 5 materials"
+ },
+ {
+  "file": "port/ship_sloop.glb",
+  "tris": 2280,
+  "h": 9.64,
+  "w": 11.08,
+  "cat": "port",
+  "replaces": "port-ships.js buildSailingShip(scale,false)"
+ },
+ {
+  "file": "hobcamp/hob_tent2.glb",
+  "tris": 84,
+  "h": 4.94,
+  "w": 5.8,
+  "cat": "hobcamp",
+  "replaces": "hobcamps.js tent cone + door plane"
+ },
+ {
+  "file": "hobcamp/hob_tent2_red.glb",
+  "tris": 84,
+  "h": 4.94,
+  "w": 5.8,
+  "cat": "hobcamp",
+  "replaces": ""
+ },
+ {
+  "file": "hobcamp/hob_totem.glb",
+  "tris": 232,
+  "h": 4.01,
+  "w": 1.95,
+  "cat": "hobcamp",
+  "replaces": ""
+ },
+ {
+  "file": "hobcamp/hob_banner.glb",
+  "tris": 14,
+  "h": 4.6,
+  "w": 1.74,
+  "cat": "hobcamp",
+  "replaces": "hobcamps.js pole + flag"
+ },
+ {
+  "file": "hobcamp/hob_rack.glb",
+  "tris": 62,
+  "h": 1.6,
+  "w": 2.0,
+  "cat": "hobcamp",
+  "replaces": ""
+ },
+ {
   "file": "clusters/cluster_grove_mixed.glb",
-  "tris": 2000,
-  "h": 6.57,
+  "tris": 1240,
+  "h": 6.51,
   "w": 16.14,
   "cat": "clusters",
   "replaces": "(new: fills empty land; merged into the chunk batch so it adds no draw call)"
@@ -545,9 +681,9 @@
  },
  {
   "file": "clusters/cluster_outcrop_a.glb",
-  "tris": 2460,
+  "tris": 1740,
   "h": 7.47,
-  "w": 13.18,
+  "w": 13.04,
   "cat": "clusters",
   "replaces": "(new: fills empty land; merged into the chunk batch so it adds no draw call)"
  },

@@ -9,7 +9,7 @@ def canopy(m,c,rad,col,n_cards=6,blobs=3,sub=1,seed=0):
   r=np.random.default_rng(seed)
   for i in range(blobs):
     o=np.array(c)+r.uniform(-.45,.45,3)*rad*np.array([1,.5,1])
-    blob(m,'leaf',rad*r.uniform(.55,.75),scale=(1,.8,1),sub=sub,jit=.22,t=o,col=col*0.95,uvs=2.0,seed=int(r.integers(1e6)))
+    blob(m,'leaf',rad*r.uniform(.6,.8),scale=(1,.8,1),sub=0,jit=.22,t=o,col=col*0.95,uvs=2.0,seed=int(r.integers(1e6)))
   for i in range(n_cards):
     a=r.uniform(0,6.28);o=np.array(c)+np.array([math.cos(a),r.uniform(-.3,.4),math.sin(a)])*rad*.55
     cards(m,'leaf',rad*1.25,rad*1.25,1,t=o-np.array([0,rad*.62,0]),col=col,yaw=a+1.57,tilt=r.uniform(-.4,.4))
@@ -17,7 +17,7 @@ def oak(seed,lod=0,pal='green'):
   m=M();r=np.random.default_rng(seed);h=r.uniform(2.6,3.2);trunk(m,h,.28,bend=(r.uniform(-.3,.3),r.uniform(-.3,.3)),seg=7 if not lod else 5)
   for k in range(0 if lod else 2):
     a=r.uniform(0,6.28);cyl(m,'bark',.12,.06,1.6,5,R=rot('y',a)@rot('z',.9),t=(0,h*.7,0))
-  canopy(m,(0,h+1.3,0),2.0,LEAFC[pal],n_cards=8 if not lod else 3,blobs=3 if not lod else 2,sub=1,seed=seed);return m
+  canopy(m,(0,h+1.3,0),2.0,LEAFC[pal],n_cards=12 if not lod else 5,blobs=4 if not lod else 2,sub=1,seed=seed);return m
 def pine(seed,lod=0,snowy=False):
   m=M();r=np.random.default_rng(seed);H=r.uniform(6,7.5);trunk(m,H*.35,.22,seg=6 if not lod else 4)
   tiers=4 if not lod else 2
@@ -39,7 +39,15 @@ def dead(seed,lod=0):
     a=r.uniform(0,6.28);y=r.uniform(h*.45,h*.9);cyl(m,'bark',.09,.02,r.uniform(1,1.8),4,R=rot('y',a)@rot('z',r.uniform(.6,1.1)),t=(0,y,0),col=W(0xb8b0a4))
   return m
 def billboard(kind,h,w):
-  m=M();cards(m,'imp_'+kind,w,h,2,col=W(0xffffff));return m
+  # 3 crossed planes with rounded (spherical) normals so the impostor shades like a volume, not a flat card
+  m=M();c=np.array([0,h*.55,0])
+  for i in range(3):
+    a=math.pi*i/3;R=rot('y',a);pts=[R@np.array(v) for v in [(-w/2,0,0),(w/2,0,0),(w/2,h,0),(-w/2,h,0)]]
+    uv=[tile_uv('imp_'+kind,*q) for q in [(0,1),(1,1),(1,0),(0,0)]]
+    nn=[]
+    for p in pts:v=p-c;v[1]*=.6;v=v/np.linalg.norm(v)+np.array([0,.35,0]);nn.append(v/np.linalg.norm(v))
+    m.tri([pts[0],pts[1],pts[2]],[uv[0],uv[1],uv[2]],W(0xffffff),n=[nn[0],nn[1],nn[2]]);m.tri([pts[0],pts[2],pts[3]],[uv[0],uv[2],uv[3]],W(0xffffff),n=[nn[0],nn[2],nn[3]])
+  return m
 def bush(seed,pal='green'):
   m=M();r=np.random.default_rng(seed);blob(m,'leaf',.75,scale=(1.2,.8,1),sub=1,t=(0,.5,0),col=LEAFC[pal]*.8,uvs=2,seed=seed)
   for i in range(4):

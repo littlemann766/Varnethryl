@@ -1,0 +1,1308 @@
+{
+"zone": "port",
+"note": "LOCAL to walled-harbor group (origin PORT_CENTER). Ships: replace the two buildSailingShip() groups at the same mooring; keep animateMooredShip on the parent.",
+"items": [
+{
+"file": "port/pier_post.glb",
+"position": [
+-14,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-14,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-14,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-14,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-16.6,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-16.6,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-16.6,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-16.6,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-19.2,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-19.2,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-19.2,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-19.2,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-21.8,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-21.8,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-21.8,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-21.8,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-24.4,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-24.4,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-24.4,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-24.4,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-27,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-27,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-27,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-27,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-29.6,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-29.6,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-29.6,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-29.6,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-32.2,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-32.2,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-32.2,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-32.2,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-34.8,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-34.8,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-34.8,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-34.8,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-37.400000000000006,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-37.400000000000006,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-37.400000000000006,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-37.400000000000006,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-40,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-40,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-40,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-40,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-42.6,
+0,
+-25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-42.6,
+0,
+-22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-42.6,
+0,
+22.2
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/pier_post.glb",
+"position": [
+-42.6,
+0,
+25.8
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-wooden-mooring-piers edge posts (new)",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "props/barrel.glb",
+"position": [
+-8,
+null,
+-30
+],
+"rotation": [
+0,
+2.829808760398999,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock dressing",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/crate_stack.glb",
+"position": [
+-10,
+null,
+30
+],
+"rotation": [
+0,
+5.968289553302807,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock dressing",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "props/barrel.glb",
+"position": [
+6,
+null,
+-50
+],
+"rotation": [
+0,
+1.3749917452121154,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock dressing",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/crate_stack.glb",
+"position": [
+20,
+null,
+-52
+],
+"rotation": [
+0,
+1.0019548247703352,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock dressing",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/crate_stack.glb",
+"position": [
+34,
+null,
+-50
+],
+"rotation": [
+0,
+4.202342027254403,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock dressing",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "props/barrel.glb",
+"position": [
+6,
+null,
+52
+],
+"rotation": [
+0,
+5.636835481898394,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock dressing",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/crate_stack.glb",
+"position": [
+20,
+null,
+50
+],
+"rotation": [
+0,
+1.6059258752083407,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock dressing",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "props/barrel.glb",
+"position": [
+48,
+null,
+40
+],
+"rotation": [
+0,
+3.178015941791702,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock dressing",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/crate_stack.glb",
+"position": [
+50,
+null,
+-38
+],
+"rotation": [
+0,
+5.9053264301624155,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock dressing",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/net_rack.glb",
+"position": [
+-6,
+null,
+-40
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) net drying racks",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/net_rack.glb",
+"position": [
+-6,
+null,
+40
+],
+"rotation": [
+0,
+3.14,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) net drying racks",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/net_rack.glb",
+"position": [
+30,
+null,
+57
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) net drying racks",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/net_rack.glb",
+"position": [
+30,
+null,
+-57
+],
+"rotation": [
+0,
+3.14,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) net drying racks",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "props/lamp_post.glb",
+"position": [
+-16,
+null,
+-36
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock lamps, no emissive",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "props/lamp_post.glb",
+"position": [
+-16,
+null,
+36
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "(new) dock lamps, no emissive",
+"frame": "walled-harbor local (PORT_CENTER origin)"
+},
+{
+"file": "port/ship_galleon.glb",
+"ship": true,
+"mooring": 0,
+"position": [
+-44,
+-0.28,
+-25
+],
+"rotation": [
+0,
+0.15,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "harbor-three-mast-sailing-ship (buildSailingShip(1.27,true))"
+},
+{
+"file": "port/ship_sloop.glb",
+"ship": true,
+"mooring": 1,
+"position": [
+-49,
+-0.28,
+24
+],
+"rotation": [
+0,
+-0.14,
+0
+],
+"scale": [
+1,
+1,
+1
+],
+"replaces": "harbor-single-mast-sailing-boat (buildSailingShip(1,false))"
+}
+]
+}

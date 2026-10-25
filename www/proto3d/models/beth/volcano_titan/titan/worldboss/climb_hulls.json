@@ -1,0 +1,29 @@
+{
+  "_note": "ConvexPolygonShape3D .tres in bone-local skeleton units. Add BoneAttachment3D(bone) -> StaticBody3D/AnimatableBody3D (layer climbable) -> CollisionShape3D(shape). Scale-agnostic: ride the Titan scale.",
+  "hulls": {
+    "shoulder_L": {
+      "bone": "shoulder_L",
+      "points": 29,
+      "shape": "collision/wb_climb_shoulder_L.tres",
+      "src_verts": 1399
+    },
+    "shoulder_R": {
+      "bone": "shoulder_R",
+      "points": 34,
+      "shape": "collision/wb_climb_shoulder_R.tres",
+      "src_verts": 1462
+    },
+    "spine_back": {
+      "bone": "spine2",
+      "points": 25,
+      "shape": "collision/wb_climb_spine_back.tres",
+      "src_verts": 623
+    },
+    "upper_back": {
+      "bone": "upperChest",
+      "points": 23,
+      "shape": "collision/wb_climb_upper_back.tres",
+      "src_verts": 1558
+    }
+  }
+}

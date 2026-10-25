@@ -19,7 +19,7 @@ func _ready() -> void:
 	var t := VStyle.label("Choose a Hero", 30, VStyle.GOLD); t.size_flags_horizontal = SIZE_EXPAND_FILL; top.add_child(t)
 	var x := Button.new(); x.text = "✕"; x.custom_minimum_size = Vector2(48, 48); x.name = "Close"; x.pressed.connect(func(): closed.emit()); top.add_child(x)
 	detail = VStyle.label("", 14, VStyle.PARCH); v.add_child(detail)
-	var sc := ScrollContainer.new(); sc.size_flags_vertical = SIZE_EXPAND_FILL; sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED; v.add_child(sc)
+	var sc := TouchScroll.new(); sc.size_flags_vertical = SIZE_EXPAND_FILL; v.add_child(sc)
 	grid = GridContainer.new(); grid.columns = 5; grid.size_flags_horizontal = SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10); sc.add_child(grid)
 	for h in VHeroData.all():

@@ -16,7 +16,17 @@ const DEFS := [
 	["house1",-9,19,PI,"Village House"], ["house2",9,19,PI,"Village House"], ["house3",-9,31,PI,"Village House"], ["house4",9,31,PI,"Village House"],
 ]
 ## Test 6: Beth's Godot "card2" buildings (metres, footprint-centred, +Z front, shared 2048 atlas) replace these.
-const CARD2 := ["inn", "bakery", "house1", "house2", "house3", "house4", "smithy", "apothecary", "guildhall"]
+const CARD2 := {"guildhall": "guildhall", "library": "library", "townhall": "townhall", "mage": "mage_academy", "treasury": "treasury",
+	"keep": "keep", "observatory": "observatory", "crypt": "crypt", "market": "market", "apothecary": "apothecary", "bakery": "bakery",
+	"inn": "inn", "smithy": "smithy", "temple": "temple", "training": "training_hall", "colosseum": "colosseum", "thieves": "thieves_den",
+	"house1": "house1", "house2": "house2", "house3": "house3", "house4": "house4",
+	"farmhouse": "tripo/bld_farmhouse_tripo", "barn": "tripo/bld_barn_stable_tripo"}
+## Heavy pieces ship and render LOD1 as their best tier (phone High): colosseum, library, mage academy, Tripo models.
+const CARD2_HEAVY := ["colosseum", "library", "mage", "farmhouse", "barn"]
+func _card2_path(id: String, suf: String) -> String:
+	var v: String = CARD2[id]
+	if CARD2_HEAVY.has(id) and suf == "": suf = "_lod1"
+	return ("res://assets/card2/%s%s.glb" % [v, suf]) if v.begins_with("tripo/") else ("res://assets/card2/bld_%s_card2%s.glb" % [v, suf])
 const CHIMNEYS := ["house1","house2","house3","house4","bakery","inn","smithy","farmhouse","thieves"]
 const PORT := Vector2(-425.6, 392)
 const ROADS := [
@@ -427,7 +437,7 @@ func _add_trimesh(n: Node3D, skip := "roof") -> void:
 func _building(d: Array) -> void:
 	var id: String = d[0]; var pos := Vector3(float(d[1]) * PK, 0, float(d[2]) * PK); var rot: float = d[3]
 	var card := CARD2.has(id)
-	var n := _place_glb("res://assets/card2/bld_%s_card2_lod1.glb" % id if card else "res://assets/buildings/bld_%s.glb" % id, pos, rot)
+	var n := _place_glb(_card2_path(id, "_lod1") if card else "res://assets/buildings/bld_%s.glb" % id, pos, rot)
 	_add_trimesh(n, "" if card else "roof")   # card2: collision from Beth's own LOD1 mesh
 	var aabb := AABB(); var first := true
 	for mi in _meshes(n, []):
@@ -450,7 +460,7 @@ func _swap_buildings() -> void:
 		for b in buildings:
 			b.lods = []; b.roofs = []
 			for suf in ["", "_lod1", "_lod2"]:
-				var vp := ("res://assets/card2/bld_%s_card2%s.glb" if CARD2.has(b.id) else "res://assets/hi/buildings/bld_%s%s.glb") % [b.id, suf]
+				var vp := _card2_path(b.id, suf) if CARD2.has(b.id) else "res://assets/hi/buildings/bld_%s%s.glb" % [b.id, suf]
 				var v: Node3D = load(vp).instantiate()
 				b.node.add_child(v); b.lods.append(v)
 				var rf = v.find_child("roof", true, false)
@@ -584,6 +594,14 @@ func _hi_terrain() -> void:
 	# lake with Beth's shore pieces, waterline at y=0
 	var w := MeshInstance3D.new(); var pm := CylinderMesh.new(); pm.top_radius = 66; pm.bottom_radius = 66; pm.height = 0.2; pm.radial_segments = 64; pm.rings = 1
 	pm.material = _water_mat(); w.mesh = pm; w.position = Vector3(LAKE.x, -0.1, LAKE.y); add_child(w)
+	# the boss's Tripo lighthouse: rock island + tower share one origin (Beth). LOD1/LOD2 only.
+	var lh := Node3D.new(); lh.name = "Lighthouse"; lh.position = Vector3(LAKE.x + 18, -0.6, LAKE.y - 12); add_child(lh)
+	for part in ["lighthouse_rock_island", "lighthouse_tower"]:
+		for k in 2:
+			var v: Node3D = load("res://assets/card2/tripo/bld_%s_tripo%s.glb" % [part, ["_lod1", "_lod2"][k]]).instantiate(); lh.add_child(v)
+			for mi in _meshes(v, []):
+				mi.visibility_range_begin = [0.0, 160.0][k]; mi.visibility_range_end = [160.0, 0.0][k]
+			if k == 0 and part == "lighthouse_rock_island": _add_trimesh(v, "")
 	for i in 12:
 		var a3 := i / 12.0 * TAU
 		var p3 := LAKE + Vector2(cos(a3), sin(a3)) * 60.0

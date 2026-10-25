@@ -29,7 +29,7 @@ func _ready() -> void:
 	var hd := HBoxContainer.new(); v.add_child(hd)
 	var t := VStyle.label("Settings", 20, VStyle.GOLD2); t.size_flags_horizontal = SIZE_EXPAND_FILL; hd.add_child(t)
 	var x := Button.new(); x.text = "✕"; x.name = "setClose"; x.custom_minimum_size = Vector2(44, 44); x.pressed.connect(func(): closed.emit()); hd.add_child(x)
-	var sc := ScrollContainer.new(); sc.size_flags_vertical = SIZE_EXPAND_FILL; sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED; v.add_child(sc)
+	var sc := TouchScroll.new(); sc.size_flags_vertical = SIZE_EXPAND_FILL; v.add_child(sc)
 	body = VBoxContainer.new(); body.size_flags_horizontal = SIZE_EXPAND_FILL; body.add_theme_constant_override("separation", 8); sc.add_child(body)
 	VPrefs.changed.connect(func(_p): for s in syncs: s.call())
 

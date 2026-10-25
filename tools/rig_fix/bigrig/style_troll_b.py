@@ -29,8 +29,8 @@ def attack2():   # Avalanche Lance: coil back, then a straight stiff-armed lunge
 def attack3():   # Brother's Vengeance: sharp diagonal chop high-right to low-left, then a stiff stop
     key(0, rot=rest())
     r = body(lean=-4, twist=-24); armfk(r, 'R', 150, 45, 60, yaw=-20); armfk(r, 'L', 25, 15, 25); key(0.9, hips=(0, 0.01, 0), rot=r, jaw=4)
-    r = body(lean=34, twist=26, side=-4); armfk(r, 'R', 80, 10, 8, yaw=30); armfk(r, 'L', -15, 20, 25); key(1.2, hips=(0, -0.03, -0.05), rot=r, jaw=16, wrist=WR)
-    key(1.3, hips=(0, -0.03, -0.052), rot=r, jaw=10, wrist=WR)
+    r = body(lean=42, twist=26, side=-4, knees=14); armfk(r, 'R', 80, 10, 8, yaw=30); armfk(r, 'L', -15, 20, 25); key(1.2, hips=(0, -0.03, -0.09), rot=r, jaw=16, wrist=WR)
+    key(1.3, hips=(0, -0.03, -0.092), rot=r, jaw=10, wrist=WR)
     end = key(1.8, rot=rest()); CONTACT['attack3'] = (1.2, 'mace'); return end
 def hit():
     key(0, rot=rest()); r = body(lean=-10, head=-14); armfk(r, 'R', 10, 15, 40); armfk(r, 'L', -10, 15, 20); key(0.12, hips=(0, 0.02, -0.01), rot=r); return key(0.45, rot=rest())

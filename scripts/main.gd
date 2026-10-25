@@ -4,7 +4,7 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "11"
+const VERSION := "12"
 ## test 11 layout (boss: buildings on the gate road / walkways through buildings): positions in METRES, solved by
 ## /workspace/layout/solve.py from Beth's collision footprints (+1 m margin): every building sits beside a STREET with its
 ## front (+Z, all door_points) facing it, a short spur path from each front door to the street, nothing on a street,
@@ -318,25 +318,8 @@ func _terrain() -> void:
 	sb.add_child(cs); add_child(sb)
 
 func _roads() -> void:
-	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for r in ROADS:
-		var pts := []
-		for i in range(1, r.size()):
-			var a := Vector2(r[i-1][0], r[i-1][1]); var b := Vector2(r[i][0], r[i][1])
-			var n := int(ceil(a.distance_to(b) / 4.0))
-			for k in n: pts.append(a.lerp(b, float(k) / n))
-		pts.append(Vector2(r[-1][0], r[-1][1]))
-		for i in range(pts.size() - 1):
-			var a: Vector2 = pts[i]; var b: Vector2 = pts[i + 1]
-			var dir := (b - a).normalized(); var side := Vector2(-dir.y, dir.x) * 4.4
-			var q := [a - side, a + side, b + side, b - side]
-			var v := []
-			for p in q: v.append(Vector3(p.x, height(p.x, p.y) + 0.12, p.y))
-			for idx in [0, 2, 1, 0, 3, 2]:   # clockwise from above = front face (was back-facing: black on phones)
-				st.set_normal(Vector3.UP); st.set_uv(Vector2(v[idx].x, v[idx].z) * 0.25); st.add_vertex(v[idx])
-	var mi := MeshInstance3D.new(); mi.mesh = st.commit()
-	var m := _mat(Color(0.55, 0.49, 0.40), 0.9)
-	mi.material_override = m; mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(mi)
+	# Beth (test 12): terrain-following ribbons on the rendered 10 m triangle surface, smooth bends, grass skirt, 3 LODs
+	add_child(load("res://assets/roads/road_builder.gd").new().build(self, ROADS))
 
 # ---------- environment / lighting ----------
 func _env() -> void:
@@ -928,9 +911,9 @@ func _volcano_titan() -> void:
 	var arena := volc_base + Vector3(aj[0], aj[1], aj[2])
 	for i in 3:
 		var a := i / 3.0 * TAU
-		var gl := OmniLight3D.new(); gl.light_color = Color(1.0, 0.45, 0.15); gl.light_energy = 3.0; gl.omni_range = 26.0
+		var gl := OmniLight3D.new(); gl.light_color = Color(1.0, 0.45, 0.15); gl.light_energy = 1.4; gl.omni_range = 18.0
 		gl.position = arena + Vector3(cos(a) * 36.0, 2.0, sin(a) * 36.0); gl.shadow_enabled = false; add_child(gl); volc_fx.append(gl)
-	var cg := OmniLight3D.new(); cg.light_color = Color(1.0, 0.5, 0.2); cg.light_energy = 2.0; cg.omni_range = 45.0
+	var cg := OmniLight3D.new(); cg.light_color = Color(1.0, 0.5, 0.2); cg.light_energy = 0.5; cg.omni_range = 40.0
 	cg.position = arena + Vector3(0, 14, 0); add_child(cg); volc_fx.append(cg)
 	# smoke plume + ash at Beth's vent markers
 	for vt in volc_vj.vents:
@@ -1674,6 +1657,10 @@ func _run_bench() -> void:
 				["ships_sea", Vector3(hb.x - 20, 14, hb.y + 70), Vector3(hb.x - 120, 2, hb.y)],
 				["ship_close", Vector3(hb.x - 18 + 16, 7, hb.y - 23 - 20), Vector3(hb.x - 18, 4, hb.y - 23)],
 				["ship_waterline", Vector3(hb.x - 18 + 14, 1.2, hb.y - 23 - 4), Vector3(hb.x - 18, 0.5, hb.y - 23)],
+				["road_hairpin", Vector3(330, height(330, 330) + 30, 330), Vector3(304, height(304, 356), 356)],
+				["road_hairpin_low", Vector3(318, height(318, 340) + 3, 340), Vector3(304, height(304, 356), 356)],
+				["road_north_gate", Vector3(0, height(0, -230) + 14, -230), Vector3(0, height(0, -180), -180)],
+				["farmstead", Vector3(-92, 22, 78), Vector3(-134, 3, 46)],
 				["boats_close", Vector3(hb.x - 2, 4, hb.y + 12), Vector3(hb.x - 10, 1, hb.y + 12)],
 				["castle_" + OS.get_environment("CASTLE_TAG"), Vector3(395, height(395, -40) + 4, -40), Vector3(480, 25, -110)]]:
 			hc.look_at_from_position(v[1], v[2]); hc.current = true

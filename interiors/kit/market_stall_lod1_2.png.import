@@ -3,11 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://lgqskcq0wi4a"
-path.s3tc="res://.godot/imported/market_stall_lod1_2.png-fde6fb8825604fe47b982105f52ca1ff.s3tc.ctex"
-path.etc2="res://.godot/imported/market_stall_lod1_2.png-fde6fb8825604fe47b982105f52ca1ff.etc2.ctex"
+path="res://.godot/imported/market_stall_lod1_2.png-fde6fb8825604fe47b982105f52ca1ff.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "c3750ee56206ba61b4943817b7c46979"
@@ -16,13 +14,13 @@ generator_parameters={
 [deps]
 
 source_file="res://interiors/kit/market_stall_lod1_2.png"
-dest_files=["res://.godot/imported/market_stall_lod1_2.png-fde6fb8825604fe47b982105f52ca1ff.s3tc.ctex", "res://.godot/imported/market_stall_lod1_2.png-fde6fb8825604fe47b982105f52ca1ff.etc2.ctex"]
+dest_files=["res://.godot/imported/market_stall_lod1_2.png-fde6fb8825604fe47b982105f52ca1ff.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.8
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
@@ -41,5 +39,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=512
+process/size_limit=1024
 detect_3d/compress_to=1

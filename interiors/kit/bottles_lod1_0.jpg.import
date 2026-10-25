@@ -3,11 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bixhyevsja7jl"
-path.s3tc="res://.godot/imported/bottles_lod1_0.jpg-2528a974dde5f34ce490b2fbf12cea4a.s3tc.ctex"
-path.etc2="res://.godot/imported/bottles_lod1_0.jpg-2528a974dde5f34ce490b2fbf12cea4a.etc2.ctex"
+path="res://.godot/imported/bottles_lod1_0.jpg-2528a974dde5f34ce490b2fbf12cea4a.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "d065e5237dcfbf173a3bc5e95384f67e"
@@ -16,13 +14,13 @@ generator_parameters={
 [deps]
 
 source_file="res://interiors/kit/bottles_lod1_0.jpg"
-dest_files=["res://.godot/imported/bottles_lod1_0.jpg-2528a974dde5f34ce490b2fbf12cea4a.s3tc.ctex", "res://.godot/imported/bottles_lod1_0.jpg-2528a974dde5f34ce490b2fbf12cea4a.etc2.ctex"]
+dest_files=["res://.godot/imported/bottles_lod1_0.jpg-2528a974dde5f34ce490b2fbf12cea4a.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.8
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
@@ -41,5 +39,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=512
+process/size_limit=1024
 detect_3d/compress_to=1

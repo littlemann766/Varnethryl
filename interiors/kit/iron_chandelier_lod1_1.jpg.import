@@ -3,11 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://nxo4a71sig5b"
-path.s3tc="res://.godot/imported/iron_chandelier_lod1_1.jpg-c5154a1ee126ef6413963fd34b6982fc.s3tc.ctex"
-path.etc2="res://.godot/imported/iron_chandelier_lod1_1.jpg-c5154a1ee126ef6413963fd34b6982fc.etc2.ctex"
+path="res://.godot/imported/iron_chandelier_lod1_1.jpg-c5154a1ee126ef6413963fd34b6982fc.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "5a086a73fd2bf1e69db62dfb2db6b61d"
@@ -16,13 +14,13 @@ generator_parameters={
 [deps]
 
 source_file="res://interiors/kit/iron_chandelier_lod1_1.jpg"
-dest_files=["res://.godot/imported/iron_chandelier_lod1_1.jpg-c5154a1ee126ef6413963fd34b6982fc.s3tc.ctex", "res://.godot/imported/iron_chandelier_lod1_1.jpg-c5154a1ee126ef6413963fd34b6982fc.etc2.ctex"]
+dest_files=["res://.godot/imported/iron_chandelier_lod1_1.jpg-c5154a1ee126ef6413963fd34b6982fc.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.8
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
@@ -41,5 +39,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=512
+process/size_limit=1024
 detect_3d/compress_to=1

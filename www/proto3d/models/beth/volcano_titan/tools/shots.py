@@ -12,7 +12,7 @@ bpy.ops.mesh.primitive_plane_add(size=900,location=(0,0,-0.05)); g=bpy.context.o
 for o in bpy.data.objects:
     if 'lava' in o.name: pl=bpy.data.lights.new('l','POINT')
 cam=bpy.data.objects.new('c',bpy.data.cameras.new('c')); sc.collection.objects.link(cam); sc.camera=cam
-P=dict(hero=((-230,-200,40),(0,0,40),28),aerial=((60,-150,260),(0,0,30),30),path=((np.float64(-115.17), np.float64(-81.73), np.float64(3.92)),(np.float64(-69.57), np.float64(-113.95), np.float64(10.42)),18),arena=((-24,24,50),(6,-6,39),18),arenaclose=((-6,6,43),(-38,-14,45),20))
+P=dict(hero=((-230,-200,40),(0,0,40),28),aerial=((60,-150,260),(0,0,30),30),path=((float(-115.17), float(-81.73), float(3.92)),(float(-69.57), float(-113.95), float(10.42)),18),arena=((-24,24,50),(6,-6,39),18),pathupper=((float(63.91), float(49.28), float(49.63)),(float(30.98), float(64.78), float(57.5)),20),rimcut=((float(2.61), float(64.04), float(62.22)),(float(-9.65), float(54.75), float(61.5)),20),rimramp=((float(-9.65), float(54.75), float(62.58)),(float(12.02), float(44.73), float(57.99)),20),arenaclose=((-6,6,43),(-38,-14,45),20))
 sel=sys.argv[-3].split(',') if len(sys.argv)>3 and ',' in sys.argv[-3] else list(P)
 for k in sel:
     if k not in P: continue

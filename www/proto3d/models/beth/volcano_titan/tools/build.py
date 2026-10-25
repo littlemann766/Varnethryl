@@ -103,13 +103,20 @@ def mkmesh2(name,V,F,UVL,mi):
     ul=me.uv_layers.new(); ul.data.foreach_set('uv',UVL.astype(np.float32).ravel())
     me.polygons.foreach_set('use_smooth',np.ones(len(F),bool)); me.polygons.foreach_set('material_index',mi.astype(np.int32))
     o=bpy.data.objects.new(name,me); bpy.context.scene.collection.objects.link(o); return o
-def boxuv(V,F,scale):
-    T=V[F]; n=np.cross(T[:,1]-T[:,0],T[:,2]-T[:,0]); ax=np.abs(n).argmax(1)
+def boxuv(V,F,scale,warp=False):
+    T=V[F].copy(); n=np.cross(T[:,1]-T[:,0],T[:,2]-T[:,0]); ax=np.abs(n).argmax(1)
+    if warp:
+        x,y,z=T[...,0].copy(),T[...,1].copy(),T[...,2].copy()
+        T[...,0]=x+1.8*np.sin(z*0.31+y*0.05)+1.1*np.sin(y*0.17)
+        T[...,1]=y+1.8*np.sin(z*0.27+x*0.05)+1.1*np.sin(x*0.19)
+        T[...,2]=z+1.4*np.sin(x*0.23)+1.4*np.sin(y*0.21)
     u=np.where(ax[:,None]==0,T[:,:,1],T[:,:,0]); v=np.where(ax[:,None]==2,T[:,:,1],T[:,:,2])
     return np.stack([u,v],-1).reshape(-1,2)/scale, n
 def mat_cliff(sz):
     m=bpy.data.materials.new('volcano_cliff'); m.use_nodes=True; nt=m.node_tree; b=nt.nodes['Principled BSDF']
-    a=nt.nodes.new('ShaderNodeTexImage'); a.image=bpy.data.images.load(f'/tmp/volc/c_albedo_{sz}.png'); nt.links.new(a.outputs[0],b.inputs['Base Color'])
+    a=nt.nodes.new('ShaderNodeTexImage'); a.image=bpy.data.images.load(f'/tmp/volc/c_albedo_{sz}.png')
+    vc=nt.nodes.new('ShaderNodeVertexColor'); vc.layer_name='Col'; mx=nt.nodes.new('ShaderNodeMix'); mx.data_type='RGBA'; mx.blend_type='MULTIPLY'; mx.inputs[0].default_value=1.0
+    nt.links.new(a.outputs[0],mx.inputs[6]); nt.links.new(vc.outputs[0],mx.inputs[7]); nt.links.new(mx.outputs[2],b.inputs['Base Color'])
     n=nt.nodes.new('ShaderNodeTexImage'); n.image=bpy.data.images.load(f'/tmp/volc/c_normal_{sz}.png'); n.image.colorspace_settings.name='Non-Color'
     nn=nt.nodes.new('ShaderNodeNormalMap'); nt.links.new(n.outputs[0],nn.inputs[1]); nt.links.new(nn.outputs[0],b.inputs['Normal'])
     b.inputs['Roughness'].default_value=0.88; b.inputs['Metallic'].default_value=0; return m
@@ -119,12 +126,12 @@ for k in range(0,len(P)-1,1):
 sd=0.0; last=-9
 cum=np.concatenate([[0],np.cumsum(np.hypot(*np.diff(P[:,:2],axis=0).T))])
 for k in range(len(P)-1):
-    if cum[k]-last<3.0: continue
+    if cum[k]-last<1.7: continue
     last=cum[k]; t=P[min(k+1,len(P)-1),:2]-P[k,:2]; t/=np.linalg.norm(t)+1e-9; nrm=np.array([-t[1],t[0]])
     for sgn in (-1,1):
-        q=P[k,:2]+nrm*sgn*rng.uniform(3.35,3.7)+t*rng.uniform(-0.8,0.8)
+        q=P[k,:2]+nrm*sgn*rng.uniform(3.5,3.9)+t*rng.uniform(-0.5,0.5)
         if np.hypot(*q)<37: continue
-        stones.append((q[0],q[1],rng.uniform(0.22,0.42)))
+        stones.append((q[0],q[1],rng.uniform(0.4,0.75)))
 def clearance(lst):
     return min(kdp.query([x,y])[0]-1.35*s for x,y,s in lst)
 print('big rock min clearance to path centreline minus radius:',round(clearance(big),2),' small:',round(clearance(small),2))
@@ -138,7 +145,7 @@ def build(tag,step,big_sub,small_sub,small_n,stone_sub,tex,lavatex,ctex,vseg):
     steep=(sl>48)|(nz<0.42)
     # same choice for both triangles of a grid quad
     uvp=planar(V)[F.ravel()]
-    uvb,_=boxuv(V,F,6.0)
+    uvb,_=boxuv(V,F,6.0,warp=True)
     UV=np.where(np.repeat(steep,3)[:,None],uvb,uvp); MI=steep.astype(int)
     parts=[rock(x,y,s,big_sub,i,crag=True) for i,(x,y,s) in enumerate(big)]
     if small_sub is not None: parts+=[rock(x,y,s,small_sub,1000+i) for i,(x,y,s) in enumerate(small[:small_n])]
@@ -150,12 +157,21 @@ def build(tag,step,big_sub,small_sub,small_n,stone_sub,tex,lavatex,ctex,vseg):
     for v,f in parts:
         u,_=boxuv(v,f,3.0); VV.append(v);FF.append(f+off);UU.append(u);MM.append(np.ones(len(f),int));off+=len(v)
     V=np.concatenate(VV);F=np.concatenate(FF)
-    o=mkmesh2('volcano'+tag,V,F,np.concatenate(UU),np.concatenate(MM)); o.data.materials.append(mt); o.data.materials.append(mc)
+    MMc=np.concatenate(MM); Lp=V[F.ravel()]
+    rgm=np.random.default_rng(3)
+    def mac(p,f,s): return np.sin(p[:,0]*f+s)*np.sin(p[:,1]*f*1.3+s*2)*np.sin(p[:,2]*f*0.7+s*3)
+    m=0.82+0.16*mac(Lp,0.09,1)+0.1*mac(Lp,0.23,2)+0.05*mac(Lp,0.6,4)
+    tint=np.stack([m*(1+0.06*mac(Lp,0.05,7)),m,m*(1-0.05*mac(Lp,0.05,7))],1)
+    cliffL=np.repeat(MMc==1,3)
+    VC=np.where(cliffL[:,None],np.clip(tint,0,1),1.0); VC=np.concatenate([VC,np.ones((len(VC),1))],1)
+    o=mkmesh2('volcano'+tag,V,F,np.concatenate(UU),MMc)
+    ca=o.data.color_attributes.new('Col','BYTE_COLOR','CORNER'); ca.data.foreach_set('color',VC.astype(np.float32).ravel())
+    o.data.materials.append(mt); o.data.materials.append(mc)
     def lz(X,Y):
         fw=nd.map_coordinates(FW,[(Y+R)/D,(X+R)/D],order=1); h=hs(X,Y); rr=np.hypot(X,Y)
-        return np.where(rr<41.5,FLOOR-1.5,h-0.15+0.7*fw)
+        return np.where(rr<41.5,FLOOR-1.0,h-0.15+0.7*fw)
     def lm(X,Y):
-        mm=nd.binary_dilation(moat,iterations=3); fw=FW>0.12
+        mm=nd.binary_dilation(moat,iterations=3)|(d['r']<34.2); fw=FW>0.12
         return nd.map_coordinates((mm|fw).astype(np.float32),[(Y+R)/D,(X+R)/D],order=0)>0.5
     LV,LF=grid(max(step,0.8),zf=lz,mask=lm)
     lo=mkmesh('volcano_lava'+tag,LV,LF,LV[:,:2]/12.0); lo.data.materials.append(ml)
@@ -169,8 +185,10 @@ for f,s in [('t_albedo',[4096,2048,1024]),('t_normal',[4096,2048,1024]),('t_orm'
         im.resize((z,z),Image.LANCZOS).save(f'/tmp/volc/{f}_{key}.png')
 info={}
 def export(path):
-    bpy.ops.export_scene.gltf(filepath=path,export_format='GLB',export_image_format='JPEG',export_jpeg_quality=88,export_apply=True,export_yup=True)
-for tag,args in [('',(0.8,2,1,300,1,4096,1024,'h',20)),('_lod1',(1.3,1,None,0,None,2048,512,'m',12)),('_lod2',(2.0,1,None,0,None,1024,256,'l',8))]:
+    bpy.ops.export_scene.gltf(filepath=path,export_format='GLB',export_image_format='JPEG',export_jpeg_quality=88,export_apply=True,export_yup=True,export_vertex_color='ACTIVE')
+if __name__=='__main__':
+  pass
+for tag,args in [('',(0.88,3,2,300,2,4096,1024,'h',20)),('_lod1',(1.3,2,None,0,None,2048,512,'m',12)),('_lod2',(2.0,1,None,0,None,1024,256,'l',8))]:
     o,lo,vt,tris=build(tag,*args)
     # markers (glTF nodes) for Lucky
     def emp(n,p):

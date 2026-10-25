@@ -36,7 +36,7 @@ wg=(np.clip((14-Hh)/10,0,1)*np.clip((30-slope)/15,0,1))[...,None]
 grass=Cb*0.9*(0.8+0.4*fine[...,None]); col=col*(1-wg)+grass*wg
 lum=Cb.mean(-1,keepdims=True)+1e-3; col=col*(0.8+0.2*Cb/lum)
 # his model's mossy grey-green on the outer flanks (keeps his look); crater + crags stay basalt
-wh=(np.clip((r-62)/14,0,1)*np.clip((55-slope)/20,0,1)*0.97)[...,None]
+wh=(np.clip((r-62)/14,0,1)*np.clip((72-slope)/22,0,1)*0.97)[...,None]
 moss=C(.30,.36,.22)[None,None]; mf=np.clip(fbm(24,4,31)*1.6-0.45,0,1)[...,None]*np.clip((30-slope)/15,0,1)[...,None]
 his=(Cb*1.05*(1-mf*0.55)+moss*mf*0.55)*(0.72+0.56*fine[...,None])*(1+0.25*np.clip(cav,-1,1)[...,None])
 col=col*(1-wh)+his*1.25*wh
@@ -47,12 +47,31 @@ pg=C(.33,.27,.21)[None,None]*(0.8+0.25*pn[...,None]+0.1*grain[...,None])
 rut=np.clip(1-np.abs(np.abs(dist)-1.15)/0.35,0,1)*(0.6+0.4*pn); pg=pg*(1-0.35*rut[...,None])
 edge=np.clip((dist-2.4)/0.8,0,1); pg=pg*(1-edge[...,None])+C(.2,.19,.18)*(0.7+0.6*grain[...,None])*edge[...,None]
 pmf=np.clip((3.6-dist)/0.8,0,1)[...,None]; col=col*(1-pmf)+pg*pmf
-col=col*(0.75+0.25*np.clip(1-cav*0.4,0.4,1.3))[...,None]
+inner_=np.clip((70-r)/10,0,1)
+col=col*(1-(1-np.clip(1-cav*0.4,0.4,1.3))*0.25*inner_-(1-inner_)*0.0)[...,None]
+lift=(np.clip((r-64)/10,0,1)*np.clip(cav*0.5,0,1)*0.6)[...,None]; col=col*(1-lift)+his*1.3*lift
 # glowing cracks
 crack=np.clip((cr-0.86)/0.06,0,1)
 em_mask=np.clip((33.5-r)/2,0,1)*0.9+np.clip(1-np.abs(r-38)/5,0,1)+np.clip(nd.gaussian_filter(FW,14)*3,0,1)
 em_mask*= (1-pmf[...,0])
-glow=crack*np.clip(em_mask,0,1)
+glow=crack*np.clip(em_mask,0,1)*(r>34)
+from scipy.spatial import cKDTree
+c0=int((R-35)/px); c1=int((R+35)/px); sub=np.s_[c0:c1,c0:c1]
+gg=g[c0:c1]; XX,YY=np.meshgrid(gg,gg); rg_=np.random.default_rng(77)
+seeds=rg_.uniform(-36,36,(900,2)); kd=cKDTree(seeds)
+dd,ii=kd.query(np.stack([XX.ravel(),YY.ravel()],1),k=2); d1=dd[:,0].reshape(XX.shape); d2=dd[:,1].reshape(XX.shape); pid=ii[:,0].reshape(XX.shape)
+edge=d2-d1; seam=np.clip(1-edge/0.22,0,1)
+rr_=np.hypot(XX,YY); am=np.clip((33.2-rr_)/0.8,0,1)
+ptone=rg_.uniform(0.75,1.25,len(seeds))[pid]
+drift=np.clip(fbm(14,4,90)[sub]*1.8-0.75+np.clip((rr_-24)/9,0,1)*0.5,0,1)
+plate=C(.075,.065,.06)*(ptone[...,None]*(0.75+0.5*fine[sub][...,None]))*(0.75+0.25*np.clip(edge/1.2,0,1))[...,None]
+ashc=C(.36,.34,.32)*(0.85+0.3*fine[sub][...,None])
+pc=plate*(1-drift[...,None]*0.85)+ashc*drift[...,None]*0.85
+gs=seam*(1-drift*0.9)*am
+pc=pc*(1-gs[...,None])+C(.95,.38,.06)*gs[...,None]
+col[sub]=col[sub]*(1-am[...,None])+pc*am[...,None]
+glow[sub]=np.maximum(glow[sub],gs)
+Hd[sub]-=seam*am*0.12-drift*am*0.05
 col=col*(1-glow[...,None])+C(.9,.35,.08)*glow[...,None]
 E=np.clip(glow[...,None]*C(1.0,.38,.06)*1.0,0,1)
 Image.fromarray((np.clip(np.flipud(col),0,1)**(1/2.2)*255).astype(np.uint8)).save('t_albedo.png')

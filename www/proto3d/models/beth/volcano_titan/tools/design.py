@@ -39,7 +39,7 @@ strata=nd.gaussian_filter(np.sin(H*2.6+fbm(12,3,17)*5),1.2)*1.4
 H+= crag*(rid*3.5+strata*0.6)
 # floor: cracked plates, small relief
 fl=r<MOAT_IN
-H=np.where(fl,FLOOR+fbm(30,4,9)*0.35,H)
+H=np.where(fl,FLOOR-2.4+fbm(30,4,9)*0.35,H)  # lava basin under the swappable arena floor stages
 H=H*np.clip((147-r)/12,0,1)**0.8
 # 4. path: outer spiral to a breach at TH1, then inner ramp to arena
 TH1=np.radians(100.0); HN=60.0

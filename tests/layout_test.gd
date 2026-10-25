@@ -21,6 +21,15 @@ func _run() -> void:
 		n += 1
 		var r: Rect2 = b.rect
 		var g := r.grow(1.0)
+		if maxf(absf(r.get_center().x), absf(r.get_center().y)) > M.CITY_HALF:   # test 14: the farmstead lives outside the walls now
+			ok(r.position.x > M.CITY_HALF + 20 or r.end.x < -M.CITY_HALF - 20 or r.position.y > M.CITY_HALF + 20 or r.end.y < -M.CITY_HALF - 20, "%s outside building hugs the wall" % b.id)
+			var lo := INF; var hi := -INF
+			for c in [r.position, r.end, Vector2(r.position.x, r.end.y), Vector2(r.end.x, r.position.y)]: var hy: float = m.height(c.x, c.y); lo = minf(lo, hy); hi = maxf(hi, hy)
+			ok(hi - lo < 0.3 and absf(b.node.global_position.y - lo) < 0.4, "%s not snapped to a level pad (corners %.2f..%.2f, base %.2f)" % [b.id, lo, hi, b.node.global_position.y])
+			for rd in M.ROADS:
+				for i in range(1, rd.size()):
+					ok(not _seg_hits_rect(Vector2(rd[i-1][0], rd[i-1][1]), Vector2(rd[i][0], rd[i][1]), r.grow(1.0)), "%s on outer road" % b.id)
+			continue
 		# 1. streets: sample the grown rect's area on a 0.5 m grid against the street edge distance
 		var hit := false
 		var x := g.position.x
@@ -50,7 +59,9 @@ func _run() -> void:
 		doors += 1
 		var b: Dictionary = {}
 		for x in m.buildings: if x.id == sp[3]: b = x
-		ok(M.street_edge_dist(sp[1]) < 0.0, "%s door spur does not reach a street (end %s, %.2f)" % [sp[3], sp[1], M.street_edge_dist(sp[1])])
+		var outside: bool = maxf(absf(b.node.global_position.x), absf(b.node.global_position.z)) > M.CITY_HALF
+		if outside: ok(m._road_dist(sp[1]) < 2.0, "%s door path does not reach its dirt road (%s)" % [sp[3], sp[1]])
+		else: ok(M.street_edge_dist(sp[1]) < 0.0, "%s door spur does not reach a street (end %s, %.2f)" % [sp[3], sp[1], M.street_edge_dist(sp[1])])
 		var lp: Vector3 = b.node.global_transform.affine_inverse() * Vector3(sp[0].x, 0, sp[0].y)
 		ok(lp.z > 0.0, "%s spur does not start on the front (door) side" % sp[3])
 		for o in m.buildings:
@@ -71,6 +82,28 @@ func _run() -> void:
 		for sp in m.spurs: if sp[3] == b.id: has = true
 		ok(has, "%s has no footpath to its door" % b.id)
 	ok(fh == 1, "one farmstead")
+	# 6. test 14 fillers: data-driven rows, never on a street, a landmark, another filler, or any landmark door path
+	var ids := {}
+	for f in m.fillers:
+		ok(not ids.has(f.id), "filler id %s unique" % f.id); ids[f.id] = true
+		var r: Rect2 = f.rect
+		ok(r.position.x >= -175 and r.end.x <= 175 and r.position.y >= -175 and r.end.y <= 175, "%s inside the walls" % f.id)
+		var hit := false; var x := r.position.x
+		while x <= r.end.x and not hit:
+			var z := r.position.y
+			while z <= r.end.y:
+				if M.street_edge_dist(Vector2(x, z)) < 0.0: hit = true; break
+				z += 0.5
+			x += 0.5
+		ok(not hit, "%s on a street" % f.id)
+		for b in m.buildings: ok(not r.intersects(b.rect), "%s overlaps %s" % [f.id, b.id])
+		for o in m.fillers: if o.id < f.id: ok(not r.intersects(o.rect), "%s overlaps %s" % [f.id, o.id])
+		for sp in m.spurs: ok(not _seg_hits_rect(sp[0], sp[1], r), "%s blocks the %s door path" % [f.id, sp[3]])
+		ok(M.street_edge_dist(f.path[1]) < 0.0, "%s path reaches a street" % f.id)
+		ok(f.node.get_node("Door") is Marker3D, "%s has a door marker" % f.id)
+		for b in m.buildings: ok(not _seg_hits_rect(f.path[0], f.path[1], b.rect), "%s path crosses %s" % [f.id, b.id])
+	ok(m.fillers.size() >= 60, "town is crowded: %d filler houses/shops" % m.fillers.size())
+	print("fillers: %d" % m.fillers.size())
 	print("LAYOUT %d buildings, %d failed" % [n, fails])
 	quit(1 if fails else 0)
 

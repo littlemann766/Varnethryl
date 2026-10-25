@@ -11,9 +11,9 @@ const VERSION := "12"
 ## no overlaps, walls/gates clear (|x|,|z| <= 172). Closest free slot to the v1.5.33 spot (BUILDING_DEFS * 2.8).
 ## The barn is gone: Beth's farmhouse_tripo is the whole farmstead; its barn doors lead into the barn interior.
 const DEFS := [
-	["colosseum",118.0,100.5,PI,"Colosseum"], ["keep",-29.0,-105.0,PI/2,"Castle Keep"], ["farmhouse",-132.0,48.4,-PI/2,"Farmhouse"],
+	["colosseum",118.0,100.5,PI,"Colosseum"], ["keep",-29.0,-105.0,PI/2,"Castle Keep"], ["farmhouse",-290.0,-288.0,-PI/2,"Farmhouse"],
 	["temple",129.5,-22.0,PI/2,"Temple"], ["mage",-124.0,-87.5,0.0,"Arcane Academy"], ["stables",-59.1,108.0,-PI/2,"Stables"],
-	["observatory",-114.0,-111.5,PI,"Observatory"], ["windmill",56.0,112.8,0.0,"Windmill"], ["training",127.0,30.0,PI/2,"Training Hall"],
+	["observatory",130.0,-149.0,0.0,"Observatory"], ["windmill",56.0,112.8,0.0,"Windmill"], ["training",127.0,30.0,PI/2,"Training Hall"],
 	["library",-57.5,-56.0,-PI/2,"Grand Library"], ["treasury",114.0,-84.0,0.0,"Treasury"], ["market",-63.2,-22.6,0.0,"Market Provisioner"],
 	["thieves",-101.2,13.6,PI,"Thieves' Den"], ["townhall",59.5,-84.0,PI/2,"Town Hall"], ["guildhall",-14.0,-54.5,PI,"Guild Hall"],
 	["crypt",120.0,-114.0,PI,"Crypt"], ["inn",59.5,-23.4,PI/2,"Inn"], ["bakery",-64.2,56.0,0.0,"Bakery"],
@@ -95,7 +95,7 @@ const ROADS := [
 	[[0,194],[-65,204],[-145,219],[-211,220],[-269,231],[-336,269],[-387,322],[-425.6,375]],
 	[[0,-194],[-10,-247],[-42,-283],[-101,-327],[-99,-391],[-68,-439],[-8,-463],[62,-446],[95,-412],[105,-360]],
 	[[-558,-6],[-474,-12],[-398,-7],[-322,0],[-270,6],[-232,4],[-185,0]],
-	[[-315,0],[-305,-67],[-313,-132],[-330,-203],[-366,-273],[-315,-284]],
+	[[-315,0],[-305,-67],[-313,-132],[-330,-203],[-366,-273],[-315,-284],[-308,-289],[-308,-297]],   # test 14: runs on to the farmstead doors
 	[[185,0],[264,-3],[335,0],[421,-2],[500,0],[558,-7]],
 	[[345,0],[377,62],[387,127],[354,190],[309,247],[285,311],[304,356],[269,315],[214,259],[150,225],[76,200],[0,194]],
 	[[0,194],[5,265],[9,344],[0,440],[-6,558]],
@@ -118,6 +118,7 @@ const STREETS := [
 const PLAZA_R := 36.4
 const SPUR_GAP := 3.1     # m from a front door to the street edge (solver GAP 2.5 + 0.6)
 var terrain_mat: ShaderMaterial
+var fillers := []         # test 14: TownFillers.build() -> [{id, node, door, path, rect}]
 var spurs := []           # [door Vector2, end Vector2, half width, building id]
 var extra_doors := []     # second entrances that lead to their own interior (the farmstead's barn doors)
 const GATES := [[Vector2(0, 1), PI, "South Gate"], [Vector2(0, -1), 0.0, "North Gate"], [Vector2(1, 0), -PI / 2, "East Gate"], [Vector2(-1, 0), PI / 2, "West Gate"]]
@@ -234,6 +235,8 @@ func _ready() -> void:
 	_walls_and_gate()
 	for d in DEFS: _building(d)
 	_street_kit()
+	_farm_fields()
+	fillers = TownFillers.build(self)   # test 14: rows of filler houses/shops from assets/town/fillers.json
 	_streets_to_shader()
 	# test 10: boss "Fix the castle and or get rid of it" - the Tripo backdrop castle reads as shredded/floating, removed
 	_harbour()
@@ -276,6 +279,11 @@ func height(x: float, z: float) -> float:
 	if dv < 200.0:
 		if is_nan(_volc_h0): _volc_h0 = _height_raw(VOLC.x, VOLC.y, VOLC.length())
 		h = lerpf(_volc_h0, h, smoothstep(150.0, 200.0, dv))
+	# test 14 (boss: "put the farmstead here"): the farmstead moved out to the end of the west dirt road; level pad
+	var fd := Vector2(x, z).distance_to(FARM)
+	if fd < 70.0:
+		if is_nan(_farm_h0): _farm_h0 = _height_raw(FARM.x, FARM.y, FARM.length())
+		h = lerpf(_farm_h0, h, smoothstep(30.0, 70.0, fd))
 	# SW-corner port: level harbour platform (+0.6) blending out to the hills by 170 m, then the sea floor
 	var pd := Vector2(x, z).distance_to(PORT)
 	if pd < 260.0: h = lerpf(0.05, h, smoothstep(80.0, 260.0, pd))
@@ -520,13 +528,86 @@ func _fountain() -> void:
 	pm.direction = Vector3(0, 1, 0); pm.spread = 18; pm.initial_velocity_min = 4.0; pm.initial_velocity_max = 5.0; pm.gravity = Vector3(0, -9.8, 0)
 	p.position = Vector3(0, 4.7, 0); add_child(p); fx_any.append([p, 1])
 
+## test 14 (boss: flat blue rectangle with tan discs by the Stables): natural irregular pond, soft muddy bank, reeds,
+## notched lily pads. No collision box (it was a hidden 40x26 wall); shallow water is walkable.
+const POND := Vector3(-110, 0, 110)
+func _pond_r(a: float) -> float:
+	return 1.0 + 0.13 * sin(a * 3.0 + 0.7) + 0.08 * sin(a * 5.0 + 2.1) + 0.05 * sin(a * 9.0)
+
 func _pond() -> void:
-	var w := MeshInstance3D.new(); var pm := PlaneMesh.new(); pm.size = Vector2(40, 26); pm.subdivide_width = 40; pm.subdivide_depth = 26
-	pm.material = _water_mat(); w.mesh = pm; w.position = Vector3(-110, 0.08, 110); add_child(w)
-	var edge := MeshInstance3D.new(); var bm := BoxMesh.new(); bm.size = Vector3(43, 0.3, 29); bm.material = _mat(Color(0.4, 0.36, 0.3))
-	edge.mesh = bm; edge.position = Vector3(-110, -0.12, 110); add_child(edge)
-	_static_box(Vector3(-110, 0.5, 110), Vector3(40, 1, 26))
-	blockers.append([Vector2(-110, 110), 24.0])
+	var RX := 17.0; var RZ := 11.0; var N := 72
+	var water := SurfaceTool.new(); water.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var bank := SurfaceTool.new(); bank.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var mud := Color(0.27, 0.22, 0.15); var grass := Color(0.36, 0.5, 0.22)
+	for i in N:
+		var a0 := TAU * i / N; var a1 := TAU * (i + 1) / N
+		var p0 := Vector3(cos(a0) * RX * _pond_r(a0), 0, sin(a0) * RZ * _pond_r(a0))
+		var p1 := Vector3(cos(a1) * RX * _pond_r(a1), 0, sin(a1) * RZ * _pond_r(a1))
+		for v in [Vector3.ZERO, p1, p0]: water.set_normal(Vector3.UP); water.set_uv(Vector2(v.x, v.z) / 8.0); water.add_vertex(v)
+		# bank: inner (under the water edge, mud) -> outer (+3.5 m, fades into grass), slight rise
+		var q0 := p0 * (1.0 + 3.5 / p0.length()); var q1 := p1 * (1.0 + 3.5 / p1.length())
+		var i0 := p0 * 0.9; var i1 := p1 * 0.9
+		var vs := [[i0, mud, -0.04], [p1 * 0.9, mud, -0.04], [q1, grass, 0.03], [i0, mud, -0.04], [q1, grass, 0.03], [q0, grass, 0.03]]
+		for t in vs:
+			bank.set_color(t[1]); bank.set_normal(Vector3.UP); var v: Vector3 = t[0]; v.y = t[2]; bank.add_vertex(v)
+	var bm := StandardMaterial3D.new(); bm.vertex_color_use_as_albedo = true; bm.roughness = 0.95
+	var bmi := MeshInstance3D.new(); bmi.mesh = bank.commit(); bmi.material_override = bm; bmi.position = POND + Vector3(0, 0.03, 0)
+	bmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(bmi)
+	var wmi := MeshInstance3D.new(); wmi.mesh = water.commit(); wmi.material_override = _water_mat(); wmi.position = POND + Vector3(0, 0.07, 0)
+	wmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(wmi)
+	var rng := RandomNumberGenerator.new(); rng.seed = 1414
+	# reeds: clumps of thin tapered blades along the bank
+	var reed := MultiMeshInstance3D.new(); var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.use_colors = true
+	var rm := CylinderMesh.new(); rm.top_radius = 0.0; rm.bottom_radius = 0.035; rm.height = 1.0; rm.radial_segments = 4; rm.rings = 1
+	var rmat := StandardMaterial3D.new(); rmat.vertex_color_use_as_albedo = true; rmat.roughness = 0.9; rm.material = rmat
+	mm.mesh = rm; mm.instance_count = 420
+	for k in 420:
+		var a := rng.randf() * TAU
+		if fmod(a, 1.6) > 1.0: a = rng.randf() * TAU   # clumpy
+		var r := rng.randf_range(0.85, 1.05)
+		var p := Vector3(cos(a) * RX * _pond_r(a) * r, 0, sin(a) * RZ * _pond_r(a) * r)
+		var hgt := rng.randf_range(0.9, 1.9)
+		var bs := Basis(Vector3(rng.randf_range(-1, 1), 0, rng.randf_range(-1, 1)).normalized(), rng.randf_range(0.0, 0.25)).scaled(Vector3(1, hgt, 1))
+		mm.set_instance_transform(k, Transform3D(bs, p + Vector3(0, hgt * 0.5, 0)))
+		mm.set_instance_color(k, Color(0.32, 0.45, 0.18).lerp(Color(0.55, 0.5, 0.25), rng.randf() * 0.5))
+	reed.multimesh = mm; reed.position = POND; add_child(reed)
+	# lily pads: green discs with a wedge notch, a few pink flowers
+	var pad := SurfaceTool.new(); pad.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in 14:
+		var a0 := 0.5 + (TAU - 0.5) * i / 14.0; var a1 := 0.5 + (TAU - 0.5) * (i + 1) / 14.0
+		for v in [Vector3.ZERO, Vector3(cos(a1), 0, sin(a1)) * 0.5, Vector3(cos(a0), 0, sin(a0)) * 0.5]: pad.set_normal(Vector3.UP); pad.add_vertex(v)
+	var pm := StandardMaterial3D.new(); pm.albedo_color = Color(0.2, 0.42, 0.14); pm.roughness = 0.6; pm.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var padm := pad.commit()
+	for k in 26:
+		var a := rng.randf() * TAU; var r := rng.randf_range(0.35, 0.8)
+		var p := Vector3(cos(a) * RX * _pond_r(a) * r, 0.09, sin(a) * RZ * _pond_r(a) * r)
+		var lp := MeshInstance3D.new(); lp.mesh = padm; lp.material_override = pm; lp.position = POND + p
+		lp.rotation.y = rng.randf() * TAU; lp.scale = Vector3.ONE * rng.randf_range(0.8, 1.6); lp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(lp)
+		if k % 5 == 0:
+			var fl := MeshInstance3D.new(); var sm := SphereMesh.new(); sm.radius = 0.13; sm.height = 0.14; fl.mesh = sm
+			var fm := StandardMaterial3D.new(); fm.albedo_color = Color(0.95, 0.6, 0.75); fl.material_override = fm; fl.position = lp.position + Vector3(0.1, 0.05, 0); add_child(fl)
+	blockers.append([Vector2(POND.x, POND.z), 20.0])
+
+## test 14: crop fields + paddock fence beside the relocated farmstead (behind it, away from the road end)
+func _farm_fields() -> void:
+	var soil := StandardMaterial3D.new(); soil.albedo_color = Color(0.36, 0.27, 0.17); soil.roughness = 1.0
+	var crop := StandardMaterial3D.new(); crop.albedo_color = Color(0.42, 0.55, 0.2); crop.roughness = 0.9
+	var wheat := StandardMaterial3D.new(); wheat.albedo_color = Color(0.78, 0.66, 0.32); wheat.roughness = 0.9
+	for f in [[Vector2(FARM.x + 34.0, FARM.y - 14.0), crop], [Vector2(FARM.x + 34.0, FARM.y + 14.0), wheat]]:
+		var c: Vector2 = f[0]; var y := height(c.x, c.y)
+		var bed := MeshInstance3D.new(); var pm := PlaneMesh.new(); pm.size = Vector2(22, 24); pm.material = soil; bed.mesh = pm
+		bed.position = Vector3(c.x, y + 0.04, c.y); bed.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(bed)
+		var mmi := MultiMeshInstance3D.new(); var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D
+		var bm := BoxMesh.new(); bm.size = Vector3(20.5, 0.55, 0.7); bm.material = f[1]; mm.mesh = bm; mm.instance_count = 11
+		for k in 11: mm.set_instance_transform(k, Transform3D(Basis.IDENTITY, Vector3(0, 0.3, -10.5 + k * 2.1)))
+		mmi.multimesh = mm; mmi.position = bed.position; add_child(mmi)
+		for side in 4:   # fence ring of Beth's fence prop
+			for k in 4:
+				var off := Vector2(-9.0 + k * 6.0, 13.0) if side % 2 == 0 else Vector2(12.0, -9.0 + k * 6.0)
+				if side >= 2: off = -off
+				var fp := c + off
+				_street_prop("fence", Vector3(fp.x, height(fp.x, fp.y), fp.y), 0.0 if side % 2 == 0 else PI / 2)
+	blockers.append([FARM + Vector2(34, 0), 32.0]); blockers.append([FARM, 26.0])
 
 func _walls_and_gate() -> void:
 	# test 13 (boss: flat untextured grey wall/lintel): fieldstone texture, world triplanar
@@ -780,6 +861,8 @@ func _add_trimesh(n: Node3D, skip := "roof") -> void:
 
 func _building(d: Array) -> void:
 	var id: String = d[0]; var pos := Vector3(float(d[1]), 0, float(d[2])); var rot: float = d[3]
+	var outside := maxf(absf(pos.x), absf(pos.z)) > CITY_HALF
+	if outside: pos.y = height(pos.x, pos.z) - 0.15   # snapped onto its levelled pad (base sunk 15 cm: no gap)
 	var card := CARD2.has(id)
 	var n := _place_glb(_card2_path(id, "_lod1") if card else "res://assets/buildings/bld_%s.glb" % id, pos, rot)
 	if card: _add_col(_card2_path(id, "_col"), pos, rot)   # Beth's -colonly collision: walls + walkable door openings
@@ -807,7 +890,7 @@ func _building(d: Array) -> void:
 		var w: Vector3 = n.global_transform * dp; var w2 := Vector2(w.x, w.z); var e := w2
 		for k in 120:   # walk out from the door until 0.4 m onto the street
 			e = w2 + fwd * (0.25 * k)
-			if street_edge_dist(e) < -0.4: break
+			if (not outside and street_edge_dist(e) < -0.4) or (outside and _road_dist(e) < 1.6): break
 		spurs.append([w2, e, 1.0 if dp.x > 3.0 and id == "farmhouse" else 0.85, id])   # narrow footpaths: 1.7 m (2 m to the barn doors)
 	if id == "farmhouse":
 		# the barn half of the welded farmstead: its 4 m doors enter the barn interior (InteriorManager.extra_doors)
@@ -954,6 +1037,9 @@ const LAKE := Vector2(250, -200)
 ## cone centre at ground level, scale 1. Phone High = lod1 (87k tris); caldera arena r 33 m at y 39 ringed by a lava moat;
 ## 6.5 m spiral path from path_start (SW foot) to path_end (arena). The Ashen Titan stands at titan_spawn.
 const VOLC := Vector2(405, -402)
+const FARM := Vector2(-290.0, -288.0)   # test 14: farmstead pad centre (outside the walls, end of the west dirt road)
+const OLD_FARM_LOT := Vector2(-132.0, 48.4)   # its old in-town lot, now a garden green
+var _farm_h0 := NAN
 var _volc_h0 := NAN
 var volc_base := Vector3.ZERO
 var lava_mats: Array[BaseMaterial3D] = []
@@ -1665,6 +1751,30 @@ func _run_bench() -> void:
 		vc.look_at_from_position(C + Vector3(26, 64, 22), C + Vector3(0, 42, 0)); vc.current = true
 		await _shot_here("t13_win")
 		print("T13 state=%s stage=%d" % [q.state, q.stage])
+		get_tree().quit()
+		return
+	if only == "t14":
+		VUI._enter("solo"); bench = true
+		var tag := OS.get_environment("T14_TAG"); if tag == "": tag = "after"
+		var hc := Camera3D.new(); hc.far = 3000; add_child(hc)
+		_set_time(11.0); tier = 2; apply_quality()
+		var tv := [["pond_close", Vector3(-110 + 24, 7, 110 + 16), Vector3(-110, 0, 110)], ["pond_top", Vector3(-109.5, 70, 110.5), Vector3(-110, 0, 110)],
+			["wide_n", Vector3(0, 40, -150), Vector3(0, 60, -900)], ["wide_e", Vector3(150, 40, 0), Vector3(900, 60, 0)],
+			["wide_s", Vector3(0, 40, 150), Vector3(0, 60, 900)], ["wide_w", Vector3(-150, 40, 0), Vector3(-900, 60, 0)],
+			["aerial", Vector3(-300, 520, 700), Vector3(80, 0, -150)], ["volcano_view", Vector3(200, 40, -150), Vector3(405, 60, -402)],
+			["port_wide", Vector3(-250, 90, 250), Vector3(-500, 0, 450)]]
+		for v in tv:
+			var a0: Vector3 = v[1]; var t0: Vector3 = v[2]
+			a0.y += height(a0.x, a0.z); t0.y += maxf(0.0, height(t0.x, t0.z)) * 0.0
+			hc.look_at_from_position(a0, t0, Vector3.UP if absf(a0.x - t0.x) + absf(a0.z - t0.z) > 0.1 else Vector3(0, 0, -1)); hc.current = true
+			for i in 40: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_t14_%s_%s.png" % [tag, v[0]]); print("BENCH ", v[0])
+		hc.current = false; cam.current = true
+		cheats.role_provider = func() -> String: return "owner"
+		cheats.request("fly", true)
+		await _shot("t14_%s_hud_ground" % tag, Vector3(-6, 0, 60), PI / 2, -0.12, 11.0, 2, 30)
+		set_flight(true)
+		await _shot("t14_%s_hud_flying" % tag, Vector3(-6, 0, 60), PI / 2, -0.12, 11.0, 2, 30)
 		get_tree().quit()
 		return
 	if only == "t13city":

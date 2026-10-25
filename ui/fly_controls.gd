@@ -59,7 +59,8 @@ func _sync() -> void:
 	var f := flying()
 	up_btn.visible = f; down_btn.visible = f
 	if fly_btn.button_pressed != f: fly_btn.set_pressed_no_signal(f)
-	jump_btn.text = "▲ Up" if f else "⤒ Jump"
+	# test 14 (boss: duplicate "▲ Up"): in flight the HUD ▲/▼ pair climbs; Jump hides instead of becoming a 2nd Up
+	jump_btn.visible = not f; jump_btn.text = "⤒ Jump"
 
 func step(dt: float) -> void:
 	_sync()

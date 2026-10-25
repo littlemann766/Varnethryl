@@ -26,6 +26,7 @@ import { createMiniMap } from './minimap.js';
 import { loadPrefs, savePrefs, qualityPlan, followYaw } from './camprefs.js';
 import { worldProfile, loadScale } from './charscale.js';
 import { buildTownOutskirts, TOWN_MAP_ROADS } from './townlands.js';
+import { KIT as BETH_KIT } from './beth-kit.js';
 import { buildHobgoblinCamps } from './hobcamps.js';
 import { CITY_HALF, FROST_PORTAL, FROST_SUMMIT, TITAN_CENTER, PORT_CENTER, FROST_REALM, terrainBiome, onLava } from './bossregions.js';
 import { buildFrostRealm, frostElevation, FROST_EXIT } from './frostreach.js';
@@ -277,6 +278,8 @@ if(BLD_ON){try{
   });
   for (const m of [IT, IL, IL2]) { m.castShadow = true; m.receiveShadow = true; scene.add(m); }
   window.__treeCount = pts.length;
+  if (BETH_KIT.ready && !/nokit/.test(location.search)) { const A = new BETH_KIT.Acc(); pts.forEach((p, i) => { const g = BETH_KIT.geo(i % 4 === 3 ? (i % 8 === 7 ? 'tree_birch_a_lod1' : 'tree_oak_a_lod1') : i % 2 ? 'tree_pine_a_lod1' : 'tree_pine_b_lod1'); A.add(g, p.x, 0, p.z, i * 2.1, p.s * 0.75); });
+    for (const m of [IT, IL, IL2]) scene.remove(m); const km = new THREE.Mesh(A.geo(), BETH_KIT.material); km.name = 'beth-town-trees'; km.castShadow = km.receiveShadow = true; km.userData.keep = true; scene.add(km); }
 }
 // a few crates/barrels (solid props)
 for (const [x, z] of (BLD_ON ? [] : [[-8.2, -4.2], [-8.6, -3.2], [9.2, -5.8], [8.4, 6.6]])) {

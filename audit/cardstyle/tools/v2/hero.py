@@ -3,6 +3,7 @@ import numpy as np, kit2
 from kit2 import cyl, cone, barrel, pot_plant
 from kit3 import tower, pinnacle
 from bld4 import glancet, statue, rock, cb
+from kit2 import crate
 UP=np.array([0,1.0,0])
 def temple(c):
     m=c['m']; X1=c['X1']; E=c['E']; Rh=c['Rh']; hs=c['hs']; t=np.array([0,0,-1.0]); n=np.array([1.0,0,0])
@@ -54,15 +55,44 @@ def keep(c):
     return c
 def townhall(c):
     m=c['m']; t=np.array([1.0,0,0]); n=np.array([0,0,1.0]); zf=c['hs']+0.8
+    hs=c['hs']; E=c['E']
+    # flat card front: one symmetric screen wall, gold string courses, lion shield centre, banners on the flanking towers
+    for s in(-1,1): m.box((min(s*2.72,s*6.0),0,hs-0.05),(max(s*2.72,s*6.0),E+0.4,hs+0.8),'ashlar',2.0)
+    for y in(c['g'],E): m.beam((-6.0,y,hs+0.86),(6.0,y,hs+0.86),0.12,'gold')
+    hs=hs+0.55
     for sx in(-1,1):
-        tower(m,(sx*3.6,0,c['hs']+0.2),1.05,c['E']+3.2,5.4,wins=3)
+        cb(m,(sx*6.9,E+1.0,hs+0.4+1.55),1.1,4.4)
+        for x in(sx*4.3,): glancet(m,(x,1.2,hs+0.25),t,n,0.9,2.4); glancet(m,(x,c['g']+0.6,hs+0.25),t,n,0.9,2.4); glancet(m,(x,c['g']+3.8,hs+0.25),t,n,0.9,2.2)
+        pinnacle(m,(sx*6.0,E+0.4,hs+0.1),2.2)
     return c
 def inn(c):
     m=c['m']; zf=c['D']/2+0.4+1.2
     for x in(-2.0,3.2): barrel(m,(x,0,zf+1.6),0.32,0.75); m.LOD=1; m.blob((x,0.85,zf+1.6),0.32,'flowers',6); m.LOD=99
     return c
 SIGNSIZE=dict(inn=1.3,bakery=1.4,smithy=1.2,market=1.2,guildhall=1.3,townhall=1.1)
-APPLY=dict(temple=temple,mage_academy=mage_academy,keep=keep,townhall=townhall,inn=inn)
+def market(c):
+    m=c['m']; from kit3 import stall, awning; from kit2 import crate
+    D=c['D']; z=D/2
+    # crowded card front: striped awnings over every bay, a row of loaded stalls, sacks/crates/barrels/flowers (door at x=-1.8 kept clear)
+    awning(m,-5.6,-4.0,c['g']-0.15,z+0.5,1.4,0.6,6)
+    for x in(-5.0,3.4,5.4): stall(m,x,z+3.4,1.6)
+    for x in(-4.6,-3.4,0.4,2.0,3.2,4.6):
+        m.LOD=1; barrel(m,(x,0,z+1.0+0.3*(x%2)),0.28,0.7) if x<0.5 else crate(m,(x,0,z+1.2),0.55); m.LOD=99
+    for x in(-5.6,0.0,1.0,5.8): pot_plant(m,(x,0,z+0.5),0.4)
+    for x in(-5.3,4.0): m.box((x-0.5,0,z+4.4),(x+0.5,0.6,z+5.0),'oak'); m.blob((x,0.75,z+4.7),0.4,'flowers',6,0.6)
+    return c
+def smithy(c):
+    m=c['m']; X1=c['X1']
+    # weapon racks: swords with gold hilts, axes, round shields either side of the door
+    for zz in(-2.4,2.3):
+        for k in np.linspace(-0.5,0.5,4):
+            b0=np.array([X1+0.45,0.15,zz+k]); m.beam(b0,b0+[0.05,1.25,0],0.05,'iron'); m.beam(b0+[0.05,1.25,-0.15],b0+[0.05,1.25,0.15],0.05,'gold'); m.beam(b0+[0.05,1.25,0],b0+[0.05,1.5,0],0.05,'beam')
+        for k in(-0.4,0.4):
+            p=np.array([X1+0.12,2.2,zz+k]); cyl(m,p,0.0,0,0,'iron',4) if False else None
+            m.obox(p,(0,0,1),(0,1,0),(1,0,0),(0.55,0.55,0.06),'gold'); m.obox(p+[0.04,0,0],(0,0,1),(0,1,0),(1,0,0),(0.42,0.42,0.06),'beam')
+        a=np.array([X1+0.7,0,zz+0.75]); m.beam(a,a+[0,1.3,0],0.05,'beam'); m.obox(a+[0,1.2,0.12],(0,0,1),(0,1,0),(1,0,0),(0.3,0.25,0.04),'iron')
+    return c
+APPLY=dict(market=market,smithy=smithy,temple=temple,mage_academy=mage_academy,keep=keep,townhall=townhall,inn=inn)
 def apply(name,c):
     f=APPLY.get(name)
     if f:

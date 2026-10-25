@@ -9,18 +9,19 @@ def rot(P,N):
     R=np.array([[0,0,-1],[0,1,0],[1,0,0]],float)  # +x -> +z  (x'=-z, z'=x)
     return P@R.T,N@R.T
 def inn():
-    c=house(dict(W=12,D=9,g=3.4,floors=2,fh=2.7,jetty=0.4,pitch=58))
-    cg=cross_gable(c,0.6,6.0,pz=0.5,pitch=60)
+    c=house(dict(W=12,D=9,g=3.4,floors=2,fh=2.7,jetty=0.4,pitch=58,upper='stone',framing=False))
+    cg=cross_gable(c,0.6,6.0,pz=0.5,pitch=60,mat='stone',framed=False)
     E,g,zf=c['E'],c['g'],cg['zf']
     door(c,'z+',0.6,1.6,2.8)
     for a in(-1.4,2.6): window(c,'z+',a,0.9,0.9,1.6)
     base=lambda a,y:(np.array([a,y,zf]),np.array([1.0,0,0]),np.array([0,0,1.0]))
-    for a in(-1.1,0.6,2.3): window(c,None,0,0,w=1.3,h=1.75,base=base(a,g+0.6),flowers=(a!=0.6)); window(c,None,0,0,w=1.3,h=1.75,base=base(a,g+fh_(c)+0.5))
-    for a in(-4.6,4.6): window(c,'z+',a,0.9,1.4,1.9); window(c,'z+',a,g+0.6,1.3,1.75,flowers=True); window(c,'z+',a,g+fh_(c)+0.5,1.3,1.75)
+    for a in(-0.2,1.4): window(c,None,0,0,w=1.2,h=1.7,base=base(a,g+0.6),flowers=True)
+    window(c,None,0,0,w=1.1,h=1.5,base=base(0.6,g+fh_(c)+0.6))
+    for a in(-4.6,4.6): window(c,'z+',a,g+0.6,1.2,1.6)
     dormer(c,-4.0,1); dormer(c,4.6,1); dormer(c,-2.5,-1); dormer(c,2.5,-1)
-    for a in(-4.2,-1.4,1.4,4.2): window(c,'z-',a,1.0); window(c,'z-',a,g+0.8); window(c,'z-',a,g+fh_(c)+0.7)
+    for a in(-3.0,3.0): window(c,'z-',a,1.0); window(c,'z-',a,g+0.8)
     for f in('x+','x-'):
-        for a in(-2.0,2.0): window(c,f,a,1.0); window(c,f,a,g+0.8); window(c,f,a,g+fh_(c)+0.7)
+        window(c,f,0,1.0); window(c,f,0,g+0.8)
         gable_fill(c,f)
     door(c,'z-',0.0,1.3,2.5)
     banner(c,'z+',-3.3,g+2.3); banner(c,'z+',5.5,g+2.3)
@@ -42,7 +43,7 @@ def bakery():
     dormer(c,2.6,1); dormer(c,0,-1)
     for a in(-3,0,3): window(c,'z-',a,1.0); window(c,'z-',a,g+0.8)
     for f in('x+','x-'): window(c,f,-1.5,1.0); window(c,f,1.5,g+0.8); gable_fill(c,f)
-    sign(c,'z+',-4.3,g-0.1,'sign_bread'); banner(c,'z+',0.8,g+2.0)
+    sign(c,'x-',4.15,g+1.9,'sign_bread',2.4,2.6); banner(c,'z+',0.8,g+2.0)
     lantern(c,'z+',-0.6,2.4)
     chimney(c,3.9,-1.4,1.3,1.8)   # tall oven chimney
     steps(c['m'],(-1.8,0,zf),(1,0,0),(0,0,1),2.0)
@@ -110,7 +111,7 @@ def smithy():
     p,t,n=facepos(c,'x+',0,E+2.4); m.obox(p+n*0.08,t,(0,1,0),n,(1.1,1.3,0.1),'gold')
     m.cell([p+n*0.14-t*0.45-[0,0.55,0],p+n*0.14+t*0.45-[0,0.55,0],p+n*0.14+t*0.45+[0,0.55,0],p+n*0.14-t*0.45+[0,0.55,0]],'banner',0.08,0.92,0.15,0.85)
     banner(c,'x+',-3.2,g+0.6,0.8,1.7); sign(c,'x+',3.2,g-0.4,'sign_anvil',0.8,0.8)
-    chimney(c,-2.4,1.6,1.4,2.0)
+    chimney(c,c['X1']-1.0,0.0,1.4,2.2)
     # forge lean-to on +z side (pre-rotation): becomes the right-hand side
     lean_to(m,-3.2,2.6,c['D']/2,2.8,3.4,2.4)
     anvil(m,(-0.6,0,c['D']/2+1.4)); m.box((1.0,0,c['D']/2),(2.2,1.1,c['D']/2+1.2),'stone')  # forge hearth
@@ -151,7 +152,7 @@ def guildhall():
         window(c,'z+',a,1.0,1.2,1.8)
         for f_ in range(2): window(c,'z+',a,g+f_*fh+0.55,1.2,1.75)
     # big guild banners on the cross gable + corner banners
-    for a in(-1.2,1.2): banner(c,'z+',a,g+fh*2-0.2,1.1,2.6)
+    for a in(-3.0,3.0): banner(c,'z+',a,g+fh*2-0.2,1.1,3.2)
     for a in(-6.8,6.8): banner(c,'z+',a,g+fh+1.6,0.9,2.0)
     dormer(c,-5.2,1); dormer(c,5.2,1)
     for a in(-4,0,4): dormer(c,a,-1)
@@ -170,12 +171,16 @@ def guildhall():
     for x in(-4.4,4.4): pot_plant(m,(x,0,zf+0.6),0.4)
     lantern(c,'z+',-1.4,2.8); lantern(c,'z+',1.4,2.8)
     # card: tall stone turret with spire at front-right corner + pinnacle spires on gables + gold trims
-    tower(m,(c['X1']-0.2,0,c['hs']+0.2),1.5,c['Rh']+0.5,4.2,wins=4)
+    m.box((c['X1']-0.5,0,c['hs']-0.3),(c['X1']+0.25,E+0.3,c['hs']+0.25),'stone',1.3); pinnacle(m,(c['X1']-0.12,E+0.3,c['hs']-0.02),2.0)
+    # card: huge gold-framed lion shields fill the front gables
+    for a in(-5.6,5.6):
+        p=np.array([a,g+fh+1.0,c['hs']+0.12]); m.obox(p,(1,0,0),(0,1,0),(0,0,1),(2.5,3.0,0.14),'gold')
+        m.cell([p+[-1.1,-1.35,0.09],p+[1.1,-1.35,0.09],p+[1.1,1.35,0.09],p+[-1.1,1.35,0.09]],'banner',0.08,0.92,0.12,0.86)
     for x in(-3.6,3.6): pinnacle(m,(x,E+0.2,zf+0.1),2.0)
     pinnacle(m,(0,cg['R2']+0.2,zf+0.4),2.4); pinnacle(m,(c['X0']-0.45,c['Rh']+0.2,0),2.2)
     m.beam((-3.5,E+0.05,zf+0.36),(3.5,E+0.05,zf+0.36),0.12,'gold'); m.beam((-3.5,g+0.05,zf+0.36),(3.5,g+0.05,zf+0.36),0.12,'gold')
-    p=np.array([0,g+fh*2+1.2,zf+0.1]); m.obox(p,(1,0,0),(0,1,0),(0,0,1),(1.5,1.8,0.12),'gold')
-    m.cell([p+[-0.65,-0.8,0.08],p+[0.65,-0.8,0.08],p+[0.65,0.8,0.08],p+[-0.65,0.8,0.08]],'banner',0.08,0.92,0.12,0.85)
+    p=np.array([0,E+1.9,zf+0.12]); m.obox(p,(1,0,0),(0,1,0),(0,0,1),(3.2,3.8,0.16),'gold')
+    m.cell([p+[-1.42,-1.72,0.1],p+[1.42,-1.72,0.1],p+[1.42,1.72,0.1],p+[-1.42,1.72,0.1]],'banner',0.08,0.92,0.12,0.86)
     return c
 
 def market():

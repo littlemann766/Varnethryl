@@ -2,7 +2,7 @@
 # usage: shots2.sh name cardfile x0 y0 x1 y1
 O=/workspace/beth-world/audit/cardstyle/shots; M=/workspace/beth-world/www/proto3d/models/beth/hi/buildings_card2
 n=$1
-(cd /workspace/cardstyle-godot && timeout 300 xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --resolution 1600x900 res://cmp2.tscn -- x $M/bld_${n}_card2.glb $O/raw2_$n.png 1.0 2.2 28 >/dev/null 2>&1)
+(cd /workspace/cardstyle-godot && timeout 300 xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --resolution 1600x900 res://cmp2.tscn -- x $M/bld_${n}_card2.glb $O/raw2_$n.png ${F:-1.0} 2.2 ${Y:-28} >/dev/null 2>&1)
 python3 - "$@" <<'P'
 import sys
 from PIL import Image,ImageDraw,ImageFont

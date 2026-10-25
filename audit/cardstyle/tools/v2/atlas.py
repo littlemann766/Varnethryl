@@ -51,7 +51,28 @@ def build():
             for yy in(y0+170,y0+400): d.rectangle([x0+44,yy,x1-44,yy+14],fill=IR)
             d.ellipse([x0+170,y0+290,x0+186,y0+306],fill=GOLD)
         elif c=='banner':
-            b=Image.open(f'{T}/banner_lion_albedo.jpg').convert('RGB').resize((256,512)); im.paste(b,(x0,y0)); d=ImageDraw.Draw(im)
+            L2=Image.new('RGB',(512,1024),(31,60,122)); dl=ImageDraw.Draw(L2); G=(214,172,64); Gd=(150,110,35)
+            nz=noise(1024,512,1.6,77); L2=Image.fromarray((np.asarray(L2)*(0.85+0.25*nz[...,None])).clip(0,255).astype(np.uint8)); dl=ImageDraw.Draw(L2)
+            dl.rectangle([0,0,511,40],fill=G); dl.rectangle([0,0,26,880],fill=G); dl.rectangle([485,0,511,880],fill=G)
+            dl.polygon([(0,880),(256,1010),(511,880),(511,860),(256,985),(0,860)],fill=G)
+            for k in range(14): dl.line([(18+k*34,40),(18+k*34,52)],fill=Gd,width=6)
+            # rampant lion facing left, scaled up
+            import math
+            def P(pts): return [(x*1.0+20,y*1.0+60) for x,y in pts]
+            body=P([(250,330),(300,300),(330,360),(320,470),(300,560),(260,610),(220,600),(205,520),(215,420)])
+            dl.polygon(body,fill=G)
+            mane=[(200+70*math.cos(a)*(1.25 if k%2 else 1.0),300+75*math.sin(a)*(1.25 if k%2 else 1.0)) for k,a in enumerate(np.linspace(0,2*np.pi,22,endpoint=False))]
+            dl.polygon(P(mane),fill=G); dl.ellipse(P([(150,255),(235,340)]),fill=G)
+            dl.polygon(P([(150,285),(105,300),(110,325),(150,330)]),fill=G)  # muzzle
+            dl.ellipse(P([(170,282),(184,296)]),fill=(31,60,122)); dl.polygon(P([(115,318),(145,322),(130,345)]),fill=(170,40,40)) # eye, tongue
+            dl.polygon(P([(160,230),(170,180),(190,215),(205,170),(220,215),(240,180),(245,235)]),fill=G)  # crown
+            for (sx,sy,ex,ey) in((240,360,120,300),(250,410,110,420)):
+                dl.line(P([(sx,sy),(ex,ey)]),fill=G,width=34); dl.polygon(P([(ex-10,ey-20),(ex-45,ey-30),(ex-40,ey),(ex-45,ey+25),(ex-5,ey+20)]),fill=G)
+            dl.line(P([(250,580),(190,690),(210,780)]),fill=G,width=38); dl.polygon(P([(190,770),(150,800),(240,800),(235,770)]),fill=G)
+            dl.line(P([(300,570),(330,680),(300,770)]),fill=G,width=34); dl.polygon(P([(280,760),(260,790),(340,790),(320,760)]),fill=G)
+            dl.line(P([(320,520),(400,560),(390,430),(430,360)]),fill=G,width=16); dl.polygon(P([(420,340),(460,300),(450,370),(470,390),(425,380)]),fill=G)
+            for k in range(3): dl.line(P([(225,430+k*40),(300,420+k*40)]),fill=Gd,width=5)
+            im.paste(L2.resize((256,512),Image.LANCZOS),(x0,y0)); d=ImageDraw.Draw(im)
         elif c.startswith('sign'):
             d.rectangle([x0,y0,x1,y1],fill=NAVY); d.rectangle([x0+10,y0+10,x1-10,y1-10],outline=GOLD,width=14)
             cx,cy=x0+128,y0+256

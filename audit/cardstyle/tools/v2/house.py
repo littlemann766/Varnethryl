@@ -11,13 +11,15 @@ def house(sp):
     m.box((X0,0,-D/2),(X1,g,D/2),'stone'); m.box((X0-0.12,0,-D/2-0.12),(X1+0.12,0.45,D/2+0.12),'stone',0.3)
     # jetty joist band + upper floors plaster
     m.box((X0-0.05,g-0.28,-hs-0.05),(X1+0.05,g,hs+0.05),'beam')
-    m.box((X0,g,-hs),(X1,E,hs),'plaster')
+    UP=sp.get('upper','plaster'); FR=sp.get('framing',True)
+    m.box((X0,g,-hs),(X1,E,hs),UP)
     m.LOD=1
     for x in np.arange(X0+0.3,X1,0.65):
         for sz in(1,-1): m.box((x-0.09,g-0.45,sz*(D/2)-0.0 if sz>0 else -hs-0.1),(x+0.09,g-0.27,hs+0.1 if sz>0 else -D/2),'beam')
     m.LOD=99
     # ---- timber framing on upper walls (z faces and x faces) ----
     def frame_face(face,y0,y1,a0,a1):
+        if not FR: return
         m.LOD=1
         o=0.07; bw=0.2
         def P(a,y):
@@ -45,8 +47,8 @@ def house(sp):
         x=X1 if sx>0 else X0
         pts=[(x,E,hs*sx),(x,E,-hs*sx),(x,Rh,0)] if sx>0 else [(x,E,-hs),(x,E,hs),(x,Rh,0)]
         a=(0,0,-1) if sx>0 else (0,0,1)
-        m.poly(pts,pts[0],a,(0,1,0),'plaster')
-        m.LOD=1; o=0.07*sx
+        m.poly(pts,pts[0],a,(0,1,0),UP)
+        m.LOD=1 if FR else -5; o=0.07*sx
         m.beam((x+o,E,-hs),(x+o,E,hs),0.2); m.beam((x+o,E,0),(x+o,Rh-0.2,0),0.2)
         yc=E+(Rh-E)*0.45; zc=hs*0.55
         m.beam((x+o,yc,-zc),(x+o,yc,zc),0.18)
@@ -69,6 +71,7 @@ def house(sp):
         m.beam(np.array([ox0,ye,ze])+nrm*th/2,np.array([ox1,ye,ze])+nrm*th/2,0.2)
         for x in(ox0,ox1): m.beam(np.array([x,ye,ze])+nrm*th/2,np.array([x,Rh,0])+nrm*th/2,0.22)
     m.beam((ox0,Rh+0.15,0),(ox1,Rh+0.15,0),0.3,'slate')
+    for x in(ox0,ox1): m.beam((x,Rh+0.2,0),(x,Rh+1.0,0),0.06,'iron'); m.obox((x,Rh+1.0,0),(1,0,0),(0,1,0),(0,0,1),(0.14,0.14,0.14),'gold')
     ctx=dict(m=m,W=W,D=D,g=g,E=E,hs=hs,Rh=Rh,pit=pit,yroof=yroof,X0=X0,X1=X1,fh=fh,fl=fl)
     return ctx
 # ---------- details ----------
@@ -80,13 +83,13 @@ def facepos(c,face,a,y,out=0.0):
     if face=='z-': return np.array([a,y,-hs-out]),np.array([-1.0,0,0]),np.array([0,0,-1.0])
     if face=='x+': return np.array([c['X1']+out,y,a]),np.array([0,0,-1.0]),np.array([1.0,0,0])
     if face=='x-': return np.array([c['X0']-out,y,a]),np.array([0,0,1.0]),np.array([-1.0,0,0])
-def window(c,face,a,y,w=0.9,h=1.25,flowers=False,base=None):
+def window(c,face,a,y,w=1.2,h=1.65,flowers=False,base=None):
     m=c['m']
     if base is None: p,t,n=facepos(c,face,a,y)
     else: p,t,n=base
     up=np.array([0,1.0,0]); b=p+n*0.02
     m.cell([b-t*w/2,b+t*w/2,b+t*w/2+up*h,b-t*w/2+up*h],'window')
-    m.LOD=2; d=0.14; fw=0.12
+    m.LOD=2; d=0.26; fw=0.14
     for s in(-1,1): m.obox(p+t*s*(w/2+fw/2)+up*h/2+n*d/2,t,up,n,(fw,h+2*fw,d),'beam')
     m.obox(p+up*(h+fw/2)+n*d/2,t,up,n,(w+2*fw,fw,d),'beam')
     m.obox(p-up*fw/2+n*0.12,t,up,n,(w+0.35,fw,0.24),'stone' if y<c['g'] else 'beam')
@@ -94,7 +97,8 @@ def window(c,face,a,y,w=0.9,h=1.25,flowers=False,base=None):
     m.obox(p+up*h/2+n*0.06,t,up,n,(0.06,h,0.06),'beam'); m.obox(p+up*h*0.5+n*0.06,t,up,n,(w,0.06,0.06),'beam')
     if flowers:
         bc=p-up*0.38+n*0.26; m.obox(bc,t,up,n,(w+0.2,0.32,0.34),'oak')
-        for k in np.linspace(-w/2,w/2,5): m.blob(bc+t*k+up*0.22,0.24,'flowers')
+        for k in np.linspace(-w/2,w/2,6): m.blob(bc+t*k+up*0.24,0.26,'flowers')
+        for k in np.linspace(-w/2+0.15,w/2-0.15,4): m.blob(bc+t*k+up*0.2+n*0.16,0.2,'flowers',squash=0.7)
     m.LOD=99
 def door(c,face,a,w=1.5,h=2.7):
     m=c['m']; p,t,n=facepos(c,face,a,0.0); up=np.array([0,1.0,0]); b=p+n*0.02
@@ -103,9 +107,10 @@ def door(c,face,a,w=1.5,h=2.7):
     r=w/2*0.84; cy=h-w/2*0.84*1.0
     m.LOD=1
     for k in range(9):
-        th=np.pi*k/8; q=p+t*np.cos(th)*r+up*(cy+np.sin(th)*r)+n*0.12
-        m.obox(q,t,up,n,(0.34,0.34,0.24),'stone',k*0.13)
-    for s in(-1,1): m.obox(p+t*s*(r+0.05)+up*cy/2+n*0.12,t,up,n,(0.3,cy,0.24),'stone')
+        th=np.pi*k/8; q=p+t*np.cos(th)*(r+0.17)+up*(cy+np.sin(th)*(r+0.17))+n*0.12
+        m.obox(q,t*np.cos(th+np.pi/2)+up*np.sin(th+np.pi/2),-(t*np.cos(th)+up*np.sin(th)),n,(0.3,0.38,0.32),'stone',k*0.13)
+    for s in(-1,1): m.obox(p+t*s*(r+0.05)+up*cy/2+n*0.16,t,up,n,(0.34,cy,0.32),'stone')
+    m.obox(p+up*(cy+r+0.12)+n*0.2,t,up,n,(0.32,0.45,0.36),'stone',0.9)
     m.LOD=99
     for k in range(2): m.obox(p+n*(0.45+0.35*(1-k))+up*(0.1+0.2*k),t,up,n,(w+0.8-0.3*k,0.2+0.2*k if False else 0.2,0.7),'stone')
 def cloth(m,top_c,t,n,w,h,name,wave=0.08,swallow=True):
@@ -181,21 +186,36 @@ def cross_gable(c,cx,cw,pz=0.25,pitch=None,attic=True,face_windows=()):
         m.beam(np.array([xe,ye,zb]),np.array([cx,R2,zb])+nrm*0.05,0.22)
         m.beam(np.array([xe,ye,zback]),np.array([xe,ye,zb]),0.2)
     m.beam((cx,R2+0.15,zback),(cx,R2+0.15,zb),0.3,'slate')
-    c['cross']=dict(zf=zf,R2=R2,x0=x0,x1=x1); return c['cross']
-def dormer(c,x,side=1,w=1.7):
-    m=c['m']; hs=c['hs']; pit=c['pit']; zf=side*(hs-0.9); yb=c['yroof'](zf); h=1.6; x0,x1=x-w/2,x+w/2
-    zb=side*0.6
+    c['cross']=dict(zf=zf,R2=R2,x0=x0,x1=x1)
+    if attic:
+        base=lambda a,y:(np.array([a,y,zf]),np.array([1.0,0,0]),np.array([0,0,1.0]))
+        window(c,None,0,0,w=1.2,h=1.5,base=base(cx,E+0.4))
+        if R2-E>3.2: window(c,None,0,0,w=0.6,h=0.75,base=base(cx,E+2.35))
+    return c['cross']
+def dormer(c,x,side=1,w=1.6,ww=1.1,wh=1.4):
+    m=c['m']; hs=c['hs']; zf=side*(hs-0.9); yb=c['yroof'](zf); x0,x1=x-w/2,x+w/2
+    h=0.15+wh+0.22; zb=side*0.6; pit=np.radians(38)
     m.box((x0,yb-0.4,min(zb,zf)),(x1,yb+h,max(zb,zf)),'plaster',0.6)
-    base=(np.array([x,yb+0.15,zf+side*0.0]),np.array([side*1.0,0,0]),np.array([0,0,side*1.0]))
-    window(c,None,0,0,w=0.8,h=1.05,base=base)
-    R2=yb+h+w/2*np.tan(np.radians(55))
+    base=(np.array([x,yb+0.15,zf]),np.array([side*1.0,0,0]),np.array([0,0,side*1.0]))
+    window(c,None,0,0,w=ww,h=wh,base=base)
+    R2=yb+h+(w/2)*np.tan(pit)
     pf=[(x0,yb+h,zf),(x1,yb+h,zf),(x,R2,zf)]
     if side<0: pf=[pf[1],pf[0],pf[2]]
     m.poly(pf,pf[0],(side,0,0),(0,1,0),'plaster',0.6)
     for sx in(1,-1):
-        xe=x+sx*(w/2+0.3); ye=yb+h-0.3*np.tan(np.radians(55)); zz=zf+side*0.3
-        p=[(xe,ye,zb),(xe,ye,zz),(x,R2+0.1,zz),(x,R2+0.1,zb)]
-        if sx*side<0: p=[p[1],p[0],p[3],p[2]]
-        a=norm(np.array(p[1])-np.array(p[0])); up=norm(np.array(p[3])-np.array(p[0])) 
+        xe=x+sx*(w/2+0.3); ye=yb+h-0.3*np.tan(pit); zz=zf+side*0.3
+        p=[(xe,ye,zb),(xe,ye,zz),(x,R2+0.12,zz),(x,R2+0.12,zb)]
+        a=norm(np.array(p[1])-np.array(p[0])); up=norm(np.array(p[3])-np.array(p[0]))
         m.poly(p,p[0],a,up,'slate',0.3)
         m.poly([p[1],p[0],p[3],p[2]],p[1],-a,up,'oak')
+        m.beam(np.array([xe,ye,zz]),np.array([x,R2+0.1,zz]),0.16)
+    m.beam((x,R2+0.2,zb),(x,R2+0.2,zz),0.22,'slate')
+def gable_fill(c,face):
+    """second small window high in a gable + herringbone beams so the triangle isn't empty"""
+    E,Rh=c['E'],c['Rh']; m=c['m']
+    window(c,face,0,E+0.45,1.2,1.5)
+    window(c,face,0,E+0.45+1.5+0.5,0.6,0.75)
+    p,t,n=facepos(c,face,0,E); m.LOD=1; hs=c['hs']; tp=np.tan(c['pit'])
+    for s_ in(-1,1):
+        m.beam(p+t*s_*hs*0.85+n*0.07,p+t*s_*hs*0.25+n*0.07+np.array([0,hs*0.6*tp,0]),0.14)
+    m.LOD=99

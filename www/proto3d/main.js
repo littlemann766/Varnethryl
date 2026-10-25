@@ -647,7 +647,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.35';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.36';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -817,7 +817,7 @@ const APPROVED_DISPLAY=new Map([
  ['rowan',v=>v.label==='Old'||v.label==='Blocky'],
  ['selene',v=>v.label==='Old'||v.label==='Blocky'],
  ['seraphine',v=>v.label==='Blocky'||v.label==='Old'||v.label==='Placeholder'],
- ['stonetroll',v=>v.label==='Blocky'],
+ ['stonetroll',v=>v.label==='Blocky'||v.label==='Smooth'],   // Smooth = Beth reweight + rig_fix clips (arms down)
  ['valen',v=>v.label==='Blocky'],
  ['thorne',v=>v.label==='Blocky'||v.label==='Old'],
  ['thrain',v=>v.label==='Blocky'||v.label.startsWith('New')],

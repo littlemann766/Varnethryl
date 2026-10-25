@@ -194,24 +194,29 @@ B0 = lambda: base(lean=10, hipsLoc=(0,0,-0.08))
 def atk1():   # two-handed overhead slam
     up = mix(base(lean=-8, hipsLoc=(0,0.05,0.04)), **arms({'L': 165, 'R': 165}, elbow=35, hang=25))
     up['rot']['chest'] = q(X, -12); up['rot']['spine'] = q(X, -8); up['rot']['head'] = q(X, 8)
-    slam = mix(base(lean=34, hipsLoc=(0,-0.15,-0.45)), **arms({'L': 55, 'R': 55}, elbow=10, hang=20))
+    slam = mix(base(lean=34, hipsLoc=(0,-0.15,-0.45)), **arms({'L': 75, 'R': 75}, elbow=12, hang=12))
     slam['rot']['chest'] = q(X, 18); slam['rot']['head'] = q(X, -16)
     st = {'footL': ((0,-0.35,0),0), 'footR': ((0,0.1,0),0)}
     return keyseq([(0, B0()), (0.42, {**up, **st}), (0.62, {**slam, **st}), (0.78, {**slam, **st}), (1.35, B0())], 'attack1')
-def atk2():   # right haymaker swipe across
-    w = mix(base(lean=6, hipsLoc=(0,0,-0.08)), **arms({'L': -15, 'R': -35}, elbow=40, hang=33))
-    w['rot']['hips'] = q(Z, -25); w['rot']['chest'] = q(Z, -30); w['rot']['upperArm_R'] = q(X, 20) @ q(Y, -75)
-    h = mix(base(lean=16, hipsLoc=(0,-0.1,-0.2)), **arms({'L': 10, 'R': 70}, elbow=25, hang=33))
-    h['rot']['hips'] = q(Z, 25); h['rot']['chest'] = q(Z, 35); h['rot']['upperArm_R'] = q(Z, 75) @ q(X, -80) @ q(Y, -50)
-    st = {'footL': ((0,-0.3,0),0), 'footR': ((0,0.2,0),0)}
-    return keyseq([(0, B0()), (0.35, {**w, **st}), (0.55, {**h, **st}), (0.68, {**h, **st}), (1.1, B0())], 'attack2')
-def atk3():   # left backhand + right follow
-    w = mix(base(lean=6, hipsLoc=(0,0,-0.08)), **arms({'L': -35, 'R': -15}, elbow=40, hang=33))
-    w['rot']['hips'] = q(Z, 25); w['rot']['chest'] = q(Z, 30); w['rot']['upperArm_L'] = q(X, 20) @ q(Y, 75)
-    h = mix(base(lean=16, hipsLoc=(0,-0.1,-0.2)), **arms({'L': 70, 'R': 10}, elbow=25, hang=33))
-    h['rot']['hips'] = q(Z, -25); h['rot']['chest'] = q(Z, -35); h['rot']['upperArm_L'] = q(Z, -75) @ q(X, -80) @ q(Y, 50)
-    st = {'footL': ((0,0.2,0),0), 'footR': ((0,-0.3,0),0)}
-    return keyseq([(0, B0()), (0.38, {**w, **st}), (0.58, {**h, **st}), (0.72, {**h, **st}), (1.15, B0())], 'attack3')
+def side_swing(s, back):   # one-arm haymaker carried by the torso: shoulder out, elbow off the body, hand arcs in front at chest height
+    sg = 1 if s == 'L' else -1; o = 'R' if s == 'L' else 'L'
+    # wind-up: torso twists the striking shoulder back, arm raised out to the side and back, elbow bent
+    w = mix(base(lean=4, hipsLoc=(0, 0, -0.10)), **arms({s: -10, o: 10}, elbow=30, hang=30))
+    w['rot']['hips'] = q(Z, sg*18); w['rot']['spine'] = q(Z, sg*12); w['rot']['chest'] = q(Z, sg*16) @ q(X, 4)
+    w['rot']['shoulder_'+s] = q(Z, sg*6) @ q(Y, -sg*10); w['rot']['upperArm_'+s] = q(Z, sg*35) @ q(Y, -sg*40); w['rot']['foreArm_'+s] = q(Z, -sg*45)
+    # strike: torso unwinds hard, arm stays abducted ~horizontal and sweeps forward (never across the belly)
+    h = mix(base(lean=14, hipsLoc=(0, -0.12, -0.22)), **arms({s: 0, o: 15}, elbow=20, hang=33))
+    h['rot']['hips'] = q(Z, -sg*20); h['rot']['spine'] = q(Z, -sg*16); h['rot']['chest'] = q(Z, -sg*22) @ q(X, 6)
+    h['rot']['shoulder_'+s] = q(Z, -sg*10) @ q(Y, -sg*10); h['rot']['upperArm_'+s] = q(Z, -sg*62) @ q(Y, -sg*38); h['rot']['foreArm_'+s] = q(Z, -sg*20)
+    f = mix(h); f['rot'] = dict(h['rot']); f['rot']['upperArm_'+s] = q(Z, -sg*72) @ q(Y, -sg*30); f['rot']['chest'] = q(Z, -sg*26) @ q(X, 8)
+    st = {'foot'+o: ((0, -0.3, 0), 0), 'foot'+s: ((0, 0.2, 0), 0)}
+    return w, h, f, st
+def atk2():   # right haymaker
+    w, h, f, st = side_swing('R', 0)
+    return keyseq([(0, B0()), (0.38, {**w, **st}), (0.56, {**h, **st}), (0.70, {**f, **st}), (1.15, B0())], 'attack2')
+def atk3():   # left haymaker (mirror)
+    w, h, f, st = side_swing('L', 0)
+    return keyseq([(0, B0()), (0.40, {**w, **st}), (0.58, {**h, **st}), (0.72, {**f, **st}), (1.2, B0())], 'attack3')
 def skill():  # roar: chest up, arms out
     r = mix(base(lean=-10, hipsLoc=(0,0.05,0.05)), **arms({'L': 20, 'R': 20}, elbow=35, hang=-5))
     r['rot']['chest'] = q(X, -15); r['rot']['head'] = q(X, 20)
@@ -231,7 +236,40 @@ for pb in P:
 for e in list(IKT.values()) + list(POLE.values()) + list(FR.values()): bpy.data.objects.remove(e)
 for a in list(bpy.data.actions):
     if '__' in a.name: bpy.data.actions.remove(a)
-arm.animation_data.action = None
+
+# ---- every-frame check: forearm/hand points inside the torso (hips/spine/chest/neck-weighted part of the mesh) ----
+import bmesh
+from mathutils.bvhtree import BVHTree
+GN = {g.index: g.name for g in mesh.vertex_groups}; TORSO = {'hips','spine','chest'}
+tv = [v.index for v in mesh.data.vertices if v.groups and GN[max(v.groups, key=lambda g: g.weight).group] in TORSO and abs((mesh.matrix_world @ v.co).x) < 1.4 and (mesh.matrix_world @ v.co).z > 2.6]
+print('RERIG torso verts', len(tv))
+tvs = set(tv); tf = [p.index for p in mesh.data.polygons if all(i in tvs for i in p.vertices)]
+REP = {}
+for nm in ['attack1','attack2','attack3','skill','idle','walk','run']:
+    arm.animation_data.action = bpy.data.actions[nm]; n = int(round(CLIPS[nm]*FPS)); worst = (0, None)
+    for f in range(1, n+2):
+        sc.frame_set(f); dg = bpy.context.evaluated_depsgraph_get(); me = mesh.evaluated_get(dg); md = me.to_mesh()
+        mwv = mesh.matrix_world; verts = [mwv @ md.vertices[i].co for i in range(len(md.vertices))]
+        bmh = bmesh.new()
+        for i in tv: bmh.verts.new(verts[i])
+        bmesh.ops.convex_hull(bmh, input=bmh.verts[:]); bmh.normal_update(); me.to_mesh_clear()
+        cen = sum((v.co for v in bmh.verts), Vector()) / len(bmh.verts)
+        PL = []
+        for fc in bmh.faces:
+            c0 = fc.calc_center_median(); nn = fc.normal.copy()
+            if (c0 - cen).dot(nn) < 0: nn = -nn
+            PL.append((c0, nn))
+        bmh.free()
+        for s_ in 'LR':
+            for b0, b1 in (('foreArm_'+s_, 'hand_'+s_), ('hand_'+s_, None)):
+                pb = P[b0]; h0 = arm.matrix_world @ pb.head; h1 = arm.matrix_world @ (P[b1].head if b1 else pb.tail + (pb.tail-pb.head)*0.6)
+                for k in range(6):
+                    pt = h0.lerp(h1, k/5); dep = min(-(pt - c0).dot(nn) for c0, nn in PL)
+                    if dep > worst[0]: worst = (dep, f'{b0} f{f}')
+    REP[nm] = (round(worst[0]/S, 3), worst[1])
+arm.animation_data.action = None; sc.frame_set(1)
+print('RERIG penetration (m, inside torso):', REP)
+
 print('RERIG clips', {k: round(v,2) for k, v in CLIPS.items()}, 'walk m/s', round(WALK_V/S,2), 'run m/s', round(RUN_V/S,2))
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.export_scene.gltf(filepath=dst, export_format='GLB', export_animation_mode='ACTIONS', export_force_sampling=True, export_frame_step=1, export_yup=True, export_skins=True, export_def_bones=False, export_optimize_animation_size=False)

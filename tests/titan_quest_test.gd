@@ -24,6 +24,8 @@ func _run() -> void:
 	ok(near(h, 28.0, 28.0 * 0.06), "measured Titan height %.2f m ~ 28" % h)
 	ok(near(VolcanoTitan.REACH_M, 17.0, 0.01), "reach 17 m")
 	ok(t.rig.clips.has("intro"), "Lucian's intro clip present")
+	ok(t.rig.clips.has("death_pool"), "Lucian's death_pool clip present")
+	ok((t.rig.tree.tree_root as AnimationNodeBlendTree).get_node("death_anim").animation == &"death_pool", "pool death uses death_pool")
 	ok(near(Vector2(t.position.x - C.x, t.position.z - C.z).length(), 0.0, 0.01), "Titan at the pool centre (0, y, 0)")
 	ok(near(rad_to_deg(t.rotation.y), 40.0, 0.5), "yaw 40")
 	ok(not t.visible and not t.active and near(t.position.y - B.y, 10.0, 0.01), "hidden at y 10 before the intro")
@@ -59,7 +61,7 @@ func _run() -> void:
 	ok(q.intro_cam != null and q.intro_cam.current, "wide intro camera active")
 	await create_timer(1.75).timeout
 	var ymid: float = t.position.y - B.y
-	ok(ymid > 12.0 and ymid < 26.8, "rising mid-way (%.1f)" % ymid)
+	ok(near(ymid, 10.0 + 16.8 * 0.5, 0.9), "linear rise: mid-way at 1.75 s (%.1f ~ 18.4)" % ymid)
 	await create_timer(2.0).timeout
 	ok(near(t.position.y - B.y, 26.8, 0.05), "risen to 26.8 at 3.5 s (%.2f)" % (t.position.y - B.y))
 	await create_timer(2.8).timeout

@@ -47,6 +47,7 @@ func setup(main: Node) -> TitanQuest:
 	titan.telegraph.connect(_telegraph)
 	titan.died.connect(func(_e): _win())
 	_hide_titan()
+	titan.rig.set_death_clip("death_pool")   # Lucian v3: in-pool death (3.03 s, holds), instead of `death`
 	for n in 3: stages.append(_load_stage(n + 1))
 	_show_stage(1)
 	ring = load("res://assets/volcano/titan_lava_ring.glb").instantiate().find_children("*", "MeshInstance3D", true, false)[0].duplicate()
@@ -178,7 +179,8 @@ func start_intro() -> void:
 	titan.rig.play_attack("intro", 1.0)
 	_splash(18); shake(0.5, 0.6)
 	_tw = create_tween()
-	_tw.tween_property(titan, "position:y", base.y + STAGE_Y[0], RISE_SEC).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	# Lucian v3: his palm plants assume a LINEAR rise y 10 -> 26.8 over 0-3.5 s
+	_tw.tween_property(titan, "position:y", base.y + STAGE_Y[0], RISE_SEC).set_trans(Tween.TRANS_LINEAR)
 	_tw.tween_callback(func(): _splash(12); shake(0.35, 0.5))          # 3.5 s: hands brace on the lava
 	_tw.tween_interval(0.4)
 	_tw.tween_callback(func(): shake(0.25, 1.4))                       # 3.9-5.5 heave
@@ -219,7 +221,7 @@ func _win() -> void:
 	for l in m.pool_lights: (l as OmniLight3D).light_energy = 0.5
 	for f in m.volc_fx: if f is OmniLight3D and not m.pool_lights.has(f): (f as OmniLight3D).light_energy *= 0.4
 	ring.visible = false
-	var tw := create_tween(); tw.tween_property(titan, "position:y", base.y + 2.0, 4.0).set_trans(Tween.TRANS_SINE)
+	var tw := create_tween(); tw.tween_interval(3.1); tw.tween_property(titan, "position:y", base.y + 2.0, 4.0).set_trans(Tween.TRANS_SINE)
 	tw.tween_callback(func(): titan.visible = false)
 	qlabel.text = "Quest complete: " + QUEST
 	if m.has_method("_toast"): m._toast("Quest complete: the volcano is calm.")

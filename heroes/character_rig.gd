@@ -197,6 +197,10 @@ func play_hit() -> void:
 	_flinch = 0.15
 	if tree and has_hit: tree.set("parameters/hit/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
+## test 13: the volcano Titan dies with Lucian's in-place `death_pool` while in the lava
+func set_death_clip(nm: String) -> void:
+	if tree and clips.has(nm): (tree.tree_root as AnimationNodeBlendTree).get_node("death_anim").animation = nm
+
 func set_dead(d: bool) -> void:
 	if tree: tree.set("parameters/dead/blend_amount", 1.0 if d else 0.0)
 

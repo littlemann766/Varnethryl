@@ -236,7 +236,7 @@ func _set_time(h: float) -> void:
 	var sunset := 1.0 - smoothstep(0.0, 0.35, abs(day))
 	if night:
 		sun.rotation_degrees = Vector3(-35, -35 + tod * 5, 0)     # moon
-		sun.light_color = Color(0.55, 0.65, 1.0); sun.light_energy = 0.22
+		sun.light_color = Color(0.55, 0.65, 1.0); sun.light_energy = 0.1
 		sun.light_volumetric_fog_energy = 0.4
 	else:
 		sun.rotation_degrees = Vector3(-max(elev, 4.0), -100 + (tod - 6.0) * 15.0, 0)
@@ -250,10 +250,10 @@ func _set_time(h: float) -> void:
 	sky_mat.ground_bottom_color = Color(0.2, 0.22, 0.2).lerp(Color(0.01, 0.01, 0.02), nf)
 	sky_mat.sun_angle_max = 25.0; sky_mat.sun_curve = 0.1
 	sky_mat.sky_cover_modulate = Color(1, 1, 1, nf)
-	env.ambient_light_energy = lerp(0.9, 0.25, nf)
+	env.ambient_light_energy = lerp(0.9, 0.12, nf)
 	env.fog_light_color = sky_mat.sky_horizon_color
 	env.volumetric_fog_albedo = Color(0.9, 0.9, 0.95).lerp(Color(1.0, 0.7, 0.5), sunset)
-	env.tonemap_exposure = lerp(1.0, 1.5, nf)
+	env.tonemap_exposure = lerp(1.0, 1.15, nf)
 	var em: float = lerp(0.0, 3.0, smoothstep(0.25, -0.1, day)) if tier > 0 else 0.0
 	for m in emissive_mats: m.emission_energy_multiplier = em
 	glow_mat.emission_energy_multiplier = em * 2.0
@@ -277,7 +277,7 @@ func apply_quality() -> void:
 	sun.directional_shadow_mode = [DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS][tier]
 	sun.light_angular_distance = 0.0
 	sun.shadow_blur = [0.5, 1.0, 1.5, 1.5][tier]
-	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if tier >= 1 else Viewport.SCALING_3D_MODE_BILINEAR
+	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR   # FSR1 is Forward+-only in 4.7
 	vp.scaling_3d_scale = [0.5, 0.6, 0.7, 0.85][tier]
 	vp.fsr_sharpness = 0.3
 	vp.msaa_3d = Viewport.MSAA_2X if tier == 3 else Viewport.MSAA_DISABLED
@@ -986,6 +986,9 @@ func _run_bench() -> void:
 		for q in 4: await _shot("dc_night_plaza_%s" % TIERS[q], views[0][1], views[0][2], views[0][3], 22.5, q, 8)
 	var ST := int(OS.get_environment("SHOT_TIER")) if OS.get_environment("SHOT_TIER") != "" else 2
 	var pre: String = String(TIERS[ST]).to_lower() + "_"
+	if only == "night":
+		await _shot("high_u6_night_plaza", Vector3(-6, 0, 30), 0.25, -0.25, 22.5, 2, 40)
+		await _shot("high_u7_night_street", Vector3(0, 0, -20), PI, -0.15, 22.5, 2, 40)
 	if only == "fly":
 		await _flythrough_all()
 	if only == "" or only == "shots":

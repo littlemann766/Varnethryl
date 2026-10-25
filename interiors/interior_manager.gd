@@ -69,6 +69,30 @@ func _physics_process(dt: float) -> void:
 		var hv2: Vector3 = cur.node.global_transform.basis.inverse() * hero.velocity
 		if cooldown <= 0 and absf(lp2.x - cur.spawn.x * float(lp2.z <= cur.exit_z)) < 2.0 and (lp2.z > cur.exit_z or (lp2.z > back_z and hv2.z > 0.5)): exit(); return
 		_update_floors(lp2.y)
+		_unstick(hero, dt, lp2)
+
+## test 13 (boss trapped beside a Treasury wall chunk): if the player pushes the stick for 1.5 s but the hero moves
+## < 0.25 m, step him to the nearest room point / door spot on his floor (always walkable, door-connected).
+var _stuck_t := 0.0
+var _stuck_from := Vector3.ZERO
+var unsticks := 0
+func _unstick(hero: CharacterBody3D, dt: float, lp: Vector3) -> void:
+	var pushing: bool = main.get("joy_vec") != null and (main.joy_vec as Vector2).length() > 0.5 and not climbing
+	if not pushing: _stuck_t = 0.0; _stuck_from = lp; return
+	if _stuck_t == 0.0: _stuck_from = lp
+	_stuck_t += dt
+	if lp.distance_to(_stuck_from) > 0.25: _stuck_t = 0.0; return
+	if _stuck_t < 1.0: return
+	_stuck_t = 0.0
+	# only when boxed in: no direction lets him move 0.8 m (pressing into a plain wall is left alone)
+	for k in 8:
+		var a := TAU * k / 8.0
+		if not hero.test_move(hero.global_transform.translated(Vector3(0, 0.15, 0)), Vector3(cos(a), 0, sin(a)) * 0.8): return
+	var fl := floor_of(cur, lp.y); var best: Vector3 = cur.spawn; var bd := INF
+	for r in cur.rooms:
+		if r.floor == fl and r.pos.distance_to(lp) < bd: bd = r.pos.distance_to(lp); best = r.pos
+	if fl == 0 and cur.spawn.distance_to(lp) < bd: best = cur.spawn
+	hero.global_position = cur.node.to_global(best + Vector3(0, 0.1, 0)); hero.velocity = Vector3.ZERO; unsticks += 1
 
 func enter(b: Dictionary) -> void:
 	cur_bld = b; cur = get_info(b.id, b.aabb.size)

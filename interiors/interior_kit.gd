@@ -69,6 +69,28 @@ static func set_layers(n: Node, shadow := true) -> void:
 	if n is GeometryInstance3D: n.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for c in n.get_children(): set_layers(c, shadow)
 
+## test 13 (boss: gold piles were smooth green-gold blobs): a heap of individual coins. A dark-gold mound core
+## (squashed sphere) under ~420 tilted coins (one MultiMesh, 1 draw call) heaped densest at the centre.
+static var _coin_mm: Mesh
+static func _coin_heap(root: Node3D, sz: Array) -> void:
+	var rx: float = sz[0] * 0.5; var rz: float = sz[2] * 0.5; var h: float = sz[1]
+	var core := MeshInstance3D.new(); var sm := SphereMesh.new(); sm.radius = 1.0; sm.height = 2.0; sm.radial_segments = 16; sm.rings = 8; core.mesh = sm
+	var cm := StandardMaterial3D.new(); cm.albedo_color = Color(0.62, 0.45, 0.12); cm.metallic = 0.7; cm.roughness = 0.5; core.material_override = cm
+	core.scale = Vector3(rx * 0.92, h * 0.9, rz * 0.92); core.position.y = -h * 0.12; core.layers = LAYER; root.add_child(core)
+	if _coin_mm == null:
+		var cy := CylinderMesh.new(); cy.top_radius = 0.038; cy.bottom_radius = 0.038; cy.height = 0.009; cy.radial_segments = 10; cy.rings = 0
+		var gm := StandardMaterial3D.new(); gm.albedo_color = Color(0.95, 0.74, 0.25); gm.metallic = 0.9; gm.roughness = 0.28
+		cy.material = gm; _coin_mm = cy
+	var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = _coin_mm; mm.instance_count = 420
+	var rng := RandomNumberGenerator.new(); rng.seed = hash(root.position)
+	for i in mm.instance_count:
+		var r := sqrt(rng.randf()); var a := rng.randf() * TAU
+		var x := cos(a) * r * rx; var z := sin(a) * r * rz
+		var y := h * 0.78 * maxf(0.0, 1.0 - r * r) + 0.005 + rng.randf() * 0.02
+		var b := Basis(Vector3.UP, rng.randf() * TAU) * Basis(Vector3.RIGHT, rng.randf_range(-0.6, 0.6) + (r * 0.5))
+		mm.set_instance_transform(i, Transform3D(b, Vector3(x, y, z)))
+	var mmi := MultiMeshInstance3D.new(); mmi.multimesh = mm; mmi.layers = LAYER; mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; root.add_child(mmi)
+
 ## Place prop `name` (kit file name). rot in degrees; kit props face +Z (front) at origin = floor centre.
 static func prop(parent: Node3D, name: String, pos: Vector3, rot_deg := 0.0, collide := true) -> Node3D:
 	var root := Node3D.new(); root.name = name; root.position = pos; root.rotation.y = deg_to_rad(rot_deg)
@@ -76,14 +98,19 @@ static func prop(parent: Node3D, name: String, pos: Vector3, rot_deg := 0.0, col
 	var info: Dictionary = index().get(name, {})
 	var path := KIT + name + ("_lod1" if lod == 1 else "") + ".glb"
 	if not ResourceLoader.exists(path): path = KIT + name + ".glb"
-	if ResourceLoader.exists(path):
+	if name == "gold_pile":
+		_coin_heap(root, info.get("size_m", [1.0, 0.45, 1.0]))
+	elif ResourceLoader.exists(path):
 		if not _scenes.has(name): _scenes[name] = load(path)
 		var v: Node3D = _scenes[name].instantiate(); root.add_child(v)
 		set_layers(v, info.get("size_m", [1, 1, 1])[1] > 0.5)
 	else:
 		var s: Array = info.get("size_m", [0.8, 0.8, 0.8])
 		box(root, Vector3(0, s[1] / 2.0, 0), Vector3(s[0], s[1], s[2]), "darkoak", false)
-	if collide and info.has("collision_box"):
+	if collide and name == "gold_pile":   # test 13: a low walkable coin mound, never a trap wall
+		var gsb := StaticBody3D.new(); var gcs := CollisionShape3D.new(); var gsh := CylinderShape3D.new()
+		gsh.radius = 0.5; gsh.height = 0.12; gcs.shape = gsh; gcs.position.y = 0.06; gsb.add_child(gcs); root.add_child(gsb)
+	elif collide and info.has("collision_box"):
 		var cb: Dictionary = info.collision_box
 		var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var sh := BoxShape3D.new()
 		sh.size = Vector3(cb.extents[0], cb.extents[1], cb.extents[2]); cs.shape = sh

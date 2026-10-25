@@ -322,6 +322,7 @@ func _terrain() -> void:
 	st.generate_normals()
 	var mi := MeshInstance3D.new(); mi.mesh = st.commit()
 	var m := ShaderMaterial.new(); m.shader = load("res://scripts/ground.gdshader"); mi.material_override = m
+	m.set_shader_parameter("cobble_albedo", load("res://assets/roads/textures/cobble_albedo.png")); m.set_shader_parameter("cobble_normal", load("res://assets/roads/textures/cobble_normal.png"))
 	terrain_mat = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(mi)
 	var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var hm := HeightMapShape3D.new()
@@ -465,19 +466,40 @@ func _static_box(pos: Vector3, size: Vector3, rot := 0.0) -> void:
 	bs.size = size; cs.shape = bs; sb.add_child(cs); sb.position = pos; sb.rotation.y = rot; add_child(sb)
 
 func _fountain() -> void:
-	var stone := _mat(Color(0.74, 0.72, 0.68))
-	var basin := MeshInstance3D.new(); var cm := CylinderMesh.new(); cm.top_radius = 6.5; cm.bottom_radius = 6.8; cm.height = 0.9; cm.radial_segments = 48
-	cm.material = stone; basin.mesh = cm; basin.position.y = 0.45; add_child(basin)
-	var w := MeshInstance3D.new(); var cw := PlaneMesh.new(); cw.size = Vector2(12, 12); cw.subdivide_width = 24; cw.subdivide_depth = 24
-	var wm := _water_mat(); wm.set_shader_parameter("wave", 0.015); cw.material = wm; w.mesh = cw; w.position.y = 0.86; add_child(w)
-	var mask := MeshInstance3D.new(); var mk := CylinderMesh.new(); mk.top_radius = 9.0; mk.bottom_radius = 9.0; mk.height = 0.01  # hide square corners
-	mk.material = stone; mask.visible = false; add_child(mask)
-	var col := MeshInstance3D.new(); var c2 := CylinderMesh.new(); c2.top_radius = 0.7; c2.bottom_radius = 1.0; c2.height = 3.2; c2.material = stone
-	col.mesh = c2; col.position.y = 1.6; add_child(col)
-	var lion := MeshInstance3D.new(); var sp := SphereMesh.new(); sp.radius = 1.0; sp.height = 1.6
-	var lm := _mat(Color(0.12, 0.29, 0.6), 0.25); lm.metallic = 0.4; sp.material = lm
-	lion.mesh = sp; lion.position.y = 3.8; add_child(lion)
+	# test 13 (boss: square shadow + blocky look): round 3-tier stone fountain. Every piece is a cylinder/torus, the
+	# water discs never cast shadows (the old 12 m water PLANE cast a square one), collision = the round basin only.
+	var stone := _mat(Color(0.74, 0.72, 0.68)); var dark := _mat(Color(0.56, 0.54, 0.5))
+	var cyl := func(r0: float, r1: float, h: float, y: float, m: Material, segs := 48, shadow := true) -> MeshInstance3D:
+		var mi := MeshInstance3D.new(); var c := CylinderMesh.new(); c.top_radius = r0; c.bottom_radius = r1; c.height = h; c.radial_segments = segs; c.rings = 1
+		c.material = m; mi.mesh = c; mi.position.y = y
+		if not shadow: mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi); return mi
+	var ring := func(r: float, t: float, y: float, m: Material) -> void:
+		var mi := MeshInstance3D.new(); var tm := TorusMesh.new(); tm.inner_radius = r - t; tm.outer_radius = r + t; tm.rings = 48; tm.ring_segments = 10
+		tm.material = m; mi.mesh = tm; mi.position.y = y; add_child(mi)
+	var wm := _water_mat(); wm.set_shader_parameter("wave", 0.015)
+	cyl.call(7.1, 7.3, 0.25, 0.12, dark)                 # round plinth step
+	cyl.call(6.6, 6.8, 0.75, 0.62, stone)                # outer basin wall
+	ring.call(6.55, 0.22, 1.0, stone)                    # rounded lip
+	cyl.call(6.25, 6.25, 0.04, 0.84, wm, 64, false)      # lower pool
+	cyl.call(0.9, 1.1, 2.2, 1.6, stone)                  # stem
+	cyl.call(2.7, 1.2, 0.5, 2.6, stone)                  # middle bowl
+	ring.call(2.68, 0.12, 2.86, stone)
+	cyl.call(2.5, 2.5, 0.04, 2.8, wm, 48, false)         # middle pool
+	cyl.call(0.45, 0.6, 1.2, 3.4, stone)                 # upper stem
+	cyl.call(1.25, 0.6, 0.35, 4.1, stone)                # top bowl
+	cyl.call(1.1, 1.1, 0.04, 4.25, wm, 32, false)
+	var fin := MeshInstance3D.new(); var sp := SphereMesh.new(); sp.radius = 0.35; sp.height = 0.7
+	var lm := _mat(Color(0.12, 0.29, 0.6), 0.25); lm.metallic = 0.4; sp.material = lm; fin.mesh = sp; fin.position.y = 4.65; add_child(fin)
 	var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var cy := CylinderShape3D.new(); cy.radius = 6.8; cy.height = 2.0; cs.shape = cy; sb.add_child(cs); add_child(sb)
+	# falling sheets from the middle + top bowls into the pools below
+	for tier in [[2.6, 2.8, 2.0], [1.15, 4.25, 1.4]]:
+		var pf := _particles(160, 0.9, _soft_quad(Color(0.85, 0.93, 1.0, 0.55), 0.14, false), 0)
+		var pp: ParticleProcessMaterial = pf.process_material
+		pp.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_RING; pp.emission_ring_radius = tier[0]; pp.emission_ring_inner_radius = tier[0] - 0.1
+		pp.emission_ring_height = 0.05; pp.emission_ring_axis = Vector3.UP; pp.direction = Vector3(0, -1, 0); pp.spread = 5; pp.radial_velocity_min = 0.4; pp.radial_velocity_max = 0.7
+		pp.initial_velocity_min = 0.2; pp.initial_velocity_max = 0.5; pp.gravity = Vector3(0, -9.8, 0)
+		pf.position = Vector3(0, tier[1], 0); add_child(pf); fx_any.append([pf, 1])
 	blockers.append([Vector2.ZERO, 9.0])
 	probe = ReflectionProbe.new(); probe.size = Vector3(90, 30, 90); probe.position = Vector3(0, 6, 0)
 	probe.update_mode = ReflectionProbe.UPDATE_ONCE; probe.box_projection = true; probe.max_distance = 120
@@ -496,7 +518,7 @@ func _fountain() -> void:
 	var p := _particles(400, 1.6, _soft_quad(Color(0.85, 0.93, 1.0, 0.7), 0.18, false), 0)
 	var pm: ParticleProcessMaterial = p.process_material
 	pm.direction = Vector3(0, 1, 0); pm.spread = 18; pm.initial_velocity_min = 4.0; pm.initial_velocity_max = 5.0; pm.gravity = Vector3(0, -9.8, 0)
-	p.position = Vector3(0, 4.4, 0); add_child(p); fx_any.append([p, 1])
+	p.position = Vector3(0, 4.7, 0); add_child(p); fx_any.append([p, 1])
 
 func _pond() -> void:
 	var w := MeshInstance3D.new(); var pm := PlaneMesh.new(); pm.size = Vector2(40, 26); pm.subdivide_width = 40; pm.subdivide_depth = 26
@@ -507,7 +529,10 @@ func _pond() -> void:
 	blockers.append([Vector2(-110, 110), 24.0])
 
 func _walls_and_gate() -> void:
-	var stone := _mat(Color(0.62, 0.6, 0.56))
+	# test 13 (boss: flat untextured grey wall/lintel): fieldstone texture, world triplanar
+	var stone := StandardMaterial3D.new(); stone.albedo_texture = load("res://interiors/tex/fieldstone_albedo.jpg"); stone.albedo_color = Color(0.86, 0.84, 0.8)
+	stone.normal_enabled = true; stone.normal_texture = load("res://interiors/tex/fieldstone_normal.png"); stone.normal_scale = 0.8
+	stone.uv1_triplanar = true; stone.uv1_world_triplanar = true; stone.uv1_scale = Vector3.ONE / 2.2; stone.roughness = 0.9
 	var H := 8.0; var T := 3.0
 	var G := 7.0   # half gate opening
 	var L := CITY_HALF - G; var cpos := (CITY_HALF + G) / 2.0
@@ -526,9 +551,20 @@ func _walls_and_gate() -> void:
 			_add_trimesh(g)
 			for mi in _meshes(g, []): mi.visible = false
 			gate_towers.append(g)
-		var arch := MeshInstance3D.new(); var am := BoxMesh.new()
-		am.size = Vector3(18, 2.0, 4) if out.x == 0 else Vector3(4, 2.0, 18)
-		am.material = stone; arch.mesh = am; arch.position = out * CITY_HALF + Vector3(0, 9, 0); add_child(arch)
+		# gatehouse top: textured lintel with a stepped crenellation + a round arch of voussoirs under it
+		var gc := out * CITY_HALF
+		var lint := MeshInstance3D.new(); var am := BoxMesh.new(); am.size = Vector3(18, 2.2, 4.4) if out.x == 0 else Vector3(4.4, 2.2, 18)
+		am.material = stone; lint.mesh = am; lint.position = gc + Vector3(0, 9.1, 0); add_child(lint)
+		for k in 7:   # merlons
+			var mm := MeshInstance3D.new(); var mb := BoxMesh.new(); mb.size = Vector3(1.4, 1.2, 4.6) if out.x == 0 else Vector3(4.6, 1.2, 1.4); mb.material = stone
+			mm.mesh = mb; mm.position = gc + along * ((k - 3) * 2.5) + Vector3(0, 10.8, 0); add_child(mm)
+		var n := 11; var R := G
+		for k in n:   # voussoirs: half circle, springing at y 3.2 between the towers
+			var a := PI * (k + 0.5) / n
+			var vm := MeshInstance3D.new(); var vb := BoxMesh.new(); vb.size = Vector3(PI * R / n + 0.15, 1.0, 4.2); vb.material = stone; vm.mesh = vb
+			vm.position = gc + along * (cos(a) * R) + Vector3(0, 3.2 + sin(a) * (8.0 - 3.2) / 1.0 * 0.95, 0)
+			vm.basis = Basis(Vector3.UP, atan2(out.x, out.z)) * Basis(Vector3(0, 0, 1), -(a - PI / 2) * (1.0 if out.x == 0 else 1.0))
+			add_child(vm)
 
 ## test 8: Beth's street kit (assets/card2/prop_*, shared card2 atlas, 3 LODs). Dressed by each building's door,
 ## kept 2.4 m+ to the side of the doorway so door lanes and interior triggers stay clear.

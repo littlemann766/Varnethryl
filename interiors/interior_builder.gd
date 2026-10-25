@@ -346,7 +346,39 @@ static func _prop(info: Dictionary, p: Array, P: Callable) -> void:
 			K.box(fn, pos + Vector3(0, ex[1] / 2, 0), Vector3(0.2, ex[1], 0.2), "iron", true)
 		_:
 			var y_off: float = ex[0] if ex.size() > 0 else 0.0
-			K.prop(fn, name, pos + Vector3(0, y_off, 0), rot, not (ex.size() > 1 and ex[1] == false))
+			var pr := K.prop(fn, name, pos + Vector3(0, y_off, 0), rot, not (ex.size() > 1 and ex[1] == false))
+			if name == "throne_dais": _dais_runner(pr)
+
+## test 13 (boss: flat rug floating across the dais steps): Beth's dais rug is stripped from the kit copy and replaced by
+## a stair runner that follows every tread and riser, same rug texture (atlas region of the old rug), centred on the steps.
+## Dais profile (kit, +Z front): floor y0 z 0.98..1.6 | tread y0.2 z 0.62..0.98 | y0.4 z 0.30..0.62 | top y0.6 z -0.4..0.30
+const RUNNER_UV := Rect2(0.7622, 0.5122, 0.2256, 0.2256)
+static func _dais_runner(pr: Node3D) -> void:
+	var mat: Material = null
+	for mi in pr.find_children("*", "MeshInstance3D", true, false): mat = (mi as MeshInstance3D).get_active_material(0); break
+	var segs := [[Vector3(0, 0.605, -0.4), Vector3(0, 0.605, 0.3)], [Vector3(0, 0.605, 0.3), Vector3(0, 0.405, 0.3)],
+		[Vector3(0, 0.405, 0.3), Vector3(0, 0.405, 0.62)], [Vector3(0, 0.405, 0.62), Vector3(0, 0.205, 0.62)],
+		[Vector3(0, 0.205, 0.62), Vector3(0, 0.205, 0.98)], [Vector3(0, 0.205, 0.98), Vector3(0, 0.005, 0.98)],
+		[Vector3(0, 0.005, 0.98), Vector3(0, 0.005, 1.6)]]
+	var total := 0.0
+	for sg in segs: total += (sg[1] - sg[0]).length()
+	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var hw := 0.6; var acc := 0.0
+	for sg in segs:
+		var a: Vector3 = sg[0]; var b: Vector3 = sg[1]; var L := (b - a).length()
+		var riser := absf(a.y - b.y) > 0.01
+		var off := Vector3(0, 0, 0.006) if riser else Vector3.ZERO     # risers sit just proud of the stone face
+		var n := Vector3(0, 0, 1) if riser else Vector3.UP
+		var v0 := RUNNER_UV.position.y + RUNNER_UV.size.y * acc / total; var v1 := RUNNER_UV.position.y + RUNNER_UV.size.y * (acc + L) / total
+		var u0 := RUNNER_UV.position.x; var u1 := RUNNER_UV.end.x
+		var q := [[a + Vector3(-hw, 0, 0) + off, Vector2(u0, v0)], [a + Vector3(hw, 0, 0) + off, Vector2(u1, v0)], [b + Vector3(hw, 0, 0) + off, Vector2(u1, v1)], [b + Vector3(-hw, 0, 0) + off, Vector2(u0, v1)]]
+		for idx in [0, 2, 1, 0, 3, 2, 0, 1, 2, 0, 2, 3]:   # both windings (atlas material is single-sided)
+			st.set_normal(n); st.set_uv(q[idx][1]); st.add_vertex(q[idx][0])
+		acc += L
+	var mi2 := MeshInstance3D.new(); mi2.name = "StairRunner"; mi2.mesh = st.commit(); mi2.layers = K.LAYER
+	mi2.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if mat: mi2.material_override = mat
+	pr.add_child(mi2)
 
 static func _light(info: Dictionary, l: Array, P: Callable) -> void:
 	# [kind, floor, u, v, rot, energy, range, shadow]
@@ -357,7 +389,8 @@ static func _light(info: Dictionary, l: Array, P: Callable) -> void:
 	match kind:
 		"chandelier":
 			var cy: float = maxf(F.h - 2.1, 2.2)
-			K.prop(fn, "iron_chandelier", pos + Vector3(0, cy, 0), rot, false)
+			var ch := K.prop(fn, "iron_chandelier", pos + Vector3(0, cy, 0), rot, false)
+			K.set_layers(ch, false)   # test 13: its own light sits above it -> it cast a dark disc/octagon on the floor
 			K.box(fn, pos + Vector3(0, cy + 2.0 + (F.h - cy - 2.0) / 2, 0), Vector3(0.04, maxf(F.h - cy - 2.0, 0.01), 0.04), "iron", false)
 			lp = pos + Vector3(0, cy + 0.6, 0)
 		"lantern":

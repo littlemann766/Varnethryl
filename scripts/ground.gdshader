@@ -10,6 +10,8 @@ uniform vec4 segs[64];
 uniform float seg_hw[64];
 uniform int seg_n = 0;
 uniform int street_n = 0;   // segs[street_n..] are door footpaths: packed dirt, narrower, no cobbles
+uniform sampler2D cobble_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D cobble_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform vec4 path_col : source_color = vec4(0.47,0.37,0.25,1.0);
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p); vec2 f=fract(p); f=f*f*(3.0-2.0*f);
@@ -34,8 +36,9 @@ void fragment(){
 	}
 	d += (noise(p*0.9)-0.5)*0.8;
 	float r = 1.0 - smoothstep(-0.2, 0.4, d);
-	float cob = noise(p*2.5) * noise(p*7.0 + 3.1);
-	vec3 rc = road.rgb * (0.8 + 0.5*cob);
+	// test 13 (boss: flat grey patch under the gates): streets use Beth's road cobble texture (same 4.4 m tile, world UV)
+	vec2 uvc = p / 4.4;
+	vec3 rc = texture(cobble_albedo, uvc).rgb * (0.92 + 0.16 * noise(p * 0.3));
 	float slope = 1.0 - clamp(wn.y, 0.0, 1.0);
 	float fr = (1.0 - smoothstep(-0.15, 0.25, fd + (noise(p*1.7)-0.5)*0.35)) * (1.0 - r);
 	vec3 col = mix(g, rc, r);
@@ -43,5 +46,6 @@ void fragment(){
 	col = mix(col, rock.rgb * (0.8 + 0.4*n), smoothstep(0.25, 0.45, slope));
 	col = mix(col, snow.rgb, smoothstep(48.0, 60.0, wp.y + n*6.0) * smoothstep(170.0, 240.0, length(p - volc_c)) * (1.0 - smoothstep(0.55, 0.75, slope)));
 	ALBEDO = col;
+	NORMAL_MAP = mix(vec3(0.5, 0.5, 1.0), texture(cobble_normal, uvc).rgb, r * (1.0 - smoothstep(0.25, 0.45, slope)));
 	ROUGHNESS = mix(0.95, 0.75, r);
 }

@@ -165,6 +165,23 @@ def solve(p,t):
                 tot=sum(HW.get(k,0) for k in HW if k not in('neck','head'))
                 QQ=rot(Q@up.cross(f), -p['headUp']*max(p['pitch'],0)*tot + p['arch'])@Q
             P[n]=aim(QQ@p[key][side]); continue
+        if n.startswith(('cape','coat')):
+            d=depth(n); tip=not any(c.name.startswith(('cape','coat')) for c in b.children)
+            if n.startswith('cape'):
+                tgt=Q@(-up + f*(0.10 if p['pitch']>30 else -0.18)).normalized()   # straight down the back, clear of the legs
+            else:
+                th='thigh'+n[-2:] if n[-2:] in('_L','_R') else None
+                if th and th in P:
+                    tv=((P[th]@REST[th].inverted()).to_3x3()@RV[th]).normalized()
+                    sd=Q@lft*(1 if n.endswith('_L') else -1)*sideL
+                    tgt=(tv+sd*0.12+(Q@-f)*0.12).normalized()
+                else: tgt=Q@(-up)
+            fl=rot(Q@lft, (1.2 if tip else 0.0)*S2(t,2,-0.1*d))
+            cur=((I@REST[n].inverted()).to_3x3()@RV[n]).normalized()
+            q=cur.rotation_difference(fl@tgt)
+            cl_=chainlen(n)
+            if cl_<=2: q=Quaternion()
+            P[n]=about(q); continue
         if n.startswith(SEC_PFX):
             d=depth(n); cur=((I@REST[n].inverted()).to_3x3()@RV[n]).normalized()
             wind = p['wind'] if p['wind'] is not None else -f
@@ -183,6 +200,22 @@ for tr in list(arm.animation_data.nla_tracks): arm.animation_data.nla_tracks.rem
 for o in bpy.data.objects:
     if o.animation_data: o.animation_data_clear() if o!=arm else None
 for b in arm.pose.bones: b.rotation_mode='QUATERNION'
+if os.environ.get('REWEIGHT'):
+    CL=('cape','coat'); LIMB=('upperArm','foreArm','hand','thigh','shin','foot','toe','fingers','index','middle','ring','pinky','thumb')
+    nfix=0
+    for o in bpy.data.objects:
+        if o.type!='MESH' or not o.vertex_groups: continue
+        GN={g.index:g.name for g in o.vertex_groups}
+        for v in o.data.vertices:
+            cw=sum(g.weight for g in v.groups if GN[g.group].startswith(CL)); lw=sum(g.weight for g in v.groups if GN[g.group].startswith(LIMB))
+            if cw>0 and lw>0:
+                drop=CL if lw>=cw else LIMB; nfix+=1
+                for g in v.groups:
+                    if GN[g.group].startswith(drop): g.weight=0.0
+                tot=sum(g.weight for g in v.groups)
+                if tot>0:
+                    for g in v.groups: g.weight/=tot
+    print('REWEIGHT verts',nfix)
 for name,dur,fn in CLIPS:
     act=bpy.data.actions.new(name); arm.animation_data.action=act
     N=int(round(dur*FPS))

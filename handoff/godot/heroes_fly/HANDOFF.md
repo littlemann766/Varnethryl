@@ -63,3 +63,43 @@ Over walk: asha, lunara, nyx, rook, snowy and wren. The cause is arm and leg wei
 
 Skipped: Ember, Zephyr, Cinder (winged creatures that already have flight clips) and Pip (quadruped).
 Preview: /workspace/hero-motion/heroes_fly_v1.mp4 (Owner, every clip side and 3/4, plus a lineup of all 29).
+
+## v2 (Oct 25): straight cape + weight pass
+- Capes (multi-bone `cape*` chains) are now aimed straight along the body in every fly clip: flat and taut, with no billow or wave and only a ±1.2° flutter on the tip bone. In upright clips (hover, ascend, descend) the cape hangs 0.18 behind the body so it clears the legs, and in forward, fast and bank it lies along the back. Multi-bone `coat*` chains follow their thigh with a small outward/back offset. Single-bone capes and coats (blocky rigs, Mortimer, Selene) stay rigid with their parent, because aiming them tore the mesh.
+- Weight pass in **lunara, nyx, rook, snowy, wren**: on vertices shared between cape/coat and limb bones, the smaller side is dropped and the rest renormalised (`REWEIGHT=1` in tools/fly.py). **Use these GLBs' meshes for those 5 heroes**, not only their clips. On Asha the pass made stretch worse, so it was reverted and Asha keeps her original weights.
+- Leg clipping check (`tools/clip.py`): cape/coat vertices inside a nearby leg surface, worst frame. Owner is 0–2 (v1: 3–31).
+
+| hero | walk p99 | fly p99 v2 | reweighted | |
+|---|---|---|---|---|
+| aldric | 265.6 | 243.6 |  |  |
+| asha | 99.3 | 117.9 |  | OVER |
+| brynn | 202.4 | 63.6 |  |  |
+| cedric | 405.9 | 257.1 |  |  |
+| coral | 309.3 | 252.2 |  |  |
+| darius | 56.8 | 42.4 |  |  |
+| elira | 306.0 | 235.5 |  |  |
+| finn | 278.0 | 234.5 |  |  |
+| garruk | 29.2 | 26.4 |  |  |
+| kael | 194.0 | 187.7 |  |  |
+| lunara | 113.9 | 51.3 | yes |  |
+| marella | 463.8 | 395.6 |  |  |
+| mirelle | 255.1 | 190.0 |  |  |
+| mortimer | 88.9 | 72.1 |  |  |
+| morwen | 337.8 | 205.5 |  |  |
+| nyx | 83.4 | 95.1 | yes | OVER |
+| orin | 365.6 | 169.8 |  |  |
+| owner | 60.6 | 40.0 |  |  |
+| player_pikachu | 134.3 | 72.9 |  |  |
+| rook | 199.5 | 231.8 | yes | OVER |
+| rowan | 323.4 | 294.7 |  |  |
+| selene | 135.7 | 86.1 |  |  |
+| seraphine | 275.8 | 206.8 |  |  |
+| snowy | 32.7 | 66.5 | yes | OVER |
+| talia | 183.2 | 121.4 |  |  |
+| thorne | 419.6 | 76.5 |  |  |
+| thrain | 149.0 | 113.1 |  |  |
+| vesper | 205.7 | 127.6 |  |  |
+| wren | 20.2 | 28.6 | yes | OVER |
+
+Still over walk: asha (118 vs 99), nyx (95 vs 83), rook (232 vs 200), snowy (67 vs 33), wren (29 vs 20). Lunara is fixed (130 -> 51). What's left comes from the limb poses on those rigs' weights, not from the cloth.
+Preview: /workspace/hero-motion/heroes_fly_v2.mp4

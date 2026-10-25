@@ -1,0 +1,36 @@
+extends Node3D
+# args: before.glb after.glb out.png camdist camheight
+func _glb(p:String)->Node3D:
+	var d:=GLTFDocument.new(); var s:=GLTFState.new()
+	if d.append_from_file(p,s)!=OK: print("FAIL ",p); return Node3D.new()
+	return d.generate_scene(s)
+func _tex(p): return ImageTexture.create_from_image(Image.load_from_file(p))
+func _ready():
+	var a:=OS.get_cmdline_user_args(); var night:=a.size()>5 and a[5]=="night"
+	var we:=WorldEnvironment.new(); var env:=Environment.new(); env.background_mode=Environment.BG_SKY
+	var sky:=Sky.new(); var sm:=ProceduralSkyMaterial.new()
+	sm.sky_top_color=Color(0.33,0.5,0.75); sm.sky_horizon_color=Color(0.78,0.8,0.82); sky.sky_material=sm; env.sky=sky
+	env.ambient_light_source=Environment.AMBIENT_SOURCE_SKY; env.tonemap_mode=Environment.TONE_MAPPER_ACES; env.tonemap_exposure=1.0
+	env.glow_enabled=true; env.glow_hdr_threshold=1.0; env.ssao_enabled=true; env.ssao_intensity=2.0; env.ssil_enabled=true
+	env.fog_enabled=true; env.fog_density=0.002
+	if night: env.ambient_light_energy=0.15; env.background_energy_multiplier=0.08; env.tonemap_exposure=1.6
+	we.environment=env; add_child(we)
+	var sun:=DirectionalLight3D.new(); sun.rotation=Vector3(-0.55,-0.9,0); sun.shadow_enabled=true; sun.light_energy=1.3 if not night else 0.08
+	sun.light_color=Color(1,0.93,0.82) if not night else Color(0.6,0.7,1); sun.directional_shadow_max_distance=200; add_child(sun)
+	var g:=MeshInstance3D.new(); var pm:=PlaneMesh.new(); pm.size=Vector2(400,400); g.mesh=pm
+	var gm:=StandardMaterial3D.new(); gm.albedo_texture=_tex("/workspace/beth-world/www/proto3d/models/beth/textures/realmed/cobblestone_albedo.jpg")
+	gm.normal_enabled=true; gm.normal_texture=_tex("/workspace/beth-world/www/proto3d/models/beth/textures/realmed/cobblestone_normal.png")
+	gm.roughness=0.9; gm.uv1_scale=Vector3(66,66,1); g.material_override=gm; add_child(g)
+	var b:=_glb(a[0]); var c:=_glb(a[1]); add_child(b); add_child(c); b.rotation.y=0.45; c.rotation.y=-0.45
+	var aabb:=AABB(); var first:=true
+	for m in c.find_children("*","MeshInstance3D",true,false):
+		var bb:AABB=m.get_aabb()
+		aabb = bb if first else aabb.merge(bb); first=false
+	var w:=maxf(aabb.size.x,aabb.size.z)*1.25+4
+	b.position.x=-w*0.5; c.position.x=w*0.5
+	var cam:=Camera3D.new(); cam.fov=50; cam.far=2000; add_child(cam)
+	var dist:=float(a[3])*w; var h:=aabb.size.y
+	cam.position=Vector3(0,h*float(a[4]),dist); cam.look_at(Vector3(0,h*0.42,0))
+	for i in 24: await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(a[2]); get_tree().quit()

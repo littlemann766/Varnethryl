@@ -8,24 +8,32 @@ var info: Label
 
 func setup(p: Party) -> void:
 	party = p
-	var vw := Vector2(1280, 720)
-	var pos := [Vector2(1100, 540), Vector2(960, 600), Vector2(990, 470), Vector2(1100, 400), Vector2(1200, 410)]
-	var sizes := [150, 96, 96, 96, 70]
+	layer = 5   # under the VUI layer (menu, settings, title)
+	# Anchored to the bottom-right corner so it scales to any phone aspect (e.g. 2340x1080) and stays
+	# clear of the joystick (bottom-left), the menu button and minimap (top-right, y < 230).
+	# [offset from bottom-right corner (x, y) of the button's top-left, size]
+	var lay := [[Vector2(-180, -180), 150], [Vector2(-300, -116), 96], [Vector2(-282, -236), 96], [Vector2(-176, -300), 96], [Vector2(-80, -280), 70]]
 	for i in 5:
-		var b := Button.new(); b.position = pos[i]; b.size = Vector2(sizes[i], sizes[i])
-		b.focus_mode = Control.FOCUS_NONE; b.add_theme_font_size_override("font_size", 18 if i else 26)
+		var b := Button.new(); var sz: int = lay[i][1]
+		b.anchor_left = 1; b.anchor_right = 1; b.anchor_top = 1; b.anchor_bottom = 1
+		b.offset_left = lay[i][0].x; b.offset_top = lay[i][0].y; b.offset_right = lay[i][0].x + sz; b.offset_bottom = lay[i][0].y + sz
+		b.focus_mode = Control.FOCUS_NONE; b.add_theme_font_size_override("font_size", 16 if i else 26)
+		b.add_theme_font_override("font", VStyle.font())
 		b.button_down.connect(func(): party.combat.use(i))
 		add_child(b); btns.append(b)
-	hero_btn = Button.new(); hero_btn.position = Vector2(12, 300); hero_btn.size = Vector2(200, 56)
-	hero_btn.focus_mode = Control.FOCUS_NONE; hero_btn.add_theme_font_size_override("font_size", 20)
+	hero_btn = Button.new(); hero_btn.position = Vector2(12, 96); hero_btn.size = Vector2(200, 48)
+	hero_btn.focus_mode = Control.FOCUS_NONE; hero_btn.add_theme_font_size_override("font_size", 18); hero_btn.add_theme_font_override("font", VStyle.font())
 	hero_btn.pressed.connect(func(): party.next_hero())
 	add_child(hero_btn)
-	info = Label.new(); info.position = Vector2(12, 360); info.add_theme_font_size_override("font_size", 20)
+	info = Label.new(); info.position = Vector2(12, 150); info.add_theme_font_size_override("font_size", 18)
 	info.add_theme_color_override("font_outline_color", Color.BLACK); info.add_theme_constant_override("outline_size", 6)
 	add_child(info)
 
 func _process(_dt: float) -> void:
 	if party == null or party.combat.kit.is_empty(): return
+	var show: bool = not (VUI.title and VUI.title.visible) and VUI.hud.visible and bool(VPrefs.prefs.get("combat", true))
+	if visible != show: visible = show
+	if not show: return
 	var c := party.combat
 	btns[0].text = "ATK"
 	for i in range(1, 5):

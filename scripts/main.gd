@@ -253,9 +253,11 @@ func _ready() -> void:
 	party = load("res://heroes/party.gd").new(); add_child(party); party.setup(self, not bench)
 	interiors = InteriorManager.new(); add_child(interiors); interiors.setup(self)
 	apply_quality()
+	if not bench: spawn_world_boss(false)   # worldboss-test: Ashen Titan world boss roams outside the walls
 	_hook_ui()
 	if bench: _run_bench()
 	else: _warm_up()
+	if args.has("--wbshots"): add_child(load("res://tests/wb_shots.gd").new())
 
 # ---------- settings ----------
 func _load_settings() -> void:
@@ -2392,3 +2394,12 @@ func _set_fade(node: Node, on: bool) -> void:
 			var orig: Array = m.get_meta("fade_orig")
 			for i in orig.size(): m.set_surface_override_material(i, orig[i])
 			m.remove_meta("fade_orig"); m.transparency = 0.0
+
+# ---------- worldboss-test: world-boss Ashen Titan (scripts/world_boss.gd) ----------
+var world_boss: WorldBoss
+func spawn_world_boss(near_hero := true) -> bool:
+	if world_boss == null:
+		world_boss = WorldBoss.new(); add_child(world_boss); world_boss.setup(self)
+		if party and party.combat: party.combat.used.connect(func(slot, sk): get_tree().create_timer(0.12).timeout.connect(func(): world_boss.on_hero_used(slot, sk)))
+	if near_hero and hero: world_boss.spawn_near(hero.global_position)
+	return true

@@ -21,7 +21,7 @@ const ZONES := [["village", "Kingdom / Main Overworld"], ["hydra", "Hydra Mire"]
 const SELF_ONLY := ["god", "fly", "noclip", "bump", "speed", "unlimited", "nocd", "heal", "titan_form", "tp_place", "fly_up", "fly_down"]
 ## Owner gets everything: self-only cheats plus world/save/economy/server tools.
 const OWNER := SELF_ONLY + ["bamboo", "inf_gold", "gold", "xp", "xp_big", "level_active", "level_party", "remax", "item",
-	"kill", "spawn_enemy", "titan", "spawn_boss", "fight_test", "tp_zone", "online_list", "online_jump", "lock", "panel", "dev"]
+	"kill", "spawn_enemy", "titan", "spawn_boss", "spawn_worldboss", "fight_test", "tp_zone", "online_list", "online_jump", "lock", "panel", "dev"]
 ## CoOwner: self-only cheats, plus the server-verified jump-beside-player (it moves only her own hero).
 const COOWNER := SELF_ONLY + ["coowner_jump", "coowner_lock"]
 
@@ -123,6 +123,10 @@ func _apply(key: String, v) -> bool:
 				for e in party.director.living(): if e.is_boss(): said.emit("Only one boss at a time."); return false
 			var hp: Vector3 = main.hero.global_position; var f: Vector3 = -main.hero_vis.global_transform.basis.z
 			party.director.spawn(tid, hp + f * (14.0 if tid == "titan" else 8.0), main.hero)
+		"spawn_worldboss":
+			if main == null: return false
+			said.emit("World Boss: the Ashen Titan roams nearby.")
+			return main.spawn_world_boss(true)
 		"fight_test":
 			if party == null: return false
 			var hp2: Vector3 = main.hero.global_position

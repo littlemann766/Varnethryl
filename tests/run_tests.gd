@@ -32,12 +32,12 @@ func test_heights() -> void:
 		ok(near(h, HeroRoster.height(id), 0.06 * HeroRoster.height(id)), "%s rendered height %.3f vs %.3f" % [id, h, HeroRoster.height(id)])
 		print("HEIGHT %-10s %.3f m (target %.3f, scale %.3f)" % [id, h, HeroRoster.height(id), r.applied_scale])
 		r.free()
-	var M := {"frosttroll_a": 5.715, "frosttroll_b": 5.715, "titan": 11.43, "titan_volcano": 20.955, "stonetroll": 5.715}
+	var M := {"frosttroll_a": 5.715, "frosttroll_b": 5.715, "titan": 11.43, "titan_volcano": 28.0, "stonetroll": 5.715}
 	for t in M:
 		var T: Dictionary = Enemy.TYPES[t]
 		var r2 := CharacterRig.new().setup(T.model, T.height)
 		root.add_child(r2)
-		var h2 := CharacterRig.measure(r2) * _idle_root_scale(r2)   # root-bone scale tracks are stripped: size is on the armature root
+		var h2 := CharacterRig.measure(r2) * _idle_root_scale(r2) * (VolcanoTitan.TITAN_SCALE if t == "titan_volcano" else 1.0)   # test 13: boss chose 28 m (x1.3362 on the node)   # root-bone scale tracks are stripped: size is on the armature root
 		ok(r2.applied_scale == 1.0, "%s loaded at scale 1 (size baked)" % t)
 		ok(near(h2, M[t], 0.06 * M[t]), "%s height %.3f vs %.3f" % [t, h2, M[t]])
 		print("HEIGHT %-14s %.3f m (target %.3f, scale %.3f)" % [t, h2, M[t], r2.applied_scale])

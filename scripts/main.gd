@@ -887,7 +887,14 @@ const VOLC := Vector2(405, -402)
 var _volc_h0 := NAN
 var volc_base := Vector3.ZERO
 var lava_mats: Array[BaseMaterial3D] = []
+var _lava_sm: ShaderMaterial
+## test 13: one shared procedural molten-rock material (scripts/lava.gdshader) for every lava surface
+func lava_mat() -> ShaderMaterial:
+	if _lava_sm == null: _lava_sm = ShaderMaterial.new(); _lava_sm.shader = load("res://scripts/lava.gdshader")
+	return _lava_sm
 var volc_fx: Array[Node3D] = []
+var pool_lights: Array[OmniLight3D] = []
+var titan_quest: Node   # scripts/titan_quest.gd (test 13)
 var volc_vj := {}
 func _volcano_titan() -> void:
 	volc_vj = JSON.parse_string(FileAccess.get_file_as_string("res://assets/volcano/index.json"))
@@ -901,9 +908,7 @@ func _volcano_titan() -> void:
 			for si in mi.mesh.get_surface_count():
 				var m := mi.get_active_material(si) as BaseMaterial3D
 				if m and m.resource_name.begins_with("volcano_lava"):
-					m = m.duplicate(); m.emission_enabled = true; m.emission_energy_multiplier = maxf(m.emission_energy_multiplier, 3.0)
-					m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-					mi.set_surface_override_material(si, m); lava_mats.append(m)
+					mi.set_surface_override_material(si, lava_mat())
 				hi_terrain.append([mi, k + 1])
 	_add_col("res://assets/volcano/volcano_titan_col.glb", volc_base, 0.0)
 	# warm light over the lava moat + the caldera floor, no shadows
@@ -921,11 +926,14 @@ func _volcano_titan() -> void:
 		var big: bool = vt.kind == "crater_plume"
 		volc_fx.append(_smoke(volc_base + Vector3(vp[0], vp[1], vp[2]), 26 if big else 6, 16.0 if big else 6.0, 14.0 if big else 8.0,
 			Color(0.3, 0.28, 0.28, 0.75) if big else Color(0.22, 0.2, 0.2, 0.6)))
-	# Titan arena: the boss stands at titan_spawn and is leashed to the caldera
-	var ts: Array = volc_vj.titan_spawn.pos
-	VolcanoTitan.CENTER = volc_base + Vector3(ts[0], ts[1], ts[2])
-	VolcanoTitan.BODY_LEASH = float(volc_vj.arena.radius_m) - 6.0
-	VolcanoTitan.CHASE_BREAK = float(volc_vj.arena.radius_m) + 40.0
+	# test 13: the Titan stands IN the central lava pool (Beth titan_pool); TitanQuest owns stages, intro and FX
+	var tp: Array = volc_vj.titan_pool.center
+	VolcanoTitan.CENTER = volc_base + Vector3(tp[0], 0.0, tp[2])
+	VolcanoTitan.CHASE_BREAK = float(volc_vj.arena.radius_m) + 42.0
+	for i in 6:   # lava lights around the pool
+		var a := i / 6.0 * TAU
+		var pl := OmniLight3D.new(); pl.light_color = Color(1.0, 0.42, 0.12); pl.light_energy = 1.6; pl.omni_range = 14.0; pl.shadow_enabled = false
+		pl.position = volc_base + Vector3(tp[0] + cos(a) * 9.0, 39.0, tp[2] + sin(a) * 9.0); add_child(pl); volc_fx.append(pl); pool_lights.append(pl)
 	blockers.append([VOLC, 155.0])
 
 func _smoke(at: Vector3, amount: int, size: float, life: float, col: Color) -> CPUParticles3D:
@@ -1381,6 +1389,8 @@ func _process(dt: float) -> void:
 	if fly_controls: fly_controls.visible = VUI.hud != null and VUI.hud.visible and not (VUI.title and VUI.title.visible)
 	_bob_ships(dt)
 	if hero == null: return
+	if titan_quest == null and party and party.director and volc_base != Vector3.ZERO:
+		titan_quest = load("res://scripts/titan_quest.gd").new(); add_child(titan_quest); titan_quest.setup(self)
 	_update_door_lights(dt)
 	if not bench and not bench_running:
 		_tacc += dt

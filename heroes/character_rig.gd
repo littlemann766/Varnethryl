@@ -64,7 +64,7 @@ func _strip_root_scale() -> void:
 			if a.track_get_type(t) == Animation.TYPE_SCALE_3D and str(a.track_get_path(t)).ends_with(":root"): a.remove_track(t)
 
 func _alias_clips(path: String) -> void:
-	var fname := path.get_file()
+	var fname := path.get_file().replace("_glow", "")   # test 13: Beth's emissive copy shares the rig + clip names
 	for id in index().characters:
 		var c: Dictionary = index().characters[id]
 		if c.file != fname: continue

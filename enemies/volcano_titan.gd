@@ -1,124 +1,210 @@
 class_name VolcanoTitan
 extends Enemy
-## Volcano-only Ashen Titan boss, 11x Owner (Beth's ashentitan_volcano_11x.glb, 20.955 m, loaded at scale 1).
-## Attacks are driven by the clip events in ashentitan_volcano_11x.json (aoe + spawn_projectile),
-## sequences/cooldowns from attackSequenceSuggestion, leash from TITAN_CENTER (bossregions.js).
+## Volcano Ashen Titan (test 13, Beth's "Titan in the lava"): stands IN the central 20 m lava pool of the caldera,
+## never walks (root motion stripped from walk/run), turns to face the player and attacks from the pool.
+## Size: ONE constant, TITAN_SCALE (boss chose 28 m = Beth's x1.3362 on the 20.955 m rig). Reach scales with it.
+## Stage 1 rock throws + melee, stage 2 + lava slam, stage 3 + falling-rock rain and +25% speed (TitanQuest sets stage).
 
 signal aoe(center: Vector3, radius: float, dmg_mult: float)
+signal telegraph(at: Vector3, radius: float, sec: float)
 
-static var CENTER := Vector3(405, 0, -402)   # test 12: main sets the caldera arena centre (Beth volcano_titan index.json)
-static var BODY_LEASH := 107.0   # test 12: main narrows this to the 33 m caldera
-static var CHASE_BREAK := 162.0  # player further than this from CENTER -> go home, keep hurling boulders
+const BASE_H := 20.955
+const TITAN_SCALE := 1.3362                  # 28.0 m (boss, test 13). Change here only.
+const REACH_M := 17.0 * TITAN_SCALE / 1.3362   # Beth: ~17 m horizontal at x1.3362
+const PLATE_Y := 39.05                       # plate tops, volcano-local
+const LAVA_Y := 38.0
+static var CENTER := Vector3(405, 0, -402)   # main: volcano base + titan_pool centre (xz); y = volcano base
+static var BODY_LEASH := 0.0
+static var CHASE_BREAK := 75.0               # player further than this from CENTER -> idle (rim r 33 + slack)
 var J: Dictionary
-var cds := {"eruption_slam": 0.0, "boulder_hurl": 0.0, "magma_sweep": 0.0, "volcano_roar": 0.0}
-var seq: Array = []            # [[clip, duration]]
+var cds := {"eruption_slam": 0.0, "boulder_hurl": 0.0, "magma_sweep": 0.0, "volcano_roar": 0.0, "attack": 0.0, "rain": 4.0}
+var seq: Array = []
 var clip_t := 0.0
 var cur_clip := ""
 var fired := {}
-var projectiles: Array = []    # [{node, vel, dmg, r, life}]
+var projectiles: Array = []
 var _proj_scenes := {}
+var stage := 1
+var active := false                          # TitanQuest enables him after the intro
+var skel: Skeleton3D
+var hands := [-1, -1]
+var body_r := 7.0
+var glow_mats: Array[BaseMaterial3D] = []
+
+static func height_m() -> float: return BASE_H * TITAN_SCALE
 
 func setup_volcano(ground: Callable) -> VolcanoTitan:
 	setup("titan_volcano", CENTER, ground)
 	J = JSON.parse_string(FileAccess.get_file_as_string("res://characters/sidecars/ashentitan_volcano__ashentitan_volcano_11x.json"))
-	aggro_m = 90.0
-	speed_mps = float(J.clips.walk.get("groundSpeedMps", 5.47)) * 0.6
+	aggro_m = CHASE_BREAK; speed_mps = 0.0
+	rig.scale = Vector3.ONE * TITAN_SCALE
+	radius = body_r
 	for k in ["volcanic_boulder", "lava_blob", "ember_rock_small"]:
 		_proj_scenes[k] = load("res://enemies/models/%s.glb" % k)
+	_no_root_motion()
+	skel = _find_skel(rig)
+	if skel: hands = [skel.find_bone("hand_L"), skel.find_bone("hand_R")]
+	for mi in rig.find_children("*", "MeshInstance3D", true, false):
+		var m3 := mi as MeshInstance3D
+		for si in m3.mesh.get_surface_count():
+			var m := m3.get_active_material(si) as BaseMaterial3D
+			if m: m = m.duplicate(); m.emission_enabled = true; m3.set_surface_override_material(si, m); glow_mats.append(m)
+	set_glow(1.0)
 	return self
 
-func reach_m() -> float: return 16.0
+func set_glow(e: float) -> void:
+	for m in glow_mats: m.emission_energy_multiplier = e
+
+## walk/run were authored with travel on root/hips: drop their XZ so he stays in the pool
+func _no_root_motion() -> void:
+	if rig.anim_player == null: return
+	for c in ["walk", "run"]:
+		if not rig.anim_player.has_animation(c): continue
+		var a := rig.anim_player.get_animation(c)
+		for t in a.get_track_count():
+			var p := str(a.track_get_path(t))
+			if a.track_get_type(t) == Animation.TYPE_POSITION_3D and (p.ends_with(":root") or p.ends_with(":hips")):
+				var y0: Vector3 = a.track_get_key_value(t, 0)
+				for k in a.track_get_key_count(t):
+					var v: Vector3 = a.track_get_key_value(t, k); a.track_set_key_value(t, k, Vector3(y0.x, v.y, y0.z))
+
+func _find_skel(n: Node) -> Skeleton3D:
+	if n is Skeleton3D: return n
+	for c in n.get_children():
+		var s := _find_skel(c)
+		if s: return s
+	return null
+
+func hand_pos(i: int) -> Vector3:
+	if skel == null or hands[i] < 0: return global_position + Vector3(0, 20, 0)
+	return skel.global_transform * skel.get_bone_global_pose(hands[i]).origin
+
+func reach_m() -> float: return REACH_M
+
+## player hurtbox: body (torso/head above the lava, radius body_r) + the arms while an attack lifts them
+func _hurt_radius() -> float:
+	var r := body_r
+	if state == "attack":
+		for i in 2:
+			var h := hand_pos(i)
+			if h.y > CENTER.y + LAVA_Y: r = maxf(r, Vector2(h.x - global_position.x, h.z - global_position.z).length() + 2.0)
+	return r
+
+func take_damage(dmg: int, from: Vector3) -> void:
+	if not active: return
+	super.take_damage(dmg, from)
 
 func _events(clip: String) -> Array:
 	return J.attackEvents.filter(func(e): return e.clip == clip)
 
 func ai_step(dt: float, to: Vector3, d: float) -> void:
-	for k in cds: cds[k] = max(0.0, cds[k] - dt)
+	radius = _hurt_radius()
 	_step_projectiles(dt)
+	if not active or state == "defeated": return
+	for k in cds: cds[k] = max(0.0, cds[k] - dt * (1.25 if stage == 3 else 1.0))
 	var tp := target.global_position
-	var player_from_center := Vector2(tp.x - CENTER.x, tp.z - CENTER.z).length()
-	if state == "defeated": return
-	if not seq.is_empty():
-		_run_seq(dt); return
-	var dir: Vector3 = to / maxf(d, 0.001)
-	var moving := 0.0
-	if state == "idle":
-		if d < aggro_m and player_from_center < CHASE_BREAK: set_state("chase")
-	elif player_from_center > CHASE_BREAK:
-		# leash: walk home, keep throwing boulders while the player is within maxRange
-		var h := CENTER - global_position; h.y = 0
-		if h.length() > 2.0: position += h.normalized() * speed_mps * dt; moving = 1.0; _face(h.normalized(), dt)
-		elif d > 110.0: set_state("idle")
-		if d <= 110.0 and cds.boulder_hurl <= 0.0: _start("boulder_hurl")
-	else:
-		_face(dir, dt)
-		var choice := ""
-		if d < 14.0 and cds.eruption_slam <= 0.0: choice = "eruption_slam"
-		elif d < 30.0 and cds.magma_sweep <= 0.0: choice = "magma_sweep"
-		elif cds.volcano_roar <= 0.0 and phase == 2: choice = "volcano_roar"
-		elif d > 20.0 and d <= 110.0 and cds.boulder_hurl <= 0.0: choice = "boulder_hurl"
-		if choice != "": _start(choice)
-		elif d > 12.0:
-			var np := global_position + dir * speed_mps * dt
-			if Vector2(np.x - CENTER.x, np.z - CENTER.z).length() <= BODY_LEASH: position = np; moving = 1.0
-	if height_fn.is_valid(): position.y = height_fn.call(position.x, position.z)
-	rig.set_locomotion(moving)
+	var pfc := Vector2(tp.x - CENTER.x, tp.z - CENTER.z).length()
+	if not seq.is_empty(): _run_seq(dt); return
+	if pfc > CHASE_BREAK: set_state("idle"); rig.set_locomotion(0.0); return
+	if state == "idle": set_state("chase")
+	_face(to / maxf(d, 0.001), dt)
+	if stage == 3 and cds.rain <= 0.0: cds.rain = 4.0; _rain(6)
+	var c := ""
+	if stage >= 2 and d < REACH_M + 2.0 and cds.eruption_slam <= 0.0: c = "eruption_slam"
+	elif d < REACH_M and cds.attack <= 0.0: c = "attack"
+	elif d < REACH_M + 8.0 and cds.magma_sweep <= 0.0: c = "magma_sweep"
+	elif stage == 3 and cds.volcano_roar <= 0.0: c = "volcano_roar"
+	elif d > 8.0 and cds.boulder_hurl <= 0.0: c = "boulder_hurl"
+	if c != "": _start(c)
+	rig.set_locomotion(0.0)
 
 func _start(clip: String) -> void:
 	var cd: Dictionary = J.attackSequenceSuggestion.cooldownsSec
-	cds[clip] = float(cd.get(clip, 6)) * (0.8 if phase == 2 else 1.0)
+	cds[clip] = float(cd.get(clip, 4)) * (0.75 if stage == 3 else 1.0)
 	var wind := {"eruption_slam": 1.2, "boulder_hurl": 0.8, "volcano_roar": 1.5}
 	seq = []
-	if wind.has(clip): seq.append(["windup", wind[clip]])
-	seq.append([clip, float(J.clips[clip].durationSec)])
+	if wind.has(clip): seq.append(["windup", wind[clip] / (1.25 if stage == 3 else 1.0)])
+	var dur := float(J.clips[clip].durationSec) if J.clips.has(clip) else rig.clip_length(clip)
+	seq.append([clip, maxf(dur, 1.0) / (1.25 if stage == 3 else 1.0)])
 	cur_clip = ""; set_state("attack")
 
 func _run_seq(dt: float) -> void:
+	var spd := 1.25 if stage == 3 else 1.0
 	if cur_clip != seq[0][0]:
 		cur_clip = seq[0][0]; clip_t = 0.0; fired = {}
-		rig.play_attack(cur_clip, 1.0)
+		rig.play_attack(cur_clip, spd)
 		if cur_clip != "windup": attacked.emit(self, {"id": cur_clip, "name": cur_clip.capitalize()})
-	clip_t += dt
-	var evs := _events(cur_clip)
-	for i in evs.size():
-		var e: Dictionary = evs[i]
-		if not fired.has(i) and clip_t >= float(e.t):
-			fired[i] = true; _fire(e)
-	if clip_t >= seq[0][1]:
+		if cur_clip == "attack": _telegraph_hand(0.9 / spd)
+	clip_t += dt * spd
+	if cur_clip == "attack" and not fired.has("melee") and clip_t >= 0.9:
+		fired["melee"] = true; _hand_hit(5.0, 1.6)
+	for i in _events(cur_clip).size():
+		var e: Dictionary = _events(cur_clip)[i]
+		if not fired.has(i) and clip_t >= float(e.t): fired[i] = true; _fire(e)
+	if clip_t >= seq[0][1] * spd:
 		seq.pop_front(); cur_clip = ""
 		if seq.is_empty(): set_state("chase")
 
+func _plate(p: Vector3) -> Vector3: return Vector3(p.x, CENTER.y + PLATE_Y, p.z)
+
+## slam lands at plate height under the hand nearest the player (clips were authored on flat ground)
+func _near_hand() -> Vector3:
+	var tp := target.global_position; var a := hand_pos(0); var b := hand_pos(1)
+	var da := Vector2(a.x - tp.x, a.z - tp.z).length(); var db := Vector2(b.x - tp.x, b.z - tp.z).length()
+	return a if da < db else b
+
+func _hand_hit(r: float, mult: float) -> void:
+	for i in 2: aoe.emit(_plate(hand_pos(i)), r, mult * 0.5)
+
+func _telegraph_hand(sec: float) -> void:
+	var tp := target.global_position; var g := global_position
+	var dir := Vector2(tp.x - g.x, tp.z - g.z); var L := minf(dir.length(), REACH_M)
+	var at := Vector3(g.x, 0, g.z) + Vector3(dir.x, 0, dir.y).normalized() * L
+	telegraph.emit(_plate(at), 5.0, sec)
+
 func _local(off: Array) -> Vector3:
-	# glTF +Z forward; our node faces -Z with the rig rotated PI, so local +Z (gltf) = -Z (node)
-	return global_transform * Vector3(-float(off[0]), float(off[1]), -float(off[2]))
+	return global_transform * (Vector3(-float(off[0]), float(off[1]), -float(off[2])) * TITAN_SCALE)
 
 func _fire(e: Dictionary) -> void:
 	if e.type == "aoe":
-		aoe.emit(_local(e.center), float(e.radius), float(e.damageMult))
+		var c := global_position if e.name == "roar_blast" else _near_hand()
+		aoe.emit(_plate(c), float(e.radius) * TITAN_SCALE / 1.3362, float(e.damageMult))
 	elif e.type == "spawn_projectile":
+		if e.get("pattern", "") == "rain_zone": return    # stage 3 rain is driven by _rain()
 		var origin := _local(e.spawn.offset)
-		var n: int = int(e.get("count", 1))
+		var n: int = mini(int(e.get("count", 1)), 6)
 		for i in n:
 			var land: Vector3
 			if e.get("target", "") == "player":
 				land = target.global_position + Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)) * float(e.get("spread", 0))
 			else:
 				var lr: Array = e.get("landRadius", [10, 20])
-				var a := (TAU * i / n) if e.get("pattern", "") == "ring" else (rotation.y + PI + deg_to_rad(randf_range(-25, 25)))
-				var r := randf_range(lr[0], lr[1])
-				land = global_position + Vector3(-sin(a), 0, -cos(a)) * r if e.get("pattern", "") != "ring" else global_position + Vector3(cos(a), 0, sin(a)) * r
-			if height_fn.is_valid(): land.y = height_fn.call(land.x, land.z)
+				var a := TAU * i / n + randf() * 0.3 if e.get("pattern", "") == "ring" else rotation.y + PI + deg_to_rad(float(e.get("aimYawDeg", 0)) + randf_range(-20, 20))
+				var r := clampf(randf_range(lr[0], lr[1]), 11.0, 31.0)
+				land = global_position + Vector3(-sin(a), 0, -cos(a)) * r
+			land = _plate(land)
 			_spawn(e.projectile, float(e.get("projectileScale", 1)), origin, land, float(e.damageMult), float(e.get("impactRadius", 2)))
 
-func _spawn(kind: String, sc: float, from: Vector3, to: Vector3, mult: float, impact_r: float) -> void:
-	if projectiles.size() > 40: return     # phone budget
+## stage 3: falling-rock rain, telegraphed circles on the arena (35% biased to the player)
+func _rain(n: int) -> void:
+	for i in n:
+		var p: Vector3
+		if randf() < 0.35: p = target.global_position + Vector3(randf_range(-3, 3), 0, randf_range(-3, 3))
+		else:
+			var a := randf() * TAU; var r := randf_range(11.0, 31.0); p = CENTER + Vector3(cos(a) * r, 0, sin(a) * r)
+		p = _plate(p)
+		_spawn("volcanic_boulder", 1.2, p + Vector3(0, 45, 0), p, 1.0, 3.0, 1.6)
+
+func _spawn(kind: String, sc: float, from: Vector3, to: Vector3, mult: float, impact_r: float, T := -1.0) -> void:
+	if projectiles.size() > 30: return
 	var node: Node3D = _proj_scenes[kind].instantiate()
 	node.scale = Vector3.ONE * sc
 	get_parent().add_child(node); node.global_position = from
-	var T: float = clamp(Vector2(to.x - from.x, to.z - from.z).length() / 18.0, 1.0, 2.6)
+	if T <= 0.0: T = clamp(Vector2(to.x - from.x, to.z - from.z).length() / 18.0, 1.0, 2.6)
 	var g := 9.81
 	var v := Vector3((to.x - from.x) / T, (to.y - from.y + 0.5 * g * T * T) / T, (to.z - from.z) / T)
 	projectiles.append({"node": node, "vel": v, "mult": mult, "r": impact_r, "life": T})
+	telegraph.emit(to, impact_r, T)
 
 func _step_projectiles(dt: float) -> void:
 	for i in range(projectiles.size() - 1, -1, -1):

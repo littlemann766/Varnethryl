@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b8ndg4djwx1v5"
-path="res://.godot/imported/ashentitan_volcano_lod1.glb-005d8447ccef4fff5a21001c25adf6b2.scn"
+uid="uid://c01mlagr3xgdb"
+path="res://.godot/imported/volcano_arena_stage3_hazard.glb-9fa38de217c6d5fba6925ad4853d3e7a.scn"
 
 [deps]
 
-source_file="res://characters/ashentitan_volcano_lod1.glb"
-dest_files=["res://.godot/imported/ashentitan_volcano_lod1.glb-005d8447ccef4fff5a21001c25adf6b2.scn"]
+source_file="res://assets/volcano/stages/volcano_arena_stage3_hazard.glb"
+dest_files=["res://.godot/imported/volcano_arena_stage3_hazard.glb-9fa38de217c6d5fba6925ad4853d3e7a.scn"]
 
 [params]
 

@@ -13,7 +13,7 @@ const TYPES := {
 	"frosttroll_b": {"model": "res://characters/frosttroll_b_lod1.glb", "height": 3.0 * HERO_M, "data": "frosttroll", "patterns": "frosttroll_b", "r": 1.9},
 	"titan": {"model": "res://characters/ashentitan_lod1.glb", "height": 6.0 * HERO_M, "data": "titan", "patterns": "titan", "r": 3.2},
 	"wolf": {"model": "res://characters/wolf_lod1.glb", "height": 0.0, "data": "wolf", "patterns": "", "r": 0.6},
-	"titan_volcano": {"model": "res://characters/ashentitan_volcano_lod1.glb", "height": 0.0, "data": "titan_volcano", "patterns": "", "r": 5.5},
+	"titan_volcano": {"model": "res://characters/ashentitan_volcano_glow_lod1.glb", "height": 0.0, "data": "titan_volcano", "patterns": "", "r": 5.5},
 	"stonetroll": {"model": "res://characters/stonetroll_lod1.glb", "height": 3.0 * HERO_M, "data": "frosttroll", "patterns": "", "r": 1.6},
 }
 

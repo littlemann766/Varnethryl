@@ -259,6 +259,7 @@ const D := {
 
 # ---- MARKET PROVISIONER: sales floor, merchant counter, bulk displays, back room/stock, upstairs loft/storage
 "market": {"name": "Market Provisioner", "scale": [0.44, 0.44],
+	"fill": [[0, ["market_stall", "keg", "chest", "bread_rack"], 0.15], [1, ["market_stall", "keg", "chest", "bread_rack"], 0.15]],
 	"floors": [{"h": 3.4, "mat": "oak", "wall": "plaster", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "plaster", "win": 4.0}],
 	"walls": [[0, -0.5, -0.2, 0.25, -0.2, [[0.5, 2.2]]]],
 	"stairs": [["auto", 0, 1, 2.0]],

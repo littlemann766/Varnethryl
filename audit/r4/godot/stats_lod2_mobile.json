@@ -1,0 +1,121 @@
+{
+  "cliff": {
+    "draw_calls": 10.0,
+    "frame_ms_llvmpipe": 35.4314,
+    "objects": 10.0,
+    "primitives": 13242.0,
+    "vram_MB": 117.347930908203
+  },
+  "closeup_inn": {
+    "draw_calls": 99.0,
+    "frame_ms_llvmpipe": 54.278,
+    "objects": 99.0,
+    "primitives": 180930.0,
+    "vram_MB": 117.347930908203
+  },
+  "closeup_mage": {
+    "draw_calls": 57.0,
+    "frame_ms_llvmpipe": 46.5868,
+    "objects": 57.0,
+    "primitives": 128648.0,
+    "vram_MB": 117.347930908203
+  },
+  "closeup_temple": {
+    "draw_calls": 80.0,
+    "frame_ms_llvmpipe": 66.3697,
+    "objects": 80.0,
+    "primitives": 192582.0,
+    "vram_MB": 117.347930908203
+  },
+  "hero_colosseum_keep": {
+    "draw_calls": 100.0,
+    "frame_ms_llvmpipe": 67.0801,
+    "objects": 100.0,
+    "primitives": 229318.0,
+    "vram_MB": 117.347930908203
+  },
+  "hero_mage_temple": {
+    "draw_calls": 101.0,
+    "frame_ms_llvmpipe": 63.2124,
+    "objects": 101.0,
+    "primitives": 218478.0,
+    "vram_MB": 117.347930908203
+  },
+  "houses": {
+    "draw_calls": 40.0,
+    "frame_ms_llvmpipe": 39.5146,
+    "objects": 40.0,
+    "primitives": 68266.0,
+    "vram_MB": 117.347930908203
+  },
+  "night_closeup_inn": {
+    "draw_calls": 99.0,
+    "frame_ms_llvmpipe": 59.3179,
+    "objects": 99.0,
+    "primitives": 180930.0,
+    "vram_MB": 117.347930908203
+  },
+  "night_closeup_mage": {
+    "draw_calls": 57.0,
+    "frame_ms_llvmpipe": 50.9948,
+    "objects": 57.0,
+    "primitives": 128648.0,
+    "vram_MB": 117.347930908203
+  },
+  "night_town": {
+    "draw_calls": 100.0,
+    "frame_ms_llvmpipe": 73.2018,
+    "objects": 100.0,
+    "primitives": 229318.0,
+    "vram_MB": 117.347930908203
+  },
+  "night_volcano": {
+    "draw_calls": 4.0,
+    "frame_ms_llvmpipe": 24.1112,
+    "objects": 4.0,
+    "primitives": 6770.0,
+    "vram_MB": 117.347930908203
+  },
+  "peak_bare": {
+    "draw_calls": 8.0,
+    "frame_ms_llvmpipe": 21.9788,
+    "objects": 8.0,
+    "primitives": 14154.0,
+    "vram_MB": 117.347930908203
+  },
+  "row2": {
+    "draw_calls": 85.0,
+    "frame_ms_llvmpipe": 53.6664,
+    "objects": 85.0,
+    "primitives": 169064.0,
+    "vram_MB": 117.347930908203
+  },
+  "shore": {
+    "draw_calls": 15.0,
+    "frame_ms_llvmpipe": 32.073,
+    "objects": 15.0,
+    "primitives": 16388.0,
+    "vram_MB": 117.347930908203
+  },
+  "terrain": {
+    "draw_calls": 9.0,
+    "frame_ms_llvmpipe": 22.3867,
+    "objects": 9.0,
+    "primitives": 14714.0,
+    "vram_MB": 117.347930908203
+  },
+  "trees": {
+    "draw_calls": 53.0,
+    "frame_ms_llvmpipe": 37.63,
+    "objects": 53.0,
+    "primitives": 6176.0,
+    "vram_MB": 117.347930908203
+  },
+  "volcano": {
+    "draw_calls": 4.0,
+    "frame_ms_llvmpipe": 24.2509,
+    "objects": 4.0,
+    "primitives": 6770.0,
+    "vram_MB": 117.347930908203
+  }
+}

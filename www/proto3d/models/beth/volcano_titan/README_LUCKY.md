@@ -17,7 +17,15 @@ All coordinates are in index.json (Godot space, origin = cone centre at ground).
 
 - Stage swap: camera shake (0.6 s), particle burst (embers + rock chunks) at the arena centre, `volcano_roar`. Then swap the floor mesh and its col and enable that stage's hazard Area3D. Plates near the spawn and the ramp landing are never removed.
 - Hazard zones: lava deals damage over time (for example 15%/s max HP to players) and plays a burn VFX. Push players up if they're under y 38.
-- Intro: when the player crosses the rim cut (path_end region, or the index `path.breach` point), the camera pulls wide over the crater. The Titan rises from the lava at `titan_spawn` (starts at y about 20, tweens to 39.05 over about 3 s, with smoke and embers), plays `volcano_roar` and shows the name card "ASHEN TITAN". Then show the boss HP bar (top centre, with stage notches at 66% and 33%).
+- Intro: when the player crosses the rim cut (path_end region, or the index `path.breach` point), the camera pulls wide over the crater. The Titan rises out of the central lava pool at (0, y, 0) (starts at y 10, tweens to 26.8 over 3.5 s, with smoke and embers), plays `volcano_roar` and shows the name card "ASHEN TITAN". Then show the boss HP bar (top centre, with stage notches at 66% and 33%).
 
 ## Budgets
-Mountain High 291k / lod1 95k / lod2 40k. Stage 1 High 27k / lod1 12k / lod2 2.6k (stages 2 and 3 are smaller).
+Mountain High 291k / lod1 95k / lod2 40k. Stage 1 High 24.9k / lod1 10.7k / lod2 2.3k (stages 2 and 3 are smaller).
+
+## Titan in the lava (2026-10-25 update)
+- Scale the Titan by **1.3362** (20.955 m -> **28.0 m**). Place him at x 0, z 0, yaw 40 deg (faces the ramp landing). He stands IN a 20 m wide lava pool (r 10 m, surface y 38.0) cut from the centre of all 3 stages. The pool is hazard in every stage (it is in each `_hazard.glb` and `hazard_polys`). The old spawn plate is gone; the ramp-landing plate is kept in all stages.
+- Root (feet) y per stage: **1: 26.8** (lava at mid-thigh), **2: 21.0** (waist), **3: 18.4** (lower chest). Head top 54.8 / 49.0 / 46.4; rim is 72-77 so he never pokes over it.
+- Sink: during the stage swap, start 0.2 s into the 0.6 s shake and tween root y old -> new over 1.6 s (sine in-out). Disable root motion for walk/run; he never leaves the pool.
+- `titan_lava_ring.glb` (48 tris): glowing collar at the waterline. Put it at (titan x, 38.03, titan z), scale xz 7 / 7 / 8 per stage, unshaded emissive, alpha blend, no depth write.
+- Attack reach: his clips were authored standing on the ground, so slams land at his root height (under the lava). Hit-test from the hand bones (`hand_L`, `hand_R`) against players, and spawn ground-slam AoEs at plate height (y 39.05) under the hand's xz, not at the root. Reach is about 17 m horizontal: plates at r 10-17 are the danger ring. In stages 2-3 his idle hands hang in the lava, so the player hurtbox should be his body above y 38 (torso/head capsule), plus the arms when an attack brings them up.
+- Shots: `shots/contact_titan_pool.jpg` (hero, player-on-plate and side view per stage).

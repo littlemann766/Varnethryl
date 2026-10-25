@@ -57,11 +57,66 @@
  "titan_spawn": {
   "pos": [
    0,
-   39.0,
-   -4.0
+   26.8,
+   0
   ],
-  "yaw_deg": 0,
-  "note": "Titan 20.955 m tall; wall rim ~35 m above floor"
+  "yaw_deg": 40,
+  "scale": 1.3362,
+  "height_m": 28.0,
+  "note": "Titan origin = feet. Stands IN the central lava pool (surface y 38.0) facing the ramp landing. pos.y is the stage-1 root height.",
+  "spawn_y_per_stage": {
+   "1": 26.8,
+   "2": 21.0,
+   "3": 18.4
+  },
+  "waterline_on_body": {
+   "1": "mid-thigh (11.2 m up the 28 m body)",
+   "2": "waist (17.0 m)",
+   "3": "lower chest (19.6 m)"
+  },
+  "head_top_y": {
+   "1": 54.8,
+   "2": 49.0,
+   "3": 46.4
+  },
+  "shoulder_y": {
+   "1": 49.1,
+   "2": 43.3,
+   "3": 40.7
+  },
+  "rim_clearance_m": {
+   "1": ">=17 (rim y 72-77.3)"
+  },
+  "sink_tween": {
+   "duration_s": 1.6,
+   "ease": "sine in-out",
+   "start": "0.2 s into the 0.6 s swap shake",
+   "note": "tween root y from the old stage value to the new one; plays during the floor swap so the drop reads as the platform collapsing"
+  },
+  "intro_rise": {
+   "from_y": 10.0,
+   "to_y": 26.8,
+   "duration_s": 3.5
+  },
+  "ring_decal": {
+   "file": "titan_lava_ring.glb",
+   "y": 38.03,
+   "scale_xz_per_stage": {
+    "1": 7.0,
+    "2": 7.0,
+    "3": 8.0
+   },
+   "tris": 48,
+   "note": "unshaded/emissive, alpha blend, follow titan xz, no depth write"
+  },
+  "reach": {
+   "horizontal_reach_m_approx": 17,
+   "strike_ring_r_m": [
+    10,
+    17
+   ],
+   "note": "plates r 10-17 m are inside his arm reach; r>17 is the safer ring"
+  }
  },
  "path": {
   "start": [
@@ -607,14 +662,14 @@
    "col": "volcano_arena_stage1_col.glb",
    "hazard_mesh": "volcano_arena_stage1_hazard.glb",
    "tris": {
-    "high": 27496,
-    "lod1": 11784,
-    "lod2": 2588
+    "high": 24899,
+    "lod1": 10671,
+    "lod2": 2302
    },
-   "plates": 659,
-   "plate_area_m2": 3107.5,
-   "hazard_area_m2": 353.9,
-   "hazard_polys_y": 37.05,
+   "plates": 578,
+   "plate_area_m2": 2799.1,
+   "hazard_area_m2": 662.3,
+   "hazard_polys_y": 38.05,
    "hazard_polys": [
     [
      [
@@ -954,14 +1009,14 @@
    "col": "volcano_arena_stage2_col.glb",
    "hazard_mesh": "volcano_arena_stage2_hazard.glb",
    "tris": {
-    "high": 19712,
-    "lod1": 8448,
-    "lod2": 1902
+    "high": 17815,
+    "lod1": 7635,
+    "lod2": 1667
    },
-   "plates": 498,
-   "plate_area_m2": 1813.9,
-   "hazard_area_m2": 1647.5,
-   "hazard_polys_y": 37.05,
+   "plates": 434,
+   "plate_area_m2": 1608.1,
+   "hazard_area_m2": 1853.3,
+   "hazard_polys_y": 38.05,
    "hazard_polys": [
     [
      [
@@ -1141,14 +1196,14 @@
    "col": "volcano_arena_stage3_col.glb",
    "hazard_mesh": "volcano_arena_stage3_hazard.glb",
    "tris": {
-    "high": 5978,
-    "lod1": 2562,
-    "lod2": 592
+    "high": 6111,
+    "lod1": 2619,
+    "lod2": 591
    },
-   "plates": 156,
-   "plate_area_m2": 536.7,
-   "hazard_area_m2": 2924.7,
-   "hazard_polys_y": 37.05,
+   "plates": 159,
+   "plate_area_m2": 512.9,
+   "hazard_area_m2": 2948.5,
+   "hazard_polys_y": 38.05,
    "hazard_polys": [
     [
      [
@@ -1328,7 +1383,18 @@
    "titan/ashentitan_volcano_glow_lod1.glb"
   ],
   "height_m": 20.955,
-  "note": "copy of characters/ashentitan_volcano(_lod1) with an emissive map (lava cracks + eyes, from the basecolor). Same skeleton + 12 clips. Set material emission_energy_multiplier per stage (1.0 / 2.2 / 4.0) instead of 3 files."
+  "note": "copy of characters/ashentitan_volcano(_lod1) with an emissive map (lava cracks + eyes, from the basecolor). Same skeleton + 12 clips. Set material emission_energy_multiplier per stage (1.0 / 2.2 / 4.0) instead of 3 files. Volcano fight: scale 1.3362 -> 28.0 m, see titan_spawn."
  },
- "lod_note": "phone: volcano_titan_lod1 (95k) + stage *_lod1 (<=12k) = <=107k"
+ "lod_note": "phone: volcano_titan_lod1 (95k) + stage *_lod1 (<=10.7k) = <=106k",
+ "titan_pool": {
+  "center": [
+   0,
+   38.0,
+   0
+  ],
+  "radius_m": 10.0,
+  "edge_jitter_m": 0.9,
+  "surface_y": 38.0,
+  "note": "central lava pool cut from all 3 stage meshes (+lod/col/hazard); hazard in every stage. Nearest plates start at r~10 m; old spawn plate removed, ramp-landing plate kept in all stages."
+ }
 }

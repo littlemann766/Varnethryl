@@ -35,6 +35,7 @@ var lava_mat: Material
 var hq := true
 var crystals: Array = []           # {name, node, hi, lo, mat, hp, broken, t_broken, ground}
 var hand_glows: Array[ShaderMaterial] = []
+var hand_quads: Array[MeshInstance3D] = []
 var crack: MeshInstance3D
 var fissures: Array[MeshInstance3D] = []
 var wave: MeshInstance3D
@@ -185,13 +186,15 @@ func _telegraphs() -> void:
 		var ba := BoneAttachment3D.new(); ba.bone_name = b; skel.add_child(ba)
 		var q := MeshInstance3D.new(); var qm := QuadMesh.new(); qm.size = Vector2.ONE * 3.5; q.mesh = qm
 		var mm: ShaderMaterial = gm.duplicate(); q.material_override = mm; q.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		ba.add_child(q); hand_glows.append(mm)
+		ba.add_child(q); hand_glows.append(mm); hand_quads.append(q); q.visible = false
 		q.set_meta("chest", b == "upperChest")
 
 func _set_glow_charge(v: float, chest := false) -> void:
 	for i in hand_glows.size():
 		var is_chest := i == hand_glows.size() - 1
-		hand_glows[i].set_shader_parameter("charge", v if is_chest == chest else 0.0)
+		var c := v if is_chest == chest else 0.0
+		hand_glows[i].set_shader_parameter("charge", c)
+		hand_quads[i].visible = c > 0.01
 
 # ---------- UI ----------
 func _ui() -> void:
@@ -285,7 +288,7 @@ func _footfall(i: int) -> void:
 func _print_at(p: Vector3) -> void:
 	var mat: ShaderMaterial = (load(WB + "materials/wb_footprint_mat.tres") as Material).duplicate()
 	var fp := _plane(mat, Vector3(48, 1, 48)); fp.visible = true
-	fp.global_position = Vector3(p.x, _gy(p.x, p.z) + 0.05, p.z); fp.rotation.y = rotation.y
+	fp.global_position = Vector3(p.x, _gy(p.x, p.z) + 0.4, p.z); fp.rotation.y = rotation.y
 	footprints.append([fp, mat, 0.0])
 	while footprints.size() > 14: (footprints.pop_front()[0] as Node).queue_free()
 
@@ -335,7 +338,7 @@ func _start_ritual() -> void:
 		_warn("The Titan's core blazes: LAVA WAVE")
 
 func _ground(mi: MeshInstance3D, p: Vector3, yaw: float) -> void:
-	mi.visible = true; mi.global_position = Vector3(p.x, _gy(p.x, p.z) + 0.15, p.z); mi.rotation = Vector3(0, yaw, 0)
+	mi.visible = true; mi.global_position = Vector3(p.x, _gy(p.x, p.z) + 0.5, p.z); mi.rotation = Vector3(0, yaw, 0)
 	var sm := mi.material_override as ShaderMaterial
 	for k in ["progress", "erupt", "rise"]: sm.set_shader_parameter(k, 0.0)
 

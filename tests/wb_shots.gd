@@ -18,7 +18,7 @@ func look(from: Vector3, at: Vector3, fov := 60.0) -> void:
 func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(OUT)
 	await frames(10)
-	m.tier = 2; m.apply_quality(); m._set_time(15.5)
+	m.tier = 2; m.apply_quality(); await frames(5); m.time_mode = 1; m._set_time(12.0); await frames(5)
 	cam = Camera3D.new(); cam.far = 3000; m.add_child(cam)
 	var wb: WorldBoss = m.world_boss
 	print("WB pos ", wb.global_position, " crystals ", wb.crystals.size())
@@ -29,19 +29,19 @@ func _run() -> void:
 	await frames(60); await shot("01_wide_city_scale")
 	hero_at(b - dir * 120.0)
 	var fwd := Vector3(sin(wb.rotation.y), 0, cos(wb.rotation.y))
-	look(b + fwd * 95.0 + Vector3(0, 70, 0) + fwd.cross(Vector3.UP) * 30.0, b + Vector3(0, 62, 0), 50.0)
+	look(b + fwd * 210.0 + Vector3(0, 75, 0) + fwd.cross(Vector3.UP) * 70.0, b + Vector3(0, 60, 0), 45.0)
 	await frames(40); await shot("02_crystals_veins_front")
-	look(b + fwd * 60.0 + Vector3(0, 25, 0) - fwd.cross(Vector3.UP) * 40.0, b + Vector3(0, 35, 0), 55.0)
+	look(b + fwd * 130.0 + Vector3(0, 30, 0) - fwd.cross(Vector3.UP) * 60.0, b + Vector3(0, 35, 0), 50.0)
 	await frames(20); await shot("03_crystals_knees_forearm")
-	look(b - fwd * 80.0 + Vector3(0, 85, 0), b + Vector3(0, 75, 0), 50.0)
+	look(b - fwd * 190.0 + Vector3(0, 95, 0) + fwd.cross(Vector3.UP) * 40.0, b + Vector3(0, 70, 0), 45.0)
 	await frames(20); await shot("04_back_crystal")
-	wb.rituals_done = 0; wb._start_ritual(); wb.t_state = 8.5
+	wb.rituals_done = 0; wb._start_ritual(); wb.t_state = 6.0
 	hero_at(b + fwd * 70.0)
-	await frames(30)
-	look(b + fwd * 150.0 + Vector3(0, 110, 0), b + fwd * 20.0, 65.0)
+	look(b + fwd * 220.0 + Vector3(0, 160, 0) + fwd.cross(Vector3.UP) * 60.0, b + fwd * 20.0, 60.0)
+	await frames(4)
 	await shot("05_fissure_slam_telegraph")
 	cam.current = false; m.cam.current = true; m.yaw = atan2(fwd.x, fwd.z); m.pitch = -0.1
-	await frames(20); await shot("06_fissure_castbar_hud")
+	await frames(3); await shot("06_fissure_castbar_hud")
 	wb.t_state = 11.99; await frames(30); await shot("07_fissure_erupt")
 	wb._end_ritual_fx(); wb._set_state("walk")
 	Engine.time_scale = 10.0
@@ -51,7 +51,7 @@ func _run() -> void:
 	b = wb.global_position; fwd = Vector3(sin(wb.rotation.y), 0, cos(wb.rotation.y))
 	print("prints ", wb.footprints.size())
 	hero_at(b - fwd * 100.0)
-	look(b - fwd * 150.0 + Vector3(0, 120, 0) + fwd.cross(Vector3.UP) * 50.0, b - fwd * 30.0, 60.0)
+	look(b - fwd * 170.0 + Vector3(0, 150, 0) + fwd.cross(Vector3.UP) * 60.0, b - fwd * 40.0, 55.0)
 	await frames(30); await shot("08_footprints_dust")
 	m.tier = 0; m.apply_quality(); await frames(20)
 	look(-dir * 230.0 + Vector3(0, 95, 0), wb.global_position + Vector3(0, 50, 0), 55.0); await shot("09_low_tier")

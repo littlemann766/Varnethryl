@@ -245,7 +245,7 @@ func _ready() -> void:
 	_hi_terrain()
 	_showcase()
 	_foliage()
-	_grass()
+	if not args.has("--wbshots"): _grass()   # shot capture on the shared box: skip grass to save RAM
 	_hero()
 	_fx()
 	_hud()

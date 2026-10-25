@@ -985,7 +985,7 @@ func _run_bench() -> void:
 			for v in views: await _shot("dc_%s_%s" % [v[0], TIERS[q]], v[1], v[2], v[3], 11.0, q, 8)
 		for q in 4: await _shot("dc_night_plaza_%s" % TIERS[q], views[0][1], views[0][2], views[0][3], 22.5, q, 8)
 	var ST := int(OS.get_environment("SHOT_TIER")) if OS.get_environment("SHOT_TIER") != "" else 2
-	var pre := TIERS[ST].to_lower() + "_"
+	var pre: String = String(TIERS[ST]).to_lower() + "_"
 	if only == "fly":
 		await _flythrough_all()
 	if only == "" or only == "shots":

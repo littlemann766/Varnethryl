@@ -2,6 +2,7 @@
 import numpy as np, kit2
 from bld4 import CREAM
 from kit2 import cyl, cone, barrel, pot_plant
+from house import chimney
 from kit3 import tower, pinnacle
 from bld4 import glancet, statue, rock, cb
 from kit2 import crate
@@ -82,13 +83,13 @@ def market(c):
     for x0,x1,zz in((-5.6,-2.9,z+0.1),(-0.7,0.4,zf+0.05),(1.1,5.5,z+0.1)):
         for k,(y,dz) in enumerate(((0.55,1.15),(0.95,0.8),(1.35,0.45))):
             m.box((x0,y-0.06,zz+dz-0.2),(x1,y,zz+dz+0.2),'oak')
-            for xx in np.arange(x0+0.2,x1-0.1,0.38):
+            for xx in np.arange(x0+0.35,x1-0.2,0.72):
                 r=rng.random(); p=(xx,y,zz+dz)
-                if r<0.3: m.blob((xx,y+0.2,zz+dz),0.26,'flowers',6,0.8)                                   # fruit / flowers heap
+                if r<0.3: m.blob((xx,y+0.35,zz+dz),0.5,'flowers',6,0.8)                                   # fruit / flowers heap
                 elif r<0.5:                                                                               # cloth bolts (gold / blue / red-oak)
-                    for j,st in enumerate(('gold','bluestone','oak')): m.beam((xx-0.17,y+0.1+0.15*j,zz+dz),(xx+0.17,y+0.1+0.15*j,zz+dz),0.14,st)
-                elif r<0.75: cyl(m,p,0.17,0,0.42,'oak',8,cap='beam',r1=0.1); m.blob((xx,y+0.48,zz+dz),0.12,'flowers',5)   # pottery with posies
-                else: crate(m,(xx,y,zz+dz),0.34); m.blob((xx,y+0.4,zz+dz),0.2,'flowers',5,0.6)
+                    for j,st in enumerate(('gold','bluestone','oak')): m.beam((xx-0.34,y+0.15+0.28*j,zz+dz),(xx+0.34,y+0.15+0.28*j,zz+dz),0.27,st)
+                elif r<0.75: cyl(m,p,0.34,0,0.8,'oak',8,cap='beam',r1=0.2); m.blob((xx,y+0.9,zz+dz),0.25,'flowers',5)   # pottery with posies
+                else: crate(m,(xx,y,zz+dz),0.6); m.blob((xx,y+0.7,zz+dz),0.4,'flowers',5,0.6)
         for xe in(x0,x1): m.box((xe-0.05,0,zz+0.3),(xe+0.05,1.4,zz+1.4),'beam')
     # hanging goods, baskets and flower garlands along both awning edges
     for (x0,x1,yy,zz) in((-5.6,-4.1,g-0.75,z+1.55),(-4.1,0.5,E-0.7,zf+1.15),(1.2,5.4,E-0.7,z+1.6),(1.2,5.3,g-0.75,z+1.65)):
@@ -101,6 +102,13 @@ def market(c):
     for x in(-3.6,1.7,3.4): crate(m,(x,0,z+2.4),0.55); crate(m,(x+0.1,0.55,z+2.4),0.45)
     for x in(-5.8,0.2,5.8): pot_plant(m,(x,0,z+1.8),0.4)
     for x in(-3.8,4.4): m.box((x-0.5,0,z+4.6),(x+0.5,0.6,z+5.2),'oak'); m.blob((x,0.75,z+4.9),0.4,'flowers',6,0.6)
+    # second row of stalls + heaped produce, sacks and baskets (central lane to the door kept open)
+    from detail import cart, local
+    for x in(-5.4,-3.4,1.2,3.4,5.6): stall(m,x,z+6.2,1.8); m.blob((x-0.4,1.25,z+6.2),0.4,'flowers',6,0.7); m.blob((x+0.4,1.25,z+6.2),0.4,'flowers',6,0.7)
+    local(m,cart,(-4.4,0,z+8.2),20); local(m,cart,(4.6,0,z+8.0),-15)
+    for x in(-5.8,-4.6,0.0,2.4,4.0,5.9):
+        cyl(m,(x,0,z+7.2),0.35,0,0.5,'oak',8,cap='beam',r1=0.4); m.blob((x,0.6,z+7.2),0.35,'flowers',6,0.8)
+    for x in(-5.0,-0.3,2.9,5.0): cyl(m,(x,0,z+4.2),0.3,0,0.55,'plaster',7,cap='plaster',r1=0.22)
     return c
 def bakery(c):
     m=c['m']; g=c['g']; hs=c['D']/2+0.35; zf=hs; n=np.array([0,0,1.0]); t=np.array([1.0,0,0])
@@ -164,7 +172,14 @@ def house_banner(c):
     p=np.array([X1+0.12,g+1.4,-c['D']/2+0.9]); m.obox(p,(0,0,-1),(0,1,0),(1,0,0),(1.25,2.7,0.06),'gold')   # big lion banner like the card
     m.cell([p+[0.05,-1.25,0.55],p+[0.05,-1.25,-0.55],p+[0.05,1.25,-0.55],p+[0.05,1.25,0.55]],'banner',0.08,0.92,0.12,0.86)
     return c
-APPLY=dict(library=library,observatory=observatory,crypt=crypt,thieves_den=thieves_den,apothecary=apothecary,house1=house_banner,house2=house_banner,house4=house_banner,bakery=bakery,market=market,smithy=smithy,temple=temple,mage_academy=mage_academy,keep=keep,townhall=townhall,inn=inn)
+def house3(c):
+    m=c['m']; g=c['g']; zf=c['D']/2+0.35+0.4
+    p=np.array([5.35,g+1.4,c['D']/2+0.5]); m.obox(p,(1,0,0),(0,1,0),(0,0,1),(1.25,2.7,0.06),'gold')
+    m.cell([p+[-0.55,-1.25,0.05],p+[0.55,-1.25,0.05],p+[0.55,1.25,0.05],p+[-0.55,1.25,0.05]],'banner',0.08,0.92,0.12,0.86)
+    for x in(0.6,4.6): pot_plant(m,(x,0,c['D']/2+0.5),0.45)
+    chimney(c,4.3,-1.0,1.0,1.6)
+    return c
+APPLY=dict(house3=house3,library=library,observatory=observatory,crypt=crypt,thieves_den=thieves_den,apothecary=apothecary,house1=house_banner,house2=house_banner,house4=house_banner,bakery=bakery,market=market,smithy=smithy,temple=temple,mage_academy=mage_academy,keep=keep,townhall=townhall,inn=inn)
 def apply(name,c):
     f=APPLY.get(name)
     if f:

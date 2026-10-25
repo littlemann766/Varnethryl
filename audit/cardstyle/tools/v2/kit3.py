@@ -80,7 +80,18 @@ def boat(m,c,L=7,W=2.2,rot=0):
         if s<0: pts=[pts[1],pts[0],pts[3],pts[2]]
         b.poly(pts,pts[0],np.array(pts[1])-np.array(pts[0]),np.array(pts[3])-np.array(pts[0]),'oak')
     b.box((-L/2+0.8,1.0,-W/2+0.2),(L/2-1.0,1.1,W/2-0.2),'oak')
-    b.beam((0,1.1,0),(0,7.0,0),0.18); b.beam((0,6.0,0),(0,6.0,0.01) if False else (0.0,6.2,0),0.01)
-    b.cell([np.array(p) for p in [(-1.6,2.2,0.05),(1.6,2.2,0.05),(1.3,6.4,0.05),(-1.3,6.4,0.05)]],'banner',0.25,0.75,0.25,0.6)
-    b.cell([np.array(p) for p in [(1.6,2.2,-0.05),(-1.6,2.2,-0.05),(-1.3,6.4,-0.05),(1.3,6.4,-0.05)]],'banner',0.25,0.75,0.25,0.6)
+    b.beam((0,1.1,0),(0,7.4,0),0.18)
+    # real sails: billowed cream canvas mainsail between yard and boom, jib to the bow, rigging lines
+    b.beam((0,6.6,-1.9),(0,6.6,1.9),0.1,'beam'); b.beam((0.15,2.0,-0.1),(0.15,2.0,1.9) if False else (-0.2,2.1,0),0.01,'beam')
+    b.beam((0,2.1,-1.7),(0,2.1,1.7),0.09,'beam')
+    ys=np.linspace(2.2,6.5,6); bil=lambda y:0.55*np.sin(np.pi*(y-2.2)/4.3)
+    for y0,y1 in zip(ys[:-1],ys[1:]):
+        w0=1.65-0.08*(y0-2.2); w1=1.65-0.08*(y1-2.2)
+        q=[(0.08+bil(y0),y0,-w0),(0.08+bil(y0),y0,w0),(0.08+bil(y1),y1,w1),(0.08+bil(y1),y1,-w1)]
+        b.poly(q,q[0],(0,0,1),(0,1,0),'plaster'); b.poly([q[1],q[0],q[3],q[2]],q[1],(0,0,-1),(0,1,0),'plaster')
+    for s in(-1,1): b.beam((0,7.3,0),(s*L/2*0.9,1.2,0),0.02,'iron'); b.beam((0,6.6,s*1.9),(0,1.2,s*W/2),0.015,'iron')
+    jib=[(0.1,1.3,0.0),(L/2-0.5,1.3,0.0),(0.1,6.8,0.0)]
+    jb=[(L/2*0.15,1.6,0.04),(L/2-0.4,1.4,0.04),(0.25,6.6,0.04)]
+    b.poly(jb,jb[0],(1,0,0),(0,1,0),'plaster'); b.poly([jb[1],jb[0],jb[2]],jb[1],(-1,0,0),(0,1,0),'plaster')
+    b.beam((0,7.4,0),(0,7.9,0),0.03,'iron'); b.obox(np.array([0.3,7.75,0]),(1,0,0),(0,1,0),(0,0,1),(0.6,0.35,0.02),'gold')
     m.merge(b,c,rot)

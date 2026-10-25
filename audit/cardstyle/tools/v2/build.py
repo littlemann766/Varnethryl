@@ -78,7 +78,7 @@ def house2():
     c['front_gable']=True; return c
 def house3():
     c=house(dict(W=10.5,D=7,g=3.0,floors=1,fh=2.7,jetty=0.35,pitch=56)); g,E=c['g'],c['E']
-    cg=cross_gable(c,2.6,4.2,pz=0.4,pitch=58); zf=cg['zf']
+    cg=cross_gable(c,2.6,5.2,pz=0.4,pitch=60); zf=cg['zf']
     door(c,'z+',2.6,1.3,2.5)
     for a in(-3.8,-1.4): window(c,'z+',a,0.9); window(c,'z+',a,g+0.6,flowers=True)
     window(c,'z+',1.5,g+0.6,flowers=True); window(c,'z+',3.7,g+0.6,flowers=True)
@@ -394,6 +394,23 @@ def port():
         for y_ in(2.0,2.7,3.4): m.beam((x0,y_,3.62),(x0+3.0,y_+0.05,3.62),0.025,'iron')
     boat(m,(-16,-0.7,10.5),6,2.0,-15); boat(m,(15,-0.7,11),6.5,2.2,20); boat(m,(1,-0.7,13),5,1.8,80)
     for x,z in((-11,2.0),(-10.3,2.4),(11.5,-1.0)): barrel(m,(x,1.25,z))
+    # busy card harbour: back row of tall varied stone/timber houses + warehouses, stacked cargo on the quay
+    m.box((-17,-2.5,-20),(17,1.2,-12),'stone')
+    for k,(x,W_,D_,fl,pit,up) in enumerate(((-13.5,7,6,2,60,'stone'),(-6.5,8.5,6.5,3,56,'plaster'),(1.0,6.5,6,2,62,'stone'),(8.0,9.5,7,2,52,'stone'),(14.5,5.5,5.5,3,60,'plaster'))):
+        h=house(dict(W=W_,D=D_,g=3.4,floors=fl,fh=2.7,jetty=0.4 if up=='plaster' else 0.0,pitch=pit,upper=up,framing=(up=='plaster')))
+        for f_ in range(fl):
+            for a in np.linspace(-W_/2+1.4,W_/2-1.4,max(2,int(W_/2.5))): window(h,'z+',a,3.4+f_*2.7+0.5,1.0,1.4,flowers=(f_==0 and k%2==0))
+        door(h,'z+',0,1.4,2.6); gable_fill(h,'x+'); gable_fill(h,'x-'); chimney(h,W_/2-1.0,-1.0,0.9,1.3)
+        if k in(1,3): dormer(h,-1.2,1); banner(h,'z+',W_/2-0.7,4.2)
+        m.merge(h['m'],(x,1.2,-16.0))
+    for (x,z) in((-11.5,-2.6),(-6.0,-1.0),(4.5,-0.8),(10.5,-2.2),(-1.0,2.6)):
+        for i in range(3):
+            for j in range(3-i): crate(m,(x+j*0.95+i*0.47,1.25+i*0.9,z),0.9)
+    for (x,z) in((-14.5,1.5),(13.5,1.0),(2.5,-2.5)):
+        for i in range(4): barrel(m,(x+(i%2)*0.8,1.25,z+(i//2)*0.8))
+        barrel(m,(x+0.4,1.25+1.0,z+0.4))
+    for x in(-8.5,6.0): m.box((x-1.0,1.25,-1.5),(x+1.0,1.45,-0.3),'oak'); [cyl(m,(x-0.6+0.6*i,1.45,-0.9),0.3,0,0.5,'plaster',7,cap='plaster',r1=0.2) for i in range(3)]
+    boat(m,(-10,-0.7,15),7.5,2.4,-5)
     return dict(m=m)
 
 def walls_demo():

@@ -44,3 +44,9 @@ Machine-readable events: worldboss_events.json ({"events": footsteps per clip, "
 
 ## v2 (2026-10-25 3:30 PM ET): knee fix
 All wb_* clips and grow: the knees now bend forward (toward the toes) on every frame. A per-frame check puts the knee in front of the hip-ankle line on all 25 wb clips. Root motion: Lucky strips it, so wb_walk/wb_run play in place, and the planted feet only hold still if the node moves at 2.96 m/s (walk) / 8.1 m/s (run) at 114 m.
+
+## v4 (2026-10-25, 5:45 PM ET): open hands, finger chains, knee follow-ups
+- Beth's open hands are merged in (her apply.py/integ2.py). Each finger now has its own chain: index/middle/ring/pinky/thumb 1-3 _L/_R, parented to hand_*, with joints at the sculpt knuckles. fingers_L/R is still there but nothing is weighted to it.
+- Finger poses are keyed in every clip. Fists: attack1-3, eruption_slam, magma_sweep, windup, wb_ritual_fissure*, wb_stomp, wb_swat_*. Half-curled grip: boulder_hurl. Open palms: everything else (idle/walk/run, intro, death, hit, grow, lavawave/meteor rituals, knockdown/down/getup, stagger).
+- Rename: wb_stagger_loop -> wb_stagger_hold. Godot's importer strips the "_loop" suffix, so the old name collided with wb_stagger and one clip was lost.
+- Knees: wb_idle both knees >= 7.5%. Pool attacks: the knee bend now follows the swing.

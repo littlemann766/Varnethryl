@@ -1,0 +1,379 @@
+{
+ "aldric": {
+  "walk": 265.6,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 137.7,
+   "fly_bank_L": 199.0,
+   "fly_bank_R": 199.4,
+   "fly_descend": 125.6,
+   "fly_fast": 243.6,
+   "fly_forward": 214.7,
+   "fly_hover": 128.9
+  }
+ },
+ "asha": {
+  "walk": 99.3,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 160.5,
+   "fly_bank_L": 164.4,
+   "fly_bank_R": 171.1,
+   "fly_descend": 103.3,
+   "fly_fast": 111.0,
+   "fly_forward": 98.5,
+   "fly_hover": 52.6
+  }
+ },
+ "brynn": {
+  "walk": 202.4,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 33.3,
+   "fly_bank_L": 52.6,
+   "fly_bank_R": 52.7,
+   "fly_descend": 56.3,
+   "fly_fast": 55.4,
+   "fly_forward": 48.2,
+   "fly_hover": 63.6
+  }
+ },
+ "cedric": {
+  "walk": 405.9,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 169.5,
+   "fly_bank_L": 213.1,
+   "fly_bank_R": 205.2,
+   "fly_descend": 152.2,
+   "fly_fast": 257.1,
+   "fly_forward": 221.6,
+   "fly_hover": 162.8
+  }
+ },
+ "coral": {
+  "walk": 309.3,
+  "seck": 0.5,
+  "fly": {
+   "fly_ascend": 210.3,
+   "fly_bank_L": 191.9,
+   "fly_bank_R": 190.8,
+   "fly_descend": 85.6,
+   "fly_fast": 252.2,
+   "fly_forward": 217.7,
+   "fly_hover": 149.0
+  }
+ },
+ "darius": {
+  "walk": 56.8,
+  "seck": 0.5,
+  "fly": {
+   "fly_ascend": 25.1,
+   "fly_bank_L": 35.1,
+   "fly_bank_R": 35.9,
+   "fly_descend": 36.1,
+   "fly_fast": 36.7,
+   "fly_forward": 31.0,
+   "fly_hover": 25.1
+  }
+ },
+ "elira": {
+  "walk": 306.0,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 75.7,
+   "fly_bank_L": 208.5,
+   "fly_bank_R": 178.1,
+   "fly_descend": 208.7,
+   "fly_fast": 235.5,
+   "fly_forward": 184.8,
+   "fly_hover": 120.3
+  }
+ },
+ "finn": {
+  "walk": 278.0,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 98.5,
+   "fly_bank_L": 203.4,
+   "fly_bank_R": 177.4,
+   "fly_descend": 176.6,
+   "fly_fast": 234.5,
+   "fly_forward": 192.3,
+   "fly_hover": 104.2
+  }
+ },
+ "garruk": {
+  "walk": 29.2,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 22.7,
+   "fly_bank_L": 23.0,
+   "fly_bank_R": 23.3,
+   "fly_descend": 19.5,
+   "fly_fast": 26.4,
+   "fly_forward": 24.2,
+   "fly_hover": 17.5
+  }
+ },
+ "kael": {
+  "walk": 194.0,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 105.6,
+   "fly_bank_L": 158.3,
+   "fly_bank_R": 150.8,
+   "fly_descend": 90.2,
+   "fly_fast": 187.7,
+   "fly_forward": 165.3,
+   "fly_hover": 93.2
+  }
+ },
+ "lunara": {
+  "walk": 113.9,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 84.3,
+   "fly_bank_L": 114.4,
+   "fly_bank_R": 110.2,
+   "fly_descend": 87.0,
+   "fly_fast": 129.9,
+   "fly_forward": 97.3,
+   "fly_hover": 49.2
+  }
+ },
+ "marella": {
+  "walk": 463.8,
+  "seck": 0.5,
+  "fly": {
+   "fly_ascend": 246.2,
+   "fly_bank_L": 283.1,
+   "fly_bank_R": 299.2,
+   "fly_descend": 235.1,
+   "fly_fast": 395.6,
+   "fly_forward": 286.8,
+   "fly_hover": 221.1
+  }
+ },
+ "mirelle": {
+  "walk": 255.1,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 107.4,
+   "fly_bank_L": 162.5,
+   "fly_bank_R": 161.6,
+   "fly_descend": 79.3,
+   "fly_fast": 190.0,
+   "fly_forward": 168.1,
+   "fly_hover": 90.5
+  }
+ },
+ "mortimer": {
+  "walk": 88.9,
+  "seck": 0.5,
+  "fly": {
+   "fly_ascend": 27.5,
+   "fly_bank_L": 60.9,
+   "fly_bank_R": 65.2,
+   "fly_descend": 29.3,
+   "fly_fast": 80.4,
+   "fly_forward": 65.7,
+   "fly_hover": 18.2
+  }
+ },
+ "morwen": {
+  "walk": 337.8,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 123.8,
+   "fly_bank_L": 170.7,
+   "fly_bank_R": 170.9,
+   "fly_descend": 137.5,
+   "fly_fast": 205.5,
+   "fly_forward": 179.0,
+   "fly_hover": 136.5
+  }
+ },
+ "nyx": {
+  "walk": 83.4,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 57.5,
+   "fly_bank_L": 76.4,
+   "fly_bank_R": 80.7,
+   "fly_descend": 40.9,
+   "fly_fast": 95.1,
+   "fly_forward": 83.2,
+   "fly_hover": 47.8
+  }
+ },
+ "orin": {
+  "walk": 365.6,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 84.8,
+   "fly_bank_L": 124.7,
+   "fly_bank_R": 138.8,
+   "fly_descend": 86.6,
+   "fly_fast": 169.8,
+   "fly_forward": 144.7,
+   "fly_hover": 82.5
+  }
+ },
+ "owner": {
+  "walk": 60.6,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 34.2,
+   "fly_bank_L": 39.5,
+   "fly_bank_R": 38.9,
+   "fly_descend": 24.4,
+   "fly_fast": 42.0,
+   "fly_forward": 36.8,
+   "fly_hover": 16.9
+  }
+ },
+ "player_pikachu": {
+  "walk": 134.3,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 29.3,
+   "fly_bank_L": 41.5,
+   "fly_bank_R": 43.3,
+   "fly_descend": 72.9,
+   "fly_fast": 35.4,
+   "fly_forward": 36.1,
+   "fly_hover": 45.9
+  }
+ },
+ "rook": {
+  "walk": 199.5,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 146.4,
+   "fly_bank_L": 190.2,
+   "fly_bank_R": 203.3,
+   "fly_descend": 55.3,
+   "fly_fast": 231.8,
+   "fly_forward": 208.4,
+   "fly_hover": 84.2
+  }
+ },
+ "rowan": {
+  "walk": 323.4,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 120.0,
+   "fly_bank_L": 261.7,
+   "fly_bank_R": 226.2,
+   "fly_descend": 218.8,
+   "fly_fast": 294.7,
+   "fly_forward": 241.6,
+   "fly_hover": 150.7
+  }
+ },
+ "selene": {
+  "walk": 135.7,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 35.1,
+   "fly_bank_L": 80.4,
+   "fly_bank_R": 79.6,
+   "fly_descend": 84.6,
+   "fly_fast": 104.8,
+   "fly_forward": 82.4,
+   "fly_hover": 58.6
+  }
+ },
+ "seraphine": {
+  "walk": 275.8,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 117.5,
+   "fly_bank_L": 173.3,
+   "fly_bank_R": 187.5,
+   "fly_descend": 127.9,
+   "fly_fast": 206.8,
+   "fly_forward": 185.4,
+   "fly_hover": 115.5
+  }
+ },
+ "snowy": {
+  "walk": 32.7,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 32.0,
+   "fly_bank_L": 53.5,
+   "fly_bank_R": 52.2,
+   "fly_descend": 69.9,
+   "fly_fast": 60.0,
+   "fly_forward": 46.1,
+   "fly_hover": 52.3
+  }
+ },
+ "talia": {
+  "walk": 183.2,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 65.8,
+   "fly_bank_L": 97.4,
+   "fly_bank_R": 97.2,
+   "fly_descend": 64.7,
+   "fly_fast": 121.4,
+   "fly_forward": 98.4,
+   "fly_hover": 56.1
+  }
+ },
+ "thorne": {
+  "walk": 419.6,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 37.2,
+   "fly_bank_L": 47.1,
+   "fly_bank_R": 47.5,
+   "fly_descend": 76.5,
+   "fly_fast": 45.1,
+   "fly_forward": 41.7,
+   "fly_hover": 65.1
+  }
+ },
+ "thrain": {
+  "walk": 149.0,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 97.6,
+   "fly_bank_L": 132.0,
+   "fly_bank_R": 131.9,
+   "fly_descend": 139.9,
+   "fly_fast": 127.0,
+   "fly_forward": 106.7,
+   "fly_hover": 56.2
+  }
+ },
+ "vesper": {
+  "walk": 205.7,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 69.7,
+   "fly_bank_L": 108.7,
+   "fly_bank_R": 109.4,
+   "fly_descend": 93.3,
+   "fly_fast": 127.6,
+   "fly_forward": 113.1,
+   "fly_hover": 76.9
+  }
+ },
+ "wren": {
+  "walk": 20.2,
+  "seck": 1.0,
+  "fly": {
+   "fly_ascend": 40.4,
+   "fly_bank_L": 47.1,
+   "fly_bank_R": 49.4,
+   "fly_descend": 32.7,
+   "fly_fast": 32.3,
+   "fly_forward": 30.1,
+   "fly_hover": 16.3
+  }
+ }
+}

@@ -1,0 +1,26 @@
+{
+ "sets": {
+  "volcano_glow": "varn-core/handoff/godot/ashentitan_pool/ashentitan_volcano_glow.glb",
+  "volcano_glow_lod1": "varn-core/handoff/godot/ashentitan_pool/ashentitan_volcano_glow_lod1.glb",
+  "volcano_lod1": "varn-core/handoff/godot/ashentitan/ashentitan_volcano_lod1.glb",
+  "lod1": "varn-core/handoff/godot/ashentitan/ashentitan_lod1.glb",
+  "base": "godot-art/characters/ashentitan.glb",
+  "lod2": "godot-art/characters/ashentitan_lod2.glb",
+  "volcano": "godot-art/characters/ashentitan_volcano.glb",
+  "volcano_lod2": "godot-art/characters/ashentitan_volcano_lod2.glb"
+ },
+ "files": {
+  "varn-core/handoff/godot/ashentitan_pool/ashentitan_volcano_glow.glb": "volcano_glow",
+  "varn-core/handoff/godot/ashentitan_pool/ashentitan_volcano_glow_lod1.glb": "volcano_glow_lod1",
+  "varn-core/handoff/godot/ashentitan/ashentitan_volcano_lod1.glb": "volcano_lod1",
+  "varn-core/handoff/godot/ashentitan/ashentitan_lod1.glb": "lod1",
+  "godot-art/volcano/titan/ashentitan_volcano_glow.glb": "volcano_glow",
+  "godot-art/volcano/titan/ashentitan_volcano_glow_lod1.glb": "volcano_glow_lod1",
+  "godot-art/characters/ashentitan.glb": "base",
+  "godot-art/characters/ashentitan_lod1.glb": "lod1",
+  "godot-art/characters/ashentitan_lod2.glb": "lod2",
+  "godot-art/characters/ashentitan_volcano.glb": "volcano",
+  "godot-art/characters/ashentitan_volcano_lod1.glb": "volcano_lod1",
+  "godot-art/characters/ashentitan_volcano_lod2.glb": "volcano_lod2"
+ }
+}

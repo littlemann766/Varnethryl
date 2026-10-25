@@ -1,5 +1,9 @@
-# Ashen Titan pool intro v2 (test 13) - staggered, no elbow flips
+# Ashen Titan pool intro v3 (test 13) - staggered, no elbow flips
 Files: ashentitan_volcano_glow.glb, ashentitan_volcano_glow_lod1.glb (same path, same scale; node scale 1.3362 in Godot = 28 m). All 12 original clips kept.
+## v3 changes
+- Plants solved onto the LOCAL lava surface per key, assuming your rise is LINEAR y=10+16.8*t/3.5 over 0-3.5 s (node scale 1.3362, lava y 38). Palms down, shoulder shrugs as the weight loads. Palm height error <0.05 m at 2.0/2.3/2.8/3.05/3.3/3.55 s, <0.7 m at 4.1/4.6. If your rise is eased, send the curve and I re-solve.
+- Right arm already up through the surface from t=0 (fingertips ~5 m above the lava over 0-0.75 s).
+- Overhead -> reach -> plant now 1.2 -> 1.6 -> 2.0 s (no 0.25 s pop).
 ## `intro` 9.233 s, 30 fps, IN PLACE (game drives y10->26.8 over 0-3.5 s)
 0-1.4 right arm reaches up out of the lava (shoulder/torso lead, weight shifts left) -> 2.0 right hand plants forward-right;
 2.0-2.8 left arm rises and reaches over -> 3.3 left plants; 3.3-5.6 torso-led haul with R->L->centre weight shifts, elbows bend then lock;

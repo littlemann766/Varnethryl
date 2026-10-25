@@ -27,10 +27,10 @@ func _ready() -> void:
 	var lg := VStyle.label("Legends Are Forged. Kingdoms Are Conquered.", 15, VStyle.PARCH); lg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; v.add_child(lg)
 	var rule := ColorRect.new(); rule.color = Color("#b48c4d"); rule.custom_minimum_size = Vector2(340, 1); rule.size_flags_horizontal = SIZE_SHRINK_CENTER; v.add_child(rule)
 	var acts := VBoxContainer.new(); acts.custom_minimum_size = Vector2(340, 0); acts.size_flags_horizontal = SIZE_SHRINK_CENTER; acts.add_theme_constant_override("separation", 10); v.add_child(acts)
-	for d in [["play", "Play Solo", play_solo], ["mp", "⚔ Multiplayer · Join World", multiplayer], ["hero", "Choose a Hero", choose_hero], ["settings", "Settings", settings]]:
+	for d in [["play", "Play Solo", "play_solo"], ["mp", "⚔ Multiplayer · Join World", "multiplayer_pressed"], ["hero", "Choose a Hero", "choose_hero"], ["settings", "Settings", "settings"]]:
 		var b := Button.new(); b.text = d[1]; b.custom_minimum_size = Vector2(0, 46); b.name = "Btn_" + d[0]
 		b.add_theme_font_size_override("font_size", 15)
-		var sig: Signal = d[2]; b.pressed.connect(func(): sig.emit())
+		var sig: String = d[2]; b.pressed.connect(func(): emit_signal(sig))
 		if d[0] == "play": VStyle.primary(b)
 		acts.add_child(b); buttons[d[0]] = b
 	var bot := VStyle.label("Your adventure continues from the existing local save. Nothing is reset.", 12, Color("#bfb39a"))

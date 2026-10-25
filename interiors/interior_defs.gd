@@ -65,7 +65,7 @@ const D := {
 
 # ---------------- GUILD HALL: foyer, main hall w/ quest board, meeting table, stair & upper balcony overlooking hall
 "guildhall": {"name": "Guild Hall of Varnethryl",
-	"floors": [{"h": 6.0, "mat": "flag", "wall": "stone", "win": 4.0},
+	"floors": [{"h": 5.2, "mat": "flag", "wall": "stone", "win": 4.0},
 		{"h": 4.0, "mat": "oak", "wall": "plaster", "win": 4.0, "slab": [[-0.5, -0.5, -0.24, 0.5], [0.24, -0.5, 0.5, 0.5], [-0.24, 0.3, 0.24, 0.5]]}],
 	"walls": [
 		[0, -0.5, 0.3, 0.5, 0.3, [[0.5, 5.0, 4.5], [0.15, 2.0], [0.85, 2.0]]],   # foyer
@@ -89,7 +89,7 @@ const D := {
 	"lights": [["chandelier", 0, 0.0, -0.15, 0, 4.0, 20.0, true], ["chandelier", 0, 0.0, 0.12, 0, 2.5, 14.0], ["fire", 0, 0.0, -0.46, 0, 2.0, 8.0],
 		["chandelier", 0, -0.37, -0.2, 0, 2.0, 11.0], ["lantern", 0, 0.37, -0.49, 0, 1.4, 8.0], ["lantern", 0, -0.1, 0.31, 180, 1.0, 7.0], ["lantern", 0, 0.1, 0.31, 180, 1.0, 7.0],
 		["lantern", 1, -0.4, -0.49, 0, 1.0, 8.0], ["lantern", 1, 0.4, -0.49, 0, 1.0, 8.0], ["lantern", 1, 0.0, 0.49, 180, 1.0, 8.0]],
-	"rooms": [["Entrance Foyer", 0, 0.0, 0.4], ["Main Hall", 0, 0.0, -0.1], ["Meeting Table", 0, -0.37, 0.05], ["Quest Board", 0, 0.37, -0.15],
+	"rooms": [["Entrance Foyer", 0, 0.0, 0.4], ["Main Hall", 0, 0.0, -0.1], ["Meeting Table", 0, -0.37, 0.05], ["Quest Board", 0, 0.3, -0.38],
 		["Upper Balcony", 1, 0.0, 0.4], ["Library Archive", 1, -0.37, 0.1], ["Storage", 1, 0.37, -0.3], ["Balcony Overlook", 1, -0.37, -0.3]]},
 
 # ---------------- TOWN HALL: great court hall (checker floor), quest board area, tower stairs; upper: council room (round table), archives
@@ -156,7 +156,7 @@ const D := {
 
 # ---------------- TEMPLE: nave w/ pews + high altar, healing chambers (E, fountain), crypt-adjacent shrine (W), upper gallery overlooking nave
 "temple": {"name": "Temple of Varnethryl", "scale": [0.8, 0.7],
-	"floors": [{"h": 7.0, "mat": "palestone", "wall": "palestone", "win": 3.5, "glass": "stained"},
+	"floors": [{"h": 6.0, "mat": "palestone", "wall": "palestone", "win": 3.5, "glass": "stained"},
 		{"h": 5.0, "mat": "palestone", "wall": "palestone", "win": 3.5, "glass": "stained", "slab": [[-0.5, -0.5, -0.2, 0.5], [0.2, -0.5, 0.5, 0.5]]}],
 	"walls": [[0, -0.2, -0.3, -0.2, 0.1, [[0.5, 3.0]]], [0, 0.2, -0.3, 0.2, 0.1, [[0.5, 3.0]]],
 		[0, -0.5, -0.3, -0.2, -0.3, []], [0, 0.2, -0.3, 0.5, -0.3, []], [0, -0.5, 0.1, -0.2, 0.1, []], [0, 0.2, 0.1, 0.5, 0.1, []]],
@@ -204,7 +204,7 @@ const D := {
 "mage": {"name": "Mage Academy of Varnethryl",
 	"floors": [{"h": 4.5, "mat": "bluecheck", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 4.0, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"},
 		{"h": 4.0, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 4.0, "mat": "bluecheck", "wall": "stone", "win": 3.5, "glass": "stained"}],
-	"stairs": [["auto", 0, -1, 2.0], ["auto", 1, 1, 2.0], ["auto", 2, -1, 2.0, 1]],
+	"stairs": [["auto", 0, -1, 2.0], ["auto", 1, 1, 2.0], ["auto", 2, -1, 2.0]],
 	"walls": [[1, -0.5, -0.1, 0.5, -0.1, [[0.5, 2.4]]], [2, -0.1, -0.5, -0.1, 0.0, [[0.5, 1.8]]]],
 	"props": [["_area", 0, 0.0, 0.0, 0, [6.0, 6.0, "blue"]], ["crystal_orb", 0, 0.0, 0.0, 0], ["bookshelf", 0, 0.49, 0.0, -90], ["bookshelf", 0, 0.49, -0.2, -90], ["_counter", 0, 0.2, -0.35, 0, [3.0, 1.0, 0.8]],
 		["lion_banner", 0, 0.0, -0.49, 0, [1.5, false]], ["bookshelf", 0, -0.2, -0.48, 0], ["bench", 0, 0.3, 0.3, 0],
@@ -220,7 +220,7 @@ const D := {
 # ---- TREASURY: front gate/guard post, main vault room (gold), item storage hall, secure office; upper overlook gallery + vault access
 "treasury": {"name": "Treasury of Varnethryl",
 	"floors": [{"h": 4.5, "mat": "palestone", "wall": "stone", "win": 0.0}, {"h": 4.0, "mat": "palestone", "wall": "stone", "win": 5.0, "slab": [[-0.5, -0.5, 0.5, -0.2], [-0.5, -0.2, -0.2, 0.5], [0.2, -0.2, 0.5, 0.5]]}],
-	"walls": [[0, -0.5, 0.25, 0.5, 0.25, [[0.5, 2.6]]], [0, -0.2, -0.5, -0.2, 0.25, [[0.6, 1.8]]], [0, 0.2, -0.5, 0.2, 0.25, [[0.6, 1.8]]]],
+	"walls": [[0, -0.5, 0.25, 0.2, 0.25, [[0.714, 2.6]]], [0, -0.2, -0.5, -0.2, 0.25, [[0.6, 1.8]]], [0, 0.2, -0.5, 0.2, 0.25, [[0.6, 1.8]]]],
 	"stairs": [["auto", 0, 1, 1.8]],
 	"rails": [[1, -0.2, -0.2, 0, 4], [1, -0.2, -0.2, -90, 3], [1, 0.2, -0.2, -90, 3]],
 	"props": [["vault_door", 0, 0.16, 0.2, 90, [0.0, false]], ["gold_pile", 0, -0.08, -0.25, 0], ["gold_pile", 0, 0.08, -0.15, 30], ["chest", 0, 0.1, -0.35, 0], ["chest", 0, -0.1, -0.4, 0], ["gold_pile", 0, 0.0, -0.4, 0],
@@ -229,7 +229,7 @@ const D := {
 		["table", 0, 0.35, -0.2, 0], ["chair", 0, 0.35, -0.25, 0], ["bookshelf", 0, 0.49, -0.1, -90], ["lion_banner", 0, 0.35, -0.49, 0, [1.2, false]],
 		["chest", 1, -0.3, -0.4, 0], ["chest", 1, 0.3, -0.4, 0], ["vault_door", 1, 0.0, -0.49, 0], ["lion_banner", 1, -0.49, 0.0, 90, [0.8, false]]],
 	"lights": [["chandelier", 0, 0.0, -0.2, 0, 3.0, 12.0, true], ["lantern", 0, 0.0, 0.26, 180, 1.4, 8.0], ["lantern", 0, -0.35, -0.49, 0, 1.0, 7.0], ["lantern", 0, 0.35, -0.49, 0, 1.0, 7.0], ["lantern", 1, 0.0, -0.49, 0, 1.2, 9.0]],
-	"rooms": [["Front Gate / Guard Post", 0, 0.0, 0.38], ["Main Vault Room", 0, 0.0, -0.05], ["Item Storage Hall", 0, -0.35, -0.2], ["Secure Office", 0, 0.35, -0.05],
+	"rooms": [["Front Gate / Guard Post", 0, 0.0, 0.38], ["Main Vault Room", 0, 0.0, -0.05], ["Item Storage Hall", 0, -0.35, -0.2], ["Secure Office", 0, 0.28, -0.38],
 		["Overlook Gallery", 1, -0.35, 0.2], ["Upper Vault Access", 1, 0.0, -0.38]]},
 
 # ---- CASTLE KEEP: throne room, great hall, war room; upper royal chambers
@@ -254,7 +254,7 @@ const D := {
 "observatory": {"name": "Observatory of Varnethryl",
 	"floors": [{"h": 4.5, "mat": "bluecheck", "wall": "stone", "win": 3.0}, {"h": 4.0, "mat": "oak", "wall": "stone", "win": 3.0},
 		{"h": 4.5, "mat": "bluecheck", "wall": "stone", "win": 3.0}, {"h": 4.0, "mat": "oak", "wall": "stone", "win": 3.0}, {"h": 4.0, "mat": "slate", "wall": "stone", "win": 2.0, "glass": "stained"}],
-	"stairs": [["auto", 0, -1, 1.8], ["auto", 1, 1, 1.8], ["auto", 2, -1, 1.8, 1], ["auto", 3, 1, 1.8, 1]],
+	"stairs": [["auto", 0, -1, 1.8], ["auto", 1, 1, 1.8], ["auto", 2, -1, 1.8], ["auto", 3, 1, 1.8]],
 	"props": [["anvil", 0, 0.2, -0.3, 0], ["forge", 0, 0.2, -0.45, 0], ["chest", 0, -0.2, -0.4, 0], ["_area", 0, 0.0, 0.0, 0, [4.0, 4.0, "gold"]],
 		["bookshelf", 1, -0.49, -0.2, 90], ["bookshelf", 1, -0.3, -0.48, 0], ["bookshelf", 1, 0.0, -0.48, 0], ["table", 1, 0.0, -0.1, 0], ["lectern", 1, 0.2, 0.1, 0],
 		["telescope", 2, 0.1, -0.2, 0], ["_area", 2, 0.1, -0.2, 0, [4.0, 4.0, "blue"]], ["table", 2, -0.25, -0.35, 0], ["chair", 2, -0.25, -0.3, 180],
@@ -363,7 +363,7 @@ const D := {
 	"floors": [{"h": 4.0, "mat": "flag", "wall": "darkoak", "win": 5.0}, {"h": 3.0, "mat": "oak", "wall": "darkoak", "win": 0.0, "slab": [[0.2, -0.5, 0.5, 0.5]]}],
 	"walls": [[0, -0.5, -0.15, 0.2, -0.15, [[0.1, 0.01], [0.3, 0.01], [0.5, 0.01], [0.7, 0.01], [0.9, 0.01]], "darkoak"],
 		[0, -0.3, -0.5, -0.3, -0.15, [], "darkoak"], [0, -0.1, -0.5, -0.1, -0.15, [], "darkoak"], [0, 0.2, -0.5, 0.2, 0.5, [[0.3, 1.8], [0.75, 1.8]], "darkoak"]],
-	"ladders": [[0, 0.15, 0.25, 90]],
+	"ladders": [[0, 0.19, 0.0, -90]],
 	"props": [["_runner", 0, -0.15, 0.17, 90, [0.25, 1.8]], ["keg", 0, -0.4, -0.25, 0], ["keg", 0, -0.2, -0.25, 0], ["keg", 0, 0.0, -0.25, 0], ["lion_banner", 0, -0.2, 0.49, 180, [1.4, false]],
 		["weapon_rack", 0, 0.49, -0.3, -90], ["table", 0, 0.35, -0.3, 0], ["chest", 0, 0.3, -0.45, 0], ["lion_banner", 0, 0.35, -0.49, 0, [1.2, false]],
 		["keg", 0, 0.35, 0.35, 0], ["keg", 0, 0.4, 0.38, 0], ["chest", 0, 0.45, 0.2, -90],

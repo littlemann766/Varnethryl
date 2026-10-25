@@ -6,7 +6,7 @@ const WALL_T := 0.35
 const SLAB_T := 0.25
 const DOOR_W := 2.2
 const DOOR_H := 3.0
-const STAIR_SLOPE := 1.3        # run = rise * 1.3  (~37.6 deg, under floor_max_angle 45)
+const STAIR_SLOPE := 1.45       # run = rise * 1.45 (~34.6 deg; capsules of every size take it, under floor_max_angle 45)
 
 ## size = exterior AABB size. Returns {node, W, D, floors:[{y,h,node,outline}], stairs, ladders, rooms, spawn, door}
 static func build(id: String, def: Dictionary, size: Vector3) -> Dictionary:
@@ -158,8 +158,8 @@ static func _stair(fn: Node3D, s: Dictionary, sm: String) -> void:
 	cv.points = pts; cs.shape = cv; sb.add_child(cs); fn.add_child(sb)
 	# balustrade colliders along both sides (stairs are entered/left only at their ends, so tiny heroes never snag a side ledge)
 	for sx in [-1, 1]:
-		var sbb := StaticBody3D.new(); var cb := CollisionShape3D.new(); var bb := BoxShape3D.new(); bb.size = Vector3(0.1, H + 1.0, L)
-		cb.shape = bb; sbb.add_child(cb); sbb.position = b + side * ((w / 2 + 0.06) * sx) + d * (L / 2) + Vector3(0, (H + 1.0) / 2, 0); sbb.rotation.y = rot
+		var sbb := StaticBody3D.new(); var cb := CollisionShape3D.new(); var bb := BoxShape3D.new(); bb.size = Vector3(0.3, H + 1.0, L)
+		cb.shape = bb; sbb.add_child(cb); sbb.position = b + side * ((w / 2 + 0.15) * sx) + d * (L / 2) + Vector3(0, (H + 1.0) / 2, 0); sbb.rotation.y = rot
 		fn.add_child(sbb)
 	# handrails (iron posts + oak rail) both sides
 	for sx in [-1, 1]:

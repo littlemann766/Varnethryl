@@ -127,6 +127,8 @@ func follow(hero: CharacterBody3D, path: PackedVector3Array, mgr: InteriorManage
 			await step(hero, d, mgr)
 			t += 1
 			if t > 60 * 12:
+				for ci in hero.get_slide_collision_count():
+					var c := hero.get_slide_collision(ci); print("  hit ", c.get_collider(), " ", (c.get_collider() as Node).get_parent().name if c.get_collider() else "", " n ", c.get_normal(), " at ", c.get_position())
 				print("STUCK at ", hero.global_position, " wp ", p, " floor ", hero.is_on_floor(), " wall ", hero.is_on_wall())
 				return false
 	return true
@@ -155,8 +157,6 @@ func test_doors() -> void:
 		for k in 90:
 			await step(hero, into, mgr)
 			if mgr.active(): break
-		if not mgr.active(): print("DOORDBG ", b.id, " hero ", hero.global_position, " local ", b.node.global_transform.affine_inverse() * hero.global_position, " door ", mgr.door_world(b), " floor ", hero.is_on_floor())
-		else: print("DOORDBG2 ", b.id, " got ", mgr.cur_bld.id)
 		ok(mgr.active() and mgr.cur_bld.id == b.id, "%s door enters interior" % b.id)
 		ok(not m.sun.visible, "%s sun hidden inside" % b.id)
 		var back: Vector3 = mgr.cur.node.global_transform.basis * Vector3(0, 0, 1)

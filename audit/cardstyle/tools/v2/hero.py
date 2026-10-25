@@ -156,7 +156,7 @@ def crypt(c):
 def thieves_den(c):
     m=c['m']; X1=c['X1']; from detail import lantern_post, local
     for s in(-1,1): local(m,lantern_post,(X1+1.6,0,0.5+s*2.0),180)
-    p=np.array([X1+0.12,c['g']-0.1,0.0]); m.obox(p,(0,0,-1),(0,1,0),(1,0,0),(4.6,0.9,0.12),'beam'); m.cell([p+[0.08,-0.35,2.1],p+[0.08,-0.35,-2.1],p+[0.08,0.35,-2.1],p+[0.08,0.35,2.1]],'sign_potion',0.05,0.95,0.42,0.58)
+    p=np.array([X1+0.12,c['g']-0.1,0.0]); m.obox(p,(0,0,-1),(0,1,0),(1,0,0),(4.6,0.9,0.12),'beam'); m.cell([p+[0.08,-0.38,0.38],p+[0.08,-0.38,-0.38],p+[0.08,0.38,-0.38],p+[0.08,0.38,0.38]],'sign_potion',0.05,0.95,0.3,0.78)
     return c
 def apothecary(c):
     m=c['m']; z=c['D']/2+0.35+0.3; g=c['g']; from kit2 import leaf
@@ -165,7 +165,7 @@ def apothecary(c):
         m.beam((x,g-0.2,z),(x,g-0.6,z),0.015,'beam')
         for k in range(5 if kit2.Q==0 else 2): leaf(m,(x+0.08*np.sin(k*2.1),g-0.65-0.12*k,z+0.05),(0.3*np.cos(k*2.1),-0.2,1),0.16,k*0.9)
     p=np.array([0,g+0.15,c['hs']+0.35+0.12]); m.obox(p,(1,0,0),(0,1,0),(0,0,1),(4.0,0.95,0.1),'beam')
-    m.cell([p+[-1.85,-0.4,0.06],p+[1.85,-0.4,0.06],p+[1.85,0.4,0.06],p+[-1.85,0.4,0.06]],'sign_potion',0.05,0.95,0.42,0.58)
+    m.cell([p+[-0.42,-0.42,0.06],p+[0.42,-0.42,0.06],p+[0.42,0.42,0.06],p+[-0.42,0.42,0.06]],'sign_potion',0.05,0.95,0.3,0.78)
     return c
 def house_banner(c):
     m=c['m']; X1=c['X1']; g=c['g']
@@ -174,11 +174,11 @@ def house_banner(c):
     return c
 def house3(c):
     m=c['m']; g=c['g']; zf=c['D']/2+0.35+0.4
-    p=np.array([4.3,g+1.4,c['D']/2+0.5]); m.obox(p,(1,0,0),(0,1,0),(0,0,1),(1.25,2.7,0.06),'gold')
-    m.cell([p+[-0.55,-1.25,0.05],p+[0.55,-1.25,0.05],p+[0.55,1.25,0.05],p+[-0.55,1.25,0.05]],'banner',0.08,0.92,0.12,0.86)
+    from house import banner
+    banner(c,'z+',3.35,g+2.5,1.0,2.4)    # card: blue lion banner on an iron bracket at the right front corner, hanging flat, facing out
     for x in(0.9,3.6): pot_plant(m,(x,0,c['D']/2+0.5),0.45)
     return c
-APPLY=dict(house3=house3,library=library,observatory=observatory,crypt=crypt,thieves_den=thieves_den,apothecary=apothecary,house1=house_banner,house2=house_banner,house4=house_banner,bakery=bakery,market=market,smithy=smithy,temple=temple,mage_academy=mage_academy,keep=keep,townhall=townhall,inn=inn)
+APPLY=dict(house3=house3,library=library,observatory=observatory,crypt=crypt,thieves_den=thieves_den,apothecary=apothecary,bakery=bakery,market=market,smithy=smithy,temple=temple,mage_academy=mage_academy,keep=keep,townhall=townhall,inn=inn)
 def apply(name,c):
     f=APPLY.get(name)
     if f:

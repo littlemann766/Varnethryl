@@ -409,8 +409,8 @@ def thieves_den():
         for a in(-1.4,1.4): window(c,'x+',a,g+f_*fh+0.5,0.9,1.4)
     gable_fill(c,'x+'); gable_fill(c,'x-')
     p,tt,nn=facepos(c,'x+',0,g-0.35)
-    m.obox(p+nn*0.14,tt,UP,nn,(3.4,0.6,0.1),'beam'); m.cell([p+nn*0.2-tt*1.55-UP*0.24,p+nn*0.2+tt*1.55-UP*0.24,p+nn*0.2+tt*1.55+UP*0.24,p+nn*0.2-tt*1.55+UP*0.24],'banner',0.08,0.92,0.42,0.52)
-    for a in(-2.1,2.1): banner(c,'x+',a,g+fh+1.2,0.7,2.0)
+    m.obox(p+nn*0.14,tt,UP,nn,(3.4,0.6,0.1),'beam'); m.cell([p+nn*0.2-tt*0.27-UP*0.27,p+nn*0.2+tt*0.27-UP*0.27,p+nn*0.2+tt*0.27+UP*0.27,p+nn*0.2-tt*0.27+UP*0.27],'sign_potion',0.05,0.95,0.3,0.78)
+    for a in(-2.55,2.55): banner(c,'x+',a,g+fh+1.4,0.7,1.9)
     sign(c,'x+',2.6,g+0.2,'sign_potion',0.7,0.7); lantern(c,'x+',-0.6,2.6); lantern(c,'x+',1.6,2.6)
     for f in('z+','z-'):
         for f_ in range(3): window(c,f,0,g+f_*fh+0.5,0.9,1.3)

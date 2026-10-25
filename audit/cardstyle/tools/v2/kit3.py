@@ -41,11 +41,11 @@ def awning(m,x0,x1,y,z,depth=1.4,drop=0.6,stripes=8):
     xs=np.linspace(x0,x1,stripes+1)
     for i in range(stripes):
         a,b=xs[i],xs[i+1]; pts=[(a,y-drop,z+depth),(b,y-drop,z+depth),(b,y,z),(a,y,z)]
-        if i%2==0: m.cell([np.array(p) for p in pts],'banner',0.3,0.36,0.3,0.36)
+        if i%2==0: m.cell([np.array(p) for p in pts],'banner',0.82,0.88,0.85,0.9)
         else: m.poly(pts,pts[0],(1,0,0),np.array(pts[3])-np.array(pts[0]),'plaster')
         q=[(a,y-drop,z+depth),(b,y-drop,z+depth),(b,y-drop-0.3,z+depth),(a,y-drop-0.3,z+depth)]
         q=[q[2],q[3],q[0],q[1]][::-1]
-        if i%2==0: m.cell([np.array(p) for p in [(a,y-drop-0.3,z+depth),(b,y-drop-0.3,z+depth),(b,y-drop,z+depth),(a,y-drop,z+depth)]],'banner',0.3,0.36,0.3,0.36)
+        if i%2==0: m.cell([np.array(p) for p in [(a,y-drop-0.3,z+depth),(b,y-drop-0.3,z+depth),(b,y-drop,z+depth),(a,y-drop,z+depth)]],'banner',0.82,0.88,0.85,0.9)
         else: m.poly([(a,y-drop-0.3,z+depth),(b,y-drop-0.3,z+depth),(b,y-drop,z+depth),(a,y-drop,z+depth)],(a,y-drop-0.3,z+depth),(1,0,0),(0,1,0),'plaster')
     for x in(x0,x1): m.beam((x,y-drop,z+depth),(x,y,z),0.05,'iron')
 def stall(m,x,z,w=2.0):

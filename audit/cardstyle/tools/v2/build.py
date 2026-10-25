@@ -24,7 +24,7 @@ def inn():
         window(c,f,0,1.0); window(c,f,0,g+0.8)
         gable_fill(c,f)
     door(c,'z-',0.0,1.3,2.5)
-    banner(c,'z+',-3.3,g+2.3); banner(c,'z+',5.5,g+2.3)
+    banner(c,'z+',-5.55,g+2.5,0.8,2.1); banner(c,'z+',5.55,g+2.5,0.8,2.1)
     sign(c,'z+',-5.5,g-0.2,'sign_inn')
     lantern(c,'z+',-0.6,2.6); lantern(c,'z+',1.8,2.6)
     zf0=cg['zf']; steps(c['m'],(0.6,0,zf0),(1,0,0),(0,0,1),2.2)
@@ -61,7 +61,7 @@ def house1():
         for a in(-2.2,1.8): window(c,f,a,1.0); window(c,f,a,g+0.7)
     dormer(c,0.0,1); dormer(c,0.0,-1)
     window(c,'x-',0,1.0); window(c,'x-',0,g+0.7); gable_fill(c,'x-')
-    banner(c,'x+',-3.3,g+2.0)
+    banner(c,'x+',-3.0,g+2.4,1.0,2.4)
     chimney(c,-3.6,0.0,1.0,1.2)
     steps(c['m'],(c['W']/2,0,0.3),(0,0,-1),(1,0,0),1.8)
     barrel(c['m'],(c['W']/2+0.6,0,-2.6)); pot_plant(c['m'],(c['W']/2+0.5,0,2.2)); pot_plant(c['m'],(c['W']/2+0.6,0,-1.6))
@@ -73,7 +73,7 @@ def house2():
     window(c,'x+',-1.2,g+0.6,flowers=True); window(c,'x+',1.2,g+0.6,flowers=True); gable_fill(c,'x+'); gable_fill(c,'x-')
     for f in('z+','z-'): window(c,f,-1.8,0.9); window(c,f,1.6,g+0.6)
     dormer(c,0.5,1)
-    banner(c,'x+',-3.0,g+2.0); chimney(c,-2.8,-1.2,0.9,1.2)
+    banner(c,'x+',-2.75,g+2.4,1.0,2.4); chimney(c,-2.8,-1.2,0.9,1.2)
     steps(c['m'],(c['W']/2,0,-1.0),(0,0,-1),(1,0,0),1.6); barrel(c['m'],(c['W']/2+0.55,0,2.4))
     c['front_gable']=True; return c
 def house3():
@@ -97,7 +97,7 @@ def house4():
     gable_fill(c,'x+'); gable_fill(c,'x-')
     for f in('z+','z-'):
         for a in(-1.6,1.6): window(c,f,a,g+0.5); window(c,f,a,g+fh+0.5)
-    banner(c,'x+',-2.9,g+fh+1.6); sign(c,'x+',2.9,g-0.2,'sign_inn',0.7,0.7)
+    banner(c,'x+',-2.75,g+fh+1.8,1.0,2.4); sign(c,'x+',2.9,g-0.2,'sign_inn',0.7,0.7)
     chimney(c,2.5,1.0,0.9,1.0)
     steps(c['m'],(c['W']/2,0,0.0),(0,0,-1),(1,0,0),1.6); pot_plant(c['m'],(c['W']/2+0.5,0,-1.9)); pot_plant(c['m'],(c['W']/2+0.5,0,1.9))
     c['front_gable']=True; return c
@@ -129,7 +129,7 @@ def apothecary():
     for a in(-0.9,0.9): window(c,'z+',a,g+0.5,1.0,1.5)
     # shop board (potion sign mounted flat) across cross gable
     p=np.array([0,g+0.15,zf+0.08]); m.obox(p,(1,0,0),(0,1,0),(0,0,1),(3.2,0.55,0.08),'beam')
-    m.cell([p+[-1.4,-0.22,0.05],p+[1.4,-0.22,0.05],p+[1.4,0.22,0.05],p+[-1.4,0.22,0.05]],'sign_potion',0.05,0.95,0.42,0.58)
+    m.cell([p+[-0.26,-0.26,0.05],p+[0.26,-0.26,0.05],p+[0.26,0.26,0.05],p+[-0.26,0.26,0.05]],'sign_potion',0.05,0.95,0.3,0.78)
     sign(c,'z+',-3.9,g-0.2,'sign_potion',0.7,0.8); lantern(c,'z+',-1.9,2.5)
     for a in(-2.5,2.5): window(c,'z-',a,0.9); window(c,'z-',a,g+0.5)
     door(c,'z-',0,1.1,2.3); dormer(c,0,-1)
@@ -198,7 +198,7 @@ def market():
     dormer(c,2.9,1); dormer(c,-2,-1); dormer(c,2,-1)
     for a in(-3,0,3): window(c,'z-',a,0.9); window(c,'z-',a,g+0.55)
     for f in('x+','x-'): window(c,f,0,0.9); gable_fill(c,f)
-    sign(c,'z+',-4.9,g-0.2,'sign_potion',0.8,0.9); banner(c,'z+',1.2,g+2.0); banner(c,'z+',-1.8,g+2.6,0.9,1.6)
+    sign(c,'z+',-4.9,g-0.2,'sign_potion',0.8,0.9); cb(m,(-1.8,E+2.3,zf+0.05),1.0,2.3)
     # tall stone chimney stack on right side with ivy (card)
     m.box((c['X1'],0,-1.0),(c['X1']+1.2,c['Rh']+1.6,0.4),'stone',0.4); m.box((c['X1']-0.1,c['Rh']+1.6,-1.1),(c['X1']+1.3,c['Rh']+1.8,0.5),'stone')
     ivy(m,[(c['X1']+1.25,y,-0.3+0.4*np.sin(y)) for y in np.arange(0.4,c['Rh'],0.5)],0.32)
@@ -385,7 +385,7 @@ def port():
     for x0 in(-13.5,-10.0,8.0):
         m.box((x0,1.25,-3.2),(x0+2.4,2.15,-2.4),'oak')
         for sx in(0,2.3): m.beam((x0+sx,1.25,-3.2),(x0+sx,3.4,-3.2),0.08,'beam'); m.beam((x0+sx,1.25,-2.4),(x0+sx,3.1,-2.4),0.08,'beam')
-        m.cell([np.array([x0-0.1,3.1,-2.1]),np.array([x0+2.5,3.1,-2.1]),np.array([x0+2.5,3.5,-3.4]),np.array([x0-0.1,3.5,-3.4])],'banner',0.3,0.36,0.3,0.36)
+        m.cell([np.array([x0-0.1,3.1,-2.1]),np.array([x0+2.5,3.1,-2.1]),np.array([x0+2.5,3.5,-3.4]),np.array([x0-0.1,3.5,-3.4])],'banner',0.82,0.88,0.85,0.9)
         for q in(0.5,1.2,1.9): m.blob((x0+q,2.3,-2.8),0.18,'flowers',5,0.7)
     for x0 in(-8.0,3.0):    # fishing nets drying on poles
         for sx in(0,3.0): m.beam((x0+sx,1.25,3.6),(x0+sx,4.0,3.6),0.1,'beam')

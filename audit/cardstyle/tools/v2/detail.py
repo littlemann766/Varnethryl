@@ -177,7 +177,7 @@ def dress(name,m,front_gable):
             p=d.copy(); p[ax]+=0.05; p[lat]+=2.8 if free(d[lat]+2.8,0.3) else -2.8; p[1]=3.3; m.LOD=2; import hero; sz_=hero.SIGNSIZE.get(name,0.9); hanging_sign(m,p,nF,SIGN[name],sz_,sz_)
     # hanging ivy on the side walls + moss tufts at the base (weathering)
     m.LOD=1
-    if name not in('port','fountain','colosseum','crypt','observatory','windmill','temple','keep','mage_academy','townhall','library','treasury','gatehouse','watchtower','walls_demo','wall_segment'):
+    if name not in('port','market','fountain','colosseum','crypt','observatory','windmill','temple','keep','mage_academy','townhall','library','treasury','gatehouse','watchtower','walls_demo','wall_segment'):
         for s_ in(-1,1):
             for k in range(3):
                 p=np.zeros(3); p[lat]=hi[lat] if s_>0 else lo[lat]; p[lat]-=s_*0.15; p[ax]=lo[ax]+(hi[ax]-lo[ax])*rng.uniform(0.2,0.8); p[1]=min(hi[1]-1,3.4+rng.random()*2)

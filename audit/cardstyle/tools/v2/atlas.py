@@ -97,22 +97,47 @@ def build():
             dl.rectangle([0,0,511,40],fill=G); dl.rectangle([0,0,26,880],fill=G); dl.rectangle([485,0,511,880],fill=G)
             dl.polygon([(0,880),(256,1010),(511,880),(511,860),(256,985),(0,860)],fill=G)
             for k in range(14): dl.line([(18+k*34,40),(18+k*34,52)],fill=Gd,width=6)
-            # rampant lion facing left, scaled up
+            # heraldic lion rampant (facing the hoist, viewer's left), drawn 4x supersampled with a dark-gold outline
             import math
-            def P(pts): return [(x*1.0+20,y*1.0+60) for x,y in pts]
-            body=P([(250,330),(300,300),(330,360),(320,470),(300,560),(260,610),(220,600),(205,520),(215,420)])
-            dl.polygon(body,fill=G)
-            mane=[(200+70*math.cos(a)*(1.25 if k%2 else 1.0),300+75*math.sin(a)*(1.25 if k%2 else 1.0)) for k,a in enumerate(np.linspace(0,2*np.pi,22,endpoint=False))]
-            dl.polygon(P(mane),fill=G); dl.ellipse(P([(150,255),(235,340)]),fill=G)
-            dl.polygon(P([(150,285),(105,300),(110,325),(150,330)]),fill=G)  # muzzle
-            dl.ellipse(P([(170,282),(184,296)]),fill=(31,60,122)); dl.polygon(P([(115,318),(145,322),(130,345)]),fill=(170,40,40)) # eye, tongue
-            dl.polygon(P([(160,230),(170,180),(190,215),(205,170),(220,215),(240,180),(245,235)]),fill=G)  # crown
-            for (sx,sy,ex,ey) in((240,360,120,300),(250,410,110,420)):
-                dl.line(P([(sx,sy),(ex,ey)]),fill=G,width=34); dl.polygon(P([(ex-10,ey-20),(ex-45,ey-30),(ex-40,ey),(ex-45,ey+25),(ex-5,ey+20)]),fill=G)
-            dl.line(P([(250,580),(190,690),(210,780)]),fill=G,width=38); dl.polygon(P([(190,770),(150,800),(240,800),(235,770)]),fill=G)
-            dl.line(P([(300,570),(330,680),(300,770)]),fill=G,width=34); dl.polygon(P([(280,760),(260,790),(340,790),(320,760)]),fill=G)
-            dl.line(P([(320,520),(400,560),(390,430),(430,360)]),fill=G,width=16); dl.polygon(P([(420,340),(460,300),(450,370),(470,390),(425,380)]),fill=G)
-            for k in range(3): dl.line(P([(225,430+k*40),(300,420+k*40)]),fill=Gd,width=5)
+            SS=4; Z=Image.new('L',(512*SS,1024*SS),0); O=Image.new('L',(512*SS,1024*SS),0); dz=ImageDraw.Draw(Z); do=ImageDraw.Draw(O)
+            def T(p): return (p[0]*SS,(p[1]+40)*SS)
+            def limb(pts,w):
+                for D,ww in((do,w+18),(dz,w)):
+                    q=[T(p) for p in pts]; D.line(q,fill=255,width=ww*SS,joint='curve')
+                    for p in q: D.ellipse([p[0]-ww*SS/2,p[1]-ww*SS/2,p[0]+ww*SS/2,p[1]+ww*SS/2],fill=255)
+            def blob(pts,o=True):
+                q=[T(p) for p in pts]
+                if o: do.polygon(q,fill=255,outline=255,width=18*SS)
+                dz.polygon(q,fill=255)
+            def claws(p,ang):
+                for k in(-1,0,1):
+                    a2=ang+k*0.45; e=(p[0]+38*math.cos(a2),p[1]+38*math.sin(a2)); limb([p,e],9)
+            # tail: S-curve rising behind, ending in a flame tuft
+            limb([(300,560),(350,600),(395,560),(400,470),(370,400),(385,330)],22)
+            blob([(385,330),(350,270),(390,300),(400,240),(420,300),(450,260),(430,330),(400,350)])
+            # hind legs: one planted, one striding forward
+            limb([(290,560),(330,650),(300,740),(330,800)],52); claws((330,805),0.2)
+            limb([(250,560),(200,640),(150,700),(110,720)],48); claws((105,722),3.0)
+            # torso: deep chest tapering to narrow waist and haunch
+            blob([(160,300),(250,270),(300,330),(310,430),(330,520),(320,590),(260,600),(220,540),(200,450),(150,380)])
+            # forelegs raised, paws out with claws
+            limb([(195,330),(110,320),(55,270)],44); claws((50,262),-2.4)
+            limb([(205,410),(120,430),(60,400)],40); claws((52,396),-2.9)
+            # mane: ring of flame-like locks round the head and down the chest
+            cx,cy=200,205
+            for k in range(16):
+                a2=-math.pi*0.15+k*(2*math.pi/16); r0=62; r1=112 if k%2 else 94
+                blob([(cx+r0*math.cos(a2-0.22),cy+r0*math.sin(a2-0.22)),(cx+r1*math.cos(a2),cy+r1*math.sin(a2)),(cx+r0*math.cos(a2+0.22),cy+r0*math.sin(a2+0.22))])
+            dz.ellipse([T((cx-70,cy-70))[0],T((cx-70,cy-70))[1],T((cx+70,cy+70))[0],T((cx+70,cy+70))[1]],fill=255)
+            # head: snout open to the left, tongue, ears and a crown
+            blob([(150,170),(105,178),(88,200),(98,218),(128,220),(108,234),(132,250),(175,245)])
+            blob([(185,140),(195,108),(215,138)])
+            blob([(160,95),(165,40),(185,70),(205,25),(225,70),(245,40),(250,95)])
+            Zs=Z.resize((512,1024),Image.LANCZOS); Os=O.resize((512,1024),Image.LANCZOS)
+            L2.paste(Image.new('RGB',(512,1024),Gd),(0,0),Os); L2.paste(Image.new('RGB',(512,1024),G),(0,0),Zs)
+            dl=ImageDraw.Draw(L2)
+            dl.ellipse([150,222,166,238],fill=(31,60,122)); dl.polygon([(100,262),(128,262),(112,282)],fill=(170,40,40))   # eye, tongue
+            for k in range(4): dl.arc([170,330+k*38,300,400+k*38],200,330,fill=Gd,width=5)      # ribs/fur shading
             im.paste(L2.resize((256,512),Image.LANCZOS),(x0,y0)); d=ImageDraw.Draw(im)
         elif c.startswith('sign'):
             d.rectangle([x0,y0,x1,y1],fill=NAVY); d.rectangle([x0+10,y0+10,x1-10,y1-10],outline=GOLD,width=14)

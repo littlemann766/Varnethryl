@@ -74,5 +74,15 @@ def lean_to(m,x0,x1,z0,depth,h0,h1,posts=3):
     th=np.array([0,0.15,0])
     m.poly([np.array(p)+th for p in pts],np.array(pts[0])+th,a,up,'slate')
     m.poly([pts[1],pts[0],pts[3],pts[2]],pts[1],(-1,0,0),up,'oak')
-def ivy(m,pts,r=0.3):
-    for p in pts: m.blob(p,r,'flowers',seg=5,squash=1.3)
+def leaf(m,p,n,s=0.18,tilt=0.0):
+    # single ivy leaf: 4-tri pointed blade cut as geometry, slightly cupped, mapped to the atlas 'leaf' rect
+    p=np.asarray(p,float); n=np.asarray(n,float); n=n/(np.linalg.norm(n)+1e-9); up=np.array([np.sin(tilt),np.cos(tilt),0.0])
+    t=np.cross(up,n); t/= (np.linalg.norm(t)+1e-9); u=np.cross(n,t)
+    tip=p-u*s*1.1+n*0.03; base=p+u*s*0.5; l=p-t*s*0.5+n*0.02; r=p+t*s*0.5+n*0.02; c=p+n*0.05
+    m.cell([l,c,base,base],'leaf',0.0,0.5,0.5,1.0); m.cell([c,r,base,base],'leaf',0.5,1.0,0.5,1.0)
+    m.cell([tip,tip,c,l],'leaf',0.5,0.5,0.0,0.5); m.cell([tip,tip,r,c],'leaf',0.5,0.5,0.0,0.5)
+def ivy(m,pts,r=0.3,n=None):
+    rng=np.random.default_rng(len(pts))
+    for p in pts:
+        nn=n if n is not None else np.array([rng.normal(),0.3,rng.normal()])
+        for k in range(3 if Q==0 else 1): leaf(m,np.asarray(p,float)+rng.normal(0,r*0.4,3),nn,r*0.55*(0.8+0.4*rng.random()),rng.uniform(-0.8,0.8))

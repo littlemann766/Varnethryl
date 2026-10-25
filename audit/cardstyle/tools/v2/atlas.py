@@ -7,7 +7,7 @@ S=2048
 # strips: name -> (y0, h, metres covered by full width, band height m)
 STRIPS={'stone':(0,384,6.0,1.125),'ashlar':(384,96,12.0,0.8),'statue':(480,16,3.0,1.0),'rock':(496,16,4.0,1.5),'plaster':(512,128,6.0,0.75),'bluestone':(640,16,3.0,1.0),'slate':(768,256,3.5*2,0.875),'oak':(1024,256,4.0,0.5),
         'beam':(1280,128,4.0,0.25),'iron':(1408,64,2.0,0.06),'gold':(1472,64,2.0,0.06)}
-RECTS={'bluewin':(0,656,128,112),'water':(256,656,1792,112),'sign_book':(128,656,64,112),'sign_sword':(192,656,64,112)}  # extra detail rects (x,y,w,h)
+RECTS={'bluewin':(0,656,128,112),'water':(384,656,1664,112),'leaf':(256,656,128,112),'sign_book':(128,656,64,112),'sign_sword':(192,656,64,112)}  # extra detail rects (x,y,w,h)
 CELLS=['window','door','banner','sign_inn','sign_bread','sign_anvil','flowers','sign_potion']  # 256x512 each at y=1536
 def hexc(h): return np.array([int(h[i:i+2],16) for i in(1,3,5)])/255
 def noise(n,m,beta,seed):
@@ -51,7 +51,12 @@ def build():
     rip=0.5+0.18*np.sin(wx*0.09+wn*9)*np.cos(wy*0.21+wx*0.02)+0.25*(wn-0.5)
     foam=np.clip((wf-0.68)*5,0,1)*(np.sin(wx*0.05+wn*12)>0.3)
     col=hexc('#1E4A5C')*(0.75+0.5*rip[...,None]); col=col*(1-foam[...,None])+hexc('#E8EEEA')*foam[...,None]
-    A[656:768,256:2048]=col; H[656:768,256:2048]=rip; R[656:768,256:2048]=0.08+0.5*foam
+    A[656:768,384:2048]=col[:,:1664]; H[656:768,384:2048]=rip[:,:1664]; R[656:768,384:2048]=(0.08+0.5*foam)[:,:1664]
+    # ivy leaf: one pointed leaf filling the rect on a dark-green surround (no alpha needed: leaves are cut as geometry)
+    lx=np.linspace(-1,1,128)[None,:]; ly=np.linspace(-1,1,112)[:,None]; ln=noise(112,128,1.2,71)
+    leafm=(np.abs(lx)<(1-np.abs(ly))**0.7*0.95); vein=np.exp(-(lx/0.04)**2)+0.5*np.exp(-((np.abs(lx)-(0.5*(ly+1)*0.6))/0.03)**2)*(np.abs(lx)<0.6)
+    lc=hexc('#3F6B2A')*(0.75+0.45*ln[...,None])+hexc('#9BBF5A')[None,None,:]*0.25*vein[...,None]
+    A[656:768,256:384]=np.where(leafm[...,None],lc,hexc('#2C4A1E')); H[656:768,256:384]=0.5+0.15*leafm-0.1*vein; R[656:768,256:384]=0.55
     sl=L('slate','albedo.jpg'); put_tile('slate',768,256,(hexc('#46638F')/hexc('#4a5664')))
     put_tile('oak',1024,256,hexc('#784F23')/hexc('#3a2a1d')*0.6)
     g=noise(128,S,1.0,9); gr=np.sin((np.arange(128)[:,None]/128*14+g*5)*np.pi)*0.5+0.5
@@ -61,8 +66,8 @@ def build():
     # cells
     im=Image.fromarray((A*255).astype(np.uint8)); d=ImageDraw.Draw(im); em=Image.new('RGB',(S,S)); de=ImageDraw.Draw(em)
     OAK=(70,48,30); GOLD=(200,162,64); NAVY=(32,53,82); IR=(40,40,44)
-    x0,y0,w,h=RECTS['bluewin']; x1,y1=x0+w-1,y0+h-1; BL=(70,140,255); dB=(30,40,70)
-    d.rectangle([x0,y0,x1,y1],fill=(60,62,70)); d.rectangle([x0+8,y0+8,x1-8,y1-8],fill=BL); de.rectangle([x0+8,y0+8,x1-8,y1-8],fill=(60,130,255))
+    x0,y0,w,h=RECTS['bluewin']; x1,y1=x0+w-1,y0+h-1; BL=(85,155,255); dB=(30,40,70)
+    d.rectangle([x0,y0,x1,y1],fill=(60,62,70)); d.rectangle([x0+8,y0+8,x1-8,y1-8],fill=BL); de.rectangle([x0+8,y0+8,x1-8,y1-8],fill=(70,150,255))
     for k in range(-8,9): d.line([(x0+8+k*14,y0+8),(x0+8+k*14+100,y0+108)],fill=dB,width=2); d.line([(x1-8-k*14,y0+8),(x1-8-k*14-100,y0+108)],fill=dB,width=2)
     d.rectangle([x0+60,y0,x0+67,y1],fill=(60,62,70)); de.rectangle([x0+60,y0,x0+67,y1],fill=0); d.rectangle([x0,y0,x0+8,y1],fill=(60,62,70)); d.rectangle([x1-8,y0,x1,y1],fill=(60,62,70))
     for nm in('sign_book','sign_sword'):

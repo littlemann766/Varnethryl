@@ -71,6 +71,20 @@ def house(sp):
         m.beam(np.array([ox0,ye,ze])+nrm*th/2,np.array([ox1,ye,ze])+nrm*th/2,0.2)
         for x in(ox0,ox1): m.beam(np.array([x,ye,ze])+nrm*th/2,np.array([x,Rh,0])+nrm*th/2,0.22)
     m.beam((ox0,Rh+0.15,0),(ox1,Rh+0.15,0),0.3,'slate')
+    # ---- hero detail: ridge tiles (rounded caps), worn cut-stone quoins on the ground-floor corners ----
+    m.LOD=1
+    for x in np.arange(ox0+0.2,ox1-0.1,0.45): m.obox((x+0.2,Rh+0.33,0),(1,0,0),(0,1,0),(0,0,1),(0.4,0.12,0.36),'slate',x*0.31)
+    if m.remap.get('stone','stone')!='ashlar':
+        for cx in(X0,X1):
+            for cz in(-D/2,D/2):
+                y=0.45; k=0
+                while y<g-0.35:
+                    hh=0.42; lg=0.7 if k%2==0 else 0.45; k+=1
+                    sx=1 if cx<0 else -1; sz=1 if cz<0 else -1
+                    def bx(xa,xb,za,zb,uo): m.box((min(xa,xb),y,min(za,zb)),(max(xa,xb),y+hh-0.04,max(za,zb)),'ashlar',uo)
+                    bx(cx-sx*0.05,cx+sx*lg,cz-sz*0.05,cz+sz*0.25,y); bx(cx-sx*0.05,cx+sx*0.25,cz-sz*0.05,cz+sz*(1.15-lg),y+0.5)
+                    y+=hh
+    m.LOD=99
     for x in(ox0,ox1): m.beam((x,Rh+0.2,0),(x,Rh+1.0,0),0.06,'iron'); m.obox((x,Rh+1.0,0),(1,0,0),(0,1,0),(0,0,1),(0.14,0.14,0.14),'gold')
     # ---- max-detail: jetty corbels with carved ends, gutters + downpipes ----
     m.LOD=1

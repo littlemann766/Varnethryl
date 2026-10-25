@@ -220,7 +220,7 @@ def townhall():
     steps(m,(0,0,zf),(1,0,0),(0,0,1),4.5,k=6)
     return c
 def temple():
-    c=house(dict(W=18,D=11,g=5.0,floors=1,fh=3.5,jetty=0.0,pitch=60,upper='stone',framing=False,remap=CREAM)); g,E=c['g'],c['E']; m=c['m']
+    c=house(dict(W=18,D=11,g=5.0,floors=1,fh=3.5,jetty=0.0,pitch=60,upper='stone',framing=False,remap=dict(CREAM,window='bluewin'))); g,E=c['g'],c['E']; m=c['m']
     X1=c['X1']; t=np.array([0,0,-1.0]); n=np.array([1.0,0,0]); up=np.array([0,1.0,0])
     # front facade on +x (rotated to +z): gold-framed portal, tall traceried lancet, rose in the gable, spired towers
     door(c,'x+',0,2.6,4.6); gold_portal(m,(X1,0,0),t,n,2.6,4.6)
@@ -300,7 +300,7 @@ def watchtower():
     return dict(m=m)
 def keep():
     from geo import Mesh
-    m=Mesh(); m.remap=dict(CREAM); t=np.array([1.0,0,0]); n=np.array([0,0,1.0]); up=np.array([0,1.0,0])
+    m=Mesh(); m.remap={}; t=np.array([1.0,0,0]); n=np.array([0,0,1.0]); up=np.array([0,1.0,0])
     m.box((-6,0,-6),(6,16,6),'stone')
     for a,b in(((-6,0,6),(6,0,6)),((6,0,-6),(-6,0,-6)),((6,0,6),(6,0,-6)),((-6,0,-6),(-6,0,6))): crenels_line(m,a,b,16.0)
     for sx in(-1,1):
@@ -404,7 +404,7 @@ def export(name,dress_on=True):
     os.makedirs(OUT,exist_ok=True); info={}; hi_n=None
     for q,(lod,suf) in enumerate(((99,''),(1,'_lod1'),(2,'_lod2'))):
         # rebuild at quality q, add the detail dressing, drop tris tagged <= lod, then decimate to the ratio caps
-        kit2.Q=q; c=SPECS[name](); m=c['m']
+        kit2.Q=q; c=SPECS[name](); import hero; hero.apply(name,c); m=c['m']
         if dress_on: detail.dress(name,m,bool(c.get('front_gable')))
         P,F,UV,N=m.arrays(-1 if lod==99 else lod)
         if q==0: hi_n=len(F)

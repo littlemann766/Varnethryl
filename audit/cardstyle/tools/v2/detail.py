@@ -10,6 +10,18 @@ def local(m,fn,pos,rot=0,*a,**k):
     t=Mesh(); t.remap=m.remap; fn(t,*a,**k); t.lod=[min(l,m.LOD) for l in t.lod] if m.LOD<99 else t.lod; m.merge(t,pos,rot)
 # ---------- props (built at origin, +z front) ----------
 def bench(m,L=1.8):
+    # carved oak bench: slatted seat, back rails with turned spindles, scrolled arm rests, stone feet
+    for k in range(4): z=-0.2+k*0.13; m.box((-L/2,0.42,z-0.05),(L/2,0.48,z+0.05),'oak',k*0.3)
+    for s in(-1,1):
+        x=s*(L/2-0.05)
+        m.box((x-0.06,0,-0.24),(x+0.06,0.06,0.24),'stone'); m.box((x-0.05,0.06,0.12),(x+0.05,0.42,0.2),'beam'); m.box((x-0.05,0.06,-0.24),(x+0.05,1.05,-0.16),'beam')
+        m.beam((x,0.72,-0.2),(x,0.72,0.22),0.07,'beam'); m.beam((x,0.72,0.22),(x,0.42,0.22),0.06,'beam')
+        cyl(m,(x,0.72,0.25),0.06,0,0.06,'beam',6)
+    m.box((-L/2,0.95,-0.24),(L/2,1.06,-0.16),'oak'); m.box((-L/2,0.6,-0.24),(L/2,0.68,-0.17),'oak')
+    for x in np.linspace(-L/2+0.25,L/2-0.25,6 if kit2.Q==0 else 3): m.beam((x,0.68,-0.2),(x,0.95,-0.2),0.035,'beam')
+    m.beam((-L/2+0.1,0.15,0),(L/2-0.1,0.15,0),0.05,'beam')
+    return
+def _bench_old(m,L=1.8):
     m.box((-L/2,0.42,-0.22),(L/2,0.48,0.22),'oak'); m.box((-L/2,0.7,-0.24),(L/2,1.0,-0.19),'oak')
     for s in(-1,1): m.box((s*(L/2-0.15)-0.05,0,-0.2),(s*(L/2-0.15)+0.05,0.42,0.2),'beam'); m.box((s*(L/2-0.15)-0.04,0.42,-0.24),(s*(L/2-0.15)+0.04,1.0,-0.19),'beam')
 def cart(m,L=2.4,load=True):
@@ -65,6 +77,22 @@ def hanging_sign(m,p,n,cellname,w=0.9,h=0.9):
         f=bc+t*s*0.04; tt=n*s; m.cell([f-tt*w/2-UP*h/2,f+tt*w/2-UP*h/2,f+tt*w/2+UP*h/2,f-tt*w/2+UP*h/2],cellname)
     m.obox(bc,n,UP,t,(w+0.08,h+0.08,0.06),'beam')
 def well(m):
+    _well_base(m)
+    # hero detail: rope coil, bucket with iron bands, crank wheel, stone rim blocks, moss/leaves, plank lid half
+    cyl(m,(0.2,1.0,0),0.17,0,0.32,'oak',10,cap='oak'); [cyl(m,(0.2,1.0+y,0),0.18,0,0.03,'iron',10) for y in(0.05,0.25)]
+    m.beam((0.2,1.32,-0.15),(0.2,1.48,0),0.015,'iron'); m.beam((0.2,1.32,0.15),(0.2,1.48,0),0.015,'iron')
+    cyl(m,(1.2,2.5,0),0.0,0,0,'iron',4) if False else None
+    for k in range(8):
+        a=2*np.pi*k/8; m.beam((1.2,2.2+0.3*np.cos(a),0.3*np.sin(a)),(1.2,2.2+0.3*np.cos(a+np.pi/4),0.3*np.sin(a+np.pi/4)),0.04,'beam')
+        m.beam((1.2,2.2,0),(1.2,2.2+0.3*np.cos(a),0.3*np.sin(a)),0.025,'beam')
+    for k in range(5 if kit2.Q==0 else 2): cyl(m,(0,2.38-0.035*k,0),0.13,0,0.03,'plaster',8)
+    for k in range(14):
+        a=2*np.pi*k/14; m.obox((1.0*np.cos(a),0.95,1.0*np.sin(a)),(-np.sin(a),0,np.cos(a)),UP,(np.cos(a),0,np.sin(a)),(0.4,0.12,0.3),'ashlar',k*0.4)
+    m.box((-0.75,0.98,-0.05),(0.0,1.03,0.75),'oak')
+    if kit2.Q==0:
+        from kit2 import leaf
+        for k in range(10): a=k*0.63; leaf(m,(1.02*np.cos(a),0.3+0.05*k,1.02*np.sin(a)),(np.cos(a),0.2,np.sin(a)),0.14,k*0.5)
+def _well_base(m):
     cyl(m,(0,0,0),1.0,0,0.9,'stone',14,cap=None); cyl(m,(0,0,0),0.8,0.0,0.92,'stone',14); cyl(m,(0,0.9,0),1.05,0,0.12,'stone',14,r1=1.05)
     m.cell([np.array([0,0.5,0]),np.array([0,0.5,0]),np.array([0.78,0.5,0]),np.array([0,0.5,0.78])],'water',0.1,0.2,0.2,0.8)
     for s in(-1,1): m.box((s*0.95-0.08,0.9,-0.08),(s*0.95+0.08,2.6,0.08),'beam')
@@ -85,9 +113,29 @@ def signpost(m):
 def cobble_edge(m,L=4.0):
     k=int(L/0.5)
     for i in range(k): x=-L/2+i*0.5+0.25; m.obox((x,0.08,0),(1,0,0),UP,(0,0,1),(0.46,0.18+0.03*((i*7)%3),0.32),'stone',i*0.37)
-def ivy_strand(m,top,n,L=2.5):
-    top=np.asarray(top,float); n=norm(n); k=max(3,int(L/0.35))
-    for i in range(k): m.blob(top-UP*(i*L/k)+n*0.12+np.cross(UP,n)*0.12*np.sin(i*1.7),0.2*(1-0.4*i/k),'flowers',5,0.8)
+def ivy_strand(m,top,n,L=2.5,seed=0):
+    # curved hanging stem with alternating cut-out leaves
+    from kit2 import leaf
+    top=np.asarray(top,float); n=norm(n); t=np.cross(UP,n); rng=np.random.default_rng(abs(int(seed))); k=max(4,int(L/0.16)); prev=top+n*0.05
+    for i in range(1,k+1):
+        f=i/k; q=top-UP*L*f+t*0.25*np.sin(f*3.1+seed)+n*(0.05+0.18*f*f)
+        m.beam(prev,q,0.025,'beam'); prev=q
+        if kit2.Q==0 or i%2==0:
+            leaf(m,q+t*0.09*(1 if i%2 else -1),n+t*0.4*(1 if i%2 else -1),0.13*(1.1-0.4*f),rng.uniform(-0.6,0.6))
+def weathervane(m,top,kind='cock'):
+    top=np.asarray(top,float)
+    m.beam(top,top+UP*1.6,0.05,'iron'); m.obox(top+UP*0.35,(1,0,0),UP,(0,0,1),(0.16,0.16,0.16),'gold')
+    for (dx,dz) in((1,0),(0,1)): m.beam(top+UP*0.7+np.array([dx,0,dz])*0.45,top+UP*0.7-np.array([dx,0,dz])*0.45,0.025,'iron')
+    for (dx,dz) in((1,0),(-1,0),(0,1),(0,-1)): m.obox(top+UP*0.7+np.array([dx,0,dz])*0.5,(1,0,0),UP,(0,0,1),(0.08,0.12,0.08),'gold')
+    a=top+UP*1.25; m.beam(a-np.array([0.55,0,0]),a+np.array([0.55,0,0]),0.03,'iron')
+    m.poly([a+[0.5,0.0,0.01],a+[0.7,0.0,0.01],a+[0.5,0.12,0.01]][::1],a,(1,0,0),UP,'gold'); m.poly([a+[0.7,0.0,-0.01],a+[0.5,0.0,-0.01],a+[0.5,0.12,-0.01]],a,(-1,0,0),UP,'gold')
+    # cockerel silhouette plate
+    c=a+UP*0.05; pts=[(-0.35,0),(-0.1,-0.05),(0.15,0),(0.25,0.18),(0.18,0.33),(0.05,0.28),(-0.05,0.12),(-0.3,0.3),(-0.42,0.15)]
+    for s in(1,-1):
+        P=[c+np.array([x,y,s*0.012]) for x,y in pts][::(1 if s>0 else -1)]
+        for i in range(1,len(P)-1): m.tri(P[0],P[i],P[i+1],(0.5,0.5),(0.5,0.5),(0.5,0.5)) if False else None
+        m.obox(c+UP*0.13,(1,0,0),UP,(0,0,1),(0.6,0.26,0.03),'iron'); m.obox(c+[0.2,0.3,0],(1,0,0),UP,(0,0,1),(0.12,0.12,0.035),'gold')
+        break
 def moss(m,c,r=0.35):
     m.blob(np.asarray(c,float),r,'flowers',6,0.25)
 PROPS=dict(lantern_post=lantern_post,market_cart=cart,well=well,bench=bench,hay_bale=hay_bale,fence=fence,signpost=signpost,flower_planter=planter,cobble_edge=cobble_edge,crate_stack=crate_stack,barrel_group=barrel_group)
@@ -116,6 +164,9 @@ def dress(name,m,front_gable):
         if not free(a): continue
         m.LOD=2 if ch in'cs' else 1
         local(m,fn[ch],at(a,0.9+0.5*rng.random()),rot_front+rng.uniform(-12,12))
+    # rooftop weathervane on the highest point (iron, gilded letters)
+    if name not in('port','fountain','walls_demo','wall_segment','crypt'):
+        P2=np.array(m.P).reshape(-1,3); top=P2[P2[:,1].argmax()]; m.LOD=1; weathervane(m,top-UP*0.05)
     # wall lanterns + specific hanging sign beside the main door
     if doors and name not in('port','fountain','colosseum','walls_demo','wall_segment'):
         d=max(doors,key=lambda d:d[ax])
@@ -123,14 +174,14 @@ def dress(name,m,front_gable):
         for s in(-1,1):
             p=d.copy(); p[ax]+=0.05; p[lat]+=s*1.6; p[1]=2.7; wall_lantern(m,p,nF)
         if name in SIGN:
-            p=d.copy(); p[ax]+=0.05; p[lat]+=2.8 if free(d[lat]+2.8,0.3) else -2.8; p[1]=3.3; m.LOD=2; hanging_sign(m,p,nF,SIGN[name])
+            p=d.copy(); p[ax]+=0.05; p[lat]+=2.8 if free(d[lat]+2.8,0.3) else -2.8; p[1]=3.3; m.LOD=2; import hero; sz_=hero.SIGNSIZE.get(name,0.9); hanging_sign(m,p,nF,SIGN[name],sz_,sz_)
     # hanging ivy on the side walls + moss tufts at the base (weathering)
     m.LOD=1
-    if name not in('port','fountain','colosseum','crypt','observatory','windmill'):
+    if name not in('port','fountain','colosseum','crypt','observatory','windmill','temple','keep','mage_academy','townhall','library','treasury','gatehouse','watchtower','walls_demo','wall_segment'):
         for s_ in(-1,1):
             for k in range(3):
                 p=np.zeros(3); p[lat]=hi[lat] if s_>0 else lo[lat]; p[lat]-=s_*0.15; p[ax]=lo[ax]+(hi[ax]-lo[ax])*rng.uniform(0.2,0.8); p[1]=min(hi[1]-1,3.4+rng.random()*2)
-                nn=np.zeros(3); nn[lat]=s_; ivy_strand(m,p,nn,rng.uniform(1.5,3.0))
+                nn=np.zeros(3); nn[lat]=s_; ivy_strand(m,p,nn,rng.uniform(1.5,3.0),k+3*s_)
         for k in range(6):
             p=np.zeros(3); p[ax]=lo[ax]+(hi[ax]-lo[ax])*rng.random(); s_=rng.choice([-1,1]); p[lat]=(hi[lat] if s_>0 else lo[lat])+s_*0.1; p[1]=0.05; moss(m,p,rng.uniform(0.25,0.45))
     m.LOD=o

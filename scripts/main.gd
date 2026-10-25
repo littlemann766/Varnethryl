@@ -4,10 +4,10 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "10"
+const VERSION := "11"
 const DEFS := [
 	["guildhall",0,-21,0.0,"Guild Hall"], ["library",-24,-27,0.0,"Grand Library"], ["townhall",23,-26,0.0,"Town Hall"],
-	["mage",-44,-31,0.0,"Mage Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
+	["mage",-44,-31,0.0,"Arcane Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
 	["observatory",-41,-46,0.0,"Observatory"], ["crypt",43,-45,0.0,"Crypt"], ["market",-24,-6,PI/2,"Market Provisioner"],
 	["apothecary",-24,9,PI/2,"Apothecary"], ["bakery",-24,21.5,PI/2,"Bakery"], ["inn",24,-8,-PI/2,"Inn"],
 	["smithy",24,7,-PI/2,"Blacksmith"], ["temple",46,-8,-PI/2,"Temple"], ["training",45,11,-PI/2,"Training Hall"],
@@ -147,6 +147,7 @@ var menu_open := false
 var lamp_shadow_t := 0.0
 var cheats: Cheats
 var fly_alt := 6.0
+var fly_controls: FlyControls
 var net_proxy: Node
 const JS_UNITS := 1.4205   # JS world units per metre (server/JS clients use world units)
 var cheat := {"speed": 1.0, "fly": false, "noclip": false, "god": false}
@@ -171,6 +172,7 @@ func _ready() -> void:
 	_street_kit()
 	# test 10: boss "Fix the castle and or get rid of it" - the Tripo backdrop castle reads as shredded/floating, removed
 	_harbour()
+	_ships()
 	_dressing()
 	_hi_terrain()
 	_showcase()
@@ -351,6 +353,8 @@ func _set_time(h: float) -> void:
 	for f in fx_day: f[0].emitting = not night and tier >= f[1]; f[0].visible = f[0].emitting
 
 func apply_quality() -> void:
+	if not ships.is_empty(): _ships_tier()
+	if volcano_smoke: volcano_smoke.emitting = tier > 0; volcano_smoke.visible = tier > 0
 	# Test 3: Mobile renderer for every tier. Cost drivers kept in check: render scale + FSR,
 	# one shadowed light (the sun) with short distance, no shadowed lamps, LOD/HLOD everywhere.
 	var vp := get_viewport()
@@ -542,6 +546,87 @@ static func harbour_spot() -> Array:
 	# quay edge (model z=0) 2 m inland of the coast; shops (model z -20..-5) on land, piers/boats out to z=+17 over the
 	# sea to the west. Shifted 8 m south so the Tidewrack road's end (-425.6, 375) stays clear of the shop row.
 	return [Vector2(SEA_COAST_X + 2.0, PORT.y + 8.0), Vector2(-1, 0)]
+
+## test 11 (boss: "Need the ship models added"): the boss's own ships, cleaned up by Beth (godot-art/ships, index.json):
+## waterline y=0, bow +Z, metres. Tidewrack sailing ship 30 m (phone High = lod1) along the harbour's main pier,
+## boat_02 (6.4 m) and boat_sail (7.2 m) at the two smaller piers, a second boat_sail out at sea.
+## Harbour local (lx, lz) -> world (root.x - lz, root.z + lx); piers run along local +z (world -x) -> bow yaw -PI/2.
+## Tier-capped (Low 2 / Medium 3 / High 4 / Ultra 4), gentle bob + roll, Beth's _col hulls (static, at rest pose).
+const SHIP_MAX := [2, 3, 4, 4]
+var ships := []   # [node, base_y, phase]
+func _ships() -> void:
+	var hs := harbour_spot(); var c: Vector2 = hs[0]
+	var L := func(lx: float, lz: float) -> Vector2: return Vector2(c.x - lz, c.y + lx)
+	# [world pos, model, near/far switch (m), yaw, phase]
+	var spots := [[L.call(-23.0, 18.0), "tidewrack_sailing_ship", 120.0, -PI / 2 + 0.02, 0.0],
+		[L.call(4.5, 10.0), "boat_02", 60.0, -PI / 2 - 0.05, 2.2],
+		[L.call(20.5, 10.0), "boat_sail", 60.0, -PI / 2 + 0.06, 3.7],
+		[c + Vector2(-85.0, 35.0), "boat_sail", 60.0, 2.4, 1.3]]
+	for i in spots.size():
+		var sp: Array = spots[i]; var id: String = sp[1]
+		var root := Node3D.new(); root.name = "Ship%d_%s" % [i, id]; add_child(root)
+		root.position = Vector3(sp[0].x, 0.0, sp[0].y); root.rotation.y = sp[3]
+		for k in 2:
+			var v: Node3D = load("res://assets/ships/ship_%s_lod%d.glb" % [id, k + 1]).instantiate(); root.add_child(v)
+			for mi in _meshes(v, []):
+				mi.visibility_range_begin = 0.0 if k == 0 else sp[2]; mi.visibility_range_end = sp[2] if k == 0 else 600.0
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if k == 0 and i < 3 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var col := _add_col("res://assets/ships/ship_%s_col.glb" % id, root.position, root.rotation.y); col.name = "ShipCol%d" % i
+		ships.append([root, 0.0, float(sp[4]), col])
+	_ships_tier()
+
+func _ships_tier() -> void:
+	var n: int = SHIP_MAX[clampi(tier, 0, 3)]
+	for i in ships.size():
+		var r: Node3D = ships[i][0]; r.visible = i < n
+		var col: Node3D = ships[i][3]; col.process_mode = Node.PROCESS_MODE_INHERIT if i < n else Node.PROCESS_MODE_DISABLED
+		for sb in col.find_children("*", "CollisionObject3D", true, false): (sb as CollisionObject3D).collision_layer = 1 if i < n else 0
+
+var _ship_t := 0.0
+## test 11 (boss: volcano looks unfinished; Beth's high-detail replacement not in yet): cheap life for the current cone.
+## Crater = model (-2.3, 38, 1.3), rim r ~13 (x scale). Emissive lava pool + flicker-free crater glow (no shadow) + a
+## slow CPU smoke column (24 billboards, Medium+ only via tier visibility). No collision changes.
+var volcano_smoke: CPUParticles3D
+func _volcano_fx(base: Vector3, sc: float) -> void:
+	var c := base + Vector3(-2.3, 38.0, 1.3) * sc
+	var pool := MeshInstance3D.new(); var cm := CylinderMesh.new(); cm.top_radius = 9.5 * sc; cm.bottom_radius = 9.5 * sc; cm.height = 0.4; cm.radial_segments = 32; cm.rings = 1
+	var lm := StandardMaterial3D.new(); lm.albedo_color = Color(1.0, 0.35, 0.05); lm.emission_enabled = true; lm.emission = Color(1.0, 0.42, 0.08); lm.emission_energy_multiplier = 4.0
+	lm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED; cm.material = lm; pool.mesh = cm; pool.name = "VolcanoLava"
+	pool.position = c + Vector3(0, 1.2 * sc, 0); pool.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(pool)
+	var gl := OmniLight3D.new(); gl.name = "VolcanoGlow"; gl.light_color = Color(1.0, 0.45, 0.15); gl.light_energy = 6.0; gl.omni_range = 30.0 * sc
+	gl.shadow_enabled = false; gl.position = c + Vector3(0, 8.0 * sc, 0); add_child(gl)
+	var sm := CPUParticles3D.new(); sm.name = "VolcanoSmoke"; sm.amount = 24; sm.lifetime = 14.0; sm.preprocess = 14.0
+	sm.position = c + Vector3(0, 4.0 * sc, 0); sm.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; sm.emission_sphere_radius = 6.0 * sc
+	sm.direction = Vector3(0.15, 1, 0); sm.spread = 12.0; sm.gravity = Vector3(0.6, 0.8, 0); sm.initial_velocity_min = 3.0; sm.initial_velocity_max = 5.0
+	sm.scale_amount_min = 1.0; sm.scale_amount_max = 1.6
+	var cv := Curve.new(); cv.add_point(Vector2(0, 0.4)); cv.add_point(Vector2(1, 1.0)); sm.scale_amount_curve = cv
+	var gr := Gradient.new(); gr.set_color(0, Color(0.32, 0.3, 0.3, 0.0)); gr.set_color(1, Color(0.55, 0.53, 0.52, 0.0)); gr.add_point(0.12, Color(0.3, 0.28, 0.28, 0.75)); sm.color_ramp = gr
+	var q := QuadMesh.new(); q.size = Vector2(16, 16)
+	var smat := StandardMaterial3D.new(); smat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA; smat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	smat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES; smat.vertex_color_use_as_albedo = true; smat.albedo_texture = _soft_dot()
+	smat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED; q.material = smat; sm.mesh = q; sm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	sm.visibility_range_end = 1400.0; add_child(sm); volcano_smoke = sm
+
+func _soft_dot() -> ImageTexture:
+	var n := 64; var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
+	for y in n:
+		for x in n:
+			var d := Vector2(x - n * 0.5 + 0.5, y - n * 0.5 + 0.5).length() / (n * 0.5)
+			img.set_pixel(x, y, Color(1, 1, 1, clampf(1.0 - d, 0.0, 1.0) ** 1.6))
+	return ImageTexture.create_from_image(img)
+
+func _shot_here(n: String) -> void:
+	for i in 20: await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png("user://shot_%s.png" % n); print("BENCH ", n)
+
+func _bob_ships(dt: float) -> void:
+	_ship_t += dt
+	for s in ships:
+		var r: Node3D = s[0]
+		if not r.visible: continue
+		var ph: float = s[2]
+		r.position.y = s[1] + sin(_ship_t * 0.7 + ph) * 0.1
+		r.rotation.z = sin(_ship_t * 0.55 + ph * 1.3) * 0.025; r.rotation.x = sin(_ship_t * 0.43 + ph) * 0.012
 
 static func _c2_door_raw(key: String) -> Variant:
 	if _c2_doors.is_empty(): card2_door("inn")
@@ -758,6 +843,7 @@ func _hi_terrain() -> void:
 		if near_port(p, 60.0): continue   # after the rng draws so every other peak stays where it was
 		_lod_instances(T + k, Transform3D(Basis(Vector3.UP, ry).scaled(Vector3(sc, sc * sy, sc)), Vector3(p.x, height(p.x, p.y) - 6.0, p.y)), true)
 	_lod_instances(T + "volcano_flank_hi", Transform3D(Basis().scaled(Vector3(1.6, 1.6, 1.6)), Vector3(405, height(405, -402) - 3.0, -402)), true)
+	_volcano_fx(Vector3(405, height(405, -402) - 3.0, -402), 1.6)
 	for i in 18:
 		var a2 := rng.randf() * TAU; var r2 := rng.randf_range(250, 460); var p2 := Vector2(cos(a2), sin(a2)) * r2
 		if _road_dist(p2) < 30 or p2.distance_to(LAKE) < 70 or near_port(p2, 10.0): continue
@@ -769,16 +855,24 @@ func _hi_terrain() -> void:
 	pm.material = _water_mat(); w.mesh = pm; w.position = Vector3(LAKE.x, -0.1, LAKE.y); add_child(w)
 	# SW-corner sea (test 10): one big water quad from the coast to the world edge
 	var sw := MeshInstance3D.new(); var sp := PlaneMesh.new(); var x0 := -1600.0; var z1 := 1600.0
-	sp.size = Vector2(SEA_COAST_X + 2.0 - x0, z1 - (SEA_NORTH_Z - 2.0)); sp.material = _water_mat(); sw.mesh = sp; sw.name = "Sea"
-	sw.position = Vector3((x0 + SEA_COAST_X + 2.0) * 0.5, -0.1, (SEA_NORTH_Z - 2.0 + z1) * 0.5); sw.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(sw)
+	sp.size = Vector2(SEA_COAST_X - 1.0 - x0, z1 - (SEA_NORTH_Z - 2.0)); sp.material = _water_mat(); sw.mesh = sp; sw.name = "Sea"
+	sw.position = Vector3((x0 + SEA_COAST_X - 1.0) * 0.5, -0.1, (SEA_NORTH_Z - 2.0 + z1) * 0.5); sw.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(sw)
 	# the boss's Tripo lighthouse: rock island + tower share one origin (Beth). LOD1/LOD2 only.
-	var lh := Node3D.new(); lh.name = "Lighthouse"; lh.position = Vector3(SEA_COAST_X - 4.0, -0.6, PORT.y + 62.0); add_child(lh)   # test 10: on the SW coast, south of the harbour
+	var lh := Node3D.new(); lh.name = "Lighthouse"; lh.position = Vector3(SEA_COAST_X - 2.0, -0.6, PORT.y + 62.0); lh.rotation.y = 1.34; add_child(lh)   # test 11: on the SW coast; island turned so its stair foot (model ~(3, 0.5, 13)) lands on the dry shore to the east
 	for part in ["lighthouse_rock_island", "lighthouse_tower"]:
 		for k in 2:
 			var v: Node3D = load("res://assets/card2/tripo/bld_%s_tripo%s.glb" % [part, ["_lod1", "_lod2"][k]]).instantiate(); lh.add_child(v)
 			for mi in _meshes(v, []):
 				mi.visibility_range_begin = [0.0, 160.0][k]; mi.visibility_range_end = [160.0, 0.0][k]
-		_add_col("res://assets/card2/tripo/bld_%s_tripo_col.glb" % part, lh.position, 0.0)
+		# test 11: island col with the stair corridor carved out (assets/lighthouse_fix, from Beth's col); ramp below
+		var cp := "res://assets/lighthouse_fix/lighthouse_rock_island_col_stairs.glb" if part == "lighthouse_rock_island" else "res://assets/card2/tripo/bld_%s_tripo_col.glb" % part
+		_add_col(cp, lh.position, lh.rotation.y)
+	# test 11: the Tripo stair treads are too tall/ragged for the capsule to climb; an invisible ramp under the stairs
+	# (island model space, ground -> plateau, ~35 deg) makes them walkable. The visible steps are unchanged.
+	var ra := Vector3(3.6, 0.6, 15.5); var rb := Vector3(0.8, 9.0, 3.0); var rd := rb - ra
+	var ramp := StaticBody3D.new(); ramp.name = "LighthouseStairRamp"; lh.add_child(ramp)
+	var rcs := CollisionShape3D.new(); var rbx := BoxShape3D.new(); rbx.size = Vector3(2.4, 0.3, rd.length()); rcs.shape = rbx
+	rcs.transform = Transform3D(Basis.looking_at(rd.normalized(), Vector3.UP), (ra + rb) * 0.5 - Vector3(0, 0.15, 0)); ramp.add_child(rcs)
 	for i in 12:
 		var a3 := i / 12.0 * TAU
 		var p3 := LAKE + Vector2(cos(a3), sin(a3)) * 60.0
@@ -1156,6 +1250,8 @@ func _physics_process(dt: float) -> void:
 
 var _tacc := 0.0
 func _process(dt: float) -> void:
+	if fly_controls: fly_controls.visible = VUI.hud != null and VUI.hud.visible and not (VUI.title and VUI.title.visible)
+	_bob_ships(dt)
 	if hero == null: return
 	_update_door_lights(dt)
 	if not bench and not bench_running:
@@ -1307,6 +1403,69 @@ func _run_bench() -> void:
 			joy_vec = Vector2.ZERO
 		get_tree().quit()
 		return
+	if only == "t11fly":
+		VUI._enter("solo"); bench = true
+		cheats.role_provider = func() -> String: return "owner"
+		await _shot("t11_hud_ground", Vector3(-6, 0, 60), PI / 2, -0.12, 11.0, 2, 30)
+		fly_controls.fly_btn.button_pressed = true
+		fly_controls.up_btn.button_down.emit()
+		for i in 20: await get_tree().process_frame
+		fly_controls.up_btn.button_up.emit()
+		await _shot("t11_hud_flying", hero.position, PI / 2, -0.12, 11.0, 2, 60)
+		print("FLY on=%s alt=%.1f hero_y=%.1f ground=%.1f" % [cheats.flags.fly, fly_alt, hero.position.y, height(hero.position.x, hero.position.z)])
+		get_tree().quit()
+		return
+	if only == "t11volcano":
+		VUI._enter("solo"); bench = true
+		await _shot("t11_volcano_far", Vector3(300, 0, -300), -PI * 0.75, 0.25, 11.0, 2, 60)
+		await _shot("t11_volcano_close", Vector3(360, 0, -350), -PI * 0.78, 0.45, 11.0, 2, 60)
+		get_tree().quit()
+		return
+	if only == "t11mage":
+		VUI._enter("solo"); bench = true
+		for b in buildings: if b.id == "mage": interiors.enter(b)
+		for i in 30: await get_tree().physics_frame
+		var info: Dictionary = interiors.cur
+		var k := 0
+		for st in info.stairs:
+			var foot: Vector3 = (info.node as Node3D).to_global(st.base + st.dir * (st.run * 0.5) + Vector3(0, st.rise * 0.5, 0))
+			hero.global_position = foot + Vector3(0, 0.1, 0); hero.velocity = Vector3.ZERO
+			yaw = atan2(st.dir.x, st.dir.z)
+			for i in 30: await get_tree().physics_frame
+			# detached view (the follow cam hugs the hero in the narrow tower): from the stair top, back toward the hero
+			var vc := Camera3D.new(); vc.fov = 80; add_child(vc)
+			var ntop: Vector3 = (info.node as Node3D).to_global(st.base + st.dir * (st.run + 0.6) + Vector3(0, st.rise + 1.7, 0))
+			vc.look_at_from_position(ntop, hero.global_position + Vector3(0, 0.6, 0)); vc.current = true
+			await _shot_here("t11_mage_stair%d" % k); k += 1
+			vc.current = false; cam.current = true; vc.queue_free()
+		get_tree().quit()
+		return
+	if only == "t11stairs":
+		VUI._enter("solo"); bench = true
+		# walk the hero from the dry shore east of the lighthouse up its stairs: waypoints in the island's model space
+		var lh := get_node("Lighthouse") as Node3D
+		var wps := [Vector3(3.5, 0, 19.0), Vector3(3.2, 0, 13.0), Vector3(2.5, 0, 9.0), Vector3(2.0, 0, 6.0), Vector3(0.5, 0, 2.0)]
+		var w0: Vector3 = lh.to_global(wps[0])
+		await _shot("t11_lighthouse_shore", Vector3(w0.x + 6.0, 0, w0.z), PI / 2, -0.15, 13.0, 2, 30)
+		hero.position = Vector3(w0.x, height(w0.x, w0.z) + 0.3, w0.z)
+		var best := -99.0; var wi := 1
+		for i in 900:
+			if wi >= wps.size(): break
+			var tgt: Vector3 = lh.to_global(wps[wi])
+			var d := Vector3(tgt.x - hero.position.x, 0, tgt.z - hero.position.z)
+			if d.length() < 0.8: wi += 1; continue
+			yaw = atan2(-d.x, -d.z); joy_vec = Vector2(0, -1)
+			await get_tree().physics_frame
+			best = maxf(best, hero.position.y)
+		joy_vec = Vector2.ZERO
+		print("STAIRS start_y=%.2f max_y=%.2f reached_wp=%d/%d end=%s" % [height(w0.x, w0.z), best, wi, wps.size(), hero.position])
+		var lc := Camera3D.new(); lc.far = 800; add_child(lc)
+		lc.look_at_from_position(lh.to_global(Vector3(14, 16, 22)), hero.position + Vector3(0, 1, 0)); lc.current = true
+		for i in 20: await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png("user://shot_t11_lighthouse_top.png")
+		lc.current = false; cam.current = true; lc.queue_free()
+		get_tree().quit()
+		return
 	if only == "t10":
 		VUI._enter("solo"); bench = true
 		var hs := harbour_spot(); var hb: Vector2 = hs[0]
@@ -1319,6 +1478,8 @@ func _run_bench() -> void:
 				["lighthouse", Vector3(SEA_COAST_X + 50, 18, PORT.y + 30), Vector3(SEA_COAST_X - 4, 4, PORT.y + 62)],
 				["from_road", Vector3(-387, 6, 322), Vector3(hb.x, 2, hb.y)],
 				["corner_map", Vector3(-200, 420, 200), Vector3(-430, 0, 400)],
+				["ships_moored", Vector3(hb.x - 30, 9, hb.y - 38), Vector3(hb.x - 25, 2, hb.y + 3)],
+				["ships_sea", Vector3(hb.x - 20, 14, hb.y + 70), Vector3(hb.x - 120, 2, hb.y)],
 				["castle_" + OS.get_environment("CASTLE_TAG"), Vector3(395, height(395, -40) + 4, -40), Vector3(480, 25, -110)]]:
 			hc.look_at_from_position(v[1], v[2]); hc.current = true
 			for i in 40: await get_tree().process_frame
@@ -1504,6 +1665,10 @@ func _hook_ui() -> void:
 		return ""
 	cheats.said.connect(_toast)
 	VUI.cheat_api = cheats
+	# test 11: on-screen Fly / ▲ / ▼ for the Owner and CoOwner (ui/fly_controls.gd), menu toggle kept in sync
+	var fl := CanvasLayer.new(); fl.layer = 5; fl.name = "FlyLayer"; add_child(fl)
+	fly_controls = FlyControls.new(); fly_controls.cheats = cheats; fly_controls.main = self; fl.add_child(fly_controls)
+	cheats.changed.connect(func(k, _v): if k == "fly" and VUI.settings and VUI.settings.visible: VUI.settings.build())
 	if cheats.role() == "owner" and not bench: cheats.request("god", true)   # JS: god starts ON for the owner
 	VUI.owner_cheat.connect(func(k, v):
 		var key: String = {"titan": "titan", "remax": "remax", "nocd": "nocd"}.get(k, k)

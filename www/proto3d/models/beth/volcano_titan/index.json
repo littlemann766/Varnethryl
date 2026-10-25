@@ -1,0 +1,599 @@
+{
+ "name": "volcano_titan",
+ "generated": "2026-10-25 (ET)",
+ "units": "metres, Y up, origin = cone centre at ground level (base y=0)",
+ "source": "boss's Tripo volcano (user_1024 diorama split, www/proto3d/models/beth/tripo/volcano_game.glb, x940): silhouette, rim height/radius and flank colour sampled from it; detail, crater arena, lava, path, scree, vents added",
+ "size_m": [
+  296,
+  77.3,
+  296
+ ],
+ "base_radius_m": 147,
+ "rim_height_m": [
+  72,
+  77.3
+ ],
+ "lods": {
+  "high": {
+   "file": "volcano_titan.glb",
+   "tris": 636732,
+   "tex": 4096
+  },
+  "lod1": {
+   "file": "volcano_titan_lod1.glb",
+   "tris": 270532,
+   "tex": 2048
+  },
+  "lod2": {
+   "file": "volcano_titan_lod2.glb",
+   "tris": 93446,
+   "tex": 1024
+  }
+ },
+ "phone_high_lod": "lod1",
+ "col": "volcano_titan_col.glb",
+ "col_tris": 36228,
+ "materials": [
+  "volcano_basalt (albedo/normal/ORM/emissive cracks)",
+  "volcano_lava (emissive strength 6, UV world/12 m, tileable; scroll UV for flow)"
+ ],
+ "arena": {
+  "center": [
+   0,
+   39.0,
+   0
+  ],
+  "radius_m": 33.0,
+  "floor_y": 39.0,
+  "note": "flat caldera floor (max slope 3.7 deg), ringed by a lava moat r33.5-40 (surface y 37.5, floor y~36.4) except a 9 m rock bridge where the ramp lands"
+ },
+ "lava_moat": {
+  "inner_r": 33.5,
+  "outer_r": 40.0,
+  "surface_y": 37.5,
+  "damage_hint": "treat lava mesh volcano_lava* as a hazard"
+ },
+ "titan_spawn": {
+  "pos": [
+   0,
+   39.0,
+   -4.0
+  ],
+  "yaw_deg": 0,
+  "note": "Titan 20.955 m tall; wall rim ~35 m above floor"
+ },
+ "path": {
+  "start": [
+   -123.84,
+   0.21,
+   71.5
+  ],
+  "end": [
+   23.78,
+   39.11,
+   28.34
+  ],
+  "breach": [
+   -10.42,
+   60.0,
+   -59.09
+  ],
+  "width_m": 6.5,
+  "length_m": 577,
+  "max_grade_deg": 14.3,
+  "surface_slope_p99_deg": 15.7,
+  "centerline": [
+   [
+    -123.84,
+    0.21,
+    71.5
+   ],
+   [
+    -116.67,
+    1.48,
+    80.09
+   ],
+   [
+    -108.93,
+    2.42,
+    88.0
+   ],
+   [
+    -100.66,
+    3.59,
+    95.2
+   ],
+   [
+    -91.95,
+    5.02,
+    101.65
+   ],
+   [
+    -82.84,
+    6.68,
+    107.33
+   ],
+   [
+    -73.42,
+    8.27,
+    112.22
+   ],
+   [
+    -63.74,
+    9.48,
+    116.29
+   ],
+   [
+    -53.88,
+    10.62,
+    119.55
+   ],
+   [
+    -43.9,
+    11.73,
+    121.99
+   ],
+   [
+    -33.87,
+    12.78,
+    123.61
+   ],
+   [
+    -23.86,
+    13.8,
+    124.42
+   ],
+   [
+    -13.93,
+    14.82,
+    124.42
+   ],
+   [
+    -4.15,
+    15.82,
+    123.65
+   ],
+   [
+    5.43,
+    16.81,
+    122.11
+   ],
+   [
+    14.74,
+    17.81,
+    119.85
+   ],
+   [
+    23.74,
+    18.8,
+    116.88
+   ],
+   [
+    32.36,
+    19.81,
+    113.25
+   ],
+   [
+    40.57,
+    20.82,
+    109.0
+   ],
+   [
+    48.31,
+    21.81,
+    104.16
+   ],
+   [
+    55.55,
+    22.82,
+    98.79
+   ],
+   [
+    62.25,
+    23.81,
+    92.93
+   ],
+   [
+    68.38,
+    24.81,
+    86.63
+   ],
+   [
+    73.91,
+    25.82,
+    79.96
+   ],
+   [
+    78.83,
+    26.84,
+    72.95
+   ],
+   [
+    83.11,
+    27.86,
+    65.67
+   ],
+   [
+    86.74,
+    28.93,
+    58.17
+   ],
+   [
+    89.71,
+    29.97,
+    50.51
+   ],
+   [
+    92.03,
+    31.0,
+    42.74
+   ],
+   [
+    93.69,
+    32.04,
+    34.92
+   ],
+   [
+    94.7,
+    33.08,
+    27.11
+   ],
+   [
+    95.07,
+    34.14,
+    19.36
+   ],
+   [
+    94.82,
+    35.21,
+    11.71
+   ],
+   [
+    93.96,
+    36.29,
+    4.22
+   ],
+   [
+    92.52,
+    37.38,
+    -3.06
+   ],
+   [
+    90.53,
+    38.49,
+    -10.09
+   ],
+   [
+    88.01,
+    39.68,
+    -16.84
+   ],
+   [
+    85.0,
+    40.93,
+    -23.25
+   ],
+   [
+    81.53,
+    42.2,
+    -29.3
+   ],
+   [
+    77.65,
+    43.52,
+    -34.95
+   ],
+   [
+    73.39,
+    44.85,
+    -40.18
+   ],
+   [
+    68.8,
+    46.21,
+    -44.96
+   ],
+   [
+    63.91,
+    47.6,
+    -49.28
+   ],
+   [
+    58.78,
+    48.99,
+    -53.11
+   ],
+   [
+    53.44,
+    50.38,
+    -56.45
+   ],
+   [
+    47.95,
+    51.79,
+    -59.29
+   ],
+   [
+    42.35,
+    53.21,
+    -61.63
+   ],
+   [
+    36.68,
+    54.6,
+    -63.45
+   ],
+   [
+    30.98,
+    56.0,
+    -64.78
+   ],
+   [
+    25.31,
+    57.43,
+    -65.61
+   ],
+   [
+    19.7,
+    58.85,
+    -65.96
+   ],
+   [
+    14.19,
+    59.92,
+    -65.85
+   ],
+   [
+    8.82,
+    60.0,
+    -65.28
+   ],
+   [
+    3.62,
+    60.0,
+    -64.29
+   ],
+   [
+    -1.37,
+    60.0,
+    -62.89
+   ],
+   [
+    -6.11,
+    60.0,
+    -61.12
+   ],
+   [
+    -10.42,
+    60.0,
+    -59.09
+   ],
+   [
+    -9.46,
+    60.0,
+    -53.66
+   ],
+   [
+    -8.51,
+    60.0,
+    -48.24
+   ],
+   [
+    -5.11,
+    59.47,
+    -46.68
+   ],
+   [
+    0.01,
+    58.6,
+    -46.83
+   ],
+   [
+    5.1,
+    57.72,
+    -46.36
+   ],
+   [
+    10.08,
+    56.84,
+    -45.31
+   ],
+   [
+    14.87,
+    55.97,
+    -43.7
+   ],
+   [
+    19.43,
+    55.09,
+    -41.55
+   ],
+   [
+    23.68,
+    54.22,
+    -38.92
+   ],
+   [
+    27.57,
+    53.34,
+    -35.83
+   ],
+   [
+    31.06,
+    52.46,
+    -32.35
+   ],
+   [
+    34.11,
+    51.59,
+    -28.52
+   ],
+   [
+    36.68,
+    50.71,
+    -24.41
+   ],
+   [
+    38.74,
+    49.83,
+    -20.06
+   ],
+   [
+    40.29,
+    48.96,
+    -15.56
+   ],
+   [
+    41.3,
+    48.08,
+    -10.96
+   ],
+   [
+    41.77,
+    47.2,
+    -6.32
+   ],
+   [
+    41.71,
+    46.33,
+    -1.7
+   ],
+   [
+    41.14,
+    45.45,
+    2.82
+   ],
+   [
+    40.06,
+    44.57,
+    7.2
+   ],
+   [
+    38.52,
+    43.7,
+    11.37
+   ],
+   [
+    36.53,
+    42.82,
+    15.29
+   ],
+   [
+    34.15,
+    41.94,
+    18.9
+   ],
+   [
+    31.4,
+    41.07,
+    22.17
+   ],
+   [
+    28.35,
+    40.19,
+    25.07
+   ],
+   [
+    25.03,
+    39.32,
+    27.55
+   ],
+   [
+    23.78,
+    39.11,
+    28.34
+   ]
+  ]
+ },
+ "vents": [
+  {
+   "name": "vent_0_crater",
+   "pos": [
+    -36.37,
+    53.83,
+    -21.0
+   ],
+   "kind": "crater"
+  },
+  {
+   "name": "vent_1_crater",
+   "pos": [
+    -39.47,
+    55.67,
+    14.36
+   ],
+   "kind": "crater"
+  },
+  {
+   "name": "vent_2_crater",
+   "pos": [
+    -14.36,
+    52.01,
+    39.47
+   ],
+   "kind": "crater"
+  },
+  {
+   "name": "vent_3_flank",
+   "pos": [
+    47.5,
+    41.35,
+    82.27
+   ],
+   "kind": "flank"
+  },
+  {
+   "name": "vent_4_flank",
+   "pos": [
+    55.0,
+    28.41,
+    -95.26
+   ],
+   "kind": "flank"
+  },
+  {
+   "name": "vent_5_flank",
+   "pos": [
+    -73.86,
+    54.91,
+    -13.02
+   ],
+   "kind": "flank"
+  },
+  {
+   "name": "vent_6_spill",
+   "pos": [
+    -43.66,
+    63.44,
+    36.64
+   ],
+   "kind": "spill"
+  },
+  {
+   "name": "smoke_plume",
+   "pos": [
+    0,
+    82,
+    0
+   ],
+   "kind": "crater_plume"
+  }
+ ],
+ "markers_in_glb": "every vent, arena_center, titan_spawn, path_start, path_end, smoke_plume exist as empty Node3D in all three LODs",
+ "scree": {
+  "big_rocks": 75,
+  "small_rocks": 520,
+  "note": "lod2 keeps only big rocks"
+ },
+ "placement_suggestion": {
+  "world_pos": [
+   405,
+   "height(405,-402)",
+   -402
+  ],
+  "scale": 1.0,
+  "replaces": "assets/hi/terrain/volcano_flank_hi (x1.6, 224 m wide, 75 m tall)",
+  "note": "new footprint 296 m wide vs 224 m: clear r150 around (405,-402); the old exclusion radius in _hi_terrain is 150, so peaks already keep out"
+ },
+ "lights": "GLB carries no lights: add OmniLight3D (orange, range ~25 m) around the moat and at vent markers"
+}

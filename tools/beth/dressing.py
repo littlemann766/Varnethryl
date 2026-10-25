@@ -46,7 +46,7 @@ def stall(col=0xb03030):
   obox(m,(.9,.95,.25),(.6,.3,.4),'b_planks',WH);return m
 def banner_pole(col=0x2040a0):
   m=M();kit.cyl(m,'b_timber',.08,.07,5.0,6);kit.cyl(m,'b_iron',.12,.01,.3,5,t=(0,5.0,0));obox(m,(.6,4.7,0),(1.3,.06,.06),'b_iron',WH)
-  rect(m,np.array([0,2.5,0]),np.array([1.,0,0]),np.array([0,1.,0]),1.2,2.2,'b_red',W(col)*1.7,(1.2,2.2));return m
+  rect(m,np.array([0,2.5,0]),np.array([1.,0,0]),np.array([0,1.,0]),1.2,2.2,'b_white',W(col)*1.1,(1.2,2.2));return m
 def wall_cap(L=4.0):
   m=M();obox(m,(0,0,0),(L,.25,1.0),'b_darkstone',WH,faces=('front','back','left','right','top'));obox(m,(0,.25,0),(L*.98,.12,.7),'b_stone',WH*1.05,faces=('front','back','left','right','top'));return m
 def rubble():

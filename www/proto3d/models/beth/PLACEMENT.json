@@ -1489,18 +1489,23 @@
    "where": "not wired (scenery.js scatterWorld is the old inner-village path)"
   }
  ],
- "zone_kits_unplaced": [
-  "frost/ice_rock",
-  "frost/snow_rock",
-  "trees/tree_pine_snow",
-  "volcano/basalt_columns",
-  "volcano/lavacrust_rock",
-  "port/dock_10m",
-  "port/ship_cog",
-  "hobcamp/hob_tent",
-  "hobcamp/hob_palisade",
-  "hobcamp/hob_firepit",
-  "clusters/cluster_hobcamp",
-  "clusters/cluster_port_dock"
- ]
+ "zone_kits_unplaced": [],
+ "zone_placements": {
+  "frost_town": "PLACEMENT_frost_town.json",
+  "frost_realm": "PLACEMENT_frost_realm.json",
+  "volcano": "PLACEMENT_volcano.json",
+  "port": "PLACEMENT_port.json",
+  "hobcamps": "PLACEMENT_hobcamps.json",
+  "dressing_town": "PLACEMENT_dressing_town.json",
+  "decals": "PLACEMENT_decals.json",
+  "dressing_roads": "PLACEMENT_dressing_roads.json"
+ },
+ "buildings": {
+  "index": "buildings/buildings_index.json",
+  "rule": "attach at building root (scale 1/K in three.js; in Godot place at the building origin in metres); roof node hides when inside; windmill blades rotate local Z"
+ },
+ "terrain": {
+  "index": "terrain/terrain_index.json",
+  "lods": "_lod1/_lod2 = Medium/Low tiers"
+ }
 }

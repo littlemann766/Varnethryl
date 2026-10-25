@@ -48,3 +48,13 @@ Note on sign: the last column is old − new, so negative = kit is heavier. Kit 
 ## Estimated totals (town_start / outskirts average)
 Draw calls: town 419 → ~415 (art share 6 → 2–3); outskirts ~200–400 → −6 to −10 each. **Art alone cannot reach 300.**
 With Lucky's code levers (one InstancedMesh set for all ladders: −20…−60; fewer building material classes: up to −100 of ~180) town could reach ≈250–300.
+
+## Round 3 (Beth): Godot-targeted
+| old (buildings.js / scene) | new asset | status |
+|---|---|---|
+| guildhall, library, townhall, mage, treasury, crypt, market, apothecary, bakery, inn, smithy, training, keep, temple, observatory, colosseum: the textured ext + roof meshes | `buildings/bld_<id>.glb` (walls + roof nodes, one atlas, emissive window mask) | built, Godot import verified, not wired |
+| fountain, port, gatehouse body, town walls | none yet | not done |
+| plain cobble street edges and plaza rim | `dressing/cobble_edge_2m`, `curb_2m` via PLACEMENT_dressing_town | placed (JSON), not wired |
+| (new) street lanterns, wells, market stalls, benches, planters, banner poles, signposts, milestones, wall lanterns, rubble | `dressing/*` | placed (JSON), not wired |
+| (new) moss, crack, dirt, grime, soot, leaves and puddle decals | `decals/*` on decals/atlas (alpha cut) | placed (JSON), not wired |
+| mountain/cliff scenery (scenery.js rocks and boulders at large scale) | `terrain/mountain_peak_*`, `volcano_cone_flank`, `cliff_ridge_60m`, `scree_slope`, `grass_mound`, `rock_arch` (+LODs) | built, no placement |

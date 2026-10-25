@@ -6,7 +6,7 @@ import kit
 from kit import M,rot,write_glb,hexc as W,blob
 from bldgeo import face,rect,obox,wall,gable,ring_wall
 OUT=sys.argv[1];kit.OUT=OUT;BD=os.path.join(OUT,'buildings');kit.BTILES=json.load(open(os.path.join(BD,'atlas','atlas.json')))['tiles']
-K=1.7;DH=1.95;WH=np.ones(3);WSP=[2.6]
+K=1.7;DH=1.95;WH=np.ones(3);WSP=[2.6];EMI=(1.0,1.0,1.0)
 rng=np.random.default_rng(5);kit.rng=rng
 def window(m,x,y,z,yaw,w=.9,h=1.1,shutters=False,bars=False,frame='b_timber'):
   R=rot('y',yaw);n=R@np.array([0,0,1.]);u=R@np.array([1.,0,0]);c=np.array([x,y,z])
@@ -106,7 +106,7 @@ def house_like(name,w,d,h,hs,ridge,rise,roof_tile='b_slate',lower='b_stone',uppe
 def scaleK(m):o=M();o.merge(m,np.eye(3),(0,0,0),K);return o
 def emit(name,nodes,meta):
   path=os.path.join(BD,name+'.glb');ns=[(nn,scaleK(mm),tuple(np.asarray(tr)*K)) for nn,mm,tr in nodes]
-  t=write_glb(None,path,name,extras=meta,atlas='buildings/atlas',nodes=ns,mat_name='beth_building_atlas')
+  t=write_glb(None,path,name,extras=meta,atlas='buildings/atlas',nodes=ns,mat_name='beth_building_atlas',emissive=EMI)
   REG.append({'file':'buildings/'+name+'.glb','tris':t,'nodes':[n[0] for n in nodes],**meta});print(name,t)
 REG=[]
 SPEC=json.load(open(sys.argv[2]))

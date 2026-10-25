@@ -89,7 +89,7 @@ def _pack(m):
   key=np.concatenate([P,N,U,C],1).round(5);uq,inv=np.unique(key,axis=0,return_inverse=True);inv=inv.reshape(-1)
   P,N,U,C=[uq[:,a:b].astype(np.float32) for a,b in ((0,3),(3,6),(6,8),(8,11))]
   I=inv.astype(np.uint16 if len(uq)<65535 else np.uint32);return I,P,N,U,C
-def write_glb(m,path,name,extras=None,atlas='atlas',nodes=None,mat_name='beth_kit_atlas'):
+def write_glb(m,path,name,extras=None,atlas='atlas',nodes=None,mat_name='beth_kit_atlas',emissive=None):
   """nodes: list of (node_name, M, translation) -> one mesh per node, all sharing ONE material."""
   nodes=nodes or [(name,m,(0,0,0))];blob=b'';views=[];acc=[];meshes=[];gn=[];tot=0
   def view(bb,tgt):
@@ -108,6 +108,9 @@ def write_glb(m,path,name,extras=None,atlas='atlas',nodes=None,mat_name='beth_ki
      'materials':[{'name':mat_name,'pbrMetallicRoughness':{'baseColorTexture':{'index':0},'metallicFactor':0.0,'roughnessFactor':0.85},'alphaMode':'MASK','alphaCutoff':0.5,'doubleSided':True}],
      'textures':[{'sampler':0,'source':0,'extensions':{'EXT_texture_webp':{'source':1}}}],'samplers':[{'magFilter':9729,'minFilter':9987,'wrapS':33071,'wrapT':33071}],
      'images':[{'uri':rel+'/atlas.png'},{'uri':rel+'/atlas.webp'}],'accessors':acc,'bufferViews':views,'buffers':[{'byteLength':len(blob)}]}
+  if emissive:  # night windows: emissive mask atlas (black except window/glass panes); scale emissiveFactor per quality tier / time of day
+    g['images']+= [{'uri':rel+'/emissive.png'},{'uri':rel+'/emissive.webp'}];g['textures'].append({'sampler':0,'source':2,'extensions':{'EXT_texture_webp':{'source':3}}})
+    g['materials'][0]['emissiveTexture']={'index':1};g['materials'][0]['emissiveFactor']=[float(v) for v in emissive]
   js=json.dumps(g).encode();js+=b' '*((4-len(js)%4)%4)
   data=struct.pack('<III',0x46546C67,2,12+8+len(js)+8+len(blob))+struct.pack('<II',len(js),0x4E4F534A)+js+struct.pack('<II',len(blob),0x004E4942)+blob
   open(path,'wb').write(data);return tot

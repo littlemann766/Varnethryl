@@ -4,7 +4,7 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "5"
+const VERSION := "6"
 const DEFS := [
 	["guildhall",0,-21,0.0,"Guild Hall"], ["library",-24,-27,0.0,"Grand Library"], ["townhall",23,-26,0.0,"Town Hall"],
 	["mage",-44,-31,0.0,"Mage Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
@@ -15,6 +15,8 @@ const DEFS := [
 	["barn",-51,21,PI/2,"Barn"], ["stables",-24,42,0.0,"Stables"], ["windmill",20,46,0.0,"Windmill"],
 	["house1",-9,19,PI,"Village House"], ["house2",9,19,PI,"Village House"], ["house3",-9,31,PI,"Village House"], ["house4",9,31,PI,"Village House"],
 ]
+## Test 6: Beth's Godot "card2" buildings (metres, footprint-centred, +Z front, shared 2048 atlas) replace these.
+const CARD2 := ["inn", "bakery", "house1", "house2", "house3", "house4", "smithy", "apothecary", "guildhall"]
 const CHIMNEYS := ["house1","house2","house3","house4","bakery","inn","smithy","farmhouse","thieves"]
 const PORT := Vector2(-425.6, 392)
 const ROADS := [
@@ -419,13 +421,14 @@ func _meshes(n: Node, out: Array) -> Array:
 
 func _add_trimesh(n: Node3D, skip := "roof") -> void:
 	for mi in _meshes(n, []):
-		if String(mi.name).to_lower().contains(skip) or String(mi.get_parent().name).to_lower().contains(skip): continue
+		if skip != "" and (String(mi.name).to_lower().contains(skip) or String(mi.get_parent().name).to_lower().contains(skip)): continue
 		mi.create_trimesh_collision()
 
 func _building(d: Array) -> void:
 	var id: String = d[0]; var pos := Vector3(float(d[1]) * PK, 0, float(d[2]) * PK); var rot: float = d[3]
-	var n := _place_glb("res://assets/buildings/bld_%s.glb" % id, pos, rot)
-	_add_trimesh(n)
+	var card := CARD2.has(id)
+	var n := _place_glb("res://assets/card2/bld_%s_card2_lod1.glb" % id if card else "res://assets/buildings/bld_%s.glb" % id, pos, rot)
+	_add_trimesh(n, "" if card else "roof")   # card2: collision from Beth's own LOD1 mesh
 	var aabb := AABB(); var first := true
 	for mi in _meshes(n, []):
 		var a: AABB = (n.global_transform.affine_inverse() * mi.global_transform) * mi.get_aabb()
@@ -447,7 +450,8 @@ func _swap_buildings() -> void:
 		for b in buildings:
 			b.lods = []; b.roofs = []
 			for suf in ["", "_lod1", "_lod2"]:
-				var v: Node3D = load("res://assets/hi/buildings/bld_%s%s.glb" % [b.id, suf]).instantiate()
+				var vp := ("res://assets/card2/bld_%s_card2%s.glb" if CARD2.has(b.id) else "res://assets/hi/buildings/bld_%s%s.glb") % [b.id, suf]
+				var v: Node3D = load(vp).instantiate()
 				b.node.add_child(v); b.lods.append(v)
 				var rf = v.find_child("roof", true, false)
 				if rf: b.roofs.append(rf)
@@ -1076,6 +1080,33 @@ func _run_bench() -> void:
 			var pos: Vector3 = d2 * (CITY_HALF + 30.0)
 			await _shot("t5_gate_" + String(gd[2]).to_lower().replace(" ", "_"), pos, atan2(d2.x, d2.z), -0.12, 11.0, 2, 30)
 		get_tree().quit(1 if fails > 0 else 0)
+		return
+	if only == "t6":
+		VUI._enter("solo"); bench = true
+		var part := OS.get_environment("T6_PART")
+		if part != "enemies":
+			await _shot("t6_houses", Vector3(0, 0, 38), PI * 0.85, -0.12, 11.0, 2, 30)
+			await _shot("t6_inn_smithy", Vector3(42, 0, 0), -PI / 2, -0.1, 11.0, 2, 30)
+			await _shot("t6_apothecary_bakery", Vector3(-42, 0, 42), PI / 2 + 0.3, -0.1, 11.0, 2, 30)
+			await _shot("t6_guildhall", Vector3(0, 0, -28), 0.0, -0.05, 11.0, 2, 30)
+			await _shot("t6_party_plaza", Vector3(-6, 0, 30), 0.25, -0.28, 11.0, 2, 10)
+			for c in party.companions: c.node.global_position = hero.global_position + Vector3(1.6, 0, -2.0) * (1 + party.companions.find(c))
+			pitch = -0.2
+			for i in 20: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_t6_party_plaza.png")
+		if part == "buildings": get_tree().quit(); return
+		for sp in EnemyDirector.SPAWNS: party.director.spawn(sp[0], sp[1], hero)
+		for e in party.director.living(): e.set_process(false); e.set_physics_process(false)   # pose them for the photo
+		await _shot("t6_wolves", Vector3(-216, 0, 24), PI / 2, -0.2, 11.0, 2, 40)
+		await _shot("t6_frost_trolls", Vector3(46, 0, 218), PI, -0.05, 11.0, 2, 40)
+		await _shot("t6_ashen_titan", Vector3(-70, 0, 236), PI, 0.15, 11.0, 2, 40)
+		bench = false
+		_teleport(Vector3(-218, 0, 24), PI / 2); pitch = -0.2
+		for i in 30: await get_tree().process_frame
+		party.combat.use(1)
+		for i in 10: await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png("user://shot_t6_combat_hud.png")
+		get_tree().quit()
 		return
 	if only == "t5":
 		var sv := func(n: String, fr := 12):

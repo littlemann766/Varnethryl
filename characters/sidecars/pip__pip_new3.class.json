@@ -1,0 +1,20 @@
+{
+ "cloth": [
+  "bandana tails (2 ribbons x 5-bone chains, torso/neck capsule colliders)",
+  "tail tip (tail5-8 only, very light, heavily damped)",
+  "bells (bellA/bellB, light swing)"
+ ],
+ "nonCloth": [
+  "fur body/skin (rigid, skinned to spine/leg bones)",
+  "tail root (tail1-4: baked slow calm sway only (no wag))",
+  "ears, eyes, jaw (baked)",
+  "bandana ring and knot on the neck (rigid)",
+  "satchel + strap (rigid-deforming; tiny baked slow calm sway only (no wag))",
+  "paws/toes (planted-foot IK baked)"
+ ],
+ "notes": [
+  "source mesh has 729 loose shells, handled with position-based weight smoothing (no per-shell tearing)",
+  "the thin vertical strap/string fins near the bandana knot come from the source model and are rigid with the spine",
+  "right fore/hind legs were foreshortened in the source leap pose; they were stretched along their own axis (about 1.3x on the lower leg) to match the left legs"
+ ]
+}

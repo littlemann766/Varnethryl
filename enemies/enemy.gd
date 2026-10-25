@@ -9,10 +9,11 @@ signal attacked(e: Enemy, pattern: Dictionary)
 
 const HERO_M := 1.905
 const TYPES := {
-	"frosttroll_a": {"model": "res://enemies/models/frosttroll_a.glb", "height": 3.0 * HERO_M, "data": "frosttroll", "patterns": "frosttroll_a", "r": 1.9},
-	"frosttroll_b": {"model": "res://enemies/models/frosttroll_b.glb", "height": 3.0 * HERO_M, "data": "frosttroll", "patterns": "frosttroll_b", "r": 1.9},
-	"titan": {"model": "res://enemies/models/ashentitan.glb", "height": 6.0 * HERO_M, "data": "titan", "patterns": "titan", "r": 3.2},
-	"titan_volcano": {"model": "res://enemies/models/ashentitan_volcano_11x.glb", "height": 0.0, "data": "titan_volcano", "patterns": "", "r": 5.5},
+	"frosttroll_a": {"model": "res://characters/frosttroll_a_lod1.glb", "height": 3.0 * HERO_M, "data": "frosttroll", "patterns": "frosttroll_a", "r": 1.9},
+	"frosttroll_b": {"model": "res://characters/frosttroll_b_lod1.glb", "height": 3.0 * HERO_M, "data": "frosttroll", "patterns": "frosttroll_b", "r": 1.9},
+	"titan": {"model": "res://characters/ashentitan_lod1.glb", "height": 6.0 * HERO_M, "data": "titan", "patterns": "titan", "r": 3.2},
+	"wolf": {"model": "res://characters/wolf_lod1.glb", "height": 0.0, "data": "wolf", "patterns": "", "r": 0.6},
+	"titan_volcano": {"model": "res://characters/ashentitan_volcano_lod1.glb", "height": 0.0, "data": "titan_volcano", "patterns": "", "r": 5.5},
 }
 
 var type_id := ""

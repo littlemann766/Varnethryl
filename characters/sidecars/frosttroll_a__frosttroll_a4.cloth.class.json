@@ -1,0 +1,13 @@
+{
+ "cloth": [],
+ "nonCloth": [
+  "fur plates, ice crystals, straps and belt rigid (bound to body bones)",
+  "loincloth banner is weighted to hips/thighs, not spring-driven",
+  "v2: shoulder fur/crystal plates are rigid pieces (each island weighted as one unit, clavicle+upperArm+chest blend); banner weighted hips->mean(thigh_L,thigh_R), no spring bones"
+ ],
+ "notes": [
+  "no cloth on this model; spring-bone config intentionally empty",
+  "frosttroll_a4: arm skeleton refit to mesh; walk/run/attack/attack2/hit/death arms re-authored with clavicle roll",
+  "frosttroll_a4: a2 scaled x0.5 to 3x player (5.7 m)"
+ ]
+}

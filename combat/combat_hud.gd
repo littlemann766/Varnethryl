@@ -39,8 +39,26 @@ func _process(_dt: float) -> void:
 	for i in range(1, 5):
 		var s := c.skill(i)
 		var cd: float = c.st.cd[i]
-		var nm: String = String(s.get("name", "-")).substr(0, 9)
-		btns[i].text = ("%s\n%.0f" % [nm, ceil(cd)]) if cd > 0.0 else nm
+		var nm: String = String(s.get("name", "-"))
+		var t: String = ("%s\n%.0f" % [nm, ceil(cd)]) if cd > 0.0 else nm
+		if btns[i].text != t:
+			btns[i].text = t; btns[i].tooltip_text = String(s.get("name", ""))
+			_fit(btns[i], 16)
 		btns[i].disabled = not CombatRules.can_use(c.hero_id, i, s, c.st)
 	hero_btn.text = "Hero: %s ▶" % HeroRoster.display_name(party.hero_id)
 	info.text = "HP %d/%d  MP %d  SP %d  Fury %d" % [c.hp, c.max_hp, c.st.mp, c.st.sp, c.st.fury]
+
+
+## Auto-shrink: wrap on words, then drop the font size until every line fits the button (min 9 px).
+func _fit(b: Button, max_size: int) -> void:
+	b.clip_text = false; b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var f: Font = b.get_theme_font("font")
+	var w := b.size.x - 10.0; var h := b.size.y - 8.0
+	var fs := max_size
+	while fs > 9:
+		var sz := f.get_multiline_string_size(b.text, HORIZONTAL_ALIGNMENT_CENTER, w, fs, -1, TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND)
+		var widest := 0.0
+		for word in b.text.split(" ", false): for part in word.split("\n", false): widest = maxf(widest, f.get_string_size(part, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x)
+		if widest <= w and sz.y <= h: break
+		fs -= 1
+	b.add_theme_font_size_override("font_size", fs)

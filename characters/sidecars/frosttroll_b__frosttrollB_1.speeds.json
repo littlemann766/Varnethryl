@@ -1,0 +1,50 @@
+{
+ "model": "frosttrollB_1",
+ "in_game_id": "frosttroll_b",
+ "height_m": 5.715,
+ "hero_height_m": 1.905,
+ "boss_multiple": 3,
+ "multiple_note": "Frost Troll B = 3x Owner (1.905 m) = 5.715 m, same as Troll A; rest skinned bbox measured 5.715 m (top = shoulder crystal tips; head top ~0.3 m lower)",
+ "walk_mps": 2.21,
+ "run_mps": 5.826,
+ "speed_basis": "measured stance-foot ground travel (planted feet)",
+ "clips_s": {
+  "idle": 3.0,
+  "walk": 1.3,
+  "run": 0.805,
+  "attack": 1.8,
+  "attack2": 1.6,
+  "hit": 0.45,
+  "death": 1.8,
+  "windup": 1.6
+ },
+ "oneshot": [
+  "death",
+  "windup"
+ ],
+ "loop": [
+  "idle",
+  "walk",
+  "run"
+ ],
+ "windup": {
+  "clip": "windup",
+  "telegraph_s": 1.0,
+  "hold_s": 0.6,
+  "then": "attack",
+  "attack_start_offset_s": 1.0,
+  "note": "windup last frame == attack pose at t=1.0 s; play windup (holds last frame) then start attack at 1.0 s for a seamless slam"
+ },
+ "note": "clip durations in seconds; attack/attack2/hit one-shots return to rest (last frame = rest), death ends collapsed (hold last frame), windup ends in the overhead telegraph pose (hold last frame). Rig: Darius detail skeleton 69 joints (same names as frosttroll_a4); finger chains unweighted (fused paws ride hand_L/R). Arms bound at 32 deg from vertical (wide body: 14 deg would sit inside the torso). Per-frame hips ground correction.",
+ "ground": "per-frame hips correction; lowest skinned vertex y>=0 (run flight phase may hover up to ~0.09 m)",
+ "sockets": [
+  "weapon_R",
+  "weapon_L"
+ ],
+ "size_baked": true,
+ "bbox_idle_t0_m": [
+  3.903,
+  5.742,
+  3.14
+ ]
+}

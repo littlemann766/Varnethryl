@@ -3,5 +3,5 @@ const b=await puppeteer.launch({executablePath:'/usr/bin/google-chrome',headless
 const p=await b.newPage();p.on('pageerror',e=>console.log('ERR',e.message));
 await p.goto('http://localhost:8731/or/rh.html');await p.waitForFunction('window.ready');
 await p.evaluate(()=>setup('/varnethryl-owner-test/owner-animated.glb'));
-const raw=await p.evaluate(()=>getRaw());
-fs.writeFileSync('newrun.json',JSON.stringify(raw));console.log(Object.keys(raw.tracks).length,raw.times.length);await b.close();
+const W=process.argv[2]==='walk';const raw=await p.evaluate(w=>getRaw(w),W);
+fs.writeFileSync(W?'newwalk.json':'newrun.json',JSON.stringify(raw));console.log(Object.keys(raw.tracks).length,raw.times.length);await b.close();

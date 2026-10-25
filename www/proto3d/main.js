@@ -322,7 +322,7 @@ const EXTRA_SCALE = {}; // lore-height normalization happens once, centrally in 
 // Frost Troll B's new Meshy rig is only 1.70 m authored height, scaled to a 6.67 m boss.
 // Its in-place 0.85 s Running clip needs native gait speeds, NOT the old 4.5/10.5 values
 // (which made the run blend unreachable at normal boss chase speeds).
-const SPEEDS = { 'n:owner': { walk: 1.486, run: 6.08, map:{walk:'Walking',run:'Running'} }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 0.52, run: 1.10 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:vaelthryx_straight_rig': { walk: 0.30, run: 0.80 }, 'n:vaelthryx_straight_rig_50': { walk: 0.055, run: 0.13 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 }, 'n:cinder_new': { walk: 0.65, run: 1.95 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
+const SPEEDS = { 'n:owner': { walk: 2.0, run: 6.08, map:{walk:'Walking',run:'Running'} }, 'n:owner_pika1': { walk: 1.5, run: 3.2 }, 'n:garruk_new5': { walk: 1.1, run: 3.2 }, 'n:darius_new6': { walk: 1.1, run: 3.2 }, 'n:pip_new2': { walk: 0.26, trot: 0.76, run: 1.4 }, 'n:ashentitan_new': { walk: 5.156, run: 10.687 }, 'n:ember_new3': { walk: 0.533, trot: 1.012, run: 2.158 }, 'n:frosttroll_a': { walk: 4.212, run: 11.796 }, 'n:frosttroll_b': { walk: 0.52, run: 1.10 }, 'n:vaelthryx_new6': { walk: 9.57, run: 14.77 }, 'n:vaelthryx_straight_rig': { walk: 0.30, run: 0.80 }, 'n:vaelthryx_straight_rig_50': { walk: 0.055, run: 0.13 }, 'n:thrain_new4': { walk: 0.85, run: 1.8 }, 'n:wren_new3': { walk: 0.45, run: 1.23 }, 'n:cinder_new': { walk: 0.65, run: 1.95 } };   // per-clip ground speed (native m/s) from Beth's audit logs: drives clip blend + playback rate so feet don't slide
 /* Beth's smoothed blocky models (_smooth.glb): extra 'Smooth' variant for characters that already exist; originals stay the default. Loaded on demand (only when picked). */
 const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'hawk', 'hearth', 'hobgoblin', 'hydrella', 'kael', 'kestrel', 'lorian', 'mirelle', 'morwen', 'mossgut', 'neris', 'nyx', 'orin', 'rook', 'rowan', 'seraphine', 'stonetroll', 'talia', 'thorne', 'valen', 'vesper', 'wolf', 'wyvern'];   // frosttroll_smooth intentionally not used (old 1.8 m base): frosttroll_a4 is the troll
 { const have = new Set(GLB_IDS.map(id => id.replace(/^[a-z]:/, ''))); for (const n of SMOOTH_NAMES) if (have.has(n)) EXTRA.push(['n:' + n + '_smooth', n + ' (SMOOTH)', 'proto3d/models-new/' + n + '_smooth.glb']); }
@@ -430,7 +430,15 @@ function locoAnim(u, sp, dt = 1/60) {
         ? Math.max(.5,Math.min(2.4,v/S.run))
         : Math.max(.65,Math.min(2.2,v/(SPEED*1.8)));
     }
-    if (standing && !u.wasStanding) { wk.time = 0; if (u.sb) u.sb.reset(); }
+    // Phase-synced walk<->run (Owner): both clips start at left touchdown, so drive one shared gait phase
+    // at the blended cadence. Feet stay in step through the blend instead of two desynced cycles mushing.
+    if (u.phaseSync && run && !standing) {
+      const Dw = wk.getClip().duration, Dr = run.getClip().duration, el = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.1)) : 0;
+      const rate = (1 - runMix) * wk.timeScale / Dw + runMix * run.timeScale / Dr;
+      u.locoPhase = ((u.locoPhase || 0) + el * rate) % 1;
+      wk.time = u.locoPhase * Dw; run.time = u.locoPhase * Dr; wk.timeScale = 0; run.timeScale = 0;
+    }
+    if (standing && !u.wasStanding) { wk.time = 0; u.locoPhase = 0; if (u.sb) u.sb.reset(); }
     u.wasStanding = standing;
   }
   // Some imported rigs expose only a running clip. Avoid leaving that action
@@ -589,7 +597,7 @@ function wrapGLB(g, id, blocky) {
     act[k].play(); act[k].setEffectiveWeight(0);
   }
   if (id === 'n:cinder_new') for (const k of ['hover', 'flap', 'glide', 'dive', 'land']) if (act[k]) { act[k].play(); act[k].setEffectiveWeight(0); }
-  Object.assign(root.userData, { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 });
+  Object.assign(root.userData, { glb: true, mixer, act, all: Object.assign({}, act), capeUpdate() {}, speeds: spd, phaseSync: id === 'n:owner', mscale, heightW: hgt > 0.01 ? hgt * mscale : 0 });
   // Cinder's authored wing and tail clips must NOT be re-aimed by spring physics.
   // The generic spring-bone family matches wing1/wing2/wing3 and creates rubbery, overlapping wing flaps.
   if (id !== 'n:cinder_new') try {
@@ -639,7 +647,7 @@ function wrapGLB(g, id, blocky) {
   if (id === 'n:cinder_new') initCinderEmbers(root, m);
   return root;
 }
-const ASSET_V = '1.5.33';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
+const ASSET_V = '1.5.34';   // stamped by tools/build_sw.py from package.json: busts any stale WebView/HTTP cache of the model files after an app update
 const gl = new GLTFLoader();
 const glbPromise = {};
 // Robust fetch: reports HTTP status / type / size / magic bytes, retries once with a cache-busting URL (bypasses a stale service-worker entry).
@@ -1187,7 +1195,10 @@ addEventListener('contextmenu', e => e.preventDefault());
 const SPEED = 5.2 * HS;
 let travelRun=false;
 const WALK_SPEED=.62, RUN_SPEED=1.24;
-const travelScale=()=>travelRun?RUN_SPEED:WALK_SPEED;
+// Owner walks at a natural brisk 2.0 native m/s (his authored Walking clip, 140 steps/min, planted feet).
+// The generic walk speed (3.04 native for him) is a jog: no real walk can cover it without sliding.
+const OWNER_WALK_MUL=2.0/3.04;
+const travelScale=()=>travelRun?RUN_SPEED:WALK_SPEED*(typeof hero!=='undefined'&&hero&&GLB_IDS[HEROES.indexOf(hero)]==='n:owner'?OWNER_WALK_MUL:1);
 // Full stamina covers roughly 290 world units of sustained running on normal ground
 // (~30 seconds). Combat and world travel use the same SP pool when combat is active.
 const STAMINA_MAX=100, STAMINA_PER_UNIT=.34, WALK_RECOVERY=8, IDLE_RECOVERY=13;

@@ -1,6 +1,6 @@
 # Procedural card-style building kit: strip-tiled walls/roofs on the shared card2 atlas + modelled details.
 import numpy as np
-from atlas import STRIPS, CELLS, S
+from atlas import STRIPS, CELLS, S, RECTS
 def norm(v): v=np.asarray(v,float); return v/np.linalg.norm(v)
 class Mesh:
     def __init__(s): s.P=[]; s.UV=[]; s.lod=[]; s.remap={}  # lod: min lod level that drops this tri (99 = never)
@@ -29,7 +29,9 @@ class Mesh:
                 s.tri(*(W[j] for j in ids),*((u[j],1-v[j]) for j in ids))
     def cell(s,corners,name,u0=0,u1=1,v0=0,v1=1):
         # corners: bl, br, tr, tl ; maps a sub-rect of a detail cell
-        i=CELLS.index(name); x0=i*256/S; y0=1536/S; cw=256/S; ch=512/S
+        name=s.remap.get(name,name)
+        if name in RECTS: rx,ry,rw,rh=RECTS[name]; x0,y0,cw,ch=rx/S,ry/S,rw/S,rh/S
+        else: i=CELLS.index(name); x0=i*256/S; y0=1536/S; cw=256/S; ch=512/S
         uv=[(x0+cw*(u0*0.98+0.01),1-(y0+ch*(1-v0)*0.99+0.002)),(x0+cw*(u1*0.98+0.01),1-(y0+ch*(1-v0)*0.99+0.002)),
             (x0+cw*(u1*0.98+0.01),1-(y0+ch*(1-v1)*0.99+0.002)),(x0+cw*(u0*0.98+0.01),1-(y0+ch*(1-v1)*0.99+0.002))]
         c=[np.asarray(p,float) for p in corners]

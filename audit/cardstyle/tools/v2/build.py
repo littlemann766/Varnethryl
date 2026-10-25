@@ -234,8 +234,8 @@ def temple():
     # statues on plinths flanking the steps + on the tower buttresses
     for sz in(-1,1):
         m.box((X1+2.2,0,sz*2.6-0.55),(X1+3.3,1.1,sz*2.6+0.55),'stone'); m.box((X1+2.1,1.1,sz*2.6-0.62),(X1+3.4,1.25,sz*2.6+0.62),'stone')
-        statue(m,'robed',(X1+2.75,1.25,sz*2.6),1.0,90)
-        m.obox((X1+0.25,4.9,sz*1.75),(0,0,1),(0,1,0),(1,0,0),(0.9,0.2,0.7),'stone'); statue(m,'robed',(X1+0.35,5.0,sz*1.75),0.8,90)
+        statue(m,'robed',(X1+2.75,1.25,sz*2.6),1.55,90)
+        m.obox((X1+0.35,4.9,sz*1.75),(0,0,1),(0,1,0),(1,0,0),(1.1,0.2,0.9),'stone'); statue(m,'robed',(X1+0.5,5.0,sz*1.75),1.15,90)
     # sides: traceried lancets + buttresses topped by side spires
     for x in np.arange(-7,7.1,3.5):
         for sz,ts,ns in((1,(1,0,0),(0,0,1)),(-1,(-1,0,0),(0,0,-1))):
@@ -310,7 +310,8 @@ def keep():
         for y in(5,9,13): lancet(m,(x,y,6.0),t,n,0.9,2.0)
     p=np.array([0,0,6.0]); b=p+n*0.03; m.cell([b-t*1.5,b+t*1.5,b+t*1.5+up*4.2,b-t*1.5+up*4.2],'door')
     for x in(-1.6,1.6): cloth_b(m,np.array([x*2.3,14.5,6.1]),1.4,4.5)
-    # curtain wall + corner towers
+    # curtain wall + corner towers in grey fieldstone (core keep stays cream)
+    m.remap={}
     R=13
     for (a,b) in(((-R,R),(R,R)),((R,R),(R,-R)),((R,-R),(-R,-R)),((-R,-R),(-R,R))):
         a3=np.array([a[0],0,a[1]]); b3=np.array([b[0],0,b[1]]); d=b3-a3; L=np.linalg.norm(d); ax=d/L; az=np.cross(ax,[0,1,0])
@@ -331,7 +332,7 @@ def fountain():
     # water disc
     for i in range(28):
         a0=2*np.pi*i/28; a1=2*np.pi*(i+1)/28
-        m.cell([np.array([0,0.7,0]),np.array([0,0.7,0]),np.array([4.15*np.cos(a0),0.7,4.15*np.sin(a0)]),np.array([4.15*np.cos(a1),0.7,4.15*np.sin(a1)])],'banner',0.3,0.36,0.3,0.36)
+        m.cell([np.array([0,0.7,0]),np.array([0,0.7,0]),np.array([4.15*np.cos(a1),0.7,4.15*np.sin(a1)]),np.array([4.15*np.cos(a0),0.7,4.15*np.sin(a0)])],'water',i/28,(i+1)/28,0.0,1.0)
     cyl(m,(0,0,0),1.7,0,1.6,'stone',16,cap='stone'); cyl(m,(0,1.6,0),1.3,0,0.4,'stone',16,r1=2.5)
     cyl(m,(0,2.0,0),2.5,0,0.25,'stone',16,cap='stone'); cyl(m,(0,2.25,0),1.0,0,1.2,'stone',12,cap='stone')
     for k in range(8):  # lion-head spouts + water arcs (blue)
@@ -339,7 +340,7 @@ def fountain():
         m.obox(d*1.75+[0,1.25,0],np.cross(d,[0,1,0]),(0,1,0),d,(0.35,0.35,0.3),'gold')
         pts=[d*1.9+[0,1.25,0],d*2.6+[0,1.2,0],d*3.1+[0,0.9,0],d*3.3+[0,0.7,0]]
         for p,q in zip(pts[:-1],pts[1:]): m.beam(p,q,0.09,'slate')
-    statue(m,'lion',(0,3.42,0),1.05,0)
+    statue(m,'lion',(0,3.42,0),1.05,0,'bluestone')
     for k in range(6):
         a=2*np.pi*(k+0.5)/6; pot_plant(m,(6.0*np.cos(a),0.12,6.0*np.sin(a)),0.45)
     return dict(m=m)
@@ -365,8 +366,28 @@ def port():
     m.beam((16.4,9.4,4.5),(16.4,4.0,4.5),0.04,'iron'); crate(m,(16.4,3.2,4.5),0.9)
     for x,z in((-3,-2.5),(-2.2,-2.2),(-2.6,-1.4),(8,-3),(9,0),(3.5,2.5)): barrel(m,(x,1.25,z))
     for x,z,sz in((-5,0.5,0.9),(-4.1,0.4,0.7),(7.5,1.5,0.8),(8.4,1.6,0.8),(7.9,1.6+0.0,0.6)): crate(m,(x,1.25,z),sz)
-    boat(m,(-6,-1.4,9.0),8,2.6,0); boat(m,(7,-1.4,9.5),7,2.2,10)
+    boat(m,(-6,-0.7,9.0),8,2.6,0); boat(m,(7,-0.7,9.5),7,2.2,10)
     for x in(-10,0,10): m.beam((x,1.25,5.4),(x,4.2,5.4),0.12,'iron'); lantern(dict(m=m,hs=5.3,g=0,D=10.6,X0=0,X1=0),'z+',x,4.0)
+    # more harbour: row of warehouses/houses, market stalls, drying nets, extra boats
+    for k,(x,z,W_,D_,rot) in enumerate(((-14,-8.0,7,6,0),(13,-8.5,7.5,6.5,0),(-1.5,-9.5,6,6,0))):
+        h=house(dict(W=W_,D=D_,g=3.2,floors=1+(k%2),fh=2.6,jetty=0.35,pitch=57))
+        door(h,'z+',-1.0,1.3,2.5); window(h,'z+',1.5,1.0); window(h,'z+',-1.4,3.8,flowers=(k==1)); window(h,'z+',1.4,3.8)
+        gable_fill(h,'x+'); gable_fill(h,'x-'); chimney(h,1.8,-1.0,0.8,1.1)
+        if k==2: banner(h,'z+',2.6,3.6)
+        m.merge(h['m'],(x,1.2,z))
+    for x in(-12.5,-9.5,9.5): stall(m,x,-2.0,2.0) if False else None
+    for x0 in(-13.5,-10.0,8.0):
+        m.box((x0,1.25,-3.2),(x0+2.4,2.15,-2.4),'oak')
+        for sx in(0,2.3): m.beam((x0+sx,1.25,-3.2),(x0+sx,3.4,-3.2),0.08,'beam'); m.beam((x0+sx,1.25,-2.4),(x0+sx,3.1,-2.4),0.08,'beam')
+        m.cell([np.array([x0-0.1,3.1,-2.1]),np.array([x0+2.5,3.1,-2.1]),np.array([x0+2.5,3.5,-3.4]),np.array([x0-0.1,3.5,-3.4])],'banner',0.3,0.36,0.3,0.36)
+        for q in(0.5,1.2,1.9): m.blob((x0+q,2.3,-2.8),0.18,'flowers',5,0.7)
+    for x0 in(-8.0,3.0):    # fishing nets drying on poles
+        for sx in(0,3.0): m.beam((x0+sx,1.25,3.6),(x0+sx,4.0,3.6),0.1,'beam')
+        for t_ in np.linspace(0,1,7 if kit2.Q==0 else 3):
+            m.beam((x0+t_*3.0,3.9,3.62),(x0+t_*3.0+0.15,1.7,3.62),0.025,'iron'); 
+        for y_ in(2.0,2.7,3.4): m.beam((x0,y_,3.62),(x0+3.0,y_+0.05,3.62),0.025,'iron')
+    boat(m,(-16,-0.7,10.5),6,2.0,-15); boat(m,(15,-0.7,11),6.5,2.2,20); boat(m,(1,-0.7,13),5,1.8,80)
+    for x,z in((-11,2.0),(-10.3,2.4),(11.5,-1.0)): barrel(m,(x,1.25,z))
     return dict(m=m)
 
 def walls_demo():

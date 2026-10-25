@@ -5,8 +5,9 @@ T='/workspace/beth-world/www/proto3d/models/beth/textures/realmed'
 OUT='/workspace/beth-world/www/proto3d/models/beth/hi/buildings_card2/atlas'; os.makedirs(OUT,exist_ok=True)
 S=2048
 # strips: name -> (y0, h, metres covered by full width, band height m)
-STRIPS={'stone':(0,384,6.0,1.125),'ashlar':(384,96,12.0,0.8),'statue':(480,16,3.0,1.0),'rock':(496,16,4.0,1.5),'plaster':(512,256,6.0,0.75),'slate':(768,256,3.5*2,0.875),'oak':(1024,256,4.0,0.5),
+STRIPS={'stone':(0,384,6.0,1.125),'ashlar':(384,96,12.0,0.8),'statue':(480,16,3.0,1.0),'rock':(496,16,4.0,1.5),'plaster':(512,128,6.0,0.75),'bluestone':(640,16,3.0,1.0),'slate':(768,256,3.5*2,0.875),'oak':(1024,256,4.0,0.5),
         'beam':(1280,128,4.0,0.25),'iron':(1408,64,2.0,0.06),'gold':(1472,64,2.0,0.06)}
+RECTS={'bluewin':(0,656,128,112),'water':(256,656,1792,112)}  # extra detail rects (x,y,w,h)
 CELLS=['window','door','banner','sign_inn','sign_bread','sign_anvil','flowers','sign_potion']  # 256x512 each at y=1536
 def hexc(h): return np.array([int(h[i:i+2],16) for i in(1,3,5)])/255
 def noise(n,m,beta,seed):
@@ -44,6 +45,13 @@ def build():
     A[496:512]=hexc('#5E5850')*(0.65+0.6*rk[...,None]); moss=(rm>0.62)[...,None]; A[496:512]=np.where(moss,hexc('#4E5A30')*(0.8+0.3*rk[...,None]),A[496:512]); H[496:512]=0.3+0.5*rk; R[496:512]=0.92
     pn=noise(256,S,1.6,4); pf=noise(256,S,1.1,5)
     A[512:768]=hexc('#E2CFAA')*0.80*(0.85+0.15*pn[...,None])*(0.92+0.08*pf[...,None]); H[512:768]=0.4+0.1*pf; R[512:768]=0.9
+    bs=noise(16,S,1.2,51); A[640:656]=hexc('#6F7E8E')*(0.8+0.35*bs[...,None]); H[640:656]=0.5+0.1*bs; R[640:656]=0.5
+    # water: deep teal with ripple height + foam streaks
+    wx=np.arange(1792)[None,:]; wy=np.arange(112)[:,None]; wn=noise(112,1792,1.3,61); wf=noise(112,1792,0.9,62)
+    rip=0.5+0.18*np.sin(wx*0.09+wn*9)*np.cos(wy*0.21+wx*0.02)+0.25*(wn-0.5)
+    foam=np.clip((wf-0.68)*5,0,1)*(np.sin(wx*0.05+wn*12)>0.3)
+    col=hexc('#1E4A5C')*(0.75+0.5*rip[...,None]); col=col*(1-foam[...,None])+hexc('#E8EEEA')*foam[...,None]
+    A[656:768,256:2048]=col; H[656:768,256:2048]=rip; R[656:768,256:2048]=0.08+0.5*foam
     sl=L('slate','albedo.jpg'); put_tile('slate',768,256,(hexc('#46638F')/hexc('#4a5664')))
     put_tile('oak',1024,256,hexc('#784F23')/hexc('#3a2a1d')*0.6)
     g=noise(128,S,1.0,9); gr=np.sin((np.arange(128)[:,None]/128*14+g*5)*np.pi)*0.5+0.5
@@ -53,6 +61,10 @@ def build():
     # cells
     im=Image.fromarray((A*255).astype(np.uint8)); d=ImageDraw.Draw(im); em=Image.new('RGB',(S,S)); de=ImageDraw.Draw(em)
     OAK=(70,48,30); GOLD=(200,162,64); NAVY=(32,53,82); IR=(40,40,44)
+    x0,y0,w,h=RECTS['bluewin']; x1,y1=x0+w-1,y0+h-1; BL=(70,140,255); dB=(30,40,70)
+    d.rectangle([x0,y0,x1,y1],fill=(60,62,70)); d.rectangle([x0+8,y0+8,x1-8,y1-8],fill=BL); de.rectangle([x0+8,y0+8,x1-8,y1-8],fill=(60,130,255))
+    for k in range(-8,9): d.line([(x0+8+k*14,y0+8),(x0+8+k*14+100,y0+108)],fill=dB,width=2); d.line([(x1-8-k*14,y0+8),(x1-8-k*14-100,y0+108)],fill=dB,width=2)
+    d.rectangle([x0+60,y0,x0+67,y1],fill=(60,62,70)); de.rectangle([x0+60,y0,x0+67,y1],fill=0); d.rectangle([x0,y0,x0+8,y1],fill=(60,62,70)); d.rectangle([x1-8,y0,x1,y1],fill=(60,62,70))
     for i,c in enumerate(CELLS):
         x0,y0=i*256,1536; x1,y1=x0+255,y0+511
         if c=='window':
@@ -106,7 +118,7 @@ def build():
                 d.ellipse([x-9,y-9,x+9,y+9],fill=col) if r.random()<0.6 else d.ellipse([x-12,y-6,x+12,y+6],fill=(70,105,40))
     A=np.asarray(im).astype(np.float32)/255; E=np.asarray(em).astype(np.float32)/255
     cy=slice(1536,2048); H[cy]=0.5+0.3*(A[cy].mean(-1)-0.3); R[cy]=0.7
-    R[1536:2048,0:256][E[1536:2048,0:256].max(-1)>0.1]=0.25
+    R[1536:2048,0:256][E[1536:2048,0:256].max(-1)>0.1]=0.25; R[656:768,0:128][E[656:768,0:128].max(-1)>0.1]=0.2
     N=nrm(H,6.0)
     O=np.stack([np.ones_like(R),R,M],-1)
     sv=lambda a,f,q=90:Image.fromarray((np.clip(a,0,1)*255).astype(np.uint8)).save(f'{OUT}/{f}',quality=q)

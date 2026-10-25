@@ -110,7 +110,7 @@ def library():
     chimney(c,-6.4,-1.5,0.9,1.2)
     return c
 def mage_academy():
-    c=house(dict(W=15,D=11,g=5.0,floors=2,fh=3.2,jetty=0.0,pitch=63,upper='stone',framing=False)); g,E,fh=c['g'],c['E'],c['fh']; m=c['m']
+    c=house(dict(W=15,D=11,g=5.0,floors=2,fh=3.2,jetty=0.0,pitch=63,upper='stone',framing=False,remap={'window':'bluewin'})); g,E,fh=c['g'],c['E'],c['fh']; m=c['m']
     t=np.array([1.0,0,0]); n=np.array([0,0,1.0]); hs=c['hs']
     # central great tower on the front with a tall blue spire, flanked by lesser spired towers
     tower(m,(0,0,hs+0.4),2.6,E+8.0,10.5,wins=5,cone_r=3.1)
@@ -134,6 +134,13 @@ def mage_academy():
         tower(m,(sx*6.6,c['Rh']-5.0,-2.6),0.8,4.0,3.8,wins=1)
         cb(m,(sx*2.7,E-0.2,hs+2.2),0.9,3.0)
     tower(m,(0,c['Rh']-3.0,-2.8),1.1,5.5,5.5,wins=2)
+    # crowd of spires: flank turrets, buttress spirelets, rear cluster
+    for sx in(-1,1):
+        for x,z,r,h,rh in((sx*4.4,hs+0.6,0.7,E+0.5,4.0),(sx*7.9,hs-1.5,0.75,E-1.0,4.2),(sx*7.9,-hs+1.0,0.75,E-0.5,4.4),(sx*1.6,-hs-0.8,0.9,E+4.5,5.6),(sx*4.5,-hs-1.6,1.0,E+2.0,5.2)):
+            tower(m,(x,0,z),r,h,rh,wins=1)
+        for z in(-3.0,0.0,3.0): pinnacle(m,(sx*(c['W']/2+0.15),E+0.2,z),2.4,0.4)
+        for x in(1.3,3.9,6.5): pinnacle(m,(sx*x,E+0.2,hs+0.1),2.0,0.35)
+    tower(m,(0,0,-hs-2.4),1.6,E+6.0,8.0,wins=3)
     steps(m,(0,0,hs+3.0),t,n,4.4,k=5)
     for x in(-2.8,2.8): pot_plant(m,(x,0,hs+3.6),0.45); lantern(dict(m=m,hs=hs+3.0,D=0,g=0,X0=0,X1=0),'z+',x*0.55,3.2)
     return c

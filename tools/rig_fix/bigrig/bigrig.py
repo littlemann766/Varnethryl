@@ -114,8 +114,9 @@ if WEAPON or STYLE.startswith('troll'):
     h0 = arm.matrix_world @ hb.head_local; f0 = arm.matrix_world @ (fb.head_local if fb else hb.tail_local)
     fore = (h0 - arm.matrix_world @ arm.data.bones['foreArm_R'].head_local).normalized()
     grip = h0.lerp(f0, 0.75)
-    shaft = Vector([float(x) for x in opt('--shaft', '0,-1,-0.35').split(',')]); shaft = (shaft - shaft.dot(fore)*fore).normalized()
-    xa = fore.cross(shaft).normalized(); ya = shaft.cross(xa)
+    WR = float(opt('--wrist', 70)); shaft = Vector([float(x) for x in opt('--shaft', '0,-1,-0.35').split(',')]); shaft = (shaft - shaft.dot(fore)*fore).normalized()
+    K_ = float(opt('--along', 0)); shaft = (fore*K_ + shaft*(1-K_)).normalized()   # head out past the fist, along the forearm line
+    xa = (fore.cross(shaft) if K_ < 0.999 else Vector((1,0,0))).normalized(); ya = shaft.cross(xa)
     SOCK = [o for o in bpy.data.objects if o.name == 'weapon_R']
     SOCK = SOCK[0] if SOCK else bpy.data.objects.new('weapon_R', None)
     if SOCK.name not in sc.collection.objects and not SOCK.users_collection: sc.collection.objects.link(SOCK)
@@ -126,6 +127,7 @@ if WEAPON or STYLE.startswith('troll'):
         for o in set(bpy.data.objects) - before:
             if o.parent is None or o.parent not in (set(bpy.data.objects) - before):
                 o.parent = SOCK; o.matrix_parent_inverse = Matrix.Identity(4); o.location = (0,0,0); o.rotation_mode = 'QUATERNION'; o.rotation_quaternion = (1,0,0,0); o.scale = (1,1,1)
+        WOBJ = [o for o in set(bpy.data.objects)-before if o.type == 'MESH']
         WLEN = max((v.co.z for o in set(bpy.data.objects)-before if o.type == 'MESH' for v in o.data.vertices), default=3.0)
     else: WLEN = 3.4
     bpy.context.view_layer.update()
@@ -142,8 +144,9 @@ for s in 'LR':
         IK[limb+s] = (t, p, c, W(tip).copy(), W(mid).copy())
 FPS = 30; sc = bpy.context.scene; sc.render.fps = FPS
 FK = ['hips'] + SP + ['neck','head'] + [f'{b}_{s}' for s in 'LR' for b in ('shoulder','upperArm','foreArm','hand','thigh','shin','foot')] + (['jaw'] if has('jaw') else [])
-def key(t, hips=(0,0,0), rot=None, ik=None, jaw=0):
-    f = 1 + round(t*FPS); rot = rot or {}
+def key(t, hips=(0,0,0), rot=None, ik=None, jaw=0, wrist=0):
+    f = 1 + round(t*FPS); rot = dict(rot or {})
+    if wrist: rot['hand_R'] = q(X, -wrist)
     off = Vector(hips)*H; hb = P['hips']; hq = hb.bone.matrix_local.to_quaternion()
     hb.location = hq.inverted() @ (off / S); hb.keyframe_insert('location', frame=f)
     for bn in FK:
@@ -250,6 +253,14 @@ for nm in CLIPS:
             hv = [ (mw @ md.vertices[v.index].co) for v in mesh.data.vertices if v.groups and GN[max(v.groups, key=lambda g: g.weight).group].startswith(('hand_'+s, 'fingers_'+s)) ]
             if hv: rep['fist_bottom_z_'+s] = round(min(p.z for p in hv), 2); rep['fist_y_'+s] = round(sum(p.y for p in hv)/len(hv), 2)
         me.to_mesh_clear()
+        if SOCK is not None and WEAPON:
+            hp = []; gp = []
+            for o in WOBJ:
+                for v in o.data.vertices:
+                    w = o.matrix_world @ v.co; ln = (SOCK.matrix_world.inverted() @ w).z
+                    (hp if ln > 0.75*WLEN else gp if abs(ln) < 0.2 else []).append(w)
+            hc = sum(hp, Vector())/max(1,len(hp)); rep['head_centre'] = [round(x,2) for x in hc]; rep['head_min_z'] = round(min(p.z for p in hp), 2)
+            rep['head_vs_grip_z'] = round(hc.z - (SOCK.matrix_world.translation.z), 2)
         if SOCK is not None: rep['tip_at_hit'] = [round(x,2) for x in SOCK.matrix_world @ Vector((0,0,WLEN))]
     REP[nm] = rep
 arm.animation_data.action = None; sc.frame_set(1)

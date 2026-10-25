@@ -5,9 +5,10 @@ TILES=json.load(open(os.path.join(OUT,'atlas','atlas.json')))['tiles'] if os.pat
 rng=np.random.default_rng(42)
 BTILES=[]
 def tile_uv(name,u,v):
-  i=TILES.index(name) if name in TILES else BTILES.index(name)
+  b=name not in TILES;i=BTILES.index(name) if b else TILES.index(name)
   ty,tx=divmod(i,4);e=3/1024
-  return (tx/4+e+u*(0.25-2*e), ty/4+e+v*(0.25-2*e))
+  return (tx/4+e+u*(0.25-2*e)+(BOFF if b else 0), ty/4+e+v*(0.25-2*e))
+BOFF=0
 def hexc(h):return np.array([(h>>16)&255,(h>>8)&255,h&255])/255.
 def rot(ax,a):
   c,s=math.cos(a),math.sin(a)

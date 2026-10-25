@@ -1,0 +1,92 @@
+[
+ {
+  "file": "hi/terrain/peak_snow_hi.glb",
+  "tris": 57800,
+  "tex": 2048
+ },
+ {
+  "file": "hi/terrain/peak_snow_hi_lod1.glb",
+  "tris": 9800,
+  "tex": 1024
+ },
+ {
+  "file": "hi/terrain/peak_snow_hi_lod2.glb",
+  "tris": 1152,
+  "tex": 512
+ },
+ {
+  "file": "hi/terrain/peak_bare_hi.glb",
+  "tris": 24200,
+  "tex": 2048
+ },
+ {
+  "file": "hi/terrain/peak_bare_hi_lod1.glb",
+  "tris": 6272,
+  "tex": 1024
+ },
+ {
+  "file": "hi/terrain/peak_bare_hi_lod2.glb",
+  "tris": 968,
+  "tex": 512
+ },
+ {
+  "file": "hi/terrain/volcano_flank_hi.glb",
+  "tris": 54450,
+  "tex": 2048
+ },
+ {
+  "file": "hi/terrain/volcano_flank_hi_lod1.glb",
+  "tris": 9800,
+  "tex": 1024
+ },
+ {
+  "file": "hi/terrain/volcano_flank_hi_lod2.glb",
+  "tris": 1352,
+  "tex": 512
+ },
+ {
+  "file": "hi/terrain/cliff_strata_hi.glb",
+  "tris": 27500,
+  "tex": 2048
+ },
+ {
+  "file": "hi/terrain/cliff_strata_hi_lod1.glb",
+  "tris": 5958,
+  "tex": 1024
+ },
+ {
+  "file": "hi/terrain/cliff_strata_hi_lod2.glb",
+  "tris": 704,
+  "tex": 512
+ },
+ {
+  "file": "hi/terrain/shore_edge_hi.glb",
+  "tris": 16000,
+  "tex": 2048
+ },
+ {
+  "file": "hi/terrain/shore_edge_hi_lod1.glb",
+  "tris": 6400,
+  "tex": 1024
+ },
+ {
+  "file": "hi/terrain/shore_edge_hi_lod2.glb",
+  "tris": 608,
+  "tex": 512
+ },
+ {
+  "file": "hi/terrain/boulder_strata_hi.glb",
+  "tris": 6400,
+  "tex": 2048
+ },
+ {
+  "file": "hi/terrain/boulder_strata_hi_lod1.glb",
+  "tris": 1600,
+  "tex": 1024
+ },
+ {
+  "file": "hi/terrain/boulder_strata_hi_lod2.glb",
+  "tris": 400,
+  "tex": 512
+ }
+]

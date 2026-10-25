@@ -19,10 +19,7 @@ func setup(m: Node) -> void:
 	main = m
 	if main.sun: main.sun.light_cull_mask &= ~InteriorKit.LAYER
 
-## test 7: library + farmhouse interiors trap the hero at the entry spot against the re-exported exteriors
-## (walk-out test fails), so they stay closed until port-interiors refits them.
-const CLOSED := ["library", "farmhouse"]
-func has_interior(id: String) -> bool: return DEF.D.has(id) and not CLOSED.has(id)
+func has_interior(id: String) -> bool: return DEF.D.has(id)
 func active() -> bool: return not cur.is_empty()
 func current_name() -> String: return cur.get("name", "")
 
@@ -55,7 +52,10 @@ func _physics_process(dt: float) -> void:
 			var dl: Vector3 = door_local(b); var lp: Vector3 = b.node.global_transform.affine_inverse() * hero.global_position
 			var hv := Vector2(hero.velocity.x, hero.velocity.z)
 			var into: Vector3 = b.node.global_transform.basis * Vector3(0, 0, -1)
-			if absf(lp.x - dl.x) < 1.8 and lp.z < maxf(dl.z + 1.4, b.aabb.end.z + 0.8) and lp.z > dl.z - 1.0 and absf(lp.y) < 3.0 and (hv.dot(Vector2(into.x, into.z)) > 0.5 or (hero.is_on_wall() and hero.get_wall_normal().dot(into) < -0.5)):
+			var pushing_wall := hero.is_on_wall() and hero.get_wall_normal().dot(into) < -0.5
+			# a yard wall/fence in front of the door (training hall) stops you short: walking into it in line with the door still enters
+			var reach := maxf(dl.z + 1.4, b.aabb.end.z + (3.0 if pushing_wall else 0.8))
+			if absf(lp.x - dl.x) < 1.8 and lp.z < reach and lp.z > dl.z - 1.0 and absf(lp.y) < 3.0 and (hv.dot(Vector2(into.x, into.z)) > 0.5 or pushing_wall):
 				enter(b); return
 	else:
 		var lp2: Vector3 = cur.node.to_local(hero.global_position)
@@ -84,7 +84,7 @@ func exit() -> void:
 
 func _teleport(p: Vector3, facing: float) -> void:
 	var hero: CharacterBody3D = main.hero
-	hero.global_position = p; hero.velocity = Vector3.ZERO
+	hero.global_position = p + Vector3(0, 0.12, 0); hero.velocity = Vector3.ZERO   # never start embedded in a raised floor/threshold
 	if main.get("yaw") != null: main.yaw = facing
 	if main.get("party") and main.party:
 		main.party.trail = PackedVector3Array()

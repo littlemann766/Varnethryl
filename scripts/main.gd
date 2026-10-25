@@ -22,11 +22,19 @@ const CARD2 := {"guildhall": "guildhall", "library": "library", "townhall": "tow
 	"house1": "house1", "house2": "house2", "house3": "house3", "house4": "house4",
 	"farmhouse": "tripo/bld_farmhouse_tripo", "barn": "tripo/bld_barn_stable_tripo"}
 ## Heavy pieces ship and render LOD1 as their best tier (phone High): colosseum, library, mage academy, Tripo models.
-const CARD2_HEAVY := ["colosseum", "library", "mage", "guildhall", "temple", "farmhouse", "barn"]   # index.json phone_high_lod = lod1
 func _add_col(path: String, pos: Vector3, rot: float) -> Node3D:
 	var c: Node3D = load(path).instantiate(); c.position = pos; c.rotation.y = rot; add_child(c)
 	for m in _meshes(c, []): m.visible = false
 	return c
+
+static var _c2_top := {}
+## index.json phone_high_lod: buildings whose best phone tier is lod1 (no High file is shipped for them).
+static func card2_lod1_top(id: String) -> bool:
+	if String(CARD2.get(id, "")).begins_with("tripo/"): return true
+	if _c2_top.is_empty():
+		var j = JSON.parse_string(FileAccess.get_file_as_string("res://assets/card2/index.json"))
+		for b in j.get("buildings", []): _c2_top[str(b.id)] = str(b.get("phone_high_lod", "high")) == "lod1"
+	return _c2_top.get(String(CARD2.get(id, "")), false)
 
 static var _c2_doors := {}
 ## Beth's buildings/index.json door_points (threshold in the building's local space) for the card2/Tripo
@@ -43,7 +51,7 @@ static func card2_door(id: String) -> Variant:
 
 static func _card2_path(id: String, suf: String) -> String:
 	var v: String = CARD2[id]
-	if CARD2_HEAVY.has(id) and suf == "": suf = "_lod1"
+	if suf == "" and card2_lod1_top(id): suf = "_lod1"
 	return ("res://assets/card2/%s%s.glb" % [v, suf]) if v.begins_with("tripo/") else ("res://assets/card2/bld_%s_card2%s.glb" % [v, suf])
 const CHIMNEYS := ["house1","house2","house3","house4","bakery","inn","smithy","farmhouse","thieves"]
 const PORT := Vector2(-425.6, 392)

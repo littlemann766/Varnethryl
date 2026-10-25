@@ -147,7 +147,6 @@ func test_doors() -> void:
 	var M = load("res://scripts/main.gd")
 	var i := 0
 	for id in DEF.D:
-		if InteriorManager.CLOSED.has(id): continue
 		var path: String = M._card2_path(id, "_lod1") if M.CARD2.has(id) else "res://assets/buildings/bld_%s.glb" % id   # card2: Beth's -colonly collision
 		var n: Node3D = load(path).instantiate(); n.position = Vector3(i * 200, 0, 0); n.rotation.y = [0.0, PI / 2, -PI / 2, PI][i % 4]; m.add_child(n)
 		for mi in n.find_children("*", "MeshInstance3D", true, false):
@@ -182,8 +181,6 @@ func test_doors() -> void:
 			await step(hero, back, mgr)
 			if not mgr.active(): break
 		ok(not mgr.active() and m.sun.visible, "%s walks back out to the street" % b.id)
-		if mgr.active(): print("EXITMISS ", b.id, " lp ", mgr.cur.node.to_local(hero.global_position), " spawn ", mgr.cur.spawn, " exit_z ", mgr.cur.exit_z, " vel ", hero.velocity)
-		if mgr.active(): mgr.exit(); await phys(2)   # don't let one stuck exit cascade into every later building
 		var lp: Vector3 = b.node.global_transform.affine_inverse() * hero.global_position
 		ok(lp.z > b.aabb.end.z, "%s exit lands outside the door (z %.1f)" % [b.id, lp.z])
 	m.queue_free(); await phys(2)

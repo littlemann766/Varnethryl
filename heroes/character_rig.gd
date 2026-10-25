@@ -301,11 +301,12 @@ func _reshape_cape(sk: Skeleton3D) -> void:
 		if _cape_cache.has(mi.mesh.resource_path) and mi.mesh.resource_path != "":
 			mi.mesh = _cape_cache[mi.mesh.resource_path]; continue
 		# skin bind index -> is cape bone, and the cape chain's z at each height (rest, skeleton space)
-		var is_cape := {}
+		var is_cape := {}; var is_tail := {}
 		for b in mi.skin.get_bind_count():
 			var bn := mi.skin.get_bind_name(b)
 			if bn == "" and mi.skin.get_bind_bone(b) >= 0: bn = sk.get_bone_name(mi.skin.get_bind_bone(b))
 			if bn.begins_with("cape"): is_cape[b] = true
+			if bn.begins_with("tail"): is_tail[b] = true
 		if is_cape.is_empty(): continue
 		var top: Vector3 = sk.get_bone_global_rest(sk.find_bone("cape")).origin
 		var am := ArrayMesh.new()
@@ -330,6 +331,12 @@ func _reshape_cape(sk: Skeleton3D) -> void:
 				for i in vs.size():
 					if cw[i] < 0.05 and absf(vs[i].x) < 0.24 and vs[i].y > 0.3:
 						var bi := int(vs[i].y / 0.05); prof[bi] = minf(prof.get(bi, 0.0), vs[i].z)
+				# test 8: the rigid fox tail stuck out through the flat cape at idle; with a cape on it is folded
+				# away inside the hips (vertices skinned to tail bones collapse to a point under the cape)
+				for i in vs.size():
+					var tw := 0.0
+					for j in k: if is_tail.has(bones[i * k + j]): tw += w[i * k + j]
+					if tw > 0.02 or (cw[i] < 0.05 and vs[i].z < -0.22 and vs[i].y > 0.15 and vs[i].y < 0.95): vs[i] = Vector3(0.0, 0.9, -0.05); changed += 1
 				if lo < INF:
 					var span := maxf(top.y - lo, 0.01)
 					for i in vs.size():

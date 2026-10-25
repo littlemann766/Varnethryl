@@ -403,15 +403,15 @@ def training_hall():
     steps(m,(X1+0.4,0,0),t,n,3.6,k=2)
     c['front_gable']=True; return c
 def thieves_den():
-    c=house(dict(W=7,D=6.6,g=3.0,floors=3,fh=2.6,jetty=0.5,pitch=63)); g,E,fh=c['g'],c['E'],c['fh']; m=c['m']; X1=c['X1']
+    c=house(dict(W=7,D=5.4,g=3.0,floors=3,fh=2.6,jetty=0.5,pitch=63)); g,E,fh=c['g'],c['E'],c['fh']; m=c['m']; X1=c['X1']
     door(c,'x+',0.5,1.3,2.5); window(c,'x+',-1.9,1.0,0.9,1.2)
     for f_ in range(3):
         for a in(-1.4,1.4): window(c,'x+',a,g+f_*fh+0.5,0.9,1.4)
     gable_fill(c,'x+'); gable_fill(c,'x-')
     p,tt,nn=facepos(c,'x+',0,g-0.35)
     m.obox(p+nn*0.14,tt,UP,nn,(3.4,0.6,0.1),'beam'); m.cell([p+nn*0.2-tt*1.55-UP*0.24,p+nn*0.2+tt*1.55-UP*0.24,p+nn*0.2+tt*1.55+UP*0.24,p+nn*0.2-tt*1.55+UP*0.24],'banner',0.08,0.92,0.42,0.52)
-    for a in(-2.6,2.6): banner(c,'x+',a,g+fh+1.2,0.8,2.0)
-    sign(c,'x+',3.0,g+0.2,'sign_potion',0.7,0.7); lantern(c,'x+',-0.6,2.6); lantern(c,'x+',1.6,2.6)
+    for a in(-2.1,2.1): banner(c,'x+',a,g+fh+1.2,0.7,2.0)
+    sign(c,'x+',2.6,g+0.2,'sign_potion',0.7,0.7); lantern(c,'x+',-0.6,2.6); lantern(c,'x+',1.6,2.6)
     for f in('z+','z-'):
         for f_ in range(3): window(c,f,0,g+f_*fh+0.5,0.9,1.3)
     dormer(c,0,1,ww=0.9,wh=1.2); chimney(c,-2.4,1.4,0.8,1.6)
@@ -423,7 +423,8 @@ def thieves_den():
             for a in(-1.3,1.3): window(h,'x+',a,h['g']+f_*h['fh']+0.5,0.9,1.3)
         gable_fill(h,'x+'); chimney(h,1.6,-1.0,0.8,1.3); lean(h['m'],-0.03*sz,2,3.0)
         m.merge(h['m'],(-0.8,0,dz))
-    for z in(-3.6,3.8): barrel(m,(X1+0.6,0,z)); crate(m,(X1+1.2,0,z*0.9),0.6)
+    for s in(-1,1): m.box((-2.0,0,s*3.0-0.25),(X1-1.2,c['E']+0.6,s*3.0+0.25),'stone',s)   # recessed party walls: den front stands proud like the card alley
+    for z in(-2.9,3.2): barrel(m,(X1+0.6,0,z)); crate(m,(X1+1.2,0,z*0.9),0.6)
     c['front_gable']=True; return c
 def colosseum():
     m=Mesh(); m.remap=dict(CREAM,window='iron'); A,B=26.0,21.0; N=28 if kit2.Q==0 else (20 if kit2.Q==1 else 14); tiers=[(0,6.5),(6.5,12.5),(12.5,18.0)]

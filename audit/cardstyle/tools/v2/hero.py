@@ -104,10 +104,10 @@ def market(c):
     for x in(-3.8,4.4): m.box((x-0.5,0,z+4.6),(x+0.5,0.6,z+5.2),'oak'); m.blob((x,0.75,z+4.9),0.4,'flowers',6,0.6)
     # second row of stalls + heaped produce, sacks and baskets (central lane to the door kept open)
     from detail import cart, local
-    for x in(-5.4,-3.4,1.2,3.4,5.6): stall(m,x,z+6.2,1.8); m.blob((x-0.4,1.25,z+6.2),0.4,'flowers',6,0.7); m.blob((x+0.4,1.25,z+6.2),0.4,'flowers',6,0.7)
-    local(m,cart,(-4.4,0,z+8.2),20); local(m,cart,(4.6,0,z+8.0),-15)
+    for x in(-5.4,-3.4,1.2,3.4,5.6): stall(m,x,z+7.2,1.8); m.blob((x-0.4,1.25,z+7.2),0.4,'flowers',6,0.7); m.blob((x+0.4,1.25,z+7.2),0.4,'flowers',6,0.7)
+    local(m,cart,(-4.4,0,z+9.2),20); local(m,cart,(4.6,0,z+9.0),-15)
     for x in(-5.8,-4.6,0.0,2.4,4.0,5.9):
-        cyl(m,(x,0,z+7.2),0.35,0,0.5,'oak',8,cap='beam',r1=0.4); m.blob((x,0.6,z+7.2),0.35,'flowers',6,0.8)
+        cyl(m,(x,0,z+8.2),0.35,0,0.5,'oak',8,cap='beam',r1=0.4); m.blob((x,0.6,z+8.2),0.35,'flowers',6,0.8)
     for x in(-5.0,-0.3,2.9,5.0): cyl(m,(x,0,z+4.2),0.3,0,0.55,'plaster',7,cap='plaster',r1=0.22)
     return c
 def bakery(c):
@@ -174,10 +174,9 @@ def house_banner(c):
     return c
 def house3(c):
     m=c['m']; g=c['g']; zf=c['D']/2+0.35+0.4
-    p=np.array([5.35,g+1.4,c['D']/2+0.5]); m.obox(p,(1,0,0),(0,1,0),(0,0,1),(1.25,2.7,0.06),'gold')
+    p=np.array([4.3,g+1.4,c['D']/2+0.5]); m.obox(p,(1,0,0),(0,1,0),(0,0,1),(1.25,2.7,0.06),'gold')
     m.cell([p+[-0.55,-1.25,0.05],p+[0.55,-1.25,0.05],p+[0.55,1.25,0.05],p+[-0.55,1.25,0.05]],'banner',0.08,0.92,0.12,0.86)
-    for x in(0.6,4.6): pot_plant(m,(x,0,c['D']/2+0.5),0.45)
-    chimney(c,4.3,-1.0,1.0,1.6)
+    for x in(0.9,3.6): pot_plant(m,(x,0,c['D']/2+0.5),0.45)
     return c
 APPLY=dict(house3=house3,library=library,observatory=observatory,crypt=crypt,thieves_den=thieves_den,apothecary=apothecary,house1=house_banner,house2=house_banner,house4=house_banner,bakery=bakery,market=market,smithy=smithy,temple=temple,mage_academy=mage_academy,keep=keep,townhall=townhall,inn=inn)
 def apply(name,c):

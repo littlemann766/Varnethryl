@@ -77,17 +77,17 @@ def house2():
     steps(c['m'],(c['W']/2,0,-1.0),(0,0,-1),(1,0,0),1.6); barrel(c['m'],(c['W']/2+0.55,0,2.4))
     c['front_gable']=True; return c
 def house3():
-    c=house(dict(W=10.5,D=7,g=3.0,floors=1,fh=2.7,jetty=0.35,pitch=56)); g,E=c['g'],c['E']
-    cg=cross_gable(c,2.6,5.2,pz=0.4,pitch=60); zf=cg['zf']
+    # card house: short body, the front gable dominates (door kept at x=2.6 on the z+ wall)
+    c=house(dict(W=7.6,D=7,g=3.0,floors=1,fh=2.7,jetty=0.35,pitch=56)); g,E=c['g'],c['E']
+    cg=cross_gable(c,1.2,5.6,pz=0.4,pitch=60); zf=cg['zf']
     door(c,'z+',2.6,1.3,2.5)
-    for a in(-3.8,-1.4): window(c,'z+',a,0.9); window(c,'z+',a,g+0.6,flowers=True)
-    window(c,'z+',1.5,g+0.6,flowers=True); window(c,'z+',3.7,g+0.6,flowers=True)
-    dormer(c,-2.6,1)
-    for a in(-3,0,3): window(c,'z-',a,0.9); window(c,'z-',a,g+0.6)
+    window(c,'z+',0.4,0.9); window(c,'z+',-2.6,0.9)
+    window(c,None,0,0,w=1.6,h=1.5,flowers=True,base=(np.array([1.2,g+0.6,zf]),np.array([1.0,0,0]),np.array([0,0,1.0])))
+    for a in(-2,2): window(c,'z-',a,0.9); window(c,'z-',a,g+0.6)
     for f in('x+','x-'): window(c,f,0,0.9); gable_fill(c,f)
-    banner(c,'z+',0.0,g+2.0); chimney(c,-4.4,-0.8,0.9,1.3)
+    chimney(c,-2.6,-0.8,0.9,1.3)
     steps(c['m'],(2.6,0,zf),(1,0,0),(0,0,1),1.8)
-    for x in(-4.6,-0.4): pot_plant(c['m'],(x,0,c['D']/2+0.5))
+    for x in(-3.2,-1.0): pot_plant(c['m'],(x,0,c['D']/2+0.5))
     return c
 def house4():
     c=house(dict(W=7,D=6.5,g=3.0,floors=2,fh=2.6,jetty=0.4,pitch=60)); g,E,fh=c['g'],c['E'],c['fh']

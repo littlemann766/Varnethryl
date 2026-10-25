@@ -1458,6 +1458,7 @@ function updateCrowd(dt) {
       else if (r.level !== state.level) {
         r.lvT += dt; const t = trailTarget(r, a);
         if (t) { gx = t.x; gz = t.z; far = true; const se = stairEntry(r, a, t); if (se) { gx = se.x; gz = se.z; } }   // walk to the stair foot (or top) first, then up/down the ramp
+        { const lh = ladderHop(r, a); if (lh) { gx = lh.x; gz = lh.z; far = true; } }   // v1.5.33 ladder-only buildings: walk to the ladder and climb with the hero
         if ((r.lvT > 12 || t === null) && state.level === 0) { const spot = { x: state.heroX + (Math.random() - 0.5) * 1.2, z: state.heroZ + (Math.random() - 0.5) * 1.2 }; resolve(spot, false, 'npc'); a.x = spot.x; a.z = spot.z; r.level = state.level; r.y = surfaceAt(a.x, a.z, r.level)?.y ?? (state.heroY || 0); r.ti = null; r.lvT = 0; r.stuckT = 0; }
       } else {
         r.ti = null;   // same floor number but a long way off (other building / stuck behind walls): catch up after a few seconds instead of pushing straight into a wall
@@ -1830,6 +1831,18 @@ const wildsMod = import('./wilds.js').then(m => { portalT = m.makeGate(0x9a6bff)
   frostCave.position.set(FROST_PORTAL.x,TOWN_LANDS?TOWN_LANDS.heightAt(FROST_PORTAL.x,FROST_PORTAL.z):FROST_SUMMIT.height,FROST_PORTAL.z);
   scene.add(frostCave);return m; });
 async function ensureWilds() { if (WM) return WM; const m = await wildsMod; WM = Object.assign({ mod: m }, m.buildWilds({ scene, HS })); WM.portalMesh = m.makeGate(0x4fd0ff); WM.portalMesh.position.set(WM.portal.x, 0, WM.portal.z); WM.portalMesh.visible = false; scene.add(WM.portalMesh); return WM; }
+/* Companions and ladders (v1.5.33 buildings have ladders, no stair ramps): a companion on a different floor walks to the
+   ladder that links its floor with the hero's, and once at the foot (or top) it climbs: it is moved to the other end and floor. */
+function ladderHop(r, a) {
+  let best = null, bd = 1e9;
+  for (const b of ectx.multi) { if (Math.abs(a.x - b.cx) > 60 || Math.abs(a.z - b.cz) > 60) continue;
+    for (const L of b.ladderSites || []) {
+      const up = r.level === L.baseLevel && state.level >= L.level, down = r.level === L.level && state.level <= L.baseLevel; if (!up && !down) continue;
+      const ex = up ? L.baseX : L.topX, ez = up ? L.baseZ : L.topZ, d = Math.hypot(ex - a.x, ez - a.z); if (d < bd) { bd = d; best = { L, up, ex, ez }; } } }
+  if (!best || bd > 45) return null;
+  if (bd < 2.2 || (bd < 5 && r.lvT > 4)) { const L = best.L; a.x = best.up ? L.topX : L.baseX; a.z = best.up ? L.topZ : L.baseZ; r.level = best.up ? L.level : L.baseLevel; r.y = best.up ? L.y1 : L.y0; r.ti = null; r.lvT = 0; return null; }
+  return { x: best.ex, z: best.ez };
+}
 function snapFollowers() {
   TRAIL.length = 0;
   let index = 0;

@@ -6,7 +6,7 @@ def attack1():   # Winterhammer: overhead one-hand smash over the right shoulder
     key(0, rot=rest())
     r = body(lean=-14, twist=-30, side=6, head=-6); armfk(r, 'R', 150, 30, 75, yaw=-15); armfk(r, 'L', 40, 20, 40); key(0.75, hips=(0, 0.02, 0.01), rot=r, ik={'legR': foot('R', 0.04)}, jaw=6, wrist=-55)
     key(0.88, hips=(0, 0.025, 0.015), rot=r, ik={'legR': foot('R', 0.04)}, jaw=8, wrist=-55)
-    r = body(lean=50, twist=12, side=-4, head=18, knees=10); armfk(r, 'R', 80, 18, 6, yaw=10); armfk(r, 'L', -25, 25, 30); key(1.1, hips=(0, -0.05, -0.12), rot=r, ik={'legR': foot('R', 0.04), 'legL': foot('L', -0.05)}, jaw=18, wrist=WR)
+    r = body(lean=50, twist=12, side=-4, head=18, knees=10); armfk(r, 'R', 84, 8, 6, yaw=-4); armfk(r, 'L', -25, 25, 30); key(1.1, hips=(0, -0.05, -0.12), rot=r, ik={'legR': foot('R', 0.04), 'legL': foot('L', -0.05)}, jaw=18, wrist=WR)
     key(1.35, hips=(0, -0.05, -0.125), rot=r, ik={'legR': foot('R', 0.04), 'legL': foot('L', -0.05)}, jaw=8, wrist=WR)
     end = key(2.0, rot=rest()); CONTACT['attack1'] = (1.1, 'club'); return end
 def attack2():   # Glacier Breaker: two-step charge-up, then a huge straight-down cleave that drags a line forward

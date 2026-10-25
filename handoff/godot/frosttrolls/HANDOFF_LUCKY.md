@@ -14,3 +14,9 @@ Zero torso penetration on all clips.
 - Small loose pieces (claws/shards/plates < 0.6 m) are rigid, 100% on their dominant bone; body weights smoothed (14 passes) within each partition; shoulder carries 30% of arm raise; wrist cock reduced 130 -> 100 deg, crouches reduced, overhead windups capped at 150 deg.
 - Elongation per edge, 99th percentile worst frame: A lod1 idle 4.5%, walk 7%, run 12%, attacks 19-27%; B lod1 idle 4%, walk 4%, attacks 10-12% (old A: 115-430%). Max single-edge outliers remain on a few tiny edges.
 - Weapons: Beth's 12:23 polished club/mace.
+
+## Troll A v4 (2026-10-25 1:20 PM ET) - rebuilt from the ORIGINAL model
+- Source: varn-core 9e6ad07:www/proto3d/models-new/frosttroll_a.glb (Body mesh only; stray Icosphere + old Darius_Rig removed, scaled to 5.715 m, feet at origin). Not Beth's cleaned mesh.
+- Fresh fitted 31-bone skeleton (joints_a_orig.json), club on weapon_R, same clips (idle walk run attack1 attack2 attack3 hit death skill).
+- attack1: club head in front on the floor at 1.1 s (no longer out sideways). Head min z: a1 0.02, a2 -0.16, a3 0.03 m.
+- lod1 = same body mesh (the original has no lod1) with the lod1 club.

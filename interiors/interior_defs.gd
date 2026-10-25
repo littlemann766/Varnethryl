@@ -285,6 +285,7 @@ const D := {
 
 # ---- COLOSSEUM: entered at ground: main gate, preparation rooms, champion hall, arena gate -> pit; armory, holding cells
 "colosseum": {"name": "Colosseum of Varnethryl", "scale": [0.44, 0.44],
+	"fill": [[0, ["bench", "weapon_rack", "keg", "armor_stand"], 0.15]],
 	"floors": [{"h": 4.5, "mat": "flag", "wall": "stone", "win": 0.0}],
 	"walls": [[0, -0.5, 0.2, 0.5, 0.2, [[0.5, 3.0], [0.15, 2.0], [0.85, 2.0]]], [0, -0.25, -0.5, -0.25, 0.2, [[0.5, 2.4]]], [0, 0.25, -0.5, 0.25, 0.2, [[0.5, 2.4]]], [0, -0.25, -0.15, 0.25, -0.15, [[0.5, 3.4]]]],
 	"props": [["_runner", 0, 0.0, 0.35, 0, [0.3, 2.4]], ["throne_dais", 0, 0.0, 0.0, 180], ["lion_banner", 0, -0.2, 0.0, 90, [2.5, false]], ["lion_banner", 0, 0.2, 0.0, -90, [2.5, false]],

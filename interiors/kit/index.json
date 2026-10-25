@@ -1188,6 +1188,70 @@
     ]
    }
   },
+  "sofa": {
+   "name": "sofa",
+   "category": "house",
+   "batch": 7,
+   "files": {
+    "high": "sofa.glb",
+    "lod1": "sofa_lod1.glb",
+    "lod2": "sofa_lod2.glb"
+   },
+   "tris": {
+    "high": 3839,
+    "lod1": 1712,
+    "lod2": 444
+   },
+   "size_m": [
+    2.06,
+    1.09,
+    0.98
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.545,
+     0.0
+    ],
+    "extents": [
+     2.06,
+     1.09,
+     0.98
+    ]
+   }
+  },
+  "armchair": {
+   "name": "armchair",
+   "category": "house",
+   "batch": 7,
+   "files": {
+    "high": "armchair.glb",
+    "lod1": "armchair_lod1.glb",
+    "lod2": "armchair_lod2.glb"
+   },
+   "tris": {
+    "high": 3063,
+    "lod1": 1396,
+    "lod2": 428
+   },
+   "size_m": [
+    0.96,
+    1.24,
+    0.96
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.62,
+     0.0
+    ],
+    "extents": [
+     0.96,
+     1.24,
+     0.96
+    ]
+   }
+  },
   "castle_model": {
    "size_m": [
     0.6,

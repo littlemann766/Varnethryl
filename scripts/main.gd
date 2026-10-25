@@ -246,7 +246,7 @@ func _ready() -> void:
 	_hi_terrain()
 	_showcase()
 	_foliage()
-	_grass()
+	if not args.has("--wbshots"): _grass()   # shot capture on the shared box: skip grass to save RAM
 	_hero()
 	_fx()
 	_hud()
@@ -254,9 +254,11 @@ func _ready() -> void:
 	party = load("res://heroes/party.gd").new(); add_child(party); party.setup(self, not bench)
 	interiors = InteriorManager.new(); add_child(interiors); interiors.setup(self)
 	apply_quality()
+	if not bench and volcano_quest_done(): spawn_world_boss(false)   # test 15: the world boss roams outside the walls only after the volcano quest (story)
 	_hook_ui()
 	if bench: _run_bench()
 	else: _warm_up()
+	if args.has("--wbshots"): add_child(load("res://tests/wb_shots.gd").new())
 
 # ---------- settings ----------
 func _load_settings() -> void:
@@ -1824,6 +1826,7 @@ func _run_bench() -> void:
 			["farm_aerial", Vector3(-250, 60, -250), Vector3(-290, 0, -288)], ["farm_ground", Vector3(-325, 3, -300), Vector3(-290, 6, -288)],
 			["obs_aerial", Vector3(100, 70, -100), Vector3(130, 0, -149)], ["obs_ground", Vector3(130, 2, -124), Vector3(130, 10, -149)],
 			["street_n", Vector3(-110, 3, -66), Vector3(-30, 4, -66)], ["street_e", Vector3(78, 3, 100), Vector3(78, 4, 20)]]
+		if OS.get_environment("T14_TOP_ONLY") != "": tv = []
 		for v in tv:
 			var a0: Vector3 = v[1]; var t0: Vector3 = v[2]
 			a0.y += height(a0.x, a0.z); t0.y += maxf(0.0, height(t0.x, t0.z)) * 0.0
@@ -1832,6 +1835,11 @@ func _run_bench() -> void:
 			get_viewport().get_texture().get_image().save_png("user://shot_t14_%s_%s.png" % [tag, v[0]]); print("BENCH ", v[0])
 		var oc := hc; oc.projection = Camera3D.PROJECTION_ORTHOGONAL; oc.size = 390.0; oc.position = Vector3(0, 420, 0); oc.rotation = Vector3(-PI / 2, 0, 0)
 		env.fog_enabled = false; get_viewport().canvas_cull_mask = 0
+		for f in fillers:   # top-down ortho camera is 420 m up: lift the filler LOD visibility ranges for this shot only
+			for mi in (f.node as Node).find_children("*", "GeometryInstance3D", true, false): 
+				var gi := mi as GeometryInstance3D
+				if gi.visibility_range_begin > 0.0: gi.visible = false
+				else: gi.visibility_range_end = 0.0
 		for i in 40: await get_tree().process_frame
 		get_viewport().get_texture().get_image().save_png("user://shot_t14_%s_city_top.png" % tag)
 		get_viewport().canvas_cull_mask = 0xFFFFFFFF; env.fog_enabled = true; oc.projection = Camera3D.PROJECTION_PERSPECTIVE
@@ -2458,3 +2466,23 @@ func _set_fade(node: Node, on: bool) -> void:
 			var orig: Array = m.get_meta("fade_orig")
 			for i in orig.size(): m.set_surface_override_material(i, orig[i])
 			m.remove_meta("fade_orig"); m.transparency = 0.0
+
+# ---------- worldboss-test: world-boss Ashen Titan (scripts/world_boss.gd) ----------
+var world_boss: WorldBoss
+const STORY_CFG := "user://story.cfg"
+func volcano_quest_done() -> bool:
+	var cf := ConfigFile.new()
+	return cf.load(STORY_CFG) == OK and bool(cf.get_value("story", "volcano_done", false))
+## called by TitanQuest._win: persist the story flag, then the world boss rises on the outskirts
+func on_volcano_quest_done() -> void:
+	var cf := ConfigFile.new(); cf.load(STORY_CFG); cf.set_value("story", "volcano_done", true); cf.save(STORY_CFG)
+	if OS.get_cmdline_user_args().has("--bench") or bench_running or world_boss != null: return
+	get_tree().create_timer(8.0).timeout.connect(func():
+		spawn_world_boss(false)
+		if has_method("_toast"): _toast("The Ashen Titan stirs beyond the walls..."))
+func spawn_world_boss(near_hero := true) -> bool:
+	if world_boss == null:
+		world_boss = WorldBoss.new(); add_child(world_boss); world_boss.setup(self)
+		if party and party.combat: party.combat.used.connect(func(slot, sk): get_tree().create_timer(0.12).timeout.connect(func(): world_boss.on_hero_used(slot, sk)))
+	if near_hero and hero: world_boss.spawn_near(hero.global_position)
+	return true

@@ -228,6 +228,7 @@ func _win() -> void:
 	tw.tween_callback(func(): titan.visible = false)
 	qlabel.text = "Quest complete: " + QUEST
 	if m.has_method("_toast"): m._toast("Quest complete: the volcano is calm.")
+	if m.has_method("on_volcano_quest_done"): m.on_volcano_quest_done()   # test 15: unlocks the world boss
 
 # ---------- FX ----------
 func shake(amp: float, sec: float) -> void: shake_t = maxf(shake_t, sec); _shake_amp = maxf(_shake_amp if shake_t > 0 else 0.0, amp)

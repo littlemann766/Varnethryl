@@ -202,6 +202,7 @@ func _owner_cards() -> void:
 	box.add_child(_row([foe, _cheat_btn("spawn_enemy", "Spawn enemy", "owner-", func(): return _val(foe))]))
 	var boss := _pick("ownerBossPick", [["titan", "Ashen Titan"], ["frosttroll_a", "Frost Troll — Krag"], ["frosttroll_b", "Frost Troll — Mog"]])
 	box.add_child(_row([boss, _cheat_btn("spawn_boss", "Summon boss", "owner-", func(): return _val(boss)), _cheat_btn("titan", "Spawn Ashen Titan", "owner-")]))
+	box.add_child(_row([_cheat_btn("spawn_worldboss", "Spawn World Boss", "owner-")]))
 	box.add_child(VStyle.label("TELEPORT", 12, VStyle.GOLD2))
 	var zone := _pick("ownerZone", [["village", "Kingdom / Main"], ["hydra", "Hydra Mire"], ["sailing", "Tidewrack Ocean"], ["frost", "Frost Cave"]])
 	box.add_child(_row([zone, _cheat_btn("tp_zone", "Go zone", "owner-", func(): return _val(zone))]))

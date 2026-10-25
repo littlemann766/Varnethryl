@@ -345,6 +345,7 @@ const D := {
 
 # ---- WINDMILL: grinding floor (millstone), storage room, upper mechanism room
 "windmill": {"name": "Windmill", "scale": [0.44, 0.44],
+	"fill": [[0, ["keg", "chest", "keg"], 0.15], [1, ["keg", "chest", "keg"], 0.15], [2, ["keg", "chest", "keg"], 0.15]],
 	"floors": [{"h": 3.0, "mat": "flag", "wall": "stone", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 4.0}, {"h": 3.0, "mat": "oak", "wall": "stone", "win": 4.0}],
 	"stairs": [["auto", 0, -1, 1.6]],
 	"ladders": [[1, 0.35, -0.2, 0]],

@@ -159,14 +159,14 @@ def chimney(c,x,z,w=1.0,extra=1.3):
     m.box((x-w/2,y0,z-w/2),(x+w/2,top,z+w/2),'stone',0.2)
     m.box((x-w/2-0.1,top,z-w/2-0.1),(x+w/2+0.1,top+0.18,z+w/2+0.1),'stone',0.5)
     for s in(-1,1): m.box((x+s*w*0.22-0.12,top+0.18,z-0.12),(x+s*w*0.22+0.12,top+0.55,z+0.12),'stone',0.7)
-def cross_gable(c,cx,cw,pz=0.25,pitch=None,attic=True,face_windows=()):
+def cross_gable(c,cx,cw,pz=0.25,pitch=None,attic=True,face_windows=(),mat='plaster',framed=True):
     # front (+z) cross gable from ground: ridge along z
     m=c['m']; g=c['g'];E=c['E'];hs=c['hs'];D=c['D']; pit=c['pit'] if pitch is None else np.radians(pitch)
     x0,x1=cx-cw/2,cx+cw/2; zf=hs+pz; ch=cw/2; R2=E+ch*np.tan(pit)
     m.box((x0,0,D/2-0.1),(x1,g,D/2+pz),'stone',0.4)
-    m.box((x0,g,hs-0.2),(x1,E,zf),'plaster',0.4)
-    m.poly([(x0,E,zf),(x1,E,zf),(cx,R2,zf)],(x0,E,zf),(1,0,0),(0,1,0),'plaster',0.4)
-    m.LOD=1
+    m.box((x0,g,hs-0.2),(x1,E,zf),mat,0.4)
+    m.poly([(x0,E,zf),(x1,E,zf),(cx,R2,zf)],(x0,E,zf),(1,0,0),(0,1,0),mat,0.4)
+    m.LOD=1 if framed else -5
     for x in np.linspace(x0+0.1,x1-0.1,4): m.beam((x,g,zf+0.07),(x,E,zf+0.07),0.2)
     for yy in(g,g+(E-g)/2,E): m.beam((x0,yy,zf+0.07),(x1,yy,zf+0.07),0.2)
     m.beam((cx,E,zf+0.07),(cx,R2-0.15,zf+0.07),0.2)

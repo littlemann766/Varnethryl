@@ -64,6 +64,9 @@ class Mesh:
                 U=lambda jj:x0+(jj/seg)*0.9*256/S; V=lambda ii:1-(1536+ (ii/rings)*500+5)/S
                 s.tri(a,cc,b,(U(j),V(i)),(U(j+1),V(i+1)),(U(j),V(i+1)))
                 s.tri(a,d,cc,(U(j),V(i)),(U(j+1),V(i)),(U(j+1),V(i+1)))
+    def merge(s,o,off=(0,0,0),rot=0):
+        P=np.array(o.P).reshape(-1,3); r=np.radians(rot); R=np.array([[np.cos(r),0,np.sin(r)],[0,1,0],[-np.sin(r),0,np.cos(r)]])
+        P=P@R.T+np.asarray(off,float); s.P+=list(P); s.UV+=list(o.UV); s.lod+=list(o.lod)
     def arrays(s,maxlod=99):
         keep=np.array(s.lod)>maxlod
         P=np.array(s.P).reshape(-1,3,3)[keep].reshape(-1,3); UV=np.array(s.UV).reshape(-1,3,2)[keep].reshape(-1,2)

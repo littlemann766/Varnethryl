@@ -1,0 +1,2723 @@
+{
+"zone": "dressing_roads",
+"note": "Outskirt roads (y:null = snap to townElevation).",
+"items": [
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-100.38,
+null,
+210.63
+],
+"rotation": [
+0,
+0.2,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-118.97,
+null,
+220.02
+],
+"rotation": [
+0,
+4.254,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-140.73,
+null,
+212.5
+],
+"rotation": [
+0,
+-1.385,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-139.7,
+null,
+218.01
+],
+"rotation": [
+0,
+1.31,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-177.0,
+null,
+219.48
+],
+"rotation": [
+0,
+0.187,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-215.97,
+null,
+215.24
+],
+"rotation": [
+0,
+-1.383,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-214.93,
+null,
+220.75
+],
+"rotation": [
+0,
+2.581,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-233.5,
+null,
+230.17
+],
+"rotation": [
+0,
+3.575,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-254.23,
+null,
+228.2
+],
+"rotation": [
+0,
+3.486,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-292.64,
+null,
+237.97
+],
+"rotation": [
+0,
+-1.055,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-289.88,
+null,
+242.84
+],
+"rotation": [
+0,
+5.187,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-324.67,
+null,
+262.57
+],
+"rotation": [
+0,
+1.64,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-334.59,
+null,
+275.9
+],
+"rotation": [
+0,
+4.717,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-356.68,
+null,
+282.41
+],
+"rotation": [
+0,
+-0.766,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-352.64,
+null,
+286.29
+],
+"rotation": [
+0,
+1.476,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-380.38,
+null,
+315.12
+],
+"rotation": [
+0,
+0.231,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/signpost.glb",
+"position": [
+-141.0,
+null,
+219.0
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-33.92,
+null,
+-273.91
+],
+"rotation": [
+0,
+5.752,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-51.88,
+null,
+-283.13
+],
+"rotation": [
+0,
+0.951,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-61.1,
+null,
+-304.23
+],
+"rotation": [
+0,
+-2.212,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-64.45,
+null,
+-299.74
+],
+"rotation": [
+0,
+5.349,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-96.51,
+null,
+-323.65
+],
+"rotation": [
+0,
+5.606,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-94.4,
+null,
+-358.81
+],
+"rotation": [
+0,
+3.11,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-100.0,
+null,
+-358.98
+],
+"rotation": [
+0,
+1.095,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-105.17,
+null,
+-379.16
+],
+"rotation": [
+0,
+0.692,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-94.66,
+null,
+-397.72
+],
+"rotation": [
+0,
+5.857,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-68.25,
+null,
+-428.28
+],
+"rotation": [
+0,
+2.568,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-72.96,
+null,
+-431.32
+],
+"rotation": [
+0,
+1.567,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-42.0,
+null,
+-449.4
+],
+"rotation": [
+0,
+3.771,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-25.59,
+null,
+-462.21
+],
+"rotation": [
+0,
+2.878,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-5.43,
+null,
+-456.61
+],
+"rotation": [
+0,
+1.333,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-4.11,
+null,
+-462.06
+],
+"rotation": [
+0,
+2.435,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+34.76,
+null,
+-452.62
+],
+"rotation": [
+0,
+0.239,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+66.34,
+null,
+-433.49
+],
+"rotation": [
+0,
+0.77,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+70.36,
+null,
+-437.39
+],
+"rotation": [
+0,
+1.614,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+88.45,
+null,
+-427.08
+],
+"rotation": [
+0,
+1.658,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+95.76,
+null,
+-408.07
+],
+"rotation": [
+0,
+2.994,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+97.81,
+null,
+-367.73
+],
+"rotation": [
+0,
+0.19,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+103.31,
+null,
+-368.79
+],
+"rotation": [
+0,
+4.561,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+88.34,
+null,
+-332.68
+],
+"rotation": [
+0,
+3.839,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+77.93,
+null,
+-312.27
+],
+"rotation": [
+0,
+1.343,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+55.43,
+null,
+-317.13
+],
+"rotation": [
+0,
+-1.266,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+57.11,
+null,
+-311.79
+],
+"rotation": [
+0,
+5.06,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+18.33,
+null,
+-304.26
+],
+"rotation": [
+0,
+4.115,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-18.47,
+null,
+-320.92
+],
+"rotation": [
+0,
+-1.857,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-20.05,
+null,
+-315.54
+],
+"rotation": [
+0,
+3.438,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-35.87,
+null,
+-324.72
+],
+"rotation": [
+0,
+2.126,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-40.42,
+null,
+-345.04
+],
+"rotation": [
+0,
+3.279,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-28.32,
+null,
+-373.07
+],
+"rotation": [
+0,
+2.511,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-32.84,
+null,
+-376.38
+],
+"rotation": [
+0,
+3.575,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+4.0,
+null,
+-383.0
+],
+"rotation": [
+0,
+1.761,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+23.49,
+null,
+-378.35
+],
+"rotation": [
+0,
+4.986,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+29.1,
+null,
+-356.02
+],
+"rotation": [
+0,
+0.764,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+33.14,
+null,
+-359.9
+],
+"rotation": [
+0,
+0.386,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/signpost.glb",
+"position": [
+-38.0,
+null,
+-283.0
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-522.09,
+null,
+-8.56
+],
+"rotation": [
+0,
+5.304,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-502.56,
+null,
+-15.78
+],
+"rotation": [
+0,
+5.903,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-481.79,
+null,
+-5.83
+],
+"rotation": [
+0,
+1.642,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-482.19,
+null,
+-11.41
+],
+"rotation": [
+0,
+1.524,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-442.07,
+null,
+-9.9
+],
+"rotation": [
+0,
+1.462,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-402.52,
+null,
+-1.69
+],
+"rotation": [
+0,
+1.505,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-402.16,
+null,
+-7.27
+],
+"rotation": [
+0,
+2.988,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-381.54,
+null,
+-11.31
+],
+"rotation": [
+0,
+5.617,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-362.15,
+null,
+-3.7
+],
+"rotation": [
+0,
+2.651,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-322.64,
+null,
+5.56
+],
+"rotation": [
+0,
+1.456,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-322.0,
+null,
+0.0
+],
+"rotation": [
+0,
+3.579,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-282.26,
+null,
+4.58
+],
+"rotation": [
+0,
+2.977,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-262.32,
+null,
+-0.21
+],
+"rotation": [
+0,
+0.519,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-241.74,
+null,
+10.12
+],
+"rotation": [
+0,
+1.623,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-242.04,
+null,
+4.53
+],
+"rotation": [
+0,
+1.244,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/signpost.glb",
+"position": [
+-470.0,
+null,
+-12.0
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-309.69,
+null,
+-35.61
+],
+"rotation": [
+0,
+2.207,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-312.47,
+null,
+-56.24
+],
+"rotation": [
+0,
+5.014,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-300.42,
+null,
+-75.62
+],
+"rotation": [
+0,
+-3.019,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-305.98,
+null,
+-74.94
+],
+"rotation": [
+0,
+4.153,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-310.86,
+null,
+-114.64
+],
+"rotation": [
+0,
+1.441,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-312.21,
+null,
+-152.75
+],
+"rotation": [
+0,
+-2.907,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-317.66,
+null,
+-151.45
+],
+"rotation": [
+0,
+5.071,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-327.95,
+null,
+-169.55
+],
+"rotation": [
+0,
+3.202,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-326.97,
+null,
+-190.35
+],
+"rotation": [
+0,
+5.925,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-336.0,
+null,
+-226.9
+],
+"rotation": [
+0,
+-2.667,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-340.98,
+null,
+-224.34
+],
+"rotation": [
+0,
+2.609,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-359.27,
+null,
+-259.91
+],
+"rotation": [
+0,
+5.781,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/signpost.glb",
+"position": [
+-301.0,
+null,
+-67.0
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+299.97,
+null,
+-1.48
+],
+"rotation": [
+0,
+4.399,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+320.19,
+null,
+-6.43
+],
+"rotation": [
+0,
+1.971,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+339.13,
+null,
+5.51
+],
+"rotation": [
+0,
+1.594,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+339.0,
+null,
+-0.09
+],
+"rotation": [
+0,
+4.535,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+378.99,
+null,
+-1.02
+],
+"rotation": [
+0,
+2.672,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+419.11,
+null,
+3.65
+],
+"rotation": [
+0,
+1.594,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+418.98,
+null,
+-1.95
+],
+"rotation": [
+0,
+1.228,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+437.14,
+null,
+-7.39
+],
+"rotation": [
+0,
+5.395,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+456.99,
+null,
+-1.09
+],
+"rotation": [
+0,
+0.477,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+496.83,
+null,
+5.52
+],
+"rotation": [
+0,
+1.545,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+496.98,
+null,
+-0.08
+],
+"rotation": [
+0,
+3.128,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+535.74,
+null,
+-4.31
+],
+"rotation": [
+0,
+3.264,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+554.9,
+null,
+-12.47
+],
+"rotation": [
+0,
+1.943,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/signpost.glb",
+"position": [
+339.0,
+null,
+0.0
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+361.51,
+null,
+31.99
+],
+"rotation": [
+0,
+5.557,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+375.84,
+null,
+47.1
+],
+"rotation": [
+0,
+4.63,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+372.07,
+null,
+66.81
+],
+"rotation": [
+0,
+0.153,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+377.61,
+null,
+65.95
+],
+"rotation": [
+0,
+2.943,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+383.69,
+null,
+105.49
+],
+"rotation": [
+0,
+2.309,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+374.62,
+null,
+138.57
+],
+"rotation": [
+0,
+-0.483,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+379.58,
+null,
+141.17
+],
+"rotation": [
+0,
+2.017,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+375.43,
+null,
+161.58
+],
+"rotation": [
+0,
+4.055,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+361.02,
+null,
+176.61
+],
+"rotation": [
+0,
+4.683,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+334.73,
+null,
+205.37
+],
+"rotation": [
+0,
+-0.668,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+339.13,
+null,
+208.84
+],
+"rotation": [
+0,
+1.621,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+314.34,
+null,
+240.23
+],
+"rotation": [
+0,
+2.312,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+310.22,
+null,
+260.27
+],
+"rotation": [
+0,
+4.725,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+292.52,
+null,
+275.0
+],
+"rotation": [
+0,
+-0.359,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+297.76,
+null,
+276.96
+],
+"rotation": [
+0,
+4.278,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+286.56,
+null,
+314.68
+],
+"rotation": [
+0,
+3.12,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+296.96,
+null,
+353.71
+],
+"rotation": [
+0,
+0.4,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+302.11,
+null,
+351.53
+],
+"rotation": [
+0,
+1.607,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+289.2,
+null,
+347.6
+],
+"rotation": [
+0,
+4.018,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+280.63,
+null,
+328.62
+],
+"rotation": [
+0,
+2.682,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+258.98,
+null,
+296.81
+],
+"rotation": [
+0,
+-2.365,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+254.99,
+null,
+300.73
+],
+"rotation": [
+0,
+1.218,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+226.96,
+null,
+272.19
+],
+"rotation": [
+0,
+4.127,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+211.28,
+null,
+264.12
+],
+"rotation": [
+0,
+2.522,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+198.96,
+null,
+244.67
+],
+"rotation": [
+0,
+-2.059,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+196.34,
+null,
+249.62
+],
+"rotation": [
+0,
+2.129,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+161.01,
+null,
+230.85
+],
+"rotation": [
+0,
+3.883,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+125.27,
+null,
+210.73
+],
+"rotation": [
+0,
+-1.897,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+123.47,
+null,
+216.04
+],
+"rotation": [
+0,
+0.668,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+102.67,
+null,
+215.13
+],
+"rotation": [
+0,
+1.675,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+85.58,
+null,
+203.24
+],
+"rotation": [
+0,
+2.287,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/signpost.glb",
+"position": [
+381.0,
+null,
+62.0
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+6.82,
+null,
+300.95
+],
+"rotation": [
+0,
+0.406,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+13.62,
+null,
+320.64
+],
+"rotation": [
+0,
+5.329,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+3.25,
+null,
+341.19
+],
+"rotation": [
+0,
+0.051,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+8.84,
+null,
+340.9
+],
+"rotation": [
+0,
+4.948,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+5.64,
+null,
+379.84
+],
+"rotation": [
+0,
+4.485,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-3.67,
+null,
+419.15
+],
+"rotation": [
+0,
+-0.093,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+1.91,
+null,
+419.67
+],
+"rotation": [
+0,
+1.188,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+5.79,
+null,
+440.29
+],
+"rotation": [
+0,
+1.67,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-1.02,
+null,
+459.97
+],
+"rotation": [
+0,
+2.0,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/milestone.glb",
+"position": [
+-8.64,
+null,
+499.64
+],
+"rotation": [
+0,
+-0.051,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-3.05,
+null,
+499.92
+],
+"rotation": [
+0,
+2.904,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-5.08,
+null,
+539.87
+],
+"rotation": [
+0,
+3.384,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "dressing/signpost.glb",
+"position": [
+13.0,
+null,
+344.0
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+}
+]
+}

@@ -1,0 +1,569 @@
+[
+ {
+  "file": "hi/buildings/bld_house1.glb",
+  "tier": "high",
+  "tris": 22616,
+  "tex": 2048,
+  "id": "house1"
+ },
+ {
+  "file": "hi/buildings/bld_house2.glb",
+  "tier": "high",
+  "tris": 25748,
+  "tex": 2048,
+  "id": "house2"
+ },
+ {
+  "file": "hi/buildings/bld_house3.glb",
+  "tier": "high",
+  "tris": 21704,
+  "tex": 2048,
+  "id": "house3"
+ },
+ {
+  "file": "hi/buildings/bld_house4.glb",
+  "tier": "high",
+  "tris": 26422,
+  "tex": 2048,
+  "id": "house4"
+ },
+ {
+  "file": "hi/buildings/bld_farmhouse.glb",
+  "tier": "high",
+  "tris": 16136,
+  "tex": 2048,
+  "id": "farmhouse"
+ },
+ {
+  "file": "hi/buildings/bld_thieves.glb",
+  "tier": "high",
+  "tris": 27206,
+  "tex": 2048,
+  "id": "thieves"
+ },
+ {
+  "file": "hi/buildings/bld_barn.glb",
+  "tier": "high",
+  "tris": 19700,
+  "tex": 2048,
+  "id": "barn"
+ },
+ {
+  "file": "hi/buildings/bld_stables.glb",
+  "tier": "high",
+  "tris": 24538,
+  "tex": 2048,
+  "id": "stables"
+ },
+ {
+  "file": "hi/buildings/bld_windmill.glb",
+  "tier": "high",
+  "tris": 3906,
+  "tex": 2048,
+  "id": "windmill"
+ },
+ {
+  "file": "hi/buildings/bld_lighthouse.glb",
+  "tier": "high",
+  "tris": 5764,
+  "tex": 2048,
+  "id": "lighthouse"
+ },
+ {
+  "file": "hi/buildings/bld_gate_tower.glb",
+  "tier": "high",
+  "tris": 2766,
+  "tex": 2048,
+  "id": "gt0,gt1"
+ },
+ {
+  "file": "hi/buildings/bld_guildhall.glb",
+  "tier": "high",
+  "tris": 32034,
+  "tex": 2048,
+  "id": "guildhall"
+ },
+ {
+  "file": "hi/buildings/bld_library.glb",
+  "tier": "high",
+  "tris": 34314,
+  "tex": 2048,
+  "id": "library"
+ },
+ {
+  "file": "hi/buildings/bld_townhall.glb",
+  "tier": "high",
+  "tris": 30662,
+  "tex": 2048,
+  "id": "townhall"
+ },
+ {
+  "file": "hi/buildings/bld_mage.glb",
+  "tier": "high",
+  "tris": 47626,
+  "tex": 2048,
+  "id": "mage"
+ },
+ {
+  "file": "hi/buildings/bld_treasury.glb",
+  "tier": "high",
+  "tris": 27984,
+  "tex": 2048,
+  "id": "treasury"
+ },
+ {
+  "file": "hi/buildings/bld_crypt.glb",
+  "tier": "high",
+  "tris": 28376,
+  "tex": 2048,
+  "id": "crypt"
+ },
+ {
+  "file": "hi/buildings/bld_market.glb",
+  "tier": "high",
+  "tris": 28236,
+  "tex": 2048,
+  "id": "market"
+ },
+ {
+  "file": "hi/buildings/bld_apothecary.glb",
+  "tier": "high",
+  "tris": 26688,
+  "tex": 2048,
+  "id": "apothecary"
+ },
+ {
+  "file": "hi/buildings/bld_bakery.glb",
+  "tier": "high",
+  "tris": 13032,
+  "tex": 2048,
+  "id": "bakery"
+ },
+ {
+  "file": "hi/buildings/bld_inn.glb",
+  "tier": "high",
+  "tris": 31656,
+  "tex": 2048,
+  "id": "inn"
+ },
+ {
+  "file": "hi/buildings/bld_smithy.glb",
+  "tier": "high",
+  "tris": 25334,
+  "tex": 2048,
+  "id": "smithy"
+ },
+ {
+  "file": "hi/buildings/bld_training.glb",
+  "tier": "high",
+  "tris": 30532,
+  "tex": 2048,
+  "id": "training"
+ },
+ {
+  "file": "hi/buildings/bld_keep.glb",
+  "tier": "high",
+  "tris": 20104,
+  "tex": 2048,
+  "id": "keep"
+ },
+ {
+  "file": "hi/buildings/bld_temple.glb",
+  "tier": "high",
+  "tris": 42240,
+  "tex": 2048,
+  "id": "temple"
+ },
+ {
+  "file": "hi/buildings/bld_observatory.glb",
+  "tier": "high",
+  "tris": 4724,
+  "tex": 2048,
+  "id": "observatory"
+ },
+ {
+  "file": "hi/buildings/bld_colosseum.glb",
+  "tier": "high",
+  "tris": 19464,
+  "tex": 2048,
+  "id": "colosseum"
+ },
+ {
+  "file": "hi/buildings/bld_house1_lod1.glb",
+  "tier": "medium",
+  "tris": 5362,
+  "tex": 1024,
+  "id": "house1"
+ },
+ {
+  "file": "hi/buildings/bld_house2_lod1.glb",
+  "tier": "medium",
+  "tris": 5972,
+  "tex": 1024,
+  "id": "house2"
+ },
+ {
+  "file": "hi/buildings/bld_house3_lod1.glb",
+  "tier": "medium",
+  "tris": 5238,
+  "tex": 1024,
+  "id": "house3"
+ },
+ {
+  "file": "hi/buildings/bld_house4_lod1.glb",
+  "tier": "medium",
+  "tris": 5982,
+  "tex": 1024,
+  "id": "house4"
+ },
+ {
+  "file": "hi/buildings/bld_farmhouse_lod1.glb",
+  "tier": "medium",
+  "tris": 7724,
+  "tex": 1024,
+  "id": "farmhouse"
+ },
+ {
+  "file": "hi/buildings/bld_thieves_lod1.glb",
+  "tier": "medium",
+  "tris": 6760,
+  "tex": 1024,
+  "id": "thieves"
+ },
+ {
+  "file": "hi/buildings/bld_barn_lod1.glb",
+  "tier": "medium",
+  "tris": 3570,
+  "tex": 1024,
+  "id": "barn"
+ },
+ {
+  "file": "hi/buildings/bld_stables_lod1.glb",
+  "tier": "medium",
+  "tris": 6868,
+  "tex": 1024,
+  "id": "stables"
+ },
+ {
+  "file": "hi/buildings/bld_windmill_lod1.glb",
+  "tier": "medium",
+  "tris": 2676,
+  "tex": 1024,
+  "id": "windmill"
+ },
+ {
+  "file": "hi/buildings/bld_lighthouse_lod1.glb",
+  "tier": "medium",
+  "tris": 3932,
+  "tex": 1024,
+  "id": "lighthouse"
+ },
+ {
+  "file": "hi/buildings/bld_gate_tower_lod1.glb",
+  "tier": "medium",
+  "tris": 1340,
+  "tex": 1024,
+  "id": "gt0,gt1"
+ },
+ {
+  "file": "hi/buildings/bld_guildhall_lod1.glb",
+  "tier": "medium",
+  "tris": 6162,
+  "tex": 1024,
+  "id": "guildhall"
+ },
+ {
+  "file": "hi/buildings/bld_library_lod1.glb",
+  "tier": "medium",
+  "tris": 6696,
+  "tex": 1024,
+  "id": "library"
+ },
+ {
+  "file": "hi/buildings/bld_townhall_lod1.glb",
+  "tier": "medium",
+  "tris": 7346,
+  "tex": 1024,
+  "id": "townhall"
+ },
+ {
+  "file": "hi/buildings/bld_mage_lod1.glb",
+  "tier": "medium",
+  "tris": 9258,
+  "tex": 1024,
+  "id": "mage"
+ },
+ {
+  "file": "hi/buildings/bld_treasury_lod1.glb",
+  "tier": "medium",
+  "tris": 4504,
+  "tex": 1024,
+  "id": "treasury"
+ },
+ {
+  "file": "hi/buildings/bld_crypt_lod1.glb",
+  "tier": "medium",
+  "tris": 4500,
+  "tex": 1024,
+  "id": "crypt"
+ },
+ {
+  "file": "hi/buildings/bld_market_lod1.glb",
+  "tier": "medium",
+  "tris": 4732,
+  "tex": 1024,
+  "id": "market"
+ },
+ {
+  "file": "hi/buildings/bld_apothecary_lod1.glb",
+  "tier": "medium",
+  "tris": 6292,
+  "tex": 1024,
+  "id": "apothecary"
+ },
+ {
+  "file": "hi/buildings/bld_bakery_lod1.glb",
+  "tier": "medium",
+  "tris": 6216,
+  "tex": 1024,
+  "id": "bakery"
+ },
+ {
+  "file": "hi/buildings/bld_inn_lod1.glb",
+  "tier": "medium",
+  "tris": 8104,
+  "tex": 1024,
+  "id": "inn"
+ },
+ {
+  "file": "hi/buildings/bld_smithy_lod1.glb",
+  "tier": "medium",
+  "tris": 4474,
+  "tex": 1024,
+  "id": "smithy"
+ },
+ {
+  "file": "hi/buildings/bld_training_lod1.glb",
+  "tier": "medium",
+  "tris": 5690,
+  "tex": 1024,
+  "id": "training"
+ },
+ {
+  "file": "hi/buildings/bld_keep_lod1.glb",
+  "tier": "medium",
+  "tris": 7304,
+  "tex": 1024,
+  "id": "keep"
+ },
+ {
+  "file": "hi/buildings/bld_temple_lod1.glb",
+  "tier": "medium",
+  "tris": 8834,
+  "tex": 1024,
+  "id": "temple"
+ },
+ {
+  "file": "hi/buildings/bld_observatory_lod1.glb",
+  "tier": "medium",
+  "tris": 2218,
+  "tex": 1024,
+  "id": "observatory"
+ },
+ {
+  "file": "hi/buildings/bld_colosseum_lod1.glb",
+  "tier": "medium",
+  "tris": 9004,
+  "tex": 1024,
+  "id": "colosseum"
+ },
+ {
+  "file": "hi/buildings/bld_house1_lod2.glb",
+  "tier": "low",
+  "tris": 2542,
+  "tex": 512,
+  "id": "house1"
+ },
+ {
+  "file": "hi/buildings/bld_house2_lod2.glb",
+  "tier": "low",
+  "tris": 2704,
+  "tex": 512,
+  "id": "house2"
+ },
+ {
+  "file": "hi/buildings/bld_house3_lod2.glb",
+  "tier": "low",
+  "tris": 2458,
+  "tex": 512,
+  "id": "house3"
+ },
+ {
+  "file": "hi/buildings/bld_house4_lod2.glb",
+  "tier": "low",
+  "tris": 2698,
+  "tex": 512,
+  "id": "house4"
+ },
+ {
+  "file": "hi/buildings/bld_farmhouse_lod2.glb",
+  "tier": "low",
+  "tris": 3464,
+  "tex": 512,
+  "id": "farmhouse"
+ },
+ {
+  "file": "hi/buildings/bld_thieves_lod2.glb",
+  "tier": "low",
+  "tris": 2528,
+  "tex": 512,
+  "id": "thieves"
+ },
+ {
+  "file": "hi/buildings/bld_barn_lod2.glb",
+  "tier": "low",
+  "tris": 2186,
+  "tex": 512,
+  "id": "barn"
+ },
+ {
+  "file": "hi/buildings/bld_stables_lod2.glb",
+  "tier": "low",
+  "tris": 2708,
+  "tex": 512,
+  "id": "stables"
+ },
+ {
+  "file": "hi/buildings/bld_windmill_lod2.glb",
+  "tier": "low",
+  "tris": 2308,
+  "tex": 512,
+  "id": "windmill"
+ },
+ {
+  "file": "hi/buildings/bld_lighthouse_lod2.glb",
+  "tier": "low",
+  "tris": 3408,
+  "tex": 512,
+  "id": "lighthouse"
+ },
+ {
+  "file": "hi/buildings/bld_gate_tower_lod2.glb",
+  "tier": "low",
+  "tris": 1204,
+  "tex": 512,
+  "id": "gt0,gt1"
+ },
+ {
+  "file": "hi/buildings/bld_guildhall_lod2.glb",
+  "tier": "low",
+  "tris": 4766,
+  "tex": 512,
+  "id": "guildhall"
+ },
+ {
+  "file": "hi/buildings/bld_library_lod2.glb",
+  "tier": "low",
+  "tris": 5124,
+  "tex": 512,
+  "id": "library"
+ },
+ {
+  "file": "hi/buildings/bld_townhall_lod2.glb",
+  "tier": "low",
+  "tris": 3486,
+  "tex": 512,
+  "id": "townhall"
+ },
+ {
+  "file": "hi/buildings/bld_mage_lod2.glb",
+  "tier": "low",
+  "tris": 6102,
+  "tex": 512,
+  "id": "mage"
+ },
+ {
+  "file": "hi/buildings/bld_treasury_lod2.glb",
+  "tier": "low",
+  "tris": 2184,
+  "tex": 512,
+  "id": "treasury"
+ },
+ {
+  "file": "hi/buildings/bld_crypt_lod2.glb",
+  "tier": "low",
+  "tris": 2180,
+  "tex": 512,
+  "id": "crypt"
+ },
+ {
+  "file": "hi/buildings/bld_market_lod2.glb",
+  "tier": "low",
+  "tris": 3236,
+  "tex": 512,
+  "id": "market"
+ },
+ {
+  "file": "hi/buildings/bld_apothecary_lod2.glb",
+  "tier": "low",
+  "tris": 2708,
+  "tex": 512,
+  "id": "apothecary"
+ },
+ {
+  "file": "hi/buildings/bld_bakery_lod2.glb",
+  "tier": "low",
+  "tris": 2680,
+  "tex": 512,
+  "id": "bakery"
+ },
+ {
+  "file": "hi/buildings/bld_inn_lod2.glb",
+  "tier": "low",
+  "tris": 3912,
+  "tex": 512,
+  "id": "inn"
+ },
+ {
+  "file": "hi/buildings/bld_smithy_lod2.glb",
+  "tier": "low",
+  "tris": 2818,
+  "tex": 512,
+  "id": "smithy"
+ },
+ {
+  "file": "hi/buildings/bld_training_lod2.glb",
+  "tier": "low",
+  "tris": 4090,
+  "tex": 512,
+  "id": "training"
+ },
+ {
+  "file": "hi/buildings/bld_keep_lod2.glb",
+  "tier": "low",
+  "tris": 4544,
+  "tex": 512,
+  "id": "keep"
+ },
+ {
+  "file": "hi/buildings/bld_temple_lod2.glb",
+  "tier": "low",
+  "tris": 5022,
+  "tex": 512,
+  "id": "temple"
+ },
+ {
+  "file": "hi/buildings/bld_observatory_lod2.glb",
+  "tier": "low",
+  "tris": 1842,
+  "tex": 512,
+  "id": "observatory"
+ },
+ {
+  "file": "hi/buildings/bld_colosseum_lod2.glb",
+  "tier": "low",
+  "tris": 7156,
+  "tex": 512,
+  "id": "colosseum"
+ }
+]

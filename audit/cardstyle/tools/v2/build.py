@@ -43,7 +43,7 @@ def bakery():
     dormer(c,2.6,1); dormer(c,0,-1)
     for a in(-3,0,3): window(c,'z-',a,1.0); window(c,'z-',a,g+0.8)
     for f in('x+','x-'): window(c,f,-1.5,1.0); window(c,f,1.5,g+0.8); gable_fill(c,f)
-    sign(c,'x-',4.15,g+1.9,'sign_bread',2.4,2.6); banner(c,'z+',0.8,g+2.0)
+    pass; banner(c,'z+',0.8,g+2.0)
     lantern(c,'z+',-0.6,2.4)
     chimney(c,3.9,-1.4,1.3,1.8)   # tall oven chimney
     steps(c['m'],(-1.8,0,zf),(1,0,0),(0,0,1),2.0)
@@ -276,9 +276,9 @@ def gatehouse():
     for y in(1.5,3.0,4.4): m.box((-1.7,y-0.05,3.1),(1.7,y+0.05,3.22),'iron')
     m.LOD=99
     for sx in(-1,1):
-        tower(m,(sx*5.4,0,0.3),2.8,12.5,5.5,wins=3,cone_r=3.2)
+        tower(m,(sx*5.4,0,0.3),2.8,15.5,6.5,wins=4,cone_r=3.2)
         p=np.array([sx*5.4,7.5,0.3+2.85]); banner(dict(m=m,hs=0,g=0,D=0,X0=0,X1=0),'__',0,0) if False else None
-        cloth_b(m,np.array([sx*5.4,9.3,3.3]),1.2,3.2)
+        cloth_b(m,np.array([sx*5.4,12.0,3.3]),1.5,4.6)
         m.box((sx*8.2-1.4*sx-1.4,0,-2.2),(sx*8.2-1.4*sx+1.4,7.0,2.2),'stone') if False else None
         a0=sx*7.8; a1=sx*12.0; lo=min(a0,a1); hi=max(a0,a1)
         m.box((lo,0,-1.8),(hi,7.0,1.8),'stone'); crenels_line(m,(lo,0,1.8),(hi,0,1.8),7.0); crenels_line(m,(hi,0,-1.8),(lo,0,-1.8),7.0)
@@ -362,7 +362,7 @@ def port():
     door(w1,'z+',0,2.4,3.0); window(w1,'z+',-3.2,1.2); window(w1,'z+',3.2,1.2); window(w1,'z+',-2.6,4.0); window(w1,'z+',2.6,4.0)
     gable_fill(w1,'x+'); gable_fill(w1,'x-'); dormer(w1,0,1)
     m.merge(w1['m'],(-8,1.2,-8.5))
-    w2=house(dict(W=8,D=6.5,g=3.2,floors=1,fh=2.7,jetty=0.35,pitch=57))
+    w2=house(dict(W=8,D=6.5,g=3.2,floors=1,fh=2.7,jetty=0.35,pitch=57,upper='stone',framing=False))
     door(w2,'z+',-1.5,1.4,2.6); window(w2,'z+',1.8,1.0); window(w2,'z+',-1.8,3.8,flowers=True); window(w2,'z+',1.8,3.8,flowers=True)
     gable_fill(w2,'x+'); gable_fill(w2,'x-'); sign(w2,'z+',3.7,3.0,'sign_inn',0.7,0.7); chimney(w2,2.5,-1.2,0.9,1.2)
     m.merge(w2['m'],(5,1.2,-8.0))
@@ -376,7 +376,7 @@ def port():
     for x in(-10,0,10): m.beam((x,1.25,5.4),(x,4.2,5.4),0.12,'iron'); lantern(dict(m=m,hs=5.3,g=0,D=10.6,X0=0,X1=0),'z+',x,4.0)
     # more harbour: row of warehouses/houses, market stalls, drying nets, extra boats
     for k,(x,z,W_,D_,rot) in enumerate(((-14,-8.0,7,6,0),(13,-8.5,7.5,6.5,0),(-1.5,-9.5,6,6,0))):
-        h=house(dict(W=W_,D=D_,g=3.2,floors=1+(k%2),fh=2.6,jetty=0.35,pitch=57))
+        h=house(dict(W=W_,D=D_,g=3.2,floors=1+(k%2),fh=2.6,jetty=0.35,pitch=57,upper='stone' if k%2==0 else 'plaster',framing=(k%2==1)))
         door(h,'z+',-1.0,1.3,2.5); window(h,'z+',1.5,1.0); window(h,'z+',-1.4,3.8,flowers=(k==1)); window(h,'z+',1.4,3.8)
         gable_fill(h,'x+'); gable_fill(h,'x-'); chimney(h,1.8,-1.0,0.8,1.1)
         if k==2: banner(h,'z+',2.6,3.6)

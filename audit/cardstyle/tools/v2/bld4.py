@@ -179,9 +179,8 @@ def treasury():
     m=Mesh(); t=np.array([1.0,0,0]); n=np.array([0,0,1.0])
     m.box((-6,0,-4),(6,10,4),'stone'); m.box((-6.15,0,-4.15),(6.15,0.7,4.15),'stone',0.3)
     for a,b in(((-6,0,4),(6,0,4)),((6,0,-4),(-6,0,-4)),((6,0,4),(6,0,-4)),((-6,0,-4),(-6,0,4))): crenels_line(m,a,b,10.0)
-    m.box((-4,0,-9),(4,14,-3),'stone'); 
-    for a,b in(((-4,0,-3),(4,0,-3)),((4,0,-9),(-4,0,-9)),((4,0,-3),(4,0,-9)),((-4,0,-9),(-4,0,-3))): crenels_line(m,a,b,14.0)
-    sq_tower(m,(0,0,-6),3.0,18.0,4.5,True,3,(0,0,1))
+    m.box((-4,0,-9),(4,11,-3),'stone'); 
+    for a,b in(((-4,0,-3),(4,0,-3)),((4,0,-9),(-4,0,-9)),((4,0,-3),(4,0,-9)),((-4,0,-9),(-4,0,-3))): crenels_line(m,a,b,11.0)
     for sx in(-1,1):
         sq_tower(m,(sx*6.2,0,4.0),4.0,15.0,6.0,True,3,(0,0,1)); cb(m,(sx*4.0,8.8,4.05),1.4,4.6)
         sq_tower(m,(sx*6.2,0,-4.5),3.4,12.5,0,True,2,(sx,0,0))
@@ -378,7 +377,7 @@ def barn():
     fence(m,(X1+4,0,-6),(X1+4,0,6)); fence(m,(-7.5,0,7.5),(X1+4,0,7.5))
     c['front_gable']=True; return c
 def training_hall():
-    c=house(dict(W=15,D=10,g=3.4,floors=1,fh=3.2,jetty=0.4,pitch=56)); g,E=c['g'],c['E']; m=c['m']; X1=c['X1']
+    c=house(dict(W=15,D=10,g=3.4,floors=1,fh=3.2,jetty=0.4,pitch=46,upper='stone',framing=False)); g,E=c['g'],c['E']; m=c['m']; X1=c['X1']
     t=np.array([0,0,-1.0]); n=np.array([1.0,0,0])
     door(c,'x+',0,2.6,3.4)
     for a in(-3.0,3.0): window(c,'x+',a,1.0,1.1,1.6); banner(c,'x+',a,g+2.2,1.0,2.4)
@@ -427,7 +426,7 @@ def thieves_den():
     for z in(-3.6,3.8): barrel(m,(X1+0.6,0,z)); crate(m,(X1+1.2,0,z*0.9),0.6)
     c['front_gable']=True; return c
 def colosseum():
-    m=Mesh(); m.remap=dict(CREAM); A,B=26.0,21.0; N=28 if kit2.Q==0 else (20 if kit2.Q==1 else 14); tiers=[(0,6.5),(6.5,12.5),(12.5,18.0)]
+    m=Mesh(); m.remap=dict(CREAM,window='iron'); A,B=26.0,21.0; N=28 if kit2.Q==0 else (20 if kit2.Q==1 else 14); tiers=[(0,6.5),(6.5,12.5),(12.5,18.0)]
     P=lambda th,s=1.0,y=0:np.array([A*s*np.cos(th),y,B*s*np.sin(th)])
     for i in range(N):
         a0,a1=2*np.pi*i/N,2*np.pi*(i+1)/N; am=(a0+a1)/2
@@ -449,7 +448,7 @@ def colosseum():
             m.beam(p0+UP*20.0,p0+UP*23.0,0.1,'iron'); cloth(m,p0+UP*22.6+nn*0.3,tt,nn,1.3,2.6,'banner',0.05)
         if i%3==1: cb(m,(p0+p1)/2+UP*12.0+nn*0.75,2.6,7.0,tt,nn)
         # inner back wall (dark recess behind the arcades) + seating tiers
-        q0,q1=P(a0,0.92),P(a1,0.92); m.obox((q0+q1)/2+UP*9.5,q1-q0,UP,np.cross(q1-q0,UP),(np.linalg.norm(q1-q0),19,0.5),'stone')
+        q0,q1=P(a0,0.92),P(a1,0.92); m.obox((q0+q1)/2+UP*9.5,q1-q0,UP,np.cross(q1-q0,UP),(np.linalg.norm(q1-q0),19,0.5),'rock')
         for k in range(7 if kit2.Q==0 else 4):
             s=0.9-k*0.065 if kit2.Q==0 else 0.9-k*0.11; h=16.0-k*(14.0/(7 if kit2.Q==0 else 4))
             r0,r1=P(a0,s),P(a1,s); dd=r1-r0

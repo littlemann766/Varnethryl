@@ -1,5 +1,6 @@
 # Per-building hero pass: extra massing/ornament layered on top of the card2 builders (doors untouched).
 import numpy as np, kit2
+from bld4 import CREAM
 from kit2 import cyl, cone, barrel, pot_plant
 from kit3 import tower, pinnacle
 from bld4 import glancet, statue, rock, cb
@@ -83,17 +84,36 @@ def market(c):
             m.box((x0,y-0.06,zz+dz-0.2),(x1,y,zz+dz+0.2),'oak')
             for xx in np.arange(x0+0.2,x1-0.1,0.38):
                 r=rng.random(); p=(xx,y,zz+dz)
-                if r<0.35: m.LOD=1; m.blob((xx,y+0.14,zz+dz),0.17,'flowers',5,0.7); m.LOD=99
-                elif r<0.6: cyl(m,p,0.09,0,0.26,'gold' if r<0.48 else 'iron',6,cap='beam')
-                elif r<0.8: crate(m,(xx,y,zz+dz),0.3)
-                else: cyl(m,p,0.14,0,0.3,'plaster',7,cap='plaster',r1=0.1)
+                if r<0.3: m.blob((xx,y+0.2,zz+dz),0.26,'flowers',6,0.8)                                   # fruit / flowers heap
+                elif r<0.5:                                                                               # cloth bolts (gold / blue / red-oak)
+                    for j,st in enumerate(('gold','bluestone','oak')): m.beam((xx-0.17,y+0.1+0.15*j,zz+dz),(xx+0.17,y+0.1+0.15*j,zz+dz),0.14,st)
+                elif r<0.75: cyl(m,p,0.17,0,0.42,'oak',8,cap='beam',r1=0.1); m.blob((xx,y+0.48,zz+dz),0.12,'flowers',5)   # pottery with posies
+                else: crate(m,(xx,y,zz+dz),0.34); m.blob((xx,y+0.4,zz+dz),0.2,'flowers',5,0.6)
         for xe in(x0,x1): m.box((xe-0.05,0,zz+0.3),(xe+0.05,1.4,zz+1.4),'beam')
+    # hanging goods, baskets and flower garlands along both awning edges
+    for (x0,x1,yy,zz) in((-5.6,-4.1,g-0.75,z+1.55),(-4.1,0.5,E-0.7,zf+1.15),(1.2,5.4,E-0.7,z+1.6),(1.2,5.3,g-0.75,z+1.65)):
+        for xx in np.arange(x0+0.25,x1,0.5): m.LOD=1; m.blob((xx,yy,zz),0.14,'flowers',5,1.0); m.LOD=99
+        for xx in np.arange(x0+0.5,x1-0.2,1.1):
+            m.beam((xx,yy+0.1,zz),(xx,yy-0.4,zz),0.02,'iron'); cyl(m,(xx,yy-0.75,zz),0.2,0,0.35,'oak',8,cap='oak',r1=0.24); m.blob((xx,yy-0.38,zz),0.17,'flowers',5,0.7)
     # crowded street front
     for x in(-5.0,3.0,5.2): stall(m,x,z+3.5,1.7)
     for x in(-4.6,0.9,2.4,4.2): m.LOD=1; barrel(m,(x,0,z+2.2),0.3,0.75); m.LOD=99
     for x in(-3.6,1.7,3.4): crate(m,(x,0,z+2.4),0.55); crate(m,(x+0.1,0.55,z+2.4),0.45)
     for x in(-5.8,0.2,5.8): pot_plant(m,(x,0,z+1.8),0.4)
     for x in(-3.8,4.4): m.box((x-0.5,0,z+4.6),(x+0.5,0.6,z+5.2),'oak'); m.blob((x,0.75,z+4.9),0.4,'flowers',6,0.6)
+    return c
+def bakery(c):
+    m=c['m']; g=c['g']; hs=c['D']/2+0.35; zf=hs; n=np.array([0,0,1.0]); t=np.array([1.0,0,0])
+    # card-size bread sign hanging face-on to the street from a scrolled iron bracket
+    p=np.array([-3.9,g+1.9,hs]); a=p+n*1.4
+    m.beam(p,a,0.07,'iron'); m.beam(p-UP*0.8,a-UP*0.05,0.05,'iron'); m.obox(a,t,UP,n,(0.12,0.12,0.12),'gold')
+    for s in(-1,1): m.beam(a+t*s*0.75-UP*0.0,a+t*s*0.75-UP*0.35,0.025,'iron')
+    m.beam(a-t*0.95,a+t*0.95,0.05,'iron')
+    bc=a-UP*1.45
+    m.obox(bc,t,UP,n,(2.05,2.15,0.1),'gold')
+    for s in(1,-1):
+        f=bc+n*s*0.06; tt=t*s
+        m.cell([f-tt*0.9-UP*0.95,f+tt*0.9-UP*0.95,f+tt*0.9+UP*0.95,f-tt*0.9+UP*0.95],'sign_bread')
     return c
 def smithy(c):
     m=c['m']; X1=c['X1']
@@ -106,7 +126,45 @@ def smithy(c):
             m.obox(p,(0,0,1),(0,1,0),(1,0,0),(0.55,0.55,0.06),'gold'); m.obox(p+[0.04,0,0],(0,0,1),(0,1,0),(1,0,0),(0.42,0.42,0.06),'beam')
         a=np.array([X1+0.7,0,zz+0.75]); m.beam(a,a+[0,1.3,0],0.05,'beam'); m.obox(a+[0,1.2,0.12],(0,0,1),(0,1,0),(1,0,0),(0.3,0.25,0.04),'iron')
     return c
-APPLY=dict(market=market,smithy=smithy,temple=temple,mage_academy=mage_academy,keep=keep,townhall=townhall,inn=inn)
+def library(c):
+    m=c['m']; zf=c['hs']+1.2
+    for s in(-1,1):   # card: robed statues flanking the gold portal
+        m.box((s*2.1-0.6,0,zf+1.0),(s*2.1+0.6,1.3,zf+2.2),'ashlar'); statue(m,'robed',(s*2.1,1.3,zf+1.6),1.9,0)
+    return c
+def observatory(c):
+    m=c['m']; m.remap={'rock':'stone'}; rng=np.random.default_rng(5)
+    for i in range(14):  # taller crag the tower stands on
+        a=2*np.pi*i/14; r=5.5+rng.random()*2.5; rock(m,(r*np.cos(a),-0.5,r*np.sin(a)),rng.uniform(3.5,5.0),rng.uniform(0,360),seed=i%4,sy=rng.uniform(0.8,1.2))
+    m.remap=dict(CREAM)
+    return c
+def crypt(c):
+    m=c['m']; X1=c['X1']; from detail import lantern_post, local
+    from kit3 import steps as _st
+    for k in range(4): m.box((X1+0.4+k*0.45,0,-1.9-k*0.3),(X1+0.85+k*0.45,0.75-k*0.18,1.9+k*0.3),'stone',k*0.3)   # wide worn stairs
+    for s in(-1,1): local(m,lantern_post,(X1+2.4,0,s*2.9),180)
+    for s in(-1,1):
+        for k in range(3): rock(m,(X1+0.9+k*1.2,-0.3,s*(3.6+0.5*k)),1.3,k*70,seed=k)
+    return c
+def thieves_den(c):
+    m=c['m']; X1=c['X1']; from detail import lantern_post, local
+    for s in(-1,1): local(m,lantern_post,(X1+1.6,0,0.5+s*2.0),180)
+    p=np.array([X1+0.12,c['g']-0.1,0.0]); m.obox(p,(0,0,-1),(0,1,0),(1,0,0),(4.6,0.9,0.12),'beam'); m.cell([p+[0.08,-0.35,2.1],p+[0.08,-0.35,-2.1],p+[0.08,0.35,-2.1],p+[0.08,0.35,2.1]],'sign_potion',0.05,0.95,0.42,0.58)
+    return c
+def apothecary(c):
+    m=c['m']; z=c['D']/2+0.35+0.3; g=c['g']; from kit2 import leaf
+    for x in np.arange(-3.7,3.8,0.55):   # card: drying-herb bunches hanging along the whole front
+        if abs(x-0.6)<0.75: continue
+        m.beam((x,g-0.2,z),(x,g-0.6,z),0.015,'beam')
+        for k in range(5 if kit2.Q==0 else 2): leaf(m,(x+0.08*np.sin(k*2.1),g-0.65-0.12*k,z+0.05),(0.3*np.cos(k*2.1),-0.2,1),0.16,k*0.9)
+    p=np.array([0,g+0.15,c['hs']+0.35+0.12]); m.obox(p,(1,0,0),(0,1,0),(0,0,1),(4.0,0.95,0.1),'beam')
+    m.cell([p+[-1.85,-0.4,0.06],p+[1.85,-0.4,0.06],p+[1.85,0.4,0.06],p+[-1.85,0.4,0.06]],'sign_potion',0.05,0.95,0.42,0.58)
+    return c
+def house_banner(c):
+    m=c['m']; X1=c['X1']; g=c['g']
+    p=np.array([X1+0.12,g+1.4,-c['D']/2+0.9]); m.obox(p,(0,0,-1),(0,1,0),(1,0,0),(1.25,2.7,0.06),'gold')   # big lion banner like the card
+    m.cell([p+[0.05,-1.25,0.55],p+[0.05,-1.25,-0.55],p+[0.05,1.25,-0.55],p+[0.05,1.25,0.55]],'banner',0.08,0.92,0.12,0.86)
+    return c
+APPLY=dict(library=library,observatory=observatory,crypt=crypt,thieves_den=thieves_den,apothecary=apothecary,house1=house_banner,house2=house_banner,house4=house_banner,bakery=bakery,market=market,smithy=smithy,temple=temple,mage_academy=mage_academy,keep=keep,townhall=townhall,inn=inn)
 def apply(name,c):
     f=APPLY.get(name)
     if f:

@@ -20,3 +20,8 @@ Zero torso penetration on all clips.
 - Fresh fitted 31-bone skeleton (joints_a_orig.json), club on weapon_R, same clips (idle walk run attack1 attack2 attack3 hit death skill).
 - attack1: club head in front on the floor at 1.1 s (no longer out sideways). Head min z: a1 0.02, a2 -0.16, a3 0.03 m.
 - lod1 = same body mesh (the original has no lod1) with the lod1 club.
+
+## Troll B v4 (2026-10-25 1:45 PM ET) - rebuilt from the ORIGINAL troll model
+- Source: varn-core ae85eee:www/proto3d/models-new/frosttroll_b.glb ("corrected, animated Frost Troll B"). The 9e6ad07 frosttroll_b.glb is a frost SERPENT (removed in 58bfdc1), so not used.
+- Prep: Body mesh only (Icosphere + old rig removed), 5.715 m, feet at origin. Hand/body fused edges split (--cut). Fresh fitted skeleton (joints_b_orig.json), mace on weapon_R, same clips; attack2 hit 1.6 s.
+- lod1 = same body mesh (no original lod1) with the lod1 mace.

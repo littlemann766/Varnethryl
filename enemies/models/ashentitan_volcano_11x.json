@@ -1,0 +1,920 @@
+{
+ "source": "ashentitan_new4.glb (+ authored attack clips)",
+ "tag": "11x volcano",
+ "heightMeters": 20.955,
+ "ownerMultiple": 11,
+ "scaleFactor": 1.83817,
+ "forwardAxis": "+Z (glTF)",
+ "clips": {
+  "idle": {
+   "durationSec": 4.067,
+   "timeStretch": 1.356,
+   "loop": true,
+   "footSolver": "toe-ground lock + 2-bone IK",
+   "footsteps": [],
+   "footHeightErrorCm_after": 0
+  },
+  "walk": {
+   "durationSec": 2.291,
+   "timeStretch": 1.763,
+   "loop": true,
+   "footSolver": "toe-ground lock + 2-bone IK + constant-speed plant",
+   "footsteps": [
+    {
+     "t": 0.852,
+     "foot": "L",
+     "strength": 0.87,
+     "pos": [
+      1.78,
+      4.5
+     ],
+     "liftMeters": 1.06
+    },
+    {
+     "t": 1.968,
+     "foot": "R",
+     "strength": 0.83,
+     "pos": [
+      -1.78,
+      4.61
+     ],
+     "liftMeters": 0.99
+    }
+   ],
+   "groundSpeedMps": 5.47,
+   "strideLenMeters": 6.26,
+   "stanceSlipMaxCm_before": 14.4,
+   "stanceSlipMaxCm_after": 1.9,
+   "footHeightErrorCm_after": 7.1
+  },
+  "run": {
+   "durationSec": 1.21,
+   "timeStretch": 1.627,
+   "loop": true,
+   "footSolver": "toe-ground lock + 2-bone IK + constant-speed plant",
+   "footsteps": [
+    {
+     "t": 0.381,
+     "foot": "L",
+     "strength": 1,
+     "pos": [
+      2.33,
+      3.83
+     ],
+     "liftMeters": 1.78
+    },
+    {
+     "t": 1.006,
+     "foot": "R",
+     "strength": 1,
+     "pos": [
+      -2.27,
+      4.2
+     ],
+     "liftMeters": 1.71
+    }
+   ],
+   "groundSpeedMps": 12.41,
+   "strideLenMeters": 7.51,
+   "stanceSlipMaxCm_before": 19.3,
+   "stanceSlipMaxCm_after": 2,
+   "footHeightErrorCm_after": 0
+  },
+  "attack": {
+   "durationSec": 2.196,
+   "timeStretch": 1.22,
+   "loop": false,
+   "footSolver": "toe-ground lock + 2-bone IK",
+   "footsteps": [
+    {
+     "t": 1.464,
+     "foot": "weapon",
+     "strength": 0.8,
+     "pos": [
+      6.1,
+      4.81
+     ],
+     "hand": "hand_L",
+     "note": "approx attack impact: hand stops after its fastest swing (heuristic, not a hand-authored hit frame)"
+    }
+   ],
+   "footHeightErrorCm_after": 0,
+   "playback": "LoopOnce + clampWhenFinished=true (holds last frame)"
+  },
+  "attack2": {
+   "durationSec": 1.952,
+   "timeStretch": 1.22,
+   "loop": false,
+   "footSolver": "toe-ground lock + 2-bone IK",
+   "footsteps": [
+    {
+     "t": 1.302,
+     "foot": "weapon",
+     "strength": 0.8,
+     "pos": [
+      8.71,
+      3.28
+     ],
+     "hand": "hand_R",
+     "note": "approx attack impact: hand stops after its fastest swing (heuristic, not a hand-authored hit frame)"
+    }
+   ],
+   "footHeightErrorCm_after": 0,
+   "playback": "LoopOnce + clampWhenFinished=true (holds last frame)"
+  },
+  "hit": {
+   "durationSec": 0.488,
+   "timeStretch": 1.085,
+   "loop": false,
+   "footSolver": "none (retimed only)",
+   "footsteps": [],
+   "footHeightErrorCm_after": null,
+   "playback": "LoopOnce + clampWhenFinished=true (holds last frame)"
+  },
+  "death": {
+   "durationSec": 2.386,
+   "timeStretch": 1.491,
+   "loop": false,
+   "footSolver": "none (retimed only)",
+   "footsteps": [
+    {
+     "t": 2.386,
+     "foot": "body",
+     "strength": 1,
+     "pos": [
+      0,
+      0
+     ],
+     "note": "body hits ground at end of clip"
+    }
+   ],
+   "footHeightErrorCm_after": null,
+   "playback": "LoopOnce + clampWhenFinished=true (holds last frame)"
+  },
+  "windup": {
+   "durationSec": 2.712,
+   "timeStretch": 1.356,
+   "loop": false,
+   "footSolver": "toe-ground lock + 2-bone IK",
+   "footsteps": [],
+   "footHeightErrorCm_after": 0,
+   "playback": "LoopOnce + clampWhenFinished=true (holds last frame)",
+   "note": "Telegraph hold: play before eruption_slam / boulder_hurl / volcano_roar. Pose reached at 0.81 s and held (with tremble) to end; clamp on last frame and cross-fade (0.25 s) into the attack when the telegraph time is up."
+  },
+  "eruption_slam": {
+   "durationSec": 2.962,
+   "timeStretch": 1.288,
+   "loop": false,
+   "footSolver": "toe-ground lock + 2-bone IK",
+   "footsteps": [
+    {
+     "t": 1.288,
+     "foot": "weapon",
+     "strength": 1,
+     "pos": [
+      0,
+      5.89
+     ],
+     "note": "both fists hit ground"
+    }
+   ],
+   "footHeightErrorCm_after": 0,
+   "playback": "LoopOnce + clampWhenFinished=true (holds last frame)"
+  },
+  "boulder_hurl": {
+   "durationSec": 3.606,
+   "timeStretch": 1.288,
+   "loop": false,
+   "footSolver": "toe-ground lock + 2-bone IK",
+   "footsteps": [
+    {
+     "t": 1.224,
+     "foot": "weapon",
+     "strength": 0.6,
+     "pos": [
+      -8.42,
+      2.84
+     ]
+    }
+   ],
+   "footHeightErrorCm_after": 0,
+   "playback": "LoopOnce + clampWhenFinished=true (holds last frame)"
+  },
+  "magma_sweep": {
+   "durationSec": 2.684,
+   "timeStretch": 1.22,
+   "loop": false,
+   "footSolver": "toe-ground lock + 2-bone IK",
+   "footsteps": [],
+   "footHeightErrorCm_after": 0,
+   "playback": "LoopOnce + clampWhenFinished=true (holds last frame)"
+  },
+  "volcano_roar": {
+   "durationSec": 4.339,
+   "timeStretch": 1.356,
+   "loop": false,
+   "footSolver": "toe-ground lock + 2-bone IK",
+   "footsteps": [
+    {
+     "t": 1.763,
+     "foot": "body",
+     "strength": 0.7,
+     "pos": [
+      0,
+      0
+     ],
+     "note": "roar shockwave"
+    }
+   ],
+   "footHeightErrorCm_after": 0,
+   "playback": "LoopOnce + clampWhenFinished=true (holds last frame)"
+  }
+ },
+ "suggestedShake": {
+  "note": "Per footstep. Trigger when player distance <= radius. amplitude(d)=intensity*strength*(1-d/radius)^falloffPower",
+  "radiusMeters": 63,
+  "fullIntensityRadiusMeters": 10,
+  "falloffPower": 2,
+  "intensity": {
+   "cameraShakeAmplitudeMeters": 0.045,
+   "cameraShakeAmplitudeDegrees": 0.36,
+   "rumbleGain": 1,
+   "dustPuffCount": 9,
+   "dustRadiusMeters": 1.7
+  },
+  "durationSec": 0.75,
+  "frequencyHz": 16.5,
+  "decay": "exp",
+  "runMultiplier": 1.35,
+  "bodyFallMultiplier": 2,
+  "audioSpeedOfSoundDelay": "optional: delay = distance/343 s"
+ },
+ "sizeNotes": {
+  "10x": {
+   "height": 19.05,
+   "scaleFactor": 1.6711
+  },
+  "20x": {
+   "height": 38.1,
+   "scaleFactor": 3.3421
+  },
+  "40x": {
+   "height": 76.2,
+   "scaleFactor": 6.6842
+  },
+  "60x": {
+   "height": 114.3,
+   "scaleFactor": 10.0264
+  },
+  "method": "root bone scale = scaleFactor (vertices untouched); to get another size set root joint scale/translation yourself"
+ },
+ "attackEvents": [
+  {
+   "clip": "eruption_slam",
+   "t": 1.288,
+   "type": "aoe",
+   "name": "fist_impact",
+   "center": [
+    0,
+    0,
+    5.89
+   ],
+   "radius": 9,
+   "damageMult": 2.5,
+   "knockback": 12,
+   "telegraphSec": 1.2,
+   "groundMarker": "circle"
+  },
+  {
+   "clip": "eruption_slam",
+   "t": 1.338,
+   "type": "spawn_projectile",
+   "name": "eruption_ring",
+   "projectile": "volcanic_boulder",
+   "projectileScale": 1.4,
+   "spawn": {
+    "bone": null,
+    "offset": [
+     0,
+     1,
+     5.89
+    ]
+   },
+   "count": 10,
+   "pattern": "ring",
+   "spread": 360,
+   "speed": [
+    18,
+    26
+   ],
+   "arc": {
+    "launchAngleDeg": [
+     55,
+     70
+    ],
+    "gravity": -9.81
+   },
+   "landRadius": [
+    14,
+    32
+   ],
+   "damageMult": 1.2,
+   "impactRadius": 3,
+   "telegraphSec": 0.8,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "eruption_slam",
+   "t": 1.338,
+   "type": "spawn_projectile",
+   "name": "eruption_lava",
+   "projectile": "lava_blob",
+   "projectileScale": 1.2,
+   "spawn": {
+    "bone": null,
+    "offset": [
+     0,
+     0.5,
+     5.89
+    ]
+   },
+   "count": 14,
+   "pattern": "ring",
+   "spread": 360,
+   "speed": [
+    14,
+    22
+   ],
+   "arc": {
+    "launchAngleDeg": [
+     50,
+     75
+    ],
+    "gravity": -9.81
+   },
+   "landRadius": [
+    10,
+    26
+   ],
+   "damageMult": 0.6,
+   "dot": {
+    "dps": 0.25,
+    "sec": 4,
+    "poolRadius": 2.5
+   },
+   "impactRadius": 2,
+   "telegraphSec": 0.8,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "boulder_hurl",
+   "t": 1.224,
+   "type": "aoe",
+   "name": "rip_up_rock",
+   "center": [
+    -8.42,
+    0,
+    2.84
+   ],
+   "radius": 5,
+   "damageMult": 0.8,
+   "telegraphSec": 0.6,
+   "groundMarker": "circle",
+   "note": "attach volcanic_boulder (scale 2.5) to hand_R from here until release"
+  },
+  {
+   "clip": "boulder_hurl",
+   "t": 2.383,
+   "type": "spawn_projectile",
+   "name": "boulder_release",
+   "event": "release",
+   "projectile": "volcanic_boulder",
+   "projectileScale": 2.5,
+   "spawn": {
+    "bone": "hand_R",
+    "offset": [
+     -8.73,
+     9.83,
+     7.05
+    ]
+   },
+   "count": 1,
+   "target": "player",
+   "spread": 4,
+   "speed": "solve_for_target",
+   "arc": {
+    "flightSec": [
+     1.4,
+     2.2
+    ],
+    "gravity": -9.81,
+    "launchAngleDeg": [
+     25,
+     45
+    ]
+   },
+   "maxRange": 110,
+   "damageMult": 3,
+   "impactRadius": 6,
+   "splinters": {
+    "projectile": "ember_rock_small",
+    "count": 8,
+    "speed": [
+     8,
+     14
+    ],
+    "damageMult": 0.3,
+    "impactRadius": 1.5
+   },
+   "telegraphSec": "flight time (marker at predicted landing the moment it is released)",
+   "groundMarker": "circle"
+  },
+  {
+   "clip": "magma_sweep",
+   "t": 0.976,
+   "type": "spawn_projectile",
+   "name": "lava_spray_0",
+   "projectile": "lava_blob",
+   "projectileScale": 1,
+   "spawn": {
+    "bone": "hand_R",
+    "offset": [
+     -4.77,
+     13.3,
+     12.58
+    ]
+   },
+   "count": 4,
+   "pattern": "cone_forward",
+   "aimYawDeg": 50,
+   "spread": 25,
+   "speed": [
+    16,
+    24
+   ],
+   "arc": {
+    "launchAngleDeg": [
+     20,
+     40
+    ],
+    "gravity": -9.81
+   },
+   "landRadius": [
+    12,
+    30
+   ],
+   "damageMult": 0.7,
+   "dot": {
+    "dps": 0.25,
+    "sec": 3,
+    "poolRadius": 2
+   },
+   "impactRadius": 2.2,
+   "telegraphSec": 0.5,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "magma_sweep",
+   "t": 1.135,
+   "type": "spawn_projectile",
+   "name": "lava_spray_1",
+   "projectile": "lava_blob",
+   "projectileScale": 1,
+   "spawn": {
+    "bone": "hand_R",
+    "offset": [
+     -6.53,
+     9.64,
+     10.57
+    ]
+   },
+   "count": 4,
+   "pattern": "cone_forward",
+   "aimYawDeg": 25,
+   "spread": 25,
+   "speed": [
+    16,
+    24
+   ],
+   "arc": {
+    "launchAngleDeg": [
+     20,
+     40
+    ],
+    "gravity": -9.81
+   },
+   "landRadius": [
+    12,
+    30
+   ],
+   "damageMult": 0.7,
+   "dot": {
+    "dps": 0.25,
+    "sec": 3,
+    "poolRadius": 2
+   },
+   "impactRadius": 2.2,
+   "telegraphSec": 0.5,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "magma_sweep",
+   "t": 1.293,
+   "type": "spawn_projectile",
+   "name": "lava_spray_2",
+   "projectile": "lava_blob",
+   "projectileScale": 1,
+   "spawn": {
+    "bone": "hand_R",
+    "offset": [
+     -6.94,
+     9.02,
+     9.68
+    ]
+   },
+   "count": 4,
+   "pattern": "cone_forward",
+   "aimYawDeg": 0,
+   "spread": 25,
+   "speed": [
+    16,
+    24
+   ],
+   "arc": {
+    "launchAngleDeg": [
+     20,
+     40
+    ],
+    "gravity": -9.81
+   },
+   "landRadius": [
+    12,
+    30
+   ],
+   "damageMult": 0.7,
+   "dot": {
+    "dps": 0.25,
+    "sec": 3,
+    "poolRadius": 2
+   },
+   "impactRadius": 2.2,
+   "telegraphSec": 0.5,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "magma_sweep",
+   "t": 1.452,
+   "type": "spawn_projectile",
+   "name": "lava_spray_3",
+   "projectile": "lava_blob",
+   "projectileScale": 1,
+   "spawn": {
+    "bone": "hand_R",
+    "offset": [
+     -7.53,
+     9.96,
+     7.64
+    ]
+   },
+   "count": 4,
+   "pattern": "cone_forward",
+   "aimYawDeg": -25,
+   "spread": 25,
+   "speed": [
+    16,
+    24
+   ],
+   "arc": {
+    "launchAngleDeg": [
+     20,
+     40
+    ],
+    "gravity": -9.81
+   },
+   "landRadius": [
+    12,
+    30
+   ],
+   "damageMult": 0.7,
+   "dot": {
+    "dps": 0.25,
+    "sec": 3,
+    "poolRadius": 2
+   },
+   "impactRadius": 2.2,
+   "telegraphSec": 0.5,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "magma_sweep",
+   "t": 1.61,
+   "type": "spawn_projectile",
+   "name": "lava_spray_4",
+   "projectile": "lava_blob",
+   "projectileScale": 1,
+   "spawn": {
+    "bone": "hand_R",
+    "offset": [
+     -7.32,
+     11.7,
+     6.01
+    ]
+   },
+   "count": 4,
+   "pattern": "cone_forward",
+   "aimYawDeg": -50,
+   "spread": 25,
+   "speed": [
+    16,
+    24
+   ],
+   "arc": {
+    "launchAngleDeg": [
+     20,
+     40
+    ],
+    "gravity": -9.81
+   },
+   "landRadius": [
+    12,
+    30
+   ],
+   "damageMult": 0.7,
+   "dot": {
+    "dps": 0.25,
+    "sec": 3,
+    "poolRadius": 2
+   },
+   "impactRadius": 2.2,
+   "telegraphSec": 0.5,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "volcano_roar",
+   "t": 1.763,
+   "type": "aoe",
+   "name": "roar_blast",
+   "center": [
+    0,
+    0,
+    0
+   ],
+   "radius": 16,
+   "damageMult": 0.4,
+   "knockback": 18,
+   "telegraphSec": 1.5,
+   "groundMarker": "ring"
+  },
+  {
+   "clip": "volcano_roar",
+   "t": 2.063,
+   "type": "spawn_projectile",
+   "name": "rain_0",
+   "projectile": "volcanic_boulder",
+   "projectileScale": 1.2,
+   "spawn": {
+    "bone": null,
+    "offset": [
+     0,
+     60,
+     0
+    ],
+    "from": "sky above random point (world)"
+   },
+   "count": 8,
+   "pattern": "rain_zone",
+   "area": "volcano leash circle (TITAN_CENTER, radius 122)",
+   "biasToPlayer": 0.35,
+   "fallSpeed": 30,
+   "arc": {
+    "type": "vertical_drop_with_drift",
+    "gravity": -9.81,
+    "startHeight": 60
+   },
+   "damageMult": 1,
+   "impactRadius": 3,
+   "telegraphSec": 1.6,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "volcano_roar",
+   "t": 2.413,
+   "type": "spawn_projectile",
+   "name": "rain_1",
+   "projectile": "lava_blob",
+   "projectileScale": 1,
+   "spawn": {
+    "bone": null,
+    "offset": [
+     0,
+     60,
+     0
+    ],
+    "from": "sky above random point (world)"
+   },
+   "count": 8,
+   "pattern": "rain_zone",
+   "area": "volcano leash circle (TITAN_CENTER, radius 122)",
+   "biasToPlayer": 0.35,
+   "fallSpeed": 30,
+   "arc": {
+    "type": "vertical_drop_with_drift",
+    "gravity": -9.81,
+    "startHeight": 60
+   },
+   "damageMult": 0.6,
+   "impactRadius": 2,
+   "telegraphSec": 1.6,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "volcano_roar",
+   "t": 2.763,
+   "type": "spawn_projectile",
+   "name": "rain_2",
+   "projectile": "volcanic_boulder",
+   "projectileScale": 1.2,
+   "spawn": {
+    "bone": null,
+    "offset": [
+     0,
+     60,
+     0
+    ],
+    "from": "sky above random point (world)"
+   },
+   "count": 8,
+   "pattern": "rain_zone",
+   "area": "volcano leash circle (TITAN_CENTER, radius 122)",
+   "biasToPlayer": 0.35,
+   "fallSpeed": 30,
+   "arc": {
+    "type": "vertical_drop_with_drift",
+    "gravity": -9.81,
+    "startHeight": 60
+   },
+   "damageMult": 1,
+   "impactRadius": 3,
+   "telegraphSec": 1.6,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "volcano_roar",
+   "t": 3.113,
+   "type": "spawn_projectile",
+   "name": "rain_3",
+   "projectile": "lava_blob",
+   "projectileScale": 1,
+   "spawn": {
+    "bone": null,
+    "offset": [
+     0,
+     60,
+     0
+    ],
+    "from": "sky above random point (world)"
+   },
+   "count": 8,
+   "pattern": "rain_zone",
+   "area": "volcano leash circle (TITAN_CENTER, radius 122)",
+   "biasToPlayer": 0.35,
+   "fallSpeed": 30,
+   "arc": {
+    "type": "vertical_drop_with_drift",
+    "gravity": -9.81,
+    "startHeight": 60
+   },
+   "damageMult": 0.6,
+   "impactRadius": 2,
+   "telegraphSec": 1.6,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "volcano_roar",
+   "t": 3.463,
+   "type": "spawn_projectile",
+   "name": "rain_4",
+   "projectile": "volcanic_boulder",
+   "projectileScale": 1.2,
+   "spawn": {
+    "bone": null,
+    "offset": [
+     0,
+     60,
+     0
+    ],
+    "from": "sky above random point (world)"
+   },
+   "count": 8,
+   "pattern": "rain_zone",
+   "area": "volcano leash circle (TITAN_CENTER, radius 122)",
+   "biasToPlayer": 0.35,
+   "fallSpeed": 30,
+   "arc": {
+    "type": "vertical_drop_with_drift",
+    "gravity": -9.81,
+    "startHeight": 60
+   },
+   "damageMult": 1,
+   "impactRadius": 3,
+   "telegraphSec": 1.6,
+   "groundMarker": "circle_per_landing"
+  },
+  {
+   "clip": "volcano_roar",
+   "t": 3.813,
+   "type": "spawn_projectile",
+   "name": "rain_5",
+   "projectile": "lava_blob",
+   "projectileScale": 1,
+   "spawn": {
+    "bone": null,
+    "offset": [
+     0,
+     60,
+     0
+    ],
+    "from": "sky above random point (world)"
+   },
+   "count": 8,
+   "pattern": "rain_zone",
+   "area": "volcano leash circle (TITAN_CENTER, radius 122)",
+   "biasToPlayer": 0.35,
+   "fallSpeed": 30,
+   "arc": {
+    "type": "vertical_drop_with_drift",
+    "gravity": -9.81,
+    "startHeight": 60
+   },
+   "damageMult": 0.6,
+   "impactRadius": 2,
+   "telegraphSec": 1.6,
+   "groundMarker": "circle_per_landing"
+  }
+ ],
+ "attackSequenceSuggestion": {
+  "eruption_slam": [
+   "windup(1.2 s)",
+   "eruption_slam"
+  ],
+  "boulder_hurl": [
+   "windup(0.8 s)",
+   "boulder_hurl"
+  ],
+  "volcano_roar": [
+   "windup(1.5 s)",
+   "volcano_roar"
+  ],
+  "magma_sweep": [
+   "magma_sweep (no windup; it has its own 0.9 s wind back)"
+  ],
+  "cooldownsSec": {
+   "eruption_slam": 9,
+   "boulder_hurl": 6,
+   "magma_sweep": 5,
+   "volcano_roar": 22
+  }
+ },
+ "projectiles": {
+  "volcanic_boulder": {
+   "file": "volcanic_boulder.glb",
+   "baseRadiusM": 1,
+   "tris": 980
+  },
+  "lava_blob": {
+   "file": "lava_blob.glb",
+   "baseRadiusM": 0.6,
+   "tris": 500,
+   "leavesPool": true
+  },
+  "ember_rock_small": {
+   "file": "ember_rock_small.glb",
+   "baseRadiusM": 0.35,
+   "tris": 320
+  },
+  "impact_crater": {
+   "file": "impact_crater.glb",
+   "baseRadiusM": 1,
+   "tris": 960,
+   "use": "decal at impact, scale = impactRadius, fade after 6 s"
+  }
+ },
+ "leash": {
+  "zone": "volcano",
+  "source": "www/proto3d/bossregions.js (vgpt-cmp @ a8aa181)",
+  "constant": "TITAN_CENTER",
+  "value": {
+   "x": 405,
+   "z": -402,
+   "radius": 122
+  },
+  "also": [
+   "LAVA_POOLS (same file) - lava pools inside the crater",
+   "lavaAmount(x,z) (same file)",
+   "townlands.js townElevation(): volcano massif d<148, crater d<36, rim/shoulder 20-135 m"
+  ],
+  "rule": "Titan body center must stay within TITAN_CENTER.radius - 15 m (=107 m). If the player leaves radius+40 m (162 m) he stops chasing, returns to center at walk speed, regenerates nothing (designer call) and keeps throwing boulder_hurl at the player while they are within maxRange. Projectiles may land outside the leash (up to ~30 m past rim). He never leaves the zone.",
+  "yAxis": "use heightAt(x,z) for his feet; crater floor is ~30 m below the rim so keep him on the slope/crater floor"
+ },
+ "doNotRescale": "Size is BAKED (root joint scale 1.83817). Load at scale 1. Do not apply charscale/boss multipliers."
+}

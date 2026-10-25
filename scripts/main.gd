@@ -48,6 +48,9 @@ var tod := 10.0              # hours
 var hero: CharacterBody3D
 var hero_vis: Node3D
 var pip: Node3D
+var party: Node              # heroes/party.gd (port-heroes hook)
+var move_speed := 6.0          # set per hero by Party
+var cam_h := 1.7               # camera pivot height, set per hero by Party
 var cam_pivot: Node3D
 var cam_arm: SpringArm3D
 var cam: Camera3D
@@ -114,6 +117,7 @@ func _ready() -> void:
 	_hero()
 	_fx()
 	_hud()
+	party = load("res://heroes/party.gd").new(); add_child(party); party.setup(self, not bench)
 	apply_quality()
 	if bench: _run_bench()
 
@@ -880,7 +884,7 @@ func _physics_process(dt: float) -> void:
 	if k.length() > 0.1: inp = k
 	var fwd := Vector3(-sin(yaw), 0, -cos(yaw)); var right := Vector3(cos(yaw), 0, -sin(yaw))
 	var dir := right * inp.x + fwd * -inp.y
-	var speed: float = 6.0 * clamp(inp.length(), 0.0, 1.0)
+	var speed: float = move_speed * clamp(inp.length(), 0.0, 1.0)
 	if dir.length() > 0.05: dir = dir.normalized()
 	hero.velocity.x = dir.x * speed; hero.velocity.z = dir.z * speed
 	hero.velocity.y = -1.0 if hero.is_on_floor() else hero.velocity.y - 20.0 * dt
@@ -906,7 +910,7 @@ func _process(dt: float) -> void:
 	if not bench and not bench_running:
 		_tacc += dt
 		if _tacc > 0.2: _set_time(tod + _tacc * speed_x * 24.0 / DAY_SECONDS); _tacc = 0.0
-	cam_pivot.position = hero.position + Vector3(0, 1.7, 0)
+	cam_pivot.position = hero.position + Vector3(0, cam_h, 0)
 	cam_pivot.rotation = Vector3(pitch, yaw, 0)
 	for bl in windmill_blades:
 		if bl: bl.rotate_object_local(Vector3(0, 0, 1), dt * 0.8)

@@ -1,0 +1,39 @@
+class_name HeroRoster
+## Playable roster. Heights in metres (foot to head). Approved by the boss: Pip 0.52, Phoenix 0.756,
+## Wren 1.35, Owner 1.905. The rest come from charscale.js HERO_LORE_HEIGHTS (inches x 0.0254).
+const HERO_M := 1.905
+const APPROVED := {"owner": 1.905, "pip": 0.52, "phoenix": 0.756, "wren": 1.35}
+const LORE_IN := {"aldric": 74, "darius": 74, "selene": 69, "elira": 68, "orin": 72, "seraphine": 70, "talia": 70,
+	"finn": 69, "brynn": 64, "mirelle": 66, "nyx": 67, "vesper": 70, "thorne": 73, "rook": 75,
+	"asha": 71, "rowan": 73, "kael": 71, "cedric": 72, "morwen": 69, "garruk": 82}
+## Model sources (copied + dequantized into res://heroes/models/<id>.glb):
+const SOURCES := {
+	"owner": "rigged/owner_new5_fight_refined2.glb", "pip": "rigged/pip_new3_fight_refined2.glb",
+	"phoenix": "rigged/phoenix_new3.glb", "wren": "rigged/wren_new6_fight_refined2.glb",
+	"garruk": "rigged/garruk_new5_arms_fight_refined2.glb", "selene": "rigged/selene_new_arms_refined2.glb",
+	"darius": "rigged/darius_new6_fight_refined2.glb", "asha": "rigged/asha_new3_arms_refined2.glb",
+	"_other": "rigged/<id>_refined2.glb",
+}
+const ORDER := ["owner", "pip", "phoenix", "wren", "aldric", "elira", "rowan", "thorne", "nyx", "seraphine", "garruk",
+	"mirelle", "cedric", "morwen", "kael", "vesper", "talia", "orin", "selene", "darius", "finn", "brynn", "asha", "rook"]
+
+static func height(id: String) -> float:
+	if APPROVED.has(id): return APPROVED[id]
+	if LORE_IN.has(id): return LORE_IN[id] * 0.0254
+	return HERO_M
+
+static func model(id: String) -> String: return "res://heroes/models/%s.glb" % id
+
+static func display_name(id: String) -> String: return id.capitalize()
+
+## Movement speed (m/s): hero 6 m/s like the test build, small heroes a bit slower, never > 1.6x (SPEED_CAP).
+static func speed(id: String) -> float:
+	var h := height(id)
+	return 6.0 * clamp(0.75 + 0.25 * h / HERO_M, 0.8, 1.6)
+
+## Charscale conflicts with the approved values (reported, approved wins).
+const CONFLICTS := [
+	"pip/phoenix/wren: not in charscale.js CHARS, so JS falls back to DEFAULT 1.905 m; approved 0.52 / 0.756 / 1.35 m used",
+	"n:frosttroll_a/b: charscale height 3.5 x HERO_M (6.67 m) and ENEMIES scale 3.5; approved 3x (5.715 m) used",
+	"n:ashentitan_new: charscale height 10 x HERO_M (19.05 m); approved 6x (11.43 m) used (ENEMIES.titan.scale is 6, agrees)",
+]

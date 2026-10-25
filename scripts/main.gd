@@ -4,7 +4,7 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "2"
+const VERSION := "3"
 const DEFS := [
 	["guildhall",0,-21,0.0,"Guild Hall"], ["library",-24,-27,0.0,"Grand Library"], ["townhall",23,-26,0.0,"Town Hall"],
 	["mage",-44,-31,0.0,"Mage Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
@@ -28,7 +28,17 @@ const ROADS := [
 ]
 const TIERS := ["Low", "Medium", "High", "Ultra"]
 
-var tier := 3
+var tier := 2
+var fps_cap := 60
+var f_btn: Button
+var b_btn: Button
+var bench_label: Label
+var bench_running := false
+var ft_acc := 0.0
+var ft_n := 0
+var ft_max := 0.0
+var ft_txt := ""
+var probe: ReflectionProbe
 var time_mode := 0          # index into TIME_PRESETS last chosen
 var speed_x := 1.0
 const TIME_PRESETS := [["Morning", 7.5], ["Noon", 12.0], ["Sunset", 18.2], ["Night", 22.5]]
@@ -45,6 +55,8 @@ var yaw := 0.0
 var pitch := -0.35
 var buildings := []
 var gate_towers := []
+var gate_lods := []
+var windmill_blades := []
 var plaza_glow := []
 var tree_lods := []         # [mmi, lod]
 var hi_terrain := []        # [node, lod]
@@ -109,10 +121,11 @@ func _ready() -> void:
 func _load_settings() -> void:
 	var cf := ConfigFile.new()
 	if cf.load("user://settings.cfg") == OK:
-		tier = int(cf.get_value("gfx", "tier", 3)); time_mode = int(cf.get_value("gfx", "time", 0)) % 4
+		tier = int(cf.get_value("gfx", "tier3", 2)); time_mode = int(cf.get_value("gfx", "time", 0)) % 4
+		fps_cap = int(cf.get_value("gfx", "fps", 60))
 
 func _save_settings() -> void:
-	var cf := ConfigFile.new(); cf.set_value("gfx", "tier", tier); cf.set_value("gfx", "time", time_mode); cf.save("user://settings.cfg")
+	var cf := ConfigFile.new(); cf.set_value("gfx", "tier3", tier); cf.set_value("gfx", "fps", fps_cap); cf.set_value("gfx", "time", time_mode); cf.save("user://settings.cfg")
 
 # ---------- terrain ----------
 func height(x: float, z: float) -> float:
@@ -248,59 +261,55 @@ func _set_time(h: float) -> void:
 	var lamp_on := em > 0.3
 	for l in lamp_lights:
 		l[0].visible = lamp_on and tier >= l[1]
-		if l[0].has_meta("shadow_ultra"): l[0].shadow_enabled = tier == 3
+		l[0].shadow_enabled = false
 	for f in fx_night: f[0].emitting = night and tier >= f[1]; f[0].visible = f[0].emitting
 	for f in fx_day: f[0].emitting = not night and tier >= f[1]; f[0].visible = f[0].emitting
 
 func apply_quality() -> void:
+	# Test 3: Mobile renderer for every tier. Cost drivers kept in check: render scale + FSR,
+	# one shadowed light (the sun) with short distance, no shadowed lamps, LOD/HLOD everywhere.
 	var vp := get_viewport()
-	var shadow_size: int = [1024, 2048, 4096, 8192][tier]
-	RenderingServer.directional_shadow_atlas_set_size(shadow_size, true)
-	RenderingServer.directional_soft_shadow_filter_set_quality([RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_HIGH, RenderingServer.SHADOW_QUALITY_SOFT_ULTRA][tier])
-	RenderingServer.positional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_LOW)
+	Engine.max_fps = fps_cap
+	RenderingServer.directional_shadow_atlas_set_size([1024, 2048, 2048, 4096][tier], true)
+	RenderingServer.directional_soft_shadow_filter_set_quality([RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_SOFT_VERY_LOW, RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM][tier])
 	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = [35.0, 50.0, 75.0, 140.0][tier]
-	sun.directional_shadow_mode = [DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS][tier]
-	sun.light_angular_distance = 1.2 if tier == 3 else 0.0     # PCSS contact-hardening on Ultra
-	sun.shadow_blur = [0.5, 1.0, 1.5, 1.0][tier]
-	vp.msaa_3d = [Viewport.MSAA_DISABLED, Viewport.MSAA_DISABLED, Viewport.MSAA_2X, Viewport.MSAA_4X][tier]
-	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if tier <= 1 else Viewport.SCREEN_SPACE_AA_DISABLED
-	vp.scaling_3d_scale = [0.75, 0.9, 1.0, 1.0][tier]
+	sun.directional_shadow_max_distance = [30.0, 45.0, 60.0, 100.0][tier]
+	sun.directional_shadow_mode = [DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS][tier]
+	sun.light_angular_distance = 0.0
+	sun.shadow_blur = [0.5, 1.0, 1.5, 1.5][tier]
+	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if tier >= 1 else Viewport.SCALING_3D_MODE_BILINEAR
+	vp.scaling_3d_scale = [0.5, 0.6, 0.7, 0.85][tier]
+	vp.fsr_sharpness = 0.3
+	vp.msaa_3d = Viewport.MSAA_2X if tier == 3 else Viewport.MSAA_DISABLED
+	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED if tier == 3 else Viewport.SCREEN_SPACE_AA_FXAA
 	env.glow_enabled = tier >= 1
-	env.ssao_enabled = tier >= 2; env.ssao_radius = 1.5; env.ssao_intensity = 2.0
-	env.ssil_enabled = tier == 3; env.ssil_radius = 6.0; env.ssil_intensity = 1.2
-	env.ssr_enabled = tier == 3; env.ssr_max_steps = 48
-	env.sdfgi_enabled = false
-	env.volumetric_fog_enabled = tier == 3; env.volumetric_fog_density = 0.008; env.volumetric_fog_length = 120.0
-	env.volumetric_fog_anisotropy = 0.6; env.volumetric_fog_sky_affect = 0.0
-	env.fog_enabled = tier < 3 or true
+	env.ssao_enabled = false; env.ssil_enabled = false; env.ssr_enabled = false; env.sdfgi_enabled = false
+	env.volumetric_fog_enabled = false
+	env.fog_enabled = true; env.fog_density = 0.0028
+	if probe: probe.visible = tier >= 1
 	for c in grass_chunks:
-		var cap := int(c.multimesh.instance_count * [0.0, 0.25, 0.6, 1.0][tier])
+		var cap := int(c.multimesh.instance_count * [0.0, 0.2, 0.35, 0.7][tier])
 		c.multimesh.visible_instance_count = cap; c.visible = cap > 0
-		c.visibility_range_end = [0.0, 45.0, 70.0, 110.0][tier]
-	for t in tree_mmis: t.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if tier == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		c.visibility_range_end = [0.0, 30.0, 40.0, 70.0][tier]
+		c.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 	for f in fx_any: f[0].visible = tier >= f[1]; f[0].emitting = tier >= f[1]
-	for t in terrain_lods:
-		var lod: int = t[1]; var n: GeometryInstance3D = t[0]
-		var near: float = [0.0, 220.0, 420.0][lod]; var far: float = [220.0, 420.0, 0.0][lod]
-		if tier <= 1: near = [0.0, 0.0, 180.0][lod]; far = [0.0, 180.0, 0.0][lod]; if lod == 0: n.visible = false; continue
-		n.visible = true; n.visibility_range_begin = near; n.visibility_range_end = far
 	_swap_buildings()
-	var tr: Array = [[[0, 0], [0, 60], [60, 0]], [[0, 0], [0, 110], [110, 0]], [[0, 45], [45, 160], [160, 0]], [[0, 75], [75, 230], [230, 0]]][tier]
+	var tr: Array = [[[-1, -1], [0, 40], [40, 0]], [[-1, -1], [0, 70], [70, 0]], [[0, 30], [30, 120], [120, 0]], [[0, 50], [50, 200], [200, 0]]][tier]
 	for t in tree_lods:
 		var r: Array = tr[t[1]]; var n2: GeometryInstance3D = t[0]
-		n2.visible = not (r[0] == 0 and r[1] == 0)
-		n2.visibility_range_begin = r[0]; n2.visibility_range_end = r[1]
-		n2.visibility_range_begin_margin = 6.0; n2.visibility_range_end_margin = 6.0
-		var casts: bool = t[1] == 0 or (t[1] == 1 and (tier == 3 or tier <= 1))
+		n2.visible = r[0] >= 0
+		n2.visibility_range_begin = max(r[0], 0); n2.visibility_range_end = max(r[1], 0)
+		n2.visibility_range_begin_margin = 4.0; n2.visibility_range_end_margin = 4.0
+		var casts: bool = t[1] == 0 or (t[1] == 1 and tier <= 1)
 		n2.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if casts else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var trr: Array = [[[0, 0], [0, 0], [0, 0]], [[0, 0], [0, 350], [350, 0]], [[0, 220], [220, 520], [520, 0]], [[0, 380], [380, 750], [750, 0]]][tier]
+	var trr: Array = [[[-1, -1], [-1, -1], [0, 0]], [[-1, -1], [0, 350], [350, 0]], [[-1, -1], [0, 450], [450, 0]], [[0, 300], [300, 650], [650, 0]]][tier]
 	for t in hi_terrain:
 		var r: Array = trr[t[1]]; var n3: GeometryInstance3D = t[0]
-		if tier == 0: n3.visible = t[1] == 2; n3.visibility_range_begin = 0; n3.visibility_range_end = 0; continue
-		n3.visible = not (r[0] == 0 and r[1] == 0)
-		n3.visibility_range_begin = r[0]; n3.visibility_range_end = r[1]
+		n3.visible = r[0] >= 0
+		n3.visibility_range_begin = max(r[0], 0); n3.visibility_range_end = max(r[1], 0)
+		n3.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if (t[1] == 0) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if q_btn: q_btn.text = "Quality: " + TIERS[tier]
+	if f_btn: f_btn.text = "FPS cap: %d" % fps_cap
 	_set_time(tod)
 
 func _mat(c: Color, rough := 0.85) -> StandardMaterial3D:
@@ -328,6 +337,9 @@ func _fountain() -> void:
 	lion.mesh = sp; lion.position.y = 3.8; add_child(lion)
 	var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var cy := CylinderShape3D.new(); cy.radius = 6.8; cy.height = 2.0; cs.shape = cy; sb.add_child(cs); add_child(sb)
 	blockers.append([Vector2.ZERO, 9.0])
+	probe = ReflectionProbe.new(); probe.size = Vector3(90, 30, 90); probe.position = Vector3(0, 6, 0)
+	probe.update_mode = ReflectionProbe.UPDATE_ONCE; probe.box_projection = true; probe.max_distance = 120
+	add_child(probe)
 	for i in 8:
 		var a := i / 8.0 * TAU + PI / 8.0
 		var lp := Vector3(cos(a) * 30.0, 0, sin(a) * 30.0)
@@ -391,7 +403,7 @@ func _building(d: Array) -> void:
 		if first: aabb = a; first = false
 		else: aabb = aabb.merge(a)
 	for mi in _meshes(n, []): mi.visible = false      # r3 shell = collision proxy; visuals come from Beth r4 hi tiers
-	buildings.append({"id": id, "name": d[4], "node": n, "roof": null, "vis": null, "aabb": aabb})
+	buildings.append({"id": id, "name": d[4], "node": n, "roof": null, "roofs": [], "lods": [], "vis": null, "aabb": aabb})
 	blockers.append([Vector2(pos.x, pos.z), max(aabb.size.x, aabb.size.z) * 0.55 + 2.0])
 	# warm interior light by the door, night only (Ultra)
 	var door_w: Vector3 = n.global_transform * Vector3(0, 2.6, aabb.end.z + 0.8)
@@ -400,31 +412,47 @@ func _building(d: Array) -> void:
 	add_child(l); lamp_lights.append([l, 3])
 
 func _swap_buildings() -> void:
-	var suf: String = ["_lod2", "_lod1", "", ""][tier]
-	if suf == cur_suffix: return
-	cur_suffix = suf
-	for b in buildings:
-		if b.vis: b.vis.queue_free()
-		var v: Node3D = load("res://assets/hi/buildings/bld_%s%s.glb" % [b.id, suf]).instantiate()
-		b.node.add_child(v); b.vis = v
-		b.roof = v.find_child("roof", true, false)
-		if b.id == "windmill": blades = v.find_child("blades", true, false)
-	for g in gate_towers:
-		for c in g.get_children():
-			if c.has_meta("vis"): c.queue_free()
-		var v2: Node3D = load("res://assets/hi/buildings/bld_gate_tower%s.glb" % suf).instantiate(); v2.set_meta("vis", true); g.add_child(v2)
-	_collect_emissive()
+	# HLOD: every building carries all three of Beth's tiers; the tier only changes the distance bands.
+	if cur_suffix == "?":
+		cur_suffix = "hlod"
+		for b in buildings:
+			b.lods = []; b.roofs = []
+			for suf in ["", "_lod1", "_lod2"]:
+				var v: Node3D = load("res://assets/hi/buildings/bld_%s%s.glb" % [b.id, suf]).instantiate()
+				b.node.add_child(v); b.lods.append(v)
+				var rf = v.find_child("roof", true, false)
+				if rf: b.roofs.append(rf)
+				if b.id == "windmill": windmill_blades.append(v.find_child("blades", true, false))
+			b.vis = b.lods[0]
+		for g in gate_towers:
+			var gl := []
+			for suf in ["", "_lod1", "_lod2"]:
+				var v2: Node3D = load("res://assets/hi/buildings/bld_gate_tower%s.glb" % suf).instantiate(); g.add_child(v2); gl.append(v2)
+			gate_lods.append(gl)
+		_collect_emissive()
+	var bands: Array = [[[-1, -1], [-1, -1], [0, 0]], [[-1, -1], [0, 70], [70, 0]], [[0, 55], [55, 140], [140, 0]], [[0, 120], [120, 260], [260, 0]]][tier]
+	var sets := []
+	for b in buildings: sets.append(b.lods)
+	for gl in gate_lods: sets.append(gl)
+	for lods in sets:
+		for i in 3:
+			var r: Array = bands[i]
+			for mi in _meshes(lods[i], []):
+				mi.visible = r[0] >= 0
+				mi.visibility_range_begin = max(r[0], 0); mi.visibility_range_end = max(r[1], 0)
+				mi.visibility_range_begin_margin = 3.0; mi.visibility_range_end_margin = 3.0
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if i == 2 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 
 func _collect_emissive() -> void:
 	var seen := {}
 	emissive_mats.clear()
 	for b in buildings:
-		if b.vis == null: continue
-		for mi in _meshes(b.vis, []):
-			for i in mi.mesh.get_surface_count():
-				var m = mi.get_active_material(i)
-				if m is BaseMaterial3D and m.emission_texture and not seen.has(m):
-					seen[m] = true; m.emission_enabled = true; m.emission = Color(1.0, 0.72, 0.38); emissive_mats.append(m)
+		for lv in b.lods:
+			for mi in _meshes(lv, []):
+				for i in mi.mesh.get_surface_count():
+					var m = mi.get_active_material(i)
+					if m is BaseMaterial3D and m.emission_texture and not seen.has(m):
+						seen[m] = true; m.emission_enabled = true; m.emission = Color(1.0, 0.72, 0.38); emissive_mats.append(m)
 
 # ---------- Beth dressing / decals ----------
 func _mesh_parts(path: String) -> Array:
@@ -745,7 +773,7 @@ func _fx() -> void:
 		pm.gravity = Vector3.ZERO; pm.turbulence_enabled = true; pm.turbulence_noise_strength = 1.5; pm.turbulence_influence_min = 0.2; pm.turbulence_influence_max = 0.4
 		var cr := Gradient.new(); cr.offsets = PackedFloat32Array([0, 0.3, 0.7, 1]); cr.colors = PackedColorArray([Color(1,1,1,0), Color(1,1,1,1), Color(1,1,1,1), Color(1,1,1,0)])
 		var crt := GradientTexture1D.new(); crt.gradient = cr; pm.color_ramp = crt
-		p.position = c; add_child(p); fx_night.append([p, 2])
+		p.position = c; add_child(p); fx_night.append([p, 1])
 	# sunlit dust motes around the hero (day)
 	var dust := _particles(120, 6.0, _soft_quad(Color(1.0, 0.95, 0.8, 0.5), 0.04, true), 0)
 	var dm: ParticleProcessMaterial = dust.process_material
@@ -802,6 +830,11 @@ func _hud() -> void:
 	t_btn = _btn(cl, Vector2(1040, 80), func(): time_mode = (time_mode + 1) % 4; _save_settings(); _apply_time_mode())
 	s_btn = _btn(cl, Vector2(1040, 148), func(): speed_x = 10.0 if speed_x == 1.0 else 1.0; s_btn.text = "Speed: %dx" % int(speed_x))
 	s_btn.text = "Speed: 1x"
+	f_btn = _btn(cl, Vector2(1040, 216), func(): fps_cap = 120 if fps_cap == 60 else 60; _save_settings(); apply_quality())
+	b_btn = _btn(cl, Vector2(1040, 284), func(): if not bench_running: _flythrough_all())
+	b_btn.text = "Benchmark"
+	bench_label = Label.new(); bench_label.position = Vector2(330, 120); bench_label.add_theme_font_size_override("font_size", 26)
+	bench_label.add_theme_color_override("font_outline_color", Color.BLACK); bench_label.add_theme_constant_override("outline_size", 8); cl.add_child(bench_label)
 	_apply_time_mode()
 	joy_base = Panel.new(); joy_base.size = Vector2(220, 220); joy_base.position = Vector2(60, 460)
 	var sb := StyleBoxFlat.new(); sb.bg_color = Color(1, 1, 1, 0.15); sb.set_corner_radius_all(110); sb.border_color = Color(1, 1, 1, 0.5); sb.set_border_width_all(3)
@@ -870,23 +903,60 @@ func _physics_process(dt: float) -> void:
 var _tacc := 0.0
 func _process(dt: float) -> void:
 	if hero == null: return
-	if not bench:
+	if not bench and not bench_running:
 		_tacc += dt
 		if _tacc > 0.2: _set_time(tod + _tacc * speed_x * 24.0 / DAY_SECONDS); _tacc = 0.0
 	cam_pivot.position = hero.position + Vector3(0, 1.7, 0)
 	cam_pivot.rotation = Vector3(pitch, yaw, 0)
-	if blades: blades.rotate_object_local(Vector3(0, 0, 1), dt * 0.8)
+	for bl in windmill_blades:
+		if bl: bl.rotate_object_local(Vector3(0, 0, 1), dt * 0.8)
 	var inside := ""
 	for b in buildings:
 		var lp: Vector3 = b.node.global_transform.affine_inverse() * hero.global_position
 		var a: AABB = b.aabb.grow(-0.6)
 		var ins: bool = lp.x > a.position.x and lp.x < a.end.x and lp.z > a.position.z and lp.z < a.end.z
-		if b.roof: b.roof.visible = not ins
+		for rf in b.roofs: rf.visible = not ins
 		if ins: inside = b.name
 	cam_arm.spring_length = 3.5 if inside != "" else 6.0
 	where_label.text = inside
-	hud_label.text = "Varnethryl Godot test %s  |  %s  |  FPS %d  |  draw calls %d  |  %dk tris  |  %02d:%02d" % [VERSION, TIERS[tier], Engine.get_frames_per_second(),
+	ft_acc += dt; ft_n += 1; ft_max = max(ft_max, dt)
+	if ft_acc >= 0.5:
+		ft_txt = "%.1f ms avg / %.1f ms worst" % [ft_acc / ft_n * 1000.0, ft_max * 1000.0]
+		ft_acc = 0.0; ft_n = 0; ft_max = 0.0
+	hud_label.text = "Varnethryl test %s | %s | FPS %d | %s | dc %d | %dk tris | %02d:%02d" % [VERSION, TIERS[tier], Engine.get_frames_per_second(), ft_txt,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000), int(tod), int(fmod(tod, 1.0) * 60)]
+
+# ---------- in-app benchmark: 10 s fly-through per tier ----------
+const FLY := [Vector3(-6, 0, 30), Vector3(0, 0, 44), Vector3(-20, 0, 60), Vector3(0, 0, 120), Vector3(0, 0, 175), Vector3(-30, 0, 90), Vector3(-60, 0, 10), Vector3(-6, 0, 30)]
+func _flythrough(seconds := 10.0) -> Array:
+	var t := 0.0; var frames := 0; var worst := 0.0; var warm := 0.5
+	while t < seconds + warm:
+		await get_tree().process_frame
+		var dt := get_process_delta_time()
+		t += dt
+		var u: float = clamp(t / (seconds + warm), 0.0, 0.999) * (FLY.size() - 1)
+		var i := int(u); var f := u - i
+		var p: Vector3 = FLY[i].lerp(FLY[i + 1], f)
+		var d: Vector3 = FLY[i + 1] - FLY[i]
+		hero.position = Vector3(p.x, height(p.x, p.z) + 0.1, p.z)
+		if d.length() > 0.1: yaw = lerp_angle(yaw, atan2(-d.x, -d.z), 0.08); hero_vis.rotation.y = yaw
+		if t > warm: frames += 1; worst = max(worst, dt)
+	return [frames / seconds, 1.0 / max(worst, 0.0001)]
+
+func _flythrough_all() -> void:
+	bench_running = true
+	var saved := tier; var lines := ["Benchmark (10 s fly-through each, cap %d)" % fps_cap]
+	var old_cap := fps_cap; Engine.max_fps = 0
+	for q in [0, 1, 2, 3]:
+		tier = q; apply_quality(); Engine.max_fps = 0
+		bench_label.text = "\n".join(lines) + "\nRunning %s..." % TIERS[q]
+		var r: Array = await _flythrough()
+		lines.append("%s: avg %.0f FPS, min %.0f FPS" % [TIERS[q], r[0], r[1]])
+		bench_label.text = "\n".join(lines)
+	tier = saved; fps_cap = old_cap; apply_quality()
+	var f := FileAccess.open("user://benchmark.txt", FileAccess.WRITE); f.store_string("\n".join(lines)); f.close()
+	print("FLY ", " | ".join(lines))
+	bench_running = false
 
 # ---------- headless bench / screenshots ----------
 func _shot(name: String, pos: Vector3, yw: float, pt: float, hour: float, q: int, frames := 25) -> void:
@@ -914,17 +984,21 @@ func _run_bench() -> void:
 		for q in 4:
 			for v in views: await _shot("dc_%s_%s" % [v[0], TIERS[q]], v[1], v[2], v[3], 11.0, q, 8)
 		for q in 4: await _shot("dc_night_plaza_%s" % TIERS[q], views[0][1], views[0][2], views[0][3], 22.5, q, 8)
+	var ST := int(OS.get_environment("SHOT_TIER")) if OS.get_environment("SHOT_TIER") != "" else 2
+	var pre := TIERS[ST].to_lower() + "_"
+	if only == "fly":
+		await _flythrough_all()
 	if only == "" or only == "shots":
-		await _shot("u1_day_plaza", Vector3(-6, 0, 30), 0.25, -0.28, 10.5, 3, 30)
-		await _shot("u2_houses", Vector3(0, 0, 44), PI * 0.82, -0.22, 14.0, 3)
-		await _shot("u3_cherry_closeup", Vector3(-150, 0, 165.5), 0.0, 0.3, 12.0, 3)
-		await _shot("u3b_tree_row", Vector3(-114, 0, 176), 0.0, -0.05, 12.0, 3)
-		await _shot("u4_sunset_gate", Vector3(0, 0, 150), 0.0, -0.05, 18.2, 3)
-		await _shot("u5_sunset_outside", Vector3(30, 0, 240), PI * 0.85, -0.02, 17.6, 3)
-		await _shot("u10_lake", Vector3(250, 0, -120), 0.0, -0.25, 15.0, 3)
-		await _shot("u9_noon_mountains", Vector3(-20, 0, 250), PI * 1.15, 0.05, 12.0, 3)
-		await _shot("u6_night_plaza", Vector3(-6, 0, 30), 0.25, -0.25, 22.5, 3, 40)
-		await _shot("u7_night_street", Vector3(0, 0, -20), PI, -0.15, 22.5, 3, 40)
-		await _shot("u8_inside", Vector3(-25.2, 0, 52), PI * 0.1, -0.55, 12.0, 3)
+		await _shot(pre + "u1_day_plaza", Vector3(-6, 0, 30), 0.25, -0.28, 10.5, ST, 30)
+		await _shot(pre + "u2_houses", Vector3(0, 0, 44), PI * 0.82, -0.22, 14.0, ST)
+		await _shot(pre + "u3_cherry_closeup", Vector3(-150, 0, 165.5), 0.0, 0.3, 12.0, ST)
+		await _shot(pre + "u3b_tree_row", Vector3(-114, 0, 176), 0.0, -0.05, 12.0, ST)
+		await _shot(pre + "u4_sunset_gate", Vector3(0, 0, 150), 0.0, -0.05, 18.2, ST)
+		await _shot(pre + "u5_sunset_outside", Vector3(30, 0, 240), PI * 0.85, -0.02, 17.6, ST)
+		await _shot(pre + "u10_lake", Vector3(250, 0, -120), 0.0, -0.25, 15.0, ST)
+		await _shot(pre + "u9_noon_mountains", Vector3(-20, 0, 250), PI * 1.15, 0.05, 12.0, ST)
+		await _shot(pre + "u6_night_plaza", Vector3(-6, 0, 30), 0.25, -0.25, 22.5, ST, 40)
+		await _shot(pre + "u7_night_street", Vector3(0, 0, -20), PI, -0.15, 22.5, ST, 40)
+		await _shot(pre + "u8_inside", Vector3(-25.2, 0, 52), PI * 0.1, -0.55, 12.0, ST)
 		await _shot("low_day_plaza", Vector3(-6, 0, 30), 0.25, -0.28, 10.5, 0)
 	get_tree().quit()

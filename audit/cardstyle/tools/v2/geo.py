@@ -31,7 +31,7 @@ class Mesh:
         # corners: bl, br, tr, tl ; maps a sub-rect of a detail cell
         if name=='door':
             c_=np.mean(np.asarray(corners,float),0); s.__dict__.setdefault('doors',[]).append(c_)
-        if name=='banner' and u0==0.08 and u1==0.92 and v1==0.85 and not getattr(s,'no_relief',False): s._relief(corners)
+        if False and name=='banner': s._relief(corners)   # relief retired: the banner art now carries a full heraldic lion
         name=s.remap.get(name,name)
         if name in RECTS: rx,ry,rw,rh=RECTS[name]; x0,y0,cw,ch=rx/S,ry/S,rw/S,rh/S
         else: i=CELLS.index(name); x0=i*256/S; y0=1536/S; cw=256/S; ch=512/S
@@ -67,7 +67,7 @@ class Mesh:
                 a,b,cc,d=p(i,j),p(i+1,j),p(i+1,j+1),p(i,j+1)
                 uv=lambda ii,jj:(0,0)
                 ci=CELLS.index(name); x0=ci*256/S+0.01*256/S
-                U=lambda jj:x0+(jj/seg)*0.9*256/S; V=lambda ii:1-(1536+ (ii/rings)*500+5)/S
+                U=lambda jj:x0+(jj/seg)*0.9*256/S; sp_=305 if name=='flowers' else 500; V=lambda ii:1-(1536+ (ii/rings)*sp_+5)/S
                 s.tri(a,cc,b,(U(j),V(i)),(U(j+1),V(i+1)),(U(j),V(i+1)))
                 s.tri(a,d,cc,(U(j),V(i)),(U(j+1),V(i)),(U(j+1),V(i+1)))
     def _sculpt(s,V,F,strip='statue',off=(0,0,0),scale=1.0,rot=0):

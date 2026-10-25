@@ -92,53 +92,12 @@ def build():
             for yy in(y0+170,y0+400): d.rectangle([x0+44,yy,x1-44,yy+14],fill=IR)
             d.ellipse([x0+170,y0+290,x0+186,y0+306],fill=GOLD)
         elif c=='banner':
-            L2=Image.new('RGB',(512,1024),(31,60,122)); dl=ImageDraw.Draw(L2); G=(214,172,64); Gd=(150,110,35)
-            nz=noise(1024,512,1.6,77); L2=Image.fromarray((np.asarray(L2)*(0.85+0.25*nz[...,None])).clip(0,255).astype(np.uint8)); dl=ImageDraw.Draw(L2)
-            dl.rectangle([0,0,511,40],fill=G); dl.rectangle([0,0,26,880],fill=G); dl.rectangle([485,0,511,880],fill=G)
-            dl.polygon([(0,880),(256,1010),(511,880),(511,860),(256,985),(0,860)],fill=G)
-            for k in range(14): dl.line([(18+k*34,40),(18+k*34,52)],fill=Gd,width=6)
-            # heraldic lion rampant (facing the hoist, viewer's left), drawn 4x supersampled with a dark-gold outline
-            import math
-            SS=4; Z=Image.new('L',(512*SS,1024*SS),0); O=Image.new('L',(512*SS,1024*SS),0); dz=ImageDraw.Draw(Z); do=ImageDraw.Draw(O)
-            def T(p): return (p[0]*SS,(p[1]+40)*SS)
-            def limb(pts,w):
-                for D,ww in((do,w+18),(dz,w)):
-                    q=[T(p) for p in pts]; D.line(q,fill=255,width=ww*SS,joint='curve')
-                    for p in q: D.ellipse([p[0]-ww*SS/2,p[1]-ww*SS/2,p[0]+ww*SS/2,p[1]+ww*SS/2],fill=255)
-            def blob(pts,o=True):
-                q=[T(p) for p in pts]
-                if o: do.polygon(q,fill=255,outline=255,width=18*SS)
-                dz.polygon(q,fill=255)
-            def claws(p,ang):
-                for k in(-1,0,1):
-                    a2=ang+k*0.45; e=(p[0]+38*math.cos(a2),p[1]+38*math.sin(a2)); limb([p,e],9)
-            # tail: S-curve rising behind, ending in a flame tuft
-            limb([(300,560),(350,600),(395,560),(400,470),(370,400),(385,330)],22)
-            blob([(385,330),(350,270),(390,300),(400,240),(420,300),(450,260),(430,330),(400,350)])
-            # hind legs: one planted, one striding forward
-            limb([(290,560),(330,650),(300,740),(330,800)],52); claws((330,805),0.2)
-            limb([(250,560),(200,640),(150,700),(110,720)],48); claws((105,722),3.0)
-            # torso: deep chest tapering to narrow waist and haunch
-            blob([(160,300),(250,270),(300,330),(310,430),(330,520),(320,590),(260,600),(220,540),(200,450),(150,380)])
-            # forelegs raised, paws out with claws
-            limb([(195,330),(110,320),(55,270)],44); claws((50,262),-2.4)
-            limb([(205,410),(120,430),(60,400)],40); claws((52,396),-2.9)
-            # mane: ring of flame-like locks round the head and down the chest
-            cx,cy=200,205
-            for k in range(16):
-                a2=-math.pi*0.15+k*(2*math.pi/16); r0=62; r1=112 if k%2 else 94
-                blob([(cx+r0*math.cos(a2-0.22),cy+r0*math.sin(a2-0.22)),(cx+r1*math.cos(a2),cy+r1*math.sin(a2)),(cx+r0*math.cos(a2+0.22),cy+r0*math.sin(a2+0.22))])
-            dz.ellipse([T((cx-70,cy-70))[0],T((cx-70,cy-70))[1],T((cx+70,cy+70))[0],T((cx+70,cy+70))[1]],fill=255)
-            # head: snout open to the left, tongue, ears and a crown
-            blob([(150,170),(105,178),(88,200),(98,218),(128,220),(108,234),(132,250),(175,245)])
-            blob([(185,140),(195,108),(215,138)])
-            blob([(160,95),(165,40),(185,70),(205,25),(225,70),(245,40),(250,95)])
-            Zs=Z.resize((512,1024),Image.LANCZOS); Os=O.resize((512,1024),Image.LANCZOS)
-            L2.paste(Image.new('RGB',(512,1024),Gd),(0,0),Os); L2.paste(Image.new('RGB',(512,1024),G),(0,0),Zs)
-            dl=ImageDraw.Draw(L2)
-            dl.ellipse([150,222,166,238],fill=(31,60,122)); dl.polygon([(100,262),(128,262),(112,282)],fill=(170,40,40))   # eye, tongue
-            for k in range(4): dl.arc([170,330+k*38,300,400+k*38],200,330,fill=Gd,width=5)      # ribs/fur shading
-            im.paste(L2.resize((256,512),Image.LANCZOS),(x0,y0)); d=ImageDraw.Draw(im)
+            # heraldic gold lion rampant on royal blue (art/lion_banner_src.jpg, flat front-on source), downsampled with sharpening
+            import os
+            from PIL import ImageFilter
+            src=Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'art','lion_banner_src.jpg')).convert('RGB')
+            src=src.resize((256,512),Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=1.2,percent=80,threshold=2))
+            im.paste(src,(x0,y0)); d=ImageDraw.Draw(im)
         elif c.startswith('sign'):
             d.rectangle([x0,y0,x1,y1],fill=NAVY); d.rectangle([x0+10,y0+10,x1-10,y1-10],outline=GOLD,width=14)
             cx,cy=x0+128,y0+256
@@ -147,10 +106,26 @@ def build():
             if c=='sign_anvil': d.polygon([(cx-90,cy-40),(cx+90,cy-40),(cx+40,cy),(cx+30,cy+60),(cx-30,cy+60),(cx-40,cy)],fill=GOLD); d.rectangle([cx-60,cy+60,cx+60,cy+80],fill=GOLD)
             if c=='sign_potion': d.ellipse([cx-70,cy-20,cx+70,cy+110],fill=GOLD); d.rectangle([cx-20,cy-90,cx+20,cy-10],fill=GOLD); d.ellipse([cx-40,cy+20,cx+40,cy+90],fill=(60,140,90))
         elif c=='flowers':
-            d.rectangle([x0,y0,x1,y1],fill=(52,72,34)); r=np.random.default_rng(3)
-            for k in range(260):
-                x=x0+r.integers(0,256); y=y0+r.integers(0,512); col=[(200,40,50),(230,120,160),(240,210,80),(250,250,240),(150,60,160)][r.integers(0,5)]
-                d.ellipse([x-9,y-9,x+9,y+9],fill=col) if r.random()<0.6 else d.ellipse([x-12,y-6,x+12,y+6],fill=(70,105,40))
+            # top 320px: foliage with clear pointed leaves + readable 5-petal blooms (bushes / pots);
+            # bottom 192px: four flower-head swatches (red, pink, yellow, white) on leaf green for modelled flower heads
+            import math
+            SS=3; F=Image.new('RGB',(256*SS,512*SS),(46,70,30)); df=ImageDraw.Draw(F); r=np.random.default_rng(3)
+            LG=[(58,92,38),(76,112,44),(96,134,54),(48,80,32)]
+            def leafp(cx,cy,L,a,col):
+                pts=[(cx+L*math.cos(a)*t-L*0.32*math.sin(a)*math.sin(math.pi*t)*s,cy+L*math.sin(a)*t+L*0.32*math.cos(a)*math.sin(math.pi*t)*s) for s in(1,-1) for t in (np.linspace(0,1,8) if s>0 else np.linspace(1,0,8))]
+                df.polygon(pts,fill=col); df.line([(cx,cy),(cx+L*math.cos(a)*0.95,cy+L*math.sin(a)*0.95)],fill=tuple(int(v*0.7) for v in col),width=2*SS)
+            def bloom(cx,cy,R,col):
+                for k in range(5):
+                    a=k*2*math.pi/5-math.pi/2; px,py=cx+R*0.55*math.cos(a),cy+R*0.55*math.sin(a)
+                    df.ellipse([px-R*0.5,py-R*0.5,px+R*0.5,py+R*0.5],fill=col,outline=tuple(int(v*0.75) for v in col),width=SS)
+                df.ellipse([cx-R*0.28,cy-R*0.28,cx+R*0.28,cy+R*0.28],fill=(235,190,60) if col!=(245,205,70) else (170,90,30))
+            for k in range(420): leafp(r.uniform(0,256*SS),r.uniform(0,320*SS),r.uniform(14,26)*SS,r.uniform(0,2*math.pi),LG[r.integers(0,4)])
+            COL=[(200,40,55),(232,120,165),(245,205,70),(248,246,236),(150,70,170)]
+            for k in range(34): bloom(r.uniform(12,244)*SS,r.uniform(12,308)*SS,r.uniform(11,16)*SS,COL[r.integers(0,5)])
+            for q,col in enumerate(COL[:4]):
+                sx,sy=(q%2)*128*SS,(320+(q//2)*96)*SS
+                df.rectangle([sx,sy,sx+128*SS,sy+96*SS],fill=(52,82,34)); bloom(sx+64*SS,sy+48*SS,40*SS,col)
+            im.paste(F.resize((256,512),Image.LANCZOS),(x0,y0))
     A=np.asarray(im).astype(np.float32)/255; E=np.asarray(em).astype(np.float32)/255
     cy=slice(1536,2048); H[cy]=0.5+0.3*(A[cy].mean(-1)-0.3); R[cy]=0.7
     R[1536:2048,0:256][E[1536:2048,0:256].max(-1)>0.1]=0.25; R[656:768,0:128][E[656:768,0:128].max(-1)>0.1]=0.2

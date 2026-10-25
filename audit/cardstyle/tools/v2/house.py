@@ -134,9 +134,26 @@ def window(c,face,a,y,w=1.2,h=1.65,flowers=False,base=None):
         m.LOD=99
     if flowers:
         bc=p-up*0.38+n*0.26; m.obox(bc,t,up,n,(w+0.2,0.32,0.34),'oak')
-        for k in np.linspace(-w/2,w/2,6): m.blob(bc+t*k+up*0.24,0.26,'flowers')
-        for k in np.linspace(-w/2+0.15,w/2-0.15,4): m.blob(bc+t*k+up*0.2+n*0.16,0.2,'flowers',squash=0.7)
+        flowerbox_plants(m,bc+up*0.16,t,up,n,w+0.1)
     m.LOD=99
+def flowerbox_plants(m,base,t,up,n,w):
+    # soil, cut-leaf foliage and modelled 5-petal flower heads (atlas 'flowers' swatches) instead of textured blobs
+    import kit2
+    from kit2 import leaf
+    rng=np.random.default_rng(int(abs(base[0]*7+base[2]*13))%9973)
+    m.obox(base+up*0.01,t,up,n,(w,0.03,0.28),'beam')
+    nl=int(w/0.12) if kit2.Q==0 else int(w/0.3)
+    for k in range(nl):
+        x=-w/2+0.06+(w-0.12)*k/max(1,nl-1); p=base+t*x+n*rng.uniform(-0.08,0.1)
+        leaf(m,p+up*0.12,n*0.6+up*0.5+t*rng.uniform(-0.6,0.6),0.13,rng.uniform(-0.7,0.7))
+        if kit2.Q==0: leaf(m,p+up*0.05+n*0.1,n+t*rng.uniform(-0.8,0.8)-up*0.3,0.12,rng.uniform(-1,1))   # trailing over the front
+    SW=[(0,0.5,0.1875,0.375),(0.5,1,0.1875,0.375),(0,0.5,0,0.1875),(0.5,1,0,0.1875)]
+    nf=int(w/0.16) if kit2.Q==0 else int(w/0.4)
+    for k in range(nf):
+        x=-w/2+0.08+(w-0.16)*(k+rng.uniform(-0.3,0.3))/max(1,nf-1); c=base+t*x+up*rng.uniform(0.2,0.34)+n*rng.uniform(-0.02,0.14)
+        u0,u1,v0,v1=SW[rng.integers(0,4)]; s=rng.uniform(0.085,0.11); f=n*0.8+up*0.6; f/=np.linalg.norm(f); tt=np.cross(up,f); tt/=np.linalg.norm(tt); uu=np.cross(f,tt)
+        m.cell([c-tt*s-uu*s,c+tt*s-uu*s,c+tt*s+uu*s,c-tt*s+uu*s],'flowers',u0+0.06,u1-0.06,v0+0.02,v1-0.02)
+        m.beam(c-uu*s*0.3,c-up*0.22,0.012,'beam')
 def door(c,face,a,w=1.5,h=2.7):
     m=c['m']; p,t,n=facepos(c,face,a,0.0); up=np.array([0,1.0,0]); b=p+n*0.02
     m.cell([b-t*w/2,b+t*w/2,b+t*w/2+up*h,b-t*w/2+up*h],'door')
@@ -156,11 +173,13 @@ def cloth(m,top_c,t,n,w,h,name,wave=0.08,swallow=True):
     for i in range(nx+1):
         for k in range(ny+1):
             u=i/nx; v=k/ny; yy=-h*v
-            if swallow and k==ny: yy+= (h*0.18)*(1-abs(u-0.5)*2)
+            vv=v*0.8 if k<ny else 0.8+0.18*(1-abs(u-0.5)*2)   # pointed V hem that follows the banner art's gold border
+            yy=-h*vv
             V[i,k]=top_c+t*(u-0.5)*w+up*yy+n*wave*np.sin(u*np.pi*2+v*3)*v
     from atlas import CELLS,S
     ci=CELLS.index(name); x0=ci*256/S; cw=256/S; y0=1536/S; ch=512/S
-    UV=lambda i,k:(x0+cw*(0.01+0.98*i/nx),1-(y0+ch*(0.005+0.99*k/ny)))
+    VV=lambda i,k:(k/ny*0.8 if k<ny else 0.8+0.18*(1-abs(i/nx-0.5)*2))
+    UV=lambda i,k:(x0+cw*(0.01+0.98*i/nx),1-(y0+ch*(0.005+0.99*VV(i,k))))
     for i in range(nx):
         for k in range(ny):
             a,b,cc,d=(i,k+1),(i+1,k+1),(i+1,k),(i,k)

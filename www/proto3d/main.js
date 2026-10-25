@@ -1843,7 +1843,7 @@ function ladderHop(r, a) {
       const up = r.level === L.baseLevel && state.level >= L.level, down = r.level === L.level && state.level <= L.baseLevel; if (!up && !down) continue;
       const ex = up ? L.baseX : L.topX, ez = up ? L.baseZ : L.topZ, d = Math.hypot(ex - a.x, ez - a.z); if (d < bd) { bd = d; best = { L, up, ex, ez }; } } }
   if (!best || bd > 45) return null;
-  if (bd < 2.2 || (bd < 5 && r.lvT > 4)) { const L = best.L; a.x = best.up ? L.topX : L.baseX; a.z = best.up ? L.topZ : L.baseZ; r.level = best.up ? L.level : L.baseLevel; r.y = best.up ? L.y1 : L.y0; r.ti = null; r.lvT = 0; return null; }
+  if (bd < 2.2 || (bd < 5 && r.lvT > 4) || r.lvT > 12) { /* stuck behind furniture for 12 s: catch up like the ground-floor rule */ const L = best.L; a.x = best.up ? L.topX : L.baseX; a.z = best.up ? L.topZ : L.baseZ; r.level = best.up ? L.level : L.baseLevel; r.y = best.up ? L.y1 : L.y0; r.ti = null; r.lvT = 0; return null; }
   return { x: best.ex, z: best.ez };
 }
 function snapFollowers() {

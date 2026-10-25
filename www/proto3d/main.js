@@ -355,6 +355,7 @@ const SMOOTH_NAMES = ['aldric', 'briar', 'brynn', 'cedric', 'elira', 'finn', 'ha
 EXTRA.push(['n:vaelthryx_straight_rig_50', 'Balthrix (50×)', 'proto3d/models-new/vaelthryx_straight_rig.glb']);
 EXTRA.push(['n:ashentitan_40', 'Ashen Titan (legacy slot · 15×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
 EXTRA.push(['n:ashentitan_20', 'Ashen Titan (15×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
+EXTRA.push(['n:ashentitan_volcano', 'Ashen Titan · Volcano (11×)', 'proto3d/models-new/ashentitan_volcano_11x.glb']);   // volcano-only boss (fight.js titan40); size: charscale VOLCANO_TITAN_MULT
 EXTRA.push(['n:ashentitan_60', 'Ashen Titan (60×)', 'proto3d/models-new/ashentitan_cl_arms.glb']);
 const EXTRA_URL = {}; for (const [id, label, url] of EXTRA) { GLB_IDS.push(id); EXTRA_URL[id] = url; }
 const glbInfo = { loaded: [], failed: [], pending: [], kb: {} };

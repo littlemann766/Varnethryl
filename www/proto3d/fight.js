@@ -20,6 +20,7 @@ import { serpentHeading } from './serpent-locomotion.js';
 import { bossHome, telegraphKey } from './combat/boss-arena.js';
 import { HOB_CAMPS } from './hobcamps.js';
 import { isColiseumCombat } from './coliseum-pvp.js';
+import { createVolcanoTitan } from './volcano-titan.js';
 export const SABER_DAMAGE = SABER.max;     // 99,999 flat per hit
 export const SABER_GLB = null;             // URL (or fight.setSaberModel(url)) for Beth's saber: hilt at origin, blade along +Y, ~1 m
 const MAX_ALIVE = 5, AUTO_MAX = (typeof matchMedia==='function' && matchMedia('(pointer:coarse)').matches) ? 12 : 15, AUTO_AGGRO = 3; // Lively world with mobile cap; wild mobs remain passive
@@ -520,6 +521,11 @@ export function createFight(env) {
     }
   }
   let lavaT=0;
+  // volcano-only Ashen Titan: special attacks, projectiles, shake and leash (volcano-titan.js); damage scales with the hero's max HP (designer tunes)
+  const VT = createVolcanoTitan({ THREE: env.THREE || THREE, scene: env.scene, heightAt: terrainY, HS,
+    playClip: (root, name, hold) => { const u = root.userData, a = u && u.all && u.all[Object.keys(u.all).find(k => k.toLowerCase() === name)]; return a ? playAct(root, a, name, 0, hold) : false; },
+    hurt: (amt, what) => { if (cc.dead > 0 || cc.god) return; cc.res.hp = Math.max(0, cc.res.hp - amt); hud.floatAt(state.heroX, terrainY(state.heroX, state.heroZ) + 2, state.heroZ, '-' + amt, 'pl'); },
+    shake: (a, t) => { shakeA = Math.max(shakeA * (shakeT > 0 ? 1 : 0), a); shakeT = Math.max(shakeT, t); } });
   function update(dt) {
     if (!on) return;
     // World streaming and character selection are asynchronous. A deferred
@@ -543,6 +549,7 @@ export function createFight(env) {
       }
     }
     if (lfx) lfx.update(dt); updateCompanions(dt); regionUpdate(dt); updateHobCamps(dt);
+    if (VT) { const vt = cc.enemies.find(q => q.def && q.def.volcanoTitan && q.state !== 'defeated'); if (vt || VT.projectiles) VT.update(dt, vt, { x: state.heroX, z: state.heroZ }, Math.max(20, Math.round(cc.res.max.hp * .09))); }
     // spawner (bad guys): small waves of regular enemies
     spawnT -= dt; const reg = cc.enemies.filter(e => !e.def.boss && e.state !== 'defeated').length;
     if (auto && (env.zone?.()==='wilds'||env.zone?.()==='town')) {   // Wilds + wilderness beyond the walls: scattered, passive mobs (they stand off until you come within 3 m or hit them first); far ones are recycled

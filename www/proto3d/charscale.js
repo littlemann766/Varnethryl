@@ -8,6 +8,8 @@
      camMin/camMax  zoom clamp for this character (zoom pref units, hero 0.4..1.7)
    Lookup key = the dropdown model id (e.g. 'n:ashentitan_new'). */
 export const HERO_M = 1.905;
+// Volcano-only Ashen Titan (Beth's ashentitan_volcano_11x.glb, baked at 20.955 m). Boss-confirmed 24 Oct: 11 x Owner. Set to 6 for the old 6x look.
+export const VOLCANO_TITAN_MULT = 11;
 // Allows the 50x serpent (95.25 m) and reserved 60x Titan (114.3 m); keeps the per-model scale limits explicit.
 export const MAX_HEIGHT_M = 120;
 export const WORLD_PER_M = (HS = 1.5) => 0.947 * HS;       // main.js: extra models are authored in metres and drawn at 0.947*HS
@@ -36,6 +38,7 @@ export const CHARS = {
   'n:garruk_new5': {height:inchesToMeters(82),fitMeasuredHeight:true},
   'n:darius_new6': {height:inchesToMeters(74),fitMeasuredHeight:true},
   'n:asha_new3': {height:inchesToMeters(71),fitMeasuredHeight:true},
+  'n:ashentitan_volcano': { height: VOLCANO_TITAN_MULT * HERO_M, native: 20.955, radius: 5.4, speed: 1.4, step: 3.2, reach: 4.7, camDist: 5.2, camHeight: 5, camMin: .55, camMax: 1.8 },   // volcano boss: loadScale = 1 at 11x
   'n:ashentitan_new': { height: 10 * HERO_M, fitMeasuredHeight: true, radius: 3.2, speed: 1.4, step: 2.0, reach: 3.2, camDist: 3.4, camHeight: 3.2, camMin: 0.55, camMax: 1.6 },          // Main Titan encounter: 10x Owner
   // Extra Titan variants: all share one rigged GLB with uniform lore-height scaling.
   'n:ashentitan_20': { height: 10 * HERO_M, fitMeasuredHeight: true, radius: 5.4, speed: 1.4, step: 3.2, reach: 4.7, camDist: 5.2, camHeight: 5, camMin: .55, camMax: 1.8 },

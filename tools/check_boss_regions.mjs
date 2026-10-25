@@ -24,7 +24,9 @@ for(const id of ['n:frosttroll_a','n:frosttroll_b']){
 for(const [id,mul] of [['n:ashentitan_new',10],['n:ashentitan_20',10],['n:ashentitan_40',10],['n:ashentitan_60',60],['n:vaelthryx_straight_rig',6],['n:vaelthryx_straight_rig_50',50]])
  assert(close(profileFor(id).height,mul*HERO_M),id+' height ratio');
 assert(close(profileFor('n:ashentitan_20').height,19.05),'Active lava boss stands 19.05 m');
-for(const [id,model] of [['titan40','n:ashentitan_20'],['frosttroll_a','n:frosttroll_a'],['frosttroll_b','n:frosttroll_b'],['vaelthryx','n:vaelthryx_straight_rig']]){
+// 24 Oct: the volcano encounter uses Beth's volcano-only Titan, 11x Owner (charscale VOLCANO_TITAN_MULT), GLB baked at 20.955 m
+assert(close(profileFor('n:ashentitan_volcano').height,11*HERO_M)&&close(loadScale('n:ashentitan_volcano'),1),'volcano Titan 20.955 m, loaded at scale 1');
+for(const [id,model] of [['titan40','n:ashentitan_volcano'],['frosttroll_a','n:frosttroll_a'],['frosttroll_b','n:frosttroll_b'],['vaelthryx','n:vaelthryx_straight_rig']]){
  assert.equal(ENEMIES[id].model,model,'encounter GLB for '+id);
  assert(ENEMIES[id].boss&&BOSS_PATTERNS[id]?.length>=3,'unique combat skills for '+id);
  const e={key:id,def:ENEMIES[id],phase:1,patI:0};

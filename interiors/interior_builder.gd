@@ -96,6 +96,7 @@ static func build(id: String, def: Dictionary, size: Vector3) -> Dictionary:
 		for k in int(b[4] if b.size() > 4 else 1):
 			K.prop(F.node, "balcony_railing", P.call(b[1], b[2], F.y) + Vector3(cos(a), 0, -sin(a)) * 2.1 * k, b[3], true)
 	for p in def.get("props", []): _prop(info, p, P)
+	if def.has("fill"): _fill(info, def, P)
 	for l in def.get("lights", []): _light(info, l, P)
 	for r in def.get("rooms", []):
 		info.rooms.append({"name": r[0], "floor": r[1], "pos": P.call(r[2], r[3], info.floors[r[1]].y)})
@@ -175,6 +176,79 @@ static func _stair(fn: Node3D, s: Dictionary, sm: String) -> void:
 		for k in 5:
 			var t := k / 4.0
 			K.box(fn, o + d * (L * t) + Vector3(0, H * t + 0.47, 0), Vector3(0.05, 0.95, 0.05), "iron", false, rot)
+
+## footprint (xz rect) of a def prop, for the wall fill pass
+static func _foot(info: Dictionary, p: Array, P: Callable) -> Rect2:
+	var pos: Vector3 = P.call(p[2], p[3], 0.0); var c := Vector2(pos.x, pos.z); var ex: Array = p[5] if p.size() > 5 else []
+	var sz := Vector2(0.6, 0.6)
+	match p[0]:
+		"_runner", "_area", "_glasswall", "_bread", "_tools", "_gear": return Rect2(c, Vector2.ZERO)
+		"_round_table": sz = Vector2.ONE * (ex[0] + 0.75) * 2.0
+		"_fountain": sz = Vector2.ONE * ex[0] * 2.0
+		"_pillar": sz = Vector2.ONE * ex[1] * 2.0
+		"_counter", "_pots": sz = Vector2(ex[0], ex[1]) if ex.size() > 1 else Vector2(1.2, 0.6)
+		_:
+			var s: Array = K.index().get(p[0], {}).get("size_m", [0.6, 0.6, 0.6]); sz = Vector2(s[0], s[2])
+			if p[0] in ["rug", "lion_banner", "chandelier"]: return Rect2(c, Vector2.ZERO)
+	var r: float = p[4] if p.size() > 4 else 0.0
+	if absf(fmod(absf(r), 180.0) - 90.0) < 1.0: sz = Vector2(sz.y, sz.x)
+	return Rect2(c - sz / 2, sz)
+
+## "fill": [[floor, [prop names...], gap_m]] lines the outer walls of that floor with the props (cycling), wherever
+## the spot and 1.1 m in front of it are free of props, stairs/ladders (+landings), the door lane, room points and slab edges.
+static func _fill(info: Dictionary, def: Dictionary, P: Callable) -> void:
+	var W: float = info.W; var D: float = info.D
+	for fd in def.fill:
+		var fi: int = fd[0]; var names: Array = fd[1]; var gap: float = fd[2] if fd.size() > 2 else 0.15
+		var F: Dictionary = info.floors[fi]
+		var obst: Array = []
+		for p in def.get("props", []):
+			if p[1] == fi: obst.append(_foot(info, p, P))
+		for st in info.stairs:
+			if st.floor == fi: obst.append(_rect_along(st.base, st.dir, -1.6, st.run + 1.4, st.w + 0.8))
+			if st.floor + 1 == fi: obst.append(_rect_along(st.base, st.dir, -0.2, st.run + 1.6, st.w + 0.8))
+		for l in info.ladders:
+			if l.floor == fi or l.floor + 1 == fi: obst.append(_rect_along(l.pos, l.dir, -1.8, 1.6, 1.8))
+		if fi == 0: obst.append(Rect2(-1.4, D / 2 - 3.0, 2.8, 3.2))
+		for r in info.rooms:
+			if r.floor == fi: obst.append(Rect2(r.pos.x - 0.8, r.pos.z - 0.8, 1.6, 1.6))
+		for wd in def.get("walls", []):
+			if wd[0] != fi: continue
+			var a := Vector2(wd[1] * info.kx, wd[2] * info.kz); var b := Vector2(wd[3] * info.kx, wd[4] * info.kz)
+			var rr := Rect2(a, Vector2.ZERO).expand(b).grow(0.25)
+			for g in (wd[5] if wd.size() > 5 else []):   # keep 1.2 m clear around partition doorways
+				var c: Vector2 = a.lerp(b, g[0]); obst.append(Rect2(c - Vector2.ONE * 1.4, Vector2.ONE * 2.8))
+			obst.append(rr)
+		var regions: Array = []
+		for r in (def.floors[fi].get("slab", [[-W / 2 / info.kx, -D / 2 / info.kz, W / 2 / info.kx, D / 2 / info.kz]])):
+			regions.append(Rect2(Vector2(r[0] * info.kx, r[1] * info.kz), Vector2((r[2] - r[0]) * info.kx, (r[3] - r[1]) * info.kz)))
+		var k := 0
+		var placed: Array = []
+		for side in 4:   # 0 back(-z) 1 left(-x) 2 right(+x) 3 front(+z)
+			var rot: float = [0.0, 90.0, -90.0, 180.0][side]
+			var L: float = W if side in [0, 3] else D
+			var t := 0.5
+			while t < L - 0.5:
+				var nm: String = names[k % names.size()]
+				var s: Array = K.index().get(nm, {}).get("size_m", [1.0, 1.0, 0.5]); var w: float = s[0]; var d: float = s[2]
+				if t + w > L - 0.3: break
+				var along: float = -L / 2 + t + w / 2; var inset: float = WALL_T / 2 + d / 2 + 0.03
+				var c: Vector2; var sz: Vector2; var front: Rect2
+				match side:
+					0: c = Vector2(along, -D / 2 + inset); sz = Vector2(w, d); front = Rect2(c.x - w / 2, c.y + d / 2, w, 1.1)
+					3: c = Vector2(along, D / 2 - inset); sz = Vector2(w, d); front = Rect2(c.x - w / 2, c.y - d / 2 - 1.1, w, 1.1)
+					1: c = Vector2(-W / 2 + inset, along); sz = Vector2(d, w); front = Rect2(c.x + d / 2, c.y - w / 2, 1.1, w)
+					2: c = Vector2(W / 2 - inset, along); sz = Vector2(d, w); front = Rect2(c.x - d / 2 - 1.1, c.y - w / 2, 1.1, w)
+				var r := Rect2(c - sz / 2, sz)
+				var ok := false
+				for rg in regions:
+					if rg.grow(-0.05).encloses(r) and rg.grow(-0.05).encloses(front): ok = true
+				if ok:
+					for o in obst + placed:
+						if o.intersects(r.grow(0.05)) or (o in obst and o.intersects(front)): ok = false; break
+				if ok:
+					K.prop(F.node, nm, Vector3(c.x, F.y, c.y), rot, true); placed.append(r); k += 1; t += w + gap
+				else: t += 0.25
 
 static func _prop(info: Dictionary, p: Array, P: Callable) -> void:
 	var name: String = p[0]; var F: Dictionary = info.floors[p[1]]; var fn: Node3D = F.node

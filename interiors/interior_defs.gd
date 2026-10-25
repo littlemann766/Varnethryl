@@ -158,6 +158,7 @@ const D := {
 # ================= the rest (cards read from card_<name>; one storey per card level, stairs via "auto")
 # ---- GRAND LIBRARY: main reading hall, archive stacks, librarian desk, restricted archive; upper balcony + stacks
 "library": {"name": "Grand Library of Varnethryl", "scale": [0.40, 0.40],
+	"fill": [[0, ["bookshelf"], 0.04], [1, ["bookshelf", "bookshelf", "lectern"], 0.04]],
 	"floors": [{"h": 4.5, "mat": "oak", "wall": "stone", "win": 3.5, "glass": "stained"}, {"h": 3.4, "mat": "oak", "wall": "stone", "win": 3.5, "slab": [[-0.5, -0.5, -0.22, 0.5], [0.22, -0.5, 0.5, 0.5], [-0.22, -0.5, 0.22, -0.3]]}],
 	"walls": [[0, -0.5, -0.3, -0.22, -0.3, [[0.5, 1.8]]], [0, 0.22, -0.3, 0.5, -0.3, [[0.5, 1.8]]]],
 	"stairs": [["auto", 0, -1, 2.2]],

@@ -1,0 +1,149 @@
+[gd_scene load_steps=14 format=3]
+
+[sub_resource type="Gradient" id="g_dot"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.6, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="t_dot"]
+gradient = SubResource("g_dot")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="g_flake"]
+offsets = PackedFloat32Array(0, 0.6, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.8, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="t_flake"]
+gradient = SubResource("g_flake")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.45, 0.55)
+fill_to = Vector2(0.95, 0.8)
+
+
+[sub_resource type="StandardMaterial3D" id="m_ember"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+albedo_color = Color(1, 0.55, 0.15, 1)
+albedo_texture = SubResource("t_dot")
+
+[sub_resource type="QuadMesh" id="q_ember"]
+material = SubResource("m_ember")
+size = Vector2(0.8, 0.8)
+
+[sub_resource type="Gradient" id="g_ember"]
+offsets = PackedFloat32Array(0, 0.15, 0.7, 1)
+colors = PackedColorArray(1, 0.9, 0.5, 0, 1, 0.65, 0.2, 1, 0.9, 0.25, 0.05, 0.8, 0.3, 0.05, 0.02, 0)
+
+[sub_resource type="StandardMaterial3D" id="m_ash"]
+transparency = 1
+shading_mode = 1
+vertex_color_use_as_albedo = true
+billboard_mode = 3
+albedo_color = Color(0.16, 0.14, 0.13, 1)
+albedo_texture = SubResource("t_flake")
+roughness = 1.0
+
+[sub_resource type="QuadMesh" id="q_ash"]
+material = SubResource("m_ash")
+size = Vector2(0.7, 0.55)
+
+[sub_resource type="Gradient" id="g_ash"]
+offsets = PackedFloat32Array(0, 0.1, 0.85, 1)
+colors = PackedColorArray(0.3, 0.27, 0.25, 0, 0.3, 0.27, 0.25, 0.9, 0.18, 0.16, 0.15, 0.7, 0.1, 0.1, 0.1, 0)
+
+[sub_resource type="StandardMaterial3D" id="m_chunk"]
+shading_mode = 1
+vertex_color_use_as_albedo = true
+emission_enabled = true
+emission = Color(1, 0.35, 0.05, 1)
+emission_energy_multiplier = 2.5
+albedo_color = Color(0.08, 0.06, 0.05, 1)
+
+[sub_resource type="SphereMesh" id="b_chunk"]
+material = SubResource("m_chunk")
+radius = 0.6
+height = 0.9
+radial_segments = 5
+rings = 2
+
+[sub_resource type="Gradient" id="g_chunk"]
+offsets = PackedFloat32Array(0, 0.8, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.6, 0.6, 0.6, 1, 0.3, 0.3, 0.3, 1)
+
+[node name="WBBodyAshEmbers" type="Node3D"]
+metadata/_note = "World metres for the 114 m Titan. Do NOT parent under the 5.44-scaled Titan node: make it a sibling and copy the chest bone's global position (x,z; y = 0) each frame. Origin = ground under the Titan. Toggle ritual_boost by setting Embers.amount_ratio 1.0 (ritual) / 0.5 (idle)."
+
+[node name="Embers" type="CPUParticles3D" parent="."]
+amount = 260
+amount_ratio = 0.5
+lifetime = 7.0
+preprocess = 7.0
+local_coords = false
+mesh = SubResource("q_ember")
+emission_shape = 3
+emission_box_extents = Vector3(22, 45, 10)
+position = Vector3(0, 55, 0)
+direction = Vector3(0, 1, 0)
+spread = 35.0
+gravity = Vector3(1.2, 2.2, 0)
+initial_velocity_min = 1.5
+initial_velocity_max = 5.0
+angular_velocity_min = -90.0
+angular_velocity_max = 90.0
+damping_min = 0.2
+damping_max = 0.6
+scale_amount_min = 0.5
+scale_amount_max = 1.6
+color_ramp = SubResource("g_ember")
+
+[node name="Ash" type="CPUParticles3D" parent="."]
+amount = 240
+lifetime = 12.0
+preprocess = 12.0
+local_coords = false
+mesh = SubResource("q_ash")
+emission_shape = 3
+emission_box_extents = Vector3(26, 20, 12)
+position = Vector3(0, 80, 0)
+direction = Vector3(0, -1, 0)
+spread = 60.0
+gravity = Vector3(0.8, -1.6, 0.3)
+initial_velocity_min = 0.5
+initial_velocity_max = 2.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
+damping_min = 0.4
+damping_max = 0.9
+scale_amount_min = 0.6
+scale_amount_max = 1.8
+color_ramp = SubResource("g_ash")
+
+[node name="FallingChunks" type="CPUParticles3D" parent="."]
+amount = 18
+lifetime = 4.5
+preprocess = 4.5
+local_coords = false
+mesh = SubResource("b_chunk")
+emission_shape = 3
+emission_box_extents = Vector3(18, 30, 8)
+position = Vector3(0, 60, 0)
+direction = Vector3(0, -1, 0)
+spread = 25.0
+gravity = Vector3(0, -9.8, 0)
+initial_velocity_min = 0.0
+initial_velocity_max = 3.0
+angular_velocity_min = -120.0
+angular_velocity_max = 120.0
+scale_amount_min = 0.6
+scale_amount_max = 2.2
+color_ramp = SubResource("g_chunk")

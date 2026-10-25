@@ -1,15 +1,19 @@
 class_name WorldBoss
 extends Node3D
-## World-boss Ashen Titan TEST (godot-test-worldboss1). Single-player preview, no net sync.
+## World-boss Ashen Titan TEST (godot-test-worldboss2). Single-player preview, no net sync.
 ## Roams the main map OUTSIDE the walls on a ring of waypoints (r 330 m, never inside the city), 114 m tall (x5.440).
-## Placeholder motion: in-place walk clip slowed to 0.3x, glided at 3 m/s. Rituals: Fissure Slam (12 s) and Lava Wave (10 s),
+## Motion: Lucian f2ea516 wb_walk in place (root stripped), node driven at 2.96 m/s on a smooth outskirts loop. Rituals: Fissure Slam (12 s) and Lava Wave (10 s),
 ## interrupted by damaging the 6 weak-point crystals. Art: Beth's worldboss kit (assets/volcano/worldboss) + lava veins.
 
 const SCALE := 5.440
-const SPEED := 3.0
+const SPEED := 2.96          # Lucian f2ea516: feet hold at 2.96 m/s walk (root motion stripped)
+const RUN_SPEED := 8.1       # wb_run, root motion stripped
 const WB := "res://assets/volcano/worldboss/"
 const LAVA := "res://assets/volcano/worldboss/titan/"
-const RING_R := 330.0
+const RING_R := 470.0         # worldboss2: outskirts loop (mountains start ~520 m)
+const ROUTE_N := 64           # many waypoints -> gentle arcs, no snapping
+const STATION_EVERY := 8      # stop (stomp/ritual) only every 8th waypoint
+const WEST_LIMIT := -400.0    # coast/port sea is west of x = -440
 const MAX_HP := 3000.0
 const CRYSTAL_HP := 90.0           # 3 %
 const INTERRUPT := 120.0           # 4 % (solo floor of 8% x sqrt(n)/2)
@@ -64,9 +68,7 @@ func setup(main: Node) -> WorldBoss:
 	m = main
 	name = "WorldBoss"
 	hq = int(m.get("tier")) >= 2
-	for i in 6:
-		var a := i / 6.0 * TAU + 0.2
-		waypoints.append(Vector3(cos(a) * RING_R, 0, sin(a) * RING_R))
+	_build_route()
 	body = (load(WB + "titan/ashentitan_worldboss.glb") as PackedScene).instantiate()
 	body.scale = Vector3.ONE * SCALE
 	add_child(body)
@@ -75,15 +77,100 @@ func setup(main: Node) -> WorldBoss:
 	for c in ["wb_walk", "wb_idle", "wb_ritual_fissure_loop", "wb_ritual_lavawave_loop", "wb_stagger_loop", "wb_down_loop"]:
 		if ap.has_animation(c): ap.get_animation(c).loop_mode = Animation.LOOP_LINEAR
 	_strip_root_xz("wb_walk")
+	if ap.has_animation("wb_run"): _strip_root_xz("wb_run")
 	var ev = JSON.parse_string(FileAccess.get_file_as_string(WB + "titan/worldboss_events.json"))
 	steps = ev.events.wb_walk
 	ap.animation_finished.connect(_on_anim_done)
 	for mi: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
 		mi.extra_cull_margin = 40.0
-	_veins(); _crystals(); _telegraphs(); _ui()
+	_veins(); _crystals(); _telegraphs(); _ui(); _ash_fx()
 	dust_scene = load(WB + "wb_dust_burst.tscn")
 	place_at(0)
 	return self
+
+## Smooth outskirts loop: ring r 470 clamped east of the coast, pushed away from farmstead/port/lake/volcano/city,
+## then relaxed so the curvature is gentle everywhere.
+func _build_route() -> void:
+	var avoid := [[Vector2(-290, -288), 120.0], [Vector2(-425.6, 392), 130.0], [Vector2(250, -200), 110.0], [Vector2(405, -402), 120.0]]
+	var pts: Array[Vector2] = []
+	for i in ROUTE_N:
+		var a := i / float(ROUTE_N) * TAU + 0.2
+		var p := Vector2(cos(a), sin(a)) * RING_R
+		pts.append(p)
+	for it in 30:
+		for i in ROUTE_N:
+			var p := pts[i]
+			for b in avoid:
+				var d: Vector2 = p - b[0]
+				if d.length() < b[1]: p = b[0] + d.normalized() * b[1]
+			p.x = maxf(p.x, WEST_LIMIT)
+			if maxf(absf(p.x), absf(p.y)) < 300.0: p = p.normalized() * 330.0
+			pts[i] = p
+		var sm: Array[Vector2] = []
+		for i in ROUTE_N:
+			sm.append(pts[(i - 1 + ROUTE_N) % ROUTE_N] * 0.25 + pts[i] * 0.5 + pts[(i + 1) % ROUTE_N] * 0.25)
+		pts = sm
+	for p in pts: waypoints.append(Vector3(p.x, 0, p.y))
+
+const GLOW_IDLE := 4.5
+const GLOW_CAST := 7.5
+var embers: Node3D
+var scorch: MeshInstance3D
+var markers: Array = []          # [Label, crystal]
+var env_base := {}
+
+## Beth's body ash/embers: sibling of the Titan (world metres, not under the x5.44 node); follows the chest bone x/z.
+func _ash_fx() -> void:
+	embers = (load(WB + "wb_body_ash_embers.tscn") as PackedScene).instantiate()
+	embers.top_level = true; add_child(embers)
+	_ember_ratio(0.5)
+	# scorched ground + ash around him (volcanic read on the ritual stretch instead of snowy meadow)
+	var sm := ShaderMaterial.new(); sm.shader = load("res://assets/volcano/worldboss/shaders/wb_scorch.gdshader")
+	scorch = _plane(sm, Vector3(240, 1, 240)); scorch.visible = true
+	for c in crystals:
+		var l := Label.new(); l.text = "◆"; l.add_theme_font_size_override("font_size", 30)
+		l.add_theme_color_override("font_color", Color(1, 0.62, 0.15)); l.add_theme_constant_override("outline_size", 8)
+		l.visible = false; ui.add_child(l); markers.append([l, c])
+
+func _ember_ratio(r: float) -> void:
+	# CPUParticles3D has no amount_ratio: scale amount from the authored count (restarts only on state change)
+	var ps: Array = embers.find_children("*", "CPUParticles3D", true, false)
+	if embers is CPUParticles3D: ps.append(embers)
+	for p: CPUParticles3D in ps:
+		if not p.has_meta("base"): p.set_meta("base", p.amount)
+		var n := maxi(1, int(int(p.get_meta("base")) * r))
+		if p.amount != n: p.amount = n
+
+func _lava(param: String, v: float) -> void:
+	if lava_mat is ShaderMaterial: (lava_mat as ShaderMaterial).set_shader_parameter(param, v)
+
+func _update_fx(dt: float) -> void:
+	var cb := skel.find_bone("chest")
+	var cp := (skel.global_transform * skel.get_bone_global_pose(cb)).origin if cb >= 0 else global_position
+	embers.global_position = Vector3(cp.x, global_position.y, cp.z)
+	if wave.visible: _drape_wave()
+	if not scorch.has_meta("at") or (scorch.get_meta("at") as Vector3).distance_to(global_position) > 12.0:
+		scorch.global_position = Vector3(global_position.x, _gy(global_position.x, global_position.z), global_position.z)
+		scorch.set_meta("at", global_position); _drape(scorch, 32, 0.25)
+	# fog washes him out: thin the fog and darken/ash the sky near him
+	var e := m.get("env") as Environment
+	if e:
+		if env_base.is_empty(): env_base = {"fd": e.fog_density, "fc": e.fog_light_color, "ae": e.ambient_light_energy, "bg": e.background_energy_multiplier}
+		var k := 1.0 - clampf((_hero_d() - 150.0) / 250.0, 0.0, 1.0)
+		e.fog_density = lerpf(env_base.fd, env_base.fd * 0.15, k)
+		e.fog_light_color = (env_base.fc as Color).lerp(Color(0.22, 0.17, 0.15), k)
+		e.background_energy_multiplier = lerpf(env_base.bg, env_base.bg * 0.45, k)
+	# weak-point markers beyond ~80 m
+	var cam := get_viewport().get_camera_3d()
+	for mk in markers:
+		var l: Label = mk[0]; var c = mk[1]
+		var wpn: Node3D = c.get("node")
+		var show: bool = cam != null and wpn != null and not c.broken and visible
+		if show:
+			var wpos := wpn.global_position
+			show = cam.global_position.distance_to(wpos) > 80.0 and not cam.is_position_behind(wpos)
+			if show: l.position = cam.unproject_position(wpos) - Vector2(10, 20)
+		l.visible = show
 
 func place_at(i: int) -> void:
 	wp = i % waypoints.size()
@@ -107,10 +194,10 @@ func _gy(x: float, z: float) -> float:
 
 # ---------- art ----------
 func _veins() -> void:
-	lava_mat = (load(WB + "titan/" + ("titan_lava_material_volcano_glow.tres" if hq else "titan_lava_fallback_volcano_glow.tres")) as Material).duplicate()
+	lava_mat = (load(WB + "materials/" + ("wb_titan_lava_mat.tres" if hq else "wb_titan_lava_lod1_mat.tres")) as Material).duplicate()
 	for mi: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
 		mi.material_override = lava_mat
-	if lava_mat is ShaderMaterial: (lava_mat as ShaderMaterial).set_shader_parameter("glow_strength", 2.2)
+	if lava_mat is ShaderMaterial: (lava_mat as ShaderMaterial).set_shader_parameter("glow_strength", GLOW_IDLE)
 	elif lava_mat is StandardMaterial3D: (lava_mat as StandardMaterial3D).emission_energy_multiplier = 4.4
 	var j = JSON.parse_string(FileAccess.get_file_as_string(LAVA + "titan_drip_points.json"))
 	var scene: PackedScene = load(LAVA + "titan_drip_particles.tscn")
@@ -235,6 +322,9 @@ func _warn(t: String) -> void:
 # ---------- loop ----------
 func _set_state(s: String) -> void:
 	state = s; t_state = 0.0
+	_lava("stagger_dim", 1.0 if s in ["stagger", "knockdown"] else 0.0)
+	if s != "windup": _lava("glow_strength", GLOW_IDLE)
+	if embers: _ember_ratio(1.0 if s in ["windup", "release"] else 0.5)
 	match s:
 		"walk": _play("wb_walk")
 		"arrive": _play("wb_stomp")
@@ -288,20 +378,22 @@ func _process(dt: float) -> void:
 		"stagger":
 			if t_state > 8.0: _play("wb_idle"); _set_state("cool")
 		"knockdown":
-			if t_state - dt < 2.4 and t_state >= 2.4: shake(0.8, 1.0)
+			if t_state - dt < 2.4 and t_state >= 2.4: _stomp(0.8, true)
 			if t_state > 22.0 and ap.current_animation != "wb_getup": _play("wb_getup")
 		"cool":
 			if t_state > 10.0: _set_state("walk")
-	_update_crystals(dt); _update_prints(dt); _update_adds(dt); _update_ui(); _do_shake(dt)
+	_update_crystals(dt); _update_prints(dt); _update_adds(dt); _update_ui(); _update_fx(dt); _do_shake(dt)
 
 func _walk(dt: float) -> void:
 	var tgt := waypoints[wp]
 	var flat := Vector3(tgt.x - position.x, 0, tgt.z - position.z)
-	if flat.length() < 4.0:
+	if flat.length() < 25.0:      # advance early so he arcs into the next leg instead of snapping
+		var station := wp % STATION_EVERY == 0
 		wp = (wp + 1) % waypoints.size()
-		_set_state("arrive"); return
+		if station: _set_state("arrive"); return
+		tgt = waypoints[wp]; flat = Vector3(tgt.x - position.x, 0, tgt.z - position.z)
 	var want := atan2(-flat.x, -flat.z)         # Lucian's rig faces -Z
-	rotation.y = rotate_toward(rotation.y, want, deg_to_rad(8.0) * dt)
+	rotation.y = rotate_toward(rotation.y, want, deg_to_rad(6.0) * dt)   # ~28 m turn radius at 2.96 m/s
 	var fwd := _fwd()
 	var np := position + fwd * SPEED * dt
 	if maxf(absf(np.x), absf(np.z)) < 260.0: np = position     # hard rule: never enters the town
@@ -319,23 +411,26 @@ func _fwd() -> Vector3: return -Vector3(sin(rotation.y), 0, cos(rotation.y))
 func _footfall(i: int) -> void:
 	var b := skel.find_bone(["foot_L", "foot_R"][i])
 	var p := (skel.global_transform * skel.get_bone_global_pose(b)).origin
-	_print_at(p); _stomp(0.3, false, p)
+	await get_tree().create_timer(0.1).timeout
+	_print_at(p); _stomp(0.3, false, p, false)
 
 func _print_at(p: Vector3) -> void:
 	var mat: ShaderMaterial = (load(WB + "materials/wb_footprint_mat.tres") as Material).duplicate()
 	var fp := _plane(mat, Vector3(48, 1, 48)); fp.visible = true
 	fp.global_position = Vector3(p.x, _gy(p.x, p.z) + 0.4, p.z); fp.rotation.y = rotation.y + PI   # plane toes = +Z, Titan faces -Z
+	_drape(fp, 8, 0.35)
 	footprints.append([fp, mat, 0.0])
 	while footprints.size() > 14: (footprints.pop_front()[0] as Node).queue_free()
 
-func _stomp(amp: float, arrive: bool, at := Vector3.INF) -> void:
+func _stomp(amp: float, arrive: bool, at := Vector3.INF, delay := true) -> void:
 	if at == Vector3.INF: at = global_position
+	if delay: await get_tree().create_timer(0.1).timeout   # contact + 0.1 s: dust, print and shake together
 	var d: Node3D = dust_scene.instantiate(); d.top_level = true; add_child(d)
 	d.global_position = Vector3(at.x, _gy(at.x, at.z) + 0.3, at.z)
 	if arrive: d.scale = Vector3.ONE * 2.0
 	for p in d.find_children("*", "CPUParticles3D", true, true) + ([d] if d is CPUParticles3D else []): (p as CPUParticles3D).restart()
 	get_tree().create_timer(4.0).timeout.connect(d.queue_free)
-	shake(amp, 0.9 if arrive else 0.5)
+	shake(amp, 1.2)
 
 ## distance-gated camera shake: full within 120 m, linear to 0 at 250 m
 func shake(amp: float, sec: float) -> void:
@@ -348,7 +443,7 @@ func _do_shake(dt: float) -> void:
 	if cam == null: return
 	if shake_t > 0.0:
 		shake_t -= dt
-		var a := shake_amp * clampf(shake_t / 0.4, 0.0, 1.0)
+		var a := shake_amp * clampf(shake_t / 1.2, 0.0, 1.0)   # linear fade over 1.2 s
 		cam.h_offset = randf_range(-1, 1) * a; cam.v_offset = randf_range(-1, 1) * a
 		if shake_t <= 0.0: cam.h_offset = 0.0; cam.v_offset = 0.0
 
@@ -369,12 +464,46 @@ func _start_ritual() -> void:
 		cast_icon.texture = load(WB + "tex/wb_icon_lava_wave.png"); cast_lbl.text = "LAVA WAVE"
 		_ground(strip, global_position, 0.0)
 		wave.visible = true; wave.global_position = global_position; wave.scale = Vector3(80, 12, 80)
-		wave.global_position.y = _gy(global_position.x, global_position.z) + 6.0
+		wave.global_position.y = _gy(global_position.x, global_position.z)
 		(wave.material_override as ShaderMaterial).set_shader_parameter("rise", 0.0)
 		_warn("The Titan's core blazes: LAVA WAVE")
 
+## Lava Wave wall: open cylinder whose base follows the terrain at every angle (was a flat cylinder that cut through
+## hills and hung in the air over valleys). Rebuilt while it grows. UV like CylinderMesh (v: 0 top -> 1 bottom).
+func _drape_wave() -> void:
+	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var c := wave.global_position; var R := wave.scale.x; var H := maxf(wave.scale.y, 0.001); var n := 48
+	for i in n + 1:
+		var a := i / float(n) * TAU; var d := Vector3(sin(a), 0, cos(a))
+		var w := c + d * R; var yb := (_gy(w.x, w.z) - c.y - 1.0) / H
+		for t in 2:
+			st.set_uv(Vector2(i / float(n), 1.0 - t)); st.set_normal(d); st.add_vertex(Vector3(d.x, yb + t, d.z))
+	for i in n:
+		var a := i * 2
+		for k in [a, a + 1, a + 2, a + 1, a + 3, a + 2]: st.add_index(k)
+	wave.mesh = st.commit()
+
 func _ground(mi: MeshInstance3D, p: Vector3, yaw: float) -> void:
 	mi.visible = true; mi.global_position = Vector3(p.x, _gy(p.x, p.z) + 0.5, p.z); mi.rotation = Vector3(0, yaw, 0)
+	_drape(mi)
+
+## worldboss2: flat decal planes floated over / sank under the hilly outskirts (the "crack/ring in the sky" bug).
+## Rebuild the unit plane as a grid whose vertices follow the terrain (UVs unchanged), lift `lift` m.
+func _drape(mi: MeshInstance3D, n := 24, lift := 0.6) -> void:
+	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var xf := mi.global_transform; var y0 := xf.origin.y; var sy := maxf(mi.scale.y, 0.001)
+	for j in n + 1:
+		for i in n + 1:
+			var u := i / float(n); var v := j / float(n)
+			var lp := Vector3(u - 0.5, 0, v - 0.5)
+			var w := xf * lp
+			lp.y = (_gy(w.x, w.z) + lift - y0) / sy
+			st.set_uv(Vector2(u, v)); st.set_normal(Vector3.UP); st.add_vertex(lp)
+	for j in n:
+		for i in n:
+			var a := j * (n + 1) + i
+			for k in [a, a + 1, a + n + 1, a + 1, a + n + 2, a + n + 1]: st.add_index(k)
+	mi.mesh = st.commit()
 	var sm := mi.material_override as ShaderMaterial
 	for k in ["progress", "erupt", "rise"]: sm.set_shader_parameter(k, 0.0)
 
@@ -383,6 +512,7 @@ func _wind_len() -> float: return 12.0 if ritual == "fissure" else 10.0
 func _windup(_dt: float) -> void:
 	var k := clampf(t_state / _wind_len(), 0.0, 1.0)
 	_set_glow_charge(k, ritual == "wave")
+	_lava("glow_strength", lerpf(GLOW_IDLE, GLOW_CAST, k))
 	if ritual == "fissure":
 		(crack.material_override as ShaderMaterial).set_shader_parameter("progress", k)
 		for f in fissures: (f.material_override as ShaderMaterial).set_shader_parameter("progress", k)
@@ -403,11 +533,11 @@ func _complete() -> void:
 		(crack.material_override as ShaderMaterial).set_shader_parameter("erupt", 1.0)
 		for f in fissures: (f.material_override as ShaderMaterial).set_shader_parameter("erupt", 1.0)
 		if h and Vector2(h.global_position.x - crack.global_position.x, h.global_position.z - crack.global_position.z).length() < 60.0: hit = true
-		shake(1.0, 1.2); _warn("FISSURE SLAM!")
+		_stomp(1.0, true, crack.global_position); _warn("FISSURE SLAM!")
 	else:
 		create_tween().tween_property(wave, "scale", Vector3(170, 12, 170), 3.0)
 		if h and _hero_d() < 170.0 and not bool(m.get("cheat").get("fly", false)): hit = true
-		shake(0.8, 1.5); _warn("LAVA WAVE!")
+		_stomp(0.8, true); _warn("LAVA WAVE!")
 	if pressure >= 3: pressure = 0; _warn("VOLCANO PRESSURE PEAKS - lava bombs rain on the region")
 	var party = m.get("party")
 	if hit and party and party.combat and not bool(m.get("cheat").get("god", false)):

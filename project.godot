@@ -6,6 +6,11 @@ config/icon="res://branding/icon_192.png"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 
+; --- port-net hook: multiplayer autoload (res://net) ---
+[autoload]
+
+Net="*res://net/Net.gd"
+
 [boot_splash]
 
 bg_color=Color(0, 0, 0, 1)

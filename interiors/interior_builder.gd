@@ -182,7 +182,8 @@ static func _foot(info: Dictionary, p: Array, P: Callable) -> Rect2:
 	var pos: Vector3 = P.call(p[2], p[3], 0.0); var c := Vector2(pos.x, pos.z); var ex: Array = p[5] if p.size() > 5 else []
 	var sz := Vector2(0.6, 0.6)
 	match p[0]:
-		"_runner", "_area", "_glasswall", "_bread", "_tools", "_gear": return Rect2(c, Vector2.ZERO)
+		"_runner", "_area", "_glasswall", "_bread", "_tools": return Rect2(c, Vector2.ZERO)
+		"_gear": sz = Vector2(ex[0] * 2.0, 0.4)
 		"_round_table": sz = Vector2.ONE * (ex[0] + 0.75) * 2.0
 		"_fountain": sz = Vector2.ONE * ex[0] * 2.0
 		"_pillar": sz = Vector2.ONE * ex[1] * 2.0
@@ -267,6 +268,19 @@ static func _prop(info: Dictionary, p: Array, P: Callable) -> void:
 			var mi := MeshInstance3D.new(); var cm := CylinderMesh.new(); cm.top_radius = ex[1]; cm.bottom_radius = ex[1]; cm.height = ex[0]
 			mi.mesh = cm; mi.material_override = K.mat(ex[2] if ex.size() > 2 else "palestone"); mi.position = pos + Vector3(0, ex[0] / 2, 0); mi.layers = K.LAYER; fn.add_child(mi)
 			var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var sh := CylinderShape3D.new(); sh.radius = ex[1]; sh.height = ex[0]; cs.shape = sh; sb.add_child(cs); mi.add_child(sb)
+		"_gear":   # wooden gear wheel standing upright, faces along the rot direction [radius, hub height]
+			var r: float = ex[0]; var hy: float = ex[1] if ex.size() > 1 else r + 0.2
+			var g := Node3D.new(); g.position = pos + Vector3(0, hy, 0); g.rotation.y = deg_to_rad(rot); fn.add_child(g)
+			var mi := MeshInstance3D.new(); var cm := CylinderMesh.new(); cm.top_radius = r; cm.bottom_radius = r; cm.height = 0.18; cm.radial_segments = 24
+			mi.mesh = cm; mi.material_override = K.mat("oak"); mi.rotation.x = PI / 2; mi.layers = K.LAYER; g.add_child(mi)
+			K.box(g, Vector3.ZERO, Vector3(0.22, 0.22, 1.2), "iron", false)
+			for k in 16:
+				var a: float = TAU * k / 16.0
+				var t := K.box(g, Vector3(cos(a), sin(a), 0) * (r + 0.08), Vector3(0.16, 0.16, 0.2), "darkoak", false); t.rotation.z = a
+			for k in 4:
+				var sp := K.box(g, Vector3.ZERO, Vector3(r * 2.0 - 0.1, 0.1, 0.1), "darkoak", false); sp.rotation.z = PI / 4 * k
+			var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var sh := BoxShape3D.new(); sh.size = Vector3(r * 2.0, hy + r, 0.4)
+			cs.shape = sh; cs.position.y = (hy + r) / 2.0; sb.add_child(cs); sb.position = pos; sb.rotation.y = deg_to_rad(rot); fn.add_child(sb)
 		"_round_table":  # [radius, chairs]
 			var mi := MeshInstance3D.new(); var cm := CylinderMesh.new(); cm.top_radius = ex[0]; cm.bottom_radius = ex[0]; cm.height = 0.1
 			mi.mesh = cm; mi.material_override = K.mat("darkoak"); mi.position = pos + Vector3(0, 0.78, 0); mi.layers = K.LAYER; fn.add_child(mi)

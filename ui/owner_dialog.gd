@@ -9,7 +9,7 @@ var btn: Button
 func _ready() -> void:
 	name = "OwnerDialog"
 	add_theme_stylebox_override("panel", VStyle.box(Color("#171127f8"), Color("#c9a24a"), 2, 14, 16))
-	set_anchors_preset(PRESET_CENTER); custom_minimum_size = Vector2(380, 0)
+	custom_minimum_size = Vector2(380, 0); set_anchors_and_offsets_preset(PRESET_CENTER, PRESET_MODE_MINSIZE)
 	var v := VBoxContainer.new(); v.add_theme_constant_override("separation", 8); add_child(v)
 	v.add_child(VStyle.label("🔒 Owner Cheats", 18, VStyle.GOLD2))
 	field = LineEdit.new(); field.secret = true; field.max_length = VOwnerGate.MAX_PASS_LEN; field.placeholder_text = "Owner passphrase"; field.custom_minimum_size = Vector2(0, 46); v.add_child(field)

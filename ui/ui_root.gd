@@ -41,7 +41,7 @@ var _hero_from_title := false
 
 func _ready() -> void:
 	layer = 20; process_mode = Node.PROCESS_MODE_ALWAYS
-	root = Control.new(); root.name = "UIRoot"; root.set_anchors_preset(Control.PRESET_FULL_RECT); root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root = Control.new(); root.name = "UIRoot"; root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.theme = VStyle.make_theme(); add_child(root)
 	hud = preload("res://ui/hud.gd").new(); hud.version = VERSION; root.add_child(hud); hud.menu_pressed.connect(toggle_menu)
 	quick = preload("res://ui/quick_menu.gd").new(); root.add_child(quick); quick.hide()

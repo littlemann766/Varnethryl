@@ -68,7 +68,7 @@ func _choice(key: String, val: String, text: String, getter: Callable, setter: C
 	b.pressed.connect(func(): setter.call(val); for f in syncs: f.call()); s.call(); syncs.append(s); return b
 
 func lab(t: String) -> Label:
-	var l := VStyle.label(t, 14); l.custom_minimum_size = Vector2(120, 0); return l
+	var l := VStyle.label(t, 14); l.autowrap_mode = TextServer.AUTOWRAP_OFF; l.custom_minimum_size = Vector2(120, 0); return l
 
 func build() -> void:
 	syncs.clear()

@@ -8,12 +8,12 @@ signal settings
 var buttons := {}
 
 func _ready() -> void:
-	set_anchors_preset(PRESET_FULL_RECT); mouse_filter = MOUSE_FILTER_STOP
+	set_anchors_and_offsets_preset(PRESET_FULL_RECT); mouse_filter = MOUSE_FILTER_STOP
 	var bg := TextureRect.new(); bg.texture = load("res://ui/assets/poster.webp")
-	bg.set_anchors_preset(PRESET_FULL_RECT); bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE; bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	bg.set_anchors_and_offsets_preset(PRESET_FULL_RECT); bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE; bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	add_child(bg)
-	var shade := ColorRect.new(); shade.color = Color(0.03, 0.04, 0.08, 0.80); shade.set_anchors_preset(PRESET_FULL_RECT); add_child(shade)
-	var center := CenterContainer.new(); center.set_anchors_preset(PRESET_FULL_RECT); add_child(center)
+	var shade := ColorRect.new(); shade.color = Color(0.03, 0.04, 0.08, 0.80); shade.set_anchors_and_offsets_preset(PRESET_FULL_RECT); add_child(shade)
+	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(PRESET_FULL_RECT); add_child(center)
 	var card := PanelContainer.new()
 	var sb := VStyle.box(Color("#1a2438f4"), Color("#bd9859"), 2, 9, 34)
 	sb.shadow_color = Color(0, 0, 0, 0.7); sb.shadow_size = 24

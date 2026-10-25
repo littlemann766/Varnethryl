@@ -9,9 +9,9 @@ var current := 0
 var cards := []
 
 func _ready() -> void:
-	set_anchors_preset(PRESET_FULL_RECT); mouse_filter = MOUSE_FILTER_STOP
-	var shade := ColorRect.new(); shade.color = Color(0.03, 0.03, 0.07, 0.92); shade.set_anchors_preset(PRESET_FULL_RECT); add_child(shade)
-	var m := MarginContainer.new(); m.set_anchors_preset(PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(PRESET_FULL_RECT); mouse_filter = MOUSE_FILTER_STOP
+	var shade := ColorRect.new(); shade.color = Color(0.03, 0.03, 0.07, 0.92); shade.set_anchors_and_offsets_preset(PRESET_FULL_RECT); add_child(shade)
+	var m := MarginContainer.new(); m.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	for k in ["left", "right", "top", "bottom"]: m.add_theme_constant_override("margin_" + k, 24)
 	add_child(m)
 	var v := VBoxContainer.new(); v.add_theme_constant_override("separation", 10); m.add_child(v)
@@ -25,7 +25,7 @@ func _ready() -> void:
 	for h in VHeroData.all():
 		var b := Button.new(); b.name = "Hero_%d" % h.id; b.custom_minimum_size = Vector2(0, 236); b.size_flags_horizontal = SIZE_EXPAND_FILL
 		b.clip_contents = true
-		var vb := VBoxContainer.new(); vb.set_anchors_preset(PRESET_FULL_RECT); vb.mouse_filter = MOUSE_FILTER_IGNORE; vb.offset_left = 6; vb.offset_right = -6; vb.offset_top = 6; vb.offset_bottom = -6
+		var vb := VBoxContainer.new(); vb.set_anchors_and_offsets_preset(PRESET_FULL_RECT); vb.mouse_filter = MOUSE_FILTER_IGNORE; vb.offset_left = 6; vb.offset_right = -6; vb.offset_top = 6; vb.offset_bottom = -6
 		var tr := TextureRect.new(); tr.texture = load(h.portrait); tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE; tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		tr.size_flags_vertical = SIZE_EXPAND_FILL; tr.mouse_filter = MOUSE_FILTER_IGNORE; vb.add_child(tr)
 		var n := VStyle.label(h.name, 14, VStyle.GOLD); n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; n.mouse_filter = MOUSE_FILTER_IGNORE; vb.add_child(n)

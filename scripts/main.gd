@@ -4,7 +4,7 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "9"
+const VERSION := "10"
 const DEFS := [
 	["guildhall",0,-21,0.0,"Guild Hall"], ["library",-24,-27,0.0,"Grand Library"], ["townhall",23,-26,0.0,"Town Hall"],
 	["mage",-44,-31,0.0,"Mage Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
@@ -169,7 +169,7 @@ func _ready() -> void:
 	_walls_and_gate()
 	for d in DEFS: _building(d)
 	_street_kit()
-	_backdrop_castle()
+	# test 10: boss "Fix the castle and or get rid of it" - the Tripo backdrop castle reads as shredded/floating, removed
 	_harbour()
 	_dressing()
 	_hi_terrain()
@@ -203,7 +203,16 @@ func height(x: float, z: float) -> float:
 	if r < 215.0: return 0.0
 	var ld := Vector2(x, z).distance_to(LAKE)
 	if ld < 100.0: return lerp(-4.0, _height_raw(x, z, r), smoothstep(45.0, 100.0, ld))
-	return _height_raw(x, z, r)
+	var h := _height_raw(x, z, r)
+	# SW-corner port: level harbour platform (+0.6) blending out to the hills by 170 m, then the sea floor
+	var pd := Vector2(x, z).distance_to(PORT)
+	if pd < 260.0: h = lerpf(0.05, h, smoothstep(80.0, 260.0, pd))
+	# hills fall away gently to the SW coast (no sheer wall at the sea edge)
+	var dsea := Vector2(maxf(0.0, x - SEA_COAST_X), maxf(0.0, SEA_NORTH_Z - z)).length()
+	if dsea < 160.0: h *= smoothstep(0.0, 160.0, dsea)
+	var sm := sea_mask(x, z)
+	if sm > 0.0: h = lerpf(h, -4.0, sm)
+	return h
 
 func _height_raw(x: float, z: float, r: float) -> float:
 	var t := smoothstep(215.0, 340.0, r)
@@ -528,12 +537,11 @@ func _harbour() -> void:
 	var d = _c2_door_raw("port")
 	if d != null: _door_light(root.global_transform * (d + Vector3(0.9, 2.6, 0.7)))
 
-## Harbour on the lake shore 70 deg round from the town-facing side, so from town the quay and piers are seen
-## side-on over the water instead of the warehouses' back wall. Returns [centre, unit vector into the lake].
+## Harbour in the SW corner on the coast (test 10). Returns [centre, unit vector into the sea].
 static func harbour_spot() -> Array:
-	var a := atan2(-LAKE.y, -LAKE.x) + deg_to_rad(70.0)
-	var out := Vector2(cos(a), sin(a))
-	return [LAKE + out * 58.0, -out]
+	# quay edge (model z=0) 2 m inland of the coast; shops (model z -20..-5) on land, piers/boats out to z=+17 over the
+	# sea to the west. Shifted 8 m south so the Tidewrack road's end (-425.6, 375) stays clear of the shop row.
+	return [Vector2(SEA_COAST_X + 2.0, PORT.y + 8.0), Vector2(-1, 0)]
 
 static func _c2_door_raw(key: String) -> Variant:
 	if _c2_doors.is_empty(): card2_door("inn")
@@ -727,6 +735,15 @@ func _lod_instances(base: String, xf: Transform3D, shadow: bool) -> void:
 			hi_terrain.append([mi, lod])
 
 const LAKE := Vector2(250, -200)
+## test 10 (boss: "Port is supposed to be in the corner"): Tidewrack harbour sits in the SOUTH-WEST corner exactly as in
+## v1.5.33 (bossregions.js PORT_CENTER = (-425.6, 392); the Tidewrack road already ends at its gate, (-425.6, 375)).
+## The original harbour opens WEST onto sea (seaX -104..-19); here that sea is a coast filling the whole SW corner.
+const SEA_COAST_X := PORT.x - 14.0     # coastline (N-S) just west of the quay
+const SEA_NORTH_Z := PORT.y - 70.0     # sea's north shore
+static func sea_mask(x: float, z: float) -> float:
+	return (1.0 - smoothstep(SEA_COAST_X - 8.0, SEA_COAST_X, x)) * smoothstep(SEA_NORTH_Z - 8.0, SEA_NORTH_Z, z)
+static func near_port(p: Vector2, pad := 0.0) -> bool:
+	return p.distance_to(PORT) < 150.0 + pad or sea_mask(p.x, p.y) > 0.0 or (p.x < SEA_COAST_X + pad and p.y > SEA_NORTH_Z - 10.0 - pad)
 const SHORE_YAW := PI
 func _hi_terrain() -> void:
 	var T := "res://assets/hi/terrain/"
@@ -737,19 +754,25 @@ func _hi_terrain() -> void:
 		if _road_dist(p) < 70 or p.distance_to(Vector2(405, -402)) < 150: continue
 		var k: String = ["peak_snow_hi", "peak_bare_hi", "peak_snow_hi", "peak_bare_hi"][i % 4]
 		var sc := rng.randf_range(1.3, 2.0)
-		_lod_instances(T + k, Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(sc, sc * rng.randf_range(0.9, 1.2), sc)), Vector3(p.x, height(p.x, p.y) - 6.0, p.y)), true)
+		var ry := rng.randf() * TAU; var sy := rng.randf_range(0.9, 1.2)
+		if near_port(p, 60.0): continue   # after the rng draws so every other peak stays where it was
+		_lod_instances(T + k, Transform3D(Basis(Vector3.UP, ry).scaled(Vector3(sc, sc * sy, sc)), Vector3(p.x, height(p.x, p.y) - 6.0, p.y)), true)
 	_lod_instances(T + "volcano_flank_hi", Transform3D(Basis().scaled(Vector3(1.6, 1.6, 1.6)), Vector3(405, height(405, -402) - 3.0, -402)), true)
 	for i in 18:
 		var a2 := rng.randf() * TAU; var r2 := rng.randf_range(250, 460); var p2 := Vector2(cos(a2), sin(a2)) * r2
-		if _road_dist(p2) < 30 or p2.distance_to(LAKE) < 70: continue
+		if _road_dist(p2) < 30 or p2.distance_to(LAKE) < 70 or near_port(p2, 10.0): continue
 		var k2: String = "boulder_strata_hi"
 		var s2 := rng.randf_range(0.5, 1.0) if k2.begins_with("cliff") else rng.randf_range(0.8, 1.6)
 		_lod_instances(T + k2, Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s2, s2, s2)), Vector3(p2.x, height(p2.x, p2.y) - 1.0, p2.y)), true)
 	# lake with Beth's shore pieces, waterline at y=0
 	var w := MeshInstance3D.new(); var pm := CylinderMesh.new(); pm.top_radius = 66; pm.bottom_radius = 66; pm.height = 0.2; pm.radial_segments = 64; pm.rings = 1
 	pm.material = _water_mat(); w.mesh = pm; w.position = Vector3(LAKE.x, -0.1, LAKE.y); add_child(w)
+	# SW-corner sea (test 10): one big water quad from the coast to the world edge
+	var sw := MeshInstance3D.new(); var sp := PlaneMesh.new(); var x0 := -1600.0; var z1 := 1600.0
+	sp.size = Vector2(SEA_COAST_X + 2.0 - x0, z1 - (SEA_NORTH_Z - 2.0)); sp.material = _water_mat(); sw.mesh = sp; sw.name = "Sea"
+	sw.position = Vector3((x0 + SEA_COAST_X + 2.0) * 0.5, -0.1, (SEA_NORTH_Z - 2.0 + z1) * 0.5); sw.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(sw)
 	# the boss's Tripo lighthouse: rock island + tower share one origin (Beth). LOD1/LOD2 only.
-	var lh := Node3D.new(); lh.name = "Lighthouse"; lh.position = Vector3(LAKE.x + 18, -0.6, LAKE.y - 12); add_child(lh)
+	var lh := Node3D.new(); lh.name = "Lighthouse"; lh.position = Vector3(SEA_COAST_X - 4.0, -0.6, PORT.y + 62.0); add_child(lh)   # test 10: on the SW coast, south of the harbour
 	for part in ["lighthouse_rock_island", "lighthouse_tower"]:
 		for k in 2:
 			var v: Node3D = load("res://assets/card2/tripo/bld_%s_tripo%s.glb" % [part, ["_lod1", "_lod2"][k]]).instantiate(); lh.add_child(v)
@@ -833,8 +856,9 @@ func _scatter(path: String, count: int, area: float, minr: float, sway: float, s
 		tries += 1
 		var p := Vector2(rng.randf_range(-area, area), rng.randf_range(-area, area))
 		if p.length() < minr or not _ok_spot(p, 2.0): continue
-		var s := rng.randf_range(smin, smax)
-		xf.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(p.x, height(p.x, p.y) - 0.05, p.y)))
+		var s := rng.randf_range(smin, smax); var ry := rng.randf() * TAU
+		if near_port(p, 2.0): continue   # SW-corner port/sea (test 10), after the draws so the rest is unchanged
+		xf.append(Transform3D(Basis(Vector3.UP, ry).scaled(Vector3(s, s, s)), Vector3(p.x, height(p.x, p.y) - 0.05, p.y)))
 	for part in _mesh_parts(path):
 		var mesh: Mesh = part[0] if sway == 0.0 else _wind_mat_for(part[0], sway)
 		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = mesh; mm.instance_count = xf.size()
@@ -856,8 +880,9 @@ func _pick(count: int, area: float, minr: float, smin: float, smax: float, maxr 
 		tries += 1
 		var p := Vector2(rng.randf_range(-area, area), rng.randf_range(-area, area))
 		if p.length() < minr or p.length() > maxr or not _ok_spot(p, 2.0) or p.distance_to(LAKE) < 62: continue
-		var s := rng.randf_range(smin, smax)
-		xf.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(p.x, height(p.x, p.y) - 0.05, p.y)))
+		var s := rng.randf_range(smin, smax); var ry := rng.randf() * TAU
+		if near_port(p, 2.0): continue   # test 10 SW port/sea, after the draws so the rest is unchanged
+		xf.append(Transform3D(Basis(Vector3.UP, ry).scaled(Vector3(s, s, s)), Vector3(p.x, height(p.x, p.y) - 0.05, p.y)))
 	return xf
 
 func _trees_hi(kind: String, xf: Array, sway: float, collide: bool, chunk := 140.0) -> void:
@@ -1282,6 +1307,25 @@ func _run_bench() -> void:
 			joy_vec = Vector2.ZERO
 		get_tree().quit()
 		return
+	if only == "t10":
+		VUI._enter("solo"); bench = true
+		var hs := harbour_spot(); var hb: Vector2 = hs[0]
+		# close: on the quay road east of the shops, looking west across the harbour to the sea
+		await _shot("t10_harbour_close", Vector3(hb.x + 40, 0, hb.y - 4), PI / 2, -0.08, 14.0, 2, 40)
+		await _shot("t10_harbour_close_lowtier", Vector3(hb.x + 40, 0, hb.y - 4), PI / 2, -0.08, 14.0, 0, 30)
+		var hc := Camera3D.new(); hc.far = 1500; add_child(hc)
+		for v in [["overview", Vector3(PORT.x + 130, 70, PORT.y - 110), Vector3(PORT.x - 20, 0, PORT.y + 10)],
+				["docks", Vector3(hb.x - 45, 12, hb.y - 40), Vector3(hb.x - 6, 1, hb.y)],
+				["lighthouse", Vector3(SEA_COAST_X + 50, 18, PORT.y + 30), Vector3(SEA_COAST_X - 4, 4, PORT.y + 62)],
+				["from_road", Vector3(-387, 6, 322), Vector3(hb.x, 2, hb.y)],
+				["corner_map", Vector3(-200, 420, 200), Vector3(-430, 0, 400)],
+				["castle_" + OS.get_environment("CASTLE_TAG"), Vector3(395, height(395, -40) + 4, -40), Vector3(480, 25, -110)]]:
+			hc.look_at_from_position(v[1], v[2]); hc.current = true
+			for i in 40: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png("user://shot_t10_%s.png" % v[0])
+		hc.current = false; cam.current = true; hc.queue_free()
+		get_tree().quit()
+		return
 	if only == "t9":
 		VUI._enter("solo"); bench = true
 		# camera fade: a frost troll parked between the camera and the hero (camera sits behind the hero, +Z at yaw 0)
@@ -1585,7 +1629,7 @@ func _build_minimap() -> void:
 		for x in N:
 			var w := MAP_RECT.position + Vector2(x + 0.5, y + 0.5) * px
 			var c := Color(0.30, 0.42, 0.22).lerp(Color(0.36, 0.48, 0.26), noise.get_noise_2d(w.x, w.y) * 0.5 + 0.5)
-			if w.distance_to(LAKE) < 60.0: c = Color(0.22, 0.42, 0.6)
+			if w.distance_to(LAKE) < 60.0 or sea_mask(w.x, w.y) > 0.5: c = Color(0.22, 0.42, 0.6)
 			var inside_wall := absf(w.x) < CITY_HALF and absf(w.y) < CITY_HALF
 			if inside_wall: c = c.lerp(Color(0.45, 0.43, 0.36), 0.35)
 			if absf(maxf(absf(w.x), absf(w.y)) - CITY_HALF) < 2.5: c = Color(0.55, 0.52, 0.47)

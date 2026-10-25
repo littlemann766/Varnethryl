@@ -6,6 +6,7 @@ const SPAWNS := [
 	["frosttroll_a", Vector3(40, 0, 235)],
 	["frosttroll_b", Vector3(52, 0, 248)],
 	["titan", Vector3(-70, 0, 262)],
+	["stonetroll", Vector3(20, 0, 225)],   # test 7: Beth's stone troll at the approved 3x Owner (5.715 m)
 	# test 6: Beth's rigged wolf, a pack outside the west gate
 	["wolf", Vector3(-232, 0, 18)], ["wolf", Vector3(-238, 0, 26)], ["wolf", Vector3(-229, 0, 31)],
 ]

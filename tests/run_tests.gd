@@ -32,13 +32,14 @@ func test_heights() -> void:
 		ok(near(h, HeroRoster.height(id), 0.06 * HeroRoster.height(id)), "%s rendered height %.3f vs %.3f" % [id, h, HeroRoster.height(id)])
 		print("HEIGHT %-10s %.3f m (target %.3f, scale %.3f)" % [id, h, HeroRoster.height(id), r.applied_scale])
 		r.free()
-	var M := {"frosttroll_a": 5.715, "frosttroll_b": 5.715, "titan": 11.43, "titan_volcano": 20.955}
+	var M := {"frosttroll_a": 5.715, "frosttroll_b": 5.715, "titan": 11.43, "titan_volcano": 20.955, "stonetroll": 5.715}
 	for t in M:
 		var T: Dictionary = Enemy.TYPES[t]
 		var r2 := CharacterRig.new().setup(T.model, T.height)
 		root.add_child(r2)
 		var h2 := CharacterRig.measure(r2) * _idle_root_scale(r2)   # volcano titan's 20.955 m lives on the idle root-bone scale track
-		ok(r2.applied_scale == 1.0, "%s loaded at scale 1 (size baked)" % t)
+		if t == "stonetroll": ok(r2.applied_scale > 2.0, "stonetroll export (~1.8 m) scaled up to the approved 3x Owner (scale %.2f)" % r2.applied_scale)
+		else: ok(r2.applied_scale == 1.0, "%s loaded at scale 1 (size baked)" % t)
 		ok(near(h2, M[t], 0.06 * M[t]), "%s height %.3f vs %.3f" % [t, h2, M[t]])
 		print("HEIGHT %-14s %.3f m (target %.3f, scale %.3f)" % [t, h2, M[t], r2.applied_scale])
 		if t == "titan_volcano": ok(r2.applied_scale == 1.0, "volcano titan loaded at scale 1")

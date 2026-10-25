@@ -4,7 +4,7 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "6"
+const VERSION := "7"
 const DEFS := [
 	["guildhall",0,-21,0.0,"Guild Hall"], ["library",-24,-27,0.0,"Grand Library"], ["townhall",23,-26,0.0,"Town Hall"],
 	["mage",-44,-31,0.0,"Mage Academy"], ["treasury",41,-27,0.0,"Treasury"], ["keep",0,-48,0.0,"Castle Keep"],
@@ -102,6 +102,7 @@ var sun: DirectionalLight3D
 var interiors: InteriorManager   # res://interiors (walk-in interiors)
 var sky_mat: ProceduralSkyMaterial
 var emissive_mats := []
+var hero_fill: OmniLight3D
 var lamp_lights := []        # [OmniLight3D, min_tier]
 var glow_mm: Array = []      # lantern glow multimeshes
 var glow_mat: StandardMaterial3D
@@ -272,7 +273,7 @@ func _set_time(h: float) -> void:
 	var sunset := 1.0 - smoothstep(0.0, 0.35, abs(day))
 	if night:
 		sun.rotation_degrees = Vector3(-35, -35 + tod * 5, 0)     # moon
-		sun.light_color = Color(0.55, 0.65, 1.0); sun.light_energy = 0.1
+		sun.light_color = Color(0.6, 0.7, 1.0); sun.light_energy = 0.38   # test 7: brighter moon (night street read too dark)
 		sun.light_volumetric_fog_energy = 0.4
 	else:
 		sun.rotation_degrees = Vector3(-max(elev, 4.0), -100 + (tod - 6.0) * 15.0, 0)
@@ -286,7 +287,7 @@ func _set_time(h: float) -> void:
 	sky_mat.ground_bottom_color = Color(0.2, 0.22, 0.2).lerp(Color(0.01, 0.01, 0.02), nf)
 	sky_mat.sun_angle_max = 25.0; sky_mat.sun_curve = 0.1
 	sky_mat.sky_cover_modulate = Color(1, 1, 1, nf)
-	env.ambient_light_energy = lerp(0.9, 0.12, nf)
+	env.ambient_light_energy = lerp(0.9, 0.4, nf)
 	env.fog_light_color = sky_mat.sky_horizon_color
 	env.volumetric_fog_albedo = Color(0.9, 0.9, 0.95).lerp(Color(1.0, 0.7, 0.5), sunset)
 	env.tonemap_exposure = lerp(1.0, 1.15, nf)
@@ -295,6 +296,12 @@ func _set_time(h: float) -> void:
 	glow_mat.emission_energy_multiplier = em * 2.0
 	for gm in glow_mm: gm.visible = em > 0.05
 	var lamp_on := em > 0.3
+	# soft warm fill that follows the hero at night so the Owner reads clearly on dark streets (no shadows: cheap)
+	if hero_fill == null and hero:
+		hero_fill = OmniLight3D.new(); hero_fill.name = "HeroNightFill"; hero_fill.light_color = Color(1.0, 0.85, 0.65)
+		hero_fill.light_energy = 0.9; hero_fill.omni_range = 7.0; hero_fill.position = Vector3(0, 2.6, 1.2); hero_fill.shadow_enabled = false
+		hero.add_child(hero_fill)
+	if hero_fill: hero_fill.visible = nf > 0.3
 	for l in lamp_lights:
 		l[0].visible = lamp_on and tier >= l[1]
 		if not (tier == 3 and lamp_on): l[0].shadow_enabled = false
@@ -381,9 +388,9 @@ func _fountain() -> void:
 		var post := _place_glb("res://assets/dressing/lantern_post.glb", lp, -a)
 		var top: AABB = _meshes(post, [])[0].get_aabb()
 		var l := OmniLight3D.new(); l.position = lp + Vector3(0, top.end.y - 0.4, 0); l.light_color = Color(1.0, 0.72, 0.4)
-		l.light_energy = 2.2; l.omni_range = 14.0; l.omni_attenuation = 1.3
+		l.light_energy = 3.0; l.omni_range = 18.0; l.omni_attenuation = 1.1
 		l.set_meta("shadow_ultra", true)
-		add_child(l); lamp_lights.append([l, 2])
+		add_child(l); lamp_lights.append([l, 1])
 		plaza_glow.append(l.position)
 	# spray
 	var p := _particles(400, 1.6, _soft_quad(Color(0.85, 0.93, 1.0, 0.7), 0.18, false), 0)
@@ -1260,7 +1267,10 @@ func _hook_ui() -> void:
 		var hid := _roster_id(id)
 		if hid != "" and party.hero_id != hid: party.set_hero(hid))
 	var act_id := _roster_id(int(VSave.state.get("active", 0)))
-	if act_id != "" and not bench: party.set_hero(act_id)
+	# the boss plays as the Owner: an unlocked owner gate always starts on the Owner hero (HUD said "Hero: Aldric")
+	if VUI.gate and VUI.gate.is_owner(): party.set_hero("owner")
+	elif act_id != "" and not bench: party.set_hero(act_id)
+	VUI.owner_set.connect(func(on: bool): if on and not bench and party.hero_id != "owner": party.set_hero("owner"))
 	Net.state_provider = func() -> Dictionary:
 		var st: Dictionary = party.net_state(); st.erase("position"); st.erase("heading")
 		for k in ["x", "y", "z"]: st[k] = float(st[k]) * JS_UNITS

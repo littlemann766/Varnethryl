@@ -22,6 +22,7 @@ signal menu_toggled(open: bool)
 signal combat_toggled(on: bool)
 signal owner_cheat(key: String, value)
 signal coowner_requested
+signal owner_set(on: bool)
 signal dev_action(key: String)
 
 const VERSION := "1.5.33"
@@ -80,7 +81,7 @@ func _ready() -> void:
 	else: show_title()
 
 func _set_owner(v: bool) -> void:
-	is_owner = v; settings.is_owner = v
+	is_owner = v; settings.is_owner = v; owner_set.emit(v)
 	if settings.visible: settings.build()
 
 func show_title() -> void:

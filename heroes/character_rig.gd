@@ -239,6 +239,7 @@ func _add_cloth() -> void:
 		for t in range(a.get_track_count() - 1, -1, -1):
 			var tp := str(a.track_get_path(t))
 			if names.has(tp.get_slice(":", 1)): a.remove_track(t)
+	_fix_chain_rest(sk, names)
 	for bn in names: sk.reset_bone_pose(sk.find_bone(bn))
 	if chains[0][0] == "cape": _reshape_cape(sk)
 	cloth = SpringBoneSimulator3D.new(); cloth.name = "Cloth"; sk.add_child(cloth)
@@ -258,6 +259,24 @@ func _add_cloth() -> void:
 		var col := SpringBoneCollisionCapsule3D.new(); col.bone_name = c[0]
 		col.radius = c[1]; col.height = c[2]; col.position_offset = c[3]
 		cloth.add_child(col)
+
+
+## Beth's export leaves the cape/hood bone rests at identity (only the clips placed them). Rebuild each chain
+## bone's rest from the skin's inverse bind poses so the stripped chain hangs where the mesh was bound.
+func _fix_chain_rest(sk: Skeleton3D, names: Dictionary) -> void:
+	var bind := {}
+	for mi: MeshInstance3D in _meshes(model, []):
+		if mi.skin == null: continue
+		for i in mi.skin.get_bind_count():
+			var bn := mi.skin.get_bind_name(i)
+			if bn == "" and mi.skin.get_bind_bone(i) >= 0: bn = sk.get_bone_name(mi.skin.get_bind_bone(i))
+			if not bind.has(bn): bind[bn] = mi.skin.get_bind_pose(i).affine_inverse()
+	var order := names.keys(); order.sort_custom(func(x, y): return sk.find_bone(x) < sk.find_bone(y))
+	for bn in order:
+		if not bind.has(bn): continue
+		var b := sk.find_bone(bn); var p := sk.get_bone_parent(b)
+		var pg: Transform3D = (bind[sk.get_bone_name(p)] if bind.has(sk.get_bone_name(p)) else sk.get_bone_global_rest(p)) if p >= 0 else Transform3D()
+		sk.set_bone_rest(b, pg.affine_inverse() * bind[bn])
 
 
 ## The source cape mesh is a wide stiff bell (flares to ~3x shoulder width, down to the ground). Reshape it once
@@ -297,6 +316,11 @@ func _reshape_cape(sk: Skeleton3D) -> void:
 					for j in k: if is_cape.has(bones[i * k + j]): s += w[i * k + j]
 					cw[i] = s
 					if s > 0.5: lo = minf(lo, vs[i].y); maxw = maxf(maxw, absf(vs[i].x))
+				# back profile of the body (incl. the fox tail) under the cape: min z per 5 cm height band
+				var prof := {}
+				for i in vs.size():
+					if cw[i] < 0.05 and absf(vs[i].x) < 0.24 and vs[i].y > 0.3:
+						var bi := int(vs[i].y / 0.05); prof[bi] = minf(prof.get(bi, 0.0), vs[i].z)
 				if lo < INF:
 					var span := maxf(top.y - lo, 0.01)
 					for i in vs.size():
@@ -310,7 +334,10 @@ func _reshape_cape(sk: Skeleton3D) -> void:
 						var back := top.z - 0.03 - 0.02 * t                          # sheet just behind the chain
 						var nz := back + 0.025 * pow(absf(nx) / half, 2.0)          # slight wrap at the edges
 						# drape over the fox tail (rigid, sticks out to z=-0.33 around y=0.76): bulge back below the hips
-						nz -= 0.17 * smoothstep(1.0, 0.8, ny) * (1.0 - smoothstep(0.6, 0.4, ny) * 0.4)
+						var bb := int(ny / 0.05); var pz := 0.0
+						for d in range(-2, 3): pz = minf(pz, prof.get(bb + d, 0.0))
+						pz = minf(pz, lerpf(0.0, -0.46, smoothstep(1.1, 0.85, ny)))   # the animated fox tail swings out to ~-0.35: drape over it
+						nz = minf(nz, pz - 0.035 + 0.025 * pow(absf(nx) / half, 2.0))   # always outside body/tail
 						var tgt := Vector3(nx, ny, nz)
 						vs[i] = v.lerp(tgt, clampf(cw[i] * 1.25, 0.0, 1.0) if t > 0.08 else cw[i] * 0.5)
 						if nrm.size() == vs.size():
@@ -321,7 +348,10 @@ func _reshape_cape(sk: Skeleton3D) -> void:
 				arr[Mesh.ARRAY_TANGENT] = null
 			var fmt: int = mi.mesh.surface_get_format(si)
 			am.add_surface_from_arrays(mi.mesh.surface_get_primitive_type(si), arr, [], {}, (fmt & ~Mesh.ARRAY_FORMAT_TANGENT) & ~Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES)
-			am.surface_set_material(am.get_surface_count() - 1, mi.mesh.surface_get_material(si))
+			var mat: Material = mi.mesh.surface_get_material(si)
+			if mat is BaseMaterial3D:  # the flattened cape is a single sheet: draw both sides
+				mat = mat.duplicate(); mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+			am.surface_set_material(am.get_surface_count() - 1, mat)
 		if changed > 0:
 			if mi.mesh.resource_path != "": _cape_cache[mi.mesh.resource_path] = am
 			mi.mesh = am

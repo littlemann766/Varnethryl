@@ -2,7 +2,6 @@
 <linearGradient id="gold" x2=".85" y2="1"><stop stop-color="#fff0b2"/><stop offset=".25" stop-color="#906037"/><stop offset=".43" stop-color="#d6b67e"/><stop offset=".7" stop-color="#593a29"/><stop offset="1" stop-color="#efcf86"/></linearGradient>
 <radialGradient id="purple"><stop stop-color="#f4d7ff"/><stop offset=".21" stop-color="#b95af2"/><stop offset=".65" stop-color="#652397"/><stop offset="1" stop-color="#21102e"/></radialGradient>
 <g id="gem"><path d="M256 10 285 48 274 75 256 96 238 75 227 48Z" fill="#37213b" stroke="#422425" stroke-width="6"/><path d="M256 18 277 49 256 85 235 49Z" fill="url(#purple)" stroke="url(#gold)" stroke-width="6"/><path d="m256 33 7 17-7 22-7-22Z" fill="#f1b9ff" opacity=".53"/><path d="M230 49h52" stroke="#efd6ff" stroke-opacity=".55"/></g>
-<g id="thorn"><path d="M82 121 102 70 124 111 151 84 151 132 177 115 165 158 204 152 188 179" fill="none" stroke="#50321f" stroke-width="19" stroke-linejoin="round"/><path d="M82 121 102 70 124 111 151 84 151 132 177 115 165 158 204 152 188 179" fill="none" stroke="url(#gold)" stroke-width="12" stroke-linejoin="round"/></g>
 </defs>
 <circle cx="256" cy="256" r="206" fill="none" stroke="#372037" stroke-width="47"/>
 <circle cx="256" cy="256" r="205" fill="none" stroke="url(#gold)" stroke-width="19"/>
@@ -10,7 +9,6 @@
 <circle cx="256" cy="256" r="180" fill="none" stroke="#ecce87" stroke-width="5"/>
 <circle cx="256" cy="256" r="231" fill="none" stroke="url(#gold)" stroke-width="3" stroke-dasharray="3 13"/>
 <g><use href="#gem"/><use href="#gem" transform="rotate(90 256 256)"/><use href="#gem" transform="rotate(180 256 256)"/><use href="#gem" transform="rotate(270 256 256)"/></g>
-<g><use href="#thorn"/><use href="#thorn" transform="rotate(90 256 256)"/><use href="#thorn" transform="rotate(180 256 256)"/><use href="#thorn" transform="rotate(270 256 256)"/></g>
 <g transform="rotate(45 256 256)"><path d="M256 16 277 49 256 83 235 49Z" fill="url(#purple)" stroke="url(#gold)" stroke-width="6"/></g>
 <g transform="rotate(135 256 256)"><path d="M256 16 277 49 256 83 235 49Z" fill="url(#purple)" stroke="url(#gold)" stroke-width="6"/></g>
 <g transform="rotate(225 256 256)"><path d="M256 16 277 49 256 83 235 49Z" fill="url(#purple)" stroke="url(#gold)" stroke-width="6"/></g>

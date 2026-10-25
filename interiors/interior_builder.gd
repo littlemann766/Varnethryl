@@ -223,6 +223,7 @@ static func _fill(info: Dictionary, def: Dictionary, P: Callable) -> void:
 		for r in (def.floors[fi].get("slab", [[-W / 2 / info.kx, -D / 2 / info.kz, W / 2 / info.kx, D / 2 / info.kz]])):
 			regions.append(Rect2(Vector2(r[0] * info.kx, r[1] * info.kz), Vector2((r[2] - r[0]) * info.kx, (r[3] - r[1]) * info.kz)))
 		var k := 0
+		var _dbg := OS.has_environment("FILLDBG")
 		var placed: Array = []
 		for side in 4:   # 0 back(-z) 1 left(-x) 2 right(+x) 3 front(+z)
 			var rot: float = [0.0, 90.0, -90.0, 180.0][side]
@@ -249,6 +250,7 @@ static func _fill(info: Dictionary, def: Dictionary, P: Callable) -> void:
 				if ok:
 					K.prop(F.node, nm, Vector3(c.x, F.y, c.y), rot, true); placed.append(r); k += 1; t += w + gap
 				else: t += 0.25
+		if _dbg: print("FILL ", info.id, " f", fi, " placed ", k)
 
 static func _prop(info: Dictionary, p: Array, P: Callable) -> void:
 	var name: String = p[0]; var F: Dictionary = info.floors[p[1]]; var fn: Node3D = F.node

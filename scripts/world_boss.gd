@@ -24,10 +24,11 @@ const INTERRUPT := 120.0           # 4 % (solo floor of 8% x sqrt(n)/2)
 const MELEE_R := 12.0              # basic attack reach to a crystal (3D, giant scale)
 const RANGED_R := 35.0             # skills/projectiles reach to a crystal (3D, terrain line of sight)
 const KNEEL_TIME := 20.0
-const KNEEL_PITCH := 1.1           # forward slump (rad) on top of wb_down, measured: back 27 m, chest 19 m, forearms 4-22 m
+const KNEEL_RANGED_R := 75.0      # test 19: kneeling upright he is ~114 m tall, so exposed chest/back/forearm crystals (30-66 m up) take ranged hits from 75 m
+const KNEEL_BLEND := 1.0           # test 19: seconds to blend into / out of the one-knee pose
 const LEGS := ["ankle_L", "ankle_R", "knee_L", "knee_R"]
 const ANKLES := {"ankle_L": "foot_L", "ankle_R": "foot_R"}   # extra crystals (Beth's knee crystal art) on the feet
-var kneel_pitch := 0.0
+var last_warn := ""
 var kneels := 0
 const SHAKE_FULL := 120.0
 const SHAKE_ZERO := 250.0
@@ -96,6 +97,7 @@ func setup(main: Node) -> WorldBoss:
 	skel = body.find_children("*", "Skeleton3D", true, false)[0]
 	ap.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL   # test 17: we advance it, then ground the feet on the fresh pose
 	_orient_and_measure()
+	_build_kneel()
 	for c in ["wb_walk", "wb_idle", "wb_ritual_fissure_loop", "wb_ritual_lavawave_loop", "wb_stagger_loop", "wb_down_loop"]:
 		if ap.has_animation(c): ap.get_animation(c).loop_mode = Animation.LOOP_LINEAR
 	_strip_root_xz("wb_walk")
@@ -198,8 +200,8 @@ func _update_fx(dt: float) -> void:
 				l.modulate.a = 1.0 - smoothstep(MARKER_NEAR, MARKER_FAR, d)
 		l.visible = show
 
-const MARKER_NEAR := 55.0   # test 18: reachable crystals sit up to ~35 m up, so ground players need ~70 m
-const MARKER_FAR := 70.0
+const MARKER_NEAR := 75.0   # test 19: kneeling chest/back sit 58-66 m up, so ground players need ~90 m
+const MARKER_FAR := 90.0
 func _terrain_blocks(a: Vector3, b: Vector3) -> bool:
 	for i in range(1, 16):
 		var q := a.lerp(b, i / 16.0)
@@ -222,6 +224,7 @@ func spawn_near(hero_pos: Vector3) -> void:
 		var d := absf(waypoints[i].distance_to(Vector3(hero_pos.x, 0, hero_pos.z)) - 180.0)
 		if d < bd: bd = d; best = i
 	place_at(best)
+	_warn("The Titan rises")   # test 19: only on an actual spawn
 
 func _gy(x: float, z: float) -> float:
 	return float(m.call("height", x, z)) if m and m.has_method("height") else 0.0
@@ -356,6 +359,7 @@ func _ui() -> void:
 	warn.add_theme_color_override("font_color", Color(1, 0.35, 0.1)); warn.add_theme_constant_override("outline_size", 10); warn.visible = false; ui.add_child(warn)
 
 func _warn(t: String) -> void:
+	last_warn = t
 	warn.text = t; warn.visible = true; warn.modulate.a = 1.0
 	var tw := create_tween(); tw.tween_interval(2.0); tw.tween_property(warn, "modulate:a", 0.0, 0.6); tw.tween_callback(func(): warn.visible = false)
 
@@ -372,7 +376,8 @@ func _set_state(s: String) -> void:
 		"windup": sub = "in"; _play("wb_ritual_%s_in" % _rid())
 		"release": _play("wb_ritual_%s_release" % _rid())
 		"stagger": _play("wb_stagger")
-		"knockdown", "kneel": _play("wb_knockdown")
+		"knockdown": _play("wb_knockdown")
+		"kneel": if ap.has_animation("wb_kneel"): ap.play("wb_kneel", KNEEL_BLEND); ap.speed_scale = 1.0
 
 func _rid() -> String: return "fissure" if ritual == "fissure" else "lavawave"
 
@@ -429,17 +434,13 @@ func _process(dt: float) -> void:
 		_rate_pending = false; _clip_rate("wb_walk", SPEED)   # clip_speed kept for the report
 		walk_rate = WALK_RATE
 		if OS.get_environment("WB_RATE") != "": walk_rate = float(OS.get_environment("WB_RATE"))
-	if state != "kneel" and kneel_pitch > 0.0: kneel_pitch = maxf(0.0, kneel_pitch - dt * KNEEL_PITCH / 2.5)
-	body.rotation.x = kneel_pitch
 	ap.advance(dt)
 	_ground_feet(dt)
 	_update_crystals(dt); _update_prints(dt); _update_adds(dt); _update_ui(); _update_fx(dt); _do_shake(dt)
 
 func _kneel(dt: float) -> void:
-	if t_state < KNEEL_TIME: kneel_pitch = minf(KNEEL_PITCH, kneel_pitch + dt * KNEEL_PITCH / 2.5)
-	elif t_state - dt < KNEEL_TIME:
-		_warn("The Titan rises"); _play("wb_getup")
-	if t_state > KNEEL_TIME + 2.5:
+	if t_state - dt < KNEEL_TIME and t_state >= KNEEL_TIME: ap.play("wb_idle", KNEEL_BLEND)   # stand back up (1 s blend)
+	if t_state > KNEEL_TIME + KNEEL_BLEND + 0.5:
 		for c in crystals: if c.name in LEGS and c.broken: _crystal_restore(c)   # legs regrow: repeat the cycle
 		_set_state("cool")
 
@@ -643,10 +644,10 @@ func on_hero_used(slot: int, _sk: Dictionary) -> void:
 ## test 18: slot 0 = basic melee (MELEE_R), skills = ranged/projectile (RANGED_R + terrain line of sight). Returns the crystal hit.
 func hit_from(eye: Vector3, slot: int):
 	var dmg := 10.0 if slot == 0 else 25.0
-	var reach := MELEE_R if slot == 0 else RANGED_R
 	var best = null; var bd := 1e9
 	for c in crystals:
 		if not crystal_available(c): continue
+		var reach := MELEE_R if slot == 0 else (KNEEL_RANGED_R if not (c.name in LEGS) else RANGED_R)
 		var cp: Vector3 = (c.node as Node3D).global_position
 		var d3 := eye.distance_to(cp)
 		if d3 < reach and d3 < bd and (slot == 0 or not _terrain_blocks(eye, cp)): bd = d3; best = c
@@ -666,7 +667,7 @@ func _hit_crystal(c: Dictionary, dmg: float) -> void:
 		c.broken = true; c.t_broken = 0.0; _crystal_meshes(c, true); _spawn_adds(c.node.global_position)
 		if crystals.all(func(x): return x.broken): _warn("ALL WEAK POINTS BROKEN - KNOCKDOWN"); _end_ritual_fx(); _set_glow_charge(0.0); _set_state("knockdown")
 		elif state != "kneel" and state != "knockdown" and not leg_crystals_up():
-			kneels += 1; _warn("LEGS BROKEN - THE TITAN KNEELS"); _end_ritual_fx(); _set_glow_charge(0.0); _set_state("kneel")
+			kneels += 1; _warn("The Titan staggers!"); _end_ritual_fx(); _set_glow_charge(0.0); _set_state("kneel")
 
 func _damage(v: float) -> void:
 	hp = maxf(0.0, hp - v)
@@ -795,9 +796,9 @@ func sole_gap() -> float:
 	return g if g < INF else 0.0
 
 func _ground_feet(dt: float) -> void:
-	if state in ["knockdown", "kneel"] or kneel_pitch > 0.0:
+	if state in ["knockdown", "kneel"]:
 		var lo := INF
-		for b in skel.get_bone_count():
+		for b in range(1, skel.get_bone_count()):   # skip the root bone: it stays at the origin while the body moves
 			var q := skel.global_transform * skel.get_bone_global_pose(b).origin
 			lo = minf(lo, q.y - _gy(q.x, q.z))
 		foot_gap = lo; ground_off -= lo; position.y = _gy(position.x, position.z) + ground_off
@@ -807,3 +808,49 @@ func _ground_feet(dt: float) -> void:
 	ground_off = clampf(ground_off, -20.0, 20.0)
 	position.y = _gy(position.x, position.z) + ground_off
 	foot_gap = sole_gap()   # residual after the snap (what the player sees)
+
+
+# ---------- test 19: clean one-knee pose (boss: the old knockdown clip + slump looked like a pretzel) ----------
+## Built once from the wb_idle pose by aiming bones (skeleton space, +Z = his front, +X = his left):
+## left knee down with the shin back along the ground, right foot planted forward, torso upright leaning a
+## little forward, left fist on the ground for support, right forearm resting over the right knee.
+const KNEEL_AIM := [
+	["spine", "spine2", Vector3(0, 1, 0.22)], ["spine2", "chest", Vector3(0, 1, 0.25)], ["chest", "upperChest", Vector3(0, 1, 0.25)],
+	["upperChest", "neck", Vector3(0, 1, 0.2)], ["neck", "head", Vector3(0, 1, 0.1)],
+	["thigh_L", "shin_L", Vector3(0.15, -1, 0.12)], ["shin_L", "foot_L", Vector3(0.05, -0.12, -1)], ["foot_L", "toe_L", Vector3(0, -0.5, -1)],
+	["thigh_R", "shin_R", Vector3(-0.25, -0.12, 1)], ["shin_R", "foot_R", Vector3(-0.05, -1, 0.05)], ["foot_R", "toe_R", Vector3(0, -0.6, 1)],
+	["upperArm_L", "foreArm_L", Vector3(0.35, -1, 0.45)], ["foreArm_L", "hand_L", Vector3(0.1, -1, 0.15)],
+	["upperArm_R", "foreArm_R", Vector3(-0.25, -0.9, 0.6)], ["foreArm_R", "hand_R", Vector3(0.1, -0.8, 0.6)],
+]
+func _aim_bone(b: int, c: int, d: Vector3) -> void:
+	var gb := skel.get_bone_global_pose(b); var gc := skel.get_bone_global_pose(c)
+	var cur := (gc.origin - gb.origin).normalized()
+	var q := Quaternion(cur, d.normalized())
+	var ng := Basis(q) * gb.basis.orthonormalized()
+	var p := skel.get_bone_parent(b)
+	var pb := skel.get_bone_global_pose(p).basis.orthonormalized() if p >= 0 else Basis()
+	skel.set_bone_pose_rotation(b, (pb.inverse() * ng).get_rotation_quaternion())
+
+func _build_kneel() -> void:
+	if not ap.has_animation("wb_idle"): return
+	ap.play("wb_idle"); ap.seek(0.0, true); ap.advance(0.0)
+	for a in KNEEL_AIM:
+		var b := skel.find_bone(a[0]); var c := skel.find_bone(a[1])
+		if b >= 0 and c >= 0: _aim_bone(b, c, a[2])
+	# drop the hips so the knee / planted foot / fist sit on his ground plane (root bone height)
+	var lo := INF
+	for n in ["shin_L", "toe_L", "foot_R", "toe_R", "fingers_L"]:
+		var bi := skel.find_bone(n); if bi >= 0: lo = minf(lo, skel.get_bone_global_pose(bi).origin.y)
+	var hb := skel.find_bone("hips"); var rb := skel.find_bone("root")
+	var ry := skel.get_bone_global_pose(rb).origin.y if rb >= 0 else 0.0
+	if hb >= 0 and lo < INF: skel.set_bone_pose_position(hb, skel.get_bone_pose_position(hb) - Vector3(0, lo - ry, 0))
+	var anim := Animation.new(); anim.length = 1.0; anim.loop_mode = Animation.LOOP_LINEAR
+	var sp := ap.get_node(ap.root_node).get_path_to(skel)
+	for b in skel.get_bone_count():
+		var t := anim.add_track(Animation.TYPE_ROTATION_3D); anim.track_set_path(t, NodePath("%s:%s" % [sp, skel.get_bone_name(b)]))
+		anim.rotation_track_insert_key(t, 0.0, skel.get_bone_pose_rotation(b))
+		var tp := anim.add_track(Animation.TYPE_POSITION_3D); anim.track_set_path(tp, NodePath("%s:%s" % [sp, skel.get_bone_name(b)]))
+		anim.position_track_insert_key(tp, 0.0, skel.get_bone_pose_position(b))
+	var libs := ap.get_animation_library_list()
+	ap.get_animation_library(libs[0]).add_animation("wb_kneel", anim)
+	ap.play("wb_idle"); ap.seek(0.0, true); ap.advance(0.0)

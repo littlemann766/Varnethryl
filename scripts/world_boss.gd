@@ -18,6 +18,17 @@ const WEST_LIMIT := -400.0    # coast/port sea is west of x = -440
 const MAX_HP := 3000.0
 const CRYSTAL_HP := 90.0           # 3 %
 const INTERRUPT := 120.0           # 4 % (solo floor of 8% x sqrt(n)/2)
+# test 18 (boss: "a way to destroy them without letting others fly"): ground players break the leg crystals
+# (ankles: melee, knees: ranged), which drops him into a ~20 s kneel/slump that brings chest/back/forearms down
+# within ranged reach. He then rises, his leg crystals regrow, and he resumes the outskirts loop. Nobody needs flight.
+const MELEE_R := 12.0              # basic attack reach to a crystal (3D, giant scale)
+const RANGED_R := 35.0             # skills/projectiles reach to a crystal (3D, terrain line of sight)
+const KNEEL_TIME := 20.0
+const KNEEL_PITCH := 1.1           # forward slump (rad) on top of wb_down, measured: back 27 m, chest 19 m, forearms 4-22 m
+const LEGS := ["ankle_L", "ankle_R", "knee_L", "knee_R"]
+const ANKLES := {"ankle_L": "foot_L", "ankle_R": "foot_R"}   # extra crystals (Beth's knee crystal art) on the feet
+var kneel_pitch := 0.0
+var kneels := 0
 const SHAKE_FULL := 120.0
 const SHAKE_ZERO := 250.0
 const BAR_RANGE := 400.0
@@ -175,7 +186,7 @@ func _update_fx(dt: float) -> void:
 	for mk in markers:
 		var l: Label = mk[0]; var c = mk[1]
 		var wpn: Node3D = c.get("node")
-		var show: bool = cam != null and wpn != null and not c.broken and visible
+		var show: bool = cam != null and wpn != null and crystal_available(c) and visible
 		if show:
 			var wpos := wpn.global_position
 			# test 18 (boss: diamonds seen over hills from across the map): screen-space labels had no depth and no
@@ -187,8 +198,8 @@ func _update_fx(dt: float) -> void:
 				l.modulate.a = 1.0 - smoothstep(MARKER_NEAR, MARKER_FAR, d)
 		l.visible = show
 
-const MARKER_NEAR := 40.0
-const MARKER_FAR := 60.0
+const MARKER_NEAR := 55.0   # test 18: reachable crystals sit up to ~35 m up, so ground players need ~70 m
+const MARKER_FAR := 70.0
 func _terrain_blocks(a: Vector3, b: Vector3) -> bool:
 	for i in range(1, 16):
 		var q := a.lerp(b, i / 16.0)
@@ -248,6 +259,13 @@ func _crystals() -> void:
 		var stem := str(p.crystal).get_basename()
 		var c := {"name": key, "node": nd, "stem": stem, "mat": base_mat.duplicate(), "hp": CRYSTAL_HP, "broken": false, "t_broken": 0.0,
 			"ground": key.begins_with("forearm") or key.begins_with("knee"), "hi": null, "lo": null}
+		_crystal_meshes(c, false)
+		crystals.append(c)
+	for key in ANKLES:
+		if skel.find_bone(ANKLES[key]) < 0: continue
+		var ba := BoneAttachment3D.new(); ba.name = "WP_" + key; ba.bone_name = ANKLES[key]; skel.add_child(ba)
+		var nd := Node3D.new(); nd.transform = Transform3D(Basis.from_euler(Vector3(-1.2, 0, 0)).scaled(Vector3.ONE * 0.8), Vector3(0, 0.25, 0.35)); ba.add_child(nd)
+		var c := {"name": key, "node": nd, "stem": "wb_crystal_knee", "mat": base_mat.duplicate(), "hp": CRYSTAL_HP, "broken": false, "t_broken": 0.0, "ground": true, "hi": null, "lo": null}
 		_crystal_meshes(c, false)
 		crystals.append(c)
 
@@ -321,8 +339,8 @@ func _ui() -> void:
 	bar_fill = ColorRect.new(); bar_fill.color = Color(0.95, 0.3, 0.06); bar_fill.position = Vector2(2, 32); bar_fill.size = Vector2(656, 18); r.add_child(bar_fill)
 	bar_txt = Label.new(); bar_txt.position = Vector2(0, 54); bar_txt.add_theme_font_size_override("font_size", 14)
 	bar_txt.add_theme_constant_override("outline_size", 5); r.add_child(bar_txt)
-	for i in 6:
-		var pp := ColorRect.new(); pp.size = Vector2(14, 14); pp.position = Vector2(500 + i * 26, 56); pp.color = Color(1, 0.6, 0.2); r.add_child(pp); pips.append(pp)
+	for i in crystals.size():   # test 18: 8 weak points (2 ankles added)
+		var pp := ColorRect.new(); pp.size = Vector2(14, 14); pp.position = Vector2(530 + i * 20, 56); pp.color = Color(1, 0.6, 0.2); r.add_child(pp); pips.append(pp)
 	cast = Control.new(); cast.set_anchors_preset(Control.PRESET_CENTER); cast.visible = false; ui.add_child(cast)
 	var cr := Control.new(); cr.position = Vector2(-260, 120); cast.add_child(cr)
 	var frame := NinePatchRect.new(); frame.texture = load(WB + "tex/wb_castbar_frame.png")
@@ -344,7 +362,7 @@ func _warn(t: String) -> void:
 # ---------- loop ----------
 func _set_state(s: String) -> void:
 	state = s; t_state = 0.0
-	_lava("stagger_dim", 1.0 if s in ["stagger", "knockdown"] else 0.0)
+	_lava("stagger_dim", 1.0 if s in ["stagger", "knockdown", "kneel"] else 0.0)
 	if s != "windup": _lava("glow_strength", GLOW_IDLE)
 	if embers: _ember_ratio(1.0 if s in ["windup", "release"] else 0.5)
 	match s:
@@ -354,7 +372,7 @@ func _set_state(s: String) -> void:
 		"windup": sub = "in"; _play("wb_ritual_%s_in" % _rid())
 		"release": _play("wb_ritual_%s_release" % _rid())
 		"stagger": _play("wb_stagger")
-		"knockdown": _play("wb_knockdown")
+		"knockdown", "kneel": _play("wb_knockdown")
 
 func _rid() -> String: return "fissure" if ritual == "fissure" else "lavawave"
 
@@ -363,8 +381,10 @@ func _on_anim_done(a: StringName) -> void:
 		"wb_stomp": if state == "arrive": _set_state("idle")
 		"wb_ritual_fissure_in", "wb_ritual_lavawave_in": if state == "windup": sub = "loop"; _play("wb_ritual_%s_loop" % _rid())
 		"wb_stagger": if state == "stagger": _play("wb_stagger_loop")
-		"wb_knockdown": if state == "knockdown": _play("wb_down_loop")
-		"wb_getup": if state == "knockdown": _set_state("cool")
+		"wb_knockdown": if state in ["knockdown", "kneel"]: _play("wb_down")
+		"wb_getup": if state == "knockdown":
+			for c in crystals: _crystal_restore(c)   # full cycle done: all weak points regrow
+			_set_state("cool")
 
 func _strip_root_xz(c: String) -> void:
 	if not ap.has_animation(c): return
@@ -402,15 +422,34 @@ func _process(dt: float) -> void:
 		"knockdown":
 			if t_state - dt < 2.4 and t_state >= 2.4: _stomp(0.8, true)
 			if t_state > 22.0 and ap.current_animation != "wb_getup": _play("wb_getup")
+		"kneel": _kneel(dt)
 		"cool":
 			if t_state > 10.0: _set_state("walk")
 	if _rate_pending and is_inside_tree():
 		_rate_pending = false; _clip_rate("wb_walk", SPEED)   # clip_speed kept for the report
 		walk_rate = WALK_RATE
 		if OS.get_environment("WB_RATE") != "": walk_rate = float(OS.get_environment("WB_RATE"))
+	if state != "kneel" and kneel_pitch > 0.0: kneel_pitch = maxf(0.0, kneel_pitch - dt * KNEEL_PITCH / 2.5)
+	body.rotation.x = kneel_pitch
 	ap.advance(dt)
 	_ground_feet(dt)
 	_update_crystals(dt); _update_prints(dt); _update_adds(dt); _update_ui(); _update_fx(dt); _do_shake(dt)
+
+func _kneel(dt: float) -> void:
+	if t_state < KNEEL_TIME: kneel_pitch = minf(KNEEL_PITCH, kneel_pitch + dt * KNEEL_PITCH / 2.5)
+	elif t_state - dt < KNEEL_TIME:
+		_warn("The Titan rises"); _play("wb_getup")
+	if t_state > KNEEL_TIME + 2.5:
+		for c in crystals: if c.name in LEGS and c.broken: _crystal_restore(c)   # legs regrow: repeat the cycle
+		_set_state("cool")
+
+func leg_crystals_up() -> bool:
+	for c in crystals: if c.name in LEGS and not c.broken: return true
+	return false
+
+## where a crystal is hittable from: available = legs any time, everything else only while he is down
+func crystal_available(c: Dictionary) -> bool:
+	return not c.broken and (c.name in LEGS or state in ["kneel", "knockdown"])
 
 func _walk(dt: float) -> void:
 	var tgt := waypoints[wp]
@@ -599,18 +638,21 @@ func _end_ritual_fx() -> void:
 func on_hero_used(slot: int, _sk: Dictionary) -> void:
 	if not visible: return
 	var h := _hero(); if h == null: return
+	hit_from(h.global_position + Vector3(0, 1.5, 0), slot)
+
+## test 18: slot 0 = basic melee (MELEE_R), skills = ranged/projectile (RANGED_R + terrain line of sight). Returns the crystal hit.
+func hit_from(eye: Vector3, slot: int):
 	var dmg := 10.0 if slot == 0 else 25.0
-	var hp3 := h.global_position
+	var reach := MELEE_R if slot == 0 else RANGED_R
 	var best = null; var bd := 1e9
 	for c in crystals:
-		if c.broken: continue
+		if not crystal_available(c): continue
 		var cp: Vector3 = (c.node as Node3D).global_position
-		var d3 := hp3.distance_to(cp)
-		var dh := Vector2(hp3.x - cp.x, hp3.z - cp.z).length()
-		var ok: bool = d3 < 22.0 or (bool(c.ground) and dh < 30.0)
-		if ok and d3 < bd: bd = d3; best = c
+		var d3 := eye.distance_to(cp)
+		if d3 < reach and d3 < bd and (slot == 0 or not _terrain_blocks(eye, cp)): bd = d3; best = c
 	if best: _hit_crystal(best, dmg)
-	elif Vector2(hp3.x - global_position.x, hp3.z - global_position.z).length() < 45.0: _damage(dmg * 0.1)
+	elif Vector2(eye.x - global_position.x, eye.z - global_position.z).length() < 45.0: _damage(dmg * 0.1)
+	return best
 
 func _hit_crystal(c: Dictionary, dmg: float) -> void:
 	var mult := 3.0 if state == "knockdown" else (2.0 if state == "stagger" else 1.0)
@@ -623,6 +665,8 @@ func _hit_crystal(c: Dictionary, dmg: float) -> void:
 	if c.hp <= 0.0:
 		c.broken = true; c.t_broken = 0.0; _crystal_meshes(c, true); _spawn_adds(c.node.global_position)
 		if crystals.all(func(x): return x.broken): _warn("ALL WEAK POINTS BROKEN - KNOCKDOWN"); _end_ritual_fx(); _set_glow_charge(0.0); _set_state("knockdown")
+		elif state != "kneel" and state != "knockdown" and not leg_crystals_up():
+			kneels += 1; _warn("LEGS BROKEN - THE TITAN KNEELS"); _end_ritual_fx(); _set_glow_charge(0.0); _set_state("kneel")
 
 func _damage(v: float) -> void:
 	hp = maxf(0.0, hp - v)
@@ -634,7 +678,7 @@ func _update_crystals(dt: float) -> void:
 	for c in crystals:
 		if c.broken:
 			c.t_broken += dt
-			if c.t_broken > 60.0: _crystal_restore(c)
+			if c.t_broken > 60.0 and state == "dead": _crystal_restore(c)
 
 # ---------- adds (static blockouts: fiend unrigged, wisp bobs) ----------
 func _spawn_adds(at: Vector3) -> void:
@@ -751,7 +795,13 @@ func sole_gap() -> float:
 	return g if g < INF else 0.0
 
 func _ground_feet(dt: float) -> void:
-	if state == "knockdown": return
+	if state in ["knockdown", "kneel"] or kneel_pitch > 0.0:
+		var lo := INF
+		for b in skel.get_bone_count():
+			var q := skel.global_transform * skel.get_bone_global_pose(b).origin
+			lo = minf(lo, q.y - _gy(q.x, q.z))
+		foot_gap = lo; ground_off -= lo; position.y = _gy(position.x, position.z) + ground_off
+		return
 	foot_gap = sole_gap()
 	ground_off -= foot_gap   # per-frame snap: the lowest sole sits on the terrain under it
 	ground_off = clampf(ground_off, -20.0, 20.0)

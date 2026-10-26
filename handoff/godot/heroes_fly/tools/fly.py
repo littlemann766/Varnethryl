@@ -260,7 +260,44 @@ for o in bpy.data.objects:
 import numpy as np
 from mathutils.bvhtree import BVHTree
 exec(open('/workspace/hero-motion/fly/inside_lib.py').read())
+CHN=0
+if os.environ.get('CHAINW'):   # cape verts that lie above their dominant cape bone's head belong to the segment above: move that weight to the parent cape bone
+    for o in bpy.data.objects:
+        if o.type!='MESH' or not o.vertex_groups: continue
+        GN={g.index:g.name for g in o.vertex_groups}; IX={v:k for k,v in GN.items()}
+        for v in o.data.vertices:
+            if not v.groups: continue
+            dg_=max(v.groups,key=lambda g:g.weight); bn=GN[dg_.group]
+            if not bn.startswith('cape') or bn not in B or B[bn].parent is None or not B[bn].parent.name.startswith('cape'): continue
+            pb_=B[bn].parent; h=B[bn].head_local; ph=pb_.head_local; ax=(h-ph); L_=ax.length; ax=ax/L_
+            sabove=(h-v.co).dot(ax)   # >0: vertex sits on the parent side of this head
+            if sabove<=0: continue
+            fr_=min(1.0,2*sabove/L_); mv=dg_.weight*fr_
+            dg_.weight-=mv
+            gi=IX.get(pb_.name)
+            if gi is None: continue
+            hit=[g for g in v.groups if g.group==gi]
+            if hit: hit[0].weight+=mv
+            else: o.vertex_groups[pb_.name].add([v.index],mv,'ADD')
+            CHN+=1
+print('CHAINW',CHN)
+SEAMN=0
+if os.environ.get('SEAM'):   # cape seam verts (cape-chain weight < 0.5) ride with the upper back they are sewn to
+    for o in bpy.data.objects:
+        if o.type!='MESH' or not o.vertex_groups: continue
+        GN={g.index:g.name for g in o.vertex_groups}
+        for v in o.data.vertices:
+            cw=sum(g.weight for g in v.groups if GN[g.group].startswith('cape'))
+            if 0<cw<0.5 and any(GN[g.group] in ('chest','upperChest') for g in v.groups):
+                for g in v.groups:
+                    if GN[g.group].startswith('cape'): g.weight=0.0
+                tot=sum(g.weight for g in v.groups)
+                for g in v.groups: g.weight/=tot
+                SEAMN+=1
+print('SEAM',SEAMN)
 RESTFIX=0
+MG=float(os.environ.get('MARGIN','0.004'))
+RFM=float(os.environ.get('RFM','0.004'))
 for o in bpy.data.objects:   # rest-geometry fix: cape verts sunk in / touching the body at bind are lifted 6 mm off it
     if o.type!='MESH' or not o.vertex_groups: continue
     GN={g.index:g.name for g in o.vertex_groups}
@@ -270,8 +307,8 @@ for o in bpy.data.objects:   # rest-geometry fix: cape verts sunk in / touching 
     if not polys: continue
     co=[v.co.copy() for v in o.data.vertices]; bvh=BVHTree.FromPolygons(co,polys)
     for i,d in enumerate(dom):
-        if d.startswith('cape') and is_bad(bvh,co[i],0.004):
-            loc,nor,fi,dist=bvh.find_nearest(co[i]); o.data.vertices[i].co=loc+nor*0.006; RESTFIX+=1
+        if d.startswith('cape') and is_bad(bvh,co[i],RFM):
+            loc,nor,fi,dist=bvh.find_nearest(co[i]); o.data.vertices[i].co=loc+nor*(RFM+0.002); RESTFIX+=1
 print('RESTFIX',RESTFIX)
 BODY=[o for o in bpy.data.objects if o.type=='MESH' and o.vertex_groups]
 def masks(o):
@@ -282,7 +319,8 @@ def masks(o):
     return cape,body
 MASK={o.name:masks(o) for o in BODY}
 GLUED=0
-if os.environ.get('GLUE'):   # cape verts hugging the torso follow the skin they lie on (blend 3-6 cm), keep MASK = original cape set
+GR=float(os.environ.get('GLUEROOT','0'))
+if os.environ.get('GLUE') or GR>0 or os.environ.get('GLUEUC'):   # cape verts hugging the torso follow the skin they lie on (blend 3-6 cm), keep MASK = original cape set
     for o in BODY:
         GN={g.index:g.name for g in o.vertex_groups}; cape,body=MASK[o.name]
         polys=[list(p.vertices) for p in o.data.polygons if all(body[i] for i in p.vertices)]
@@ -292,6 +330,15 @@ if os.environ.get('GLUE'):   # cape verts hugging the torso follow the skin they
             loc,nor,fi,d=bvh.find_nearest(co[i])
             if loc is None or d>0.06: continue
             w=min(1.0,max(0.0,(0.06-d)/0.03))
+            if os.environ.get('GLUEUC'):
+                GNb={g.index:g.name for g in o.vertex_groups}
+                fb=max(o.data.vertices[polys[fi][0]].groups,key=lambda g:g.weight)
+                if GNb[fb.group] not in ('upperChest','chest') or d>0.04: continue
+                w=0.7*(0.04-d)/0.04
+            elif GR>0:
+                rh=arm.data.bones['cape'].head_local; r_=(co[i]-rh).length
+                if r_>GR: continue
+                w*=min(1.0,(GR-r_)/(GR*0.5))
             j=min(polys[fi],key=lambda k:(co[k]-co[i]).length)
             cw={GN[g.group]:g.weight*(1-w) for g in o.data.vertices[i].groups}
             for g in o.data.vertices[j].groups: cw[GN[g.group]]=cw.get(GN[g.group],0)+g.weight*w
@@ -313,7 +360,7 @@ def inside_count():
     bvh=BVHTree.FromPolygons(allco,polys); c=0
     for i in allcape:
         p=allco[i]
-        if is_bad(bvh,p): c+=1
+        if is_bad(bvh,p,MG): c+=1
     return c
 def apply_pose(P,fr=None):
     for b in B:

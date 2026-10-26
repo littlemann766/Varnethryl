@@ -3,7 +3,7 @@ import bpy,sys,json,math,numpy as np
 from mathutils import Vector,Quaternion
 from mathutils.bvhtree import BVHTree
 src,dst,mode=sys.argv[-3:]   # mode fix|check
-bpy.ops.wm.read_factory_settings(use_empty=True);bpy.ops.import_scene.gltf(filepath=src)
+bpy.ops.wm.read_factory_settings(use_empty=True);bpy.context.scene.render.fps=30;bpy.context.scene.render.fps_base=1;bpy.ops.import_scene.gltf(filepath=src)
 arm=[o for o in bpy.data.objects if o.type=='ARMATURE'][0];sc=bpy.context.scene;P=arm.pose.bones
 bodies=[o for o in bpy.data.objects if o.type=='MESH' and o.find_armature()==arm]
 body=max(bodies,key=lambda o:len(o.data.vertices))

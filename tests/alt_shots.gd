@@ -30,6 +30,22 @@ func _run() -> void:
 		m.cam.current = true
 	m.joy_vec = Vector2.ZERO
 	if fc0: fc0.hold = 0.0
+	# close-ups: cape straight in flight (default hero) + re-meshed Nyx (fly v2 48fb389 weight pass)
+	m.fly_alt = 25.0; await frames(30)
+	for hid in ["", "nyx"]:
+		if hid != "": m.party.set_hero(hid); await frames(10)
+		print("FLYCLIPS %s has_fly_clips=%s" % [hid if hid != "" else "default", m.party.rig.has_fly_clips])
+		for pz2 in [["hover", Vector2.ZERO], ["forward", Vector2(0, -1)]]:
+			m.joy_vec = pz2[1]; await frames(60)
+			Engine.time_scale = 0.0
+			var hp3: Vector3 = m.hero.global_position; var bx: Vector3 = m.hero_vis.global_basis.x; var bz: Vector3 = m.hero_vis.global_basis.z
+			for side in [["side", bx * 4.5], ["back", bz * 4.5 + bx * 1.5]]:
+				sc.look_at_from_position(hp3 + side[1] + Vector3(0, 1.4, 0), hp3 + Vector3(0, 0.9, 0), Vector3.UP); sc.current = true
+				await frames(3)
+				get_viewport().get_texture().get_image().save_png(OUT + "close_%s_%s_%s.png" % [hid if hid != "" else "aldric", pz2[0], side[0]])
+			Engine.time_scale = 1.0
+		m.cam.current = true
+	m.joy_vec = Vector2.ZERO
 	for alt in [500.0, 1500.0, 3000.0]:
 		m.fly_alt = alt
 		m.hero.position = Vector3(-60, m.height(-60, 260) + alt, 260)

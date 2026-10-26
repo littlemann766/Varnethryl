@@ -25,6 +25,18 @@ const LOOPS := ["idle", "walk", "run", "trot", "hover", "fly", "glide"]
 func setup(path: String, height_m: float) -> CharacterRig:
 	var ps: PackedScene = load(path)
 	model = ps.instantiate()
+	# test 16 (Lucian fly v2 48fb389): Nyx/Rook/Wren use the re-weighted fly mesh (cape/limb weight pass) with their game clips
+	var fm := "res://characters/%s_flymesh.glb" % path.get_file().get_basename().trim_suffix("_lod1")
+	if path.begins_with("res://characters/") and ResourceLoader.exists(fm):
+		var src_ap := _find_player(model)
+		var nm: Node3D = (load(fm) as PackedScene).instantiate()
+		var dst_ap := _find_player(nm)
+		if src_ap and dst_ap:
+			var lib: AnimationLibrary = dst_ap.get_animation_library("")
+			for c in src_ap.get_animation_list():
+				if not lib.has_animation(c): lib.add_animation(c, src_ap.get_animation(c))
+			model.free(); model = nm
+		else: nm.free()
 	add_child(model)
 	model.rotation.y = PI    # glTF faces +Z; the game's visual node faces -Z
 	measured_height = measure(model, path)

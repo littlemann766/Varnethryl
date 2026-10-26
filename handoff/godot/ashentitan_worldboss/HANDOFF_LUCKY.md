@@ -54,9 +54,10 @@ The open-hands notes below were reverted. The fists come from 75c0682. The extra
 - Rename: wb_stagger_loop -> wb_stagger_hold. Godot's importer strips the "_loop" suffix, so the old name collided with wb_stagger and one clip was lost.
 - Knees: wb_idle both knees >= 7.5%. Pool attacks: the knee bend now follows the swing.
 
-## v5 (2026-10-25, 9:30 PM ET): wb_emerge spawn cinematic
-- New clip `wb_emerge`, 10.0 s (300 frames @30), on both ashentitan_worldboss.glb and _lod1. Fists, ac97cb3-lineage knees and fa6d533 arm clearance unchanged; all other 41 clips untouched.
-- Beats: 0-3.2 rises from below ground (root starts sunk 1 body height, hunched/curled); 3.2-6.5 assembles (L arm, then R arm unfurl with jerky settle, L leg pushes, knee buckle, stand); 7.0 wind-up, 7.4-8.8 roar (chest out, arms wide, head back, held); 8.8-10.0 blend into wb_idle. Last frame equals wb_idle frame 0 exactly, so crossfade 0 or play wb_idle right after.
-- Root motion: vertical rise is keyed on the `root` bone (location Z), not hips. Do NOT strip root Z for this clip (keep it in place in XY; there is no XY root motion). Place the node at the spawn point on the ground; the lava/ground surface is node origin z=0, he starts fully below it.
-- Events (worldboss_events.json -> "wb_emerge"): footsteps 5.6 L, 6.3 R; impacts 0.9 breach, 3.2 lands, 3.85/4.75 arm snaps, 5.8 buckle, 6.5 settle; roar wind-up 7.0, start 7.4, peak 7.65, end 8.8.
-- Checks: p99 edge stretch 124.1% (base) / 114.1% (lod1), below wb_getup 128.9% / 114.6%; 0 arm-leg intersection frames; Godot 4 headless import OK (42 clips, wb_emerge 10.0 s).
+## v6 (2026-10-25, 10:15 PM ET): wb_emerge v2, violent eruption (replaces v5)
+- `wb_emerge` is now 10.5 s (315 frames @30) on ashentitan_worldboss.glb and _lod1. Fists, ac97cb3-lineage knees and fa6d533 arm clearance unchanged.
+- Beats: 0-1.0 tension underground (tremble); 1.22 right FIST PUNCHES through; 1.75 left hand claws out, 1.9 grips the ground; 2.1-2.5 strain; 2.6-2.88 explosive heave (head/shoulders burst out, overshoot), 3.3 heavy settle; 3.9 right hand plants; 4.4 left knee up / foot plants; 5.4 right knee up, 5.75 STOMP to standing; 6.5 settle; 7.0 wind-up, 7.35-9.0 held roar (chest out, head back, arms out to the sides); 9.0-10.5 blend. Last frame == wb_idle frame 0 exactly.
+- Root motion: keyed on the `root` bone, vertical Z only (no XY). Do NOT strip root Z for this clip. Node origin = ground/lava surface; he starts ~1.15 body heights below it.
+- Events in worldboss_events.json -> "wb_emerge" (fist_breach, hand_grip, burst, hand_plant, stomp, roar, footsteps, impacts).
+- FIX: the v5 export (8ff4f0f) was resampled at the wrong frame rate, so every OTHER clip in both world-boss files played 1.25x fast (wb_idle 4.8 s instead of 6.0). This commit restores them from fa6d533 timing (wb_idle 6.0, wb_walk 10.0; 24 fps-authored clips now land on the 30 fps grid, e.g. wb_stomp 4.417 -> 4.400 s). Please re-pull both GLBs.
+- Checks: p99 edge stretch 121.8% (base) / 110.7% (lod1), below wb_getup 128.8% / 114.6%; 0 arm-leg intersection frames; Godot 4 headless import OK (42 clips); per-frame track sampling in Godot shows continuous motion, no frozen runs.

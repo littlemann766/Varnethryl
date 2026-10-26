@@ -288,7 +288,7 @@ if os.environ.get('SEAM'):   # cape seam verts (cape-chain weight < 0.5) ride wi
         GN={g.index:g.name for g in o.vertex_groups}
         for v in o.data.vertices:
             cw=sum(g.weight for g in v.groups if GN[g.group].startswith('cape'))
-            if 0<cw<0.5 and any(GN[g.group] in ('chest','upperChest') for g in v.groups):
+            if 0<cw<float(os.environ.get('SEAMT','0.5')) and any(GN[g.group] in ('chest','upperChest') for g in v.groups):
                 for g in v.groups:
                     if GN[g.group].startswith('cape'): g.weight=0.0
                 tot=sum(g.weight for g in v.groups)
@@ -394,6 +394,8 @@ for name,dur,fn in CLIPS:
             for _ in range(3): m=[(m[(fr-1)%N]+2*m[fr]+m[(fr+1)%N])/4 for fr in range(N)]
             return m
         req=[p+(2.0 if p>0 else 0.0) for p in pushes]
+        EX=json.load(open(os.environ['EXTRA'])) if os.environ.get('EXTRA') and os.path.exists(os.environ['EXTRA']) else {}
+        for k_,v_ in EX.get(name,{}).items(): req[int(k_)%N]=max(req[int(k_)%N],pushes[int(k_)%N])+v_
         for it in range(5):
             sm=envelope(req); changed=False
             for fr in range(N):

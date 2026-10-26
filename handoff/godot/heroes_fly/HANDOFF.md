@@ -118,3 +118,6 @@ Preview: /workspace/hero-motion/heroes_fly_v2.mp4
 - Lunara, Garruk, Snowy, Thrain and Wren are NOT at zero yet. Their files here are still v3.
 - Video continuity check (tools/cont.py): at 30 fps, every view of every clip has no frozen frames, no pops and a clean loop seam.
 - Preview: /workspace/hero-motion/heroes_fly_v4.mp4 (Owner: side | 3/4 | shoulders 3/4-back | top-down/back).
+
+### Lunara v4 (partial)
+Cape rebuilt with CHAINW+SEAM+RFM=0.015+REWEIGHT. Independent export check: inside-body frames dropped from 173 (v3) to 23, max 1-2 verts/frame, all near the cape root (z 1.3-1.4 m): bank_R f8-15, forward f31-33, hover f23-30, 45-49. ascend/descend/fast/bank_L are 0. Not yet zero.

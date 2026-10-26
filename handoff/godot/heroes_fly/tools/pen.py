@@ -37,5 +37,6 @@ for act in [x for x in bpy.data.actions if x.name.startswith(pfx)]:
     arm.animation_data.action=act; s,e=map(int,act.frame_range); mx=0; ww=None
     for fr in range(s,e+1, int(os.environ.get('STEP','1'))):
         sc.frame_set(fr); c,w=count()
+        if c and os.environ.get('FRAMES'): print('FAIL',act.name.split('_Darius')[0].split('_'+arm.name)[0],fr,c)
         if c>mx: mx=c; ww=w
     out[act.name]=mx; print('PEN',act.name,mx,ww.most_common(5) if ww else '')

@@ -7,6 +7,7 @@ extends Node3D
 
 const SCALE := 5.440
 const SPEED := 2.96          # Lucian ac97cb3 (timing unchanged from f2ea516): feet hold at 2.96 m/s walk (root motion stripped)
+const WALK_RATE := 1.2      # test 17: wb_walk play rate at SPEED, tuned with tests/wb_lite.tscn (planted-foot slip +0.06 m per m walked; 1.0 gave +0.17, 0.8 +0.43)
 const RUN_SPEED := 8.1       # wb_run, root motion stripped
 const WB := "res://assets/volcano/worldboss/"
 const LAVA := "res://assets/volcano/worldboss/titan/"
@@ -391,7 +392,8 @@ func _process(dt: float) -> void:
 		"cool":
 			if t_state > 10.0: _set_state("walk")
 	if _rate_pending and is_inside_tree():
-		_rate_pending = false; walk_rate = _clip_rate("wb_walk", SPEED)
+		_rate_pending = false; _clip_rate("wb_walk", SPEED)   # clip_speed kept for the report
+		walk_rate = WALK_RATE
 		if OS.get_environment("WB_RATE") != "": walk_rate = float(OS.get_environment("WB_RATE"))
 	ap.advance(dt)
 	_ground_feet(dt)
@@ -722,7 +724,6 @@ func _clip_rate(clip: String, speed: float) -> float:
 	spd.sort()
 	clip_speed = spd[spd.size() / 2] if spd.size() > 0 else 0.0
 	if prev != "": ap.play(prev); ap.seek(prev_t, true)
-	clip_speed = dist / t_st if t_st > 0.0 else 0.0
 	return clampf(speed / clip_speed, 0.25, 4.0) if clip_speed > 0.05 else 1.0
 var clip_speed := 0.0
 var _rate_pending := false

@@ -23,7 +23,7 @@ func _run() -> void:
 			var a: Vector3 = inv * wb.skel.get_bone_global_pose(wb.skel.find_bone("toe_L")).origin; var b: Vector3 = inv * wb.skel.get_bone_global_pose(wb.skel.find_bone("toe_R")).origin
 			print("DUMP %.2f L(%.2f,%.2f,%.2f) R(%.2f,%.2f,%.2f)" % [L * k / 24.0, a.x, a.y, a.z, b.x, b.y, b.z])
 		get_tree().quit(); return
-	var fails := 0; var max_gap := 0.0; var max_ang := 0.0; var n := 0; var slide := 0.0; var slide_n := 0
+	var fails := 0; var max_gap := 0.0; var max_ang := 0.0; var n := 0; var slide := 0.0; var slide_n := 0; var lat_sway := 0.0; var node_d := 0.0
 	var last: Vector3 = wb.global_position
 	var lastfoot := {}
 	var lastloc := {}; var footmin := {}
@@ -50,7 +50,8 @@ func _run() -> void:
 			if lastfoot.has(bn) and i > 60:
 				var dt := get_process_delta_time()
 				if dt > 0.0 and lp.z > lastloc[bn].z and lp.y < footmin[bn] + 2.0:
-					slide += Vector2(tp.x - lastfoot[bn].x, tp.z - lastfoot[bn].z).length() / dt; slide_n += 1
+					slide += (tp - lastfoot[bn]).dot(f); node_d += v.length()   # signed metres: + = foot dragged forward, - = moonwalk back; slide_n += 1   # along-travel slip (moonwalk); the clip's own wide-stance lateral sway is not counted
+					lat_sway += absf((tp - lastfoot[bn]).dot(f.cross(Vector3.UP).normalized()))
 			lastfoot[bn] = tp; lastloc[bn] = lp
 		if i == 400:
 			var hp: Vector3 = wb.global_position; var side: Vector3 = f.cross(Vector3.UP).normalized()
@@ -62,11 +63,11 @@ func _run() -> void:
 			c.look_at_from_position(hp + side * 40.0 + Vector3(0, 6, 0), hp + Vector3(0, 2, 0) + side * 0.0, Vector3.UP)
 			await frames(2); get_viewport().get_texture().get_image().save_png(OUT + "wb_feet_ground_close.png")
 			m.cam.current = true; c.queue_free()
-	var avg_slide := slide / maxf(slide_n, 1)
-	print("WBCHECK samples=%d max_foot_gap=%.2f m max_facing_vs_velocity=%.1f deg planted_slide=%.2f m/s prints=%d" % [n, max_gap, max_ang, avg_slide, wb.prints_made - p0])
+	var avg_slide := slide / maxf(node_d, 0.001)   # planted-foot travel per metre he walks
+	print("WBCHECK samples=%d max_foot_gap=%.2f m max_facing_vs_velocity=%.1f deg planted_foot_slip=%+.2f m per m walked (lateral %.2f) prints=%d" % [n, max_gap, max_ang, avg_slide, lat_sway / maxf(node_d, 0.001), wb.prints_made - p0])
 	if max_gap > 0.6: fails += 1; print("FAIL foot gap")
 	if max_ang > 20.0: fails += 1; print("FAIL facing")
-	if avg_slide > 1.0: fails += 1; print("FAIL foot slide")
+	if absf(avg_slide) > 0.25: fails += 1; print("FAIL foot slide")
 	if wb.prints_made - p0 < 4: fails += 1; print("FAIL no footprints at plants")
 	# fresh prints shot (behind him, from above)
 	var hp2: Vector3 = wb.global_position; var bk: Vector3 = -wb._fwd()

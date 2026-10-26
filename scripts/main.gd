@@ -1508,7 +1508,7 @@ func _hud() -> void:
 	hud_label.add_theme_color_override("font_outline_color", Color.BLACK); hud_label.add_theme_constant_override("outline_size", 6); cl.add_child(hud_label)
 	where_label = Label.new(); where_label.position = Vector2(500, 44); where_label.add_theme_font_size_override("font_size", 30)
 	where_label.add_theme_color_override("font_outline_color", Color.BLACK); where_label.add_theme_constant_override("outline_size", 8); cl.add_child(where_label)
-	bench_label = Label.new(); bench_label.position = Vector2(330, 120); bench_label.add_theme_font_size_override("font_size", 26)
+	bench_label = Label.new(); bench_label.position = Vector2(40, 110); bench_label.add_theme_font_size_override("font_size", 18)
 	bench_label.add_theme_color_override("font_outline_color", Color.BLACK); bench_label.add_theme_constant_override("outline_size", 8); cl.add_child(bench_label)
 	_apply_time_mode()
 	joy_base = Panel.new(); joy_base.size = Vector2(220, 220); joy_base.position = Vector2(60, 460)
@@ -1726,7 +1726,11 @@ func _flythrough_all() -> void:
 	tier = saved; apply_quality()
 	var top := _bench_spikes.slice(0, 40)
 	lines.append("Spikes (%d):" % _bench_spikes.size()); lines.append_array(top)
-	bench_label.text = "\n".join(lines.slice(0, 6)) + "\nSpikes: %d (see benchmark.txt)" % _bench_spikes.size()
+	# test 20: user://benchmark.txt is app-private on Android (/data/data/com.varnethryl.godottest/files/), so also
+	# copy the full report to the clipboard and show the worst spikes on screen.
+	DisplayServer.clipboard_set("\n".join(lines))
+	var worst := _bench_spikes.filter(func(x): return x.contains("SPIKE"))
+	bench_label.text = "\n".join(lines.slice(0, 5)) + "\nSpikes: %d - full report copied to clipboard (paste it in chat)\n%s" % [worst.size(), "\n".join(worst.slice(0, 6))]
 	var f := FileAccess.open("user://benchmark.txt", FileAccess.WRITE); f.store_string("\n".join(lines)); f.close()
 	print("FLY ", " | ".join(lines.slice(0, 5)))
 	for l in top: print(l)
@@ -2239,8 +2243,10 @@ func _hook_ui() -> void:
 	VPrefs.changed.connect(func(_p):
 		if bench_running: return
 		var t := VPrefs.tier()
-		if t != tier: tier = t
-		apply_quality())
+		var changed := t != tier
+		if changed: tier = t
+		apply_quality()
+		if changed: _warm_veiled())
 	VUI.menu_toggled.connect(func(o): menu_open = o)
 	VUI.get_snapshot = func() -> Dictionary:
 		return {"x": hero.position.x, "z": hero.position.z, "yaw": yaw, "zone": "village", "hero": int(VSave.state.get("active", 0))}
@@ -2443,8 +2449,7 @@ func _warm_views() -> void:
 	cam.current = true; wcam.queue_free()
 	for l in lamp_lights: _lamp_shadow_on[l[0]] = l[0].shadow_enabled
 
-func _warm_up() -> void:
-	var saved := tier; var saved_t := tod
+func _veil() -> CanvasLayer:
 	var veil := ColorRect.new(); veil.color = Color(0.05, 0.04, 0.06); veil.set_anchors_preset(Control.PRESET_FULL_RECT)
 	var cl := CanvasLayer.new(); cl.layer = 100; add_child(cl); cl.add_child(veil)
 	var lbl := VStyle.label("Preparing shaders…", 22, Color(0.9, 0.85, 0.7))
@@ -2452,6 +2457,21 @@ func _warm_up() -> void:
 	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	cl.add_child(lbl)
+	return cl
+
+## test 20: a graphics-quality change in game changes the global shadow settings (drops compiled pipelines),
+## so re-warm the new tier behind the same "Preparing shaders" veil instead of stuttering while walking.
+var _rewarming := false
+func _warm_veiled() -> void:
+	if _rewarming or not warmed: return
+	_rewarming = true
+	var cl := _veil(); var cam_far := cam.far
+	await _warm_views()
+	cam.far = cam_far; cl.queue_free(); _rewarming = false
+
+func _warm_up() -> void:
+	var saved := tier; var saved_t := tod
+	var cl := _veil()
 	var cam_far := cam.far
 	# test 20: the soft-shadow quality / atlas size are global and changing them drops every compiled pipeline, so
 	# warming other tiers first only helped if the player stayed on the last one. Warm the player's own tier LAST.

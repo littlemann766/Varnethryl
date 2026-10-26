@@ -234,18 +234,18 @@ func _ready() -> void:
 	_pond()
 	_walls_and_gate()
 	for d in DEFS: _building(d)
-	_street_kit()
-	_farm_fields()
+	if OS.get_environment("VARN_LITE") == "": _street_kit()   # test 17: lean world for shared-box checks
+	if OS.get_environment("VARN_LITE") == "": _farm_fields()   # test 17: lean world for shared-box checks
 	if OS.get_environment("VARN_NO_FILLERS") == "": fillers = TownFillers.build(self)   # test 14: rows of filler houses/shops from assets/town/fillers.json
 	_streets_to_shader()
 	# test 10: boss "Fix the castle and or get rid of it" - the Tripo backdrop castle reads as shredded/floating, removed
 	_harbour()
 	if OS.get_environment("VARN_NO_HARBOR") == "": harbor = HarborDistrict.new().build(self)
-	_ships()
-	_dressing()
+	if OS.get_environment("VARN_LITE") == "": _ships()   # test 17: lean world for shared-box checks
+	if OS.get_environment("VARN_LITE") == "": _dressing()   # test 17: lean world for shared-box checks
 	_hi_terrain()
-	_showcase()
-	_foliage()
+	if OS.get_environment("VARN_LITE") == "": _showcase()   # test 17: lean world for shared-box checks
+	if OS.get_environment("VARN_LITE") == "": _foliage()   # test 17: lean world for shared-box checks
 	if not args.has("--wbshots") and not args.has("--altshots") and not args.has("--roofshots") and not args.has("--wbcheck"): _grass()   # shot capture on the shared box: skip grass to save RAM
 	_hero()
 	_fx()

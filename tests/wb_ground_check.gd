@@ -14,12 +14,22 @@ func _run() -> void:
 	m.spawn_world_boss(false); await frames(5)
 	var wb = m.world_boss
 	wb.place_at(5); await frames(30)
-	print("WB walk_rate=%.3f sole_clear=%.2f body_yaw=%.2f" % [wb.walk_rate, wb.sole_clear, wb.body.rotation.y])
+	await frames(3); print("WB clip_speed=%.2f walk_rate=%.3f sole_clear=%.2f body_yaw=%.2f" % [wb.clip_speed, wb.walk_rate, wb.sole_clear, wb.body.rotation.y])
+	if OS.get_environment("WB_DUMP") != "":
+		wb.ap.play("wb_walk"); var L: float = wb.ap.get_animation("wb_walk").length
+		for k in 25:
+			wb.ap.seek(L * k / 24.0, true); wb.ap.advance(0.0)
+			var inv: Transform3D = wb.global_transform.affine_inverse() * wb.skel.global_transform
+			var a: Vector3 = inv * wb.skel.get_bone_global_pose(wb.skel.find_bone("toe_L")).origin; var b: Vector3 = inv * wb.skel.get_bone_global_pose(wb.skel.find_bone("toe_R")).origin
+			print("DUMP %.2f L(%.2f,%.2f,%.2f) R(%.2f,%.2f,%.2f)" % [L * k / 24.0, a.x, a.y, a.z, b.x, b.y, b.z])
+		get_tree().quit(); return
 	var fails := 0; var max_gap := 0.0; var max_ang := 0.0; var n := 0; var slide := 0.0; var slide_n := 0
 	var last: Vector3 = wb.global_position
 	var lastfoot := {}
+	var lastloc := {}; var footmin := {}
 	var p0: int = wb.prints_made
-	for i in 900:   # ~ 900 frames of patrol walking
+	var NF := int(OS.get_environment("WB_FRAMES")) if OS.get_environment("WB_FRAMES") != "" else 900
+	for i in NF:   # ~ 900 frames of patrol walking
 		await get_tree().process_frame
 		if wb.state != "walk": wb._set_state("walk")
 		var p: Vector3 = wb.global_position; var v := Vector3(p.x - last.x, 0, p.z - last.z); last = p
@@ -29,15 +39,19 @@ func _run() -> void:
 		face.y = 0
 		var ang := rad_to_deg(face.normalized().angle_to(v.normalized()))
 		max_ang = maxf(max_ang, ang); max_gap = maxf(max_gap, absf(wb.foot_gap)); n += 1
-		# planted-foot slide: lowest toe's world xz motion per second while it is within 0.5 m of the ground
+		if i % 60 == 0: print("  t%d gap=%.2f off=%.2f y=%.2f gy=%.2f" % [i, wb.foot_gap, wb.ground_off, wb.position.y, wb._gy(p.x, p.z)])
+		# planted-foot slide: a foot is planted while it moves backwards in node space near its own low point;
+		# its world xz speed then should be ~0
+		var inv: Transform3D = wb.global_transform.affine_inverse()
 		for bn in ["toe_L", "toe_R"]:
-			var b: int = wb.skel.find_bone(bn)
-			var tp: Vector3 = wb.skel.global_transform * wb.skel.get_bone_global_pose(b).origin
-			var g: float = tp.y - wb.sole_clear - wb._gy(tp.x, tp.z)
-			if lastfoot.has(bn) and g < 0.5:
-				var dt := get_process_delta_time() * Engine.time_scale
-				if dt > 0.0: slide += Vector2(tp.x - lastfoot[bn].x, tp.z - lastfoot[bn].z).length() / dt; slide_n += 1
-			lastfoot[bn] = tp
+			var tp: Vector3 = wb.skel.global_transform * wb.skel.get_bone_global_pose(wb.skel.find_bone(bn)).origin
+			var lp: Vector3 = inv * tp
+			footmin[bn] = minf(footmin.get(bn, INF), lp.y)
+			if lastfoot.has(bn) and i > 60:
+				var dt := get_process_delta_time()
+				if dt > 0.0 and lp.z > lastloc[bn].z and lp.y < footmin[bn] + 2.0:
+					slide += Vector2(tp.x - lastfoot[bn].x, tp.z - lastfoot[bn].z).length() / dt; slide_n += 1
+			lastfoot[bn] = tp; lastloc[bn] = lp
 		if i == 400:
 			var hp: Vector3 = wb.global_position; var side: Vector3 = f.cross(Vector3.UP).normalized()
 			var c := Camera3D.new(); c.fov = 50; c.far = 3000; m.add_child(c)

@@ -82,6 +82,7 @@ func setup(main: Node) -> WorldBoss:
 	add_child(body)
 	ap = body.find_children("*", "AnimationPlayer", true, false)[0]
 	skel = body.find_children("*", "Skeleton3D", true, false)[0]
+	ap.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL   # test 17: we advance it, then ground the feet on the fresh pose
 	_orient_and_measure()
 	for c in ["wb_walk", "wb_idle", "wb_ritual_fissure_loop", "wb_ritual_lavawave_loop", "wb_stagger_loop", "wb_down_loop"]:
 		if ap.has_animation(c): ap.get_animation(c).loop_mode = Animation.LOOP_LINEAR
@@ -389,6 +390,10 @@ func _process(dt: float) -> void:
 			if t_state > 22.0 and ap.current_animation != "wb_getup": _play("wb_getup")
 		"cool":
 			if t_state > 10.0: _set_state("walk")
+	if _rate_pending and is_inside_tree():
+		_rate_pending = false; walk_rate = _clip_rate("wb_walk", SPEED)
+		if OS.get_environment("WB_RATE") != "": walk_rate = float(OS.get_environment("WB_RATE"))
+	ap.advance(dt)
 	_ground_feet(dt)
 	_update_crystals(dt); _update_prints(dt); _update_adds(dt); _update_ui(); _update_fx(dt); _do_shake(dt)
 
@@ -679,7 +684,8 @@ func _orient_and_measure() -> void:
 	if fl >= 0 and tl >= 0:
 		var to_node := global_transform.affine_inverse() * skel.global_transform
 		var d := to_node * skel.get_bone_global_rest(tl).origin - to_node * skel.get_bone_global_rest(fl).origin
-		if d.z > 0.0: body.rotation.y += PI     # toes point +Z (glTF front) but he walks -Z: turn the model around
+		if d.z > 0.0: body.rotation.y += PI
+		if OS.get_environment("WB_FLIP") != "": body.rotation.y += PI     # toes point +Z (glTF front) but he walks -Z: turn the model around
 	var to_node2 := global_transform.affine_inverse() * skel.global_transform
 	var lo := INF
 	for bn in ["toe_L", "toe_R"]:
@@ -687,27 +693,39 @@ func _orient_and_measure() -> void:
 		if b >= 0: lo = minf(lo, (to_node2 * skel.get_bone_global_rest(b).origin).y)
 	var root_y := (to_node2 * skel.get_bone_global_rest(maxi(skel.find_bone("root"), 0)).origin).y
 	sole_clear = maxf(0.0, lo - root_y) if lo < INF else 0.0
-	walk_rate = _clip_rate("wb_walk", SPEED)
+	walk_rate = 1.0   # measured on the first walking frame (_rate_pending)
+	_rate_pending = true
+	if OS.get_environment("WB_RATE") != "": walk_rate = float(OS.get_environment("WB_RATE"))
 
-## wb_walk is in place (root stripped): average backward speed of the planted foot across the cycle = clip ground speed.
+## wb_walk is in place (root stripped): sample the clip on the real skeleton and measure how fast the
+## planted (lowest) toe travels backwards in node space; play rate = SPEED / that speed so stance feet stay put.
 func _clip_rate(clip: String, speed: float) -> float:
 	if not ap.has_animation(clip): return 1.0
-	var a := ap.get_animation(clip); var n := 48; var best := 0.0
-	for bn in ["foot_L", "foot_R"]:
-		var bi := skel.find_bone(bn); if bi < 0: continue
-		var tr := a.find_track(NodePath("%s:%s" % [ap.get_node(ap.root_node).get_path_to(skel), bn]), Animation.TYPE_POSITION_3D)
-		if tr < 0: continue
-		var zs := []; var ys := []
-		for i in n:
-			var p: Vector3 = a.position_track_interpolate(tr, a.length * i / n)
-			var w := global_transform.affine_inverse() * skel.global_transform * (skel.get_bone_global_rest(skel.get_bone_parent(bi)) * p)
-			zs.append(w.z); ys.append(w.y)
-		var ymin: float = ys.min(); var dist := 0.0; var t_st := 0.0
-		for i in n:   # stance = foot within 15 cm of its lowest point; sum its travel
-			var j := (i + 1) % n
-			if ys[i] < ymin + 0.15 * SCALE and ys[j] < ymin + 0.15 * SCALE: dist += absf(zs[j] - zs[i]); t_st += a.length / n
-		if t_st > 0.0: best = maxf(best, dist / t_st)
-	return clampf(speed / best, 0.3, 3.0) if best > 0.01 else 1.0
+	var prev := ap.current_animation; var prev_t := ap.current_animation_position if prev != "" else 0.0
+	ap.play(clip); var L := ap.get_animation(clip).length; var n := 60
+	var inv := global_transform.affine_inverse()
+	var pts := {"toe_L": [], "toe_R": []}
+	for i in n + 1:
+		ap.seek(L * i / n, true); ap.advance(0.0)
+		for bn in pts:
+			var bi := skel.find_bone(bn)
+			if bi >= 0: pts[bn].append(inv * skel.global_transform * skel.get_bone_global_pose(bi).origin)
+	# stance = foot moving backwards (+Z, the model faces -Z after the turn... measured in node space, so use the
+	# direction opposite to travel) while near its own lowest height; clip ground speed = mean stance speed
+	var spd := []
+	for bn in pts:
+		var ps: Array = pts[bn]; if ps.size() < 2: continue
+		var ymin := INF; for q in ps: ymin = minf(ymin, q.y)
+		for i in ps.size() - 1:
+			var dz: float = (ps[i + 1].z - ps[i].z) / (L / n)   # node fwd is -Z, so a planted foot moves +Z
+			if dz > 0.0 and ps[i].y < ymin + 2.0: spd.append(dz)
+	spd.sort()
+	clip_speed = spd[spd.size() / 2] if spd.size() > 0 else 0.0
+	if prev != "": ap.play(prev); ap.seek(prev_t, true)
+	clip_speed = dist / t_st if t_st > 0.0 else 0.0
+	return clampf(speed / clip_speed, 0.25, 4.0) if clip_speed > 0.05 else 1.0
+var clip_speed := 0.0
+var _rate_pending := false
 
 ## lowest sole world height vs the terrain right under it
 func sole_gap() -> float:
@@ -721,6 +739,7 @@ func sole_gap() -> float:
 func _ground_feet(dt: float) -> void:
 	if state == "knockdown": return
 	foot_gap = sole_gap()
-	ground_off -= foot_gap * clampf(dt * 8.0, 0.0, 1.0)   # per-frame snap, smoothed so steps do not pop
-	ground_off = clampf(ground_off, -8.0, 8.0)
+	ground_off -= foot_gap   # per-frame snap: the lowest sole sits on the terrain under it
+	ground_off = clampf(ground_off, -20.0, 20.0)
 	position.y = _gy(position.x, position.z) + ground_off
+	foot_gap = sole_gap()   # residual after the snap (what the player sees)

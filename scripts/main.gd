@@ -445,6 +445,8 @@ func _set_time(h: float) -> void:
 	for f in fx_night: f[0].emitting = night and tier >= f[1]; f[0].visible = f[0].emitting
 	for f in fx_day: f[0].emitting = not night and tier >= f[1]; f[0].visible = f[0].emitting
 
+var _rs_atlas := -1
+var _rs_soft := -1
 func apply_quality() -> void:
 	if titan_quest and titan_quest.titan and titan_quest.titan.lava_mat and titan_quest.titan.lava_hq != (tier >= 2):   # test 14: veins shader on High/Ultra only
 		titan_quest.titan.lava_veins(tier >= 2); titan_quest.titan.lava_stage(maxi(1, titan_quest.stage), false)
@@ -454,9 +456,14 @@ func apply_quality() -> void:
 	# one shadowed light (the sun) with short distance, no shadowed lamps, LOD/HLOD everywhere.
 	var vp := get_viewport()
 	Engine.max_fps = fps_cap
-	RenderingServer.directional_shadow_atlas_set_size([1024, 2048, 2048, 4096][tier], true)
+	# test 20: these two are global renderer settings; calling them (even with the same value) dropped the scene
+	# pipelines, so every apply_quality() (tier change, settings, benchmark start) re-compiled shaders mid-walk.
+	# Only touch them when the value really changes.
+	var atlas: int = [1024, 2048, 2048, 4096][tier]
+	if atlas != _rs_atlas: _rs_atlas = atlas; RenderingServer.directional_shadow_atlas_set_size(atlas, true)
 	var prefs_shadows: bool = bench or bool(VPrefs.prefs.get("shadows", true))
-	RenderingServer.directional_soft_shadow_filter_set_quality([RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_SOFT_VERY_LOW, RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM][tier])
+	var sq: int = [RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_SOFT_VERY_LOW, RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM][tier]
+	if sq != _rs_soft: _rs_soft = sq; RenderingServer.directional_soft_shadow_filter_set_quality(sq)
 	sun.shadow_enabled = prefs_shadows
 	sun.directional_shadow_max_distance = [30.0, 45.0, 60.0, 140.0][tier]
 	sun.directional_shadow_mode = [DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS][tier]
@@ -1679,6 +1686,11 @@ func _flythrough(seconds := 10.0) -> Array:
 			rows.append([t - warm, dt, i, pc[0] - pc0[0], pc[1] - pc0[1], pc[2] - pc0[2] + pc[3] - pc0[3], dc - dc0, ob - ob0,
 				Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, lamp_shadow_t > lamp0, (mem - mem0) / 1048576.0])
 		pc0 = pc; dc0 = dc; ob0 = ob; mem0 = mem; lamp0 = lamp_shadow_t
+	var tot := [0, 0, 0]
+	for r in rows: tot[0] += r[3]; tot[1] += r[4]; tot[2] += r[5]
+	if OS.get_environment("BENCH_COMPLOG") != "":
+		for r in rows: if r[3] > 0 or r[4] > 0: print("COMPLOG %s t=%.2f leg %d draw %d spec %d dobj %+d ddc %+d" % [TIERS[tier], r[0], r[2], r[3], r[4], r[7], r[6]])
+	_bench_spikes.append("  COMPILES %s during run: draw-time %d, specialization %d, surface/mesh %d" % [TIERS[tier], tot[0], tot[1], tot[2]])
 	var sorted := dts.duplicate(); sorted.sort()
 	var med: float = sorted[sorted.size() / 2] if sorted.size() > 0 else 0.016
 	var p99: float = sorted[int(sorted.size() * 0.99)] if sorted.size() > 0 else 0.016
@@ -1690,8 +1702,7 @@ func _flythrough(seconds := 10.0) -> Array:
 			if r[5] > 0: why.append("%d surface/mesh pipeline(s)" % r[5])
 			if absf(r[6]) > 40: why.append("draw calls %+d" % r[6])
 			if absf(r[7]) > 40: why.append("objects %+d" % r[7])
-			if r[8] > 8.0: why.append("script %.1f ms" % r[8])
-			if r[9]: why.append("lamp shadow re-pick")
+			if r[9] and tier == 3: why.append("lamp shadow re-pick")
 			if r[10] > 2.0: why.append("+%.1f MB static mem" % r[10])
 			if why.is_empty(): why.append("unknown (GPU/driver, shadow cascade or streaming)")
 			_bench_spikes.append("  SPIKE %s t=%.2fs leg %d: %.1f ms - %s" % [TIERS[tier], r[0], r[2], r[1] * 1000.0, ", ".join(why)])
@@ -1701,8 +1712,12 @@ func _flythrough_all() -> void:
 	bench_running = true
 	_bench_spikes = []
 	var saved := tier; var lines := ["Benchmark (10 s fly-through each, cap %s)" % (str(fps_cap) if fps_cap > 0 else "off")]
-	for q in [0, 1, 2, 3]:
-		tier = q; apply_quality(); Engine.max_fps = fps_cap   # test 20: the cap used to be switched off (Low read avg 111 under "cap 60")
+	var order := [0, 1, 2, 3]
+	if OS.get_environment("BENCH_TIERS") != "": order = Array(OS.get_environment("BENCH_TIERS").split(",")).map(func(x): return int(x))
+	for q in order:
+		if OS.get_environment("BENCH_NOAPPLY") == "" or tier != q or order.find(q) == order.rfind(q): tier = q; apply_quality()
+		else: tier = q
+		Engine.max_fps = fps_cap   # test 20: the cap used to be switched off (Low read avg 111 under "cap 60")
 		bench_label.text = "\n".join(lines) + "\nRunning %s..." % TIERS[q]
 		var r: Array = await _flythrough()
 		lines.append("%s: avg %.0f FPS, 1%% low %.0f FPS, worst frame %.0f FPS (median %.1f ms)" % [TIERS[q], r[0], r[2], r[1], r[3]])
@@ -1738,6 +1753,12 @@ func _run_bench() -> void:
 		["inside", Vector3(-25.2, 0, 52), PI * 0.1, -0.55], ["gate", Vector3(0, 0, 165), 0.0, -0.12],
 		["outside", Vector3(30, 0, 240), PI * 0.85, -0.05], ["keep", Vector3(0, 0, -95), 0.0, -0.1]]
 	var only := OS.get_environment("BENCH_ONLY")
+	if only == "flywarm":   # test 20: boot warm-up as on device, then the in-app benchmark (prints FLY / SPIKE lines)
+		_warm_up()
+		while not warmed: await get_tree().process_frame
+		fps_cap = 60
+		await _flythrough_all()
+		get_tree().quit(); return
 	if only == "" or only == "dc":
 		for q in 4:
 			for v in views: await _shot("dc_%s_%s" % [v[0], TIERS[q]], v[1], v[2], v[3], 11.0, q, 8)
@@ -2334,6 +2355,7 @@ func _camera_prefs(inside: bool, dt: float) -> void:
 	if P.get("camMode", "follow") == "follow" and not first and cam_touch == -1 and joy_vec.length() > 0.2 and not bench_running:
 		yaw = lerp_angle(yaw, hero_vis.rotation.y, min(1.0, 1.5 * dt))
 
+var _lamp_shadow_on := {}
 func _update_lamp_shadows() -> void:
 	# Ultra only: the 3 nearest lit lamps within 28 m cast shadows (Mobile renderer handles a few omni shadows fine).
 	if tier != 3:
@@ -2345,8 +2367,10 @@ func _update_lamp_shadows() -> void:
 	lit.sort_custom(func(a, b): return a[0] < b[0])
 	for i in lit.size():
 		var on: bool = i < 3 and lit[i][0] < 28.0 * 28.0
-		lit[i][1].shadow_enabled = on
+		if _lamp_shadow_on.get(lit[i][1], null) == on: continue   # test 20: no per-0.5 s re-set of unchanged lights
+		_lamp_shadow_on[lit[i][1]] = on
 		if on: lit[i][1].shadow_bias = 0.05; lit[i][1].omni_shadow_mode = OmniLight3D.SHADOW_DUAL_PARABOLOID
+		lit[i][1].shadow_enabled = on
 
 func _clear_remotes() -> void:
 	for id in remotes.keys():
@@ -2395,6 +2419,11 @@ func _build_minimap() -> void:
 		VUI.hud.minimap.set_markers(mk)
 
 # --- shader warm-up: draw every LOD / tier variant once behind the title screen ---
+const WARM_VIEWS := [
+	[Vector3(-6, 8, 30), Vector3(-6, 6, -20)], [Vector3(-6, 8, 30), Vector3(44, 6, 30)], [Vector3(-6, 8, 30), Vector3(-6, 6, 80)],
+	[Vector3(-6, 8, 30), Vector3(-56, 6, 30)], [Vector3(-6, 60, 30), Vector3(-6, 0, 31)],
+	[Vector3(0, 4, 120), Vector3(0, 4, 175)], [Vector3(0, 4, 175), Vector3(0, 10, 260)], [Vector3(-60, 4, 10), Vector3(-6, 4, 30)],
+	[Vector3(0, 40, 0), Vector3(250, 0, -120)], [Vector3(0, 40, 0), Vector3(-20, 30, 300)]]
 func _warm_up() -> void:
 	var saved := tier; var saved_t := tod
 	var veil := ColorRect.new(); veil.color = Color(0.05, 0.04, 0.06); veil.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -2405,6 +2434,7 @@ func _warm_up() -> void:
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	cl.add_child(lbl)
 	var cam_far := cam.far
+	var wcam := Camera3D.new(); wcam.fov = 90; wcam.far = 4000; add_child(wcam); wcam.current = true
 	for q in [3, 0, 1, 2]:
 		tier = q; apply_quality()
 		for h in [12.0, 22.5]:
@@ -2414,8 +2444,17 @@ func _warm_up() -> void:
 			for b in buildings: for m in _meshes(b.node, []): m.visibility_range_begin = 0; m.visibility_range_end = 0
 			for f in fx_any + fx_day + fx_night: f[0].visible = true; f[0].emitting = true
 			for l in lamp_lights: l[0].visible = true; l[0].shadow_enabled = q == 3
-			await get_tree().process_frame; await get_tree().process_frame
+			# test 20: the old pass only drew what the boot camera happened to face, so first sight of the rest of the
+			# town (benchmark path, gate, lake, mountains) compiled pipelines mid-walk = the 12-30 FPS minimums.
+			# Look around from the plaza and from the benchmark legs with a long far plane so every visible material,
+			# LOD band and shadow-caster variant is drawn once per tier and time of day.
+			for vp in WARM_VIEWS:
+				wcam.look_at_from_position(vp[0], vp[1], Vector3.UP)
+				await get_tree().process_frame
+			await get_tree().process_frame
 	cam.far = cam_far; tier = saved; _set_time(saved_t); apply_quality(); _apply_time_mode()
+	cam.current = true; wcam.queue_free()
+	for l in lamp_lights: _lamp_shadow_on[l[0]] = l[0].shadow_enabled
 	warmed = true
 	cl.queue_free()
 

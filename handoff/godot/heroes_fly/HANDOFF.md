@@ -110,3 +110,11 @@ Preview: /workspace/hero-motion/heroes_fly_v2.mp4
 - Single-bone capes and coats stay rigid, and the coat chains are unchanged from v2.
 - Owner: leg clipping 0–2 verts, p99 stretch at most 40.9% (walk 60.6%). The full table is in stretch_p99_v3.json.
 - Preview: /workspace/hero-motion/heroes_fly_v3.mp4
+
+## v4 (Oct 25): cape attachment + no cape inside the body
+- Cause 1, attachment: in v3 every cape bone, including the root, was aimed at an absolute "straight back" target. That rotated the root segment 10–26° off its rest drape relative to the chest (walk: 6°), so the cape slid off the shoulders. Now the root keeps its rest attachment (≤1.8° off rest), the target is built in the upper-back frame, the second segment blends to straight, and the ripple stays.
+- Cause 2, cape through the body (boss screenshot, v2/test 16): cape vertices also carried upperArm/foreArm/spine weights, so the arms and spine dragged the cape into the back. Cape-dominant verts now follow only the cape chain + chest/upperChest/shoulder (limited to 4 influences, as in the export). A per-frame solver then lifts the cape chain away from the back just enough to keep it out. The lift goes through a smooth looping envelope, so there are no pops.
+- Check (tools/pen.py, inside_lib.py): a cape vert counts as inside if it lies behind the nearest torso/hips/leg surface (within 3 cm) and ray parity agrees. Owner, Asha and Darius have 0 inside in every frame of all 7 clips (checked frame by frame on the exported GLBs).
+- Lunara, Garruk, Snowy, Thrain and Wren are NOT at zero yet. Their files here are still v3.
+- Video continuity check (tools/cont.py): at 30 fps, every view of every clip has no frozen frames, no pops and a clean loop seam.
+- Preview: /workspace/hero-motion/heroes_fly_v4.mp4 (Owner: side | 3/4 | shoulders 3/4-back | top-down/back).

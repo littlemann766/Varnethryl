@@ -126,6 +126,7 @@ import os
 DBG=os.environ.get('DBG','')
 WAVE={'fly_hover':(8,1,0.12),'fly_forward':(12,2,0.2),'fly_fast':(15,3,0.3),'fly_ascend':(10,2,0.18),'fly_descend':(10,2,0.18),'fly_bank_L':(12,2,0.2),'fly_bank_R':(12,2,0.2)}
 CUR_CLIP=''
+PUSH=0.0
 def solve(p,t):
     if 'nosec' in DBG: p['bias']=0; p['flut']=0
     _k=float(os.environ.get('SECK','1')); p['bias']*=_k; p['flut']*=_k
@@ -170,7 +171,14 @@ def solve(p,t):
         if n.startswith(('cape','coat')):
             d=depth(n); tip=not any(c.name.startswith(('cape','coat')) for c in b.children)
             if n.startswith('cape'):
-                tgt=Q@(-up + f*(0.10 if p['pitch']>30 else -0.18)).normalized()   # straight down the back, clear of the legs
+                rb=B[n]
+                while rb.parent.name.startswith('cape'): rb=rb.parent
+                rp=rb.parent.name
+                Rc=(P[rp]@REST[rp].inverted()).to_quaternion()   # chest/upper-back frame in flight
+                drape=(Rc@RV[n]).normalized()                     # where this segment lies at rest, carried by the back
+                straight=(Q@(-up + f*(float(os.environ.get('CO','-0.2')) if p['pitch']>30 else -0.18))).normalized()
+                wgt=min(1.0, float(depth(n)))                        # root keeps its rest attachment, blends to straight by segment 3
+                tgt=drape.slerp(straight,wgt) if hasattr(drape,'slerp') else (drape*(1-wgt)+straight*wgt).normalized()
             else:
                 th='thigh'+n[-2:] if n[-2:] in('_L','_R') else None
                 if th and th in P:
@@ -182,9 +190,10 @@ def solve(p,t):
                 pt=p['pitch']; W=WAVE.get(CUR_CLIP,(10,2,0.2))
                 Lc=chainlen(n); dd=depth(n); u_=(dd+1)/Lc
                 ang=W[0]*u_**1.5*0.5*(1+S2(t,W[1],-W[2]*dd))   # travelling wave root->tip, away from body only
-                fl=rot(Q@up.cross(f), ang)
+                fl=rot(Rc@up.cross(f), ang)
             else: fl=Quaternion()
             cur=((I@REST[n].inverted()).to_3x3()@RV[n]).normalized()
+            if n.startswith('cape') and PUSH: fl=rot(Rc@up.cross(f), PUSH)@fl
             q=cur.rotation_difference(fl@tgt)
             cl_=chainlen(n)
             if cl_<=2: q=Quaternion()
@@ -207,6 +216,23 @@ for tr in list(arm.animation_data.nla_tracks): arm.animation_data.nla_tracks.rem
 for o in bpy.data.objects:
     if o.animation_data: o.animation_data_clear() if o!=arm else None
 for b in arm.pose.bones: b.rotation_mode='QUATERNION'
+if True:  # cape weight cleanup: cape-dominant verts follow only cape chain + upper back
+    KEEP=('cape','chest','upperChest','shoulder')
+    for o in bpy.data.objects:
+        if o.type!='MESH' or not o.vertex_groups: continue
+        GN={g.index:g.name for g in o.vertex_groups}
+        if not any(n.startswith('cape2') for n in GN.values()): continue
+        for v in o.data.vertices:
+            if not v.groups: continue
+            dg_=max(v.groups,key=lambda g:g.weight)
+            if not GN[dg_.group].startswith('cape'): continue
+            for g in v.groups:
+                if not GN[g.group].startswith(KEEP): g.weight=0.0
+            tot=sum(g.weight for g in v.groups)
+            if tot>0:
+                for g in v.groups: g.weight/=tot
+if os.environ.get('REWEIGHT') or True:
+    pass
 if os.environ.get('REWEIGHT'):
     CL=('cape','coat'); LIMB=('upperArm','foreArm','hand','thigh','shin','foot','toe','fingers','index','middle','ring','pinky','thumb')
     nfix=0
@@ -223,24 +249,130 @@ if os.environ.get('REWEIGHT'):
                 if tot>0:
                     for g in v.groups: g.weight/=tot
     print('REWEIGHT verts',nfix)
+for o in bpy.data.objects:
+    if o.type!='MESH' or not o.vertex_groups: continue
+    for v in o.data.vertices:
+        gs=sorted(v.groups,key=lambda g:-g.weight)
+        for g in gs[4:]: g.weight=0.0
+        tot=sum(g.weight for g in gs[:4])
+        if tot>0:
+            for g in gs[:4]: g.weight/=tot
+import numpy as np
+from mathutils.bvhtree import BVHTree
+exec(open('/workspace/hero-motion/fly/inside_lib.py').read())
+RESTFIX=0
+for o in bpy.data.objects:   # rest-geometry fix: cape verts sunk in / touching the body at bind are lifted 6 mm off it
+    if o.type!='MESH' or not o.vertex_groups: continue
+    GN={g.index:g.name for g in o.vertex_groups}
+    dom=[GN[max(v.groups,key=lambda g:g.weight).group] if v.groups else '' for v in o.data.vertices]
+    body=[d.startswith(('hips','spine','chest','upperChest','thigh','shin','foot','toe')) for d in dom]
+    polys=[list(p.vertices) for p in o.data.polygons if all(body[i] for i in p.vertices)]
+    if not polys: continue
+    co=[v.co.copy() for v in o.data.vertices]; bvh=BVHTree.FromPolygons(co,polys)
+    for i,d in enumerate(dom):
+        if d.startswith('cape') and is_bad(bvh,co[i],0.004):
+            loc,nor,fi,dist=bvh.find_nearest(co[i]); o.data.vertices[i].co=loc+nor*0.006; RESTFIX+=1
+print('RESTFIX',RESTFIX)
+BODY=[o for o in bpy.data.objects if o.type=='MESH' and o.vertex_groups]
+def masks(o):
+    GN={g.index:g.name for g in o.vertex_groups}
+    dom=[GN[max(v.groups,key=lambda g:g.weight).group] if v.groups else '' for v in o.data.vertices]
+    cape=np.array([d.startswith('cape') for d in dom])
+    body=np.array([d.startswith(('hips','spine','chest','upperChest','thigh','shin','foot','toe')) for d in dom])
+    return cape,body
+MASK={o.name:masks(o) for o in BODY}
+GLUED=0
+if os.environ.get('GLUE'):   # cape verts hugging the torso follow the skin they lie on (blend 3-6 cm), keep MASK = original cape set
+    for o in BODY:
+        GN={g.index:g.name for g in o.vertex_groups}; cape,body=MASK[o.name]
+        polys=[list(p.vertices) for p in o.data.polygons if all(body[i] for i in p.vertices)]
+        if not polys or not cape.any(): continue
+        co=[v.co.copy() for v in o.data.vertices]; bvh=BVHTree.FromPolygons(co,polys)
+        for i in np.where(cape)[0]:
+            loc,nor,fi,d=bvh.find_nearest(co[i])
+            if loc is None or d>0.06: continue
+            w=min(1.0,max(0.0,(0.06-d)/0.03))
+            j=min(polys[fi],key=lambda k:(co[k]-co[i]).length)
+            cw={GN[g.group]:g.weight*(1-w) for g in o.data.vertices[i].groups}
+            for g in o.data.vertices[j].groups: cw[GN[g.group]]=cw.get(GN[g.group],0)+g.weight*w
+            top=sorted(cw.items(),key=lambda x:-x[1])[:4]; tot=sum(x[1] for x in top)
+            for g in list(o.data.vertices[i].groups): o.vertex_groups[GN[g.group]].remove([int(i)])
+            for nm,wt in top: o.vertex_groups[nm].add([int(i)],wt/tot,'REPLACE')
+            GLUED+=1
+print('GLUED',GLUED)
+HASCAPE=any(m[0].any() for m in MASK.values()) and any(n.startswith('cape') and chainlen(n)>2 for n in B.keys())
+def inside_count():
+    dg=bpy.context.evaluated_depsgraph_get(); allco=[];allbody=[];allcape=[];polys=[];off=0
+    for o in BODY:
+        e=o.evaluated_get(dg); m=e.to_mesh(); co=[o.matrix_world@v.co for v in m.vertices]
+        cape,body=MASK[o.name]
+        for p in m.polygons:
+            if all(body[i] for i in p.vertices): polys.append([i+off for i in p.vertices])
+        allco+=co; allcape+=[i+off for i in np.where(cape)[0]]; off+=len(co); e.to_mesh_clear()
+    if not polys or not allcape: return 0
+    bvh=BVHTree.FromPolygons(allco,polys); c=0
+    for i in allcape:
+        p=allco[i]
+        if is_bad(bvh,p): c+=1
+    return c
+def apply_pose(P,fr=None):
+    for b in B:
+        n=b.name
+        if b.parent is None: continue
+        pn=b.parent.name
+        L=(REST[pn].inverted()@REST[n]).inverted()@P[pn].inverted()@P[n]
+        pb=arm.pose.bones[n]; loc,q,_=L.decompose(); pb.rotation_quaternion=q
+        if n=='hips': pb.location=loc
+        if fr is not None:
+            pb.keyframe_insert('rotation_quaternion',frame=fr)
+            if n=='hips': pb.keyframe_insert('location',frame=fr)
+REPORT={}
 for name,dur,fn in CLIPS:
     CUR_CLIP=name
-    act=bpy.data.actions.new(name); arm.animation_data.action=act
-    N=int(round(dur*FPS))
+    act=bpy.data.actions.new(name); arm.animation_data.action=None
+    N=int(round(dur*FPS)); pushes=[0.0]*N; before=[0]*N
+    if os.environ.get('FIXPUSH'): HASCAPE_=False; sm=[float(os.environ['FIXPUSH'])]*N
+    elif HASCAPE:
+        for fr in range(N):
+            t=fr/N; pv=0.0
+            while True:
+                PUSH=pv; P=solve(fn(t),t); apply_pose(P); bpy.context.view_layer.update()
+                c=inside_count()
+                if fr==0 or pv==0.0: before[fr]=c if pv==0.0 else before[fr]
+                if c==0 or pv>=35: break
+                pv+=2.5
+            pushes[fr]=pv
+        def envelope(req):
+            m=[max(req[(fr+k)%N] for k in range(-6,7)) for fr in range(N)]
+            for _ in range(3): m=[(m[(fr-1)%N]+2*m[fr]+m[(fr+1)%N])/4 for fr in range(N)]
+            return m
+        req=[p+(2.0 if p>0 else 0.0) for p in pushes]
+        for it in range(5):
+            sm=envelope(req); changed=False
+            for fr in range(N):
+                t=fr/N; PUSH=sm[fr]; P=solve(fn(t),t); apply_pose(P); bpy.context.view_layer.update()
+                if inside_count()==0: continue
+                for dv in (2.5,5,7.5,10,15,20,25):
+                    if sm[fr]+dv>50: break
+                    PUSH=sm[fr]+dv; P=solve(fn(t),t); apply_pose(P); bpy.context.view_layer.update()
+                    if inside_count()==0: req[fr]=PUSH+1.0; changed=True; break
+            if not changed: break
+        sm=envelope(req)
+    elif not os.environ.get('FIXPUSH'): sm=[0.0]*N
+    arm.animation_data.action=act
+    after=[]
     for fr in range(N+1):
-        t=(fr%N)/N; P=solve(fn(t),t)
-        for b in B:
-            n=b.name
-            if b.parent is None: continue
-            pn=b.parent.name
-            L=(REST[pn].inverted()@REST[n]).inverted()@P[pn].inverted()@P[n]
-            pb=arm.pose.bones[n]
-            loc,q,_=L.decompose()
-            pb.rotation_quaternion=q; pb.keyframe_insert('rotation_quaternion',frame=fr)
-            if n=='hips': pb.location=loc; pb.keyframe_insert('location',frame=fr)
+        t=(fr%N)/N; PUSH=sm[fr%N]; P=solve(fn(t),t); apply_pose(P,fr)
+    arm.animation_data.action=None
+    if HASCAPE:
+        for fr in range(N):
+            t=fr/N; PUSH=sm[fr]; P=solve(fn(t),t); apply_pose(P); bpy.context.view_layer.update(); after.append(inside_count())
+    REPORT[name]=dict(before=max(before) if HASCAPE else None,after=max(after) if after else None,push_max=round(max(sm),1))
+    arm.animation_data.action=act
     act.use_fake_user=True
     tr=arm.animation_data.nla_tracks.new(); tr.name=name; tr.strips.new(name,0,act); tr.mute=True
 arm.animation_data.action=None
 bpy.ops.export_scene.gltf(filepath=out, export_format='GLB', export_animations=True,
     export_animation_mode='NLA_TRACKS', export_force_sampling=True, export_frame_step=1, export_yup=True)
+print('PEN',json.dumps(REPORT)); json.dump(REPORT,open(out+'.pen.json','w'))
 print('OK',out)

@@ -178,9 +178,22 @@ func _update_fx(dt: float) -> void:
 		var show: bool = cam != null and wpn != null and not c.broken and visible
 		if show:
 			var wpos := wpn.global_position
-			show = cam.global_position.distance_to(wpos) > 80.0 and not cam.is_position_behind(wpos)
-			if show: l.position = cam.unproject_position(wpos) - Vector2(10, 20)
+			# test 18 (boss: diamonds seen over hills from across the map): screen-space labels had no depth and no
+			# range (shown at >80 m only). Now: close range only, fading 40 -> 60 m, and hidden when terrain blocks the line.
+			var d := cam.global_position.distance_to(wpos)
+			show = d < MARKER_FAR and not cam.is_position_behind(wpos) and not _terrain_blocks(cam.global_position, wpos)
+			if show:
+				l.position = cam.unproject_position(wpos) - Vector2(10, 20)
+				l.modulate.a = 1.0 - smoothstep(MARKER_NEAR, MARKER_FAR, d)
 		l.visible = show
+
+const MARKER_NEAR := 40.0
+const MARKER_FAR := 60.0
+func _terrain_blocks(a: Vector3, b: Vector3) -> bool:
+	for i in range(1, 16):
+		var q := a.lerp(b, i / 16.0)
+		if _gy(q.x, q.z) > q.y + 0.3: return true
+	return false
 
 func place_at(i: int) -> void:
 	wp = i % waypoints.size()

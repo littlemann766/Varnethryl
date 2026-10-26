@@ -29,4 +29,4 @@ func _ready() -> void:
 			for q in [a, b, c, b, d, c]: st.add_vertex(q)
 	st.generate_normals(); var mi := MeshInstance3D.new(); mi.mesh = st.commit()
 	var mat := StandardMaterial3D.new(); mat.albedo_color = Color(0.32, 0.42, 0.22); mat.cull_mode = BaseMaterial3D.CULL_DISABLED; mi.material_override = mat; add_child(mi)
-	add_child(load("res://tests/wb_ground_check.gd").new())
+	add_child(load("res://tests/wb_marker_shots.gd" if OS.get_environment("WB_MARKERS") != "" else "res://tests/wb_ground_check.gd").new())

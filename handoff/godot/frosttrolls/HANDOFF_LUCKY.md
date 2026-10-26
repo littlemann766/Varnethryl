@@ -35,3 +35,10 @@ Zero torso penetration on all clips.
 - v7 club and mace (hero-motion/weapons) on weapon_R.
 - B: weapon_R (child of hand_R) translation (-0.0863, -0.0086, -0.0964), rotation wxyz (0.1792, 0.146, -0.9578, -0.1707), Beth's measurement as given. Fingers unchanged.
 - A: fingers_R grip pose keyed (constant) in every clip, 90 deg about the bone's local -Z axis, local quat wxyz (0.7071, 0, 0, -0.7071). Fingers clear a 0.30 m cylinder centred 0.15 m off the palm (finger median 0.295 m, min 0.182 m from its axis). A's socket is unchanged and waiting for Beth to re-measure.
+
+## Troll A v7 (2026-10-25, 10:00 PM ET): Beth's socket, finger chain, thigh weights, leg clearance
+- weapon_R (child of hand_R) = Beth's socket: t (0.345, 0.654, -0.1004), r wxyz (0.0139, -0.0086, 0.8051, -0.5929), same on lod1. Club handle not thinned (radius ~0.147 m).
+- fingers_R split into a 3-bone chain (fingers_R > fingers2_R > fingers3_R), curl about local -Z 30/50/40 deg, keyed in every clip. Inner finger surface ~0.9 cm outside the handle; 0 palm/finger verts inside the handle in any frame.
+- Skin fix: 1,591 verts above the hips that were mostly thigh-weighted moved to hips/spine; 882 leg-weighted verts sitting on the arm/hand moved to the nearest arm bone.
+- walk/run: per-frame upperArm_R offset (max ~18 deg, smoothed, loops kept) so the club clears the legs: min club-to-leg 0.082 m walk, 0.113 m run (was 0.002-0.005). lod1 uses the same clips.
+- Godot 4 headless import: 0 errors, both files.

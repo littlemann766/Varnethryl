@@ -102,7 +102,7 @@ func build(main: Node3D) -> Node3D:
 		for k in 2:
 			var v: Node3D = load(m._card2_path(b[0], ["_lod1", "_lod2"][k])).instantiate(); n.add_child(v)
 			for mi: MeshInstance3D in v.find_children("*", "MeshInstance3D", true, false):
-				mi.visibility_range_begin = [0.0, 90.0][k]; mi.visibility_range_end = [90.0, 600.0][k]
+				mi.visibility_range_begin = [0.0, 90.0][k]; mi.visibility_range_end = [90.0, 0.0][k]   # test 17: lod2 stays drawn from any height
 				if k == 1: mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		m._add_col(m._card2_path(b[0], "_col"), pos, 0.0)
 		_label(b[2], pos + Vector3(0, 13.0, 8.0))

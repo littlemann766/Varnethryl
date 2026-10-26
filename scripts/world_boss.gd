@@ -48,6 +48,11 @@ var wave_rng := RandomNumberGenerator.new()
 const WAVE_R0 := 80.0
 const WAVE_R1 := 170.0
 var strip: MeshInstance3D
+## test 17 (boss: footprints that fade): glowing scorched print at every foot plant, held 70 s, smooth 15 s fade, max 24
+const PRINT_HOLD := 70.0
+const PRINT_FADE := 15.0
+const PRINT_CAP := 24
+var prints_made := 0
 var footprints: Array = []         # [node, mat, age]
 var dust_scene: PackedScene
 var adds: Array = []
@@ -77,6 +82,7 @@ func setup(main: Node) -> WorldBoss:
 	add_child(body)
 	ap = body.find_children("*", "AnimationPlayer", true, false)[0]
 	skel = body.find_children("*", "Skeleton3D", true, false)[0]
+	_orient_and_measure()
 	for c in ["wb_walk", "wb_idle", "wb_ritual_fissure_loop", "wb_ritual_lavawave_loop", "wb_stagger_loop", "wb_down_loop"]:
 		if ap.has_animation(c): ap.get_animation(c).loop_mode = Animation.LOOP_LINEAR
 	_strip_root_xz("wb_walk")
@@ -383,6 +389,7 @@ func _process(dt: float) -> void:
 			if t_state > 22.0 and ap.current_animation != "wb_getup": _play("wb_getup")
 		"cool":
 			if t_state > 10.0: _set_state("walk")
+	_ground_feet(dt)
 	_update_crystals(dt); _update_prints(dt); _update_adds(dt); _update_ui(); _update_fx(dt); _do_shake(dt)
 
 func _walk(dt: float) -> void:
@@ -398,7 +405,8 @@ func _walk(dt: float) -> void:
 	var fwd := _fwd()
 	var np := position + fwd * SPEED * dt
 	if maxf(absf(np.x), absf(np.z)) < 260.0: np = position     # hard rule: never enters the town
-	position = Vector3(np.x, _gy(np.x, np.z), np.z)
+	position = Vector3(np.x, _gy(np.x, np.z) + ground_off, np.z)
+	if ap.current_animation == "wb_walk": ap.speed_scale = walk_rate   # test 17: clip cadence matched to SPEED (no foot slide)
 	# footfalls from the clip phase
 	if ap.current_animation != "wb_walk": return
 	var f := ap.current_animation_position
@@ -420,8 +428,8 @@ func _print_at(p: Vector3) -> void:
 	var fp := _plane(mat, Vector3(48, 1, 48)); fp.visible = true
 	fp.global_position = Vector3(p.x, _gy(p.x, p.z) + 0.4, p.z); fp.rotation.y = rotation.y + PI   # plane toes = +Z, Titan faces -Z
 	_drape(fp, 8, 0.35)
-	footprints.append([fp, mat, 0.0])
-	while footprints.size() > 14: (footprints.pop_front()[0] as Node).queue_free()
+	footprints.append([fp, mat, 0.0]); prints_made += 1
+	while footprints.size() > PRINT_CAP: (footprints.pop_front()[0] as Node).queue_free()
 
 func _stomp(amp: float, arrive: bool, at := Vector3.INF, delay := true) -> void:
 	if at == Vector3.INF: at = global_position
@@ -640,8 +648,8 @@ func _update_prints(dt: float) -> void:
 		f[2] += dt
 		var mat: ShaderMaterial = f[1]
 		mat.set_shader_parameter("heat", clampf(1.0 - f[2] / 10.0, 0.0, 1.0))
-		mat.set_shader_parameter("fade", clampf(1.0 - (f[2] - 100.0) / 20.0, 0.0, 1.0))
-	while footprints.size() > 0 and footprints[0][2] > 120.0: (footprints.pop_front()[0] as Node).queue_free()
+		mat.set_shader_parameter("fade", clampf(1.0 - (f[2] - PRINT_HOLD) / PRINT_FADE, 0.0, 1.0))
+	while footprints.size() > 0 and footprints[0][2] > PRINT_HOLD + PRINT_FADE: (footprints.pop_front()[0] as Node).queue_free()
 
 func _update_ui() -> void:
 	var near := _hero_d() < BAR_RANGE
@@ -655,3 +663,64 @@ func _update_ui() -> void:
 		var k := clampf(t_state / _wind_len(), 0.0, 1.0)
 		cast_fill.size.x = 484.0 * k
 		cast_lbl.text = "%s   %.1fs   interrupt %d%%" % ["FISSURE SLAM" if ritual == "fissure" else "LAVA WAVE", _wind_len() - t_state, int(100.0 * dmg_window / INTERRUPT)]
+
+
+# ---------- test 17 (boss: world boss floats / moon-walks backwards) ----------
+var ground_off := 0.0        # node y relative to the terrain under his origin, so the lowest sole touches the ground
+var sole_clear := 0.0        # rest-pose height of the toe bones above the soles (world metres at SCALE)
+var walk_rate := 1.0         # AnimationPlayer speed for wb_walk so stance feet stay planted at SPEED
+var foot_gap := 0.0          # last measured lowest-sole-to-terrain gap (m), for the check
+const FEET := ["toe_L", "toe_R", "foot_L", "foot_R"]
+
+## The node moves along -Z (_fwd). Find which way the rig's toes point in node space and turn the body to match,
+## then measure sole clearance and the walk clip's own ground speed.
+func _orient_and_measure() -> void:
+	var fl := skel.find_bone("foot_L"); var tl := skel.find_bone("toe_L")
+	if fl >= 0 and tl >= 0:
+		var to_node := global_transform.affine_inverse() * skel.global_transform
+		var d := to_node * skel.get_bone_global_rest(tl).origin - to_node * skel.get_bone_global_rest(fl).origin
+		if d.z > 0.0: body.rotation.y += PI     # toes point +Z (glTF front) but he walks -Z: turn the model around
+	var to_node2 := global_transform.affine_inverse() * skel.global_transform
+	var lo := INF
+	for bn in ["toe_L", "toe_R"]:
+		var b := skel.find_bone(bn)
+		if b >= 0: lo = minf(lo, (to_node2 * skel.get_bone_global_rest(b).origin).y)
+	var root_y := (to_node2 * skel.get_bone_global_rest(maxi(skel.find_bone("root"), 0)).origin).y
+	sole_clear = maxf(0.0, lo - root_y) if lo < INF else 0.0
+	walk_rate = _clip_rate("wb_walk", SPEED)
+
+## wb_walk is in place (root stripped): average backward speed of the planted foot across the cycle = clip ground speed.
+func _clip_rate(clip: String, speed: float) -> float:
+	if not ap.has_animation(clip): return 1.0
+	var a := ap.get_animation(clip); var n := 48; var best := 0.0
+	for bn in ["foot_L", "foot_R"]:
+		var bi := skel.find_bone(bn); if bi < 0: continue
+		var tr := a.find_track(NodePath("%s:%s" % [ap.get_node(ap.root_node).get_path_to(skel), bn]), Animation.TYPE_POSITION_3D)
+		if tr < 0: continue
+		var zs := []; var ys := []
+		for i in n:
+			var p: Vector3 = a.position_track_interpolate(tr, a.length * i / n)
+			var w := global_transform.affine_inverse() * skel.global_transform * (skel.get_bone_global_rest(skel.get_bone_parent(bi)) * p)
+			zs.append(w.z); ys.append(w.y)
+		var ymin: float = ys.min(); var dist := 0.0; var t_st := 0.0
+		for i in n:   # stance = foot within 15 cm of its lowest point; sum its travel
+			var j := (i + 1) % n
+			if ys[i] < ymin + 0.15 * SCALE and ys[j] < ymin + 0.15 * SCALE: dist += absf(zs[j] - zs[i]); t_st += a.length / n
+		if t_st > 0.0: best = maxf(best, dist / t_st)
+	return clampf(speed / best, 0.3, 3.0) if best > 0.01 else 1.0
+
+## lowest sole world height vs the terrain right under it
+func sole_gap() -> float:
+	var g := INF
+	for bn in ["toe_L", "toe_R"]:
+		var b := skel.find_bone(bn); if b < 0: continue
+		var p := skel.global_transform * skel.get_bone_global_pose(b).origin
+		g = minf(g, p.y - sole_clear - _gy(p.x, p.z))
+	return g if g < INF else 0.0
+
+func _ground_feet(dt: float) -> void:
+	if state == "knockdown": return
+	foot_gap = sole_gap()
+	ground_off -= foot_gap * clampf(dt * 8.0, 0.0, 1.0)   # per-frame snap, smoothed so steps do not pop
+	ground_off = clampf(ground_off, -8.0, 8.0)
+	position.y = _gy(position.x, position.z) + ground_off

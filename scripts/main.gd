@@ -246,7 +246,7 @@ func _ready() -> void:
 	_hi_terrain()
 	_showcase()
 	_foliage()
-	if not args.has("--wbshots") and not args.has("--altshots"): _grass()   # shot capture on the shared box: skip grass to save RAM
+	if not args.has("--wbshots") and not args.has("--altshots") and not args.has("--roofshots") and not args.has("--wbcheck"): _grass()   # shot capture on the shared box: skip grass to save RAM
 	_hero()
 	_fx()
 	_hud()
@@ -260,6 +260,8 @@ func _ready() -> void:
 	else: _warm_up()
 	if args.has("--wbshots"): add_child(load("res://tests/wb_shots.gd").new())
 	if args.has("--altshots"): add_child(load("res://tests/alt_shots.gd").new())   # test 16
+	if args.has("--roofshots"): add_child(load("res://tests/roof_shots.gd").new())   # test 17
+	if args.has("--wbcheck"): add_child(load("res://tests/wb_ground_check.gd").new())   # test 17
 
 # ---------- settings ----------
 func _load_settings() -> void:
@@ -1623,7 +1625,9 @@ func _process(dt: float) -> void:
 	for b in buildings:
 		var lp: Vector3 = b.node.global_transform.affine_inverse() * hero.global_position
 		var a: AABB = b.aabb.grow(-0.6)
-		var ins: bool = lp.x > a.position.x and lp.x < a.end.x and lp.z > a.position.z and lp.z < a.end.z
+		# test 17 (boss: roof missing while flying): only "inside" when the hero is also BELOW the roof line; the footprint-only
+		# test hid the Stables roof for a hero flying over it at any height
+		var ins: bool = lp.x > a.position.x and lp.x < a.end.x and lp.z > a.position.z and lp.z < a.end.z and lp.y < b.aabb.end.y - 1.0 and not flying_now()
 		for rf in b.roofs: rf.visible = not ins
 		if ins: inside = b.name
 	if interiors and interiors.active(): inside = interiors.current_name()

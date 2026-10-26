@@ -108,7 +108,7 @@ static func build(m: Node3D) -> Array:
 		for k in 2:
 			var v: Node3D = load(M._card2_path(f.model, ["_lod1", "_lod2"][k])).instantiate(); n.add_child(v)
 			for mi: MeshInstance3D in v.find_children("*", "MeshInstance3D", true, false):
-				mi.visibility_range_begin = LOD_BANDS[k][0]; mi.visibility_range_end = LOD_BANDS[k][1]
+				mi.visibility_range_begin = LOD_BANDS[k][0]; mi.visibility_range_end = 0.0 if k == LOD_BANDS.size() - 1 else LOD_BANDS[k][1]   # test 17: last LOD open-ended so roofs show from any height
 				mi.visibility_range_begin_margin = 4.0; mi.visibility_range_end_margin = 4.0
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if k == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		m._add_col(M._card2_path(f.model, "_col"), pos, rot)

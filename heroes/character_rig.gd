@@ -184,7 +184,7 @@ func _build_tree() -> void:
 	if has_fly_clips:   # HANDOFF blend tips: BlendSpace2D (x turn: bank_L/forward/bank_R, y speed: hover/forward/fast) -> Blend3 vertical -> Blend2 with ground loco
 		var fs := AnimationNodeBlendSpace2D.new(); fs.min_space = Vector2(-1, 0); fs.max_space = Vector2(1, 2)
 		for pt in [["fly_hover", Vector2(0, 0)], ["fly_forward", Vector2(0, 1)], ["fly_fast", Vector2(0, 2)], ["fly_bank_L", Vector2(-1, 1)], ["fly_bank_R", Vector2(1, 1)], ["fly_bank_L", Vector2(-1, 2)], ["fly_bank_R", Vector2(1, 2)]]:
-			var an := AnimationNodeAnimation.new(); an.animation = pt[0]; fs.add_blend_point(an, pt[1])
+			var an := AnimationNodeAnimation.new(); an.animation = pt[0]; fs.add_blend_point(an, pt[1], -1, "%s_%d_%d" % [pt[0], int(pt[1].x + 1), int(pt[1].y)])
 		bt.add_node("flyspace", fs)
 		var vb := AnimationNodeBlend3.new(); bt.add_node("flyvert", vb)
 		var dn := AnimationNodeAnimation.new(); dn.animation = "fly_descend"; bt.add_node("fly_down", dn)

@@ -1649,8 +1649,19 @@ func _process(dt: float) -> void:
 
 # ---------- in-app benchmark: 10 s fly-through per tier ----------
 const FLY := [Vector3(-6, 0, 30), Vector3(0, 0, 44), Vector3(-20, 0, 60), Vector3(0, 0, 120), Vector3(0, 0, 175), Vector3(-30, 0, 90), Vector3(-60, 0, 10), Vector3(-6, 0, 30)]
+## test 20 (boss benchmark: Low avg 111 with "cap 60"; mins 12-30): the run now honours the FPS cap, reports a
+## 1% low next to the single worst frame, and logs every spike (> 2.5x the median frame and > 25 ms) with what
+## happened that frame: pipeline compiles (draw-time = blocking), draw-call / object jumps, script time, lamp-shadow
+## re-picks, memory growth. Written to user://benchmark.txt and printed as FLY / SPIKE lines.
+var _bench_spikes: Array = []
+func _pc() -> Array:
+	return [Performance.get_monitor(Performance.PIPELINE_COMPILATIONS_DRAW), Performance.get_monitor(Performance.PIPELINE_COMPILATIONS_SPECIALIZATION),
+		Performance.get_monitor(Performance.PIPELINE_COMPILATIONS_SURFACE), Performance.get_monitor(Performance.PIPELINE_COMPILATIONS_MESH)]
 func _flythrough(seconds := 10.0) -> Array:
 	var t := 0.0; var frames := 0; var worst := 0.0; var warm := 0.5
+	var dts: PackedFloat32Array = []; var rows: Array = []
+	var pc0 := _pc(); var dc0 := 0.0; var ob0 := 0.0; var mem0 := Performance.get_monitor(Performance.MEMORY_STATIC)
+	var lamp0 := lamp_shadow_t
 	while t < seconds + warm:
 		await get_tree().process_frame
 		var dt := get_process_delta_time()
@@ -1661,22 +1672,48 @@ func _flythrough(seconds := 10.0) -> Array:
 		var d: Vector3 = FLY[i + 1] - FLY[i]
 		hero.position = Vector3(p.x, height(p.x, p.z) + 0.1, p.z)
 		if d.length() > 0.1: yaw = lerp_angle(yaw, atan2(-d.x, -d.z), 0.08); hero_vis.rotation.y = yaw
-		if t > warm: frames += 1; worst = max(worst, dt)
-	return [frames / seconds, 1.0 / max(worst, 0.0001)]
+		var pc := _pc(); var dc := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME); var ob := Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)
+		var mem := Performance.get_monitor(Performance.MEMORY_STATIC)
+		if t > warm:
+			frames += 1; worst = max(worst, dt); dts.append(dt)
+			rows.append([t - warm, dt, i, pc[0] - pc0[0], pc[1] - pc0[1], pc[2] - pc0[2] + pc[3] - pc0[3], dc - dc0, ob - ob0,
+				Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, lamp_shadow_t > lamp0, (mem - mem0) / 1048576.0])
+		pc0 = pc; dc0 = dc; ob0 = ob; mem0 = mem; lamp0 = lamp_shadow_t
+	var sorted := dts.duplicate(); sorted.sort()
+	var med: float = sorted[sorted.size() / 2] if sorted.size() > 0 else 0.016
+	var p99: float = sorted[int(sorted.size() * 0.99)] if sorted.size() > 0 else 0.016
+	for r in rows:
+		if r[1] > maxf(med * 2.5, 0.025):
+			var why := []
+			if r[3] > 0: why.append("%d draw-time pipeline compile(s)" % r[3])
+			if r[4] > 0: why.append("%d specialization compile(s)" % r[4])
+			if r[5] > 0: why.append("%d surface/mesh pipeline(s)" % r[5])
+			if absf(r[6]) > 40: why.append("draw calls %+d" % r[6])
+			if absf(r[7]) > 40: why.append("objects %+d" % r[7])
+			if r[8] > 8.0: why.append("script %.1f ms" % r[8])
+			if r[9]: why.append("lamp shadow re-pick")
+			if r[10] > 2.0: why.append("+%.1f MB static mem" % r[10])
+			if why.is_empty(): why.append("unknown (GPU/driver, shadow cascade or streaming)")
+			_bench_spikes.append("  SPIKE %s t=%.2fs leg %d: %.1f ms - %s" % [TIERS[tier], r[0], r[2], r[1] * 1000.0, ", ".join(why)])
+	return [frames / seconds, 1.0 / max(worst, 0.0001), 1.0 / max(p99, 0.0001), med * 1000.0]
 
 func _flythrough_all() -> void:
 	bench_running = true
-	var saved := tier; var lines := ["Benchmark (10 s fly-through each, cap %d)" % fps_cap]
-	var old_cap := fps_cap; Engine.max_fps = 0
+	_bench_spikes = []
+	var saved := tier; var lines := ["Benchmark (10 s fly-through each, cap %s)" % (str(fps_cap) if fps_cap > 0 else "off")]
 	for q in [0, 1, 2, 3]:
-		tier = q; apply_quality(); Engine.max_fps = 0
+		tier = q; apply_quality(); Engine.max_fps = fps_cap   # test 20: the cap used to be switched off (Low read avg 111 under "cap 60")
 		bench_label.text = "\n".join(lines) + "\nRunning %s..." % TIERS[q]
 		var r: Array = await _flythrough()
-		lines.append("%s: avg %.0f FPS, min %.0f FPS" % [TIERS[q], r[0], r[1]])
+		lines.append("%s: avg %.0f FPS, 1%% low %.0f FPS, worst frame %.0f FPS (median %.1f ms)" % [TIERS[q], r[0], r[2], r[1], r[3]])
 		bench_label.text = "\n".join(lines)
-	tier = saved; fps_cap = old_cap; apply_quality()
+	tier = saved; apply_quality()
+	var top := _bench_spikes.slice(0, 40)
+	lines.append("Spikes (%d):" % _bench_spikes.size()); lines.append_array(top)
+	bench_label.text = "\n".join(lines.slice(0, 6)) + "\nSpikes: %d (see benchmark.txt)" % _bench_spikes.size()
 	var f := FileAccess.open("user://benchmark.txt", FileAccess.WRITE); f.store_string("\n".join(lines)); f.close()
-	print("FLY ", " | ".join(lines))
+	print("FLY ", " | ".join(lines.slice(0, 5)))
+	for l in top: print(l)
 	bench_running = false
 
 # ---------- headless bench / screenshots ----------

@@ -310,6 +310,28 @@ for o in bpy.data.objects:   # rest-geometry fix: cape verts sunk in / touching 
         if d.startswith('cape') and is_bad(bvh,co[i],RFM):
             loc,nor,fi,dist=bvh.find_nearest(co[i]); o.data.vertices[i].co=loc+nor*(RFM+0.002); RESTFIX+=1
 print('RESTFIX',RESTFIX)
+if os.environ.get('TFIX'):   # targeted fix: cape verts near the join that the export check flags
+    from mathutils import Vector
+    TP=[Vector(p) for p in json.load(open(os.environ['TFIX']))]; TR=float(os.environ.get('TR','0.02')); TN=0
+    for o in bpy.data.objects:
+        if o.type!='MESH' or not o.vertex_groups: continue
+        GN={g.index:g.name for g in o.vertex_groups}; root=o.vertex_groups.get('cape')
+        for v in o.data.vertices:
+            p=o.matrix_world@v.co
+            if min((p-t).length for t in TP)>TR: continue
+            cg=[g for g in v.groups if GN[g.group].startswith('cape')]
+            if not cg: continue
+            if any(GN[g.group] in ('chest','upperChest') for g in v.groups):
+                for g in cg: g.weight=0.0
+            elif root:
+                w=sum(g.weight for g in cg if GN[g.group]!='cape')
+                for g in cg:
+                    if GN[g.group]!='cape': g.weight=0.0
+                root.add([v.index],w,'ADD')
+            tot=sum(g.weight for g in v.groups)
+            for g in v.groups: g.weight/=tot
+            TN+=1
+    print('TFIX',TN)
 BODY=[o for o in bpy.data.objects if o.type=='MESH' and o.vertex_groups]
 def masks(o):
     GN={g.index:g.name for g in o.vertex_groups}

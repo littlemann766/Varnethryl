@@ -121,3 +121,6 @@ Preview: /workspace/hero-motion/heroes_fly_v2.mp4
 
 ### Lunara v4 (partial)
 Cape rebuilt with CHAINW+SEAM+RFM=0.015+REWEIGHT. Independent export check: inside-body frames dropped from 173 (v3) to 23, max 1-2 verts/frame, all near the cape root (z 1.3-1.4 m): bank_R f8-15, forward f31-33, hover f23-30, 45-49. ascend/descend/fast/bank_L are 0. Not yet zero.
+
+### Lunara v5 — zero cape penetration
+Targeted weight fix (fly.py TFIX=lun_tfix.json TR=0.02, on top of CHAINW+SEAM+RFM=0.015+REWEIGHT): 14 cape verts at the cape-to-back join — the ones that were part cape/part chest now follow the chest only, and the ones that were cape2/cape3 follow the cape root bone. Export check (every frame, all 7 clips): 0 cape points inside the body. The rest pose is unchanged (0).

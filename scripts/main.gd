@@ -1717,6 +1717,7 @@ func _flythrough_all() -> void:
 	for q in order:
 		if OS.get_environment("BENCH_NOAPPLY") == "" or tier != q or order.find(q) == order.rfind(q): tier = q; apply_quality()
 		else: tier = q
+		if OS.get_environment("BENCH_NOWARM") == "": await _warm_views()   # same per-tier warm-up the game does at load
 		Engine.max_fps = fps_cap   # test 20: the cap used to be switched off (Low read avg 111 under "cap 60")
 		bench_label.text = "\n".join(lines) + "\nRunning %s..." % TIERS[q]
 		var r: Array = await _flythrough()
@@ -2424,6 +2425,24 @@ const WARM_VIEWS := [
 	[Vector3(-6, 8, 30), Vector3(-56, 6, 30)], [Vector3(-6, 60, 30), Vector3(-6, 0, 31)],
 	[Vector3(0, 4, 120), Vector3(0, 4, 175)], [Vector3(0, 4, 175), Vector3(0, 10, 260)], [Vector3(-60, 4, 10), Vector3(-6, 4, 30)],
 	[Vector3(0, 40, 0), Vector3(250, 0, -120)], [Vector3(0, 40, 0), Vector3(-20, 30, 300)]]
+## Draw every LOD band, fx, lamp and the town/bench-path views once at the current tier for day and night.
+func _warm_views() -> void:
+	var wcam := Camera3D.new(); wcam.fov = 90; wcam.far = 4000; add_child(wcam); wcam.current = true
+	var saved_t := tod
+	for h in [12.0, 22.5]:
+		_set_time(h)
+		for t in tree_lods + hi_terrain: t[0].visibility_range_begin = 0; t[0].visibility_range_end = 0; t[0].visible = true
+		for b in buildings: for m in _meshes(b.node, []): m.visibility_range_begin = 0; m.visibility_range_end = 0
+		for f in fx_any + fx_day + fx_night: f[0].visible = true; f[0].emitting = true
+		for l in lamp_lights: l[0].visible = true; l[0].shadow_enabled = tier == 3
+		for vp in WARM_VIEWS:
+			wcam.look_at_from_position(vp[0], vp[1], Vector3.UP)
+			await get_tree().process_frame
+		await get_tree().process_frame
+	_set_time(saved_t); apply_quality(); _apply_time_mode()
+	cam.current = true; wcam.queue_free()
+	for l in lamp_lights: _lamp_shadow_on[l[0]] = l[0].shadow_enabled
+
 func _warm_up() -> void:
 	var saved := tier; var saved_t := tod
 	var veil := ColorRect.new(); veil.color = Color(0.05, 0.04, 0.06); veil.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -2434,26 +2453,13 @@ func _warm_up() -> void:
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	cl.add_child(lbl)
 	var cam_far := cam.far
-	var wcam := Camera3D.new(); wcam.fov = 90; wcam.far = 4000; add_child(wcam); wcam.current = true
-	for q in [3, 0, 1, 2]:
+	# test 20: the soft-shadow quality / atlas size are global and changing them drops every compiled pipeline, so
+	# warming other tiers first only helped if the player stayed on the last one. Warm the player's own tier LAST.
+	var order := [3, 0, 1, 2]; order.erase(saved); order.append(saved)
+	for q in order:
 		tier = q; apply_quality()
-		for h in [12.0, 22.5]:
-			_set_time(h)
-			# force every LOD band visible for a frame so its pipeline compiles now instead of mid-walk
-			for t in tree_lods + hi_terrain: t[0].visibility_range_begin = 0; t[0].visibility_range_end = 0; t[0].visible = true
-			for b in buildings: for m in _meshes(b.node, []): m.visibility_range_begin = 0; m.visibility_range_end = 0
-			for f in fx_any + fx_day + fx_night: f[0].visible = true; f[0].emitting = true
-			for l in lamp_lights: l[0].visible = true; l[0].shadow_enabled = q == 3
-			# test 20: the old pass only drew what the boot camera happened to face, so first sight of the rest of the
-			# town (benchmark path, gate, lake, mountains) compiled pipelines mid-walk = the 12-30 FPS minimums.
-			# Look around from the plaza and from the benchmark legs with a long far plane so every visible material,
-			# LOD band and shadow-caster variant is drawn once per tier and time of day.
-			for vp in WARM_VIEWS:
-				wcam.look_at_from_position(vp[0], vp[1], Vector3.UP)
-				await get_tree().process_frame
-			await get_tree().process_frame
+		await _warm_views()
 	cam.far = cam_far; tier = saved; _set_time(saved_t); apply_quality(); _apply_time_mode()
-	cam.current = true; wcam.queue_free()
 	for l in lamp_lights: _lamp_shadow_on[l[0]] = l[0].shadow_enabled
 	warmed = true
 	cl.queue_free()

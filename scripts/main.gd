@@ -430,7 +430,7 @@ func _set_time(h: float) -> void:
 	env.tonemap_exposure = lerp(1.0, 1.15, nf)
 	var em: float = lerp(0.0, 3.0, smoothstep(0.25, -0.1, day)) if tier > 0 else 0.0
 	for m in emissive_mats: m.emission_energy_multiplier = em
-	glow_mat.emission_energy_multiplier = em * 2.0
+	if glow_mat: glow_mat.emission_energy_multiplier = em * 2.0   # null with VARN_LITE (no street kit)
 	for gm in glow_mm: gm.visible = em > 0.05
 	var lamp_on := em > 0.3
 	# soft warm fill that follows the hero at night so the Owner reads clearly on dark streets (no shadows: cheap)

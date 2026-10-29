@@ -1,0 +1,1 @@
+{"hero": "selene", "cube": 0.045, "voxels": 3222, "quads": 7946, "tris": 15892, "verts": 31784, "palette": 487, "actions": ["fly_ascend", "fly_bank_L", "fly_bank_R", "fly_descend", "fly_fast", "fly_forward", "fly_hover", "idle", "run", "walk"]}

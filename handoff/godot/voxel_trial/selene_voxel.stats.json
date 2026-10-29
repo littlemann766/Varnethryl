@@ -1,1 +1,1 @@
-{"hero": "selene", "cube": 0.045, "voxels": 3222, "quads": 7946, "tris": 15892, "verts": 31784, "palette": 487, "actions": ["fly_ascend", "fly_bank_L", "fly_bank_R", "fly_descend", "fly_fast", "fly_forward", "fly_hover", "idle", "run", "walk"]}
+{"hero": "selene", "cube": 0.018, "head_cube": 0.008, "voxels": 26933, "quads": 66032, "tris": 132064, "verts": 264128, "palette": 2295, "actions": ["fly_ascend", "fly_bank_L", "fly_bank_R", "fly_descend", "fly_fast", "fly_forward", "fly_hover", "idle", "run", "walk"]}

@@ -43,6 +43,24 @@ if 'capeV_c0_r0' not in TB:
         okc=(h<hr[1] or h>hr[0]) if hr[0]>hr[1] else (hr[0]<h<hr[1])
         return okc and s>SPEC.get('sat',0.25) and d['c'].y>hipsY+SPEC.get('behind',0.04) and d['c'].z<neckZ and d['g'] in [P+x for x in ('Hips','Spine','Spine1','Spine2')]
     cape=[d for d in cubes.values() if iscape(d)]
+    if SPEC.get('cc',SPEC['mode']!='group'):
+        ks={k for k,d in cubes.items() if iscape(d)}; seen=set(); comps=[]
+        for k0 in ks:
+            if k0 in seen: continue
+            st_=[k0]; seen.add(k0); comp=[]
+            while st_:
+                k=st_.pop(); comp.append(k)
+                for dx in (-2,0,2):
+                    for dy in (-2,0,2):
+                        for dz in (-2,0,2):
+                            n_=(k[0]+dx,k[1]+dy,k[2]+dz)
+                            if n_ in ks and n_ not in seen: seen.add(n_); st_.append(n_)
+            comps.append(comp)
+        comps.sort(key=len,reverse=True); keep=set(comps[0])
+        for c_ in comps[1:]:
+            if len(c_)>=0.15*len(comps[0]): keep|=set(c_)
+        print('components',len(comps),'kept',len(keep),'of',len(ks))
+        cape=[cubes[k] for k in keep]
     print('cape cubes',len(cape))
     pts=np.array([list(d['c']) for d in cape])
     ztop=min(pts[:,2].max(), (arm.matrix_world@TB[ANCH].head_local).z+SPEC.get('topoff',0.12)); zbot=pts[:,2].min()
@@ -99,7 +117,7 @@ restA=arm.matrix_world@TB[ANCH].matrix_local
 loc0=[[restA.inverted()@J[c][r] for r in range(R+1)] for c in range(Cn)]
 L=[[(J[c][r+1]-J[c][r]).length for r in range(R)] for c in range(Cn)]
 LX=[[(J[c+1][r]-J[c][r]).length for r in range(R+1)] for c in range(Cn-1)]
-caps=[(bn('hips'),bn('neck'),None),(bn('thL'),bn('shL'),None),(bn('thR'),bn('shR'),None),(bn('shL'),bn('ftL'),None),(bn('shR'),bn('ftR'),None)]
+caps=[(bn('hips'),bn('spine'),None),(bn('spine'),ANCH,None),(bn('hips'),bn('neck'),None),(bn('thL'),bn('shL'),None),(bn('thR'),bn('shR'),None),(bn('shL'),bn('ftL'),None),(bn('shR'),bn('ftR'),None)]
 # radii from rest mesh of non-cape verts near each segment
 co=np.array([list(arm.matrix_world@v.co) for v in list(me.vertices)[::7]])
 gidx=np.array([v.groups[0].group if v.groups else -1 for v in list(me.vertices)[::7]])
@@ -112,13 +130,19 @@ TORSO=[bn('hips'),bn('spine')]+[x for x in (P+'Spine1',P+'Spine2','spine2','ches
 gnames=np.array([gn.get(g,'') for g in gidx])
 for a_,b_,_ in caps:
     A=np.array(arm.matrix_world@TB[a_].head_local); B=np.array(arm.matrix_world@TB[b_].head_local)
-    own=np.isin(gnames,TORSO if a_==bn('hips') else [a_])
+    own=np.isin(gnames,TORSO if a_ in (bn('hips'),bn('spine')) else [a_])
     d,t=segd(co[own],A,B); m=(t>0.05)&(t<0.95)
     rr=float(np.percentile(d[m],70)) if m.sum()>20 else 0.07
     jp=np.array([list(J[c][r]) for c in range(Cn) for r in range(1,R+1)])
     dj,tj=segd(jp,A,B)
     rr=min(rr,float(dj.min())-MARG0)
     RAD.append(max(0.03,rr))
+RC={}
+for k_,(a_,b_,_) in enumerate(caps[:2]):
+    A=arm.matrix_world@TB[a_].head_local; B=arm.matrix_world@TB[b_].head_local
+    for c in range(Cn):
+        for r in range(1,R+1):
+            p=J[c][r]; AB=B-A; t=max(0,min(1,(p-A).dot(AB)/max(AB.length_squared,1e-9))); RC[(k_,c,r)]=(p-(A+AB*t)).length
 print('RADII',[round(r,3) for r in RAD])
 SPEC.setdefault('wind',{})
 sp=json.load(open(f'/workspace/mocap/out/{name}.speeds.json'))
@@ -268,7 +292,7 @@ def simulate2(FW,wind,loop,name):
             acc=0.0
             for r in range(R):
                 u=(r+1)/R
-                ph=2*math.pi*(cyc*ii/max(1,n))-r*0.75+c*SPEC.get('cph',0.1)
+                ph=2*math.pi*(cyc*ii/max(1,n))-r*0.75+c*(0 if name.startswith('fly') else SPEC.get('cph',0.1))
                 phi=th[i]*(0.35+0.65*u)+amp*u*math.sin(ph)
                 sw=math.radians(6)*u*max(-1,min(1,la[i]/4))+amp*0.25*u*math.sin(ph*0.5)
                 d=loc0[c][r+1]-loc0[c][r]
@@ -277,22 +301,29 @@ def simulate2(FW,wind,loop,name):
                 col.append(pw.copy())
             st.append(col)
         segs=FW[i][1]
-        for it in range(SPEC.get('xit',8)):
+        MG=MARG+(SPEC.get('extra_nonloop',0.06) if not loop else SPEC.get('extra_loop',0.03))+(0.03 if name.startswith('fly_fast') else 0)
+        for it in range(SPEC.get('xit',8)*(3 if name.startswith('fly') else 1)):
             for c in range(Cn):
                 for r in range(1,R+1):
-                    for (A_,B_),rad in zip(segs,RAD):
-                        AB=B_-A_; t=max(0,min(1,(st[c][r]-A_).dot(AB)/AB.length_squared)); q_=A_+AB*t
-                        d=st[c][r]-q_; dl=d.length
-                        if dl<rad+MARG and dl>1e-6: st[c][r]=q_+d/dl*(rad+MARG)
+                    for k_,((A_,B_),rad) in enumerate(zip(segs,RAD)):
+                        AB=B_-A_; t=max(0,min(1,(st[c][r]-A_).dot(AB)/max(AB.length_squared,1e-9))); q_=A_+AB*t
+                        d=st[c][r]-q_; dl=d.length; need=max(rad+MG,RC.get((k_,c,r),0)*SPEC.get('rcf',1.0))
+                        if dl<need and dl>1e-6: st[c][r]=q_+d/dl*need
             for c in range(Cn-1):
                 for r in range(1,R+1):
                     a_,b_=st[c][r],st[c+1][r]; d=b_-a_; l=d.length or 1e-6
-                    if l>LX[c][r]*1.02:
+                    if l>LX[c][r]*(1.0 if name.startswith('fly') else 1.02):
                         e=(l-LX[c][r]*1.02)/l*0.5; st[c][r]=a_+d*e; st[c+1][r]=b_-d*e
             for c in range(Cn):
                 for r in range(R):
                     a_,b_=st[c][r],st[c][r+1]; d=b_-a_; l=d.length or 1e-6; e=(l-L[c][r])/l
                     st[c][r+1]=b_-d*e
+        for c in range(Cn):
+            for r in range(1,R+1):
+                for k_,((A_,B_),rad) in enumerate(zip(segs,RAD)):
+                    AB=B_-A_; t=max(0,min(1,(st[c][r]-A_).dot(AB)/max(AB.length_squared,1e-9))); q_=A_+AB*t
+                    d=st[c][r]-q_; dl=d.length; need=max(rad+MG,RC.get((k_,c,r),0)*SPEC.get('rcf',1.0))
+                    if dl<need and dl>1e-6: st[c][r]=q_+d/dl*need
         rec.append(st)
     if loop: rec[-1]=rec[0] if len(rec)>n else rec[-1]
     # recompute last frame for loop to match first exactly in anchor space

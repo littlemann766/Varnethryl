@@ -1,0 +1,139 @@
+{
+ "rest_baseline": {
+  "arm_in_leg": 0,
+  "cape_in_body": 829
+ },
+ "attack": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 16
+ },
+ "attack2": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 17
+ },
+ "death": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_ascend": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_bank_L": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_bank_R": {
+  "arm_in_leg_verts_max": 3,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_descend": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_fast": {
+  "arm_in_leg_verts_max": 69,
+  "arm_leg_frames_over24": 14,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 16
+ },
+ "fly_forward": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_hover": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 31
+ },
+ "hit": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 8
+ },
+ "idle": {
+  "arm_in_leg_verts_max": 3,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 38
+ },
+ "idle_saber": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 46
+ },
+ "run": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 15
+ },
+ "run_saber": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 11
+ },
+ "saber_ready": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 46
+ },
+ "saber_slash": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 20
+ },
+ "walk": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 21
+ },
+ "walk_saber": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 15
+ }
+}

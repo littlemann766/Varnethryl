@@ -45,7 +45,15 @@ for an in ['__rest__']+a[1].split(','):
         al.append(len(hits))
         if os.environ.get('DIAG') and hits:
             import collections; print('DIAG',an,f,collections.Counter(gname[gi[i]] for i in hits).most_common(4))
-        cb.append(sum(1 for t in map(tuple,np.floor(P[C=='cape']/S).astype(int)) if t in body or t in legs))
+        cm=np.where(C=='cape')[0]
+        hitc=[i for i,t in zip(cm,map(tuple,np.floor(P[cm]/S).astype(int))) if t in body or t in legs]
+        cb.append(len(hitc))
+        if os.environ.get('CDIAG') and an!='__rest__':
+            import collections
+            bset=collections.Counter()
+            for i in hitc[::5]:
+                t=tuple(np.floor(P[i]/S).astype(int)); bset[gname[gi[i]]]+=1
+            print('CDIAG',an,f,len(hitc),bset.most_common(5))
     hc=(C=='cape').any()
     if an=='__rest__': base=(al[0],cb[0]); res['rest_baseline']={'arm_in_leg':al[0],'cape_in_body':cb[0]}; continue
     al=[max(0,x-base[0]) for x in al]; cb=[max(0,x-base[1]) for x in cb]

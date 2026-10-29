@@ -8,7 +8,8 @@
   "behind": -9,
   "maxtilt": 55,
   "tscale": 2.5,
-  "ripple": 8
+  "ripple": 8,
+  "rcf": 1.1
  },
  "selene": {
   "mode": "group",
@@ -24,7 +25,8 @@
   "maxtilt": 55,
   "ripple": 8,
   "tscale": 2.5,
-  "behind": -9
+  "behind": -9,
+  "extra_nonloop": 0.12
  },
  "holyknight_villain": {
   "mode": "color",
@@ -37,7 +39,9 @@
   "margin": 0.05,
   "maxtilt": 48,
   "ripple": 8,
-  "tscale": 2.5
+  "tscale": 2.5,
+  "extra_nonloop": 0.15,
+  "rcf": 1.15
  },
  "town_guard": {
   "mode": "color",

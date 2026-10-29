@@ -1,0 +1,104 @@
+{
+ "rest_baseline": {
+  "arm_in_leg": 0,
+  "cape_in_body": 1684
+ },
+ "attack": {
+  "arm_in_leg_verts_max": 1531,
+  "arm_leg_frames_over24": 4,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 16
+ },
+ "attack2": {
+  "arm_in_leg_verts_max": 1531,
+  "arm_leg_frames_over24": 3,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 17
+ },
+ "death": {
+  "arm_in_leg_verts_max": 1531,
+  "arm_leg_frames_over24": 1,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_ascend": {
+  "arm_in_leg_verts_max": 868,
+  "arm_leg_frames_over24": 25,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_bank_L": {
+  "arm_in_leg_verts_max": 1128,
+  "arm_leg_frames_over24": 25,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_bank_R": {
+  "arm_in_leg_verts_max": 994,
+  "arm_leg_frames_over24": 25,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_descend": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_fast": {
+  "arm_in_leg_verts_max": 2269,
+  "arm_leg_frames_over24": 16,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 16
+ },
+ "fly_forward": {
+  "arm_in_leg_verts_max": 1119,
+  "arm_leg_frames_over24": 25,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 25
+ },
+ "fly_hover": {
+  "arm_in_leg_verts_max": 226,
+  "arm_leg_frames_over24": 18,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 31
+ },
+ "hit": {
+  "arm_in_leg_verts_max": 1531,
+  "arm_leg_frames_over24": 3,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 8
+ },
+ "idle": {
+  "arm_in_leg_verts_max": 84,
+  "arm_leg_frames_over24": 15,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 38
+ },
+ "run": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 15
+ },
+ "walk": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 21
+ }
+}

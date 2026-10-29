@@ -6,14 +6,22 @@ extends Node3D
 ## interrupted by damaging the 6 weak-point crystals. Art: Beth's worldboss kit (assets/volcano/worldboss) + lava veins.
 
 const SCALE := 5.440
-const SPEED := 5.2           # test 22 (boss: "walks funny, like he's slow"): was 2.96 m/s, one step per 4-5 s; now ~2x the cadence.
+## titan-voxel: Lucian's voxel Ashen Titan (varn-core c7ad026 handoff/godot/ashentitan_wb_voxel, LOD0 High/Ultra,
+## LOD1 Low/Medium). Its wb_walk (3.0 s cycle) covers ROOT_U model units/s (30.2 m/s at 114 m); the node walks at
+## SPEED, so the clip plays at SPEED / (ROOT_U * SCALE) and the planted feet don't slide.
+const ROOT_U := 5.60
+const WALK_TRIM := 1.04   # wb_walk_check slip m/m: 0.39x +0.154, 0.40x +0.085, 0.41x +0.007, 0.42x -0.054
+const VOXEL_BODY := "titan/ashentitan_wb_voxel"
+const SPEED := 12.0          # titan-voxel: was 5.2 (old rig). 12 m/s -> wb_walk at 0.39x (7.6 s per stride cycle)
+const _OLD_SPEED := 5.2           # test 22 (boss: "walks funny, like he's slow"): was 2.96 m/s, one step per 4-5 s; now ~2x the cadence.
 ##                             was: Lucian ac97cb3 (timing unchanged from f2ea516): feet hold at 2.96 m/s walk (root motion stripped)
 const WALK_RATE := 1.2 * 5.2 / 2.96   # test 22: same foot-plant ratio at the new SPEED (was 1.2 at 2.96 m/s); test 17: wb_walk play rate at SPEED, tuned with tests/wb_lite.tscn (planted-foot slip +0.06 m per m walked; 1.0 gave +0.17, 0.8 +0.43)
 const RUN_SPEED := 8.1       # wb_run, root motion stripped
 const WB := "res://assets/volcano/worldboss/"
 const LAVA := "res://assets/volcano/worldboss/titan/"
 const RING_R := 470.0         # worldboss2: outskirts loop (mountains start ~520 m)
-const TURN_DEG := 18.0        # test 23: turn circle r = SPEED / rad(TURN_DEG) ~ 16.5 m
+const TURN_DEG := 27.5        # titan-voxel: turn circle r = 12 / rad(27.5) ~ 25 m (was 18 deg/s at 5.2 m/s, ~16.5 m)
+const _OLD_TURN := 18.0        # test 23: turn circle r = SPEED / rad(TURN_DEG) ~ 16.5 m
 const ARRIVE_R := 12.0
 const PASS_R := 40.0
 const ROUTE_N := 64           # many waypoints -> gentle arcs, no snapping
@@ -95,7 +103,7 @@ func setup(main: Node) -> WorldBoss:
 	hq = int(m.get("tier")) >= 2
 	_build_route()
 	_pick_stations()
-	body = (load(WB + "titan/ashentitan_worldboss.glb") as PackedScene).instantiate()
+	body = (load(WB + VOXEL_BODY + ("" if hq else "_lod1") + ".glb") as PackedScene).instantiate()
 	body.scale = Vector3.ONE * SCALE
 	add_child(body)
 	ap = body.find_children("*", "AnimationPlayer", true, false)[0]
@@ -109,9 +117,15 @@ func setup(main: Node) -> WorldBoss:
 	if ap.has_animation("wb_run"): _strip_root_xz("wb_run")
 	var ev = JSON.parse_string(FileAccess.get_file_as_string(WB + "titan/worldboss_events.json"))
 	steps = ev.events.wb_walk
+	contact = ev.get("contact", {})   # titan-voxel: Lucian 6578e07 ground-contact frames (slam waves / dust on contact)
 	ap.animation_finished.connect(_on_anim_done)
 	for mi: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
 		mi.extra_cull_margin = 40.0
+		for si in mi.mesh.get_surface_count():   # titan-voxel: palette cubes = plain NEAREST, no mip blending (test 25 speckle fix)
+			var vm := mi.get_active_material(si)
+			if vm is BaseMaterial3D:
+				var dm := (vm as BaseMaterial3D).duplicate() as BaseMaterial3D; dm.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+				mi.set_surface_override_material(si, dm)
 	_veins(); _crystals(); _telegraphs(); _ui(); _ash_fx()
 	dust_scene = load(WB + "wb_dust_burst.tscn")
 	place_at(0)
@@ -290,11 +304,12 @@ func _gy(x: float, z: float) -> float:
 
 # ---------- art ----------
 func _veins() -> void:
-	lava_mat = (load(WB + "materials/" + ("wb_titan_lava_mat.tres" if hq else "wb_titan_lava_lod1_mat.tres")) as Material).duplicate()
+	# titan-voxel: the voxel body keeps its own palette + emissive palette (*_vox_emis) material; the old lava shader's
+	# UVs belong to the sculpted mesh, so no override. Glow is the material's emission energy.
 	for mi: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
-		mi.material_override = lava_mat
-	if lava_mat is ShaderMaterial: (lava_mat as ShaderMaterial).set_shader_parameter("glow_strength", GLOW_IDLE)
-	elif lava_mat is StandardMaterial3D: (lava_mat as StandardMaterial3D).emission_energy_multiplier = 4.4
+		var vm := mi.get_surface_override_material(0)
+		if vm: lava_mat = vm; break
+	if lava_mat is StandardMaterial3D: (lava_mat as StandardMaterial3D).emission_energy_multiplier = 1.6
 	var j = JSON.parse_string(FileAccess.get_file_as_string(LAVA + "titan_drip_points.json"))
 	var scene: PackedScene = load(LAVA + "titan_drip_particles.tscn")
 	var n := 0
@@ -476,22 +491,22 @@ func _process(dt: float) -> void:
 			if t_state > 6.0: _start_ritual()
 		"windup": _windup(dt)
 		"arrive":
-			if t_state - dt < 2.4 and t_state >= 2.4: _stomp(1.0, true)
+			if t_state - dt < _ct("wb_stomp", 2.4) and t_state >= _ct("wb_stomp", 2.4): _stomp(1.0, true)
 		"release":
-			var hit_t := 0.9 if ritual == "fissure" else 1.3
+			var hit_t := _ct("wb_ritual_fissure_release", 0.9) if ritual == "fissure" else _ct("wb_ritual_lavawave_release", 1.3)
 			if t_state - dt < hit_t and t_state >= hit_t: _complete()
 			if t_state > 4.0: _end_ritual_fx(); _set_state("cool")
 		"stagger":
 			if t_state > 8.0: _play("wb_idle"); _set_state("cool")
 		"knockdown":
-			if t_state - dt < 2.4 and t_state >= 2.4: _stomp(0.8, true)
+			if t_state - dt < _ct("wb_knockdown", 2.4) and t_state >= _ct("wb_knockdown", 2.4): _stomp(0.8, true)
 			if t_state > 22.0 and ap.current_animation != "wb_getup": _play("wb_getup")
 		"kneel": _kneel(dt)
 		"cool":
 			if t_state > 10.0: _set_state("walk")
 	if _rate_pending and is_inside_tree():
 		_rate_pending = false; _clip_rate("wb_walk", SPEED)   # clip_speed kept for the report
-		walk_rate = WALK_RATE
+		walk_rate = SPEED / (ROOT_U * SCALE) * WALK_TRIM   # titan-voxel: authored root speed (0.394x), trimmed on the slip check
 		if OS.get_environment("WB_RATE") != "": walk_rate = float(OS.get_environment("WB_RATE"))
 	_ik_restore()
 	ap.advance(dt)
@@ -504,6 +519,9 @@ func _kneel(dt: float) -> void:
 	if t_state > KNEEL_TIME + KNEEL_BLEND + 0.5:
 		for c in crystals: if c.name in LEGS and c.broken: _crystal_restore(c)   # legs regrow: repeat the cycle
 		_set_state("cool")
+
+var contact := {}
+func _ct(clip: String, dflt: float) -> float: return float(contact.get(clip, dflt))
 
 func leg_crystals_up() -> bool:
 	for c in crystals: if c.name in LEGS and not c.broken: return true

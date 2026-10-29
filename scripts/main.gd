@@ -248,6 +248,8 @@ func _ready() -> void:
 	if OS.get_environment("VARN_LITE") == "": _showcase()   # test 17: lean world for shared-box checks
 	if OS.get_environment("VARN_LITE") == "": _foliage()   # test 17: lean world for shared-box checks
 	if not args.has("--wbshots") and not args.has("--altshots") and not args.has("--roofshots") and not args.has("--wbcheck"): _grass()   # shot capture on the shared box: skip grass to save RAM
+	if OS.get_environment("VARN_NO_FLOWERS") == "": TerrainFlowers.build(self)   # test 23: Beth's wildflowers (baked placement)
+	if OS.get_environment("VARN_NO_TFIX2") == "": add_child(FarGrass.new()); TerrainScatter.build(self)   # test 23: far grass + foothill rocks/bushes/pebbles/farm
 	_hero()
 	_fx()
 	_hud()
@@ -365,7 +367,12 @@ func _terrain() -> void:
 			st.add_index(a + 1); st.add_index(a + N + 2); st.add_index(a + N + 1)
 	st.generate_normals()
 	var mi := MeshInstance3D.new(); mi.mesh = st.commit()
-	var m := ShaderMaterial.new(); m.shader = load("res://scripts/ground.gdshader"); mi.material_override = m
+	var m := ShaderMaterial.new(); mi.material_override = m
+	if OS.get_environment("VARN_NO_TFIX2") == "":   # test 23: Beth's terrain fix 2 (ground layers, baked smooth normals, dirt wear)
+		m.shader = load("res://terrain_fix2/ground/ground2.gdshader")
+		for k in [["t_norm", "res://terrain_fix2/data/terrain_n.png"], ["t_data", "res://terrain_fix2/data/terrain_d.png"], ["grass_detail", "res://terrain_fix2/data/grass_detail.png"], ["dirt_albedo", "res://assets/roads/textures/dirt_albedo.png"], ["dirt_normal", "res://assets/roads/textures/dirt_normal.png"]]:
+			m.set_shader_parameter(k[0], load(k[1]))
+	else: m.shader = load("res://scripts/ground.gdshader")
 	m.set_shader_parameter("cobble_albedo", load("res://assets/roads/textures/cobble_albedo.png")); m.set_shader_parameter("cobble_normal", load("res://assets/roads/textures/cobble_normal.png"))
 	terrain_mat = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; add_child(mi)
@@ -509,6 +516,9 @@ func apply_quality() -> void:
 		n3.visible = r[0] >= 0
 		n3.visibility_range_begin = max(r[0], 0); n3.visibility_range_end = max(r[1], 0)
 		n3.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if (t[1] == 0) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	TerrainFlowers.apply_tier(tier)   # test 23
+	if OS.get_environment("VARN_NO_TFIX2") == "":
+		FarGrass.apply_tier(tier); TerrainScatter.apply_tier(tier); terrain_mat.set_shader_parameter("beth_detail", tier >= 2)
 	_set_time(tod)
 
 func _mat(c: Color, rough := 0.85) -> StandardMaterial3D:
@@ -2453,6 +2463,12 @@ func _warm_views() -> void:
 		for vp in WARM_VIEWS:
 			wcam.look_at_from_position(vp[0], vp[1], Vector3.UP)
 			await get_tree().process_frame
+		# test 23: wildflowers (both lods), far grass, scatter rocks/bushes/pebbles, ground2 near detail: eye-level views
+		for tv in TERRAIN_WARM:
+			var e: Vector3 = tv[0]; e.y = height(e.x, e.z) + 1.7
+			var lk: Vector3 = tv[1]; lk.y = height(lk.x, lk.z) + 0.5
+			wcam.look_at_from_position(e, lk, Vector3.UP)
+			await get_tree().process_frame; await get_tree().process_frame
 		await get_tree().process_frame
 	_set_time(saved_t); apply_quality(); _apply_time_mode()
 	cam.current = true; wcam.queue_free()
@@ -2505,6 +2521,7 @@ func _register_shell_doors() -> void:
 			var n := harbor.get_node_or_null(NodePath(hb[1]))
 			if n and interiors.has_interior(hb[0]): extra_doors.append(_shell_entry(hb[0], hb[1], n))
 
+const TERRAIN_WARM := [[Vector3(40, 0, 262), Vector3(30, 0, 230)], [Vector3(-245, 0, -245), Vector3(-225, 0, -265)], [Vector3(-60, 0, -440), Vector3(-80, 0, -470)], [Vector3(-262, 0, 14), Vector3(-280, 0, 10)]]
 ## test 21: Beth's interior pass tier (textures + torch lights). InteriorManager caches built interiors, so a tier
 ## change drops every cached one except the room the hero stands in (that one rebuilds on its next entry).
 func _pass_tier_set(t: String) -> void:

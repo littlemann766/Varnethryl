@@ -389,7 +389,7 @@ if 'slams' in steps:
             if kind=='foot': best=(0.0,1.2)
             else:
                 for d in np.arange(float(os.environ.get('D0','0.6')),5.01,0.2):
-                    for th in range(0,82,2):
+                    for th in range(int(os.environ.get('TH0','0')),82,2):
                         Wn,ok=solve_at(fW,1,1,0,th,d,ztg,rot0)
                         exc=max((tg[e]+Vector((0,0,ztg[e]))-Wn[ARMS[e[-1]][0]].translation).length/((REST[ARMS[e[-1]][1]].translation-REST[ARMS[e[-1]][0]].translation).length+(REST[ARMS[e[-1]][2]].translation-REST[ARMS[e[-1]][1]].translation).length) for e in effs)
                         if FB[0] is None or exc<FB[0][0]: FB[0]=(exc,th,d)
@@ -410,7 +410,7 @@ if 'slams' in steps:
         return solve_at,th,d,ztg,rot0,kind,tg
     kind0=effs[0].split('_')[0]
     CANDS=[{}] if kind0=='foot' else [dict(SXO=a_,SK=k_,D0=d_,DW='0.5') for d_ in ('0','-0.6') for k_ in ('0.98','1.0','1.03','1.06') for a_ in (('0.7','0.9','1.2','1.6') if kind0=='fist' else ('1.2','2.0','3.0','4.5'))]
-    if clip=='wb_ritual_fissure_release': CANDS=[dict(STRAIGHT='1',SXO='0.7',SXR='2.2',SK='1.0',D0='0',DW='0.5')]+[dict(STRAIGHT='1',SXO=l_,SXR=r_,SK=k_,D0='0',DW='0.5') for k_ in ('1.0','0.98') for l_ in ('1.5','2.5') for r_ in ('1.7','2.5','3.5')]
+    if clip=='wb_ritual_fissure_release': CANDS=[dict(STRAIGHT='1',SXO='0.7',SXR='2.2',SK='1.0',D0='0',DW='0.5')]+[dict(STRAIGHT='1',SXO=l_,SXR=r_,SK=k_,D0='0',DW='0.5') for k_ in ('1.0','0.97') for r_ in ('2.2','3.0','4.5','7') for l_ in ('0.7','2.2')]+[dict(STRAIGHT='0',FX=x_,FY=y_,D0='0',DW='0.5') for x_ in ('6','7') for y_ in ('6','8','10')]
     elif kind0=='fist': CANDS=[dict(STRAIGHT='0',FX='4.6',FY='8.5',D0='0.6',DW='3'),dict(STRAIGHT='0',FX='6',FY='9',D0='0.6',DW='3')]+[dict(c_,STRAIGHT='1') for c_ in CANDS]
     elif kind0=='forearm': CANDS=[dict(STRAIGHT='0',AX=ax,AY=ay,D0=d_,DW='0.5') for d_ in ('0','-1') for ax in ('9','11','13') for ay in ('1','3','5','0','-1.5')]
     chosen=None; BEST=[None]
@@ -419,7 +419,7 @@ if 'slams' in steps:
         solve_at,th,d,ztg,rot0,kind,tg=plan()
         if kind=='foot': chosen=cd; break
         bad=0
-        for f in range(fc-PRE,fc+HOLD+REC+2,2):
+        for f in (range(fc,fc+HOLD+1) if os.environ.get('HOLDONLY') else range(fc-PRE,fc+HOLD+REC+2,2)):
             if f>f1: continue
             wc,wd,wa=wts(f); Wb=W0[fc-f0] if fc<=f<=fc+HOLD else W0[f-f0]
             Wt,_=solve_at(Wb,wc,wd,wa,th,d,ztg,rot0); bad+=n_inside(Wt)

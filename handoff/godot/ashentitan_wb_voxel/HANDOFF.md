@@ -10,3 +10,4 @@ Godot 4.7.2 headless: 0 errors, 42 animations in both.
 - wb_walk: Quaternius UAL1 Walk_Loop (CC0) retargeted, 0.444x playback, 3.0 s cycle (footsteps L 0.3, R 1.733), heavier dip/sway/lean, ball-locked feet (0 slide). Root motion 30.2 m/s at 114 m (was 2.96 m/s) — node speed must change if root motion is stripped.
 - Ground contact (IK, held 4 frames, lowest point -0.01 m): wb_stomp/wb_swat_knee R foot 2.4 s; wb_ritual_fissure_release both fists 0.9 s; wb_ritual_lavawave_release both fists 1.3 s; wb_swat_forearm_L/R forearm 1.6 s. Event times unchanged. Same in ashentitan_worldboss(.glb/_lod1).
 - Scripts: tools/titan_voxel/v2/.
+- v3 (arm-leg clearance pass, tools/titan_voxel/v2/post.py): upper-arm abduction off the hold frames (voxel fissure hold: right knee turned in 30°). Arm-leg intersections = 0 on all 42 clips in ashentitan_worldboss.glb and ashentitan_wb_voxel.glb (LOD0). LOD1 files are NOT clean yet (worldboss_lod1: skill 11 frames; voxel_lod1: most clips).

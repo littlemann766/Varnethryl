@@ -13,6 +13,9 @@ const RUN_SPEED := 8.1       # wb_run, root motion stripped
 const WB := "res://assets/volcano/worldboss/"
 const LAVA := "res://assets/volcano/worldboss/titan/"
 const RING_R := 470.0         # worldboss2: outskirts loop (mountains start ~520 m)
+const TURN_DEG := 18.0        # test 23: turn circle r = SPEED / rad(TURN_DEG) ~ 16.5 m
+const ARRIVE_R := 12.0
+const PASS_R := 40.0
 const ROUTE_N := 64           # many waypoints -> gentle arcs, no snapping
 const STATION_EVERY := 8      # stop (stomp/ritual) only every 8th waypoint
 const WEST_LIMIT := -400.0    # coast/port sea is west of x = -440
@@ -458,16 +461,21 @@ func crystal_available(c: Dictionary) -> bool:
 func _walk(dt: float) -> void:
 	var tgt := waypoints[wp]
 	var flat := Vector3(tgt.x - position.x, 0, tgt.z - position.z)
-	if flat.length() < 25.0:      # advance early so he arcs into the next leg instead of snapping
+	# test 23 (boss: "walks in a small circle"): at test 22's 5.2 m/s the old 6 deg/s turn gave a ~50 m turn circle,
+	# wider than the 25 m arrival radius, so he orbited a waypoint forever. Now: turn rate sized to SPEED (~16 m circle),
+	# and a waypoint also counts as reached once it is behind him (passed), so he can never orbit one.
+	var fwd0 := _fwd()
+	if flat.length() < ARRIVE_R or (flat.length() < PASS_R and fwd0.dot(flat) < 0.0):
 		var station := wp % STATION_EVERY == 0
 		wp = (wp + 1) % waypoints.size()
 		if station: _set_state("arrive"); return
 		tgt = waypoints[wp]; flat = Vector3(tgt.x - position.x, 0, tgt.z - position.z)
 	var want := atan2(-flat.x, -flat.z)         # Lucian's rig faces -Z
-	rotation.y = rotate_toward(rotation.y, want, deg_to_rad(6.0) * dt)   # ~28 m turn radius at 2.96 m/s
+	rotation.y = rotate_toward(rotation.y, want, deg_to_rad(TURN_DEG) * dt)
 	var fwd := _fwd()
 	var np := position + fwd * SPEED * dt
-	if maxf(absf(np.x), absf(np.z)) < 260.0: np = position     # hard rule: never enters the town
+	if maxf(absf(np.x), absf(np.z)) < 260.0:   # hard rule: never enters the town (test 23: slide along the edge instead of freezing)
+		var out := Vector2(np.x, np.z).normalized() * 260.5; np = Vector3(out.x, np.y, out.y)
 	position = Vector3(np.x, _gy(np.x, np.z) + ground_off, np.z)
 	if ap.current_animation == "wb_walk": ap.speed_scale = walk_rate   # test 17: clip cadence matched to SPEED (no foot slide)
 	# footfalls from the clip phase

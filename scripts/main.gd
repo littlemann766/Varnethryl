@@ -262,6 +262,8 @@ func _ready() -> void:
 	if args.has("--altshots"): add_child(load("res://tests/alt_shots.gd").new())   # test 16
 	if args.has("--roofshots"): add_child(load("res://tests/roof_shots.gd").new())   # test 17
 	if args.has("--wbcheck"): add_child(load("res://tests/wb_ground_check.gd").new())   # test 17
+	if args.has("--intcheck"): add_child(load("res://tests/interior_pass_check.gd").new())   # test 21
+	InteriorExtraDoors.register(self)   # test 21: Beth's pass - harbour warehouse/shop/cottages, gate towers, lighthouse enterable
 
 # ---------- settings ----------
 func _load_settings() -> void:
@@ -468,6 +470,7 @@ func apply_quality() -> void:
 	sun.directional_shadow_max_distance = [30.0, 45.0, 60.0, 140.0][tier]
 	sun.directional_shadow_mode = [DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_ORTHOGONAL, DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS][tier]
 	sun.light_angular_distance = 0.0
+	_pass_tier_set("high" if tier >= 2 else "low")
 	sun.shadow_blur = [0.5, 1.0, 1.5, 1.5][tier]
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR   # FSR1 is Forward+-only in 4.7
 	vp.scaling_3d_scale = [0.5, 0.6, 0.7, 1.0][tier]
@@ -1717,7 +1720,7 @@ func _flythrough_all() -> void:
 	for q in order:
 		if OS.get_environment("BENCH_NOAPPLY") == "" or tier != q or order.find(q) == order.rfind(q): tier = q; apply_quality()
 		else: tier = q
-		if OS.get_environment("BENCH_NOWARM") == "": await _warm_views()   # same per-tier warm-up the game does at load
+		if OS.get_environment("BENCH_NOWARM") == "": await _warm_views(); await _warm_interiors()   # same per-tier warm-up the game does at load
 		Engine.max_fps = fps_cap   # test 20: the cap used to be switched off (Low read avg 111 under "cap 60")
 		bench_label.text = "\n".join(lines) + "\nRunning %s..." % TIERS[q]
 		var r: Array = await _flythrough()
@@ -2466,8 +2469,34 @@ func _warm_veiled() -> void:
 	if _rewarming or not warmed: return
 	_rewarming = true
 	var cl := _veil(); var cam_far := cam.far
-	await _warm_views()
+	await _warm_views(); await _warm_interiors()   # test 21
 	cam.far = cam_far; cl.queue_free(); _rewarming = false
+
+## test 21: Beth's interior pass tier (textures + torch lights). InteriorManager caches built interiors, so a tier
+## change drops every cached one except the room the hero stands in (that one rebuilds on its next entry).
+func _pass_tier_set(t: String) -> void:
+	if InteriorManager.pass_tier == t: return
+	InteriorManager.pass_tier = t
+	if interiors == null: return
+	for id in interiors.built.keys():
+		if not interiors.cur.is_empty() and interiors.cur == interiors.built[id]: continue
+		interiors.built[id].node.queue_free(); interiors.built.erase(id)
+
+## test 21: render a dressed interior (indoor env, sun off, torches) so the pass materials compile behind the veil
+const WARM_INTERIORS := ["keep", "temple"]
+func _warm_interiors() -> void:
+	if interiors == null: return
+	var wcam := Camera3D.new(); wcam.fov = 90; add_child(wcam); wcam.current = true
+	var sun_v := sun.visible; sun.visible = false; interiors._env_inside(true)
+	for id in WARM_INTERIORS:
+		if not InteriorDefs.D.has(id): continue
+		var info: Dictionary = interiors.get_info(id, Vector3(20, 10, 20))
+		var n: Node3D = info.node
+		for v in [[Vector3(info.W * 0.18, 1.7, info.D / 2 - 1.2), Vector3(-info.W * 0.25, 2.6, -info.D * 0.2)], [Vector3(-info.W * 0.3, 1.6, info.D * 0.25), Vector3(info.W * 0.45, 3.4, -info.D * 0.3)]]:
+			wcam.look_at_from_position(n.to_global(v[0]), n.to_global(v[1]), Vector3.UP)
+			await get_tree().process_frame; await get_tree().process_frame
+	interiors._env_inside(false); sun.visible = sun_v
+	cam.current = true; wcam.queue_free()
 
 func _warm_up() -> void:
 	var saved := tier; var saved_t := tod
@@ -2479,6 +2508,7 @@ func _warm_up() -> void:
 	for q in order:
 		tier = q; apply_quality()
 		await _warm_views()
+		await _warm_interiors()   # test 21
 	cam.far = cam_far; tier = saved; _set_time(saved_t); apply_quality(); _apply_time_mode()
 	for l in lamp_lights: _lamp_shadow_on[l[0]] = l[0].shadow_enabled
 	warmed = true

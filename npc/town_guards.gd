@@ -1,14 +1,14 @@
 class_name TownGuards
 extends Node3D
 ## voxel-heroes: Lucian's town_guard_voxel (varn-core dcfc9b2 capes_v1) as NPC guards around town.
-## 8 guards (they are ~130k tris each; a lighter LOD is coming): a pair inside each of the 4 gates walking a short
-## beat along the wall and back. In-place walk clip at its 1.04 m/s root speed -> 1x playback, no foot slide.
+## 8 guards (they are ~130k tris each; a lighter LOD is coming): a pair flanking each of the 4 gates on the inside,
+## walking a short beat in from the gate and back. In-place walk clip at its 1.04 m/s root speed -> 1x playback, no foot slide.
 ## Phone budget: AnimationTree frozen beyond 60 m, guard hidden beyond 140 m (and inside interiors with the town).
 const MODEL := "res://voxel/town_guard_voxel.glb"
 const HEIGHT := 1.905
 const WALK := 1.04
 const BEAT := 7.0          # m each way
-const INSET := 9.0         # m inside the wall
+const INSET := 10.0        # m inside the wall
 const ANIM_M := 60.0
 const SHOW_M := 140.0
 var guards: Array = []     # [{node, rig, a, b, to_b, wait}]
@@ -19,8 +19,9 @@ static func spots(city_half: float, gates: Array) -> Array:
 	for gd in gates:
 		var o := Vector3(gd[0].x, 0, gd[0].y); var along := Vector3(o.z, 0, -o.x)
 		for sd in [-1, 1]:
-			var c: Vector3 = o * (city_half - INSET) + along * (sd * 13.0)
-			out.append([c - along * BEAT * 0.5, c + along * BEAT * 0.5])
+			# flank the gate opening (towers sit at +-13.9 m along the wall), walking a beat in from the gate and back
+			var c: Vector3 = o * (city_half - INSET) + along * (sd * 4.5)
+			out.append([c + o * BEAT * 0.5, c - o * BEAT * 0.5])
 	return out
 
 func setup(m: Node, city_half: float, gates: Array) -> TownGuards:

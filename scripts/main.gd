@@ -269,6 +269,7 @@ func _ready() -> void:
 	if args.has("--wbcheck"): add_child(load("res://tests/wb_ground_check.gd").new())   # test 17
 	if args.has("--crystalcheck"): add_child(load("res://tests/crystal_reach_test.gd").new())   # test 24
 	if args.has("--bouldercheck"): add_child(load("res://tests/boulder_check.gd").new())   # test 23
+	if args.has("--voxshots"): add_child(load("res://tests/voxel_shots.gd").new())   # voxel-heroes
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
 	if args.has("--extshots"): add_child(load("res://tests/ext_shots.gd").new())   # test 22
 	if args.has("--intcheck"): add_child(load("res://tests/interior_pass_check.gd").new())   # test 21

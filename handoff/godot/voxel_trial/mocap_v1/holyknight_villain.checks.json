@@ -1,0 +1,27 @@
+{
+ "rest_baseline": {
+  "arm_in_leg": 75,
+  "cape_in_body": 0
+ },
+ "walk": {
+  "arm_in_leg_verts_max": 116,
+  "arm_leg_frames_over24": 8,
+  "cape_in_body_verts_max": null,
+  "cape_frames_over24": null,
+  "frames_sampled": 21
+ },
+ "run": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": null,
+  "cape_frames_over24": null,
+  "frames_sampled": 15
+ },
+ "idle": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": null,
+  "cape_frames_over24": null,
+  "frames_sampled": 38
+ }
+}

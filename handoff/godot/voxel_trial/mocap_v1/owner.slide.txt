@@ -1,0 +1,1 @@
+SLIDE owner {"walk": {"stance_samples": 23, "max_slide_mm_per_frame": 1.3}, "run": {"stance_samples": 4, "max_slide_mm_per_frame": 0.0}, "idle": {"stance_samples": 150, "max_slide_mm_per_frame": 0.0}}

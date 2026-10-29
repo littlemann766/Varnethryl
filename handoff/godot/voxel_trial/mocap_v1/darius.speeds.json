@@ -1,0 +1,30 @@
+{
+ "walk": {
+  "source": "Quaternius UAL1 Walk_Loop",
+  "frames": 40,
+  "speed_mps": 1.0204209387302399,
+  "cycle_s": 1.3333333333333333
+ },
+ "run": {
+  "source": "Quaternius UAL1 Jog_Fwd_Loop",
+  "frames": 28,
+  "speed_mps": 5.854777581989765,
+  "cycle_s": 0.9333333333333333
+ },
+ "idle": {
+  "source": "Quaternius UAL1 Idle_Loop",
+  "frames": 75,
+  "speed_mps": 0.0,
+  "cycle_s": 2.5
+ },
+ "_params": {
+  "CAPE_K": 0.0,
+  "CAPE_MODE": "rigid",
+  "ABD": 14.0,
+  "ABD_IDLE": 18.0,
+  "HOLD": [
+   "hand_R"
+  ],
+  "HOLD_MODE": "world"
+ }
+}

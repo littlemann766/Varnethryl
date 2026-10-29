@@ -1,0 +1,1 @@
+SLIDE selene {"walk": {"stance_samples": 39, "max_slide_mm_per_frame": 0.0}, "run": {"stance_samples": 8, "max_slide_mm_per_frame": 0.0}, "idle": {"stance_samples": 150, "max_slide_mm_per_frame": 0.0}}

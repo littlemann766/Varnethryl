@@ -51,6 +51,6 @@ static func apply(root: Node, tier := "high") -> int:
 	var em = root.get("emissive_mats")
 	if em is Array:
 		var keep := []
-		for m in em: if not _is_card2(m) and m != _proxy: keep.append(m)
+		for m in em: if m != _proxy and not (m is Material and _is_card2(m)): keep.append(m)   # test 22 (Lucky): the proxy is not a Material
 		keep.append(_proxy); em.clear(); em.append_array(keep)
 	return n

@@ -1,0 +1,211 @@
+{
+ "_cands": {
+  "wb_stomp": {
+   "chosen": {},
+   "inside_samples": 0
+  },
+  "wb_swat_knee": {
+   "chosen": {},
+   "inside_samples": 0
+  },
+  "wb_ritual_fissure_release": {
+   "chosen": {
+    "STRAIGHT": "1",
+    "SXO": "0.7",
+    "SXR": "2.2",
+    "SK": "1.0",
+    "D0": "0",
+    "DW": "0.5"
+   },
+   "inside_samples": 4
+  },
+  "wb_ritual_lavawave_release": {
+   "chosen": {
+    "STRAIGHT": "0",
+    "FX": "4.6",
+    "FY": "8.5",
+    "D0": "0.6",
+    "DW": "3"
+   },
+   "inside_samples": 0
+  },
+  "wb_swat_forearm_L": {
+   "chosen": {
+    "STRAIGHT": "0",
+    "AX": "9",
+    "AY": "1",
+    "D0": "0",
+    "DW": "0.5"
+   },
+   "inside_samples": 0
+  },
+  "wb_swat_forearm_R": {
+   "chosen": {
+    "STRAIGHT": "0",
+    "AX": "9",
+    "AY": "1",
+    "D0": "0",
+    "DW": "0.5"
+   },
+   "inside_samples": 0
+  }
+ },
+ "wb_stomp": {
+  "impact_frame": 72,
+  "impact_s": 2.4,
+  "hold_frames": [
+   72,
+   73,
+   74,
+   75
+  ],
+  "effectors": [
+   "foot_R"
+  ],
+  "spine_bend_deg": 0.0,
+  "body_drop_m": 6.47,
+  "contact_min_height_m": {
+   "foot_R": [
+    -0.009,
+    -0.009,
+    -0.009,
+    -0.009
+   ]
+  },
+  "frames": 133
+ },
+ "wb_swat_knee": {
+  "impact_frame": 72,
+  "impact_s": 2.4,
+  "hold_frames": [
+   72,
+   73,
+   74,
+   75
+  ],
+  "effectors": [
+   "foot_R"
+  ],
+  "spine_bend_deg": 0.0,
+  "body_drop_m": 6.47,
+  "contact_min_height_m": {
+   "foot_R": [
+    -0.009,
+    -0.009,
+    -0.009,
+    -0.009
+   ]
+  },
+  "frames": 133
+ },
+ "wb_ritual_fissure_release": {
+  "impact_frame": 27,
+  "impact_s": 0.9,
+  "hold_frames": [
+   27,
+   28,
+   29,
+   30
+  ],
+  "effectors": [
+   "fist_L",
+   "fist_R"
+  ],
+  "spine_bend_deg": 16,
+  "body_drop_m": 0.0,
+  "contact_min_height_m": {
+   "fist_L": [
+    -0.01,
+    -0.01,
+    -0.01,
+    -0.01
+   ],
+   "fist_R": [
+    -0.011,
+    -0.011,
+    -0.011,
+    -0.011
+   ]
+  },
+  "frames": 110
+ },
+ "wb_ritual_lavawave_release": {
+  "impact_frame": 39,
+  "impact_s": 1.3,
+  "hold_frames": [
+   39,
+   40,
+   41,
+   42
+  ],
+  "effectors": [
+   "fist_L",
+   "fist_R"
+  ],
+  "spine_bend_deg": 80,
+  "body_drop_m": 20.49,
+  "contact_min_height_m": {
+   "fist_L": [
+    -0.01,
+    -0.01,
+    -0.01,
+    -0.01
+   ],
+   "fist_R": [
+    -0.01,
+    -0.01,
+    -0.01,
+    -0.01
+   ]
+  },
+  "frames": 110
+ },
+ "wb_swat_forearm_L": {
+  "impact_frame": 48,
+  "impact_s": 1.6,
+  "hold_frames": [
+   48,
+   49,
+   50,
+   51
+  ],
+  "effectors": [
+   "forearm_L"
+  ],
+  "spine_bend_deg": 40,
+  "body_drop_m": 0.0,
+  "contact_min_height_m": {
+   "forearm_L": [
+    -0.01,
+    -0.01,
+    -0.01,
+    -0.01
+   ]
+  },
+  "frames": 103
+ },
+ "wb_swat_forearm_R": {
+  "impact_frame": 48,
+  "impact_s": 1.6,
+  "hold_frames": [
+   48,
+   49,
+   50,
+   51
+  ],
+  "effectors": [
+   "forearm_R"
+  ],
+  "spine_bend_deg": 50,
+  "body_drop_m": 0.0,
+  "contact_min_height_m": {
+   "forearm_R": [
+    -0.01,
+    -0.01,
+    -0.01,
+    -0.01
+   ]
+  },
+  "frames": 103
+ }
+}

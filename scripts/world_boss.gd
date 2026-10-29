@@ -6,8 +6,9 @@ extends Node3D
 ## interrupted by damaging the 6 weak-point crystals. Art: Beth's worldboss kit (assets/volcano/worldboss) + lava veins.
 
 const SCALE := 5.440
-const SPEED := 2.96          # Lucian ac97cb3 (timing unchanged from f2ea516): feet hold at 2.96 m/s walk (root motion stripped)
-const WALK_RATE := 1.2      # test 17: wb_walk play rate at SPEED, tuned with tests/wb_lite.tscn (planted-foot slip +0.06 m per m walked; 1.0 gave +0.17, 0.8 +0.43)
+const SPEED := 5.2           # test 22 (boss: "walks funny, like he's slow"): was 2.96 m/s, one step per 4-5 s; now ~2x the cadence.
+##                             was: Lucian ac97cb3 (timing unchanged from f2ea516): feet hold at 2.96 m/s walk (root motion stripped)
+const WALK_RATE := 1.2 * 5.2 / 2.96   # test 22: same foot-plant ratio at the new SPEED (was 1.2 at 2.96 m/s); test 17: wb_walk play rate at SPEED, tuned with tests/wb_lite.tscn (planted-foot slip +0.06 m per m walked; 1.0 gave +0.17, 0.8 +0.43)
 const RUN_SPEED := 8.1       # wb_run, root motion stripped
 const WB := "res://assets/volcano/worldboss/"
 const LAVA := "res://assets/volcano/worldboss/titan/"
@@ -434,7 +435,9 @@ func _process(dt: float) -> void:
 		_rate_pending = false; _clip_rate("wb_walk", SPEED)   # clip_speed kept for the report
 		walk_rate = WALK_RATE
 		if OS.get_environment("WB_RATE") != "": walk_rate = float(OS.get_environment("WB_RATE"))
+	_ik_restore()
 	ap.advance(dt)
+	if state == "walk" and ap.current_animation == "wb_walk" and OS.get_environment("WB_NOIK") == "": _straight_legs(dt)   # test 22
 	_ground_feet(dt)
 	_update_crystals(dt); _update_prints(dt); _update_adds(dt); _update_ui(); _update_fx(dt); _do_shake(dt)
 
@@ -481,7 +484,7 @@ func _footfall(i: int) -> void:
 	var b := skel.find_bone(["foot_L", "foot_R"][i])
 	var p := (skel.global_transform * skel.get_bone_global_pose(b)).origin
 	await get_tree().create_timer(0.1).timeout
-	_print_at(p); _stomp(0.3, false, p, false)
+	_print_at(p); _stomp(0.45, false, p, false)   # test 22: heavier footfall shake near the player (full within 120 m)
 
 func _print_at(p: Vector3) -> void:
 	var mat: ShaderMaterial = (load(WB + "materials/wb_footprint_mat.tres") as Material).duplicate()
@@ -809,6 +812,87 @@ func _ground_feet(dt: float) -> void:
 	position.y = _gy(position.x, position.z) + ground_off
 	foot_gap = sole_gap()   # residual after the snap (what the player sees)
 
+
+# ---------- test 22: heavy giant walk (boss: "his knees are bent too much") ----------
+## Lucian's wb_walk keeps both knees bent 55-85 deg (crouched look). After the clip pose each frame: lift the hips
+## until the planted (lower) leg is near-straight (STANCE_BEND), then two-bone IK both legs back onto the clip's own
+## foot positions (skeleton space). Feet land exactly where the clip put them, so plant timing / slip are unchanged;
+## the swing leg still bends because its foot is lifted. The hip lift follows the stride = heavy up/down body bob;
+## a small hip roll over the planted leg adds the weight shift.
+const STANCE_BEND := 4.0      # deg, IK target for the planted knee (measured ~19 avg with smoothing / double support; was 55)
+const LIFT_MIX := 0.0           # 0 = lift only as far as the planted leg needing the least lift (no over-stretch, no slip)
+const HIP_ROLL := 2.5          # deg, hips lean over the planted leg
+var _hip_lift := 0.0
+var _leg_len := {}
+var _ik_saved := {}   # bone -> clip pose before our IK; put back before the next ap.advance() so the mixer (blends / unkeyed tracks) never feeds on the IK pose
+func _ik_restore() -> void:
+	for b in _ik_saved:
+		var sv: Array = _ik_saved[b]
+		skel.set_bone_pose_position(b, sv[0]); skel.set_bone_pose_rotation(b, sv[1]); skel.set_bone_pose_scale(b, sv[2])
+	_ik_saved.clear()
+func _ik_bones() -> Array:
+	var out := []
+	for n in ["hips", "thigh_L", "shin_L", "foot_L", "thigh_R", "shin_R", "foot_R"]:
+		var b := skel.find_bone(n); if b >= 0: out.append(b)
+	return out
+func _straight_legs(dt: float) -> void:
+	var hb := skel.find_bone("hips"); if hb < 0: return
+	var ikb := _ik_bones(); var clip := {}
+	for b in ikb: clip[b] = [skel.get_bone_pose_position(b), skel.get_bone_pose_rotation(b), skel.get_bone_pose_scale(b)]
+	var legs := []
+	for sd in ["L", "R"]:
+		var t := skel.find_bone("thigh_" + sd); var k := skel.find_bone("shin_" + sd); var f := skel.find_bone("foot_" + sd)
+		if t < 0 or k < 0 or f < 0: return
+		if not _leg_len.has(sd):
+			_leg_len[sd] = [(skel.get_bone_global_rest(k).origin - skel.get_bone_global_rest(t).origin).length(), (skel.get_bone_global_rest(f).origin - skel.get_bone_global_rest(k).origin).length()]
+		legs.append([t, k, f, skel.get_bone_global_pose(t), skel.get_bone_global_pose(k), skel.get_bone_global_pose(f), _leg_len[sd]])
+	# planted legs = feet near the lowest foot (both in double support); lift until the planted leg needing the
+	# least lift reaches a STANCE_BEND knee, so no planted leg is ever over-stretched
+	var ty := [skel.get_bone_global_pose(skel.find_bone("toe_L")).origin.y, skel.get_bone_global_pose(skel.find_bone("toe_R")).origin.y]
+	var lo: float = minf(ty[0], ty[1])
+	var want := -1.0; var st: Array = legs[0]; var wmin := INF
+	for li in 2:
+		var lg: Array = legs[li]
+		if ty[li] > lo + 0.12: continue
+		var L1: float = lg[6][0]; var L2: float = lg[6][1]
+		var d := sqrt(L1 * L1 + L2 * L2 + 2.0 * L1 * L2 * cos(deg_to_rad(STANCE_BEND)))
+		var r: Vector3 = lg[5].origin - lg[3].origin
+		var rxz := Vector2(r.x, r.z).length_squared()
+		var w := maxf(0.0, sqrt(maxf(d * d - rxz, 0.0)) + r.y) if d * d > rxz else 0.0
+		if w > want: want = w; st = lg
+		wmin = minf(wmin, w)
+	want = maxf(lerpf(wmin, want, LIFT_MIX) if wmin < INF else 0.0, 0.0)
+	_hip_lift = lerpf(_hip_lift, want, clampf(dt * 25.0, 0.0, 1.0))
+	var up := Vector3(0, _hip_lift, 0)
+	var hp := skel.get_bone_global_pose(hb)
+	var lean := 1.0 if st == legs[0] else -1.0   # +X = his left
+	var roll := Basis(Vector3(0, 0, 1), deg_to_rad(HIP_ROLL) * -lean)
+	hp.origin += up
+	skel.set_bone_global_pose(hb, Transform3D(roll * hp.basis, hp.origin))
+	for lg in legs:
+		var t: int = lg[0]; var k: int = lg[1]; var f: int = lg[2]
+		var A: Vector3 = skel.get_bone_global_pose(t).origin
+		var K0: Vector3 = lg[4].origin + up; var C: Vector3 = lg[5].origin
+		var a: float = lg[6][0]; var b: float = lg[6][1]
+		var ac := C - A; var dist := clampf(ac.length(), absf(a - b) + 0.001, a + b - 0.001)
+		var dir := ac.normalized()
+		var pole := (K0 - A) - dir * (K0 - A).dot(dir)
+		if pole.length() < 0.0001: pole = Vector3(0, 0, 1)   # knee forward fallback
+		pole = pole.normalized()
+		var x := (a * a - b * b + dist * dist) / (2.0 * dist); var h := sqrt(maxf(a * a - x * x, 0.0))
+		var K := A + dir * x + pole * h
+		_aim_global(t, k, K - A); _aim_global(k, f, A + dir * dist - K)
+		var fp := skel.get_bone_global_pose(f)
+		skel.set_bone_global_pose(f, Transform3D(lg[5].basis, fp.origin))   # foot keeps the clip's orientation (flat plant)
+	for b in ikb: _ik_saved[b] = clip[b]
+	for b in ikb: skel.set_bone_pose_scale(b, clip[b][2])   # IK only rotates/moves: no scale creep
+## rotate bone b (global pose) so its child direction points along d
+func _aim_global(b: int, c: int, d: Vector3) -> void:
+	var g := skel.get_bone_global_pose(b)
+	var cur := (skel.get_bone_global_pose(c).origin - g.origin).normalized()
+	if cur.length() < 0.5 or d.length() < 0.0001: return
+	var q := Quaternion(cur, d.normalized())
+	skel.set_bone_global_pose(b, Transform3D(Basis(q) * g.basis, g.origin))
 
 # ---------- test 19: clean one-knee pose (boss: the old knockdown clip + slump looked like a pretzel) ----------
 ## Built once from the wb_idle pose by aiming bones (skeleton space, +Z = his front, +X = his left):

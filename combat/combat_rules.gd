@@ -53,11 +53,11 @@ static func commit(hero_id: String, slot: int, skill: Dictionary, st: Dictionary
 	return st.cd[slot]
 
 static func new_state() -> Dictionary:
-	return {"cd": [0.0, 0.0, 0.0, 0.0, 0.0], "mp": 100.0, "sp": 100.0, "fury": 0.0, "basic_t": 0.0}
+	return {"cd": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "mp": 100.0, "sp": 100.0, "fury": 0.0, "basic_t": 0.0}
 
 static func tick(st: Dictionary, dt: float) -> void:
 	var P: Dictionary = CombatData.data().PLAYER
-	for i in 5: st.cd[i] = max(0.0, st.cd[i] - dt)
+	for i in st.cd.size(): st.cd[i] = max(0.0, st.cd[i] - dt)
 	st.basic_t = max(0.0, st.basic_t - dt)
 	st.mp = min(100.0, st.mp + P.mpRegen * dt); st.sp = min(100.0, st.sp + P.spRegen * dt)
 

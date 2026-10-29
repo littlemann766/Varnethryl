@@ -156,7 +156,7 @@ func _process(_dt: float) -> void:
 		return
 	if flags.god: c.hp = c.max_hp
 	if flags.unlimited: c.st.mp = 100.0; c.st.sp = 100.0
-	if flags.nocd: for i in 5: c.st.cd[i] = 0.0
+	if flags.nocd: for i in c.st.cd.size(): c.st.cd[i] = 0.0
 	if flags.inf_gold and r == "owner" and int(_vs().state.get("gold", 0)) < GOLD_CAP: _vs().state.gold = GOLD_CAP
 
 func _clear_all() -> void:

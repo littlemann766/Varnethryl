@@ -12,8 +12,8 @@ func setup(p: Party) -> void:
 	# Anchored to the bottom-right corner so it scales to any phone aspect (e.g. 2340x1080) and stays
 	# clear of the joystick (bottom-left), the menu button and minimap (top-right, y < 230).
 	# [offset from bottom-right corner (x, y) of the button's top-left, size]
-	var lay := [[Vector2(-180, -180), 150], [Vector2(-300, -116), 96], [Vector2(-282, -236), 96], [Vector2(-176, -300), 96], [Vector2(-80, -280), 70]]
-	for i in 5:
+	var lay := [[Vector2(-180, -180), 150], [Vector2(-300, -116), 96], [Vector2(-282, -236), 96], [Vector2(-176, -300), 96], [Vector2(-80, -280), 70], [Vector2(-80, -366), 70]]   # test 25: slot 5 = Owner's Holy Destruction
+	for i in 6:
 		var b := Button.new(); var sz: int = lay[i][1]
 		b.anchor_left = 1; b.anchor_right = 1; b.anchor_top = 1; b.anchor_bottom = 1
 		b.offset_left = lay[i][0].x; b.offset_top = lay[i][0].y; b.offset_right = lay[i][0].x + sz; b.offset_bottom = lay[i][0].y + sz
@@ -36,8 +36,10 @@ func _process(_dt: float) -> void:
 	if not show: return
 	var c := party.combat
 	btns[0].text = "ATK"
-	for i in range(1, 5):
+	for i in range(1, btns.size()):
 		var s := c.skill(i)
+		btns[i].visible = not s.is_empty()
+		if s.is_empty(): continue
 		var cd: float = c.st.cd[i]
 		var nm: String = String(s.get("name", "-"))
 		var t: String = ("%s\n%.0f" % [nm, ceil(cd)]) if cd > 0.0 else nm

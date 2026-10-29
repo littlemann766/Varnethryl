@@ -74,6 +74,11 @@ func take_damage(dmg: int, from: Vector3) -> void:
 	if hp <= 0.0:
 		set_state("defeated"); rig.set_dead(true); died.emit(self)
 
+## test 25: Owner ultimate one-shot - bypasses every guard (inactive/intro bosses, phases, poise)
+func kill_now(from: Vector3) -> void:
+	if not alive(): return
+	hp = 0.0; set_state("defeated"); rig.set_dead(true); died.emit(self)
+
 func set_state(s: String) -> void: state = s; t_state = 0.0
 
 ## test 14: Lucian's v4 frost trolls (A 0986577, B 349a02f): hit frame (s into attack1/2/3) per BOSS_PATTERNS order

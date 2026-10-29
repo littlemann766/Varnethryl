@@ -702,9 +702,18 @@ func _end_ritual_fx() -> void:
 	wave.visible = false
 
 # ---------- damage (hooked to HeroCombat.used) ----------
-func on_hero_used(slot: int, _sk: Dictionary) -> void:
+func on_hero_used(slot: int, _sk: Dictionary, hero_id := "") -> void:
 	if not visible: return
 	var h := _hero(); if h == null: return
+	# test 25: the Owner's ultimates (Unholy + Holy Destruction) kill the Titan in one hit when it lands
+	# (a crystal in reach, or the Titan's body within the ult radius / 45 m, whichever is larger)
+	if slot > 0 and HeroCombat.one_shot(hero_id, _sk) and state != "dead":
+		var R := maxf(45.0, float(CombatData.data().TUNING.ult.radius) * CombatRules.UNIT_M)
+		var hp2 := Vector2(h.global_position.x - global_position.x, h.global_position.z - global_position.z).length()
+		var near_c := false
+		for c in crystals:
+			if crystal_available(c) and h.global_position.distance_to((c.node as Node3D).global_position) < KNEEL_RANGED_R: near_c = true
+		if hp2 < R or near_c: _damage(hp + 1.0); return
 	hit_from(h.global_position + Vector3(0, 1.5, 0), slot)
 
 ## test 18: slot 0 = basic melee (MELEE_R), skills = ranged/projectile (RANGED_R + terrain line of sight). Returns the crystal hit.

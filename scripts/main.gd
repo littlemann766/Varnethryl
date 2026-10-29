@@ -2717,7 +2717,7 @@ func on_volcano_quest_done() -> void:
 func spawn_world_boss(near_hero := true) -> bool:
 	if world_boss == null:
 		world_boss = WorldBoss.new(); add_child(world_boss); world_boss.setup(self)
-		if party and party.combat: party.combat.used.connect(func(slot, sk): get_tree().create_timer(0.12).timeout.connect(func(): world_boss.on_hero_used(slot, sk)))
+		if party and party.combat: party.combat.used.connect(func(slot, sk): get_tree().create_timer(0.12).timeout.connect(func(): world_boss.on_hero_used(slot, sk, party.hero_id)))
 	if near_hero and hero: world_boss.spawn_near(hero.global_position)
 	return true
 

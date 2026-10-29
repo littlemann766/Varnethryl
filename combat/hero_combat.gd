@@ -68,9 +68,15 @@ func use(slot: int) -> bool:
 	used.emit(slot, sk)
 	return true
 
+## test 25 (boss: "the owner's ultimate attacks should 1 shot anything"): Owner only, Unholy Destruction + Holy Destruction
+const OWNER_ONE_SHOT := ["unholy", "holy"]
+static func one_shot(hid: String, sk: Dictionary) -> bool: return hid == "owner" and OWNER_ONE_SHOT.has(str(sk.get("id", "")))
+
 func _hit(e: Enemy, slot: int, sk: Dictionary, mult := 1.0) -> void:
 	var r: Dictionary = CombatRules.basic_damage(hero_id, dmg_pct(), rng) if slot == 0 else CombatRules.skill_damage(hero_id, sk, dmg_pct(), rng)
 	var dmg := int(r.dmg * mult)
+	if slot > 0 and one_shot(hero_id, sk):   # whole HP in one hit (bosses, villain, phases, immunity ignored)
+		var full := int(e.max_hp); e.kill_now(body.global_position); damaged_enemy.emit(e, full, true); return
 	e.take_damage(dmg, body.global_position)
 	damaged_enemy.emit(e, dmg, r.crit)
 
@@ -102,10 +108,13 @@ func _resolve(slot: int, sk: Dictionary) -> void:
 		"storm":
 			for i in 3: _pending.append([0.25 * i, func(): _area(sk, slot, _pos2(), _fwd(), 1.0 / 3.0)])
 		"meteor":
-			if sk.get("mode", "") != "":     # Owner Holy/Unholy Destruction: kills everything hostile in radius
+			if sk.get("mode", "") != "" or one_shot(hero_id, sk):     # Owner Holy/Unholy Destruction: kills everything hostile in radius
 				var R := float(CombatData.data().TUNING.ult.radius) * CombatRules.UNIT_M
 				for e: Enemy in _living():
-					if e.global_position.distance_to(body.global_position) <= R: e.take_damage(int(e.hp) + 1, body.global_position); damaged_enemy.emit(e, int(e.max_hp), true)
+					if e.global_position.distance_to(body.global_position) <= R:
+						if one_shot(hero_id, sk): e.kill_now(body.global_position)
+						else: e.take_damage(int(e.hp) + 1, body.global_position)
+						damaged_enemy.emit(e, int(e.max_hp), true)
 			else:
 				var c := _pos2() + fwd * 6.0
 				var s2 := sk.duplicate(); s2.range = float(sk.get("radius", 8)); s2.arc = -1

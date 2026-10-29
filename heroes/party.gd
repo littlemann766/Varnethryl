@@ -169,6 +169,7 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_2: combat.use(2)
 			KEY_3: combat.use(3)
 			KEY_4: combat.use(4)
+			KEY_5: combat.use(5)
 			KEY_TAB: next_hero(-1 if e.shift_pressed else 1)
 
 ## voxel companions: measured horizontal speed (m/s), smoothed

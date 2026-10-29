@@ -182,6 +182,7 @@ var sun: DirectionalLight3D
 var interiors: InteriorManager   # res://interiors (walk-in interiors)
 var sky_mat: ProceduralSkyMaterial
 var emissive_mats := []
+var _ext_tier := ""   # test 22: ExteriorDressing tier applied (re-scan only when it changes)
 var hero_fill: OmniLight3D
 var door_lights: Array[OmniLight3D] = []   # door + street lanterns; only the nearest few are on (per tier)
 var _dl_t := 0.0
@@ -262,6 +263,7 @@ func _ready() -> void:
 	if args.has("--altshots"): add_child(load("res://tests/alt_shots.gd").new())   # test 16
 	if args.has("--roofshots"): add_child(load("res://tests/roof_shots.gd").new())   # test 17
 	if args.has("--wbcheck"): add_child(load("res://tests/wb_ground_check.gd").new())   # test 17
+	if args.has("--extshots"): add_child(load("res://tests/ext_shots.gd").new())   # test 22
 	if args.has("--intcheck"): add_child(load("res://tests/interior_pass_check.gd").new())   # test 21
 	InteriorExtraDoors.register(self)   # test 21: Beth's pass - harbour warehouse/shop/cottages, gate towers, lighthouse enterable
 	_register_shell_doors()   # test 22: filler houses/shops + harbour landmarks were hollow shells you could walk into
@@ -490,6 +492,8 @@ func apply_quality() -> void:
 		c.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 	for f in fx_any: f[0].visible = tier >= f[1]; f[0].emitting = tier >= f[1]
 	_swap_buildings()
+	var ext_t := "high" if tier >= 2 else "low"   # test 22: Beth's exterior weathering pass (card2 atlas -> weathering shader)
+	if ext_t != _ext_tier and OS.get_environment("VARN_NO_EXT") == "": _ext_tier = ext_t; ExteriorDressing.apply(self, ext_t)
 	var tr: Array = [[[-1, -1], [0, 40], [40, 0]], [[-1, -1], [0, 70], [70, 0]], [[0, 30], [30, 120], [120, 0]], [[0, 50], [50, 200], [200, 0]]][tier]
 	for t in tree_lods:
 		var r: Array = tr[t[1]]; var n2: GeometryInstance3D = t[0]

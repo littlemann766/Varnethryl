@@ -22,6 +22,7 @@ func setup(m: Node) -> void:
 ## library/farmhouse (and mage/colosseum) report a zero AABB in the game (lazy-loaded shells); interiors now build from
 ## DEF.SIZE (see get_info), so nothing is closed any more. Keep the list for emergencies.
 const CLOSED := []
+const EXIT_DY := 1.5   # test 22: max height of the hero above/below the ground floor for the exit door
 func has_interior(id: String) -> bool: return (DEF.D.has(id) or InteriorExtraDefs.D.has(id)) and not CLOSED.has(id)
 ## Beth's interior pass tier: "high" on phone High/Ultra + desktop, "low" on Low/Medium (set from the graphics menu)
 static var pass_tier := "high"
@@ -60,6 +61,7 @@ func _physics_process(dt: float) -> void:
 		if cooldown > 0: return
 		for b in main.buildings + main.get("extra_doors"):
 			if not has_interior(b.id): continue
+			if (b.node as Node3D).global_position.distance_squared_to(hero.global_position) > 3600.0: continue   # test 22: 200+ shell doors, near ones only
 			var dl: Vector3 = door_local(b); var lp: Vector3 = b.node.global_transform.affine_inverse() * hero.global_position
 			var hv := Vector2(hero.velocity.x, hero.velocity.z)
 			var into: Vector3 = b.node.global_transform.basis * Vector3(0, 0, -1)
@@ -72,7 +74,9 @@ func _physics_process(dt: float) -> void:
 		# leave through the door; also when walking back onto the entry spot (some refit rooms put props by exit_z)
 		var back_z: float = minf(cur.exit_z, cur.spawn.z + 0.6)
 		var hv2: Vector3 = cur.node.global_transform.basis.inverse() * hero.velocity
-		if cooldown <= 0 and absf(lp2.x - cur.spawn.x * float(lp2.z <= cur.exit_z)) < 2.0 and (lp2.z > cur.exit_z or (lp2.z > back_z and hv2.z > 0.5)): exit(); return
+		# test 22 (boss left through the door from the second storey): the exit only works at ground-floor level
+		var on_ground_floor: bool = absf(lp2.y - cur.spawn.y) < EXIT_DY
+		if cooldown <= 0 and on_ground_floor and absf(lp2.x - cur.spawn.x * float(lp2.z <= cur.exit_z)) < 2.0 and (lp2.z > cur.exit_z or (lp2.z > back_z and hv2.z > 0.5)): exit(); return
 		_update_floors(lp2.y)
 		_unstick(hero, dt, lp2)
 

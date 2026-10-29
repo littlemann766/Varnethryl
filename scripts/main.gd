@@ -264,6 +264,7 @@ func _ready() -> void:
 	if args.has("--wbcheck"): add_child(load("res://tests/wb_ground_check.gd").new())   # test 17
 	if args.has("--intcheck"): add_child(load("res://tests/interior_pass_check.gd").new())   # test 21
 	InteriorExtraDoors.register(self)   # test 21: Beth's pass - harbour warehouse/shop/cottages, gate towers, lighthouse enterable
+	_register_shell_doors()   # test 22: filler houses/shops + harbour landmarks were hollow shells you could walk into
 
 # ---------- settings ----------
 func _load_settings() -> void:
@@ -2471,6 +2472,33 @@ func _warm_veiled() -> void:
 	var cl := _veil(); var cam_far := cam.far
 	await _warm_views(); await _warm_interiors()   # test 21
 	cam.far = cam_far; cl.queue_free(); _rewarming = false
+
+## test 22 (boss: "a lot of places look like this on the inside" - bare stone shell, no props/ceiling, dark window bars):
+## the 212 town fillers and the harbour's Harbour Master / Fish Market / Salty Anchor reuse Beth's card2 models, whose
+## -colonly collision keeps the door opening walkable, but they had no door trigger - the hero walked into the hollow
+## exterior shell. Each now leads to the dressed interior of its model (house1-4, bakery, apothecary, smithy, market, inn).
+static var _shell_aabb := {}
+func _shell_entry(model: String, label: String, n: Node3D) -> Dictionary:
+	if not _shell_aabb.has(model):
+		var ab := AABB(); var first := true
+		var v: Node3D = load(_card2_path(model, "_lod1")).instantiate()
+		for mi in _meshes(v, []):
+			var xf := Transform3D(); var q: Node = mi
+			while q != v: xf = (q as Node3D).transform * xf; q = q.get_parent()
+			var a: AABB = xf * mi.get_aabb()
+			if first: ab = a; first = false
+			else: ab = ab.merge(a)
+		v.free(); _shell_aabb[model] = ab
+	return {"id": model, "name": label, "node": n, "aabb": _shell_aabb[model], "rect": Rect2(), "shell": true}
+
+func _register_shell_doors() -> void:
+	if interiors == null: return
+	for f in fillers:
+		if interiors.has_interior(f.model): extra_doors.append(_shell_entry(f.model, String(f.node.get_meta("filler_id", f.id)), f.node))
+	if harbor:
+		for hb in [["house4", "Harbour Master"], ["market", "Fish Market"], ["inn", "The Salty Anchor (Tavern)"]]:
+			var n := harbor.get_node_or_null(NodePath(hb[1]))
+			if n and interiors.has_interior(hb[0]): extra_doors.append(_shell_entry(hb[0], hb[1], n))
 
 ## test 21: Beth's interior pass tier (textures + torch lights). InteriorManager caches built interiors, so a tier
 ## change drops every cached one except the room the hero stands in (that one rebuilds on its next entry).

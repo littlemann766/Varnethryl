@@ -30,13 +30,16 @@ func _run() -> void:
 			var st := InteriorDressing.apply(info, def, args.get("tier", "high"))
 			report.append("%s tris=%d lights=%d windows=%d decals=%d" % [id, st.tris, st.lights, st.windows, st.get("decals", 0)])
 		# hide floors above 0 (as the game does when the hero is on floor 0)
-		for i in info.floors.size(): info.floors[i].node.visible = i == 0
+		var fl := int(args.get("fl", "0"))
+		if fl >= info.floors.size(): info.node.queue_free(); await frames(2); continue
+		for i in info.floors.size(): info.floors[i].node.visible = i == fl
+		var fy: float = info.floors[fl].y
 		var W: float = info.W; var D: float = info.D
 		# A: eye level from the door looking in and up-left (like the boss's phone shot)
-		cam.position = Vector3(W * 0.18, 1.7, D / 2 - 1.2); cam.look_at(Vector3(-W * 0.25, 2.6, -D * 0.2))
+		cam.position = Vector3(W * 0.18, fy + 1.7, D / 2 - 1.2); cam.look_at(Vector3(-W * 0.25, fy + 2.6, -D * 0.2))
 		await frames(6); root.get_viewport().get_texture().get_image().save_jpg("%s/%s_a.jpg" % [out, id], 0.85)
 		# B: along the right wall, looking up toward the ceiling
-		cam.position = Vector3(-W * 0.3, 1.6, D * 0.25); cam.look_at(Vector3(W * 0.45, 3.4, -D * 0.3))
+		cam.position = Vector3(-W * 0.3, fy + 1.6, D * 0.25); cam.look_at(Vector3(W * 0.45, fy + 3.4, -D * 0.3))
 		await frames(6); root.get_viewport().get_texture().get_image().save_jpg("%s/%s_b.jpg" % [out, id], 0.85)
 		# C: low by the stair, looking along it (the boss's v1.93 angle)
 		if info.stairs.size():

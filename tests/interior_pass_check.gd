@@ -16,7 +16,13 @@ func _run() -> void:
 	var mgr = m.interiors; var hero: CharacterBody3D = m.hero
 	var entries := []
 	for b in m.buildings: if mgr.has_interior(b.id): entries.append(b)
-	for b in m.extra_doors: entries.append(b)
+	var shell_seen := {}
+	for b in m.extra_doors:
+		if b.get("shell", false):   # test 22: one filler per model + the harbour landmarks (INT_ALL_SHELLS=1: every filler)
+			var key: String = b.id if String(b.name).begins_with("fill_") else String(b.name)
+			if shell_seen.has(key) and OS.get_environment("INT_ALL_SHELLS") == "": continue
+			shell_seen[key] = true
+		entries.append(b)
 	var lines := []; var fails := 0; var ids := {}; var comp_total := 0
 	for b in entries:
 		if only.size() and not only.has(b.id): continue
@@ -26,6 +32,14 @@ func _run() -> void:
 		var reach: float = maxf(2.6, b.aabb.end.z - dl.z + 1.6) if not b.has("door") else 2.6
 		hero.global_position = n.global_transform * Vector3(dl.x, dl.y + 0.1, dl.z + reach); hero.velocity = Vector3.ZERO; mgr.cooldown = 0.0
 		var entered := false; var t := 0.0
+		if b.get("shell", false) and OS.get_environment("INT_SHOTS") != "":
+			mgr.set_physics_process(false)
+			hero.global_position = n.global_transform * Vector3(dl.x, dl.y + 0.1, dl.z - 2.5); m.yaw = atan2(-into.x, -into.z)
+			for k in 8: await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_jpg("%s/SHELL_%s_%s.jpg" % [OS.get_environment("INT_SHOTS"), b.id, n.name], 0.8)
+			mgr.set_physics_process(true)
+			hero.global_position = n.global_transform * Vector3(dl.x, dl.y + 0.1, dl.z + reach); mgr.cooldown = 0.0
+			await pf(2)
 		while t < 6.0:   # walk in with the game's own controller (joystick forward, camera yaw facing the door)
 			m.yaw = atan2(-into.x, -into.z); m.joy_vec = Vector2(0, -1)
 			await pf(1); t += 1.0 / 60.0
@@ -44,6 +58,13 @@ func _run() -> void:
 		var torches := 0
 		for o in inode.find_children("*", "OmniLight3D", true, false): if (o as OmniLight3D).light_color.is_equal_approx(Color(1.0, 0.7, 0.42)): torches += 1
 		await get_tree().process_frame; await get_tree().process_frame
+		var shot_dir := OS.get_environment("INT_SHOTS")
+		if shot_dir != "":
+			DirAccess.make_dir_recursive_absolute(shot_dir)
+			for k in 2:
+				await get_tree().process_frame; await get_tree().process_frame
+				get_viewport().get_texture().get_image().save_jpg("%s/%s_%s_%d.jpg" % [shot_dir, mgr.cur.get("id", b.id), n.name, k], 0.8)
+				m.yaw += PI
 		var dcs := []
 		for k in 4:   # draw calls per frame, four headings
 			m.yaw += PI / 2; await get_tree().process_frame; await get_tree().process_frame

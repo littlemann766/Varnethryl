@@ -28,7 +28,7 @@ func test_heights() -> void:
 		var h := CharacterRig.measure(r) # skinned rest height of the rig incl. applied scale
 		# test 6: Beth's models carry their size on the armature root -> never rescaled. Our skinned rest-pose
 		# measure includes hair/wings/props, so allow 6% vs Beth's height_m (deviations printed + reported).
-		ok(r.applied_scale == 1.0, "%s loaded at scale 1 (size baked)" % id)
+		ok(r.applied_scale == 1.0 or r.voxel, "%s loaded at scale 1 (size baked; voxel heroes fit to roster height)" % id)
 		ok(near(h, HeroRoster.height(id), 0.06 * HeroRoster.height(id)), "%s rendered height %.3f vs %.3f" % [id, h, HeroRoster.height(id)])
 		print("HEIGHT %-10s %.3f m (target %.3f, scale %.3f)" % [id, h, HeroRoster.height(id), r.applied_scale])
 		r.free()

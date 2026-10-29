@@ -41,6 +41,7 @@ func set_hero(id: String) -> void:
 	if rig: rig.queue_free()
 	rig = CharacterRig.new().setup(HeroRoster.model(id), HeroRoster.height(id))
 	main.hero_vis.add_child(rig)
+	if rig.voxel and HeroRoster.ROOT_SPEED.has(id): rig.set_root_speeds(HeroRoster.ROOT_SPEED[id][0], HeroRoster.ROOT_SPEED[id][1], HeroRoster.speed(id))
 	var h := HeroRoster.height(id)
 	var cs: CollisionShape3D = main.hero.get_child(0)
 	var cap := CapsuleShape3D.new(); cap.radius = clamp(h * 0.17, 0.12, 0.53); cap.height = max(h, cap.radius * 2.0 + 0.01)
@@ -63,6 +64,8 @@ func _set_companions(ids: Array) -> void:
 		var n := Node3D.new(); main.add_child(n)
 		var r := CharacterRig.new().setup(HeroRoster.model(companion_ids[i]), HeroRoster.height(companion_ids[i]))
 		n.add_child(r)
+		var cid: String = companion_ids[i]
+		if r.voxel and HeroRoster.ROOT_SPEED.has(cid): r.set_root_speeds(HeroRoster.ROOT_SPEED[cid][0], HeroRoster.ROOT_SPEED[cid][1], HeroRoster.speed(cid) * 1.15)
 		n.global_position = main.hero.global_position + Vector3(1.0 + i, 0, 1.0)
 		companions.append({"id": companion_ids[i], "node": n, "rig": r, "swing": 0.0})
 
@@ -128,7 +131,9 @@ func _follow(c: Dictionary, gap: float, dt: float) -> void:
 		n.global_position += to.normalized() * min(to.length(), spd * dt * clamp(flat, 0.3, 1.5))
 		n.rotation.y = lerp_angle(n.rotation.y, atan2(-to.x, -to.z), 10 * dt)
 	n.global_position.y = lerp(n.global_position.y, goal.y, min(1.0, 12.0 * dt))
-	(c.rig as CharacterRig).set_locomotion(clamp(flat * 1.2, 0.0, 2.0))
+	var cr := c.rig as CharacterRig
+	if cr.root_walk > 0.0: cr.set_move_mps(_comp_speed(c, n, dt))
+	else: cr.set_locomotion(clamp(flat * 1.2, 0.0, 2.0))
 	_companion_fight(c, dt)
 
 ## CompanionCombat (companions.js): modest damage 95-150, 1.1-1.5 s cadence, only near the hero.
@@ -165,3 +170,11 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_3: combat.use(3)
 			KEY_4: combat.use(4)
 			KEY_TAB: next_hero(-1 if e.shift_pressed else 1)
+
+## voxel companions: measured horizontal speed (m/s), smoothed
+func _comp_speed(c: Dictionary, n: Node3D, dt: float) -> float:
+	var p := n.global_position
+	var lp: Vector3 = c.get("lp", p); c.lp = p
+	var v := Vector2(p.x - lp.x, p.z - lp.z).length() / maxf(dt, 0.001)
+	c.sv = lerpf(float(c.get("sv", 0.0)), v, minf(1.0, dt * 8.0))
+	return c.sv

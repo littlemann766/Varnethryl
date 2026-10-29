@@ -25,7 +25,14 @@ static func height(id: String) -> float:
 	return HERO_M
 
 ## Test 6: Beth's characters (res://characters, LOD1 = ~50% tris / 1024 tex, size baked on the armature root).
-static func model(id: String) -> String: return CharacterRig.char_path(id)
+static func model(id: String) -> String: return VOXEL[id] if VOXEL.has(id) else CharacterRig.char_path(id)
+
+## voxel-heroes (Lucian, varn-core heroes-motion-pass dcfc9b2 handoff/godot/voxel_trial/capes_v1): Owner, Selene and
+## Darius use the voxel models (same skeleton/bone names, mocap idle/walk/run, cape cubes baked into every clip).
+const VOXEL := {"owner": "res://voxel/owner_voxel.glb", "selene": "res://voxel/selene_voxel.glb", "darius": "res://voxel/darius_voxel.glb"}
+## In-place walk/run clips: root speed (m/s) each clip was authored at, so playback is matched to real movement.
+const ROOT_SPEED := {"owner": [1.12, 6.98], "selene": [0.96, 5.55], "darius": [1.02, 5.85],
+	"town_guard": [1.04, 6.11], "holyknight_villain": [1.19, 7.10]}
 
 static func display_name(id: String) -> String: return id.capitalize()
 

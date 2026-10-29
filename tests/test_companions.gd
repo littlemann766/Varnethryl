@@ -31,7 +31,7 @@ func _run() -> void:
 			var want: float = float(idx[c.id].height_m)
 			var h: float = CharacterRig.measure(r) * r.global_transform.basis.get_scale().y
 			ok(absf(h - want) <= 0.06 * want, "%s in-game height %.3f m vs index %.3f m" % [c.id, h, want])
-			ok(r.applied_scale == 1.0 and is_equal_approx(c.node.global_transform.basis.get_scale().y, 1.0), "%s: no extra scale on top of Beth's armature root" % c.id)
+			ok((r.applied_scale == 1.0 or r.voxel) and is_equal_approx(c.node.global_transform.basis.get_scale().y, 1.0), "%s: no extra scale on top of Beth's armature root" % c.id)
 		# walk 3 s, stop 1.5 s, then check follow positions
 		main.joy_vec = Vector2(0, -1)
 		for i in 180: await physics_frame

@@ -14,6 +14,8 @@ const TYPES := {
 	"titan": {"model": "res://characters/ashentitan_lod1.glb", "height": 6.0 * HERO_M, "data": "titan", "patterns": "titan", "r": 3.2},
 	"wolf": {"model": "res://characters/wolf_lod1.glb", "height": 0.0, "data": "wolf", "patterns": "", "r": 0.6},
 	"titan_volcano": {"model": "res://characters/ashentitan_volcano_glow_lod1.glb", "height": 0.0, "data": "titan_volcano", "patterns": "", "r": 5.5},
+	# voxel-heroes: Lucian's holyknight_villain_voxel (varn-core dcfc9b2 capes_v1), a raider-class bad guy
+	"holyknight_villain": {"model": "res://voxel/holyknight_villain_voxel.glb", "height": HERO_M, "data": "raider", "patterns": "", "r": 0.6},
 	"stonetroll": {"model": "res://characters/stonetroll_lod1.glb", "height": 3.0 * HERO_M, "data": "frosttroll", "patterns": "", "r": 1.6},
 }
 
@@ -48,6 +50,7 @@ func setup(tid: String, pos: Vector3, ground: Callable) -> Enemy:
 	position = pos; home = pos
 	rig = CharacterRig.new().setup(T.model, T.height)
 	add_child(rig)
+	if rig.voxel and HeroRoster.ROOT_SPEED.has(tid): rig.set_root_speeds(HeroRoster.ROOT_SPEED[tid][0], HeroRoster.ROOT_SPEED[tid][1], 4.0)
 	aggro_m = float(def.aggro) * CombatRules.UNIT_M
 	leash_m = aggro_m * 2.0
 	speed_mps = float(def.speed) * CombatRules.UNIT_M * 0.6
@@ -134,7 +137,8 @@ func ai_step(dt: float, to: Vector3, d: float) -> void:
 			if h.length() < 1.6: hp = max_hp; phase = 1; pat_i = 0; set_state("idle")
 			else: position += h.normalized() * speed_mps * dt; moving = 1.0; _face(h.normalized(), dt)
 	if height_fn.is_valid(): position.y = height_fn.call(position.x, position.z)
-	rig.set_locomotion(moving)
+	if rig.root_walk > 0.0: rig.set_move_mps(moving * speed_mps * (1.25 if phase == 2 and state == "chase" else 1.0))
+	else: rig.set_locomotion(moving)
 
 func _face(dir: Vector3, dt: float) -> void:
 	var yaw := atan2(-dir.x, -dir.z)

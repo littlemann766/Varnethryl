@@ -18,6 +18,11 @@ var has_hit := false
 var _lunge := 0.0
 var _flinch := 0.0
 var _atk_i := 0
+var voxel := false
+## voxel-heroes: authored root speeds of the in-place walk/run clips (m/s); 0 = old ratio behaviour
+var root_walk := 0.0
+var root_run := 0.0
+var game_run := 6.0     # the game's full move speed for this character (m/s)
 
 const LOOPS := ["idle", "walk", "run", "trot", "hover", "fly", "glide"]
 
@@ -48,7 +53,10 @@ func setup(path: String, height_m: float) -> CharacterRig:
 		target_height = measured_height
 	model.scale = Vector3.ONE * applied_scale
 	anim_player = _find_player(model)
-	if anim_player:
+	voxel = path.begins_with("res://voxel/")
+	if anim_player and voxel:   # voxel-heroes: capes are cube bones baked per clip -> no spring cloth / cape reshape
+		_build_tree()
+	elif anim_player:
 		_alias_clips(path)
 		if path.begins_with("res://characters/"): _strip_root_scale()
 		_add_cloth()
@@ -170,7 +178,8 @@ func _build_tree() -> void:
 	clips = anim_player.get_animation_list()
 	for c in clips:
 		var a := anim_player.get_animation(c)
-		a.loop_mode = Animation.LOOP_LINEAR if LOOPS.has(c) else Animation.LOOP_NONE
+		a.loop_mode = Animation.LOOP_LINEAR if (LOOPS.has(c) or (voxel and c.begins_with("fly_"))) else Animation.LOOP_NONE
+	if voxel: has_fly_clips = FLY_CLIPS.all(func(f): return clips.has(f))
 	has_attack = clips.has("attack")
 	has_hit = clips.has("hit")
 	var bt := AnimationNodeBlendTree.new()
@@ -180,7 +189,8 @@ func _build_tree() -> void:
 	for pt in [[idle, 0.0], [walk, 1.0], [run, 2.0]]:
 		var an := AnimationNodeAnimation.new(); an.animation = pt[0]; loco.add_blend_point(an, pt[1], -1, "p%d" % int(pt[1]))
 	bt.add_node("loco", loco)
-	var src := "loco"
+	var lts := AnimationNodeTimeScale.new(); bt.add_node("loco_ts", lts); bt.connect_node("loco_ts", 0, "loco")
+	var src := "loco_ts"
 	if has_fly_clips:   # HANDOFF blend tips: BlendSpace2D (x turn: bank_L/forward/bank_R, y speed: hover/forward/fast) -> Blend3 vertical -> Blend2 with ground loco
 		var fs := AnimationNodeBlendSpace2D.new(); fs.min_space = Vector2(-1, 0); fs.max_space = Vector2(1, 2)
 		for pt in [["fly_hover", Vector2(0, 0)], ["fly_forward", Vector2(0, 1)], ["fly_fast", Vector2(0, 2)], ["fly_bank_L", Vector2(-1, 1)], ["fly_bank_R", Vector2(1, 1)], ["fly_bank_L", Vector2(-1, 2)], ["fly_bank_R", Vector2(1, 2)]]:
@@ -191,7 +201,7 @@ func _build_tree() -> void:
 		var up := AnimationNodeAnimation.new(); up.animation = "fly_ascend"; bt.add_node("fly_up", up)
 		bt.connect_node("flyvert", 0, "fly_down"); bt.connect_node("flyvert", 1, "flyspace"); bt.connect_node("flyvert", 2, "fly_up")
 		var fm := AnimationNodeBlend2.new(); bt.add_node("flymix", fm)
-		bt.connect_node("flymix", 0, "loco"); bt.connect_node("flymix", 1, "flyvert")
+		bt.connect_node("flymix", 0, "loco_ts"); bt.connect_node("flymix", 1, "flyvert")
 		src = "flymix"
 	var atk_anim := AnimationNodeAnimation.new(); atk_anim.animation = _clip(["attack", "idle"])
 	bt.add_node("atk_anim", atk_anim)
@@ -218,11 +228,30 @@ func _build_tree() -> void:
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
 	tree.active = true
 	tree.set("parameters/atk_speed/scale", 1.6)
+	tree.set("parameters/loco_ts/scale", 1.0)
 
 ## speed_ratio: 0 idle, 1 walk, 2 run
 func set_locomotion(speed_ratio: float) -> void:
 	if fly_on: speed_ratio = 0.0   # test 16: never walk/run on air; flight pose rides on the idle clip
+	if root_walk > 0.0 and not fly_on: set_move_mps(clampf(speed_ratio, 0.0, 2.0) * 0.5 * game_run); return
 	if tree: tree.set("parameters/loco/blend_position", clamp(speed_ratio, 0.0, 2.0))
+
+## voxel-heroes: drive idle/walk/run from the real ground speed (m/s). Walk plays at 1x up to its root speed,
+## then blends to run; playback = speed / blended clip root speed, so feet don't slide (run >= 0.75x).
+func set_root_speeds(walk: float, run: float, game_full: float) -> void:
+	root_walk = walk; root_run = run; game_run = maxf(game_full, walk + 0.5)
+
+func set_move_mps(v: float) -> void:
+	if tree == null: return
+	var blend := 0.0; var sc := 1.0
+	if fly_on: v = 0.0
+	if v <= root_walk: blend = v / root_walk
+	else:
+		var t := clampf((v - root_walk) / maxf(game_run - root_walk, 0.01), 0.0, 1.0)
+		blend = 1.0 + t
+		sc = clampf(v / lerpf(root_walk, root_run, t), 0.75, 2.0)
+	tree.set("parameters/loco/blend_position", blend)
+	tree.set("parameters/loco_ts/scale", sc)
 
 # ---------- test 16: procedural flying state (hover / forward / bank / climb), smooth blends ----------
 var fly_on := false

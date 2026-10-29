@@ -175,6 +175,7 @@ var joy_knob: Control
 var walk_t := 0.0
 var limbs := []
 var bench := false
+var guards: TownGuards
 var rng := RandomNumberGenerator.new()
 var noise := FastNoiseLite.new()
 var env: Environment
@@ -256,6 +257,7 @@ func _ready() -> void:
 	if not bench: tier = VPrefs.tier()
 	party = load("res://heroes/party.gd").new(); add_child(party); party.setup(self, not bench)
 	interiors = InteriorManager.new(); add_child(interiors); interiors.setup(self)
+	if not bench: guards = TownGuards.new().setup(self, CITY_HALF, GATES); add_child(guards)   # voxel-heroes
 	apply_quality()
 	if not bench and volcano_quest_done(): spawn_world_boss(false)   # test 15: the world boss roams outside the walls only after the volcano quest (story)
 	_hook_ui()
@@ -2552,6 +2554,20 @@ func _warm_interiors() -> void:
 	interiors._env_inside(false); sun.visible = sun_v
 	cam.current = true; wcam.queue_free()
 
+## voxel-heroes: show one of each voxel model (heroes, guard, villain) to a warm camera, normal and faded
+## (camera-occlusion alpha-hash copy), so their skinned materials compile behind the veil, not mid-walk.
+func _warm_voxel() -> void:
+	var wcam := Camera3D.new(); wcam.fov = 70; add_child(wcam)
+	var root := Node3D.new(); add_child(root); root.global_position = hero.global_position + Vector3(0, 200, 0)
+	var paths := HeroRoster.VOXEL.values() + [TownGuards.MODEL, Enemy.TYPES.holyknight_villain.model]
+	for i in paths.size():
+		var r := CharacterRig.new().setup(paths[i], 1.905); root.add_child(r); r.position = Vector3((i - 2) * 1.2, 0, 0)
+	wcam.look_at_from_position(root.global_position + Vector3(0, 1.2, 5.5), root.global_position + Vector3(0, 1.0, 0), Vector3.UP); wcam.current = true
+	await get_tree().process_frame; await get_tree().process_frame
+	_set_fade(root, true)
+	await get_tree().process_frame; await get_tree().process_frame
+	root.queue_free(); cam.current = true; wcam.queue_free()
+
 func _warm_up() -> void:
 	var saved := tier; var saved_t := tod
 	var cl := _veil()
@@ -2563,6 +2579,7 @@ func _warm_up() -> void:
 		tier = q; apply_quality()
 		await _warm_views()
 		await _warm_interiors()   # test 21
+		await _warm_voxel()   # voxel-heroes
 	cam.far = cam_far; tier = saved; _set_time(saved_t); apply_quality(); _apply_time_mode()
 	for l in lamp_lights: _lamp_shadow_on[l[0]] = l[0].shadow_enabled
 	warmed = true

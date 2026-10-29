@@ -29,6 +29,10 @@ def kneeout(W,s,ang):
 def swing(W,s,ang,abd,pin=False):
     W={k:m.copy() for k,m in W.items()}
     if KO[0] and pin: kneeout(W,s,KO[0]*ang/95.0)
+    FI=float(os.environ.get('FI','0'))
+    if FI and pin:
+        th_,sh_,ft_=LEGS[s]; F=W[ft_].translation.copy(); Hx=W['hips'].translation.x
+        t=Vector((Hx+(F.x-Hx)*(1-FI*min(1,ang/95.0)),F.y,F.z)); two_bone(W,th_,sh_,ft_,t,keep_rot=W[ft_].to_3x3())
     ang=ang*float(os.environ.get('HSWF','1')) if pin else ang
     sh,el,ha=ARMS[s]; S=W[sh].translation.copy(); Hd=W[ha].translation.copy()
     sg=1 if s=='L' else -1
@@ -60,7 +64,7 @@ for clip in CL:
     W0=[]; 
     for f in fr: sc.frame_set(f); W0.append(getW())
     PINE[:]=rep.get(clip,{}).get('effectors',[]); hold=HOLDS.get(clip,set()); n=len(fr); loop=clip in('wb_walk','wb_idle')
-    def par(sv,f): return ((float(os.environ.get('HSW','95'))*sv,float(os.environ.get('HAB','0'))*sv,True) if f in hold else (0.0,50*sv,False))
+    def par(sv,f): return ((float(os.environ.get('HSW','95'))*sv,float(os.environ.get('HAB','0'))*sv,True) if f in hold else (0.0,float(os.environ.get('NAB','50'))*sv,False))
     def pose(t,S):
         W=W0[t]
         for s in 'LR':
@@ -95,7 +99,7 @@ for clip in CL:
     for t,f in enumerate(fr):
         W=W0[t]
         for s in 'LR':
-            if A[s][t] or B[s][t]: W=swing(W,s,A[s][t],B[s][t])
+            if A[s][t] or B[s][t]: W=swing(W,s,A[s][t],B[s][t],f in hold)
         r=n_in(W); after+= 1 if (r['L'] or r['R']) else 0
         apply(W,f)
         if f in hold: hts.append({e:round(rmin(W,RG(e))*M2G,3) for e in rep[clip]['effectors']})

@@ -59,7 +59,34 @@ func setup(main: Node) -> TitanQuest:
 	embers = _embers(); add_child(embers); embers.emitting = false
 	for f in m.volc_fx: if f is CPUParticles3D: smokes.append([f, (f as CPUParticles3D).amount])
 	_giver(); _ui()
+	if m.has_method("volcano_quest_done") and m.volcano_quest_done(): apply_aftermath()   # test 24: persists across reloads
 	return self
+
+## test 24 (boss: "the volcano must stay destroyed while the Titan is out"): the quest-complete aftermath, applied
+## instantly from the saved story flag (volcano_done in user://story.cfg). Same end state as _win(): last (most broken)
+## arena stage, calm lava, thin smoke, dimmed lava lights, quest Titan gone, giver retired. Re-applied by
+## main.apply_quality / _set_time via reapply_aftermath(), so tier swaps and day/night can't bring the eruption back.
+## Master has no restore path: nothing un-completes the quest, and defeating the world boss doesn't restore it.
+func apply_aftermath() -> void:
+	state = "won"; stage = 3
+	_show_stage(3)
+	titan.active = false; titan.visible = false; titan.glow_strength = 0.25
+	if bar: bar.visible = false
+	if card: card.visible = false
+	if ring: ring.visible = false
+	if embers: embers.emitting = false
+	if giver: giver.visible = false
+	if qlabel: qlabel.visible = false
+	reapply_aftermath()
+func reapply_aftermath() -> void:
+	if state != "won": return
+	if m.lava_mat(): m.lava_mat().set_shader_parameter("glow", 0.12); m.lava_mat().set_shader_parameter("calm", 1.0)
+	for s in smokes: (s[0] as CPUParticles3D).amount = maxi(2, int(s[1] * 0.3))
+	for l in m.pool_lights: (l as OmniLight3D).light_energy = 0.5
+	for f in m.volc_fx:
+		if f is OmniLight3D and not m.pool_lights.has(f):
+			if not f.has_meta("e0"): f.set_meta("e0", (f as OmniLight3D).light_energy)
+			(f as OmniLight3D).light_energy = float(f.get_meta("e0")) * 0.4
 
 # ---------- arena ----------
 func _load_stage(n: int) -> Dictionary:
@@ -221,7 +248,7 @@ func _win() -> void:
 	if m.lava_mat(): m.lava_mat().set_shader_parameter("glow", 0.12); m.lava_mat().set_shader_parameter("calm", 1.0)
 	for s in smokes: (s[0] as CPUParticles3D).amount = maxi(2, int(s[1] * 0.3))
 	for l in m.pool_lights: (l as OmniLight3D).light_energy = 0.5
-	for f in m.volc_fx: if f is OmniLight3D and not m.pool_lights.has(f): (f as OmniLight3D).light_energy *= 0.4
+	for f in m.volc_fx: if f is OmniLight3D and not m.pool_lights.has(f): f.set_meta("e0", (f as OmniLight3D).light_energy); (f as OmniLight3D).light_energy *= 0.4
 	ring.visible = false
 	create_tween().tween_property(titan, "glow_strength", 0.25, 3.0)   # veins cool as he falls
 	var tw := create_tween(); tw.tween_interval(3.1); tw.tween_property(titan, "position:y", base.y + 2.0, 4.0).set_trans(Tween.TRANS_SINE)

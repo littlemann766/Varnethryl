@@ -94,6 +94,7 @@ func setup(main: Node) -> WorldBoss:
 	name = "WorldBoss"
 	hq = int(m.get("tier")) >= 2
 	_build_route()
+	_pick_stations()
 	body = (load(WB + "titan/ashentitan_worldboss.glb") as PackedScene).instantiate()
 	body.scale = Vector3.ONE * SCALE
 	add_child(body)
@@ -139,6 +140,60 @@ func _build_route() -> void:
 			sm.append(pts[(i - 1 + ROUTE_N) % ROUTE_N] * 0.25 + pts[i] * 0.5 + pts[(i + 1) % ROUTE_N] * 0.25)
 		pts = sm
 	for p in pts: waypoints.append(Vector3(p.x, 0, p.y))
+
+## test 24 (boss: "the crystals are hard to get to"): his weak-point crystals are the only crystals in the world and
+## players reach them when he stops at a station (stomp/ritual/kneel). Stations used to be every 8th waypoint wherever
+## that fell (hills/back slopes). Now each station is the loop point nearest an outskirts road, nudged to sit
+## STATION_ROAD_D m beside it (neighbours eased so the loop stays smooth), plus regular fill-ins where the gap is long.
+const STATION_ROAD_D := 14.0
+const STATION_MAX_SHIFT := 60.0
+const STATION_MIN_GAP := 3
+const STATION_MAX_GAP := 64   # fill-ins off: every station must be beside a road (gaps over open hills are fine, he keeps walking)
+var stations: Array[int] = []
+var stations_old: Array[int] = []
+var waypoints_old: Array[Vector3] = []   # before the station nudge (test/report only)
+func _roads() -> Array:
+	var sc: Script = m.get_script() if m else null
+	return sc.get_script_constant_map().get("ROADS", []) if sc else []
+func _road_near(p: Vector2, roads: Array) -> Vector2:
+	var best := Vector2.INF; var bd := 1e9
+	for r in roads:
+		for i in range(1, r.size()):
+			var q := Geometry2D.get_closest_point_to_segment(p, Vector2(r[i-1][0], r[i-1][1]), Vector2(r[i][0], r[i][1]))
+			if q.distance_to(p) < bd: bd = q.distance_to(p); best = q
+	return best
+func _pick_stations() -> void:
+	var n := waypoints.size(); waypoints_old = waypoints.duplicate()
+	for i in n: if i % STATION_EVERY == 0: stations_old.append(i)
+	var roads := _roads()
+	if roads.is_empty(): stations = stations_old.duplicate(); return
+	var d: Array[float] = []
+	for w in waypoints: var p := Vector2(w.x, w.z); d.append(p.distance_to(_road_near(p, roads)))
+	var cand := range(n).filter(func(i): return d[i] < STATION_MAX_SHIFT + STATION_ROAD_D and d[i] <= d[(i - 1 + n) % n] and d[i] <= d[(i + 1) % n])
+	cand.sort_custom(func(a, b): return d[a] < d[b])
+	var gap := func(a: int, b: int) -> int: return mini(absi(a - b), n - absi(a - b))
+	for c in cand:
+		if stations.all(func(s): return gap.call(s, c) >= STATION_MIN_GAP): stations.append(c)
+	stations.sort()
+	var fill := true
+	while fill:
+		fill = false
+		for k in stations.size():
+			var a := stations[k]; var b := stations[(k + 1) % stations.size()] + (n if k == stations.size() - 1 else 0)
+			if b - a > STATION_MAX_GAP: stations.append(((a + b) / 2) % n); stations.sort(); fill = true; break
+	if stations.is_empty(): stations = stations_old.duplicate()
+	for s in stations:   # nudge beside the road
+		var p := Vector2(waypoints[s].x, waypoints[s].z); var q := _road_near(p, roads)
+		var dd := p.distance_to(q)
+		if dd <= STATION_ROAD_D or dd - STATION_ROAD_D > STATION_MAX_SHIFT: continue
+		var np := q + (p - q).normalized() * STATION_ROAD_D
+		if maxf(absf(np.x), absf(np.y)) < 300.0 or np.x < WEST_LIMIT: continue
+		var sh := np - p
+		for o: int in [-2, -1, 0, 1, 2]:
+			var j := (s + o + n) % n
+			if o != 0 and stations.has(j): continue
+			var k: float = [0.25, 0.6, 1.0, 0.6, 0.25][o + 2]
+			waypoints[j] += Vector3(sh.x, 0, sh.y) * k
 
 const GLOW_IDLE := 4.5
 const GLOW_CAST := 7.5
@@ -466,7 +521,7 @@ func _walk(dt: float) -> void:
 	# and a waypoint also counts as reached once it is behind him (passed), so he can never orbit one.
 	var fwd0 := _fwd()
 	if flat.length() < ARRIVE_R or (flat.length() < PASS_R and fwd0.dot(flat) < 0.0):
-		var station := wp % STATION_EVERY == 0
+		var station := stations.has(wp)
 		wp = (wp + 1) % waypoints.size()
 		if station: _set_state("arrive"); return
 		tgt = waypoints[wp]; flat = Vector3(tgt.x - position.x, 0, tgt.z - position.z)

@@ -265,6 +265,7 @@ func _ready() -> void:
 	if args.has("--altshots"): add_child(load("res://tests/alt_shots.gd").new())   # test 16
 	if args.has("--roofshots"): add_child(load("res://tests/roof_shots.gd").new())   # test 17
 	if args.has("--wbcheck"): add_child(load("res://tests/wb_ground_check.gd").new())   # test 17
+	if args.has("--crystalcheck"): add_child(load("res://tests/crystal_reach_test.gd").new())   # test 24
 	if args.has("--bouldercheck"): add_child(load("res://tests/boulder_check.gd").new())   # test 23
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
 	if args.has("--extshots"): add_child(load("res://tests/ext_shots.gd").new())   # test 22
@@ -458,6 +459,7 @@ func _set_time(h: float) -> void:
 		if not (tier == 3 and lamp_on): l[0].shadow_enabled = false
 	for f in fx_night: f[0].emitting = night and tier >= f[1]; f[0].visible = f[0].emitting
 	for f in fx_day: f[0].emitting = not night and tier >= f[1]; f[0].visible = f[0].emitting
+	if titan_quest and titan_quest.has_method("reapply_aftermath"): titan_quest.reapply_aftermath()   # test 24
 
 var _rs_atlas := -1
 var _rs_soft := -1
@@ -466,6 +468,7 @@ func apply_quality() -> void:
 		titan_quest.titan.lava_veins(tier >= 2); titan_quest.titan.lava_stage(maxi(1, titan_quest.stage), false)
 	if not ships.is_empty(): _ships_tier()
 	for f in volc_fx: f.visible = tier > 0   # volcano smoke + lava lights off on Low
+	if titan_quest and titan_quest.has_method("reapply_aftermath"): titan_quest.reapply_aftermath()   # test 24: quest aftermath survives tier swaps
 	# Test 3: Mobile renderer for every tier. Cost drivers kept in check: render scale + FSR,
 	# one shadowed light (the sun) with short distance, no shadowed lamps, LOD/HLOD everywhere.
 	var vp := get_viewport()

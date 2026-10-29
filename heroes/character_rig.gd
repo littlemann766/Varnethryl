@@ -54,6 +54,7 @@ func setup(path: String, height_m: float) -> CharacterRig:
 	model.scale = Vector3.ONE * applied_scale
 	anim_player = _find_player(model)
 	voxel = path.begins_with("res://voxel/")
+	if voxel: _voxel_materials()
 	if anim_player and voxel:   # voxel-heroes: capes are cube bones baked per clip -> no spring cloth / cape reshape
 		_build_tree()
 	elif anim_player:
@@ -519,3 +520,21 @@ func _reshape_cape(sk: Skeleton3D) -> void:
 		if changed > 0:
 			if mi.mesh.resource_path != "": _cape_cache[mi.mesh.resource_path] = am
 			mi.mesh = am
+
+
+## test 25 (boss: voxel Owner a speckled orange/white/black mess on the phone): each cube samples one texel of a
+## 32x32 palette (UV at texel centres), but the glTF sampler is NEAREST_MIPMAP_NEAREST and the palette was imported
+## with mipmaps. On the phone the cubes are a few pixels wide, so every 2x2 pixel quad spans different cubes, the UV
+## derivative jumps and the GPU samples a small mip: averaged palette cells (incl. the unused white rows). The
+## palettes now import without mipmaps (lossless) and the voxel materials are forced to plain NEAREST.
+static var _vox_mats := {}
+func _voxel_materials() -> void:
+	for mi: MeshInstance3D in _meshes(model, []):
+		for si in mi.mesh.get_surface_count():
+			var mat := mi.get_active_material(si)
+			if not (mat is BaseMaterial3D): continue
+			if not _vox_mats.has(mat):
+				var d := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
+				d.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+				_vox_mats[mat] = d
+			mi.set_surface_override_material(si, _vox_mats[mat])

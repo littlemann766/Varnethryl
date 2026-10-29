@@ -15,6 +15,8 @@ var cooldown := 0.0
 var climbing := false
 var sun_mask := 0
 
+signal left_room
+
 func setup(m: Node) -> void:
 	main = m
 	if main.sun: main.sun.light_cull_mask &= ~InteriorKit.LAYER
@@ -57,6 +59,12 @@ func _physics_process(dt: float) -> void:
 	if main == null or main.hero == null: return
 	cooldown -= dt
 	var hero: CharacterBody3D = main.hero
+	# test 25 (boss: "Arcane Academy of Varnethryl" stuck on screen while flying far outside): left the room without
+	# the door (flight, cheat teleport, fall) -> drop the interior state so the HUD and camera know he is outside
+	if not cur.is_empty() and cur.has("node") and is_instance_valid(cur.node):
+		var lpx: Vector3 = (cur.node as Node3D).global_transform.affine_inverse() * hero.global_position
+		var half := maxf(float(cur.get("W", 20.0)), float(cur.get("D", 20.0))) * 0.5 + 8.0
+		if absf(lpx.x) > half or absf(lpx.z) > half or lpx.y > 40.0 or lpx.y < -15.0: left_room.emit(); cur = {}; cur_bld = {}
 	if cur.is_empty():
 		if cooldown > 0: return
 		for b in main.buildings + main.get("extra_doors"):
@@ -104,6 +112,7 @@ func _unstick(hero: CharacterBody3D, dt: float, lp: Vector3) -> void:
 	hero.global_position = cur.node.to_global(best + Vector3(0, 0.1, 0)); hero.velocity = Vector3.ZERO; unsticks += 1
 
 func enter(b: Dictionary) -> void:
+	if main.has_method("hide_where"): main.hide_where()   # test 25
 	cur_bld = b; cur = get_info(b.id, b.aabb.size)
 	_teleport(cur.node.to_global(cur.spawn), cur.node.global_rotation.y)
 	if main.sun: main.sun.visible = false
@@ -111,6 +120,7 @@ func enter(b: Dictionary) -> void:
 	cooldown = 0.8
 
 func exit() -> void:
+	if main.has_method("hide_where"): main.hide_where()   # test 25
 	var b := cur_bld; cur = {}; cur_bld = {}
 	var dl: Vector3 = door_local(b)
 	var out: Vector3 = b.node.global_transform * Vector3(dl.x, 0, maxf(dl.z + 2.0, b.aabb.end.z + 1.0))

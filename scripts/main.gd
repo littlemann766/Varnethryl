@@ -269,6 +269,8 @@ func _ready() -> void:
 	if args.has("--wbcheck"): add_child(load("res://tests/wb_ground_check.gd").new())   # test 17
 	if args.has("--crystalcheck"): add_child(load("res://tests/crystal_reach_test.gd").new())   # test 24
 	if args.has("--bouldercheck"): add_child(load("res://tests/boulder_check.gd").new())   # test 23
+	if args.has("--whereshots"): add_child(load("res://tests/where_shots.gd").new())   # test 25
+	if args.has("--voxclose"): add_child(load("res://tests/voxel_close.gd").new())   # test 25
 	if args.has("--voxshots"): add_child(load("res://tests/voxel_shots.gd").new())   # voxel-heroes
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
 	if args.has("--extshots"): add_child(load("res://tests/ext_shots.gd").new())   # test 22
@@ -1671,7 +1673,7 @@ func _process(dt: float) -> void:
 	lamp_shadow_t -= dt
 	if lamp_shadow_t <= 0.0: lamp_shadow_t = 0.5; _update_lamp_shadows()
 	_net_tick(dt)
-	where_label.text = inside
+	_where_update(inside, dt)
 	ft_acc += dt; ft_n += 1; ft_max = max(ft_max, dt)
 	if ft_acc >= 0.5:
 		ft_txt = "%.1f ms avg / %.1f ms worst" % [ft_acc / ft_n * 1000.0, ft_max * 1000.0]
@@ -1679,6 +1681,23 @@ func _process(dt: float) -> void:
 	hud_label.visible = bool(VPrefs.prefs.get("showFps", false)) or bench_running
 	hud_label.text = "test %s | %s | FPS %d | %s | dc %d | %dk tris | %02d:%02d" % [VERSION, TIERS[tier], Engine.get_frames_per_second(), ft_txt,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000), int(tod), int(fmod(tod, 1.0) * 60)]
+
+## test 25 (boss: the Arcane Academy title stayed up while he flew far outside): a place/interior title shows when
+## the hero arrives somewhere new and hides after WHERE_SECS, on leaving, on any door or teleport, and while flying.
+const WHERE_SECS := 4.0
+var _where_name := ""
+var _where_t := 0.0
+func _where_update(inside: String, dt: float) -> void:
+	if flight or flying_now(): inside = ""
+	if inside != _where_name:
+		_where_name = inside; _where_t = WHERE_SECS if inside != "" else 0.0
+	_where_t = maxf(0.0, _where_t - dt)
+	where_label.text = _where_name
+	where_label.visible = _where_t > 0.0 and _where_name != ""
+
+func hide_where() -> void:
+	_where_t = 0.0
+	if where_label: where_label.visible = false
 
 # ---------- in-app benchmark: 10 s fly-through per tier ----------
 const FLY := [Vector3(-6, 0, 30), Vector3(0, 0, 44), Vector3(-20, 0, 60), Vector3(0, 0, 120), Vector3(0, 0, 175), Vector3(-30, 0, 90), Vector3(-60, 0, 10), Vector3(-6, 0, 30)]
@@ -2334,6 +2353,7 @@ func _hook_ui() -> void:
 	_build_minimap()
 
 func _teleport(p: Vector3, yw: float) -> void:
+	hide_where()   # test 25
 	hero.position = Vector3(p.x, height(p.x, p.z) + 0.2, p.z); hero.velocity = Vector3.ZERO
 	yaw = yw; hero_vis.rotation.y = yw; pip.position = hero.position + Vector3(1, 0, 1)
 	if party and party.rig and party.rig.cloth: party.rig.cloth.call_deferred("reset")   # no cape fling on teleport
@@ -2615,6 +2635,9 @@ func _occluders() -> Array:
 	if party:
 		for c in party.companions: out.append([c.node, c.rig, 0.45])
 		for e in party.director.living(): out.append([e, e.rig, float(e.radius)])
+	if guards:   # test 25: a gate guard right behind the hero filled the boss's screen; fade it like companions
+		for g in guards.guards:
+			if (g.node as Node3D).visible: out.append([g.node, g.rig, 0.5])
 	for id in remotes:
 		var rp = remotes[id]
 		if is_instance_valid(rp) and rp.rig: out.append([rp, rp.rig, 0.5])

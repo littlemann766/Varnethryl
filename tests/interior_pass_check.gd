@@ -14,7 +14,6 @@ func _run() -> void:
 		m.tier = int(OS.get_environment("INT_TIER")); m.apply_quality(); await m._warm_views(); await m._warm_interiors()
 	var only: Array = OS.get_environment("INT_ONLY").split(",", false)
 	var mgr = m.interiors; var hero: CharacterBody3D = m.hero
-	hero.set_physics_process(false); hero.set_process(false)
 	var entries := []
 	for b in m.buildings: if mgr.has_interior(b.id): entries.append(b)
 	for b in m.extra_doors: entries.append(b)
@@ -26,24 +25,29 @@ func _run() -> void:
 		var into: Vector3 = n.global_transform.basis * Vector3(0, 0, -1)
 		var reach: float = maxf(2.6, b.aabb.end.z - dl.z + 1.6) if not b.has("door") else 2.6
 		hero.global_position = n.global_transform * Vector3(dl.x, dl.y + 0.1, dl.z + reach); hero.velocity = Vector3.ZERO; mgr.cooldown = 0.0
-		var pc0: Array = m._pc()
 		var entered := false; var t := 0.0
-		while t < 6.0:
-			hero.velocity = Vector3(into.x * 3.0, hero.velocity.y - 9.8 / 60.0, into.z * 3.0)
-			if hero.is_on_floor(): hero.velocity.y = 0
-			hero.move_and_slide(); await pf(1); t += 1.0 / 60.0
+		while t < 6.0:   # walk in with the game's own controller (joystick forward, camera yaw facing the door)
+			m.yaw = atan2(-into.x, -into.z); m.joy_vec = Vector2(0, -1)
+			await pf(1); t += 1.0 / 60.0
 			if mgr.active(): entered = true; break
-		var res := "%s @ %s: " % [b.id, n.name]
+		m.joy_vec = Vector2.ZERO
+		var pc0: Array = m._pc()   # compiles from the moment the room is entered
+		var res := "%s @ %s: " % [mgr.cur.get("id", b.id) if mgr.active() else b.id, n.name]
 		if not entered:
 			fails += 1; lines.append(res + "FAIL never entered (hero at %s, door %s)" % [n.to_local(hero.global_position), dl]); continue
-		for k in 40:
-			hero.velocity = Vector3(0, hero.velocity.y - 9.8 / 60.0, 0); hero.move_and_slide(); await pf(1)
+		await pf(40)
+		for k in 6:   # look around the room: four headings + up at the ceiling
+			m.yaw += PI / 2; await get_tree().process_frame
 		var inode: Node3D = mgr.cur.node
 		var ceil_n := inode.find_children("PassCeiling*", "", true, false).size()
 		var dress_n := inode.find_children("PassDressing*", "", true, false).size()
 		var torches := 0
 		for o in inode.find_children("*", "OmniLight3D", true, false): if (o as OmniLight3D).light_color.is_equal_approx(Color(1.0, 0.7, 0.42)): torches += 1
 		await get_tree().process_frame; await get_tree().process_frame
+		var dcs := []
+		for k in 4:   # draw calls per frame, four headings
+			m.yaw += PI / 2; await get_tree().process_frame; await get_tree().process_frame
+			dcs.append(int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)))
 		var pc1: Array = m._pc(); var comp: int = int(pc1[0] - pc0[0])
 		comp_total += comp
 		var on_floor := hero.is_on_floor()
@@ -51,13 +55,15 @@ func _run() -> void:
 		var outv: Vector3 = inode.global_transform.basis * Vector3(0, 0, 1)
 		var exited := false; t = 0.0
 		while t < 5.0:
-			hero.velocity = Vector3(outv.x * 3.0, hero.velocity.y - 9.8 / 60.0, outv.z * 3.0); hero.move_and_slide(); await pf(1); t += 1.0 / 60.0
+			m.yaw = atan2(-outv.x, -outv.z); m.joy_vec = Vector2(0, -1)
+			await pf(1); t += 1.0 / 60.0
 			if not mgr.active(): exited = true; break
+		m.joy_vec = Vector2.ZERO
 		await pf(3)
 		var stuck := hero.test_move(hero.global_transform, Vector3(0, 0.01, 0)) and hero.test_move(hero.global_transform, Vector3(0.3, 0, 0)) and hero.test_move(hero.global_transform, Vector3(-0.3, 0, 0))
 		var ok := on_floor and exited and not stuck and ceil_n > 0 and dress_n > 0
 		if not ok: fails += 1
-		lines.append(res + ("PASS" if ok else "FAIL") + " floor=%s exited=%s free_outside=%s ceilings=%d dressing=%d torches=%d draw_compiles=%d" % [on_floor, exited, not stuck, ceil_n, dress_n, torches, comp])
+		lines.append(res + ("PASS" if ok else "FAIL") + " floor=%s exited=%s free_outside=%s ceilings=%d dressing=%d torches=%d draw_compiles=%d draw_calls=%d-%d" % [on_floor, exited, not stuck, ceil_n, dress_n, torches, comp, dcs.min(), dcs.max()])
 		if mgr.active(): mgr.exit()
 		await pf(3)
 	lines.append("INTCHECK tier=%d pass_tier=%s entries=%d ids=%d fails=%d draw_compiles_inside=%d" % [m.tier, InteriorManager.pass_tier, lines.size(), ids.size(), fails, comp_total])

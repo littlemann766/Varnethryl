@@ -249,7 +249,7 @@ func _ready() -> void:
 	if OS.get_environment("VARN_LITE") == "": _foliage()   # test 17: lean world for shared-box checks
 	if not args.has("--wbshots") and not args.has("--altshots") and not args.has("--roofshots") and not args.has("--wbcheck"): _grass()   # shot capture on the shared box: skip grass to save RAM
 	if OS.get_environment("VARN_NO_FLOWERS") == "": TerrainFlowers.build(self)   # test 23: Beth's wildflowers (baked placement)
-	if OS.get_environment("VARN_NO_TFIX2") == "": add_child(FarGrass.new()); TerrainScatter.build(self)   # test 23: far grass + foothill rocks/bushes/pebbles/farm
+	if OS.get_environment("VARN_NO_TFIX2") == "": add_child(FarGrass.new()); TerrainScatter.build(self); _drop_blocking_boulders()   # test 23: far grass + foothill rocks/bushes/pebbles/farm
 	_hero()
 	_fx()
 	_hud()
@@ -265,6 +265,7 @@ func _ready() -> void:
 	if args.has("--altshots"): add_child(load("res://tests/alt_shots.gd").new())   # test 16
 	if args.has("--roofshots"): add_child(load("res://tests/roof_shots.gd").new())   # test 17
 	if args.has("--wbcheck"): add_child(load("res://tests/wb_ground_check.gd").new())   # test 17
+	if args.has("--bouldercheck"): add_child(load("res://tests/boulder_check.gd").new())   # test 23
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
 	if args.has("--extshots"): add_child(load("res://tests/ext_shots.gd").new())   # test 22
 	if args.has("--intcheck"): add_child(load("res://tests/interior_pass_check.gd").new())   # test 21
@@ -2691,3 +2692,14 @@ func _altitude_view() -> void:
 	var k := clampf((y - 150.0) / 350.0, 0.0, 1.0)
 	env.fog_density = float(_alt_base.fog) * lerpf(1.0, 0.03, k)   # thin the fog with height so the ground is not a white sheet
 	env.fog_aerial_perspective = lerpf(float(_alt_base.ap), 0.0, k); env.fog_sky_affect = lerpf(float(_alt_base.sa), 0.0, k)
+
+
+# test 23: boulder colliders found blocking by tests/boulder_check.gd (1 on a placement/blocker zone, 5 on the volcano quest pad).
+const BOULDER_DROP := [Vector2(-873.1,-186.4), Vector2(617.6,-315.9), Vector2(621.2,-325.8), Vector2(213.7,-258.1), Vector2(337.8,-177.6), Vector2(326.2,-198.4)]
+func _drop_blocking_boulders() -> void:
+	var bc: Node = TerrainScatter.root.get_node_or_null("BoulderCollision") if TerrainScatter.root else null
+	if bc == null: return
+	for cs in bc.get_children():
+		var p: Vector3 = (cs as Node3D).global_position if cs.is_inside_tree() else (cs as Node3D).position
+		for d: Vector2 in BOULDER_DROP:
+			if Vector2(p.x, p.z).distance_to(d) < 0.3: cs.queue_free(); break

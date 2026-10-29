@@ -257,7 +257,7 @@ func _ready() -> void:
 	if not bench: tier = VPrefs.tier()
 	party = load("res://heroes/party.gd").new(); add_child(party); party.setup(self, not bench)
 	interiors = InteriorManager.new(); add_child(interiors); interiors.setup(self)
-	if not bench: guards = TownGuards.new().setup(self, CITY_HALF, GATES); add_child(guards)   # voxel-heroes
+	if not bench or OS.get_environment("BENCH_ONLY") == "flywarm": guards = TownGuards.new().setup(self, CITY_HALF, GATES); add_child(guards)   # voxel-heroes
 	apply_quality()
 	if not bench and volcano_quest_done(): spawn_world_boss(false)   # test 15: the world boss roams outside the walls only after the volcano quest (story)
 	_hook_ui()
@@ -1743,7 +1743,7 @@ func _flythrough_all() -> void:
 	for q in order:
 		if OS.get_environment("BENCH_NOAPPLY") == "" or tier != q or order.find(q) == order.rfind(q): tier = q; apply_quality()
 		else: tier = q
-		if OS.get_environment("BENCH_NOWARM") == "": await _warm_views(); await _warm_interiors()   # same per-tier warm-up the game does at load
+		if OS.get_environment("BENCH_NOWARM") == "": await _warm_views(); await _warm_interiors(); await _warm_voxel()   # same per-tier warm-up the game does at load (+ voxel-heroes)
 		Engine.max_fps = fps_cap   # test 20: the cap used to be switched off (Low read avg 111 under "cap 60")
 		bench_label.text = "\n".join(lines) + "\nRunning %s..." % TIERS[q]
 		var r: Array = await _flythrough()

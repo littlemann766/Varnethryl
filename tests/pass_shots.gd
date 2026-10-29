@@ -28,7 +28,7 @@ func _run() -> void:
 		var info := B.build(id, def, sz); root.add_child(info.node)
 		if after:
 			var st := InteriorDressing.apply(info, def, args.get("tier", "high"))
-			report.append("%s tris=%d lights=%d windows=%d bricked=%d" % [id, st.tris, st.lights, st.windows, st.bricked])
+			report.append("%s tris=%d lights=%d windows=%d decals=%d" % [id, st.tris, st.lights, st.windows, st.get("decals", 0)])
 		# hide floors above 0 (as the game does when the hero is on floor 0)
 		for i in info.floors.size(): info.floors[i].node.visible = i == 0
 		var W: float = info.W; var D: float = info.D

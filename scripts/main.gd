@@ -263,6 +263,7 @@ func _ready() -> void:
 	if args.has("--altshots"): add_child(load("res://tests/alt_shots.gd").new())   # test 16
 	if args.has("--roofshots"): add_child(load("res://tests/roof_shots.gd").new())   # test 17
 	if args.has("--wbcheck"): add_child(load("res://tests/wb_ground_check.gd").new())   # test 17
+	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
 	if args.has("--extshots"): add_child(load("res://tests/ext_shots.gd").new())   # test 22
 	if args.has("--intcheck"): add_child(load("res://tests/interior_pass_check.gd").new())   # test 21
 	InteriorExtraDoors.register(self)   # test 21: Beth's pass - harbour warehouse/shop/cottages, gate towers, lighthouse enterable

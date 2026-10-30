@@ -1,0 +1,256 @@
+{
+ "tiles": {
+  "high": [
+   [
+    "coast_tile_x0z0",
+    25570
+   ],
+   [
+    "coast_tile_x0z1",
+    18800
+   ],
+   [
+    "coast_tile_x0z2",
+    25960
+   ],
+   [
+    "coast_tile_x0z3",
+    25562
+   ],
+   [
+    "coast_tile_x1z0",
+    18216
+   ],
+   [
+    "coast_tile_x1z1",
+    16574
+   ],
+   [
+    "coast_tile_x1z2",
+    12776
+   ],
+   [
+    "coast_tile_x1z3",
+    16130
+   ],
+   [
+    "coast_tile_x2z1",
+    6469
+   ],
+   [
+    "coast_tile_x2z2",
+    2969
+   ],
+   [
+    "coast_tile_x2z3",
+    4586
+   ]
+  ],
+  "lod1": [
+   [
+    "coast_tile_x0z0_lod1",
+    11094
+   ],
+   [
+    "coast_tile_x0z1_lod1",
+    6969
+   ],
+   [
+    "coast_tile_x0z2_lod1",
+    10166
+   ],
+   [
+    "coast_tile_x0z3_lod1",
+    11704
+   ],
+   [
+    "coast_tile_x1z0_lod1",
+    8430
+   ],
+   [
+    "coast_tile_x1z1_lod1",
+    9070
+   ],
+   [
+    "coast_tile_x1z2_lod1",
+    5799
+   ],
+   [
+    "coast_tile_x1z3_lod1",
+    9548
+   ],
+   [
+    "coast_tile_x2z1_lod1",
+    2224
+   ],
+   [
+    "coast_tile_x2z2_lod1",
+    1256
+   ],
+   [
+    "coast_tile_x2z3_lod1",
+    1864
+   ]
+  ]
+ },
+ "region": "B Saltglass Coast",
+ "rect": [
+  -3000,
+  -1500,
+  -1200,
+  1700
+ ],
+ "stats": {
+  "coast_terrain": {
+   "tris": 173612,
+   "lod1": 78124,
+   "lod1_pct": 45.0
+  },
+  "coast_terrain_tiles": {
+   "count": 11,
+   "note": "3x4 tiles, 600 x 800 m; frustum + shadow culled per tile"
+  },
+  "coast_saltglass_landing": {
+   "tris": 3824,
+   "lod1": 1912,
+   "lod1_pct": 50.0
+  },
+  "coast_echo_grotto": {
+   "tris": 1932,
+   "lod1": 868,
+   "lod1_pct": 44.9
+  },
+  "coast_glasswyrm_cavern": {
+   "tris": 2092,
+   "lod1": 940,
+   "lod1_pct": 44.9
+  },
+  "coast_smugglers_throat": {
+   "tris": 2608,
+   "lod1": 1172,
+   "lod1_pct": 44.9
+  },
+  "coast_sunken_ward_surface": {
+   "tris": 3796,
+   "lod1": 1708,
+   "lod1_pct": 45.0
+  },
+  "coast_saltglass_crystals": {
+   "tris": 13128,
+   "lod1": 5906,
+   "lod1_pct": 45.0
+  },
+  "coast_offshore_rocks": {
+   "tris": 22272,
+   "lod1": 10022,
+   "lod1_pct": 45.0
+  },
+  "coast_beach_dressing": {
+   "tris": 2108,
+   "lod1": 948,
+   "lod1_pct": 45.0
+  },
+  "coast_storm_wall": {
+   "tris": 320
+  },
+  "coast_fog_bank": {
+   "tris": 320
+  }
+ },
+ "props": {
+  "saltglass_landing": {
+   "pos": [
+    -2115.0,
+    0,
+    -117.0
+   ],
+   "yaw": 1.8970641810918603,
+   "anchor": [
+    -2024.0644626617432,
+    0.0,
+    -147.76896286010742
+   ],
+   "cam": [
+    -1999.0889008453119,
+    30,
+    -148.05828541230258
+   ]
+  },
+  "coast_echo_grotto": {
+   "pos": [
+    -2325.0,
+    0,
+    -294.0
+   ],
+   "yaw": 0.507595441858331,
+   "skiff_only": true,
+   "interior_cell": "echo_grotto_interior (Stage 3 sub-cell)",
+   "cam": [
+    -2266.078524596367,
+    17.2,
+    -278.21203824874624
+   ]
+  },
+  "coast_glasswyrm_cavern": {
+   "pos": [
+    -2301.0,
+    0,
+    402.0
+   ],
+   "yaw": 0.7754879704193164,
+   "skiff_only": true,
+   "interior_cell": "glasswyrm_cavern_interior (Stage 3 sub-cell)",
+   "cam": [
+    -2246.2586195199046,
+    20.799999999999997,
+    444.0045386016017
+   ]
+  },
+  "coast_smugglers_throat": {
+   "pos": [
+    -2415.0,
+    0,
+    1182.0
+   ],
+   "yaw": 2.3555577355728547,
+   "skiff_only": true,
+   "interior_cell": "smugglers_throat_interior (Stage 3 sub-cell)",
+   "cam": [
+    -2388.0,
+    18.4,
+    1135.2346281956402
+   ]
+  },
+  "sunken_ward": {
+   "box": [
+    -1520,
+    150,
+    -1080,
+    650
+   ],
+   "dive_buoy": [
+    -1300,
+    0,
+    300
+   ],
+   "dive_raft": [
+    -1286,
+    0,
+    300
+   ],
+   "ring_radius": 30,
+   "cam": [
+    -1410,
+    24,
+    450
+   ]
+  },
+  "beached_wreck": {
+   "pos": [
+    -2430.0,
+    0,
+    900.0
+   ]
+  }
+ }
+}

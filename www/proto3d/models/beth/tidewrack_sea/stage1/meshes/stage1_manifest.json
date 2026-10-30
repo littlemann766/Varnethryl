@@ -1,0 +1,204 @@
+{
+ "stats": {
+  "arch_islands": {
+   "tris": 73322,
+   "lod1": 32993,
+   "lod1_pct": 45.0
+  },
+  "arch_gullhaven_port": {
+   "tris": 3472,
+   "lod1": 1732,
+   "lod1_pct": 49.9
+  },
+  "arch_lantern_rock": {
+   "tris": 432,
+   "lod1": 194,
+   "lod1_pct": 44.9
+  },
+  "arch_wreck_reef": {
+   "tris": 6360,
+   "lod1": 2860,
+   "lod1_pct": 45.0
+  },
+  "arch_saltwatch_keep": {
+   "tris": 1656,
+   "lod1": 744,
+   "lod1_pct": 44.9
+  },
+  "arch_shore_rocks": {
+   "tris": 11708,
+   "lod1": 5268,
+   "lod1_pct": 45.0
+  },
+  "buoy_route": {
+   "tris": 180,
+   "lod1": 80,
+   "lod1_pct": 44.4
+  },
+  "buoy_skiff": {
+   "tris": 180,
+   "lod1": 80,
+   "lod1_pct": 44.4
+  },
+  "buoy_dive": {
+   "tris": 180,
+   "lod1": 80,
+   "lod1_pct": 44.4
+  },
+  "arch_storm_wall": {
+   "tris": 320
+  },
+  "arch_fog_bank": {
+   "tris": 320
+  },
+  "brinecrown_coil_rest": {
+   "tris": 5526,
+   "lod1": 2486,
+   "lod1_pct": 45.0
+  },
+  "brinecrown_coil_hero": {
+   "tris": 5526
+  },
+  "arch_coil_arena": {
+   "tris": 4396,
+   "lod1": 1978,
+   "lod1_pct": 45.0
+  },
+  "upg_galleon_t1": {
+   "tris": 3100,
+   "lod1": 1394,
+   "lod1_pct": 45.0
+  },
+  "upg_galleon_t2": {
+   "tris": 4174,
+   "lod1": 1878,
+   "lod1_pct": 45.0
+  },
+  "upg_galleon_t3": {
+   "tris": 4428,
+   "lod1": 1992,
+   "lod1_pct": 45.0
+  },
+  "upg_skiff_t1": {
+   "tris": 1740,
+   "lod1": 782,
+   "lod1_pct": 44.9
+  },
+  "upg_skiff_t2": {
+   "tris": 3134,
+   "lod1": 1410,
+   "lod1_pct": 45.0
+  },
+  "upg_skiff_t3": {
+   "tris": 3308,
+   "lod1": 1488,
+   "lod1_pct": 45.0
+  }
+ },
+ "props": {
+  "gullhaven": {
+   "pos": [
+    -420,
+    0,
+    -380
+   ],
+   "yaw": 0.664346672141238,
+   "anchor": [
+    -321.00505063388334,
+    0,
+    -281.00505063388334
+   ]
+  },
+  "lantern_rock": {
+   "pos": [
+    -45.105245797723605,
+    9.0,
+    -56.4169668796321
+   ],
+   "light_y": 33.0,
+   "cam": [
+    -117.54968276940374,
+    20,
+    -75.82839526232112
+   ]
+  },
+  "wreck_reef": {
+   "pos": [
+    109.43079649003073,
+    0,
+    -444.5134221798073
+   ],
+   "cam": [
+    80.96070152875336,
+    22,
+    -550.7652630716047
+   ],
+   "note": "skiff-only shallows; galleon reef collider ring r=95 m"
+  },
+  "saltwatch_keep": {
+   "cam": [
+    -538.851318359375,
+    12,
+    477.4233093261719
+   ],
+   "pos": [
+    -556.6700439453125,
+    -3.270312547683716,
+    406.40179443359375
+   ],
+   "dive_bell": [
+    -567.1356201171875,
+    3.0,
+    449.1390380859375
+   ],
+   "dive_buoy": [
+    -1300,
+    0,
+    300
+   ]
+  },
+  "coil_arena": {
+   "pos": [
+    -241.92533317427734,
+    0,
+    777.1345131623848
+   ],
+   "radius": 95,
+   "cam": [
+    -260.0426663314538,
+    18,
+    844.7493210026196
+   ]
+  }
+ },
+ "ships": {
+  "galleon": {
+   "masts": [
+    [
+     -7.0,
+     13.27
+    ],
+    [
+     -0.8,
+     13.5
+    ],
+    [
+     5.3,
+     13.59
+    ]
+   ],
+   "bow_z": 15.0,
+   "deck_y": 2.78
+  },
+  "skiff": {
+   "masts": [
+    [
+     -0.04,
+     5.03
+    ]
+   ],
+   "bow_z": 3.62,
+   "deck_y": 1.61
+  }
+ }
+}

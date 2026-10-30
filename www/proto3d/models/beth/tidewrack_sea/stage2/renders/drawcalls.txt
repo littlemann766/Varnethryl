@@ -1,0 +1,12 @@
+C0_coast_overview_High dc=36 prims=410951
+C1_saltglass_landing_High dc=33 prims=474091
+C2_cliff_coast_sailing_High dc=39 prims=476882
+C3_echo_grotto_High dc=35 prims=471019
+C4_glasswyrm_cavern_High dc=34 prims=529722
+C5_smugglers_throat_High dc=30 prims=482658
+C6_sunken_ward_dive_High dc=41 prims=725238
+C7_beach_cove_wreck_High dc=36 prims=612042
+C8_seam_to_archipelago_High dc=22 prims=685060
+C9_storm_wall_border_High dc=18 prims=268982
+C0_coast_overview_Low dc=36 prims=163808
+C1_saltglass_landing_Low dc=17 prims=91461

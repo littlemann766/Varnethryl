@@ -31,7 +31,8 @@ func setup(p: Party) -> void:
 
 func _process(_dt: float) -> void:
 	if party == null or party.combat.kit.is_empty(): return
-	var show: bool = not (VUI.title and VUI.title.visible) and VUI.hud.visible and bool(VPrefs.prefs.get("combat", true))
+	var sc := get_tree().current_scene; var sea = sc.get("sea") if sc else null
+	var show: bool = not (VUI.title and VUI.title.visible) and VUI.hud.visible and bool(VPrefs.prefs.get("combat", true)) and not (sea != null and sea.active)   # test 32: no combat buttons while sailing
 	if visible != show: visible = show
 	if not show: return
 	var c := party.combat

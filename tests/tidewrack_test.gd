@@ -41,6 +41,9 @@ func _run() -> void:
 	sea.ui._cb.call(); await frames(60)
 	ok(sea.active and sea.ship != null and sea.ship.kind == "galleon", "boarded the galleon in the Tidewrack Sea")
 	ok(await until(func(): return sea.regions.get("A", {}).get("state", 0) == 2), "region A streamed in (threaded load)")
+	await frames(3)
+	ok(not m.party.hud.visible and not m.fly_controls.visible, "combat + jump/fly buttons hidden while sailing")
+	if m.world_boss: m.world_boss._warn("3 SECONDS! Break his crystals!"); await frames(2); ok(not m.world_boss.ui.visible and not m.world_boss.warn.visible, "mainland world-boss popups suppressed at sea")
 	await shot("A_start")
 	# --- water: per-region shader + shore rect shifted to world coords
 	var wm: ShaderMaterial = sea.water.material_override
@@ -79,7 +82,7 @@ func _run() -> void:
 	# --- Gullhaven: dock, chart, shipwright
 	var an := sea._v3(sea.M.s1.props.gullhaven.anchor); sea.ship.position = an; sea.ship.speed = 0.0; sea.ship.throttle = 0.0; sea.drive(Vector2.ZERO, 1.0 / 60.0)
 	ok(sea.save.discovered_ports.has("gullhaven") and sea.ui.prompt.text == "Shipwright", "docking at Gullhaven charts it + Shipwright prompt")
-	VS = get_tree().root.get_node("VSave").state; VS.gold = 100; ok(sea.upgrade("galleon") != "", "upgrade refused without gold/Driftwood")
+	VS = get_tree().root.get_node("VSave").state; sea.save.galleon_tier = 0; sea.ship.set_tier(0); VS.gold = 100; ok(sea.upgrade("galleon") != "", "upgrade refused without gold/Driftwood")
 	VS.gold = 5000; sea.save.items = {"Driftwood": 10}
 	var ue := sea.upgrade("galleon"); print("TW INFO upgrade: '%s' tier=%d" % [ue, sea.ship.tier])
 	ok(ue == "" and sea.ship.tier == 1 and sea.ship.addon != null, "Patched Canvas (T1) add-on fitted")
@@ -141,5 +144,5 @@ func _run() -> void:
 	ok(sea.chart_travel("tidewrack") == "", "Harbour Charts: Tidewrack pier")
 	await frames(90)
 	ok(not sea.active and m.hero.global_position.distance_to(m._galleon_pier()[0]) < 3.0, "home at the Tidewrack pier (hero %s, pier %s)" % [m.hero.global_position, m._galleon_pier()[0]])
-	VS = get_tree().root.get_node("VSave").state; VS.gold = gold0; sea.save.galleon_tier = 0; sea.save.items = {}; sea.save.discovered_ports = ["tidewrack"]
+	VS = get_tree().root.get_node("VSave").state; VS.gold = gold0; sea.save.galleon_tier = 0; sea.save.items = {}; sea.save.discovered_ports = ["tidewrack"]; sea.write_save()
 	print("TW DONE pass=%d fail=%d" % [npass, nfail]); get_tree().quit(0 if nfail == 0 else 1)

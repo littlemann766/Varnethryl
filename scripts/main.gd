@@ -1685,7 +1685,7 @@ func _physics_process(dt: float) -> void:
 var _tacc := 0.0
 func _process(dt: float) -> void:
 	for lm in lava_mats: lm.uv1_offset.x = fmod(lm.uv1_offset.x + dt * 0.02, 1.0); lm.uv1_offset.y = fmod(lm.uv1_offset.y + dt * 0.013, 1.0)
-	if fly_controls: fly_controls.visible = VUI.hud != null and VUI.hud.visible and not (VUI.title and VUI.title.visible)
+	if fly_controls: fly_controls.visible = VUI.hud != null and VUI.hud.visible and not (VUI.title and VUI.title.visible) and not (sea and sea.active)
 	if Input.is_key_pressed(KEY_SPACE) and hero and hero.is_on_floor(): request_jump()
 	_bob_ships(dt)
 	if hero == null: return

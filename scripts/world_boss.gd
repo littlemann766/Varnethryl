@@ -432,8 +432,14 @@ func _ui() -> void:
 	warn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; warn.add_theme_font_size_override("font_size", 34)
 	warn.add_theme_color_override("font_color", Color(1, 0.35, 0.1)); warn.add_theme_constant_override("outline_size", 10); warn.visible = false; ui.add_child(warn)
 
+## test 32: no mainland world-boss popups/cast bar while the player is out in the Tidewrack Sea
+func _at_sea() -> bool:
+	var sc := get_tree().current_scene
+	var s = sc.get("sea") if sc else null
+	return s != null and bool(s.active)
 func _warn(t: String) -> void:
 	last_warn = t
+	if _at_sea(): return
 	warn.text = t; warn.visible = true; warn.modulate.a = 1.0
 	var tw := create_tween(); tw.tween_interval(2.0); tw.tween_property(warn, "modulate:a", 0.0, 0.6); tw.tween_callback(func(): warn.visible = false)
 
@@ -483,6 +489,7 @@ func _hero_d() -> float:
 	var h := _hero(); return h.global_position.distance_to(global_position) if h else 1e9
 
 func _process(dt: float) -> void:
+	if ui: ui.visible = not _at_sea()
 	if not visible: return
 	t_state += dt
 	match state:

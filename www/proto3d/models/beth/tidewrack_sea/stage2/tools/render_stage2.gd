@@ -63,8 +63,11 @@ func _run() -> void:
 	for t in man.tiles.high: prop("meshes/" + t[0])
 	for n in ["coast_offshore_rocks", "coast_saltglass_landing", "coast_echo_grotto", "coast_glasswyrm_cavern", "coast_smugglers_throat", "coast_sunken_ward_surface", "coast_saltglass_crystals", "coast_beach_dressing"]: prop("meshes/" + n)
 	prop("s1/arch_islands"); prop("s1/arch_shore_rocks")   # Stage 1 next door: the seam
-	var storm := glb("res://meshes/coast_storm_wall.glb"); var smat := ShaderMaterial.new(); smat.shader = load("res://shaders/storm_wall.gdshader"); _mat_all(storm, smat); root.add_child(storm)
-	var fog := glb("res://meshes/coast_fog_bank.glb"); var fmat := ShaderMaterial.new(); fmat.shader = load("res://shaders/fog_bank.gdshader"); _mat_all(fog, fmat); root.add_child(fog)
+	# storm border v2: soft layered fog + storm sky + choppy dark sea (the old slab wall is gone; the blocker is coast_storm_col.glb, invisible)
+	var storm := Node3D.new(); root.add_child(storm); var fog := Node3D.new(); root.add_child(fog)
+	for pair in [["coast_storm_sea", "storm_sea"], ["coast_storm_sky", "storm_sky"]]:
+		var n := glb("res://meshes/%s.glb" % pair[0]); var m := ShaderMaterial.new(); m.shader = load("res://shaders/%s.gdshader" % pair[1]); _mat_all(n, m); storm.add_child(n)
+	var fl := glb("res://meshes/coast_fog_layers.glb"); var flm := ShaderMaterial.new(); flm.shader = load("res://shaders/fog_layers.gdshader"); _mat_all(fl, flm); fog.add_child(fl)
 	var la: Dictionary = P.saltglass_landing; var an := _v(la.anchor); var lp := _v(la.pos)
 	var gal := ship("galleon", 2, an, float(la.yaw) + PI / 2)
 	var eg: Dictionary = P.coast_echo_grotto; var ep := _v(eg.pos); var ec := _v(eg.cam)
@@ -91,4 +94,7 @@ func _run() -> void:
 		await shot("C8_seam_to_archipelago" + sfx, Vector3(-1180, 55, 640), Vector3(-560, 5, 420), 60)
 		storm.visible = true; fog.visible = true
 		await shot("C9_storm_wall_border" + sfx, Vector3(-1400, 25, 1350), Vector3(-1200, 50, 1700), 65)
+		await shot("C9b_storm_fog_sailing_height" + sfx, Vector3(-1560, 9, 1430), Vector3(-1520, 22, 1800), 62)
+		await shot("C9c_storm_fog_distance" + sfx, Vector3(-1900, 70, 600), Vector3(-1900, 40, 1700), 60)
+		await shot("C9d_storm_fog_inside_bank" + sfx, Vector3(-1750, 8, 1600), Vector3(-1750, 15, 1800), 62)
 	var f := FileAccess.open(out + "/drawcalls.txt", FileAccess.WRITE); f.store_string("\n".join(stats)); f.close(); quit()

@@ -24,3 +24,5 @@ Built by Beth on 2026-10-29. Art-only drop-in for Lucky. No game project files w
 - The galleon upgrade sails now use explicit mast positions (z -7.0 / -0.8 / 5.3), so all 3 masts are covered. Before this, the main mast was missed.
 - The T1 figurehead is now a carved bust with a brass collar. Before, it read like a log.
 - ship_upgrade_contact_sheet.jpg was re-rendered and checked by eye.
+
+- Storm border v2, from Stage 2: arch_fog_layers / arch_storm_sky / arch_storm_sea / arch_storm_col with shaders fog_layers / storm_sky / storm_sea. These replace arch_storm_wall and arch_fog_bank in-game; the old files are kept only for the old renders. See ../ocean_stage2/README_LUCKY.md.

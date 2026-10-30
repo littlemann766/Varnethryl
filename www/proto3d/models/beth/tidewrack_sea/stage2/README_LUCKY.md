@@ -38,3 +38,19 @@ Art-only drop-in, made by Beth on 2026-10-30. It uses the same conventions as St
 - Skiff launch buoys outside each cave (use Stage 1 `buoy_skiff`), and a cave-entry trigger at each `props.coast_*.pos`.
 - Docking at Saltglass Landing (`props.saltglass_landing.anchor`), which also adds it to Harbour Charts fast travel.
 - Dive trigger at the Sunken Ward ring.
+
+## Storm border v2 (2026-10-30): replaces the slab storm wall and fog bank
+The user said the old wall "looks more like a wave than fog", so it's been replaced. `coast_storm_wall.glb` and `coast_fog_bank.glb` are removed.
+
+| Mesh | Shader | What it does |
+|---|---|---|
+| `coast_fog_layers.glb` | `shaders/fog_layers.gdshader` | 5 stacked soft fog ribbons, 30–170 m inside the border. The layer index is stored in vertex colour R. Tops are ragged with no edge line, the base blends into the sea, and fbm puffs drift. The fog thickens as you approach (full at about 140 m, faint haze beyond about 1100 m) and thins in the last 35 m, so the camera sails into it instead of clipping a card. |
+| `coast_storm_sky.glb` | `storm_sky.gdshader` | Backdrop 220 m outside the border: low heavy cloud that breaks up with height (no top edge), soft rain curtains, and a `flash` uniform for lightning. |
+| `coast_storm_sea.glb` | `storm_sea.gdshader` | Dark choppy water with whitecaps, from 150 m inside the border to 600 m outside. It fades in over its first ~75 m and sits about 1 m above the calm sea, so the two surfaces never interleave. |
+| `coast_storm_col.glb` | (none) | INVISIBLE blocker: 4 thin boxes, 60 m tall, on the same line as the old wall (40 m inset). Use it as a StaticBody collider only and don't render it. |
+
+- **Cost:** 3 draw calls, about 9k tris. All three are alpha/unshaded, with no shadows.
+- **Low tier:** keep the same meshes. If you need to save cost, drop `storm_sky` rain via `rain = 0`.
+- **Unlocking a region:** fade `opacity` on the fog and sky to 0, then free the nodes and the collider.
+- **Region A:** the matching set is `arch_fog_layers`, `arch_storm_sky`, `arch_storm_sea` and `arch_storm_col` in Stage 1 meshes/ (shaders copied there too). They're built by `tools/build_stormfog.py`.
+- **Note for any future ribbons:** glTF export flips V, so these shaders use `1.0 - UV.y`.

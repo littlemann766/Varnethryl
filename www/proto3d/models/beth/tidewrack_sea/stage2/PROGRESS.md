@@ -18,3 +18,4 @@ Made by Beth on 2026-10-30. All test renders were done in /tmp copies, and those
 - Smugglers' Throat and Echo Grotto read more like rocky clefts than caves from far away. They need a bigger dark overhang.
 - The seam view to the Archipelago is mostly open sea, because the A islands are about 600 m away and in fog.
 - Overview cameras are a bit high, so the cliffs read best in the close-ups.
+| Storm border v2: layered soft fog + storm sky + choppy dark sea, invisible collider unchanged; checked at sailing height, at a distance and inside the bank | done |

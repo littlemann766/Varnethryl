@@ -127,6 +127,34 @@ func _resolve(slot: int, sk: Dictionary) -> void:
 	if sk.has("heal") and kind != "heal": hp = min(max_hp, hp + max_hp * float(sk.heal))
 
 ## enemy -> hero (calc.js fallback formula atk*1000/(1000+def), min 12)
+## test 26 (boss: the Titan "needs to do a little bit of damage ... so it doesn't one shot people"): every Ashen Titan
+## attack (world boss slams/waves, the volcano Titan and the 6x Titan's stomps/swats/sweeps) does at most TITAN_HIT of a
+## normal hero's max HP (700), and all Titan hits inside TITAN_WIN seconds together at most TITAN_WIN_CAP, so no combo
+## or overlap can take a full-HP hero down in one go. Owner cheat HP is irrelevant (fixed reference HP).
+const TITAN_HIT := 0.12
+const TITAN_WIN := 5.0
+const TITAN_WIN_CAP := 0.35
+var _titan_log: Array = []   # [time_s, dmg]
+static func titan_ref_hp() -> float: return float(CombatData.data().PLAYER.hp)
+func titan_hit(frac := TITAN_HIT) -> int:
+	if hp <= 0.0: return 0
+	var now := Time.get_ticks_msec() / 1000.0
+	_titan_log = _titan_log.filter(func(e): return now - float(e[0]) < TITAN_WIN)
+	var used_ := 0.0
+	for e in _titan_log: used_ += float(e[1])
+	var h := minf(clampf(frac, 0.0, TITAN_HIT), maxf(0.0, TITAN_WIN_CAP - used_ / titan_ref_hp())) * titan_ref_hp()
+	if reduce_t > 0.0: h *= (1.0 - reduce)
+	h = roundf(h)
+	if h <= 0.0: return 0
+	_titan_log.append([now, h])
+	hp = max(0.0, hp - h)
+	if rig: rig.play_hit()
+	hero_hurt.emit(int(h))
+	if hp <= 0.0:
+		if rig: rig.set_dead(true)
+		_pending.append([float(CombatData.data().PLAYER.respawn), _respawn])
+	return int(h)
+
 func take_hit(atk: float, mult := 1.0) -> int:
 	if hp <= 0.0: return 0
 	var P: Dictionary = CombatData.data().PLAYER

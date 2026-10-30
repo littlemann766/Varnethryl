@@ -710,7 +710,7 @@ func _complete() -> void:
 	var party = m.get("party")
 	if hit and party and party.combat and not bool(m.get("cheat").get("god", false)):
 		var c = party.combat
-		c.hp = maxf(1.0, c.hp - c.max_hp * (0.4 if ritual == "fissure" else 0.5)); c.hero_hurt.emit(int(c.max_hp * 0.4))
+		c.titan_hit(HeroCombat.TITAN_HIT)   # test 26: was 40-50% of max HP per slam/wave
 
 func _end_ritual_fx() -> void:
 	for mi in [crack, strip] + fissures:

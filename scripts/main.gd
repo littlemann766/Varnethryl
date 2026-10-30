@@ -495,8 +495,14 @@ func apply_quality() -> void:
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR   # FSR1 is Forward+-only in 4.7
 	vp.scaling_3d_scale = [0.5, 0.6, 0.7, 1.0][tier]
 	vp.fsr_sharpness = 0.3
-	vp.msaa_3d = Viewport.MSAA_2X if tier == 3 else Viewport.MSAA_DISABLED
-	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED if tier == 3 else Viewport.SCREEN_SPACE_AA_FXAA
+	# test 26 (boss: the voxel skin still looks speckled on the phone): the heroes are 1.8 cm cubes, ~1-2 px each on
+	# screen, rendered at 50-70% 3D scale and then FXAA'd. One sample per pixel lands on a random cube colour (geometric
+	# aliasing -> speckle) and FXAA's edge blend turns every cube edge into noise. Mobile-only: the box's Compatibility
+	# renderer has no FXAA / 3D scaling, so it never showed. Now: no FXAA; MSAA (cheap on tiled phone GPUs) on
+	# Medium+ averages the sub-pixel cubes into their real colours.
+	HeroRoster.lod1 = tier == 0   # test 26: Low uses Beth's voxel LOD1 heroes (next hero load)
+	vp.msaa_3d = [Viewport.MSAA_DISABLED, Viewport.MSAA_2X, Viewport.MSAA_2X, Viewport.MSAA_4X][tier]
+	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
 	env.glow_enabled = tier >= 1
 	env.ssao_enabled = false; env.ssil_enabled = false; env.ssr_enabled = false; env.sdfgi_enabled = false
 	env.volumetric_fog_enabled = false

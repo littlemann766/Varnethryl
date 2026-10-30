@@ -47,11 +47,16 @@ func _wire(e: Enemy, hero: Node3D) -> void:
 func _on_attack(e: Enemy, p: Dictionary) -> void:
 	if e is VolcanoTitan: return       # its damage comes from clip events (aoe)
 	if combat and e.pattern_hits(p if not p.is_empty() else {"shape": "cone", "cos": 0.3}, combat.body.global_position):
-		combat.take_hit(float(e.def.atk), float(p.get("dmg", 1.0)))
+		if _is_titan(e): combat.titan_hit(HeroCombat.TITAN_HIT * clampf(float(p.get("dmg", 1.0)), 0.5, 1.0))   # test 26
+		else: combat.take_hit(float(e.def.atk), float(p.get("dmg", 1.0)))
 
 func _aoe(e: Enemy, c: Vector3, r: float, mult: float) -> void:
 	if combat and Vector2(c.x - combat.body.global_position.x, c.z - combat.body.global_position.z).length() <= r:
-		combat.take_hit(float(e.def.atk), mult)
+		if _is_titan(e): combat.titan_hit(HeroCombat.TITAN_HIT * clampf(mult, 0.5, 1.0))   # test 26
+		else: combat.take_hit(float(e.def.atk), mult)
 
 ## a dormant volcano Titan (hidden in the lava until the quest intro) is not a living foe for cheats/AI
 func living() -> Array: return enemies.filter(func(e): return is_instance_valid(e) and e.alive() and not (e is VolcanoTitan and not e.visible))
+
+## test 26: Ashen Titan variants (6x roaming Titan, volcano Titan) hit for a capped share of HP, never a one-shot
+static func _is_titan(e: Enemy) -> bool: return e is VolcanoTitan or e.type_id in ["titan", "titan_volcano"]

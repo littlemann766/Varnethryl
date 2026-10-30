@@ -536,5 +536,8 @@ func _voxel_materials() -> void:
 			if not _vox_mats.has(mat):
 				var d := (mat as BaseMaterial3D).duplicate() as BaseMaterial3D
 				d.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+				# test 26: no specular glints on the tiny cube faces (Mobile sparkle), hidden back faces culled
+				d.specular_mode = BaseMaterial3D.SPECULAR_DISABLED; d.roughness = 1.0; d.metallic = 0.0
+				d.cull_mode = BaseMaterial3D.CULL_BACK
 				_vox_mats[mat] = d
 			mi.set_surface_override_material(si, _vox_mats[mat])

@@ -25,14 +25,21 @@ static func height(id: String) -> float:
 	return HERO_M
 
 ## Test 6: Beth's characters (res://characters, LOD1 = ~50% tris / 1024 tex, size baked on the armature root).
-static func model(id: String) -> String: return VOXEL[id] if VOXEL.has(id) else CharacterRig.char_path(id)
+static func model(id: String) -> String:
+	if not VOXEL.has(id): return CharacterRig.char_path(id)
+	var lp: String = VOXEL[id].replace(".glb", "_lod1.glb")
+	return lp if lod1 and ResourceLoader.exists(lp) else VOXEL[id]
 
 ## voxel-heroes (Lucian, varn-core heroes-motion-pass dcfc9b2 handoff/godot/voxel_trial/capes_v1): Owner, Selene and
 ## Darius use the voxel models (same skeleton/bone names, mocap idle/walk/run, cape cubes baked into every clip).
 const VOXEL := {"owner": "res://voxel/owner_voxel.glb", "selene": "res://voxel/selene_voxel.glb", "darius": "res://voxel/darius_voxel.glb"}
+	# Beth's voxel batch 1 (aldric/elira/rowan/thorne/nyx) is on hold until her cape re-rig + Nyx/Thorne fixes land
+## test 26: Low tier loads <id>_voxel_lod1.glb when it exists (Beth batch 1; ~33% tris). Set by main.apply_quality().
+static var lod1 := false
 ## In-place walk/run clips: root speed (m/s) each clip was authored at, so playback is matched to real movement.
 const ROOT_SPEED := {"owner": [1.12, 6.98], "selene": [0.96, 5.55], "darius": [1.02, 5.85],
-	"town_guard": [1.04, 6.11], "holyknight_villain": [1.19, 7.10]}
+	"town_guard": [1.04, 6.11],
+	"aldric": [0.96, 5.15], "elira": [0.88, 4.72], "rowan": [0.94, 5.08], "thorne": [0.94, 5.07], "nyx": [0.87, 4.66], "holyknight_villain": [1.19, 7.10]}
 
 static func display_name(id: String) -> String: return id.capitalize()
 

@@ -55,7 +55,7 @@ func top_speed() -> float:
 	var a := clampf(dir.dot(wind.normalized()) * 0.5 + 0.5, 0.0, 1.0)
 	var v: float = s[0] * lerpf(0.55, 1.15, a)
 	if gust_t > 0.0: v *= 1.0 + GUST[tier][0]
-	if kind == "galleon" and shallow_fn.is_valid() and float(shallow_fn.call(Vector2(position.x, position.z))) < 25.0: v *= 0.4
+	if kind == "galleon" and alt <= 0.0 and shallow_fn.is_valid() and float(shallow_fn.call(Vector2(position.x, position.z))) < 25.0: v *= 0.4
 	return v
 
 func gust() -> bool:
@@ -69,10 +69,13 @@ func wave_h(p: Vector2, t: float) -> float:
 		h += w[1] * sin(k * (d.dot(p) - c * t))
 	return h
 
+## test 33 (boss): fly cheat lifts the whole ship; speed cheat scales sailing speed. Set by TidewrackSea.drive().
+var alt := 0.0          # metres above the sea (0 = afloat)
+var speed_mul := 1.0
 func drive(inp: Vector2, dt: float) -> void:
 	var s: Array = stats()
 	if absf(inp.y) > 0.15: throttle = clampf(throttle - inp.y * dt * 0.7, -0.25, 1.0)   # coasting: the sail setting holds
-	var want := top_speed() * throttle
+	var want := top_speed() * throttle * speed_mul
 	speed = move_toward(speed, want, s[1] * dt * (1.0 if absf(want) > absf(speed) else 0.6))
 	var steer := clampf(absf(speed) / (s[0] * 0.3), 0.25, 1.0)
 	heading -= deg_to_rad(s[2]) * inp.x * steer * dt
@@ -84,5 +87,7 @@ func drive(inp: Vector2, dt: float) -> void:
 	bob_t += dt
 	var p := Vector2(global_position.x, global_position.z)
 	var h := wave_h(p, bob_t) if high else sin(bob_t * 0.9) * 0.18
+	if alt > 0.0: h *= clampf(1.0 - alt / 3.0, 0.0, 1.0)   # no wave bob once airborne
 	vis.position.y = MODEL[kind][1] + h * 0.8
+	position.y = alt
 	rotation = Vector3(0.0, heading, 0.0)

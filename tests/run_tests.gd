@@ -15,6 +15,11 @@ func _init() -> void:
 	test_anim()
 	test_combat()
 	test_net()
+	# test 33: HUD test number == export_presets version/code - 1 (one setting to bump)
+	var cf := ConfigFile.new(); var vc := -1
+	if cf.load("res://export_presets.cfg") == OK: vc = int(cf.get_value("preset.0.options", "version/code", -1))
+	var tb := str(ProjectSettings.get_setting("application/config/test_build", "?"))
+	ok(vc > 0 and tb == str(vc - 1), "HUD test number %s == version/code %d - 1" % [tb, vc])
 	print("RESULT %d passed, %d failed" % [passes, fails])
 	quit(1 if fails else 0)
 

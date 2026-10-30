@@ -1,6 +1,8 @@
 config_version=5
 
 [application]
+
+config/test_build=33
 config/name="Varnethryl"
 config/version="1.9.3"
 config/icon="res://branding/icon_192.png"

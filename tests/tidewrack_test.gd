@@ -110,13 +110,61 @@ func _run() -> void:
 			ok(C.allowed("ship_upgrade", "coowner") and not C.allowed("gold", "coowner") and not C.allowed("spawn_boss", "coowner"), "coowner: ship_upgrade allowed, world/economy cheats still refused")
 			ok(not sea.unlock_all and not sea.unlocked("B"), "coowner: free upgrades do not unlock the storm-locked sea")
 	await shot("galleon_t3_coowner", an + Vector3(30, 14, 30), an + Vector3(0, 4, 0))
-	C.coowner_ok = false; C.role_provider = func() -> String: return ""
+	C.coowner_ok = false
+	C.role_provider = func() -> String: return ""
 	ok(not sea.free_upgrade(), "unverified coowner (role '') gets no free upgrade")
 	C.role_provider = rp0
 	for k in save0: sea.save[k] = save0[k]
-	 VS.gold = g0; sea.ship.set_tier(int(sea.save.galleon_tier))
+	VS.gold = g0; sea.ship.set_tier(int(sea.save.galleon_tier))
 	ok(sea.ship.gust() and sea.ship.gust_t > 0.0, "gust charm (T1)")
 	await shot("galleon_t1", an + Vector3(30, 14, 30), an + Vector3(0, 4, 0))
+	# --- test 33: speed cheat scales the ship; fly cheat lifts the whole ship (Owner + CoOwner), players can't
+	var C2: Cheats = m.cheats; var rp1: Callable = C2.role_provider; var fa0: float = m.fly_alt
+	var open := an + Vector3(0, 0, 0)
+	for k in 60:   # find open water near Gullhaven
+		var q2 := an + Vector3(cos(k * 0.7), 0, sin(k * 0.7)) * (120.0 + k * 10.0)
+		if sea.over_water(Vector2(q2.x, q2.z)) and sea.shore_m(Vector2(q2.x, q2.z)) > 120.0 and sea.unlocked(sea.region_at(Vector2(q2.x, q2.z))): open = q2; break
+	var land := Vector3.INF
+	for k in 400:
+		var q3 := an + Vector3(cos(k * 0.37), 0, sin(k * 0.37)) * (10.0 + k * 2.0)
+		if not sea.over_water(Vector2(q3.x, q3.z)) and sea.unlocked(sea.region_at(Vector2(q3.x, q3.z))): land = q3; break
+	var sail := func(n: int) -> void:
+		for i in n: sea.ship.throttle = 1.0; sea.drive(Vector2.ZERO, 1.0 / 60.0)
+	C2.role_provider = func() -> String: return "owner"
+	C2.request("fly", false); C2.request("speed", 1.0)
+	sea.ship.position = Vector3(open.x, 0, open.z); sea.ship.speed = 0.0; sail.call(600)
+	var v1: float = sea.ship.speed
+	sea.ship.position = Vector3(open.x, 0, open.z); C2.request("speed", 3.0); sail.call(900)
+	print("TW INFO speed x1=%.1f x3=%.1f" % [v1, sea.ship.speed])
+	ok(v1 > 1.0 and sea.ship.speed > v1 * 2.5, "speed cheat x3 scales sailing speed (%.1f -> %.1f m/s)" % [v1, sea.ship.speed])
+	C2.request("speed", 1.0)
+	for who in ["owner", "coowner"]:
+		C2.role_provider = func() -> String: return who
+		sea.ship.position = Vector3(open.x, 0, open.z); sea.ship.alt = 0.0; sea.ship.speed = 0.0
+		ok(C2.request("fly", true), "%s: fly cheat on at sea" % who)
+		m.fly_alt = 30.0; sail.call(300)
+		ok(absf(sea.ship.alt - 30.0) < 0.5 and absf(sea.ship.global_position.y - sea.to_global(Vector3(0, 30, 0)).y) < 0.6, "%s: whole ship flies at fly_alt (alt %.1f)" % [who, sea.ship.alt])
+		ok(absf(sea.ship.rotation.x) < 0.001 and absf(sea.ship.rotation.z) < 0.001, "%s: flying ship stays level" % who)
+		ok(sea.ship.speed > 1.0 and Vector2(sea.ship.position.x - open.x, sea.ship.position.z - open.z).length() > 10.0, "%s: flying ship is steerable/moves" % who)
+		await frames(3); ok(m.fly_controls.visible, "%s: fly buttons shown at sea with fly on" % who)
+		C2.request("fly_up"); C2.request("fly_up"); sail.call(200)
+		ok(sea.ship.alt > 34.0, "%s: fly up raises the ship (%.1f)" % [who, sea.ship.alt])
+		if who == "owner": await shot("galleon_flying", Vector3(sea.ship.position.x + 45, sea.ship.alt + 12, sea.ship.position.z + 45), sea.ship.position)
+		# fly off over land: holds above ground, then settles once back over water
+		if land != Vector3.INF:
+			sea.ship.position = Vector3(land.x, sea.ship.alt, land.z); C2.request("fly", false); sea.ship.throttle = 0.0; sea.ship.speed = 0.0
+			for i in 400: sea.drive(Vector2.ZERO, 1.0 / 60.0)
+			ok(sea.ship.alt >= sea.SHIP_FLY_MIN - 0.01, "%s: fly off over land -> ship hovers, never drops on land (alt %.1f)" % [who, sea.ship.alt])
+		C2.request("fly", false); sea.ship.position = Vector3(open.x, sea.ship.alt, open.z); sea.ship.speed = 0.0
+		for i in 600: sea.drive(Vector2.ZERO, 1.0 / 60.0)
+		ok(sea.ship.alt == 0.0 and absf(sea.ship.rotation.x) < 0.001 and sea.ship.collision_mask == 1, "%s: fly off over water -> lands back on the sea" % who)
+		await frames(3); ok(not m.fly_controls.visible, "%s: fly buttons hidden at sea with fly off" % who)
+	C2.role_provider = func() -> String: return ""
+	ok(not C2.request("fly", true), "player: fly cheat refused")
+	sea.ship.position = Vector3(open.x, 0, open.z); m.fly_alt = 30.0; sail.call(200)
+	ok(sea.ship.alt == 0.0, "player: ship stays on the water")
+	C2.role_provider = rp1; m.fly_alt = fa0; C2.flags.fly = false; C2.flags.speed = 1.0; if m.get("cheat"): m.cheat.fly = false
+	sea.ship.position = an; sea.ship.speed = 0.0; sea.ship.throttle = 0.0
 	# --- Echo Grotto: clear exit (never inside the north cliff), skiff, cave cell in/out
 	var q: Dictionary = sea.M.s2.props.coast_echo_grotto; var mouth := sea._v3(q.pos)
 	sea.unlock_all = true; sea._border_update()   # Owner-style unlock for the B checks
@@ -168,9 +216,43 @@ func _run() -> void:
 	ok(basalt and lava, "ash basalt (metallic_specular 0.15) + lava seam materials")
 	sea.drive(Vector2.ZERO, 1.0 / 60.0); await shot("ash_vent_harbour_" + m.TIERS[m.tier])
 	m.tier = 0; sea.water_mats.clear(); sea.drive(Vector2.ZERO, 1.0 / 60.0); await shot("ash_vent_harbour_Low_water"); m.tier = t0; sea.water_mats.clear()
+	# --- test 33: Pip + companions ride ON the deck (every galleon tier + the skiff), even while the ship flies
+	m.party._set_companions(["nyx", "selene"]); await frames(5)
+	var crew_ok := func(tag: String) -> void:
+		var bad := []
+		var nodes: Array = [m.pip] + m.party.companions.map(func(c): return c.node)
+		for n: Node3D in nodes:
+			var lp: Vector3 = sea.ship.global_transform.affine_inverse() * n.global_position
+			var half: Vector2 = Vector2(2.3, 7.0) if sea.ship.kind == "galleon" else Vector2(0.8, 3.0)
+			var dy: float = n.global_position.y - (sea.ship.global_position.y + sea.deck_y())
+			if absf(lp.x) > half.x or absf(lp.z) > half.y or absf(dy) > 0.2 or not n.visible: bad.append("%s lp=%s dy=%.2f vis=%s" % [n.name, lp, dy, n.visible])
+		ok(bad.is_empty() and m.party.riding, "%s: Pip + %d companions seated on deck %s" % [tag, m.party.companions.size(), bad])
+	for t in 4:
+		sea.ship.set_tier(t); sea.ship.speed = 8.0; sea.ship.throttle = 1.0
+		for i in 120: sea.drive(Vector2(0.3, 0), 1.0 / 60.0)
+		crew_ok.call("galleon T%d sailing" % t)
+	var Cc: Cheats = m.cheats; var rpc: Callable = Cc.role_provider
+	Cc.role_provider = func() -> String: return "owner"
+	Cc.request("fly", true); m.fly_alt = 25.0
+	for i in 300: sea.drive(Vector2(0.2, 0), 1.0 / 60.0)
+	crew_ok.call("galleon flying (alt %.0f)" % sea.ship.alt)
+	Cc.request("fly", false)
+	for i in 600: sea.drive(Vector2.ZERO, 1.0 / 60.0)
+	Cc.role_provider = rpc
+	sea.ship.speed = 0.0; sea.drive(Vector2.ZERO, 1.0 / 60.0)
+	await shot("pip_on_deck", sea.ship.position + sea.ship.global_basis * Vector3(9, 7, -9), sea.ship.position + Vector3(0, 3, 0))
+	sea._board("skiff", sea.ship.position + Vector3(30, 0, 0), sea.ship.heading)
+	for t in 4:
+		sea.ship.set_tier(t)
+		for i in 60: sea.drive(Vector2(0.3, 0), 1.0 / 60.0)
+		crew_ok.call("skiff T%d" % t)
+	await shot("skiff_crew", sea.ship.position + sea.ship.global_basis * Vector3(4, 3, -4), sea.ship.position + Vector3(0, 1, 0))
+	sea._board("galleon", sea.ship.position + Vector3(-30, 0, 0), sea.ship.heading); sea.ship.set_tier(int(sea.save.galleon_tier))
 	# --- charts home
 	ok(sea.chart_travel("tidewrack") == "", "Harbour Charts: Tidewrack pier")
 	await frames(90)
 	ok(not sea.active and m.hero.global_position.distance_to(m._galleon_pier()[0]) < 3.0, "home at the Tidewrack pier (hero %s, pier %s)" % [m.hero.global_position, m._galleon_pier()[0]])
+	ok(not m.party.riding and m.party.companions.all(func(c): return c.node.global_position.distance_to(m.hero.global_position) < 6.0), "disembark: companions follow on foot again")
+	m.party._set_companions([])
 	VS = get_tree().root.get_node("VSave").state; VS.gold = gold0; sea.save.galleon_tier = 0; sea.save.items = {}; sea.save.discovered_ports = ["tidewrack"]; sea.write_save()
 	print("TW DONE pass=%d fail=%d" % [npass, nfail]); get_tree().quit(0 if nfail == 0 else 1)

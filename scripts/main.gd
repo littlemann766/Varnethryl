@@ -4,7 +4,9 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
-const VERSION := "12"
+## test 33: the HUD test number comes from ONE setting (project.godot application/config/test_build), bumped per build;
+## run_tests checks it == export_presets version/code - 1.
+var VERSION: String = str(ProjectSettings.get_setting("application/config/test_build", "?"))
 ## test 11 layout (boss: buildings on the gate road / walkways through buildings): positions in METRES, solved by
 ## /workspace/layout/solve.py from Beth's collision footprints (+1 m margin): every building sits beside a STREET with its
 ## front (+Z, all door_points) facing it, a short spur path from each front door to the street, nothing on a street,
@@ -202,6 +204,7 @@ var shot_dir := "user://"
 var menu_open := false
 var lamp_shadow_t := 0.0
 var cheats: Cheats
+var world_map: WorldMap
 var fly_alt := 6.0
 const JUMP_H := 1.2
 var JUMP_V := sqrt(2.0 * 20.0 * JUMP_H)
@@ -275,6 +278,7 @@ func _ready() -> void:
 	if args.has("--bouldercheck"): add_child(load("res://tests/boulder_check.gd").new())   # test 23
 	if args.has("--whereshots"): add_child(load("res://tests/where_shots.gd").new())   # test 25
 	if args.has("--voxclose"): add_child(load("res://tests/voxel_close.gd").new())   # test 25
+	if args.has("--worldmap"): add_child(load("res://tests/worldmap_test.gd").new())   # test 33
 	if args.has("--capeshots"): add_child(load("res://tests/cape_shots.gd").new())   # test 33
 	if args.has("--ownershots"): add_child(load("res://tests/owner_shots.gd").new())   # test 26
 	if args.has("--shiplevel"): add_child(load("res://tests/ship_level.gd").new())   # test 28
@@ -1686,7 +1690,7 @@ func _physics_process(dt: float) -> void:
 var _tacc := 0.0
 func _process(dt: float) -> void:
 	for lm in lava_mats: lm.uv1_offset.x = fmod(lm.uv1_offset.x + dt * 0.02, 1.0); lm.uv1_offset.y = fmod(lm.uv1_offset.y + dt * 0.013, 1.0)
-	if fly_controls: fly_controls.visible = VUI.hud != null and VUI.hud.visible and not (VUI.title and VUI.title.visible) and not (sea and sea.active)
+	if fly_controls: fly_controls.visible = VUI.hud != null and VUI.hud.visible and not (VUI.title and VUI.title.visible) and not (sea and sea.active and not (cheats and cheats.flags.fly and not sea.diving))   # test 33: fly buttons at sea only with the fly cheat on
 	if Input.is_key_pressed(KEY_SPACE) and hero and hero.is_on_floor(): request_jump()
 	_bob_ships(dt)
 	if hero == null: return
@@ -1717,6 +1721,7 @@ func _process(dt: float) -> void:
 	_camera_prefs(inside != "", dt)
 	_camera_occlusion()
 	if VUI.hud and VUI.hud.minimap: VUI.hud.minimap.set_player(Vector2(hero.position.x, hero.position.z), hero_vis.rotation.y)
+	if world_map: world_map.tick(dt)   # test 33: fog of war + full map
 	VUI.set_fps(Engine.get_frames_per_second())
 	lamp_shadow_t -= dt
 	if lamp_shadow_t <= 0.0: lamp_shadow_t = 0.5; _update_lamp_shadows()
@@ -2399,6 +2404,9 @@ func _hook_ui() -> void:
 		if typeof(sp) == TYPE_DICTIONARY and sp.has("x"): _teleport(Vector3(float(sp.x) / JS_UNITS, 0, float(sp.get("z", 0)) / JS_UNITS), float(sp.get("yaw", yaw))))
 	Net.disconnected.connect(func(_c, _r): _clear_remotes())
 	_build_minimap()
+	world_map = WorldMap.new().setup(self)   # test 33: tap the minimap -> whole-world map with fog of war
+	var wl := CanvasLayer.new(); wl.layer = 50; add_child(wl); wl.add_child(world_map)
+	if VUI.hud and VUI.hud.minimap: VUI.hud.minimap.tapped.connect(world_map.toggle)
 
 func _teleport(p: Vector3, yw: float) -> void:
 	hide_where()   # test 25

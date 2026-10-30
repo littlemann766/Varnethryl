@@ -265,13 +265,14 @@ func enter(kind := "galleon", at := Vector3.INF, yaw := INF) -> void:
 	if at == Vector3.INF:   # Tidewrack bay mouth: open water at the east edge of the Archipelago
 		at = Vector3(1300, 0, 300); yaw = -PI / 2
 	_board(kind, at, yaw)
-	m.hero.collision_layer = 0; m.hero.collision_mask = 0; m.pip.visible = false
+	m.hero.collision_layer = 0; m.hero.collision_mask = 0; m.pip.visible = true
+	if m.party: m.party.riding = true
 	sun_dist = m.sun.directional_shadow_max_distance; m.sun.directional_shadow_max_distance = 60.0   # README: 60 m shadows at sea
 	cur_region = region_at(Vector2(at.x, at.z)); _stream(Vector2(at.x, at.z))
 	_port_check(true)
 func leave_to_harbour() -> void:
 	active = false; visible = false; in_cave = ""; diving = false; m.cam.environment = null
-	m.hero.collision_layer = 1; m.hero.collision_mask = 1; m.pip.visible = true
+	m.hero.collision_layer = 1; m.hero.collision_mask = 1; m.pip.visible = true; unseat_crew()
 	m.sun.directional_shadow_max_distance = sun_dist
 	var g: Array = m._galleon_pier()
 	m.hide_where(); m.hero.global_position = g[0]; m.hero.velocity = Vector3.ZERO; m.yaw = g[1]
@@ -280,20 +281,72 @@ func _board(kind: String, at: Vector3, yaw: float) -> void:
 	if not ships.has(kind):
 		var s := TwShip.new().setup(kind, int(save.get(kind + "_tier", 0)), high()); add_child(s)
 		s.shallow_fn = shore_m; ships[kind] = s
-	ship = ships[kind]; ship.position = Vector3(at.x, 0.0, at.z); ship.heading = yaw; ship.speed = 0.0; ship.throttle = 0.0
+	ship = ships[kind]; ship.alt = 0.0; ship.position = Vector3(at.x, 0.0, at.z); ship.heading = yaw; ship.speed = 0.0; ship.throttle = 0.0
 	if kind == "skiff" and ships.has("galleon"): ships.galleon.visible = true
 	ship.visible = true
 
 func cam_dist() -> float: return 24.0 if ship and ship.kind == "galleon" else 11.0
+
+## test 33 (boss): with the fly cheat on, the whole ship flies (target = main.fly_alt, min SHIP_FLY_MIN, max SHIP_FLY_MAX),
+## level, steerable, fly up/down buttons work. Fly off over water -> settles back onto the sea; fly off over land -> it
+## holds just above the ground (never drops onto land) and settles once it is back over water.
+const SHIP_FLY_MIN := 14.0
+const SHIP_FLY_MAX := 300.0
+func ship_flying() -> bool:
+	var ch = m.get("cheats"); return ch != null and bool(ch.flags.get("fly", false)) and in_cave == "" and not diving
+func over_water(p: Vector2) -> bool: return shore_m(p) >= 8.0
+func _fly_step(dt: float) -> void:
+	var ch = m.get("cheats")
+	ship.speed_mul = clampf(float(ch.flags.get("speed", 1.0)), 0.1, 50.0) if ch != null else 1.0
+	var p := Vector2(ship.position.x, ship.position.z); var want := 0.0
+	if ship_flying(): want = clampf(float(m.fly_alt), SHIP_FLY_MIN, SHIP_FLY_MAX)
+	elif ship.alt > 0.0 and not over_water(p): want = SHIP_FLY_MIN
+	var was := ship.alt
+	ship.alt = move_toward(ship.alt, want, maxf(8.0, absf(want - ship.alt) * 1.5) * dt)
+	if ship.alt < 0.05 and want == 0.0: ship.alt = 0.0
+	ship.collision_mask = 0 if ship.alt > 1.0 else ship_mask0
+	if was > 0.0 and ship.alt == 0.0: ui.toast("Back on the water.")
+var ship_mask0 := 1
+
+## test 33 (boss: Pip swam beside the boat): Pip + companions ride ON the deck at fixed seats (ship-local), facing the
+## bow, rising with the ship when it flies; party follow AI is off while riding and comes back on disembark.
+const SEATS := {"galleon": [Vector3(1.4, 0, -2.6), Vector3(-1.6, 0, -1.0), Vector3(1.6, 0, 1.2), Vector3(-1.6, 0, 3.0), Vector3(1.6, 0, 4.6)],
+	"skiff": [Vector3(0.35, 0, 0.2), Vector3(-0.35, 0, 1.0), Vector3(0.3, 0, 1.8), Vector3(-0.3, 0, 2.4), Vector3(0.0, 0, -0.5)]}
+func deck_y() -> float: return (2.78 if ship.kind == "galleon" else 1.61) + ship.vis.position.y - TwShip.MODEL[ship.kind][1]
+func seat_pos(i: int) -> Vector3:
+	var S: Array = SEATS[ship.kind]; var o: Vector3 = S[mini(i, S.size() - 1)]
+	return ship.global_position + ship.global_basis * Vector3(o.x, deck_y(), o.z)
+func seat_crew() -> void:
+	if ship == null or diving: return
+	if m.party: m.party.riding = true
+	var k := 0
+	if m.pip: m.pip.visible = true; m.pip.global_position = seat_pos(k); m.pip.rotation = Vector3(0, ship.heading + PI, 0); k += 1
+	if m.party:
+		for c in m.party.companions:
+			c.node.global_position = seat_pos(k); c.node.rotation = Vector3(0, ship.heading + PI, 0); k += 1
+			if c.rig: c.rig.set_move_mps(0.0); c.rig.set_flight(false)
+func unseat_crew() -> void:
+	if m.party:
+		m.party.riding = false; m.party.trail = PackedVector3Array()
+		var i := 0
+		for c in m.party.companions: c.node.global_position = m.hero.global_position + Vector3(1.0 + i, 0, 1.0); c.node.rotation = Vector3.ZERO; i += 1
+	if m.pip: m.pip.position = m.hero.position + Vector3(1, 0, 1)
 
 # ---------------------------------------------------------------- per frame (called from main._physics_process)
 func drive(inp: Vector2, dt: float) -> void:
 	if diving: _swim(inp, dt); return
 	ship.wind = REGIONS[cur_region].wind
 	var before := ship.position
+	_fly_step(dt)
 	ship.drive(inp, dt)
 	var p := Vector2(ship.position.x, ship.position.z)
-	if in_cave == "":
+	if in_cave == "" and ship.alt > 0.0:   # airborne: over reefs, bergs and shores, but the storm locks still hold
+		var r3 := region_at(p)
+		if not unlocked(r3) and _rect_dist(r3, p) < 60.0:
+			ship.position = before; ship.speed = -ship.speed * 0.3; ui.toast("The crew refuses to sail into the storm.")
+		elif r3 != cur_region and _rect_dist(r3, p) <= 0.0: cur_region = r3
+		_stream(p)
+	elif in_cave == "":
 		# Wreck Reef no-go ring for the galleon (skiff-only shallows) and the drifting icebergs
 		var reef := _v3(M.s1.props.wreck_reef.pos)
 		if ship.kind == "galleon" and p.distance_to(Vector2(reef.x, reef.z)) < 95.0:
@@ -312,6 +365,7 @@ func drive(inp: Vector2, dt: float) -> void:
 	m.hero.global_position = ship.global_position + ship.global_basis * Vector3(0, deck + ship.vis.position.y - TwShip.MODEL[ship.kind][1], -4.0 if ship.kind == "galleon" else -1.0)
 	m.hero.velocity = Vector3.ZERO; m.hero_vis.rotation.y = ship.heading + PI
 	if m.party and m.party.get("rig"): m.party.rig.set_move_mps(0.0)
+	seat_crew()
 	water.global_position = Vector3(snappedf(m.cam.global_position.x, 8.0), 0.0, snappedf(m.cam.global_position.z, 8.0))
 	water.material_override = _water_mat(cur_region)
 	water.visible = in_cave == ""

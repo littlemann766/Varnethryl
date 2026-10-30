@@ -70,6 +70,7 @@ func _set_companions(ids: Array) -> void:
 		companions.append({"id": companion_ids[i], "node": n, "rig": r, "swing": 0.0})
 
 var _fly_last_yaw := 0.0
+var riding := false   # test 33: true while sailing (set by TidewrackSea)
 func _physics_process(dt: float) -> void:
 	if main == null or main.hero == null: return
 	var hp: Vector3 = main.hero.global_position
@@ -92,6 +93,7 @@ func _physics_process(dt: float) -> void:
 	elif trail[trail.size() - 1].distance_to(hp) >= TRAIL_STEP:
 		trail.append(hp)
 		if trail.size() > 80: trail = trail.slice(trail.size() - 80)
+	if riding: return   # test 33: at sea, companions sit on the deck (TidewrackSea.seat_crew), no follow / swim AI
 	for i in companions.size():
 		_follow(companions[i], FOLLOW_GAP[min(i, FOLLOW_GAP.size() - 1)], dt)
 

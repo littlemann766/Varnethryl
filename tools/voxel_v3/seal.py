@@ -43,6 +43,31 @@ N6=[(1,0,0),(-1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1)]
 iso=[k for k in list(cells) if not any(nb(k,n) in cells for n in N6)]
 for k in iso: del cells[k]; del bone[k]
 info['removed_isolated']=len(iso)
+if os.environ.get('CLEAN'):
+    # 1) lone-bone cells (no 6-neighbour on the same bone) take the majority bone of their neighbours
+    fixed=0
+    for it in range(2):
+        for k in list(cells):
+            nbs=[nb(k,n) for n in N6]; nbs=[x for x in nbs if x in bone]
+            if not nbs or any(bone[x]==bone[k] for x in nbs): continue
+            maj=Counter(bone[x] for x in nbs).most_common(1)[0][0]; bone[k]=maj; fixed+=1
+    # 2) drop small connected components of cape cells that are not touching the main cape
+    capek=[k for k in cells if bone[k]>=0 and gn[bone[k]].startswith('cape')]
+    cs=set(capek); seen=set(); comps=[]
+    for k0 in capek:
+        if k0 in seen: continue
+        st_=[k0]; seen.add(k0); comp=[]
+        while st_:
+            k=st_.pop(); comp.append(k)
+            for n in N6:
+                x=nb(k,n)
+                if x in cs and x not in seen: seen.add(x); st_.append(x)
+        comps.append(comp)
+    comps.sort(key=len,reverse=True); MC=int(os.environ.get('MINCOMP','40')); dropped=0
+    for comp in comps[1:]:
+        if len(comp)<MC:
+            for k in comp: del cells[k]; del bone[k]; dropped+=1
+    info['lone_bone_fixed']=fixed; info['cape_cells_dropped']=dropped; info['cape_comps']=[len(c) for c in comps[:6]]
 bm=bmesh.new(); uvb=bm.loops.layers.uv.new('UVMap'); dl=bm.verts.layers.deform.verify()
 D=[((1,0,0),[(1,0,0),(1,1,0),(1,1,1),(1,0,1)]),((-1,0,0),[(0,0,0),(0,0,1),(0,1,1),(0,1,0)]),
    ((0,1,0),[(0,1,0),(0,1,1),(1,1,1),(1,1,0)]),((0,-1,0),[(0,0,0),(1,0,0),(1,0,1),(0,0,1)]),

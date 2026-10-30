@@ -1,7 +1,7 @@
 {
  "rest_baseline": {
-  "arm_in_leg": 197,
-  "cape_in_body": 4721
+  "arm_in_leg": 229,
+  "cape_in_body": 755
  },
  "attack": {
   "arm_in_leg_verts_max": 0,

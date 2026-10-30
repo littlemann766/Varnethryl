@@ -10,7 +10,7 @@ sh.light='STUDIO'; sh.color_type='TEXTURE'; sh.show_shadows=True; sh.shadow_inte
 sc.display.render_aa='8'; sh.background_type='WORLD'
 if sc.world is None: sc.world=bpy.data.worlds.new('W')
 sc.world.color=(0.55,0.62,0.72)
-sc.render.resolution_x=1280; sc.render.resolution_y=720; sc.view_settings.view_transform='Standard'
+sc.render.resolution_x=int(os.environ.get('RX','1280')); sc.render.resolution_y=int(os.environ.get('RY','720')); sc.view_settings.view_transform='Standard'
 bpy.ops.mesh.primitive_plane_add(size=60); fl=bpy.context.object
 m=bpy.data.materials.new('fl'); m.diffuse_color=(0.42,0.44,0.40,1); fl.data.materials.append(m); sh.color_type='TEXTURE'
 cam=bpy.data.objects.new('C',bpy.data.cameras.new('C')); sc.collection.objects.link(cam); sc.camera=cam; cam.data.lens=50

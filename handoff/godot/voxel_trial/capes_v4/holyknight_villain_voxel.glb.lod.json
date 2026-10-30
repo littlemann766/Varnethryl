@@ -1,1 +1,1 @@
-{"src_tris": 181424, "removed_isolated": 59, "cells": 37851, "sealed_faces": 20508, "tris": 213080}
+{"src_tris": 181424, "removed_isolated": 59, "lone_bone_fixed": 287, "cape_cells_dropped": 153, "cape_comps": [6351, 2514, 76, 74, 46, 16], "cells": 37698, "sealed_faces": 18218, "tris": 208492}

@@ -6,8 +6,8 @@
  "attack1": {
   "arm_in_leg_verts_max": 0,
   "arm_leg_frames_over24": 0,
-  "cape_in_body_verts_max": 64,
-  "cape_frames_over24": 2,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
   "frames_sampled": 16
  },
  "attack2": {
@@ -18,7 +18,7 @@
   "frames_sampled": 31
  },
  "death": {
-  "arm_in_leg_verts_max": 0,
+  "arm_in_leg_verts_max": 3,
   "arm_leg_frames_over24": 0,
   "cape_in_body_verts_max": 0,
   "cape_frames_over24": 0,

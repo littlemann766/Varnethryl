@@ -18,7 +18,9 @@
   "ripple": 8,
   "tscale": 2.5,
   "behind": -9,
-  "extra_nonloop": 0.12
+  "extra_nonloop": 0.12,
+  "floorgap": -5,
+  "hang_death": 0.0
  },
  "darius": {
   "mode": "group",
@@ -42,7 +44,9 @@
   "ripple": 8,
   "tscale": 2.5,
   "extra_nonloop": 0.15,
-  "rcf": 1.15
+  "rcf": 1.15,
+  "floorgap": 0.12,
+  "hang_death": 0.0
  },
  "town_guard": {
   "mode": "color",

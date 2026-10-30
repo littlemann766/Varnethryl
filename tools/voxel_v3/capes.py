@@ -23,6 +23,7 @@ img=[n.image for n in ob.active_material.node_tree.nodes if n.type=='TEX_IMAGE']
 Wd,Hd=img.size; pal=np.array(img.pixels[:]).reshape(Hd,Wd,4)
 uvl=me.uv_layers.active.data
 SPEC=json.load(open('/workspace/vx3/spec.json'))[name]
+SPEC.update(json.loads(os.environ.get('SPEC_OVR','{}')))
 if 'capeV_c0_r0' not in TB:
     # ---------- stage 1: build cape bones + reassign cubes
     cubes={}  # key -> dict(faces, center, color, group)
@@ -138,6 +139,7 @@ for a_,b_,_ in caps:
     rr=min(rr,float(dj.min())-MARG0)
     RAD.append(max(0.03,rr))
 RC={}
+GZ=float(co[:,2].min())+SPEC.get('floorgap',0.03)
 for k_,(a_,b_,_) in enumerate(caps[:2]):
     A=arm.matrix_world@TB[a_].head_local; B=arm.matrix_world@TB[b_].head_local
     for c in range(Cn):
@@ -281,7 +283,7 @@ def simulate2(FW,wind,loop,name):
         spd=th[i]/MAXT if MAXT else 0
         amp=amp0*(0.25+spd)
         st=[]
-        hw=0.0 if name.startswith('fly') else SPEC.get('hang',0.85)
+        hw=0.0 if name.startswith('fly') else SPEC.get('hang_'+name,SPEC.get('hang',0.85))
         cur_dn=(Am.to_3x3()@dn).normalized(); want=(R0@dn).normalized()
         Qg=Quaternion().slerp(cur_dn.rotation_difference(want),hw)
         A3=Am.to_3x3()
@@ -312,28 +314,62 @@ def simulate2(FW,wind,loop,name):
             for c in range(Cn-1):
                 for r in range(1,R+1):
                     a_,b_=st[c][r],st[c+1][r]; d=b_-a_; l=d.length or 1e-6
-                    if l>LX[c][r]*(1.0 if name.startswith('fly') else 1.02):
-                        e=(l-LX[c][r]*1.02)/l*0.5; st[c][r]=a_+d*e; st[c+1][r]=b_-d*e
+                    if l>LX[c][r]*(1.0 if name.startswith('fly') else SPEC.get('lxtol',1.02)):
+                        e=(l-LX[c][r]*SPEC.get('lxtol',1.02))/l*0.5; st[c][r]=a_+d*e; st[c+1][r]=b_-d*e
             for c in range(Cn):
                 for r in range(R):
                     a_,b_=st[c][r],st[c][r+1]; d=b_-a_; l=d.length or 1e-6; e=(l-L[c][r])/l
                     st[c][r+1]=b_-d*e
+            for c in range(Cn):
+                for r in range(1,R+1):
+                    if st[c][r].z<GZ: st[c][r].z=GZ
         for c in range(Cn):
             for r in range(1,R+1):
                 for k_,((A_,B_),rad) in enumerate(zip(segs,RAD)):
                     AB=B_-A_; t=max(0,min(1,(st[c][r]-A_).dot(AB)/max(AB.length_squared,1e-9))); q_=A_+AB*t
                     d=st[c][r]-q_; dl=d.length; need=max(rad+MG,RC.get((k_,c,r),0)*SPEC.get('rcf',1.0))
                     if dl<need and dl>1e-6: st[c][r]=q_+d/dl*need
+                if st[c][r].z<GZ: st[c][r].z=GZ
+        for it in range(SPEC.get('lx_final',0)):
+            for c in range(Cn-1):
+                for r in range(1,R+1):
+                    a_,b_=st[c][r],st[c+1][r]; d=b_-a_; l=d.length or 1e-6
+                    if l>LX[c][r]*SPEC.get('lxtol',1.02):
+                        e=(l-LX[c][r]*SPEC.get('lxtol',1.02))/l*0.5; st[c][r]=a_+d*e; st[c+1][r]=b_-d*e
+            for c in range(Cn):
+                for r in range(1,R+1):
+                    if st[c][r].z<GZ: st[c][r].z=GZ
         rec.append(st)
+    DF=SPEC.get('drape_'+name)
+    if DF is not None:
+        RW=8
+        for i in range(len(FW)):
+            w=min(1.0,max(0.0,(i-DF)/RW))
+            if w<=0: continue
+            Am=FW[i][0]; A3=Am.to_3x3()
+            dn_w=(A3@dn); fl=Vector((dn_w.x,dn_w.y,0))
+            if fl.length<0.2: fl=Vector(((A3@bk).x,(A3@bk).y,0))
+            fl.normalize()
+            st=rec[i]
+            for c in range(Cn):
+                for r in range(1,R+1):
+                    q=Am@loc0[c][r]; q.z=GZ+0.004; st[c][r]=st[c][r].lerp(q,w)
+    print('MINZ',name,round(GZ,3),round(min(p.z for st in rec for col in st for p in col),3))
     if loop: rec[-1]=rec[0] if len(rec)>n else rec[-1]
     # recompute last frame for loop to match first exactly in anchor space
     if loop and len(FW)>n:
         rec[n]=[[FW[n][0]@(FW[0][0].inverted()@rec[0][c][r]) for r in range(R+1)] for c in range(Cn)]
     return rec
+FLAT=[False]
 def frame_of(st,c,r,Q=None):
     y=(arm.matrix_world.inverted().to_3x3()@(st[c][r+1]-st[c][r])).normalized()
     if Q is not None and (c,r) in RX:
-        xd=Q@RX[(c,r)]; z=xd.cross(y).normalized(); x=y.cross(z).normalized()
+        xd=Q@RX[(c,r)]
+        if FLAT[0]:
+            xw=arm.matrix_world.to_3x3()@xd; xw.z=0
+            if xw.length<1e-3: xw=Vector((1,0,0))
+            xd=arm.matrix_world.inverted().to_3x3()@xw
+        z=xd.cross(y).normalized(); x=y.cross(z).normalized()
         return Matrix((x,y,z)).transposed()
     cl=c+1 if c+1<Cn else c-1
     xd=(st[cl][r]+st[cl][r+1]-st[c][r]-st[c][r+1]) if Cn>1 else Vector((1,0,0))
@@ -354,6 +390,9 @@ def key(act,rec,f0):
     for i,st in enumerate(rec):
         f=f0+i; sc.frame_set(f)
         Q=arm.pose.bones[ANCH].matrix.to_3x3()
+        DF_=SPEC.get('drape_'+act.name)
+        DR=DF_ is not None and i>=DF_+2
+        FLAT[0]=DR
         for c in range(Cn):
             parentM=arm.pose.bones[ANCH].matrix.copy()
             head=arm.matrix_world.inverted()@st[c][0]
@@ -365,7 +404,7 @@ def key(act,rec,f0):
                 bp=b.parent
                 pb.matrix_basis=(bp.matrix_local.inverted()@b.matrix_local).inverted()@parentM.inverted()@M
                 pb.keyframe_insert('rotation_quaternion',frame=f); pb.keyframe_insert('location',frame=f)
-                parentM=M; head=head+R3.col[1]*b.length
+                parentM=M; head=(arm.matrix_world.inverted()@st[c][r+1]) if DR else head+R3.col[1]*b.length
 acts=[x for x in bpy.data.actions if (only is None or x.name in only)]
 done=set(json.load(open(OUT+'.done.json'))) if os.path.exists(OUT+'.done.json') else set()
 for act in acts:

@@ -276,6 +276,7 @@ func _ready() -> void:
 	if args.has("--voxclose"): add_child(load("res://tests/voxel_close.gd").new())   # test 25
 	if args.has("--ownershots"): add_child(load("res://tests/owner_shots.gd").new())   # test 26
 	if args.has("--shiplevel"): add_child(load("res://tests/ship_level.gd").new())   # test 28
+	if args.has("--shipcam"): add_child(load("res://tests/ship_cam.gd").new())   # test 29
 	if args.has("--voxshots"): add_child(load("res://tests/voxel_shots.gd").new())   # voxel-heroes
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
 	if args.has("--extshots"): add_child(load("res://tests/ext_shots.gd").new())   # test 22
@@ -866,8 +867,8 @@ func _ships() -> void:
 							sm = sm.duplicate(); sm.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 							sm.cull_mode = BaseMaterial3D.CULL_DISABLED; sm.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED; mi.set_surface_override_material(si, sm)
 		# hull draft: Beth's origin is ~1 m above the painted waterline on the galleon, ~0.3 m on the boats
-		# test 26 (boss: "it's sunk"): test 27 (boss: now floating in the air): keel y -1.85, deck ~4.3 -> waterline ~1/3 up the hull
-		var sink := -0.2 if id == "tidewrack_sailing_ship" else -0.3
+		# test 26 (boss: "it's sunk"): test 27 (boss: now floating in the air): test 29: hull levelled in the GLB (keel flat at y ~-1.05) -> keel ~1.4 m under, waterline ~1/3 up the hull
+		var sink := -0.35 if id == "tidewrack_sailing_ship" else -0.3
 		root.position.y = sink   # test 27: set the float height first so the collision hull matches the raised galleon
 		var col := _add_col("res://assets/ships/ship_%s_col.glb" % id, root.position, root.rotation.y); col.name = "ShipCol%d" % i
 		ships.append([root, sink, float(sp[4]), col])

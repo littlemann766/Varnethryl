@@ -247,6 +247,7 @@ func _ready() -> void:
 	_harbour()
 	if OS.get_environment("VARN_NO_HARBOR") == "": harbor = HarborDistrict.new().build(self)
 	if OS.get_environment("VARN_LITE") == "": _ships()   # test 17: lean world for shared-box checks
+	sea = TidewrackSea.new(); add_child(sea); sea.setup(self)   # test 32: Beth's Tidewrack Sea (idle + hidden until you set sail)
 	if OS.get_environment("VARN_LITE") == "": _dressing()   # test 17: lean world for shared-box checks
 	_hi_terrain()
 	if OS.get_environment("VARN_LITE") == "": _showcase()   # test 17: lean world for shared-box checks
@@ -278,6 +279,7 @@ func _ready() -> void:
 	if args.has("--shiplevel"): add_child(load("res://tests/ship_level.gd").new())   # test 28
 	if args.has("--shipcam"): add_child(load("res://tests/ship_cam.gd").new())   # test 29
 	if args.has("--vox30"): add_child(load("res://tests/vox30_shots.gd").new())   # test 30
+	if args.has("--tidewrack"): add_child(load("res://tests/tidewrack_test.gd").new())   # test 32
 	if args.has("--vox31"): add_child(load("res://tests/vox31_shots.gd").new())   # test 31
 	if args.has("--voxshots"): add_child(load("res://tests/voxel_shots.gd").new())   # voxel-heroes
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
@@ -835,6 +837,22 @@ static func harbour_spot() -> Array:
 ## Tier-capped (Low 2 / Medium 3 / High 4 / Ultra 4), gentle bob + roll, Beth's _col hulls (static, at rest pose).
 const SHIP_MAX := [3, 6, 10, 12]   # test 14: many ships (far ones are LOD2, no shadows)
 var ships := []   # [node, base_y, phase]
+var sea: TidewrackSea   # test 32
+var _pier_spot := []
+## the moored galleon at the Tidewrack main pier: [deck-side spot on the pier, yaw]
+func _galleon_pier() -> Array:
+	var r: Node3D = ships[0][0] if ships.size() > 0 else null
+	if r == null: return [Vector3(PORT.x, 0.5, PORT.y), 0.0]
+	if _pier_spot.is_empty():   # whichever side of the hull has the pier deck under it (ray onto the colliders)
+		var best := r.global_position + r.global_basis.x * 6.5; var by := -99.0
+		for sd in [1.0, -1.0]:
+			for dd in [5.0, 6.5, 8.0]:
+				var c: Vector3 = r.global_position + r.global_basis.x * (sd * dd); var q := PhysicsRayQueryParameters3D.create(c + Vector3(0, 20, 0), c - Vector3(0, 20, 0), 1)
+				var h := get_world_3d().direct_space_state.intersect_ray(q)
+				if h and h.position.y > by and h.position.y < 3.0 and not (h.collider in ships.map(func(x): return x[3])): by = h.position.y; best = h.position
+		if by < 0.0: return [best, r.rotation.y]   # not ready yet: physics may still be settling
+		_pier_spot = [best + Vector3(0, 0.3, 0), r.rotation.y]
+	return _pier_spot
 func _ships() -> void:
 	var hs := harbour_spot(); var c: Vector2 = hs[0]
 	var L := func(lx: float, lz: float) -> Vector2: return Vector2(c.x - lz, c.y + lx)
@@ -1623,6 +1641,7 @@ func _physics_process(dt: float) -> void:
 	var inp := joy_vec if not _input_blocked() else Vector2.ZERO
 	var k := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	if k.length() > 0.1: inp = k
+	if sea and sea.active: sea.drive(inp, dt); return   # test 32: sailing / diving in the Tidewrack Sea
 	var fwd := Vector3(-sin(yaw), 0, -cos(yaw)); var right := Vector3(cos(yaw), 0, -sin(yaw))
 	var dir := right * inp.x + fwd * -inp.y
 	var speed: float = (move_speed * float(cheat.speed)) * clamp(inp.length(), 0.0, 1.0)
@@ -2401,8 +2420,8 @@ func _on_multiplayer(world: String) -> void:
 func _on_travel(dest: String) -> void:
 	match dest:
 		"town": _teleport(Vector3(-6, 0, 26), 0.0)
-		"sail":  # TODO(port-zones): sailing scene; stand-in = lake shore
-			_teleport(Vector3(LAKE.x, 0, LAKE.y + 80), 0.0); _toast("Sailing is coming in a later build — here is the lake.")
+		"sail":  # test 32: the Tidewrack Sea
+			if sea and not sea.active: sea.ui.fade(func(): sea.enter())
 		"hydra":  # TODO(port-zones): hydra arena
 			_teleport(Vector3(0, 0, 175), PI); _toast("Hydra lair is coming in a later build.")
 		_: _toast("Unknown destination: " + dest)
@@ -2430,6 +2449,7 @@ func _camera_prefs(inside: bool, dt: float) -> void:
 	var base := 6.0 * float(P.get("zoom", 1.0))
 	var want: float = 0.0 if first else (min(3.5, base) if inside else base)
 	if interiors and interiors.active() and not first: want = clampf(base, 5.0, 6.5)   # high over-the-walls view
+	if sea and sea.active and not sea.diving: want = sea.cam_dist()   # test 32: deck camera rides high behind the ship
 	cam_arm.spring_length = lerpf(cam_arm.spring_length, want, min(1.0, 10.0 * dt))
 	hero_vis.visible = not first or bench_running
 	# follow mode: drift yaw behind the hero while walking (unless the player is dragging the camera)

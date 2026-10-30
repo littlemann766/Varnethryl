@@ -1,0 +1,8 @@
+{
+ "x0": -1200,
+ "z0": -1300,
+ "x1": 1500,
+ "z1": 1300,
+ "px_m": 3.0,
+ "note": "R channel = metres to nearest land (0..255)"
+}

@@ -19,7 +19,7 @@ def cls(nm):
     return 'body'
 C=np.array([cls(gname.get(g,'')) for g in gi])
 W=(mw@co.T).T
-S=0.018
+S=float(os.environ.get('S','0.018'))
 res={}
 for an in ['__rest__']+a[1].split(','):
     if an=='__rest__':

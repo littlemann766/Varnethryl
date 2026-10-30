@@ -16,7 +16,7 @@ func _run():
 		for z in [299.7, 300.0, 300.3, 309.7, 310.0, 310.3, 312.0, 316.0, 318.0, 319.7, 320.0, 320.3]: row += " z%d terr=%.2f col=%.2f |" % [z, m.height(x, z), ray(x, z)]
 		log += row + "\n"
 	FileAccess.open(out + "profile.txt", FileAccess.WRITE).store_string(log); print(log)
-	m.party._set_companions([])
+	m.party._set_companions([]); m.party.set_hero("owner")
 	for spot in [Vector3(-510, 0, 318), Vector3(-484, 0, 316)]:
 		var y = ray(spot.x, spot.z); m.hero.position = Vector3(spot.x, y + 0.1, spot.z)
 		m.yaw = PI * 0.5; m.pitch = -0.12; m.cam_arm.spring_length = 6.0; m.hero_vis.rotation.y = m.yaw + PI

@@ -22,11 +22,17 @@ func _run() -> void:
 	var party: Party = m.party; var c: HeroCombat = party.combat
 	party.set_hero("owner"); await f(3)
 	var hud = party.hud
-	ok(c.skill(5).get("id", "") == "holy" and c.skill(4).get("id", "") == "unholy" and c.skill(3).get("id", "") == "wrath", "owner kit: wrath 3, unholy 4, holy 5")
+	ok(c.skill(4).get("id", "") == "holy" and c.skill(3).get("id", "") == "unholy" and c.skill(5).is_empty(), "owner kit: unholy 3, holy 4, no Wrath")
 	await f(3)
-	ok(hud.btns.size() >= 6 and hud.btns[5].visible and String(hud.btns[5].text).contains("Holy"), "Holy Destruction has a button: " + String(hud.btns[5].text))
-	ok(hud.btns[4].visible and String(hud.btns[4].text).contains("Unholy"), "Unholy Destruction has a button")
-	for slot in [4, 5]:
+	ok(hud.btns[4].visible and String(hud.btns[4].text).contains("Holy"), "Holy Destruction has a button: " + String(hud.btns[4].text))
+	ok(hud.btns[3].visible and String(hud.btns[3].text).contains("Unholy"), "Unholy Destruction has a button")
+	ok(not hud.btns[5].visible and not String(hud.btns[3].text + hud.btns[4].text).contains("Wrath"), "no Sovereign's Wrath button")
+	var fc = m.fly_controls
+	if fc and fc.jump_btn:
+		var jr: Rect2 = fc.jump_btn.get_global_rect()
+		for i in 6:
+			if hud.btns[i].visible: ok(not jr.intersects(hud.btns[i].get_global_rect()), "Jump clear of skill button %d" % i)
+	for slot in [3, 4]:
 		m.hero.global_position = Vector3(30, m.height(30, 240), 240); await f(2)
 		var es := _spawn(m.hero.global_position)
 		m.spawn_world_boss(true); await f(5)
@@ -42,8 +48,8 @@ func _run() -> void:
 	# negatives: Wrath stays as it was; another hero's ultimate is not a one-shot
 	m.hero.global_position = Vector3(30, m.height(30, 240), 240); await f(2)
 	var es2 := _spawn(m.hero.global_position)
-	c.use(3); await f(40)
-	ok(es2[1].alive(), "Sovereign's Wrath unchanged: no one-shot (troll hp %.0f)" % es2[1].hp)
+	c.use(1); await f(40)
+	ok(es2[1].alive(), "Royal Slash: no one-shot (troll hp %.0f)" % es2[1].hp)
 	party.set_hero("darius"); await f(3)
 	c.st.fury = 100.0; c.st.mp = 999; c.st.sp = 999; c.st.cd[4] = 0.0
 	c.use(4); await f(40)

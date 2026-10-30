@@ -505,6 +505,7 @@ func apply_quality() -> void:
 	# renderer has no FXAA / 3D scaling, so it never showed. Now: no FXAA; MSAA (cheap on tiled phone GPUs) on
 	# Medium+ averages the sub-pixel cubes into their real colours.
 	HeroRoster.lod1 = false   # test 26: the hero always uses full detail (LOD0) on every tier
+	HeroRoster.comp_lod1 = tier <= 1
 	vp.msaa_3d = [Viewport.MSAA_DISABLED, Viewport.MSAA_2X, Viewport.MSAA_2X, Viewport.MSAA_4X][tier]
 	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
 	env.glow_enabled = tier >= 1
@@ -863,11 +864,12 @@ func _ships() -> void:
 						if sm is BaseMaterial3D:
 							sm = sm.duplicate(); sm.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 							sm.cull_mode = BaseMaterial3D.CULL_DISABLED; sm.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED; mi.set_surface_override_material(si, sm)
-		var col := _add_col("res://assets/ships/ship_%s_col.glb" % id, root.position, root.rotation.y); col.name = "ShipCol%d" % i
 		# hull draft: Beth's origin is ~1 m above the painted waterline on the galleon, ~0.3 m on the boats
-		# test 26 (boss: "it's sunk"): galleon keel is model y -1.85 -> float it with the keel ~0.7 m under, red lower hull above water
-		var sink := 1.15 if id == "tidewrack_sailing_ship" else -0.3
-		root.position.y = sink; ships.append([root, sink, float(sp[4]), col])
+		# test 26 (boss: "it's sunk"): test 27 (boss: now floating in the air): keel y -1.85, deck ~4.3 -> waterline ~1/3 up the hull
+		var sink := -0.2 if id == "tidewrack_sailing_ship" else -0.3
+		root.position.y = sink   # test 27: set the float height first so the collision hull matches the raised galleon
+		var col := _add_col("res://assets/ships/ship_%s_col.glb" % id, root.position, root.rotation.y); col.name = "ShipCol%d" % i
+		ships.append([root, sink, float(sp[4]), col])
 	_ships_tier()
 
 func _ships_tier() -> void:

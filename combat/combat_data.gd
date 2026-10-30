@@ -24,7 +24,8 @@ static func kit(hero_id: String) -> Dictionary:
 	if hero_id == "owner":
 		var sk := []
 		# test 25: Holy Destruction gets its own button (slot 5)
-		for k in ["royal", "chains", "wrath", "unholy", "holy"]: sk.append(d.OWNER_SKILLS[k])
+		# test 27 (boss): Sovereign's Wrath removed; Unholy (slot 3) + Holy (slot 4) on the normal buttons, clear of Jump
+		for k in ["royal", "chains", "unholy", "holy"]: sk.append(d.OWNER_SKILLS[k])
 		return {"color": "#ffd700", "basic": "Saber slash", "skills": sk, "owner": true}
 	if d.KITS.has(hero_id): return d.KITS[hero_id]
 	# Pip / Phoenix / Wren have no kit in the JS game: generic kit from ABILITIES (heavy, secondary, class, ultimate), saber flag removed.

@@ -62,7 +62,7 @@ func _set_companions(ids: Array) -> void:
 	companion_ids = ids.filter(func(x): return x != hero_id)
 	for i in companion_ids.size():
 		var n := Node3D.new(); main.add_child(n)
-		var r := CharacterRig.new().setup(HeroRoster.model(companion_ids[i]), HeroRoster.height(companion_ids[i]))
+		var r := CharacterRig.new().setup(HeroRoster.model(companion_ids[i], true), HeroRoster.height(companion_ids[i]))
 		n.add_child(r)
 		var cid: String = companion_ids[i]
 		if r.voxel and HeroRoster.ROOT_SPEED.has(cid): r.set_root_speeds(HeroRoster.ROOT_SPEED[cid][0], HeroRoster.ROOT_SPEED[cid][1], HeroRoster.speed(cid) * 1.15)

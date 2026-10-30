@@ -27,7 +27,7 @@ func apply_state(p: Dictionary, snap := false) -> void:
 	if sk != skin:
 		skin = sk
 		if rig: rig.queue_free()
-		rig = CharacterRig.new().setup(HeroRoster.model(sk), HeroRoster.height(sk)); add_child(rig)
+		rig = CharacterRig.new().setup(HeroRoster.model(sk, true), HeroRoster.height(sk)); add_child(rig)
 	if label == null:
 		label = Label3D.new(); label.billboard = BaseMaterial3D.BILLBOARD_ENABLED; label.font_size = 48; label.pixel_size = 0.004; add_child(label)
 	label.text = str(p.get("name", p.get("hero", "")))

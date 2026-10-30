@@ -9,7 +9,7 @@ arm=[o for o in bpy.data.objects if o.type=='ARMATURE'][0]
 ob=[o for o in bpy.data.objects if o.type=='MESH' and o.parent==arm and len(o.data.vertices)>1000][0]
 for o in list(bpy.data.objects):
     if o.name.startswith('Icosphere'): bpy.data.objects.remove(o)
-me=ob.data; S=0.018; G=K*S; INF=float(os.environ.get('INFLATE','1.0'))
+me=ob.data; S=float(os.environ.get('S','0.018')); G=K*S; INF=float(os.environ.get('INFLATE','1.0'))
 info={'src_tris':sum(len(p.vertices)-2 for p in me.polygons)}
 gn={g.index:g.name for g in ob.vertex_groups}
 uvl=me.uv_layers.active.data
@@ -25,7 +25,7 @@ def geo(p):
 for p in me.polygons:
     pc,sz=geo(p)
     if K==1:
-        c=pc-p.normal*(sz/2); k=(R(c.x,sz),R(c.y,sz),R(c.z,sz),round(sz,6))
+        c=pc-p.normal*(sz/2); k=(R(c.x,sz),R(c.y,sz),R(c.z,sz),round(sz,4))
     else:
         c=pc-p.normal*(sz/2); k=tuple(int(math.floor(x/G)) for x in c)+(0,)
     d=cells[k]; d['s']=sz if K==1 else G

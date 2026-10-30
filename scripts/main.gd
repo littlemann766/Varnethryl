@@ -275,6 +275,7 @@ func _ready() -> void:
 	if args.has("--bouldercheck"): add_child(load("res://tests/boulder_check.gd").new())   # test 23
 	if args.has("--whereshots"): add_child(load("res://tests/where_shots.gd").new())   # test 25
 	if args.has("--voxclose"): add_child(load("res://tests/voxel_close.gd").new())   # test 25
+	if args.has("--capeshots"): add_child(load("res://tests/cape_shots.gd").new())   # test 33
 	if args.has("--ownershots"): add_child(load("res://tests/owner_shots.gd").new())   # test 26
 	if args.has("--shiplevel"): add_child(load("res://tests/ship_level.gd").new())   # test 28
 	if args.has("--shipcam"): add_child(load("res://tests/ship_cam.gd").new())   # test 29

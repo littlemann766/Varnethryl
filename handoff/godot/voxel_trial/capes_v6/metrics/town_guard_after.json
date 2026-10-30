@@ -1,0 +1,65 @@
+{
+ "H": 1.8080971240997314,
+ "clips": {
+  "attack": {
+   "frames": 31,
+   "flip_max": 52.504813467360016,
+   "flip_bone": "mixamorig:RightArm",
+   "flip_frame": 14,
+   "wrist_max": 0.05595291023658669,
+   "arm_abd_max": 138.82068799928254,
+   "knee_max": 26.338416675504966,
+   "knee_hyper": 0.0,
+   "hand_in_leg": 0,
+   "cape_in_leg": 0,
+   "facing_err_deg": -1,
+   "lat_speed_mean": 1.6689300537109375e-06,
+   "stance_lat_drift_m": 9.834766387939453e-07
+  },
+  "idle": {
+   "frames": 76,
+   "flip_max": 0.6103749052449634,
+   "flip_bone": "mixamorig:LeftForeArm",
+   "flip_frame": 7,
+   "wrist_max": 11.877555951679549,
+   "arm_abd_max": 42.72740906137608,
+   "knee_max": 36.584429553217994,
+   "knee_hyper": 0.0,
+   "hand_in_leg": 0,
+   "cape_in_leg": 0,
+   "facing_err_deg": -1,
+   "lat_speed_mean": 2.9623508453369142e-06,
+   "stance_lat_drift_m": 5.811452865600586e-07
+  },
+  "run": {
+   "frames": 29,
+   "flip_max": 34.88498212157787,
+   "flip_bone": "mixamorig:RightUpLeg",
+   "flip_frame": 4,
+   "wrist_max": 11.65795072303652,
+   "arm_abd_max": 26.706172412142273,
+   "knee_max": 120.53131009446118,
+   "knee_hyper": 0.0,
+   "hand_in_leg": 0,
+   "cape_in_leg": 0,
+   "facing_err_deg": 0.2616960033259676,
+   "lat_speed_mean": 0.03471312113106251,
+   "stance_lat_drift_m": 0.0029944702982902527
+  },
+  "walk": {
+   "frames": 41,
+   "flip_max": 11.80797211367716,
+   "flip_bone": "mixamorig:LeftUpLeg",
+   "flip_frame": 29,
+   "wrist_max": 22.617733472110565,
+   "arm_abd_max": 25.252778274061026,
+   "knee_max": 85.89759964367175,
+   "knee_hyper": 0.0,
+   "hand_in_leg": 0,
+   "cape_in_leg": 0,
+   "facing_err_deg": 0.0,
+   "lat_speed_mean": 0.0014268290251493454,
+   "stance_lat_drift_m": 0.0003969743847846985
+  }
+ }
+}

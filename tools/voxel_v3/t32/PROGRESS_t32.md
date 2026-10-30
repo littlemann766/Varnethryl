@@ -1,0 +1,69 @@
+# test32 progress (ET)
+- 17:05 start; read audit
+- 17:10 audit read. game test31 voxel = my glb_sealed_v2/capes_v5 except asha+nyx (Lucky splice: use /workspace/godot-voxel/voxel/{asha,nyx}*). titan game = repo ashentitan_wb_voxel_sealed (1e8ce5e). trolls game = godot-voxel/characters/frosttroll_{a,b}_lod1.glb (differs from repo frosttrolls/).
+- NOTE audit facing_err is in DEGREES (rad_to_deg) with 0.5 threshold -> 0.5-1.8 deg = likely false alarm; measure lateral drift myself.
+- audit arm_abd = atan2(|lateral|,down) of upper arm; rest A-pose ~66 deg.
+- 17:25 diag: run shin pops = rt2 moving foot-lock drives ankle past reach -> knee snaps straight (frames 1,7,11,15,21,25). UAL1 has Jump_Start/Loop/Land, Swim_Fwd_Loop, Swim_Idle_Loop.
+- plan: per char pipeline in /workspace/t32: imp -> rt2 new clips (jump, swim_tread, swim_stroke; no lock for swim) -> handfix new clips -> mfix.py (despike, leg reach smooth + lateral plant lock walk/run, arm cap walk/run + elbow bend clearance, wrist twist clamp) -> meas before/after -> check1 -> export; LOD1/2 get all actions copied from LOD0 blend.
+- aldric mfix ok; jump clips need LEGCLIPS (shin pop 62); swim sits low (UAL root)
+- 17:24 done aldric -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 17:25 aldric full pipeline ok (run flip 61->35, abd 88->29). batch launched: jobs.txt via xargs -P3
+- 17:27 pip/phoenix: run snaps REAL (pip foot_LB 151 roll, phoenix thighs 135); cfix cyclic smooth -> <=38; exported batch3/glb_sealed_v3 + lod1
+- 17:32 done nyx -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 17:32 done elira -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 17:35 done rowan -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 17:35 titan -> ashentitan_wb_voxel_sealed_v2 (hand snaps 88-112 -> <=39); trolls -> frosttrolls_v8 (attack hand_R clamp 80/100 -> 45)
+- 17:38 done thorne -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 17:40 done cedric -> /workspace/godot-art/voxel_cast/batch2/glb_sealed_v3
+- 17:47 done mirelle -> /workspace/godot-art/voxel_cast/batch2/glb_sealed_v3
+- 17:48 done kael -> /workspace/godot-art/voxel_cast/batch2/glb_sealed_v3
+- 17:49 done garruk -> /workspace/godot-art/voxel_cast/batch2/glb_sealed_v3
+- 17:55 done morwen -> /workspace/godot-art/voxel_cast/batch2/glb_sealed_v3
+- 17:55 done asha -> /workspace/godot-art/voxel_cast/batch3/glb_sealed_v3
+- 17:57 done seraphine -> /workspace/godot-art/voxel_cast/batch2/glb_sealed_v3
+- 18:00 done brynn -> /workspace/godot-art/voxel_cast/batch3/glb_sealed_v3
+- skip phoenix (own rig) in humanoid batch
+- skip pip (own rig) in humanoid batch
+- 18:04 done finn -> /workspace/godot-art/voxel_cast/batch3/glb_sealed_v3
+- 18:06 done orin -> /workspace/godot-art/voxel_cast/batch3/glb_sealed_v3
+- 18:11 done rook -> /workspace/godot-art/voxel_cast/batch3/glb_sealed_v3
+- 18:14 done vesper -> /workspace/godot-art/voxel_cast/batch3/glb_sealed_v3
+- 18:17 done talia -> /workspace/godot-art/voxel_cast/batch3/glb_sealed_v3
+- 18:18 freed seal30 blends (own temp)
+- 18:19 done wren -> /workspace/godot-art/voxel_cast/batch3/glb_sealed_v3
+- 18:22 done darius -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v6
+- 18:25 done holyknight_villain -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v6
+- 18:25 done selene -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v6
+- 18:26 done owner -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v6
+- 18:26 done town_guard -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v6
+- 18:33 fix2 holyknight_villain -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v6/holyknight_villain_voxel.glb
+- 18:35 fix2 town_guard -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v6/town_guard_voxel.glb
+- 18:36 fix2 asha -> /workspace/godot-art/voxel_cast/batch3/glb_sealed_v3/asha_voxel.glb
+- 18:36 selene death: bridged R leg keys 41-44
+- 18:43 test33 scope: arm-in-leg (Beth cape_fix32). New: merge33.py (Beth capes + my motion), alfix.py (vertex solver shoulder outward). garruk test: 11k->0-626 raw. fixed imp _Armature rename + action rename list() bug
+- 18:44 launched run33 for 24 (villain/guard after fix2)
+- 18:47 fix2 holyknight_villain -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v6/holyknight_villain_voxel.glb
+- 18:48 fix2 town_guard -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v6/town_guard_voxel.glb
+- 18:51 fix2 wren -> /workspace/godot-art/voxel_cast/batch3/glb_sealed_v3/wren_voxel.glb
+- 18:52 run33 done elira -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 18:52 run33 done nyx -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 18:54 run33 done aldric -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 18:58 fix2 holyknight_villain -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v6/holyknight_villain_voxel.glb
+- 18:58 villain death wrist clamp 169->60 (wclamp mixamo hands)
+- 18:58 killed run33 batch: alfix v1 abducts run arms to 75 (undoes cap) + LOD1 residual. redesign alfix v2: abd limited for walk/run (<=30 total), shoulder flex + elbow flex candidates, DIL margin
+- 18:59 re-running run1 aldric/elira/nyx (v3 overwritten by run33 v1). run33 will now write glb_sealed_v4/capes_v7
+- thorne also rerun
+- 19:05 done nyx -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 19:07 done thorne -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 19:07 done elira -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 19:08 launched run33 v2 (alfix2, 24 heroes, P4) -> glb_sealed_v4 / capes_v7
+- 19:09 asha/wren v3 lod1 re-copied from v3 lod0
+- 19:10 done aldric -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v3
+- 19:10 run33 done town_guard -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v7
+- 19:11 run33 done holyknight_villain -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v7
+- 19:16 run33 done elira -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v4
+- 19:19 run33 done nyx -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v4
+- 19:23 run33 done rowan -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v4
+- 19:23 run33 done thorne -> /workspace/godot-art/voxel_cast/batch1/glb_sealed_v4
+- 19:24 alfix2 v1 raised weapons/arms (shoulder flex in run, elbow 90). v2b: no shoulder flex in walk/run, elbow<=45, cost prefers abduction; ABDLIM 35 pass1 / 50 pass2. relaunch
+- 19:26 run33 done town_guard -> /workspace/varn-core/handoff/godot/voxel_trial/capes_v7

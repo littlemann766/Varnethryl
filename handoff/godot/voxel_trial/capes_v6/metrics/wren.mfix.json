@@ -1,0 +1,380 @@
+{
+ "attack1": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 5.4,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 5.4,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "attack2": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 1.5,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 1.5,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "attack3": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 5.3,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 5.3,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "death": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 1.7,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 1.7,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "fly_ascend": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "fly_bank_L": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "fly_bank_R": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "fly_descend": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "fly_fast": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "fly_forward": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "fly_hover": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "hit": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 1.5,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 1.5,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "idle": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0.3,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 1.4,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "jump": {
+  "despike1": 1,
+  "legs": {
+   "L": {
+    "stance_frames": 41,
+    "min_knee_deg": 34.5
+   },
+   "R": {
+    "stance_frames": 136,
+    "min_knee_deg": 11.5
+   }
+  },
+  "wrist": {
+   "L": {
+    "max_twist_deg": 28.3,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 12.6,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "jump_land": {
+  "despike1": 0,
+  "legs": {
+   "L": {
+    "stance_frames": 39,
+    "min_knee_deg": 23.9
+   },
+   "R": {
+    "stance_frames": 39,
+    "min_knee_deg": 22.4
+   }
+  },
+  "wrist": {
+   "L": {
+    "max_twist_deg": 28.3,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 12.6,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "jump_loop": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 8.6,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "jump_start": {
+  "despike1": 0,
+  "legs": {
+   "L": {
+    "stance_frames": 4,
+    "min_knee_deg": 34.5
+   },
+   "R": {
+    "stance_frames": 23,
+    "min_knee_deg": 11.5
+   }
+  },
+  "wrist": {
+   "L": {
+    "max_twist_deg": 28.3,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 8.6,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "run": {
+  "despike1": 0,
+  "legs": {
+   "L": {
+    "stance_frames": 7,
+    "min_knee_deg": 11.5
+   },
+   "R": {
+    "stance_frames": 6,
+    "min_knee_deg": 11.5
+   }
+  },
+  "arms": {
+   "L": {
+    "max_inward_deg": 30.7,
+    "max_elbow_extra_deg": 0.0
+   },
+   "R": {
+    "max_inward_deg": 31.0,
+    "max_elbow_extra_deg": 0.0
+   }
+  },
+  "wrist": {
+   "L": {
+    "max_twist_deg": 1.4,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 3.5,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "skill": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 1.5,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 1.5,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "swim_stroke": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 61.8,
+    "clamped": true
+   },
+   "R": {
+    "max_twist_deg": 75.0,
+    "clamped": true
+   }
+  },
+  "despike2": 0
+ },
+ "swim_tread": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0.6,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 4.8,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "walk": {
+  "despike1": 0,
+  "legs": {
+   "L": {
+    "stance_frames": 28,
+    "min_knee_deg": 13.7
+   },
+   "R": {
+    "stance_frames": 28,
+    "min_knee_deg": 11.5
+   }
+  },
+  "arms": {
+   "L": {
+    "max_inward_deg": 0.0,
+    "max_elbow_extra_deg": 19.8
+   },
+   "R": {
+    "max_inward_deg": 0.0,
+    "max_elbow_extra_deg": 4.9
+   }
+  },
+  "wrist": {
+   "L": {
+    "max_twist_deg": 1.3,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 1.3,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ }
+}

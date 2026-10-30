@@ -1,0 +1,26 @@
+{
+ "attack1/hand_L": [
+  0,
+  0
+ ],
+ "attack1/hand_R": [
+  100.0,
+  45.0
+ ],
+ "attack2/hand_L": [
+  0,
+  0
+ ],
+ "attack2/hand_R": [
+  100.0,
+  45.0
+ ],
+ "attack3/hand_L": [
+  0,
+  0
+ ],
+ "attack3/hand_R": [
+  100.0,
+  45.0
+ ]
+}

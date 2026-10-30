@@ -1,0 +1,98 @@
+{
+ "attack": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "idle": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 4.2,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "run": {
+  "despike1": 0,
+  "legs": {
+   "L": {
+    "stance_frames": 3,
+    "min_knee_deg": 11.5
+   },
+   "R": {
+    "stance_frames": 3,
+    "min_knee_deg": 11.5
+   }
+  },
+  "arms": {
+   "L": {
+    "max_inward_deg": 50.7,
+    "max_elbow_extra_deg": 0.0
+   },
+   "R": {
+    "max_inward_deg": 51.0,
+    "max_elbow_extra_deg": 0.0
+   }
+  },
+  "wrist": {
+   "L": {
+    "max_twist_deg": 5.1,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "walk": {
+  "despike1": 0,
+  "legs": {
+   "L": {
+    "stance_frames": 27,
+    "min_knee_deg": 14.7
+   },
+   "R": {
+    "stance_frames": 27,
+    "min_knee_deg": 11.5
+   }
+  },
+  "arms": {
+   "L": {
+    "max_inward_deg": 18.3,
+    "max_elbow_extra_deg": 0.0
+   },
+   "R": {
+    "max_inward_deg": 17.6,
+    "max_elbow_extra_deg": 0.0
+   }
+  },
+  "wrist": {
+   "L": {
+    "max_twist_deg": 3.4,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ }
+}

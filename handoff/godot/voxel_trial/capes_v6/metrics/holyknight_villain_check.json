@@ -1,0 +1,48 @@
+{
+ "rest_baseline": {
+  "arm_in_leg": 75,
+  "cape_in_body": 18324
+ },
+ "attack": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 31
+ },
+ "death": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 73
+ },
+ "hit": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 16
+ },
+ "idle": {
+  "arm_in_leg_verts_max": 6,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 76
+ },
+ "run": {
+  "arm_in_leg_verts_max": 1096,
+  "arm_leg_frames_over24": 13,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 29
+ },
+ "walk": {
+  "arm_in_leg_verts_max": 3140,
+  "arm_leg_frames_over24": 37,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 41
+ }
+}

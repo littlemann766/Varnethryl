@@ -1,0 +1,160 @@
+{
+ "rest_baseline": {
+  "arm_in_leg": 212,
+  "cape_in_body": 4490
+ },
+ "attack1": {
+  "arm_in_leg_verts_max": 184,
+  "arm_leg_frames_over24": 2,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 31
+ },
+ "attack2": {
+  "arm_in_leg_verts_max": 42,
+  "arm_leg_frames_over24": 1,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 33
+ },
+ "attack3": {
+  "arm_in_leg_verts_max": 106,
+  "arm_leg_frames_over24": 4,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 51
+ },
+ "death": {
+  "arm_in_leg_verts_max": 7,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 49
+ },
+ "fly_ascend": {
+  "arm_in_leg_verts_max": 273,
+  "arm_leg_frames_over24": 29,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 49
+ },
+ "fly_bank_L": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 49
+ },
+ "fly_bank_R": {
+  "arm_in_leg_verts_max": 807,
+  "arm_leg_frames_over24": 49,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 49
+ },
+ "fly_descend": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 49
+ },
+ "fly_fast": {
+  "arm_in_leg_verts_max": 730,
+  "arm_leg_frames_over24": 31,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 31
+ },
+ "fly_forward": {
+  "arm_in_leg_verts_max": 700,
+  "arm_leg_frames_over24": 49,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 49
+ },
+ "fly_hover": {
+  "arm_in_leg_verts_max": 2,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 61
+ },
+ "hit": {
+  "arm_in_leg_verts_max": 7,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 13
+ },
+ "idle": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 76
+ },
+ "jump": {
+  "arm_in_leg_verts_max": 2775,
+  "arm_leg_frames_over24": 27,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 154
+ },
+ "jump_land": {
+  "arm_in_leg_verts_max": 2791,
+  "arm_leg_frames_over24": 26,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 39
+ },
+ "jump_loop": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 76
+ },
+ "jump_start": {
+  "arm_in_leg_verts_max": 693,
+  "arm_leg_frames_over24": 2,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 41
+ },
+ "run": {
+  "arm_in_leg_verts_max": 777,
+  "arm_leg_frames_over24": 3,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 29
+ },
+ "skill": {
+  "arm_in_leg_verts_max": 56,
+  "arm_leg_frames_over24": 3,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 45
+ },
+ "swim_stroke": {
+  "arm_in_leg_verts_max": 2791,
+  "arm_leg_frames_over24": 11,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 41
+ },
+ "swim_tread": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 101
+ },
+ "walk": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 41
+ }
+}

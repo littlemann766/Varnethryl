@@ -1,0 +1,86 @@
+{
+ "attack_Armature": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0.0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "death_Armature": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 114.0,
+    "clamped": true
+   },
+   "R": {
+    "max_twist_deg": 82.1,
+    "clamped": true
+   }
+  },
+  "despike2": 0
+ },
+ "hit_Armature": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 0,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 0,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "idle_Armature": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 2.7,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 3.5,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "run_Armature": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 18.1,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 18.2,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ },
+ "walk_Armature": {
+  "despike1": 0,
+  "wrist": {
+   "L": {
+    "max_twist_deg": 15.8,
+    "clamped": false
+   },
+   "R": {
+    "max_twist_deg": 18.4,
+    "clamped": false
+   }
+  },
+  "despike2": 0
+ }
+}

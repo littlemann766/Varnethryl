@@ -278,6 +278,7 @@ func _ready() -> void:
 	if args.has("--shiplevel"): add_child(load("res://tests/ship_level.gd").new())   # test 28
 	if args.has("--shipcam"): add_child(load("res://tests/ship_cam.gd").new())   # test 29
 	if args.has("--vox30"): add_child(load("res://tests/vox30_shots.gd").new())   # test 30
+	if args.has("--vox31"): add_child(load("res://tests/vox31_shots.gd").new())   # test 31
 	if args.has("--voxshots"): add_child(load("res://tests/voxel_shots.gd").new())   # voxel-heroes
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
 	if args.has("--extshots"): add_child(load("res://tests/ext_shots.gd").new())   # test 22

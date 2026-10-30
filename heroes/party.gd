@@ -75,7 +75,13 @@ func _physics_process(dt: float) -> void:
 	var hp: Vector3 = main.hero.global_position
 	var v: Vector3 = main.hero.velocity; v.y = 0
 	var fly: bool = main.has_method("flying_now") and main.flying_now()
-	if fly or rig.fly_on:   # test 16: flying state instead of walk/run on air
+	var swim: bool = main.has_method("in_sea") and main.in_sea(hp)
+	if swim:   # test 26: tread water / swim stroke (hover + forward flight clips) chest-deep at the sea surface
+		var sl: Vector3 = rig.global_basis.inverse() * main.hero.velocity; sl.y = 0.0
+		rig.set_flight(true, sl, 0.0, maxf(main.move_speed, 1.0))
+	rig.swim_on = swim
+	rig.position.y = lerpf(rig.position.y, -1.15 * rig.target_height / 1.905 if swim else 0.0, minf(1.0, dt * 6.0))
+	if (fly or rig.fly_on) and not swim:   # test 16: flying state instead of walk/run on air
 		var vv: Vector3 = main.hero.velocity
 		var vl: Vector3 = rig.global_basis.inverse() * vv
 		var yr: float = rig.global_rotation.y; var turn := wrapf(yr - _fly_last_yaw, -PI, PI) / maxf(dt, 0.001); _fly_last_yaw = yr

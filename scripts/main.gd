@@ -210,6 +210,9 @@ var jump_count := 0
 var flight := false      # test 13: HUD ✈ toggles real flight; the menu "fly" cheat only unlocks the button
 var landing := false
 func flying_now() -> bool: return flight and bool(cheat.get("fly", false))
+## test 26 (boss: Owner "standing on the water"): over the open sea the hero swims / treads water instead of walking.
+func in_sea(p: Vector3) -> bool:
+	return not flying_now() and p.x < SEA_COAST_X - 3.0 and p.z > SEA_NORTH_Z + 2.0 and sea_mask(p.x, p.z) > 0.5
 func request_jump() -> void: jump_req = true
 func set_flight(on: bool) -> void:
 	if flight and not on: landing = true
@@ -271,6 +274,7 @@ func _ready() -> void:
 	if args.has("--bouldercheck"): add_child(load("res://tests/boulder_check.gd").new())   # test 23
 	if args.has("--whereshots"): add_child(load("res://tests/where_shots.gd").new())   # test 25
 	if args.has("--voxclose"): add_child(load("res://tests/voxel_close.gd").new())   # test 25
+	if args.has("--ownershots"): add_child(load("res://tests/owner_shots.gd").new())   # test 26
 	if args.has("--voxshots"): add_child(load("res://tests/voxel_shots.gd").new())   # voxel-heroes
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
 	if args.has("--extshots"): add_child(load("res://tests/ext_shots.gd").new())   # test 22
@@ -500,7 +504,7 @@ func apply_quality() -> void:
 	# aliasing -> speckle) and FXAA's edge blend turns every cube edge into noise. Mobile-only: the box's Compatibility
 	# renderer has no FXAA / 3D scaling, so it never showed. Now: no FXAA; MSAA (cheap on tiled phone GPUs) on
 	# Medium+ averages the sub-pixel cubes into their real colours.
-	HeroRoster.lod1 = tier == 0   # test 26: Low uses Beth's voxel LOD1 heroes (next hero load)
+	HeroRoster.lod1 = false   # test 26: the hero always uses full detail (LOD0) on every tier
 	vp.msaa_3d = [Viewport.MSAA_DISABLED, Viewport.MSAA_2X, Viewport.MSAA_2X, Viewport.MSAA_4X][tier]
 	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
 	env.glow_enabled = tier >= 1
@@ -827,14 +831,14 @@ func _ships() -> void:
 	var hs := harbour_spot(); var c: Vector2 = hs[0]
 	var L := func(lx: float, lz: float) -> Vector2: return Vector2(c.x - lz, c.y + lx)
 	# [world pos, model, near/far switch (m), yaw, phase]
-	var spots := [[L.call(-23.0, 18.0), "tidewrack_sailing_ship", 120.0, -PI / 2 + 0.02, 0.0],
+	var spots := [[L.call(-29.0, 18.0), "tidewrack_sailing_ship", 120.0, -PI / 2 + 0.02, 0.0],
 		[L.call(4.5, 10.0), "boat_02", 60.0, -PI / 2 - 0.05, 2.2],
 		[L.call(20.5, 10.0), "boat_sail", 60.0, -PI / 2 + 0.06, 3.7],
 		[c + Vector2(-85.0, 35.0), "boat_sail", 60.0, 2.4, 1.3],
 		# test 14 harbour district: one moored at each new pier, two galleons + boats at anchor in the bay
 		[Vector2(HarborDistrict.PIERS[0] + 5.2, 348.0), "boat_02", 60.0, 0.03, 0.8],
 		[Vector2(HarborDistrict.PIERS[1] + 5.2, 350.0), "boat_sail", 60.0, -0.04, 2.9],
-		[Vector2(HarborDistrict.PIERS[2] - 9.0, 352.0), "tidewrack_sailing_ship", 120.0, 0.02, 4.1],
+		[Vector2(HarborDistrict.PIERS[2] - 14.0, 352.0), "tidewrack_sailing_ship", 120.0, 0.02, 4.1],
 		[Vector2(-520.0, 430.0), "tidewrack_sailing_ship", 120.0, 2.6, 1.7],
 		[Vector2(-600.0, 380.0), "boat_sail", 60.0, 1.1, 0.4],
 		[Vector2(-470.0, 520.0), "boat_02", 60.0, -0.7, 3.3],
@@ -853,9 +857,16 @@ func _ships() -> void:
 				mi.visibility_range_begin = bands[k][0]; mi.visibility_range_end = bands[k][1]
 				# thin double-sided sails self-shadow into acne, and the sea doesn't show ship shadows: no casting
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				if id == "tidewrack_sailing_ship":   # test 26: lossless atlas, anisotropic (hull no longer smeared at grazing angles), solid both-sided sails
+					for si in mi.mesh.get_surface_count():
+						var sm = mi.mesh.surface_get_material(si)
+						if sm is BaseMaterial3D:
+							sm = sm.duplicate(); sm.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+							sm.cull_mode = BaseMaterial3D.CULL_DISABLED; sm.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED; mi.set_surface_override_material(si, sm)
 		var col := _add_col("res://assets/ships/ship_%s_col.glb" % id, root.position, root.rotation.y); col.name = "ShipCol%d" % i
 		# hull draft: Beth's origin is ~1 m above the painted waterline on the galleon, ~0.3 m on the boats
-		var sink := -0.9 if id == "tidewrack_sailing_ship" else -0.3
+		# test 26 (boss: "it's sunk"): galleon keel is model y -1.85 -> float it with the keel ~0.7 m under, red lower hull above water
+		var sink := 1.15 if id == "tidewrack_sailing_ship" else -0.3
 		root.position.y = sink; ships.append([root, sink, float(sp[4]), col])
 	_ships_tier()
 
@@ -1615,6 +1626,7 @@ func _physics_process(dt: float) -> void:
 		if party and party.get("rig") and party.rig.clips.has("jump"): party.rig.play_attack("jump", 1.0)
 	jump_req = false
 	if flying_now(): hero.velocity.y = (height(hero.position.x, hero.position.z) + fly_alt - hero.position.y) * 2.0
+	elif in_sea(hero.position) and hero.position.y < -0.05: hero.velocity.y = (0.0 - hero.position.y) * 4.0   # test 26: float at the sea surface (swim)
 	elif landing and not hero.is_on_floor(): hero.velocity.y = maxf(hero.velocity.y, -7.0)   # fly turned off mid-air: soft landing
 	elif landing: landing = false
 	_altitude_view()

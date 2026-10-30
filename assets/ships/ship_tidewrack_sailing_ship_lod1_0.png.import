@@ -18,7 +18,7 @@ dest_files=["res://.godot/imported/ship_tidewrack_sailing_ship_lod1_0.png-9f415f
 
 [params]
 
-compress/mode=1
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.8
 compress/uastc_level=0

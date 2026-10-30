@@ -256,6 +256,7 @@ func set_move_mps(v: float) -> void:
 
 # ---------- test 16: procedural flying state (hover / forward / bank / climb), smooth blends ----------
 var fly_on := false
+var swim_on := false   # test 26
 var fly_pose: FlyPose
 var _fly := {"w": 0.0, "fwd": 0.0, "bank": 0.0, "climb": 0.0, "pitch": 0.0, "roll": 0.0}
 ## v_local: velocity in rig space (forward = -Z); turn: yaw rate rad/s; max_speed: speed that counts as "fast"

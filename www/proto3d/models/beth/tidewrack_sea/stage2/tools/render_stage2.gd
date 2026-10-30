@@ -44,6 +44,16 @@ func _mat_all(n: Node, m: Material) -> void:
 	if n is MeshInstance3D:
 		n.material_override = m; n.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for c in n.get_children(): _mat_all(c, m)
+var sd_img: Image
+# Stage 4 fix: walk from p along dir and stop at the last open-water point (shore dist >= 3 m), so a shot camera is never placed inside terrain.
+func clear_dist(p: Vector3, dir: Vector3, maxd: float) -> float:
+	var best := 0.0; var d := 2.0
+	while d <= maxd:
+		var q := p + dir * d; var u := (q.x + 3000.0) / 1800.0; var v := (q.z + 1500.0) / 3200.0
+		if u < 0.0 or v < 0.0 or u >= 1.0 or v >= 1.0: break
+		if sd_img.get_pixel(int(u * sd_img.get_width()), int(v * sd_img.get_height())).r * 255.0 < 3.0 and d > 12.0: break
+		best = d; d += 2.0
+	return best
 func _run() -> void:
 	out = OS.get_cmdline_user_args()[0]; root.size = Vector2i(1280, 720); root.mesh_lod_threshold = 0.0
 	man = JSON.parse_string(FileAccess.get_file_as_string("res://meshes/stage2_manifest.json")); var P: Dictionary = man.props
@@ -53,7 +63,7 @@ func _run() -> void:
 	env.background_mode = Environment.BG_SKY; env.sky = sky; env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY; env.tonemap_mode = Environment.TONE_MAPPER_ACES
 	env.fog_enabled = true; env.fog_light_color = Color(0.74, 0.8, 0.86); env.fog_density = 0.0005; env.glow_enabled = true; we.environment = env; root.add_child(we)
 	sun = DirectionalLight3D.new(); sun.rotation_degrees = Vector3(-30, 60, 0); sun.light_color = Color(1, 0.92, 0.8); sun.shadow_enabled = true; sun.directional_shadow_max_distance = 60; root.add_child(sun)
-	var tex := ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path("res://shaders/coast_shore_dist.png")))
+	sd_img = Image.load_from_file(ProjectSettings.globalize_path("res://shaders/coast_shore_dist.png")); var tex := ImageTexture.create_from_image(sd_img)
 	var rect := Vector4(-3000, -1500, 1800, 3200)
 	var whi := ShaderMaterial.new(); whi.shader = load("res://shaders/ocean_water.gdshader"); whi.set_shader_parameter("shore_dist", tex); whi.set_shader_parameter("shore_rect", rect); whi.set_shader_parameter("wind_dir", Vector2(1.0, 0.1))
 	var wlo := ShaderMaterial.new(); wlo.shader = load("res://shaders/ocean_water_low.gdshader"); wlo.set_shader_parameter("shore_dist", tex); wlo.set_shader_parameter("shore_rect", rect)
@@ -87,6 +97,7 @@ func _run() -> void:
 		await shot("C2_cliff_coast_sailing" + sfx, an + Vector3(70, 26, 120), lp.lerp(an, 0.5) + Vector3(0, 8, 0), 62)
 		var ed := Vector3(sin(float(eg.yaw)), 0, cos(float(eg.yaw)))
 		var ecd := (Vector3(ec.x, 0, ec.z) - ep).normalized(); await shot("C3_echo_grotto" + sfx, ep + ecd * 140 + Vector3(0, 26, 0), ep + Vector3(0, 7, 0), 50)   # Stage 4: open-water approach (the old spot inside the north inlet showed thin dark spike artefacts)
+		var cd := minf(60.0, clear_dist(ep, ed, 60.0)); await shot("C3b_echo_grotto_mouth_front" + sfx, ep + ed * cd + Vector3(0, 9, 0), ep + Vector3(0, 7, 0), 66)   # original front-of-mouth framing; old fixed 60 m offset sat inside the north bank cliff
 		var gw: Dictionary = P.coast_glasswyrm_cavern; await shot("C4_glasswyrm_cavern" + sfx, _v(gw.cam), _v(gw.pos) + Vector3(0, 8, 0), 58)
 		var st: Dictionary = P.coast_smugglers_throat; var sdd := Vector3(sin(float(st.yaw)), 0, cos(float(st.yaw)))
 		await shot("C5_smugglers_throat" + sfx, _v(st.pos) + sdd * 60 + Vector3(0, 10, 0), _v(st.pos) + Vector3(0, 8, 0), 58)

@@ -13,7 +13,6 @@ Godot 4.7.2, Mobile renderer, High + Low tiers. Load `meshes/stage4_manifest.jso
 
 ## Runtime notes
 - Water: use stage1 `ocean_water` / `ocean_water_low` with `shaders/{frost,ash}_shore_dist.png`, `shore_rect` = region rect (x0,z0,w,d), `ice` from manifest.
-  `ocean_water_low` gained an optional `rough` uniform (default 0.12 = unchanged); ash uses 0.45.
 - Shore distance png is now baked from the real terrain height (>0.2 m), not the map solid mask (that left submerged land -> white foam fields).
 - Basalt: StandardMaterial vertex colour with **metallic_specular 0.15**, else it mirrors the hazy sky and reads beige.
 - Shaders reading data packed in COLOR.r/g must decode with `pow(x, 1.0/2.2)` (save() writes linear vertex colours).
@@ -22,8 +21,9 @@ Godot 4.7.2, Mobile renderer, High + Low tiers. Load `meshes/stage4_manifest.jso
 - Map field changes (Cinderreach lava spit, Rimefang gorge carve) live in `map/straits_fields.npz` (tools/make_fields.py); the beth-world map file is untouched.
 - Budgets: lod1 ~45% of High; Low tier ~75-137k prims, 15-33 draw calls; High ~270-690k prims, <=41 draw calls.
 
-## Known issue
-- Stage 2: thin dark spikes appear in the inlet north of Echo Grotto (~(-2290,-230), terrain tile x1z1). Not slivers/fins; root cause unknown.
-  The C3 shot camera was moved to the open-water approach; the artefact itself remains.
+## Fixed issues
+- Echo Grotto "spikes" (stage 2): camera was inside the north-bank cliff of the narrow inlet in front of the mouth, not a mesh fault. See stage2 PROGRESS.
+- Low ash water: own shader `shaders/ocean_water_low_straits.gdshader` (stage1 `ocean_water_low` is untouched): roughness 0.4, specular 0.18, cool fresnel sheen,
+  ash Low colours deep (0.05,0.13,0.15) / shallow (0.12,0.32,0.32) / sheen (0.12,0.24,0.27). Frost Low still uses the stage1 shader.
 
 Renders: `renders/small/` (S4_contact_*.jpg, F*/A* shots, POLISH_before_after_*.jpg).

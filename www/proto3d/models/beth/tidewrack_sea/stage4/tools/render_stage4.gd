@@ -81,7 +81,8 @@ func _run() -> void:
 		var rect := Vector4(rc[0], rc[1], float(rc[2]) - float(rc[0]), float(rc[3]) - float(rc[1]))
 		var wh := smat("ocean_water"); wh.set_shader_parameter("shore_dist", tex); wh.set_shader_parameter("shore_rect", rect); wh.set_shader_parameter("ice", W.ice)
 		wh.set_shader_parameter("deep", col3(W.deep)); wh.set_shader_parameter("shallow", col3(W.shallow)); wh.set_shader_parameter("wind_dir", Vector2(0.1, 1.0) if k == "frost" else Vector2(0.0, -1.0)); wmat_hi[k] = wh
-		var wl := smat("ocean_water_low"); wl.set_shader_parameter("shore_dist", tex); wl.set_shader_parameter("shore_rect", rect); wl.set_shader_parameter("deep", col3(W.deep)); wl.set_shader_parameter("shallow", col3(W.shallow)); wl.set_shader_parameter("rough", 0.12 if k == "frost" else 0.45); wmat_lo[k] = wl
+		var wl := smat("ocean_water_low" if k == "frost" else "ocean_water_low_straits"); wl.set_shader_parameter("shore_dist", tex); wl.set_shader_parameter("shore_rect", rect); wl.set_shader_parameter("deep", col3(W.deep)); wl.set_shader_parameter("shallow", col3(W.shallow)); if k == "ash": wl.set_shader_parameter("deep", Color(0.05, 0.13, 0.15)); wl.set_shader_parameter("shallow", Color(0.12, 0.32, 0.32)); wl.set_shader_parameter("sheen", Color(0.12, 0.24, 0.27))   # Low has no wave lighting, so lift it toward the High teal
+		wmat_lo[k] = wl
 		var g := Node3D.new(); root.add_child(g); groups[k] = g
 		for t in man.tiles[k].high: gprop(g, t[0])
 		var fm := smat("fog_layers"); fm.set_shader_parameter("fog_col", col3(man.fog[k].fog_col)); fm.set_shader_parameter("fog_dark", col3(man.fog[k].fog_dark)); fogm[k] = fm

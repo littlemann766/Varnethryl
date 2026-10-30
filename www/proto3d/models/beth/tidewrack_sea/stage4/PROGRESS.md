@@ -13,3 +13,5 @@
 ## 4c
 - Fixed ash white-foam water: test copy had a stale shore_dist png (old rect); also shore_dist now baked from terrain height; ash sky horizon darkened; Low water `rough` uniform (ash 0.45).
 - Final renders checked by eye (24 shots), smalls + contact sheets + polish before/after in renders/small.
+- 4d: committed 1764517, pushed to beth-world-art; /tmp test dirs deleted.
+- 4e: Echo spike root cause = old shot camera inside north-bank cliff (fixed with clear_dist); ash Low water own shader (cool, less specular); stage1 Low shader reverted to original.

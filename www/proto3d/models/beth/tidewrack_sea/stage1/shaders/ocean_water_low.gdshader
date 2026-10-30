@@ -6,7 +6,6 @@ uniform vec4 deep : source_color = vec4(0.03, 0.16, 0.26, 1.0);
 uniform vec4 shallow : source_color = vec4(0.12, 0.50, 0.50, 1.0);
 uniform sampler2D shore_dist : filter_linear, repeat_disable;
 uniform vec4 shore_rect = vec4(-1200.0, -1300.0, 2700.0, 2600.0);
-uniform float rough = 0.12;   // Stage 4: Ash strait uses ~0.4 so the flat Low water doesn't mirror the hazy sky white
 varying vec3 wpos;
 void vertex(){ wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
 void fragment(){
@@ -15,5 +14,5 @@ void fragment(){
 	vec3 col = mix(deep.rgb, shallow.rgb, 1.0 - smoothstep(0.0, 70.0, sd));
 	col = mix(col, vec3(0.9, 0.95, 0.96), (1.0 - smoothstep(4.0, 12.0, sd)) * 0.7);
 	NORMAL = normalize(NORMAL + (VIEW_MATRIX * vec4((n - 0.5) * 0.08, 0.0, 0.0, 0.0)).xyz);
-	ALBEDO = col; ROUGHNESS = rough; SPECULAR = 0.5;
+	ALBEDO = col; ROUGHNESS = 0.12; SPECULAR = 0.5;
 }

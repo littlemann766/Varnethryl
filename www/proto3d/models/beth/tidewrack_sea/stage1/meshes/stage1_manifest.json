@@ -26,8 +26,8 @@
    "lod1_pct": 44.9
   },
   "arch_shore_rocks": {
-   "tris": 11708,
-   "lod1": 5268,
+   "tris": 32736,
+   "lod1": 14730,
    "lod1_pct": 45.0
   },
   "buoy_route": {

@@ -49,39 +49,39 @@
   "lod1": [
    [
     "coast_tile_x0z0_lod1",
-    11094
+    11067
    ],
    [
     "coast_tile_x0z1_lod1",
-    6969
+    7005
    ],
    [
     "coast_tile_x0z2_lod1",
-    10166
+    10176
    ],
    [
     "coast_tile_x0z3_lod1",
-    11704
+    11640
    ],
    [
     "coast_tile_x1z0_lod1",
-    8430
+    8418
    ],
    [
     "coast_tile_x1z1_lod1",
-    9070
+    9074
    ],
    [
     "coast_tile_x1z2_lod1",
-    5799
+    5843
    ],
    [
     "coast_tile_x1z3_lod1",
-    9548
+    9523
    ],
    [
     "coast_tile_x2z1_lod1",
-    2224
+    2246
    ],
    [
     "coast_tile_x2z2_lod1",
@@ -89,7 +89,7 @@
    ],
    [
     "coast_tile_x2z3_lod1",
-    1864
+    1876
    ]
   ]
  },
@@ -116,18 +116,18 @@
    "lod1_pct": 50.0
   },
   "coast_echo_grotto": {
-   "tris": 1932,
-   "lod1": 868,
+   "tris": 2684,
+   "lod1": 1206,
    "lod1_pct": 44.9
   },
   "coast_glasswyrm_cavern": {
-   "tris": 2092,
-   "lod1": 940,
+   "tris": 2124,
+   "lod1": 954,
    "lod1_pct": 44.9
   },
   "coast_smugglers_throat": {
-   "tris": 2608,
-   "lod1": 1172,
+   "tris": 3360,
+   "lod1": 1510,
    "lod1_pct": 44.9
   },
   "coast_sunken_ward_surface": {
@@ -136,18 +136,18 @@
    "lod1_pct": 45.0
   },
   "coast_saltglass_crystals": {
-   "tris": 13128,
-   "lod1": 5906,
+   "tris": 13392,
+   "lod1": 6026,
    "lod1_pct": 45.0
   },
   "coast_offshore_rocks": {
-   "tris": 22272,
-   "lod1": 10022,
+   "tris": 62112,
+   "lod1": 27950,
    "lod1_pct": 45.0
   },
   "coast_beach_dressing": {
-   "tris": 2108,
-   "lod1": 948,
+   "tris": 2148,
+   "lod1": 966,
    "lod1_pct": 45.0
   },
   "coast_storm_wall": {
@@ -186,9 +186,9 @@
    "skiff_only": true,
    "interior_cell": "echo_grotto_interior (Stage 3 sub-cell)",
    "cam": [
-    -2266.078524596367,
-    17.2,
-    -278.21203824874624
+    -2264.146672943789,
+    19.0,
+    -277.6944001585412
    ]
   },
   "coast_glasswyrm_cavern": {
@@ -216,9 +216,9 @@
    "skiff_only": true,
    "interior_cell": "smugglers_throat_interior (Stage 3 sub-cell)",
    "cam": [
-    -2388.0,
-    18.4,
-    1135.2346281956402
+    -2392.42167749046,
+    19.6,
+    1127.491107581834
    ]
   },
   "sunken_ward": {

@@ -122,6 +122,31 @@ def dock(p, yaw, length, width=4.0):
     for k in range(0, int(length), 7): parts.append(cyl(0.18, 0.9, IRON, (width / 2 - 0.3, 2.0, k + 1)))
     return T(merge(parts), p, (0, yaw, 0))
 def rock(p, r, seed, squash=0.7, col=DST): return ball(r, col, p, 1, (1, squash, 1), 0.25, seed)
+def natural_stack(x, z, h, r, seed):
+    """Weathered sea stack (Stage 3 fix for the pale cones): stacked, leaning, eroded tiers; dark wet foot with a
+    wave-cut notch, darker grey-brown rock with pale strata, lichen/guano on the cap. One merged piece."""
+    rr = np.random.default_rng(seed); parts = []; y = -4.0; rad = r * 1.15; lean = rr.uniform(-0.06, 0.06, 2); ox = oz = 0.0
+    tiers = rr.integers(3, 6); th = (h + 4) / tiers
+    for k in range(tiers):
+        m = trimesh.creation.cylinder(1.0, 1.0, sections=12); m = m.subdivide()
+        v = m.vertices; v[:, 2] += 0.5   # 0..1 along z
+        ang = np.arctan2(v[:, 1], v[:, 0]); t = v[:, 2]
+        bump = 1 + 0.22 * np.sin(ang * 3 + seed + k) * np.cos(ang * 5 - k) + rr.uniform(-0.12, 0.12, len(v))
+        rk = rad * (1 - 0.18 * t) * (0.78 if (k == 0) else 1.0) ** (1 - t)
+        v[:, 0] *= rk * bump; v[:, 1] *= rk * bump * rr.uniform(0.75, 1.0); v[:, 2] *= th * rr.uniform(0.85, 1.1)
+        m.apply_transform(trimesh.transformations.rotation_matrix(-math.pi / 2, (1, 0, 0)))
+        m.apply_translation((ox, y, oz)); yy = m.vertices[:, 1]
+        col = np.tile(C(84, 78, 72), (len(yy), 1))
+        col[(np.sin(yy * 1.7 + seed) > 0.75)] = C(118, 110, 98)                     # pale strata lines
+        col[yy < 1.6] = C(40, 40, 42); col[(yy > 0.2) & (yy < 1.6) & (np.sin(ang * 7) > 0.3)] = C(46, 64, 50)   # wet foot + weed
+        col[(yy < 1.0) & (yy > -0.5)] = C(30, 30, 32)                                 # wave-cut notch shadow
+        m.visual = trimesh.visual.ColorVisuals(m, vertex_colors=col); parts.append(m)
+        y += th * 0.92; rad *= rr.uniform(0.72, 0.9); ox += lean[0] * th + rr.uniform(-0.6, 0.6); oz += lean[1] * th + rr.uniform(-0.6, 0.6)
+    cap = ball(rad * 1.25, C(96, 104, 78), (ox, y - th * 0.15, oz), 1, (1, 0.45, 1), 0.3, seed + 9)   # lichen/grass cap
+    cap.visual.vertex_colors[np.random.default_rng(seed).uniform(size=len(cap.vertices)) > 0.6] = C(206, 204, 192)   # guano flecks
+    parts.append(cap)
+    for k in range(rr.integers(2, 5)): parts.append(rock((rr.uniform(-r, r) * 1.6, rr.uniform(-1.5, 0.2), rr.uniform(-r, r) * 1.6), rr.uniform(1.2, 2.6), seed * 7 + k, 0.6, C(52, 50, 50)))   # fallen blocks
+    return T(merge(parts), (x, 0, z), (0, rr.uniform(0, math.tau), 0))
 def find_water(x, z, mind, rmax=600):
     for _r in range(0, rmax, 8):
         for _a in np.linspace(0, 2 * math.pi, 36, endpoint=False):
@@ -200,7 +225,7 @@ props['saltwatch_keep'] = {'cam': open_cam(hx_, hz_, 40, 12), 'pos': [cx_, base,
 dist = D['dist_m']; cand = np.argwhere((dist[j0:j1, i0:i1] > 4) & (dist[j0:j1, i0:i1] < 30)); rp = []
 for k in rng.choice(len(cand), 160, replace=False):
     jj, ii = cand[k]; x = (ii + i0 - S / 2) / pm; z = (jj + j0 - S / 2) / pm
-    if rng.uniform() < 0.15: rp.append(cyl(rng.uniform(2, 4), rng.uniform(8, 20), STONE, (x, 2, z), sec=7, r2=1.2))
+    if rng.uniform() < 0.15: rp.append(natural_stack(x, z, rng.uniform(8, 20), rng.uniform(2.5, 4.5), 4000 + int(k)))
     else: rp.append(rock((x, rng.uniform(-1, 0.3), z), rng.uniform(1.2, 4.5), 300 + int(k), 0.6))
 save('arch_shore_rocks', merge(rp))
 def buoy(col):

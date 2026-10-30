@@ -34,7 +34,7 @@ def hf_coast(lf, n, x):
     sea = np.where(cliffy, np.maximum(lf * 0.35, -14.0), np.maximum(lf * 0.16, -12.0))  # cliffs drop into deeper water
     return np.where(lf > 0, np.minimum(land, 120), sea), cliffy
 _sol0 = D['solid'] > 0; _edge0 = _sol0 & ndimage.binary_dilation(~_sol0); _ej0, _ei0 = np.nonzero(_edge0); _et0 = cKDTree(np.stack([_ei0, _ej0], 1))
-CAVES = {'coast_echo_grotto': ((-2330, -300), 16, 12, 'echo', 1), 'coast_glasswyrm_cavern': ((-2330, 360), 24, 18, 'wyrm', 2), 'coast_smugglers_throat': ((-2330, 1100), 9, 14, 'smug', 3)}
+CAVES = {'coast_echo_grotto': ((-2330, -300), 18, 15, 'echo', 1), 'coast_glasswyrm_cavern': ((-2330, 360), 24, 18, 'wyrm', 2), 'coast_smugglers_throat': ((-2330, 1100), 14, 16, 'smug', 3)}
 CAVE_GEO = {}
 _yy, _xx = np.mgrid[0:S, 0:S]
 for _n, ((x, z), w, hgt, kind, sd_) in CAVES.items():
@@ -52,6 +52,10 @@ i0, j0 = map(int, px(X0, Z0)); i1, j1 = map(int, px(X1, Z1)); i0 = max(i0, 0)
 lf = LF[j0:j1:step, i0:i1:step]; n = N1[j0:j1:step, i0:i1:step]
 gz, gx = np.mgrid[j0:j1:step, i0:i1:step]; WXg = (gx - S / 2) / pm; WZg = (gz - S / 2) / pm
 H, CL = hf_coast(lf, n, WXg)
+# Stage 3 fix: the map's small scattered islets came out as pale sandy pyramids. Make them low, rounded, dark weathered rock.
+_orig = D['land_f'][j0:j1:step, i0:i1:step]; ISLET = (lf > 0) & (_orig <= 0)
+_ins = np.clip(lf, 0, None) / 1.4
+H = np.where(ISLET, 7.0 * (1 - np.exp(-_ins / 7.0)) * (0.8 + 0.4 * np.clip(n + 0.5, 0, 1)) - 0.6, H)
 keep = lf > -50
 idx = -np.ones(lf.shape, int); idx[keep] = np.arange(keep.sum())
 V = np.stack([WXg[keep], H[keep], WZg[keep]], 1)
@@ -65,6 +69,7 @@ col[(h < 2.2) & ~clf] = C(216, 198, 142); col[h < 0] = C(170, 160, 120); col[h <
 rk = (slope > 0.4) & (h > 0.3); col[rk] = CLIFF; col[(slope > 0.6) & (h > 0)] = CLIFF2
 band = (slope > 0.5) & (h > 3) & (h < 30) & (np.sin(h * 1.3) > 0.6); col[band] = C(150, 136, 118)   # strata bands
 col[clf & (h < 1.5) & (h > -2)] = C(64, 60, 58)   # dark wet rock at the cliff foot
+isl_k = ISLET[keep]; col[isl_k] = C(78, 74, 70); col[isl_k & (h < 1.2)] = C(42, 42, 44); col[isl_k & (h > 4.5)] = C(96, 104, 80)
 coast.visual = trimesh.visual.ColorVisuals(coast, vertex_colors=col)
 v2, f2 = fast_simplification.simplify(coast.vertices.astype(np.float32), coast.faces.astype(np.int64), target_reduction=max(0, 1 - 180000 / len(coast.faces)))
 c2 = trimesh.Trimesh(v2, f2, process=False); c2.visual = trimesh.visual.ColorVisuals(c2, vertex_colors=col[cKDTree(V).query(v2)[1]])
@@ -140,12 +145,22 @@ def cave_mouth(x, z, w, hgt, depth, seed, kind):
 def cave_mouth2(sx_, sz_, dv, w, hgt, kind, seed):
     yaw = math.atan2(dv[0], dv[1]); r = np.random.default_rng(seed); parts = []
     for k in range(20):   # arch over the cleft mouth, legs anchored on the cliff either side
-        t = k / 19; a = math.pi * t; parts.append(rock((math.cos(a) * (w / 2 + 2), math.sin(a) * hgt + 1, r.uniform(-1, 1)), r.uniform(2.8, 4.8) * (1.4 if k in (0, 19) else 1), seed * 50 + k, 0.8, CLIFF2 if k % 2 else CLIFF))
+        t = k / 19; a = math.pi * t; _rs = 1.0 if kind == 'wyrm' else 0.55; parts.append(rock((math.cos(a) * (w / 2 + 2 * _rs), math.sin(a) * hgt + 1, r.uniform(-1, 1) * _rs - (0 if kind == 'wyrm' else 1.5)), r.uniform(2.8, 4.8) * _rs * (1.4 if k in (0, 19) else 1), seed * 50 + k, 0.8, CLIFF2 if k % 2 else CLIFF))
     for k in range(12):   # roof: rock slabs bridging the cleft going inland (so it reads as a cave, not a gorge)
         zz = -3 - k * 3.2; parts.append(T(box((w + 8, 5 + r.uniform(0, 3), 4.0), CLIFF2 if k % 2 else CLIFF), (r.uniform(-1, 1), hgt + 2 + k * 0.9, zz), (r.uniform(-.06, .06), r.uniform(-.08, .08), r.uniform(-.05, .05))))
     for k in range(3):  # dark void walls deep in the cleft
         parts.append(box((w * (0.9 - 0.2 * k), hgt * (1.1 - 0.2 * k), 0.4), DARK, (0, hgt * 0.45 - 1, -14 - k * 9)))
     parts.append(box((w + 2, 1.0, 38), DARK, (0, hgt + 1.0, -20)))   # ceiling underside (dark)
+    _hv = [(0, -1.5, -0.8)] + [(math.cos(math.pi * t) * (w / 2 + 0.5), max(-1.5, math.sin(math.pi * t) * (hgt + 0.5)), 0.6) for t in np.linspace(0, 1, 17)]
+    parts.append(paint(trimesh.Trimesh(_hv, [(0, k + 1, k + 2) for k in range(16)] + [(0, k + 2, k + 1) for k in range(16)], process=False), DARK))   # black opening fills the arch
+    if kind in ('echo', 'smug'):   # Stage 3: deep dark overhang so the mouth reads as a cave from a distance
+        oh = hgt * 0.55
+        for k in range(7):   # brow of the cliff pushed out over the water
+            a = math.pi * (0.08 + 0.84 * k / 8); parts.append(rock((math.cos(a) * (w / 2 + 3), hgt + oh * 0.4 + math.sin(a) * oh * 0.5, 3.5 + r.uniform(-1, 1)), r.uniform(4.5, 7), seed * 90 + k, 0.7, CLIFF2))
+        parts.append(T(box((w + 14, oh, 9), CLIFF2), (0, hgt + oh / 2 + 0.5, 2.0)))           # overhang slab
+        parts.append(box((w + 6, 0.6, 12), DARK, (0, hgt - 0.2, 1.5)))                        # its dark underside
+        for k in range(3): parts.append(box((w * (1.05 - 0.15 * k), hgt * (1.0 - 0.15 * k), 0.4), DARK, (0, hgt * 0.5 - 1.2, -2.5 - k * 3.0)))   # near-mouth black voids
+        for k in range(10): parts.append(cyl(0.5, r.uniform(1.5, 4.0), CLIFF2, (r.uniform(-w / 2, w / 2), hgt - 0.6, r.uniform(-1, 5)), (math.pi, 0, 0), 5, 0))   # dripstone fringe
     if kind == 'echo':
         for k in range(14): parts.append(cyl(0.35, r.uniform(1.5, 3.8), SALT, (r.uniform(-w / 2.5, w / 2.5), hgt - 0.5, r.uniform(-12, 1)), (math.pi, 0, 0), 5, 0))
     if kind == 'wyrm':
@@ -189,7 +204,7 @@ save('coast_saltglass_crystals', merge(cr))
 cand = np.argwhere((dB > 3) & (dB < 45)); rp = []
 for k in rng.choice(len(cand), 300, replace=False):
     jj, ii = cand[k]; x, z = xs(ii), zs(jj)
-    if rng.uniform() < 0.2 and x < -2150: rp.append(cyl(rng.uniform(3, 6), rng.uniform(12, 34), CLIFF, (x, 3, z), sec=8, r2=rng.uniform(1.5, 3)))
+    if rng.uniform() < 0.2 and x < -2150: rp.append(natural_stack(x, z, rng.uniform(12, 34), rng.uniform(3.5, 6.5), 5000 + int(k)))
     else: rp.append(rock((x, rng.uniform(-1.2, 0.3), z), rng.uniform(1.2, 5.5), 900 + int(k), 0.6, CLIFF2 if k % 3 else DST))
 save('coast_offshore_rocks', merge(rp))
 cand = np.argwhere((lfB > 1) & (lfB < 10)); dw = []
@@ -202,8 +217,9 @@ props['beached_wreck'] = {'pos': [wx_, 0, wz_]}
 save('coast_beach_dressing', merge(dw))
 # ---------------------------------------------------------------- region border: storm wall + fog bank (B is locked until the Coil falls)
 ins = 40
-ribbon([(X0 + ins, Z0 + ins), (X1 - ins, Z0 + ins), (X1 - ins, Z1 - ins), (X0 + ins, Z1 - ins), (X0 + ins, Z0 + ins)], 140).export(os.path.join(OUT, 'coast_storm_wall.glb'))
-ribbon([(X0 + 100, Z0 + 100), (X1 - 100, Z0 + 100), (X1 - 100, Z1 - 100), (X0 + 100, Z1 - 100), (X0 + 100, Z0 + 100)], 45).export(os.path.join(OUT, 'coast_fog_bank.glb'))
+pass  # v1 slab wall retired (storm border v2: tools/build_stormfog.py)
+if False: ribbon([(X0 + ins, Z0 + ins), (X1 - ins, Z0 + ins), (X1 - ins, Z1 - ins), (X0 + ins, Z1 - ins), (X0 + ins, Z0 + ins)], 140).export(os.path.join(OUT, 'coast_storm_wall.glb'))
+if False: ribbon([(X0 + 100, Z0 + 100), (X1 - 100, Z0 + 100), (X1 - 100, Z1 - 100), (X0 + 100, Z1 - 100), (X0 + 100, Z0 + 100)], 45).export(os.path.join(OUT, 'coast_fog_bank.glb'))
 STATS['coast_storm_wall'] = {'tris': 320}; STATS['coast_fog_bank'] = {'tris': 320}
 json.dump({'tiles': TILES, 'region': 'B Saltglass Coast', 'rect': [X0, Z0, X1, Z1], 'stats': STATS, 'props': props}, open(os.path.join(OUT, 'stage2_manifest.json'), 'w'), indent=1, default=float)
 print('DONE')

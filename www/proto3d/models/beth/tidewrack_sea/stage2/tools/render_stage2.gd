@@ -71,7 +71,7 @@ func _run() -> void:
 	var la: Dictionary = P.saltglass_landing; var an := _v(la.anchor); var lp := _v(la.pos)
 	var gal := ship("galleon", 2, an, float(la.yaw) + PI / 2)
 	var eg: Dictionary = P.coast_echo_grotto; var ep := _v(eg.pos); var ec := _v(eg.cam)
-	ship("skiff", 1, ep.lerp(Vector3(ec.x, 0, ec.z), 0.45), float(eg.yaw) + PI)
+	ship("skiff", 1, ep + Vector3(sin(float(eg.yaw)), 0, cos(float(eg.yaw))) * 22, float(eg.yaw) + PI)
 	var swd: Dictionary = P.sunken_ward; var db := _v(swd.dive_buoy)
 	prop("s1/buoy_dive", db); prop("s1/buoy_dive", db + Vector3(30, 0, 0)); prop("s1/buoy_dive", db + Vector3(-30, 0, 0)); prop("s1/buoy_dive", db + Vector3(0, 0, 30)); prop("s1/buoy_dive", db + Vector3(0, 0, -30))
 	prop("s1/buoy_skiff", ep.lerp(Vector3(ec.x, 0, ec.z), 0.8)); prop("s1/buoy_route", an + Vector3(60, 0, 0))
@@ -85,9 +85,11 @@ func _run() -> void:
 		await shot("C1_saltglass_landing" + sfx, an + (an - lp).normalized() * 60 + Vector3(0, 22, 0) + Vector3((an - lp).z, 0, -(an - lp).x).normalized() * 50, lp + Vector3(0, 12, 0), 60)
 		if low: continue
 		await shot("C2_cliff_coast_sailing" + sfx, an + Vector3(70, 26, 120), lp.lerp(an, 0.5) + Vector3(0, 8, 0), 62)
-		await shot("C3_echo_grotto" + sfx, ec, ep + Vector3(0, 6, 0), 58)
+		var ed := Vector3(sin(float(eg.yaw)), 0, cos(float(eg.yaw)))
+		await shot("C3_echo_grotto" + sfx, ep + ed * 60 + Vector3(0, 16, 0), ep + Vector3(0, 7, 0), 58)
 		var gw: Dictionary = P.coast_glasswyrm_cavern; await shot("C4_glasswyrm_cavern" + sfx, _v(gw.cam), _v(gw.pos) + Vector3(0, 8, 0), 58)
-		var st: Dictionary = P.coast_smugglers_throat; await shot("C5_smugglers_throat" + sfx, _v(st.cam), _v(st.pos) + Vector3(0, 7, 0), 58)
+		var st: Dictionary = P.coast_smugglers_throat; var sdd := Vector3(sin(float(st.yaw)), 0, cos(float(st.yaw)))
+		await shot("C5_smugglers_throat" + sfx, _v(st.pos) + sdd * 60 + Vector3(0, 10, 0), _v(st.pos) + Vector3(0, 8, 0), 58)
 		await shot("C6_sunken_ward_dive" + sfx, _v(swd.cam), db + Vector3(0, 0, 60), 60)
 		var bw: Dictionary = P.beached_wreck; var bwp := _v(bw.pos); await shot("C7_beach_cove_wreck" + sfx, bwp + Vector3(90, 22, 40), bwp, 58)
 		storm.visible = false; fog.visible = false

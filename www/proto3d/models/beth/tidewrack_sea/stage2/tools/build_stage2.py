@@ -146,8 +146,9 @@ def cave_mouth2(sx_, sz_, dv, w, hgt, kind, seed):
     yaw = math.atan2(dv[0], dv[1]); r = np.random.default_rng(seed); parts = []
     for k in range(20):   # arch over the cleft mouth, legs anchored on the cliff either side
         t = k / 19; a = math.pi * t; _rs = 1.0 if kind == 'wyrm' else 0.55; parts.append(rock((math.cos(a) * (w / 2 + 2 * _rs), math.sin(a) * hgt + 1, r.uniform(-1, 1) * _rs - (0 if kind == 'wyrm' else 1.5)), r.uniform(2.8, 4.8) * _rs * (1.4 if k in (0, 19) else 1), seed * 50 + k, 0.8, CLIFF2 if k % 2 else CLIFF))
-    for k in range(12):   # roof: rock slabs bridging the cleft going inland (so it reads as a cave, not a gorge)
-        zz = -3 - k * 3.2; parts.append(T(box((w + 8, 5 + r.uniform(0, 3), 4.0), CLIFF2 if k % 2 else CLIFF), (r.uniform(-1, 1), hgt + 2 + k * 0.9, zz), (r.uniform(-.06, .06), r.uniform(-.08, .08), r.uniform(-.05, .05))))
+    for k in range(12):   # roof: lumpy boulders bridging the cleft going inland (Stage 4 polish: was flat box slabs)
+        zz = -3 - k * 3.2
+        for j in range(4): parts.append(rock(((j - 1.5) * (w + 8) / 4 + r.uniform(-1, 1), hgt + 3.5 + k * 0.9 + r.uniform(-0.6, 0.6), zz + r.uniform(-1, 1)), (w + 8) / 5.2 + r.uniform(0, 1.2), seed * 130 + k * 4 + j, 0.62, CLIFF2 if (k + j) % 2 else CLIFF))
     for k in range(3):  # dark void walls deep in the cleft
         parts.append(box((w * (0.9 - 0.2 * k), hgt * (1.1 - 0.2 * k), 0.4), DARK, (0, hgt * 0.45 - 1, -14 - k * 9)))
     parts.append(box((w + 2, 1.0, 38), DARK, (0, hgt + 1.0, -20)))   # ceiling underside (dark)
@@ -157,7 +158,8 @@ def cave_mouth2(sx_, sz_, dv, w, hgt, kind, seed):
         oh = hgt * 0.55
         for k in range(7):   # brow of the cliff pushed out over the water
             a = math.pi * (0.08 + 0.84 * k / 8); parts.append(rock((math.cos(a) * (w / 2 + 3), hgt + oh * 0.4 + math.sin(a) * oh * 0.5, 3.5 + r.uniform(-1, 1)), r.uniform(4.5, 7), seed * 90 + k, 0.7, CLIFF2))
-        parts.append(T(box((w + 14, oh, 9), CLIFF2), (0, hgt + oh / 2 + 0.5, 2.0)))           # overhang slab
+        for j in range(9):   # overhang brow: overlapping squashed boulders, sagging at the middle (Stage 4 polish: was one box slab)
+            u = (j - 4) / 4.0; parts.append(rock((u * (w + 12) / 2 + r.uniform(-0.8, 0.8), hgt + oh * 0.55 - 0.9 * (1 - u * u) + r.uniform(-0.5, 0.5), 2.0 + r.uniform(-1.5, 1.5) + 1.2 * (1 - u * u)), (w + 14) / 9 + oh * 0.35 + r.uniform(0, 1.0), seed * 170 + j, 0.55, CLIFF2 if j % 2 else C(78, 72, 68)))
         parts.append(box((w + 6, 0.6, 12), DARK, (0, hgt - 0.2, 1.5)))                        # its dark underside
         for k in range(3): parts.append(box((w * (1.05 - 0.15 * k), hgt * (1.0 - 0.15 * k), 0.4), DARK, (0, hgt * 0.5 - 1.2, -2.5 - k * 3.0)))   # near-mouth black voids
         for k in range(10): parts.append(cyl(0.5, r.uniform(1.5, 4.0), CLIFF2, (r.uniform(-w / 2, w / 2), hgt - 0.6, r.uniform(-1, 5)), (math.pi, 0, 0), 5, 0))   # dripstone fringe

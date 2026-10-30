@@ -116,19 +116,19 @@
    "lod1_pct": 50.0
   },
   "coast_echo_grotto": {
-   "tris": 2684,
-   "lod1": 1206,
-   "lod1_pct": 44.9
+   "tris": 7088,
+   "lod1": 3188,
+   "lod1_pct": 45.0
   },
   "coast_glasswyrm_cavern": {
-   "tris": 2124,
-   "lod1": 954,
-   "lod1_pct": 44.9
+   "tris": 5820,
+   "lod1": 2618,
+   "lod1_pct": 45.0
   },
   "coast_smugglers_throat": {
-   "tris": 3360,
-   "lod1": 1510,
-   "lod1_pct": 44.9
+   "tris": 7764,
+   "lod1": 3492,
+   "lod1_pct": 45.0
   },
   "coast_sunken_ward_surface": {
    "tris": 3796,

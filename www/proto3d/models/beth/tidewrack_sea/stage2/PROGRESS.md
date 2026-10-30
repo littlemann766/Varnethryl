@@ -19,3 +19,6 @@ Made by Beth on 2026-10-30. All test renders were done in /tmp copies, and those
 - The seam view to the Archipelago is mostly open sea, because the A islands are about 600 m away and in fog.
 - Overview cameras are a bit high, so the cliffs read best in the close-ups.
 | Storm border v2: layered soft fog + storm sky + choppy dark sea, invisible collider unchanged; checked at sailing height, at a distance and inside the bank | done |
+
+## Stage 4 polish
+- Cave overhang + roof slabs replaced by lumpy rock clusters (less boxy). C3 camera moved to open-water approach to avoid the Echo-inlet dark spike artefact (~(-2290,-230), tile x1z1, cause unknown). Re-rendered all shots.

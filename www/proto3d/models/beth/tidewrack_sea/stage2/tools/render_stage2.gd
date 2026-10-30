@@ -86,7 +86,7 @@ func _run() -> void:
 		if low: continue
 		await shot("C2_cliff_coast_sailing" + sfx, an + Vector3(70, 26, 120), lp.lerp(an, 0.5) + Vector3(0, 8, 0), 62)
 		var ed := Vector3(sin(float(eg.yaw)), 0, cos(float(eg.yaw)))
-		await shot("C3_echo_grotto" + sfx, ep + ed * 60 + Vector3(0, 16, 0), ep + Vector3(0, 7, 0), 58)
+		var ecd := (Vector3(ec.x, 0, ec.z) - ep).normalized(); await shot("C3_echo_grotto" + sfx, ep + ecd * 140 + Vector3(0, 26, 0), ep + Vector3(0, 7, 0), 50)   # Stage 4: open-water approach (the old spot inside the north inlet showed thin dark spike artefacts)
 		var gw: Dictionary = P.coast_glasswyrm_cavern; await shot("C4_glasswyrm_cavern" + sfx, _v(gw.cam), _v(gw.pos) + Vector3(0, 8, 0), 58)
 		var st: Dictionary = P.coast_smugglers_throat; var sdd := Vector3(sin(float(st.yaw)), 0, cos(float(st.yaw)))
 		await shot("C5_smugglers_throat" + sfx, _v(st.pos) + sdd * 60 + Vector3(0, 10, 0), _v(st.pos) + Vector3(0, 8, 0), 58)

@@ -61,10 +61,20 @@ def water_plane(pts, ws, margin=6):
 def portal_card(w, h):   # daylight seen back out of the entrance (unshaded, see shaders/cave_portal)
     m = trimesh.Trimesh([(-w / 2, -1, 1.5), (w / 2, -1, 1.5), (w / 2, h, 1.5), (-w / 2, h, 1.5)], [(0, 1, 2), (0, 2, 3), (0, 2, 1), (0, 3, 2)], process=False)
     m.visual = trimesh.visual.TextureVisuals(uv=np.array([(0, 0), (1, 0), (1, 1), (0, 1)])); return m
-def crystal(p, d, length, r, col): # hexagonal prism with a point, pointing along d
-    d = np.array(d, float); d /= np.linalg.norm(d)
-    m = merge([cyl(r, length * 0.75, col, (0, length * 0.375, 0), sec=6), cyl(r, length * 0.25, col, (0, length * 0.75 + length * 0.125, 0), sec=6, r2=0)])
+def crystal(p, d, length, r, col, seed=None): # Stage 4 polish: sharp faceted saltglass: tapering hex body + long needle tip, flat-shaded facets
+    d = np.array(d, float); d /= np.linalg.norm(d); rr = np.random.default_rng(seed if seed is not None else int(abs(p[0] * 31 + p[2] * 17 + length * 101)) % 100000)
+    body = cyl(r, length * 0.58, col, (0, length * 0.29, 0), sec=6, r2=r * 0.72); tip = cyl(r * 0.72, length * 0.42, col, (0, length * 0.58 + length * 0.21, 0), sec=6, r2=0)
+    m = merge([body, tip]); m.apply_transform(trimesh.transformations.rotation_matrix(rr.uniform(0, 1.0), (0, 1, 0)))
+    m = trimesh.Trimesh(m.vertices[m.faces].reshape(-1, 3), np.arange(len(m.faces) * 3).reshape(-1, 3), process=False)   # unshared verts = crisp facets
+    shade = np.repeat(rr.uniform(0.72, 1.15, len(m.faces)), 3)[:, None]; hi = np.repeat(rr.uniform(size=len(m.faces)) > 0.85, 3)
+    c = np.tile(np.array(col, float), (len(m.vertices), 1)); c[:, :3] = np.clip(c[:, :3] * shade, 0, 255); c[hi, :3] = np.clip(c[hi, :3] * 0.5 + 128, 0, 255)
+    m.visual = trimesh.visual.ColorVisuals(m, vertex_colors=c.astype(np.uint8))
     m.apply_transform(trimesh.geometry.align_vectors((0, 1, 0), d)); m.apply_translation(p); return m
+def crystal_cluster(p, d, length, r, col, n=4, spread=0.35, seed=0):   # one big point + smaller satellites fanning out
+    rr = np.random.default_rng(seed); d = np.array(d, float); out = [crystal(p, d, length, r, col, seed)]
+    for j in range(n - 1):
+        dj = d + rr.normal(0, spread, 3); out.append(crystal(np.array(p) + rr.normal(0, r * 1.4, 3), dj, length * rr.uniform(0.35, 0.7), r * rr.uniform(0.45, 0.75), SALT2 if j % 2 else col, seed * 7 + j))
+    return merge(out)
 def lantern(p):
     return merge([cyl(0.25, 0.5, LANT, (p[0], p[1], p[2]), sec=6), cyl(0.3, 0.12, IRON, (p[0], p[1] + 0.3, p[2]), sec=6), cyl(0.3, 0.12, IRON, (p[0], p[1] - 0.3, p[2]), sec=6)])
 def save_cell(name, tubem, glow, props_, water, extra=None):
@@ -84,7 +94,7 @@ shell, P, W, Hh, Fr = tube(echo_path, 130, 26, D_, veins=SALTV, seed=1)
 glow = []; pr = []
 for k in range(190):
     t = rng.uniform(0.04, 1.0); a = math.pi / 2 + rng.normal(0, 0.45); p = wall_pt(P, W, Hh, Fr, D_, t, a, rng.uniform(0.85, 0.97))
-    glow.append(crystal(p, (rng.normal(0, 0.15), -1, rng.normal(0, 0.15)), rng.uniform(0.8, 3.2) * (1.6 if bump(t, 0.55, 0.12) > 0.5 else 1), rng.uniform(0.12, 0.32), SALT if k % 3 else SALT2))
+    glow.append(crystal_cluster(p, (rng.normal(0, 0.15), -1, rng.normal(0, 0.15)), rng.uniform(1.2, 3.8) * (1.6 if bump(t, 0.55, 0.12) > 0.5 else 1), rng.uniform(0.14, 0.34), SALT if k % 3 else SALT2, int(rng.integers(3, 6)), 0.3, 2000 + k))   # hanging saltglass clusters
 for k in range(60):   # crystal beds on the ledges just above the waterline
     t = rng.uniform(0.1, 1.0); a = rng.choice([0.15, math.pi - 0.15]) + rng.normal(0, 0.1); p = wall_pt(P, W, Hh, Fr, D_, t, a, 0.9); p[1] = max(p[1], 0.6)
     for j in range(rng.integers(2, 5)): glow.append(crystal(p + rng.normal(0, 0.5, 3) * (1, 0, 1), (rng.normal(0, 0.4), 1, rng.normal(0, 0.4)), rng.uniform(0.5, 1.8), rng.uniform(0.1, 0.25), SALT))
@@ -155,7 +165,8 @@ for k in range(4): pr.append(cyl(0.6, 1.4, C(120, 80, 50), (jc[0] + 2 + k * 1.5,
 pr.append(box((14, 1.4, 6), R1, (jc[0] - 3, 1.0, jc[2] - 10)))   # rock landing
 for k in range(8): pr.append(box((2.2, 0.5, 1.0), C(110, 104, 94), (jc[0] + 6, 1.8 + k * 0.9, jc[2] - 12 - k * 0.9)))   # stair up to a door
 pr.append(box((2.6, 3.4, 0.4), DKW, (jc[0] + 6, 9.8, jc[2] - 20.4)))
-for p in [(jc[0] - 6, 3.2, jc[2] - 8), (jc[0] + 4, 3.2, jc[2] - 8), (jc[0] + 6, 11.8, jc[2] - 20)]: glow.append(lantern(p)); lpos.append(list(p))
+for p in [(jc[0] - 6, 3.2, jc[2] - 8), (jc[0] + 4, 3.2, jc[2] - 8), (jc[0] + 6, 11.8, jc[2] - 20), (jc[0] + 4.2, 10.6, jc[2] - 19.9), (jc[0] + 7.8, 10.6, jc[2] - 19.9), (jc[0] + 6, 6.0, jc[2] - 15.5), (jc[0] - 4, 2.6, jc[2] + 20)]: glow.append(lantern(p)); lpos.append(list(p))   # Stage 4: door flanked by 2 lanterns + stair + jetty-end lantern
+pr += [cyl(0.08, 1.0, IRON, (jc[0] + 4.2, 11.4, jc[2] - 19.9), sec=4), cyl(0.08, 1.0, IRON, (jc[0] + 7.8, 11.4, jc[2] - 19.9), sec=4), cyl(0.12, 4.2, DKW, (jc[0] - 4, 1.0, jc[2] + 20), sec=6)]
 save_cell('cave_smugglers_throat', shell, merge(glow), merge(pr), water_plane(P, W))
 MANI['caves']['smugglers_throat'] = {'length_m': 230, 'bridge': {'pos': (bc + np.array([0, by, 0])).tolist(), 'span_m': float(bw)}, 'jetty': [jc[0] - 4, 0, jc[2] + 6], 'lanterns': lpos, 'skiff_path': P[::10].tolist(), 'min_width_m': float(W.min())}
 # ---------------------------------------------------------------- 4) Sunken Ward underwater cell (world coords)
@@ -235,10 +246,11 @@ for k in range(260):
 save('sw_rubble', merge(rb))
 # light shafts (unshaded additive cones from the surface) + surface seen from below
 sh = []
-for k in range(14):
+for k in range(26):   # Stage 4 polish: more shafts, each = 3 nested cones (soft core -> wide faint halo)
     x = cx + rng.uniform(-200, 200); z = cz + rng.uniform(-220, 220); r = rng.uniform(4, 10); L = -SB + 2
-    m = trimesh.creation.cone(r * 2.2, L, sections=10); m.apply_transform(trimesh.transformations.rotation_matrix(math.pi / 2, (1, 0, 0)))
-    m.apply_translation((x, 0, z)); m.apply_transform(trimesh.transformations.rotation_matrix(0.18, (0, 0, 1), (x, 0, z))); sh.append(m)
+    for f_ in (0.55, 1.0, 1.6):
+        m = trimesh.creation.cone(r * 2.2 * f_, L, sections=14); m.update_faces(np.abs(m.face_normals[:, 2]) < 0.97); m.remove_unreferenced_vertices(); m.apply_transform(trimesh.transformations.rotation_matrix(math.pi / 2, (1, 0, 0)))
+        m.apply_translation((x, 0, z)); m.apply_transform(trimesh.transformations.rotation_matrix(0.18, (0, 0, 1), (x, 0, z))); sh.append(m)
 shafts = trimesh.util.concatenate(sh); shafts.export(os.path.join(OUT, 'sw_light_shafts.glb'))
 surf = trimesh.creation.box((X1 - X0 + 200, 0.01, Z1 - Z0 + 200)); surf.apply_translation((cx, -0.05, cz)); surf.export(os.path.join(OUT, 'sw_surface_under.glb'))
 MANI['sunken_ward'] = {'rect': [X0, Z0, X1, Z1], 'seabed_y': SB, 'surface_y': 0, 'dive_start': [-1300, -2, 300], 'dome': [dc[0], SB, dc[1]], 'street_grid_m': 50,

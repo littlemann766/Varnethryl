@@ -7,3 +7,6 @@
 - Shaders: glow_vc, cave_water, cave_portal, kelp_sway, light_shaft (fog_disabled — fog made additive cones white), surface_under, seabed_caustics.
 - render_stage3.gd: 4 shots/cave + 6 underwater, High+Low (36). Checked by eye; caves needed far more ambient/omni + cull off.
 - Before/after: renders/small/S3_before_after_cave_mouths.jpg, S3_before_after_sea_stacks.jpg.
+
+## Stage 4 polish
+- Faceted crystalline saltglass (crystal/crystal_cluster), lanterns at the Smugglers' Throat jetty door/stair/jetty end, light shafts = 3 nested soft cones (strength 0.12, soft rim, long top fade). New shot I_smugglers_throat_5jetty_door. Re-rendered.

@@ -52,7 +52,8 @@ func _run() -> void:
 		add(g, b + "_shell", vc); add(g, b + "_props", vc); add(g, b + "_glow", smat("glow_vc"))
 		var wm := smat("cave_water"); wm.set_shader_parameter("glow_tint", LC[k]); add(g, b + "_water", wm); add(g, b + "_portal", smat("cave_portal"))
 		var C: Dictionary = man.caves[k]; var L: Array = C.get("lanterns", C.get("lights", []))
-		for p in L.slice(0, 6):
+		var nL := L.size(); var LL: Array = L if nL <= 6 else [L[0], L[nL / 3], L[2 * nL / 3], L[nL - 5], L[nL - 2], L[nL - 1]]   # Stage 4: always light the jetty/door end
+		for p in LL:
 			var o := OmniLight3D.new(); o.position = _v(p) + Vector3(0, 4.0 if k != "smugglers_throat" else 0.3, 0); o.light_color = LC[k]; o.light_energy = 14.0; o.omni_range = 50; o.omni_attenuation = 0.6; o.shadow_enabled = false; g.add_child(o)
 		var sk := glb("res://ships/ship_boat_sail.glb"); mat_all(sk, vc); var sp: Array = C.skiff_path; sk.position = _v(sp[3]); sk.scale = Vector3.ONE * 0.6
 		sk.look_at_from_position(sk.position, _v(sp[4]), Vector3.UP); g.add_child(sk)
@@ -67,6 +68,9 @@ func _run() -> void:
 			await shot("I_%s_2mid_%s" % [k, T], o + _v(sp[n / 2 - 2]) + Vector3(0, 3.5, 0), o + _v(sp[n / 2 + 1]) + Vector3(0, 3, 0))
 			await shot("I_%s_3end_%s" % [k, T], o + _v(sp[n - 4]) + Vector3(0, 6, 0), o + _v(sp[n - 1]) + Vector3(0, 2, -10))
 			await shot("I_%s_4lookback_%s" % [k, T], o + _v(sp[n / 2]) + Vector3(0, 4, 0), o + _v(sp[1]) + Vector3(0, 3, 0))
+			if k == "smugglers_throat":   # Stage 4: the hidden jetty + its lantern-lit door
+				var jc: Vector3 = o + _v(man.caves[k].jetty) + Vector3(4, 0, -6)
+				await shot("I_%s_5jetty_door_%s" % [k, T], o + _v(sp[n - 2]) + Vector3(0, 4.0, 0), jc + Vector3(6, 8.5, -20), 62)
 		var S: Dictionary = man.sunken_ward; sea_env(S.env); show_only("sw"); var d: Vector3 = _v(S.dome)
 		await shot("U_1dive_down_%s" % T, _v(S.dive_start) + Vector3(0, -4, 0), d + Vector3(0, 0, 0))
 		await shot("U_2street_%s" % T, Vector3(-1395, -26.0, 450), Vector3(-1300, -25.0, 450))

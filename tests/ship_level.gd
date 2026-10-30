@@ -11,7 +11,7 @@ func tilt_deg(b: Basis) -> Vector2:   # (pitch about local X, roll about local Z
 	var f := b.orthonormalized().z; var r := b.orthonormalized().x
 	return Vector2(rad_to_deg(asin(clampf(f.y, -1, 1))), rad_to_deg(asin(clampf(r.y, -1, 1))))
 func _run() -> void:
-	var out := "/workspace/shots/voxel28/"; DirAccess.make_dir_recursive_absolute(out)
+	var out := "/workspace/shots/voxel30/ship_level/"; DirAccess.make_dir_recursive_absolute(out)
 	while not m.warmed: await get_tree().process_frame
 	m._set_time(11.0); m.party._set_companions([]); m.party.set_hero("owner")
 	var mx := {}

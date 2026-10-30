@@ -25,7 +25,7 @@ func _run() -> void:
 		var r := CharacterRig.new().setup(paths[i], 1.905); root.add_child(r); r.position = Vector3(i * 1.6, 0, 0)
 	await frames(10)
 	for i in names.size():
-		for d in [["near", 2.6], ["mid", 9.0], ["far", 16.0]]:
+		for d in ([["near", 2.6]] if OS.get_environment("VOX_NEAR") != "" else [["near", 2.6], ["mid", 9.0], ["far", 16.0]]):
 			var p: Vector3 = root.global_position + Vector3(i * 1.6, 1.1, 0)
 			cam.look_at_from_position(p + Vector3(0.0, 0.25, -d[1]), p, Vector3.UP); cam.current = true
 			await frames(8)

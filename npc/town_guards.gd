@@ -4,7 +4,7 @@ extends Node3D
 ## 8 guards (they are ~130k tris each; a lighter LOD is coming): a pair flanking each of the 4 gates on the inside,
 ## walking a short beat in from the gate and back. In-place walk clip at its 1.04 m/s root speed -> 1x playback, no foot slide.
 ## Phone budget: AnimationTree frozen beyond 60 m, guard hidden beyond 140 m (and inside interiors with the town).
-const MODEL := "res://voxel/town_guard_voxel.glb"
+const MODEL := "res://voxel/town_guard_voxel_lod1.glb"   # test 26 capes_v4: LOD1 (38.6k tris, 28%) for the 8 NPC guards
 const HEIGHT := 1.905
 const WALK := 1.04
 const BEAT := 7.0          # m each way

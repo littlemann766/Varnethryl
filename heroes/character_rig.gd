@@ -176,6 +176,9 @@ func _load_fly(path: String) -> void:
 	has_fly_clips = FLY_CLIPS.all(func(c): return dst.has_animation(c))
 
 func _build_tree() -> void:
+	if voxel:   # test 26 capes_v4: Selene ships attack1/attack2 (no "attack") -> alias so attacks alternate 1/2
+		var lib: AnimationLibrary = anim_player.get_animation_library("")
+		if lib and not lib.has_animation("attack") and lib.has_animation("attack1"): lib.add_animation("attack", lib.get_animation("attack1"))
 	clips = anim_player.get_animation_list()
 	for c in clips:
 		var a := anim_player.get_animation(c)

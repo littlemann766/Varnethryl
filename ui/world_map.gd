@@ -124,7 +124,7 @@ func w2s(w: Vector2, r: Rect2) -> Vector2: return r.position + (w - WORLD.positi
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.03, 0.04, 0.06, 0.96))
 	var r := _fit()
-	draw_string(get_theme_default_font(), Vector2(r.position.x, 50), "WORLD MAP" + ("   (Owner: fully revealed)" if owner_view() else "   %d%% explored" % int(explored_frac() * 100.0)), HORIZONTAL_ALIGNMENT_LEFT, -1, 30, Color("#f3d98b"))
+	draw_string(get_theme_default_font(), Vector2(r.position.x, 50), "WORLD MAP" + ("   (Owner: fully revealed)" if owner_view() else "   %.1f%% explored" % (explored_frac() * 100.0)), HORIZONTAL_ALIGNMENT_LEFT, -1, 30, Color("#f3d98b"))
 	if sea_tex: draw_texture_rect(sea_tex, r, false)
 	if land_tex:
 		var a := w2s(land_rect.position, r); var b := w2s(land_rect.end, r); var lr := Rect2(a, b - a).grow(0)

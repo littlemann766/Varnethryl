@@ -384,13 +384,22 @@ func chart_travel(k: String) -> String:
 	ui.fade(func(): _board("galleon", P[k][1], ship.heading); cur_region = P[k][2]; _stream(Vector2(P[k][1].x, P[k][1].z)), 3.2)   # "sails filling"
 	return ""
 const COST := {1: [400, {"Driftwood": 10}], 2: [1500, {"Coil Scale": 6, "Saltglass": 4}], 3: [4000, {"Stormsilk Bolt": 1, "Glasswyrm Shard": 3}]}
+## test 33 (boss: "We should be allowed to upgrade our ships too"): Owner and the server-verified CoOwner
+## upgrade their OWN ship free (no boss wins, gold or items). Role comes only from Cheats.role(), never the caller.
+func free_upgrade() -> bool:
+	if unlock_all: return true
+	var ch = m.get("cheats")
+	if ch == null: return false
+	var r: String = ch.role()
+	return r == "owner" or (r == "coowner" and ch.allowed("ship_upgrade", r))
 func upgrade(kind: String) -> String:
 	var t := int(save.get(kind + "_tier", 0)) + 1
 	if t > 3: return "Fully upgraded."
-	if t == 2 and not bool(save.coil_beaten) and not unlock_all: return "Needs the Brinecrown Coil beaten."
-	if t == 3 and not bool(save.get("glasswyrm_beaten", false)) and not unlock_all: return "Needs the Glasswyrm beaten."
+	var free := free_upgrade()
+	if t == 2 and not bool(save.coil_beaten) and not free: return "Needs the Brinecrown Coil beaten."
+	if t == 3 and not bool(save.get("glasswyrm_beaten", false)) and not free: return "Needs the Glasswyrm beaten."
 	var st: Dictionary = m.get_tree().root.get_node("VSave").state; var c: Array = COST[t]; var items: Dictionary = save.get("items", {})
-	if not unlock_all:
+	if not free:
 		if int(st.get("gold", 0)) < c[0]: return "Needs %d gold." % c[0]
 		for it in c[1]:
 			if int(items.get(it, 0)) < c[1][it]: return "Needs %d %s." % [c[1][it], it]

@@ -23,7 +23,8 @@ const SELF_ONLY := ["god", "fly", "noclip", "bump", "speed", "unlimited", "nocd"
 const OWNER := SELF_ONLY + ["bamboo", "inf_gold", "gold", "xp", "xp_big", "level_active", "level_party", "remax", "item",
 	"kill", "spawn_enemy", "titan", "spawn_boss", "spawn_worldboss", "fight_test", "tp_zone", "online_list", "online_jump", "lock", "panel", "dev"]
 ## CoOwner: self-only cheats, plus the server-verified jump-beside-player (it moves only her own hero).
-const COOWNER := SELF_ONLY + ["coowner_jump", "coowner_lock"]
+## test 33: + ship_upgrade = free tier upgrades for HER OWN ship only (checked in TidewrackSea.free_upgrade()).
+const COOWNER := SELF_ONLY + ["coowner_jump", "coowner_lock", "ship_upgrade"]
 
 var flags := {"god": false, "fly": false, "noclip": false, "bump": true, "speed": 1.0, "unlimited": false, "nocd": false,
 	"bamboo": false, "inf_gold": false, "titan_form": false}

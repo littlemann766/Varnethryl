@@ -87,6 +87,34 @@ func _run() -> void:
 	var ue := sea.upgrade("galleon"); print("TW INFO upgrade: '%s' tier=%d" % [ue, sea.ship.tier])
 	ok(ue == "" and sea.ship.tier == 1 and sea.ship.addon != null, "Patched Canvas (T1) add-on fitted")
 	ok(sea.upgrade("galleon") != "", "T2 needs the Coil beaten")
+	# --- test 33: Owner + CoOwner upgrade their own ship free; normal player stays locked
+	var C: Cheats = m.cheats; var rp0: Callable = C.role_provider; var save0: Dictionary = sea.save.duplicate(true); var g0: int = int(VS.gold)
+	for who in ["", "owner", "coowner"]:
+		C.role_provider = func() -> String: return who
+		sea.save.galleon_tier = 0; sea.save.coil_beaten = false; sea.save.glasswyrm_beaten = false; sea.save.items = {}; VS.gold = 0; sea.ship.set_tier(0)
+		var tag: String = who if who != "" else "player"
+		if who == "":
+			ok(not sea.free_upgrade() and sea.upgrade("galleon") != "" and int(sea.save.galleon_tier) == 0, "player: T1 locked without gold/items")
+			sea.save.galleon_tier = 1; ok(sea.upgrade("galleon") == "Needs the Brinecrown Coil beaten.", "player: T2 still needs the Coil")
+			sea.save.galleon_tier = 2; ok(sea.upgrade("galleon") == "Needs the Glasswyrm beaten.", "player: T3 still needs the Glasswyrm")
+			continue
+		var errs := []
+		for i in 3: errs.append(sea.upgrade("galleon"))
+		ok(errs == ["", "", ""] and int(sea.save.galleon_tier) == 3 and sea.ship.tier == 3, "%s: galleon T1-T3 free, no boss wins (%s)" % [tag, errs])
+		ok(int(VS.gold) == 0 and sea.save.items.is_empty() and not bool(sea.save.coil_beaten), "%s: no gold/items spent, boss flags untouched" % tag)
+		ok(sea.upgrade("galleon") == "Fully upgraded.", "%s: stops at T3" % tag)
+		sea.save.skiff_tier = 0; var se := []
+		for i in 3: se.append(sea.upgrade("skiff"))
+		ok(se == ["", "", ""] and int(sea.save.skiff_tier) == 3, "%s: skiff T1-T3 free" % tag)
+		if who == "coowner":
+			ok(C.allowed("ship_upgrade", "coowner") and not C.allowed("gold", "coowner") and not C.allowed("spawn_boss", "coowner"), "coowner: ship_upgrade allowed, world/economy cheats still refused")
+			ok(not sea.unlock_all and not sea.unlocked("B"), "coowner: free upgrades do not unlock the storm-locked sea")
+	await shot("galleon_t3_coowner", an + Vector3(30, 14, 30), an + Vector3(0, 4, 0))
+	C.coowner_ok = false; C.role_provider = func() -> String: return ""
+	ok(not sea.free_upgrade(), "unverified coowner (role '') gets no free upgrade")
+	C.role_provider = rp0
+	for k in save0: sea.save[k] = save0[k]
+	 VS.gold = g0; sea.ship.set_tier(int(sea.save.galleon_tier))
 	ok(sea.ship.gust() and sea.ship.gust_t > 0.0, "gust charm (T1)")
 	await shot("galleon_t1", an + Vector3(30, 14, 30), an + Vector3(0, 4, 0))
 	# --- Echo Grotto: clear exit (never inside the north cliff), skiff, cave cell in/out

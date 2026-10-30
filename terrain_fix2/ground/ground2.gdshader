@@ -69,7 +69,8 @@ void fragment(){
 	g *= 1.0 - smoothstep(0.04, 0.3, sl0) * 0.18;
 	// in-town streets + door spurs from main.gd STREETS / spurs (test 11), plaza disc, ring road outside the walls
 	float d = length(p) - 36.4;
-	d = min(d, abs(length(p) - ring_r) - 4.2);
+	// test 32 (boss): the ring road just outside the town wall is removed (ring_r kept only so old params still bind)
+	// d = min(d, abs(length(p) - ring_r) - 4.2);
 	float fd = 1e6;
 	for (int i = 0; i < seg_n; i++) {
 		vec2 a = segs[i].xy; vec2 b = segs[i].zw; vec2 ab = b - a;

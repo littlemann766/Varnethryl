@@ -52,6 +52,9 @@ func build(main: Node3D) -> Node3D:
 	pv.material_override = cobble; pv.position = Vector3((X0 + xc + 1.0) * 0.5, m.HARBOR_Y + 0.06, (Z0 + SHORE_Z) * 0.5); pv.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; root.add_child(pv)
 	var pv2 := MeshInstance3D.new(); var pm2 := PlaneMesh.new(); pm2.size = Vector2(X1 - xc, 60.0); pv2.mesh = pm2; pv2.material_override = cobble
 	pv2.position = Vector3((xc + X1) * 0.5, m.HARBOR_Y + 0.06, Z0 + 30.0); pv2.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; root.add_child(pv2)
+	# test 32: one flat collider under the whole paved district (top = pave level) so the walkable ground matches the
+	# cobbles everywhere and there are no heightfield seams (rays exactly on the 10 m grid lines used to miss)
+	m._static_box(Vector3((X0 + xc) * 0.5, m.HARBOR_Y + 0.06 - 0.5, (Z0 + SHORE_Z) * 0.5), Vector3(xc - X0, 1.0, SHORE_Z - Z0 + 1.0))
 	# quay: solid dressed-stone wall along the north shore, deck at QY, bollards
 	var qz := SHORE_Z + 2.0
 	_box(Vector3((X0 + xc) * 0.5, QY - 2.5, qz), Vector3(xc - X0, 5.0, 6.0), stone)

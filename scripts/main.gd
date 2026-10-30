@@ -323,6 +323,9 @@ func height(x: float, z: float) -> float:
 	var hw := HarborDistrict.pad_weight(x, z)
 	if hw > 0.0: h = lerpf(h, HARBOR_Y, hw)
 	var sm := sea_mask(x, z)
+	# test 32 (boss's docks shot): the sea_mask slope started ~10 m inland of the quay wall and carved a 3-4 m trench
+	# between the warehouses and the wall. Behind the quay wall (z < its inner face) the district stays at pad level.
+	if hw > 0.99 and z < HarborDistrict.SHORE_Z - 1.0: sm = 0.0
 	if x < SEA_COAST_X + 1.0 and z > SEA_NORTH_Z - 2.0: h = maxf(h, 0.7)   # over the sea plane: beach stays above the water
 	if sm > 0.0: h = lerpf(h, -4.0, sm)
 	return h

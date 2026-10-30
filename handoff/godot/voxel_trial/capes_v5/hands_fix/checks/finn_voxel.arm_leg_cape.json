@@ -1,0 +1,56 @@
+{
+ "before": {
+  "rest_baseline": {
+   "arm_in_leg": 0,
+   "cape_in_body": 3050
+  },
+  "idle": {
+   "arm_in_leg_verts_max": 2098,
+   "arm_leg_frames_over24": 76,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 76
+  },
+  "run": {
+   "arm_in_leg_verts_max": 1119,
+   "arm_leg_frames_over24": 18,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 29
+  },
+  "walk": {
+   "arm_in_leg_verts_max": 2497,
+   "arm_leg_frames_over24": 35,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 41
+  }
+ },
+ "after": {
+  "rest_baseline": {
+   "arm_in_leg": 0,
+   "cape_in_body": 3050
+  },
+  "idle": {
+   "arm_in_leg_verts_max": 0,
+   "arm_leg_frames_over24": 0,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 76
+  },
+  "run": {
+   "arm_in_leg_verts_max": 0,
+   "arm_leg_frames_over24": 0,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 29
+  },
+  "walk": {
+   "arm_in_leg_verts_max": 0,
+   "arm_leg_frames_over24": 0,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 41
+  }
+ }
+}

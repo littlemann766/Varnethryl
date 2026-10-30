@@ -1,0 +1,28 @@
+{
+ "before": {
+  "rest_baseline": {
+   "arm_in_leg": 215,
+   "cape_in_body": 4404
+  },
+  "run": {
+   "arm_in_leg_verts_max": 0,
+   "arm_leg_frames_over24": 0,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 29
+  }
+ },
+ "after": {
+  "rest_baseline": {
+   "arm_in_leg": 215,
+   "cape_in_body": 4404
+  },
+  "run": {
+   "arm_in_leg_verts_max": 0,
+   "arm_leg_frames_over24": 0,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 29
+  }
+ }
+}

@@ -1,0 +1,98 @@
+{
+ "before": {
+  "rest_baseline": {
+   "arm_in_leg": 1289,
+   "cape_in_body": 7315
+  },
+  "attack1": {
+   "arm_in_leg_verts_max": 9890,
+   "arm_leg_frames_over24": 12,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 31
+  },
+  "attack2": {
+   "arm_in_leg_verts_max": 9550,
+   "arm_leg_frames_over24": 8,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 33
+  },
+  "attack3": {
+   "arm_in_leg_verts_max": 9591,
+   "arm_leg_frames_over24": 16,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 51
+  },
+  "death": {
+   "arm_in_leg_verts_max": 9188,
+   "arm_leg_frames_over24": 4,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 49
+  },
+  "hit": {
+   "arm_in_leg_verts_max": 9116,
+   "arm_leg_frames_over24": 6,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 13
+  },
+  "skill": {
+   "arm_in_leg_verts_max": 9573,
+   "arm_leg_frames_over24": 14,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 45
+  }
+ },
+ "after": {
+  "rest_baseline": {
+   "arm_in_leg": 1289,
+   "cape_in_body": 7315
+  },
+  "attack1": {
+   "arm_in_leg_verts_max": 9658,
+   "arm_leg_frames_over24": 12,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 31
+  },
+  "attack2": {
+   "arm_in_leg_verts_max": 9659,
+   "arm_leg_frames_over24": 8,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 33
+  },
+  "attack3": {
+   "arm_in_leg_verts_max": 9725,
+   "arm_leg_frames_over24": 16,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 51
+  },
+  "death": {
+   "arm_in_leg_verts_max": 9072,
+   "arm_leg_frames_over24": 4,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 49
+  },
+  "hit": {
+   "arm_in_leg_verts_max": 9035,
+   "arm_leg_frames_over24": 6,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 13
+  },
+  "skill": {
+   "arm_in_leg_verts_max": 9924,
+   "arm_leg_frames_over24": 14,
+   "cape_in_body_verts_max": 0,
+   "cape_frames_over24": 0,
+   "frames_sampled": 45
+  }
+ }
+}

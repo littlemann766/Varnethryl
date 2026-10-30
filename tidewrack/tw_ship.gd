@@ -7,7 +7,7 @@ const STATS := {
 	"galleon": [[13.0, 1.2, 14.0], [16.0, 1.5, 16.0], [20.0, 1.9, 18.0], [26.0, 2.4, 20.0]],   # top m/s, accel m/s2, turn deg/s
 	"skiff": [[9.0, 2.0, 40.0], [11.0, 2.4, 44.0], [13.5, 2.9, 48.0], [17.0, 3.5, 52.0]]}
 const GUST := [[0.0, 0.0, 0.0], [0.15, 6.0, 40.0], [0.20, 7.0, 35.0], [0.30, 8.0, 30.0]]    # bonus, seconds, cooldown
-const MODEL := {"galleon": ["res://assets/ships/ship_tidewrack_sailing_ship_lod1.glb", -0.35], "skiff": ["res://assets/ships/ship_boat_sail_lod1.glb", -0.3]}
+const MODEL := {"galleon": ["res://assets/ships/ship_tidewrack_sailing_ship_lod1.glb", -0.35], "skiff": ["res://assets/ships/ship_boat_sail_lod1.glb", 0.35]}
 const WAVES := [[38.0, 0.55, 0.0], [17.0, 0.25, 0.7], [7.0, 0.08, -0.5]]   # L m, A m, angle offset from wind (rad)
 var kind := "galleon"
 var tier := 0
@@ -69,6 +69,7 @@ func wave_h(p: Vector2, t: float) -> float:
 		h += w[1] * sin(k * (d.dot(p) - c * t))
 	return h
 
+## test 33: skiff model offset -0.3 -> +0.35: its floor (model y 0.25) sat at the waterline, so the sea showed through the hull.
 ## test 33 (boss): fly cheat lifts the whole ship; speed cheat scales sailing speed. Set by TidewrackSea.drive().
 var alt := 0.0          # metres above the sea (0 = afloat)
 var speed_mul := 1.0

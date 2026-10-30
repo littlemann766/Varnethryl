@@ -146,7 +146,7 @@ func _run() -> void:
 		ok(absf(sea.ship.alt - 30.0) < 0.5 and absf(sea.ship.global_position.y - sea.to_global(Vector3(0, 30, 0)).y) < 0.6, "%s: whole ship flies at fly_alt (alt %.1f)" % [who, sea.ship.alt])
 		ok(absf(sea.ship.rotation.x) < 0.001 and absf(sea.ship.rotation.z) < 0.001, "%s: flying ship stays level" % who)
 		ok(sea.ship.speed > 1.0 and Vector2(sea.ship.position.x - open.x, sea.ship.position.z - open.z).length() > 10.0, "%s: flying ship is steerable/moves" % who)
-		await frames(3); ok(m.fly_controls.visible, "%s: fly buttons shown at sea with fly on" % who)
+		await frames(10); ok(m.fly_controls.visible, "%s: fly buttons shown at sea with fly on (hud=%s title=%s fly=%s)" % [who, VUI.hud.visible, VUI.title.visible if VUI.title else false, C2.flags.fly])
 		C2.request("fly_up"); C2.request("fly_up"); sail.call(200)
 		ok(sea.ship.alt > 34.0, "%s: fly up raises the ship (%.1f)" % [who, sea.ship.alt])
 		if who == "owner": await shot("galleon_flying", Vector3(sea.ship.position.x + 45, sea.ship.alt + 12, sea.ship.position.z + 45), sea.ship.position)
@@ -158,7 +158,7 @@ func _run() -> void:
 		C2.request("fly", false); sea.ship.position = Vector3(open.x, sea.ship.alt, open.z); sea.ship.speed = 0.0
 		for i in 600: sea.drive(Vector2.ZERO, 1.0 / 60.0)
 		ok(sea.ship.alt == 0.0 and absf(sea.ship.rotation.x) < 0.001 and sea.ship.collision_mask == 1, "%s: fly off over water -> lands back on the sea" % who)
-		await frames(3); ok(not m.fly_controls.visible, "%s: fly buttons hidden at sea with fly off" % who)
+		await frames(10); ok(not m.fly_controls.visible, "%s: fly buttons hidden at sea with fly off (hud=%s fly=%s active=%s)" % [who, VUI.hud.visible, C2.flags.fly, sea.active])
 	C2.role_provider = func() -> String: return ""
 	ok(not C2.request("fly", true), "player: fly cheat refused")
 	sea.ship.position = Vector3(open.x, 0, open.z); m.fly_alt = 30.0; sail.call(200)

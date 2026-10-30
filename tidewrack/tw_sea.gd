@@ -312,7 +312,7 @@ var ship_mask0 := 1
 ## bow, rising with the ship when it flies; party follow AI is off while riding and comes back on disembark.
 const SEATS := {"galleon": [Vector3(1.4, 0, -2.6), Vector3(-1.6, 0, -1.0), Vector3(1.6, 0, 1.2), Vector3(-1.6, 0, 3.0), Vector3(1.6, 0, 4.6)],
 	"skiff": [Vector3(0.35, 0, 0.2), Vector3(-0.35, 0, 1.0), Vector3(0.3, 0, 1.8), Vector3(-0.3, 0, 2.4), Vector3(0.0, 0, -0.5)]}
-func deck_y() -> float: return (2.78 if ship.kind == "galleon" else 1.61) + ship.vis.position.y - TwShip.MODEL[ship.kind][1]
+func deck_y() -> float: return (2.78 if ship.kind == "galleon" else 0.62) + ship.vis.position.y - TwShip.MODEL[ship.kind][1]
 func seat_pos(i: int) -> Vector3:
 	var S: Array = SEATS[ship.kind]; var o: Vector3 = S[mini(i, S.size() - 1)]
 	return ship.global_position + ship.global_basis * Vector3(o.x, deck_y(), o.z)
@@ -361,7 +361,7 @@ func drive(inp: Vector2, dt: float) -> void:
 		elif r2 != cur_region and _rect_dist(r2, p) <= 0.0: cur_region = r2
 		_stream(p)
 	# the hero rides on deck; main's camera follows the hero, so he faces the bow
-	var deck := 2.78 if ship.kind == "galleon" else 1.61
+	var deck := 2.78 if ship.kind == "galleon" else 0.62   # test 33: skiff floor (model y 0.25) raised above the swell
 	m.hero.global_position = ship.global_position + ship.global_basis * Vector3(0, deck + ship.vis.position.y - TwShip.MODEL[ship.kind][1], -4.0 if ship.kind == "galleon" else -1.0)
 	m.hero.velocity = Vector3.ZERO; m.hero_vis.rotation.y = ship.heading + PI
 	if m.party and m.party.get("rig"): m.party.rig.set_move_mps(0.0)

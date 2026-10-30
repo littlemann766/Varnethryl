@@ -275,6 +275,7 @@ func _ready() -> void:
 	if args.has("--whereshots"): add_child(load("res://tests/where_shots.gd").new())   # test 25
 	if args.has("--voxclose"): add_child(load("res://tests/voxel_close.gd").new())   # test 25
 	if args.has("--ownershots"): add_child(load("res://tests/owner_shots.gd").new())   # test 26
+	if args.has("--shiplevel"): add_child(load("res://tests/ship_level.gd").new())   # test 28
 	if args.has("--voxshots"): add_child(load("res://tests/voxel_shots.gd").new())   # voxel-heroes
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
 	if args.has("--extshots"): add_child(load("res://tests/ext_shots.gd").new())   # test 22
@@ -898,8 +899,9 @@ func _bob_ships(dt: float) -> void:
 		var r: Node3D = s[0]
 		if not r.visible: continue
 		var ph: float = s[2]
-		r.position.y = s[1] + sin(_ship_t * 0.7 + ph) * 0.1
-		r.rotation.z = sin(_ship_t * 0.55 + ph * 1.3) * 0.025; r.rotation.x = sin(_ship_t * 0.43 + ph) * 0.012
+		r.position.y = s[1] + sin(_ship_t * 0.7 + ph) * 0.06
+		# test 28 (boss: "the ship isn't even horizontal"): no roll/pitch rock -- every hull stays level (deck flat, masts vertical); vertical bob only
+		r.rotation.x = 0.0; r.rotation.z = 0.0
 
 static func _c2_door_raw(key: String) -> Variant:
 	if _c2_doors.is_empty(): card2_door("inn")

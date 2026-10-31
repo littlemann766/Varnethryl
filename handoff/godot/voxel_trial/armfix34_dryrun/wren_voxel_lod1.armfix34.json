@@ -1,0 +1,47 @@
+{
+ "fly_bank_L": {
+  "start": 46,
+  "orig_before": 46,
+  "after": 3
+ },
+ "fly_bank_R": {
+  "start": 93,
+  "orig_before": 93,
+  "after": 3
+ },
+ "fly_fast": {
+  "start": 63,
+  "orig_before": 63,
+  "after": 0
+ },
+ "jump": {
+  "start": 508,
+  "orig_before": 508,
+  "after": 3
+ },
+ "jump_hang": {
+  "start": 0,
+  "orig_before": 0,
+  "after": 0
+ },
+ "jump_land": {
+  "start": 493,
+  "orig_before": 493,
+  "after": 3
+ },
+ "jump_start": {
+  "start": 39,
+  "orig_before": 39,
+  "after": 0
+ },
+ "swim_stroke": {
+  "start": 237,
+  "orig_before": 237,
+  "after": 0
+ },
+ "swim_tread": {
+  "start": 0,
+  "orig_before": 0,
+  "after": 0
+ }
+}

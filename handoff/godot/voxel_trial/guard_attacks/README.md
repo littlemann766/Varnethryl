@@ -1,5 +1,5 @@
 # Town guard melee set (Lucian) — base: voxel_trial/armfix35/town_guard_voxel{,_lod1,_lod2}.glb
-Drop-in replacements for res://voxel/town_guard_voxel*.glb. Existing attack/idle/walk/run are byte-for-byte the armfix35 clips (same lengths: walk 1.333 s, run 0.9 s). Loaded at 30 fps.
+Drop-in replacements for res://voxel/town_guard_voxel*.glb. Existing attack/idle/walk/run are carried over from armfix35 unedited (lengths match: walk 1.333 s, run 0.9 s). Loaded at 30 fps.
 
 New clips (30 fps; hit frames in guard_attacks.events.json):
 | clip | s | source (Quaternius CC0) | hit frame |

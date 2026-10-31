@@ -45,6 +45,13 @@ func _run() -> void:
 	wm.albedo_color = Color(0,0,0) if false else ({"A": Color(0.1, 0.38, 0.5), "B": Color(0.1, 0.36, 0.46), "frost": Color(0.2, 0.36, 0.48), "ash": Color(0.04, 0.1, 0.12)}[reg] as Color); wm.roughness = 0.3; w.material_override = wm; top.add_child(w)
 	w.position = Vector3(I.pier_head[0], 0, I.pier_head[2])
 	var cam := Camera3D.new(); top.add_child(cam); cam.current = true; cam.far = 3000
+	if a.size() > 11 and a[4] == "frame":   # generic close-up between two world points (pier stair, causeway landings), same framing before/after: args ... frame x0 y0 z0 x1 y1 z1 tag
+		var f0 := Vector3(float(a[5]), float(a[6]), float(a[7])); var f1 := Vector3(float(a[8]), float(a[9]), float(a[10])); var fm := (f0 + f1) * 0.5; var sc := maxf(1.0, f0.distance_to(f1) / 50.0)
+		for sv in [["A", Vector3(55, 30, 45)], ["B", Vector3(-45, 40, -50)]]:
+			cam.fov = 55; cam.look_at_from_position(fm + sv[1] * sc, fm, Vector3.UP)
+			for i in 4: await process_frame
+			get_root().get_texture().get_image().save_jpg("%s/%s_%s%s_%s_%s.jpg" % [out, id, a[11], sv[0], a[2], a[3]], 0.85)
+		quit(); return
 	if a.size() > 4 and a[4] == "stair" and I.get("ramp") != null:   # Saltglass stair close-up, same framing before/after
 		var b0 := Vector3(I.ramp.bottom[0], I.ramp.bottom[1], I.ramp.bottom[2]); var t0 := Vector3(I.ramp.top[0], I.ramp.top[1], I.ramp.top[2]); var mid := (b0 + t0) * 0.5
 		for sv in [["stairA", Vector3(55, 30, 45)], ["stairB", Vector3(-20, 45, 70)]]:

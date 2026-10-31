@@ -37,7 +37,7 @@ GROUND = {'A': 'temperate', 'B': 'saltglass', 'frost': 'frost', 'ash': 'ash'}
 # per landing: window half-size, hill amplitude, POIs (type, name); first POI goes on the high ground
 ISL = {
  'gullhaven':      dict(R=170, amp=11, pois=[('watchtower', 'Gull Watchtower ruin'), ('shrine', 'Gull Shrine'), ('lore', 'Founders\' Stone'), ('chest', 'Harbourmaster\'s Cache')]),
- 'saltglass':      dict(R=170, amp=9,  pois=[('crystal_shrine', 'Saltglass Shrine'), ('crystal_grove', 'Singing Shards'), ('chest', 'Glass-diver\'s Chest'), ('lore', 'Salt-crusted Tablet'), ('watchtower', 'Saltglass Lookout', 'top'), ('chest', 'Clifftop Cache', 'top')], ramp=True),
+ 'saltglass':      dict(R=170, amp=9,  pois=[('crystal_shrine', 'Saltglass Shrine'), ('crystal_grove', 'Singing Shards'), ('chest', 'Glass-diver\'s Chest'), ('lore', 'Salt-crusted Tablet'), ('watchtower', 'Saltglass Lookout', 'top'), ('chest', 'Clifftop Cache', 'top')], ramp=True, pier_stair=(62, 80)),
  'frostreach':     dict(R=170, amp=10, pois=[('ice_cave', 'Rimehollow Ice Cave'), ('frost_shrine', 'Frostreach Cairn'), ('chest', 'Iced Chest'), ('lore', 'Frozen Waystone')]),
  'vent':           dict(R=170, amp=9,  pois=[('lava_vent', 'Ventmouth'), ('hot_pool', 'Steam Pools'), ('obsidian_shrine', 'Ember Shrine'), ('chest', 'Ash-buried Chest')]),
  'lantern_rock':   dict(R=120, amp=9,  pois=[('lighthouse', 'Old Lantern ruin'), ('hut_ruin', 'Keeper\'s Hut'), ('chest', 'Keeper\'s Strongbox'), ('lore', 'Lamp-oil Logbook')]),
@@ -101,17 +101,19 @@ def walk_graph(H, okc, sj, sii, ny, nx, hard=None):
         rr_ += [a_, b_]; cc_ += [b_, a_]; ww_ += [w_, w_]
     G = coo_matrix((np.concatenate(ww_), (np.concatenate(rr_), np.concatenate(cc_))), shape=(okc.sum(), okc.sum())).tocsr()
     return G, okc, nid
-def build_ramp(H, base, comp, walk, FP, dsh, si, X, Z, xs, zs, cd):
+def build_ramp(H, base, comp, walk, FP, dsh, si, X, Z, xs, zs, cd, reach_o=None, plat_o=None, tag='ramp'):
     """Switchback stair from the reachable lower shelf to the unreachable upper plateau: stone flights <=26.6 deg + flat landings
     on pillars, rails both sides. Returns the deck list (world), routing heights, keep-out zone, plateau mask, walk mask, deck cells."""
     ny, nx = H.shape
     Gr, okr, nidr = walk_graph(H, walk & ~(FP & (dsh > 12)), si[0], si[1], ny, nx, hard=0.7)
     dr = dijkstra(Gr, indices=nidr[si]); reach0 = np.zeros_like(comp); reach0[okr] = np.isfinite(dr)
     hi = np.percentile(H[reach0], 90)
-    plat = comp & ~reach0 & (H > hi + 15) & (cd > 4); lab, nl = ndimage.label(plat)
+    plat = comp & ~reach0 & (H > hi + 15) & (cd > 4)
+    if reach_o is not None: reach0 = reach_o; plat = plat_o
+    lab, nl = ndimage.label(plat)
     if nl == 0: print('  ramp: no plateau'); return None, H, np.zeros_like(comp), np.zeros_like(comp), walk, np.zeros_like(comp)
     big = 1 + int(np.argmax(ndimage.sum(np.ones_like(lab), lab, range(1, nl + 1)))); P = ndimage.binary_opening(lab == big, iterations=2)
-    pe = np.argwhere(P & ~ndimage.binary_erosion(P, iterations=3)); re_ = np.argwhere(ndimage.binary_erosion(reach0, iterations=3) & (dsh > 20))
+    pe = np.argwhere(P & ~ndimage.binary_erosion(P, iterations=3)); re_ = np.argwhere(ndimage.binary_erosion(reach0, iterations=3) & (dsh > 20)) if reach_o is None else np.argwhere(reach0)
     def hat(A, x, z): return float(ndimage.map_coordinates(A, [[(z - zs[0]) / STEP], [(x - xs[0]) / STEP]], order=1)[0])
     tr = cKDTree(re_); dd, ii = tr.query(pe); order_ = np.argsort(dd)
     Lg, W, GAP = 20.0, 3.6, 5.0
@@ -155,9 +157,67 @@ def build_ramp(H, base, comp, walk, FP, dsh, si, X, Z, xs, zs, cd):
                         for ww in np.linspace(-e['w'] / 2 + 0.4, e['w'] / 2 - 0.4, 6):
                             q = a_ + u * tt; x, z = q[0] + pv[0] * ww, q[2] + pv[1] * ww; j = int(round((z - zs[0]) / STEP)); i = int(round((x - xs[0]) / STEP))
                             if 0 <= j < ny and 0 <= i < nx: RD[j, i] = True; Hr[j, i] = q[1]
-                print(f'  ramp: {N} flights, {math.degrees(math.atan(g)):.1f} deg, rise {rise:.1f} m ({Hbot:.1f} -> {Htop:.1f})')
+                print(f'  {tag}: {N} flights, {math.degrees(math.atan(g)):.1f} deg, rise {rise:.1f} m ({Hbot:.1f} -> {Htop:.1f})')
                 return {'decks': decks, 'flights': N, 'deg': round(math.degrees(math.atan(g)), 1), 'rise_m': round(rise, 1), 'bottom': decks[0]['a'], 'top': decks[-1]['b']}, Hr, ndimage.binary_dilation(RD, iterations=3), P, walk | RD | P, RD
     print('  ramp: no clear spot'); return None, H, np.zeros_like(comp), np.zeros_like(comp), walk, np.zeros_like(comp)
+def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0):
+    """Tower switchback at the pier head: flights alternate between two lines 5 m apart, stacking up the sea-cliff face
+    (16.8 m+ headroom between flights on one line); the top walk runs inland onto the shelf. Same deck format as build_ramp."""
+    ny, nx = H.shape; colC = _g['colC']; Lg, W, GAP = 20.0, 3.6, 5.0
+    def hat(A, x, z): return float(ndimage.map_coordinates(A, [[(z - zs[0]) / STEP], [(x - xs[0]) / STEP]], order=1)[0])
+    def top(x, z): return max(hat(base, x, z), hat(colC, x, z))
+    n = np.array(inl, float); n /= np.linalg.norm(n); t = np.array([-n[1], n[0]]); sh = np.array(sh, float)
+    for side, d0 in [(sd, dd) for sd in (1, -1) for dd in (-6.0, -9.0, -12.0)]:   # tower stands in the water beside the pier head: bottom at pier level, clear of the cliff
+            S_ = sh + t * side * (Lg / 2 + W / 2 + 0.6); o = S_ + n * d0 - t * side * Lg / 2; y00 = max(top(*o), y0 + 0.3)
+            if y00 - y0 > 1.0: continue
+            for N in range(2, 10):
+                dl = side if (N - 1) % 2 == 0 else -side; lastline = d0 + GAP * ((N - 1) % 2)
+                bl = S_ + n * lastline + t * (Lg / 2 * dl); end = bl + t * dl * (W / 2 + 0.2) - n * (W / 2)
+                best = None
+                for Lx in np.arange(8.0, 60.1, 1.0):
+                    q = end + n * Lx; Ht = top(*q); gg = (Ht - 0.3 - y00) / (N * Lg)
+                    if Ht >= hmin and 0.1 <= gg <= 0.47 and abs(top(*(q + n)) - Ht) < 0.3 and abs(top(*(q + 2 * n)) - Ht) < 0.6 and abs(top(*(q + t)) - Ht) < 0.4 and abs(top(*(q - t)) - Ht) < 0.4: best = (Lx, q, Ht, gg); break
+                if best is None: continue
+                Lx, q, Ht, g = best; decks, h, ok = [], y00, True
+                for k in range(N):
+                    d_ = side if k % 2 == 0 else -side; sk = 1 if k % 2 == 0 else -1; c0 = S_ + n * (d0 + GAP * (k % 2)) + t * (-Lg / 2 * d_); c1 = c0 + t * Lg * d_
+                    decks.append({'kind': 'flight', 'a': [float(c0[0]), float(h), float(c0[1])], 'b': [float(c1[0]), float(h + g * Lg), float(c1[1])], 'w': W}); h += g * Lg
+                    if k < N - 1:
+                        l0 = c1 + t * d_ * (W / 2 + 0.2) - n * sk * (W / 2); l1 = l0 + n * sk * (GAP + W)
+                        decks.append({'kind': 'landing', 'a': [float(l0[0]), float(h), float(l0[1])], 'b': [float(l1[0]), float(h), float(l1[1])], 'w': W + 0.4, 'out': [float(t[0] * d_), float(t[1] * d_)]})
+                em = end + n * (W + 0.6)
+                decks.append({'kind': 'landing', 'a': [float(end[0]), float(h), float(end[1])], 'b': [float(em[0]), float(h), float(em[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)]})
+                decks.append({'kind': 'landing', 'a': [float(em[0]), float(h), float(em[1])], 'b': [float(q[0]), float(Ht + 0.4), float(q[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)]})
+                qa = np.array(q, float); ya = Ht + 0.4; flat = 0
+                for st in range(1, 41):
+                    qb = q + n * st; yg = top(*qb); yb = float(np.clip(yg + 0.4, ya - 0.45, ya + 0.45))
+                    decks.append({'kind': 'landing', 'a': [float(qa[0]), float(ya), float(qa[1])], 'b': [float(qb[0]), yb, float(qb[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)]})
+                    flat = flat + 1 if abs(yg - top(*(q + n * (st + 1)))) < 0.25 and abs(yb - yg - 0.4) < 0.3 else 0
+                    qa, ya = qb, yb
+                    if flat >= 3 and st >= 24: break
+                for e in decks[1:-1]:
+                    if e['kind'] == 'landing' and e['b'][1] <= top(e['b'][0], e['b'][2]) + 0.6 and e is not decks[-1] and decks.index(e) > 2 * N: continue
+                    for tt in np.linspace(0.1, 0.9, 6):
+                        p_ = np.array(e['a']) + (np.array(e['b']) - np.array(e['a'])) * tt
+                        if top(p_[0], p_[2]) > p_[1] - 0.5: ok = False; _g.setdefault("psdbg", []).append((side, d0, N, e["kind"], round(float(p_[1]), 1), round(top(p_[0], p_[2]), 1))); break
+                    if not ok: break
+                if not ok: continue
+                f0 = decks[0]
+                if top(f0['a'][0], f0['a'][2]) > f0['a'][1] - 1.0: fa = np.array(f0['a']); fb = np.array(f0['b']); f0['a'] = (fa - (fb - fa) / Lg * 3.0).tolist(); f0['a'][1] = float(fa[1] - g * 3.0 - 0.4)
+                fa0 = np.array(decks[0]['a']); ap = np.array([sh[0], y0 + 0.05, sh[1]]); La = math.hypot(fa0[0] - ap[0], fa0[2] - ap[2])
+                if La > 1.0:
+                    if abs(fa0[1] - ap[1]) / La > 0.5: continue
+                    decks.insert(0, {'kind': 'landing', 'a': ap.tolist(), 'b': fa0.tolist(), 'w': W + 0.4})
+                Hr = H.copy(); RD = np.zeros(H.shape, bool)
+                for e in decks:
+                    a_ = np.array(e['a']); b_ = np.array(e['b']); u = b_ - a_; Lh = math.hypot(u[0], u[2]); uh = np.array([u[0], u[2]]) / (Lh + 1e-9); pv = np.array([-uh[1], uh[0]])
+                    for tt in np.linspace(0, 1, max(2, int(Lh / 0.5))):
+                        for ww in np.linspace(-e['w'] / 2 + 0.4, e['w'] / 2 - 0.4, 6):
+                            p_ = a_ + u * tt; x, z = p_[0] + pv[0] * ww, p_[2] + pv[1] * ww; j = int(round((z - zs[0]) / STEP)); i = int(round((x - xs[0]) / STEP))
+                            if 0 <= j < ny and 0 <= i < nx and (not RD[j, i] or p_[1] > Hr[j, i]): RD[j, i] = True; Hr[j, i] = p_[1]
+                print(f'  pier stair: {N} flights, {math.degrees(math.atan(g)):.1f} deg, rise {h - y00:.1f} m ({y00:.1f} -> {h:.1f})')
+                return {'decks': decks, 'flights': N, 'deg': round(math.degrees(math.atan(g)), 1), 'rise_m': round(h - y00, 1), 'bottom': decks[0]['a'], 'top': decks[-1]['b']}, Hr, RD
+    print('  pier stair: no clear spot'); return None, H, np.zeros(H.shape, bool)
 def ramp_geo(R):
     S_, C_ = [], []; ST = C(176, 168, 172); ST2 = C(146, 138, 146)
     for e in R['decks']:
@@ -239,8 +299,16 @@ def build(k):
     Hr = H.copy(); RDECK = np.zeros_like(comp); RAMPZ = np.zeros_like(comp); PLAT = np.zeros_like(comp); ramp = None
     if cfg.get('ramp'):
         ramp, Hr, RAMPZ, PLAT, walk, RDECK = build_ramp(H, base, comp, walk, FP, dsh, si, X, Z, xs, zs, cd)
+    if cfg.get('pier_stair'):   # built switchback from the pier head straight up the sea cliff to the lower shelf (no terrain reshaping)
+        r2, Hr, RD2 = pier_stair(Hr, base, sh, inl, float(Ld['shore'][1]), X, Z, xs, zs, hmin=cfg['pier_stair'][0])
+        if r2 is not None:
+            RDECK = RDECK | RD2; RAMPZ = RAMPZ | ndimage.binary_dilation(RD2, iterations=3); walk = walk | RD2; ramp = ramp or {}; ramp['pier_stair'] = r2
     Gr, okr, nidr = walk_graph(Hr, walk & ~(FP & (dsh > 12)), si[0], si[1], ny, nx, hard=0.7)   # walkable (<=35 deg steps) from the pier head
     dr = dijkstra(Gr, indices=nidr[si], limit=np.inf); reach = np.zeros_like(comp); reach[okr] = np.isfinite(dr)
+    if ramp and ramp.get('pier_stair'):   # stacked flights: the climb is the deck chain itself; reach continues from the top-walk end
+        te = ramp['pier_stair']['decks'][-1]['b']; tj = int(round((te[2] - zs[0]) / STEP)); ti = int(round((te[0] - xs[0]) / STEP))
+        Gt, okt, nidt = walk_graph(Hr, (walk | comp | ndimage.binary_dilation(RD2, iterations=2)) & ~(RD2 & (Hr < te[1] - 1.5)), tj, ti, ny, nx, hard=0.7)
+        dt = dijkstra(Gt, indices=nidt[tj, ti], limit=np.inf); rt_ = np.zeros_like(comp); rt_[okt] = np.isfinite(dt); reach |= rt_; print('  stair-top reach cells', int(rt_.sum()), te)
     reach = ndimage.binary_erosion(reach, iterations=1) | (dsh < 6)
     cand = reach & comp & (cd > 12) & (fpd > 18) & (dsh > 30) & (dsh < R * 1.35) & (edge > 26)
     for t_i, pdef in enumerate(cfg['pois']):
@@ -310,16 +378,22 @@ def build(k):
     Hd = ndimage.minimum_filter(np.where(RDECK, Hr, 1e9), size=5)   # terrain never rises into the stair / landing headroom
     H = np.where((Hd < 1e8) & ((Hd - base > 1.0) | (H > Hd + 0.3)), np.minimum(H, Hd - 0.7), H)
     # final re-route on the finished surface: what the walk test (and the player) actually walks; avoids prop footprints + their edge ring
-    Hq = np.where(RDECK, Hr, H); okw = ndimage.binary_erosion(keep, iterations=2) | ndimage.binary_dilation(RDECK, iterations=1) | BR | ((dsh < 10) & keep)   # >=4 m inside the patch rim (no tuck edge under a path)
-    okw &= ~(ndimage.binary_dilation(FPS, iterations=1) & (dsh > 14))
+    Hq = np.where(RDECK, Hr, np.where(keep, H, np.maximum(base, _g['colC']))); okw = ndimage.binary_erosion(keep, iterations=2) | ndimage.binary_dilation(RDECK, iterations=1) | BR | ((dsh < 10) & keep) | ((dsh < 40) & comp & ~FPS & (keep | (slope_of(np.maximum(base, _g['colC'])) < 0.6))) | (ndimage.binary_dilation(RDECK, iterations=2) & comp)   # >=4 m inside the patch rim (no tuck edge under a path)
+    okw &= ~((ndimage.binary_dilation(FPS, iterations=1) & (dsh > 40)) | FPS)
+    if cfg.get('pier_stair'): okw &= ~((slope_of(np.maximum(base, _g['colC'])) > 0.8) & (dsh < 45)) | ndimage.binary_dilation(RDECK, iterations=2); okw &= ndimage.binary_dilation(RDECK, iterations=2) | (dsh >= 45) | (dsh < 4) | (Hq > ramp['pier_stair']['decks'][-1]['b'][1] - 3.0)   # cliff island: steep original ground only via the built stairs
     _g['okw'] = okw.copy(); _g['si'] = (sj, sii); _g['FPS'] = FPS; _g['Hq'] = Hq
-    G2, okc2, nid2 = walk_graph(Hq, okw, sj, sii, ny, nx); d2, pr2 = dijkstra(G2, indices=nid2[sj, sii], return_predecessors=True); c2_ = np.argwhere(okc2); grade = []
+    PSP = None; s0j, s0i = sj, sii
+    if ramp and ramp.get('pier_stair'):   # stacked flights can't live on a 2D grid: route = the stair's deck chain, then the grid from the top-walk end
+        dk = ramp['pier_stair']['decks']; PSP = [dk[0]['a']] + [e['b'] for e in dk]; te = dk[-1]['b']
+        s0j = int(round((te[2] - zs[0]) / STEP)); s0i = int(round((te[0] - xs[0]) / STEP))
+        okw &= ~(RDECK & (Hq < te[1] - 1.5)) & (dsh >= 4)
+    G2, okc2, nid2 = walk_graph(Hq, okw, s0j, s0i, ny, nx); d2, pr2 = dijkstra(G2, indices=nid2[s0j, s0i], return_predecessors=True); c2_ = np.argwhere(okc2); grade = []
     for p in pois:
         t = nid2[p['ij']]
         if t < 0 or not np.isfinite(d2[t]) or d2[t] > 4000: print('  final route missing/hard for', p['name'], (float(d2[t]) if t >= 0 else 'nocell'), int(okw[p['ij']])); continue
         rt = []
-        while t >= 0 and t != nid2[sj, sii]: rt.append(tuple(c2_[t])); t = pr2[t]
-        p['route'] = rt[::-1]
+        while t >= 0 and t != nid2[s0j, s0i]: rt.append(tuple(c2_[t])); t = pr2[t]
+        p['route'] = rt[::-1]; p['pre'] = PSP
         for (a0, b0), (a1, b1) in zip(p['route'][:-1], p['route'][1:]):
             if not BR[a0, b0]: grade.append(float(np.degrees(np.arctan(abs(Hq[a1, b1] - Hq[a0, b0]) / (math.hypot(a1 - a0, b1 - b0) * STEP)))))
     STATS[k]['path_max_deg'] = round(max(grade) if grade else 0, 1); STATS[k]['path_p95_deg'] = round(float(np.percentile(grade, 95)) if grade else 0, 1)
@@ -371,7 +445,8 @@ def build(k):
         x, z = X[j, i] + rng.uniform(-1, 1), Z[j, i] + rng.uniform(-1, 1); y = Hat(x, z)
         s, g, c = veg(GROUND[reg], (x, y, z), rng); solid += s; glow += g; colp += c
     if ramp:
-        s_, c_ = ramp_geo(ramp); solid += s_; colp += c_
+        if ramp.get('decks'): s_, c_ = ramp_geo(ramp); solid += s_; colp += c_
+        if ramp.get('pier_stair'): s_, c_ = ramp_geo(ramp['pier_stair']); solid += s_; colp += c_
     for b0 in bridges:
         s_, c_ = bridge(b0, GROUND[reg]); solid += s_; colp += c_
     name = f'{pre}isl_{k}'
@@ -390,7 +465,7 @@ def build(k):
         return [round(x, 2), round(y, 2), round(z, 2)]
     return {'id': k, 'name': Ld['name'], 'region': reg, 'ground': GROUND[reg], 'files': {'mesh': name, 'lod1': name + '_lod1', 'glow': name + '_glow' if glow else None, 'col': name + '_col'},
             'pier_head': Ld['shore'], 'window': [float(xs[0]), float(zs[0]), float(xs[-1]), float(zs[-1])],
-            'pois': [{'type': p['type'], 'name': p['name'], 'pos': [round(c, 2) for c in p['pos']], 'radius': p['r'], 'route': [rpt(a, b) for (a, b) in p.get('route', [])]} for p in pois], 'ramp': ramp,
+            'pois': [{'type': p['type'], 'name': p['name'], 'pos': [round(c, 2) for c in p['pos']], 'radius': p['r'], 'route': [[round(float(v), 2) for v in w] for w in (p.get('pre') or [])] + [rpt(a, b) for (a, b) in p.get('route', [])]} for p in pois], 'ramp': ramp,
             'lights': lights, 'bridges': bridges, 'path': {'max_deg': STATS[k]['path_max_deg'], 'p95_deg': STATS[k]['path_p95_deg']},
             'cams': {'inland': [Ld['shore'][0] - inl[0] * 6, Ld['shore'][1] + 4.5, Ld['shore'][2] - inl[1] * 6], 'inland_look': [sh[0] + inl[0] * 40, Hat(*(sh + inl * 40)) + 1.5, sh[1] + inl[1] * 40],
                      'over': [sh[0] - inl[0] * 60 + inl[1] * 50, max(H.max(), 0) + 55, sh[1] - inl[1] * 60 - inl[0] * 50], 'over_look': [cen[0], float(np.median(H[comp])) if comp.any() else 0, cen[1]]}}

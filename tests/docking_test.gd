@@ -165,6 +165,10 @@ func _run() -> void:
 			await get_tree().physics_frame
 		var endp := sea.to_local(m.hero.global_position)
 		var dist := Vector2(endp.x - start.x, endp.z - start.z).length()
+		if dist < 20.0:
+			var w := m.hero.global_position + Vector3(0, 0.5, 0); var q := PhysicsRayQueryParameters3D.create(w, w + fw * 3.0, 1); q.exclude = [m.hero.get_rid()]
+			var hh: Dictionary = m.get_world_3d().direct_space_state.intersect_ray(q)
+			print("DK BLOCK %s at %s by %s n=%s" % [k, str(endp), str(hh.get("collider", null).get_parent().name if hh else "none"), str(hh.get("normal", ""))])
 		ok(dist >= 20.0 and minh > 0.0 and resets == 0, "%s: walked %.1f m inland on foot (min y %.2f, resets %d)" % [k, dist, minh, resets])
 		await frames(30)
 		var c0: Vector3 = m.party.companions[0].node.global_position if m.party.companions.size() > 0 else m.pip.global_position

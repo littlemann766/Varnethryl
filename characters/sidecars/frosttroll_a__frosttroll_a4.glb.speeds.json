@@ -1,0 +1,29 @@
+{
+ "model": "frosttroll_a4",
+ "height_m": 5.7,
+ "hero_height_m": 1.9,
+ "boss_multiple": 3,
+ "multiple_note": "user decided: Frost Troll is 3x player height (5.7 m). a3 = a2 baked-scaled x0.5",
+ "walk_mps": 2.106,
+ "run_mps": 5.898,
+ "speed_basis": "measured stance-foot ground travel (planted feet)",
+ "clips_s": {
+  "idle": 3,
+  "walk": 1.3,
+  "run": 0.781,
+  "attack": 1.8,
+  "attack2": 1.6,
+  "hit": 0.45,
+  "death": 1.8
+ },
+ "oneshot": [
+  "death"
+ ],
+ "loop": [
+  "idle",
+  "walk",
+  "run"
+ ],
+ "note": "clip durations in seconds; attack/attack2/hit one-shots return to rest, death ends collapsed (hold last frame); v2: arms/shoulders re-rigged (joints refit to mesh, shoulder fur rigid pieces + clavicle rolls), per-frame ground correction on hips (min vertex y=0 each frame); a3: whole-model bake scale 0.5 of a2 (11.4 m -> 5.7 m), clip durations unchanged so speeds halve",
+ "ground": "per-frame hips correction; lowest skinned vertex y>=0 (loops: <=0.06 m hover in run flight/walk swing)"
+}

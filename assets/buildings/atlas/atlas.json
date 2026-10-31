@@ -1,0 +1,22 @@
+{
+ "tile": 256,
+ "grid": 4,
+ "tiles": [
+  "b_stone",
+  "b_plaster",
+  "b_timber",
+  "b_slate",
+  "b_cobble",
+  "b_thatch",
+  "b_planks",
+  "b_redplanks",
+  "b_window",
+  "b_door",
+  "b_darkstone",
+  "b_shingle",
+  "b_white",
+  "b_red",
+  "b_glass",
+  "b_iron"
+ ]
+}

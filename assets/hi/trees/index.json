@@ -1,0 +1,137 @@
+[
+ {
+  "file": "hi/trees/oak_hi.glb",
+  "tris": 2494,
+  "tex": 2048
+ },
+ {
+  "file": "hi/trees/oak_hi_lod1.glb",
+  "tris": 684,
+  "tex": 1024
+ },
+ {
+  "file": "hi/trees/oak_hi_lod2.glb",
+  "tris": 6,
+  "tex": 512
+ },
+ {
+  "file": "hi/trees/oak_autumn_hi.glb",
+  "tris": 2494,
+  "tex": 2048
+ },
+ {
+  "file": "hi/trees/oak_autumn_hi_lod1.glb",
+  "tris": 684,
+  "tex": 1024
+ },
+ {
+  "file": "hi/trees/oak_autumn_hi_lod2.glb",
+  "tris": 6,
+  "tex": 512
+ },
+ {
+  "file": "hi/trees/oak_deep_hi.glb",
+  "tris": 2494,
+  "tex": 2048
+ },
+ {
+  "file": "hi/trees/oak_deep_hi_lod1.glb",
+  "tris": 684,
+  "tex": 1024
+ },
+ {
+  "file": "hi/trees/oak_deep_hi_lod2.glb",
+  "tris": 6,
+  "tex": 512
+ },
+ {
+  "file": "hi/trees/birch_hi.glb",
+  "tris": 2494,
+  "tex": 2048
+ },
+ {
+  "file": "hi/trees/birch_hi_lod1.glb",
+  "tris": 684,
+  "tex": 1024
+ },
+ {
+  "file": "hi/trees/birch_hi_lod2.glb",
+  "tris": 6,
+  "tex": 512
+ },
+ {
+  "file": "hi/trees/blossom_hi.glb",
+  "tris": 2494,
+  "tex": 2048
+ },
+ {
+  "file": "hi/trees/blossom_hi_lod1.glb",
+  "tris": 684,
+  "tex": 1024
+ },
+ {
+  "file": "hi/trees/blossom_hi_lod2.glb",
+  "tris": 6,
+  "tex": 512
+ },
+ {
+  "file": "hi/trees/pine_hi.glb",
+  "tris": 2934,
+  "tex": 2048
+ },
+ {
+  "file": "hi/trees/pine_hi_lod1.glb",
+  "tris": 172,
+  "tex": 1024
+ },
+ {
+  "file": "hi/trees/pine_hi_lod2.glb",
+  "tris": 6,
+  "tex": 512
+ },
+ {
+  "file": "hi/trees/pine_snow_hi.glb",
+  "tris": 6174,
+  "tex": 2048
+ },
+ {
+  "file": "hi/trees/pine_snow_hi_lod1.glb",
+  "tris": 972,
+  "tex": 1024
+ },
+ {
+  "file": "hi/trees/pine_snow_hi_lod2.glb",
+  "tris": 6,
+  "tex": 512
+ },
+ {
+  "file": "hi/trees/bush_hi.glb",
+  "tris": 760,
+  "tex": 2048
+ },
+ {
+  "file": "hi/trees/bush_hi_lod1.glb",
+  "tris": 180,
+  "tex": 1024
+ },
+ {
+  "file": "hi/trees/bush_autumn_hi.glb",
+  "tris": 760,
+  "tex": 2048
+ },
+ {
+  "file": "hi/trees/bush_autumn_hi_lod1.glb",
+  "tris": 180,
+  "tex": 1024
+ },
+ {
+  "file": "hi/trees/grass_clump_hi.glb",
+  "tris": 440,
+  "tex": 2048
+ },
+ {
+  "file": "hi/trees/grass_clump_hi_lod1.glb",
+  "tris": 100,
+  "tex": 1024
+ }
+]

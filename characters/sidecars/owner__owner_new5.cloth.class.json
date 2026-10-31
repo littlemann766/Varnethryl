@@ -1,0 +1,17 @@
+{
+ "cloth": [
+  "cape (5-segment spring chain, leg/arm/torso capsule colliders)",
+  "hood (light secondary)"
+ ],
+ "nonCloth": [
+  "onesie body (rigid, skinned to body bones)",
+  "hair (rigid; baked clip sway only)",
+  "tail (rigid, baked)",
+  "coat bones present but unweighted (onesie has no coat)",
+  "slippers, hands, face"
+ ],
+ "notes": [
+  "cape is the only real cloth; hood is light",
+  "owner_new4: arm swing solved against torso and cape sheet; cape moved back 3 cm"
+ ]
+}

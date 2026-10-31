@@ -4,7 +4,8 @@ on:
     branches: [main, master]
     paths:
       - 'multiplayer/**'
-      - 'www/proto3d/multiplayer-client.js'
+      - 'legacy-web/www/proto3d/multiplayer-client.js'
+      - 'net/**'
       - '.github/workflows/test-multiplayer.yml'
   workflow_dispatch:
 permissions:
@@ -18,7 +19,8 @@ jobs:
         with:
           node-version: '22'
       - name: Check client code syntax
-        run: node --check www/proto3d/multiplayer-client.js
+        run: node --check legacy-web/www/proto3d/multiplayer-client.js
+      - 'net/**'
       - name: Install multiplayer relay dependencies
         working-directory: multiplayer
         run: npm install --no-audit --no-fund

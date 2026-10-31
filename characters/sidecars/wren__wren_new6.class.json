@@ -1,0 +1,17 @@
+{
+ "cloth": [
+  "cape (robe skirt/back chain, 5 bones)",
+  "wing_L/wing_R (NEW: 4-bone sleeve+feather-hand spring chain per side, parent foreArm)",
+  "ears (light)"
+ ],
+ "nonCloth": [
+  "skin/body",
+  "satchel, hat (rigid)",
+  "feathers on face/body (rigid)",
+  "armor/gear/props bound to body bones"
+ ],
+ "notes": [
+  "wings = the owl's bell sleeves + feather hands; verts within ~8-13 cm of the elbow->fingertip axis (torso/skirt excluded) are blended onto wing chain; sleeve-tearing source mesh issue not fixed",
+  "baked gentle lag-sway tracks on wing bones in idle/walk/run (<=10 deg per bone), physics adds secondary motion on top"
+ ]
+}

@@ -1,0 +1,100 @@
+{
+ "walk": {
+  "period": 0.5,
+  "speed": 0.255,
+  "stride": 0.127,
+  "hop_distance": 0.127,
+  "stance_distance": 0.07,
+  "duty": 0.55,
+  "hop_height": 0.035,
+  "speed_in_heights_per_sec": 0.336,
+  "loop": true,
+  "note": "two-footed bird hop walk, feet planted in stance (0.0 cm slip), stride = distance per hop; speed = ground speed in m/s at scale 1"
+ },
+ "run": {
+  "period": 0.34,
+  "speed": 0.882,
+  "stride": 0.3,
+  "hop_distance": 0.3,
+  "stance_distance": 0.12,
+  "duty": 0.4,
+  "hop_height": 0.07,
+  "speed_in_heights_per_sec": 1.166,
+  "loop": true,
+  "note": "two-footed bird hop run, feet planted in stance (0.0 cm slip), stride = distance per hop; speed = ground speed in m/s at scale 1"
+ },
+ "idle": {
+  "period": 3.2,
+  "speed": null,
+  "loop": true,
+  "note": "in-place clip: play at timeScale 1. perched breathing + slight head turn"
+ },
+ "hover": {
+  "period": 1.0,
+  "speed": null,
+  "loop": true,
+  "note": "in-place clip: play at timeScale 1. in-place hover; root is raised by air_offset_m"
+ },
+ "fly": {
+  "period": 0.8,
+  "speed": null,
+  "loop": true,
+  "note": "in-place clip: play at timeScale 1. forward flapping flight; set flight speed in game; suggested flight speed 3.5 m/s"
+ },
+ "glide": {
+  "period": 3.0,
+  "speed": null,
+  "loop": true,
+  "note": "in-place clip: play at timeScale 1. wings out, gentle sway; suggested 5 m/s"
+ },
+ "attack": {
+  "period": 0.9,
+  "speed": null,
+  "loop": false,
+  "duration": 0.9,
+  "note": "beak peck lunge"
+ },
+ "attack2": {
+  "period": 1.2,
+  "speed": null,
+  "loop": false,
+  "duration": 1.2,
+  "note": "talon swipe + wing flare"
+ },
+ "hit": {
+  "period": 0.5333333333333333,
+  "speed": null,
+  "loop": false,
+  "duration": 0.5333333333333333,
+  "note": "flinch"
+ },
+ "death": {
+  "period": 1.7,
+  "speed": null,
+  "loop": false,
+  "duration": 1.7,
+  "note": "fall, settle on its side, holds last pose"
+ },
+ "land": {
+  "period": 1.0,
+  "speed": null,
+  "loop": false,
+  "duration": 1.0,
+  "note": "one-shot: descends air_offset_m to the perched idle pose (root y animates)"
+ },
+ "takeoff": {
+  "period": 0.9,
+  "speed": null,
+  "loop": false,
+  "duration": 0.9,
+  "note": "one-shot: crouch, push off, rises air_offset_m, ends on the first frame of hover"
+ },
+ "_meta": {
+  "wingspan_m": 1.601,
+  "scale_K": 1.6008,
+  "perched_height_m": 0.757,
+  "air_offset_m": 0.3,
+  "hero_height_m": 1.9,
+  "units": "metres, Y up, faces +Z"
+ }
+}

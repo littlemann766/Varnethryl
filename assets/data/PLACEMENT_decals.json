@@ -1,0 +1,5972 @@
+{
+"zone": "decals",
+"note": "Decals: town walls/streets/building fronts. Separate decal atlas material.",
+"items": [
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-151.48,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-162.17,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.45,
+1.45,
+1.45
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-130.83,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.53,
+1.53,
+1.53
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-124.96,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.3,
+1.3,
+1.3
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-110.03,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.45,
+1.45,
+1.45
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-108.54,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.35,
+1.35,
+1.35
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-77.39,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-88.29,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.51,
+1.51,
+1.51
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-52.9,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.52,
+1.52,
+1.52
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-55.47,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-44.25,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.41,
+1.41,
+1.41
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-45.33,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.19,
+1.19,
+1.19
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-15.66,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.52,
+1.52,
+1.52
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-21.27,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.05,
+1.05,
+1.05
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+11.83,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.07,
+1.07,
+1.07
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+2.96,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+39.95,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.15,
+1.15,
+1.15
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+26.26,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+51.54,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.1,
+1.1,
+1.1
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+51.1,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+86.39,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.24,
+1.24,
+1.24
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+76.16,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+102.77,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+111.69,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+137.3,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.6,
+1.6,
+1.6
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+134.3,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.48,
+1.48,
+1.48
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+163.52,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.46,
+1.46,
+1.46
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+164.85,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+184.4,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+174.72,
+0.0,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-151.58,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-158.52,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-125.1,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.17,
+1.17,
+1.17
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-135.24,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.06,
+1.06,
+1.06
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-113.13,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.44,
+1.44,
+1.44
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-104.36,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.52,
+1.52,
+1.52
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-79.16,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.52,
+1.52,
+1.52
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-86.06,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.42,
+1.42,
+1.42
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-53.99,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.06,
+1.06,
+1.06
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-61.13,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.56,
+1.56,
+1.56
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-28.76,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.43,
+1.43,
+1.43
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-31.92,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.26,
+1.26,
+1.26
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-19.12,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.03,
+1.03,
+1.03
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-13.57,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+10.88,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.49,
+1.49,
+1.49
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+10.63,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.46,
+1.46,
+1.46
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+45.32,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+28.21,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+62.42,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.09,
+1.09,
+1.09
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+59.4,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+81.6,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.42,
+1.42,
+1.42
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+86.86,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+100.43,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.06,
+1.06,
+1.06
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+98.67,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.42,
+1.42,
+1.42
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+139.3,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+140.5,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.01,
+1.01,
+1.01
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+156.09,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+164.62,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+177.41,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.52,
+1.52,
+1.52
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+189.95,
+0.0,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.38,
+1.38,
+1.38
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+-163.15
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+182.6,
+0.0,
+-164.51
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+182.6,
+0.0,
+-130.34
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.59,
+1.59,
+1.59
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+182.6,
+0.0,
+-141.19
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.49,
+1.49,
+1.49
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+-107.65
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.57,
+1.57,
+1.57
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+182.6,
+0.0,
+-98.99
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.58,
+1.58,
+1.58
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+-82.53
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.59,
+1.59,
+1.59
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+182.6,
+0.0,
+-79.06
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.05,
+1.05,
+1.05
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+-65.99
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+182.6,
+0.0,
+-64.87
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+-33.02
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.26,
+1.26,
+1.26
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+182.6,
+0.0,
+-30.55
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+182.6,
+0.0,
+-9.77
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.07,
+1.07,
+1.07
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+182.6,
+0.0,
+-6.92
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+182.6,
+0.0,
+20.22
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+18.96
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.45,
+1.45,
+1.45
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+182.6,
+0.0,
+30.93
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+36.45
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.34,
+1.34,
+1.34
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+182.6,
+0.0,
+55.75
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.13,
+1.13,
+1.13
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+182.6,
+0.0,
+55.82
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+182.6,
+0.0,
+86.53
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+182.6,
+0.0,
+89.29
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+113.47
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.52,
+1.52,
+1.52
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+113.17
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.07,
+1.07,
+1.07
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+127.32
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.37,
+1.37,
+1.37
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+182.6,
+0.0,
+131.37
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.07,
+1.07,
+1.07
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+182.6,
+0.0,
+146.73
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.34,
+1.34,
+1.34
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+182.6,
+0.0,
+154.56
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+182.6,
+0.0,
+173.45
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.48,
+1.48,
+1.48
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+182.6,
+0.0,
+178.89
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.26,
+1.26,
+1.26
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+-152.7
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.41,
+1.41,
+1.41
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-182.6,
+0.0,
+-157.77
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.41,
+1.41,
+1.41
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-182.6,
+0.0,
+-137.0
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.28,
+1.28,
+1.28
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-182.6,
+0.0,
+-138.07
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.22,
+1.22,
+1.22
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-182.6,
+0.0,
+-106.26
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+-103.03
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.29,
+1.29,
+1.29
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+-79.18
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.02,
+1.02,
+1.02
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-182.6,
+0.0,
+-79.79
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.15,
+1.15,
+1.15
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-182.6,
+0.0,
+-53.5
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.53,
+1.53,
+1.53
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+-55.62
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.51,
+1.51,
+1.51
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-182.6,
+0.0,
+-40.14
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.19,
+1.19,
+1.19
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+-40.32
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.26,
+1.26,
+1.26
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+-18.76
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-182.6,
+0.0,
+-12.17
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-182.6,
+0.0,
+15.22
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+14.1
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+26.57
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.4,
+1.4,
+1.4
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-182.6,
+0.0,
+40.39
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-182.6,
+0.0,
+63.71
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-182.6,
+0.0,
+58.15
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.17,
+1.17,
+1.17
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-182.6,
+0.0,
+74.43
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-182.6,
+0.0,
+75.05
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.06,
+1.06,
+1.06
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-182.6,
+0.0,
+107.63
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+117.02
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.35,
+1.35,
+1.35
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-182.6,
+0.0,
+130.18
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+130.79
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-182.6,
+0.0,
+161.58
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_grime_wall.glb",
+"position": [
+-182.6,
+0.0,
+163.16
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_wall.glb",
+"position": [
+-182.6,
+0.0,
+185.96
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_wall.glb",
+"position": [
+-182.6,
+0.0,
+172.0
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.25,
+1.25,
+1.25
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+2.73,
+0.0,
+-129.83
+],
+"rotation": [
+0,
+0.527,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+-168.7,
+0.0,
+0.95
+],
+"rotation": [
+0,
+2.805,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-91.74,
+0.0,
+1.85
+],
+"rotation": [
+0,
+2.943,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+104.43,
+0.0,
+1.88
+],
+"rotation": [
+0,
+0.083,
+0
+],
+"scale": [
+1.28,
+1.28,
+1.28
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-1.79,
+0.0,
+87.74
+],
+"rotation": [
+0,
+5.733,
+0
+],
+"scale": [
+1.29,
+1.29,
+1.29
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+128.34,
+0.0,
+-1.22
+],
+"rotation": [
+0,
+0.973,
+0
+],
+"scale": [
+0.96,
+0.96,
+0.96
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-107.86,
+0.0,
+1.55
+],
+"rotation": [
+0,
+1.284,
+0
+],
+"scale": [
+0.9,
+0.9,
+0.9
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+177.98,
+0.0,
+0.48
+],
+"rotation": [
+0,
+5.999,
+0
+],
+"scale": [
+1.47,
+1.47,
+1.47
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+110.96,
+0.0,
+0.8
+],
+"rotation": [
+0,
+3.504,
+0
+],
+"scale": [
+1.38,
+1.38,
+1.38
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+66.96,
+0.0,
+1.14
+],
+"rotation": [
+0,
+0.559,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+101.08,
+0.0,
+0.72
+],
+"rotation": [
+0,
+1.695,
+0
+],
+"scale": [
+0.89,
+0.89,
+0.89
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-161.34,
+0.0,
+-0.88
+],
+"rotation": [
+0,
+1.063,
+0
+],
+"scale": [
+1.36,
+1.36,
+1.36
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+1.66,
+0.0,
+-176.89
+],
+"rotation": [
+0,
+3.156,
+0
+],
+"scale": [
+0.98,
+0.98,
+0.98
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+84.83,
+0.0,
+1.62
+],
+"rotation": [
+0,
+4.234,
+0
+],
+"scale": [
+0.91,
+0.91,
+0.91
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+45.35,
+0.0,
+-2.46
+],
+"rotation": [
+0,
+2.613,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+0.46,
+0.0,
+163.47
+],
+"rotation": [
+0,
+3.942,
+0
+],
+"scale": [
+1.05,
+1.05,
+1.05
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+96.86,
+0.0,
+0.93
+],
+"rotation": [
+0,
+3.905,
+0
+],
+"scale": [
+1.49,
+1.49,
+1.49
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-129.49,
+0.0,
+1.64
+],
+"rotation": [
+0,
+2.71,
+0
+],
+"scale": [
+0.91,
+0.91,
+0.91
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+155.96,
+0.0,
+-0.34
+],
+"rotation": [
+0,
+3.269,
+0
+],
+"scale": [
+0.91,
+0.91,
+0.91
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+3.4,
+0.0,
+98.72
+],
+"rotation": [
+0,
+1.933,
+0
+],
+"scale": [
+0.89,
+0.89,
+0.89
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+0.45,
+0.0,
+92.17
+],
+"rotation": [
+0,
+2.147,
+0
+],
+"scale": [
+1.26,
+1.26,
+1.26
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+0.11,
+0.0,
+117.5
+],
+"rotation": [
+0,
+2.152,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+0.09,
+0.0,
+124.91
+],
+"rotation": [
+0,
+1.976,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+0.87,
+0.0,
+106.47
+],
+"rotation": [
+0,
+0.24,
+0
+],
+"scale": [
+0.81,
+0.81,
+0.81
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-1.97,
+0.0,
+127.37
+],
+"rotation": [
+0,
+3.513,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-3.23,
+0.0,
+162.22
+],
+"rotation": [
+0,
+3.526,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-84.58,
+0.0,
+-1.41
+],
+"rotation": [
+0,
+5.575,
+0
+],
+"scale": [
+0.82,
+0.82,
+0.82
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+130.49,
+0.0,
+0.05
+],
+"rotation": [
+0,
+4.369,
+0
+],
+"scale": [
+1.3,
+1.3,
+1.3
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+172.46,
+0.0,
+-0.82
+],
+"rotation": [
+0,
+0.109,
+0
+],
+"scale": [
+1.33,
+1.33,
+1.33
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-3.16,
+0.0,
+61.46
+],
+"rotation": [
+0,
+1.686,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+98.42,
+0.0,
+-1.97
+],
+"rotation": [
+0,
+4.206,
+0
+],
+"scale": [
+0.83,
+0.83,
+0.83
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+-2.31,
+0.0,
+175.31
+],
+"rotation": [
+0,
+5.983,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+103.5,
+0.0,
+-2.56
+],
+"rotation": [
+0,
+2.16,
+0
+],
+"scale": [
+1.41,
+1.41,
+1.41
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+2.32,
+0.0,
+93.57
+],
+"rotation": [
+0,
+4.809,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-72.12,
+0.0,
+0.32
+],
+"rotation": [
+0,
+0.671,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-2.52,
+0.0,
+93.24
+],
+"rotation": [
+0,
+3.906,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+0.09,
+0.0,
+143.74
+],
+"rotation": [
+0,
+5.835,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+93.05,
+0.0,
+-0.45
+],
+"rotation": [
+0,
+2.891,
+0
+],
+"scale": [
+1.09,
+1.09,
+1.09
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-103.09,
+0.0,
+1.81
+],
+"rotation": [
+0,
+4.025,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-145.04,
+0.0,
+2.31
+],
+"rotation": [
+0,
+5.932,
+0
+],
+"scale": [
+0.95,
+0.95,
+0.95
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-105.85,
+0.0,
+2.22
+],
+"rotation": [
+0,
+0.822,
+0
+],
+"scale": [
+1.38,
+1.38,
+1.38
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-1.2,
+0.0,
+-80.66
+],
+"rotation": [
+0,
+2.81,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+-175.64,
+0.0,
+0.36
+],
+"rotation": [
+0,
+3.765,
+0
+],
+"scale": [
+1.41,
+1.41,
+1.41
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+-0.02,
+0.0,
+-157.56
+],
+"rotation": [
+0,
+3.0,
+0
+],
+"scale": [
+0.94,
+0.94,
+0.94
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+172.4,
+0.0,
+1.21
+],
+"rotation": [
+0,
+3.72,
+0
+],
+"scale": [
+1.41,
+1.41,
+1.41
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+47.31,
+0.0,
+-0.96
+],
+"rotation": [
+0,
+2.976,
+0
+],
+"scale": [
+1.13,
+1.13,
+1.13
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+169.75,
+0.0,
+0.92
+],
+"rotation": [
+0,
+3.293,
+0
+],
+"scale": [
+0.82,
+0.82,
+0.82
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+168.65,
+0.0,
+1.28
+],
+"rotation": [
+0,
+2.849,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+130.6,
+0.0,
+-0.49
+],
+"rotation": [
+0,
+3.877,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+102.9,
+0.0,
+0.26
+],
+"rotation": [
+0,
+1.788,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-104.69,
+0.0,
+0.19
+],
+"rotation": [
+0,
+0.791,
+0
+],
+"scale": [
+0.84,
+0.84,
+0.84
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-70.71,
+0.0,
+1.47
+],
+"rotation": [
+0,
+4.773,
+0
+],
+"scale": [
+0.84,
+0.84,
+0.84
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-2.55,
+0.0,
+57.31
+],
+"rotation": [
+0,
+5.855,
+0
+],
+"scale": [
+1.5,
+1.5,
+1.5
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+2.5,
+0.0,
+-114.93
+],
+"rotation": [
+0,
+3.66,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+141.29,
+0.0,
+-0.75
+],
+"rotation": [
+0,
+3.705,
+0
+],
+"scale": [
+1.43,
+1.43,
+1.43
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+169.2,
+0.0,
+-0.57
+],
+"rotation": [
+0,
+5.488,
+0
+],
+"scale": [
+0.82,
+0.82,
+0.82
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+-0.63,
+0.0,
+-95.27
+],
+"rotation": [
+0,
+5.83,
+0
+],
+"scale": [
+0.97,
+0.97,
+0.97
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+-60.97,
+0.0,
+2.33
+],
+"rotation": [
+0,
+0.816,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+2.33,
+0.0,
+-95.9
+],
+"rotation": [
+0,
+0.054,
+0
+],
+"scale": [
+1.09,
+1.09,
+1.09
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-76.72,
+0.0,
+1.7
+],
+"rotation": [
+0,
+2.125,
+0
+],
+"scale": [
+1.37,
+1.37,
+1.37
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+1.69,
+0.0,
+123.7
+],
+"rotation": [
+0,
+1.809,
+0
+],
+"scale": [
+1.1,
+1.1,
+1.1
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-83.86,
+0.0,
+1.64
+],
+"rotation": [
+0,
+5.326,
+0
+],
+"scale": [
+1.26,
+1.26,
+1.26
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-91.45,
+0.0,
+0.24
+],
+"rotation": [
+0,
+3.63,
+0
+],
+"scale": [
+1.49,
+1.49,
+1.49
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+145.64,
+0.0,
+-0.19
+],
+"rotation": [
+0,
+4.122,
+0
+],
+"scale": [
+0.83,
+0.83,
+0.83
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+0.03,
+0.0,
+134.24
+],
+"rotation": [
+0,
+2.333,
+0
+],
+"scale": [
+1.18,
+1.18,
+1.18
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+1.55,
+0.0,
+-107.14
+],
+"rotation": [
+0,
+6.135,
+0
+],
+"scale": [
+1.01,
+1.01,
+1.01
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+0.31,
+0.0,
+133.36
+],
+"rotation": [
+0,
+5.625,
+0
+],
+"scale": [
+0.82,
+0.82,
+0.82
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+0.04,
+0.0,
+-122.29
+],
+"rotation": [
+0,
+3.12,
+0
+],
+"scale": [
+0.84,
+0.84,
+0.84
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-2.54,
+0.0,
+-128.68
+],
+"rotation": [
+0,
+2.951,
+0
+],
+"scale": [
+0.94,
+0.94,
+0.94
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-2.75,
+0.0,
+-128.59
+],
+"rotation": [
+0,
+1.408,
+0
+],
+"scale": [
+1.17,
+1.17,
+1.17
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-131.0,
+0.0,
+2.53
+],
+"rotation": [
+0,
+6.014,
+0
+],
+"scale": [
+0.97,
+0.97,
+0.97
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-136.58,
+0.0,
+-1.43
+],
+"rotation": [
+0,
+0.21,
+0
+],
+"scale": [
+1.08,
+1.08,
+1.08
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-1.81,
+0.0,
+-154.91
+],
+"rotation": [
+0,
+2.458,
+0
+],
+"scale": [
+1.28,
+1.28,
+1.28
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-2.96,
+0.0,
+-83.69
+],
+"rotation": [
+0,
+4.134,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+2.45,
+0.0,
+135.51
+],
+"rotation": [
+0,
+0.504,
+0
+],
+"scale": [
+0.84,
+0.84,
+0.84
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-116.31,
+0.0,
+1.23
+],
+"rotation": [
+0,
+4.086,
+0
+],
+"scale": [
+1.13,
+1.13,
+1.13
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+2.94,
+0.0,
+104.26
+],
+"rotation": [
+0,
+0.67,
+0
+],
+"scale": [
+1.17,
+1.17,
+1.17
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-120.93,
+0.0,
+2.73
+],
+"rotation": [
+0,
+5.311,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-116.41,
+0.0,
+1.83
+],
+"rotation": [
+0,
+3.777,
+0
+],
+"scale": [
+1.47,
+1.47,
+1.47
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-43.7,
+0.0,
+-2.66
+],
+"rotation": [
+0,
+3.296,
+0
+],
+"scale": [
+1.26,
+1.26,
+1.26
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-80.57,
+0.0,
+-1.08
+],
+"rotation": [
+0,
+2.665,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-134.03,
+0.0,
+1.3
+],
+"rotation": [
+0,
+0.333,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+-170.15,
+0.0,
+0.22
+],
+"rotation": [
+0,
+2.467,
+0
+],
+"scale": [
+1.19,
+1.19,
+1.19
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-135.26,
+0.0,
+-2.64
+],
+"rotation": [
+0,
+1.811,
+0
+],
+"scale": [
+1.1,
+1.1,
+1.1
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+2.37,
+0.0,
+-142.23
+],
+"rotation": [
+0,
+1.684,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+1.85,
+0.0,
+169.4
+],
+"rotation": [
+0,
+5.001,
+0
+],
+"scale": [
+1.44,
+1.44,
+1.44
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-121.62,
+0.0,
+-2.67
+],
+"rotation": [
+0,
+2.853,
+0
+],
+"scale": [
+0.97,
+0.97,
+0.97
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-140.71,
+0.0,
+0.21
+],
+"rotation": [
+0,
+5.322,
+0
+],
+"scale": [
+1.12,
+1.12,
+1.12
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+162.87,
+0.0,
+2.62
+],
+"rotation": [
+0,
+0.985,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+3.04,
+0.0,
+-139.28
+],
+"rotation": [
+0,
+5.395,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-0.41,
+0.0,
+96.76
+],
+"rotation": [
+0,
+0.24,
+0
+],
+"scale": [
+0.97,
+0.97,
+0.97
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+151.52,
+0.0,
+-1.36
+],
+"rotation": [
+0,
+2.494,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-152.9,
+0.0,
+-1.05
+],
+"rotation": [
+0,
+5.118,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+87.18,
+0.0,
+-2.06
+],
+"rotation": [
+0,
+0.874,
+0
+],
+"scale": [
+0.97,
+0.97,
+0.97
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-2.35,
+0.0,
+69.71
+],
+"rotation": [
+0,
+3.537,
+0
+],
+"scale": [
+1.24,
+1.24,
+1.24
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-120.27,
+0.0,
+-1.38
+],
+"rotation": [
+0,
+4.838,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-100.07,
+0.0,
+-1.41
+],
+"rotation": [
+0,
+2.435,
+0
+],
+"scale": [
+0.86,
+0.86,
+0.86
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+41.49,
+0.0,
+-1.6
+],
+"rotation": [
+0,
+2.668,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-2.74,
+0.0,
+-144.58
+],
+"rotation": [
+0,
+0.556,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+103.41,
+0.0,
+-2.04
+],
+"rotation": [
+0,
+2.8,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+1.17,
+0.0,
+136.15
+],
+"rotation": [
+0,
+4.21,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+2.52,
+0.0,
+-135.24
+],
+"rotation": [
+0,
+1.025,
+0
+],
+"scale": [
+1.17,
+1.17,
+1.17
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+0.3,
+0.0,
+-91.95
+],
+"rotation": [
+0,
+5.525,
+0
+],
+"scale": [
+1.49,
+1.49,
+1.49
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+0.87,
+0.0,
+124.84
+],
+"rotation": [
+0,
+2.266,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+53.15,
+0.0,
+-2.32
+],
+"rotation": [
+0,
+4.757,
+0
+],
+"scale": [
+1.05,
+1.05,
+1.05
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-2.35,
+0.0,
+-80.71
+],
+"rotation": [
+0,
+1.508,
+0
+],
+"scale": [
+0.89,
+0.89,
+0.89
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+177.6,
+0.0,
+-0.16
+],
+"rotation": [
+0,
+0.944,
+0
+],
+"scale": [
+0.92,
+0.92,
+0.92
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-2.57,
+0.0,
+-120.36
+],
+"rotation": [
+0,
+5.844,
+0
+],
+"scale": [
+1.21,
+1.21,
+1.21
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-0.72,
+0.0,
+-96.32
+],
+"rotation": [
+0,
+2.403,
+0
+],
+"scale": [
+0.94,
+0.94,
+0.94
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-3.44,
+0.0,
+112.17
+],
+"rotation": [
+0,
+2.276,
+0
+],
+"scale": [
+0.88,
+0.88,
+0.88
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-1.99,
+0.0,
+-67.03
+],
+"rotation": [
+0,
+2.417,
+0
+],
+"scale": [
+1.24,
+1.24,
+1.24
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-0.45,
+0.0,
+-48.78
+],
+"rotation": [
+0,
+2.032,
+0
+],
+"scale": [
+1.39,
+1.39,
+1.39
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+99.19,
+0.0,
+-1.7
+],
+"rotation": [
+0,
+1.927,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+105.69,
+0.0,
+0.94
+],
+"rotation": [
+0,
+6.054,
+0
+],
+"scale": [
+1.45,
+1.45,
+1.45
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-146.28,
+0.0,
+-0.08
+],
+"rotation": [
+0,
+3.111,
+0
+],
+"scale": [
+1.31,
+1.31,
+1.31
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-110.11,
+0.0,
+0.63
+],
+"rotation": [
+0,
+3.331,
+0
+],
+"scale": [
+1.35,
+1.35,
+1.35
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-150.78,
+0.0,
+-2.39
+],
+"rotation": [
+0,
+5.14,
+0
+],
+"scale": [
+1.47,
+1.47,
+1.47
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-128.96,
+0.0,
+-1.09
+],
+"rotation": [
+0,
+2.91,
+0
+],
+"scale": [
+1.14,
+1.14,
+1.14
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+-110.85,
+0.0,
+-1.48
+],
+"rotation": [
+0,
+5.445,
+0
+],
+"scale": [
+1.17,
+1.17,
+1.17
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-3.15,
+0.0,
+176.78
+],
+"rotation": [
+0,
+3.447,
+0
+],
+"scale": [
+1.24,
+1.24,
+1.24
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+85.22,
+0.0,
+-0.22
+],
+"rotation": [
+0,
+2.07,
+0
+],
+"scale": [
+1.42,
+1.42,
+1.42
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+-108.7,
+0.0,
+0.83
+],
+"rotation": [
+0,
+0.172,
+0
+],
+"scale": [
+1.24,
+1.24,
+1.24
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+-0.97,
+0.0,
+-150.18
+],
+"rotation": [
+0,
+2.544,
+0
+],
+"scale": [
+0.96,
+0.96,
+0.96
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+143.87,
+0.0,
+-0.01
+],
+"rotation": [
+0,
+3.826,
+0
+],
+"scale": [
+1.28,
+1.28,
+1.28
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+-0.07,
+0.0,
+-43.37
+],
+"rotation": [
+0,
+2.338,
+0
+],
+"scale": [
+1.27,
+1.27,
+1.27
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-3.17,
+0.0,
+-90.68
+],
+"rotation": [
+0,
+5.266,
+0
+],
+"scale": [
+0.94,
+0.94,
+0.94
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-2.96,
+0.0,
+-42.22
+],
+"rotation": [
+0,
+1.418,
+0
+],
+"scale": [
+1.32,
+1.32,
+1.32
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+152.88,
+0.0,
+2.78
+],
+"rotation": [
+0,
+3.419,
+0
+],
+"scale": [
+0.99,
+0.99,
+0.99
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+0.61,
+0.0,
+100.1
+],
+"rotation": [
+0,
+4.41,
+0
+],
+"scale": [
+0.87,
+0.87,
+0.87
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+173.55,
+0.0,
+2.04
+],
+"rotation": [
+0,
+1.845,
+0
+],
+"scale": [
+1.09,
+1.09,
+1.09
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-138.9,
+0.0,
+1.98
+],
+"rotation": [
+0,
+5.255,
+0
+],
+"scale": [
+0.97,
+0.97,
+0.97
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+85.37,
+0.0,
+2.41
+],
+"rotation": [
+0,
+2.861,
+0
+],
+"scale": [
+0.84,
+0.84,
+0.84
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_leaves.glb",
+"position": [
+1.4,
+0.0,
+-55.91
+],
+"rotation": [
+0,
+4.296,
+0
+],
+"scale": [
+1.25,
+1.25,
+1.25
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+148.65,
+0.0,
+-2.25
+],
+"rotation": [
+0,
+2.254,
+0
+],
+"scale": [
+1.36,
+1.36,
+1.36
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-3.23,
+0.0,
+89.61
+],
+"rotation": [
+0,
+4.894,
+0
+],
+"scale": [
+1.43,
+1.43,
+1.43
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+-1.8,
+0.0,
+151.47
+],
+"rotation": [
+0,
+2.109,
+0
+],
+"scale": [
+1.13,
+1.13,
+1.13
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_crack_ground.glb",
+"position": [
+3.17,
+0.0,
+74.0
+],
+"rotation": [
+0,
+1.833,
+0
+],
+"scale": [
+1.11,
+1.11,
+1.11
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+139.94,
+0.0,
+0.94
+],
+"rotation": [
+0,
+5.706,
+0
+],
+"scale": [
+1.16,
+1.16,
+1.16
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-2.68,
+0.0,
+-62.07
+],
+"rotation": [
+0,
+5.622,
+0
+],
+"scale": [
+1.23,
+1.23,
+1.23
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_puddle.glb",
+"position": [
+1.32,
+0.0,
+-157.11
+],
+"rotation": [
+0,
+0.515,
+0
+],
+"scale": [
+1.42,
+1.42,
+1.42
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-17.93,
+0.02,
+-44.27
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+17.93,
+0.02,
+-44.27
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-83.85,
+0.02,
+-57.25
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-50.55,
+0.02,
+-57.25
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+53.7,
+0.02,
+-61.25
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+75.1,
+0.02,
+-61.25
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-135.6,
+0.02,
+-74.4
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-110.8,
+0.02,
+-74.4
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+105.8,
+0.02,
+-66.6
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+123.8,
+0.02,
+-66.6
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-17.5,
+0.02,
+-120.3
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+17.5,
+0.02,
+-120.3
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-124.48,
+0.02,
+-117.42
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-105.12,
+0.02,
+-117.42
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+113.1,
+0.02,
+-113.6
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+127.7,
+0.02,
+-113.6
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-55.22,
+0.02,
+-2.7
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-55.22,
+0.02,
+-30.9
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-57.77,
+0.02,
+34.2
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-57.77,
+0.02,
+16.2
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-57.77,
+0.02,
+69.2
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-57.77,
+0.02,
+51.2
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+54.59,
+0.02,
+-37.14
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+54.59,
+0.02,
+-7.66
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+56.5,
+0.02,
+9.32
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+56.5,
+0.02,
+29.88
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+109.6,
+0.02,
+-33.1
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+109.6,
+0.02,
+-11.7
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+111.47,
+0.02,
+11.6
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+111.47,
+0.02,
+50.0
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+97.72,
+0.02,
+127.98
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+137.48,
+0.02,
+127.98
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-111.2,
+0.02,
+31.82
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-93.2,
+0.02,
+31.82
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-129.15,
+0.02,
+-14.5
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-106.05,
+0.02,
+-14.5
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-132.1,
+0.02,
+66.1
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-132.1,
+0.02,
+51.5
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-81.3,
+0.02,
+125.75
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-53.1,
+0.02,
+125.75
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+48.36,
+0.02,
+138.14
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+63.64,
+0.02,
+138.14
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-17.48,
+0.02,
+45.05
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-32.92,
+0.02,
+45.05
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+33.56,
+0.02,
+44.54
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+16.84,
+0.02,
+44.54
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-18.11,
+0.02,
+78.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-32.29,
+0.02,
+78.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+32.92,
+0.02,
+77.38
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+17.48,
+0.02,
+77.38
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-447.24,
+0.02,
+342.54
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+-431.96,
+0.02,
+342.54
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_moss_ground.glb",
+"position": [
+-7.98,
+0.02,
+174.88
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "decals/decal_dirt_ground.glb",
+"position": [
+7.98,
+0.02,
+174.88
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+}
+]
+}

@@ -2,7 +2,7 @@ config_version=5
 
 [application]
 
-config/test_build=35
+config/test_build=36
 config/name="Varnethryl"
 config/version="1.9.3"
 config/icon="res://branding/icon_192.png"

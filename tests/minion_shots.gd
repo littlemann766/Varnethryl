@@ -5,7 +5,7 @@ func _ready() -> void: m = get_parent(); _run.call_deferred()
 func frames(n: int) -> void:
 	for i in n: await get_tree().process_frame
 func _run() -> void:
-	var out := "/workspace/shots/t34/minions/"; DirAccess.make_dir_recursive_absolute(out)
+	var out := OS.get_environment("SHOT_OUT") if OS.get_environment("SHOT_OUT") != "" else "/workspace/shots/t34/minions/"; DirAccess.make_dir_recursive_absolute(out)
 	while not m.warmed: await get_tree().process_frame
 	m._set_time(11.0); m.party._set_companions([]); m.party.set_hero("aldric")
 	m.cheat["god"] = true

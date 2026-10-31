@@ -5,7 +5,7 @@ func _ready() -> void: m = get_parent(); _run.call_deferred()
 func frames(n: int) -> void:
 	for i in n: await get_tree().process_frame
 func _run() -> void:
-	var out := "/workspace/shots/voxel33/capes/"; DirAccess.make_dir_recursive_absolute(out)
+	var out := OS.get_environment("SHOT_OUT") if OS.get_environment("SHOT_OUT") != "" else "/workspace/shots/voxel33/capes/"; DirAccess.make_dir_recursive_absolute(out)
 	var tag := OS.get_environment("CAPE_TAG")
 	while not m.warmed: await get_tree().process_frame
 	m._set_time(11.0)

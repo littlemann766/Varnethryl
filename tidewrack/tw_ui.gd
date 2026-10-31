@@ -16,7 +16,10 @@ func _ready() -> void:
 	prompt = _b("", Vector2(-160, -470), func(): if _cb.is_valid(): _cb.call()); prompt.visible = false
 	gust_b = _b("Gust", Vector2(-420, -470), func(): if sea.ship and sea.ship.gust(): toast("Gust!"))
 	charts_b = _b("Charts", Vector2(-560, -470), open_charts)
-	msg = Label.new(); msg.position = Vector2(40, 160); msg.add_theme_font_size_override("font_size", 26); add_child(msg)
+	# test 36 (boss: toast sat on the HP/MP line): top-centre, under the badge row, clear of the minimap and Menu button
+	msg = Label.new(); msg.name = "Toast"; msg.add_theme_font_size_override("font_size", 26); msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	msg.add_theme_color_override("font_shadow_color", Color.BLACK); msg.add_theme_constant_override("shadow_offset_y", 2)
+	msg.anchor_left = 0.5; msg.anchor_right = 0.5; msg.offset_left = 0; msg.offset_right = 0; msg.offset_top = 16; msg.grow_horizontal = Control.GROW_DIRECTION_BOTH; add_child(msg)
 	veil = ColorRect.new(); veil.color = Color(0, 0, 0, 0); veil.set_anchors_preset(Control.PRESET_FULL_RECT); veil.mouse_filter = Control.MOUSE_FILTER_IGNORE; add_child(veil)
 func _b(t: String, off: Vector2, cb: Callable) -> Button:
 	var b := Button.new(); b.text = t; b.custom_minimum_size = Vector2(130, 64); b.add_theme_font_size_override("font_size", 22)
@@ -25,11 +28,16 @@ func _process(_dt: float) -> void:
 	var on: bool = sea.active and not sea.diving and sea.in_cave == ""
 	gust_b.visible = on and sea.ship != null and sea.ship.tier > 0
 	if gust_b.visible: gust_b.text = "Gust" if sea.ship.gust_cd <= 0.0 else "Gust %ds" % int(ceil(sea.ship.gust_cd))
-	charts_b.visible = on and sea.ship != null and sea.ship.kind == "galleon"
+	charts_b.visible = on and sea.ship != null and sea.ship.kind == "galleon" and charts_here()
 	if not sea.active:   # on land: "Set sail" beside the moored galleon at the Tidewrack main pier
 		var g: Array = sea.m._galleon_pier()
 		var near: bool = sea.m.hero.global_position.distance_to(g[0]) < 14.0
 		set_prompt("Set sail" if near else "", (func(): fade(func(): sea.enter())) if near else Callable())
+## test 36 (boss: Charts showed far inland): Harbour Charts only aboard, or ashore within 12 m of the pier (18 m of the moored ship / pier.
+func charts_here() -> bool:
+	if sea.ashore == "": return true
+	var L: Dictionary = sea.landing(sea.ashore); var lp: Vector3 = sea.to_local(sea.m.hero.global_position)
+	return lp.distance_to(sea.pier_head(L)) < 12.0 or lp.distance_to(sea.ship.position) < 18.0
 func set_prompt(t: String, cb: Callable) -> void:
 	prompt.visible = t != ""; prompt.text = t; _cb = cb
 func toast(t: String) -> void:

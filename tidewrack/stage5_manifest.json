@@ -1,0 +1,1383 @@
+{
+ "islands": {
+  "lantern_rock": {
+   "id": "lantern_rock",
+   "name": "Lantern Rock",
+   "region": "A",
+   "ground": "temperate",
+   "files": {
+    "mesh": "arch_isl_lantern_rock",
+    "lod1": "arch_isl_lantern_rock_lod1",
+    "glow": "arch_isl_lantern_rock_glow",
+    "col": "arch_isl_lantern_rock_col"
+   },
+   "pier_head": [
+    -16.9144687652588,
+    19.162353515625,
+    -46.1563606262207
+   ],
+   "window": [
+    -59.30858819771166,
+    -134.0109519130684,
+    180.69141180228834,
+    105.9890480869316
+   ],
+   "pois": [
+    {
+     "type": "lighthouse",
+     "name": "Old Lantern ruin",
+     "pos": [
+      108.69,
+      58.14,
+      -72.01
+     ],
+     "radius": 9
+    },
+    {
+     "type": "hut_ruin",
+     "name": "Keeper's Hut",
+     "pos": [
+      -29.31,
+      26.28,
+      71.99
+     ],
+     "radius": 7
+    },
+    {
+     "type": "chest",
+     "name": "Keeper's Strongbox",
+     "pos": [
+      0.69,
+      19.86,
+      -72.01
+     ],
+     "radius": 3
+    },
+    {
+     "type": "lore",
+     "name": "Lamp-oil Logbook",
+     "pos": [
+      64.69,
+      29.85,
+      23.99
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [],
+   "path": {
+    "max_deg": 21.9,
+    "p95_deg": 14.6
+   },
+   "cams": {
+    "inland": [
+     -22.457745948655024,
+     23.662353515625,
+     -48.452461248588726
+    ],
+    "inland_look": [
+     20.0407124573827,
+     32.48928264494686,
+     -30.84902314376722
+    ],
+    "over": [
+     -53.2130687461542,
+     123.92618203823777,
+     -115.31134337820279
+    ],
+    "over_look": [
+     60.69141180228834,
+     32.99154262495408,
+     -14.010951913068396
+    ]
+   }
+  },
+  "gullhaven": {
+   "id": "gullhaven",
+   "name": "Gullhaven",
+   "region": "A",
+   "ground": "temperate",
+   "files": {
+    "mesh": "arch_isl_gullhaven",
+    "lod1": "arch_isl_gullhaven_lod1",
+    "glow": "arch_isl_gullhaven_glow",
+    "col": "arch_isl_gullhaven_col"
+   },
+   "pier_head": [
+    -353.144409179688,
+    0.60595703125,
+    -319.307250976562
+   ],
+   "window": [
+    -568.6837381899871,
+    -599.2489151139205,
+    -228.68373818998714,
+    -259.2489151139205
+   ],
+   "pois": [
+    {
+     "type": "watchtower",
+     "name": "Gull Watchtower ruin",
+     "pos": [
+      -430.68,
+      21.51,
+      -517.25
+     ],
+     "radius": 8
+    },
+    {
+     "type": "shrine",
+     "name": "Gull Shrine",
+     "pos": [
+      -484.68,
+      5.29,
+      -287.25
+     ],
+     "radius": 5
+    },
+    {
+     "type": "lore",
+     "name": "Founders' Stone",
+     "pos": [
+      -258.68,
+      19.6,
+      -379.25
+     ],
+     "radius": 3
+    },
+    {
+     "type": "chest",
+     "name": "Harbourmaster's Cache",
+     "pos": [
+      -390.68,
+      19.64,
+      -379.25
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [],
+   "path": {
+    "max_deg": 39.4,
+    "p95_deg": 13.9
+   },
+   "cams": {
+    "inland": [
+     -350.84830855731997,
+     5.10595703125,
+     -313.76397379316575
+    ],
+    "inland_look": [
+     -368.4517466621415,
+     17.59641019184623,
+     -356.2624321992035
+    ],
+    "over": [
+     -376.3773794843097,
+     89.39291632301956,
+     -244.7403072895329
+    ],
+    "over_look": [
+     -398.68373818998714,
+     19.152961528204965,
+     -429.2489151139205
+    ]
+   }
+  },
+  "saltglass": {
+   "id": "saltglass",
+   "name": "Saltglass Landing",
+   "region": "B",
+   "ground": "saltglass",
+   "files": {
+    "mesh": "coast_isl_saltglass",
+    "lod1": "coast_isl_saltglass_lod1",
+    "glow": "coast_isl_saltglass_glow",
+    "col": "coast_isl_saltglass_col"
+   },
+   "pier_head": [
+    -2123.65747070312,
+    20.2239837646484,
+    -90.2689666748047
+   ],
+   "window": [
+    -2412.65747070312,
+    -260.2689666748047,
+    -2072.65747070312,
+    79.73103332519531
+   ],
+   "pois": [
+    {
+     "type": "crystal_shrine",
+     "name": "Saltglass Shrine",
+     "pos": [
+      -2118.66,
+      77.53,
+      41.73
+     ],
+     "radius": 6
+    },
+    {
+     "type": "crystal_grove",
+     "name": "Singing Shards",
+     "pos": [
+      -2134.66,
+      23.7,
+      -56.27
+     ],
+     "radius": 9
+    },
+    {
+     "type": "chest",
+     "name": "Glass-diver's Chest",
+     "pos": [
+      -2134.66,
+      69.02,
+      -6.27
+     ],
+     "radius": 3
+    },
+    {
+     "type": "lore",
+     "name": "Salt-crusted Tablet",
+     "pos": [
+      -2100.66,
+      66.09,
+      9.73
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [],
+   "path": {
+    "max_deg": 56.1,
+    "p95_deg": 23.4
+   },
+   "cams": {
+    "inland": [
+     -2117.65747070312,
+     24.7239837646484,
+     -90.2689666748047
+    ],
+    "inland_look": [
+     -2163.65747070312,
+     69.75368370901978,
+     -90.2689666748047
+    ],
+    "over": [
+     -2063.65747070312,
+     175.66644215926357,
+     -40.2689666748047
+    ],
+    "over_look": [
+     -2242.65747070312,
+     62.94190186206714,
+     -90.2689666748047
+    ]
+   }
+  },
+  "frostreach": {
+   "id": "frostreach",
+   "name": "Frostreach Ice Dock",
+   "region": "frost",
+   "ground": "frost",
+   "files": {
+    "mesh": "frost_isl_frostreach",
+    "lod1": "frost_isl_frostreach_lod1",
+    "glow": "frost_isl_frostreach_glow",
+    "col": "frost_isl_frostreach_col"
+   },
+   "pier_head": [
+    -982.912170410156,
+    0.46441650390625,
+    -1954.53295898438
+   ],
+   "window": [
+    -1068.766463448957,
+    -2208.6786659455793,
+    -728.766463448957,
+    -1868.6786659455793
+   ],
+   "pois": [
+    {
+     "type": "ice_cave",
+     "name": "Rimehollow Ice Cave",
+     "pos": [
+      -820.77,
+      15.94,
+      -2002.68
+     ],
+     "radius": 9
+    },
+    {
+     "type": "frost_shrine",
+     "name": "Frostreach Cairn",
+     "pos": [
+      -980.77,
+      2.51,
+      -1986.68
+     ],
+     "radius": 6
+    },
+    {
+     "type": "chest",
+     "name": "Iced Chest",
+     "pos": [
+      -900.77,
+      2.5,
+      -2080.68
+     ],
+     "radius": 3
+    },
+    {
+     "type": "lore",
+     "name": "Frozen Waystone",
+     "pos": [
+      -886.77,
+      2.86,
+      -2014.68
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [
+    {
+     "a": [
+      -958.766463448957,
+      0.5239400735708489,
+      -1996.6786659455793
+     ],
+     "b": [
+      -914.766463448957,
+      0.5423425318057267,
+      -2034.6786659455793
+     ],
+     "len_m": 58.1
+    }
+   ],
+   "path": {
+    "max_deg": 11.0,
+    "p95_deg": 9.7
+   },
+   "cams": {
+    "inland": [
+     -987.1548110972753,
+     4.96441650390625,
+     -1950.2903182972607
+    ],
+    "inland_look": [
+     -954.6278991626941,
+     2.045485630769422,
+     -1982.817230231842
+    ],
+    "over": [
+     -1060.6939163406764,
+     115.31235119412318,
+     -1947.4618911725147
+    ],
+    "over_look": [
+     -898.7664634489569,
+     34.804124705195775,
+     -2038.6786659455793
+    ]
+   }
+  },
+  "vent": {
+   "id": "vent",
+   "name": "Vent Harbour",
+   "region": "ash",
+   "ground": "ash",
+   "files": {
+    "mesh": "ash_isl_vent",
+    "lod1": "ash_isl_vent_lod1",
+    "glow": "ash_isl_vent_glow",
+    "col": "ash_isl_vent_col"
+   },
+   "pier_head": [
+    -485.727203369141,
+    16.3218231201172,
+    1873.42028808594
+   ],
+   "window": [
+    -655.7272033691411,
+    1822.42028808594,
+    -315.7272033691411,
+    2162.4202880859402
+   ],
+   "pois": [
+    {
+     "type": "lava_vent",
+     "name": "Ventmouth",
+     "pos": [
+      -595.73,
+      50.74,
+      2048.42
+     ],
+     "radius": 7
+    },
+    {
+     "type": "hot_pool",
+     "name": "Steam Pools",
+     "pos": [
+      -427.73,
+      20.59,
+      1862.42
+     ],
+     "radius": 8
+    },
+    {
+     "type": "obsidian_shrine",
+     "name": "Ember Shrine",
+     "pos": [
+      -425.73,
+      26.81,
+      2030.42
+     ],
+     "radius": 6
+    },
+    {
+     "type": "chest",
+     "name": "Ash-buried Chest",
+     "pos": [
+      -565.73,
+      19.76,
+      1906.42
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [],
+   "path": {
+    "max_deg": 50.7,
+    "p95_deg": 11.1
+   },
+   "cams": {
+    "inland": [
+     -485.727203369141,
+     20.8218231201172,
+     1867.42028808594
+    ],
+    "inland_look": [
+     -485.727203369141,
+     19.92385804015605,
+     1913.42028808594
+    ],
+    "over": [
+     -435.727203369141,
+     112.13807890463576,
+     1813.42028808594
+    ],
+    "over_look": [
+     -485.727203369141,
+     29.78481137658928,
+     1992.42028808594
+    ]
+   }
+  },
+  "saltwatch_keep": {
+   "id": "saltwatch_keep",
+   "name": "Saltwatch Keep",
+   "region": "A",
+   "ground": "temperate",
+   "files": {
+    "mesh": "arch_isl_saltwatch_keep",
+    "lod1": "arch_isl_saltwatch_keep_lod1",
+    "glow": "arch_isl_saltwatch_keep_glow",
+    "col": "arch_isl_saltwatch_keep_col"
+   },
+   "pier_head": [
+    -535.019409179688,
+    0.535232543945312,
+    393.901794433594
+   ],
+   "window": [
+    -644.8376482882476,
+    146.89444372416006,
+    -344.8376482882476,
+    446.89444372416006
+   ],
+   "pois": [
+    {
+     "type": "keep_ruin",
+     "name": "Outer Wall ruin",
+     "pos": [
+      -602.84,
+      9.21,
+      348.89
+     ],
+     "radius": 12
+    },
+    {
+     "type": "shrine",
+     "name": "Watch Shrine",
+     "pos": [
+      -532.84,
+      1.62,
+      362.89
+     ],
+     "radius": 5
+    },
+    {
+     "type": "chest",
+     "name": "Garrison Chest",
+     "pos": [
+      -570.84,
+      2.6,
+      370.89
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [],
+   "path": {
+    "max_deg": 13.8,
+    "p95_deg": 10.7
+   },
+   "cams": {
+    "inland": [
+     -537.315509802056,
+     5.035232543945312,
+     399.4450716169902
+    ],
+    "inland_look": [
+     -519.7120716972345,
+     1.482886899661762,
+     356.9466132109525
+    ],
+    "over": [
+     -604.17439193167,
+     70.02637672424316,
+     430.2003944144894
+    ],
+    "over_look": [
+     -494.8376482882476,
+     2.6049181913059716,
+     296.89444372416006
+    ]
+   }
+  },
+  "coil_isle": {
+   "id": "coil_isle",
+   "name": "Coil Isle",
+   "region": "A",
+   "ground": "temperate",
+   "files": {
+    "mesh": "arch_isl_coil_isle",
+    "lod1": "arch_isl_coil_isle_lod1",
+    "glow": "arch_isl_coil_isle_glow",
+    "col": "arch_isl_coil_isle_col"
+   },
+   "pier_head": [
+    -161.576873779297,
+    0.416824340820312,
+    681.378967285156
+   ],
+   "window": [
+    -206.576873779297,
+    531.378967285156,
+    93.42312622070301,
+    831.378967285156
+   ],
+   "pois": [
+    {
+     "type": "bones",
+     "name": "Coil Bones",
+     "pos": [
+      -156.58,
+      1.63,
+      603.38
+     ],
+     "radius": 11
+    },
+    {
+     "type": "shrine",
+     "name": "Serpent Shrine",
+     "pos": [
+      -42.58,
+      2.39,
+      769.38
+     ],
+     "radius": 5
+    },
+    {
+     "type": "chest",
+     "name": "Drowned Offering",
+     "pos": [
+      -22.58,
+      8.84,
+      631.38
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [],
+   "path": {
+    "max_deg": 10.6,
+    "p95_deg": 6.3
+   },
+   "cams": {
+    "inland": [
+     -167.576873779297,
+     4.916824340820312,
+     681.378967285156
+    ],
+    "inland_look": [
+     -121.57687377929699,
+     3.9286816315033333,
+     681.378967285156
+    ],
+    "over": [
+     -221.576873779297,
+     76.74780307130266,
+     631.378967285156
+    ],
+    "over_look": [
+     -56.57687377929699,
+     7.36634344218273,
+     681.378967285156
+    ]
+   }
+  },
+  "beached_wreck": {
+   "id": "beached_wreck",
+   "name": "Beached Wreck",
+   "region": "B",
+   "ground": "saltglass",
+   "files": {
+    "mesh": "coast_isl_beached_wreck",
+    "lod1": "coast_isl_beached_wreck_lod1",
+    "glow": "coast_isl_beached_wreck_glow",
+    "col": "coast_isl_beached_wreck_col"
+   },
+   "pier_head": [
+    -2439.55053710938,
+    0.90411376953125,
+    954.164428710938
+   ],
+   "window": [
+    -2648.8470016656615,
+    883.4608932672196,
+    -2368.8470016656615,
+    1163.4608932672195
+   ],
+   "pois": [
+    {
+     "type": "wreck_camp",
+     "name": "Castaway Camp",
+     "pos": [
+      -2538.85,
+      40.18,
+      929.46
+     ],
+     "radius": 10
+    },
+    {
+     "type": "chest",
+     "name": "Salvage Chest",
+     "pos": [
+      -2620.85,
+      25.92,
+      997.46
+     ],
+     "radius": 3
+    },
+    {
+     "type": "lore",
+     "name": "Captain's Last Log",
+     "pos": [
+      -2620.85,
+      33.78,
+      911.46
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [
+    {
+     "a": [
+      -2466.8470016656615,
+      1.3010759332488129,
+      953.4608932672196
+     ],
+     "b": [
+      -2502.8470016656615,
+      0.9083883659372589,
+      937.4608932672196
+     ],
+     "len_m": 39.4
+    }
+   ],
+   "path": {
+    "max_deg": 33.7,
+    "p95_deg": 29.9
+   },
+   "cams": {
+    "inland": [
+     -2435.307896422261,
+     5.40411376953125,
+     949.9217880238186
+    ],
+    "inland_look": [
+     -2467.8348083568417,
+     -2.9449376068891775,
+     982.4486999583999
+    ],
+    "over": [
+     -2361.76879117886,
+     96.20873092822313,
+     947.0933608990724
+    ],
+    "over_look": [
+     -2508.8470016656615,
+     28.771655498068093,
+     1023.4608932672196
+    ]
+   }
+  },
+  "frozen_wreck": {
+   "id": "frozen_wreck",
+   "name": "Frozen Wreck",
+   "region": "frost",
+   "ground": "frost",
+   "files": {
+    "mesh": "frost_isl_frozen_wreck",
+    "lod1": "frost_isl_frozen_wreck_lod1",
+    "glow": "frost_isl_frozen_wreck_glow",
+    "col": "frost_isl_frozen_wreck_col"
+   },
+   "pier_head": [
+    -249.392196655273,
+    0.810562133789062,
+    -2587.10766601562
+   ],
+   "window": [
+    -443.7389137432488,
+    -2781.454383103596,
+    -183.73891374324882,
+    -2521.454383103596
+   ],
+   "pois": [
+    {
+     "type": "wreck_camp",
+     "name": "Frozen Camp",
+     "pos": [
+      -211.74,
+      14.46,
+      -2611.45
+     ],
+     "radius": 10
+    },
+    {
+     "type": "ice_cave",
+     "name": "Bergcleft Cave",
+     "pos": [
+      -413.74,
+      7.34,
+      -2645.45
+     ],
+     "radius": 9
+    },
+    {
+     "type": "chest",
+     "name": "Frostbitten Chest",
+     "pos": [
+      -291.74,
+      20.08,
+      -2709.45
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [],
+   "path": {
+    "max_deg": 22.9,
+    "p95_deg": 14.4
+   },
+   "cams": {
+    "inland": [
+     -245.14955596815372,
+     5.310562133789062,
+     -2582.865025328501
+    ],
+    "inland_look": [
+     -277.6764679027349,
+     6.061044157984267,
+     -2615.3919372630817
+    ],
+    "over": [
+     -242.32112884340754,
+     96.67715724965369,
+     -2509.3259200851
+    ],
+    "over_look": [
+     -313.7389137432488,
+     21.88796750390462,
+     -2651.454383103596
+    ]
+   }
+  },
+  "aurora_arch": {
+   "id": "aurora_arch",
+   "name": "Aurora Arch",
+   "region": "frost",
+   "ground": "frost",
+   "files": {
+    "mesh": "frost_isl_aurora_arch",
+    "lod1": "frost_isl_aurora_arch_lod1",
+    "glow": "frost_isl_aurora_arch_glow",
+    "col": "frost_isl_aurora_arch_col"
+   },
+   "pier_head": [
+    50.449348449707,
+    16.6130065917969,
+    -2449.16430664062
+   ],
+   "window": [
+    -37.40524283714069,
+    -2646.770187208167,
+    202.5947571628593,
+    -2406.770187208167
+   ],
+   "pois": [
+    {
+     "type": "frost_shrine",
+     "name": "Aurora Shrine",
+     "pos": [
+      0.59,
+      39.08,
+      -2598.77
+     ],
+     "radius": 6
+    },
+    {
+     "type": "ice_cave",
+     "name": "Skyglass Hollow",
+     "pos": [
+      168.59,
+      13.77,
+      -2438.77
+     ],
+     "radius": 9
+    },
+    {
+     "type": "lore",
+     "name": "Starwatcher's Stone",
+     "pos": [
+      24.59,
+      18.39,
+      -2464.77
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [],
+   "path": {
+    "max_deg": 39.8,
+    "p95_deg": 25.7
+   },
+   "cams": {
+    "inland": [
+     48.15324782733898,
+     21.1130065917969,
+     -2443.621029457224
+    ],
+    "inland_look": [
+     65.75668593216048,
+     29.34409477978582,
+     -2486.1194878632614
+    ],
+    "over": [
+     -18.705634302275094,
+     101.5282476338476,
+     -2412.8657066597248
+    ],
+    "over_look": [
+     82.59475716285931,
+     29.833969670781357,
+     -2526.770187208167
+    ]
+   }
+  },
+  "ember_wreck": {
+   "id": "ember_wreck",
+   "name": "Ember Wreck",
+   "region": "ash",
+   "ground": "ash",
+   "files": {
+    "mesh": "ash_isl_ember_wreck",
+    "lod1": "ash_isl_ember_wreck_lod1",
+    "glow": "ash_isl_ember_wreck_glow",
+    "col": "ash_isl_ember_wreck_col"
+   },
+   "pier_head": [
+    626.333984375,
+    9.63995361328125,
+    2268.15356445312
+   ],
+   "window": [
+    428.72810380745284,
+    2116.0081557399676,
+    668.7281038074528,
+    2356.0081557399676
+   ],
+   "pois": [
+    {
+     "type": "wreck_camp",
+     "name": "Cinder Camp",
+     "pos": [
+      590.73,
+      9.71,
+      2236.01
+     ],
+     "radius": 10
+    },
+    {
+     "type": "lava_vent",
+     "name": "Ember Vent",
+     "pos": [
+      522.73,
+      14.76,
+      2328.01
+     ],
+     "radius": 7
+    },
+    {
+     "type": "chest",
+     "name": "Scorched Chest",
+     "pos": [
+      508.73,
+      26.04,
+      2252.01
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [
+    {
+     "a": [
+      566.7281038074528,
+      1.6920881234473033,
+      2260.0081557399676
+     ],
+     "b": [
+      550.7281038074528,
+      1.6764314498056547,
+      2260.0081557399676
+     ],
+     "len_m": 16.0
+    }
+   ],
+   "path": {
+    "max_deg": 24.8,
+    "p95_deg": 19.1
+   },
+   "cams": {
+    "inland": [
+     631.8772615583962,
+     14.13995361328125,
+     2270.449665075488
+    ],
+    "inland_look": [
+     589.3788031523585,
+     11.331711398479104,
+     2252.8462269706665
+    ],
+    "over": [
+     662.6325843558955,
+     122.62322002001328,
+     2337.308547205102
+    ],
+    "over_look": [
+     548.7281038074528,
+     25.222416314806843,
+     2236.0081557399676
+    ]
+   }
+  },
+  "hot_spring": {
+   "id": "hot_spring",
+   "name": "Hot Spring Grotto",
+   "region": "ash",
+   "ground": "ash",
+   "files": {
+    "mesh": "ash_isl_hot_spring",
+    "lod1": "ash_isl_hot_spring_lod1",
+    "glow": "ash_isl_hot_spring_glow",
+    "col": "ash_isl_hot_spring_col"
+   },
+   "pier_head": [
+    1142.2861328125,
+    17.9225616455078,
+    2015.39086914062
+   ],
+   "window": [
+    1106.2861328125,
+    1895.39086914062,
+    1346.2861328125,
+    2135.39086914062
+   ],
+   "pois": [
+    {
+     "type": "hot_pool",
+     "name": "Upper Spring",
+     "pos": [
+      1182.29,
+      9.24,
+      2089.39
+     ],
+     "radius": 8
+    },
+    {
+     "type": "hot_pool",
+     "name": "Lower Spring",
+     "pos": [
+      1230.29,
+      3.73,
+      1981.39
+     ],
+     "radius": 8
+    },
+    {
+     "type": "shrine",
+     "name": "Bathers' Shrine",
+     "pos": [
+      1254.29,
+      5.9,
+      2057.39
+     ],
+     "radius": 5
+    },
+    {
+     "type": "chest",
+     "name": "Bather's Bundle",
+     "pos": [
+      1260.29,
+      5.78,
+      2015.39
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [],
+   "path": {
+    "max_deg": 11.3,
+    "p95_deg": 9.9
+   },
+   "cams": {
+    "inland": [
+     1136.2861328125,
+     22.4225616455078,
+     2015.39086914062
+    ],
+    "inland_look": [
+     1182.2861328125,
+     -0.028922521737458462,
+     2015.39086914062
+    ],
+    "over": [
+     1082.2861328125,
+     73.68995768413922,
+     1965.39086914062
+    ],
+    "over_look": [
+     1226.2861328125,
+     5.848148272091463,
+     2015.39086914062
+    ]
+   }
+  },
+  "obsidian_arch": {
+   "id": "obsidian_arch",
+   "name": "Obsidian Arch",
+   "region": "ash",
+   "ground": "ash",
+   "files": {
+    "mesh": "ash_isl_obsidian_arch",
+    "lod1": "ash_isl_obsidian_arch_lod1",
+    "glow": "ash_isl_obsidian_arch_glow",
+    "col": "ash_isl_obsidian_arch_col"
+   },
+   "pier_head": [
+    458.833343505859,
+    14.2959136962891,
+    2678.52978515625
+   ],
+   "window": [
+    261.2274629383118,
+    2590.6751938694024,
+    501.2274629383118,
+    2830.6751938694024
+   ],
+   "pois": [
+    {
+     "type": "obsidian_shrine",
+     "name": "Glassfire Shrine",
+     "pos": [
+      389.23,
+      29.97,
+      2790.68
+     ],
+     "radius": 6
+    },
+    {
+     "type": "lava_vent",
+     "name": "Arch Vent",
+     "pos": [
+      451.23,
+      13.26,
+      2618.68
+     ],
+     "radius": 7
+    },
+    {
+     "type": "lore",
+     "name": "Obsidian Mirror",
+     "pos": [
+      299.23,
+      15.09,
+      2660.68
+     ],
+     "radius": 3
+    }
+   ],
+   "lights": [],
+   "bridges": [],
+   "path": {
+    "max_deg": 10.2,
+    "p95_deg": 9.5
+   },
+   "cams": {
+    "inland": [
+     464.3766206892552,
+     18.795913696289098,
+     2676.233684533882
+    ],
+    "inland_look": [
+     421.8781622832175,
+     21.19148878798683,
+     2693.8371226387035
+    ],
+    "over": [
+     533.4002871928881,
+     91.83063329280833,
+     2701.7627554608716
+    ],
+    "over_look": [
+     381.2274629383118,
+     19.247915770044763,
+     2710.6751938694024
+    ]
+   }
+  }
+ },
+ "stats": {
+  "lantern_rock": {
+   "reach_m2": 48508,
+   "path_max_deg": 21.9,
+   "path_p95_deg": 14.6
+  },
+  "arch_isl_lantern_rock": {
+   "tris": 37586,
+   "lod1": 16913,
+   "lod1_pct": 45.0,
+   "col_tris": 15408,
+   "terrain_tris": 22780
+  },
+  "arch_isl_lantern_rock_glow": {
+   "tris": 252
+  },
+  "gullhaven": {
+   "reach_m2": 89596,
+   "path_max_deg": 39.4,
+   "path_p95_deg": 13.9
+  },
+  "arch_isl_gullhaven": {
+   "tris": 51348,
+   "lod1": 23105,
+   "lod1_pct": 45.0,
+   "col_tris": 19816,
+   "terrain_tris": 36000
+  },
+  "arch_isl_gullhaven_glow": {
+   "tris": 672
+  },
+  "saltglass": {
+   "reach_m2": 10340,
+   "path_max_deg": 56.1,
+   "path_p95_deg": 23.4
+  },
+  "coast_isl_saltglass": {
+   "tris": 44182,
+   "lod1": 19880,
+   "lod1_pct": 45.0,
+   "col_tris": 18188,
+   "terrain_tris": 34370
+  },
+  "coast_isl_saltglass_glow": {
+   "tris": 2562
+  },
+  "frostreach": {
+   "reach_m2": 20324,
+   "path_max_deg": 11.0,
+   "path_p95_deg": 9.7
+  },
+  "frost_isl_frostreach": {
+   "tris": 38150,
+   "lod1": 17167,
+   "lod1_pct": 45.0,
+   "col_tris": 16521,
+   "terrain_tris": 25996
+  },
+  "frost_isl_frostreach_glow": {
+   "tris": 762
+  },
+  "vent": {
+   "reach_m2": 84080,
+   "path_max_deg": 50.7,
+   "path_p95_deg": 11.1
+  },
+  "ash_isl_vent": {
+   "tris": 51704,
+   "lod1": 23265,
+   "lod1_pct": 45.0,
+   "col_tris": 20827,
+   "terrain_tris": 36000
+  },
+  "ash_isl_vent_glow": {
+   "tris": 4516
+  },
+  "saltwatch_keep": {
+   "reach_m2": 7400,
+   "path_max_deg": 13.8,
+   "path_p95_deg": 10.7
+  },
+  "arch_isl_saltwatch_keep": {
+   "tris": 8116,
+   "lod1": 3651,
+   "lod1_pct": 45.0,
+   "col_tris": 3369,
+   "terrain_tris": 3326
+  },
+  "arch_isl_saltwatch_keep_glow": {
+   "tris": 660
+  },
+  "coil_isle": {
+   "reach_m2": 51160,
+   "path_max_deg": 10.6,
+   "path_p95_deg": 6.3
+  },
+  "arch_isl_coil_isle": {
+   "tris": 40286,
+   "lod1": 18127,
+   "lod1_pct": 45.0,
+   "col_tris": 14826,
+   "terrain_tris": 25848
+  },
+  "arch_isl_coil_isle_glow": {
+   "tris": 740
+  },
+  "beached_wreck": {
+   "reach_m2": 11680,
+   "path_max_deg": 33.7,
+   "path_p95_deg": 29.9
+  },
+  "coast_isl_beached_wreck": {
+   "tris": 10928,
+   "lod1": 4916,
+   "lod1_pct": 45.0,
+   "col_tris": 3916,
+   "terrain_tris": 4804
+  },
+  "coast_isl_beached_wreck_glow": {
+   "tris": 634
+  },
+  "frozen_wreck": {
+   "reach_m2": 44340,
+   "path_max_deg": 22.9,
+   "path_p95_deg": 14.4
+  },
+  "frost_isl_frozen_wreck": {
+   "tris": 31782,
+   "lod1": 14301,
+   "lod1_pct": 45.0,
+   "col_tris": 12467,
+   "terrain_tris": 21922
+  },
+  "frost_isl_frozen_wreck_glow": {
+   "tris": 342
+  },
+  "aurora_arch": {
+   "reach_m2": 48468,
+   "path_max_deg": 39.8,
+   "path_p95_deg": 25.7
+  },
+  "frost_isl_aurora_arch": {
+   "tris": 33008,
+   "lod1": 14852,
+   "lod1_pct": 45.0,
+   "col_tris": 14229,
+   "terrain_tris": 23306
+  },
+  "frost_isl_aurora_arch_glow": {
+   "tris": 682
+  },
+  "ember_wreck": {
+   "reach_m2": 25848,
+   "path_max_deg": 24.8,
+   "path_p95_deg": 19.1
+  },
+  "ash_isl_ember_wreck": {
+   "tris": 22994,
+   "lod1": 10346,
+   "lod1_pct": 45.0,
+   "col_tris": 10011,
+   "terrain_tris": 12042
+  },
+  "ash_isl_ember_wreck_glow": {
+   "tris": 2452
+  },
+  "hot_spring": {
+   "reach_m2": 14312,
+   "path_max_deg": 11.3,
+   "path_p95_deg": 9.9
+  },
+  "ash_isl_hot_spring": {
+   "tris": 14602,
+   "lod1": 6569,
+   "lod1_pct": 45.0,
+   "col_tris": 5628,
+   "terrain_tris": 6462
+  },
+  "ash_isl_hot_spring_glow": {
+   "tris": 2452
+  },
+  "obsidian_arch": {
+   "reach_m2": 51112,
+   "path_max_deg": 10.2,
+   "path_p95_deg": 9.5
+  },
+  "ash_isl_obsidian_arch": {
+   "tris": 40034,
+   "lod1": 18014,
+   "lod1_pct": 45.0,
+   "col_tris": 16614,
+   "terrain_tris": 25446
+  },
+  "ash_isl_obsidian_arch_glow": {
+   "tris": 3672
+  }
+ },
+ "note": "Stage 5 island interiors. Files per island live in meshes/<region>/ with the region prefix; copy them into that region mesh dir."
+}

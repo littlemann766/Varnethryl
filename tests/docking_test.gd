@@ -6,7 +6,7 @@ var m: Node
 var sea: TidewrackSea
 var npass := 0
 var nfail := 0
-var out := "/workspace/shots/t34/dock/"
+var out := "/workspace/shots/t36/dock/"
 func ok(c: bool, t: String) -> void:
 	if c: npass += 1; print("DK PASS ", t)
 	else: nfail += 1; print("DK FAIL ", t)
@@ -16,12 +16,115 @@ func frames(n: int) -> void:
 func shot(n: String) -> void:
 	if DisplayServer.get_name() == "headless": return
 	await frames(25); get_viewport().get_texture().get_image().save_png(out + "dock_%s.png" % n); print("DK SHOT ", n)
+## test 36: every companion's (and Pip's) feet within 0.1 m of the real floor
+func feet_check(k: String, when: String) -> void:
+	var nodes: Array = [["pip", m.pip]]
+	for c in m.party.companions:
+		if not m.party.FLYERS.has(c.id): nodes.append([c.id, c.node])
+	for e in nodes:
+		var n: Node3D = e[1]; var gy: float = sea.floor_y(n.global_position)
+		var d: float = absf(n.global_position.y - gy) if not is_nan(gy) else 99.0
+		ok(d <= 0.1, "%s: %s feet %.2f m from ground %s" % [k, e[0], d, when])
+func hud_check(where: String) -> void:
+	var keep: String = sea.ui.msg.text
+	sea.ui.msg.text = "Ashore at Some Very Long Landing Name."; await frames(2)
+	var o: Array = HudOverlap.overlaps(get_tree().root)
+	sea.ui.msg.text = keep
+	ok(o.is_empty(), "%s: no HUD texts overlap %s" % [where, str(o)])
+## test 36 (Beth stage 5 islands): from the pier head walk to every POI in stage5_manifest.json and back, on foot on the
+## real colliders: never below the sea, no safety resets (fall / no floor / stuck), and the floor ray never misses (gaps).
+## grid path over the real colliders (1.5 m cells, <= 1.1 m rise per cell ~36 deg), so the walk follows the island's
+## paths/switchbacks like a player would instead of beelining into a cliff.
+var _grid := {}
+func build_grid(win: Array) -> void:
+	_grid = {}
+	var x0: float = win[0]; var z0: float = win[1]; var x1: float = win[2]; var z1: float = win[3]
+	var space: PhysicsDirectSpaceState3D = m.get_world_3d().direct_space_state
+	var ix := 0; var x := x0
+	while x <= x1:
+		var iz := 0; var z := z0
+		while z <= z1:
+			var w := sea.to_global(Vector3(x, 0, z))
+			var q := PhysicsRayQueryParameters3D.create(w + Vector3(0, 200, 0), w - Vector3(0, 5, 0), 1)
+			q.exclude = [m.hero.get_rid()]
+			var h: Dictionary = space.intersect_ray(q)
+			if h and h.normal.y > 0.6 and sea.to_local(h.position).y > 0.3: _grid[Vector2i(ix, iz)] = sea.to_local(h.position)
+			z += 1.5; iz += 1
+		x += 1.5; ix += 1
+func grid_path(from: Vector3, to: Vector3) -> Array:
+	var best_a := Vector2i(-1, -1); var best_b := Vector2i(-1, -1); var da := 1e9; var db := 1e9
+	for c in _grid:
+		var p: Vector3 = _grid[c]
+		var a := Vector2(p.x - from.x, p.z - from.z).length(); var b := Vector2(p.x - to.x, p.z - to.z).length() + absf(p.y - to.y) * 0.5
+		if a < da: da = a; best_a = c
+		if b < db: db = b; best_b = c
+	var prev := {best_a: best_a}; var queue: Array = [best_a]; var qi := 0
+	while qi < queue.size():
+		var c: Vector2i = queue[qi]; qi += 1
+		if c == best_b: break
+		for o in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 1), Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1)]:
+			var n: Vector2i = c + o
+			if prev.has(n) or not _grid.has(n): continue
+			if absf(_grid[n].y - _grid[c].y) > 1.1 * (1.41 if o.x != 0 and o.y != 0 else 1.0): continue
+			prev[n] = c; queue.append(n)
+	if not prev.has(best_b): return []
+	var path: Array = []; var c2: Vector2i = best_b
+	while c2 != best_a: path.push_front(_grid[c2]); c2 = prev[c2]
+	return path
+func walk_path(tgt: Vector3, reach: float, limit_s: float) -> Dictionary:
+	var path := grid_path(sea.to_local(m.hero.global_position), tgt)
+	if path.is_empty(): return {"ok": false, "resets": 0, "gaps": 0, "minh": 0.0, "t": 0.0, "nopath": true}
+	var tot := {"ok": true, "resets": 0, "gaps": 0, "minh": 1e9, "t": 0.0}
+	for i in range(0, path.size(), 4):
+		var wp: Vector3 = path[mini(i + 3, path.size() - 1)]
+		var r := await walk_to(wp, 2.0, 25.0)
+		tot.resets += r.resets; tot.gaps += r.gaps; tot.minh = minf(tot.minh, r.minh); tot.t += r.t
+		if not r.ok: tot.ok = false; break
+	if tot.ok: var f := await walk_to(tgt, reach, 20.0); tot.ok = f.ok; tot.resets += f.resets; tot.gaps += f.gaps; tot.t += f.t
+	return tot
+func walk_to(tgt: Vector3, reach: float, limit_s: float) -> Dictionary:
+	var resets := 0; var gaps := 0; var minh := 1e9; var t := 0.0; var last: Vector3 = m.hero.global_position; var still := 0.0; var detour := 0.0; var dsign := 1.0
+	while t < limit_s:
+		var lp := sea.to_local(m.hero.global_position)
+		var to := Vector2(tgt.x - lp.x, tgt.z - lp.z)
+		if to.length() <= reach: return {"ok": true, "resets": resets, "gaps": gaps, "minh": minh, "t": t}
+		var yaw := atan2(-to.x, -to.y)
+		if detour > 0.0: yaw += dsign * 1.1; detour -= 1.0 / 60.0
+		m.yaw = yaw
+		sea.drive(Vector2(0, -1), 1.0 / 60.0); t += 1.0 / 60.0
+		lp = sea.to_local(m.hero.global_position); minh = minf(minh, lp.y)
+		if sea.ui.msg.text.begins_with("Careful"): resets += 1; sea.ui.msg.text = ""
+		if m.hero.is_on_floor() and sea._ray_floor(lp, 0.5, 3.0).is_empty(): gaps += 1
+		if fmod(t, 1.0) < 1.0 / 60.0:
+			if m.hero.global_position.distance_to(last) < 1.0: still += 1.0
+			else: still = 0.0
+			last = m.hero.global_position
+			if still >= 2.0: detour = 1.2; dsign = -dsign; still = 0.0
+		await get_tree().physics_frame
+	return {"ok": false, "resets": resets, "gaps": gaps, "minh": minh, "t": t}
+var _s5 := {}
+func poi_walk(k: String, d: Dictionary) -> void:
+	if _s5.is_empty(): _s5 = JSON.parse_string(FileAccess.get_file_as_string("res://tidewrack/stage5_manifest.json")).islands
+	var isl: Dictionary = _s5.get(k, {})
+	ok(not isl.is_empty(), "%s: stage 5 island in the manifest" % k)
+	if isl.is_empty(): return
+	build_grid(isl.window)
+	for poi in isl.get("pois", []):
+		var tgt := Vector3(poi.pos[0], poi.pos[1], poi.pos[2])
+		var r := await walk_path(tgt, float(poi.radius) + 4.0, 150.0)
+		print("DK POI %s / %s: nopath=%s reached=%s t=%.0fs resets=%d gaps=%d miny=%.1f" % [k, poi.name, r.get("nopath", false), r.ok, r.t, r.resets, r.gaps, r.minh])
+		ok(r.ok and r.resets == 0 and r.gaps == 0 and r.minh > 0.0, "%s: walked to %s (%.0f s, resets %d, gaps %d)" % [k, poi.name, r.t, r.resets, r.gaps])
+		var back := await walk_path(sea.pier_head(d), 6.0, 150.0)
+		ok(back.ok and back.resets == 0 and back.gaps == 0, "%s: walked back from %s to the pier (%.0f s, resets %d, gaps %d)" % [k, poi.name, back.t, back.resets, back.gaps])
+		if not back.ok: m.hero.global_position = sea.to_global(sea.pier_head(d) + Vector3(0, 0.6, 0)); await frames(3)
+	m.hero.global_position = sea.to_global(sea.pier_head(d) + Vector3(0, 0.6, 0)); m.hero.velocity = Vector3.ZERO; await frames(10)
+	sea.unseat_crew()
 func fade_wait() -> void:
 	await get_tree().create_timer(1.4).timeout; await frames(3)
 func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(out)
 	while not m.warmed: await get_tree().process_frame
-	m._set_time(11.0); m.party.set_hero("aldric"); m.party._set_companions(["garruk"])
+	m._set_time(11.0); m.party.set_hero("aldric"); m.party._set_companions(["garruk", "wren"])
 	sea = m.sea; sea.save.discovered_ports = ["tidewrack"]
 	sea.enter("galleon"); sea.unlock_all = true; await frames(5)
 	var L: Dictionary = sea._landings()
@@ -44,6 +147,10 @@ func _run() -> void:
 		var hp := sea.to_local(m.hero.global_position)
 		ok(hp.distance_to(sea.pier_head(d)) < 2.5, "%s: hero on the pier head (%.1f m)" % [k, hp.distance_to(sea.pier_head(d))])
 		ok(m.pip.global_position.distance_to(m.hero.global_position) < 4.0 and not m.party.riding, "%s: Pip + companions ashore with the hero" % k)
+		feet_check(k, "after disembark")
+		await hud_check(k + " ashore")
+		ok(sea.ui.charts_b.visible, "%s: Charts shown at the pier beside the ship" % k)
+		if OS.get_environment("DK_POI") != "": await poi_walk(k, d)
 		var inl := sea._inland(d)
 		m.yaw = atan2(inl.x, inl.z)   # camera looks inland: fwd = (-sin, -cos) = -inl, so the shot frames hero + pier + ship behind
 		if k in shots: await shot(k + "_ashore")
@@ -62,6 +169,9 @@ func _run() -> void:
 		await frames(30)
 		var c0: Vector3 = m.party.companions[0].node.global_position if m.party.companions.size() > 0 else m.pip.global_position
 		ok(c0.distance_to(m.hero.global_position) < 8.0, "%s: companion followed ashore (%.1f m)" % [k, c0.distance_to(m.hero.global_position)])
+		feet_check(k, "20 m inland")
+		ok(not sea.ui.charts_b.visible, "%s: Charts hidden 20 m inland, away from the ship" % k)
+		await hud_check(k + " inland")
 		if k in shots:
 			m.yaw = atan2(-inl.x, -inl.z); await shot(k + "_inland")
 		m.hero.global_position = sea.to_global(sea.pier_head(d) + Vector3(0, 0.6, 0)); await frames(4); sea.drive(Vector2.ZERO, 1.0 / 60.0)

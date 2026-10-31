@@ -70,6 +70,7 @@ func _set_companions(ids: Array) -> void:
 		companions.append({"id": companion_ids[i], "node": n, "rig": r, "swing": 0.0})
 
 var _fly_last_yaw := 0.0
+var ground_snap := Callable()   # test 36: ashore on Tidewrack islands -> floor y under a world point (NAN = none)
 var riding := false   # test 33: true while sailing (set by TidewrackSea)
 func _physics_process(dt: float) -> void:
 	if main == null or main.hero == null: return
@@ -139,6 +140,9 @@ func _follow(c: Dictionary, gap: float, dt: float) -> void:
 		n.global_position += to.normalized() * min(to.length(), spd * dt * clamp(flat, 0.3, 1.5))
 		n.rotation.y = lerp_angle(n.rotation.y, atan2(-to.x, -to.z), 10 * dt)
 	n.global_position.y = lerp(n.global_position.y, goal.y, min(1.0, 12.0 * dt))
+	if ground_snap.is_valid() and not FLYERS.has(c.id):   # test 36: feet on the real island colliders, never hovering
+		var gy: float = ground_snap.call(n.global_position)
+		if not is_nan(gy): n.global_position.y = gy
 	var cr := c.rig as CharacterRig
 	if cr.root_walk > 0.0: cr.set_move_mps(_comp_speed(c, n, dt))
 	else: cr.set_locomotion(clamp(flat * 1.2, 0.0, 2.0))

@@ -216,6 +216,14 @@ func region_at(p: Vector2) -> String:
 		var d := _rect_dist(id, p)
 		if d < bd: bd = d; best = id
 	return best
+var _causeways: Array = []
+func causeways() -> Array:   # [[a, b], ...] from tidewrack/stage5_manifest.json (islands.<id>.bridges)
+	if _causeways.is_empty():
+		var d = JSON.parse_string(FileAccess.get_file_as_string(R + "stage5_manifest.json"))
+		if d is Dictionary:
+			for k in d.islands:
+				for br in d.islands[k].get("bridges", []): _causeways.append([_v3(br.a), _v3(br.b), k])
+	return _causeways
 func shore_m(p: Vector2) -> float:
 	var id := region_at(p)
 	if _rect_dist(id, p) > 0.0: return 255.0
@@ -272,6 +280,7 @@ func enter(kind := "galleon", at := Vector3.INF, yaw := INF) -> void:
 	cur_region = region_at(Vector2(at.x, at.z)); _stream(Vector2(at.x, at.z))
 	_port_check(true)
 func leave_to_harbour() -> void:
+	if m.party: m.party.ground_snap = Callable()
 	ashore = ""; active = false; visible = false; in_cave = ""; diving = false; m.cam.environment = null
 	m.hero.collision_layer = 1; m.hero.collision_mask = 1; m.pip.visible = true; unseat_crew()
 	m.sun.directional_shadow_max_distance = sun_dist
@@ -332,6 +341,25 @@ func unseat_crew() -> void:
 		var i := 0
 		for c in m.party.companions: c.node.global_position = m.hero.global_position + Vector3(1.0 + i, 0, 1.0); c.node.rotation = Vector3.ZERO; i += 1
 	if m.pip: m.pip.position = m.hero.position + Vector3(1, 0, 1)
+	snap_crew()
+## test 36 (boss: companion hovering ~1 m beside the hero at Gullhaven): feet of Pip + every walking companion on the floor.
+func floor_y(w: Vector3) -> float:
+	var q := PhysicsRayQueryParameters3D.create(Vector3(w.x, m.hero.global_position.y + 4.0, w.z), Vector3(w.x, m.hero.global_position.y - 12.0, w.z), 1)
+	q.exclude = [m.hero.get_rid()] + ships.values().map(func(s): return s.get_rid())
+	var hit: Dictionary = m.get_world_3d().direct_space_state.intersect_ray(q)
+	return float(hit.position.y) if hit else NAN
+func snap_crew() -> void:
+	if ashore == "": return
+	var nodes: Array = []
+	if m.pip: nodes.append(m.pip)
+	if m.party:
+		for c in m.party.companions:
+			if not m.party.FLYERS.has(c.id): nodes.append(c.node)
+	for n in nodes:
+		var gy := floor_y(n.global_position)
+		if is_nan(gy):   # off the pier/beach edge: stand beside the hero instead
+			n.global_position = m.hero.global_position + (n.global_position - m.hero.global_position).normalized() * 1.0; gy = floor_y(n.global_position)
+		if not is_nan(gy): n.global_position.y = gy
 
 # ---------------------------------------------------------------- per frame (called from main._physics_process)
 func drive(inp: Vector2, dt: float) -> void:
@@ -353,6 +381,13 @@ func drive(inp: Vector2, dt: float) -> void:
 		var reef := _v3(M.s1.props.wreck_reef.pos)
 		if ship.kind == "galleon" and p.distance_to(Vector2(reef.x, reef.z)) < 95.0:
 			var o := (p - Vector2(reef.x, reef.z)).normalized() * 95.0 + Vector2(reef.x, reef.z); ship.position = Vector3(o.x, 0, o.y); ship.speed *= 0.3
+		for cw in causeways():   # test 36: Beth's stage-5 causeways sit ~0.3 m above the water: hulls never pass through them
+			var a2 := Vector2(cw[0].x, cw[0].z); var b2 := Vector2(cw[1].x, cw[1].z); var ab := b2 - a2
+			var q := a2 + ab * clampf((p - a2).dot(ab) / maxf(ab.length_squared(), 0.001), 0.0, 1.0)
+			var rr2 := 9.0 if ship.kind == "galleon" else 4.0
+			if p.distance_to(q) < rr2:
+				var o3 := q + ((p - q).normalized() if p.distance_to(q) > 0.01 else ab.orthogonal().normalized()) * rr2
+				ship.position = Vector3(o3.x, 0, o3.y); ship.speed *= 0.3; p = o3
 		for b in bergs:
 			var bp := Vector2(b.node.position.x, b.node.position.z); var rr: float = b.r + (8.0 if ship.kind == "galleon" else 3.0)
 			if p.distance_to(bp) < rr:
@@ -613,14 +648,18 @@ func go_ashore(k: String) -> void:
 		h.collision_layer = 1; h.collision_mask = 1; h.velocity = Vector3.ZERO
 		h.global_position = to_global(pier_head(L) + Vector3(0, 0.6, 0)); _safe = pier_head(L) + Vector3(0, 0.6, 0)
 		m.yaw = atan2(-_inland(L).x, -_inland(L).z) + PI; m.hero_vis.rotation.y = atan2(-_inland(L).x, -_inland(L).z)
+		if m.party: m.party.ground_snap = func(w: Vector3) -> float: return floor_y(w)
 		unseat_crew()
 		if m.pip: m.pip.global_position = h.global_position + Vector3(1, 0, 1)
+		snap_crew()
 		if not save.discovered_ports.has(k) and ports().has(k): save.discovered_ports.append(k); write_save()
 		ui.set_prompt("", Callable()); ui.toast("Ashore at %s." % L.name))
 func board_ship() -> void:
 	if ashore == "": return
 	ui.fade(func():
-		ashore = ""; m.hero.collision_layer = 0; m.hero.collision_mask = 0; m.hero.velocity = Vector3.ZERO
+		ashore = ""
+		if m.party: m.party.ground_snap = Callable()
+		m.hero.collision_layer = 0; m.hero.collision_mask = 0; m.hero.velocity = Vector3.ZERO
 		seat_crew(); ui.set_prompt("", Callable()); ui.toast("All aboard."))
 func _ray_floor(lp: Vector3, up := 3.0, down := 40.0) -> Dictionary:
 	var w := to_global(lp); var q := PhysicsRayQueryParameters3D.create(w + Vector3(0, up, 0), w - Vector3(0, down, 0), 1)

@@ -1,0 +1,32 @@
+{
+ "jump": {
+  "start": 648,
+  "orig_before": 648,
+  "after": 0
+ },
+ "jump_hang": {
+  "start": 0,
+  "orig_before": 0,
+  "after": 0
+ },
+ "jump_land": {
+  "start": 514,
+  "orig_before": 514,
+  "after": 3
+ },
+ "jump_start": {
+  "start": 648,
+  "orig_before": 648,
+  "after": 0
+ },
+ "swim_stroke": {
+  "start": 639,
+  "orig_before": 639,
+  "after": 0
+ },
+ "swim_tread": {
+  "start": 0,
+  "orig_before": 0,
+  "after": 0
+ }
+}

@@ -287,6 +287,7 @@ func _ready() -> void:
 	if args.has("--tidewrack"): add_child(load("res://tests/tidewrack_test.gd").new())   # test 32
 	if args.has("--landgen"): add_child(load("res://tests/landing_gen.gd").new())   # test 34
 	if args.has("--docking"): add_child(load("res://tests/docking_test.gd").new())   # test 34
+	if args.has("--vox34"): add_child(load("res://tests/vox34_shots.gd").new())   # test 34
 	if args.has("--vox31"): add_child(load("res://tests/vox31_shots.gd").new())   # test 31
 	if args.has("--voxshots"): add_child(load("res://tests/voxel_shots.gd").new())   # voxel-heroes
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23

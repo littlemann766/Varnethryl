@@ -730,6 +730,7 @@ func _end_ritual_fx() -> void:
 func on_hero_used(slot: int, _sk: Dictionary, hero_id := "") -> void:
 	if not visible: return
 	var h := _hero(); if h == null: return
+	_hit_minions(h, slot, slot > 0 and HeroCombat.one_shot(hero_id, _sk))   # test 34
 	# test 25: the Owner's ultimates (Unholy + Holy Destruction) kill the Titan in one hit when it lands
 	# (a crystal in reach, or the Titan's body within the ult radius / 45 m, whichever is larger)
 	if slot > 0 and HeroCombat.one_shot(hero_id, _sk) and state != "dead":
@@ -781,32 +782,42 @@ func _update_crystals(dt: float) -> void:
 			c.t_broken += dt
 			if c.t_broken > 60.0 and state == "dead": _crystal_restore(c)
 
-# ---------- adds (static blockouts: fiend unrigged, wisp bobs) ----------
+# ---------- adds (test 34: rigged + animated minions with AI, scripts/titan_minion.gd) ----------
+func minions() -> Array:
+	return adds.filter(func(a): return is_instance_valid(a) and a.alive())
 func _spawn_adds(at: Vector3) -> void:
-	var live := adds.filter(func(a): return is_instance_valid(a[0]))
-	adds = live
+	adds = adds.filter(func(a): return is_instance_valid(a))
 	for i in 5:
 		if adds.size() >= 12: break
 		var wisp := i >= 3
-		var n: Node3D = (load(WB + ("wb_ember_wisp" if wisp else "wb_ash_fiend") + ("_lod1.glb")) as PackedScene).instantiate()
+		var sc: PackedScene = load(WB + ("wb_ember_wisp" if wisp else "wb_ash_fiend") + "_lod1.glb")
 		var mat: Material = load(WB + "materials/" + ("wb_wisp_mat.tres" if wisp else "wb_fiend_mat.tres"))
-		for mi: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false): mi.material_override = mat
+		var n := TitanMinion.new().setup(self, "wisp" if wisp else "fiend", sc, mat)
 		n.top_level = true; add_child(n)
 		var a := randf() * TAU; var r := randf_range(8.0, 18.0)
 		var p := Vector3(at.x + cos(a) * r, 0, at.z + sin(a) * r)
-		n.global_position = Vector3(p.x, _gy(p.x, p.z) + (2.0 if wisp else 0.0), p.z)
+		n.global_position = Vector3(p.x, n.ground_y(p), p.z)
 		var h := _hero(); if h: n.rotation.y = atan2(h.global_position.x - p.x, h.global_position.z - p.z)
-		adds.append([n, wisp, 0.0, n.global_position.y])
+		adds.append(n)
 
 func _update_adds(dt: float) -> void:
 	if state != "walk" and _hero_d() < 200.0:
 		add_t -= dt
 		if add_t <= 0.0: add_t = 45.0; _spawn_adds(global_position + _fwd() * 50.0)
-	for a in adds:
-		if not is_instance_valid(a[0]): continue
-		a[2] += dt
-		if a[1]: (a[0] as Node3D).global_position.y = a[3] + sin(a[2] * 2.0) * 0.4; (a[0] as Node3D).rotation.y += dt * 0.6
-		if a[2] > 90.0: (a[0] as Node).queue_free()
+	for a in adds.duplicate():
+		if not is_instance_valid(a): adds.erase(a); continue
+		if not a.tick(dt): adds.erase(a); a.queue_free()
+
+## hero attacks on the minions: basic melee 3 m, skills 12 m; the Owner's one-shot ults kill every minion in the ult radius
+func _hit_minions(h: Node3D, slot: int, one_shot: bool) -> void:
+	var R := maxf(45.0, float(CombatData.data().TUNING.ult.radius) * CombatRules.UNIT_M) if one_shot else (3.0 if slot == 0 else 12.0)
+	var best = null; var bd := 1e9
+	for a in minions():
+		var d: float = a.global_position.distance_to(h.global_position)
+		if d > R: continue
+		if one_shot: a.take_damage(a.hp + 1.0, h.global_position)
+		elif d < bd: bd = d; best = a
+	if best: best.take_damage(10.0 if slot == 0 else 25.0, h.global_position)
 
 func _update_prints(dt: float) -> void:
 	for f in footprints:

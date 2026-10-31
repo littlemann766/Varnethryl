@@ -406,7 +406,8 @@ func _contexts() -> void:
 			if ships.has("galleon") and ships.galleon.position.distance_to(ship.position) < 60.0: ui.set_prompt("Board galleon", func(): _swap("galleon")); return
 	if p.distance_to(Vector2(1300, 300)) < 60.0 and absf(ship.speed) < 3.0 and ship.alt <= 0.5 and ship.kind == "galleon":   # test 34: mainland Tidewrack pier
 		ui.set_prompt("Go ashore", func(): ui.fade(leave_to_harbour)); return
-	var ln := landing_near(p, 40.0)
+	var gh := _v3(M.s1.props.gullhaven.anchor)
+	var ln := "" if p.distance_to(Vector2(gh.x, gh.z)) < 20.0 else landing_near(p, 40.0)   # right at the Gullhaven anchor: Shipwright wins
 	if ln != "" and absf(ship.speed) < 3.0 and ship.alt <= 0.5:
 		_port_check(false); ui.set_prompt("Go ashore", func(): go_ashore(ln)); return
 	if _port_check(false): return
@@ -648,6 +649,7 @@ func _walk(inp: Vector2, dt: float) -> void:
 	else: _air_t += dt
 	var moved := h.global_position.distance_to(before)
 	_stuck_t = _stuck_t + dt if spd > 0.5 and moved < spd * dt * 0.05 else 0.0
+	if _air_t > 1.5 and not _ray_floor(lp, 0.5, 4.0).is_empty(): _air_t = 0.0   # sliding on a steep bit right above the ground: not lost
 	if lp.y < -0.2 or _air_t > 1.5 or _stuck_t > 2.0:
 		var f := _ray_floor(_safe)
 		h.global_position = (f.position + Vector3(0, 0.3, 0)) if f else to_global(pier_head(landing(ashore)) + Vector3(0, 0.6, 0))

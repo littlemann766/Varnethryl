@@ -71,7 +71,10 @@ func in_zone(p: Vector3, pad := 0.0) -> bool: return maxf(absf(p.x), absf(p.z)) 
 func hostiles() -> Array:
 	var d = main.party.director if main and main.get("party") and main.party.get("director") else null
 	if d == null: return []
-	return d.living().filter(func(e): return e is Enemy and not (e.type_id in IGNORE) and in_zone(e.global_position))
+	var out: Array = d.living().filter(func(e): return e is Enemy and not (e.type_id in IGNORE) and in_zone(e.global_position))
+	var wb = main.get("world_boss")   # test 34: the Titan's minions are monsters too (the Titan itself is still left out)
+	if wb and is_instance_valid(wb): out += wb.minions().filter(func(e): return in_zone(e.global_position))
+	return out
 
 ## assign each intruder to its PER_TARGET nearest free guards
 func _assign() -> void:
@@ -85,7 +88,7 @@ func _assign() -> void:
 		free.sort_custom(func(a, b): return (a.node as Node3D).global_position.distance_to(e.global_position) < (b.node as Node3D).global_position.distance_to(e.global_position))
 		for g in free.slice(0, PER_TARGET - have): g.tgt = e
 
-func _strike(g: Dictionary, e: Enemy) -> void:
+func _strike(g: Dictionary, e) -> void:
 	var dmg := int(ceil(e.max_hp * (BOSS_FRAC if e.is_boss() else DMG_FRAC)))
 	e.take_damage(dmg, (g.node as Node3D).global_position)
 	guard_hit.emit(e, dmg)

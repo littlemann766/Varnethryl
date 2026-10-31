@@ -20,7 +20,7 @@ func walk_ok(p: Vector2, d: Vector2, y0: float) -> bool:
 	var y := y0
 	for k in range(1, 25):
 		var h := hit(p.x + d.x * k, p.y + d.y * k)
-		if h.is_empty() or h.n.y < 0.6 or absf(h.y - y) > 0.7 or h.y < 0.3: return false
+		if h.is_empty() or h.n.y < 0.6 or absf(h.y - y) > 0.3 or h.y < 0.3: return false
 		var a := sea.to_global(Vector3(p.x + d.x * (k - 1), y + 1.0, p.y + d.y * (k - 1))); var b := sea.to_global(Vector3(p.x + d.x * k, h.y + 1.0, p.y + d.y * k))
 		for side in [-0.5, 0.0, 0.5]:   # no wall / house across the 1 m wide path
 			var o: Vector3 = Vector3(-d.y, 0, d.x) * side

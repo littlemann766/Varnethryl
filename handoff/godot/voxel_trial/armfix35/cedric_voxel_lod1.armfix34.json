@@ -1,0 +1,37 @@
+{
+ "jump": {
+  "start": 55,
+  "orig_before": 55,
+  "after": 3
+ },
+ "jump_land": {
+  "start": 67,
+  "orig_before": 67,
+  "after": 0
+ },
+ "jump_start": {
+  "start": 3,
+  "orig_before": 3,
+  "after": 0
+ },
+ "run": {
+  "start": 19,
+  "orig_before": 19,
+  "after": 0
+ },
+ "swim_stroke": {
+  "start": 22,
+  "orig_before": 22,
+  "after": 3
+ },
+ "swim_tread": {
+  "start": 0,
+  "orig_before": 0,
+  "after": 0
+ },
+ "walk": {
+  "start": 7,
+  "orig_before": 7,
+  "after": 3
+ }
+}

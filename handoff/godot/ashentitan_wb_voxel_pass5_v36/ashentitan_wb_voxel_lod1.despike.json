@@ -1,0 +1,85 @@
+{
+ "wb_ritual_fissure_in": {},
+ "wb_ritual_fissure_loop": {},
+ "wb_ritual_fissure_release": {
+  "hand_L": {
+   "max_step_deg": [
+    34.1,
+    25.0
+   ],
+   "seam_deg": [
+    15.9,
+    15.9
+   ],
+   "frames_fixed": 1
+  },
+  "hand_R": {
+   "max_step_deg": [
+    31.7,
+    25.0
+   ],
+   "seam_deg": [
+    14.4,
+    14.4
+   ],
+   "frames_fixed": 1
+  }
+ },
+ "wb_ritual_lavawave_in": {},
+ "wb_ritual_lavawave_loop": {},
+ "wb_ritual_lavawave_release": {
+  "hand_L": {
+   "max_step_deg": [
+    74.5,
+    25.0
+   ],
+   "seam_deg": [
+    2.0,
+    2.0
+   ],
+   "frames_fixed": 3
+  },
+  "hand_R": {
+   "max_step_deg": [
+    76.6,
+    25.0
+   ],
+   "seam_deg": [
+    2.0,
+    2.0
+   ],
+   "frames_fixed": 3
+  }
+ },
+ "wb_ritual_meteor_in": {},
+ "wb_ritual_meteor_loop": {},
+ "wb_ritual_meteor_release": {},
+ "wb_swat_back": {},
+ "wb_swat_forearm_L": {
+  "hand_L": {
+   "max_step_deg": [
+    38.9,
+    25.0
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 1
+  }
+ },
+ "wb_swat_forearm_R": {
+  "hand_R": {
+   "max_step_deg": [
+    29.0,
+    25.0
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 2
+  }
+ },
+ "wb_swat_knee": {}
+}

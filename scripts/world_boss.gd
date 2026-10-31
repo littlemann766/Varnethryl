@@ -112,6 +112,7 @@ func setup(main: Node) -> WorldBoss:
 	_orient_and_measure()
 	_build_kneel()
 	for c in ["wb_walk", "wb_idle", "wb_ritual_fissure_loop", "wb_ritual_lavawave_loop", "wb_stagger_loop", "wb_down_loop"]:
+		c = _clip(c)
 		if ap.has_animation(c): ap.get_animation(c).loop_mode = Animation.LOOP_LINEAR
 	_strip_root_xz("wb_walk")
 	if ap.has_animation("wb_run"): _strip_root_xz("wb_run")
@@ -480,7 +481,13 @@ func _strip_root_xz(c: String) -> void:
 			for k in a.track_get_key_count(t):
 				var v: Vector3 = a.track_get_key_value(t, k); a.track_set_key_value(t, k, Vector3(p0.x, v.y, p0.z))
 
+func _clip(c: String) -> String:   # test 37: Godot's glTF import strips the "_loop" suffix (and sets looping)
+	if ap.has_animation(c): return c
+	if c.ends_with("_loop") and ap.has_animation(c.trim_suffix("_loop")): return c.trim_suffix("_loop")
+	return c
+
 func _play(c: String, _sp := 1.0) -> void:
+	c = _clip(c)
 	if ap.has_animation(c): ap.play(c, 0.5); ap.speed_scale = 1.0
 	else: push_warning("WB: missing clip " + c)
 

@@ -1,0 +1,229 @@
+{
+ "_about": "Ashen Titan minions (adds) clip events. Frames at 30 fps from clip start. Fire an event when lastT < t <= currentT. Model space: +Z forward, +X the minion's left, +Y up, metres, scale 1. Clips are in place (no root motion): move the node at root_speed_mps / suggested_speed_mps and scale AnimationPlayer speed if you move faster or slower.",
+ "wb_ash_fiend": {
+  "height_m": 2.45,
+  "rig": "ash_fiend_Rig, 24 bones (Beth-style names: hips, spine, spine2, chest, neck, head, shoulder/upperArm/foreArm/hand/fingers_L/R, thigh/shin/foot/toe_L/R)",
+  "clips": {
+   "attack": {
+    "frames": 59,
+    "seconds": 1.967,
+    "fps": 30,
+    "loop": false,
+    "hand": "hand_R",
+    "windup_start_frame": 4,
+    "windup_peak_frame": 15,
+    "hit_frame": 21,
+    "hit_time": 0.7,
+    "recover_frame": 59,
+    "hit_point_model": [
+     -0.562,
+     1.599,
+     1.344
+    ],
+    "reach_m": 1.46,
+    "peak_hand_speed_mps": 22.9,
+    "name": "claw_rake",
+    "source": "Quaternius CC0 UAL2 Zombie_Scratch"
+   },
+   "attack2": {
+    "frames": 39,
+    "seconds": 1.3,
+    "fps": 30,
+    "loop": false,
+    "hand": "hand_R",
+    "windup_start_frame": 1,
+    "windup_peak_frame": 8,
+    "hit_frame": 14,
+    "hit_time": 0.467,
+    "recover_frame": 39,
+    "hit_point_model": [
+     -0.787,
+     1.348,
+     2.126
+    ],
+    "reach_m": 2.27,
+    "peak_hand_speed_mps": 32.9,
+    "name": "hook_haymaker",
+    "source": "Quaternius CC0 UAL2 Melee_Hook + Melee_Hook_Rec"
+   },
+   "attack3": {
+    "frames": 35,
+    "seconds": 1.167,
+    "fps": 30,
+    "loop": false,
+    "hand": "hand_R",
+    "windup_start_frame": 1,
+    "windup_peak_frame": 4,
+    "hit_frame": 11,
+    "hit_time": 0.367,
+    "recover_frame": 35,
+    "hit_point_model": [
+     -0.5,
+     1.827,
+     1.22
+    ],
+    "reach_m": 1.32,
+    "peak_hand_speed_mps": 7.0,
+    "name": "quick_cross",
+    "source": "Quaternius CC0 UAL1 Punch_Cross"
+   },
+   "death": {
+    "frames": 72,
+    "seconds": 2.4,
+    "fps": 30,
+    "loop": false,
+    "ground_impact_frame": 26,
+    "ground_impact_time": 0.867,
+    "hips_height_start": 1.11,
+    "hips_height_end": 0.41,
+    "source": "Quaternius CC0 UAL1 Death01"
+   },
+   "hit": {
+    "frames": 10,
+    "seconds": 0.333,
+    "fps": 30,
+    "loop": false,
+    "source": "Quaternius CC0 UAL1 Hit_Chest"
+   },
+   "idle": {
+    "frames": 75,
+    "seconds": 2.5,
+    "fps": 30,
+    "loop": true,
+    "source": "Quaternius CC0 UAL1 Idle_Loop"
+   },
+   "run": {
+    "frames": 28,
+    "seconds": 0.933,
+    "fps": 30,
+    "loop": true,
+    "footsteps": [
+     {
+      "foot": "foot_L",
+      "frame": 2,
+      "time": 0.067
+     },
+     {
+      "foot": "foot_R",
+      "frame": 16,
+      "time": 0.533
+     }
+    ],
+    "source": "Quaternius CC0 UAL1 Jog_Fwd_Loop",
+    "root_speed_mps": 5.95
+   },
+   "walk": {
+    "frames": 40,
+    "seconds": 1.333,
+    "fps": 30,
+    "loop": true,
+    "footsteps": [
+     {
+      "foot": "foot_L",
+      "frame": 3,
+      "time": 0.1
+     },
+     {
+      "foot": "foot_R",
+      "frame": 23,
+      "time": 0.767
+     }
+    ],
+    "source": "Quaternius CC0 UAL1 Walk_Loop",
+    "root_speed_mps": 0.96
+   }
+  },
+  "damage_window_note": "apply melee damage once at hit_frame to targets within reach_m in a ~70 deg cone in front; windup_start..hit_frame is the telegraph"
+ },
+ "wb_ember_wisp": {
+  "height_m": 1.3,
+  "hover_height_m": 2.0,
+  "rig": "ember_wisp_Rig, 15 bones (core, crown, crown2, flare_L/R, tail1-3, shards + shard_0..6 rigid)",
+  "clips": {
+   "idle": {
+    "frames": 60,
+    "seconds": 2.0,
+    "fps": 30,
+    "loop": true,
+    "source": "hand-keyed (non-humanoid; no mocap applies)"
+   },
+   "walk": {
+    "frames": 40,
+    "seconds": 1.333,
+    "fps": 30,
+    "loop": true,
+    "source": "hand-keyed (non-humanoid; no mocap applies)",
+    "suggested_speed_mps": 2.5
+   },
+   "run": {
+    "frames": 24,
+    "seconds": 0.8,
+    "fps": 30,
+    "loop": true,
+    "source": "hand-keyed (non-humanoid; no mocap applies)",
+    "suggested_speed_mps": 6.0
+   },
+   "attack": {
+    "frames": 36,
+    "seconds": 1.2,
+    "fps": 30,
+    "loop": false,
+    "source": "hand-keyed (non-humanoid; no mocap applies)",
+    "name": "ember_lash",
+    "windup_start_frame": 0,
+    "windup_peak_frame": 14,
+    "hit_frame": 20,
+    "recover_frame": 36,
+    "reach_m": 1.3,
+    "type": "melee lunge",
+    "hit_point_model": [
+     0,
+     0.1,
+     1.25
+    ],
+    "hit_time": 0.667,
+    "windup_peak_time": 0.467
+   },
+   "attack2": {
+    "frames": 42,
+    "seconds": 1.4,
+    "fps": 30,
+    "loop": false,
+    "source": "hand-keyed (non-humanoid; no mocap applies)",
+    "name": "shard_burst",
+    "windup_start_frame": 0,
+    "windup_peak_frame": 18,
+    "hit_frame": 21,
+    "recover_frame": 42,
+    "type": "aoe ring",
+    "aoe_radius_m": 2.2,
+    "hit_point_model": [
+     0,
+     0,
+     0
+    ],
+    "hit_time": 0.7,
+    "windup_peak_time": 0.6
+   },
+   "hit": {
+    "frames": 12,
+    "seconds": 0.4,
+    "fps": 30,
+    "loop": false,
+    "source": "hand-keyed (non-humanoid; no mocap applies)"
+   },
+   "death": {
+    "frames": 54,
+    "seconds": 1.8,
+    "fps": 30,
+    "loop": false,
+    "source": "hand-keyed (non-humanoid; no mocap applies)",
+    "ground_impact_frame": 32,
+    "ground_impact_time": 1.067,
+    "fall_m": 1.13,
+    "note": "assumes node at ground+2.0 (world_boss.gd); lands on the ground at f32, small bounce, settles"
+   }
+  },
+  "note": "idle/walk/run already bob and spin the shards: remove the code bob/spin in _update_adds when using clips. death drops the body 1.13 m root + tilt so it rests on the ground when the node is at ground+2.0."
+ }
+}

@@ -1,0 +1,287 @@
+{
+ "fiend": {
+  "attack": {
+   "frames": 59,
+   "min_z_first": 0.001,
+   "min_z_min": -0.026,
+   "min_z_max": 0.038,
+   "min_z_last": 0.001,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 21.7,
+   "max_step_bone": "upperArm_R",
+   "max_step_frame": 23
+  },
+  "attack2": {
+   "frames": 39,
+   "min_z_first": -0.004,
+   "min_z_min": -0.022,
+   "min_z_max": 0.037,
+   "min_z_last": -0.005,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 28.4,
+   "max_step_bone": "foreArm_L",
+   "max_step_frame": 11
+  },
+  "attack3": {
+   "frames": 35,
+   "min_z_first": 0.0,
+   "min_z_min": -0.003,
+   "min_z_max": 0.003,
+   "min_z_last": 0.0,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 23.5,
+   "max_step_bone": "foreArm_R",
+   "max_step_frame": 12
+  },
+  "death": {
+   "frames": 72,
+   "min_z_first": -0.0,
+   "min_z_min": -0.037,
+   "min_z_max": 0.035,
+   "min_z_last": 0.0,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 29.1,
+   "max_step_bone": "shin_R",
+   "max_step_frame": 29
+  },
+  "hit": {
+   "frames": 10,
+   "min_z_first": -0.002,
+   "min_z_min": -0.002,
+   "min_z_max": 0.001,
+   "min_z_last": -0.002,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 10.6,
+   "max_step_bone": "head",
+   "max_step_frame": 7
+  },
+  "idle": {
+   "frames": 75,
+   "min_z_first": 0.0,
+   "min_z_min": 0.0,
+   "min_z_max": 0.001,
+   "min_z_last": 0.0,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 0.5,
+   "max_step_bone": "foreArm_L",
+   "max_step_frame": 8
+  },
+  "run": {
+   "frames": 28,
+   "min_z_first": 0.114,
+   "min_z_min": 0.0,
+   "min_z_max": 0.303,
+   "min_z_last": 0.114,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 37.1,
+   "max_step_bone": "thigh_R",
+   "max_step_frame": 4
+  },
+  "walk": {
+   "frames": 40,
+   "min_z_first": 0.011,
+   "min_z_min": 0.0,
+   "min_z_max": 0.011,
+   "min_z_last": 0.011,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 13.0,
+   "max_step_bone": "thigh_L",
+   "max_step_frame": 30
+  }
+ },
+ "fiend_post": {
+  "attack": {
+   "despike_fixes": 0,
+   "ground_offset_m": [
+    0.027,
+    0.027
+   ],
+   "min_z_after": [
+    -0.026,
+    0.038
+   ],
+   "min_z_last": 0.001
+  },
+  "attack2": {
+   "despike_fixes": 0,
+   "ground_offset_m": [
+    0.035,
+    0.035
+   ],
+   "min_z_after": [
+    -0.022,
+    0.037
+   ],
+   "min_z_last": -0.005
+  },
+  "attack3": {
+   "despike_fixes": 0,
+   "ground_offset_m": [
+    -0.005,
+    -0.005
+   ],
+   "min_z_after": [
+    -0.003,
+    0.003
+   ],
+   "min_z_last": 0.0
+  },
+  "death": {
+   "despike_fixes": 0,
+   "ground_offset_m": [
+    0.028,
+    0.406
+   ],
+   "min_z_after": [
+    -0.037,
+    0.035
+   ],
+   "min_z_last": 0.0
+  },
+  "hit": {
+   "despike_fixes": 0,
+   "ground_offset_m": [
+    -0.007,
+    -0.007
+   ],
+   "min_z_after": [
+    -0.002,
+    0.001
+   ],
+   "min_z_last": -0.002
+  },
+  "idle": {
+   "despike_fixes": 0,
+   "ground_offset_m": [
+    -0.005,
+    -0.005
+   ],
+   "min_z_after": [
+    0.0,
+    0.001
+   ],
+   "min_z_last": 0.0
+  },
+  "run": {
+   "despike_fixes": 7,
+   "ground_offset_m": [
+    0.039,
+    0.039
+   ],
+   "min_z_after": [
+    0.0,
+    0.303
+   ],
+   "min_z_last": 0.114
+  },
+  "walk": {
+   "despike_fixes": 0,
+   "ground_offset_m": [
+    0.033,
+    0.033
+   ],
+   "min_z_after": [
+    0.0,
+    0.011
+   ],
+   "min_z_last": 0.011
+  }
+ },
+ "fiend_hand_ground_lift_deg": {
+  "attack_R": 11.8
+ },
+ "wisp": {
+  "attack": {
+   "frames": 36,
+   "min_z_first": -0.59,
+   "min_z_min": -0.877,
+   "min_z_max": -0.256,
+   "min_z_last": -0.59,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 26.3,
+   "max_step_bone": "core",
+   "max_step_frame": 20
+  },
+  "attack2": {
+   "frames": 42,
+   "min_z_first": -0.59,
+   "min_z_min": -0.59,
+   "min_z_max": -0.49,
+   "min_z_last": -0.59,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 19.2,
+   "max_step_bone": "shards",
+   "max_step_frame": 13
+  },
+  "death": {
+   "frames": 54,
+   "min_z_first": -0.59,
+   "min_z_min": -2.079,
+   "min_z_max": -0.552,
+   "min_z_last": -1.99,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 60.0,
+   "max_step_bone": "shard_2",
+   "max_step_frame": 33
+  },
+  "hit": {
+   "frames": 12,
+   "min_z_first": -0.59,
+   "min_z_min": -0.59,
+   "min_z_max": -0.209,
+   "min_z_last": -0.59,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 30.0,
+   "max_step_bone": "shard_6",
+   "max_step_frame": 4
+  },
+  "idle": {
+   "frames": 60,
+   "min_z_first": -0.59,
+   "min_z_min": -0.67,
+   "min_z_max": -0.51,
+   "min_z_last": -0.59,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 6.0,
+   "max_step_bone": "shards",
+   "max_step_frame": 30
+  },
+  "run": {
+   "frames": 24,
+   "min_z_first": -0.353,
+   "min_z_min": -0.472,
+   "min_z_max": -0.192,
+   "min_z_last": -0.353,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 15.0,
+   "max_step_bone": "shards",
+   "max_step_frame": 12
+  },
+  "walk": {
+   "frames": 40,
+   "min_z_first": -0.262,
+   "min_z_min": -0.388,
+   "min_z_max": -0.157,
+   "min_z_last": -0.262,
+   "arm_leg_verts_max": 0,
+   "arm_leg_frames": 0,
+   "max_frame_step_deg": 9.0,
+   "max_step_bone": "shard_3",
+   "max_step_frame": 4
+  }
+ }
+}

@@ -1,7 +1,0 @@
-import puppeteer from 'puppeteer-core';import fs from 'fs';
-const b=await puppeteer.launch({executablePath:'/usr/bin/google-chrome',headless:'new',args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
-const p=await b.newPage();p.on('pageerror',e=>console.log('ERR',e.message));
-await p.goto('http://localhost:8731/or/rh.html');await p.waitForFunction('window.ready');
-await p.evaluate(()=>setup('/varnethryl-owner-test/owner-animated.glb'));
-const W=process.argv[2]==='walk';const raw=await p.evaluate(w=>getRaw(w),W);
-fs.writeFileSync(W?'newwalk.json':'newrun.json',JSON.stringify(raw));console.log(Object.keys(raw.tracks).length,raw.times.length);await b.close();

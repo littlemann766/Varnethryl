@@ -84,8 +84,19 @@ func _run() -> void:
 			out[po.name] = await walk(ph, pts, v3(po.pos), float(po.radius) + 2.0)
 		for b in I.bridges:
 			var dv := (v3(b.b) - v3(b.a)).normalized(); var A := v3(b.a) - dv * 3.0 + Vector3(0, 0.8, 0); var B := v3(b.b) + dv * 3.0 + Vector3(0, 0.8, 0)
-			out["causeway a->b"] = await walk(A, [B], B, 1.5)
-			out["causeway b->a"] = await walk(B, [A], A, 1.5)
+			var da := v3(b.a) + Vector3(0, 0.3, 0); var db := v3(b.b) + Vector3(0, 0.3, 0)
+			if b.has("ends"):
+				A = v3(b.ends[0]) + Vector3(0, 0.8, 0); B = v3(b.ends[1]) + Vector3(0, 0.8, 0)
+			out["causeway a->b"] = await walk(A, [da, db, B], B, 1.5)
+			out["causeway b->a"] = await walk(B, [db, da, A], A, 1.5)
+		if I.get("ramp") != null and I.ramp.has("pier_stair"):
+			var pp := []
+			for d in I.ramp.pier_stair.decks:
+				pp.append(v3(d.a)); pp.append(v3(d.b))
+			var s0: Vector3 = pp[0] - (pp[1] - pp[0]).normalized() * 3.0 + Vector3(0, 1.0, 0)
+			out["pier stair up"] = await walk(s0, pp, pp[-1], 1.5)
+			var rp := pp.duplicate(); rp.reverse()
+			out["pier stair down"] = await walk(rp[0] + Vector3(0, 0.8, 0), rp, rp[-1], 1.5)
 		if I.get("ramp") != null:
 			var pts := []
 			for d in I.ramp.decks:

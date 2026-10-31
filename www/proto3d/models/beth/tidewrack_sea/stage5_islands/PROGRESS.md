@@ -15,3 +15,6 @@
   failing: saltglass 2/9 (stair up/down pass; lower-shelf POI routes: final re-route can't leave the pier zone -> falls back to old route, snags at (-2134,21,-75)),
   beached_wreck 1/6 and ember_wreck 0/6 (same pier-zone disconnect + causeway ends: walker falls off the deck side near the end / approach ramp).
   Next: fix okw connectivity at the pier zone, widen causeway ends (flared approach, rails start after the ramp), then re-run remaining snags one island at a time.
+- 6d: causeway ends opened (no rail on first/last span) + routes stay on the deck (no over-water corridor). Frostreach now 6/6 incl. both causeway legs.
+  Tried and rolled back (made other islands worse, kept in /tmp only): bench cutting, wider path corridor, adaptive bank ramps, second Saltglass pier stair (bottom landed mid-slope).
+  Final table in walk_test_final.json: 34/55 legs pass (pier boards excluded).

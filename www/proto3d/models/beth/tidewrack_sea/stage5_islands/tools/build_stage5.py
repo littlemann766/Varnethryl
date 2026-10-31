@@ -310,7 +310,7 @@ def build(k):
     Hd = ndimage.minimum_filter(np.where(RDECK, Hr, 1e9), size=5)   # terrain never rises into the stair / landing headroom
     H = np.where((Hd < 1e8) & ((Hd - base > 1.0) | (H > Hd + 0.3)), np.minimum(H, Hd - 0.7), H)
     # final re-route on the finished surface: what the walk test (and the player) actually walks; avoids prop footprints + their edge ring
-    Hq = np.where(RDECK, Hr, H); okw = ndimage.binary_erosion(keep, iterations=2) | ndimage.binary_dilation(RDECK, iterations=1) | ndimage.binary_dilation(BR, iterations=1) | ((dsh < 10) & keep)   # >=4 m inside the patch rim (no tuck edge under a path)
+    Hq = np.where(RDECK, Hr, H); okw = ndimage.binary_erosion(keep, iterations=2) | ndimage.binary_dilation(RDECK, iterations=1) | BR | ((dsh < 10) & keep)   # >=4 m inside the patch rim (no tuck edge under a path)
     okw &= ~(ndimage.binary_dilation(FPS, iterations=1) & (dsh > 14))
     _g['okw'] = okw.copy(); _g['si'] = (sj, sii); _g['FPS'] = FPS; _g['Hq'] = Hq
     G2, okc2, nid2 = walk_graph(Hq, okw, sj, sii, ny, nx); d2, pr2 = dijkstra(G2, indices=nid2[sj, sii], return_predecessors=True); c2_ = np.argwhere(okc2); grade = []
@@ -408,6 +408,7 @@ def bridge(b0, ground):
         for sd in (-1.4, 1.4):
             off = np.array([math.cos(yaw) * sd, 0, -math.sin(yaw) * sd])
             if i % 2 == 0: S_.append(line(p0 + off + (0, -3.0, 0), p0 + off + (0, 1.1, 0), 0.14, post))
+            if i in (0, n - 1): continue   # open ends: no rail on the first/last span, so you can step on from an angle
             rl = line(p0 + off + (0, 1.0, 0), p1 + off + (0, 1.0, 0), 0.07, post); S_.append(rl); C_.append(T(box((0.2, 1.0, Lh / n), post, (0, 0, 0), (-pitch, 0, 0)), mid + off + (0, 0.6, 0), (0, yaw, 0)))
     for e0, dd in ((a, -d), (b, d)):   # approach ramps: slope from 0.3 m under the beach up to the deck end, so there is no step on or off
         dh = dd / (np.linalg.norm(dd) + 1e-9); far = e0 + dh * 6.0; far = np.array([far[0], _g['Hat'](far[0], far[2]) - 0.3, far[2]])

@@ -1,0 +1,112 @@
+{
+ "attack1": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "attack2": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "attack3": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "death": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "fly_ascend": {
+  "before": 1272,
+  "after": 0,
+  "maxdeg": 33.0
+ },
+ "fly_bank_L": {
+  "before": 1431,
+  "after": 55,
+  "maxdeg": 48.0
+ },
+ "fly_bank_R": {
+  "before": 1639,
+  "after": 87,
+  "maxdeg": 48.0
+ },
+ "fly_descend": {
+  "before": 222,
+  "after": 0,
+  "maxdeg": 6.0
+ },
+ "fly_fast": {
+  "before": 1908,
+  "after": 243,
+  "maxdeg": 60.0
+ },
+ "fly_forward": {
+  "before": 1601,
+  "after": 0,
+  "maxdeg": 51.0
+ },
+ "fly_hover": {
+  "before": 1274,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "hit": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "idle": {
+  "before": 2645,
+  "after": 0,
+  "maxdeg": 33.0
+ },
+ "jump": {
+  "before": 5501,
+  "after": 2056,
+  "maxdeg": 39.0
+ },
+ "jump_hang": {
+  "before": 0,
+  "after": 0,
+  "maxdeg": 0
+ },
+ "jump_land": {
+  "before": 5109,
+  "after": 2079,
+  "maxdeg": 39.0
+ },
+ "jump_start": {
+  "before": 5501,
+  "after": 127,
+  "maxdeg": 39.0
+ },
+ "run": {
+  "before": 2843,
+  "after": 0,
+  "maxdeg": 39.0
+ },
+ "skill": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "swim_stroke": {
+  "before": 5073,
+  "after": 1492,
+  "maxdeg": 39.0
+ },
+ "swim_tread": {
+  "before": 0,
+  "after": 0,
+  "maxdeg": 0
+ },
+ "walk": {
+  "before": 2836,
+  "after": 0,
+  "maxdeg": 30.0
+ }
+}

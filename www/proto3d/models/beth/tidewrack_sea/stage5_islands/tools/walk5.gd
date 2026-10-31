@@ -87,13 +87,20 @@ func _run() -> void:
 			var da := v3(b.a) + Vector3(0, 0.3, 0); var db := v3(b.b) + Vector3(0, 0.3, 0)
 			if b.has("ends"):
 				A = v3(b.ends[0]) + Vector3(0, 0.8, 0); B = v3(b.ends[1]) + Vector3(0, 0.8, 0)
-			out["causeway a->b"] = await walk(A, [da, db, B], B, 1.5)
-			out["causeway b->a"] = await walk(B, [db, da, A], A, 1.5)
+			if b.has("path"):   # causeway with built bank stairs: walk the whole deck chain end to end
+				var cp := []
+				for q in b.path: cp.append(v3(q) + Vector3(0, 0.3, 0))
+				var rv := cp.duplicate(); rv.reverse()
+				out["causeway a->b"] = await walk(cp[0] + Vector3(0, 0.5, 0), cp.slice(1), cp[-1], 1.5)
+				out["causeway b->a"] = await walk(rv[0] + Vector3(0, 0.5, 0), rv.slice(1), rv[-1], 1.5)
+			else:
+				out["causeway a->b"] = await walk(A, [da, db, B], B, 1.5)
+				out["causeway b->a"] = await walk(B, [db, da, A], A, 1.5)
 		if I.get("ramp") != null and I.ramp.has("pier_stair"):
 			var pp := []
 			for d in I.ramp.pier_stair.decks:
 				pp.append(v3(d.a)); pp.append(v3(d.b))
-			var s0: Vector3 = pp[0] - (pp[1] - pp[0]).normalized() * 3.0 + Vector3(0, 1.0, 0)
+			var s0: Vector3 = pp[0].lerp(pp[1], 0.2) + Vector3(0, 1.0, 0)
 			out["pier stair up"] = await walk(s0, pp, pp[-1], 1.5)
 			var rp := pp.duplicate(); rp.reverse()
 			out["pier stair down"] = await walk(rp[0] + Vector3(0, 0.8, 0), rp, rp[-1], 1.5)

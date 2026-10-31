@@ -160,23 +160,23 @@ def build_ramp(H, base, comp, walk, FP, dsh, si, X, Z, xs, zs, cd, reach_o=None,
                 print(f'  {tag}: {N} flights, {math.degrees(math.atan(g)):.1f} deg, rise {rise:.1f} m ({Hbot:.1f} -> {Htop:.1f})')
                 return {'decks': decks, 'flights': N, 'deg': round(math.degrees(math.atan(g)), 1), 'rise_m': round(rise, 1), 'bottom': decks[0]['a'], 'top': decks[-1]['b']}, Hr, ndimage.binary_dilation(RD, iterations=3), P, walk | RD | P, RD
     print('  ramp: no clear spot'); return None, H, np.zeros_like(comp), np.zeros_like(comp), walk, np.zeros_like(comp)
-def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0):
+def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0, Lg=20.0, Nmax=9, tag='pier stair', ftol=0.3, avoid=None):
     """Tower switchback at the pier head: flights alternate between two lines 5 m apart, stacking up the sea-cliff face
     (16.8 m+ headroom between flights on one line); the top walk runs inland onto the shelf. Same deck format as build_ramp."""
-    ny, nx = H.shape; colC = _g['colC']; Lg, W, GAP = 20.0, 3.6, 5.0
+    ny, nx = H.shape; colC = _g['colC']; W, GAP = 3.6, 5.0; lift = 0.4 if Nmax > 2 else -0.05   # bank stairs are walked onto from the top too: deck end flush with (just under) the ground
     def hat(A, x, z): return float(ndimage.map_coordinates(A, [[(z - zs[0]) / STEP], [(x - xs[0]) / STEP]], order=1)[0])
     def top(x, z): return max(hat(base, x, z), hat(colC, x, z))
     n = np.array(inl, float); n /= np.linalg.norm(n); t = np.array([-n[1], n[0]]); sh = np.array(sh, float)
     for side, d0 in [(sd, dd) for sd in (1, -1) for dd in (-6.0, -9.0, -12.0)]:   # tower stands in the water beside the pier head: bottom at pier level, clear of the cliff
             S_ = sh + t * side * (Lg / 2 + W / 2 + 0.6); o = S_ + n * d0 - t * side * Lg / 2; y00 = max(top(*o), y0 + 0.3)
             if y00 - y0 > 1.0: continue
-            for N in range(2, 10):
+            for N in range(1 if Nmax <= 2 else 2, Nmax + 1):
                 dl = side if (N - 1) % 2 == 0 else -side; lastline = d0 + GAP * ((N - 1) % 2)
                 bl = S_ + n * lastline + t * (Lg / 2 * dl); end = bl + t * dl * (W / 2 + 0.2) - n * (W / 2)
                 best = None
                 for Lx in np.arange(8.0, 60.1, 1.0):
                     q = end + n * Lx; Ht = top(*q); gg = (Ht - 0.3 - y00) / (N * Lg)
-                    if Ht >= hmin and 0.1 <= gg <= 0.47 and abs(top(*(q + n)) - Ht) < 0.3 and abs(top(*(q + 2 * n)) - Ht) < 0.6 and abs(top(*(q + t)) - Ht) < 0.4 and abs(top(*(q - t)) - Ht) < 0.4: best = (Lx, q, Ht, gg); break
+                    if Ht >= hmin and 0.1 <= gg <= 0.47 and abs(top(*(q + n)) - Ht) < ftol and abs(top(*(q + 2 * n)) - Ht) < 2 * ftol and abs(top(*(q + t)) - Ht) < ftol + 0.1 and abs(top(*(q - t)) - Ht) < ftol + 0.1: best = (Lx, q, Ht, gg); break
                 if best is None: continue
                 Lx, q, Ht, g = best; decks, h, ok = [], y00, True
                 for k in range(N):
@@ -187,18 +187,21 @@ def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0):
                         decks.append({'kind': 'landing', 'a': [float(l0[0]), float(h), float(l0[1])], 'b': [float(l1[0]), float(h), float(l1[1])], 'w': W + 0.4, 'out': [float(t[0] * d_), float(t[1] * d_)]})
                 em = end + n * (W + 0.6)
                 decks.append({'kind': 'landing', 'a': [float(end[0]), float(h), float(end[1])], 'b': [float(em[0]), float(h), float(em[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)]})
-                decks.append({'kind': 'landing', 'a': [float(em[0]), float(h), float(em[1])], 'b': [float(q[0]), float(Ht + 0.4), float(q[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)]})
-                qa = np.array(q, float); ya = Ht + 0.4; flat = 0
+                decks.append({'kind': 'landing', 'a': [float(em[0]), float(h), float(em[1])], 'b': [float(q[0]), float(Ht + lift), float(q[1])], 'w': W + 0.4, **({'rail_trim': 4.0} if Nmax <= 2 else {'out': [float(t[0] * dl), float(t[1] * dl)]})})
+                qa = np.array(q, float); ya = Ht + lift; flat = 0
                 for st in range(1, 41):
-                    qb = q + n * st; yg = top(*qb); yb = float(np.clip(yg + 0.4, ya - 0.45, ya + 0.45))
-                    decks.append({'kind': 'landing', 'a': [float(qa[0]), float(ya), float(qa[1])], 'b': [float(qb[0]), yb, float(qb[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)]})
-                    flat = flat + 1 if abs(yg - top(*(q + n * (st + 1)))) < 0.25 and abs(yb - yg - 0.4) < 0.3 else 0
+                    qb = q + n * st; yg = top(*qb); yb = float(np.clip(yg + lift, ya - 0.45, ya + 0.45))
+                    decks.append({'kind': 'landing', 'a': [float(qa[0]), float(ya), float(qa[1])], 'b': [float(qb[0]), yb, float(qb[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)], 'norail': Nmax <= 2})
+                    flat = flat + 1 if abs(yg - top(*(q + n * (st + 1)))) < 0.25 and abs(yb - yg - lift) < 0.3 else 0
                     qa, ya = qb, yb
-                    if flat >= 3 and st >= 24: break
+                    if flat >= 3 and st >= (24 if Nmax > 2 else 4): break
                 for e in decks[1:-1]:
                     if e['kind'] == 'landing' and e['b'][1] <= top(e['b'][0], e['b'][2]) + 0.6 and e is not decks[-1] and decks.index(e) > 2 * N: continue
                     for tt in np.linspace(0.1, 0.9, 6):
                         p_ = np.array(e['a']) + (np.array(e['b']) - np.array(e['a'])) * tt
+                        if avoid is not None:
+                            jj_ = int(round((p_[2] - zs[0]) / STEP)); ii_ = int(round((p_[0] - xs[0]) / STEP))
+                            if 0 <= jj_ < ny and 0 <= ii_ < nx and avoid[jj_, ii_]: ok = False; break
                         if top(p_[0], p_[2]) > p_[1] - 0.5: ok = False; _g.setdefault("psdbg", []).append((side, d0, N, e["kind"], round(float(p_[1]), 1), round(top(p_[0], p_[2]), 1))); break
                     if not ok: break
                 if not ok: continue
@@ -207,7 +210,8 @@ def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0):
                 fa0 = np.array(decks[0]['a']); ap = np.array([sh[0], y0 + 0.05, sh[1]]); La = math.hypot(fa0[0] - ap[0], fa0[2] - ap[2])
                 if La > 1.0:
                     if abs(fa0[1] - ap[1]) / La > 0.5: continue
-                    decks.insert(0, {'kind': 'landing', 'a': ap.tolist(), 'b': fa0.tolist(), 'w': W + 0.4})
+                    decks.insert(0, {'kind': 'landing', 'a': ap.tolist(), 'b': fa0.tolist(), 'w': W + 0.4, 'norail': Nmax <= 2})
+                    if Nmax <= 2: decks[1]['rail_trim_a'] = 2.5
                 Hr = H.copy(); RD = np.zeros(H.shape, bool)
                 for e in decks:
                     a_ = np.array(e['a']); b_ = np.array(e['b']); u = b_ - a_; Lh = math.hypot(u[0], u[2]); uh = np.array([u[0], u[2]]) / (Lh + 1e-9); pv = np.array([-uh[1], uh[0]])
@@ -215,23 +219,24 @@ def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0):
                         for ww in np.linspace(-e['w'] / 2 + 0.4, e['w'] / 2 - 0.4, 6):
                             p_ = a_ + u * tt; x, z = p_[0] + pv[0] * ww, p_[2] + pv[1] * ww; j = int(round((z - zs[0]) / STEP)); i = int(round((x - xs[0]) / STEP))
                             if 0 <= j < ny and 0 <= i < nx and (not RD[j, i] or p_[1] > Hr[j, i]): RD[j, i] = True; Hr[j, i] = p_[1]
-                print(f'  pier stair: {N} flights, {math.degrees(math.atan(g)):.1f} deg, rise {h - y00:.1f} m ({y00:.1f} -> {h:.1f})')
+                print(f'  {tag}: {N} flights, {math.degrees(math.atan(g)):.1f} deg, rise {h - y00:.1f} m ({y00:.1f} -> {h:.1f})')
                 return {'decks': decks, 'flights': N, 'deg': round(math.degrees(math.atan(g)), 1), 'rise_m': round(h - y00, 1), 'bottom': decks[0]['a'], 'top': decks[-1]['b']}, Hr, RD
-    print('  pier stair: no clear spot'); return None, H, np.zeros(H.shape, bool)
+    print(f'  {tag}: no clear spot'); return None, H, np.zeros(H.shape, bool)
 def ramp_geo(R):
     S_, C_ = [], []; ST = C(176, 168, 172); ST2 = C(146, 138, 146)
     for e in R['decks']:
         a = np.array(e['a']); b = np.array(e['b']); u = b - a; Lh = math.hypot(u[0], u[2]); yaw = math.atan2(u[0], u[2]); pitch = -math.atan2(u[1], Lh); Ls = math.hypot(Lh, u[1]); mid = (a + b) / 2
-        def place(m, lat=0.0, up=0.0):
-            m = T(m, (lat, up, 0), (pitch, 0, 0)); return T(m, mid, (0, yaw, 0))
+        def place(m, lat=0.0, up=0.0, al=0.0):
+            m = T(m, (lat, up, al), (pitch, 0, 0)); return T(m, mid, (0, yaw, 0))
         dk = place(box((e['w'], 0.5, Ls + 0.3), ST if e['kind'] == 'flight' else ST2), 0, -0.25); S_.append(dk); C_.append(dk)
         if e['kind'] == 'flight':
             for k in range(int(Ls / 0.6)):   # tread lines (visual only; the collider is the smooth slab)
                 S_.append(place(box((e['w'] - 0.2, 0.06, 0.12), ST2, (0, 0.02, -Ls / 2 + 0.3 + k * 0.6))))
         pv = np.array([math.cos(yaw), -math.sin(yaw)])   # local +x in world (x,z)
         sides = (-1, 1) if 'out' not in e else (1 if float(np.dot(pv, e['out'])) > 0 else -1,)
+        if e.get('norail'): sides = ()
         for sd in sides:
-            rl = place(box((0.3, 1.0, Ls + 0.3), ST2), sd * (e['w'] / 2 + 0.1), 0.5); S_.append(rl); C_.append(rl)
+            tr_ = min(float(e.get('rail_trim', 0.0)), Ls * 0.5); ta_ = min(float(e.get('rail_trim_a', 0.0)), Ls * 0.3); rl = place(box((0.3, 1.0, Ls + 0.3 - tr_ - ta_), ST2), sd * (e['w'] / 2 + 0.1), 0.5, (ta_ - tr_) / 2); S_.append(rl); C_.append(rl)
         for tt in np.linspace(0.1, 0.9, 3):   # pillars down to the shelf
             q = a + u * tt; S_.append(cyl(0.6, q[1] + 30, ST2, (q[0], q[1] - (q[1] + 30) / 2 - 0.5, q[2]), sec=6))
     return S_, C_
@@ -295,6 +300,7 @@ def build(k):
     # POI sites
     def slope_of(h): gz, gx = np.gradient(h, STEP); return np.hypot(gx, gz)
     pois = []; taken = []
+    _g['bsm'] = []
     edge = np.minimum(np.minimum(X - xs[0], xs[-1] - X), np.minimum(Z - zs[0], zs[-1] - Z))
     Hr = H.copy(); RDECK = np.zeros_like(comp); RAMPZ = np.zeros_like(comp); PLAT = np.zeros_like(comp); ramp = None
     if cfg.get('ramp'):
@@ -303,12 +309,37 @@ def build(k):
         r2, Hr, RD2 = pier_stair(Hr, base, sh, inl, float(Ld['shore'][1]), X, Z, xs, zs, hmin=cfg['pier_stair'][0])
         if r2 is not None:
             RDECK = RDECK | RD2; RAMPZ = RAMPZ | ndimage.binary_dilation(RD2, iterations=3); walk = walk | RD2; ramp = ramp or {}; ramp['pier_stair'] = r2
+    def _top(x, z): return float(max(ndimage.map_coordinates(base, [[(z - zs[0]) / STEP], [(x - xs[0]) / STEP]], order=1)[0], ndimage.map_coordinates(_g['colC'], [[(z - zs[0]) / STEP], [(x - xs[0]) / STEP]], order=1)[0]))
+    for b0 in bridges:   # causeway meets a steep bank: built switchback (max 2 flights side by side, no stacking) from the deck end up onto the bank top
+        A0 = np.array(b0['a']); B0 = np.array(b0['b']); path = [A0.tolist(), B0.tolist()]
+        for e, o_ in ((B0, A0), (A0, B0)):
+            d2 = np.array([e[0] - o_[0], e[2] - o_[2]]); d2 /= np.linalg.norm(d2); e2 = np.array([e[0], e[2]])
+            prof = [_top(*(e2 + d2 * ss)) for ss in range(2, 17)]
+            if max(prof) < e[1] + 2.5 or (prof[6] - e[1]) / 8.0 < 0.45: continue   # gentle bank (<24 deg over the first 8 m): the open deck end walks straight on
+            hm = e[1] + 0.85 * (max(prof) - e[1]); rr = None
+            for Lg_ in (20.0, 26.0, 32.0, 38.0, 44.0):
+                rr, Hr2, RDb = pier_stair(Hr, base, e2, d2, float(e[1]), X, Z, xs, zs, hmin=hm, Lg=Lg_, Nmax=2, tag='bank stair', ftol=0.6, avoid=ndimage.binary_dilation(RDECK, iterations=1))
+                if rr is not None: break
+            if rr is None: continue
+            Hr2 = np.where(BR, Hr, Hr2); RDb = RDb & ~BR
+            _g.setdefault('bsm', []).append((rr, ndimage.binary_dilation(RDb, iterations=2)))
+            Hr = Hr2; RDECK = RDECK | RDb; RAMPZ = RAMPZ | RDb; walk = walk | RDb; b0.setdefault('bank_stairs', []).append(rr)
+            b0['open_b' if e is B0 else 'open_a'] = 16.0
+            chain = [p__ for d_ in rr['decks'] for p__ in (d_['a'], d_['b'])]
+            if e is B0: path = path + chain
+            else: path = chain[::-1] + path
+        if b0.get('bank_stairs'): b0['path'] = [[round(float(v), 2) for v in q_] for q_ in path]
     Gr, okr, nidr = walk_graph(Hr, walk & ~(FP & (dsh > 12)), si[0], si[1], ny, nx, hard=0.7)   # walkable (<=35 deg steps) from the pier head
     dr = dijkstra(Gr, indices=nidr[si], limit=np.inf); reach = np.zeros_like(comp); reach[okr] = np.isfinite(dr)
     if ramp and ramp.get('pier_stair'):   # stacked flights: the climb is the deck chain itself; reach continues from the top-walk end
         te = ramp['pier_stair']['decks'][-1]['b']; tj = int(round((te[2] - zs[0]) / STEP)); ti = int(round((te[0] - xs[0]) / STEP))
         Gt, okt, nidt = walk_graph(Hr, (walk | comp | ndimage.binary_dilation(RD2, iterations=2)) & ~(RD2 & (Hr < te[1] - 1.5)), tj, ti, ny, nx, hard=0.7)
         dt = dijkstra(Gt, indices=nidt[tj, ti], limit=np.inf); rt_ = np.zeros_like(comp); rt_[okt] = np.isfinite(dt); reach |= rt_; print('  stair-top reach cells', int(rt_.sum()), te)
+    for b0 in bridges:   # bank stairs: reach continues from each stair's top-walk end
+        for st_ in b0.get('bank_stairs', []):
+            te = st_['decks'][-1]['b']; tj = int(round((te[2] - zs[0]) / STEP)); ti = int(round((te[0] - xs[0]) / STEP))
+            Gt, okt, nidt = walk_graph(Hr, (walk | comp) & ~(FP & (dsh > 12)), tj, ti, ny, nx, hard=0.7)
+            dt = dijkstra(Gt, indices=nidt[tj, ti], limit=np.inf); rt_ = np.zeros_like(comp); rt_[okt] = np.isfinite(dt); reach |= rt_; print('  bank-stair top reach cells', int(rt_.sum()))
     reach = ndimage.binary_erosion(reach, iterations=1) | (dsh < 6)
     cand = reach & comp & (cd > 12) & (fpd > 18) & (dsh > 30) & (dsh < R * 1.35) & (edge > 26)
     for t_i, pdef in enumerate(cfg['pois']):
@@ -381,13 +412,36 @@ def build(k):
     Hq = np.where(RDECK, Hr, np.where(keep, H, np.maximum(base, _g['colC']))); okw = ndimage.binary_erosion(keep, iterations=2) | ndimage.binary_dilation(RDECK, iterations=1) | BR | ((dsh < 10) & keep) | ((dsh < 40) & comp & ~FPS & (keep | (slope_of(np.maximum(base, _g['colC'])) < 0.6))) | (ndimage.binary_dilation(RDECK, iterations=2) & comp)   # >=4 m inside the patch rim (no tuck edge under a path)
     okw &= ~((ndimage.binary_dilation(FPS, iterations=1) & (dsh > 40)) | FPS)
     if cfg.get('pier_stair'): okw &= ~((slope_of(np.maximum(base, _g['colC'])) > 0.8) & (dsh < 45)) | ndimage.binary_dilation(RDECK, iterations=2); okw &= ndimage.binary_dilation(RDECK, iterations=2) | (dsh >= 45) | (dsh < 4) | (Hq > ramp['pier_stair']['decks'][-1]['b'][1] - 3.0)   # cliff island: steep original ground only via the built stairs
+    for b0 in bridges:   # come onto an open causeway end straight along its axis (the beach beside a deck end is often awash)
+        A0 = np.array(b0['a']); B0 = np.array(b0['b'])
+        for e, o_, kk in ((A0, B0, 'open_a'), (B0, A0, 'open_b')):
+            if b0.get(kk): continue
+            ax = np.array([e[0] - o_[0], e[2] - o_[2]]); ax /= np.linalg.norm(ax); rx, rz = X - e[0], Z - e[2]
+            along = rx * ax[0] + rz * ax[1]; perp = np.abs(-rx * ax[1] + rz * ax[0])
+            okw &= ~((np.hypot(rx, rz) < 9.0) & (along > -1.0) & (perp > 1.6) & ~BR)
     _g['okw'] = okw.copy(); _g['si'] = (sj, sii); _g['FPS'] = FPS; _g['Hq'] = Hq
     PSP = None; s0j, s0i = sj, sii
     if ramp and ramp.get('pier_stair'):   # stacked flights can't live on a 2D grid: route = the stair's deck chain, then the grid from the top-walk end
         dk = ramp['pier_stair']['decks']; PSP = [dk[0]['a']] + [e['b'] for e in dk]; te = dk[-1]['b']
         s0j = int(round((te[2] - zs[0]) / STEP)); s0i = int(round((te[0] - xs[0]) / STEP))
         okw &= ~(RDECK & (Hq < te[1] - 1.5)) & (dsh >= 4)
-    G2, okc2, nid2 = walk_graph(Hq, okw, s0j, s0i, ny, nx); d2, pr2 = dijkstra(G2, indices=nid2[s0j, s0i], return_predecessors=True); c2_ = np.argwhere(okc2); grade = []
+    okw &= ~((Hq < -0.3) & ~BR & ~RDECK)   # never route through the sea
+    BSE = []
+    for rr, mk in _g['bsm']:   # bank stairs: one virtual edge foot -> top (the deck chain), none of its cells on the grid
+        ch = [q_ for d_ in rr['decks'] for q_ in (d_['a'], d_['b'])]
+        cb = (int(round((ch[0][2] - zs[0]) / STEP)), int(round((ch[0][0] - xs[0]) / STEP))); ct = (int(round((ch[-1][2] - zs[0]) / STEP)), int(round((ch[-1][0] - xs[0]) / STEP)))
+        ok0 = okw.copy(); okw &= ~(mk & ~BR); okw |= ok0 & (np.hypot(X - ch[-1][0], Z - ch[-1][2]) < 5.0) & (Hq > ch[-1][1] - 1.0); okw[cb] = True; okw[ct] = True; BSE.append((cb, ct, ch))
+    Hq2 = Hq.copy()
+    for cb, ct, ch in BSE:   # graph heights at the virtual edge's ends: the causeway level at the foot, the ground at the top
+        w_ = BR[max(cb[0] - 2, 0):cb[0] + 3, max(cb[1] - 2, 0):cb[1] + 3]
+        if w_.any(): Hq2[cb] = float(np.median(Hq[max(cb[0] - 2, 0):cb[0] + 3, max(cb[1] - 2, 0):cb[1] + 3][w_]))
+        Hq2[ct] = float(Hq[ct]) if not RDECK[ct] else float(ch[-1][1])
+    G2, okc2, nid2 = walk_graph(Hq2, okw, s0j, s0i, ny, nx)
+    for cb, ct, ch in BSE:
+        if nid2[cb] >= 0 and nid2[ct] >= 0:
+            Lc = sum(math.dist(ch[n_], ch[n_ + 1]) for n_ in range(len(ch) - 1)) * 1.5; G2 = (G2 + coo_matrix(([Lc, Lc], ([nid2[cb], nid2[ct]], [nid2[ct], nid2[cb]])), shape=G2.shape)).tocsr()
+    d2, pr2 = dijkstra(G2, indices=nid2[s0j, s0i], return_predecessors=True); c2_ = np.argwhere(okc2); grade = []
+    _g['G2'] = (nid2, pr2, d2, c2_, Hq, (s0j, s0i), BSE)
     for p in pois:
         t = nid2[p['ij']]
         if t < 0 or not np.isfinite(d2[t]) or d2[t] > 4000: print('  final route missing/hard for', p['name'], (float(d2[t]) if t >= 0 else 'nocell'), int(okw[p['ij']])); continue
@@ -396,6 +450,12 @@ def build(k):
         p['route'] = rt[::-1]; p['pre'] = PSP
         for (a0, b0), (a1, b1) in zip(p['route'][:-1], p['route'][1:]):
             if not BR[a0, b0]: grade.append(float(np.degrees(np.arctan(abs(Hq[a1, b1] - Hq[a0, b0]) / (math.hypot(a1 - a0, b1 - b0) * STEP)))))
+    for p in pois:   # a route over a bank stair's virtual edge walks its deck chain
+        for cb, ct, ch in BSE:
+            r_ = p.get('route', []); T_ = lambda L_: [tuple(float(v) for v in q_) for q_ in L_]
+            for n_ in range(len(r_) - 1):
+                if (r_[n_], r_[n_ + 1]) == (cb, ct): p['route'] = r_[:n_] + T_(ch) + r_[n_ + 2:]; break
+                if (r_[n_], r_[n_ + 1]) == (ct, cb): p['route'] = r_[:n_] + T_(ch[::-1]) + r_[n_ + 2:]; break
     STATS[k]['path_max_deg'] = round(max(grade) if grade else 0, 1); STATS[k]['path_p95_deg'] = round(float(np.percentile(grade, 95)) if grade else 0, 1)
     _g['dbg'] = dict(keep=keep.copy(), X=X, Z=Z, H=H.copy(), base=base, colC=_g['colC'], FP=FP)
     rim = keep & ~ndimage.binary_erosion(keep)   # patch rim tucks 0.25 m under the original ground: no visible step / seam
@@ -449,6 +509,7 @@ def build(k):
         if ramp.get('pier_stair'): s_, c_ = ramp_geo(ramp['pier_stair']); solid += s_; colp += c_
     for b0 in bridges:
         s_, c_ = bridge(b0, GROUND[reg]); solid += s_; colp += c_
+        for st_ in b0.get('bank_stairs', []): s_, c_ = ramp_geo(st_); solid += s_; colp += c_
     name = f'{pre}isl_{k}'
     allm = merge(solid); save(name, allm)
     if glow: save(name + '_glow', merge(glow), lod=False)
@@ -465,7 +526,7 @@ def build(k):
         return [round(x, 2), round(y, 2), round(z, 2)]
     return {'id': k, 'name': Ld['name'], 'region': reg, 'ground': GROUND[reg], 'files': {'mesh': name, 'lod1': name + '_lod1', 'glow': name + '_glow' if glow else None, 'col': name + '_col'},
             'pier_head': Ld['shore'], 'window': [float(xs[0]), float(zs[0]), float(xs[-1]), float(zs[-1])],
-            'pois': [{'type': p['type'], 'name': p['name'], 'pos': [round(c, 2) for c in p['pos']], 'radius': p['r'], 'route': [[round(float(v), 2) for v in w] for w in (p.get('pre') or [])] + [rpt(a, b) for (a, b) in p.get('route', [])]} for p in pois], 'ramp': ramp,
+            'pois': [{'type': p['type'], 'name': p['name'], 'pos': [round(c, 2) for c in p['pos']], 'radius': p['r'], 'route': [[round(float(v), 2) for v in w] for w in (p.get('pre') or [])] + [([round(w[0], 2), round(w[1] + 0.08, 2), round(w[2], 2)] if len(w) == 3 else rpt(*w)) for w in p.get('route', [])]} for p in pois], 'ramp': ramp,
             'lights': lights, 'bridges': bridges, 'path': {'max_deg': STATS[k]['path_max_deg'], 'p95_deg': STATS[k]['path_p95_deg']},
             'cams': {'inland': [Ld['shore'][0] - inl[0] * 6, Ld['shore'][1] + 4.5, Ld['shore'][2] - inl[1] * 6], 'inland_look': [sh[0] + inl[0] * 40, Hat(*(sh + inl * 40)) + 1.5, sh[1] + inl[1] * 40],
                      'over': [sh[0] - inl[0] * 60 + inl[1] * 50, max(H.max(), 0) + 55, sh[1] - inl[1] * 60 - inl[0] * 50], 'over_look': [cen[0], float(np.median(H[comp])) if comp.any() else 0, cen[1]]}}
@@ -483,12 +544,13 @@ def bridge(b0, ground):
         for sd in (-1.4, 1.4):
             off = np.array([math.cos(yaw) * sd, 0, -math.sin(yaw) * sd])
             if i % 2 == 0: S_.append(line(p0 + off + (0, -3.0, 0), p0 + off + (0, 1.1, 0), 0.14, post))
+            if i * Lh / n < b0.get('open_a', 0) or (n - 1 - i) * Lh / n < b0.get('open_b', 0): continue   # bank stair at this end: its approach crosses here
             if i in (0, n - 1): continue   # open ends: no rail on the first/last span, so you can step on from an angle
             rl = line(p0 + off + (0, 1.0, 0), p1 + off + (0, 1.0, 0), 0.07, post); S_.append(rl); C_.append(T(box((0.2, 1.0, Lh / n), post, (0, 0, 0), (-pitch, 0, 0)), mid + off + (0, 0.6, 0), (0, yaw, 0)))
-    for e0, dd in ((a, -d), (b, d)):   # approach ramps: slope from 0.3 m under the beach up to the deck end, so there is no step on or off
+    for e0, dd in [x_ for x_, k_ in zip(((a, -d), (b, d)), ('open_a', 'open_b')) if not b0.get(k_)]:   # approach ramps (not where a bank stair takes over): slope from 0.3 m under the beach up to the deck end, so there is no step on or off
         dh = dd / (np.linalg.norm(dd) + 1e-9); far = e0 + dh * 6.0; far = np.array([far[0], _g['Hat'](far[0], far[2]) - 0.3, far[2]])
         u = e0 - far; Lr = math.hypot(u[0], u[2]); yw = math.atan2(u[0], u[2]); pt = math.atan2(u[1], Lr); mid = (e0 + far) / 2 + (0, 0.0, 0)
-        sl_ = T(T(box((3.0, 0.3, math.hypot(Lr, u[1]) + 0.3), deck), (0, 0, 0), (-pt, 0, 0)), mid, (0, yw, 0)); S_.append(sl_); C_.append(sl_)
+        sl_ = T(T(box((7.0, 0.3, math.hypot(Lr, u[1]) + 0.3), deck), (0, 0, 0), (-pt, 0, 0)), mid, (0, yw, 0)); S_.append(sl_); C_.append(sl_)   # 7 m wide: a route may come onto the deck end at an angle
     return S_, C_
 def chest(p, yaw):
     s = [box((1.2, 0.7, 0.8), WOOD, (0, 0.35, 0)), box((1.24, 0.12, 0.84), BRASS, (0, 0.72, 0)), box((0.2, 0.25, 0.06), BRASS, (0, 0.5, 0.43)), box((1.25, 0.08, 0.1), IRON, (0, 0.3, 0.38))]

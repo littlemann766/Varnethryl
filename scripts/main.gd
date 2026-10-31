@@ -285,6 +285,8 @@ func _ready() -> void:
 	if args.has("--shipcam"): add_child(load("res://tests/ship_cam.gd").new())   # test 29
 	if args.has("--vox30"): add_child(load("res://tests/vox30_shots.gd").new())   # test 30
 	if args.has("--tidewrack"): add_child(load("res://tests/tidewrack_test.gd").new())   # test 32
+	if args.has("--landgen"): add_child(load("res://tests/landing_gen.gd").new())   # test 34
+	if args.has("--docking"): add_child(load("res://tests/docking_test.gd").new())   # test 34
 	if args.has("--vox31"): add_child(load("res://tests/vox31_shots.gd").new())   # test 31
 	if args.has("--voxshots"): add_child(load("res://tests/voxel_shots.gd").new())   # voxel-heroes
 	if args.has("--tfshots"): add_child(load("res://tests/tf_shots.gd").new())   # test 23
@@ -2458,7 +2460,7 @@ func _camera_prefs(inside: bool, dt: float) -> void:
 	var base := 6.0 * float(P.get("zoom", 1.0))
 	var want: float = 0.0 if first else (min(3.5, base) if inside else base)
 	if interiors and interiors.active() and not first: want = clampf(base, 5.0, 6.5)   # high over-the-walls view
-	if sea and sea.active and not sea.diving: want = sea.cam_dist()   # test 32: deck camera rides high behind the ship
+	if sea and sea.active and not sea.diving and sea.ashore == "": want = sea.cam_dist()   # test 32: deck camera rides high behind the ship
 	cam_arm.spring_length = lerpf(cam_arm.spring_length, want, min(1.0, 10.0 * dt))
 	hero_vis.visible = not first or bench_running
 	# follow mode: drift yaw behind the hero while walking (unless the player is dragging the camera)

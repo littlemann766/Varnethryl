@@ -161,6 +161,7 @@ func _build_region(id: String) -> void:
 	if id == "A": _place_a(root)
 	if id == "B": _place_b(root)
 	if id == "frost": _place_bergs(root)
+	_place_landings(id, root)
 	_border_update()
 func _local_xf(mi: Node3D, top: Node3D) -> Transform3D:
 	var t := Transform3D.IDENTITY; var n: Node = mi
@@ -271,7 +272,7 @@ func enter(kind := "galleon", at := Vector3.INF, yaw := INF) -> void:
 	cur_region = region_at(Vector2(at.x, at.z)); _stream(Vector2(at.x, at.z))
 	_port_check(true)
 func leave_to_harbour() -> void:
-	active = false; visible = false; in_cave = ""; diving = false; m.cam.environment = null
+	ashore = ""; active = false; visible = false; in_cave = ""; diving = false; m.cam.environment = null
 	m.hero.collision_layer = 1; m.hero.collision_mask = 1; m.pip.visible = true; unseat_crew()
 	m.sun.directional_shadow_max_distance = sun_dist
 	var g: Array = m._galleon_pier()
@@ -335,6 +336,7 @@ func unseat_crew() -> void:
 # ---------------------------------------------------------------- per frame (called from main._physics_process)
 func drive(inp: Vector2, dt: float) -> void:
 	if diving: _swim(inp, dt); return
+	if ashore != "": _walk(inp, dt); return
 	ship.wind = REGIONS[cur_region].wind
 	var before := ship.position
 	_fly_step(dt)
@@ -402,6 +404,11 @@ func _contexts() -> void:
 		if p.distance_to(Vector2(ex[0].x, ex[0].z)) < 25.0 and absf(ship.speed) < 3.0:
 			if ship.kind == "galleon": ui.set_prompt("Launch skiff", func(): _swap("skiff")); return
 			if ships.has("galleon") and ships.galleon.position.distance_to(ship.position) < 60.0: ui.set_prompt("Board galleon", func(): _swap("galleon")); return
+	if p.distance_to(Vector2(1300, 300)) < 60.0 and absf(ship.speed) < 3.0 and ship.alt <= 0.5 and ship.kind == "galleon":   # test 34: mainland Tidewrack pier
+		ui.set_prompt("Go ashore", func(): ui.fade(leave_to_harbour)); return
+	var ln := landing_near(p, 40.0)
+	if ln != "" and absf(ship.speed) < 3.0 and ship.alt <= 0.5:
+		_port_check(false); ui.set_prompt("Go ashore", func(): go_ashore(ln)); return
 	if _port_check(false): return
 	ui.set_prompt("", Callable())
 func _swap(kind: String) -> void:
@@ -541,3 +548,123 @@ func surface() -> void:
 		ward.visible = false; m.cam.environment = null
 		if m.party and m.party.get("rig"): m.party.rig.set_flight(false)
 		m.hero.collision_layer = 0; m.hero.collision_mask = 0)
+
+# ---------------------------------------------------------------- test 34: landings (boss Oct 31: "the ship needs to allow us
+## to have either ports or locations to get off the ship to explore"). tidewrack/landings.json (tests/landing_gen.gd, real
+## colliders): every port + every island/coast with content has a shore point on walkable ground (20 m inland checked) and a
+## moor point in galleon-safe water. Near the moor -> "Go ashore": the ship parks level at the moor (parallel to the shore),
+## the hero + Pip + companions walk ashore on a pier; near the pier head -> "Board ship" puts everyone back on deck.
+## Ashore safety: never fall through / get stuck: last safe floor spot is kept; water, a fall or 1.5 s without floor -> back.
+var landings := {}
+var ashore := ""
+var _safe := Vector3.ZERO
+var _air_t := 0.0
+var _stuck_t := 0.0
+func _landings() -> Dictionary:
+	if landings.is_empty():
+		var d = JSON.parse_string(FileAccess.get_file_as_string(R + "landings.json"))
+		if d is Dictionary: landings = d
+	return landings
+func landing(k: String) -> Dictionary: return _landings().get(k, {})
+func landing_near(p: Vector2, r: float) -> String:
+	for k in _landings():
+		var L: Dictionary = landings[k]
+		if unlocked(L.region) and p.distance_to(Vector2(L.moor[0], L.moor[2])) < r: return k
+	return ""
+func _inland(L: Dictionary) -> Vector3: return Vector3(L.inland[0], 0, L.inland[1]).normalized()
+func moor_heading(L: Dictionary) -> float:
+	var d := _inland(L); return atan2(-d.z, d.x)   # bow along the shore (broadside to the pier)
+func pier_head(L: Dictionary) -> Vector3:
+	return _v3(L.shore) + Vector3(0, 0.2, 0)
+func pier_foot(L: Dictionary) -> Vector3:
+	return _v3(L.moor) + _inland(L) * (4.8 if ship == null or ship.kind == "galleon" else 1.8) + Vector3(0, 1.0, 0)
+func _place_landings(id: String, root: Node3D) -> void:
+	var wood := StandardMaterial3D.new(); wood.albedo_color = Color(0.45, 0.31, 0.19); wood.roughness = 0.9
+	var lamp := StandardMaterial3D.new(); lamp.albedo_color = Color(1.0, 0.8, 0.4); lamp.emission_enabled = true; lamp.emission = Color(1.0, 0.75, 0.35); lamp.emission_energy_multiplier = 3.0
+	for k in _landings():
+		var L: Dictionary = landings[k]
+		if L.region != id: continue
+		var n := Node3D.new(); n.name = "Landing_" + k; root.add_child(n)
+		var a := _v3(L.moor) + _inland(L) * 3.0 + Vector3(0, 1.0, 0); var b := pier_head(L) - Vector3(0, 0.2, 0) + _inland(L) * 1.5
+		var len := a.distance_to(b); var mid := (a + b) * 0.5
+		var mi := MeshInstance3D.new(); var bm := BoxMesh.new(); bm.size = Vector3(3.2, 0.3, len); mi.mesh = bm; mi.material_override = wood; n.add_child(mi)
+		mi.look_at_from_position(mid, b, Vector3.UP)
+		var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var bs := BoxShape3D.new(); bs.size = bm.size; cs.shape = bs; sb.add_child(cs); n.add_child(sb); sb.transform = mi.transform
+		for t in [0.0, 0.33, 0.66]:   # piles down into the sea
+			var pp := a.lerp(b, t)
+			if pp.y < 0.5 and t > 0.0: continue
+			var pm := MeshInstance3D.new(); var cy := CylinderMesh.new(); cy.top_radius = 0.22; cy.bottom_radius = 0.22; cy.height = pp.y + 3.0; pm.mesh = cy; pm.material_override = wood; n.add_child(pm)
+			pm.position = pp - Vector3(0, cy.height * 0.5, 0) + _inland(L).cross(Vector3.UP) * 1.5
+		var post := MeshInstance3D.new(); var pc := CylinderMesh.new(); pc.top_radius = 0.15; pc.bottom_radius = 0.2; pc.height = 4.0; post.mesh = pc; post.material_override = wood; n.add_child(post)
+		post.position = pier_head(L) + Vector3(0, 2.0, 0) + _inland(L).cross(Vector3.UP) * 2.0
+		var lb := MeshInstance3D.new(); var sp := SphereMesh.new(); sp.radius = 0.4; sp.height = 0.8; lb.mesh = sp; lb.material_override = lamp; n.add_child(lb); lb.position = post.position + Vector3(0, 2.2, 0)
+		var ol := OmniLight3D.new(); ol.light_color = Color(1, 0.8, 0.45); ol.light_energy = 3.0; ol.omni_range = 14.0; n.add_child(ol); ol.position = lb.position
+		var lab := Label3D.new(); lab.text = str(L.name); lab.font_size = 96; lab.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lab.no_depth_test = false; lab.modulate = Color(1, 0.93, 0.7); n.add_child(lab); lab.position = lb.position + Vector3(0, 1.6, 0)
+func _region_ready(id: String) -> bool: return regions.get(id, {}).get("state", 0) == 2
+func go_ashore(k: String) -> void:
+	var L := landing(k)
+	if L.is_empty() or diving or in_cave != "": return
+	ui.fade(func():
+		ship.alt = 0.0; ship.speed = 0.0; ship.throttle = 0.0; ship.heading = moor_heading(L); ship.position = Vector3(L.moor[0], 0.0, L.moor[2])
+		ship.rotation = Vector3(0, ship.heading, 0); ship.vis.position.y = TwShip.MODEL[ship.kind][1]   # parked dead level, no bob
+		ashore = k; _air_t = 0.0; _stuck_t = 0.0
+		var h: CharacterBody3D = m.hero
+		h.collision_layer = 1; h.collision_mask = 1; h.velocity = Vector3.ZERO
+		h.global_position = to_global(pier_head(L) + Vector3(0, 0.6, 0)); _safe = pier_head(L) + Vector3(0, 0.6, 0)
+		m.yaw = atan2(-_inland(L).x, -_inland(L).z) + PI; m.hero_vis.rotation.y = atan2(-_inland(L).x, -_inland(L).z)
+		unseat_crew()
+		if m.pip: m.pip.global_position = h.global_position + Vector3(1, 0, 1)
+		if not save.discovered_ports.has(k) and ports().has(k): save.discovered_ports.append(k); write_save()
+		ui.set_prompt("", Callable()); ui.toast("Ashore at %s." % L.name))
+func board_ship() -> void:
+	if ashore == "": return
+	ui.fade(func():
+		ashore = ""; m.hero.collision_layer = 0; m.hero.collision_mask = 0; m.hero.velocity = Vector3.ZERO
+		seat_crew(); ui.set_prompt("", Callable()); ui.toast("All aboard."))
+func _ray_floor(lp: Vector3, up := 3.0, down := 40.0) -> Dictionary:
+	var w := to_global(lp); var q := PhysicsRayQueryParameters3D.create(w + Vector3(0, up, 0), w - Vector3(0, down, 0), 1)
+	q.exclude = [m.hero.get_rid()] + ships.values().map(func(s): return s.get_rid())
+	return m.get_world_3d().direct_space_state.intersect_ray(q)
+func _walk(inp: Vector2, dt: float) -> void:
+	var h: CharacterBody3D = m.hero; var yaw: float = m.yaw
+	var fwd := Vector3(-sin(yaw), 0, -cos(yaw)); var right := Vector3(cos(yaw), 0, -sin(yaw))
+	var dir := right * inp.x + fwd * -inp.y
+	var ch = m.get("cheats"); var mul := 1.0
+	if ch != null: mul = clampf(float(ch.flags.get("speed", 1.0)), 0.1, 50.0)
+	var spd: float = float(m.move_speed) * mul * clampf(inp.length(), 0.0, 1.0)
+	if dir.length() > 0.05: dir = dir.normalized()
+	h.velocity.x = dir.x * spd; h.velocity.z = dir.z * spd
+	h.velocity.y = -1.0 if h.is_on_floor() else h.velocity.y - 20.0 * dt
+	if m.get("jump_req") and h.is_on_floor(): h.velocity.y = float(m.JUMP_V); m.jump_req = false
+	h.floor_snap_length = 0.6; h.floor_max_angle = deg_to_rad(50.0)
+	var before := h.global_position
+	h.move_and_slide()
+	if spd > 0.1: m.hero_vis.rotation.y = lerp_angle(m.hero_vis.rotation.y, atan2(-dir.x, -dir.z), 10 * dt)
+	var lp := to_local(h.global_position)
+	# safety: on floor -> remember; in the sea / falling / no floor -> back to the last safe spot
+	if h.is_on_floor():
+		_air_t = 0.0
+		if lp.y > 0.25: _safe = lp + Vector3(0, 0.3, 0)
+	else: _air_t += dt
+	var moved := h.global_position.distance_to(before)
+	_stuck_t = _stuck_t + dt if spd > 0.5 and moved < spd * dt * 0.05 else 0.0
+	if lp.y < -0.2 or _air_t > 1.5 or _stuck_t > 2.0:
+		var f := _ray_floor(_safe)
+		h.global_position = (f.position + Vector3(0, 0.3, 0)) if f else to_global(pier_head(landing(ashore)) + Vector3(0, 0.6, 0))
+		print("ASHORE reset y=%.2f air=%.2f stuck=%.2f at %s" % [lp.y, _air_t, _stuck_t, str(lp)])
+		h.velocity = Vector3.ZERO; _air_t = 0.0; _stuck_t = 0.0
+		ui.toast("Careful - back on solid ground.")
+	# Pip trots along on the real ground
+	if m.pip:
+		var tgt: Vector3 = h.global_position + m.hero_vis.global_transform.basis.z * 1.3 + m.hero_vis.global_transform.basis.x * 0.7
+		var dp: Vector3 = tgt - m.pip.global_position; dp.y = 0
+		if dp.length() > 0.3: m.pip.global_position += dp * minf(1.0, 4.0 * dt); m.pip.rotation.y = lerp_angle(m.pip.rotation.y, atan2(-dp.x, -dp.z), 8 * dt)
+		var pf := _ray_floor(to_local(m.pip.global_position), 3.0, 10.0)
+		m.pip.global_position.y = pf.position.y if pf else h.global_position.y
+	water.global_position = Vector3(snappedf(m.cam.global_position.x, 8.0), 0.0, snappedf(m.cam.global_position.z, 8.0)) + Vector3(0, global_position.y, 0)
+	_stream(Vector2(lp.x, lp.z))
+	var L := landing(ashore)
+	if lp.distance_to(pier_head(L)) < 10.0: ui.set_prompt("Board ship", board_ship)
+	elif ashore == "gullhaven" and Vector2(lp.x, lp.z).distance_to(Vector2(M.s1.props.gullhaven.anchor[0], M.s1.props.gullhaven.anchor[2])) < 90.0: ui.set_prompt("Shipwright", ui.open_shipwright)
+	else: ui.set_prompt("", Callable())
+func sailing() -> bool: return active and ashore == "" and not diving

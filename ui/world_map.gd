@@ -72,10 +72,12 @@ func reveal(w: Vector2, r: float) -> int:
 ## world-frame position of the player (sea coords at sea, mainland shifted to LAND_AT on land)
 func world_pos() -> Vector2:
 	var sea = m.get("sea")
+	if sea and sea.active and sea.ashore != "":   # test 34: on foot on an island
+		var lp: Vector3 = sea.to_local(m.hero.global_position); return Vector2(lp.x, lp.z)
 	if sea and sea.active and sea.ship: return Vector2(sea.ship.position.x, sea.ship.position.z)
 	return LAND_AT + Vector2(m.hero.position.x, m.hero.position.z)
 func tick(dt: float) -> void:
-	var sea = m.get("sea"); var at_sea: bool = sea != null and sea.active
+	var sea = m.get("sea"); var at_sea: bool = sea != null and sea.active and sea.ashore == ""
 	player_w = world_pos(); player_yaw = (sea.ship.heading + PI) if at_sea and sea.ship else m.hero_vis.rotation.y
 	reveal(player_w, R_SEA if at_sea else R_LAND)
 	tex_t -= dt; save_t -= dt
@@ -136,6 +138,12 @@ func _draw() -> void:
 			var pv = sea.ports()[k][1]; var w: Vector2 = Vector2(1300, 300) if pv == null else Vector2(pv.x, pv.z)
 			if owner_view() or revealed(w):
 				var p := w2s(w, r); draw_circle(p, 6, Color("#ffd27a")); draw_string(get_theme_default_font(), p + Vector2(9, 5), str(sea.ports()[k][0]), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
+		var LD: Dictionary = sea._landings()   # test 34: landing points (anchor), only where explored (Owner: all)
+		for k in LD:
+			var lw := Vector2(LD[k].shore[0], LD[k].shore[2])
+			if owner_view() or revealed(lw):
+				var q := w2s(lw, r); draw_rect(Rect2(q - Vector2(5, 5), Vector2(10, 10)), Color("#7fd4ff")); draw_rect(Rect2(q - Vector2(5, 5), Vector2(10, 10)), Color.BLACK, false, 1.5)
+				if not sea.ports().has(k): draw_string(get_theme_default_font(), q + Vector2(9, 18), str(LD[k].name), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#bfe9ff"))
 	if not owner_view() and fog_tex: draw_texture_rect(fog_tex, r, false)
 	draw_rect(r, Color("#8a7340"), false, 2.0)
 	var c := w2s(player_w, r); var f := Vector2(-sin(player_yaw), -cos(player_yaw)); var sd := Vector2(-f.y, f.x)

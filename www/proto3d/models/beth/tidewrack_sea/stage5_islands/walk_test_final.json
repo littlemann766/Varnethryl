@@ -1,28 +1,16 @@
 {
  "aurora_arch": {
   "Aurora Shrine": {
-   "at": [
-    37.1,
-    21.5,
-    -2491.5
-   ],
-   "hits": [
-    "frost_isl_aurora_arch_col_geometry_0 n(0.78, 0.5, 0.38) p(36.9, 21.7, -2491.7)",
-    "frost_isl_aurora_arch_col_geometry_0 n(-0.43, 0.87, 0.25) p(37.3, 21.6, -2491.6)"
-   ],
-   "of": 56,
-   "ok": false,
-   "t": 10.3,
-   "why": "stuck",
-   "wp": 11
+   "ok": true,
+   "t": 33.1
   },
   "Skyglass Hollow": {
    "ok": true,
-   "t": 23.1
+   "t": 20.4
   },
   "Starwatcher's Stone": {
    "ok": true,
-   "t": 4.7
+   "t": 4.9
   },
   "pier_boards": {
    "at": [
@@ -43,81 +31,24 @@
  },
  "beached_wreck": {
   "Captain's Last Log": {
-   "at": [
-    -2467.7,
-    -0.2,
-    951.1
-   ],
-   "hits": [
-    "coast_isl_beached_wreck_col_geometry_0 n(0.41, 0.0, -0.91) p(-2467.8, 1.4, 951.4)"
-   ],
-   "of": 87,
-   "ok": false,
-   "t": 5.5,
-   "why": "fell_in_sea",
-   "wp": 7
+   "ok": true,
+   "t": 53.3
   },
   "Castaway Camp": {
-   "at": [
-    -2467.7,
-    -0.2,
-    951.1
-   ],
-   "hits": [
-    "coast_isl_beached_wreck_col_geometry_0 n(0.41, 0.0, -0.91) p(-2467.8, 1.1, 951.4)"
-   ],
-   "of": 71,
-   "ok": false,
-   "t": 5.5,
-   "why": "fell_in_sea",
-   "wp": 7
+   "ok": true,
+   "t": 35.0
   },
   "Salvage Chest": {
-   "at": [
-    -2467.7,
-    -0.2,
-    951.1
-   ],
-   "hits": [
-    "coast_isl_beached_wreck_col_geometry_0 n(0.41, 0.0, -0.91) p(-2467.8, 1.1, 951.4)"
-   ],
-   "of": 105,
-   "ok": false,
-   "t": 5.5,
-   "why": "fell_in_sea",
-   "wp": 7
+   "ok": true,
+   "t": 64.5
   },
   "causeway a->b": {
-   "at": [
-    -2502.6,
-    1.1,
-    937.6
-   ],
-   "hits": [
-    "coast_isl_beached_wreck_col_geometry_0 n(0.85, 0.38, 0.38) p(-2502.8, 1.3, 937.5)",
-    "coast_isl_beached_wreck_col_geometry_0 n(-0.01, 1.0, 0.0) p(-2502.6, 1.1, 937.6)"
-   ],
-   "of": 3,
-   "ok": false,
-   "t": 9.0,
-   "why": "stuck",
-   "wp": 2
+   "ok": true,
+   "t": 31.4
   },
   "causeway b->a": {
-   "at": [
-    -2503.5,
-    -0.2,
-    937.3
-   ],
-   "hits": [
-    "coast_isl_beached_wreck_col_geometry_0 n(-0.85, -0.38, -0.38) p(-2503.3, 1.6, 937.4)",
-    "coast_isl_beached_wreck_col_geometry_0 n(-0.85, -0.38, -0.38) p(-2503.3, 1.5, 937.4)"
-   ],
-   "of": 3,
-   "ok": false,
-   "t": 0.4,
-   "why": "fell_in_sea",
-   "wp": 1
+   "ok": true,
+   "t": 27.4
   },
   "pier_boards": {
    "ok": true,
@@ -126,20 +57,8 @@
  },
  "coil_isle": {
   "Coil Bones": {
-   "at": [
-    -159.6,
-    1.5,
-    616.4
-   ],
-   "hits": [
-    "arch_isl_coil_isle_col_geometry_0 n(-0.97, 0.0, -0.24) p(-159.3, 2.8, 616.5)",
-    "arch_isl_coil_isle_col_geometry_0 n(0.02, 1.0, 0.03) p(-159.6, 1.5, 616.4)"
-   ],
-   "of": 21,
-   "ok": false,
-   "t": 14.6,
-   "why": "stuck",
-   "wp": 17
+   "ok": true,
+   "t": 12.3
   },
   "Drowned Offering": {
    "ok": true,
@@ -147,7 +66,7 @@
   },
   "Serpent Shrine": {
    "ok": true,
-   "t": 25.2
+   "t": 25.3
   },
   "pier_boards": {
    "ok": true,
@@ -156,77 +75,48 @@
  },
  "ember_wreck": {
   "Cinder Camp": {
-   "at": [
-    604.0,
-    10.3,
-    2248.6
-   ],
-   "hits": [
-    "ash_isl_ember_wreck_col_geometry_0 n(0.92, 0.0, 0.39) p(603.7, 10.9, 2248.4)"
-   ],
-   "of": 14,
-   "ok": false,
-   "t": 7.3,
-   "why": "stuck",
-   "wp": 8
+   "ok": true,
+   "t": 6.4
   },
   "Ember Vent": {
    "at": [
-    565.9,
-    -0.3,
-    2256.0
+    495.9,
+    29.7,
+    2267.7
    ],
    "hits": [
-    "ash_isl_ember_wreck_col_geometry_0 n(-0.81, 0.58, 0.1) p(566.2, 0.0, 2255.9)",
-    "ash_isl_ember_wreck_col_geometry_0 n(-0.81, 0.58, 0.1) p(566.2, -0.1, 2256.0)"
+    "ash_isl_ember_wreck_col_geometry_0 n(0.28, 0.6, -0.75) p(495.8, 29.8, 2267.9)",
+    "ash_terrain_col_geometry_0 n(0.38, 0.92, 0.08) p(495.8, 29.7, 2267.6)"
    ],
-   "of": 49,
+   "of": 160,
    "ok": false,
-   "t": 13.1,
-   "why": "fell_in_sea",
-   "wp": 19
+   "t": 49.6,
+   "why": "stuck",
+   "wp": 127
   },
   "Scorched Chest": {
    "at": [
-    566.0,
-    -0.2,
-    2256.0
+    495.9,
+    29.7,
+    2267.7
    ],
    "hits": [
-    "ash_isl_ember_wreck_col_geometry_0 n(-0.81, 0.58, 0.1) p(566.3, 0.0, 2255.8)",
-    "ash_isl_ember_wreck_col_geometry_0 n(-0.81, 0.58, 0.1) p(566.2, -0.1, 2255.9)"
+    "ash_isl_ember_wreck_col_geometry_0 n(0.28, 0.6, -0.75) p(495.8, 29.8, 2267.9)",
+    "ash_terrain_col_geometry_0 n(0.38, 0.92, 0.08) p(495.8, 29.7, 2267.6)"
    ],
-   "of": 68,
+   "of": 146,
    "ok": false,
-   "t": 13.1,
-   "why": "fell_in_sea",
-   "wp": 19
+   "t": 49.6,
+   "why": "stuck",
+   "wp": 127
   },
   "causeway a->b": {
-   "at": [
-    567.1,
-    -0.3,
-    2259.4
-   ],
-   "hits": [],
-   "of": 3,
-   "ok": false,
-   "t": 0.4,
-   "why": "fell_in_sea",
-   "wp": 1
+   "ok": true,
+   "t": 37.6
   },
   "causeway b->a": {
-   "at": [
-    550.2,
-    -0.2,
-    2260.0
-   ],
-   "hits": [],
-   "of": 3,
-   "ok": false,
-   "t": 0.6,
-   "why": "fell_in_sea",
-   "wp": 1
+   "ok": true,
+   "t": 35.8
   },
   "pier_boards": {
    "at": [
@@ -235,8 +125,8 @@
     2268.9
    ],
    "hits": [
-    "@StaticBody3D@18 n(0.33, 0.93, 0.14) p(627.6, 8.7, 2268.9)",
-    "@StaticBody3D@18 n(0.33, 0.93, 0.14) p(627.6, 8.7, 2268.9)"
+    "@StaticBody3D@58 n(0.33, 0.93, 0.14) p(627.6, 8.7, 2268.9)",
+    "@StaticBody3D@58 n(0.33, 0.93, 0.14) p(627.6, 8.7, 2268.9)"
    ],
    "of": 1,
    "ok": false,
@@ -248,15 +138,15 @@
  "frostreach": {
   "Frostreach Cairn": {
    "ok": true,
-   "t": 4.5
+   "t": 4.6
   },
   "Frozen Waystone": {
    "ok": true,
-   "t": 22.8
+   "t": 23.8
   },
   "Iced Chest": {
    "ok": true,
-   "t": 25.3
+   "t": 25.6
   },
   "Rimehollow Ice Cave": {
    "ok": true,
@@ -278,15 +168,26 @@
  "frozen_wreck": {
   "Bergcleft Cave": {
    "ok": true,
-   "t": 29.2
+   "t": 29.3
   },
   "Frostbitten Chest": {
    "ok": true,
    "t": 24.6
   },
   "Frozen Camp": {
-   "ok": true,
-   "t": 13.6
+   "at": [
+    -245.5,
+    6.1,
+    -2598.2
+   ],
+   "hits": [
+    "frost_isl_frozen_wreck_col_geometry_0 n(-0.82, 0.42, -0.39) p(-245.3, 6.3, -2598.0)"
+   ],
+   "of": 20,
+   "ok": false,
+   "t": 7.1,
+   "why": "stuck",
+   "wp": 6
   },
   "pier_boards": {
    "ok": true,
@@ -296,7 +197,7 @@
  "gullhaven": {
   "Founders' Stone": {
    "ok": true,
-   "t": 27.5
+   "t": 27.4
   },
   "Gull Shrine": {
    "ok": true,
@@ -304,11 +205,11 @@
   },
   "Gull Watchtower ruin": {
    "ok": true,
-   "t": 41.9
+   "t": 42.3
   },
   "Harbourmaster's Cache": {
    "ok": true,
-   "t": 17.0
+   "t": 16.9
   },
   "pier_boards": {
    "ok": true,
@@ -318,30 +219,19 @@
  "hot_spring": {
   "Bather's Bundle": {
    "ok": true,
-   "t": 21.2
+   "t": 21.6
   },
   "Bathers' Shrine": {
-   "at": [
-    1214.5,
-    5.7,
-    2039.6
-   ],
-   "hits": [
-    "ash_isl_hot_spring_col_geometry_0 n(-0.81, 0.49, 0.31) p(1214.8, 5.9, 2039.5)"
-   ],
-   "of": 35,
-   "ok": false,
-   "t": 16.3,
-   "why": "stuck",
-   "wp": 22
+   "ok": true,
+   "t": 21.1
   },
   "Lower Spring": {
    "ok": true,
-   "t": 19.7
+   "t": 19.5
   },
   "Upper Spring": {
    "ok": true,
-   "t": 14.9
+   "t": 13.3
   },
   "pier_boards": {
    "at": [
@@ -355,7 +245,7 @@
    ],
    "of": 1,
    "ok": false,
-   "t": 5.3,
+   "t": 5.5,
    "why": "stuck",
    "wp": 0
   }
@@ -375,7 +265,7 @@
   },
   "Old Lantern ruin": {
    "ok": true,
-   "t": 37.3
+   "t": 37.0
   },
   "pier_boards": {
    "at": [
@@ -402,11 +292,11 @@
   },
   "Glassfire Shrine": {
    "ok": true,
-   "t": 23.0
+   "t": 23.1
   },
   "Obsidian Mirror": {
    "ok": true,
-   "t": 28.2
+   "t": 28.3
   },
   "pier_boards": {
    "at": [
@@ -428,114 +318,59 @@
  },
  "saltglass": {
   "Clifftop Cache": {
-   "at": [
-    -2134.3,
-    21.3,
-    -74.6
-   ],
-   "hits": [
-    "coast_isl_saltglass_col_geometry_0 n(0.28, 0.28, -0.92) p(-2134.4, 21.6, -74.3)",
-    "coast_terrain_col_geometry_0 n(0.58, 0.81, 0.01) p(-2134.5, 21.4, -74.6)"
-   ],
-   "of": 176,
-   "ok": false,
-   "t": 10.0,
-   "why": "stuck",
-   "wp": 22
+   "ok": true,
+   "t": 83.7
   },
   "Glass-diver's Chest": {
    "at": [
-    -2134.3,
-    21.3,
-    -74.6
+    -2151.8,
+    104.7,
+    57.7
    ],
-   "hits": [
-    "coast_isl_saltglass_col_geometry_0 n(1.0, 0.0, 0.0) p(-2134.7, 21.7, -74.6)",
-    "coast_isl_saltglass_col_geometry_0 n(0.28, 0.28, -0.92) p(-2134.4, 21.6, -74.3)"
-   ],
-   "of": 109,
+   "hits": [],
+   "of": 172,
    "ok": false,
-   "t": 10.0,
-   "why": "stuck",
-   "wp": 22
+   "t": 90.1,
+   "why": "dropped_through",
+   "wp": 124
   },
   "Salt-crusted Tablet": {
-   "at": [
-    -2134.3,
-    21.3,
-    -74.6
-   ],
-   "hits": [
-    "coast_isl_saltglass_col_geometry_0 n(1.0, 0.0, 0.0) p(-2134.7, 21.7, -74.6)",
-    "coast_isl_saltglass_col_geometry_0 n(0.29, 0.29, -0.91) p(-2134.4, 21.6, -74.3)"
-   ],
-   "of": 228,
-   "ok": false,
-   "t": 10.0,
-   "why": "stuck",
-   "wp": 22
+   "ok": true,
+   "t": 69.8
   },
   "Saltglass Lookout": {
-   "at": [
-    -2134.3,
-    21.3,
-    -74.6
-   ],
-   "hits": [
-    "coast_isl_saltglass_col_geometry_0 n(1.0, 0.0, 0.0) p(-2134.7, 21.7, -74.6)",
-    "coast_isl_saltglass_col_geometry_0 n(0.29, 0.29, -0.91) p(-2134.4, 21.6, -74.3)"
-   ],
-   "of": 178,
-   "ok": false,
-   "t": 10.0,
-   "why": "stuck",
-   "wp": 22
+   "ok": true,
+   "t": 89.2
   },
   "Saltglass Shrine": {
-   "at": [
-    -2134.3,
-    21.3,
-    -74.6
-   ],
-   "hits": [
-    "coast_isl_saltglass_col_geometry_0 n(0.28, 0.28, -0.92) p(-2134.4, 21.6, -74.3)",
-    "coast_terrain_col_geometry_0 n(0.58, 0.81, 0.01) p(-2134.5, 21.4, -74.6)"
-   ],
-   "of": 195,
-   "ok": false,
-   "t": 10.0,
-   "why": "stuck",
-   "wp": 22
+   "ok": true,
+   "t": 72.7
   },
   "Singing Shards": {
-   "at": [
-    -2134.3,
-    21.3,
-    -74.6
-   ],
-   "hits": [
-    "coast_isl_saltglass_col_geometry_0 n(0.28, 0.28, -0.92) p(-2134.4, 21.6, -74.3)",
-    "coast_terrain_col_geometry_0 n(0.58, 0.81, 0.01) p(-2134.5, 21.4, -74.6)"
-   ],
-   "of": 276,
-   "ok": false,
-   "t": 10.0,
-   "why": "stuck",
-   "wp": 22
+   "ok": true,
+   "t": 76.4
+  },
+  "pier stair down": {
+   "ok": true,
+   "t": 9.8
+  },
+  "pier stair up": {
+   "ok": true,
+   "t": 43.3
   },
   "pier_boards": {
    "at": [
-    -2118.3,
-    15.5,
-    -88.9
+    -2117.5,
+    14.9,
+    -90.3
    ],
    "hits": [
-    "@StaticBody3D@18 n(0.59, 0.81, 0.0) p(-2118.5, 15.6, -88.9)",
-    "@StaticBody3D@18 n(0.59, 0.81, 0.0) p(-2118.5, 15.6, -88.9)"
+    "coast_isl_saltglass_col_geometry_0 n(0.89, 0.44, 0.12) p(-2117.8, 15.1, -90.3)",
+    "@StaticBody3D@18 n(0.59, 0.81, 0.0) p(-2117.7, 15.0, -90.3)"
    ],
    "of": 1,
    "ok": false,
-   "t": 8.0,
+   "t": 6.7,
    "why": "stuck",
    "wp": 0
   },
@@ -554,23 +389,12 @@
    "t": 6.9
   },
   "Outer Wall ruin": {
-   "at": [
-    -569.9,
-    2.7,
-    370.8
-   ],
-   "hits": [
-    "arch_isl_saltwatch_keep_col_geometry_0 n(0.87, 0.0, 0.49) p(-570.2, 3.6, 370.6)"
-   ],
-   "of": 24,
-   "ok": false,
-   "t": 9.6,
-   "why": "stuck",
-   "wp": 10
+   "ok": true,
+   "t": 13.1
   },
   "Watch Shrine": {
    "ok": true,
-   "t": 4.1
+   "t": 4.4
   },
   "pier_boards": {
    "ok": true,
@@ -580,23 +404,11 @@
  "vent": {
   "Ash-buried Chest": {
    "ok": true,
-   "t": 20.8
+   "t": 17.8
   },
   "Ember Shrine": {
-   "at": [
-    -453.8,
-    34.9,
-    1954.2
-   ],
-   "hits": [
-    "ash_isl_vent_col_geometry_0 n(-0.48, 0.25, -0.84) p(-453.7, 35.2, 1954.5)",
-    "ash_isl_vent_col_geometry_0 n(-0.02, 1.0, -0.09) p(-453.8, 34.9, 1954.3)"
-   ],
-   "of": 51,
-   "ok": false,
-   "t": 22.1,
-   "why": "stuck",
-   "wp": 31
+   "ok": true,
+   "t": 32.8
   },
   "Steam Pools": {
    "ok": true,
@@ -604,7 +416,7 @@
   },
   "Ventmouth": {
    "ok": true,
-   "t": 49.4
+   "t": 49.5
   },
   "pier_boards": {
    "at": [

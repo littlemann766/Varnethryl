@@ -436,6 +436,8 @@ def build(k):
         w_ = BR[max(cb[0] - 2, 0):cb[0] + 3, max(cb[1] - 2, 0):cb[1] + 3]
         if w_.any(): Hq2[cb] = float(np.median(Hq[max(cb[0] - 2, 0):cb[0] + 3, max(cb[1] - 2, 0):cb[1] + 3][w_]))
         Hq2[ct] = float(Hq[ct]) if not RDECK[ct] else float(ch[-1][1])
+    for p in pois:   # no route through a POI's own prop (chests, walls, shrines): its centre disc is off the walk graph; routes end at the pad edge
+        okw &= ~(np.hypot(X - p['pos'][0], Z - p['pos'][2]) < min(0.6 * p['r'], p['r'] - 1.5))
     G2, okc2, nid2 = walk_graph(Hq2, okw, s0j, s0i, ny, nx)
     for cb, ct, ch in BSE:
         if nid2[cb] >= 0 and nid2[ct] >= 0:
@@ -444,6 +446,9 @@ def build(k):
     _g['G2'] = (nid2, pr2, d2, c2_, Hq, (s0j, s0i), BSE)
     for p in pois:
         t = nid2[p['ij']]
+        if t < 0:   # centre disc is off the graph: aim at the nearest graph cell on the pad
+            dd_ = np.where(okc2, np.hypot(X - p['pos'][0], Z - p['pos'][2]), 1e9); jj_ = np.unravel_index(np.argmin(dd_), dd_.shape)
+            if dd_[jj_] < p['r'] + 2: t = nid2[jj_]
         if t < 0 or not np.isfinite(d2[t]) or d2[t] > 4000: print('  final route missing/hard for', p['name'], (float(d2[t]) if t >= 0 else 'nocell'), int(okw[p['ij']])); continue
         rt = []
         while t >= 0 and t != nid2[s0j, s0i]: rt.append(tuple(c2_[t])); t = pr2[t]
@@ -496,12 +501,19 @@ def build(k):
     ok = comp & ~FP & (pband > 3.5) & (cd > 3) & (dsh > 16) & ~RAMPZ
     for p in pois: ok &= np.hypot(X - p['pos'][0], Z - p['pos'][2]) > p['r'] + 3
     cells = np.argwhere(ok); rng.shuffle(cells)
+    FRm = np.zeros_like(comp)   # final routes (what the player walks): no scatter rock / plant collider on or right beside them
+    for p in pois:
+        for c_ in p.get('route', []):
+            if len(c_) == 2: FRm[c_] = True
+    frd = ndimage.distance_transform_edt(~FRm) * STEP if FRm.any() else np.full(comp.shape, 1e9)
     nrock = int(min(70, len(cells) * 0.004 + 18)); nveg = int(min(110, len(cells) * 0.008 + 20))
     for (j, i) in cells[:nrock]:
+        if frd[j, i] < 3.0: continue
         r = float(rng.uniform(0.6, 2.6) if sl[j, i] < 0.5 else rng.uniform(1.2, 3.6)); x, z = X[j, i] + rng.uniform(-1, 1), Z[j, i] + rng.uniform(-1, 1)
         rk = rock((x, Hat(x, z) + r * 0.2, z), r, int(rng.integers(1e6)), 0.6, P['rock'] if rng.random() < 0.6 else P['rock2']); solid.append(rk)
         if r > 1.4: colp.append(rk)
     for (j, i) in cells[nrock:nrock + nveg]:
+        if frd[j, i] < 3.0: continue
         x, z = X[j, i] + rng.uniform(-1, 1), Z[j, i] + rng.uniform(-1, 1); y = Hat(x, z)
         s, g, c = veg(GROUND[reg], (x, y, z), rng); solid += s; glow += g; colp += c
     if ramp:
@@ -519,6 +531,11 @@ def build(k):
     STATS[name]['terrain_tris'] = int(len(f2))
     lights = [l for p in pois for l in p.get('lights', [])]
     HqF = np.where(RDECK, Hr, np.where(keep, H, np.maximum(_g['colC'], base) - 0.08))
+    def padcut(p, R):   # the route ends at the POI's pad edge: its own prop (wall, bones, shrine) is not walked into
+        r0 = float(p['r']) + 1.0; R2 = [q_ for q_ in R if math.hypot(q_[0] - p['pos'][0], q_[2] - p['pos'][2]) > r0]
+        if len(R2) < 2: return R
+        q_ = R2[-1]; dx, dz = q_[0] - p['pos'][0], q_[2] - p['pos'][2]; d_ = math.hypot(dx, dz)
+        return R2 + [[round(p['pos'][0] + dx / d_ * r0, 2), q_[1], round(p['pos'][2] + dz / d_ * r0, 2)]]
     def rpt(a, b):   # route point; on a causeway, snapped to the deck centreline (a player steers down the middle, not along a rail)
         x, z, y = float(X[a, b]), float(Z[a, b]), float(HqF[a, b]) + 0.08
         if BR[a, b] and bridges:
@@ -526,7 +543,7 @@ def build(k):
         return [round(x, 2), round(y, 2), round(z, 2)]
     return {'id': k, 'name': Ld['name'], 'region': reg, 'ground': GROUND[reg], 'files': {'mesh': name, 'lod1': name + '_lod1', 'glow': name + '_glow' if glow else None, 'col': name + '_col'},
             'pier_head': Ld['shore'], 'window': [float(xs[0]), float(zs[0]), float(xs[-1]), float(zs[-1])],
-            'pois': [{'type': p['type'], 'name': p['name'], 'pos': [round(c, 2) for c in p['pos']], 'radius': p['r'], 'route': [[round(float(v), 2) for v in w] for w in (p.get('pre') or [])] + [([round(w[0], 2), round(w[1] + 0.08, 2), round(w[2], 2)] if len(w) == 3 else rpt(*w)) for w in p.get('route', [])]} for p in pois], 'ramp': ramp,
+            'pois': [{'type': p['type'], 'name': p['name'], 'pos': [round(c, 2) for c in p['pos']], 'radius': p['r'], 'route': padcut(p, [[round(float(v), 2) for v in w] for w in (p.get('pre') or [])] + [([round(w[0], 2), round(w[1] + 0.08, 2), round(w[2], 2)] if len(w) == 3 else rpt(*w)) for w in p.get('route', [])])} for p in pois], 'ramp': ramp,
             'lights': lights, 'bridges': bridges, 'path': {'max_deg': STATS[k]['path_max_deg'], 'p95_deg': STATS[k]['path_p95_deg']},
             'cams': {'inland': [Ld['shore'][0] - inl[0] * 6, Ld['shore'][1] + 4.5, Ld['shore'][2] - inl[1] * 6], 'inland_look': [sh[0] + inl[0] * 40, Hat(*(sh + inl * 40)) + 1.5, sh[1] + inl[1] * 40],
                      'over': [sh[0] - inl[0] * 60 + inl[1] * 50, max(H.max(), 0) + 55, sh[1] - inl[1] * 60 - inl[0] * 50], 'over_look': [cen[0], float(np.median(H[comp])) if comp.any() else 0, cen[1]]}}
@@ -646,7 +663,7 @@ def poi(typ, p, yaw, P, reg, rng):
     if typ == 'bones':   # Brinecrown-coil serpent ribs half buried
         BONE = C(222, 214, 190)
         for k in range(9):
-            zz = -12 + k * 3; rr = 4.5 - abs(k - 4) * 0.35
+            zz = -9.6 + k * 2.4; rr = 4.5 - abs(k - 4) * 0.35   # spine trimmed to sit inside its 11 m pad (was 25 m long: the end ribs stood across the approach)
             for sgn in (-1, 1):
                 rb = line((sgn * 0.6, 0.2, zz), (sgn * rr, rr * 1.1, zz + 0.8), 0.35, BONE, 6); S_.append(R_(p, yaw, rb))
             S_.append(R_(p, yaw, ball(0.8, BONE, (0, 0.4, zz))))

@@ -37,7 +37,7 @@ GROUND = {'A': 'temperate', 'B': 'saltglass', 'frost': 'frost', 'ash': 'ash'}
 # per landing: window half-size, hill amplitude, POIs (type, name); first POI goes on the high ground
 ISL = {
  'gullhaven':      dict(R=170, amp=11, pois=[('watchtower', 'Gull Watchtower ruin'), ('shrine', 'Gull Shrine'), ('lore', 'Founders\' Stone'), ('chest', 'Harbourmaster\'s Cache')]),
- 'saltglass':      dict(R=170, amp=9,  pois=[('crystal_shrine', 'Saltglass Shrine'), ('crystal_grove', 'Singing Shards'), ('chest', 'Glass-diver\'s Chest'), ('lore', 'Salt-crusted Tablet')]),
+ 'saltglass':      dict(R=170, amp=9,  pois=[('crystal_shrine', 'Saltglass Shrine'), ('crystal_grove', 'Singing Shards'), ('chest', 'Glass-diver\'s Chest'), ('lore', 'Salt-crusted Tablet'), ('watchtower', 'Saltglass Lookout', 'top'), ('chest', 'Clifftop Cache', 'top')], ramp=True),
  'frostreach':     dict(R=170, amp=10, pois=[('ice_cave', 'Rimehollow Ice Cave'), ('frost_shrine', 'Frostreach Cairn'), ('chest', 'Iced Chest'), ('lore', 'Frozen Waystone')]),
  'vent':           dict(R=170, amp=9,  pois=[('lava_vent', 'Ventmouth'), ('hot_pool', 'Steam Pools'), ('obsidian_shrine', 'Ember Shrine'), ('chest', 'Ash-buried Chest')]),
  'lantern_rock':   dict(R=120, amp=9,  pois=[('lighthouse', 'Old Lantern ruin'), ('hut_ruin', 'Keeper\'s Hut'), ('chest', 'Keeper\'s Strongbox'), ('lore', 'Lamp-oil Logbook')]),
@@ -53,6 +53,8 @@ ISL = {
 PAD = {'watchtower': 8, 'lighthouse': 9, 'keep_ruin': 12, 'hut_ruin': 7, 'shrine': 5, 'crystal_shrine': 6, 'frost_shrine': 6, 'obsidian_shrine': 6, 'crystal_grove': 9,
        'ice_cave': 9, 'lava_vent': 7, 'hot_pool': 8, 'wreck_camp': 10, 'bones': 11, 'chest': 3, 'lore': 3}
 _cache = {}
+_fpm = {}
+FLUSH = ('_glow', '_lava_seams', '_beach_dressing')   # flush ground decals: re-laid onto the new patch instead of cutting holes for them
 def region_meshes(reg):
     if reg in _cache: return _cache[reg]
     d, pre = RDIR[reg]; base, fp = [], []
@@ -62,7 +64,28 @@ def region_meshes(reg):
         m = trimesh.load(f, force='mesh')
         (base if ('_tile_' in b or b == 'arch_islands') else fp).append((b, m))
     bv = np.concatenate([m.vertices for _, m in base]); fv = np.concatenate([m.vertices for _, m in fp]) if fp else np.zeros((0, 3))
-    _cache[reg] = (bv, fv, base); return _cache[reg]
+    _cache[reg] = (bv, fv, base); _fpm[reg] = fp; return _cache[reg]
+_colc = {}
+def col_top(reg, X, Z):
+    d, pre = RDIR[reg]
+    if reg not in _colc:
+        ms = [trimesh.load(f, force='mesh') for f in glob.glob(os.path.join(GA, d, pre + '*_col.glb')) if 'storm' not in f]
+        _colc[reg] = trimesh.util.concatenate(ms)
+    m = _colc[reg]; hs = []
+    for ox in (-1.0, -0.33, 0.33, 1.0):        # highest collider point within +-1 m of each grid vertex: the coarse collider can bulge between samples
+        for oz in (-1.0, -0.33, 0.33, 1.0):
+            o = np.c_[X.ravel() + ox, np.full(X.size, 400.0), Z.ravel() + oz]
+            loc, ir, _ = m.ray.intersects_location(o, np.tile([0, -1.0, 0], (X.size, 1)), multiple_hits=False)
+            h = np.full(X.size, -10.0); h[ir] = loc[:, 1]; hs.append(h)
+    hs = np.array(hs); c = np.full(X.size, -10.0); o = np.c_[X.ravel(), np.full(X.size, 400.0), Z.ravel()]
+    loc, ir, _ = m.ray.intersects_location(o, np.tile([0, -1.0, 0], (X.size, 1)), multiple_hits=False); c[ir] = loc[:, 1]
+    hs = np.where(hs - c[None] < 3.0, hs, c[None])   # ignore overhang hits
+    c2 = c.reshape(X.shape); _g['colC'] = c2; ny, nx = X.shape; jj, ii = np.mgrid[0:ny, 0:nx].astype(float); dev = np.zeros(X.shape); n_ = 0
+    for ox in (-1.0, -0.33, 0.33, 1.0):   # how far the collider bulges above the plane through our 2 m samples (bilinear), per vertex neighbourhood
+        for oz in (-1.0, -0.33, 0.33, 1.0):
+            pl = ndimage.map_coordinates(c2, [jj + oz / STEP, ii + ox / STEP], order=1, mode='nearest')
+            dev = np.maximum(dev, hs[n_].reshape(X.shape) - pl); n_ += 1
+    return c2 + np.clip(dev, 0, 3.0)
 def smooth01(a, b, x): t = np.clip((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t)
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import dijkstra
@@ -78,6 +101,80 @@ def walk_graph(H, okc, sj, sii, ny, nx, hard=None):
         rr_ += [a_, b_]; cc_ += [b_, a_]; ww_ += [w_, w_]
     G = coo_matrix((np.concatenate(ww_), (np.concatenate(rr_), np.concatenate(cc_))), shape=(okc.sum(), okc.sum())).tocsr()
     return G, okc, nid
+def build_ramp(H, base, comp, walk, FP, dsh, si, X, Z, xs, zs, cd):
+    """Switchback stair from the reachable lower shelf to the unreachable upper plateau: stone flights <=26.6 deg + flat landings
+    on pillars, rails both sides. Returns the deck list (world), routing heights, keep-out zone, plateau mask, walk mask, deck cells."""
+    ny, nx = H.shape
+    Gr, okr, nidr = walk_graph(H, walk & ~(FP & (dsh > 12)), si[0], si[1], ny, nx, hard=0.7)
+    dr = dijkstra(Gr, indices=nidr[si]); reach0 = np.zeros_like(comp); reach0[okr] = np.isfinite(dr)
+    hi = np.percentile(H[reach0], 90)
+    plat = comp & ~reach0 & (H > hi + 15) & (cd > 4); lab, nl = ndimage.label(plat)
+    if nl == 0: print('  ramp: no plateau'); return None, H, np.zeros_like(comp), np.zeros_like(comp), walk, np.zeros_like(comp)
+    big = 1 + int(np.argmax(ndimage.sum(np.ones_like(lab), lab, range(1, nl + 1)))); P = ndimage.binary_opening(lab == big, iterations=2)
+    pe = np.argwhere(P & ~ndimage.binary_erosion(P, iterations=3)); re_ = np.argwhere(ndimage.binary_erosion(reach0, iterations=3) & (dsh > 20))
+    def hat(A, x, z): return float(ndimage.map_coordinates(A, [[(z - zs[0]) / STEP], [(x - xs[0]) / STEP]], order=1)[0])
+    tr = cKDTree(re_); dd, ii = tr.query(pe); order_ = np.argsort(dd)
+    Lg, W, GAP = 20.0, 3.6, 5.0
+    for cand_ in order_[:400:8]:
+        bj, bi = pe[cand_]; aj, ai = re_[ii[cand_]]; bx, bz = X[bj, bi], Z[bj, bi]; ax_, az_ = X[aj, ai], Z[aj, ai]
+        n = np.array([ax_ - bx, az_ - bz]); n /= np.linalg.norm(n) + 1e-9; t = np.array([-n[1], n[0]])
+        for off0 in (5.0, 8.0, 11.0, 14.0):
+            Htop = None; ok = True
+            for N in range(2, 12):
+                send = (Lg / 2) * (1 if (N - 1) % 2 == 0 else -1)                     # last flight ends here (along t)
+                topp = np.array([bx, bz]) + t * send - n * 3; Htop = hat(H, *topp)
+                off = [off0 + (N - 1 - k) * GAP for k in range(N)]
+                s0 = -Lg / 2; bot = np.array([bx, bz]) + n * off[0] + t * s0; Hbot = hat(base, *bot)
+                rise = Htop - Hbot
+                if rise <= 0: ok = False; break
+                if rise / (N * Lg) <= 0.5: break
+            if not ok: continue
+            g = rise / (N * Lg); decks = []; h = Hbot; good = True
+            for k in range(N):
+                d_ = 1 if k % 2 == 0 else -1; c0 = np.array([bx, bz]) + n * off[k] + t * (-Lg / 2 * d_); c1 = c0 + t * Lg * d_
+                decks.append({'kind': 'flight', 'a': [float(c0[0]), float(h), float(c0[1])], 'b': [float(c1[0]), float(h + g * Lg), float(c1[1])], 'w': W}); h += g * Lg
+                if k < N - 1:
+                    l0 = c1 + t * d_ * (W / 2 + 0.2) + n * (W / 2); l1 = l0 - n * (GAP + W)   # spans both flights' full width; rail only on the far (outer) side
+                    decks.append({'kind': 'landing', 'a': [float(l0[0]), float(h), float(l0[1])], 'b': [float(l1[0]), float(h), float(l1[1])], 'w': W + 0.4, 'out': [float(t[0] * d_), float(t[1] * d_)]})
+            dl = 1 if (N - 1) % 2 == 0 else -1; end = np.array(decks[-1]['b'])[[0, 2]] + t * dl * (W / 2 + 0.2) + n * (W / 2); e1 = end - n * (off[-1] + 3 + W / 2)
+            hb = min(h + 0.3 * (off[-1] + 3), max(h - 0.3 * (off[-1] + 3), hat(H, *e1) - 0.3))   # top walk eases onto the plateau ground (<17 deg)
+            em = end - n * (W + 0.6)   # flat over the last flight's full width, then eases onto the plateau
+            decks.append({'kind': 'landing', 'a': [float(end[0]), float(h), float(end[1])], 'b': [float(em[0]), float(h), float(em[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)]})
+            decks.append({'kind': 'landing', 'a': [float(em[0]), float(h), float(em[1])], 'b': [float(e1[0]), float(hb), float(e1[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)]})
+            f0 = decks[0]; fa = np.array(f0['a']); fb = np.array(f0['b']); f0['a'] = (fa - (fb - fa) / Lg * 3.0).tolist(); f0['a'][1] = float(fa[1] - g * 3.0 - 0.4)   # foot dips under the shelf: no lip
+            for e in decks[1:-1]:   # ground must stay below every deck (except where it meets the shelf / plateau)
+                for tt in np.linspace(0, 1, 9):
+                    q = np.array(e['a']) + (np.array(e['b']) - np.array(e['a'])) * tt
+                    if hat(base, q[0], q[2]) > q[1] - 0.6: good = False; break
+                if not good: break
+            if good:
+                Hr = H.copy(); RD = np.zeros_like(comp)
+                for e in decks:
+                    a_ = np.array(e['a']); b_ = np.array(e['b']); u = (b_ - a_); Lh = math.hypot(u[0], u[2]); uh = np.array([u[0], u[2]]) / (Lh + 1e-9); pv = np.array([-uh[1], uh[0]])
+                    for tt in np.linspace(0, 1, max(2, int(Lh / 0.5))):
+                        for ww in np.linspace(-e['w'] / 2 + 0.4, e['w'] / 2 - 0.4, 6):
+                            q = a_ + u * tt; x, z = q[0] + pv[0] * ww, q[2] + pv[1] * ww; j = int(round((z - zs[0]) / STEP)); i = int(round((x - xs[0]) / STEP))
+                            if 0 <= j < ny and 0 <= i < nx: RD[j, i] = True; Hr[j, i] = q[1]
+                print(f'  ramp: {N} flights, {math.degrees(math.atan(g)):.1f} deg, rise {rise:.1f} m ({Hbot:.1f} -> {Htop:.1f})')
+                return {'decks': decks, 'flights': N, 'deg': round(math.degrees(math.atan(g)), 1), 'rise_m': round(rise, 1), 'bottom': decks[0]['a'], 'top': decks[-1]['b']}, Hr, ndimage.binary_dilation(RD, iterations=3), P, walk | RD | P, RD
+    print('  ramp: no clear spot'); return None, H, np.zeros_like(comp), np.zeros_like(comp), walk, np.zeros_like(comp)
+def ramp_geo(R):
+    S_, C_ = [], []; ST = C(176, 168, 172); ST2 = C(146, 138, 146)
+    for e in R['decks']:
+        a = np.array(e['a']); b = np.array(e['b']); u = b - a; Lh = math.hypot(u[0], u[2]); yaw = math.atan2(u[0], u[2]); pitch = -math.atan2(u[1], Lh); Ls = math.hypot(Lh, u[1]); mid = (a + b) / 2
+        def place(m, lat=0.0, up=0.0):
+            m = T(m, (lat, up, 0), (pitch, 0, 0)); return T(m, mid, (0, yaw, 0))
+        dk = place(box((e['w'], 0.5, Ls + 0.3), ST if e['kind'] == 'flight' else ST2), 0, -0.25); S_.append(dk); C_.append(dk)
+        if e['kind'] == 'flight':
+            for k in range(int(Ls / 0.6)):   # tread lines (visual only; the collider is the smooth slab)
+                S_.append(place(box((e['w'] - 0.2, 0.06, 0.12), ST2, (0, 0.02, -Ls / 2 + 0.3 + k * 0.6))))
+        pv = np.array([math.cos(yaw), -math.sin(yaw)])   # local +x in world (x,z)
+        sides = (-1, 1) if 'out' not in e else (1 if float(np.dot(pv, e['out'])) > 0 else -1,)
+        for sd in sides:
+            rl = place(box((0.3, 1.0, Ls + 0.3), ST2), sd * (e['w'] / 2 + 0.1), 0.5); S_.append(rl); C_.append(rl)
+        for tt in np.linspace(0.1, 0.9, 3):   # pillars down to the shelf
+            q = a + u * tt; S_.append(cyl(0.6, q[1] + 30, ST2, (q[0], q[1] - (q[1] + 30) / 2 - 0.5, q[2]), sec=6))
+    return S_, C_
 def build(k):
     Ld = L[k]; cfg = ISL[k]; reg = Ld['region']; pre = RDIR[reg][1]; P = PAL[GROUND[reg]]; rng = np.random.default_rng(zlib.crc32(k.encode()))
     OUT = os.path.join(ROOT5, 'meshes', reg); os.makedirs(OUT, exist_ok=True); _g['OUT'] = OUT
@@ -89,6 +186,8 @@ def build(k):
     # top surface: keep the highest vertex per 0.5 m bin (caves/overhangs would otherwise fold the patch)
     key = np.round(v[:, [0, 2]] * 2).astype(np.int64); o = np.lexsort((-v[:, 1], key[:, 1], key[:, 0])); kk = key[o]; first = np.r_[True, np.any(kk[1:] != kk[:-1], 1)]; v = v[o][first]
     base = LinearNDInterpolator(v[:, [0, 2]], v[:, 1], fill_value=-10.0)(X, Z)
+    colH = col_top(reg, X, Z)          # the game's own (decimated) terrain collider: the patch must ride above it, never under
+    _g['colH'] = colH
     land = base > 0.2
     si = (int(round((sh[1] + inl[1] * 8 - zs[0]) / STEP)), int(round((sh[0] + inl[0] * 8 - xs[0]) / STEP)))
     lab, nl = ndimage.label(land); comp = lab == lab[si] if lab[si] else land
@@ -112,11 +211,12 @@ def build(k):
     cd = ndimage.distance_transform_edt(comp) * STEP
     # existing props: footprint (cut out of the patch) and keep-out falloff
     fsel = (np.abs(fv[:, 0] - cen[0]) < R + 20) & (np.abs(fv[:, 2] - cen[1]) < R + 20) if len(fv) else np.zeros(0, bool)
-    FP = np.zeros_like(comp)
+    FP = np.zeros_like(comp); FPS = np.zeros_like(comp)
     if fsel.any():
         q = fv[fsel]; ii = np.round((q[:, 0] - xs[0]) / STEP).astype(int); jj = np.round((q[:, 2] - zs[0]) / STEP).astype(int); ok = (ii >= 0) & (ii < nx) & (jj >= 0) & (jj < ny)
         hb = base[jj[ok], ii[ok]]; up = q[ok, 1] > hb - 3   # only parts standing on this land
         FP[jj[ok][up], ii[ok][up]] = True; FP = ndimage.binary_closing(ndimage.binary_dilation(FP, iterations=1), iterations=2)
+        tall = up & (q[ok, 1] > hb + 0.8); FPS[jj[ok][tall], ii[ok][tall]] = True   # solid, standing props (not flush decals: glow, lava seams)
     fpd = ndimage.distance_transform_edt(~FP) * STEP if FP.any() else np.full(FP.shape, 999.0)
     dsh = np.hypot(X - sh[0], Z - sh[1])
     # hills: smooth random field + ridges, rising inland
@@ -136,18 +236,22 @@ def build(k):
     def slope_of(h): gz, gx = np.gradient(h, STEP); return np.hypot(gx, gz)
     pois = []; taken = []
     edge = np.minimum(np.minimum(X - xs[0], xs[-1] - X), np.minimum(Z - zs[0], zs[-1] - Z))
-    Gr, okr, nidr = walk_graph(H, walk & ~(FP & (dsh > 12)), si[0], si[1], ny, nx, hard=0.7)   # walkable (<=35 deg steps) from the pier head
+    Hr = H.copy(); RDECK = np.zeros_like(comp); RAMPZ = np.zeros_like(comp); PLAT = np.zeros_like(comp); ramp = None
+    if cfg.get('ramp'):
+        ramp, Hr, RAMPZ, PLAT, walk, RDECK = build_ramp(H, base, comp, walk, FP, dsh, si, X, Z, xs, zs, cd)
+    Gr, okr, nidr = walk_graph(Hr, walk & ~(FP & (dsh > 12)), si[0], si[1], ny, nx, hard=0.7)   # walkable (<=35 deg steps) from the pier head
     dr = dijkstra(Gr, indices=nidr[si], limit=np.inf); reach = np.zeros_like(comp); reach[okr] = np.isfinite(dr)
     reach = ndimage.binary_erosion(reach, iterations=1) | (dsh < 6)
     cand = reach & comp & (cd > 12) & (fpd > 18) & (dsh > 30) & (dsh < R * 1.35) & (edge > 26)
-    for t_i, (typ, name) in enumerate(cfg['pois']):
-        r = PAD[typ]; c2 = cand & (cd > r + 4) & (fpd > r + 10)
+    for t_i, pdef in enumerate(cfg['pois']):
+        typ, name = pdef[0], pdef[1]; top = len(pdef) > 2
+        r = PAD[typ]; c2 = cand & (cd > r + 4) & (fpd > r + 10) & (PLAT if top else ~PLAT) & ~RAMPZ
         for tk in taken: c2 &= np.hypot(X - tk[0], Z - tk[1]) > max(34, r + tk[2] + 14)
         if not c2.any():
-            c2 = reach & comp & (cd > r + 2) & (fpd > r + 4) & (dsh > 20) & (edge > r + 8)
+            c2 = reach & comp & (cd > r + 2) & (fpd > r + 4) & (dsh > 20) & (edge > r + 8) & (PLAT if top else ~PLAT) & ~RAMPZ
             for tk in taken: c2 &= np.hypot(X - tk[0], Z - tk[1]) > r + tk[2] + 6
         if not c2.any(): print('  no site for', typ); continue
-        if t_i == 0 and typ not in ('ice_cave', 'hot_pool', 'wreck_camp', 'bones'): sc = H + rng.uniform(0, 0.5, H.shape)
+        if (t_i == 0 or top) and typ not in ('ice_cave', 'hot_pool', 'wreck_camp', 'bones'): sc = H + rng.uniform(0, 0.5, H.shape)
         elif typ in ('wreck_camp', 'hot_pool', 'bones'): sc = -np.abs(cd - (r + 10)) * 0.5 - dsh * 0.05 + (np.min([np.hypot(X - tk[0], Z - tk[1]) for tk in taken], 0) * 0.3 if taken else 0)
         else: sc = (np.min([np.hypot(X - tk[0], Z - tk[1]) for tk in taken], 0) if taken else dsh) + rng.uniform(0, 4, H.shape) - 0.25 * dsh * (dsh > R)
         sc = sc - 1.5 * (ndimage.maximum_filter(H, size=int(24 / STEP)) - H)   # no pits / ravines
@@ -162,7 +266,8 @@ def build(k):
     if bridges:   # bridge deck heights into H so the router sees the crossing
         b0 = bridges[0]; ab = np.array([b0['b'][0] - b0['a'][0], b0['b'][2] - b0['a'][2]]); t_ = np.clip(((X - b0['a'][0]) * ab[0] + (Z - b0['a'][2]) * ab[1]) / (ab @ ab), 0, 1)
         H = np.where(BR, b0['a'][1] + (b0['b'][1] - b0['a'][1]) * t_, H)
-    G, okc, nid = walk_graph(H, walk & ~(FP & (dsh > 12)), sj, sii, ny, nx)
+    Hq = np.where(RDECK, Hr, H)
+    G, okc, nid = walk_graph(Hq, walk & ~(FP & (dsh > 12)), sj, sii, ny, nx)
     dist_, pred = dijkstra(G, indices=nid[sj, sii], return_predecessors=True)
     cells_ = np.argwhere(okc)
     for p in pois:
@@ -176,8 +281,8 @@ def build(k):
     # bench fill: the path is a level shelf at its own height (fills only; the original slope stays above it on the uphill side)
     pband, pidx = ndimage.distance_transform_edt(~path, return_indices=True); pband = pband * STEP
     Hp = ndimage.gaussian_filter(H, 1.0)[pidx[0], pidx[1]]
-    band = (pband < 3.2) & walk & ~BR & (cd > 4)
-    H = np.where(band, np.clip(H * smooth01(1.6, 3.2, pband) + Hp * (1 - smooth01(1.6, 3.2, pband)), base, base + 2.5), H)
+    band = (pband < 3.2) & walk & ~BR & (cd > 4) & ~RAMPZ
+    H = np.where(band, np.clip(H * smooth01(1.6, 3.2, pband) + Hp * (1 - smooth01(1.6, 3.2, pband)), np.maximum(base, H - 1.0), H + 2.5), H)   # bench: never cuts a trench (>1 m) nor fills >2.5 m
     H = np.where(dsh < 14, base, H * smooth01(14, 22, dsh) + base * (1 - smooth01(14, 22, dsh)))   # pier head stays as built
     sl = slope_of(H)
     grade = []
@@ -185,16 +290,42 @@ def build(k):
         r_ = p.get('route', [])
         for (a0, b0), (a1, b1) in zip(r_[:-1], r_[1:]):
             if BR[a0, b0] or BR[a1, b1]: continue
-            grade.append(float(np.degrees(np.arctan(abs(H[a1, b1] - H[a0, b0]) / (math.hypot(a1 - a0, b1 - b0) * STEP)))))
+            grade.append(float(np.degrees(np.arctan(abs(Hq[a1, b1] - Hq[a0, b0]) / (math.hypot(a1 - a0, b1 - b0) * STEP)))))
     STATS[k] = {'reach_m2': int(reach.sum() * STEP ** 2), 'path_max_deg': round(max(grade) if grade else 0, 1), 'path_p95_deg': round(float(np.percentile(grade, 95)) if grade else 0, 1)}
     # ---------------- terrain mesh
-    keep = comp & ~ndimage.binary_dilation(FP, iterations=0 if not FP.any() else 1) & (base > 0.15)
-    keep &= ~((dsh < 6))   # leave the pier-head boards alone
-    keep &= ~((slope_of(base) > 0.85) & (H - base < 0.5) & (pband > 3))   # original sea cliffs stay as built (their own colours / shape)
+    FPc = ndimage.binary_closing(ndimage.binary_dilation(FPS, iterations=2), iterations=2) if FPS.any() else FPS   # holes only for standing props
+    keep = comp & ~FPc & (base > 0.15)
+    keep &= ~((slope_of(base) > 0.85) & (H - base < 0.5) & (pband > 3) & (dsh > 12))   # original sea cliffs stay as built (their own colours / shape)
     keep = ndimage.binary_opening(keep, iterations=1) | (keep & (pband < 3))
+    nh = (pband < 3) & ~FP & (base > -1.0); print('  route cells outside patch before fix:', int((nh & ~keep).sum())); keep |= nh   # every walk path is patch-covered: no holes under a route
     idx = -np.ones(keep.shape, int); idx[keep] = np.arange(keep.sum())
+    H = np.where(RDECK, H, np.where(colH - H < 3.0, np.maximum(H, colH + 0.1), H))   # never let the game's coarse terrain collider poke through the walkable patch (>3 m above = overhang/arch, ignored)
+    colC = _g['colC']; topB = np.where(colC - base < 3.0, colC, base)
+    fade = smooth01(0.0, 6.0, ndimage.distance_transform_edt(keep) * STEP)   # every patch edge (outer rim, prop holes) eases down onto the game collider: no lip, no pit
+    H = np.where(RDECK, H, topB + (H - topB) * fade)
+    near = dsh < 4.5   # at the pier head the patch hugs the game collider exactly, so the board end meets it without a lip
+    H = np.where(near & (colC - base < 3.0), np.maximum(base, colC), H)
+    for _ in range(3):   # iron out the per-vertex mix of lifts / fades into one smooth surface, still riding above the game collider
+        Hs = ndimage.gaussian_filter(H, 0.8); H = np.where(RDECK | BR, H, np.where(colH - Hs < 3.0, np.maximum(Hs, colH + 0.08), Hs))
+    Hd = ndimage.minimum_filter(np.where(RDECK, Hr, 1e9), size=5)   # terrain never rises into the stair / landing headroom
+    H = np.where((Hd < 1e8) & ((Hd - base > 1.0) | (H > Hd + 0.3)), np.minimum(H, Hd - 0.7), H)
+    # final re-route on the finished surface: what the walk test (and the player) actually walks; avoids prop footprints + their edge ring
+    Hq = np.where(RDECK, Hr, H); okw = ndimage.binary_erosion(keep, iterations=2) | ndimage.binary_dilation(RDECK, iterations=1) | ndimage.binary_dilation(BR, iterations=1) | ((dsh < 10) & keep)   # >=4 m inside the patch rim (no tuck edge under a path)
+    okw &= ~(ndimage.binary_dilation(FPS, iterations=1) & (dsh > 14))
+    _g['okw'] = okw.copy(); _g['si'] = (sj, sii); _g['FPS'] = FPS; _g['Hq'] = Hq
+    G2, okc2, nid2 = walk_graph(Hq, okw, sj, sii, ny, nx); d2, pr2 = dijkstra(G2, indices=nid2[sj, sii], return_predecessors=True); c2_ = np.argwhere(okc2); grade = []
+    for p in pois:
+        t = nid2[p['ij']]
+        if t < 0 or not np.isfinite(d2[t]) or d2[t] > 4000: print('  final route missing/hard for', p['name'], (float(d2[t]) if t >= 0 else 'nocell'), int(okw[p['ij']])); continue
+        rt = []
+        while t >= 0 and t != nid2[sj, sii]: rt.append(tuple(c2_[t])); t = pr2[t]
+        p['route'] = rt[::-1]
+        for (a0, b0), (a1, b1) in zip(p['route'][:-1], p['route'][1:]):
+            if not BR[a0, b0]: grade.append(float(np.degrees(np.arctan(abs(Hq[a1, b1] - Hq[a0, b0]) / (math.hypot(a1 - a0, b1 - b0) * STEP)))))
+    STATS[k]['path_max_deg'] = round(max(grade) if grade else 0, 1); STATS[k]['path_p95_deg'] = round(float(np.percentile(grade, 95)) if grade else 0, 1)
+    _g['dbg'] = dict(keep=keep.copy(), X=X, Z=Z, H=H.copy(), base=base, colC=_g['colC'], FP=FP)
     rim = keep & ~ndimage.binary_erosion(keep)   # patch rim tucks 0.25 m under the original ground: no visible step / seam
-    V = np.stack([X[keep], np.where(rim, base - 0.25, H + 0.08)[keep], Z[keep]], 1)
+    V = np.stack([X[keep], np.where(rim, np.minimum(base, _g["colC"]) - 0.25, H + 0.08)[keep], Z[keep]], 1)
     q = keep[:-1, :-1] & keep[1:, :-1] & keep[:-1, 1:] & keep[1:, 1:]
     a = idx[:-1, :-1][q]; b = idx[:-1, 1:][q]; c_ = idx[1:, :-1][q]; d = idx[1:, 1:][q]
     Fc = np.concatenate([np.stack([a, c_, b], 1), np.stack([b, c_, d], 1)])
@@ -210,13 +341,25 @@ def build(k):
     terr = trimesh.Trimesh(v2, f2, process=False); terr.visual = trimesh.visual.ColorVisuals(terr, vertex_colors=col[cKDTree(V).query(v2)[1]])
     def Hat(x, z):
         i = (x - xs[0]) / STEP; j = (z - zs[0]) / STEP; return float(ndimage.map_coordinates(H, [[j], [i]], order=1)[0]) + 0.08
+    _g['Hat'] = Hat
     solid, glow, colp = [terr], [], []
+    for nm, dm in _fpm[reg]:   # re-lay flush decals (glow patches, lava seams, beach dressing) that fall on the patch onto its new surface
+        if not any(f_ in nm for f_ in FLUSH): continue
+        vv = np.asarray(dm.vertices); fi = (vv[:, 0] - xs[0]) / STEP; fj = (vv[:, 2] - zs[0]) / STEP
+        ii_ = np.round(fi).astype(int); jj_ = np.round(fj).astype(int); inb = (ii_ >= 0) & (ii_ < nx) & (jj_ >= 0) & (jj_ < ny)
+        vin = np.zeros(len(vv), bool); vin[inb] = keep[jj_[inb], ii_[inb]]
+        fs = np.where(vin[dm.faces].all(1))[0]
+        if not len(fs): continue
+        sub = dm.submesh([fs], append=True); sv = np.asarray(sub.vertices).copy(); gi = (sv[:, 0] - xs[0]) / STEP; gj = (sv[:, 2] - zs[0]) / STEP
+        b0_ = ndimage.map_coordinates(base, [gj, gi], order=1); h0_ = ndimage.map_coordinates(H, [gj, gi], order=1)
+        sv[:, 1] = h0_ + 0.08 + np.clip(sv[:, 1] - b0_, 0.03, 0.6); sub.vertices = sv
+        (glow if ('glow' in nm or 'lava' in nm) else solid).append(sub)
     # ---------------- POIs
     pm_ = P
     for p in pois:
         x, _, z = p['pos']; y = Hat(x, z); yaw = math.atan2(sh[0] - x, sh[1] - z); s, g, c = poi(p['type'], (x, y, z), yaw, pm_, reg, rng); solid += s; glow += g; colp += c; p['pos'][1] = y
     # ---------------- scatter (rocks, vegetation / crystals / ice / basalt)
-    ok = comp & ~FP & (pband > 3.5) & (cd > 3) & (dsh > 16)
+    ok = comp & ~FP & (pband > 3.5) & (cd > 3) & (dsh > 16) & ~RAMPZ
     for p in pois: ok &= np.hypot(X - p['pos'][0], Z - p['pos'][2]) > p['r'] + 3
     cells = np.argwhere(ok); rng.shuffle(cells)
     nrock = int(min(70, len(cells) * 0.004 + 18)); nveg = int(min(110, len(cells) * 0.008 + 20))
@@ -227,19 +370,27 @@ def build(k):
     for (j, i) in cells[nrock:nrock + nveg]:
         x, z = X[j, i] + rng.uniform(-1, 1), Z[j, i] + rng.uniform(-1, 1); y = Hat(x, z)
         s, g, c = veg(GROUND[reg], (x, y, z), rng); solid += s; glow += g; colp += c
+    if ramp:
+        s_, c_ = ramp_geo(ramp); solid += s_; colp += c_
     for b0 in bridges:
         s_, c_ = bridge(b0, GROUND[reg]); solid += s_; colp += c_
     name = f'{pre}isl_{k}'
     allm = merge(solid); save(name, allm)
     if glow: save(name + '_glow', merge(glow), lod=False)
-    cv, cf = fast_simplification.simplify(np.asarray(terr.vertices, np.float32), np.asarray(terr.faces, np.int64), target_reduction=0.6)
+    cv, cf = V.astype(np.float32), Fc.astype(np.int64)   # full-res 2 m patch (decimating lifted edges into lips the capsule snagged on)
     colm = merge([trimesh.Trimesh(cv, cf, process=False)] + [trimesh.Trimesh(c.vertices, c.faces, process=False) for c in colp])
     colm.export(os.path.join(OUT, name + '_col.glb')); STATS[name]['col_tris'] = int(len(colm.faces))
     STATS[name]['terrain_tris'] = int(len(f2))
     lights = [l for p in pois for l in p.get('lights', [])]
+    HqF = np.where(RDECK, Hr, np.where(keep, H, np.maximum(_g['colC'], base) - 0.08))
+    def rpt(a, b):   # route point; on a causeway, snapped to the deck centreline (a player steers down the middle, not along a rail)
+        x, z, y = float(X[a, b]), float(Z[a, b]), float(HqF[a, b]) + 0.08
+        if BR[a, b] and bridges:
+            A = np.array(bridges[0]['a']); B = np.array(bridges[0]['b']); u = B - A; t = np.clip(((x - A[0]) * u[0] + (z - A[2]) * u[2]) / (u[0] ** 2 + u[2] ** 2), 0, 1); q = A + u * t; x, y, z = float(q[0]), float(q[1]) + 0.15, float(q[2])
+        return [round(x, 2), round(y, 2), round(z, 2)]
     return {'id': k, 'name': Ld['name'], 'region': reg, 'ground': GROUND[reg], 'files': {'mesh': name, 'lod1': name + '_lod1', 'glow': name + '_glow' if glow else None, 'col': name + '_col'},
             'pier_head': Ld['shore'], 'window': [float(xs[0]), float(zs[0]), float(xs[-1]), float(zs[-1])],
-            'pois': [{'type': p['type'], 'name': p['name'], 'pos': [round(c, 2) for c in p['pos']], 'radius': p['r']} for p in pois],
+            'pois': [{'type': p['type'], 'name': p['name'], 'pos': [round(c, 2) for c in p['pos']], 'radius': p['r'], 'route': [rpt(a, b) for (a, b) in p.get('route', [])]} for p in pois], 'ramp': ramp,
             'lights': lights, 'bridges': bridges, 'path': {'max_deg': STATS[k]['path_max_deg'], 'p95_deg': STATS[k]['path_p95_deg']},
             'cams': {'inland': [Ld['shore'][0] - inl[0] * 6, Ld['shore'][1] + 4.5, Ld['shore'][2] - inl[1] * 6], 'inland_look': [sh[0] + inl[0] * 40, Hat(*(sh + inl * 40)) + 1.5, sh[1] + inl[1] * 40],
                      'over': [sh[0] - inl[0] * 60 + inl[1] * 50, max(H.max(), 0) + 55, sh[1] - inl[1] * 60 - inl[0] * 50], 'over_look': [cen[0], float(np.median(H[comp])) if comp.any() else 0, cen[1]]}}
@@ -258,6 +409,10 @@ def bridge(b0, ground):
             off = np.array([math.cos(yaw) * sd, 0, -math.sin(yaw) * sd])
             if i % 2 == 0: S_.append(line(p0 + off + (0, -3.0, 0), p0 + off + (0, 1.1, 0), 0.14, post))
             rl = line(p0 + off + (0, 1.0, 0), p1 + off + (0, 1.0, 0), 0.07, post); S_.append(rl); C_.append(T(box((0.2, 1.0, Lh / n), post, (0, 0, 0), (-pitch, 0, 0)), mid + off + (0, 0.6, 0), (0, yaw, 0)))
+    for e0, dd in ((a, -d), (b, d)):   # approach ramps: slope from 0.3 m under the beach up to the deck end, so there is no step on or off
+        dh = dd / (np.linalg.norm(dd) + 1e-9); far = e0 + dh * 6.0; far = np.array([far[0], _g['Hat'](far[0], far[2]) - 0.3, far[2]])
+        u = e0 - far; Lr = math.hypot(u[0], u[2]); yw = math.atan2(u[0], u[2]); pt = math.atan2(u[1], Lr); mid = (e0 + far) / 2 + (0, 0.0, 0)
+        sl_ = T(T(box((3.0, 0.3, math.hypot(Lr, u[1]) + 0.3), deck), (0, 0, 0), (-pt, 0, 0)), mid, (0, yw, 0)); S_.append(sl_); C_.append(sl_)
     return S_, C_
 def chest(p, yaw):
     s = [box((1.2, 0.7, 0.8), WOOD, (0, 0.35, 0)), box((1.24, 0.12, 0.84), BRASS, (0, 0.72, 0)), box((0.2, 0.25, 0.06), BRASS, (0, 0.5, 0.43)), box((1.25, 0.08, 0.1), IRON, (0, 0.3, 0.38))]

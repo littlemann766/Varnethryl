@@ -5,14 +5,15 @@ a=sys.argv[sys.argv.index('--')+1:]; T=40; REF=a[2] if len(a)>2 else None  # REF
 bpy.ops.wm.read_factory_settings(use_empty=True); bpy.context.scene.render.fps=30
 RL={}
 if REF:
-    bpy.ops.import_scene.gltf(filepath=REF); RL={x.name.split('_'+x.name.split('_')[-2]+'_')[0] if False else x.name.rsplit('_',2)[0]:x.frame_range[1] for x in bpy.data.actions}
+    bpy.ops.import_scene.gltf(filepath=REF); an=[o for o in bpy.data.objects if o.type=='ARMATURE'][0].name; RL={x.name.replace('_'+an,''):round(x.frame_range[1]) for x in bpy.data.actions}
     bpy.ops.wm.read_factory_settings(use_empty=True); bpy.context.scene.render.fps=30
 bpy.ops.import_scene.gltf(filepath=a[0])
+arm0=[o for o in bpy.data.objects if o.type=='ARMATURE'][0].name
 w=[x for x in bpy.data.actions if x.name.startswith('walk_')][0]; r=T/w.frame_range[1]
 n=round(math.log(r,1.25)); F=1.25**n; print('FACTOR',round(r,4),'->',F)
-if n:
+if n or REF:
     for act in bpy.data.actions:
-        cl=act.name.rsplit('_',2)[0]; Fa=(RL[cl]/act.frame_range[1]) if cl in RL and act.frame_range[1]>0 else F
+        cl=act.name.replace('_'+arm0,''); Fa=(RL[cl]/act.frame_range[1]) if cl in RL and act.frame_range[1]>0 else F
         if abs(Fa/F-1)>0.15: Fa=F
         for fc in act.fcurves:
             for kp in fc.keyframe_points:
@@ -20,4 +21,4 @@ if n:
             fc.update()
         act.frame_range=(act.frame_range[0]*F,act.frame_range[1]*F) if act.use_frame_range else act.frame_range
 json.dump({'factor':F},open(a[1].replace('.glb','.retime.json'),'w'))
-bpy.ops.export_scene.gltf(filepath=a[1],export_format='GLB',export_animation_mode='ACTIONS',export_force_sampling=True,export_yup=True,export_skins=True,export_apply=False)
+bpy.ops.export_scene.gltf(filepath=a[1],export_frame_step=1,export_format='GLB',export_animation_mode='ACTIONS',export_force_sampling=True,export_yup=True,export_skins=True,export_apply=False)

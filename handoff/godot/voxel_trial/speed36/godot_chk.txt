@@ -1,0 +1,7 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+OK holyknight_villain_voxel.glb skel=1 tris=173836 clips=["attack", "death", "hit", "idle", "run", "walk"]
+OK nyx_voxel.glb skel=1 tris=103160 clips=["attack1", "attack2", "attack3", "death", "fly_ascend", "fly_bank_L", "fly_bank_R", "fly_descend", "fly_fast", "fly_forward", "fly_hover", "hit", "idle", "jump", "jump_hang", "jump_land", "jump_start", "run", "skill", "swim_stroke", "swim_tread", "walk"]
+OK nyx_voxel_lod1.glb skel=1 tris=38836 clips=["attack1", "attack2", "attack3", "death", "fly_ascend", "fly_bank_L", "fly_bank_R", "fly_descend", "fly_fast", "fly_forward", "fly_hover", "hit", "idle", "jump", "jump_hang", "jump_land", "jump_start", "run", "skill", "swim_stroke", "swim_tread", "walk"]
+OK rook_voxel_lod1.glb skel=1 tris=54056 clips=["attack1", "attack2", "attack3", "death", "fly_ascend", "fly_bank_L", "fly_bank_R", "fly_descend", "fly_fast", "fly_forward", "fly_hover", "hit", "idle", "jump", "jump_hang", "jump_land", "jump_start", "run", "skill", "swim_stroke", "swim_tread", "walk"]
+RESULT PASS

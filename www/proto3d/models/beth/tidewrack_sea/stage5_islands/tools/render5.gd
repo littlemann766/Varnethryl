@@ -45,6 +45,13 @@ func _run() -> void:
 	wm.albedo_color = Color(0,0,0) if false else ({"A": Color(0.1, 0.38, 0.5), "B": Color(0.1, 0.36, 0.46), "frost": Color(0.2, 0.36, 0.48), "ash": Color(0.04, 0.1, 0.12)}[reg] as Color); wm.roughness = 0.3; w.material_override = wm; top.add_child(w)
 	w.position = Vector3(I.pier_head[0], 0, I.pier_head[2])
 	var cam := Camera3D.new(); top.add_child(cam); cam.current = true; cam.far = 3000
+	if a.size() > 4 and a[4] == "stair" and I.get("ramp") != null:   # Saltglass stair close-up, same framing before/after
+		var b0 := Vector3(I.ramp.bottom[0], I.ramp.bottom[1], I.ramp.bottom[2]); var t0 := Vector3(I.ramp.top[0], I.ramp.top[1], I.ramp.top[2]); var mid := (b0 + t0) * 0.5
+		for sv in [["stairA", Vector3(55, 30, 45)], ["stairB", Vector3(-20, 45, 70)]]:
+			cam.fov = 55; cam.look_at_from_position(mid + sv[1], mid, Vector3.UP)
+			for i in 4: await process_frame
+			get_root().get_texture().get_image().save_jpg("%s/%s_%s_%s_%s.jpg" % [out, id, sv[0], a[2], a[3]], 0.85)
+		quit(); return
 	for sh in [["inland", "inland_look", 62.0], ["over", "over_look", 55.0]]:
 		var c: Array = I.cams[sh[0]]; var l: Array = I.cams[sh[1]]
 		cam.fov = sh[2]; cam.look_at_from_position(Vector3(c[0], c[1], c[2]), Vector3(l[0], l[1], l[2]), Vector3.UP)

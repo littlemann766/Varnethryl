@@ -63,3 +63,51 @@ Budgets: High <= ~52k tris per island (terrain capped at 36k), lod1 = 45 % of Hi
 Renders: `renders/small/<id>_before_after_High.jpg` (inland view from the pier head + overview, before/after),
 `<id>_before_after_Low.jpg`, `<id>_pois_High.jpg` (each POI), `S5_contact_inland_after.jpg`.
 Tools: `tools/build_stage5.py [id ...]` (deterministic per id), `tools/render5.gd`.
+
+## Stage 6 - Saltglass stair, causeway check, walk test
+
+**Saltglass stair.** This is a switchback stair from the lower shelf (72.6 m) up to the plateau (108.3 m): 5 stone flights at 19.6°, rising 35.7 m.
+- Landings span both flights, with a rail on the outer side only.
+- The top walk is flat, then eases onto the plateau. The foot dips under the shelf so there is no lip.
+- Slabs and rails are in `coast_isl_saltglass_col.glb`.
+- Two new points of interest on top: **Saltglass Lookout** (watchtower) and **Clifftop Cache** (chest).
+- Manifest: `islands.saltglass.ramp` = {decks, flights, deg, rise_m, bottom, top}.
+- Renders: `renders/small/saltglass_stair_before_after_A.jpg` and `_B.jpg` (left before, right after).
+
+**Sailing lanes vs causeways.** No stage 1-4 route or lane crosses the Frostreach (58 m), Beached Wreck (39 m) or Ember Wreck (16 m) causeways.
+- The nearest are Rimefang Narrows, 309 m from Frostreach, and Cinder Gate, 631 m from Ember Wreck.
+- So no arch was needed and the causeways stay low.
+- Caveat: the water under the Frostreach deck is deep enough to sail, but no route uses it.
+
+**Causeways.** The first and last span of each causeway is open (no rail) so you can step on at an angle. The decks are in the `_col`.
+
+**Walk test.** Tool: `tools/walk5.gd`. It uses your ashore capsule: height 1.905, radius 0.32, speed 6, gravity 20, snap 0.6, 50° max floor, same resets as `_walk`. It walks from the pier head along every route in the manifest (`pois[].route`, world points) to each point of interest, both ways across each causeway, and up and down the stair. Results are in `walk_test_final.json`. Pier boards are excluded from this table and listed below.
+
+| island | legs passed | still failing |
+|---|---|---|
+| gullhaven | 4/4 | - |
+| frozen_wreck | 3/3 | - |
+| frostreach | 6/6 | - |
+| lantern_rock | 4/4 | - |
+| obsidian_arch | 3/3 | - |
+| vent | 3/4 | Ember Shrine (snag on a steep patch near the top) |
+| hot_spring | 3/4 | Bathers' Shrine (snag at a pool edge) |
+| coil_isle | 2/3 | Coil Bones (snag on a prop collider) |
+| saltwatch_keep | 2/3 | Outer Wall ruin (snag on a wall block) |
+| aurora_arch | 2/3 | Aurora Shrine (snag on a steep patch) |
+| saltglass | 2/8 | stair up/down pass. All 6 lower-shelf points of interest fail: from the pier the shelf is up a ~50° cliff, so it needs a second stair from the pier |
+| beached_wreck | 0/5 | causeway ends: the far islet bank is too steep where the deck lands |
+| ember_wreck | 0/5 | causeway ends (same) + Cinder Camp snag |
+
+**Total: 34/55 legs pass.**
+
+**Your pier boards** (not stage 5): the sloped board fails the capsule on lantern_rock (48°), hot_spring (49°), vent (47°), saltglass (36°), aurora_arch (37°), obsidian_arch (31°) and ember_wreck (21°).
+
+**Builder changes in stage 6:**
+- Route heights come from the final mesh.
+- The patch rides above the game's terrain collider.
+- The patch collider is full resolution.
+- Patch edges fade onto the game collider.
+- Holes are cut only for standing props. Flat decals are re-laid onto the patch.
+- Routes are re-planned on the finished surface.
+- Terrain is kept out of stair headroom.

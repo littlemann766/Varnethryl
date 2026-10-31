@@ -18,3 +18,4 @@
 - 6d: causeway ends opened (no rail on first/last span) + routes stay on the deck (no over-water corridor). Frostreach now 6/6 incl. both causeway legs.
   Tried and rolled back (made other islands worse, kept in /tmp only): bench cutting, wider path corridor, adaptive bank ramps, second Saltglass pier stair (bottom landed mid-slope).
   Final table in walk_test_final.json: 34/55 legs pass (pier boards excluded).
+- 6e: Saltglass stair before/after renders (renders/small/saltglass_stair_before_after_A/B.jpg, checked by eye) + README Stage 6 section.

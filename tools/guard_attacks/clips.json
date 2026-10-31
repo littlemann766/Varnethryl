@@ -1,0 +1,184 @@
+{
+ "attack_slash": {
+  "segs": [
+   [
+    "U2:Sword_Regular_A",
+    0,
+    5,
+    0.55
+   ],
+   [
+    "U2:Sword_Regular_A",
+    6,
+    10,
+    0.35
+   ],
+   [
+    "U2:Sword_Regular_A",
+    11,
+    null,
+    1.0
+   ],
+   [
+    "U2:Sword_Regular_A_Rec",
+    null,
+    null,
+    1.0
+   ]
+  ],
+  "damp": 0.45,
+  "left_arm_from": [
+   "U2:Idle_Shield_Loop",
+   0
+  ],
+  "weapon": "R",
+  "arm_max": 26.0,
+  "twist_max": 35.0
+ },
+ "attack_backhand": {
+  "segs": [
+   [
+    "U2:Sword_Regular_B",
+    0,
+    5,
+    0.6
+   ],
+   [
+    "U2:Sword_Regular_B",
+    6,
+    10,
+    0.35
+   ],
+   [
+    "U2:Sword_Regular_B",
+    11,
+    null,
+    1.0
+   ],
+   [
+    "U2:Sword_Regular_B_Rec",
+    null,
+    null,
+    1.0
+   ]
+  ],
+  "damp": 0.45,
+  "left_arm_from": [
+   "U2:Idle_Shield_Loop",
+   0
+  ],
+  "weapon": "R",
+  "arm_max": 26.0,
+  "twist_max": 35.0
+ },
+ "attack_overhead": {
+  "segs": [
+   [
+    "U1:Sword_Attack",
+    0,
+    9,
+    0.75
+   ],
+   [
+    "U1:Sword_Attack",
+    10,
+    16,
+    0.3
+   ],
+   [
+    "U1:Sword_Attack",
+    17,
+    null,
+    1.0
+   ]
+  ],
+  "damp": 0.45,
+  "left_arm_from": [
+   "U2:Idle_Shield_Loop",
+   0
+  ],
+  "weapon": "R",
+  "arm_max": 26.0,
+  "twist_max": 35.0
+ },
+ "attack_shield_bash": {
+  "segs": [
+   [
+    "U1:Punch_Jab",
+    0,
+    3,
+    0.4
+   ],
+   [
+    "U1:Punch_Jab",
+    4,
+    8,
+    0.45
+   ],
+   [
+    "U1:Punch_Jab",
+    9,
+    null,
+    0.9
+   ]
+  ],
+  "damp": 0.6,
+  "weapon": "L",
+  "arm_max": 26.0,
+  "twist_max": 35.0
+ },
+ "block": {
+  "segs": [
+   [
+    "U2:Shield_OneShot",
+    null,
+    null
+   ]
+  ],
+  "damp": 0.6,
+  "arm_max": 26.0,
+  "twist_max": 35.0
+ },
+ "guard_stance": {
+  "segs": [
+   [
+    "U2:Idle_Shield_Loop",
+    null,
+    null
+   ]
+  ],
+  "loop": true,
+  "arm_max": 26.0,
+  "twist_max": 35.0
+ },
+ "combat_idle": {
+  "segs": [
+   [
+    "U1:Sword_Idle",
+    null,
+    null
+   ]
+  ],
+  "loop": true,
+  "left_arm_from": [
+   "U2:Idle_Shield_Loop",
+   0
+  ],
+  "arm_max": 26.0,
+  "twist_max": 35.0
+ },
+ "hit": {
+  "segs": [
+   [
+    "U1:Hit_Chest",
+    null,
+    null,
+    0.8
+   ]
+  ],
+  "pad": 8,
+  "loop": true,
+  "arm_max": 26.0,
+  "twist_max": 35.0
+ }
+}

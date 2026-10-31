@@ -2,7 +2,7 @@
 # usage: blender -b -P despike.py -- in.glb out.glb '<clip regex>' '<bone regex>' [thresh_deg=20] [seam=0|N]
 import bpy,sys,re,json,math
 from mathutils import Quaternion
-a=sys.argv[sys.argv.index('--')+1:]; src,out,CR,BR=a[:4]; TH=math.radians(float(a[4]) if len(a)>4 else 20); SEAM=int(a[5]) if len(a)>5 else 0
+a=sys.argv[sys.argv.index('--')+1:]; src,out,CR,BR=a[:4]; TH=math.radians(float(a[4]) if len(a)>4 else 20); SEAM=int(a[5]) if len(a)>5 else 0; RATE=math.radians(float(a[6])) if len(a)>6 else 0  # optional max deg/frame
 bpy.ops.wm.read_factory_settings(use_empty=True); bpy.context.scene.render.fps=30; bpy.ops.import_scene.gltf(filepath=src); bpy.context.scene.render.fps=30
 arm=[o for o in bpy.data.objects if o.type=='ARMATURE'][0]
 def qcurves(act):
@@ -34,6 +34,17 @@ for act in bpy.data.actions:
             for j in range(1,n-1):
                 d1=Q[j-1].rotation_difference(Q[j]).angle; d2=Q[j].rotation_difference(Q[j+1]).angle; d=Q[j-1].rotation_difference(Q[j+1]).angle
                 if d1+d2-d>TH: Q[j]=Q[j-1].slerp(Q[j+1],0.5); fixed+=1
+        if RATE and n>2 and step(Q)>RATE:
+            for it in range(30):
+                F=[Q[0]]
+                for j in range(1,n):
+                    d=F[-1].rotation_difference(Q[j]).angle; F.append(F[-1].slerp(Q[j],min(1,RATE/d)) if d>RATE else Q[j])
+                Bk=[Q[-1]]
+                for j in range(n-2,-1,-1):
+                    d=Bk[-1].rotation_difference(Q[j]).angle; Bk.append(Bk[-1].slerp(Q[j],min(1,RATE/d)) if d>RATE else Q[j])
+                Bk=Bk[::-1]; Q=[F[j].slerp(Bk[j] if F[j].dot(Bk[j])>=0 else -Bk[j],0.5) for j in range(n)]
+                if step(Q)<=RATE*1.05: break
+            fixed+=1
         if SEAM and n>SEAM+2:
             q0=Q[0]
             for k in range(SEAM):

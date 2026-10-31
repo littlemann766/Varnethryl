@@ -1,0 +1,26 @@
+{
+ "walk": {
+  "foot_L": {
+   "max_step_deg": [
+    17.2,
+    17.2
+   ],
+   "seam_deg": [
+    1.4,
+    1.4
+   ],
+   "frames_fixed": 1
+  },
+  "shin_L": {
+   "max_step_deg": [
+    26.4,
+    26.4
+   ],
+   "seam_deg": [
+    2.6,
+    2.6
+   ],
+   "frames_fixed": 1
+  }
+ }
+}

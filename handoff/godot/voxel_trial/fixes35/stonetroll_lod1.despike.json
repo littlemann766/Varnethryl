@@ -1,0 +1,235 @@
+{
+ "walk": {
+  "cape": {
+   "max_step_deg": [
+    0.0,
+    0.0
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 0
+  },
+  "head": {
+   "max_step_deg": [
+    0.9,
+    0.9
+   ],
+   "seam_deg": [
+    0.6,
+    0.1
+   ],
+   "frames_fixed": 0
+  },
+  "neck": {
+   "max_step_deg": [
+    0.0,
+    0.0
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 0
+  },
+  "hand_L": {
+   "max_step_deg": [
+    0.0,
+    0.0
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 0
+  },
+  "foreArm_L": {
+   "max_step_deg": [
+    4.3,
+    4.3
+   ],
+   "seam_deg": [
+    3.1,
+    0.6
+   ],
+   "frames_fixed": 0
+  },
+  "upperArm_L": {
+   "max_step_deg": [
+    6.1,
+    6.1
+   ],
+   "seam_deg": [
+    4.3,
+    0.9
+   ],
+   "frames_fixed": 0
+  },
+  "shoulder_L": {
+   "max_step_deg": [
+    0.0,
+    0.0
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 0
+  },
+  "hand_R": {
+   "max_step_deg": [
+    0.0,
+    0.0
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 0
+  },
+  "foreArm_R": {
+   "max_step_deg": [
+    4.3,
+    4.3
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 0
+  },
+  "upperArm_R": {
+   "max_step_deg": [
+    6.1,
+    6.1
+   ],
+   "seam_deg": [
+    4.3,
+    0.9
+   ],
+   "frames_fixed": 0
+  },
+  "shoulder_R": {
+   "max_step_deg": [
+    0.0,
+    0.0
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 0
+  },
+  "chest": {
+   "max_step_deg": [
+    1.0,
+    1.0
+   ],
+   "seam_deg": [
+    0.7,
+    0.1
+   ],
+   "frames_fixed": 0
+  },
+  "spine": {
+   "max_step_deg": [
+    1.8,
+    1.8
+   ],
+   "seam_deg": [
+    1.3,
+    0.3
+   ],
+   "frames_fixed": 0
+  },
+  "foot_L": {
+   "max_step_deg": [
+    2.6,
+    2.6
+   ],
+   "seam_deg": [
+    1.8,
+    0.4
+   ],
+   "frames_fixed": 0
+  },
+  "shin_L": {
+   "max_step_deg": [
+    14.7,
+    19.5
+   ],
+   "seam_deg": [
+    1.6,
+    0.3
+   ],
+   "frames_fixed": 0
+  },
+  "thigh_L": {
+   "max_step_deg": [
+    9.6,
+    9.6
+   ],
+   "seam_deg": [
+    6.8,
+    1.3
+   ],
+   "frames_fixed": 0
+  },
+  "foot_R": {
+   "max_step_deg": [
+    2.6,
+    2.6
+   ],
+   "seam_deg": [
+    1.8,
+    0.4
+   ],
+   "frames_fixed": 0
+  },
+  "shin_R": {
+   "max_step_deg": [
+    14.7,
+    14.7
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 0
+  },
+  "thigh_R": {
+   "max_step_deg": [
+    9.6,
+    9.6
+   ],
+   "seam_deg": [
+    6.8,
+    1.3
+   ],
+   "frames_fixed": 0
+  },
+  "hips": {
+   "max_step_deg": [
+    2.1,
+    2.1
+   ],
+   "seam_deg": [
+    1.5,
+    0.3
+   ],
+   "frames_fixed": 0
+  },
+  "root": {
+   "max_step_deg": [
+    0.0,
+    0.0
+   ],
+   "seam_deg": [
+    0.0,
+    0.0
+   ],
+   "frames_fixed": 0
+  }
+ }
+}

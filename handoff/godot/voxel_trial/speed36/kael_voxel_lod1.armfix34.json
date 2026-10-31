@@ -1,0 +1,12 @@
+{
+ "jump": {
+  "start": 30,
+  "orig_before": 30,
+  "after": 0
+ },
+ "jump_land": {
+  "start": 30,
+  "orig_before": 30,
+  "after": 3
+ }
+}

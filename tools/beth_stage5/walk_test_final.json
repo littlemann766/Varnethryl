@@ -1,0 +1,438 @@
+{
+ "aurora_arch": {
+  "Aurora Shrine": {
+   "ok": true,
+   "t": 33.1
+  },
+  "Skyglass Hollow": {
+   "ok": true,
+   "t": 20.4
+  },
+  "Starwatcher's Stone": {
+   "ok": true,
+   "t": 4.9
+  },
+  "pier_boards": {
+   "at": [
+    48.7,
+    12.2,
+    -2444.8
+   ],
+   "hits": [
+    "@StaticBody3D@53 n(-0.23, 0.8, 0.56) p(48.7, 12.2, -2445.0)",
+    "@StaticBody3D@53 n(-0.23, 0.8, 0.56) p(48.7, 12.2, -2445.0)"
+   ],
+   "of": 1,
+   "ok": false,
+   "t": 5.8,
+   "why": "stuck",
+   "wp": 0
+  }
+ },
+ "beached_wreck": {
+  "Captain's Last Log": {
+   "ok": true,
+   "t": 53.3
+  },
+  "Castaway Camp": {
+   "ok": true,
+   "t": 35.0
+  },
+  "Salvage Chest": {
+   "ok": true,
+   "t": 64.5
+  },
+  "causeway a->b": {
+   "ok": true,
+   "t": 31.4
+  },
+  "causeway b->a": {
+   "ok": true,
+   "t": 27.4
+  },
+  "pier_boards": {
+   "ok": true,
+   "t": 1.8
+  }
+ },
+ "coil_isle": {
+  "Coil Bones": {
+   "ok": true,
+   "t": 12.3
+  },
+  "Drowned Offering": {
+   "ok": true,
+   "t": 28.7
+  },
+  "Serpent Shrine": {
+   "ok": true,
+   "t": 25.3
+  },
+  "pier_boards": {
+   "ok": true,
+   "t": 1.8
+  }
+ },
+ "ember_wreck": {
+  "Cinder Camp": {
+   "ok": true,
+   "t": 6.4
+  },
+  "Ember Vent": {
+   "at": [
+    495.9,
+    29.7,
+    2267.7
+   ],
+   "hits": [
+    "ash_isl_ember_wreck_col_geometry_0 n(0.28, 0.6, -0.75) p(495.8, 29.8, 2267.9)",
+    "ash_terrain_col_geometry_0 n(0.38, 0.92, 0.08) p(495.8, 29.7, 2267.6)"
+   ],
+   "of": 160,
+   "ok": false,
+   "t": 49.6,
+   "why": "stuck",
+   "wp": 127
+  },
+  "Scorched Chest": {
+   "at": [
+    495.9,
+    29.7,
+    2267.7
+   ],
+   "hits": [
+    "ash_isl_ember_wreck_col_geometry_0 n(0.28, 0.6, -0.75) p(495.8, 29.8, 2267.9)",
+    "ash_terrain_col_geometry_0 n(0.38, 0.92, 0.08) p(495.8, 29.7, 2267.6)"
+   ],
+   "of": 146,
+   "ok": false,
+   "t": 49.6,
+   "why": "stuck",
+   "wp": 127
+  },
+  "causeway a->b": {
+   "ok": true,
+   "t": 37.6
+  },
+  "causeway b->a": {
+   "ok": true,
+   "t": 35.8
+  },
+  "pier_boards": {
+   "at": [
+    627.7,
+    8.7,
+    2268.9
+   ],
+   "hits": [
+    "@StaticBody3D@58 n(0.33, 0.93, 0.14) p(627.6, 8.7, 2268.9)",
+    "@StaticBody3D@58 n(0.33, 0.93, 0.14) p(627.6, 8.7, 2268.9)"
+   ],
+   "of": 1,
+   "ok": false,
+   "t": 5.7,
+   "why": "stuck",
+   "wp": 0
+  }
+ },
+ "frostreach": {
+  "Frostreach Cairn": {
+   "ok": true,
+   "t": 4.6
+  },
+  "Frozen Waystone": {
+   "ok": true,
+   "t": 23.8
+  },
+  "Iced Chest": {
+   "ok": true,
+   "t": 25.6
+  },
+  "Rimehollow Ice Cave": {
+   "ok": true,
+   "t": 37.1
+  },
+  "causeway a->b": {
+   "ok": true,
+   "t": 10.5
+  },
+  "causeway b->a": {
+   "ok": true,
+   "t": 10.5
+  },
+  "pier_boards": {
+   "ok": true,
+   "t": 1.8
+  }
+ },
+ "frozen_wreck": {
+  "Bergcleft Cave": {
+   "ok": true,
+   "t": 29.3
+  },
+  "Frostbitten Chest": {
+   "ok": true,
+   "t": 24.6
+  },
+  "Frozen Camp": {
+   "at": [
+    -245.5,
+    6.1,
+    -2598.2
+   ],
+   "hits": [
+    "frost_isl_frozen_wreck_col_geometry_0 n(-0.82, 0.42, -0.39) p(-245.3, 6.3, -2598.0)"
+   ],
+   "of": 20,
+   "ok": false,
+   "t": 7.1,
+   "why": "stuck",
+   "wp": 6
+  },
+  "pier_boards": {
+   "ok": true,
+   "t": 3.0
+  }
+ },
+ "gullhaven": {
+  "Founders' Stone": {
+   "ok": true,
+   "t": 27.4
+  },
+  "Gull Shrine": {
+   "ok": true,
+   "t": 26.9
+  },
+  "Gull Watchtower ruin": {
+   "ok": true,
+   "t": 42.3
+  },
+  "Harbourmaster's Cache": {
+   "ok": true,
+   "t": 16.9
+  },
+  "pier_boards": {
+   "ok": true,
+   "t": 2.4
+  }
+ },
+ "hot_spring": {
+  "Bather's Bundle": {
+   "ok": true,
+   "t": 21.6
+  },
+  "Bathers' Shrine": {
+   "ok": true,
+   "t": 21.1
+  },
+  "Lower Spring": {
+   "ok": true,
+   "t": 19.5
+  },
+  "Upper Spring": {
+   "ok": true,
+   "t": 13.3
+  },
+  "pier_boards": {
+   "at": [
+    1137.5,
+    10.9,
+    2015.4
+   ],
+   "hits": [
+    "@StaticBody3D@63 n(-0.76, 0.65, 0.0) p(1137.7, 11.1, 2015.4)",
+    "@StaticBody3D@63 n(-0.76, 0.65, 0.0) p(1137.7, 11.1, 2015.4)"
+   ],
+   "of": 1,
+   "ok": false,
+   "t": 5.5,
+   "why": "stuck",
+   "wp": 0
+  }
+ },
+ "lantern_rock": {
+  "Keeper's Hut": {
+   "ok": true,
+   "t": 20.8
+  },
+  "Keeper's Strongbox": {
+   "ok": true,
+   "t": 5.1
+  },
+  "Lamp-oil Logbook": {
+   "ok": true,
+   "t": 33.0
+  },
+  "Old Lantern ruin": {
+   "ok": true,
+   "t": 37.0
+  },
+  "pier_boards": {
+   "at": [
+    -19.6,
+    14.6,
+    -47.3
+   ],
+   "hits": [
+    "@StaticBody3D@8 n(-0.68, 0.67, -0.28) p(-19.5, 14.7, -47.2)",
+    "@StaticBody3D@8 n(-0.68, 0.67, -0.28) p(-19.5, 14.7, -47.2)",
+    "@StaticBody3D@8 n(-0.68, 0.67, -0.28) p(-19.4, 14.7, -47.2)"
+   ],
+   "of": 1,
+   "ok": false,
+   "t": 4.7,
+   "why": "dropped_through",
+   "wp": 0
+  }
+ },
+ "obsidian_arch": {
+  "Arch Vent": {
+   "ok": true,
+   "t": 9.4
+  },
+  "Glassfire Shrine": {
+   "ok": true,
+   "t": 23.1
+  },
+  "Obsidian Mirror": {
+   "ok": true,
+   "t": 28.3
+  },
+  "pier_boards": {
+   "at": [
+    461.5,
+    11.9,
+    2677.4
+   ],
+   "hits": [
+    "@StaticBody3D@68 n(0.47, 0.86, -0.19) p(461.4, 11.9, 2677.5)",
+    "@StaticBody3D@68 n(0.47, 0.86, -0.19) p(461.4, 11.9, 2677.5)",
+    "@StaticBody3D@68 n(0.47, 0.86, -0.19) p(461.4, 12.0, 2677.5)"
+   ],
+   "of": 1,
+   "ok": false,
+   "t": 4.0,
+   "why": "dropped_through",
+   "wp": 0
+  }
+ },
+ "saltglass": {
+  "Clifftop Cache": {
+   "ok": true,
+   "t": 83.7
+  },
+  "Glass-diver's Chest": {
+   "at": [
+    -2151.8,
+    104.7,
+    57.7
+   ],
+   "hits": [],
+   "of": 172,
+   "ok": false,
+   "t": 90.1,
+   "why": "dropped_through",
+   "wp": 124
+  },
+  "Salt-crusted Tablet": {
+   "ok": true,
+   "t": 69.8
+  },
+  "Saltglass Lookout": {
+   "ok": true,
+   "t": 89.2
+  },
+  "Saltglass Shrine": {
+   "ok": true,
+   "t": 72.7
+  },
+  "Singing Shards": {
+   "ok": true,
+   "t": 76.4
+  },
+  "pier stair down": {
+   "ok": true,
+   "t": 9.8
+  },
+  "pier stair up": {
+   "ok": true,
+   "t": 43.3
+  },
+  "pier_boards": {
+   "at": [
+    -2117.5,
+    14.9,
+    -90.3
+   ],
+   "hits": [
+    "coast_isl_saltglass_col_geometry_0 n(0.89, 0.44, 0.12) p(-2117.8, 15.1, -90.3)",
+    "@StaticBody3D@18 n(0.59, 0.81, 0.0) p(-2117.7, 15.0, -90.3)"
+   ],
+   "of": 1,
+   "ok": false,
+   "t": 6.7,
+   "why": "stuck",
+   "wp": 0
+  },
+  "stair down": {
+   "ok": true,
+   "t": 24.8
+  },
+  "stair up": {
+   "ok": true,
+   "t": 28.6
+  }
+ },
+ "saltwatch_keep": {
+  "Garrison Chest": {
+   "ok": true,
+   "t": 6.9
+  },
+  "Outer Wall ruin": {
+   "ok": true,
+   "t": 13.1
+  },
+  "Watch Shrine": {
+   "ok": true,
+   "t": 4.4
+  },
+  "pier_boards": {
+   "ok": true,
+   "t": 2.4
+  }
+ },
+ "vent": {
+  "Ash-buried Chest": {
+   "ok": true,
+   "t": 17.8
+  },
+  "Ember Shrine": {
+   "ok": true,
+   "t": 32.8
+  },
+  "Steam Pools": {
+   "ok": true,
+   "t": 9.4
+  },
+  "Ventmouth": {
+   "ok": true,
+   "t": 49.5
+  },
+  "pier_boards": {
+   "at": [
+    -485.7,
+    6.4,
+    1865.2
+   ],
+   "hits": [
+    "@StaticBody3D@28 n(0.0, 0.69, -0.73) p(-485.7, 6.5, 1865.4)",
+    "@StaticBody3D@28 n(0.0, 0.69, -0.73) p(-485.7, 6.5, 1865.4)"
+   ],
+   "of": 1,
+   "ok": false,
+   "t": 3.5,
+   "why": "stuck",
+   "wp": 0
+  }
+ }
+}

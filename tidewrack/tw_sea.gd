@@ -622,6 +622,8 @@ func _place_landings(id: String, root: Node3D) -> void:
 		if L.region != id: continue
 		var n := Node3D.new(); n.name = "Landing_" + k; root.add_child(n)
 		var a := _v3(L.moor) + _inland(L) * 3.0 + Vector3(0, 1.0, 0); var b := pier_head(L) - Vector3(0, 0.2, 0) + _inland(L) * 1.5
+		var hz := Vector2(b.x - a.x, b.z - a.z).length()   # test 36: steep landings (up to 49 deg) -> raise the sea end on taller piles so the boards are <= 18 deg (walkable)
+		a.y = maxf(a.y, b.y - hz * tan(deg_to_rad(18.0)))
 		var len := a.distance_to(b); var mid := (a + b) * 0.5
 		var mi := MeshInstance3D.new(); var bm := BoxMesh.new(); bm.size = Vector3(3.2, 0.3, len); mi.mesh = bm; mi.material_override = wood; n.add_child(mi)
 		mi.look_at_from_position(mid, b, Vector3.UP)

@@ -1,0 +1,146 @@
+{
+ "attack_slash": {
+  "Left": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 116,
+   "after_max": 40,
+   "wrist_offset_deg": {
+    "x": -30,
+    "z": 30
+   }
+  }
+ },
+ "attack_backhand": {
+  "Left": {
+   "before_max": 70,
+   "after_max": 40,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": -15
+   }
+  },
+  "Right": {
+   "before_max": 132,
+   "after_max": 58,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": -30
+   }
+  }
+ },
+ "attack_overhead": {
+  "Left": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 140,
+   "after_max": 52,
+   "wrist_offset_deg": {
+    "x": -30,
+    "z": 15
+   }
+  }
+ },
+ "attack_shield_bash": {
+  "Left": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 50,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 30,
+    "z": 0
+   }
+  }
+ },
+ "block": {
+  "Left": {
+   "before_max": 51,
+   "after_max": 11,
+   "wrist_offset_deg": {
+    "x": 30,
+    "z": -30
+   }
+  },
+  "Right": {
+   "before_max": 68,
+   "after_max": 14,
+   "wrist_offset_deg": {
+    "x": -15,
+    "z": 30
+   }
+  }
+ },
+ "guard_stance": {
+  "Left": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 92,
+   "after_max": 22,
+   "wrist_offset_deg": {
+    "x": -15,
+    "z": 30
+   }
+  }
+ },
+ "combat_idle": {
+  "Left": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 96,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": -30,
+    "z": 30
+   }
+  }
+ },
+ "hit": {
+  "Left": {
+   "before_max": 86,
+   "after_max": 17,
+   "wrist_offset_deg": {
+    "x": 30,
+    "z": 15
+   }
+  },
+  "Right": {
+   "before_max": 111,
+   "after_max": 53,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 30
+   }
+  }
+ }
+}

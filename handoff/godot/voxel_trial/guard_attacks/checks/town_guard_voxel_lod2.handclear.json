@@ -1,0 +1,146 @@
+{
+ "attack_slash": {
+  "Left": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  }
+ },
+ "attack_backhand": {
+  "Left": {
+   "before_max": 8,
+   "after_max": 8,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  }
+ },
+ "attack_overhead": {
+  "Left": {
+   "before_max": 8,
+   "after_max": 8,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  }
+ },
+ "attack_shield_bash": {
+  "Left": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  }
+ },
+ "block": {
+  "Left": {
+   "before_max": 52,
+   "after_max": 2,
+   "wrist_offset_deg": {
+    "x": 15,
+    "z": -15
+   }
+  },
+  "Right": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  }
+ },
+ "guard_stance": {
+  "Left": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  }
+ },
+ "combat_idle": {
+  "Left": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  }
+ },
+ "hit": {
+  "Left": {
+   "before_max": 24,
+   "after_max": 5,
+   "wrist_offset_deg": {
+    "x": 15,
+    "z": 0
+   }
+  },
+  "Right": {
+   "before_max": 0,
+   "after_max": 0,
+   "wrist_offset_deg": {
+    "x": 0,
+    "z": 0
+   }
+  }
+ }
+}

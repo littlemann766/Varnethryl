@@ -1,0 +1,42 @@
+{
+ "attack_backhand": {
+  "start": 58,
+  "orig_before": 58,
+  "after": 24
+ },
+ "attack_overhead": {
+  "start": 52,
+  "orig_before": 52,
+  "after": 66
+ },
+ "attack_shield_bash": {
+  "start": 0,
+  "orig_before": 0,
+  "after": 0
+ },
+ "attack_slash": {
+  "start": 40,
+  "orig_before": 40,
+  "after": 23
+ },
+ "block": {
+  "start": 14,
+  "orig_before": 14,
+  "after": 7
+ },
+ "combat_idle": {
+  "start": 0,
+  "orig_before": 0,
+  "after": 0
+ },
+ "guard_stance": {
+  "start": 22,
+  "orig_before": 22,
+  "after": 0
+ },
+ "hit": {
+  "start": 53,
+  "orig_before": 53,
+  "after": 50
+ }
+}

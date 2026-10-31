@@ -1,0 +1,138 @@
+{
+ "attack_slash": {
+  "source": "Quaternius UAL2 Sword_Regular_A [0-5] x0.55 + Quaternius UAL2 Sword_Regular_A [6-10] x0.35 + Quaternius UAL2 Sword_Regular_A [11-None] + Quaternius UAL2 Sword_Regular_A_Rec",
+  "frames": 52,
+  "fps": 30,
+  "loop": false,
+  "lower_body_damp": 0.45,
+  "max_hip_drop_m": 0.07,
+  "side_abd_deg": {},
+  "arm_out_max_deg": 26.0,
+  "wrist_twist_max_deg": 35.0,
+  "feet_planted_flat": true,
+  "contact_frames": {
+   "L": 10,
+   "R": 10
+  }
+ },
+ "attack_backhand": {
+  "source": "Quaternius UAL2 Sword_Regular_B [0-5] x0.6 + Quaternius UAL2 Sword_Regular_B [6-10] x0.35 + Quaternius UAL2 Sword_Regular_B [11-None] + Quaternius UAL2 Sword_Regular_B_Rec",
+  "frames": 56,
+  "fps": 30,
+  "loop": false,
+  "lower_body_damp": 0.45,
+  "max_hip_drop_m": 0.07,
+  "side_abd_deg": {},
+  "arm_out_max_deg": 26.0,
+  "wrist_twist_max_deg": 35.0,
+  "feet_planted_flat": true,
+  "contact_frames": {
+   "L": 5,
+   "R": 4
+  }
+ },
+ "attack_overhead": {
+  "source": "Quaternius UAL1 Sword_Attack [0-9] x0.75 + Quaternius UAL1 Sword_Attack [10-16] x0.3 + Quaternius UAL1 Sword_Attack [17-None]",
+  "frames": 62,
+  "fps": 30,
+  "loop": false,
+  "lower_body_damp": 0.45,
+  "max_hip_drop_m": 0.07,
+  "side_abd_deg": {},
+  "arm_out_max_deg": 26.0,
+  "wrist_twist_max_deg": 35.0,
+  "feet_planted_flat": true,
+  "contact_frames": {
+   "L": 6,
+   "R": 6
+  }
+ },
+ "attack_shield_bash": {
+  "source": "Quaternius UAL1 Punch_Jab [0-3] x0.4 + Quaternius UAL1 Punch_Jab [4-8] x0.45 + Quaternius UAL1 Punch_Jab [9-None] x0.9",
+  "frames": 34,
+  "fps": 30,
+  "loop": false,
+  "lower_body_damp": 0.6,
+  "max_hip_drop_m": 0.07,
+  "side_abd_deg": {},
+  "arm_out_max_deg": 26.0,
+  "wrist_twist_max_deg": 35.0,
+  "feet_planted_flat": true,
+  "contact_frames": {
+   "L": 34,
+   "R": 34
+  }
+ },
+ "block": {
+  "source": "Quaternius UAL2 Shield_OneShot",
+  "frames": 26,
+  "fps": 30,
+  "loop": false,
+  "lower_body_damp": 0.6,
+  "max_hip_drop_m": 0.07,
+  "side_abd_deg": {},
+  "arm_out_max_deg": 26.0,
+  "wrist_twist_max_deg": 35.0,
+  "feet_planted_flat": true,
+  "contact_frames": {
+   "L": 26,
+   "R": 26
+  }
+ },
+ "guard_stance": {
+  "source": "Quaternius UAL2 Idle_Shield_Loop",
+  "frames": 76,
+  "fps": 30,
+  "loop": true,
+  "lower_body_damp": 1.0,
+  "max_hip_drop_m": 0.07,
+  "side_abd_deg": {},
+  "arm_out_max_deg": 26.0,
+  "wrist_twist_max_deg": 35.0,
+  "feet_planted_flat": true,
+  "contact_frames": {
+   "L": 76,
+   "R": 76
+  }
+ },
+ "combat_idle": {
+  "source": "Quaternius UAL1 Sword_Idle",
+  "frames": 51,
+  "fps": 30,
+  "loop": true,
+  "lower_body_damp": 1.0,
+  "max_hip_drop_m": 0.07,
+  "side_abd_deg": {},
+  "arm_out_max_deg": 26.0,
+  "wrist_twist_max_deg": 35.0,
+  "feet_planted_flat": true,
+  "contact_frames": {
+   "L": 0,
+   "R": 0
+  }
+ },
+ "hit": {
+  "source": "Quaternius UAL1 Hit_Chest x0.8",
+  "frames": 21,
+  "fps": 30,
+  "loop": true,
+  "lower_body_damp": 1.0,
+  "max_hip_drop_m": 0.07,
+  "side_abd_deg": {},
+  "arm_out_max_deg": 26.0,
+  "wrist_twist_max_deg": 35.0,
+  "feet_planted_flat": true,
+  "contact_frames": {
+   "L": 21,
+   "R": 21
+  }
+ },
+ "_params": {
+  "CAPE_K": 0.0,
+  "CAPE_MODE": "rigid",
+  "ABD": 0.0,
+  "ABD_IDLE": 0.0,
+  "HOLD": [],
+  "HOLD_MODE": "parent"
+ }
+}

@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { once } from 'node:events';
 import { WebSocket } from 'ws';
 import { createWorldServer } from '../server.mjs';
-import { nextRemoteYaw,remoteFacing } from '../../legacy-web/www/proto3d/multiplayer-client.js';
+import { nextRemoteYaw,remoteFacing } from './web-client-helpers.js';
 
 function recv(ws,type){
  return new Promise((resolve,reject)=>{

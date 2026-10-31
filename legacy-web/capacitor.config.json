@@ -1,8 +1,0 @@
-{
-  "appId": "com.varnethryl.rpg",
-  "appName": "Varnethryl",
-  "webDir": "www",
-  "server": {
-    "androidScheme": "https"
-  }
-}

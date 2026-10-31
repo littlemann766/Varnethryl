@@ -22,6 +22,7 @@ func v3(a: Array) -> Vector3: return Vector3(a[0], a[1], a[2])
 func pier(L: Dictionary) -> void:
 	var inl := Vector3(L.inland[0], 0, L.inland[1]).normalized()
 	var a := v3(L.moor) + inl * 3.0 + Vector3(0, 1.0, 0); var b := v3(L.shore) + inl * 1.5
+	var hz := Vector2(b.x - a.x, b.z - a.z).length(); a.y = maxf(a.y, b.y - hz * tan(deg_to_rad(18.0)))   # Lucky test 36 (godot-voxel 74526d1): sea end raised so the boards are <= 18 deg
 	var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var bs := BoxShape3D.new(); bs.size = Vector3(3.2, 0.3, a.distance_to(b)); cs.shape = bs; sb.add_child(cs); space_root.add_child(sb)
 	sb.look_at_from_position((a + b) * 0.5, b, Vector3.UP)
 func pos3(v: Vector3) -> Array: return [snappedf(v.x, 0.1), snappedf(v.y, 0.1), snappedf(v.z, 0.1)]
@@ -74,7 +75,7 @@ func _run() -> void:
 		for i in 3: await physics_frame
 		var ph := v3(L.shore) + Vector3(0, 0.8, 0); var inl := Vector3(L.inland[0], 0, L.inland[1]).normalized()
 		var out := {}
-		var pa := v3(L.moor) + inl * 3.0 + Vector3(0, 1.0, 0); var pb := v3(L.shore) + inl * 1.5; var pf := pa.lerp(pb, 0.08) + Vector3(0, 1.0, 0)
+		var pa := v3(L.moor) + inl * 3.0 + Vector3(0, 1.0, 0); var pb := v3(L.shore) + inl * 1.5; pa.y = maxf(pa.y, pb.y - Vector2(pb.x - pa.x, pb.z - pa.z).length() * tan(deg_to_rad(18.0))); var pf := pa.lerp(pb, 0.08) + Vector3(0, 1.0, 0)
 		out["pier_boards"] = await walk(pf, [ph], ph, 1.2)
 		for po in I.pois:
 			var pts := []

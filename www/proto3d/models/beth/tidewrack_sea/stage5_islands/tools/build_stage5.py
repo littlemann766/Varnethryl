@@ -222,6 +222,7 @@ def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0, Lg=20.0, Nmax=9, t
                 print(f'  {tag}: {N} flights, {math.degrees(math.atan(g)):.1f} deg, rise {h - y00:.1f} m ({y00:.1f} -> {h:.1f})')
                 return {'decks': decks, 'flights': N, 'deg': round(math.degrees(math.atan(g)), 1), 'rise_m': round(h - y00, 1), 'bottom': decks[0]['a'], 'top': decks[-1]['b']}, Hr, RD
     print(f'  {tag}: no clear spot'); return None, H, np.zeros(H.shape, bool)
+LOCAL_FIX = {'ember_wreck': [(495.8, 29.9, 2267.9)], 'frozen_wreck': [(-245.3, 6.4, -2598.0)]}   # walk-test lips / holes: (x, lip top y or None, z)
 def ramp_geo(R):
     S_, C_ = [], []; ST = C(176, 168, 172); ST2 = C(146, 138, 146)
     for e in R['decks']:
@@ -397,6 +398,9 @@ def build(k):
     keep &= ~((slope_of(base) > 0.85) & (H - base < 0.5) & (pband > 3) & (dsh > 12))   # original sea cliffs stay as built (their own colours / shape)
     keep = ndimage.binary_opening(keep, iterations=1) | (keep & (pband < 3))
     nh = (pband < 3) & ~FP & (base > -1.0); print('  route cells outside patch before fix:', int((nh & ~keep).sum())); keep |= nh   # every walk path is patch-covered: no holes under a route
+    LFm = np.zeros_like(keep)   # collider patch at walk-test lips: the patch fills its pin-holes there and does not tuck its rim (no dimple / steep fold under a route)
+    for fx in LOCAL_FIX.get(k, []): LFm |= np.hypot(X - fx[0], Z - fx[2]) < (fx[4] if len(fx) > 4 else 7.0)
+    if LFm.any(): keep |= LFm & (ndimage.binary_dilation(keep, iterations=3)) & ~FPS; print('  collider patch cells:', int((LFm & keep).sum()))
     idx = -np.ones(keep.shape, int); idx[keep] = np.arange(keep.sum())
     H = np.where(RDECK, H, np.where(colH - H < 3.0, np.maximum(H, colH + 0.1), H))   # never let the game's coarse terrain collider poke through the walkable patch (>3 m above = overhang/arch, ignored)
     colC = _g['colC']; topB = np.where(colC - base < 3.0, colC, base)
@@ -406,8 +410,10 @@ def build(k):
     H = np.where(near & (colC - base < 3.0), np.maximum(base, colC), H)
     for _ in range(3):   # iron out the per-vertex mix of lifts / fades into one smooth surface, still riding above the game collider
         Hs = ndimage.gaussian_filter(H, 0.8); H = np.where(RDECK | BR, H, np.where(colH - Hs < 3.0, np.maximum(Hs, colH + 0.08), Hs))
+    BSM_ = np.zeros_like(keep)
+    for _, mk_ in _g.get('bsm', []): BSM_ |= mk_   # bank stairs only (their walk ends hug the ground)
     Hd = ndimage.minimum_filter(np.where(RDECK, Hr, 1e9), size=5)   # terrain never rises into the stair / landing headroom
-    H = np.where((Hd < 1e8) & ((Hd - base > 1.0) | (H > Hd + 0.3)), np.minimum(H, Hd - 0.7), H)
+    H = np.where((Hd < 1e8) & ((Hd - base > 1.0) | (H > Hd + 0.3)) & ~(BSM_ & ndimage.binary_dilation(RDECK & (np.abs(Hr - np.maximum(base, _g['colC'])) < 0.6), iterations=2)), np.minimum(H, Hd - 0.7), H)   # (not under ground-hugging walk decks: no fold beside them)
     # final re-route on the finished surface: what the walk test (and the player) actually walks; avoids prop footprints + their edge ring
     Hq = np.where(RDECK, Hr, np.where(keep, H, np.maximum(base, _g['colC']))); okw = ndimage.binary_erosion(keep, iterations=2) | ndimage.binary_dilation(RDECK, iterations=1) | BR | ((dsh < 10) & keep) | ((dsh < 40) & comp & ~FPS & (keep | (slope_of(np.maximum(base, _g['colC'])) < 0.6))) | (ndimage.binary_dilation(RDECK, iterations=2) & comp)   # >=4 m inside the patch rim (no tuck edge under a path)
     okw &= ~((ndimage.binary_dilation(FPS, iterations=1) & (dsh > 40)) | FPS)
@@ -464,7 +470,7 @@ def build(k):
     STATS[k]['path_max_deg'] = round(max(grade) if grade else 0, 1); STATS[k]['path_p95_deg'] = round(float(np.percentile(grade, 95)) if grade else 0, 1)
     _g['dbg'] = dict(keep=keep.copy(), X=X, Z=Z, H=H.copy(), base=base, colC=_g['colC'], FP=FP)
     rim = keep & ~ndimage.binary_erosion(keep)   # patch rim tucks 0.25 m under the original ground: no visible step / seam
-    V = np.stack([X[keep], np.where(rim, np.minimum(base, _g["colC"]) - 0.25, H + 0.08)[keep], Z[keep]], 1)
+    V = np.stack([X[keep], np.where(rim & ~LFm, np.minimum(base, _g["colC"]) - 0.25, np.where(LFm, np.maximum(H, _g['colC']) + 0.08, H + 0.08))[keep], Z[keep]], 1)
     q = keep[:-1, :-1] & keep[1:, :-1] & keep[:-1, 1:] & keep[1:, 1:]
     a = idx[:-1, :-1][q]; b = idx[:-1, 1:][q]; c_ = idx[1:, :-1][q]; d = idx[1:, 1:][q]
     Fc = np.concatenate([np.stack([a, c_, b], 1), np.stack([b, c_, d], 1)])
@@ -510,6 +516,7 @@ def build(k):
     for (j, i) in cells[:nrock]:
         if frd[j, i] < 3.0: continue
         r = float(rng.uniform(0.6, 2.6) if sl[j, i] < 0.5 else rng.uniform(1.2, 3.6)); x, z = X[j, i] + rng.uniform(-1, 1), Z[j, i] + rng.uniform(-1, 1)
+        if frd[j, i] < r + 2.5: continue   # the boulder's own radius keeps clear of the route too
         rk = rock((x, Hat(x, z) + r * 0.2, z), r, int(rng.integers(1e6)), 0.6, P['rock'] if rng.random() < 0.6 else P['rock2']); solid.append(rk)
         if r > 1.4: colp.append(rk)
     for (j, i) in cells[nrock:nrock + nveg]:
@@ -522,6 +529,32 @@ def build(k):
     for b0 in bridges:
         s_, c_ = bridge(b0, GROUND[reg]); solid += s_; colp += c_
         for st_ in b0.get('bank_stairs', []): s_, c_ = ramp_geo(st_); solid += s_; colp += c_
+    for fx in ([] if True else LOCAL_FIX.get(k, [])):   # local ramp / collider patch over a lip (or hole) the walk test found on a route: a thin norail deck, route-aligned
+        HqF_ = np.where(RDECK, Hr, np.where(keep, H, np.maximum(_g['colC'], base) - 0.08)); best = None
+        for p in pois:
+            cs = [c_ for c_ in p.get('route', []) if len(c_) == 2]
+            for n_, c_ in enumerate(cs):
+                d_ = math.hypot(X[c_] - fx[0], Z[c_] - fx[2])
+                if best is None or d_ < best[0]: best = (d_, cs, n_)
+        if best is None or best[0] > 6: print('  local fix: no route near', fx); continue
+        _, cs, n_ = best; rim_ = keep & ~ndimage.binary_erosion(keep)
+        gs_ = np.where(keep, np.where(rim_, np.minimum(base, _g['colC']) - 0.25, H + 0.08), -1e9); gs_ = np.maximum(gs_, _g['colC'])   # the surface the player actually stands on: patch collider, else the game's coarse collider
+        gnd_ = gs_; gmin_ = ndimage.minimum_filter(gs_, size=5)   # ends go under the LOWEST ground around them: always buried, no end face
+        seg = [n_]
+        while seg[0] > 0 and max(abs(cs[seg[0] - 1][0] - cs[seg[0]][0]), abs(cs[seg[0] - 1][1] - cs[seg[0]][1])) <= 2 and len(seg) < 12: seg.insert(0, seg[0] - 1)
+        while seg[-1] < len(cs) - 1 and max(abs(cs[seg[-1] + 1][0] - cs[seg[-1]][0]), abs(cs[seg[-1] + 1][1] - cs[seg[-1]][1])) <= 2 and len(seg) < 24: seg.append(seg[-1] + 1)
+        pick = None   # shortest straight ramp over the lip: ends tucked 0.25 m in, ground under it never above the deck, <= 28 deg
+        for ia in seg:
+            for ib in seg:
+                if not ia < n_ < ib: continue
+                a_, b_ = cs[ia], cs[ib]; ya, yb = float(gmin_[a_]) - 0.3, float(gmin_[b_]) - 0.3; Lh = math.hypot(X[a_] - X[b_], Z[a_] - Z[b_])
+                if Lh < 2 or abs(yb - ya) / Lh > 0.58: continue
+                okr_ = all(gnd_[cs[m_]] <= ya + (yb - ya) * math.hypot(X[cs[m_]] - X[a_], Z[cs[m_]] - Z[a_]) / Lh + 0.05 for m_ in range(ia + 1, ib))
+                if okr_ and (pick is None or Lh < pick[0]): pick = (Lh, a_, b_, ya, yb)
+        if pick is None: print('  local fix: no clear ramp at', fx); continue
+        _, a_, b_, ya, yb = pick; A_ = [float(X[a_]), ya, float(Z[a_])]; B_ = [float(X[b_]), yb, float(Z[b_])]; M_ = A_
+        s_, c_ = ramp_geo({'decks': [{'kind': 'landing', 'a': A_, 'b': B_, 'w': 3.0, 'norail': True}]}); solid += s_; colp += c_
+        print('  local fix at', [round(v, 1) for v in M_], 'from', [round(v, 1) for v in A_], 'to', [round(v, 1) for v in B_])
     name = f'{pre}isl_{k}'
     allm = merge(solid); save(name, allm)
     if glow: save(name + '_glow', merge(glow), lod=False)

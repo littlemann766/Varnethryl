@@ -19,3 +19,9 @@
   Tried and rolled back (made other islands worse, kept in /tmp only): bench cutting, wider path corridor, adaptive bank ramps, second Saltglass pier stair (bottom landed mid-slope).
   Final table in walk_test_final.json: 34/55 legs pass (pier boards excluded).
 - 6e: Saltglass stair before/after renders (renders/small/saltglass_stair_before_after_A/B.jpg, checked by eye) + README Stage 6 section.
+
+## 7 — built structures for the last gaps (walk test 34/55 -> 53/57)
+- 7a (0e9d16a): Saltglass pier stair. A 6-flight tower stands in the water beside the pier head and climbs from 20.5 m to 68.7 m at 21.9 deg. Its top walk runs onto the lower shelf, and the POI routes follow the deck chain. Saltglass went from 4/10 to 9/10.
+- 7b (6c28e67): bank stairs where causeways meet steep banks. Beached Wreck's far end gets 2 flights (1.2 -> 33.1 m). Ember Wreck gets one at each end (2.0 -> 12.3 m and 2.0 -> 8.0 m). Open causeway ends get 7 m wide approach ramps. Beached went from 0/5 to 5/5 and Ember from 0/5 to 2/5.
+- 7c (fc581e3): the five snags. Coil Bones' spine is trimmed to fit inside its pad. POI centre props are off the walk graph, so routes end at the pad edge. No scatter rocks or plants within 3 m of a route. Aurora, Coil, Hot Spring, Saltwatch and Vent all pass.
+- Still failing: Ember Vent and Scorched Chest (a steep terrain lip at 496,30,2268), Frozen Camp (a lip at -245,6,-2598) and Glass-diver's Chest (drops through at -2152,105,58).

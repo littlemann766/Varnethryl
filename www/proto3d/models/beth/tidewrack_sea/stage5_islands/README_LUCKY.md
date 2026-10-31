@@ -111,3 +111,6 @@ Tools: `tools/build_stage5.py [id ...]` (deterministic per id), `tools/render5.g
 - Holes are cut only for standing props. Flat decals are re-laid onto the patch.
 - Routes are re-planned on the finished surface.
 - Terrain is kept out of stair headroom.
+
+## Stage 7 — stairs, bank landings, snags
+Walk test 53/57, with Lucky's pier boards left out. New built pieces are in the manifest: `ramp.pier_stair` (Saltglass), and `bridges[].bank_stairs` plus `bridges[].path` (Beached Wreck, Ember Wreck). Before/after renders are in renders/small/sheet_*_stair*.jpg. Results are in walk_test_final.json.

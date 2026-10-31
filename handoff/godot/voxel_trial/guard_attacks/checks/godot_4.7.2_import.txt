@@ -1,0 +1,60 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+OK town_guard_voxel.glb skel=1 tris=136944 clips=["attack", "attack_backhand", "attack_overhead", "attack_shield_bash", "attack_slash", "block", "combat_idle", "guard_stance", "hit", "idle", "run", "walk"] len={ "attack": 1.0, "attack_backhand": 1.833, "attack_overhead": 2.033, "attack_shield_bash": 1.1, "attack_slash": 1.7, "block": 0.833, "combat_idle": 1.667, "guard_stance": 2.5, "hit": 0.667, "idle": 2.5, "run": 0.9, "walk": 1.333 }
+OK town_guard_voxel_lod1.glb skel=1 tris=37544 clips=["attack", "attack_backhand", "attack_overhead", "attack_shield_bash", "attack_slash", "block", "combat_idle", "guard_stance", "hit", "idle", "run", "walk"] len={ "attack": 1.0, "attack_backhand": 1.833, "attack_overhead": 2.033, "attack_shield_bash": 1.1, "attack_slash": 1.7, "block": 0.833, "combat_idle": 1.667, "guard_stance": 2.5, "hit": 0.667, "idle": 2.5, "run": 0.9, "walk": 1.333 }
+OK town_guard_voxel_lod2.glb skel=1 tris=13064 clips=["attack", "attack_backhand", "attack_overhead", "attack_shield_bash", "attack_slash", "block", "combat_idle", "guard_stance", "hit", "idle", "run", "walk"] len={ "attack": 1.0, "attack_backhand": 1.833, "attack_overhead": 2.033, "attack_shield_bash": 1.1, "attack_slash": 1.7, "block": 0.833, "combat_idle": 1.667, "guard_stance": 2.5, "hit": 0.667, "idle": 2.5, "run": 0.9, "walk": 1.333 }
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Scanning actions... (3 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | town_guard_voxel.glb[39m[0m
+[  25% ] [90m[1m_update_scan_actions[22m | town_guard_voxel_lod1.glb[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | town_guard_voxel_lod2.glb[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (3 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  25% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  50% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mreimport[22m | town_guard_voxel.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  25% ] [90m[1mreimport[22m | town_guard_voxel_lod1.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  50% ] [90m[1mreimport[22m | town_guard_voxel_lod2.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  75% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (3 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m

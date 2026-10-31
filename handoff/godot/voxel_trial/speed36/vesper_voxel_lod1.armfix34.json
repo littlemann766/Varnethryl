@@ -1,0 +1,22 @@
+{
+ "jump_land": {
+  "start": 5,
+  "orig_before": 5,
+  "after": 0
+ },
+ "jump_start": {
+  "start": 0,
+  "orig_before": 0,
+  "after": 0
+ },
+ "jump": {
+  "start": 12,
+  "orig_before": 12,
+  "after": 0
+ },
+ "swim_stroke": {
+  "start": 23,
+  "orig_before": 23,
+  "after": 0
+ }
+}

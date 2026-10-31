@@ -17,8 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check client code syntax
-      - 'net/**'
+      - name: Check client helper syntax
+        run: node --check multiplayer/test/web-client-helpers.js
       - name: Install multiplayer relay dependencies
         working-directory: multiplayer
         run: npm install --no-audit --no-fund

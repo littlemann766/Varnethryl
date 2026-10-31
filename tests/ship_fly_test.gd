@@ -61,6 +61,12 @@ func _run() -> void:
 	m.yaw = sea.ship.heading + PI * 0.5   # side view like the phone shot
 	for i in 60: sea.drive(Vector2.ZERO, 1.0 / 60.0); await get_tree().physics_frame
 	if DisplayServer.get_name() != "headless": get_viewport().get_texture().get_image().save_png(out + "galleon_flying_side.png")
+	if OS.get_environment("SF_PROBE") != "":
+		for px in [Vector2(460, 460), Vector2(480, 390), Vector2(300, 470)]:
+			var o: Vector3 = m.cam.project_ray_origin(px); var dv: Vector3 = m.cam.project_ray_normal(px)
+			var q3 := PhysicsRayQueryParameters3D.create(o, o + dv * 500.0, 0xFFFFFFFF)
+			var hh: Dictionary = m.get_world_3d().direct_space_state.intersect_ray(q3)
+			print("SFR ", px, " -> ", hh.get("collider").get_path() if hh else "none", " at ", hh.get("position", Vector3.ZERO) - sea.ship.global_position if hh else "", " water hit ", o + dv * ((0.0 - o.y) / dv.y) - sea.ship.global_position)
 	m.yaw = sea.ship.heading + PI
 	for i in 60: sea.drive(Vector2.ZERO, 1.0 / 60.0); await get_tree().physics_frame
 	if DisplayServer.get_name() != "headless": get_viewport().get_texture().get_image().save_png(out + "galleon_flying_behind.png")

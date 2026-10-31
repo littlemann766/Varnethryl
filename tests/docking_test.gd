@@ -15,7 +15,14 @@ func frames(n: int) -> void:
 	for i in n: await get_tree().physics_frame
 func shot(n: String) -> void:
 	if DisplayServer.get_name() == "headless": return
-	await frames(25); get_viewport().get_texture().get_image().save_png(out + "dock_%s.png" % n); print("DK SHOT ", n)
+	await frames(25); var img := get_viewport().get_texture().get_image(); img.save_png(out + "dock_%s.png" % n); print("DK SHOT ", n)
+	# test 37: camera blackout check -- share of near-black pixels (Vent t36 was ~55%, Gullhaven ~20%)
+	var dark := 0; var tot := 0
+	for y in range(0, img.get_height(), 8):
+		for x in range(0, img.get_width(), 8):
+			tot += 1
+			if img.get_pixel(x, y).get_luminance() < 0.05: dark += 1
+	ok(float(dark) / tot < 0.04, "%s: no camera blackout (%.1f%% near-black pixels)" % [n, 100.0 * dark / tot])
 ## test 36: every companion's (and Pip's) feet within 0.1 m of the real floor
 func feet_check(k: String, when: String) -> void:
 	var nodes: Array = [["pip", m.pip]]
@@ -139,7 +146,7 @@ func _run() -> void:
 	sea.enter("galleon"); sea.unlock_all = true; await frames(5)
 	var L: Dictionary = sea._landings()
 	ok(L.size() >= 13, "landings.json has %d landing points" % L.size())
-	var shots := ["gullhaven", "lantern_rock", "saltglass", "frostreach", "vent", "aurora_arch"]
+	var shots := ["gullhaven", "lantern_rock", "saltglass", "frostreach", "vent", "aurora_arch", "hot_spring"]
 	var only := OS.get_environment("DK_ONLY")
 	for k in L:
 		if only != "" and not (k in only.split(",")): continue

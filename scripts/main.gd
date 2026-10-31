@@ -1714,6 +1714,7 @@ func _process(dt: float) -> void:
 	var pe := minf(pitch, -0.95) if in_int and P_view_third() else pitch
 	if sea and sea.active and sea.ashore == "" and not sea.diving: pe = minf(pe, -0.6)   # test 36 (boss: hero hidden behind the rail): look down onto the deck at sea
 	cam_pivot.rotation = Vector3(pe, yaw, 0)
+	_cam_fade()
 	for bl in windmill_blades:
 		if bl: bl.rotate_object_local(Vector3(0, 0, 1), dt * 0.8)
 	var inside := ""
@@ -2472,6 +2473,40 @@ func _camera_prefs(inside: bool, dt: float) -> void:
 	# follow mode: drift yaw behind the hero while walking (unless the player is dragging the camera)
 	if P.get("camMode", "follow") == "follow" and not first and cam_touch == -1 and joy_vec.length() > 0.2 and not bench_running:
 		yaw = lerp_angle(yaw, hero_vis.rotation.y, min(1.0, 1.5 * dt))
+
+## test 37 (t36 shots: black blackouts ashore at Vent Harbour / Gullhaven = camera inside the moored galleon, which has no
+## camera collider): every visual mesh up to 45 m across that sits on the hero->camera line or around the camera fades out
+## (GeometryInstance3D.transparency), so no collider is needed. On deck the ship's sails get a hero cut-out instead.
+var _mesh_faded := {}   # GeometryInstance3D -> original transparency
+func _cam_fade() -> void:
+	if cam == null or hero == null or not cam.current: return
+	var on_deck: bool = sea != null and sea.active and sea.sailing()
+	if sea and sea.active:
+		for s in sea.ships.values():
+			s.set_cut(on_deck and s == sea.ship, hero.global_position + Vector3(0, 1.0, 0), s.global_position.y + sea.deck_y() + 1.8)
+	var h: Vector3 = hero.global_position + Vector3(0, 1.2, 0); var c: Vector3 = cam.global_position
+	var want := {}
+	if not P_view_third() or bench_running: pass
+	else:
+		var sc: RID = get_world_3d().scenario
+		var ids: PackedInt64Array = RenderingServer.instances_cull_ray(h, c + (c - h).normalized() * 0.8, sc)
+		ids.append_array(RenderingServer.instances_cull_aabb(AABB(c - Vector3.ONE * 1.0, Vector3.ONE * 2.0), sc))
+		for id in ids:
+			var o = instance_from_id(id)
+			if not (o is GeometryInstance3D) or want.has(o): continue
+			var gi := o as GeometryInstance3D
+			var sz: Vector3 = (gi.global_transform.basis * gi.get_aabb().size).abs()
+			var mx: float = maxf(sz.x, maxf(sz.y, sz.z))
+			if mx > 45.0 or mx < 3.0: continue   # terrain / sky / water / heroes, companions, small props
+			if hero.is_ancestor_of(gi): continue
+			if on_deck and sea.ship.is_ancestor_of(gi): continue   # sails use the cut-out
+			want[gi] = true
+	for gi in _mesh_faded.keys():
+		if not is_instance_valid(gi): _mesh_faded.erase(gi); continue
+		if not want.has(gi): gi.transparency = _mesh_faded[gi]; _mesh_faded.erase(gi)
+	for gi in want:
+		if not _mesh_faded.has(gi): _mesh_faded[gi] = gi.transparency
+		gi.transparency = 0.85
 
 var _lamp_shadow_on := {}
 func _update_lamp_shadows() -> void:

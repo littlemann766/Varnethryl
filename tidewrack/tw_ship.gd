@@ -22,6 +22,12 @@ var shallow_fn: Callable    # (local Vector2) -> metres to land
 var vis: Node3D
 var addon: Node3D
 var bob_t := 0.0
+const CUT_SHADER := preload("res://tidewrack/ship_cut.gdshader")
+var cut_mats: Array[ShaderMaterial] = []
+## test 37: hero cut-out through sails/masts (on while the hero is on deck); min_y = world height of deck + 2 m
+func set_cut(on: bool, hero_pos: Vector3, min_y: float) -> void:
+	for cm in cut_mats:
+		cm.set_shader_parameter("cut_on", 1.0 if on else 0.0); cm.set_shader_parameter("hero_pos", hero_pos); cm.set_shader_parameter("cut_min_y", min_y)
 
 func setup(k: String, t: int, hi: bool) -> TwShip:
 	kind = k; tier = t; high = hi; name = "TwShip_" + k
@@ -36,7 +42,12 @@ func setup(k: String, t: int, hi: bool) -> TwShip:
 		for si in mi.mesh.get_surface_count():
 			var sm = mi.mesh.surface_get_material(si)
 			if sm is BaseMaterial3D:   # same as the harbour ships (test 26): solid, both-sided sails
-				sm = sm.duplicate(); sm.cull_mode = BaseMaterial3D.CULL_DISABLED; sm.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED; mi.set_surface_override_material(si, sm)
+				# test 37: ShaderMaterial copy of it with the hero cut-out (sails no longer hide the hero from behind)
+				var cm := ShaderMaterial.new(); cm.shader = CUT_SHADER
+				var st: Texture2D = (sm as BaseMaterial3D).albedo_texture
+				cm.set_shader_parameter("tint", (sm as BaseMaterial3D).albedo_color); cm.set_shader_parameter("use_tex", 1.0 if st else 0.0)
+				if st: cm.set_shader_parameter("tex", st)
+				mi.set_surface_override_material(si, cm); cut_mats.append(cm)
 	set_tier(t)
 	return self
 

@@ -1,0 +1,82 @@
+{
+ "attack1": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "attack2": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "attack3": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "death": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "fly_ascend": {
+  "before": 1272,
+  "after": 0,
+  "maxdeg": 33.0
+ },
+ "fly_bank_L": {
+  "before": 1431,
+  "after": 55,
+  "maxdeg": 48.0
+ },
+ "fly_bank_R": {
+  "before": 1639,
+  "after": 87,
+  "maxdeg": 48.0
+ },
+ "fly_descend": {
+  "before": 222,
+  "after": 0,
+  "maxdeg": 6.0
+ },
+ "fly_fast": {
+  "before": 1908,
+  "after": 243,
+  "maxdeg": 60.0
+ },
+ "fly_forward": {
+  "before": 1601,
+  "after": 0,
+  "maxdeg": 51.0
+ },
+ "fly_hover": {
+  "before": 1274,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "hit": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "idle": {
+  "before": 2645,
+  "after": 0,
+  "maxdeg": 33.0
+ },
+ "run": {
+  "before": 416,
+  "after": 0,
+  "maxdeg": 30.0
+ },
+ "skill": {
+  "before": 1930,
+  "after": 0,
+  "maxdeg": 21.0
+ },
+ "walk": {
+  "before": 2925,
+  "after": 0,
+  "maxdeg": 33.0
+ }
+}

@@ -1,0 +1,511 @@
+{
+ "note": "Beth street-dressing kit on the shared card2 atlas (atlas/, 2048, one material). Origin at ground centre, +Z front, metres. no suffix=High, _lod1<=50%, _lod2<=20%.",
+ "props": [
+  {
+   "id": "lantern_post",
+   "high": {
+    "file": "prop_lantern_post.glb",
+    "tris": 1096,
+    "bbox_min": [
+     -0.25,
+     0.0,
+     -0.25
+    ],
+    "bbox_max": [
+     0.8,
+     4.43,
+     0.25
+    ]
+   },
+   "medium": {
+    "file": "prop_lantern_post_lod1.glb",
+    "tris": 531,
+    "bbox_min": [
+     -0.25,
+     0.0,
+     -0.25
+    ],
+    "bbox_max": [
+     0.8,
+     4.43,
+     0.25
+    ]
+   },
+   "low": {
+    "file": "prop_lantern_post_lod2.glb",
+    "tris": 212,
+    "bbox_min": [
+     -0.25,
+     0.0,
+     -0.25
+    ],
+    "bbox_max": [
+     0.75,
+     3.23,
+     0.25
+    ]
+   },
+   "phone_high_lod": "high"
+  },
+  {
+   "id": "market_cart",
+   "high": {
+    "file": "prop_market_cart.glb",
+    "tris": 849,
+    "bbox_min": [
+     -1.24,
+     -0.03,
+     -0.8
+    ],
+    "bbox_max": [
+     2.61,
+     1.45,
+     0.8
+    ]
+   },
+   "medium": {
+    "file": "prop_market_cart_lod1.glb",
+    "tris": 411,
+    "bbox_min": [
+     -1.24,
+     -0.03,
+     -0.8
+    ],
+    "bbox_max": [
+     2.61,
+     1.45,
+     0.8
+    ]
+   },
+   "low": {
+    "file": "prop_market_cart_lod2.glb",
+    "tris": 163,
+    "bbox_min": [
+     -1.24,
+     0.16,
+     -0.8
+    ],
+    "bbox_max": [
+     2.61,
+     1.45,
+     0.8
+    ]
+   },
+   "phone_high_lod": "high"
+  },
+  {
+   "id": "well",
+   "high": {
+    "file": "prop_well.glb",
+    "tris": 1006,
+    "bbox_min": [
+     -1.4,
+     0.0,
+     -1.17
+    ],
+    "bbox_max": [
+     1.4,
+     3.2,
+     1.17
+    ]
+   },
+   "medium": {
+    "file": "prop_well_lod1.glb",
+    "tris": 486,
+    "bbox_min": [
+     -1.4,
+     0.0,
+     -1.17
+    ],
+    "bbox_max": [
+     1.4,
+     3.2,
+     1.17
+    ]
+   },
+   "low": {
+    "file": "prop_well_lod2.glb",
+    "tris": 194,
+    "bbox_min": [
+     -1.4,
+     0.0,
+     -1.17
+    ],
+    "bbox_max": [
+     1.4,
+     3.2,
+     1.17
+    ]
+   },
+   "phone_high_lod": "high"
+  },
+  {
+   "id": "bench",
+   "high": {
+    "file": "prop_bench.glb",
+    "tris": 364,
+    "bbox_min": [
+     -0.91,
+     0.0,
+     -0.25
+    ],
+    "bbox_max": [
+     0.91,
+     1.06,
+     0.3
+    ]
+   },
+   "medium": {
+    "file": "prop_bench_lod1.glb",
+    "tris": 176,
+    "bbox_min": [
+     -0.91,
+     0.0,
+     -0.25
+    ],
+    "bbox_max": [
+     0.91,
+     1.06,
+     0.25
+    ]
+   },
+   "low": {
+    "file": "prop_bench_lod2.glb",
+    "tris": 70,
+    "bbox_min": [
+     -0.9,
+     0.06,
+     -0.25
+    ],
+    "bbox_max": [
+     0.9,
+     1.06,
+     0.24
+    ]
+   },
+   "phone_high_lod": "high"
+  },
+  {
+   "id": "hay_bale",
+   "high": {
+    "file": "prop_hay_bale.glb",
+    "tris": 112,
+    "bbox_min": [
+     -0.6,
+     -0.01,
+     -0.42
+    ],
+    "bbox_max": [
+     0.6,
+     0.77,
+     0.42
+    ]
+   },
+   "medium": {
+    "file": "prop_hay_bale_lod1.glb",
+    "tris": 54,
+    "bbox_min": [
+     -0.6,
+     -0.01,
+     -0.42
+    ],
+    "bbox_max": [
+     0.6,
+     0.77,
+     0.42
+    ]
+   },
+   "low": {
+    "file": "prop_hay_bale_lod2.glb",
+    "tris": 20,
+    "bbox_min": [
+     -0.6,
+     -0.01,
+     -0.42
+    ],
+    "bbox_max": [
+     0.6,
+     0.77,
+     0.42
+    ]
+   },
+   "phone_high_lod": "high"
+  },
+  {
+   "id": "fence",
+   "high": {
+    "file": "prop_fence.glb",
+    "tris": 192,
+    "bbox_min": [
+     -2.09,
+     0.0,
+     -0.09
+    ],
+    "bbox_max": [
+     2.09,
+     1.16,
+     0.09
+    ]
+   },
+   "medium": {
+    "file": "prop_fence_lod1.glb",
+    "tris": 92,
+    "bbox_min": [
+     -2.09,
+     0.0,
+     -0.09
+    ],
+    "bbox_max": [
+     2.09,
+     1.16,
+     0.09
+    ]
+   },
+   "low": {
+    "file": "prop_fence_lod2.glb",
+    "tris": 36,
+    "bbox_min": [
+     -2.07,
+     0.0,
+     -0.07
+    ],
+    "bbox_max": [
+     2.07,
+     1.1,
+     0.07
+    ]
+   },
+   "phone_high_lod": "high"
+  },
+  {
+   "id": "signpost",
+   "high": {
+    "file": "prop_signpost.glb",
+    "tris": 228,
+    "bbox_min": [
+     -1.08,
+     0.0,
+     -0.72
+    ],
+    "bbox_max": [
+     1.3,
+     4.09,
+     0.3
+    ]
+   },
+   "medium": {
+    "file": "prop_signpost_lod1.glb",
+    "tris": 109,
+    "bbox_min": [
+     -1.08,
+     0.0,
+     -0.72
+    ],
+    "bbox_max": [
+     1.3,
+     4.09,
+     0.3
+    ]
+   },
+   "low": {
+    "file": "prop_signpost_lod2.glb",
+    "tris": 43,
+    "bbox_min": [
+     -1.08,
+     0.0,
+     -0.72
+    ],
+    "bbox_max": [
+     1.3,
+     2.8,
+     0.3
+    ]
+   },
+   "phone_high_lod": "high"
+  },
+  {
+   "id": "flower_planter",
+   "high": {
+    "file": "prop_flower_planter.glb",
+    "tris": 180,
+    "bbox_min": [
+     -0.64,
+     0.0,
+     -0.34
+    ],
+    "bbox_max": [
+     0.64,
+     0.86,
+     0.34
+    ]
+   },
+   "medium": {
+    "file": "prop_flower_planter_lod1.glb",
+    "tris": 87,
+    "bbox_min": [
+     -0.64,
+     0.0,
+     -0.34
+    ],
+    "bbox_max": [
+     0.64,
+     0.86,
+     0.34
+    ]
+   },
+   "low": {
+    "file": "prop_flower_planter_lod2.glb",
+    "tris": 34,
+    "bbox_min": [
+     -0.64,
+     0.0,
+     -0.34
+    ],
+    "bbox_max": [
+     0.64,
+     0.83,
+     0.34
+    ]
+   },
+   "phone_high_lod": "high"
+  },
+  {
+   "id": "cobble_edge",
+   "high": {
+    "file": "prop_cobble_edge.glb",
+    "tris": 96,
+    "bbox_min": [
+     -1.98,
+     -0.04,
+     -0.16
+    ],
+    "bbox_max": [
+     1.98,
+     0.2,
+     0.16
+    ]
+   },
+   "medium": {
+    "file": "prop_cobble_edge_lod1.glb",
+    "tris": 46,
+    "bbox_min": [
+     -1.98,
+     -0.04,
+     -0.16
+    ],
+    "bbox_max": [
+     1.98,
+     0.2,
+     0.16
+    ]
+   },
+   "low": {
+    "file": "prop_cobble_edge_lod2.glb",
+    "tris": 18,
+    "bbox_min": [
+     -1.48,
+     0.04,
+     -0.16
+    ],
+    "bbox_max": [
+     1.98,
+     0.12,
+     0.16
+    ]
+   },
+   "phone_high_lod": "high"
+  },
+  {
+   "id": "crate_stack",
+   "high": {
+    "file": "prop_crate_stack.glb",
+    "tris": 200,
+    "bbox_min": [
+     -0.4,
+     0.0,
+     -0.4
+    ],
+    "bbox_max": [
+     1.17,
+     1.35,
+     0.42
+    ]
+   },
+   "medium": {
+    "file": "prop_crate_stack_lod1.glb",
+    "tris": 96,
+    "bbox_min": [
+     -0.4,
+     0.0,
+     -0.4
+    ],
+    "bbox_max": [
+     1.17,
+     1.35,
+     0.42
+    ]
+   },
+   "low": {
+    "file": "prop_crate_stack_lod2.glb",
+    "tris": 38,
+    "bbox_min": [
+     -0.4,
+     0.0,
+     -0.39
+    ],
+    "bbox_max": [
+     1.15,
+     1.35,
+     0.4
+    ]
+   },
+   "phone_high_lod": "high"
+  },
+  {
+   "id": "barrel_group",
+   "high": {
+    "file": "prop_barrel_group.glb",
+    "tris": 517,
+    "bbox_min": [
+     -0.38,
+     0.0,
+     -0.92
+    ],
+    "bbox_max": [
+     1.18,
+     0.95,
+     0.56
+    ]
+   },
+   "medium": {
+    "file": "prop_barrel_group_lod1.glb",
+    "tris": 234,
+    "bbox_min": [
+     -0.38,
+     0.0,
+     -0.89
+    ],
+    "bbox_max": [
+     1.18,
+     0.95,
+     0.53
+    ]
+   },
+   "low": {
+    "file": "prop_barrel_group_lod2.glb",
+    "tris": 100,
+    "bbox_min": [
+     -0.38,
+     0.0,
+     -0.89
+    ],
+    "bbox_max": [
+     1.18,
+     0.95,
+     0.53
+    ]
+   },
+   "phone_high_lod": "high"
+  }
+ ]
+}

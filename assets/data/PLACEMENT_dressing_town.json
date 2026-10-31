@@ -1,0 +1,10646 @@
+{
+"zone": "dressing_town",
+"note": "Town interior, world coords, y given (town ground is flat y=0).",
+"items": [
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+39
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+41
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+43
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+45
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+47
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+49
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+51
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+53
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+55
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+57
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+59
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+61
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+63
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+65
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+67
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+69
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+71
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+73
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+75
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+77
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+79
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-81
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+81
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-83
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+83
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-85
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+85
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-87
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+87
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-89
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+89
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-91
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+91
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-93
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-5.45,
+0.0,
+-93
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+93
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-95
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+95
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-97
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+97
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-99
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+99
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-101
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+101
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-103
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+103
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-105
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+105
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-107
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+107
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-109
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-5.45,
+0.0,
+-109
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+109
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-111
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+111
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-113
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+113
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+115
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+117
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+119
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+121
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+123
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+125
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+127
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+129
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+131
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+133
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+135
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+137
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+139
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+141
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+143
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+145
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+147
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+149
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-155
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-157
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-5.45,
+0.0,
+-157
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-159
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-161
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-163
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-165
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-167
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-4.5,
+0.0,
+-169
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-171
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-173
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-5.45,
+0.0,
+-173
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-175
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-177
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-179
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-4.5,
+0.0,
+-181
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+39
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+41
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+43
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+45
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+5.45,
+0.0,
+45
+],
+"rotation": [
+0,
+6.283,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+47
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+49
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+51
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+53
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+55
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+57
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+59
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+61
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+5.45,
+0.0,
+61
+],
+"rotation": [
+0,
+6.283,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+63
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+65
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+67
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+69
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+71
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+73
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+75
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+77
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+5.45,
+0.0,
+77
+],
+"rotation": [
+0,
+6.283,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+79
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-81
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+81
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-83
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+83
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-85
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+85
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-87
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+87
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-89
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+89
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-91
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+91
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-93
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+93
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+5.45,
+0.0,
+93
+],
+"rotation": [
+0,
+6.283,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-95
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+95
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-97
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+97
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-99
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+99
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-101
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+101
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-103
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+103
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-105
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+105
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-107
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+107
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-109
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+109
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+5.45,
+0.0,
+109
+],
+"rotation": [
+0,
+6.283,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-111
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+111
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-113
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+113
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+115
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+117
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+119
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+121
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+123
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+125
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+5.45,
+0.0,
+125
+],
+"rotation": [
+0,
+6.283,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+127
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+129
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+131
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+133
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+135
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+137
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+139
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+141
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+5.45,
+0.0,
+141
+],
+"rotation": [
+0,
+6.283,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+143
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+145
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+147
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+149
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-155
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-157
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-159
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-161
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-163
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-165
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-167
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+4.5,
+0.0,
+-169
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-171
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-173
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-175
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-177
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-179
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+4.5,
+0.0,
+-181
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-39,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+39,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-41,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+41,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-43,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+43,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-45,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-45,
+0.0,
+-4.6
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+45,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-47,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+47,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-49,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+49,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-51,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+51,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-53,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+53,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-55,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-81,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+81,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-83,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+83,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-85,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+85,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-87,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+87,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-89,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+89,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-91,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+91,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-93,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-93,
+0.0,
+-4.6
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+93,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-95,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+95,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-97,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+97,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-99,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+99,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-101,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+101,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-103,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+103,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-105,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+105,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-107,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+107,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-109,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-109,
+0.0,
+-4.6
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+109,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-111,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-113,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-115,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-117,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-119,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-121,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-123,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-125,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-125,
+0.0,
+-4.6
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-127,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-129,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-131,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-133,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-135,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-137,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-139,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-141,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-141,
+0.0,
+-4.6
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-143,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-145,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-147,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-149,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+149,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-151,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+151,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-153,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+153,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-155,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+155,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-157,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-157,
+0.0,
+-4.6
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+157,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-159,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+159,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-161,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+161,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-163,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+163,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-165,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+165,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-167,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+167,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-169,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+169,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-171,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+171,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-173,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+-173,
+0.0,
+-4.6
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+173,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-175,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+175,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-177,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+177,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-179,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+179,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-181,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+181,
+0.0,
+-3.65
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-39,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+39,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-41,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+41,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-43,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+43,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-45,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+45,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+45,
+0.0,
+4.6
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-47,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+47,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-49,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+49,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-51,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+51,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-53,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+53,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-55,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+55,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+79,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-81,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+81,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-83,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+83,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-85,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+85,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-87,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+87,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-89,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+89,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-91,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+91,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-93,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+93,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+93,
+0.0,
+4.6
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-95,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+95,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-97,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+97,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-99,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+99,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-101,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+101,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-103,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+103,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-105,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+105,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-107,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+107,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-109,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+109,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+109,
+0.0,
+4.6
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-111,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+111,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-113,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-115,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-117,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-119,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-121,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-123,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-125,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-127,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-129,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-131,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-133,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-135,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-137,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-139,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-141,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+141,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+141,
+0.0,
+4.6
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-143,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+143,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-145,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+145,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-147,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+147,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-149,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+149,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-151,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+151,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-153,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+153,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-155,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+155,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-157,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+157,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+157,
+0.0,
+4.6
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-159,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+159,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-161,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+161,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-163,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+163,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-165,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+165,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-167,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+167,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+-169,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/cobble_edge_2m.glb",
+"position": [
+169,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-171,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+171,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-173,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+173,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/lantern_post.glb",
+"position": [
+173,
+0.0,
+4.6
+],
+"rotation": [
+0,
+4.712,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-175,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+175,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-177,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+177,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-179,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+179,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-181,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+181,
+0.0,
+3.65
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+35.68,
+0.0,
+8.14
+],
+"rotation": [
+0,
+1.346,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+34.55,
+0.0,
+12.09
+],
+"rotation": [
+0,
+1.234,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+32.98,
+0.0,
+15.88
+],
+"rotation": [
+0,
+1.122,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+30.99,
+0.0,
+19.47
+],
+"rotation": [
+0,
+1.01,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+28.62,
+0.0,
+22.82
+],
+"rotation": [
+0,
+0.898,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+25.88,
+0.0,
+25.88
+],
+"rotation": [
+0,
+0.785,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+22.82,
+0.0,
+28.61
+],
+"rotation": [
+0,
+0.673,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+19.47,
+0.0,
+30.99
+],
+"rotation": [
+0,
+0.561,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+15.88,
+0.0,
+32.97
+],
+"rotation": [
+0,
+0.449,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+12.09,
+0.0,
+34.55
+],
+"rotation": [
+0,
+0.337,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+8.15,
+0.0,
+35.68
+],
+"rotation": [
+0,
+0.224,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-8.14,
+0.0,
+35.68
+],
+"rotation": [
+0,
+-0.224,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-12.09,
+0.0,
+34.55
+],
+"rotation": [
+0,
+-0.337,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-15.88,
+0.0,
+32.98
+],
+"rotation": [
+0,
+-0.449,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-19.47,
+0.0,
+30.99
+],
+"rotation": [
+0,
+-0.561,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-22.82,
+0.0,
+28.62
+],
+"rotation": [
+0,
+-0.673,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-25.88,
+0.0,
+25.88
+],
+"rotation": [
+0,
+-0.785,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-28.61,
+0.0,
+22.82
+],
+"rotation": [
+0,
+-0.898,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-30.99,
+0.0,
+19.47
+],
+"rotation": [
+0,
+-1.01,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-32.97,
+0.0,
+15.88
+],
+"rotation": [
+0,
+-1.122,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-34.55,
+0.0,
+12.09
+],
+"rotation": [
+0,
+-1.234,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-35.68,
+0.0,
+8.15
+],
+"rotation": [
+0,
+-1.346,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-35.68,
+0.0,
+-8.14
+],
+"rotation": [
+0,
+-1.795,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-34.55,
+0.0,
+-12.08
+],
+"rotation": [
+0,
+-1.907,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-32.98,
+0.0,
+-15.88
+],
+"rotation": [
+0,
+-2.019,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-30.99,
+0.0,
+-19.47
+],
+"rotation": [
+0,
+-2.132,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-28.62,
+0.0,
+-22.82
+],
+"rotation": [
+0,
+-2.244,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-25.88,
+0.0,
+-25.88
+],
+"rotation": [
+0,
+-2.356,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-22.82,
+0.0,
+-28.61
+],
+"rotation": [
+0,
+-2.468,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-19.48,
+0.0,
+-30.99
+],
+"rotation": [
+0,
+-2.58,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-15.88,
+0.0,
+-32.97
+],
+"rotation": [
+0,
+-2.693,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-12.09,
+0.0,
+-34.54
+],
+"rotation": [
+0,
+-2.805,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+-8.15,
+0.0,
+-35.68
+],
+"rotation": [
+0,
+-2.917,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+8.14,
+0.0,
+-35.68
+],
+"rotation": [
+0,
+-3.366,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+12.08,
+0.0,
+-34.55
+],
+"rotation": [
+0,
+-3.478,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+15.88,
+0.0,
+-32.98
+],
+"rotation": [
+0,
+-3.59,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+19.47,
+0.0,
+-30.99
+],
+"rotation": [
+0,
+-3.702,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+22.82,
+0.0,
+-28.62
+],
+"rotation": [
+0,
+-3.815,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+25.88,
+0.0,
+-25.88
+],
+"rotation": [
+0,
+-3.927,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+28.61,
+0.0,
+-22.82
+],
+"rotation": [
+0,
+-4.039,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+30.99,
+0.0,
+-19.48
+],
+"rotation": [
+0,
+-4.151,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+32.97,
+0.0,
+-15.89
+],
+"rotation": [
+0,
+-4.263,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+34.54,
+0.0,
+-12.09
+],
+"rotation": [
+0,
+-4.376,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/curb_2m.glb",
+"position": [
+35.68,
+0.0,
+-8.15
+],
+"rotation": [
+0,
+-4.488,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_red.glb",
+"position": [
+27.53,
+0.0,
+9.12
+],
+"rotation": [
+0,
+-1.891,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_blue.glb",
+"position": [
+23.93,
+0.0,
+16.37
+],
+"rotation": [
+0,
+-2.171,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_green.glb",
+"position": [
+18.48,
+0.0,
+22.35
+],
+"rotation": [
+0,
+-2.451,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/bench.glb",
+"position": [
+13.48,
+0.0,
+30.12
+],
+"rotation": [
+0,
+-2.721,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/flower_planter.glb",
+"position": [
+33.46,
+0.0,
+1.67
+],
+"rotation": [
+0,
+-1.621,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_blue.glb",
+"position": [
+-9.92,
+0.0,
+27.25
+],
+"rotation": [
+0,
+-3.491,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_green.glb",
+"position": [
+-17.07,
+0.0,
+23.45
+],
+"rotation": [
+0,
+-3.771,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_red.glb",
+"position": [
+-22.88,
+0.0,
+17.82
+],
+"rotation": [
+0,
+-4.051,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/bench.glb",
+"position": [
+-30.5,
+0.0,
+12.59
+],
+"rotation": [
+0,
+-4.321,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/flower_planter.glb",
+"position": [
+-2.65,
+0.0,
+33.39
+],
+"rotation": [
+0,
+-3.221,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_green.glb",
+"position": [
+-27.45,
+0.0,
+-9.35
+],
+"rotation": [
+0,
+-5.041,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_red.glb",
+"position": [
+-23.8,
+0.0,
+-16.58
+],
+"rotation": [
+0,
+-5.321,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_blue.glb",
+"position": [
+-18.29,
+0.0,
+-22.51
+],
+"rotation": [
+0,
+-5.601,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/bench.glb",
+"position": [
+-13.23,
+0.0,
+-30.23
+],
+"rotation": [
+0,
+-5.871,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/flower_planter.glb",
+"position": [
+-33.44,
+0.0,
+-1.96
+],
+"rotation": [
+0,
+-4.771,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_red.glb",
+"position": [
+10.15,
+0.0,
+-27.17
+],
+"rotation": [
+0,
+-6.641,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_blue.glb",
+"position": [
+17.26,
+0.0,
+-23.3
+],
+"rotation": [
+0,
+-6.921,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/market_stall_green.glb",
+"position": [
+23.03,
+0.0,
+-17.62
+],
+"rotation": [
+0,
+-7.201,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/bench.glb",
+"position": [
+30.61,
+0.0,
+-12.34
+],
+"rotation": [
+0,
+-7.471,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/flower_planter.glb",
+"position": [
+2.93,
+0.0,
+-33.37
+],
+"rotation": [
+0,
+-6.371,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/banner_pole_red.glb",
+"position": [
+7.5,
+0.0,
+40
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/banner_pole_blue.glb",
+"position": [
+-7.5,
+0.0,
+40
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/banner_pole_blue.glb",
+"position": [
+7.5,
+0.0,
+-40
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/banner_pole_blue.glb",
+"position": [
+-7.5,
+0.0,
+-40
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/banner_pole_red.glb",
+"position": [
+40,
+0.0,
+6.5
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/banner_pole_blue.glb",
+"position": [
+-40,
+0.0,
+6.5
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/banner_pole_blue.glb",
+"position": [
+40,
+0.0,
+-6.5
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/banner_pole_blue.glb",
+"position": [
+-40,
+0.0,
+-6.5
+],
+"rotation": [
+0,
+0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/signpost.glb",
+"position": [
+7,
+0.0,
+172
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/signpost.glb",
+"position": [
+9,
+0.0,
+-48
+],
+"rotation": [
+0,
+0.3,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/well.glb",
+"position": [
+18,
+0.0,
+110
+],
+"rotation": [
+0,
+3.532,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-156,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-132,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-127,
+0.0,
+-181.1
+],
+"rotation": [
+0,
+5.474,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-108,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-84,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-60,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-55,
+0.0,
+-181.1
+],
+"rotation": [
+0,
+5.556,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-36,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-12,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+12,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+17,
+0.0,
+-181.1
+],
+"rotation": [
+0,
+2.117,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+36,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+60,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+84,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+89,
+0.0,
+-181.1
+],
+"rotation": [
+0,
+1.113,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+108,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+132,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+156,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+161,
+0.0,
+-181.1
+],
+"rotation": [
+0,
+3.37,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+180,
+4.6,
+-182.6
+],
+"rotation": [
+0,
+0.0,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-156,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-132,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-127,
+0.0,
+181.1
+],
+"rotation": [
+0,
+4.373,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-108,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-84,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-60,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-55,
+0.0,
+181.1
+],
+"rotation": [
+0,
+0.639,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-36,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-12,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+12,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+17,
+0.0,
+181.1
+],
+"rotation": [
+0,
+1.464,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+36,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+60,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+84,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+89,
+0.0,
+181.1
+],
+"rotation": [
+0,
+0.039,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+108,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+132,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+156,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+161,
+0.0,
+181.1
+],
+"rotation": [
+0,
+3.659,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+180,
+4.6,
+182.6
+],
+"rotation": [
+0,
+3.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+-156
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+-132
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+181.1,
+0.0,
+-127
+],
+"rotation": [
+0,
+1.866,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+-108
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+-84
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+-60
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+181.1,
+0.0,
+-55
+],
+"rotation": [
+0,
+1.549,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+-36
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+-12
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+12
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+181.1,
+0.0,
+17
+],
+"rotation": [
+0,
+4.806,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+36
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+60
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+84
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+181.1,
+0.0,
+89
+],
+"rotation": [
+0,
+5.142,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+108
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+132
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+156
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+181.1,
+0.0,
+161
+],
+"rotation": [
+0,
+1.427,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+182.6,
+4.6,
+180
+],
+"rotation": [
+0,
+-1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+-156
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+-132
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-181.1,
+0.0,
+-127
+],
+"rotation": [
+0,
+1.422,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+-108
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+-84
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+-60
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-181.1,
+0.0,
+-55
+],
+"rotation": [
+0,
+1.123,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+-36
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+-12
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+12
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-181.1,
+0.0,
+17
+],
+"rotation": [
+0,
+4.676,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+36
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+60
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+84
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-181.1,
+0.0,
+89
+],
+"rotation": [
+0,
+1.419,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+108
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+132
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+156
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/rubble.glb",
+"position": [
+-181.1,
+0.0,
+161
+],
+"rotation": [
+0,
+5.843,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+},
+{
+"file": "dressing/wall_lantern.glb",
+"position": [
+-182.6,
+4.6,
+180
+],
+"rotation": [
+0,
+1.571,
+0
+],
+"scale": [
+1.0,
+1.0,
+1.0
+],
+"replaces": "new"
+}
+]
+}

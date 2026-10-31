@@ -1,0 +1,6 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://assets/volcano/worldboss/shaders/wb_wave_skirt.gdshader" id="1"]
+
+[resource]
+shader = ExtResource("1")

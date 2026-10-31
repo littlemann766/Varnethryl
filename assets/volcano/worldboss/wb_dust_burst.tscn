@@ -1,0 +1,49 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="Gradient" id="g"]
+offsets = PackedFloat32Array(0, 0.15, 1)
+colors = PackedColorArray(0.45, 0.38, 0.32, 0, 0.42, 0.36, 0.3, 0.75, 0.3, 0.27, 0.25, 0)
+
+[sub_resource type="Curve" id="c"]
+_data = [Vector2(0, 0.35), 0.0, 1.5, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="StandardMaterial3D" id="m"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+
+[sub_resource type="QuadMesh" id="q"]
+material = SubResource("m")
+size = Vector2(6, 6)
+
+[node name="WbDustBurst" type="CPUParticles3D"]
+emitting = false
+amount = 40
+lifetime = 2.6
+one_shot = true
+explosiveness = 0.92
+fixed_fps = 30
+local_coords = false
+mesh = SubResource("q")
+emission_shape = 6
+emission_ring_axis = Vector3(0, 1, 0)
+emission_ring_height = 0.5
+emission_ring_radius = 12.5
+emission_ring_inner_radius = 8.0
+emission_ring_cone_angle = 90.0
+direction = Vector3(0, 0.35, 1)
+spread = 70.0
+initial_velocity_min = 6.0
+initial_velocity_max = 14.0
+gravity = Vector3(0, -1.5, 0)
+damping_min = 3.0
+damping_max = 5.0
+angle_max = 360.0
+scale_amount_curve = SubResource("c")
+scale_amount_min = 1.0
+scale_amount_max = 2.2
+color_ramp = SubResource("g")

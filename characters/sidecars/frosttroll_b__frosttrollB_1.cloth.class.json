@@ -1,0 +1,12 @@
+{
+ "cloth": [],
+ "nonCloth": [
+  "fur, ice crystals, leather straps, wrist/ankle bands rigid (bound to body bones)",
+  "blue loincloth banner weighted to hips/thighs, not spring-driven (same as frosttroll_a4)"
+ ],
+ "notes": [
+  "no cloth/spring bones on this model; config intentionally empty (secondary motion rule: nothing here needs it)",
+  "no tail",
+  "frosttrollB_1: fingers folded into hand_L/R weights; arm<->thigh weight bleed removed by geodesic split; arms re-bound 60->32 deg"
+ ]
+}

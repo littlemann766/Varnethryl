@@ -1,0 +1,1276 @@
+{
+ "atlas": {
+  "albedo": "atlas/atlas_albedo.png",
+  "note": "all props share one material/atlas; 2048 high, 1024 lod1, 512 lod2"
+ },
+ "props": {
+  "bar_counter": {
+   "name": "bar_counter",
+   "category": "tavern",
+   "batch": 1,
+   "files": {
+    "high": "bar_counter.glb",
+    "lod1": "bar_counter_lod1.glb",
+    "lod2": "bar_counter_lod2.glb"
+   },
+   "tris": {
+    "high": 5852,
+    "lod1": 3712,
+    "lod2": 1484
+   },
+   "size_m": [
+    3.14,
+    1.441,
+    0.715
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.721,
+     0.0
+    ],
+    "extents": [
+     3.14,
+     1.441,
+     0.715
+    ]
+   }
+  },
+  "stool": {
+   "name": "stool",
+   "category": "tavern",
+   "batch": 1,
+   "files": {
+    "high": "stool.glb",
+    "lod1": "stool_lod1.glb",
+    "lod2": "stool_lod2.glb"
+   },
+   "tris": {
+    "high": 660,
+    "lod1": 360,
+    "lod2": 286
+   },
+   "size_m": [
+    0.37,
+    0.725,
+    0.364
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.363,
+     0.0
+    ],
+    "extents": [
+     0.37,
+     0.725,
+     0.364
+    ]
+   }
+  },
+  "table": {
+   "name": "table",
+   "category": "tavern",
+   "batch": 1,
+   "files": {
+    "high": "table.glb",
+    "lod1": "table_lod1.glb",
+    "lod2": "table_lod2.glb"
+   },
+   "tris": {
+    "high": 1536,
+    "lod1": 1012,
+    "lod2": 604
+   },
+   "size_m": [
+    1.4,
+    0.955,
+    0.85
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.477,
+     0.0
+    ],
+    "extents": [
+     1.4,
+     0.955,
+     0.85
+    ]
+   }
+  },
+  "bench": {
+   "name": "bench",
+   "category": "tavern",
+   "batch": 1,
+   "files": {
+    "high": "bench.glb",
+    "lod1": "bench_lod1.glb",
+    "lod2": "bench_lod2.glb"
+   },
+   "tris": {
+    "high": 344,
+    "lod1": 112,
+    "lod2": 48
+   },
+   "size_m": [
+    1.6,
+    0.465,
+    0.34
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.233,
+     0.0
+    ],
+    "extents": [
+     1.6,
+     0.465,
+     0.34
+    ]
+   }
+  },
+  "keg": {
+   "name": "keg",
+   "category": "tavern",
+   "batch": 1,
+   "files": {
+    "high": "keg.glb",
+    "lod1": "keg_lod1.glb",
+    "lod2": "keg_lod2.glb"
+   },
+   "tris": {
+    "high": 560,
+    "lod1": 320,
+    "lod2": 104
+   },
+   "size_m": [
+    0.606,
+    0.72,
+    0.647
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.36,
+     0.0
+    ],
+    "extents": [
+     0.606,
+     0.72,
+     0.647
+    ]
+   }
+  },
+  "hearth": {
+   "name": "hearth",
+   "category": "tavern",
+   "batch": 1,
+   "files": {
+    "high": "hearth.glb",
+    "lod1": "hearth_lod1.glb",
+    "lod2": "hearth_lod2.glb"
+   },
+   "tris": {
+    "high": 8678,
+    "lod1": 4817,
+    "lod2": 1762
+   },
+   "size_m": [
+    2.715,
+    2.975,
+    1.215
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.487,
+     0.0
+    ],
+    "extents": [
+     2.715,
+     2.975,
+     1.215
+    ]
+   }
+  },
+  "bed": {
+   "name": "bed",
+   "category": "tavern",
+   "batch": 1,
+   "files": {
+    "high": "bed.glb",
+    "lod1": "bed_lod1.glb",
+    "lod2": "bed_lod2.glb"
+   },
+   "tris": {
+    "high": 4090,
+    "lod1": 1935,
+    "lod2": 734
+   },
+   "size_m": [
+    1.57,
+    1.55,
+    2.164
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.775,
+     0.0
+    ],
+    "extents": [
+     1.57,
+     1.55,
+     2.164
+    ]
+   }
+  },
+  "wardrobe": {
+   "name": "wardrobe",
+   "category": "tavern",
+   "batch": 1,
+   "files": {
+    "high": "wardrobe.glb",
+    "lod1": "wardrobe_lod1.glb",
+    "lod2": "wardrobe_lod2.glb"
+   },
+   "tris": {
+    "high": 1623,
+    "lod1": 494,
+    "lod2": 60
+   },
+   "size_m": [
+    1.2,
+    2.095,
+    0.704
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.048,
+     0.0
+    ],
+    "extents": [
+     1.2,
+     2.095,
+     0.704
+    ]
+   }
+  },
+  "quest_board": {
+   "name": "quest_board",
+   "category": "hall",
+   "batch": 2,
+   "files": {
+    "high": "quest_board.glb",
+    "lod1": "quest_board_lod1.glb",
+    "lod2": "quest_board_lod2.glb"
+   },
+   "tris": {
+    "high": 2335,
+    "lod1": 1242,
+    "lod2": 698
+   },
+   "size_m": [
+    1.9,
+    2.128,
+    0.404
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.064,
+     0.0
+    ],
+    "extents": [
+     1.9,
+     2.128,
+     0.404
+    ]
+   }
+  },
+  "meeting_table": {
+   "name": "meeting_table",
+   "category": "hall",
+   "batch": 2,
+   "files": {
+    "high": "meeting_table.glb",
+    "lod1": "meeting_table_lod1.glb",
+    "lod2": "meeting_table_lod2.glb"
+   },
+   "tris": {
+    "high": 3264,
+    "lod1": 2160,
+    "lod2": 1746
+   },
+   "size_m": [
+    3.6,
+    1.165,
+    1.1
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.582,
+     0.0
+    ],
+    "extents": [
+     3.6,
+     1.165,
+     1.1
+    ]
+   }
+  },
+  "chair": {
+   "name": "chair",
+   "category": "hall",
+   "batch": 2,
+   "files": {
+    "high": "chair.glb",
+    "lod1": "chair_lod1.glb",
+    "lod2": "chair_lod2.glb"
+   },
+   "tris": {
+    "high": 896,
+    "lod1": 596,
+    "lod2": 348
+   },
+   "size_m": [
+    0.5,
+    1.08,
+    0.5
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.54,
+     0.0
+    ],
+    "extents": [
+     0.5,
+     1.08,
+     0.5
+    ]
+   }
+  },
+  "throne_dais": {
+   "name": "throne_dais",
+   "category": "hall",
+   "batch": 2,
+   "files": {
+    "high": "throne_dais.glb",
+    "lod1": "throne_dais_lod1.glb",
+    "lod2": "throne_dais_lod2.glb"
+   },
+   "tris": {
+    "high": 6386,
+    "lod1": 3935,
+    "lod2": 1360
+   },
+   "size_m": [
+    3.2,
+    3.579,
+    3.2
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.789,
+     0.0
+    ],
+    "extents": [
+     3.2,
+     3.579,
+     3.2
+    ]
+   }
+  },
+  "lion_banner": {
+   "name": "lion_banner",
+   "category": "hall",
+   "batch": 2,
+   "files": {
+    "high": "lion_banner.glb",
+    "lod1": "lion_banner_lod1.glb",
+    "lod2": "lion_banner_lod2.glb"
+   },
+   "tris": {
+    "high": 2628,
+    "lod1": 830,
+    "lod2": 364
+   },
+   "size_m": [
+    1.28,
+    2.371,
+    0.101
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.186,
+     0.0
+    ],
+    "extents": [
+     1.28,
+     2.371,
+     0.101
+    ]
+   }
+  },
+  "iron_chandelier": {
+   "name": "iron_chandelier",
+   "category": "hall",
+   "batch": 2,
+   "files": {
+    "high": "iron_chandelier.glb",
+    "lod1": "iron_chandelier_lod1.glb",
+    "lod2": "iron_chandelier_lod2.glb"
+   },
+   "tris": {
+    "high": 8252,
+    "lod1": 4508,
+    "lod2": 2922
+   },
+   "size_m": [
+    1.63,
+    2.225,
+    1.63
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.113,
+     0.0
+    ],
+    "extents": [
+     1.63,
+     2.225,
+     1.63
+    ]
+   }
+  },
+  "wall_lantern": {
+   "name": "wall_lantern",
+   "category": "hall",
+   "batch": 2,
+   "files": {
+    "high": "wall_lantern.glb",
+    "lod1": "wall_lantern_lod1.glb",
+    "lod2": "wall_lantern_lod2.glb"
+   },
+   "tris": {
+    "high": 668,
+    "lod1": 510,
+    "lod2": 330
+   },
+   "size_m": [
+    0.2,
+    0.476,
+    0.405
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.238,
+     0.0
+    ],
+    "extents": [
+     0.2,
+     0.476,
+     0.405
+    ]
+   }
+  },
+  "rug": {
+   "name": "rug",
+   "category": "hall",
+   "batch": 2,
+   "files": {
+    "high": "rug.glb",
+    "lod1": "rug_lod1.glb",
+    "lod2": "rug_lod2.glb"
+   },
+   "tris": {
+    "high": 1532,
+    "lod1": 428,
+    "lod2": 14
+   },
+   "size_m": [
+    3.155,
+    0.017,
+    2.0
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.008,
+     0.0
+    ],
+    "extents": [
+     3.155,
+     0.017,
+     2.0
+    ]
+   }
+  },
+  "bakery_oven": {
+   "name": "bakery_oven",
+   "category": "shop",
+   "batch": 3,
+   "files": {
+    "high": "bakery_oven.glb",
+    "lod1": "bakery_oven_lod1.glb",
+    "lod2": "bakery_oven_lod2.glb"
+   },
+   "tris": {
+    "high": 1980,
+    "lod1": 1000,
+    "lod2": 624
+   },
+   "size_m": [
+    2.24,
+    3.15,
+    2.952
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.575,
+     0.0
+    ],
+    "extents": [
+     2.24,
+     3.15,
+     2.952
+    ]
+   }
+  },
+  "bread_rack": {
+   "name": "bread_rack",
+   "category": "shop",
+   "batch": 3,
+   "files": {
+    "high": "bread_rack.glb",
+    "lod1": "bread_rack_lod1.glb",
+    "lod2": "bread_rack_lod2.glb"
+   },
+   "tris": {
+    "high": 3224,
+    "lod1": 1994,
+    "lod2": 366
+   },
+   "size_m": [
+    1.25,
+    1.81,
+    0.45
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.905,
+     0.0
+    ],
+    "extents": [
+     1.25,
+     1.81,
+     0.45
+    ]
+   }
+  },
+  "apothecary_shelf": {
+   "name": "apothecary_shelf",
+   "category": "shop",
+   "batch": 3,
+   "files": {
+    "high": "apothecary_shelf.glb",
+    "lod1": "apothecary_shelf_lod1.glb",
+    "lod2": "apothecary_shelf_lod2.glb"
+   },
+   "tris": {
+    "high": 5904,
+    "lod1": 1964,
+    "lod2": 336
+   },
+   "size_m": [
+    1.5,
+    2.25,
+    0.42
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.125,
+     0.0
+    ],
+    "extents": [
+     1.5,
+     2.25,
+     0.42
+    ]
+   }
+  },
+  "bottles": {
+   "name": "bottles",
+   "category": "shop",
+   "batch": 3,
+   "files": {
+    "high": "bottles.glb",
+    "lod1": "bottles_lod1.glb",
+    "lod2": "bottles_lod2.glb"
+   },
+   "tris": {
+    "high": 780,
+    "lod1": 496,
+    "lod2": 330
+   },
+   "size_m": [
+    0.343,
+    0.329,
+    0.273
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.164,
+     0.0
+    ],
+    "extents": [
+     0.343,
+     0.329,
+     0.273
+    ]
+   }
+  },
+  "anvil": {
+   "name": "anvil",
+   "category": "shop",
+   "batch": 3,
+   "files": {
+    "high": "anvil.glb",
+    "lod1": "anvil_lod1.glb",
+    "lod2": "anvil_lod2.glb"
+   },
+   "tris": {
+    "high": 596,
+    "lod1": 296,
+    "lod2": 200
+   },
+   "size_m": [
+    0.83,
+    0.858,
+    0.585
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.429,
+     0.0
+    ],
+    "extents": [
+     0.83,
+     0.858,
+     0.585
+    ]
+   }
+  },
+  "forge": {
+   "name": "forge",
+   "category": "shop",
+   "batch": 3,
+   "files": {
+    "high": "forge.glb",
+    "lod1": "forge_lod1.glb",
+    "lod2": "forge_lod2.glb"
+   },
+   "tris": {
+    "high": 3172,
+    "lod1": 1586,
+    "lod2": 734
+   },
+   "size_m": [
+    3.122,
+    3.5,
+    1.597
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.75,
+     0.0
+    ],
+    "extents": [
+     3.122,
+     3.5,
+     1.597
+    ]
+   }
+  },
+  "weapon_rack": {
+   "name": "weapon_rack",
+   "category": "shop",
+   "batch": 3,
+   "files": {
+    "high": "weapon_rack.glb",
+    "lod1": "weapon_rack_lod1.glb",
+    "lod2": "weapon_rack_lod2.glb"
+   },
+   "tris": {
+    "high": 2714,
+    "lod1": 1171,
+    "lod2": 522
+   },
+   "size_m": [
+    1.5,
+    2.05,
+    0.407
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.025,
+     0.0
+    ],
+    "extents": [
+     1.5,
+     2.05,
+     0.407
+    ]
+   }
+  },
+  "market_stall": {
+   "name": "market_stall",
+   "category": "shop",
+   "batch": 3,
+   "files": {
+    "high": "market_stall.glb",
+    "lod1": "market_stall_lod1.glb",
+    "lod2": "market_stall_lod2.glb"
+   },
+   "tris": {
+    "high": 2900,
+    "lod1": 1746,
+    "lod2": 864
+   },
+   "size_m": [
+    2.4,
+    2.576,
+    1.204
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.288,
+     0.0
+    ],
+    "extents": [
+     2.4,
+     2.576,
+     1.204
+    ]
+   }
+  },
+  "altar": {
+   "name": "altar",
+   "category": "temple",
+   "batch": 4,
+   "files": {
+    "high": "altar.glb",
+    "lod1": "altar_lod1.glb",
+    "lod2": "altar_lod2.glb"
+   },
+   "tris": {
+    "high": 4490,
+    "lod1": 2257,
+    "lod2": 1346
+   },
+   "size_m": [
+    2.6,
+    1.81,
+    1.7
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.905,
+     0.0
+    ],
+    "extents": [
+     2.6,
+     1.81,
+     1.7
+    ]
+   }
+  },
+  "pew": {
+   "name": "pew",
+   "category": "temple",
+   "batch": 4,
+   "files": {
+    "high": "pew.glb",
+    "lod1": "pew_lod1.glb",
+    "lod2": "pew_lod2.glb"
+   },
+   "tris": {
+    "high": 556,
+    "lod1": 380,
+    "lod2": 48
+   },
+   "size_m": [
+    2.28,
+    1.08,
+    0.5
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.54,
+     0.0
+    ],
+    "extents": [
+     2.28,
+     1.08,
+     0.5
+    ]
+   }
+  },
+  "bookshelf": {
+   "name": "bookshelf",
+   "category": "temple",
+   "batch": 4,
+   "files": {
+    "high": "bookshelf.glb",
+    "lod1": "bookshelf_lod1.glb",
+    "lod2": "bookshelf_lod2.glb"
+   },
+   "tris": {
+    "high": 3740,
+    "lod1": 808,
+    "lod2": 144
+   },
+   "size_m": [
+    1.42,
+    2.37,
+    0.44
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.185,
+     0.0
+    ],
+    "extents": [
+     1.42,
+     2.37,
+     0.44
+    ]
+   }
+  },
+  "lectern": {
+   "name": "lectern",
+   "category": "temple",
+   "batch": 4,
+   "files": {
+    "high": "lectern.glb",
+    "lod1": "lectern_lod1.glb",
+    "lod2": "lectern_lod2.glb"
+   },
+   "tris": {
+    "high": 1307,
+    "lod1": 582,
+    "lod2": 248
+   },
+   "size_m": [
+    0.6,
+    1.23,
+    0.51
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.615,
+     0.0
+    ],
+    "extents": [
+     0.6,
+     1.23,
+     0.51
+    ]
+   }
+  },
+  "crystal_orb": {
+   "name": "crystal_orb",
+   "category": "temple",
+   "batch": 4,
+   "files": {
+    "high": "crystal_orb.glb",
+    "lod1": "crystal_orb_lod1.glb",
+    "lod2": "crystal_orb_lod2.glb"
+   },
+   "tris": {
+    "high": 1808,
+    "lod1": 1616,
+    "lod2": 584
+   },
+   "size_m": [
+    0.6,
+    1.37,
+    0.6
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.685,
+     0.0
+    ],
+    "extents": [
+     0.6,
+     1.37,
+     0.6
+    ]
+   }
+  },
+  "telescope": {
+   "name": "telescope",
+   "category": "temple",
+   "batch": 4,
+   "files": {
+    "high": "telescope.glb",
+    "lod1": "telescope_lod1.glb",
+    "lod2": "telescope_lod2.glb"
+   },
+   "tris": {
+    "high": 724,
+    "lod1": 496,
+    "lod2": 220
+   },
+   "size_m": [
+    0.709,
+    1.83,
+    1.032
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.915,
+     0.0
+    ],
+    "extents": [
+     0.709,
+     1.83,
+     1.032
+    ]
+   }
+  },
+  "chest": {
+   "name": "chest",
+   "category": "treasury",
+   "batch": 5,
+   "files": {
+    "high": "chest.glb",
+    "lod1": "chest_lod1.glb",
+    "lod2": "chest_lod2.glb"
+   },
+   "tris": {
+    "high": 776,
+    "lod1": 660,
+    "lod2": 150
+   },
+   "size_m": [
+    0.956,
+    0.695,
+    0.612
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.348,
+     0.0
+    ],
+    "extents": [
+     0.956,
+     0.695,
+     0.612
+    ]
+   }
+  },
+  "gold_pile": {
+   "name": "gold_pile",
+   "category": "treasury",
+   "batch": 5,
+   "files": {
+    "high": "gold_pile.glb",
+    "lod1": "gold_pile_lod1.glb",
+    "lod2": "gold_pile_lod2.glb"
+   },
+   "tris": {
+    "high": 3392,
+    "lod1": 862,
+    "lod2": 222
+   },
+   "size_m": [
+    1.24,
+    0.314,
+    1.265
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.157,
+     0.0
+    ],
+    "extents": [
+     1.24,
+     0.314,
+     1.265
+    ]
+   }
+  },
+  "vault_door": {
+   "name": "vault_door",
+   "category": "treasury",
+   "batch": 5,
+   "files": {
+    "high": "vault_door.glb",
+    "lod1": "vault_door_lod1.glb",
+    "lod2": "vault_door_lod2.glb"
+   },
+   "tris": {
+    "high": 4166,
+    "lod1": 2399,
+    "lod2": 738
+   },
+   "size_m": [
+    2.74,
+    2.81,
+    0.846
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.405,
+     0.0
+    ],
+    "extents": [
+     2.74,
+     2.81,
+     0.846
+    ]
+   }
+  },
+  "sarcophagus": {
+   "name": "sarcophagus",
+   "category": "crypt",
+   "batch": 5,
+   "files": {
+    "high": "sarcophagus.glb",
+    "lod1": "sarcophagus_lod1.glb",
+    "lod2": "sarcophagus_lod2.glb"
+   },
+   "tris": {
+    "high": 6386,
+    "lod1": 2501,
+    "lod2": 402
+   },
+   "size_m": [
+    1.1,
+    1.27,
+    2.4
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.635,
+     0.0
+    ],
+    "extents": [
+     1.1,
+     1.27,
+     2.4
+    ]
+   }
+  },
+  "armor_stand": {
+   "name": "armor_stand",
+   "category": "keep",
+   "batch": 5,
+   "files": {
+    "high": "armor_stand.glb",
+    "lod1": "armor_stand_lod1.glb",
+    "lod2": "armor_stand_lod2.glb"
+   },
+   "tris": {
+    "high": 3043,
+    "lod1": 1736,
+    "lod2": 810
+   },
+   "size_m": [
+    0.742,
+    2.1,
+    0.498
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.05,
+     0.0
+    ],
+    "extents": [
+     0.742,
+     2.1,
+     0.498
+    ]
+   }
+  },
+  "balcony_railing": {
+   "name": "balcony_railing",
+   "category": "structure",
+   "batch": 6,
+   "files": {
+    "high": "balcony_railing.glb",
+    "lod1": "balcony_railing_lod1.glb",
+    "lod2": "balcony_railing_lod2.glb"
+   },
+   "tris": {
+    "high": 752,
+    "lod1": 388,
+    "lod2": 244
+   },
+   "size_m": [
+    2.14,
+    1.22,
+    0.133
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.61,
+     0.0
+    ],
+    "extents": [
+     2.14,
+     1.22,
+     0.133
+    ]
+   }
+  },
+  "ladder": {
+   "name": "ladder",
+   "category": "structure",
+   "batch": 6,
+   "files": {
+    "high": "ladder.glb",
+    "lod1": "ladder_lod1.glb",
+    "lod2": "ladder_lod2.glb"
+   },
+   "tris": {
+    "high": 808,
+    "lod1": 288,
+    "lod2": 224
+   },
+   "size_m": [
+    0.5,
+    3.0,
+    0.059
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     1.5,
+     0.0
+    ],
+    "extents": [
+     0.5,
+     3.0,
+     0.059
+    ]
+   }
+  },
+  "sofa": {
+   "name": "sofa",
+   "category": "house",
+   "batch": 7,
+   "files": {
+    "high": "sofa.glb",
+    "lod1": "sofa_lod1.glb",
+    "lod2": "sofa_lod2.glb"
+   },
+   "tris": {
+    "high": 3839,
+    "lod1": 1712,
+    "lod2": 444
+   },
+   "size_m": [
+    2.06,
+    1.09,
+    0.98
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.545,
+     0.0
+    ],
+    "extents": [
+     2.06,
+     1.09,
+     0.98
+    ]
+   }
+  },
+  "armchair": {
+   "name": "armchair",
+   "category": "house",
+   "batch": 7,
+   "files": {
+    "high": "armchair.glb",
+    "lod1": "armchair_lod1.glb",
+    "lod2": "armchair_lod2.glb"
+   },
+   "tris": {
+    "high": 3063,
+    "lod1": 1396,
+    "lod2": 428
+   },
+   "size_m": [
+    0.96,
+    1.24,
+    0.96
+   ],
+   "collision_box": {
+    "center": [
+     0.0,
+     0.62,
+     0.0
+    ],
+    "extents": [
+     0.96,
+     1.24,
+     0.96
+    ]
+   }
+  },
+  "castle_model": {
+   "size_m": [
+    0.6,
+    0.54,
+    0.566
+   ],
+   "collision_box": {
+    "center": [
+     0,
+     0.27,
+     0
+    ],
+    "extents": [
+     0.6,
+     0.54,
+     0.566
+    ]
+   },
+   "name": "castle_model"
+  }
+ }
+}

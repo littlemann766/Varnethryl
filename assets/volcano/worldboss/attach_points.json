@@ -1,0 +1,132 @@
+{
+  "_note": "bone-local offsets in skeleton units (Skeleton3D under Darius_Rig). Instance the crystal under BoneAttachment3D(bone) -> Node3D with transform = Transform3D(Basis(rotation_quat).scaled(Vector3.ONE*scale), offset). +Y of the crystal points out of the skin. Values are scale-agnostic: they ride the Titan node's scale.",
+  "points": {
+    "back": {
+      "bone": "upperChest",
+      "crystal": "wb_crystal_core.glb",
+      "offset": [
+        -0.0602,
+        1.4105,
+        0.0386
+      ],
+      "rotation_quat": [
+        0.0962,
+        -0.0243,
+        0.0243,
+        0.9948
+      ],
+      "scale": 1.3938,
+      "surface_mesh_units": [
+        -0.118217411424354,
+        16.1942884552363,
+        -2.41769016747384
+      ]
+    },
+    "chest": {
+      "bone": "chest",
+      "crystal": "wb_crystal_core.glb",
+      "offset": [
+        0.0504,
+        -1.2564,
+        0.6109
+      ],
+      "rotation_quat": [
+        0.9873,
+        0.0107,
+        -0.0107,
+        0.1581
+      ],
+      "scale": 1.3938,
+      "surface_mesh_units": [
+        0.0966687274024132,
+        15.8118427080285,
+        2.77315284342126
+      ]
+    },
+    "forearm_L": {
+      "bone": "foreArm_L",
+      "crystal": "wb_crystal_forearm.glb",
+      "offset": [
+        0.5607,
+        -0.2036,
+        -1.1377
+      ],
+      "rotation_quat": [
+        0.9155,
+        0.2033,
+        -0.2033,
+        0.2813
+      ],
+      "scale": 0.8041,
+      "surface_mesh_units": [
+        5.32876130432726,
+        9.16379888176516,
+        0.571528716783121
+      ]
+    },
+    "forearm_R": {
+      "bone": "foreArm_R",
+      "crystal": "wb_crystal_forearm.glb",
+      "offset": [
+        -0.7168,
+        -0.1369,
+        -1.1768
+      ],
+      "rotation_quat": [
+        0.9041,
+        -0.2374,
+        0.2374,
+        0.2642
+      ],
+      "scale": 0.8041,
+      "surface_mesh_units": [
+        -5.62659244877909,
+        9.08705409128947,
+        0.421875891692302
+      ]
+    },
+    "knee_L": {
+      "bone": "shin_L",
+      "crystal": "wb_crystal_knee.glb",
+      "offset": [
+        0.3336,
+        -1.2148,
+        0.243
+      ],
+      "rotation_quat": [
+        0.9977,
+        0.0476,
+        -0.0476,
+        -0.0118
+      ],
+      "scale": 1.0185,
+      "surface_mesh_units": [
+        3.05934716174625,
+        6.40962209262841,
+        2.51573637609431
+      ]
+    },
+    "knee_R": {
+      "bone": "shin_R",
+      "crystal": "wb_crystal_knee.glb",
+      "offset": [
+        -0.1779,
+        -1.74,
+        0.3246
+      ],
+      "rotation_quat": [
+        0.9973,
+        -0.0521,
+        0.0521,
+        -0.0053
+      ],
+      "scale": 1.0185,
+      "surface_mesh_units": [
+        -3.08217517670664,
+        6.56311122883198,
+        2.51573637609431
+      ]
+    }
+  },
+  "rig_scale": 1.86540746688843
+}

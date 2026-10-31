@@ -1,0 +1,17 @@
+[gd_resource type="ShaderMaterial" load_steps=7 format=3]
+
+[ext_resource type="Shader" path="res://assets/volcano/worldboss/shaders/wb_titan_lava.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/tex/wb_lava/titan_basecolor_volcano_glow.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/tex/wb_lava/titan_normal_volcano_glow.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/tex/wb_lava/titan_rm_volcano_glow.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/tex/wb_lava/wb_titan_lava_mask.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/volcano/worldboss/tex/wb_lava/wb_rock_detail.png" id="6"]
+
+[resource]
+shader = ExtResource("1")
+shader_parameter/albedo_tex = ExtResource("2")
+shader_parameter/normal_tex = ExtResource("3")
+shader_parameter/rm_tex = ExtResource("4")
+shader_parameter/lava_mask = ExtResource("5")
+shader_parameter/detail_tex = ExtResource("6")
+shader_parameter/glow_strength = 4.5

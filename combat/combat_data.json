@@ -1,0 +1,2595 @@
+{
+ "KITS": {
+  "aldric": {
+   "color": "#d9b44a",
+   "basic": "Shield Bash combo",
+   "skills": [
+    {
+     "id": "aldric.1",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "sp": 15
+     },
+     "mult": 1.6,
+     "name": "Shield Bash",
+     "icon": "shield",
+     "cd": 4,
+     "kind": "melee",
+     "range": 3.6
+    },
+    {
+     "id": "aldric.2",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 2.2,
+     "name": "Guardian Slam",
+     "icon": "ring",
+     "cd": 8,
+     "kind": "aoe",
+     "range": 6,
+     "knock": 4
+    },
+    {
+     "id": "aldric.3",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.7,
+     "cost": {
+      "sp": 30
+     },
+     "mult": 2.4,
+     "name": "Bulwark Charge",
+     "icon": "dash",
+     "cd": 12,
+     "kind": "dash",
+     "range": 9,
+     "dist": 9
+    },
+    {
+     "id": "aldric.u",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 4.5,
+     "fury": 100,
+     "cd": 30,
+     "name": "Lionheart Bulwark",
+     "icon": "lion",
+     "kind": "aoe",
+     "range": 10,
+     "knock": 6,
+     "shield": 4
+    }
+   ],
+   "weapon": {
+    "name": "Steel Longsword",
+    "glb": null,
+    "model": "procedural (aldric.js)",
+    "dmgPct": 0.05
+   },
+   "armor": {
+    "name": "Lionguard Plate",
+    "hpPct": 0.21,
+    "mpPct": 0,
+    "spPct": 0,
+    "defPct": 0.16
+   }
+  },
+  "elira": {
+   "color": "#5fbf6a",
+   "basic": "Quick-draw arrow",
+   "skills": [
+    {
+     "id": "elira.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.6,
+     "cost": {
+      "sp": 12
+     },
+     "mult": 1.8,
+     "name": "Aimed Shot",
+     "icon": "arrow",
+     "cd": 4,
+     "kind": "ranged",
+     "range": 20
+    },
+    {
+     "id": "elira.2",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.93,
+     "cost": {
+      "mp": 20
+     },
+     "mult": 2.6,
+     "name": "Piercing Arrow",
+     "icon": "line",
+     "cd": 8,
+     "kind": "line",
+     "range": 22
+    },
+    {
+     "id": "elira.3",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 1.2,
+     "name": "Snare Trap",
+     "icon": "trap",
+     "cd": 12,
+     "kind": "aoe",
+     "range": 5
+    },
+    {
+     "id": "elira.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": 0.4,
+     "cost": {},
+     "mult": 6,
+     "fury": 100,
+     "cd": 30,
+     "name": "Eagle-Eye Barrage",
+     "icon": "volley",
+     "kind": "storm",
+     "range": 16
+    }
+   ],
+   "weapon": {
+    "name": "Longbow",
+    "glb": null,
+    "model": "none yet",
+    "dmgPct": 0.06
+   },
+   "armor": {
+    "name": "Ranger Leathers",
+    "hpPct": 0.09,
+    "mpPct": 0.06,
+    "spPct": 0.11,
+    "defPct": 0.07
+   }
+  },
+  "rowan": {
+   "color": "#ff7a2a",
+   "basic": "Firebolt",
+   "skills": [
+    {
+     "id": "rowan.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.6,
+     "cost": {
+      "mp": 15
+     },
+     "mult": 2,
+     "name": "Firebolt",
+     "icon": "flame",
+     "cd": 4,
+     "kind": "ranged",
+     "range": 18
+    },
+    {
+     "id": "rowan.2",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.25,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 2.4,
+     "name": "Flame Wave",
+     "icon": "wave",
+     "cd": 8,
+     "kind": "melee",
+     "range": 9
+    },
+    {
+     "id": "rowan.3",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 30
+     },
+     "mult": 2.6,
+     "name": "Ember Burst",
+     "icon": "ring",
+     "cd": 12,
+     "kind": "aoe",
+     "range": 6.5
+    },
+    {
+     "id": "rowan.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": 0.3,
+     "cost": {},
+     "mult": 8,
+     "fury": 100,
+     "cd": 30,
+     "name": "Meteor Burst",
+     "icon": "meteor",
+     "kind": "meteor",
+     "radius": 10,
+     "delay": 1.4
+    }
+   ],
+   "weapon": {
+    "name": "Fire Staff",
+    "glb": null,
+    "model": "none yet",
+    "dmgPct": 0.05
+   },
+   "armor": {
+    "name": "Emberweave Robes",
+    "hpPct": 0.06,
+    "mpPct": 0.32,
+    "spPct": 0,
+    "defPct": 0.05
+   }
+  },
+  "thorne": {
+   "color": "#f3f0d0",
+   "basic": "Staff light bolt",
+   "skills": [
+    {
+     "id": "thorne.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.6,
+     "cost": {
+      "mp": 12
+     },
+     "mult": 1.8,
+     "name": "Radiant Bolt",
+     "icon": "sun",
+     "cd": 4,
+     "kind": "ranged",
+     "range": 18
+    },
+    {
+     "id": "thorne.2",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 1.5,
+     "name": "Mend",
+     "icon": "heal",
+     "cd": 8,
+     "kind": "heal",
+     "heal": 0.3
+    },
+    {
+     "id": "thorne.3",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 30
+     },
+     "mult": 2.4,
+     "name": "Holy Smite",
+     "icon": "ring",
+     "cd": 12,
+     "kind": "aoe",
+     "range": 5.5
+    },
+    {
+     "id": "thorne.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 3,
+     "fury": 100,
+     "cd": 30,
+     "name": "Divine Renewal",
+     "icon": "heal2",
+     "kind": "aoe",
+     "range": 8,
+     "heal": 0.6
+    }
+   ],
+   "weapon": {
+    "name": "Radiant Spellbook (off-hand)",
+    "glb": "spellbook",
+    "model": "weapons/spellbook.glb (off-hand)",
+    "dmgPct": 0.05
+   },
+   "armor": {
+    "name": "Vestments of Light",
+    "hpPct": 0.08,
+    "mpPct": 0.26,
+    "spPct": 0,
+    "defPct": 0.06
+   }
+  },
+  "nyx": {
+   "color": "#7a4bd0",
+   "basic": "Twin dagger flurry",
+   "skills": [
+    {
+     "id": "nyx.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "sp": 15
+     },
+     "mult": 2.4,
+     "name": "Dagger Flurry",
+     "icon": "dagger",
+     "cd": 4,
+     "kind": "storm",
+     "range": 3.8
+    },
+    {
+     "id": "nyx.2",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.6,
+     "cost": {
+      "sp": 20
+     },
+     "mult": 2,
+     "name": "Shadow Step",
+     "icon": "blink",
+     "cd": 8,
+     "kind": "blink",
+     "range": 14
+    },
+    {
+     "id": "nyx.3",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 2.6,
+     "name": "Poison Cut",
+     "icon": "poison",
+     "cd": 12,
+     "kind": "melee",
+     "range": 3.8
+    },
+    {
+     "id": "nyx.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 7,
+     "fury": 100,
+     "cd": 30,
+     "name": "Shadow Flurry",
+     "icon": "storm",
+     "kind": "storm",
+     "range": 8
+    }
+   ],
+   "weapon": {
+    "name": "Twin Daggers",
+    "glb": "nyx_dagger",
+    "model": "weapons/nyx_dagger.glb (R+L)",
+    "dmgPct": 0.07
+   },
+   "armor": {
+    "name": "Shadowsilk Leathers",
+    "hpPct": 0.06,
+    "mpPct": 0,
+    "spPct": 0.2,
+    "defPct": 0.06
+   }
+  },
+  "seraphine": {
+   "color": "#ffd86a",
+   "basic": "Mace swing",
+   "skills": [
+    {
+     "id": "seraphine.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.9,
+     "cost": {
+      "mp": 15
+     },
+     "mult": 1.9,
+     "name": "Sun Smite",
+     "icon": "sun",
+     "cd": 4,
+     "kind": "line",
+     "range": 16
+    },
+    {
+     "id": "seraphine.2",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.7,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 2.3,
+     "name": "Aegis Dash",
+     "icon": "dash",
+     "cd": 8,
+     "kind": "dash",
+     "range": 8,
+     "dist": 8
+    },
+    {
+     "id": "seraphine.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 30
+     },
+     "mult": 2.2,
+     "name": "Consecrate",
+     "icon": "ring",
+     "cd": 12,
+     "kind": "aoe",
+     "range": 6,
+     "heal": 0.15
+    },
+    {
+     "id": "seraphine.u",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 4.5,
+     "fury": 100,
+     "cd": 30,
+     "name": "Radiant Aegis",
+     "icon": "sun",
+     "kind": "aoe",
+     "range": 10,
+     "shield": 5,
+     "heal": 0.3
+    }
+   ],
+   "weapon": {
+    "name": "Holy Mace",
+    "glb": "seraphine_holymace",
+    "model": "weapons/seraphine_holymace.glb",
+    "dmgPct": 0.06
+   },
+   "armor": {
+    "name": "Sunforged Armor",
+    "hpPct": 0.18,
+    "mpPct": 0.05,
+    "spPct": 0,
+    "defPct": 0.14
+   }
+  },
+  "garruk": {
+   "color": "#c0392b",
+   "basic": "Axe chop",
+   "skills": [
+    {
+     "id": "garruk.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "sp": 15
+     },
+     "mult": 2,
+     "name": "Whirl Axe",
+     "icon": "slash",
+     "cd": 4,
+     "kind": "aoe",
+     "range": 4.5
+    },
+    {
+     "id": "garruk.2",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 2.4,
+     "name": "Ground Pound",
+     "icon": "ring",
+     "cd": 8,
+     "kind": "aoe",
+     "range": 7,
+     "knock": 5
+    },
+    {
+     "id": "garruk.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "sp": 20
+     },
+     "mult": 1.5,
+     "name": "War Cry",
+     "icon": "lion",
+     "cd": 12,
+     "kind": "shield",
+     "dur": 4,
+     "reduce": 0.4
+    },
+    {
+     "id": "garruk.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 7,
+     "fury": 100,
+     "cd": 30,
+     "name": "Bloodstorm",
+     "icon": "storm",
+     "kind": "storm",
+     "range": 8
+    }
+   ],
+   "weapon": {
+    "name": "Stonefist Greataxe",
+    "glb": "garruk_greataxe",
+    "model": "weapons/garruk_greataxe.glb",
+    "dmgPct": 0.08
+   },
+   "armor": {
+    "name": "Stonefist Harness",
+    "hpPct": 0.16,
+    "mpPct": 0,
+    "spPct": 0.04,
+    "defPct": 0.11
+   }
+  },
+  "mirelle": {
+   "color": "#7bd36a",
+   "basic": "Thorn lash",
+   "skills": [
+    {
+     "id": "mirelle.1",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 15
+     },
+     "mult": 1.4,
+     "name": "Entangle",
+     "icon": "trap",
+     "cd": 4,
+     "kind": "aoe",
+     "range": 5.5
+    },
+    {
+     "id": "mirelle.2",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 1.5,
+     "name": "Bloom",
+     "icon": "heal",
+     "cd": 8,
+     "kind": "heal",
+     "heal": 0.28
+    },
+    {
+     "id": "mirelle.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.7,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 2.4,
+     "name": "Wolf Dash",
+     "icon": "dash",
+     "cd": 12,
+     "kind": "dash",
+     "range": 9,
+     "dist": 9
+    },
+    {
+     "id": "mirelle.u",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 5,
+     "fury": 100,
+     "cd": 30,
+     "name": "Grove Awakening",
+     "icon": "ring",
+     "kind": "aoe",
+     "range": 11
+    }
+   ],
+   "weapon": {
+    "name": "Thorn Sickle",
+    "glb": "mirelle_sickle",
+    "model": "weapons/mirelle_sickle.glb",
+    "dmgPct": 0.05
+   },
+   "armor": {
+    "name": "Rootweave Vestments",
+    "hpPct": 0.11,
+    "mpPct": 0.2,
+    "spPct": 0,
+    "defPct": 0.07
+   }
+  },
+  "cedric": {
+   "color": "#e8a0d0",
+   "basic": "Lute strum",
+   "skills": [
+    {
+     "id": "cedric.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 20
+     },
+     "mult": 1.5,
+     "name": "Battle Hymn",
+     "icon": "bolt",
+     "cd": 14,
+     "kind": "buff",
+     "buff": {
+      "id": "hymn",
+      "dur": 8,
+      "dmg": 0.2,
+      "reduce": 0.15,
+      "party": true
+     },
+     "heal": 0.1
+    },
+    {
+     "id": "cedric.2",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 2.2,
+     "name": "Dissonance",
+     "icon": "wave",
+     "cd": 8,
+     "kind": "melee",
+     "range": 8
+    },
+    {
+     "id": "cedric.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 30
+     },
+     "mult": 1.5,
+     "name": "Encore",
+     "icon": "heal2",
+     "cd": 12,
+     "kind": "heal",
+     "heal": 0.2
+    },
+    {
+     "id": "cedric.u",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 4.5,
+     "fury": 100,
+     "cd": 30,
+     "name": "Grand Crescendo",
+     "icon": "wave",
+     "kind": "aoe",
+     "range": 10,
+     "heal": 0.3
+    }
+   ],
+   "weapon": {
+    "name": "Lute",
+    "glb": null,
+    "model": "none yet",
+    "dmgPct": 0.05
+   },
+   "armor": {
+    "name": "Minstrel Finery",
+    "hpPct": 0.09,
+    "mpPct": 0.14,
+    "spPct": 0.11,
+    "defPct": 0.06
+   }
+  },
+  "morwen": {
+   "color": "#4de0a0",
+   "basic": "Scythe sweep",
+   "skills": [
+    {
+     "id": "morwen.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 1.5,
+     "name": "Raise Thrall",
+     "icon": "throw",
+     "cd": 16,
+     "kind": "summon",
+     "summon": {
+      "id": "thrall",
+      "dur": 12,
+      "hp": 0.35,
+      "range": 2.2,
+      "speed": 4.5,
+      "every": 1,
+      "mult": 0.7,
+      "aggro": 18
+     }
+    },
+    {
+     "id": "morwen.2",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.9,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 2.4,
+     "name": "Soul Drain",
+     "icon": "line",
+     "cd": 8,
+     "kind": "line",
+     "range": 14,
+     "heal": 0.06
+    },
+    {
+     "id": "morwen.3",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 30
+     },
+     "mult": 2,
+     "name": "Bone Cage",
+     "icon": "trap",
+     "cd": 12,
+     "kind": "aoe",
+     "range": 5.5
+    },
+    {
+     "id": "morwen.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": 0.95,
+     "cost": {},
+     "mult": 6.5,
+     "fury": 100,
+     "cd": 30,
+     "name": "Legion of the Dead",
+     "icon": "storm",
+     "kind": "line",
+     "range": 22
+    }
+   ],
+   "weapon": {
+    "name": "Bone Scythe",
+    "glb": "morwen_scythe",
+    "model": "weapons/morwen_scythe.glb",
+    "dmgPct": 0.06
+   },
+   "armor": {
+    "name": "Blackveil Shroud",
+    "hpPct": 0.07,
+    "mpPct": 0.19,
+    "spPct": 0,
+    "defPct": 0.07
+   }
+  },
+  "kael": {
+   "color": "#40c4ff",
+   "basic": "Rune bolt",
+   "skills": [
+    {
+     "id": "kael.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.6,
+     "cost": {
+      "mp": 15
+     },
+     "mult": 2,
+     "name": "Arc Rune",
+     "icon": "bolt",
+     "cd": 4,
+     "kind": "ranged",
+     "range": 18
+    },
+    {
+     "id": "kael.2",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 2.4,
+     "name": "Ward Rune",
+     "icon": "trap",
+     "cd": 8,
+     "kind": "aoe",
+     "range": 5.5
+    },
+    {
+     "id": "kael.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.6,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 2,
+     "name": "Rune Swap",
+     "icon": "blink",
+     "cd": 12,
+     "kind": "blink",
+     "range": 14
+    },
+    {
+     "id": "kael.u",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 5.5,
+     "fury": 100,
+     "cd": 30,
+     "name": "Runic Cataclysm",
+     "icon": "ring",
+     "kind": "aoe",
+     "range": 11
+    }
+   ],
+   "weapon": {
+    "name": "Rune Staff",
+    "glb": null,
+    "model": "none yet",
+    "dmgPct": 0.05
+   },
+   "armor": {
+    "name": "Runebound Coat",
+    "hpPct": 0.08,
+    "mpPct": 0.24,
+    "spPct": 0,
+    "defPct": 0.07
+   }
+  },
+  "vesper": {
+   "color": "#b38b59",
+   "basic": "Crossbow bolt",
+   "skills": [
+    {
+     "id": "vesper.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.6,
+     "cost": {
+      "sp": 12
+     },
+     "mult": 2,
+     "name": "Hex Mark",
+     "icon": "arrow",
+     "cd": 4,
+     "kind": "ranged",
+     "range": 20
+    },
+    {
+     "id": "vesper.2",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 1.8,
+     "name": "Purge Flare",
+     "icon": "sun",
+     "cd": 8,
+     "kind": "aoe",
+     "range": 6
+    },
+    {
+     "id": "vesper.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.7,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 2.2,
+     "name": "Hunter's Roll",
+     "icon": "dash",
+     "cd": 12,
+     "kind": "dash",
+     "range": 8,
+     "dist": 8
+    },
+    {
+     "id": "vesper.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": 0.4,
+     "cost": {},
+     "mult": 6,
+     "fury": 100,
+     "cd": 30,
+     "name": "Judgement Volley",
+     "icon": "volley",
+     "kind": "storm",
+     "range": 16
+    }
+   ],
+   "weapon": {
+    "name": "Silver Hand Crossbow",
+    "glb": "hand_crossbow",
+    "model": "weapons/hand_crossbow.glb",
+    "dmgPct": 0.06
+   },
+   "armor": {
+    "name": "Hunter Coat",
+    "hpPct": 0.1,
+    "mpPct": 0,
+    "spPct": 0.1,
+    "defPct": 0.08
+   }
+  },
+  "talia": {
+   "color": "#59c3ff",
+   "basic": "Spark staff",
+   "skills": [
+    {
+     "id": "talia.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.6,
+     "cost": {
+      "mp": 15
+     },
+     "mult": 2.2,
+     "name": "Chain Lightning",
+     "icon": "bolt",
+     "cd": 4,
+     "kind": "ranged",
+     "range": 18
+    },
+    {
+     "id": "talia.2",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 1.5,
+     "name": "Totem of Wind",
+     "icon": "wave",
+     "cd": 16,
+     "kind": "summon",
+     "summon": {
+      "id": "totem",
+      "dur": 10,
+      "radius": 8,
+      "slow": 0.5,
+      "reduce": 0.2,
+      "haste": 0.25
+     }
+    },
+    {
+     "id": "talia.3",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 30
+     },
+     "mult": 1.6,
+     "name": "Static Field",
+     "icon": "trap",
+     "cd": 12,
+     "kind": "aoe",
+     "range": 6
+    },
+    {
+     "id": "talia.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 6.5,
+     "fury": 100,
+     "cd": 30,
+     "name": "Tempest Call",
+     "icon": "bolt",
+     "kind": "storm",
+     "range": 14
+    }
+   ],
+   "weapon": {
+    "name": "Storm Staff",
+    "glb": null,
+    "model": "none yet",
+    "dmgPct": 0.05
+   },
+   "armor": {
+    "name": "Stormcaller Garb",
+    "hpPct": 0.07,
+    "mpPct": 0.27,
+    "spPct": 0,
+    "defPct": 0.06
+   }
+  },
+  "orin": {
+   "color": "#d0a070",
+   "basic": "Spear thrust",
+   "skills": [
+    {
+     "id": "orin.1",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.8,
+     "cost": {
+      "sp": 15
+     },
+     "mult": 1.8,
+     "name": "Sweep",
+     "icon": "slash",
+     "cd": 4,
+     "kind": "melee",
+     "range": 5
+    },
+    {
+     "id": "orin.2",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.7,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 2.4,
+     "name": "Vault Strike",
+     "icon": "dash",
+     "cd": 8,
+     "kind": "dash",
+     "range": 9,
+     "dist": 9
+    },
+    {
+     "id": "orin.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "sp": 20
+     },
+     "mult": 1.5,
+     "name": "Phalanx Stance",
+     "icon": "shield",
+     "cd": 12,
+     "kind": "shield",
+     "dur": 4,
+     "reduce": 0.6
+    },
+    {
+     "id": "orin.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": 0.5,
+     "cost": {},
+     "mult": 7,
+     "fury": 100,
+     "cd": 30,
+     "name": "Thousand Thrusts",
+     "icon": "line",
+     "kind": "storm",
+     "range": 9
+    }
+   ],
+   "weapon": {
+    "name": "Ashlance Spear",
+    "glb": null,
+    "model": "none yet",
+    "dmgPct": 0.06
+   },
+   "armor": {
+    "name": "Ashplate Cuirass",
+    "hpPct": 0.17,
+    "mpPct": 0,
+    "spPct": 0.06,
+    "defPct": 0.14
+   }
+  },
+  "selene": {
+   "color": "#9fe8ff",
+   "basic": "Ice shard",
+   "skills": [
+    {
+     "id": "selene.1",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 15
+     },
+     "mult": 1.8,
+     "name": "Frost Nova",
+     "icon": "ring",
+     "cd": 4,
+     "kind": "aoe",
+     "range": 5.5
+    },
+    {
+     "id": "selene.2",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 1.5,
+     "name": "Glacier Wall",
+     "icon": "shield",
+     "cd": 8,
+     "kind": "shield",
+     "dur": 3,
+     "reduce": 0.5
+    },
+    {
+     "id": "selene.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.6,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 2.2,
+     "name": "Blink Frost",
+     "icon": "blink",
+     "cd": 12,
+     "kind": "blink",
+     "range": 14
+    },
+    {
+     "id": "selene.u",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 5.5,
+     "fury": 100,
+     "cd": 30,
+     "name": "Absolute Zero",
+     "icon": "ring",
+     "kind": "aoe",
+     "range": 12
+    }
+   ],
+   "weapon": {
+    "name": "Crystal Staff",
+    "glb": null,
+    "model": "procedural (heroes2.js)",
+    "dmgPct": 0.05
+   },
+   "armor": {
+    "name": "Frostveil Robes",
+    "hpPct": 0.07,
+    "mpPct": 0.28,
+    "spPct": 0,
+    "defPct": 0.06
+   }
+  },
+  "darius": {
+   "color": "#6a3d9a",
+   "basic": "Greatsword cleave",
+   "skills": [
+    {
+     "id": "darius.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.9,
+     "cost": {
+      "sp": 15
+     },
+     "mult": 1.9,
+     "name": "Shadow Cleave",
+     "icon": "wave",
+     "cd": 4,
+     "kind": "line",
+     "range": 12
+    },
+    {
+     "id": "darius.2",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 2.2,
+     "name": "Vampiric Grasp",
+     "icon": "poison",
+     "cd": 8,
+     "kind": "melee",
+     "range": 7,
+     "heal": 0.08
+    },
+    {
+     "id": "darius.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 1.5,
+     "name": "Dark Armor",
+     "icon": "shield",
+     "cd": 12,
+     "kind": "shield",
+     "dur": 4,
+     "reduce": 0.5
+    },
+    {
+     "id": "darius.u",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 6,
+     "fury": 100,
+     "cd": 30,
+     "name": "Eclipse Reaver",
+     "icon": "heavy",
+     "kind": "aoe",
+     "range": 11,
+     "knock": 6
+    }
+   ],
+   "weapon": {
+    "name": "Shadow Greatsword",
+    "glb": null,
+    "model": "procedural (heroes2.js)",
+    "dmgPct": 0.08
+   },
+   "armor": {
+    "name": "Umbral Plate",
+    "hpPct": 0.16,
+    "mpPct": 0,
+    "spPct": 0,
+    "defPct": 0.12
+   }
+  },
+  "finn": {
+   "color": "#e84a5f",
+   "basic": "Rapier lunges",
+   "skills": [
+    {
+     "id": "finn.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "sp": 12
+     },
+     "mult": 1.5,
+     "name": "Riposte",
+     "icon": "shield",
+     "cd": 4,
+     "kind": "shield",
+     "dur": 1.2,
+     "reduce": 0.9
+    },
+    {
+     "id": "finn.2",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.6,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 2.6,
+     "name": "Fleche Dash",
+     "icon": "dash",
+     "cd": 8,
+     "kind": "dash",
+     "range": 11,
+     "dist": 11
+    },
+    {
+     "id": "finn.3",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.4,
+     "cost": {
+      "sp": 20
+     },
+     "mult": 2,
+     "name": "Feint",
+     "icon": "slash",
+     "cd": 12,
+     "kind": "melee",
+     "range": 4
+    },
+    {
+     "id": "finn.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": -1,
+     "cost": {},
+     "mult": 7,
+     "fury": 100,
+     "cd": 30,
+     "name": "Thousand Cuts",
+     "icon": "dagger",
+     "kind": "storm",
+     "range": 9
+    }
+   ],
+   "weapon": {
+    "name": "Duelist Rapier",
+    "glb": "finn_rapier",
+    "model": "weapons/finn_rapier.glb (+ finn_parry_dagger.glb off-hand)",
+    "dmgPct": 0.07
+   },
+   "armor": {
+    "name": "Crimson Doublet",
+    "hpPct": 0.07,
+    "mpPct": 0,
+    "spPct": 0.17,
+    "defPct": 0.06
+   }
+  },
+  "brynn": {
+   "color": "#ffb03a",
+   "basic": "Repeater crossbow",
+   "skills": [
+    {
+     "id": "brynn.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "sp": 20
+     },
+     "mult": 1.5,
+     "name": "Turret",
+     "icon": "trap",
+     "cd": 14,
+     "kind": "summon",
+     "summon": {
+      "id": "turret",
+      "dur": 12,
+      "range": 14,
+      "every": 0.8,
+      "mult": 0.8
+     }
+    },
+    {
+     "id": "brynn.2",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 2.4,
+     "name": "Mine Field",
+     "icon": "ring",
+     "cd": 8,
+     "kind": "aoe",
+     "range": 6
+    },
+    {
+     "id": "brynn.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 1.5,
+     "name": "Overclock",
+     "icon": "bolt",
+     "cd": 20,
+     "kind": "buff",
+     "buff": {
+      "id": "overclock",
+      "dur": 6,
+      "dmg": 0.15,
+      "cdRate": 1,
+      "summonRate": 1
+     }
+    },
+    {
+     "id": "brynn.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": 0.3,
+     "cost": {},
+     "mult": 8,
+     "fury": 100,
+     "cd": 30,
+     "name": "Siege Cannon",
+     "icon": "meteor",
+     "kind": "meteor",
+     "radius": 12,
+     "delay": 1.4
+    }
+   ],
+   "weapon": {
+    "name": "Repeater Crossbow",
+    "glb": "brynn_repeater_crossbow",
+    "model": "weapons/brynn_repeater_crossbow.glb",
+    "dmgPct": 0.06
+   },
+   "armor": {
+    "name": "Cogwright Apron",
+    "hpPct": 0.1,
+    "mpPct": 0,
+    "spPct": 0.12,
+    "defPct": 0.08
+   }
+  },
+  "asha": {
+   "color": "#ffcf5a",
+   "basic": "Palm combo",
+   "skills": [
+    {
+     "id": "asha.1",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.4,
+     "cost": {
+      "sp": 15
+     },
+     "mult": 2,
+     "name": "Dragon Kick",
+     "icon": "push",
+     "cd": 4,
+     "kind": "melee",
+     "range": 4,
+     "knock": 6
+    },
+    {
+     "id": "asha.2",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "mp": 25
+     },
+     "mult": 1.5,
+     "name": "Meditation Shield",
+     "icon": "heal",
+     "cd": 8,
+     "kind": "shield",
+     "dur": 3,
+     "reduce": 0.5,
+     "heal": 0.15
+    },
+    {
+     "id": "asha.3",
+     "kit": true,
+     "stagger": 2,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "mp": 30
+     },
+     "mult": 2.2,
+     "name": "Chi Burst",
+     "icon": "ring",
+     "cd": 12,
+     "kind": "aoe",
+     "range": 6
+    },
+    {
+     "id": "asha.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": 0.3,
+     "cost": {},
+     "mult": 8,
+     "fury": 100,
+     "cd": 30,
+     "name": "Heaven's Fist",
+     "icon": "heavy",
+     "kind": "meteor",
+     "radius": 8,
+     "delay": 1
+    }
+   ],
+   "weapon": {
+    "name": "Hand Wraps + Knuckles",
+    "glb": "asha_knuckles",
+    "model": "weapons/asha_knuckles.glb",
+    "dmgPct": 0.07
+   },
+   "armor": {
+    "name": "Saffron Gi",
+    "hpPct": 0.09,
+    "mpPct": 0.04,
+    "spPct": 0.1,
+    "defPct": 0.05
+   }
+  },
+  "rook": {
+   "color": "#8fae5a",
+   "basic": "Whip snare",
+   "skills": [
+    {
+     "id": "rook.1",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.7,
+     "cost": {
+      "sp": 15
+     },
+     "mult": 2,
+     "name": "Wolf Pounce",
+     "icon": "dash",
+     "cd": 4,
+     "kind": "dash",
+     "range": 8,
+     "dist": 8
+    },
+    {
+     "id": "rook.2",
+     "kit": true,
+     "stagger": 1,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": -1,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 1.6,
+     "name": "Howl",
+     "icon": "wave",
+     "cd": 8,
+     "kind": "aoe",
+     "range": 7
+    },
+    {
+     "id": "rook.3",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.18,
+     "T": 0.5,
+     "arc": 0.3,
+     "cost": {
+      "sp": 25
+     },
+     "mult": 1.5,
+     "name": "Feral Mend",
+     "icon": "heal",
+     "cd": 12,
+     "kind": "heal",
+     "heal": 0.3
+    },
+    {
+     "id": "rook.u",
+     "kit": true,
+     "stagger": 0,
+     "windup": 0.3,
+     "T": 0.9,
+     "arc": 0.95,
+     "cost": {},
+     "mult": 6.5,
+     "fury": 100,
+     "cd": 30,
+     "name": "Pack Stampede",
+     "icon": "storm",
+     "kind": "line",
+     "range": 20
+    }
+   ],
+   "weapon": {
+    "name": "Beastmaster Whip",
+    "glb": "rook_whip",
+    "model": "weapons/rook_whip.glb",
+    "dmgPct": 0.05
+   },
+   "armor": {
+    "name": "Wildbane Hides",
+    "hpPct": 0.12,
+    "mpPct": 0,
+    "spPct": 0.12,
+    "defPct": 0.08
+   }
+  }
+ },
+ "OWNER_SKILLS": {
+  "royal": {
+   "id": "royal",
+   "name": "Royal Slash",
+   "icon": "slash",
+   "owner": true,
+   "saber": true,
+   "cd": 4,
+   "cost": {
+    "mp": 12
+   },
+   "kind": "melee",
+   "mult": 2.2,
+   "windup": 0.18,
+   "T": 0.5,
+   "range": 7,
+   "arc": 0.45,
+   "stagger": 0
+  },
+  "chains": {
+   "id": "chains",
+   "name": "Shadow Chains",
+   "icon": "chains",
+   "owner": true,
+   "saber": true,
+   "cd": 8,
+   "cost": {
+    "mp": 20
+   },
+   "kind": "melee",
+   "mult": 1.2,
+   "windup": 0.22,
+   "T": 0.55,
+   "range": 12,
+   "arc": 0.3,
+   "stagger": 1
+  },
+  "wrath": {
+   "id": "wrath",
+   "name": "Sovereign's Wrath",
+   "icon": "bolt",
+   "owner": true,
+   "saber": true,
+   "cd": 12,
+   "cost": {
+    "mp": 25
+   },
+   "kind": "aoe",
+   "mult": 1.5,
+   "windup": 0.2,
+   "T": 0.6,
+   "range": 9,
+   "arc": -1,
+   "stagger": 1,
+   "knock": 5
+  },
+  "unholy": {
+   "id": "unholy",
+   "name": "Unholy Destruction",
+   "icon": "meteor",
+   "owner": true,
+   "saber": true,
+   "cd": 35,
+   "cost": {},
+   "fury": 100,
+   "kind": "meteor",
+   "mode": "all",
+   "mult": 0,
+   "windup": 0.25,
+   "T": 0.7,
+   "stagger": 0
+  },
+  "holy": {
+   "id": "holy",
+   "name": "Holy Destruction",
+   "icon": "meteor",
+   "owner": true,
+   "saber": true,
+   "cd": 35,
+   "cost": {},
+   "fury": 100,
+   "kind": "meteor",
+   "mode": "hostile",
+   "mult": 0,
+   "windup": 0.25,
+   "T": 0.7,
+   "stagger": 0
+  }
+ },
+ "ABILITIES": [
+  {
+   "id": "basic",
+   "name": "Slash",
+   "icon": "⚔",
+   "cd": 0.5,
+   "cost": {},
+   "kind": "melee",
+   "mult": 1,
+   "windup": 0.14,
+   "T": 0.38,
+   "range": 4.6,
+   "arc": 0.2,
+   "stagger": 0
+  },
+  {
+   "id": "heavy",
+   "name": "Heavy",
+   "icon": "⚒",
+   "cd": 3,
+   "cost": {
+    "sp": 25
+   },
+   "kind": "melee",
+   "mult": 1.8,
+   "windup": 0.32,
+   "T": 0.7,
+   "range": 5,
+   "arc": 0.1,
+   "stagger": 1
+  },
+  {
+   "id": "class",
+   "name": "Force Push",
+   "icon": "✵",
+   "cd": 6,
+   "cost": {
+    "mp": 25
+   },
+   "kind": "aoe",
+   "mult": 0.5,
+   "windup": 0.18,
+   "T": 0.55,
+   "range": 7,
+   "arc": -1,
+   "stagger": 1,
+   "knock": 7,
+   "saber": true
+  },
+  {
+   "id": "secondary",
+   "name": "Saber Throw",
+   "icon": "➹",
+   "cd": 5,
+   "cost": {
+    "mp": 20
+   },
+   "kind": "ranged",
+   "mult": 1.2,
+   "windup": 0.2,
+   "T": 0.5,
+   "range": 16,
+   "arc": 0.6,
+   "stagger": 0,
+   "saber": true
+  },
+  {
+   "id": "defensive",
+   "name": "Shield",
+   "icon": "⛨",
+   "cd": 12,
+   "cost": {
+    "mp": 30
+   },
+   "kind": "shield",
+   "mult": 0,
+   "windup": 0.05,
+   "T": 0.4,
+   "dur": 3,
+   "reduce": 0.8,
+   "saber": true
+  },
+  {
+   "id": "ultimate",
+   "name": "Blade Storm",
+   "icon": "☄",
+   "cd": 25,
+   "cost": {
+    "mp": 60
+   },
+   "kind": "storm",
+   "mult": 3,
+   "windup": 0.3,
+   "T": 1,
+   "range": 6.5,
+   "arc": -1,
+   "stagger": 1,
+   "saber": true
+  }
+ ],
+ "ENEMIES": {
+  "wolf": {
+   "name": "Wild Wolf",
+   "level": 5,
+   "cls": "Beast",
+   "hp": 1050,
+   "atk": 42,
+   "def": 40,
+   "speed": 6.4,
+   "atkMs": 1750,
+   "tele": 0.4,
+   "reach": 2.2,
+   "aggro": 24,
+   "scale": 1,
+   "xp": 42,
+   "gold": 12,
+   "boss": false,
+   "stagger": 0.55,
+   "poise": 0,
+   "model": "wolf",
+   "r": 0.9
+  },
+  "raider": {
+   "name": "Hobgoblin Raider",
+   "level": 12,
+   "cls": "Bandit",
+   "hp": 1450,
+   "atk": 56,
+   "def": 80,
+   "speed": 4.6,
+   "atkMs": 1750,
+   "tele": 0.55,
+   "reach": 2.2,
+   "aggro": 24,
+   "scale": 1,
+   "xp": 58,
+   "gold": 16,
+   "boss": false,
+   "stagger": 0.55,
+   "poise": 0,
+   "model": "o:hobgoblin",
+   "r": 1
+  },
+  "hob_enforcer": {
+   "name": "Hobgoblin Enforcer",
+   "level": 19,
+   "cls": "Camp Guard",
+   "hp": 3200,
+   "atk": 100,
+   "def": 160,
+   "speed": 4.2,
+   "atkMs": 1750,
+   "tele": 0.55,
+   "reach": 2.2,
+   "aggro": 23,
+   "scale": 1,
+   "xp": 190,
+   "gold": 58,
+   "boss": false,
+   "stagger": 0.55,
+   "poise": 0,
+   "model": "o:hobgoblin",
+   "r": 1.05
+  },
+  "wraith": {
+   "name": "Vine Wraith",
+   "level": 18,
+   "cls": "Spirit",
+   "hp": 1700,
+   "atk": 66,
+   "def": 90,
+   "speed": 4.2,
+   "atkMs": 1750,
+   "tele": 0.55,
+   "reach": 2.2,
+   "aggro": 24,
+   "scale": 1,
+   "xp": 68,
+   "gold": 19,
+   "boss": false,
+   "stagger": 0.55,
+   "poise": 0,
+   "model": "o:mossgut",
+   "r": 1.1
+  },
+  "skeleton": {
+   "name": "Ash Skeleton",
+   "level": 30,
+   "cls": "Undead",
+   "hp": 5600,
+   "atk": 270,
+   "def": 200,
+   "speed": 3.6,
+   "atkMs": 2300,
+   "tele": 0.8,
+   "reach": 2.2,
+   "aggro": 24,
+   "scale": 1,
+   "xp": 224,
+   "gold": 62,
+   "boss": false,
+   "stagger": 0.55,
+   "poise": 0,
+   "model": "o:stonetroll",
+   "r": 1.4
+  },
+  "frosttroll": {
+   "name": "Frost Troll",
+   "level": 45,
+   "cls": "Elite",
+   "hp": 60000,
+   "atk": 900,
+   "def": 400,
+   "speed": 4.2,
+   "atkMs": 2300,
+   "tele": 0.9,
+   "reach": 4.2,
+   "aggro": 40,
+   "scale": 3.5,
+   "xp": 4000,
+   "gold": 900,
+   "boss": false,
+   "stagger": 0.4,
+   "poise": 0.5,
+   "model": "n:frosttroll_a",
+   "r": 3,
+   "patterns": true
+  },
+  "frosttroll_a": {
+   "name": "Frost Troll A — Elder Brother",
+   "level": 52,
+   "cls": "Brother Boss",
+   "hp": 780000,
+   "atk": 1320,
+   "def": 480,
+   "speed": 4.4,
+   "atkMs": 2200,
+   "tele": 1,
+   "reach": 6.4,
+   "aggro": 65,
+   "scale": 3.5,
+   "xp": 6200,
+   "gold": 1500,
+   "boss": true,
+   "stagger": 0.45,
+   "poise": 0.65,
+   "model": "n:frosttroll_a",
+   "r": 3
+  },
+  "frosttroll_b": {
+   "name": "Frost Troll B — Younger Brother",
+   "level": 52,
+   "cls": "Brother Boss",
+   "hp": 780000,
+   "atk": 1450,
+   "def": 430,
+   "speed": 4.9,
+   "atkMs": 2250,
+   "tele": 1,
+   "reach": 7.2,
+   "aggro": 65,
+   "scale": 3.5,
+   "xp": 6200,
+   "gold": 1500,
+   "boss": true,
+   "stagger": 0.45,
+   "poise": 0.65,
+   "model": "n:frosttroll_b",
+   "r": 3,
+   "trollTint": true
+  },
+  "titan40": {
+   "name": "Ashen Titan — 15×",
+   "level": 80,
+   "cls": "Volcanic Boss",
+   "hp": 11500000,
+   "atk": 3200,
+   "def": 990,
+   "speed": 4.1,
+   "atkMs": 3400,
+   "tele": 2.2,
+   "reach": 12,
+   "aggro": 75,
+   "scale": 15,
+   "xp": 54000,
+   "gold": 13000,
+   "boss": true,
+   "stagger": 0.25,
+   "poise": 0.95,
+   "model": "n:ashentitan_20",
+   "r": 7
+  },
+  "titan": {
+   "name": "Ashen Titan",
+   "level": 60,
+   "cls": "Boss",
+   "hp": 5000000,
+   "atk": 2100,
+   "def": 600,
+   "speed": 7.3,
+   "atkMs": 2300,
+   "tele": 1.1,
+   "reach": 8.4,
+   "aggro": 60,
+   "scale": 6,
+   "xp": 20000,
+   "gold": 4000,
+   "boss": true,
+   "stagger": 0.3,
+   "poise": 0.85,
+   "model": "n:ashentitan_new",
+   "r": 5
+  },
+  "vaelthryx": {
+   "name": "Balthrix the Crystal Sovereign",
+   "level": 70,
+   "cls": "Boss",
+   "hp": 8000000,
+   "atk": 2600,
+   "def": 700,
+   "speed": 7,
+   "atkMs": 2400,
+   "tele": 1.1,
+   "reach": 9.5,
+   "aggro": 70,
+   "scale": 10,
+   "xp": 30000,
+   "gold": 6000,
+   "boss": true,
+   "stagger": 0.25,
+   "poise": 0.9,
+   "model": "n:vaelthryx_straight_rig",
+   "r": 5.2
+  },
+  "hydra": {
+   "name": "Five-Headed Hydra",
+   "level": 72,
+   "cls": "Mire Boss",
+   "hp": 4500000,
+   "atk": 1680,
+   "def": 690,
+   "speed": 0,
+   "atkMs": 2700,
+   "tele": 1.25,
+   "reach": 18,
+   "aggro": 115,
+   "scale": 10,
+   "xp": 32000,
+   "gold": 6700,
+   "boss": true,
+   "stagger": 0.35,
+   "poise": 0.8,
+   "model": "hydra:mire",
+   "r": 9
+  }
+ },
+ "BOSS_PATTERNS": {
+  "hydra": [
+   {
+    "id": "leftsnap",
+    "name": "Left Head — Snap Bite",
+    "shape": "cone",
+    "reach": 15,
+    "cos": 0.7,
+    "tele": 0.9,
+    "dmg": 1
+   },
+   {
+    "id": "acidbreath",
+    "name": "Second Head — Acid Breath",
+    "shape": "line",
+    "reach": 23,
+    "width": 3.4,
+    "tele": 1.5,
+    "dmg": 1.15,
+    "slow": 0.2
+   },
+   {
+    "id": "kinglunge",
+    "name": "Center Head — Crushing Lunge",
+    "shape": "cone",
+    "reach": 20,
+    "cos": 0.4,
+    "tele": 1.3,
+    "dmg": 1.5
+   },
+   {
+    "id": "tailsweep",
+    "name": "Fourth Head — Sweeping Strike",
+    "shape": "ring",
+    "reach": 18,
+    "tele": 1.2,
+    "dmg": 1.1
+   },
+   {
+    "id": "venomburst",
+    "name": "Fifth Head — Venom Burst",
+    "shape": "ring",
+    "reach": 24,
+    "tele": 1.55,
+    "dmg": 1.75,
+    "phase": 2
+   }
+  ],
+  "titan": [
+   {
+    "id": "stomp",
+    "name": "Titan Stomp",
+    "shape": "ring",
+    "reach": 6.5,
+    "tele": 1.1,
+    "dmg": 1
+   },
+   {
+    "id": "sweep",
+    "name": "Cleaving Sweep",
+    "shape": "cone",
+    "reach": 8.4,
+    "cos": 0.35,
+    "tele": 1,
+    "dmg": 1.1
+   },
+   {
+    "id": "slam",
+    "name": "Ashen Slam",
+    "shape": "line",
+    "reach": 14,
+    "width": 3.6,
+    "tele": 1.4,
+    "dmg": 1.4
+   },
+   {
+    "id": "quake",
+    "name": "Rage Quake",
+    "shape": "ring",
+    "reach": 12,
+    "tele": 1,
+    "dmg": 1.6,
+    "phase": 2
+   }
+  ],
+  "titan40": [
+   {
+    "id": "moltenStomp",
+    "name": "Molten Cataclysm",
+    "shape": "ring",
+    "reach": 13,
+    "tele": 2.1,
+    "dmg": 1.35
+   },
+   {
+    "id": "ashenWave",
+    "name": "Lava Shockwave",
+    "shape": "cone",
+    "reach": 17,
+    "cos": 0.1,
+    "tele": 1.9,
+    "dmg": 1.5
+   },
+   {
+    "id": "eruption",
+    "name": "Eruption Pillars",
+    "shape": "line",
+    "reach": 22,
+    "width": 6,
+    "tele": 2.4,
+    "dmg": 1.85
+   },
+   {
+    "id": "inferno",
+    "name": "Inferno Collapse",
+    "shape": "ring",
+    "reach": 19,
+    "tele": 2.3,
+    "dmg": 2.15,
+    "phase": 2
+   }
+  ],
+  "frosttroll_a": [
+   {
+    "id": "winterhammer",
+    "name": "Winterhammer",
+    "shape": "cone",
+    "reach": 6.4,
+    "cos": 0.28,
+    "tele": 1.1,
+    "dmg": 1.1,
+    "slow": 0.35
+   },
+   {
+    "id": "glacierbreaker",
+    "name": "Glacier Breaker",
+    "shape": "line",
+    "reach": 15,
+    "width": 3.8,
+    "tele": 1.5,
+    "dmg": 1.5,
+    "slow": 0.5
+   },
+   {
+    "id": "brotherswrath",
+    "name": "Brother's Wrath",
+    "shape": "ring",
+    "reach": 10,
+    "tele": 1.3,
+    "dmg": 1.75,
+    "phase": 2
+   }
+  ],
+  "frosttroll_b": [
+   {
+    "id": "frostcrash",
+    "name": "Frost Crash",
+    "shape": "ring",
+    "reach": 7.2,
+    "tele": 1.1,
+    "dmg": 1.1,
+    "slow": 0.35
+   },
+   {
+    "id": "avalanche",
+    "name": "Avalanche Lance",
+    "shape": "line",
+    "reach": 18,
+    "width": 4.6,
+    "tele": 1.6,
+    "dmg": 1.5,
+    "slow": 0.6
+   },
+   {
+    "id": "brothersvengeance",
+    "name": "Brother's Vengeance",
+    "shape": "cone",
+    "reach": 13,
+    "cos": 0.13,
+    "tele": 1.2,
+    "dmg": 1.8,
+    "phase": 2
+   }
+  ],
+  "frosttroll": [
+   {
+    "id": "club",
+    "name": "Club Smash",
+    "shape": "cone",
+    "reach": 4.6,
+    "cos": 0.4,
+    "tele": 0.9,
+    "dmg": 1
+   },
+   {
+    "id": "stomp",
+    "name": "Frost Stomp",
+    "shape": "ring",
+    "reach": 4,
+    "tele": 1,
+    "dmg": 0.9,
+    "slow": 0.4
+   },
+   {
+    "id": "roll",
+    "name": "Avalanche Charge",
+    "shape": "line",
+    "reach": 9,
+    "width": 2.6,
+    "tele": 1.2,
+    "dmg": 1.2
+   },
+   {
+    "id": "glacier",
+    "name": "Glacier Spike",
+    "shape": "line",
+    "reach": 13,
+    "width": 2,
+    "tele": 1,
+    "dmg": 1.5,
+    "phase": 2,
+    "slow": 0.5
+   }
+  ],
+  "vaelthryx": [
+   {
+    "id": "claw",
+    "name": "Crystal Claw",
+    "shape": "cone",
+    "reach": 9.5,
+    "cos": 0.3,
+    "tele": 1,
+    "dmg": 1
+   },
+   {
+    "id": "tail",
+    "name": "Tail Sweep",
+    "shape": "ring",
+    "reach": 8,
+    "tele": 1.1,
+    "dmg": 1.1
+   },
+   {
+    "id": "breath",
+    "name": "Prism Breath",
+    "shape": "line",
+    "reach": 22,
+    "width": 4.2,
+    "tele": 1.5,
+    "dmg": 1.5
+   },
+   {
+    "id": "shards",
+    "name": "Shard Rain",
+    "shape": "ring",
+    "reach": 14,
+    "tele": 1.3,
+    "dmg": 1.2
+   },
+   {
+    "id": "nova",
+    "name": "Sovereign Nova",
+    "shape": "ring",
+    "reach": 20,
+    "tele": 1.4,
+    "dmg": 1.8,
+    "phase": 2
+   }
+  ]
+ },
+ "TUNING": {
+  "normal": {
+   "dmg": [
+    28,
+    48
+   ],
+   "basicCdMul": 0.6,
+   "windupMul": 1.5,
+   "basicSp": 3,
+   "hp": 700,
+   "staggerFrac": 0.2
+  },
+  "owner": {
+   "hp": 999999,
+   "saber": 99999
+  },
+  "perks": {
+   "saberBossesX12": false,
+   "saberMul": 12,
+   "saberHolderResources": false,
+   "holderMul": 3
+  },
+  "ownerWeaponBase": 99999,
+  "skillMul": {
+   "royal": 3,
+   "chains": 6,
+   "wrath": 12
+  },
+  "ult": {
+   "dmgMul": 50,
+   "radius": 25,
+   "delay": 1.5,
+   "cooldown": 35,
+   "fury": 100,
+   "bossesInstantKill": true,
+   "furyPerBasic": 8,
+   "furyPerSkill": 5
+  },
+  "boss": {
+   "enrageAt": 0.5,
+   "enrageTele": 0.75,
+   "enrageSpeed": 1.25,
+   "enrageCd": 0.8
+  }
+ },
+ "PLAYER": {
+  "hp": 700,
+  "ownerHp": 999999,
+  "mp": 100,
+  "sp": 100,
+  "def": 600,
+  "agi": 20,
+  "mpRegen": 3,
+  "spRegen": 24,
+  "spDelay": 0.9,
+  "crit": 0.06,
+  "critMult": 1.55,
+  "dodge": {
+   "sp": 20,
+   "iframes": 0.38,
+   "dist": 7,
+   "cd": 0.7
+  },
+  "block": {
+   "drain": 8,
+   "reduce": 0.75,
+   "parry": 0.22,
+   "minSp": 5
+  },
+  "jump": {
+   "sp": 8,
+   "dur": 0.55,
+   "height": 1.6
+  },
+  "potion": {
+   "heal": 0.4,
+   "cd": 20,
+   "charges": 3
+  },
+  "respawn": 3.2,
+  "lockRange": 34,
+  "lockBreak": 46
+ },
+ "UNARMED": {
+  "min": 28,
+  "max": 48
+ },
+ "SABER": {
+  "min": 99999,
+  "max": 99999
+ }
+}

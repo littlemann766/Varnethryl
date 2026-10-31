@@ -1,0 +1,571 @@
+{
+ "units": "metres, Y up, size baked (do not rescale); where a rescale was needed it sits on the armature root node scale",
+ "characters": {
+  "owner": {
+   "file": "owner_lod1.glb",
+   "height_m": 1.905,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "idle_saber",
+    "run_saber",
+    "saber_ready",
+    "walk_saber",
+    "skill2",
+    "skill3",
+    "skill4"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack",
+    "attack3": "saber_slash"
+   }
+  },
+  "aldric": {
+   "file": "aldric_lod1.glb",
+   "height_m": 1.914,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "asha": {
+   "file": "asha_lod1.glb",
+   "height_m": 1.71,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "hit",
+    "death",
+    "attack3",
+    "skill"
+   ],
+   "renamed_from_source": {}
+  },
+  "brynn": {
+   "file": "brynn_lod1.glb",
+   "height_m": 1.592,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "cedric": {
+   "file": "cedric_lod1.glb",
+   "height_m": 2.017,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "darius": {
+   "file": "darius_lod1.glb",
+   "height_m": 1.9,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "elira": {
+   "file": "elira_lod1.glb",
+   "height_m": 1.699,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "finn": {
+   "file": "finn_lod1.glb",
+   "height_m": 1.736,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "garruk": {
+   "file": "garruk_lod1.glb",
+   "height_m": 2.02,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "kael": {
+   "file": "kael_lod1.glb",
+   "height_m": 1.805,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "mirelle": {
+   "file": "mirelle_lod1.glb",
+   "height_m": 1.652,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "morwen": {
+   "file": "morwen_lod1.glb",
+   "height_m": 1.736,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "nyx": {
+   "file": "nyx_lod1.glb",
+   "height_m": 1.667,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "orin": {
+   "file": "orin_lod1.glb",
+   "height_m": 1.84,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "rook": {
+   "file": "rook_lod1.glb",
+   "height_m": 1.95,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "rowan": {
+   "file": "rowan_lod1.glb",
+   "height_m": 1.877,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "selene": {
+   "file": "selene_lod1.glb",
+   "height_m": 1.946,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "hit",
+    "death",
+    "attack3",
+    "skill"
+   ],
+   "renamed_from_source": {}
+  },
+  "seraphine": {
+   "file": "seraphine_lod1.glb",
+   "height_m": 1.77,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "talia": {
+   "file": "talia_lod1.glb",
+   "height_m": 1.772,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "thorne": {
+   "file": "thorne_lod1.glb",
+   "height_m": 1.877,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "vesper": {
+   "file": "vesper_lod1.glb",
+   "height_m": 1.768,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "wren": {
+   "file": "wren_lod1.glb",
+   "height_m": 1.35,
+   "role": "hero",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "pip": {
+   "file": "pip_lod1.glb",
+   "height_m": 0.52,
+   "role": "companion",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "jump",
+    "trot"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "phoenix": {
+   "file": "phoenix_lod1.glb",
+   "height_m": 0.756,
+   "role": "companion",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "fly",
+    "glide",
+    "hover",
+    "land",
+    "takeoff"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "wolf": {
+   "file": "wolf_lod1.glb",
+   "height_m": 1.009,
+   "role": "enemy",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {}
+  },
+  "frosttroll_a": {
+   "file": "frosttroll_a_lod1.glb",
+   "height_m": 5.715,
+   "role": "enemy",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "frosttroll_b": {
+   "file": "frosttroll_b_lod1.glb",
+   "height_m": 5.715,
+   "role": "enemy",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "windup"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "ashentitan": {
+   "file": "ashentitan_lod1.glb",
+   "height_m": 11.43,
+   "role": "boss",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack"
+   }
+  },
+  "ashentitan_volcano": {
+   "file": "ashentitan_volcano_lod1.glb",
+   "height_m": 20.955,
+   "role": "boss",
+   "clips": [
+    "idle",
+    "walk",
+    "run",
+    "attack1",
+    "attack2",
+    "attack3",
+    "skill",
+    "hit",
+    "death",
+    "boulder_hurl",
+    "volcano_roar",
+    "windup"
+   ],
+   "renamed_from_source": {
+    "attack1": "attack",
+    "attack3": "magma_sweep",
+    "skill": "eruption_slam"
+   }
+  }
+ }
+}

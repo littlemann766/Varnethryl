@@ -1,0 +1,89 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://assets/volcano/worldboss/wb_lava_wave.gd" id="0"]
+[ext_resource type="Material" path="res://assets/volcano/worldboss/materials/wb_wave_wall_mat.tres" id="1"]
+[ext_resource type="Material" path="res://assets/volcano/worldboss/materials/wb_wave_crest_mat.tres" id="2"]
+[ext_resource type="Material" path="res://assets/volcano/worldboss/materials/wb_wave_skirt_mat.tres" id="3"]
+
+[sub_resource type="CylinderMesh" id="wall"]
+top_radius = 1.0
+bottom_radius = 1.0
+height = 1.0
+radial_segments = 64
+rings = 1
+cap_top = false
+cap_bottom = false
+
+[sub_resource type="TorusMesh" id="crest"]
+inner_radius = 0.93
+outer_radius = 1.0
+rings = 96
+ring_segments = 10
+
+[sub_resource type="PlaneMesh" id="skirt"]
+size = Vector2(2, 2)
+
+[sub_resource type="Gradient" id="g_dot"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.6, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="t_dot"]
+gradient = SubResource("g_dot")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="m_spray"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+billboard_mode = 3
+albedo_texture = SubResource("t_dot")
+
+[sub_resource type="QuadMesh" id="q_spray"]
+material = SubResource("m_spray")
+size = Vector2(1.2, 1.2)
+
+[sub_resource type="Gradient" id="g_spray"]
+offsets = PackedFloat32Array(0, 0.2, 0.75, 1)
+colors = PackedColorArray(1, 0.95, 0.6, 1, 1, 0.6, 0.15, 1, 0.85, 0.2, 0.04, 0.7, 0.3, 0.05, 0.02, 0)
+
+[node name="WBLavaWave" type="Node3D"]
+script = ExtResource("0")
+metadata/_note = "World metres. Root position = boss feet. Drive: set rise (0..1 over the 10 s wind-up) on Wall/Crest/Skirt materials (duplicate them), then tween root scale x/z outward (start 1 = 80 m radius via the children). Wall height 24 m; keep Crest.position.y and CrestSpray.position.y = 24*rise (+3 for spray) so the crest rides the wall top. Spray particles follow the crest (local coords). v3.2: follow_ground raycasts 4x64 ground heights around the ring (ground_mask) and drapes wall/crest/skirt/posts/spray on the terrain."
+
+[node name="Wall" type="MeshInstance3D" parent="."]
+transform = Transform3D(80, 0, 0, 0, 24, 0, 0, 0, 80, 0, 12, 0)
+mesh = SubResource("wall")
+surface_material_override/0 = ExtResource("1")
+
+[node name="Crest" type="MeshInstance3D" parent="."]
+transform = Transform3D(81, 0, 0, 0, 90, 0, 0, 0, 81, 0, 24, 0)
+mesh = SubResource("crest")
+surface_material_override/0 = ExtResource("2")
+
+[node name="Skirt" type="MeshInstance3D" parent="."]
+transform = Transform3D(108, 0, 0, 0, 1, 0, 0, 0, 108, 0, 0.08, 0)
+mesh = SubResource("skirt")
+surface_material_override/0 = ExtResource("3")
+
+[node name="CrestSpray" type="CPUParticles3D" parent="."]
+position = Vector3(0, 27, 0)
+amount = 420
+lifetime = 2.2
+preprocess = 2.2
+mesh = SubResource("q_spray")
+emission_shape = 4
+direction = Vector3(0, 1, 0)
+spread = 30.0
+gravity = Vector3(0, -9.8, 0)
+initial_velocity_min = 6.0
+initial_velocity_max = 14.0
+radial_accel_min = 3.0
+radial_accel_max = 8.0
+scale_amount_min = 0.6
+scale_amount_max = 2.0
+color_ramp = SubResource("g_spray")

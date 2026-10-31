@@ -1,5 +1,7 @@
-node_modules/
-android/
-.DS_Store
-*.log
-__pycache__/
+build/
+.godot/
+*.keystore
+build/
+.godot/
+*.keystore
+*.jks

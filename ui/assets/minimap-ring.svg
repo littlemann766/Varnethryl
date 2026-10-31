@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>
+<linearGradient id="gold" x2=".85" y2="1"><stop stop-color="#fff0b2"/><stop offset=".25" stop-color="#906037"/><stop offset=".43" stop-color="#d6b67e"/><stop offset=".7" stop-color="#593a29"/><stop offset="1" stop-color="#efcf86"/></linearGradient>
+<radialGradient id="purple"><stop stop-color="#f4d7ff"/><stop offset=".21" stop-color="#b95af2"/><stop offset=".65" stop-color="#652397"/><stop offset="1" stop-color="#21102e"/></radialGradient>
+<g id="gem"><path d="M256 10 285 48 274 75 256 96 238 75 227 48Z" fill="#37213b" stroke="#422425" stroke-width="6"/><path d="M256 18 277 49 256 85 235 49Z" fill="url(#purple)" stroke="url(#gold)" stroke-width="6"/><path d="m256 33 7 17-7 22-7-22Z" fill="#f1b9ff" opacity=".53"/><path d="M230 49h52" stroke="#efd6ff" stroke-opacity=".55"/></g>
+
+</defs>
+<circle cx="256" cy="256" r="206" fill="none" stroke="#372037" stroke-width="47"/>
+<circle cx="256" cy="256" r="205" fill="none" stroke="url(#gold)" stroke-width="19"/>
+<circle cx="256" cy="256" r="190" fill="none" stroke="#2f102f" stroke-width="15"/>
+<circle cx="256" cy="256" r="180" fill="none" stroke="#ecce87" stroke-width="5"/>
+<circle cx="256" cy="256" r="231" fill="none" stroke="url(#gold)" stroke-width="3" stroke-dasharray="3 13"/>
+<g><use href="#gem"/><use href="#gem" transform="rotate(90 256 256)"/><use href="#gem" transform="rotate(180 256 256)"/><use href="#gem" transform="rotate(270 256 256)"/></g>
+<g></g>
+<g transform="rotate(45 256 256)"><path d="M256 16 277 49 256 83 235 49Z" fill="url(#purple)" stroke="url(#gold)" stroke-width="6"/></g>
+<g transform="rotate(135 256 256)"><path d="M256 16 277 49 256 83 235 49Z" fill="url(#purple)" stroke="url(#gold)" stroke-width="6"/></g>
+<g transform="rotate(225 256 256)"><path d="M256 16 277 49 256 83 235 49Z" fill="url(#purple)" stroke="url(#gold)" stroke-width="6"/></g>
+<g transform="rotate(315 256 256)"><path d="M256 16 277 49 256 83 235 49Z" fill="url(#purple)" stroke="url(#gold)" stroke-width="6"/></g>
+<circle cx="256" cy="256" r="169" fill="none" stroke="#c99a60" stroke-opacity=".65" stroke-width="2"/>
+</svg>

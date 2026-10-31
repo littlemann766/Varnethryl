@@ -1,0 +1,18 @@
+{
+ "cloth": [
+  "none (no cloth bones)"
+ ],
+ "nonCloth": [
+  "tail (runtime tail_physics.js bird preset, no baked keys, no spring)",
+  "crest wisps (baked small sway)",
+  "feather rows tert/sec/pri1/pri2 a+b per wing (baked, lagged flap)",
+  "legs/talons (IK-planted on ground clips)",
+  "body/head/neck/jaw"
+ ],
+ "role": "companion",
+ "notes": [
+  "phoenix_new3: companion pet, wingspan 1.6 m, perched height ~0.76 m; scale is a parameter (rig_phoenix.py --span)",
+  "air clips (hover/fly/glide, end of takeoff, start of land) are raised by air_offset_m=0.30 m of root height",
+  "roles: tail rotation tracks intentionally absent"
+ ]
+}

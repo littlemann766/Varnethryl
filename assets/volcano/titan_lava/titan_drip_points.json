@@ -1,0 +1,261 @@
+{
+ "note": "Offsets are in bone-local space at bind pose, model units (pre 1.3362 instance scale). Attach a BoneAttachment3D to the bone, add a child Node3D at offset; emit along world -Y.",
+ "points": [
+  {
+   "name": "drip_neck",
+   "bone": "head",
+   "offset": [
+    -0.6832,
+    0.0191,
+    0.5368
+   ],
+   "rest_pos_model": [
+    -1.2745,
+    19.4025,
+    0.2876
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.765
+  },
+  {
+   "name": "drip_chest",
+   "bone": "chest",
+   "offset": [
+    -1.0137,
+    0.3236,
+    -0.3888
+   ],
+   "rest_pos_model": [
+    -1.891,
+    13.9121,
+    -0.2803
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.751
+  },
+  {
+   "name": "drip_waist",
+   "bone": "spine2",
+   "offset": [
+    0.5913,
+    0.7912,
+    -0.1886
+   ],
+   "rest_pos_model": [
+    1.103,
+    12.4036,
+    -1.1527
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.765
+  },
+  {
+   "name": "drip_hips",
+   "bone": "hips",
+   "offset": [
+    0.3023,
+    -0.2932,
+    -1.7217
+   ],
+   "rest_pos_model": [
+    0.564,
+    7.6617,
+    0.8702
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.748
+  },
+  {
+   "name": "drip_shoulder_L",
+   "bone": "shoulder_L",
+   "offset": [
+    0.8116,
+    -0.3446,
+    -0.0833
+   ],
+   "rest_pos_model": [
+    2.9581,
+    16.5731,
+    0.9661
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.207
+  },
+  {
+   "name": "drip_shoulder_R",
+   "bone": "shoulder_R",
+   "offset": [
+    -0.9332,
+    -0.2882,
+    -0.047
+   ],
+   "rest_pos_model": [
+    -3.1849,
+    16.6407,
+    0.8609
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.249
+  },
+  {
+   "name": "drip_elbow_L",
+   "bone": "upperArm_L",
+   "offset": [
+    0.6592,
+    1.4927,
+    -2.5913
+   ],
+   "rest_pos_model": [
+    3.9867,
+    11.8946,
+    -2.4612
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.739
+  },
+  {
+   "name": "drip_elbow_R",
+   "bone": "upperArm_R",
+   "offset": [
+    -1.1104,
+    1.1958,
+    -2.5166
+   ],
+   "rest_pos_model": [
+    -4.8285,
+    12.0339,
+    -1.9074
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.736
+  },
+  {
+   "name": "drip_wrist_L",
+   "bone": "foreArm_L",
+   "offset": [
+    0.5796,
+    -0.003,
+    -2.6067
+   ],
+   "rest_pos_model": [
+    5.3096,
+    6.3751,
+    0.1123
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.72
+  },
+  {
+   "name": "drip_wrist_R",
+   "bone": "foreArm_R",
+   "offset": [
+    -0.1626,
+    -0.2053,
+    -2.9634
+   ],
+   "rest_pos_model": [
+    -4.5306,
+    5.7134,
+    0.4657
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.738
+  },
+  {
+   "name": "drip_hand_L",
+   "bone": "hand_L",
+   "offset": [
+    -0.3678,
+    0.1187,
+    -0.8014
+   ],
+   "rest_pos_model": [
+    4.7631,
+    5.1865,
+    -0.2944
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.731
+  },
+  {
+   "name": "drip_hand_R",
+   "bone": "hand_R",
+   "offset": [
+    0.4016,
+    0.0624,
+    -0.7786
+   ],
+   "rest_pos_model": [
+    -4.6982,
+    5.236,
+    -0.2332
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.748
+  },
+  {
+   "name": "drip_knee_L",
+   "bone": "thigh_L",
+   "offset": [
+    0.744,
+    -0.7359,
+    -3.284
+   ],
+   "rest_pos_model": [
+    2.9561,
+    4.7474,
+    1.6959
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.738
+  },
+  {
+   "name": "drip_knee_R",
+   "bone": "thigh_R",
+   "offset": [
+    -0.6376,
+    -0.7552,
+    -3.165
+   ],
+   "rest_pos_model": [
+    -2.7577,
+    4.9695,
+    1.7319
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.737
+  },
+  {
+   "name": "drip_ankle_L",
+   "bone": "shin_L",
+   "offset": [
+    0.4004,
+    0.1354,
+    -3.1387
+   ],
+   "rest_pos_model": [
+    3.1734,
+    0.1045,
+    -0.1143
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.731
+  },
+  {
+   "name": "drip_ankle_R",
+   "bone": "shin_R",
+   "offset": [
+    -0.1526,
+    -0.5421,
+    -3.0908
+   ],
+   "rest_pos_model": [
+    -3.0233,
+    0.1939,
+    0.1699
+   ],
+   "emit_dir": "down (world -Y)",
+   "vein_density": 0.754
+  }
+ ]
+}

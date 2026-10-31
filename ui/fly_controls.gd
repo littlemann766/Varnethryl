@@ -50,7 +50,12 @@ func allowed() -> bool:
 ## the menu's Fly cheat unlocks the HUD button
 func unlocked() -> bool: return allowed() and bool(cheats.flags.get("fly", false))
 
-func flying() -> bool: return unlocked() and main != null and bool(main.get("flight"))
+func flying() -> bool: return unlocked() and main != null and (bool(main.get("flight")) or ship_flying())
+## test 36 (boss phone shot: only Fly + Jump showed on the flying galleon): the ship flies with the fly cheat, not main.flight
+func at_sea() -> bool:
+	var sea = main.get("sea") if main else null
+	return sea != null and sea.active and sea.ashore == "" and not sea.diving
+func ship_flying() -> bool: return at_sea() and main.sea.ship_flying()
 
 func _sync() -> void:
 	var u := unlocked()
@@ -60,7 +65,7 @@ func _sync() -> void:
 	up_btn.visible = f; down_btn.visible = f
 	if fly_btn.button_pressed != f: fly_btn.set_pressed_no_signal(f)
 	# test 14 (boss: duplicate "▲ Up"): in flight the HUD ▲/▼ pair climbs; Jump hides instead of becoming a 2nd Up
-	jump_btn.visible = not f; jump_btn.text = "⤒ Jump"
+	jump_btn.visible = not f and not at_sea(); jump_btn.text = "⤒ Jump"   # test 36: no Jump on a ship
 
 func step(dt: float) -> void:
 	_sync()

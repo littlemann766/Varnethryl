@@ -34,8 +34,14 @@ func _process(_dt: float) -> void:
 		var near: bool = sea.m.hero.global_position.distance_to(g[0]) < 14.0
 		set_prompt("Set sail" if near else "", (func(): fade(func(): sea.enter())) if near else Callable())
 ## test 36 (boss: Charts showed far inland): Harbour Charts only aboard, or ashore within 12 m of the pier (18 m of the moored ship / pier.
-func charts_here() -> bool:
-	if sea.ashore == "": return true
+func charts_here() -> bool:   # test 36: never while the ship flies; afloat only near a harbour / landing
+	if sea.ship.alt > 0.5: return false
+	if sea.ashore == "":
+		var p := Vector2(sea.ship.position.x, sea.ship.position.z)
+		for k in sea.ports():
+			var a = sea.ports()[k][1]
+			if a != null and p.distance_to(Vector2(a.x, a.z)) < 180.0: return true
+		return sea.landing_near(p, 60.0) != ""
 	var L: Dictionary = sea.landing(sea.ashore); var lp: Vector3 = sea.to_local(sea.m.hero.global_position)
 	return lp.distance_to(sea.pier_head(L)) < 12.0 or lp.distance_to(sea.ship.position) < 18.0
 func set_prompt(t: String, cb: Callable) -> void:

@@ -215,6 +215,7 @@ var landing := false
 func flying_now() -> bool: return flight and bool(cheat.get("fly", false))
 ## test 26 (boss: Owner "standing on the water"): over the open sea the hero swims / treads water instead of walking.
 func in_sea(p: Vector3) -> bool:
+	if sea and sea.active: return false   # test 36 (boss: hero sank out of sight on the galleon): on deck / ashore never swims here
 	return not flying_now() and p.x < SEA_COAST_X - 3.0 and p.z > SEA_NORTH_Z + 2.0 and sea_mask(p.x, p.z) > 0.5
 func request_jump() -> void: jump_req = true
 func set_flight(on: bool) -> void:
@@ -286,6 +287,7 @@ func _ready() -> void:
 	if args.has("--vox30"): add_child(load("res://tests/vox30_shots.gd").new())   # test 30
 	if args.has("--tidewrack"): add_child(load("res://tests/tidewrack_test.gd").new())   # test 32
 	if args.has("--landgen"): add_child(load("res://tests/landing_gen.gd").new())   # test 34
+	if args.has("--shipfly"): add_child(load("res://tests/ship_fly_test.gd").new())   # test 36
 	if args.has("--docking"): add_child(load("res://tests/docking_test.gd").new())   # test 34
 	if args.has("--vox34"): add_child(load("res://tests/vox34_shots.gd").new())   # test 34
 	if args.has("--minionshots"): add_child(load("res://tests/minion_shots.gd").new())   # test 34
@@ -1709,7 +1711,9 @@ func _process(dt: float) -> void:
 	# (floors above are hidden) instead of colliding with them and jamming into the hero's face
 	var in_int: bool = interiors != null and interiors.active()
 	cam_arm.collision_mask = 0 if in_int else 1
-	cam_pivot.rotation = Vector3(minf(pitch, -0.95) if in_int and P_view_third() else pitch, yaw, 0)
+	var pe := minf(pitch, -0.95) if in_int and P_view_third() else pitch
+	if sea and sea.active and sea.ashore == "" and not sea.diving: pe = minf(pe, -0.6)   # test 36 (boss: hero hidden behind the rail): look down onto the deck at sea
+	cam_pivot.rotation = Vector3(pe, yaw, 0)
 	for bl in windmill_blades:
 		if bl: bl.rotate_object_local(Vector3(0, 0, 1), dt * 0.8)
 	var inside := ""

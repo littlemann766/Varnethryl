@@ -1,0 +1,264 @@
+{
+ "H": 2.0519999861717224,
+ "W": 1000000000.0,
+ "zcut": -1000000000.0,
+ "zcut_frac_H": -487329437.95561725,
+ "col_shift": {
+  "c0": 0.0,
+  "c1": 0.0,
+  "c2": 0.0,
+  "c3": 0.0,
+  "c4": 0.0
+ },
+ "rest_baseline": [
+  747,
+  906,
+  0
+ ],
+ "k": {
+  "attack1": [
+   1.0,
+   1.0
+  ],
+  "attack2": [
+   1.0,
+   1.0
+  ],
+  "attack3": [
+   1.0,
+   1.0
+  ],
+  "death": [
+   1.0,
+   1.0
+  ],
+  "fly_ascend": [
+   1.0,
+   1.0
+  ],
+  "fly_bank_L": [
+   1.0,
+   1.0
+  ],
+  "fly_bank_R": [
+   1.0,
+   1.0
+  ],
+  "fly_descend": [
+   1.0,
+   1.0
+  ],
+  "fly_fast": [
+   1.0,
+   1.0
+  ],
+  "fly_forward": [
+   1.0,
+   1.0
+  ],
+  "fly_hover": [
+   1.0,
+   1.0
+  ],
+  "hit": [
+   1.0,
+   1.0
+  ],
+  "idle": [
+   1.0,
+   1.0
+  ],
+  "jump": [
+   1.0,
+   1.0
+  ],
+  "jump_hang": [
+   1.0,
+   1.0
+  ],
+  "jump_land": [
+   1.0,
+   1.0
+  ],
+  "jump_start": [
+   1.0,
+   1.0
+  ],
+  "run": [
+   1.0,
+   1.0
+  ],
+  "skill": [
+   1.0,
+   1.0
+  ],
+  "swim_stroke": [
+   1.0,
+   1.0
+  ],
+  "swim_tread": [
+   1.0,
+   1.0
+  ],
+  "walk": [
+   1.0,
+   1.0
+  ]
+ },
+ "checks": {
+  "attack1": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.272,
+   "cape_halfw_bones": 0.261
+  },
+  "attack2": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.333,
+   "cape_halfw_bones": 0.351
+  },
+  "attack3": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.333,
+   "cape_halfw_bones": 0.352
+  },
+  "death": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.2,
+   "cape_halfw_bones": 0.168
+  },
+  "fly_ascend": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.177,
+   "cape_halfw_bones": 0.148
+  },
+  "fly_bank_L": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.304,
+   "cape_halfw_bones": 0.487
+  },
+  "fly_bank_R": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.3,
+   "cape_halfw_bones": 0.476
+  },
+  "fly_descend": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.178,
+   "cape_halfw_bones": 0.145
+  },
+  "fly_fast": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 12,
+   "cape_halfw_cubes": 0.18,
+   "cape_halfw_bones": 0.154
+  },
+  "fly_forward": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.181,
+   "cape_halfw_bones": 0.158
+  },
+  "fly_hover": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.178,
+   "cape_halfw_bones": 0.146
+  },
+  "hit": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.197,
+   "cape_halfw_bones": 0.162
+  },
+  "idle": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.237,
+   "cape_halfw_bones": 0.211
+  },
+  "jump": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.335,
+   "cape_halfw_bones": 0.359
+  },
+  "jump_hang": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.298,
+   "cape_halfw_bones": 0.295
+  },
+  "jump_land": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.282,
+   "cape_halfw_bones": 0.266
+  },
+  "jump_start": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.336,
+   "cape_halfw_bones": 0.351
+  },
+  "run": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.398,
+   "cape_halfw_bones": 0.444
+  },
+  "skill": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.333,
+   "cape_halfw_bones": 0.35
+  },
+  "swim_stroke": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 39,
+   "cape_halfw_cubes": 0.176,
+   "cape_halfw_bones": 0.137
+  },
+  "swim_tread": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.186,
+   "cape_halfw_bones": 0.152
+  },
+  "walk": {
+   "arm_in_leg": 0,
+   "cape_in_body": 0,
+   "cape_in_arm": 0,
+   "cape_halfw_cubes": 0.221,
+   "cape_halfw_bones": 0.205
+  }
+ }
+}

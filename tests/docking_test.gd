@@ -133,9 +133,34 @@ func cam_probe(t: String) -> void:
 	for id in RenderingServer.instances_cull_ray(h, c + (c - h).normalized() * 0.5, m.get_world_3d().scenario):
 		var o = instance_from_id(id)
 		if o is GeometryInstance3D: print("CP   ", o.get_path(), " aabb=", o.get_aabb().size)
+	for id in RenderingServer.instances_cull_ray(h + Vector3(2, 0, 2), h + Vector3(2, -6, 2), m.get_world_3d().scenario):
+		var o = instance_from_id(id)
+		if o is MeshInstance3D and o.mesh:
+			var mats := []
+			for si in o.mesh.get_surface_count():
+				var mm = o.get_active_material(si)
+				mats.append(str(mm.shader.resource_path if mm is ShaderMaterial else (mm.resource_path if mm else "none")) + ("/" + str(mm.get("transparency")) if mm else ""))
+			print("CPdown ", o.get_path(), " ovr=", o.material_override, " ", mats)
 	for id in RenderingServer.instances_cull_aabb(AABB(c - Vector3.ONE * 0.5, Vector3.ONE), m.get_world_3d().scenario):
 		var o = instance_from_id(id)
 		if o is GeometryInstance3D: print("CPin ", o.get_path(), " aabb=", o.get_aabb().size)
+func dark_pct() -> float:
+	await frames(3); var img := get_viewport().get_texture().get_image(); var dark := 0; var tot := 0
+	for y in range(0, img.get_height(), 8):
+		for x in range(0, img.get_width(), 8):
+			tot += 1
+			if img.get_pixel(x, y).get_luminance() < 0.05: dark += 1
+	return 100.0 * dark / tot
+func hide_probe(t: String) -> void:
+	await frames(20); var base := await dark_pct(); print("HP %s base %.1f" % [t, base])
+	var cands: Array = []
+	for mi in sea.find_children("*", "GeometryInstance3D", true, false): cands.append(mi)
+	for mi in m.find_children("*", "GeometryInstance3D", true, false):
+		if not sea.is_ancestor_of(mi) and (mi as Node3D).is_visible_in_tree() and (mi as Node3D).global_position.distance_to(m.hero.global_position) < 60: cands.append(mi)
+	for mi in cands:
+		if not mi.is_visible_in_tree(): continue
+		mi.visible = false; var d := await dark_pct(); mi.visible = true
+		if absf(d - base) > 2.0: print("HP   ", mi.get_path(), " -> %.1f" % d)
 func fade_wait() -> void:
 	await get_tree().create_timer(1.4).timeout; await frames(3)
 func _run() -> void:
@@ -171,6 +196,7 @@ func _run() -> void:
 		var inl := sea._inland(d)
 		m.yaw = atan2(inl.x, inl.z)   # camera looks inland: fwd = (-sin, -cos) = -inl, so the shot frames hero + pier + ship behind
 		if OS.get_environment("DK_CAMPROBE") != "": await cam_probe(k + " ashore")
+		if OS.get_environment("DK_HIDEPROBE") != "": m.yaw = atan2(inl.x, inl.z); await hide_probe(k)
 		if k in shots: await shot(k + "_ashore")
 		var start := sea.to_local(m.hero.global_position); var minh := 1e9; var resets := 0
 		var fw := Vector3(-sin(m.yaw), 0, -cos(m.yaw))

@@ -89,8 +89,12 @@ func _mat_for(n: String) -> Material:
 		var l := _sh("stage4/shaders/lava_seam.gdshader"); l.set_shader_parameter("energy", 6.0); return l
 	if n == "ash_steam": return _sh("stage4/shaders/steam_plume.gdshader")
 	if n.begins_with("ash_"):   # stage 4 README: black basalt = vertex colour + metallic_specular 0.15 (else it mirrors the haze and reads beige)
-		var b := StandardMaterial3D.new(); b.vertex_color_use_as_albedo = true; b.roughness = 0.9; b.metallic_specular = 0.15; return b
-	return load(R + "stage1/shaders/vc_lit.tres")
+		return _sh("stage4/shaders/ash_rock_lift.gdshader")   # test 37: lifted basalt (was pure black on screen)
+	# test 37: island rock/scatter right at the camera (no collider for the spring arm) dither-fades instead of filling the
+	# screen black (t36 Gullhaven wedge, Saltglass pillar)
+	var vm: StandardMaterial3D = (load(R + "stage1/shaders/vc_lit.tres") as StandardMaterial3D).duplicate()
+	vm.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER; vm.distance_fade_min_distance = 0.8; vm.distance_fade_max_distance = 3.0
+	return vm
 func _no_shadow(n: String) -> bool:
 	for k in ["_fog_layers", "_storm_sky", "_storm_sea", "_glow", "_steam", "_lava_seams", "buoy_", "upg_", "_ice_floes", "_icicles"]:
 		if n.find(k) >= 0: return true

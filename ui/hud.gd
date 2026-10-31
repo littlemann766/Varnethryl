@@ -9,13 +9,14 @@ var editing := false
 var drag_target: Control
 var drag_off := Vector2.ZERO
 var edit_bar: HBoxContainer
-var version: String = str(ProjectSettings.get_setting("application/config/version", "1.9.3")) + "  test " + str(ProjectSettings.get_setting("application/config/test_build", "?"))
+var version: String = str(ProjectSettings.get_setting("application/config/version", "1.9.3"))
+var test_no: String = str(ProjectSettings.get_setting("application/config/test_build", "?"))   # test 37: badge shows the test build
 var movable: Array[Control] = []
 var defaults := {}
 
 func _ready() -> void:
 	name = "HUD"; set_anchors_and_offsets_preset(PRESET_FULL_RECT); mouse_filter = MOUSE_FILTER_IGNORE
-	badge = VStyle.label("VARNETHRYL v" + version, 14, VStyle.GOLD); badge.name = "Badge"; badge.autowrap_mode = TextServer.AUTOWRAP_OFF
+	badge = VStyle.label("VARNETHRYL v%s · test %s" % [version, test_no], 14, VStyle.GOLD); badge.name = "Badge"; badge.autowrap_mode = TextServer.AUTOWRAP_OFF
 	badge.position = Vector2(12, 10); badge.add_theme_color_override("font_shadow_color", Color.BLACK); badge.add_theme_constant_override("shadow_offset_y", 2); add_child(badge)
 	menu_btn = Button.new(); menu_btn.name = "MenuBtn"; menu_btn.text = "☰ Menu"; menu_btn.size = Vector2(110, 44)
 	menu_btn.anchor_left = 1; menu_btn.anchor_right = 1; menu_btn.offset_left = -126; menu_btn.offset_right = -16; menu_btn.offset_top = 10; menu_btn.offset_bottom = 54; menu_btn.pressed.connect(func(): if not editing: menu_pressed.emit()); add_child(menu_btn)
@@ -29,7 +30,7 @@ func _ready() -> void:
 	load_layout()
 
 func set_fps(fps: float, show: bool) -> void:
-	badge.text = "VARNETHRYL v%s%s" % [version, ("   %d fps" % roundi(fps)) if show else ""]
+	badge.text = "VARNETHRYL v%s · test %s%s" % [version, test_no, ("   %d fps" % roundi(fps)) if show else ""]
 
 func begin_edit() -> void:
 	editing = true; edit_bar.visible = true

@@ -26,7 +26,7 @@ func crew_check(when: String) -> void:
 	var cl: Vector3 = sea.ship.global_transform.affine_inverse() * m.cam.global_position
 	ok(hit.is_empty(), "%s: camera sees the hero (cam ship-local %s, blocked by %s at %s, hero %s)" % [when, str(cl), str(hit.get("collider").name) if hit else "-", str(sea.ship.global_transform.affine_inverse() * hit.position) if hit else "", str(sea.ship.global_transform.affine_inverse() * m.hero.global_position)])
 func _run() -> void:
-	var out := OS.get_environment("SHOT_OUT") if OS.get_environment("SHOT_OUT") != "" else "/workspace/shots/t36/shipfly/"
+	var out := OS.get_environment("SHOT_OUT") if OS.get_environment("SHOT_OUT") != "" else "/workspace/shots/t37/shipfly/"
 	DirAccess.make_dir_recursive_absolute(out)
 	while not m.warmed: await get_tree().process_frame
 	m._set_time(10.7); m.party.set_hero("owner"); m.party._set_companions(["garruk"])
@@ -53,6 +53,11 @@ func _run() -> void:
 	ok(not sea.ui.charts_b.visible, "flying ship: Charts hidden")
 	var a0: float = m.fly_alt; fc.up_btn.button_down.emit(); for i in 30: fc.step(1.0 / 60.0)
 	fc.up_btn.button_up.emit(); ok(m.fly_alt > a0, "▲ raises the flying ship's target altitude")
+	if OS.get_environment("SF_PROBE") != "":
+		var sp: Vector3 = sea.ship.global_position
+		for id in RenderingServer.instances_cull_aabb(AABB(sp + Vector3(-20, -sp.y + 0.5, -20), Vector3(40, sp.y - 1.0, 40)), m.get_world_3d().scenario):
+			var o = instance_from_id(id)
+			if o is Node3D and (o as Node3D).global_position.distance_to(sp) < 200: print("SFP ", o.get_path(), " ", o.get_class(), " at ", (o as Node3D).global_position - sp, " vis=", o.is_visible_in_tree())
 	m.yaw = sea.ship.heading + PI * 0.5   # side view like the phone shot
 	for i in 60: sea.drive(Vector2.ZERO, 1.0 / 60.0); await get_tree().physics_frame
 	if DisplayServer.get_name() != "headless": get_viewport().get_texture().get_image().save_png(out + "galleon_flying_side.png")

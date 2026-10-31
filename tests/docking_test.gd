@@ -6,7 +6,7 @@ var m: Node
 var sea: TidewrackSea
 var npass := 0
 var nfail := 0
-var out := "/workspace/shots/t36/dock/"
+var out := "/workspace/shots/t37/dock/"
 func ok(c: bool, t: String) -> void:
 	if c: npass += 1; print("DK PASS ", t)
 	else: nfail += 1; print("DK FAIL ", t)
@@ -119,6 +119,16 @@ func poi_walk(k: String, d: Dictionary) -> void:
 		if not back.ok: m.hero.global_position = sea.to_global(sea.pier_head(d) + Vector3(0, 0.6, 0)); await frames(3)
 	m.hero.global_position = sea.to_global(sea.pier_head(d) + Vector3(0, 0.6, 0)); m.hero.velocity = Vector3.ZERO; await frames(10)
 	sea.unseat_crew()
+func cam_probe(t: String) -> void:
+	await frames(25)
+	var c: Vector3 = m.cam.global_position; var h: Vector3 = m.hero.global_position + Vector3(0, 1.2, 0)
+	print("CP %s cam=%s hero=%s arm=%.2f floor_under_cam=%s" % [t, c, h, m.cam_arm.get_hit_length(), sea.floor_y(c)])
+	for id in RenderingServer.instances_cull_ray(h, c + (c - h).normalized() * 0.5, m.get_world_3d().scenario):
+		var o = instance_from_id(id)
+		if o is GeometryInstance3D: print("CP   ", o.get_path(), " aabb=", o.get_aabb().size)
+	for id in RenderingServer.instances_cull_aabb(AABB(c - Vector3.ONE * 0.5, Vector3.ONE), m.get_world_3d().scenario):
+		var o = instance_from_id(id)
+		if o is GeometryInstance3D: print("CPin ", o.get_path(), " aabb=", o.get_aabb().size)
 func fade_wait() -> void:
 	await get_tree().create_timer(1.4).timeout; await frames(3)
 func _run() -> void:
@@ -153,6 +163,7 @@ func _run() -> void:
 		if OS.get_environment("DK_POI") != "": await poi_walk(k, d)
 		var inl := sea._inland(d)
 		m.yaw = atan2(inl.x, inl.z)   # camera looks inland: fwd = (-sin, -cos) = -inl, so the shot frames hero + pier + ship behind
+		if OS.get_environment("DK_CAMPROBE") != "": await cam_probe(k + " ashore")
 		if k in shots: await shot(k + "_ashore")
 		var start := sea.to_local(m.hero.global_position); var minh := 1e9; var resets := 0
 		var fw := Vector3(-sin(m.yaw), 0, -cos(m.yaw))

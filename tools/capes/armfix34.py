@@ -65,7 +65,7 @@ def hits2(P,legs,s_,ab,fl,el,piv,hp,ep,eax):
     return int(np.isin(K(Q),legs).sum())
 D=math.radians
 def mkgrid(abmax,flmax): return sorted([(ab,fl) for ab in range(-24,abmax+1,8) for fl in range(-40,flmax+1,10)],key=lambda t:abs(t[0])+abs(t[1]))
-G0=mkgrid(60,60); GS=mkgrid(60,150); GB=mkgrid(88,60)
+G0=mkgrid(60,60); GS=mkgrid(60,150); GB=mkgrid(88,60); GR=mkgrid(8,60)
 arm.animation_data_create(); res={}
 for act in sorted(bpy.data.actions,key=lambda x:x.name):
     cl=act.name.split('_'+arm.name)[0]
@@ -78,7 +78,7 @@ for act in sorted(bpy.data.actions,key=lambda x:x.name):
             eax=(mw[:3,:3]@np.array(fb.matrix.to_3x3().col[0])); eax/=np.linalg.norm(eax)
             h0=hits2(P,legs,s_,0,0,0,piv,hp,ep,eax); before=max(before,h0); best=(h0,0,0,0)
             if h0>0:
-                for ab,fl in (GS if 'swim' in cl else GB if 'bank' in cl else G0):
+                for ab,fl in (GS if 'swim' in cl else GB if 'bank' in cl else GR if cl in ('run','walk') else G0):
                     h=hits2(P,legs,s_,D(ab),D(fl),0,piv,hp,ep,eax)
                     if h<best[0]: best=(h,ab,fl,0)
                     if h==0: break
@@ -115,7 +115,7 @@ for act in sorted(bpy.data.actions,key=lambda x:x.name):
             h0=hits2(P,legs,s_,0,0,0,piv,hp,ep,eax)
             if h0<=3: continue
             best=(h0,0,0,0)
-            for ab,fl in (GS if 'swim' in cl else GB if 'bank' in cl else G0):
+            for ab,fl in (GS if 'swim' in cl else GB if 'bank' in cl else GR if cl in ('run','walk') else G0):
                 for el in (0,30,-30,60,-60):
                     h=hits2(P,legs,s_,D(ab),D(fl),D(el),piv,hp,ep,eax)
                     if h<best[0]: best=(h,ab,fl,el)

@@ -2,7 +2,7 @@ import bpy,bmesh,collections
 import numpy as np
 from mathutils import Vector,Matrix
 def load(f):
-    bpy.ops.wm.read_factory_settings(use_empty=True); bpy.ops.import_scene.gltf(filepath=f)
+    bpy.ops.wm.read_factory_settings(use_empty=True); bpy.context.scene.render.fps=30; bpy.ops.import_scene.gltf(filepath=f)
     me=max([o for o in bpy.data.objects if o.type=='MESH'],key=lambda o:len(o.data.vertices)); return me,me.parent
 def cls(nm):
     l=nm.lower().replace('mixamorig:','').replace('mixamorig_','')

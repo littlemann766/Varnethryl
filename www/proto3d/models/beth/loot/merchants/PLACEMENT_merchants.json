@@ -1,0 +1,167 @@
+{
+ "zone": "merchants",
+ "note": "World coords, Godot metres. y=null -> snap to ground under (x,z). Stall front +Z (counter); merchant stands 0.0/-0.6 m behind the counter at the same yaw (smith/shipwright stand in front at local (0.25,-0.75)->(x,+0.75)). Interiors are Lucky's: see README interior spec.",
+ "items": [
+  {
+   "shop": "town_blacksmith",
+   "file": "loot/merchants/stall_smith.glb",
+   "lod1": "loot/merchants/stall_smith_lod1.glb",
+   "position": [
+    70.4,
+    null,
+    15.0
+   ],
+   "yaw": 1.5708,
+   "frame": "world (main.gd DEFS smithy front)",
+   "npc": {
+    "file": "loot/merchants/merchant_smith.glb",
+    "local_offset": [
+     0.25,
+     0,
+     0.75
+    ],
+    "anim": "idle",
+    "interact_radius_m": 2.5,
+    "prompt": "Trade"
+   }
+  },
+  {
+   "shop": "town_provisioner",
+   "file": "loot/merchants/stall_provisioner.glb",
+   "lod1": "loot/merchants/stall_provisioner_lod1.glb",
+   "position": [
+    -67.2,
+    null,
+    -12.65
+   ],
+   "yaw": 0.0,
+   "frame": "world (main.gd DEFS market front)",
+   "npc": {
+    "file": "loot/merchants/merchant_provisioner.glb",
+    "local_offset": [
+     0,
+     0,
+     -0.1
+    ],
+    "anim": "idle",
+    "interact_radius_m": 2.5,
+    "prompt": "Trade"
+   }
+  },
+  {
+   "shop": "town_apothecary",
+   "file": "loot/merchants/stall_apothecary.glb",
+   "lod1": "loot/merchants/stall_apothecary_lod1.glb",
+   "position": [
+    -70.0,
+    null,
+    21.9
+   ],
+   "yaw": -1.5708,
+   "frame": "world (main.gd DEFS apothecary front)",
+   "npc": {
+    "file": "loot/merchants/merchant_apothecary.glb",
+    "local_offset": [
+     0,
+     0,
+     -0.1
+    ],
+    "anim": "idle",
+    "interact_radius_m": 2.5,
+    "prompt": "Trade"
+   }
+  },
+  {
+   "shop": "saltglass_quay_provisioner",
+   "file": "loot/merchants/stall_provisioner.glb",
+   "lod1": "loot/merchants/stall_provisioner_lod1.glb",
+   "position": [
+    -2336.0,
+    2.2,
+    104.5
+   ],
+   "yaw": -1.5708,
+   "frame": "world (stage2 saltglass_port quay top y 2.2, beside harbormaster hut -2340.6,107.6)",
+   "npc": {
+    "file": "loot/merchants/merchant_provisioner.glb",
+    "local_offset": [
+     0,
+     0,
+     -0.1
+    ],
+    "anim": "idle",
+    "interact_radius_m": 2.5,
+    "prompt": "Trade"
+   }
+  },
+  {
+   "shop": "gullhaven_shipwright",
+   "file": "loot/merchants/stall_shipwright.glb",
+   "lod1": "loot/merchants/stall_shipwright_lod1.glb",
+   "position": [
+    -356.2,
+    null,
+    -326.7
+   ],
+   "yaw": 0.3927,
+   "frame": "world (stage5 gullhaven pier head + 8 m inland; tw_sea.gd opens the Shipwright here)",
+   "npc": {
+    "file": "loot/merchants/merchant_shipwright.glb",
+    "local_offset": [
+     0.25,
+     0,
+     0.75
+    ],
+    "anim": "idle",
+    "interact_radius_m": 2.5,
+    "prompt": "Trade"
+   }
+  },
+  {
+   "shop": "frostreach_trader",
+   "file": "loot/merchants/stall_smith.glb",
+   "lod1": "loot/merchants/stall_smith_lod1.glb",
+   "position": [
+    -905.0,
+    null,
+    -1950.0
+   ],
+   "yaw": 1.6134,
+   "frame": "world (stage4 frostreach_ice_dock pos, landward side); snap to nearest walkable within 8 m",
+   "npc": {
+    "file": "loot/merchants/merchant_smith.glb",
+    "local_offset": [
+     0.25,
+     0,
+     0.75
+    ],
+    "anim": "idle",
+    "interact_radius_m": 2.5,
+    "prompt": "Trade"
+   }
+  },
+  {
+   "shop": "vent_harbour_apothecary",
+   "file": "loot/merchants/stall_apothecary.glb",
+   "lod1": "loot/merchants/stall_apothecary_lod1.glb",
+   "position": [
+    -501.0,
+    null,
+    1858.0
+   ],
+   "yaw": 2.9926,
+   "frame": "world (stage4 vent_harbour pos, landward); snap to nearest walkable within 8 m",
+   "npc": {
+    "file": "loot/merchants/merchant_apothecary.glb",
+    "local_offset": [
+     0,
+     0,
+     -0.1
+    ],
+    "anim": "idle",
+    "interact_radius_m": 2.5,
+    "prompt": "Trade"
+   }
+  }
+ ]
+}

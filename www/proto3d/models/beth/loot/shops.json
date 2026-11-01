@@ -1,0 +1,860 @@
+{
+ "_note": "Loot phase 2 shops (PROPOSED). buy = round5(value * markup). Merchants pay sell_pct (by item slot, '*' = default) of the item's value, rounded down, min 1. Key and legendary items cannot be sold. T3 gear is never in stock (drops, chests and bosses only) but can be sold back. Restock: 'daily' = refill to qty at in-game dawn; 'weekly' = every 7 in-game days; 'once' = never restocks. rotating = pick `slots` random ids from pool each `every`. Buyback: anything the player sold stays buyable at the sale price until the next dawn.",
+ "currency": "gold (VSave.state.gold)",
+ "day_wage_reference_gold": 10,
+ "shops": {
+  "town_blacksmith": {
+   "name": "Hale's Forge",
+   "merchant": "smith",
+   "merchant_mesh": "res://loot/merchants/merchant_smith.glb",
+   "stall_mesh": "res://loot/merchants/stall_smith.glb",
+   "region": "mainland town",
+   "placement": {
+    "position": [
+     70.4,
+     null,
+     15.0
+    ],
+    "yaw": 1.5708,
+    "frame": "world (main.gd DEFS smithy front)"
+   },
+   "stock": [
+    {
+     "id": "iron_arming_sword",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 60,
+     "sell": 21,
+     "gear": true
+    },
+    {
+     "id": "iron_sidesword",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 60,
+     "sell": 21,
+     "gear": true
+    },
+    {
+     "id": "iron_two_hander",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 85,
+     "sell": 29,
+     "gear": true
+    },
+    {
+     "id": "iron_dagger",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 35,
+     "sell": 12,
+     "gear": true
+    },
+    {
+     "id": "iron_bearded_axe",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 60,
+     "sell": 21,
+     "gear": true
+    },
+    {
+     "id": "iron_mace",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 60,
+     "sell": 21,
+     "gear": true
+    },
+    {
+     "id": "ash_spear",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 60,
+     "sell": 21,
+     "gear": true
+    },
+    {
+     "id": "oak_quarterstaff",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 40,
+     "sell": 14,
+     "gear": true
+    },
+    {
+     "id": "field_scythe",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 60,
+     "sell": 21,
+     "gear": true
+    },
+    {
+     "id": "elm_longbow",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 60,
+     "sell": 21,
+     "gear": true
+    },
+    {
+     "id": "wooden_crossbow",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 70,
+     "sell": 24,
+     "gear": true
+    },
+    {
+     "id": "pine_lute",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 50,
+     "sell": 17,
+     "gear": true
+    },
+    {
+     "id": "hide_whip",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 60,
+     "sell": 21,
+     "gear": true
+    },
+    {
+     "id": "iron_knuckles",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 35,
+     "sell": 12,
+     "gear": true
+    },
+    {
+     "id": "wool_hood",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 25,
+     "sell": 8,
+     "gear": true
+    },
+    {
+     "id": "kettle_hat",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 30,
+     "sell": 10,
+     "gear": true
+    },
+    {
+     "id": "iron_bascinet",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 40,
+     "sell": 14,
+     "gear": true
+    },
+    {
+     "id": "quilted_robe",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 55,
+     "sell": 19,
+     "gear": true
+    },
+    {
+     "id": "leather_jerkin",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 65,
+     "sell": 22,
+     "gear": true
+    },
+    {
+     "id": "iron_cuirass",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 90,
+     "sell": 31,
+     "gear": true
+    },
+    {
+     "id": "round_buckler",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 50,
+     "sell": 17,
+     "gear": true
+    },
+    {
+     "id": "iron_ore",
+     "qty": 20,
+     "restock": "daily",
+     "buy": 10,
+     "sell": 3,
+     "gear": false
+    },
+    {
+     "id": "whetstone",
+     "qty": 10,
+     "restock": "daily",
+     "buy": 12,
+     "sell": 3,
+     "gear": false
+    },
+    {
+     "id": "rusted_shortsword",
+     "qty": 2,
+     "restock": "weekly",
+     "buy": 25,
+     "sell": 8,
+     "gear": false
+    },
+    {
+     "id": "iron_longsword",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 80,
+     "sell": 28,
+     "gear": false
+    }
+   ],
+   "rotating": {
+    "pool": [
+     "steel_knightly_sword",
+     "steel_rapier",
+     "steel_greatsword",
+     "steel_rondel_dagger",
+     "steel_dane_axe",
+     "steel_flanged_mace",
+     "steel_winged_spear",
+     "bound_rowan_staff",
+     "steel_war_scythe",
+     "yew_longbow",
+     "steel_prod_crossbow",
+     "rosewood_lute",
+     "braided_bullwhip",
+     "steel_cestus",
+     "lined_coif",
+     "nasal_helm",
+     "steel_barbute",
+     "bound_scholars_robe",
+     "ring_sewn_jack",
+     "steel_breastplate",
+     "heater_shield"
+    ],
+    "slots": 3,
+    "every": "weekly",
+    "prices": {
+     "steel_knightly_sword": 420,
+     "steel_rapier": 420,
+     "steel_greatsword": 590,
+     "steel_rondel_dagger": 250,
+     "steel_dane_axe": 420,
+     "steel_flanged_mace": 420,
+     "steel_winged_spear": 420,
+     "bound_rowan_staff": 295,
+     "steel_war_scythe": 420,
+     "yew_longbow": 420,
+     "steel_prod_crossbow": 505,
+     "rosewood_lute": 335,
+     "braided_bullwhip": 420,
+     "steel_cestus": 250,
+     "lined_coif": 170,
+     "nasal_helm": 210,
+     "steel_barbute": 280,
+     "bound_scholars_robe": 390,
+     "ring_sewn_jack": 485,
+     "steel_breastplate": 650,
+     "heater_shield": 320
+    }
+   },
+   "sell_pct": {
+    "weapon": 35,
+    "head": 35,
+    "chest": 35,
+    "shield": 35,
+    "material": 30,
+    "*": 25
+   },
+   "markup": 1.0,
+   "services": {
+    "repair_pct_of_value": 5,
+    "forge": "50*level gold + forge shards"
+   }
+  },
+  "town_provisioner": {
+   "name": "Market Provisioner",
+   "merchant": "provisioner",
+   "merchant_mesh": "res://loot/merchants/merchant_provisioner.glb",
+   "stall_mesh": "res://loot/merchants/stall_provisioner.glb",
+   "region": "mainland town",
+   "placement": {
+    "position": [
+     -67.2,
+     null,
+     -12.65
+    ],
+    "yaw": 0.0,
+    "frame": "world (main.gd DEFS market front)"
+   },
+   "stock": [
+    {
+     "id": "bread_cheese",
+     "qty": 30,
+     "restock": "daily",
+     "buy": 4,
+     "sell": 1,
+     "gear": false
+    },
+    {
+     "id": "minor_healing_draught",
+     "qty": 12,
+     "restock": "daily",
+     "buy": 15,
+     "sell": 5,
+     "gear": false
+    },
+    {
+     "id": "driftwood",
+     "qty": 20,
+     "restock": "daily",
+     "buy": 8,
+     "sell": 2,
+     "gear": false
+    },
+    {
+     "id": "warming_tonic",
+     "qty": 6,
+     "restock": "daily",
+     "buy": 30,
+     "sell": 10,
+     "gear": false
+    },
+    {
+     "id": "cooling_salve",
+     "qty": 6,
+     "restock": "daily",
+     "buy": 30,
+     "sell": 10,
+     "gear": false
+    },
+    {
+     "id": "whetstone",
+     "qty": 6,
+     "restock": "daily",
+     "buy": 12,
+     "sell": 4,
+     "gear": false
+    },
+    {
+     "id": "diver_s_breath_flask",
+     "qty": 4,
+     "restock": "daily",
+     "buy": 40,
+     "sell": 14,
+     "gear": false
+    },
+    {
+     "id": "iron_band",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 80,
+     "sell": 20,
+     "gear": true
+    },
+    {
+     "id": "pewter_pilgrim_badge",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 70,
+     "sell": 17,
+     "gear": true
+    },
+    {
+     "id": "leather_collar",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 30,
+     "sell": 7,
+     "gear": true
+    }
+   ],
+   "rotating": {
+    "pool": [
+     "brass_studded_collar",
+     "garnet_signet"
+    ],
+    "slots": 1,
+    "every": "weekly",
+    "prices": {
+     "brass_studded_collar": 200,
+     "garnet_signet": 450
+    }
+   },
+   "sell_pct": {
+    "consumable": 35,
+    "material": 35,
+    "*": 25
+   },
+   "markup": 1.0,
+   "services": {}
+  },
+  "town_apothecary": {
+   "name": "Wort & Phial",
+   "merchant": "apothecary",
+   "merchant_mesh": "res://loot/merchants/merchant_apothecary.glb",
+   "stall_mesh": "res://loot/merchants/stall_apothecary.glb",
+   "region": "mainland town",
+   "placement": {
+    "position": [
+     -70.0,
+     null,
+     21.9
+    ],
+    "yaw": -1.5708,
+    "frame": "world (main.gd DEFS apothecary front)"
+   },
+   "stock": [
+    {
+     "id": "minor_healing_draught",
+     "qty": 20,
+     "restock": "daily",
+     "buy": 15,
+     "sell": 6,
+     "gear": false
+    },
+    {
+     "id": "healing_potion",
+     "qty": 10,
+     "restock": "daily",
+     "buy": 45,
+     "sell": 18,
+     "gear": false
+    },
+    {
+     "id": "warming_tonic",
+     "qty": 8,
+     "restock": "daily",
+     "buy": 30,
+     "sell": 12,
+     "gear": false
+    },
+    {
+     "id": "cooling_salve",
+     "qty": 8,
+     "restock": "daily",
+     "buy": 30,
+     "sell": 12,
+     "gear": false
+    },
+    {
+     "id": "elixir_of_the_deep_hearth",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 250,
+     "sell": 100,
+     "gear": false
+    },
+    {
+     "id": "pilgrim_s_token",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 400,
+     "sell": 100,
+     "gear": false
+    },
+    {
+     "id": "pewter_pilgrim_badge",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 70,
+     "sell": 17,
+     "gear": true
+    }
+   ],
+   "rotating": {
+    "pool": [
+     "garnet_pendant"
+    ],
+    "slots": 1,
+    "every": "weekly",
+    "prices": {
+     "garnet_pendant": 400
+    }
+   },
+   "sell_pct": {
+    "consumable": 40,
+    "material": 30,
+    "*": 25
+   },
+   "markup": 1.0,
+   "services": {}
+  },
+  "saltglass_quay_provisioner": {
+   "name": "Saltglass Quay Stall",
+   "merchant": "provisioner",
+   "merchant_mesh": "res://loot/merchants/merchant_provisioner.glb",
+   "stall_mesh": "res://loot/merchants/stall_provisioner.glb",
+   "region": "Saltglass west cove port",
+   "placement": {
+    "position": [
+     -2336.0,
+     2.2,
+     104.5
+    ],
+    "yaw": -1.5708,
+    "frame": "world (stage2 saltglass_port quay top y 2.2, beside harbormaster hut -2340.6,107.6)"
+   },
+   "stock": [
+    {
+     "id": "saltglass",
+     "qty": 8,
+     "restock": "daily",
+     "buy": 70,
+     "sell": 21,
+     "gear": false
+    },
+    {
+     "id": "diver_s_breath_flask",
+     "qty": 6,
+     "restock": "daily",
+     "buy": 45,
+     "sell": 10,
+     "gear": false
+    },
+    {
+     "id": "bread_cheese",
+     "qty": 12,
+     "restock": "daily",
+     "buy": 5,
+     "sell": 1,
+     "gear": false
+    },
+    {
+     "id": "minor_healing_draught",
+     "qty": 8,
+     "restock": "daily",
+     "buy": 17,
+     "sell": 3,
+     "gear": false
+    },
+    {
+     "id": "harbour_charts",
+     "qty": 1,
+     "restock": "once",
+     "buy": 575,
+     "sell": 125,
+     "gear": false
+    },
+    {
+     "id": "saltglass_spear",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 1035,
+     "sell": 225,
+     "gear": false
+    },
+    {
+     "id": "iron_band",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 90,
+     "sell": 20,
+     "gear": true
+    }
+   ],
+   "rotating": {
+    "pool": [
+     "garnet_signet",
+     "steel_winged_spear",
+     "steel_rondel_dagger"
+    ],
+    "slots": 2,
+    "every": "weekly",
+    "prices": {
+     "garnet_signet": 520,
+     "steel_winged_spear": 485,
+     "steel_rondel_dagger": 290
+    }
+   },
+   "sell_pct": {
+    "material": 35,
+    "*": 25
+   },
+   "markup": 1.15,
+   "services": {}
+  },
+  "gullhaven_shipwright": {
+   "name": "Gullhaven Shipwright",
+   "merchant": "shipwright",
+   "merchant_mesh": "res://loot/merchants/merchant_shipwright.glb",
+   "stall_mesh": "res://loot/merchants/stall_shipwright.glb",
+   "region": "Gullhaven",
+   "placement": {
+    "position": [
+     -356.2,
+     null,
+     -326.7
+    ],
+    "yaw": 0.3927,
+    "frame": "world (stage5 gullhaven pier head + 8 m inland; tw_sea.gd opens the Shipwright here)"
+   },
+   "stock": [
+    {
+     "id": "driftwood",
+     "qty": 30,
+     "restock": "daily",
+     "buy": 8,
+     "sell": 3,
+     "gear": false
+    },
+    {
+     "id": "ship_s_lantern",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 150,
+     "sell": 45,
+     "gear": false
+    },
+    {
+     "id": "oar_bank",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 600,
+     "sell": 180,
+     "gear": false
+    },
+    {
+     "id": "copper_hull_sheathing",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 1200,
+     "sell": 360,
+     "gear": false
+    },
+    {
+     "id": "bronze_ram_prow",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 2000,
+     "sell": 600,
+     "gear": false
+    }
+   ],
+   "rotating": null,
+   "sell_pct": {
+    "material": 40,
+    "ship_addon": 30,
+    "*": 25
+   },
+   "markup": 1.0,
+   "services": {
+    "ship_tiers": "tw_sea.gd COST (unchanged)"
+   }
+  },
+  "frostreach_trader": {
+   "name": "Frostreach Ice-Dock Trader",
+   "merchant": "smith",
+   "merchant_mesh": "res://loot/merchants/merchant_smith.glb",
+   "stall_mesh": "res://loot/merchants/stall_smith.glb",
+   "region": "Frost island (Frostreach Ice Dock)",
+   "placement": {
+    "position": [
+     -905.0,
+     null,
+     -1950.0
+    ],
+    "yaw": 1.6134,
+    "frame": "world (stage4 frostreach_ice_dock pos, landward side); snap to nearest walkable within 8 m"
+   },
+   "stock": [
+    {
+     "id": "warming_tonic",
+     "qty": 10,
+     "restock": "daily",
+     "buy": 40,
+     "sell": 9,
+     "gear": false
+    },
+    {
+     "id": "iron_ore",
+     "qty": 20,
+     "restock": "daily",
+     "buy": 12,
+     "sell": 4,
+     "gear": false
+    },
+    {
+     "id": "healing_potion",
+     "qty": 4,
+     "restock": "daily",
+     "buy": 55,
+     "sell": 13,
+     "gear": false
+    },
+    {
+     "id": "lined_coif",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 210,
+     "sell": 51,
+     "gear": true
+    },
+    {
+     "id": "nasal_helm",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 260,
+     "sell": 63,
+     "gear": true
+    },
+    {
+     "id": "steel_barbute",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 350,
+     "sell": 84,
+     "gear": true
+    },
+    {
+     "id": "bound_scholars_robe",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 490,
+     "sell": 117,
+     "gear": true
+    },
+    {
+     "id": "ring_sewn_jack",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 605,
+     "sell": 145,
+     "gear": true
+    },
+    {
+     "id": "steel_breastplate",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 810,
+     "sell": 195,
+     "gear": true
+    }
+   ],
+   "rotating": {
+    "pool": [
+     "rimewarden_plate",
+     "rimebite_axe",
+     "steel_knightly_sword",
+     "steel_rapier",
+     "steel_greatsword",
+     "steel_rondel_dagger",
+     "steel_dane_axe",
+     "steel_flanged_mace",
+     "steel_winged_spear",
+     "bound_rowan_staff",
+     "steel_war_scythe",
+     "yew_longbow",
+     "steel_prod_crossbow",
+     "rosewood_lute",
+     "braided_bullwhip",
+     "steel_cestus"
+    ],
+    "slots": 2,
+    "every": "weekly",
+    "prices": {
+     "rimewarden_plate": 1750,
+     "rimebite_axe": 1500,
+     "steel_knightly_sword": 525,
+     "steel_rapier": 525,
+     "steel_greatsword": 740,
+     "steel_rondel_dagger": 310,
+     "steel_dane_axe": 525,
+     "steel_flanged_mace": 525,
+     "steel_winged_spear": 525,
+     "bound_rowan_staff": 370,
+     "steel_war_scythe": 525,
+     "yew_longbow": 525,
+     "steel_prod_crossbow": 630,
+     "rosewood_lute": 420,
+     "braided_bullwhip": 525,
+     "steel_cestus": 310
+    }
+   },
+   "sell_pct": {
+    "material": 40,
+    "*": 30
+   },
+   "markup": 1.25,
+   "services": {}
+  },
+  "vent_harbour_apothecary": {
+   "name": "Vent Harbour Herbalist",
+   "merchant": "apothecary",
+   "merchant_mesh": "res://loot/merchants/merchant_apothecary.glb",
+   "stall_mesh": "res://loot/merchants/stall_apothecary.glb",
+   "region": "Ash island (Vent Harbour)",
+   "placement": {
+    "position": [
+     -501.0,
+     null,
+     1858.0
+    ],
+    "yaw": 2.9926,
+    "frame": "world (stage4 vent_harbour pos, landward); snap to nearest walkable within 8 m"
+   },
+   "stock": [
+    {
+     "id": "cooling_salve",
+     "qty": 12,
+     "restock": "daily",
+     "buy": 40,
+     "sell": 10,
+     "gear": false
+    },
+    {
+     "id": "healing_potion",
+     "qty": 8,
+     "restock": "daily",
+     "buy": 55,
+     "sell": 15,
+     "gear": false
+    },
+    {
+     "id": "minor_healing_draught",
+     "qty": 10,
+     "restock": "daily",
+     "buy": 19,
+     "sell": 5,
+     "gear": false
+    },
+    {
+     "id": "elixir_of_the_deep_hearth",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 310,
+     "sell": 87,
+     "gear": false
+    },
+    {
+     "id": "garnet_pendant",
+     "qty": 1,
+     "restock": "weekly",
+     "buy": 500,
+     "sell": 100,
+     "gear": true
+    }
+   ],
+   "rotating": null,
+   "sell_pct": {
+    "material": 40,
+    "consumable": 35,
+    "*": 25
+   },
+   "markup": 1.25,
+   "services": {}
+  }
+ }
+}

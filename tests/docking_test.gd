@@ -217,6 +217,9 @@ func _run() -> void:
 		var sp: Vector3 = sea.to_global(pa.lerp(pb, 0.06)); var rq := PhysicsRayQueryParameters3D.create(sp + Vector3(0, 5, 0), sp - Vector3(0, 5, 0), 1); rq.exclude = [m.hero.get_rid()]
 		var rh: Dictionary = m.get_world_3d().direct_space_state.intersect_ray(rq)
 		print("DK PIERRAY %s start_local=%s hit=%s" % [k, pa.lerp(pb, 0.06), str(sea.to_local(rh.position)) + " " + str(rh.collider.get_parent().name) if rh else "none"])
+		for ln in sea.find_children("Landing_" + k, "", true, false):
+			for sbn in ln.find_children("*", "StaticBody3D", true, false):
+				print("DK PIERBODY %s in_tree=%s layer=%d pos_local=%s basisz=%s shapes=%d" % [k, sbn.is_inside_tree(), sbn.collision_layer, sea.to_local(sbn.global_position), sbn.global_transform.basis.z, sbn.get_child_count()])
 		sea.ui.msg.text = ""
 		m.hero.global_position = sp + Vector3(0, 0.6, 0); m.hero.velocity = Vector3.ZERO; await frames(5)
 		var pw := await walk_to(sea.pier_head(d), 1.5, 25.0)

@@ -626,7 +626,7 @@ func _place_landings(id: String, root: Node3D) -> void:
 		a.y = maxf(a.y, b.y - hz * tan(deg_to_rad(11.0)))   # test 37: 18 -> 11 deg (Beth walker failed 6 landings at 18)
 		var len := a.distance_to(b); var mid := (a + b) * 0.5
 		var mi := MeshInstance3D.new(); var bm := BoxMesh.new(); bm.size = Vector3(3.2, 0.3, len); mi.mesh = bm; mi.material_override = wood; n.add_child(mi)
-		mi.look_at_from_position(mid, b, Vector3.UP)
+		mi.look_at_from_position(n.to_global(mid), n.to_global(b), Vector3.UP)   # test 37: was sea-local coords as GLOBAL -> boards sat 20 km north (OFF), never under the pier
 		var sb := StaticBody3D.new(); var cs := CollisionShape3D.new(); var bs := BoxShape3D.new(); bs.size = bm.size; cs.shape = bs; sb.add_child(cs); n.add_child(sb); sb.transform = mi.transform
 		for t in [0.0, 0.33, 0.66]:   # piles down into the sea
 			var pp := a.lerp(b, t)

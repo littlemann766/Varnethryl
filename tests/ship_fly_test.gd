@@ -62,11 +62,24 @@ func _run() -> void:
 	for i in 60: sea.drive(Vector2.ZERO, 1.0 / 60.0); await get_tree().physics_frame
 	if DisplayServer.get_name() != "headless": get_viewport().get_texture().get_image().save_png(out + "galleon_flying_side.png")
 	if OS.get_environment("SF_PROBE") != "":
-		for px in [Vector2(460, 460), Vector2(480, 390), Vector2(300, 470)]:
-			var o: Vector3 = m.cam.project_ray_origin(px); var dv: Vector3 = m.cam.project_ray_normal(px)
-			var q3 := PhysicsRayQueryParameters3D.create(o, o + dv * 500.0, 0xFFFFFFFF)
-			var hh: Dictionary = m.get_world_3d().direct_space_state.intersect_ray(q3)
-			print("SFR ", px, " -> ", hh.get("collider").get_path() if hh else "none", " at ", hh.get("position", Vector3.ZERO) - sea.ship.global_position if hh else "", " water hit ", o + dv * ((0.0 - o.y) / dv.y) - sea.ship.global_position)
+		var vs: Vector2 = get_viewport().get_visible_rect().size; var r := Rect2i(Vector2i(Vector2(430, 440) * vs / Vector2(1024, 576)), Vector2i(Vector2(60, 40) * vs / Vector2(1024, 576)))
+		var base := get_viewport().get_texture().get_image().get_region(r)
+		var cnt := func(im: Image) -> int:
+			var n := 0
+			for y in im.get_height():
+				for x in im.get_width():
+					var c := im.get_pixel(x, y)
+					if c.get_luminance() < 0.42 and c.b < 0.5: n += 1
+			return n
+		var b0: int = cnt.call(base); print("SFB base dark ", b0, " of ", base.get_width() * base.get_height())
+		for gi in m.find_children("*", "GeometryInstance3D", true, false):
+			if not is_instance_valid(gi): continue
+			if (gi as Node3D).global_position.distance_to(sea.ship.global_position) > 400.0 and not sea.is_ancestor_of(gi): continue
+			if not is_instance_valid(gi) or not gi.is_visible_in_tree(): continue
+			gi.visible = false; await frames(2)
+			var im := get_viewport().get_texture().get_image().get_region(r); gi.visible = true
+			var n1: int = cnt.call(im)
+			if n1 < b0 * 0.5: print("SFB ", gi.get_path(), " dark ", n1)
 	m.yaw = sea.ship.heading + PI
 	for i in 60: sea.drive(Vector2.ZERO, 1.0 / 60.0); await get_tree().physics_frame
 	if DisplayServer.get_name() != "headless": get_viewport().get_texture().get_image().save_png(out + "galleon_flying_behind.png")

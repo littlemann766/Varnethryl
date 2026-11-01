@@ -101,8 +101,8 @@ func _files(id: String) -> Array:
 	var d: Dictionary = REGIONS[id]; var out := []
 	for f in DirAccess.get_files_at(R + d.dir):
 		var f2 := f.trim_suffix(".remap").trim_suffix(".import")
-		if not f2.ends_with(".glb") or not f2.begins_with(d.pre) or out.has(f2): continue
 		var b := f2.trim_suffix(".glb")
+		if not f2.ends_with(".glb") or not f2.begins_with(d.pre) or out.has(b): continue   # test 37: was out.has(f2) -> every region mesh (x.glb + x.glb.import) loaded and drawn twice
 		if b.ends_with("_lod1") or b in SKIP: continue
 		if id == "B" and b in CAVES.values(): pass
 		out.append(b)

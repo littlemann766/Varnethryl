@@ -322,3 +322,13 @@ These lod1 files were re-decimated from their base with gltfpack 1.3 (`-si 0.44 
 
 The originals are in `stage4/meshes_v1_backup/`. All `*_v1_backup` files were moved out of `meshes/` because `tw_sea` auto-loads every `frost_`/`ash_`/`coast_` glb in that folder.
 **Lucky:** copy the 28 tile glbs over yours. Suggested (your code): in the frost region set the ambient to (0.55, 0.62, 0.75) and use the FogV2 values from Fix 3.
+
+## Fix 8c - lake and west coast (main.gd patch, your file)
+`terrain_pass/mainland/fix08c_main_gd.patch` (a unified diff of main.gd, applied after Fix 2):
+- `LAKE` moves from (250,-200) to (270,-205), and the new `_lake_r(angle)` gives the lake a lobed outline in `height()`.
+  - The water disc goes from r 66 to r 92. The terrain clips it, so the shoreline follows the lobes.
+  - Measured with `tools/lakechk.gd`: the water is now 28.7 m from the town wall (it used to touch it), 156 m from the nearest road and 186 m from the Titan. The bank also covers the old bare patch at (300,-260).
+- The 12 shore_edge pieces on a perfect 60 m ring become 22 jittered pieces seated on the real y=0 waterline, with 44 mossy rocks on the bank.
+- West coast (old port to lighthouse, z SEA_NORTH_Z+12..478): shingle rocks and boulders at the waterline. They skip the lighthouse island foot and the old pier.
+Apply with `patch scripts/main.gd < fix08c_main_gd.patch`. If it fails because of your local edits, the three hunks are short enough to copy by hand.
+The volcano's hard cone/grass edge is handled by Fix 7b's 152-212 m scree and ash band.

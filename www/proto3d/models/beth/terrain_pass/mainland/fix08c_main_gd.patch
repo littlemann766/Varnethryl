@@ -1,0 +1,72 @@
+--- /tmp/rp/s8/main_tp_pre8c.gd	2026-11-01 01:01:30.172322116 -0400
++++ scripts/main_tp.gd	2026-11-01 01:03:23.205190687 -0400
+@@ -313,7 +313,7 @@
+ func height(x: float, z: float) -> float:
+ 	var r := Vector2(x, z).length()
+ 	if r < 215.0: return 0.0
+-	var ld := Vector2(x, z).distance_to(LAKE)
++	var lo := Vector2(x, z) - LAKE; var ld := lo.length() / _lake_r(lo.angle())
+ 	if ld < 100.0: return lerp(-4.0, _height_raw(x, z, r), smoothstep(45.0, 100.0, ld))
+ 	var h := _height_raw(x, z, r)
+ 	# test 12: Beth's volcano_titan stands on a level pad (its base ring is flat at y=0, r 147 m)
+@@ -1166,7 +1166,10 @@
+ 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if (shadow and lod == 0) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+ 			hi_terrain.append([mi, lod])
+ 
+-const LAKE := Vector2(250, -200)
++const LAKE := Vector2(270, -205)   # terrain pass fix 8c: was (250,-200); its bank ran into the NE wall corner (185,-185)
++## terrain pass fix 8c: irregular lake outline (lobes/bays) instead of a perfect circle
++static func _lake_r(a: float) -> float:
++	return 0.85 * (1.0 + 0.14 * sin(a * 3.0 + 0.5) + 0.08 * sin(a * 5.0 + 1.9) + 0.05 * sin(a * 8.0 + 0.3))
+ ## test 12: Beth's volcano_titan (godot-art/volcano, built on the boss's volcano_game): 296 m across, 77 m tall, origin =
+ ## cone centre at ground level, scale 1. Phone High = lod1 (87k tris); caldera arena r 33 m at y 39 ringed by a lava moat;
+ ## 6.5 m spiral path from path_start (SW foot) to path_end (arena). The Ashen Titan stands at titan_spawn.
+@@ -1285,7 +1288,7 @@
+ 		var s2 := rng.randf_range(0.5, 1.0) if k2.begins_with("cliff") else rng.randf_range(0.8, 1.6)
+ 		_lod_instances(T + k2, Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s2, s2, s2)), Vector3(p2.x, height(p2.x, p2.y) - 1.0, p2.y)), true)
+ 	# lake with Beth's shore pieces, waterline at y=0
+-	var w := MeshInstance3D.new(); var pm := CylinderMesh.new(); pm.top_radius = 66; pm.bottom_radius = 66; pm.height = 0.2; pm.radial_segments = 64; pm.rings = 1
++	var w := MeshInstance3D.new(); var pm := CylinderMesh.new(); pm.top_radius = 92; pm.bottom_radius = 92; pm.height = 0.2; pm.radial_segments = 64; pm.rings = 1
+ 	pm.material = _water_mat(); w.mesh = pm; w.position = Vector3(LAKE.x, -0.1, LAKE.y); add_child(w)
+ 	# SW-corner sea (test 10): one big water quad from the coast to the world edge
+ 	var sw := MeshInstance3D.new(); var sp := PlaneMesh.new(); var x0 := -4000.0; var z1 := 4000.0   # test 14: sea to the horizon
+@@ -1307,11 +1310,34 @@
+ 	var ramp := StaticBody3D.new(); ramp.name = "LighthouseStairRamp"; lh.add_child(ramp)
+ 	var rcs := CollisionShape3D.new(); var rbx := BoxShape3D.new(); rbx.size = Vector3(2.4, 0.3, rd.length()); rcs.shape = rbx
+ 	rcs.transform = Transform3D(Basis.looking_at(rd.normalized(), Vector3.UP), (ra + rb) * 0.5 - Vector3(0, 0.15, 0)); ramp.add_child(rcs)
+-	for i in 12:
+-		var a3 := i / 12.0 * TAU
+-		var p3 := LAKE + Vector2(cos(a3), sin(a3)) * 60.0
+-		var b3 := Basis(Vector3.UP, atan2(p3.x - LAKE.x, p3.y - LAKE.y) + SHORE_YAW)
+-		_lod_instances(T + "shore_edge_hi", Transform3D(b3, Vector3(p3.x, 0, p3.y)), false)
++	# terrain pass fix 8c: shore pieces follow the irregular waterline (y=0 crossing), jittered, plus Beth's rocks on the bank
++	var lrng := RandomNumberGenerator.new(); lrng.seed = 8803
++	var rocks := []
++	for i in 22:
++		var a3 := (i + lrng.randf_range(-0.3, 0.3)) / 22.0 * TAU; var dir := Vector2(cos(a3), sin(a3))
++		var rr := 40.0
++		while rr < 95.0 and height(LAKE.x + dir.x * rr, LAKE.y + dir.y * rr) < -0.15: rr += 0.5
++		var p3 := LAKE + dir * rr
++		if lrng.randf() < 0.75:
++			var b3 := Basis(Vector3.UP, atan2(p3.x - LAKE.x, p3.y - LAKE.y) + SHORE_YAW + lrng.randf_range(-0.25, 0.25)).scaled(Vector3.ONE * lrng.randf_range(0.8, 1.2))
++			_lod_instances(T + "shore_edge_hi", Transform3D(b3, Vector3(p3.x, -0.15, p3.y)), false)
++		for k in 2:
++			var q := p3 + dir * lrng.randf_range(2.0, 9.0) + Vector2(-dir.y, dir.x) * lrng.randf_range(-5.0, 5.0); var sc := lrng.randf_range(0.6, 1.4)
++			rocks.append(Transform3D(Basis(Vector3.UP, lrng.randf() * TAU).scaled(Vector3(sc, sc * 0.8, sc)), Vector3(q.x, height(q.x, q.y) - 0.2 * sc, q.y)))
++	_multimesh("res://assets/rocks/rock_mossy.glb", rocks, true, 260.0)
++	# terrain pass fix 8c: break the straight west coast (old port -> lighthouse) with shingle rocks + boulders at the waterline
++	var crocks := []; var cbould := []
++	for k in 140:
++		var zz := lrng.randf_range(SEA_NORTH_Z + 12.0, 478.0)
++		if absf(zz - (PORT.y + 62.0)) < 26.0 or absf(zz - PORT.y) < 34.0: continue   # lighthouse island foot, old port pier
++		var xx := coast_x(zz) + lrng.randf_range(-3.0, 6.0); var sc := lrng.randf_range(0.5, 1.5)
++		var q := Vector2(xx, zz)
++		if _road_dist(q) < 6.0: continue
++		var t3 := Transform3D(Basis(Vector3.UP, lrng.randf() * TAU).scaled(Vector3(sc, sc * 0.7, sc)), Vector3(xx, maxf(height(xx, zz), -0.3) - 0.25 * sc, zz))
++		if k % 4 == 0: cbould.append(t3.scaled_local(Vector3.ONE * 1.6))
++		else: crocks.append(t3)
++	_multimesh("res://assets/rocks/rock_mossy.glb", crocks, false, 220.0)
++	_multimesh("res://assets/rocks/boulder.glb", cbould, true, 320.0)
+ 
+ func _mountains_old() -> void:
+ 	var kinds := ["mountain_peak_snow", "mountain_peak_bare", "mountain_peak_snow", "mountain_peak_bare", "cliff_ridge_60m"]

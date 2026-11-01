@@ -360,3 +360,67 @@ Assets are in `tidewrack_sea/stage5_islands/waystones/`: `waystone{,_lod1 (29%),
 - **Works with 8c.** The 8c shingle samples `coast_x()`, so it follows the new coves. The lake is unaffected; its water stays inland at y 0.
 
 If `patch` rejects a hunk, the replaced blocks are: shore_z/coast_x/sea_mask, `height()` lines dsea/beach, the Sea quad in `_hi_terrain`, and the lighthouse x.
+
+## Fix 10 - Saltglass and Frost are now big islands in open sea (replaces the border-ridge idea)
+Final call from the boss: no land meets a region rectangle any more. Saltglass (B) is one big western island; Frost is one big icy
+northern island (plus its existing separate isles) ringed by irregular floes. Ash and the Archipelago keep their shapes.
+Open sea runs all the way round both, so every channel between regions is open water.
+
+- **How:** `tidewrack_sea/world_merge/tools/run_all.sh` (re-runnable, always starts from `meshes_v2_backup/`). `island_carve.py`
+  pulls land back from every rect edge along an fbm-wobbled inset (Saltglass 150-330 m, Frost 60-360 m), so coves and
+  headlands replace the edge. Mountains fall to a -16 m sea floor over ~200 m. Saltglass's old west fjords are tied together by a
+  low hill spine so it is one island; the port bay keeps a ~280 m west mouth. The B/ash overlap notch and its square islet are gone.
+- **Frost tiles are re-gridded** (`resample_frost.py`): the old decimated tiles had 165 m slivers (col up to 800 m) that would have
+  stretched. Tiles now 7.5 m grid (lod1 15 m = 25%), `frost_terrain_col` 20 m grid, sampled exactly from the originals (seams match).
+- **Kept:** every POI, landing shore/moor/spawn, the Saltglass port and the Frostreach ice dock are untouched (all >= 400 m inside the
+  carve, checked). Props on lowered ground were re-seated or dropped (`reseat_props.py`: beach dressing, saltglass crystals, icicles,
+  the notch islet's vent/steam/glow/lava pieces). `stage4.vents[12]` (-1788, 1590) now sits in open water - drop it from your vent list if you use it.
+- **New file:** `stage4/meshes/frost_ice_floes_coast{,_lod1}.glb` (1339 irregular floes 8-160 m off the new frost coast, 26.5k tris,
+  lod1 31%). Its name matches your `_ice_floes` decor rule, so `_files("frost")` auto-loads it with no collision. Nothing within 70 m of a landing or the ice dock.
+- The authored `frost_ice_floes` fields had square outlines; trimmed to an irregular mask (8256 of 15620 tris kept).
+- **Shore maps (replace yours):** `stage1/shaders/arch_shore_dist.png`, `stage2/.../coast_shore_dist.png`, `stage4/.../frost_shore_dist.png`,
+  `stage4/.../ash_shore_dist.png` are re-rasterised from the final meshes (3 m, land = y > 0; 99% match with the authored maps on the old meshes).
+  `world_merge/world_shore_dist.png` = all regions merged (1280², 5 m/px, rect -3200, -3200, 6400, 6400; R = metres to land, cap 255).
+- **Copy:** everything under `tidewrack_sea/stage1|2|4/meshes`, `stage5_islands/meshes/*` and the shaders listed above that
+  `git show --stat` lists for the fix 10/11 commits.
+
+**tw_sea.gd (your code, spec only):**
+1. `REGIONS` rects and `region_at()` stay as they are (fog, wind, water material, streaming). No land touches a rect edge now, so
+   nothing pops at a border.
+2. `shore_m(p)`: one lookup in `world_merge/world_shore_dist.png` instead of the per-rect maps (and no `return 255.0` outside the
+   rects). That removes every rectangle from the world map's shallows and the ship's grounding test:
+```gdscript
+const WORLD_SHORE := "world_merge/world_shore_dist.png"; const WORLD_RECT := [-3200.0, -3200.0, 6400.0, 6400.0]
+var _wshore: Image
+func shore_m(p: Vector2) -> float:
+	if _wshore == null:
+		_wshore = (load(R + WORLD_SHORE) as Texture2D).get_image()
+		if _wshore.is_compressed(): _wshore.decompress()
+	var u := clampi(int((p.x - WORLD_RECT[0]) / WORLD_RECT[2] * _wshore.get_width()), 0, _wshore.get_width() - 1)
+	var v := clampi(int((p.y - WORLD_RECT[1]) / WORLD_RECT[3] * _wshore.get_height()), 0, _wshore.get_height() - 1)
+	return _wshore.get_pixel(u, v).r * 255.0
+```
+3. Water shader: keep the per-region `shore_dist` samplers (they are updated); foam/shallows now fade out well inside each rect.
+4. storm_col walls: unchanged (they sit in open water now).
+
+**ui/world_map.gd (your code, spec only)** - see fix 11.
+
+## Fix 11 - no straight lines anywhere
+`world_merge/tools/straight_scan.py` finds every coast run that stays within 0.5 m of a straight line for 30 m or more (contours of the
+3 m land mask). `wobble_runs.py` breaks each one: terrain vertices within ~22 m are pushed sideways by an along-run noise (+-7 m), the
+same field for visual, lod1 and col (stage5 islands, arch_islands, all region tiles). Runs within 45 m of a port, pier, mooring or the
+Saltglass port mesh are built structures and are kept. 4 passes: 107 -> 7 runs, and all 7 are at piers/moorings (list in
+`world_merge/straight_runs_final.json`). Also:
+- The three Frost POI islands no longer sit on the tiles as squares: their outer band tucks under the tile surface with an fbm edge and
+  takes the tile colour (`isl_blend.py`); the other POI islands' square sea-floor skirts sink to -4 m in an fbm band (coast untouched,
+  nothing within 60 m of a landing).
+- Mainland: `fix11_main_gd.patch` adds three small harmonics to `_lake_r()` (the lobed lake had a 51 m straight bank). After it, only the
+  two stone quays at the port (x -442, z 366-481 and z 325, x -566..-454) are straight - built, so kept.
+
+**ui/world_map.gd + main._build_minimap (your code, spec only):**
+1. `WORLD := Rect2(-3200, -3200, 6000, 6400)` (GW 480, GH 512): the mainland copy reaches x 2600 and was cut by the map's right edge; the
+   frost/Saltglass coasts sat 90 m from the old left/top edge.
+2. `_build_sea()`: uses `sea.shore_m()` - with the unified lookup above there are no rect edges in the shallows.
+3. `_build_minimap()` land copy: `edge_r := 660.0 + 30.0 * noise(2x) + 14.0 * noise(7x + 91, 7z - 37)` (the outer edge had 32-39 m
+   straight runs), and draw the lake with the real outline instead of a 60 m circle:
+   `var lo := w - LAKE; if lo.length() / _lake_r(lo.angle()) < 62.0: c = water`.

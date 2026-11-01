@@ -1,0 +1,12 @@
+--- /tmp/rp/s11/main_tp_pre11.gd	2026-11-01 01:44:43.459912769 -0500
++++ /tmp/gv2/scripts/main_tp.gd	2026-11-01 01:44:43.471912861 -0500
+@@ -1172,7 +1172,8 @@
+ const LAKE := Vector2(270, -205)   # terrain pass fix 8c: was (250,-200); its bank ran into the NE wall corner (185,-185)
+ ## terrain pass fix 8c: irregular lake outline (lobes/bays) instead of a perfect circle
+ static func _lake_r(a: float) -> float:
+-	return 0.85 * (1.0 + 0.14 * sin(a * 3.0 + 0.5) + 0.08 * sin(a * 5.0 + 1.9) + 0.05 * sin(a * 8.0 + 0.3))
++	# fix 11: + small coves (harmonics 11/17/23) so no stretch of the bank runs straight
++	return 0.85 * (1.0 + 0.14 * sin(a * 3.0 + 0.5) + 0.08 * sin(a * 5.0 + 1.9) + 0.05 * sin(a * 8.0 + 0.3) + 0.045 * sin(a * 11.0 + 2.6) + 0.03 * sin(a * 17.0 + 0.9) + 0.02 * sin(a * 23.0 + 4.1))
+ ## test 12: Beth's volcano_titan (godot-art/volcano, built on the boss's volcano_game): 296 m across, 77 m tall, origin =
+ ## cone centre at ground level, scale 1. Phone High = lod1 (87k tris); caldera arena r 33 m at y 39 ringed by a lava moat;
+ ## 6.5 m spiral path from path_start (SW foot) to path_end (arena). The Ashen Titan stands at titan_spawn.

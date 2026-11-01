@@ -32,23 +32,23 @@
  "beached_wreck": {
   "Captain's Last Log": {
    "ok": true,
-   "t": 53.5
+   "t": 51.3
   },
   "Castaway Camp": {
    "ok": true,
-   "t": 35.4
+   "t": 34.3
   },
   "Salvage Chest": {
    "ok": true,
-   "t": 64.7
+   "t": 62.5
   },
   "causeway a->b": {
    "ok": true,
-   "t": 31.6
+   "t": 30.4
   },
   "causeway b->a": {
    "ok": true,
-   "t": 27.4
+   "t": 26.0
   },
   "pier_boards": {
    "ok": true,
@@ -80,19 +80,19 @@
   },
   "Ember Vent": {
    "ok": true,
-   "t": 60.3
+   "t": 58.6
   },
   "Scorched Chest": {
    "ok": true,
-   "t": 48.0
+   "t": 46.4
   },
   "causeway a->b": {
    "ok": true,
-   "t": 38.0
+   "t": 36.5
   },
   "causeway b->a": {
    "ok": true,
-   "t": 35.7
+   "t": 34.1
   },
   "pier_boards": {
    "at": [
@@ -270,35 +270,35 @@
  "saltglass": {
   "Clifftop Cache": {
    "ok": true,
-   "t": 83.7
+   "t": 82.2
   },
   "Glass-diver's Chest": {
    "ok": true,
-   "t": 88.0
+   "t": 86.6
   },
   "Salt-crusted Tablet": {
    "ok": true,
-   "t": 69.7
+   "t": 68.3
   },
   "Saltglass Lookout": {
    "ok": true,
-   "t": 89.1
+   "t": 87.7
   },
   "Saltglass Shrine": {
    "ok": true,
-   "t": 72.6
+   "t": 71.2
   },
   "Singing Shards": {
    "ok": true,
-   "t": 76.3
+   "t": 76.9
   },
   "pier stair down": {
    "ok": true,
-   "t": 9.8
+   "t": 9.5
   },
   "pier stair up": {
    "ok": true,
-   "t": 43.3
+   "t": 43.1
   },
   "pier_boards": {
    "at": [

@@ -37,7 +37,7 @@ GROUND = {'A': 'temperate', 'B': 'saltglass', 'frost': 'frost', 'ash': 'ash'}
 # per landing: window half-size, hill amplitude, POIs (type, name); first POI goes on the high ground
 ISL = {
  'gullhaven':      dict(R=170, amp=11, pois=[('watchtower', 'Gull Watchtower ruin'), ('shrine', 'Gull Shrine'), ('lore', 'Founders\' Stone'), ('chest', 'Harbourmaster\'s Cache')]),
- 'saltglass':      dict(R=170, amp=9,  pois=[('crystal_shrine', 'Saltglass Shrine'), ('crystal_grove', 'Singing Shards'), ('chest', 'Glass-diver\'s Chest'), ('lore', 'Salt-crusted Tablet'), ('watchtower', 'Saltglass Lookout', 'top'), ('chest', 'Clifftop Cache', 'top')], ramp=True, pier_stair=(62, 80)),
+ 'saltglass':      dict(R=170, amp=9,  pois=[('crystal_shrine', 'Saltglass Shrine'), ('crystal_grove', 'Singing Shards'), ('chest', 'Glass-diver\'s Chest'), ('lore', 'Salt-crusted Tablet'), ('watchtower', 'Saltglass Lookout', 'top'), ('chest', 'Clifftop Cache', 'top')], ramp=True, pier_stair=(62, 80), stair_avoid=['ocean_stage2/meshes/coast_saltglass_landing.glb']),
  'frostreach':     dict(R=170, amp=10, pois=[('ice_cave', 'Rimehollow Ice Cave'), ('frost_shrine', 'Frostreach Cairn'), ('chest', 'Iced Chest'), ('lore', 'Frozen Waystone')]),
  'vent':           dict(R=170, amp=9,  pois=[('lava_vent', 'Ventmouth'), ('hot_pool', 'Steam Pools'), ('obsidian_shrine', 'Ember Shrine'), ('chest', 'Ash-buried Chest')]),
  'lantern_rock':   dict(R=120, amp=9,  pois=[('lighthouse', 'Old Lantern ruin'), ('hut_ruin', 'Keeper\'s Hut'), ('chest', 'Keeper\'s Strongbox'), ('lore', 'Lamp-oil Logbook')]),
@@ -160,15 +160,24 @@ def build_ramp(H, base, comp, walk, FP, dsh, si, X, Z, xs, zs, cd, reach_o=None,
                 print(f'  {tag}: {N} flights, {math.degrees(math.atan(g)):.1f} deg, rise {rise:.1f} m ({Hbot:.1f} -> {Htop:.1f})')
                 return {'decks': decks, 'flights': N, 'deg': round(math.degrees(math.atan(g)), 1), 'rise_m': round(rise, 1), 'bottom': decks[0]['a'], 'top': decks[-1]['b']}, Hr, ndimage.binary_dilation(RD, iterations=3), P, walk | RD | P, RD
     print('  ramp: no clear spot'); return None, H, np.zeros_like(comp), np.zeros_like(comp), walk, np.zeros_like(comp)
-def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0, Lg=20.0, Nmax=9, tag='pier stair', ftol=0.3, avoid=None):
+def _hb(e, avoid):   # does a deck (+2.4 m headroom) touch any 3D house box
+    a = np.array(e['a']); b = np.array(e['b']); u = b - a; pv = np.array([-u[2], u[0]]) / (math.hypot(u[0], u[2]) + 1e-9)
+    for tt in np.linspace(0, 1, 11):
+        p = a + u * tt
+        for ww in np.linspace(-e['w'] / 2, e['w'] / 2, 5):
+            x, z = p[0] + pv[0] * ww, p[2] + pv[1] * ww
+            if any(lo[0] < x < hi[0] and lo[2] < z < hi[2] and p[1] - 0.6 < hi[1] and p[1] + 2.4 > lo[1] for lo, hi in avoid): return True
+    return False
+
+def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0, Lg=20.0, Nmax=9, tag='pier stair', ftol=0.3, avoid=None, soft=False):
     """Tower switchback at the pier head: flights alternate between two lines 5 m apart, stacking up the sea-cliff face
     (16.8 m+ headroom between flights on one line); the top walk runs inland onto the shelf. Same deck format as build_ramp."""
     ny, nx = H.shape; colC = _g['colC']; W, GAP = 3.6, 5.0; lift = 0.4 if Nmax > 2 else -0.05   # bank stairs are walked onto from the top too: deck end flush with (just under) the ground
     def hat(A, x, z): return float(ndimage.map_coordinates(A, [[(z - zs[0]) / STEP], [(x - xs[0]) / STEP]], order=1)[0])
     def top(x, z): return max(hat(base, x, z), hat(colC, x, z))
     n = np.array(inl, float); n /= np.linalg.norm(n); t = np.array([-n[1], n[0]]); sh = np.array(sh, float)
-    for side, d0 in [(sd, dd) for sd in (1, -1) for dd in (-6.0, -9.0, -12.0)]:   # tower stands in the water beside the pier head: bottom at pier level, clear of the cliff
-            S_ = sh + t * side * (Lg / 2 + W / 2 + 0.6); o = S_ + n * d0 - t * side * Lg / 2; y00 = max(top(*o), y0 + 0.3)
+    for ex, side, d0 in [(e_, sd, dd) for e_ in (0.0, 2.5, 5.0) for sd in (1, -1) for dd in (-6.0, -9.0, -12.0)]:   # tower stands in the water beside the pier head: bottom at pier level, clear of the cliff
+            S_ = sh + t * side * (Lg / 2 + W / 2 + 0.6 + ex); o = S_ + n * d0 - t * side * Lg / 2; y00 = max(top(*o), y0 + 0.3)
             if y00 - y0 > 1.0: continue
             for N in range(1 if Nmax <= 2 else 2, Nmax + 1):
                 dl = side if (N - 1) % 2 == 0 else -side; lastline = d0 + GAP * ((N - 1) % 2)
@@ -176,7 +185,7 @@ def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0, Lg=20.0, Nmax=9, t
                 best = None
                 for Lx in np.arange(8.0, 60.1, 1.0):
                     q = end + n * Lx; Ht = top(*q); gg = (Ht - 0.3 - y00) / (N * Lg)
-                    if Ht >= hmin and 0.1 <= gg <= 0.47 and abs(top(*(q + n)) - Ht) < ftol and abs(top(*(q + 2 * n)) - Ht) < 2 * ftol and abs(top(*(q + t)) - Ht) < ftol + 0.1 and abs(top(*(q - t)) - Ht) < ftol + 0.1: best = (Lx, q, Ht, gg); break
+                    if Ht >= hmin and 0.1 <= gg <= 0.47 and abs(top(*(q + n)) - Ht) < ftol and abs(top(*(q + 2 * n)) - Ht) < 2 * ftol and abs(top(*(q + t)) - Ht) < ftol + 0.1 and abs(top(*(q - t)) - Ht) < ftol + 0.1 and not (isinstance(avoid, list) and not soft and any(lo_[0] - 2.3 < q[0] < hi_[0] + 2.3 and lo_[2] - 2.3 < q[1] < hi_[2] + 2.3 and Ht - 0.6 < hi_[1] and Ht + 2.4 > lo_[1] for lo_, hi_ in avoid)): best = (Lx, q, Ht, gg); break
                 if best is None: continue
                 Lx, q, Ht, g = best; decks, h, ok = [], y00, True
                 for k in range(N):
@@ -188,21 +197,44 @@ def pier_stair(H, base, sh, inl, y0, X, Z, xs, zs, hmin=44.0, Lg=20.0, Nmax=9, t
                 em = end + n * (W + 0.6)
                 decks.append({'kind': 'landing', 'a': [float(end[0]), float(h), float(end[1])], 'b': [float(em[0]), float(h), float(em[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)]})
                 decks.append({'kind': 'landing', 'a': [float(em[0]), float(h), float(em[1])], 'b': [float(q[0]), float(Ht + lift), float(q[1])], 'w': W + 0.4, **({'rail_trim': 4.0} if Nmax <= 2 else {'out': [float(t[0] * dl), float(t[1] * dl)]})})
-                qa = np.array(q, float); ya = Ht + lift; flat = 0
+                def hits_(pa_, pb_, y_):   # a ground-walk segment vs the house boxes (deck + 2.4 m headroom, 4 m wide)
+                    if not isinstance(avoid, list): return False
+                    dv_ = pb_ - pa_; pv_ = np.array([-dv_[1], dv_[0]]) / (np.linalg.norm(dv_) + 1e-9)
+                    return any(lo_[0] < xq_[0] < hi_[0] and lo_[2] < xq_[1] < hi_[2] and y_ - 0.6 < hi_[1] and y_ + 2.4 > lo_[1] for lo_, hi_ in avoid for tq_ in (0.0, 0.5, 1.0) for ww_ in (-2.2, 0.0, 2.2) for xq_ in [pa_ + dv_ * tq_ + pv_ * ww_])
+                nw_ = n; nb_ = None; qo_ = np.array(q, float)
+                for off_ in (0.0, -1.0, 1.0, -2.0, 2.0, -3.0, 3.0, -4.0, 4.0):   # the walk slides sideways / turns off the line where a house stands in the way (fewest touches)
+                    q2_ = np.array(q, float) + t * off_
+                    for ang_ in sorted(range(-90, 91, 15), key=abs):
+                        ca_, sa_ = math.cos(math.radians(ang_)), math.sin(math.radians(ang_)); nd_ = np.array([n[0] * ca_ - n[1] * sa_, n[0] * sa_ + n[1] * ca_])
+                        c_ = sum(hits_(q2_ + nd_ * (st_ - 1), q2_ + nd_ * st_, top(*(q2_ + nd_ * st_))) for st_ in range(1, 25)) + (hits_(np.array(q, float), q2_, Ht) if off_ else 0) + abs(off_) * 0.01
+                        if nb_ is None or c_ < nb_: nw_, nb_, qo_ = nd_, c_, q2_
+                        if c_ == 0: break
+                    if nb_ is not None and nb_ < 0.05: break
+                qa = np.array(q, float); ya = Ht + lift; flat = 0; slid_ = np.linalg.norm(qo_ - qa) > 0.1
+                if slid_:
+                    decks[-1]['b'] = [float(qo_[0]), float(top(*qo_) + lift), float(qo_[1])]; decks[-1]['norail'] = True; decks[-1].pop('out', None)   # the top walk aims straight at the slid start
+                    qa, ya = qo_, float(top(*qo_) + lift); q = qo_
                 for st in range(1, 41):
-                    qb = q + n * st; yg = top(*qb); yb = float(np.clip(yg + lift, ya - 0.45, ya + 0.45))
-                    decks.append({'kind': 'landing', 'a': [float(qa[0]), float(ya), float(qa[1])], 'b': [float(qb[0]), yb, float(qb[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)], 'norail': Nmax <= 2})
-                    flat = flat + 1 if abs(yg - top(*(q + n * (st + 1)))) < 0.25 and abs(yb - yg - lift) < 0.3 else 0
+                    qb = q + nw_ * st; yg = top(*qb); yb = float(np.clip(yg + lift, ya - (0.12 if slid_ and st == 1 else 0.45), ya + 0.45))
+                    decks.append({'kind': 'landing', 'a': [float(qa[0]), float(ya), float(qa[1])], 'b': [float(qb[0]), yb, float(qb[1])], 'w': W + 0.4, 'out': [float(t[0] * dl), float(t[1] * dl)], 'norail': Nmax <= 2 or (slid_ and st <= 3)})
+                    flat = flat + 1 if abs(yg - top(*(q + nw_ * (st + 1)))) < 0.25 and abs(yb - yg - lift) < 0.3 else 0
                     qa, ya = qb, yb
                     if flat >= 3 and st >= (24 if Nmax > 2 else 4): break
                 for e in decks[1:-1]:
-                    if e['kind'] == 'landing' and e['b'][1] <= top(e['b'][0], e['b'][2]) + 0.6 and e is not decks[-1] and decks.index(e) > 2 * N: continue
+                    gl_ = e['kind'] == 'landing' and e['b'][1] <= top(e['b'][0], e['b'][2]) + 0.8 and e is not decks[-1] and decks.index(e) > 2 * N   # ground-level walk: no terrain test (houses still)
                     for tt in np.linspace(0.1, 0.9, 6):
                         p_ = np.array(e['a']) + (np.array(e['b']) - np.array(e['a'])) * tt
-                        if avoid is not None:
-                            jj_ = int(round((p_[2] - zs[0]) / STEP)); ii_ = int(round((p_[0] - xs[0]) / STEP))
-                            if 0 <= jj_ < ny and 0 <= ii_ < nx and avoid[jj_, ii_]: ok = False; break
-                        if top(p_[0], p_[2]) > p_[1] - 0.5: ok = False; _g.setdefault("psdbg", []).append((side, d0, N, e["kind"], round(float(p_[1]), 1), round(top(p_[0], p_[2]), 1))); break
+                        if avoid is not None and not soft:
+                            u_ = np.array(e['b']) - np.array(e['a']); pv_ = np.array([-u_[2], u_[0]]) / (math.hypot(u_[0], u_[2]) + 1e-9); hit_ = False
+                            for ww_ in (-e['w'] / 2, 0.0, e['w'] / 2):
+                                xq_, zq_ = p_[0] + pv_[0] * ww_, p_[2] + pv_[1] * ww_
+                                if isinstance(avoid, list):   # 3D boxes (houses): clear only if the deck + headroom misses them
+                                    hit_ |= any(lo_[0] < xq_ < hi_[0] and lo_[2] < zq_ < hi_[2] and p_[1] - 0.6 < hi_[1] and p_[1] + 2.4 > lo_[1] for lo_, hi_ in avoid)
+                                else:
+                                    jj_ = int(round((zq_ - zs[0]) / STEP)); ii_ = int(round((xq_ - xs[0]) / STEP))
+                                    if 0 <= jj_ < ny and 0 <= ii_ < nx and avoid[jj_, ii_]: hit_ = True
+                            if hit_: ok = False; break
+                        if not gl_ and top(p_[0], p_[2]) > p_[1] - 0.5: ok = False; _g.setdefault("psdbg", []).append((side, d0, N, e["kind"], round(float(p_[1]), 1), round(top(p_[0], p_[2]), 1))); break
                     if not ok: break
                 if not ok: continue
                 f0 = decks[0]
@@ -301,13 +333,25 @@ def build(k):
     # POI sites
     def slope_of(h): gz, gx = np.gradient(h, STEP); return np.hypot(gx, gz)
     pois = []; taken = []
-    _g['bsm'] = []
+    _g['bsm'] = []; _g['rsm'] = []
     edge = np.minimum(np.minimum(X - xs[0], xs[-1] - X), np.minimum(Z - zs[0], zs[-1] - Z))
     Hr = H.copy(); RDECK = np.zeros_like(comp); RAMPZ = np.zeros_like(comp); PLAT = np.zeros_like(comp); ramp = None
     if cfg.get('ramp'):
         ramp, Hr, RAMPZ, PLAT, walk, RDECK = build_ramp(H, base, comp, walk, FP, dsh, si, X, Z, xs, zs, cd)
+        if ramp and ramp.get('decks'): _g['rsm'] = [(ramp, ndimage.binary_dilation(RDECK, iterations=2))]   # plateau stair: routed as one deck-chain edge too (stacked flights)
     if cfg.get('pier_stair'):   # built switchback from the pier head straight up the sea cliff to the lower shelf (no terrain reshaping)
-        r2, Hr, RD2 = pier_stair(Hr, base, sh, inl, float(Ld['shore'][1]), X, Z, xs, zs, hmin=cfg['pier_stair'][0])
+        AVB = []   # landing houses (Lucky's region props taller than 3 m): the tower and its top walk keep 1 m clear of them
+        for f_ in cfg.get('stair_avoid', []):
+            sc_ = trimesh.load(os.path.join(GA, f_)); g_ = sc_.to_geometry() if hasattr(sc_, 'to_geometry') else sc_
+            for pt_ in g_.split(only_watertight=False):
+                lo_, hi_ = pt_.bounds
+                if 3.0 < hi_[1] - lo_[1] < 12.0 and max(hi_[0] - lo_[0], hi_[2] - lo_[2]) < 14.0: AVB.append((lo_ - [0.3, 0, 0.3], hi_ + [0.3, 0, 0.3]))
+        r2, Hr, RD2 = pier_stair(Hr, base, sh, inl, float(Ld['shore'][1]), X, Z, xs, zs, hmin=cfg['pier_stair'][0], avoid=AVB or None)
+        if r2 is None and AVB:   # no fully clear spot: build the plain stair, then narrow any walk that grazes a house
+            r2, Hr, RD2 = pier_stair(Hr, base, sh, inl, float(Ld['shore'][1]), X, Z, xs, zs, hmin=cfg['pier_stair'][0], avoid=AVB, soft=True)
+            for e_ in (r2['decks'] if r2 else []):
+                while e_['w'] > 2.4 and _hb(e_, AVB): e_['w'] = round(e_['w'] - 0.2, 2)
+                if _hb(e_, AVB): print('  pier stair: deck still touches a house', [round(v) for v in e_['a']])
         if r2 is not None:
             RDECK = RDECK | RD2; RAMPZ = RAMPZ | ndimage.binary_dilation(RD2, iterations=3); walk = walk | RD2; ramp = ramp or {}; ramp['pier_stair'] = r2
     def _top(x, z): return float(max(ndimage.map_coordinates(base, [[(z - zs[0]) / STEP], [(x - xs[0]) / STEP]], order=1)[0], ndimage.map_coordinates(_g['colC'], [[(z - zs[0]) / STEP], [(x - xs[0]) / STEP]], order=1)[0]))
@@ -433,7 +477,7 @@ def build(k):
         okw &= ~(RDECK & (Hq < te[1] - 1.5)) & (dsh >= 4)
     okw &= ~((Hq < -0.3) & ~BR & ~RDECK)   # never route through the sea
     BSE = []
-    for rr, mk in _g['bsm']:   # bank stairs: one virtual edge foot -> top (the deck chain), none of its cells on the grid
+    for rr, mk in _g['bsm'] + _g['rsm']:   # bank stairs (+ the plateau stair): one virtual edge foot -> top (the deck chain), none of its cells on the grid
         ch = [q_ for d_ in rr['decks'] for q_ in (d_['a'], d_['b'])]
         cb = (int(round((ch[0][2] - zs[0]) / STEP)), int(round((ch[0][0] - xs[0]) / STEP))); ct = (int(round((ch[-1][2] - zs[0]) / STEP)), int(round((ch[-1][0] - xs[0]) / STEP)))
         ok0 = okw.copy(); okw &= ~(mk & ~BR); okw |= ok0 & (np.hypot(X - ch[-1][0], Z - ch[-1][2]) < 5.0) & (Hq > ch[-1][1] - 1.0); okw[cb] = True; okw[ct] = True; BSE.append((cb, ct, ch))
@@ -455,6 +499,14 @@ def build(k):
         if t < 0:   # centre disc is off the graph: aim at the nearest graph cell on the pad
             dd_ = np.where(okc2, np.hypot(X - p['pos'][0], Z - p['pos'][2]), 1e9); jj_ = np.unravel_index(np.argmin(dd_), dd_.shape)
             if dd_[jj_] < p['r'] + 2: t = nid2[jj_]
+        if t < 0 or not np.isfinite(d2[t]) or d2[t] > 4000:   # site only reachable over a steep step: move the POI to the nearest easily reached spot (<= 150 m away, same level: shelf or plateau)
+            dg_ = np.full(okc2.shape, np.inf); dg_[okc2] = d2[nid2[okc2]]
+            cand_ = (dg_ < 4000) & keep & (cd > 3) & ~ndimage.binary_dilation(FP, iterations=2) & (np.hypot(X - p['pos'][0], Z - p['pos'][2]) < 150) & ~ndimage.binary_dilation(RDECK, iterations=3) & (PLAT if p.get('top') else ~PLAT)
+            for q_ in pois:
+                if q_ is not p: cand_ &= np.hypot(X - q_['pos'][0], Z - q_['pos'][2]) > q_['r'] + p['r'] + 4
+            if cand_.any():
+                dd_ = np.where(cand_, np.hypot(X - p['pos'][0], Z - p['pos'][2]), 1e9); ij_ = np.unravel_index(np.argmin(dd_), dd_.shape)
+                print('  moved', p['name'], round(float(dd_[ij_]), 1), 'm to an easily reached spot'); p['ij'] = ij_; p['pos'][0] = float(X[ij_]); p['pos'][2] = float(Z[ij_]); t = nid2[ij_]
         if t < 0 or not np.isfinite(d2[t]) or d2[t] > 4000: print('  final route missing/hard for', p['name'], (float(d2[t]) if t >= 0 else 'nocell'), int(okw[p['ij']])); continue
         rt = []
         while t >= 0 and t != nid2[s0j, s0i]: rt.append(tuple(c2_[t])); t = pr2[t]

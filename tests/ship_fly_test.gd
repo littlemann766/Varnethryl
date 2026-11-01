@@ -62,7 +62,7 @@ func _run() -> void:
 	for i in 60: sea.drive(Vector2.ZERO, 1.0 / 60.0); await get_tree().physics_frame
 	if DisplayServer.get_name() != "headless": get_viewport().get_texture().get_image().save_png(out + "galleon_flying_side.png")
 	if OS.get_environment("SF_PROBE") != "":
-		var vs: Vector2 = get_viewport().get_visible_rect().size; var r := Rect2i(Vector2i(Vector2(430, 440) * vs / Vector2(1024, 576)), Vector2i(Vector2(60, 40) * vs / Vector2(1024, 576)))
+		var vs: Vector2 = Vector2(get_viewport().get_texture().get_image().get_size()); var r := Rect2i(Vector2i(Vector2(430, 440) * vs / Vector2(1024, 576)), Vector2i(Vector2(60, 40) * vs / Vector2(1024, 576)))
 		var base := get_viewport().get_texture().get_image().get_region(r)
 		var cnt := func(im: Image) -> int:
 			var n := 0

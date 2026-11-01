@@ -114,3 +114,41 @@ Tools: `tools/build_stage5.py [id ...]` (deterministic per id), `tools/render5.g
 
 ## Stage 7 — stairs, bank landings, snags
 Walk test 53/57, with Lucky's pier boards left out. New built pieces are in the manifest: `ramp.pier_stair` (Saltglass), and `bridges[].bank_stairs` plus `bridges[].path` (Beached Wreck, Ember Wreck). Before/after renders are in renders/small/sheet_*_stair*.jpg. Results are in walk_test_final.json.
+
+## Stage 9 — Saltglass dock lift + locked shortcut (stairs kept)
+(Named Stage 9 because the 8a-8d fix commits already used "Stage 8".) Robert didn't want to climb ~11 flights every time, so Saltglass now has two faster ways from the dock to the plateau top. The old pier stair and plateau stair are unchanged.
+
+**New files**
+- `meshes/B/coast_isl_saltglass_lift.glb`, `_lod1` (49.9%), `_glow`, `_col`: the static parts. `tw_sea.gd` auto-loads them by the `coast_` prefix, so no code change is needed for these. 6,672 tris, collider 1,416 tris.
+- `props/` (NOT auto-loaded; wire these in): `sg_lift.tscn` + `sg_lift.gd` + `sg_lift_platform.glb`, `sg_shortcut_gate.tscn` + `sg_shortcut_gate.gd` + `sg_shortcut_gate.glb` + `sg_lever.glb`, and `world_flags.gd`. The `.tscn` files expect the props at `res://tidewrack/stage2/props/`; change the paths if you put them elsewhere.
+- Builder: `tools/build_stage9_saltglass.py`. It writes `islands.saltglass.stage9` into the manifest (positions, flags and walk routes).
+
+**Layout (world m)**
+- Dock walkway: runs from the pier head north along x -2124.6, then east along z -76 to the gate landing (y 20.4).
+- **Shortcut ramp:** a switchback ramp tower in the water at x -2103.4..-2095.2, z -74..-46. It has 10 runs at **17.5°**, each 28 m long, with a turn landing after every run, rising 20.4 → 108.68 m. It has rails throughout and treads drawn on the ramps (the collider is a smooth slab).
+- Top landing (y 108.68, z -76), then an **80.7 m skybridge** WNW onto the plateau at (-2172, 107.2, -22). That point is about 14 m from the Clifftop Cache. The skybridge pillars miss every POI route by 9 m or more, and the landing houses too.
+- **Lift:** a shaft at (-2104, -82), right beside the ramp, running 20.4 → 108.68 (88.3 m) at 6 m/s, about 15 s per ride. Doors face north (+z) at both stops, with short connectors onto the gate landing and the top landing. It shares the top landing and skybridge with the ramp.
+
+**Lock (Dark Souls style)**
+- The **gate** is a portcullis at x -2100 across the gate landing, at the bottom of the ramp. It is locked from the dock side.
+- The **lever** at (-2097.6, 20.4, -77.4) is on the ramp side, so the player can only reach it by first climbing the stairs to the plateau, crossing the skybridge and walking down the ramp.
+- Pulling the lever raises the leaf 3.6 m into the gatehouse over 2.5 s and saves the flag **`saltglass_shortcut_open`**. On later loads the gate starts open.
+- From the dock side the prompt reads "Locked from the other side".
+- **Lift lock:** the lift uses its own flag, **`saltglass_lift_unlocked`**. Until that flag is saved, the lift parks at the TOP and the bottom call says "The lift is locked from above". Riding it down from the top once saves the flag, and after that it works from both ends. To make the lift always open, set `requires_flag = ""` on `SaltglassLift`. That's Robert's call.
+- Flags are stored by `WorldFlags` in `user://world_flags.cfg`. Point its two static funcs at your own save system if you have one.
+
+**Wiring (tw_sea.gd, `_walk`)**
+1. Instance both scenes under the B region root. The gate scene is already placed at (-2100, 20.4, -76). The lift places itself from its exports.
+2. Add one branch to the prompt chain, before the final `else`:
+   `var p: Array = lift.prompt_for(h.global_position); if p[0] == "": p = gate.prompt_for(h.global_position)`, then `ui.set_prompt(p[0], p[1])` when `p[0] != ""`.
+3. Nothing else is needed. The lift is an `AnimatableBody3D` with `sync_to_physics`, and your ashore capsule rides it with no input. During the ride `_stuck_t` stays at 0 because spd is 0, and `_air_t` stays at 0 because the hero is on the floor.
+
+**Walk test** (`tools/walk5.gd`, your ashore capsule, test-36 piers): **66/66 legs pass.** That is the 57 earlier legs plus 9 new Saltglass legs:
+- shortcut gate locked: the dock side is blocked by the gate, as it should be (counted as a pass when the walker can't get through)
+- shortcut down to the lever with the gate locked
+- shortcut up (unlocked) and shortcut down (unlocked), dock ↔ plateau
+- lift: dock to platform, ride up, top to plateau, plateau back to the platform, ride down
+
+The shortcut legs only run as passable after the test removes the gate collider (the unlocked state). Pier boards are still excluded; the same 6 fail as before (aurora, ember, hot_spring, obsidian, saltglass, vent). That is your board, not stage 9.
+
+**Renders:** `renders/small/saltglass_lift_shortcut_before_after_A/B/C.jpg` (left before, right after). A is from the sea, B is from above with the skybridge, and C is a close-up of the gate, lever and lift door.

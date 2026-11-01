@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://tidewrack/stage2/props/sg_lift.gd" id="1"]
+[ext_resource type="PackedScene" path="res://tidewrack/stage2/props/sg_lift_platform.glb" id="2"]
+
+[sub_resource type="BoxShape3D" id="b1"]
+size = Vector3(3.6, 0.3, 3.6)
+[sub_resource type="BoxShape3D" id="b2"]
+size = Vector3(3.6, 1.1, 0.12)
+[sub_resource type="BoxShape3D" id="b3"]
+size = Vector3(0.12, 1.1, 3.6)
+
+[node name="SaltglassLift" type="AnimatableBody3D"]
+script = ExtResource("1")
+
+[node name="Mesh" parent="." instance=ExtResource("2")]
+
+[node name="Deck" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+shape = SubResource("b1")
+
+[node name="RailS" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, -1.74)
+shape = SubResource("b2")
+
+[node name="RailW" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.74, 0.55, 0)
+shape = SubResource("b3")
+
+[node name="RailE" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.74, 0.55, 0)
+shape = SubResource("b3")

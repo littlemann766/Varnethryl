@@ -58,6 +58,21 @@ func walk(start: Vector3, pts: Array, goal: Vector3, goal_r: float) -> Dictionar
 			hits.append("%s n%s p%s" % [(co as Node).name if co is Node else "?", str(c.get_normal().snapped(Vector3(0.01, 0.01, 0.01))), str(c.get_position().snapped(Vector3(0.1, 0.1, 0.1)))])
 		if why != "": return {"hits": hits, "ok": false, "t": snappedf(t, 0.1), "why": why, "at": pos3(hero.global_position), "wp": wi, "of": pts.size()}
 	return {"ok": false, "t": snappedf(t, 0.1), "why": "timeout", "at": pos3(hero.global_position), "wp": wi, "of": pts.size()}
+func pv3(a: Array) -> Array:
+	var o := []
+	for q in a: o.append(v3(q))
+	return o
+func ride(body: AnimatableBody3D, to: Vector3, speed: float) -> Dictionary:   # player stands still on the moving platform (Lucky's ashore physics, no input)
+	var from := body.global_position; var dur := from.distance_to(to) / speed; var t := 0.0
+	while t < dur + 1.0:
+		await physics_frame
+		t += 1.0 / 60.0; body.global_position = from.lerp(to, clampf(t / dur, 0.0, 1.0))
+		hero.velocity.x = 0.0; hero.velocity.z = 0.0
+		hero.velocity.y = -1.0 if hero.is_on_floor() else hero.velocity.y - 20.0 / 60.0
+		hero.move_and_slide()
+		if absf(hero.global_position.y - body.global_position.y) > 2.5: return {"ok": false, "why": "left_platform", "t": snappedf(t, 0.1), "at": pos3(hero.global_position)}
+	var ok := hero.is_on_floor() and absf(hero.global_position.y - to.y) < 0.4 and Vector2(hero.global_position.x - to.x, hero.global_position.z - to.z).length() < 1.6
+	return {"ok": ok, "t": snappedf(t, 0.1), "at": pos3(hero.global_position), "why": "" if ok else "off_target"}
 func _initialize() -> void: _run.call_deferred()
 func _run() -> void:
 	var a := OS.get_cmdline_user_args(); var man: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(a[0])); var only: Array = a.slice(2)
@@ -71,6 +86,15 @@ func _run() -> void:
 		for f in DirAccess.get_files_at("res://tw/" + DIRS[reg]):
 			if f.begins_with(PRE[reg]) and f.ends_with("_col.glb") and not f.contains("storm"): add_col(ProjectSettings.globalize_path("res://tw/%s/%s" % [DIRS[reg], f]))
 		add_col("%s/meshes/%s/%s.glb" % [S5, reg, I.files.col])
+		var gate: StaticBody3D = null; var lift: AnimatableBody3D = null
+		if I.has("stage9"):   # stage 9 (Saltglass): lift + shortcut statics; the gate starts LOCKED, the lift platform parks at the bottom
+			add_col("%s/meshes/%s/%s.glb" % [S5, reg, I.stage9.files.col])
+			gate = StaticBody3D.new(); var gcs := CollisionShape3D.new(); var gbs := BoxShape3D.new(); gbs.size = v3(I.stage9.gate.size); gcs.shape = gbs; gate.add_child(gcs); space_root.add_child(gate)
+			gate.global_position = v3(I.stage9.gate.pos) + Vector3(0, gbs.size.y / 2, 0)
+			lift = AnimatableBody3D.new(); lift.sync_to_physics = true
+			for bx in [[Vector3(3.6, 0.3, 3.6), Vector3(0, -0.15, 0)], [Vector3(3.6, 1.1, 0.12), Vector3(0, 0.55, -1.74)], [Vector3(0.12, 1.1, 3.6), Vector3(-1.74, 0.55, 0)], [Vector3(0.12, 1.1, 3.6), Vector3(1.74, 0.55, 0)]]:
+				var lc := CollisionShape3D.new(); var lb := BoxShape3D.new(); lb.size = bx[0]; lc.shape = lb; lc.position = bx[1]; lift.add_child(lc)
+			space_root.add_child(lift); lift.global_position = v3(I.stage9.lift.bottom)
 		var L: Dictionary = man.landings[k]; pier(L)
 		for i in 3: await physics_frame
 		var ph := v3(L.shore) + Vector3(0, 0.8, 0); var inl := Vector3(L.inland[0], 0, L.inland[1]).normalized()
@@ -113,6 +137,25 @@ func _run() -> void:
 			out["stair up"] = await walk(st, pts, pts[-1], 1.5)
 			var rv := pts.duplicate(); rv.reverse()
 			out["stair down"] = await walk(rv[0] + Vector3(0, 0.8, 0), rv, rv[-1], 1.5)
+		if I.has("stage9"):
+			var R9: Dictionary = I.stage9.routes
+			var gr := await walk(ph, pv3(R9.dock_to_gate), pv3(R9.dock_to_gate)[-1], 1.0)   # must NOT get through while locked
+			out["shortcut gate locked (dock side blocked)"] = {"ok": not gr.ok, "walk": gr}
+			var dn := pv3(R9.shortcut_down_to_lever)
+			out["shortcut down to lever (gate locked)"] = await walk(dn[0] + Vector3(0, 0.8, 0), dn.slice(1), dn[-1], 1.0)
+			gate.queue_free(); for i in 3: await physics_frame   # lever pulled: gate open (persistent flag)
+			var upr := pv3(R9.shortcut_up)
+			out["shortcut up (unlocked)"] = await walk(ph, upr, upr[-1], 1.5)
+			var rv9 := upr.duplicate(); rv9.reverse(); rv9.append(ph)
+			out["shortcut down (unlocked)"] = await walk(rv9[0] + Vector3(0, 0.8, 0), rv9.slice(1), ph, 1.5)
+			var dl := pv3(R9.dock_to_lift)
+			out["lift: dock to platform"] = await walk(ph, dl, dl[-1], 0.6)
+			out["lift: ride up"] = await ride(lift, v3(I.stage9.lift.top), float(I.stage9.lift.speed))
+			var lp := pv3(R9.lift_to_plateau)
+			out["lift: top to plateau"] = await walk(hero.global_position, lp, lp[-1], 1.5)
+			var lr := lp.duplicate(); lr.reverse(); lr.append(v3(I.stage9.lift.top) + Vector3(0, 0.08, 0))
+			out["lift: plateau back to platform"] = await walk(lr[0] + Vector3(0, 0.8, 0), lr.slice(1), lr[-1], 0.6)
+			out["lift: ride down"] = await ride(lift, v3(I.stage9.lift.bottom), float(I.stage9.lift.speed))
 		res[k] = out; var nok := 0
 		for r in out.values(): nok += 1 if r.ok else 0
 		print("ISLAND %s %d/%d" % [k, nok, out.size()])

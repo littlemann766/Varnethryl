@@ -142,7 +142,9 @@ func _run() -> void:
 		C2.role_provider = func() -> String: return who
 		sea.ship.position = Vector3(open.x, 0, open.z); sea.ship.alt = 0.0; sea.ship.speed = 0.0
 		ok(C2.request("fly", true), "%s: fly cheat on at sea" % who)
-		m.fly_alt = 30.0; sail.call(300)
+		m.set_flight(false); m.fly_alt = 30.0; sail.call(120)
+		ok(sea.ship.alt == 0.0, "%s: fly cheat on but Fly not tapped -> ship stays on the sea (alt %.1f)" % [who, sea.ship.alt])   # test 37 boss bug
+		m.set_flight(true); sail.call(300)
 		ok(absf(sea.ship.alt - 30.0) < 0.5 and absf(sea.ship.global_position.y - sea.to_global(Vector3(0, 30, 0)).y) < 0.6, "%s: whole ship flies at fly_alt (alt %.1f)" % [who, sea.ship.alt])
 		ok(absf(sea.ship.rotation.x) < 0.001 and absf(sea.ship.rotation.z) < 0.001, "%s: flying ship stays level" % who)
 		ok(sea.ship.speed > 1.0 and Vector2(sea.ship.position.x - open.x, sea.ship.position.z - open.z).length() > 10.0, "%s: flying ship is steerable/moves" % who)
@@ -233,7 +235,7 @@ func _run() -> void:
 		crew_ok.call("galleon T%d sailing" % t)
 	var Cc: Cheats = m.cheats; var rpc: Callable = Cc.role_provider
 	Cc.role_provider = func() -> String: return "owner"
-	Cc.request("fly", true); m.fly_alt = 25.0
+	Cc.request("fly", true); m.set_flight(true); m.fly_alt = 25.0
 	for i in 300: sea.drive(Vector2(0.2, 0), 1.0 / 60.0)
 	crew_ok.call("galleon flying (alt %.0f)" % sea.ship.alt)
 	Cc.request("fly", false)

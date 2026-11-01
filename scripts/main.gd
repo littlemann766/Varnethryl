@@ -212,7 +212,7 @@ var jump_req := false
 var jump_count := 0
 var flight := false      # test 13: HUD ✈ toggles real flight; the menu "fly" cheat only unlocks the button
 var landing := false
-func flying_now() -> bool: return flight and bool(cheat.get("fly", false))
+func flying_now() -> bool: return flight and bool(cheat.get("fly", false)) and not (sea != null and sea.active and sea.ashore == "")   # test 37: aboard, Fly lifts the ship, not the hero
 ## test 26 (boss: Owner "standing on the water"): over the open sea the hero swims / treads water instead of walking.
 func in_sea(p: Vector3) -> bool:
 	if sea and sea.active: return false   # test 36 (boss: hero sank out of sight on the galleon): on deck / ashore never swims here
@@ -858,7 +858,7 @@ func _galleon_pier() -> Array:
 	if _pier_spot.is_empty():   # whichever side of the hull has the pier deck under it (ray onto the colliders)
 		var best := r.global_position + r.global_basis.x * 6.5; var by := -99.0
 		for sd in [1.0, -1.0]:
-			for dd in [5.0, 6.5, 8.0]:
+			for dd in [5.0, 6.5, 8.0, 10.0, 12.0, 14.0]:
 				var c: Vector3 = r.global_position + r.global_basis.x * (sd * dd); var q := PhysicsRayQueryParameters3D.create(c + Vector3(0, 20, 0), c - Vector3(0, 20, 0), 1)
 				var h := get_world_3d().direct_space_state.intersect_ray(q)
 				if h and h.position.y > by and h.position.y < 3.0 and not (h.collider in ships.map(func(x): return x[3])): by = h.position.y; best = h.position

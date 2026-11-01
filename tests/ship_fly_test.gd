@@ -43,7 +43,11 @@ func _run() -> void:
 	var fc: FlyControls = m.fly_controls
 	ok(not fc.jump_btn.is_visible_in_tree(), "sailing: no Jump on a ship")
 	ok(not sea.ui.charts_b.visible, "open sea: Charts hidden (not near a harbour)")
-	C.request("fly", true); m.fly_alt = 40.0
+	C.request("fly", true); m.fly_alt = 40.0   # test 37 (boss bug): the cheat only makes Fly available
+	for i in 120: sea.ship.throttle = 1.0; sea.drive(Vector2.ZERO, 1.0 / 60.0); await get_tree().physics_frame
+	ok(sea.ship.alt == 0.0 and not m.flight, "fly cheat on, Fly not tapped: ship sails at sea level (alt %.1f)" % sea.ship.alt)
+	ok(fc.fly_btn.is_visible_in_tree() and not fc.fly_btn.button_pressed, "fly cheat on: Fly button available, not pressed")
+	fc.fly_btn.button_pressed = true   # tap Fly
 	for i in 400: sea.ship.throttle = 1.0; sea.drive(Vector2.ZERO, 1.0 / 60.0); await get_tree().physics_frame
 	ok(sea.ship.alt > 30.0, "ship flying (alt %.1f)" % sea.ship.alt)
 	crew_check("flying")
@@ -83,7 +87,11 @@ func _run() -> void:
 	m.yaw = sea.ship.heading + PI
 	for i in 60: sea.drive(Vector2.ZERO, 1.0 / 60.0); await get_tree().physics_frame
 	if DisplayServer.get_name() != "headless": get_viewport().get_texture().get_image().save_png(out + "galleon_flying_behind.png")
+	fc.fly_btn.button_pressed = false   # tap Fly again over open water -> lands back on the sea
+	sea.ship.position = Vector3(open.x, sea.ship.alt, open.z); sea.ship.speed = 0.0; sea.ship.throttle = 0.0
+	for i in 600: sea.drive(Vector2.ZERO, 1.0 / 60.0); fc.step(1.0 / 60.0)
+	ok(not m.flight and sea.ship.alt == 0.0, "tap Fly again: ship lands back on the water (alt %.1f)" % sea.ship.alt)
 	C.request("fly", false)
-	sea.ship.position = an + Vector3(40, 0, 0); sea.ship.alt = 0.0; sea.ship.speed = 0.0; await frames(5)
+	sea.ship.position = an + Vector3(40, 0, 0); sea.ship.alt = 0.0; sea.ship.speed = 0.0; await frames(5); for i in 3: await get_tree().process_frame
 	ok(sea.ui.charts_b.visible, "near Gullhaven harbour on the water: Charts shown")
 	print("SF DONE pass=%d fail=%d" % [npass, nfail]); get_tree().quit(0 if nfail == 0 else 1)

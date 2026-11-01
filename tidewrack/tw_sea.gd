@@ -310,7 +310,7 @@ func cam_dist() -> float: return 24.0 if ship and ship.kind == "galleon" else 11
 const SHIP_FLY_MIN := 14.0
 const SHIP_FLY_MAX := 300.0
 func ship_flying() -> bool:
-	var ch = m.get("cheats"); return ch != null and bool(ch.flags.get("fly", false)) and in_cave == "" and not diving
+	var ch = m.get("cheats"); return ch != null and bool(ch.flags.get("fly", false)) and bool(m.get("flight")) and in_cave == "" and not diving   # test 37 (boss): the ship flies only when Fly is tapped (main.flight), not whenever the Owner has the Fly cheat unlocked
 func over_water(p: Vector2) -> bool: return shore_m(p) >= 8.0
 func _fly_step(dt: float) -> void:
 	var ch = m.get("cheats")

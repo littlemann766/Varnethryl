@@ -13,7 +13,8 @@ Files: `fit/armor_attach.json` (22 playable heroes x 14 parts), `fit/companion_a
 Selectors use each vertex's REST model-space position and its dominant bone. Remove the triangles that touch a selected vertex (rebuild the index array once at equip time; restore the original mesh on unequip). Reference implementation: `tools/godot/dress.gd` `hide_verts()`.
 - `helmet_full` (plate great helms): head verts above the eye line + anything above the head top (hair, hats).
 - `helmet_open` (coif/sallet/hood/circlet): hair crown + anything above the head top; the face stays.
-- `boots`: foot verts.  `cloak`: all cape* bone verts.  `baked_weapon`: hand verts outside a keep-sphere around the fist.
+- `boots`: foot verts.
+- `robe_hem` (apply whenever legs OR boots are equipped): removes skirt/tabard/robe verts below knee+6 cm that are farther than `keep_radius` from the leg bones (`skirt` selector: point-to-segment distance against the 4 leg segments). Greaves are now full-shin and solid with a knee rim/cop, so the armour reads below every robe.  `cloak`: all cape* bone verts.  `baked_weapon`: hand verts outside a keep-sphere around the fist.
 
 ## Built-in (baked) weapons — list for Lucian
 These rigs have a weapon modelled into the hand mesh, which doubles up with an equipped main_hand/off_hand. The `baked_weapon` hide rule removes it at runtime; Lucian may prefer to split it into its own mesh/bone in the rig:

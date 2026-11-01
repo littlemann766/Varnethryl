@@ -57,7 +57,15 @@ func hide_verts(sk,rules):
 				var rp=sk.get_bone_global_rest(sk.find_bone(bone_name))*skin.get_bind_pose(best)*V[vi]
 				for r in rules:
 					if not (bone_name in r["bones"]): continue
-					if r.has("sphere_keep"):
+					if r.has("skirt"):
+						var sk_=r["skirt"]
+						if rp.y<sk_["below_y"]:
+							var dm=1e9
+							for L in sk_["legs"]:
+								var a=Vector3(L[0][0],L[0][1],L[0][2]); var b=Vector3(L[1][0],L[1][1],L[1][2]); var ab=b-a
+								var tt=clamp((rp-a).dot(ab)/ab.length_squared(),0.0,1.0); dm=min(dm,rp.distance_to(a+ab*tt))
+							if dm>sk_["keep_radius"]: hid[vi]=1
+					elif r.has("sphere_keep"):
 						var c=r["sphere_keep"]["center"]
 						if rp.distance_to(Vector3(c[0],c[1],c[2]))>r["sphere_keep"]["radius"]: hid[vi]=1
 					elif r["aabb"]==null: hid[vi]=1
@@ -158,6 +166,8 @@ func run(j):
 		if slot=="helmet": rules+=A["hide"]["helmet_full" if fam in ["plate"] else "helmet_open"]
 		if slot=="cloak": rules+=A["hide"]["cloak"]
 		if slot=="boots": rules+=A["hide"]["boots"]
+		if slot in ["boots","legs"] and j.get("robe_hem",false) and not ("robe_hem" in j.get("_done",[])):
+			rules+=A["hide"]["robe_hem"]; j["_done"]=j.get("_done",[])+["robe_hem"]
 	if j.get("weapon",""):
 		rules+=A["hide"]["baked_weapon"]
 		var g=gear_attach[h]["slots"]

@@ -68,6 +68,11 @@ def fit(h):
     out["hide"]["cloak"]=[{"bones":[b for b in B if b.startswith("cape")],"aabb":None,"why":"hero's built-in cape replaced by the cloak"}]
     out["hide"]["boots"]=[{"bones":["foot_L","foot_R"],"aabb":None,"why":"bare feet/shoes inside boots"}]
     out["hide"]["gloves"]=[]
+    # robe/tabard hem: skirt verts below the knee that sit away from the leg core, so greaves + sabatons show
+    kn=float((B["shin_L"][:3,3][1]+B["shin_R"][:3,3][1])/2); rs=max(limb_info(B,S,dom,"shin_L","foot_L")[4],limb_info(B,S,dom,"shin_R","foot_R")[4])
+    legs=[[[round(float(x),4) for x in B[a+s][:3,3]],[round(float(x),4) for x in B[b+s][:3,3]]] for s in ("_L","_R") for a,b in (("thigh","shin"),("shin","foot"))]
+    skb=sorted(set(dom.tolist())-{"foot_L","foot_R","toe_L","toe_R","hand_L","hand_R","foreArm_L","foreArm_R","head","neck"})
+    out["hide"]["robe_hem"]=[{"bones":[b for b in skb if not b.startswith("cape")],"skirt":{"below_y":round(kn+0.06,3),"legs":legs,"keep_radius":round(rs+0.045,3)},"why":"shorten robe/tabard skirt at the knee when leg armour (legs or boots) is worn"}]
     # baked weapons: hand verts far from the fist
     bw=[]
     for s in ("R","L"):

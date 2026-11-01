@@ -149,7 +149,7 @@ def leg(fam,r,side):
     """cuisse on the thigh + knee cop; ref thigh 0.40 m (33 vox), radius 0.075 m. pivot = hip joint (top)."""
     i=RARITIES.index(r); p=pal(fam,r); L=36; v=V(26,26,L+6); cx=cy=12.5
     m=v.c(p['metal'] if fam in("plate","scale","chain") else p['leather'] if fam=="leather" else p['cloth']); tr=v.c(p['trim']); ed=v.c(p['edge'])
-    zt=L+2; tube(v,cx,cy,4,zt-2,6.0,6.0,m)
+    zt=L+2; tube(v,cx,cy,4,zt-2,0.01,0.01,m,8.0)
     if fam in("plate","scale"): 
         for z in range(8,zt-2,6): tube(v,cx,cy,z,z,6.0,6.0,ed if i<2 else tr,2)
         v.ball(cx,cy-6,4,4.2+0.2*i,m,(1,0.7,1)); v.ball(cx,cy-8,4,1.6,tr if i>=2 else ed)   # knee cop
@@ -168,8 +168,11 @@ def boot_shin(fam,r,side):
     """greave on lower shin; ref shin 0.40 m (33 vox), radius 0.06 m. pivot = knee (top)"""
     i=RARITIES.index(r); p=pal(fam,r); L=34; v=V(24,24,L+6); cx=cy=11.5
     m=v.c(p['metal'] if fam in("plate","scale") else p['leather'] if fam in("leather","chain") else p['cloth']); tr=v.c(p['trim']); ed=v.c(p['edge'])
-    zt=L+2; top=int(zt-L*0.45)
-    tube(v,cx,cy,2,top,4.8,4.8,m); tube(v,cx,cy,top-2,top,5.6+0.3*i,5.6+0.3*i,ed if i<2 else tr,1)  # cuff
+    zt=L+2; top=zt-1
+    tube(v,cx,cy,2,top,0.01,0.01,m,6.6)   # solid greave, full shin (shows under shortened robes)
+    for z in range(top-3,top+1): tube(v,cx,cy,z,z,0.01,0.01,ed if i<2 else tr,7.0+0.3*i)  # knee rim
+    if fam in("plate","scale"): v.ball(cx,cy-6,top-2,3.6+0.25*i,m,(1,0.7,1)); v.ball(cx,cy-8,top-2,1.4,tr if i>=2 else ed)  # knee cop
+    else: tube(v,cx,cy,int(zt-L*0.45)-1,int(zt-L*0.45),0.01,0.01,v.c(p['leather']) if fam!="leather" else tr,6.9)
     if fam in("plate","scale") and i>=2: v.box(int(cx),int(cx)+1,int(cy)-7,int(cy)-7,4,top,tr)
     if i>=3: spike(v,(cx,cy-7,top-2),(0,-1,0.6),2+i,tr)
     return finish(v,fam,p,i,61+i),VS,(cx+0.5,cy+0.5,zt)

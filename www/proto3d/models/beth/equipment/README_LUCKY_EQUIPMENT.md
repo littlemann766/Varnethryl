@@ -92,5 +92,5 @@ Mount: copy/merge `www/proto3d/models/beth/equipment/` to `res://equipment/` (an
 ## Known gaps / next art
 - Weapons use the phase-2 family meshes (T1/T2/T3) for 6 rarities; named weapons use the T3 mesh as a placeholder. Dedicated legendary/masterwork and named meshes are next.
 - Cloak now binds to the cape bones (polish 2).
-- Robed/tabard heroes (aldric, seraphine, rowan, thorne, mirelle, selene, …) hide part of the leg pieces under their skirts; it reads fine, but a "robe" hide rule would be the next step if the boss wants plate legs to show.
+- Robed/tabard heroes: `hide.robe_hem` shortens the skirt at the knee when legs/boots are worn (polish 3).
 - Class items, artifacts, gems, runes and materials have 2D icons only (no world mesh).

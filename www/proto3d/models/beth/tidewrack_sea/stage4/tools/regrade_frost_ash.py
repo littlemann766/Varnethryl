@@ -4,6 +4,7 @@ Ash: flat uniform grey becomes warm ash sand on the flats and dark basalt on the
 Originals are copied to ../meshes_v1_backup/. Usage: python3 regrade_frost_ash.py <meshes_dir>"""
 import sys, os, glob, shutil, numpy as np, trimesh
 D = sys.argv[1]; BK = os.path.join(D, '..', 'meshes_v1_backup'); os.makedirs(BK, exist_ok=True)
+# NOTE: an existing <name>_v1_backup.glb is treated as the source; delete it first if the live file changed after that backup was made (fix 8a lod1s).
 def ss(a, b, x): t = np.clip((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t)
 def noise(p, f): return (np.sin(p[:, 0] * f + 1.7) * np.cos(p[:, 2] * f * 1.13 - 0.4) + 0.5 * np.sin((p[:, 0] - p[:, 2]) * f * 2.3 + p[:, 1] * f)) / 1.5
 def grade(g, kind, xf):

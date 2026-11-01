@@ -65,3 +65,54 @@ Load them like `set_tier()` does, for example a `TwShip.addons` array attached u
 6. **Giving out boat materials.** Ship upgrades already read `sea.items` with display-name keys ("Driftwood", "Coil Scale", "Saltglass", "Stormsilk Bolt", "Glasswyrm Shard"). Every material item that feeds the Shipwright has `sea_item_key`. When one is picked up, also add it to `state.sea.items[sea_item_key]`, or switch `upgrade()` to read the shared inventory (only one source of truth, please). The **Brinecrown Coil** and **Glasswyrm** entries in `drop_tables.json` supply Coil Scale, Stormsilk Bolt and Glasswyrm Shard. Driftwood comes from chests, the Shipwright and beach pickups (`pickups/driftwood.glb`). Without these, T2 and T3 can't be reached.
 7. **New ship add-ons** (`ship_addon` items): buy them at the Shipwright using `cost_items`. Copper Hull needs `requires_item` = the plans from the Scorched Chest. Effects are in `stats` (shallows damage -50%, ram damage, oar burst 20 s, lantern +50% night range).
 8. **Inventory UI.** A grid using `icons/<id>.png` (frames are baked in), sorted by slot, showing count and sell value on tap. The phone layout needs a 4-column grid with 72 px tiles.
+
+---
+
+# Loot phase 2 (Beth): gear, fuller drops, shops
+
+New files (copy the whole `loot/` folder to `res://loot/` as before):
+
+| Path | What |
+|---|---|
+| `gear/gear.json` | 72 equippable items: id, name, slot, family, tier (1 common / 2 rare / 3 epic), stats, value, sell (30%), icon, mesh, mesh_lod1, `heroes` (which heroes can wear it), tris, size. `hero_classes` maps each hero to weapon family, hand(s), armor weight and shield. |
+| `gear/gear_attach.json` | Per hero, per slot: `bone`, `position`, `rotation` (quaternion xyzw), `scale`, all bone-local. Computed from each hero's skinned rest pose in `res://voxel/<id>_voxel.glb` (Lucian's rigs were not edited). |
+| `gear/meshes/<id>.glb` + `_lod1` | One mesh per item. Origin = attach pivot: weapons at the grip (blade/shaft along +Y), helmets at the shell centre, chest pieces at 62% of torso height, shields at the handle, rings at the band centre, amulets at the top of the chain, collars at the ring centre. Front faces +Z. Vertex colours (COLOR_0) + one emissive material (`vox_glow`), same as phase 1. |
+| `gear/icons/<id>.png` | 256 px icons with the rarity frame and tier pips baked in. |
+| `drop_tables.json` | v2: replaces v1 (same keys, plus `holyknight_villain`). |
+| `shops.json` | 7 shops: stock, buy/sell, restock rules, rotating stock, services. Replaces the `shops` block in `items.json` (leave that block unused). |
+| `merchants/merchant_<type>.glb` + `_lod1` | smith, provisioner, shipwright, apothecary. Two nodes, `<type>_body` and `<type>_arm_R` (pivot at the shoulder). One looping animation, **`idle`** (smith hammers, 1.2 s; the others gesture, 3 s). About 1.8 m tall, front +Z. |
+| `merchants/stall_<type>.glb` + `_lod1` | The matching stall (anvil and forge, canopy market stall, timber and rope yard, canopy and bottle shelves). About 3.2 x 2.0 m, counter at the front (+Z). |
+| `merchants/PLACEMENT_merchants.json` | World positions and yaw for the 7 exterior stalls and their NPCs. |
+| `PRICING_SANITY.md` | Prices against the 5-gold toll and a 10-gold day wage, plus kills needed per tier. |
+
+## Gear wiring
+1. **Load.** Add `gear.json` to the `Loot` autoload next to `items.json`. Each gear id is an inventory item (stack 1). Save the equipped set per hero: `state.equipped[hero_id] = {slot: gear_id}`, using the slots `weapon, weapon_offhand, head, chest, shield, ring, trinket, collar`.
+2. **Who can equip what.** Only allow `item.heroes.has(hero_id)`. Dual-wielders (nyx daggers, asha cestus) put the same item in `weapon` and `weapon_offhand`. Wren uses a single dagger. Pip and Phoenix only take `collar`.
+3. **Showing it on the model.** On equip, for each slot in `gear_attach.json.heroes[hero_id].slots` add a `BoneAttachment3D` (bone_name = `bone`) under the hero's Skeleton3D, with a child holding the mesh: `transform = Transform3D(Basis(Quaternion(rotation[0],rotation[1],rotation[2],rotation[3])) * Basis.from_scale(Vector3(scale)), Vector3(position))`. Use `mesh_lod1` on the Low tier, like `apply_quality()` does. `weapon_offhand` reuses the weapon mesh. The ring and trinket share the hand_R and chest bones.
+   - Cedric's lute attaches to `chest` (slung on his back). Move it to `hand_R` with the weapon transform from the `weapon_offhand` math if you want it in hand while strumming.
+   - Chest pieces are rigid shells on the `chest` bone with non-uniform scale fitted to each torso. Turn on cape_clamp or leave the cloth as is; capes stay outside them.
+   - **Baked weapons.** Some voxel heroes already have a weapon in their mesh (Darius's sword shows in the sheets). While a gear weapon is equipped, either hide it (needs a weaponless variant from Lucian, which I didn't touch) or skip the gear weapon mesh for those heroes and only apply its stats.
+4. **Stats.** Weapon `atk` maps onto `base_item` atk. Head, chest and shield `def` add together. Extra keys: `crit_pct`, `on_hit` (bleed, burn_3s, frost_slow, stagger, pierce, shock, snare, riposte, mp_on_hit, party_atk_5pct), `skill_pct`, `aura_heal`, `mp_pct`, `mp_regen_pct`, `dodge_pct`, `speed_pct`, `poise`, `*_res_pct`, `block_pct`, `hp_regen`, `revive_once_per_day`, `atk_pct`, `companion_hp_pct`, `companion_atk_pct`. Anything you don't support yet can be ignored, because atk and def carry the balance.
+5. **Legacy items.** The phase 1 weapons and armour in `items.json` (rusted_shortsword ... ashwalker_mail, iron_buckler) stay as loot. Treat them as "any hero" gear in the `weapon`/`chest`/`shield` slots that shows no mesh (stats only), or sell-only.
+
+## Drop wiring (drop_tables.json v2)
+- Entry types: `{item, chance_pct, count}` (from `items.json`), `{gear_tier, chance_pct, slot?, for_party}`, and `{rarity, chance_pct}`.
+- For `gear_tier`, pick a random `gear.json` item of that tier (and slot, if one is given) whose `heroes` includes someone in the current party. Re-roll up to 3 times toward heroes the player owns.
+- `choice_of` on bosses (vaelthryx, hydra, titan) now means 3 T3 gear pieces for the party, shown in the pick-1-of-3 panel.
+- `first_kill`, `repeat` and `gold_repeat` work as before. Add the pity counters from `pity`: normal enemies guarantee a T1 gear drop after 40 kills without one, and elites guarantee a T2 after 15. Save them in `state.loot_pity`.
+- `holyknight_villain` has its own entry. enemy.gd uses raider data for it, so key the drops by `type_id`.
+- The gear pickup is `pickups/drop_bag.glb` with the rarity beam, like phase 1.
+
+## Shop wiring (shops.json)
+- **NPCs.** Spawn each exterior stall and NPC from `merchants/PLACEMENT_merchants.json`. A `y` of null means snap to the ground at (x, z). The NPC sits at `npc.local_offset` in the stall frame, plays `idle` on loop, and shows a "Trade" prompt within 2.5 m.
+  - The town positions are the card2 building fronts from the DEFS in `main.gd`, plus about 2.5 m.
+  - The Saltglass stall is on the west cove quay next to the harbormaster hut.
+  - Gullhaven is 8 m inland of the pier head, where `tw_sea.gd` already opens the Shipwright. Put the NPC on that prompt.
+  - Frostreach and Vent Harbour use their dock props. Snap them to walkable ground within 8 m, and check them in a shot, because I could not walk-test them.
+- **Buy and sell.** The buy price is `stock[].buy`, already including the shop markup: 1.0 in town, 1.15 at Saltglass, 1.25 at Frostreach and Vent. When the player sells, the merchant pays `floor(value * sell_pct[slot or '*'] / 100)`, at least 1. That is 25-40% depending on the shop's trade. Key and legendary items can't be sold. T3 gear is never stocked but can be sold.
+- **Restock.** `daily` refills to `qty` at in-game dawn, `weekly` every 7 in-game days, and `once` never refills. Each `rotating` block picks `slots` random ids from `pool` each period at the listed `prices`. Buyback: whatever the player sold stays buyable at the price they got until the next dawn.
+- **Services.** The blacksmith repairs at 5% of value and forges at 50 x level + forge shards. Ship tiers stay in `tw_sea.gd` COST, unchanged.
+- **Interiors (yours).** If you'd rather run the town shops inside, put the same merchant mesh behind the interior counter of smithy, market and apothecary, about 1.0 m behind the counter front and facing the door. Use the shop id from `shops.json` (`town_blacksmith`, `town_provisioner`, `town_apothecary`) and drop the matching exterior stall. I didn't touch any interior file.
+
+## Phase 2 LOD (lod1 / High tris)
+All 72 gear meshes are at or under 50% (range 24-43%). Merchants are 25-29%, and stalls 26-28%. Per-item figures are in `gear.json` (`tris`).

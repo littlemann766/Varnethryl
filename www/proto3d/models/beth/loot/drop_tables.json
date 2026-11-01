@@ -1,0 +1,481 @@
+{
+ "_note": "PROPOSED values. Gold rolled once per kill (inclusive range). Keys match combat_data.json ENEMIES ids / Enemy.type_id.",
+ "enemies": {
+  "wolf": {
+   "name": "Wild Wolf",
+   "gold": [
+    0,
+    0
+   ],
+   "drops": [
+    {
+     "item": "wolf_pelt",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "wolfpelt_cloak",
+     "chance_pct": 2,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "raider": {
+   "name": "Hobgoblin Raider",
+   "gold": [
+    2,
+    8
+   ],
+   "drops": [
+    {
+     "item": "hob_tusk",
+     "chance_pct": 40,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "minor_healing_draught",
+     "chance_pct": 15,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "rusted_shortsword",
+     "chance_pct": 8,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "hob_enforcer": {
+   "name": "Hobgoblin Enforcer",
+   "gold": [
+    10,
+    25
+   ],
+   "drops": [
+    {
+     "item": "hob_tusk",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "hob_cleaver",
+     "chance_pct": 6,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "iron_ore",
+     "chance_pct": 30,
+     "count": [
+      2,
+      2
+     ]
+    }
+   ]
+  },
+  "wraith": {
+   "name": "Vine Wraith",
+   "gold": [
+    3,
+    10
+   ],
+   "drops": [
+    {
+     "item": "healing_potion",
+     "chance_pct": 10,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "pilgrim_s_token",
+     "chance_pct": 1,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "skeleton": {
+   "name": "Ash Skeleton",
+   "gold": [
+    10,
+    25
+   ],
+   "drops": [
+    {
+     "item": "ash_ember",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "cinderbrand",
+     "chance_pct": 0.5,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "cooling_salve",
+     "chance_pct": 15,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "frosttroll": {
+   "name": "Frost Troll",
+   "gold": [
+    60,
+    100
+   ],
+   "drops": [
+    {
+     "item": "troll_hide",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "rime_shard",
+     "chance_pct": 100,
+     "count": [
+      2,
+      2
+     ]
+    },
+    {
+     "item": "rimebite_axe",
+     "chance_pct": 5,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "rimewarden_plate",
+     "chance_pct": 3,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "stonetroll": {
+   "name": "Stone Troll",
+   "note": "enemy.gd maps stonetroll to frosttroll data; key drops by type_id",
+   "gold": [
+    60,
+    100
+   ],
+   "drops": [
+    {
+     "item": "troll_hide",
+     "chance_pct": 100,
+     "count": [
+      2,
+      2
+     ]
+    },
+    {
+     "item": "iron_ore",
+     "chance_pct": 100,
+     "count": [
+      4,
+      4
+     ]
+    },
+    {
+     "item": "troll_bone_maul",
+     "chance_pct": 3,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "frosttroll_a": {
+   "name": "Frost Troll A (Elder Brother)",
+   "gold": [
+    150,
+    150
+   ],
+   "first_kill": [
+    {
+     "item": "rimehollow_key",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ],
+   "drops": [
+    {
+     "item": "rime_shard",
+     "chance_pct": 100,
+     "count": [
+      5,
+      5
+     ]
+    },
+    {
+     "item": "troll_bone_maul",
+     "chance_pct": 15,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "rimewarden_plate",
+     "chance_pct": 20,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "frosttroll_b": {
+   "name": "Frost Troll B (Younger Brother)",
+   "gold": [
+    150,
+    150
+   ],
+   "first_kill": [
+    {
+     "item": "rimehollow_key",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ],
+   "drops": [
+    {
+     "item": "rime_shard",
+     "chance_pct": 100,
+     "count": [
+      5,
+      5
+     ]
+    },
+    {
+     "item": "troll_bone_maul",
+     "chance_pct": 15,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "rimewarden_plate",
+     "chance_pct": 20,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "coil": {
+   "name": "Brinecrown Coil (sea boss)",
+   "gold": [
+    400,
+    400
+   ],
+   "drops": [
+    {
+     "item": "coil_scale",
+     "chance_pct": 100,
+     "count": [
+      6,
+      6
+     ]
+    },
+    {
+     "item": "stormsilk_bolt",
+     "chance_pct": 25,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ],
+   "note": "Give materials into sea.items (tw_sea save) using item.sea_item_key"
+  },
+  "glasswyrm": {
+   "name": "Glasswyrm (cave boss)",
+   "gold": [
+    600,
+    600
+   ],
+   "drops": [
+    {
+     "item": "glasswyrm_shard",
+     "chance_pct": 100,
+     "count": [
+      3,
+      3
+     ]
+    },
+    {
+     "item": "stormsilk_bolt",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "saltglass_spear",
+     "chance_pct": 30,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ]
+  },
+  "vaelthryx": {
+   "name": "Balthrix the Crystal Sovereign",
+   "gold": [
+    800,
+    800
+   ],
+   "choice_of": {
+    "rarity": "epic",
+    "count": 3
+   },
+   "drops": [
+    {
+     "rarity": "legendary",
+     "chance_pct": 5
+    }
+   ]
+  },
+  "hydra": {
+   "name": "Five-Headed Hydra",
+   "gold": [
+    800,
+    800
+   ],
+   "choice_of": {
+    "rarity": "epic",
+    "count": 3
+   },
+   "drops": [
+    {
+     "rarity": "legendary",
+     "chance_pct": 5
+    }
+   ]
+  },
+  "titan": {
+   "name": "Ashen Titan (world boss)",
+   "aliases": [
+    "titan40",
+    "titan_volcano"
+   ],
+   "gold": [
+    1500,
+    1500
+   ],
+   "gold_repeat": [
+    300,
+    300
+   ],
+   "first_kill": [
+    {
+     "item": "titan_magma_core",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "titan_s_brand",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "titanheart_greatblade",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ],
+   "repeat": [
+    {
+     "item": "titan_magma_core",
+     "chance_pct": 100,
+     "count": [
+      1,
+      1
+     ]
+    },
+    {
+     "item": "titanheart_greatblade",
+     "chance_pct": 3,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ],
+   "drops": [
+    {
+     "rarity": "epic",
+     "chance_pct": 100
+    },
+    {
+     "item": "ember_core_amulet",
+     "chance_pct": 10,
+     "count": [
+      1,
+      1
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,966 @@
+{
+ "_note": "Beth loot plan v1. All numbers are PROPOSED values for tuning. Currency = existing save key `gold`.",
+ "starting_gold": 100,
+ "shop_buyback_pct": 25,
+ "rarity": {
+  "common": {
+   "color": "#9a9a9a",
+   "weight": 60,
+   "sell_mult": 1
+  },
+  "uncommon": {
+   "color": "#4caf50",
+   "weight": 28,
+   "sell_mult": 2.5
+  },
+  "rare": {
+   "color": "#3d7fe0",
+   "weight": 9,
+   "sell_mult": 6
+  },
+  "epic": {
+   "color": "#9b4de0",
+   "weight": 2.7,
+   "sell_mult": 15
+  },
+  "legendary": {
+   "color": "#e0a526",
+   "weight": 0.3,
+   "sell_mult": null
+  },
+  "key": {
+   "color": "#c9b48a",
+   "weight": 0,
+   "sell_mult": null
+  }
+ },
+ "ship_tiers_existing": {
+  "note": "Already in tw_sea.gd COST; unchanged",
+  "1": [
+   400,
+   {
+    "Driftwood": 10
+   }
+  ],
+  "2": [
+   1500,
+   {
+    "Coil Scale": 6,
+    "Saltglass": 4
+   }
+  ],
+  "3": [
+   4000,
+   {
+    "Stormsilk Bolt": 1,
+    "Glasswyrm Shard": 3
+   }
+  ]
+ },
+ "shops": {
+  "smithy": {
+   "where": "town plaza",
+   "stock": [
+    "rusted_shortsword",
+    "iron_longsword",
+    "ash_oak_longbow",
+    "steel_warhammer",
+    "padded_gambeson",
+    "leather_jerkin",
+    "ringmail_hauberk",
+    "brigandine",
+    "iron_buckler",
+    "whetstone"
+   ],
+   "services": {
+    "repair_pct_of_price": 5,
+    "forge_level_cost": "50*level gold + shards"
+   }
+  },
+  "apothecary": {
+   "where": "town",
+   "stock": [
+    "minor_healing_draught",
+    "healing_potion",
+    "warming_tonic",
+    "cooling_salve",
+    "elixir_of_the_deep_hearth",
+    "pilgrim_s_token"
+   ]
+  },
+  "inn": {
+   "where": "town (bakery/inn)",
+   "stock": [
+    "bread_cheese"
+   ],
+   "services": {
+    "rest_gold": 10
+   }
+  },
+  "shipwright": {
+   "where": "Gullhaven",
+   "stock": [
+    "driftwood",
+    "oar_bank",
+    "ship_s_lantern",
+    "copper_hull_sheathing",
+    "bronze_ram_prow"
+   ],
+   "services": {
+    "ship_tiers": true
+   }
+  },
+  "harbormaster": {
+   "where": "Saltglass west cove hut",
+   "stock": [
+    "saltglass",
+    "diver_s_breath_flask",
+    "saltglass_spear",
+    "harbour_charts"
+   ]
+  },
+  "frostreach_trader": {
+   "where": "Frostreach Ice Dock",
+   "stock": [
+    "warming_tonic",
+    "iron_ore"
+   ],
+   "rotating_weekly": [
+    "rimewarden_plate",
+    "rimebite_axe"
+   ]
+  }
+ },
+ "items": [
+  {
+   "id": "rusted_shortsword",
+   "name": "Rusted Shortsword",
+   "slot": "weapon",
+   "kind": "sword",
+   "rarity": "common",
+   "stats": {
+    "atk": 12
+   },
+   "buy": 25,
+   "sell": 6,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/rusted_shortsword.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "iron_longsword",
+   "name": "Iron Longsword",
+   "slot": "weapon",
+   "kind": "sword",
+   "rarity": "common",
+   "stats": {
+    "atk": 20
+   },
+   "buy": 80,
+   "sell": 20,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/iron_longsword.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "hob_cleaver",
+   "name": "Hob Cleaver",
+   "slot": "weapon",
+   "kind": "axe",
+   "rarity": "uncommon",
+   "stats": {
+    "atk": 28,
+    "stagger_pct": 5
+   },
+   "buy": null,
+   "sell": 45,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/hob_cleaver.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "ash_oak_longbow",
+   "name": "Ash Oak Longbow",
+   "slot": "weapon",
+   "kind": "bow",
+   "rarity": "uncommon",
+   "stats": {
+    "atk": 26,
+    "range_pct": 15
+   },
+   "buy": 220,
+   "sell": 55,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/ash_oak_longbow.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "steel_warhammer",
+   "name": "Steel Warhammer",
+   "slot": "weapon",
+   "kind": "hammer",
+   "rarity": "uncommon",
+   "stats": {
+    "atk": 34,
+    "poise_bonus": true,
+    "slow": true
+   },
+   "buy": 260,
+   "sell": 65,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/steel_warhammer.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "saltglass_spear",
+   "name": "Saltglass Spear",
+   "slot": "weapon",
+   "kind": "spear",
+   "rarity": "rare",
+   "stats": {
+    "atk": 42,
+    "crit_pct": 10
+   },
+   "buy": 900,
+   "sell": 225,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/saltglass_spear.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "rimebite_axe",
+   "name": "Rimebite Axe",
+   "slot": "weapon",
+   "kind": "axe",
+   "rarity": "rare",
+   "stats": {
+    "atk": 46,
+    "on_hit": "frost_slow"
+   },
+   "buy": null,
+   "sell": 300,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/rimebite_axe.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "troll_bone_maul",
+   "name": "Troll-bone Maul",
+   "slot": "weapon",
+   "kind": "hammer",
+   "rarity": "epic",
+   "stats": {
+    "atk": 70,
+    "on_hit": "knockdown"
+   },
+   "buy": null,
+   "sell": 800,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/troll_bone_maul.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "cinderbrand",
+   "name": "Cinderbrand",
+   "slot": "weapon",
+   "kind": "sword",
+   "rarity": "epic",
+   "stats": {
+    "atk": 66,
+    "on_hit": "burn_3s"
+   },
+   "buy": null,
+   "sell": 850,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/cinderbrand.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "titanheart_greatblade",
+   "name": "Titanheart Greatblade",
+   "slot": "weapon",
+   "kind": "greatsword",
+   "rarity": "legendary",
+   "stats": {
+    "atk": 110,
+    "charged": "lava_wave"
+   },
+   "buy": null,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/titanheart_greatblade.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "padded_gambeson",
+   "name": "Padded Gambeson",
+   "slot": "armor",
+   "kind": "armor",
+   "rarity": "common",
+   "stats": {
+    "def": 8
+   },
+   "buy": 30,
+   "sell": 8,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/padded_gambeson.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "leather_jerkin",
+   "name": "Leather Jerkin",
+   "slot": "armor",
+   "kind": "armor",
+   "rarity": "common",
+   "stats": {
+    "def": 12
+   },
+   "buy": 70,
+   "sell": 18,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/leather_jerkin.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "ringmail_hauberk",
+   "name": "Ringmail Hauberk",
+   "slot": "armor",
+   "kind": "armor",
+   "rarity": "uncommon",
+   "stats": {
+    "def": 22,
+    "speed_pct": -3
+   },
+   "buy": 300,
+   "sell": 75,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/ringmail_hauberk.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "wolfpelt_cloak",
+   "name": "Wolfpelt Cloak",
+   "slot": "armor",
+   "kind": "cloak",
+   "rarity": "uncommon",
+   "stats": {
+    "def": 14,
+    "frost_res_pct": 15
+   },
+   "buy": null,
+   "sell": 60,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/wolfpelt_cloak.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "brigandine",
+   "name": "Brigandine",
+   "slot": "armor",
+   "kind": "armor",
+   "rarity": "rare",
+   "stats": {
+    "def": 34
+   },
+   "buy": 1100,
+   "sell": 275,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/brigandine.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "rimewarden_plate",
+   "name": "Rimewarden Plate",
+   "slot": "armor",
+   "kind": "plate",
+   "rarity": "rare",
+   "stats": {
+    "def": 40,
+    "frost_res_pct": 30
+   },
+   "buy": null,
+   "sell": 350,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/rimewarden_plate.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "ashwalker_mail",
+   "name": "Ashwalker Mail",
+   "slot": "armor",
+   "kind": "plate",
+   "rarity": "epic",
+   "stats": {
+    "def": 52,
+    "fire_res_pct": 40
+   },
+   "buy": null,
+   "sell": 900,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/ashwalker_mail.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "iron_buckler",
+   "name": "Iron Buckler",
+   "slot": "charm",
+   "kind": "shield",
+   "rarity": "common",
+   "stats": {
+    "block_pct": 10
+   },
+   "buy": 60,
+   "sell": 15,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/iron_buckler.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "pilgrim_s_token",
+   "name": "Pilgrim's Token",
+   "slot": "charm",
+   "kind": "amulet",
+   "rarity": "uncommon",
+   "stats": {
+    "hp_regen": 1
+   },
+   "buy": 400,
+   "sell": 100,
+   "sellable": true,
+   "stack": 1,
+   "icon": "res://loot/icons/pilgrim_s_token.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "ember_core_amulet",
+   "name": "Ember Core Amulet",
+   "slot": "charm",
+   "kind": "amulet",
+   "rarity": "legendary",
+   "stats": {
+    "fire_immune_after_dodge_s": 5
+   },
+   "buy": null,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/ember_core_amulet.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "bread_cheese",
+   "name": "Bread & Cheese",
+   "slot": "consumable",
+   "kind": "food",
+   "rarity": "common",
+   "stats": {
+    "heal_pct_over_10s": 15
+   },
+   "buy": 4,
+   "sell": 1,
+   "sellable": true,
+   "stack": 20,
+   "icon": "res://loot/icons/bread_cheese.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "minor_healing_draught",
+   "name": "Minor Healing Draught",
+   "slot": "consumable",
+   "kind": "potion",
+   "rarity": "common",
+   "stats": {
+    "heal_pct": 30
+   },
+   "buy": 15,
+   "sell": 4,
+   "sellable": true,
+   "stack": 20,
+   "icon": "res://loot/icons/minor_healing_draught.png",
+   "pickup": "res://loot/pickups/potion.glb"
+  },
+  {
+   "id": "healing_potion",
+   "name": "Healing Potion",
+   "slot": "consumable",
+   "kind": "potion",
+   "rarity": "uncommon",
+   "stats": {
+    "heal_pct": 60
+   },
+   "buy": 45,
+   "sell": 11,
+   "sellable": true,
+   "stack": 20,
+   "icon": "res://loot/icons/healing_potion.png",
+   "pickup": "res://loot/pickups/potion.glb"
+  },
+  {
+   "id": "warming_tonic",
+   "name": "Warming Tonic",
+   "slot": "consumable",
+   "kind": "tonic",
+   "rarity": "uncommon",
+   "stats": {
+    "frost_res_pct": 50,
+    "dur_s": 180
+   },
+   "buy": 30,
+   "sell": 8,
+   "sellable": true,
+   "stack": 20,
+   "icon": "res://loot/icons/warming_tonic.png",
+   "pickup": "res://loot/pickups/potion.glb"
+  },
+  {
+   "id": "cooling_salve",
+   "name": "Cooling Salve",
+   "slot": "consumable",
+   "kind": "salve",
+   "rarity": "uncommon",
+   "stats": {
+    "fire_res_pct": 50,
+    "dur_s": 180
+   },
+   "buy": 30,
+   "sell": 8,
+   "sellable": true,
+   "stack": 20,
+   "icon": "res://loot/icons/cooling_salve.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "whetstone",
+   "name": "Whetstone",
+   "slot": "consumable",
+   "kind": "whetstone",
+   "rarity": "common",
+   "stats": {
+    "atk_pct": 10,
+    "dur_s": 120
+   },
+   "buy": 12,
+   "sell": 3,
+   "sellable": true,
+   "stack": 20,
+   "icon": "res://loot/icons/whetstone.png",
+   "pickup": "res://loot/pickups/drop_bag.glb"
+  },
+  {
+   "id": "diver_s_breath_flask",
+   "name": "Diver's Breath Flask",
+   "slot": "consumable",
+   "kind": "flask",
+   "rarity": "uncommon",
+   "stats": {
+    "underwater_s": 60
+   },
+   "buy": 40,
+   "sell": 10,
+   "sellable": true,
+   "stack": 20,
+   "icon": "res://loot/icons/diver_s_breath_flask.png",
+   "pickup": "res://loot/pickups/potion.glb"
+  },
+  {
+   "id": "elixir_of_the_deep_hearth",
+   "name": "Elixir of the Deep Hearth",
+   "slot": "consumable",
+   "kind": "elixir",
+   "rarity": "rare",
+   "stats": {
+    "full_heal": true,
+    "revive": 1
+   },
+   "buy": 250,
+   "sell": 60,
+   "sellable": true,
+   "stack": 20,
+   "icon": "res://loot/icons/elixir_of_the_deep_hearth.png",
+   "pickup": "res://loot/pickups/potion.glb"
+  },
+  {
+   "id": "wolf_pelt",
+   "name": "Wolf Pelt",
+   "slot": "material",
+   "kind": "pelt",
+   "rarity": "common",
+   "stats": {},
+   "buy": null,
+   "sell": 3,
+   "sellable": true,
+   "stack": 99,
+   "icon": "res://loot/icons/wolf_pelt.png",
+   "pickup": "res://loot/pickups/material_bundle.glb",
+   "sea_item_key": null
+  },
+  {
+   "id": "iron_ore",
+   "name": "Iron Ore",
+   "slot": "material",
+   "kind": "ore",
+   "rarity": "common",
+   "stats": {},
+   "buy": 10,
+   "sell": 2,
+   "sellable": true,
+   "stack": 99,
+   "icon": "res://loot/icons/iron_ore.png",
+   "pickup": "res://loot/pickups/material_bundle.glb",
+   "sea_item_key": null
+  },
+  {
+   "id": "driftwood",
+   "name": "Driftwood",
+   "slot": "material",
+   "kind": "driftwood",
+   "rarity": "common",
+   "stats": {},
+   "buy": 8,
+   "sell": 2,
+   "sellable": true,
+   "stack": 99,
+   "icon": "res://loot/icons/driftwood.png",
+   "pickup": "res://loot/pickups/driftwood.glb",
+   "sea_item_key": "Driftwood"
+  },
+  {
+   "id": "hob_tusk",
+   "name": "Hob Tusk",
+   "slot": "material",
+   "kind": "tusk",
+   "rarity": "common",
+   "stats": {},
+   "buy": null,
+   "sell": 4,
+   "sellable": true,
+   "stack": 99,
+   "icon": "res://loot/icons/hob_tusk.png",
+   "pickup": "res://loot/pickups/material_bundle.glb",
+   "sea_item_key": null
+  },
+  {
+   "id": "troll_hide",
+   "name": "Troll Hide",
+   "slot": "material",
+   "kind": "hide",
+   "rarity": "uncommon",
+   "stats": {},
+   "buy": null,
+   "sell": 20,
+   "sellable": true,
+   "stack": 99,
+   "icon": "res://loot/icons/troll_hide.png",
+   "pickup": "res://loot/pickups/material_bundle.glb",
+   "sea_item_key": null
+  },
+  {
+   "id": "rime_shard",
+   "name": "Rime Shard",
+   "slot": "material",
+   "kind": "rime",
+   "rarity": "uncommon",
+   "stats": {},
+   "buy": null,
+   "sell": 15,
+   "sellable": true,
+   "stack": 99,
+   "icon": "res://loot/icons/rime_shard.png",
+   "pickup": "res://loot/pickups/material_bundle.glb",
+   "sea_item_key": null
+  },
+  {
+   "id": "saltglass",
+   "name": "Saltglass",
+   "slot": "material",
+   "kind": "saltglass",
+   "rarity": "uncommon",
+   "stats": {},
+   "buy": 60,
+   "sell": 15,
+   "sellable": true,
+   "stack": 99,
+   "icon": "res://loot/icons/saltglass.png",
+   "pickup": "res://loot/pickups/saltglass.glb",
+   "sea_item_key": "Saltglass"
+  },
+  {
+   "id": "coil_scale",
+   "name": "Coil Scale",
+   "slot": "material",
+   "kind": "scale",
+   "rarity": "rare",
+   "stats": {},
+   "buy": null,
+   "sell": 40,
+   "sellable": true,
+   "stack": 99,
+   "icon": "res://loot/icons/coil_scale.png",
+   "pickup": "res://loot/pickups/coil_scale.glb",
+   "sea_item_key": "Coil Scale"
+  },
+  {
+   "id": "ash_ember",
+   "name": "Ash Ember",
+   "slot": "material",
+   "kind": "ember",
+   "rarity": "uncommon",
+   "stats": {},
+   "buy": null,
+   "sell": 15,
+   "sellable": true,
+   "stack": 99,
+   "icon": "res://loot/icons/ash_ember.png",
+   "pickup": "res://loot/pickups/material_bundle.glb",
+   "sea_item_key": null
+  },
+  {
+   "id": "glasswyrm_shard",
+   "name": "Glasswyrm Shard",
+   "slot": "material",
+   "kind": "wyrmshard",
+   "rarity": "epic",
+   "stats": {},
+   "buy": null,
+   "sell": 150,
+   "sellable": true,
+   "stack": 99,
+   "icon": "res://loot/icons/glasswyrm_shard.png",
+   "pickup": "res://loot/pickups/glasswyrm_shard.glb",
+   "sea_item_key": "Glasswyrm Shard"
+  },
+  {
+   "id": "titan_magma_core",
+   "name": "Titan Magma Core",
+   "slot": "material",
+   "kind": "magma",
+   "rarity": "legendary",
+   "stats": {},
+   "buy": null,
+   "sell": null,
+   "sellable": false,
+   "stack": 99,
+   "icon": "res://loot/icons/titan_magma_core.png",
+   "pickup": "res://loot/pickups/material_bundle.glb",
+   "sea_item_key": null
+  },
+  {
+   "id": "stormsilk_bolt",
+   "name": "Stormsilk Bolt",
+   "slot": "material",
+   "kind": "silk",
+   "rarity": "epic",
+   "stats": {},
+   "buy": null,
+   "sell": null,
+   "sellable": false,
+   "stack": 99,
+   "icon": "res://loot/icons/stormsilk_bolt.png",
+   "pickup": "res://loot/pickups/stormsilk_bolt.glb",
+   "sea_item_key": "Stormsilk Bolt"
+  },
+  {
+   "id": "harbour_charts",
+   "name": "Harbour Charts",
+   "slot": "key",
+   "kind": "key",
+   "rarity": "key",
+   "stats": {},
+   "buy": 500,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/harbour_charts.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "desc": "Fast travel between discovered ports"
+  },
+  {
+   "id": "rimehollow_key",
+   "name": "Rimehollow Key",
+   "slot": "key",
+   "kind": "key",
+   "rarity": "key",
+   "stats": {},
+   "buy": null,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/rimehollow_key.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "desc": "Opens the Frost Troll ice cave inner gate"
+  },
+  {
+   "id": "keeper_s_lamp",
+   "name": "Keeper's Lamp",
+   "slot": "key",
+   "kind": "key",
+   "rarity": "key",
+   "stats": {},
+   "buy": null,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/keeper_s_lamp.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "desc": "Lights Lantern Rock; reveals Keeper's Strongbox"
+  },
+  {
+   "id": "sunken_ward_seal",
+   "name": "Sunken Ward Seal",
+   "slot": "key",
+   "kind": "key",
+   "rarity": "key",
+   "stats": {},
+   "buy": null,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/sunken_ward_seal.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "desc": "Opens the Sunken Ward dive vault"
+  },
+  {
+   "id": "titan_s_brand",
+   "name": "Titan's Brand",
+   "slot": "key",
+   "kind": "key",
+   "rarity": "key",
+   "stats": {},
+   "buy": null,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/titan_s_brand.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "desc": "Proof of the world boss kill; unlocks the Titanheart forge recipe"
+  },
+  {
+   "id": "captain_s_last_log",
+   "name": "Captain's Last Log",
+   "slot": "key",
+   "kind": "lore",
+   "rarity": "key",
+   "stats": {},
+   "buy": null,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/captain_s_last_log.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "desc": "Lore pickup, small XP reward"
+  },
+  {
+   "id": "copper_hull_sheathing_plans",
+   "name": "Copper Hull Sheathing Plans",
+   "slot": "key",
+   "kind": "key",
+   "rarity": "key",
+   "stats": {},
+   "buy": null,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/copper_hull_sheathing_plans.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "desc": "Unlocks Copper Hull Sheathing at the Shipwright"
+  },
+  {
+   "id": "copper_hull_sheathing",
+   "name": "Copper Hull Sheathing",
+   "slot": "ship_addon",
+   "kind": "hull",
+   "rarity": "rare",
+   "stats": {
+    "shallows_dmg_pct": -50
+   },
+   "buy": 1200,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/copper_hull_sheathing.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "cost_items": {
+    "iron_ore": 8
+   },
+   "requires_item": "copper_hull_sheathing_plans"
+  },
+  {
+   "id": "bronze_ram_prow",
+   "name": "Bronze Ram Prow",
+   "slot": "ship_addon",
+   "kind": "ram",
+   "rarity": "rare",
+   "stats": {
+    "ram_damage": true
+   },
+   "buy": 2000,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/bronze_ram_prow.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "cost_items": {
+    "troll_hide": 2
+   },
+   "requires_item": null
+  },
+  {
+   "id": "oar_bank",
+   "name": "Oar Bank",
+   "slot": "ship_addon",
+   "kind": "oars",
+   "rarity": "uncommon",
+   "stats": {
+    "burst_speed_s": 20,
+    "cooldown_s": 20,
+    "ship": "skiff"
+   },
+   "buy": 600,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/oar_bank.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "cost_items": {
+    "driftwood": 10
+   },
+   "requires_item": null
+  },
+  {
+   "id": "ship_s_lantern",
+   "name": "Ship's Lantern",
+   "slot": "ship_addon",
+   "kind": "lantern",
+   "rarity": "common",
+   "stats": {
+    "night_range_pct": 50
+   },
+   "buy": 150,
+   "sell": null,
+   "sellable": false,
+   "stack": 1,
+   "icon": "res://loot/icons/ship_s_lantern.png",
+   "pickup": "res://loot/pickups/drop_bag.glb",
+   "cost_items": {},
+   "requires_item": null
+  }
+ ]
+}

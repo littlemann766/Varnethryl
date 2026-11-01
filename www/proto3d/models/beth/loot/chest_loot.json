@@ -1,0 +1,380 @@
+{
+ "_note": "PROPOSED. First-open contents are fixed; weekly_refill is a small re-roll per in-game week (null = never refills). Chest names match README_LUCKY.md stage5 POIs.",
+ "chests": {
+  "harbourmasters_cache": {
+   "name": "Harbourmaster's Cache",
+   "region": "Gullhaven",
+   "gold": 40,
+   "items": [
+    {
+     "item": "driftwood",
+     "count": 5
+    },
+    {
+     "item": "minor_healing_draught",
+     "count": 2
+    }
+   ],
+   "chest_type": "sea_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     10
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   }
+  },
+  "keepers_strongbox": {
+   "name": "Keeper's Strongbox",
+   "region": "Lantern Rock",
+   "gold": 80,
+   "items": [
+    {
+     "item": "ship_s_lantern",
+     "count": 1
+    },
+    {
+     "item": "healing_potion",
+     "count": 1
+    }
+   ],
+   "chest_type": "iron_strongbox",
+   "weekly_refill": {
+    "gold": [
+     5,
+     20
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   },
+   "requires_item": "keeper_s_lamp"
+  },
+  "garrison_chest": {
+   "name": "Garrison Chest",
+   "region": "Saltwatch Keep",
+   "gold": 60,
+   "items": [
+    {
+     "item": "ringmail_hauberk",
+     "count": 1
+    },
+    {
+     "item": "whetstone",
+     "count": 2
+    }
+   ],
+   "chest_type": "iron_strongbox",
+   "weekly_refill": {
+    "gold": [
+     5,
+     15
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   }
+  },
+  "drowned_offering": {
+   "name": "Drowned Offering",
+   "region": "Coil Isle",
+   "gold": 120,
+   "items": [
+    {
+     "item": "coil_scale",
+     "count": 2
+    },
+    {
+     "item": "pilgrim_s_token",
+     "count": 1
+    }
+   ],
+   "chest_type": "sea_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     30
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   }
+  },
+  "glass_divers_chest": {
+   "name": "Glass-diver's Chest",
+   "region": "Saltglass Landing",
+   "gold": 100,
+   "items": [
+    {
+     "item": "saltglass",
+     "count": 3
+    },
+    {
+     "item": "diver_s_breath_flask",
+     "count": 2
+    }
+   ],
+   "chest_type": "sea_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     25
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   }
+  },
+  "clifftop_cache": {
+   "name": "Clifftop Cache",
+   "region": "Saltglass plateau",
+   "gold": 150,
+   "items": [],
+   "chest_type": "sea_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     37
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   },
+   "one_of": [
+    [
+     {
+      "item": "saltglass_spear",
+      "count": 1
+     }
+    ],
+    [
+     {
+      "item": "saltglass",
+      "count": 4
+     }
+    ]
+   ]
+  },
+  "salvage_chest": {
+   "name": "Salvage Chest",
+   "region": "Beached Wreck",
+   "gold": 50,
+   "items": [
+    {
+     "item": "driftwood",
+     "count": 8
+    },
+    {
+     "item": "iron_ore",
+     "count": 4
+    }
+   ],
+   "chest_type": "sea_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     12
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   }
+  },
+  "iced_chest": {
+   "name": "Iced Chest",
+   "region": "Frostreach Ice Dock",
+   "gold": 90,
+   "items": [
+    {
+     "item": "warming_tonic",
+     "count": 3
+    },
+    {
+     "item": "rime_shard",
+     "count": 3
+    }
+   ],
+   "chest_type": "frozen_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     22
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   }
+  },
+  "frostbitten_chest": {
+   "name": "Frostbitten Chest",
+   "region": "Frozen Wreck",
+   "gold": 110,
+   "items": [
+    {
+     "item": "rimewarden_plate",
+     "count": 1
+    },
+    {
+     "item": "driftwood",
+     "count": 5
+    }
+   ],
+   "chest_type": "frozen_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     27
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   },
+   "note": "Page says 'Rimewarden helm piece'; no helm slot exists, so full plate given"
+  },
+  "ash_buried_chest": {
+   "name": "Ash-buried Chest",
+   "region": "Vent Harbour",
+   "gold": 130,
+   "items": [
+    {
+     "item": "ash_ember",
+     "count": 4
+    },
+    {
+     "item": "cooling_salve",
+     "count": 3
+    }
+   ],
+   "chest_type": "scorched_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     32
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   }
+  },
+  "scorched_chest": {
+   "name": "Scorched Chest",
+   "region": "Ember Wreck",
+   "gold": 100,
+   "items": [
+    {
+     "item": "copper_hull_sheathing_plans",
+     "count": 1
+    },
+    {
+     "item": "iron_ore",
+     "count": 6
+    }
+   ],
+   "chest_type": "scorched_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     25
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   }
+  },
+  "bathers_bundle": {
+   "name": "Bather's Bundle",
+   "region": "Hot Spring Grotto",
+   "gold": 60,
+   "items": [
+    {
+     "item": "elixir_of_the_deep_hearth",
+     "count": 1
+    }
+   ],
+   "chest_type": "drop_bag",
+   "weekly_refill": {
+    "gold": [
+     5,
+     15
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   }
+  },
+  "sunken_ward_vault": {
+   "name": "Sunken Ward vault",
+   "region": "Sunken Ward dive",
+   "gold": 250,
+   "items": [
+    {
+     "item": "glasswyrm_shard",
+     "count": 1
+    }
+   ],
+   "chest_type": "iron_strongbox",
+   "weekly_refill": null,
+   "requires_item": "sunken_ward_seal",
+   "epic_armor_roll": 1
+  },
+  "rimehollow_ice_cave_chest": {
+   "name": "Ice cave chest",
+   "region": "Rimehollow Ice Cave",
+   "gold": 200,
+   "items": [
+    {
+     "item": "rimebite_axe",
+     "count": 1
+    },
+    {
+     "item": "rime_shard",
+     "count": 5
+    }
+   ],
+   "chest_type": "frozen_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     50
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   },
+   "requires_item": "rimehollow_key"
+  },
+  "mainland_crate": {
+   "name": "Farm / roadside crate",
+   "region": "Mainland",
+   "gold": [
+    5,
+    15
+   ],
+   "items": [],
+   "chest_type": "crate",
+   "weekly_refill": {
+    "gold": [
+     5,
+     5
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   },
+   "rolls_from": [
+    "bread_cheese",
+    "iron_ore"
+   ]
+  },
+  "interior_chest": {
+   "name": "Interior chest",
+   "region": "Town buildings (Lucky's interiors)",
+   "gold": [
+    10,
+    40
+   ],
+   "items": [],
+   "chest_type": "sea_chest",
+   "weekly_refill": {
+    "gold": [
+     5,
+     10
+    ],
+    "rolls": 1,
+    "rarity_max": "uncommon"
+   },
+   "rolls_from": [
+    "rarity:common",
+    "bread_cheese"
+   ]
+  }
+ }
+}

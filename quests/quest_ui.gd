@@ -40,6 +40,7 @@ func setup(q: Node) -> void:
 ## quests-test 2: a short one-time hint on the first start of the story (also on old saves that never saw it)
 func _maybe_hint() -> void:
 	if qm.flag("start_hint_seen"): return
+	if qm.main == null or not is_instance_valid(qm.main) or not qm.main.get("warmed"): return   # not behind the "Preparing shaders" veil
 	var q: Dictionary = qm.qstate("crew_pilgrim")
 	if q.is_empty() or q.get("done", false) or int(q.get("step", 0)) != 0: return
 	qm.story().flags["start_hint_seen"] = true; qm.save()

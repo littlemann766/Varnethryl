@@ -123,11 +123,11 @@
    "lod1": "loot/merchants/stall_smith_lod1.glb",
    "position": [
     -905.0,
-    null,
-    -1950.0
+    1.6,
+    -1949.0
    ],
    "yaw": 1.6134,
-   "frame": "world (stage4 frostreach_ice_dock pos, landward side); snap to nearest walkable within 8 m",
+   "frame": "world (stage4 frostreach_ice_dock pos, landward side); snap to nearest walkable within 8 m; SNAPPED (Equipment v1 step 3) by raycast vs stage4 frost_terrain_col+frost_harbour: flat (|n.y|>=0.85, height spread <=0.3 m over stall footprint), 1.0 m from the old point",
    "npc": {
     "file": "loot/merchants/merchant_smith.glb",
     "local_offset": [
@@ -138,19 +138,24 @@
     "anim": "idle",
     "interact_radius_m": 2.5,
     "prompt": "Trade"
-   }
+   },
+   "position_v0": [
+    -905.0,
+    null,
+    -1950.0
+   ]
   },
   {
    "shop": "vent_harbour_apothecary",
    "file": "loot/merchants/stall_apothecary.glb",
    "lod1": "loot/merchants/stall_apothecary_lod1.glb",
    "position": [
-    -501.0,
-    null,
-    1858.0
+    -512.5,
+    1.6,
+    1856.0
    ],
    "yaw": 2.9926,
-   "frame": "world (stage4 vent_harbour pos, landward); snap to nearest walkable within 8 m",
+   "frame": "world (stage4 vent_harbour pos, landward); snap to nearest walkable within 8 m; SNAPPED (Equipment v1 step 3) by raycast vs stage4 ash_terrain_col+ash_harbour: flat (|n.y|>=0.85, height spread <=0.3 m over stall footprint), 11.67 m from the old point",
    "npc": {
     "file": "loot/merchants/merchant_apothecary.glb",
     "local_offset": [
@@ -161,7 +166,12 @@
     "anim": "idle",
     "interact_radius_m": 2.5,
     "prompt": "Trade"
-   }
+   },
+   "position_v0": [
+    -501.0,
+    null,
+    1858.0
+   ]
   }
  ]
 }

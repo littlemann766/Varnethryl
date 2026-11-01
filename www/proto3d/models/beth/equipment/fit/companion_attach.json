@@ -1,0 +1,47 @@
+{
+ "pip": {
+  "collar": {
+   "bone": "neck1",
+   "neck_radius_m": 0.09,
+   "position": [
+    0.0,
+    -0.0225,
+    0.011
+   ],
+   "rotation": [
+    0.96833,
+    0.0,
+    -0.0,
+    0.24967
+   ],
+   "scale": [
+    0.9441,
+    0.9441,
+    0.9441
+   ]
+  },
+  "note": "fixed: collar now sits on the neck between spine3 and head (was on neck2 at bone origin, inside the head)."
+ },
+ "phoenix": {
+  "collar": {
+   "bone": "neck2",
+   "neck_radius_m": 0.079,
+   "position": [
+    0.0,
+    0.008,
+    -0.004
+   ],
+   "rotation": [
+    0.74728,
+    0.0,
+    0.0,
+    0.66451
+   ],
+   "scale": [
+    0.8332,
+    0.8332,
+    0.8332
+   ]
+  }
+ }
+}

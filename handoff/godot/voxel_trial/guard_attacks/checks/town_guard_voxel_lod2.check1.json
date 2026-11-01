@@ -1,10 +1,10 @@
 {
  "rest_baseline": {
   "arm_in_leg": 34,
-  "cape_in_body": 468
+  "cape_in_body": 537
  },
  "attack_slash": {
-  "arm_in_leg_verts_max": 3,
+  "arm_in_leg_verts_max": 0,
   "arm_leg_frames_over24": 0,
   "cape_in_body_verts_max": 0,
   "cape_frames_over24": 0,
@@ -53,10 +53,38 @@
   "frames_sampled": 51
  },
  "hit": {
-  "arm_in_leg_verts_max": 4,
+  "arm_in_leg_verts_max": 0,
   "arm_leg_frames_over24": 0,
   "cape_in_body_verts_max": 0,
   "cape_frames_over24": 0,
   "frames_sampled": 21
+ },
+ "walk": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 41
+ },
+ "run": {
+  "arm_in_leg_verts_max": 9,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 28
+ },
+ "attack": {
+  "arm_in_leg_verts_max": 13,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 31
+ },
+ "idle": {
+  "arm_in_leg_verts_max": 0,
+  "arm_leg_frames_over24": 0,
+  "cape_in_body_verts_max": 0,
+  "cape_frames_over24": 0,
+  "frames_sampled": 76
  }
 }

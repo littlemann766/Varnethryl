@@ -1,0 +1,75 @@
+{
+ "beached_wreck": {
+  "dock_stone": [
+   -2446.0,
+   3.85,
+   960.0
+  ],
+  "far_stone": [
+   -2610.85,
+   26.71,
+   929.46
+  ],
+  "legs": {
+   "Captain's Last Log": {
+    "before_s": 51.3,
+    "via_waystone_s": 4.4,
+    "use": "waystone"
+   },
+   "Castaway Camp": {
+    "before_s": 34.3,
+    "via_waystone_s": null,
+    "use": "walk (dock route unchanged)"
+   },
+   "Salvage Chest": {
+    "before_s": 62.5,
+    "via_waystone_s": 11.9,
+    "use": "waystone"
+   }
+  }
+ },
+ "saltglass": {
+  "dock_stone": [
+   -2338.0,
+   2.2,
+   108.0
+  ],
+  "far_stone": [
+   -2190.0,
+   112.54,
+   14.0
+  ],
+  "legs": {
+   "Clifftop Cache": {
+    "before_s": 71.2,
+    "via_waystone_s": 4.4,
+    "use": "waystone"
+   },
+   "Glass-diver's Chest": {
+    "before_s": 61.4,
+    "via_waystone_s": 10.1,
+    "use": "waystone"
+   },
+   "Salt-crusted Tablet": {
+    "before_s": 55.5,
+    "via_waystone_s": 23.9,
+    "use": "waystone"
+   },
+   "Saltglass Lookout": {
+    "before_s": 72.5,
+    "via_waystone_s": 3.0,
+    "use": "waystone"
+   },
+   "Saltglass Shrine": {
+    "before_s": 68.1,
+    "via_waystone_s": 18.5,
+    "use": "waystone"
+   },
+   "Singing Shards": {
+    "before_s": 75.3,
+    "via_waystone_s": 36.7,
+    "use": "waystone"
+   }
+  }
+ }
+}

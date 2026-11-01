@@ -332,3 +332,14 @@ The originals are in `stage4/meshes_v1_backup/`. All `*_v1_backup` files were mo
 - West coast (old port to lighthouse, z SEA_NORTH_Z+12..478): shingle rocks and boulders at the waterline. They skip the lighthouse island foot and the old pier.
 Apply with `patch scripts/main.gd < fix08c_main_gd.patch`. If it fails because of your local edits, the three hunks are short enough to copy by hand.
 The volcano's hard cone/grass edge is handled by Fix 7b's 152-212 m scree and ash band.
+
+## Fix 8d - shorter long walks: waystone pairs (Saltglass, Beached Wreck)
+The Saltglass climb is about 95 m. Even a perfect 19-degree path is about 290 m, so a better path alone can't bring it under about 45 s. Instead, each island gets a pair of carved waystones: one at the dock and one on the plateau or near the chest.
+Assets are in `tidewrack_sea/stage5_islands/waystones/`: `waystone{,_lod1 (29%),_col,_glow}.glb`. Positions and the measured legs are in `waystones.json`, from `waywalk.gd`.
+- **Saltglass**, plateau stone at about (-2190, 112.5, 14): Shrine 68→18.5 s, Shards 75→36.7 s, Chest 61→10.1 s, Tablet 56→23.9 s, Lookout 73→3.0 s, Cache 71→3.8 s.
+- **Beached Wreck**, stone on the Salvage Chest route: Chest 62→11.9 s, Log 51→4.4 s. Castaway Camp stays on its 34 s dock route.
+
+**Lucky (code, your files):** instance the stone pair at `dock_stone`/`far_stone` in the island's region node, using the `_col` as a StaticBody.
+- Add an interact prompt "Travel by waystone" within 3 m.
+- On use: fade, teleport the hero to the other stone + 2 m along its facing, then unfade. The glow mesh uses an emissive (0.35, 0.8, 1.0) material.
+- Require that the far stone has been visited once (walked to) before it works, so the climb is still discovered the first time. That part is optional.

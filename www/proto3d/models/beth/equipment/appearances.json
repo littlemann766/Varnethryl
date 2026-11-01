@@ -7638,819 +7638,1274 @@
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_arming_sword.glb",
-   "lod1": "res://loot/gear/meshes/iron_arming_sword_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/sword_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/sword_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    558,
+    232
+   ],
+   "weapon_family": "sword"
   },
   "app_w_sword_common": {
    "icon": "res://equipment/icons/longsword_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_arming_sword.glb",
-   "lod1": "res://loot/gear/meshes/iron_arming_sword_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/sword_common.glb",
+   "lod1": "res://equipment/meshes/weapons/sword_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    406,
+    198
+   ],
+   "weapon_family": "sword"
   },
   "app_w_sword_rare": {
    "icon": "res://equipment/icons/longsword_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/steel_knightly_sword.glb",
-   "lod1": "res://loot/gear/meshes/steel_knightly_sword_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/sword_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/sword_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    384,
+    56
+   ],
+   "weapon_family": "sword"
   },
   "app_w_sword_epic": {
    "icon": "res://equipment/icons/longsword_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_longsword.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_longsword_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/sword_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/sword_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    698,
+    262
+   ],
+   "weapon_family": "sword"
   },
   "app_w_sword_legendary": {
    "icon": "res://equipment/icons/longsword_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_longsword.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_longsword_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/sword_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/sword_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1164,
+    394
+   ],
+   "weapon_family": "sword"
   },
   "app_w_sword_masterwork": {
    "icon": "res://equipment/icons/longsword_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_longsword.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_longsword_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/sword_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/sword_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1336,
+    386
+   ],
+   "weapon_family": "sword"
   },
   "app_w_rapier_uncommon": {
    "icon": "res://equipment/icons/short_sword_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_sidesword.glb",
-   "lod1": "res://loot/gear/meshes/iron_sidesword_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/rapier_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/rapier_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    300,
+    124
+   ],
+   "weapon_family": "rapier"
   },
   "app_w_rapier_common": {
    "icon": "res://equipment/icons/short_sword_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_sidesword.glb",
-   "lod1": "res://loot/gear/meshes/iron_sidesword_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/rapier_common.glb",
+   "lod1": "res://equipment/meshes/weapons/rapier_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    234,
+    88
+   ],
+   "weapon_family": "rapier"
   },
   "app_w_rapier_rare": {
    "icon": "res://equipment/icons/short_sword_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/steel_rapier.glb",
-   "lod1": "res://loot/gear/meshes/steel_rapier_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/rapier_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/rapier_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    304,
+    140
+   ],
+   "weapon_family": "rapier"
   },
   "app_w_rapier_epic": {
    "icon": "res://equipment/icons/short_sword_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/duelists_swept_hilt_rapier.glb",
-   "lod1": "res://loot/gear/meshes/duelists_swept_hilt_rapier_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/rapier_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/rapier_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    444,
+    192
+   ],
+   "weapon_family": "rapier"
   },
   "app_w_rapier_legendary": {
    "icon": "res://equipment/icons/short_sword_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/duelists_swept_hilt_rapier.glb",
-   "lod1": "res://loot/gear/meshes/duelists_swept_hilt_rapier_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/rapier_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/rapier_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    490,
+    60
+   ],
+   "weapon_family": "rapier"
   },
   "app_w_rapier_masterwork": {
    "icon": "res://equipment/icons/short_sword_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/duelists_swept_hilt_rapier.glb",
-   "lod1": "res://loot/gear/meshes/duelists_swept_hilt_rapier_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/rapier_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/rapier_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    532,
+    94
+   ],
+   "weapon_family": "rapier"
   },
   "app_w_greatsword_uncommon": {
    "icon": "res://equipment/icons/greatsword_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_two_hander.glb",
-   "lod1": "res://loot/gear/meshes/iron_two_hander_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/greatsword_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/greatsword_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    776,
+    218
+   ],
+   "weapon_family": "greatsword"
   },
   "app_w_greatsword_common": {
    "icon": "res://equipment/icons/greatsword_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_two_hander.glb",
-   "lod1": "res://loot/gear/meshes/iron_two_hander_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/greatsword_common.glb",
+   "lod1": "res://equipment/meshes/weapons/greatsword_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    704,
+    218
+   ],
+   "weapon_family": "greatsword"
   },
   "app_w_greatsword_rare": {
    "icon": "res://equipment/icons/greatsword_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/steel_greatsword.glb",
-   "lod1": "res://loot/gear/meshes/steel_greatsword_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/greatsword_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/greatsword_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    864,
+    266
+   ],
+   "weapon_family": "greatsword"
   },
   "app_w_greatsword_epic": {
    "icon": "res://equipment/icons/greatsword_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/rimeforged_zweihander.glb",
-   "lod1": "res://loot/gear/meshes/rimeforged_zweihander_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/greatsword_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/greatsword_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1062,
+    364
+   ],
+   "weapon_family": "greatsword"
   },
   "app_w_greatsword_legendary": {
    "icon": "res://equipment/icons/greatsword_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/rimeforged_zweihander.glb",
-   "lod1": "res://loot/gear/meshes/rimeforged_zweihander_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/greatsword_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/greatsword_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1868,
+    496
+   ],
+   "weapon_family": "greatsword"
   },
   "app_w_greatsword_masterwork": {
    "icon": "res://equipment/icons/greatsword_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/rimeforged_zweihander.glb",
-   "lod1": "res://loot/gear/meshes/rimeforged_zweihander_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/greatsword_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/greatsword_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    2220,
+    616
+   ],
+   "weapon_family": "greatsword"
   },
   "app_w_dagger_uncommon": {
    "icon": "res://equipment/icons/dual_blades_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_dagger.glb",
-   "lod1": "res://loot/gear/meshes/iron_dagger_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/dagger_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/dagger_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    260,
+    84
+   ],
+   "weapon_family": "dagger"
   },
   "app_w_dagger_common": {
    "icon": "res://equipment/icons/dual_blades_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_dagger.glb",
-   "lod1": "res://loot/gear/meshes/iron_dagger_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/dagger_common.glb",
+   "lod1": "res://equipment/meshes/weapons/dagger_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    230,
+    96
+   ],
+   "weapon_family": "dagger"
   },
   "app_w_dagger_rare": {
    "icon": "res://equipment/icons/dual_blades_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/steel_rondel_dagger.glb",
-   "lod1": "res://loot/gear/meshes/steel_rondel_dagger_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/dagger_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/dagger_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    306,
+    142
+   ],
+   "weapon_family": "dagger"
   },
   "app_w_dagger_epic": {
    "icon": "res://equipment/icons/dual_blades_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_misericorde.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_misericorde_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/dagger_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/dagger_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    454,
+    190
+   ],
+   "weapon_family": "dagger"
   },
   "app_w_dagger_legendary": {
    "icon": "res://equipment/icons/dual_blades_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_misericorde.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_misericorde_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/dagger_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/dagger_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    574,
+    238
+   ],
+   "weapon_family": "dagger"
   },
   "app_w_dagger_masterwork": {
    "icon": "res://equipment/icons/dual_blades_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_misericorde.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_misericorde_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/dagger_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/dagger_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    606,
+    248
+   ],
+   "weapon_family": "dagger"
   },
   "app_w_axe_uncommon": {
    "icon": "res://equipment/icons/battle_axe_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_bearded_axe.glb",
-   "lod1": "res://loot/gear/meshes/iron_bearded_axe_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/axe_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/axe_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    538,
+    222
+   ],
+   "weapon_family": "axe"
   },
   "app_w_axe_common": {
    "icon": "res://equipment/icons/battle_axe_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_bearded_axe.glb",
-   "lod1": "res://loot/gear/meshes/iron_bearded_axe_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/axe_common.glb",
+   "lod1": "res://equipment/meshes/weapons/axe_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    514,
+    194
+   ],
+   "weapon_family": "axe"
   },
   "app_w_axe_rare": {
    "icon": "res://equipment/icons/battle_axe_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/steel_dane_axe.glb",
-   "lod1": "res://loot/gear/meshes/steel_dane_axe_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/axe_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/axe_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    518,
+    226
+   ],
+   "weapon_family": "axe"
   },
   "app_w_axe_epic": {
    "icon": "res://equipment/icons/battle_axe_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/emberwrought_axe.glb",
-   "lod1": "res://loot/gear/meshes/emberwrought_axe_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/axe_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/axe_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    682,
+    240
+   ],
+   "weapon_family": "axe"
   },
   "app_w_axe_legendary": {
    "icon": "res://equipment/icons/battle_axe_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/emberwrought_axe.glb",
-   "lod1": "res://loot/gear/meshes/emberwrought_axe_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/axe_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/axe_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1570,
+    374
+   ],
+   "weapon_family": "axe"
   },
   "app_w_axe_masterwork": {
    "icon": "res://equipment/icons/battle_axe_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/emberwrought_axe.glb",
-   "lod1": "res://loot/gear/meshes/emberwrought_axe_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/axe_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/axe_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1772,
+    384
+   ],
+   "weapon_family": "axe"
   },
   "app_w_mace_uncommon": {
    "icon": "res://equipment/icons/mace_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_mace.glb",
-   "lod1": "res://loot/gear/meshes/iron_mace_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/mace_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/mace_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    764,
+    286
+   ],
+   "weapon_family": "mace"
   },
   "app_w_mace_common": {
    "icon": "res://equipment/icons/mace_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_mace.glb",
-   "lod1": "res://loot/gear/meshes/iron_mace_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/mace_common.glb",
+   "lod1": "res://equipment/meshes/weapons/mace_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    796,
+    316
+   ],
+   "weapon_family": "mace"
   },
   "app_w_mace_rare": {
    "icon": "res://equipment/icons/mace_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/steel_flanged_mace.glb",
-   "lod1": "res://loot/gear/meshes/steel_flanged_mace_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/mace_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/mace_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    902,
+    394
+   ],
+   "weapon_family": "mace"
   },
   "app_w_mace_epic": {
    "icon": "res://equipment/icons/mace_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/hallowed_flanged_mace.glb",
-   "lod1": "res://loot/gear/meshes/hallowed_flanged_mace_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/mace_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/mace_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1174,
+    450
+   ],
+   "weapon_family": "mace"
   },
   "app_w_mace_legendary": {
    "icon": "res://equipment/icons/mace_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/hallowed_flanged_mace.glb",
-   "lod1": "res://loot/gear/meshes/hallowed_flanged_mace_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/mace_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/mace_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1760,
+    446
+   ],
+   "weapon_family": "mace"
   },
   "app_w_mace_masterwork": {
    "icon": "res://equipment/icons/mace_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/hallowed_flanged_mace.glb",
-   "lod1": "res://loot/gear/meshes/hallowed_flanged_mace_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/mace_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/mace_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1702,
+    402
+   ],
+   "weapon_family": "mace"
   },
   "app_w_spear_uncommon": {
    "icon": "res://equipment/icons/spear_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/ash_spear.glb",
-   "lod1": "res://loot/gear/meshes/ash_spear_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/spear_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/spear_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    426,
+    130
+   ],
+   "weapon_family": "spear"
   },
   "app_w_spear_common": {
    "icon": "res://equipment/icons/spear_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/ash_spear.glb",
-   "lod1": "res://loot/gear/meshes/ash_spear_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/spear_common.glb",
+   "lod1": "res://equipment/meshes/weapons/spear_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    408,
+    132
+   ],
+   "weapon_family": "spear"
   },
   "app_w_spear_rare": {
    "icon": "res://equipment/icons/spear_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/steel_winged_spear.glb",
-   "lod1": "res://loot/gear/meshes/steel_winged_spear_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/spear_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/spear_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    390,
+    172
+   ],
+   "weapon_family": "spear"
   },
   "app_w_spear_epic": {
    "icon": "res://equipment/icons/spear_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_partisan.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_partisan_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/spear_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/spear_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    404,
+    188
+   ],
+   "weapon_family": "spear"
   },
   "app_w_spear_legendary": {
    "icon": "res://equipment/icons/spear_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_partisan.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_partisan_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/spear_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/spear_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    608,
+    228
+   ],
+   "weapon_family": "spear"
   },
   "app_w_spear_masterwork": {
    "icon": "res://equipment/icons/spear_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_partisan.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_partisan_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/spear_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/spear_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    686,
+    244
+   ],
+   "weapon_family": "spear"
   },
   "app_w_staff_uncommon": {
    "icon": "res://equipment/icons/two_handed_staff_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/oak_quarterstaff.glb",
-   "lod1": "res://loot/gear/meshes/oak_quarterstaff_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/staff_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/staff_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    718,
+    292
+   ],
+   "weapon_family": "staff"
   },
   "app_w_staff_common": {
    "icon": "res://equipment/icons/two_handed_staff_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/oak_quarterstaff.glb",
-   "lod1": "res://loot/gear/meshes/oak_quarterstaff_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/staff_common.glb",
+   "lod1": "res://equipment/meshes/weapons/staff_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    722,
+    356
+   ],
+   "weapon_family": "staff"
   },
   "app_w_staff_rare": {
    "icon": "res://equipment/icons/two_handed_staff_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/bound_rowan_staff.glb",
-   "lod1": "res://loot/gear/meshes/bound_rowan_staff_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/staff_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/staff_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    904,
+    436
+   ],
+   "weapon_family": "staff"
   },
   "app_w_staff_epic": {
    "icon": "res://equipment/icons/two_handed_staff_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/starglass_staff.glb",
-   "lod1": "res://loot/gear/meshes/starglass_staff_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/staff_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/staff_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1302,
+    540
+   ],
+   "weapon_family": "staff"
   },
   "app_w_staff_legendary": {
    "icon": "res://equipment/icons/two_handed_staff_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/starglass_staff.glb",
-   "lod1": "res://loot/gear/meshes/starglass_staff_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/staff_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/staff_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1454,
+    552
+   ],
+   "weapon_family": "staff"
   },
   "app_w_staff_masterwork": {
    "icon": "res://equipment/icons/two_handed_staff_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/starglass_staff.glb",
-   "lod1": "res://loot/gear/meshes/starglass_staff_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/staff_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/staff_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1606,
+    516
+   ],
+   "weapon_family": "staff"
   },
   "app_w_scythe_uncommon": {
    "icon": "res://equipment/icons/scythe_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/field_scythe.glb",
-   "lod1": "res://loot/gear/meshes/field_scythe_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/scythe_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/scythe_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1090,
+    426
+   ],
+   "weapon_family": "scythe"
   },
   "app_w_scythe_common": {
    "icon": "res://equipment/icons/scythe_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/field_scythe.glb",
-   "lod1": "res://loot/gear/meshes/field_scythe_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/scythe_common.glb",
+   "lod1": "res://equipment/meshes/weapons/scythe_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1144,
+    394
+   ],
+   "weapon_family": "scythe"
   },
   "app_w_scythe_rare": {
    "icon": "res://equipment/icons/scythe_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/steel_war_scythe.glb",
-   "lod1": "res://loot/gear/meshes/steel_war_scythe_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/scythe_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/scythe_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1118,
+    390
+   ],
+   "weapon_family": "scythe"
   },
   "app_w_scythe_epic": {
    "icon": "res://equipment/icons/scythe_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/rime_reaper.glb",
-   "lod1": "res://loot/gear/meshes/rime_reaper_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/scythe_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/scythe_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1188,
+    430
+   ],
+   "weapon_family": "scythe"
   },
   "app_w_scythe_legendary": {
    "icon": "res://equipment/icons/scythe_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/rime_reaper.glb",
-   "lod1": "res://loot/gear/meshes/rime_reaper_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/scythe_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/scythe_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1638,
+    502
+   ],
+   "weapon_family": "scythe"
   },
   "app_w_scythe_masterwork": {
    "icon": "res://equipment/icons/scythe_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/rime_reaper.glb",
-   "lod1": "res://loot/gear/meshes/rime_reaper_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/scythe_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/scythe_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1718,
+    496
+   ],
+   "weapon_family": "scythe"
   },
   "app_w_bow_uncommon": {
    "icon": "res://equipment/icons/longbow_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/elm_longbow.glb",
-   "lod1": "res://loot/gear/meshes/elm_longbow_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/bow_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/bow_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    356,
+    118
+   ],
+   "weapon_family": "bow"
   },
   "app_w_bow_common": {
    "icon": "res://equipment/icons/longbow_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/elm_longbow.glb",
-   "lod1": "res://loot/gear/meshes/elm_longbow_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/bow_common.glb",
+   "lod1": "res://equipment/meshes/weapons/bow_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    356,
+    118
+   ],
+   "weapon_family": "bow"
   },
   "app_w_bow_rare": {
    "icon": "res://equipment/icons/longbow_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/yew_longbow.glb",
-   "lod1": "res://loot/gear/meshes/yew_longbow_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/bow_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/bow_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    378,
+    132
+   ],
+   "weapon_family": "bow"
   },
   "app_w_bow_epic": {
    "icon": "res://equipment/icons/longbow_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/glasswyrm_recurve.glb",
-   "lod1": "res://loot/gear/meshes/glasswyrm_recurve_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/bow_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/bow_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    410,
+    154
+   ],
+   "weapon_family": "bow"
   },
   "app_w_bow_legendary": {
    "icon": "res://equipment/icons/longbow_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/glasswyrm_recurve.glb",
-   "lod1": "res://loot/gear/meshes/glasswyrm_recurve_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/bow_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/bow_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    410,
+    154
+   ],
+   "weapon_family": "bow"
   },
   "app_w_bow_masterwork": {
    "icon": "res://equipment/icons/longbow_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/glasswyrm_recurve.glb",
-   "lod1": "res://loot/gear/meshes/glasswyrm_recurve_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/bow_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/bow_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    410,
+    150
+   ],
+   "weapon_family": "bow"
   },
   "app_w_crossbow_uncommon": {
    "icon": "res://equipment/icons/crossbow_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/wooden_crossbow.glb",
-   "lod1": "res://loot/gear/meshes/wooden_crossbow_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/crossbow_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/crossbow_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    598,
+    296
+   ],
+   "weapon_family": "crossbow"
   },
   "app_w_crossbow_common": {
    "icon": "res://equipment/icons/crossbow_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/wooden_crossbow.glb",
-   "lod1": "res://loot/gear/meshes/wooden_crossbow_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/crossbow_common.glb",
+   "lod1": "res://equipment/meshes/weapons/crossbow_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    630,
+    296
+   ],
+   "weapon_family": "crossbow"
   },
   "app_w_crossbow_rare": {
    "icon": "res://equipment/icons/crossbow_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/steel_prod_crossbow.glb",
-   "lod1": "res://loot/gear/meshes/steel_prod_crossbow_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/crossbow_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/crossbow_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    624,
+    296
+   ],
+   "weapon_family": "crossbow"
   },
   "app_w_crossbow_epic": {
    "icon": "res://equipment/icons/crossbow_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/stormsilk_arbalest.glb",
-   "lod1": "res://loot/gear/meshes/stormsilk_arbalest_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/crossbow_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/crossbow_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    632,
+    150
+   ],
+   "weapon_family": "crossbow"
   },
   "app_w_crossbow_legendary": {
    "icon": "res://equipment/icons/crossbow_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/stormsilk_arbalest.glb",
-   "lod1": "res://loot/gear/meshes/stormsilk_arbalest_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/crossbow_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/crossbow_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    750,
+    162
+   ],
+   "weapon_family": "crossbow"
   },
   "app_w_crossbow_masterwork": {
    "icon": "res://equipment/icons/crossbow_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/stormsilk_arbalest.glb",
-   "lod1": "res://loot/gear/meshes/stormsilk_arbalest_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/crossbow_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/crossbow_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    780,
+    162
+   ],
+   "weapon_family": "crossbow"
   },
   "app_w_lute_uncommon": {
    "icon": "res://equipment/icons/instrument_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/pine_lute.glb",
-   "lod1": "res://loot/gear/meshes/pine_lute_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/lute_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/lute_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1206,
+    386
+   ],
+   "weapon_family": "lute"
   },
   "app_w_lute_common": {
    "icon": "res://equipment/icons/instrument_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/pine_lute.glb",
-   "lod1": "res://loot/gear/meshes/pine_lute_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/lute_common.glb",
+   "lod1": "res://equipment/meshes/weapons/lute_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1206,
+    386
+   ],
+   "weapon_family": "lute"
   },
   "app_w_lute_rare": {
    "icon": "res://equipment/icons/instrument_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/rosewood_lute.glb",
-   "lod1": "res://loot/gear/meshes/rosewood_lute_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/lute_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/lute_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1222,
+    386
+   ],
+   "weapon_family": "lute"
   },
   "app_w_lute_epic": {
    "icon": "res://equipment/icons/instrument_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/court_lute_of_gullhaven.glb",
-   "lod1": "res://loot/gear/meshes/court_lute_of_gullhaven_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/lute_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/lute_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1212,
+    390
+   ],
+   "weapon_family": "lute"
   },
   "app_w_lute_legendary": {
    "icon": "res://equipment/icons/instrument_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/court_lute_of_gullhaven.glb",
-   "lod1": "res://loot/gear/meshes/court_lute_of_gullhaven_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/lute_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/lute_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1212,
+    390
+   ],
+   "weapon_family": "lute"
   },
   "app_w_lute_masterwork": {
    "icon": "res://equipment/icons/instrument_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/court_lute_of_gullhaven.glb",
-   "lod1": "res://loot/gear/meshes/court_lute_of_gullhaven_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/lute_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/lute_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1212,
+    390
+   ],
+   "weapon_family": "lute"
   },
   "app_w_whip_uncommon": {
    "icon": "res://equipment/icons/whip_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/hide_whip.glb",
-   "lod1": "res://loot/gear/meshes/hide_whip_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/whip_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/whip_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1296,
+    576
+   ],
+   "weapon_family": "whip"
   },
   "app_w_whip_common": {
    "icon": "res://equipment/icons/whip_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/hide_whip.glb",
-   "lod1": "res://loot/gear/meshes/hide_whip_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/whip_common.glb",
+   "lod1": "res://equipment/meshes/weapons/whip_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1296,
+    576
+   ],
+   "weapon_family": "whip"
   },
   "app_w_whip_rare": {
    "icon": "res://equipment/icons/whip_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/braided_bullwhip.glb",
-   "lod1": "res://loot/gear/meshes/braided_bullwhip_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/whip_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/whip_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1296,
+    576
+   ],
+   "weapon_family": "whip"
   },
   "app_w_whip_epic": {
    "icon": "res://equipment/icons/whip_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/coil_scale_lash.glb",
-   "lod1": "res://loot/gear/meshes/coil_scale_lash_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/whip_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/whip_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1478,
+    568
+   ],
+   "weapon_family": "whip"
   },
   "app_w_whip_legendary": {
    "icon": "res://equipment/icons/whip_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/coil_scale_lash.glb",
-   "lod1": "res://loot/gear/meshes/coil_scale_lash_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/whip_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/whip_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1478,
+    568
+   ],
+   "weapon_family": "whip"
   },
   "app_w_whip_masterwork": {
    "icon": "res://equipment/icons/whip_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/coil_scale_lash.glb",
-   "lod1": "res://loot/gear/meshes/coil_scale_lash_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/whip_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/whip_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    1478,
+    568
+   ],
+   "weapon_family": "whip"
   },
   "app_w_knuckles_uncommon": {
    "icon": "res://equipment/icons/fist_weapon_uncommon.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_knuckles.glb",
-   "lod1": "res://loot/gear/meshes/iron_knuckles_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/knuckles_uncommon.glb",
+   "lod1": "res://equipment/meshes/weapons/knuckles_uncommon_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    204,
+    100
+   ],
+   "weapon_family": "knuckles"
   },
   "app_w_knuckles_common": {
    "icon": "res://equipment/icons/fist_weapon_common.png",
    "rarity_border": "res://equipment/ui/border_common.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/iron_knuckles.glb",
-   "lod1": "res://loot/gear/meshes/iron_knuckles_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/knuckles_common.glb",
+   "lod1": "res://equipment/meshes/weapons/knuckles_common_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    248,
+    88
+   ],
+   "weapon_family": "knuckles"
   },
   "app_w_knuckles_rare": {
    "icon": "res://equipment/icons/fist_weapon_rare.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/steel_cestus.glb",
-   "lod1": "res://loot/gear/meshes/steel_cestus_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/knuckles_rare.glb",
+   "lod1": "res://equipment/meshes/weapons/knuckles_rare_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    162,
+    28
+   ],
+   "weapon_family": "knuckles"
   },
   "app_w_knuckles_epic": {
    "icon": "res://equipment/icons/fist_weapon_epic.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/ember_cestus.glb",
-   "lod1": "res://loot/gear/meshes/ember_cestus_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/knuckles_epic.glb",
+   "lod1": "res://equipment/meshes/weapons/knuckles_epic_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    192,
+    32
+   ],
+   "weapon_family": "knuckles"
   },
   "app_w_knuckles_legendary": {
    "icon": "res://equipment/icons/fist_weapon_legendary.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/ember_cestus.glb",
-   "lod1": "res://loot/gear/meshes/ember_cestus_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/knuckles_legendary.glb",
+   "lod1": "res://equipment/meshes/weapons/knuckles_legendary_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    296,
+    94
+   ],
+   "weapon_family": "knuckles"
   },
   "app_w_knuckles_masterwork": {
    "icon": "res://equipment/icons/fist_weapon_masterwork.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/ember_cestus.glb",
-   "lod1": "res://loot/gear/meshes/ember_cestus_lod1.glb",
-   "note": "uses the phase-2 weapon mesh for this family/tier (legendary/masterwork re-use T3 until dedicated meshes); hide rule baked_weapon applies"
+   "mesh": "res://equipment/meshes/weapons/knuckles_masterwork.glb",
+   "lod1": "res://equipment/meshes/weapons/knuckles_masterwork_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms",
+   "tris": [
+    292,
+    84
+   ],
+   "weapon_family": "knuckles"
   },
   "app_named_worldbreaker": {
    "icon": "res://equipment/icons/worldbreaker.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/rimeforged_zweihander.glb",
-   "lod1": "res://loot/gear/meshes/rimeforged_zweihander_lod1.glb",
-   "note": "named weapon: T3 family mesh placeholder, dedicated model on the list"
+   "mesh": "res://equipment/meshes/weapons/named_worldbreaker.glb",
+   "lod1": "res://equipment/meshes/weapons/named_worldbreaker_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms; named unique hero piece",
+   "tris": [
+    3266,
+    940
+   ],
+   "weapon_family": "greatsword"
   },
   "app_named_winters_end": {
    "icon": "res://equipment/icons/winters_end.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_longsword.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_longsword_lod1.glb",
-   "note": "named weapon: T3 family mesh placeholder, dedicated model on the list"
+   "mesh": "res://equipment/meshes/weapons/named_winters_end.glb",
+   "lod1": "res://equipment/meshes/weapons/named_winters_end_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms; named unique hero piece",
+   "tris": [
+    1242,
+    448
+   ],
+   "weapon_family": "sword"
   },
   "app_named_soulrender": {
    "icon": "res://equipment/icons/soulrender.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/rime_reaper.glb",
-   "lod1": "res://loot/gear/meshes/rime_reaper_lod1.glb",
-   "note": "named weapon: T3 family mesh placeholder, dedicated model on the list"
+   "mesh": "res://equipment/meshes/weapons/named_soulrender.glb",
+   "lod1": "res://equipment/meshes/weapons/named_soulrender_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms; named unique hero piece",
+   "tris": [
+    1716,
+    538
+   ],
+   "weapon_family": "scythe"
   },
   "app_named_dawnbringer": {
    "icon": "res://equipment/icons/dawnbringer.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_longsword.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_longsword_lod1.glb",
-   "note": "named weapon: T3 family mesh placeholder, dedicated model on the list"
+   "mesh": "res://equipment/meshes/weapons/named_dawnbringer.glb",
+   "lod1": "res://equipment/meshes/weapons/named_dawnbringer_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms; named unique hero piece",
+   "tris": [
+    1598,
+    472
+   ],
+   "weapon_family": "sword"
   },
   "app_named_voidfang": {
    "icon": "res://equipment/icons/voidfang.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/rimeforged_zweihander.glb",
-   "lod1": "res://loot/gear/meshes/rimeforged_zweihander_lod1.glb",
-   "note": "named weapon: T3 family mesh placeholder, dedicated model on the list"
+   "mesh": "res://equipment/meshes/weapons/named_voidfang.glb",
+   "lod1": "res://equipment/meshes/weapons/named_voidfang_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms; named unique hero piece",
+   "tris": [
+    2396,
+    730
+   ],
+   "weapon_family": "greatsword"
   },
   "app_named_serpents_kiss": {
    "icon": "res://equipment/icons/serpents_kiss.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/saltglass_misericorde.glb",
-   "lod1": "res://loot/gear/meshes/saltglass_misericorde_lod1.glb",
-   "note": "named weapon: T3 family mesh placeholder, dedicated model on the list"
+   "mesh": "res://equipment/meshes/weapons/named_serpents_kiss.glb",
+   "lod1": "res://equipment/meshes/weapons/named_serpents_kiss_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms; named unique hero piece",
+   "tris": [
+    684,
+    196
+   ],
+   "weapon_family": "dagger"
   },
   "app_named_eternal_cinder": {
    "icon": "res://equipment/icons/eternal_cinder.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
    "kind": "held",
    "attach_part": "main_hand",
-   "mesh": "res://loot/gear/meshes/starglass_staff.glb",
-   "lod1": "res://loot/gear/meshes/starglass_staff_lod1.glb",
-   "note": "named weapon: T3 family mesh placeholder, dedicated model on the list"
+   "mesh": "res://equipment/meshes/weapons/named_eternal_cinder.glb",
+   "lod1": "res://equipment/meshes/weapons/named_eternal_cinder_lod1.glb",
+   "note": "own Equipment v1 mesh; grip pivot matches loot/gear/gear_attach.json weapon transforms; named unique hero piece",
+   "tris": [
+    1810,
+    600
+   ],
+   "weapon_family": "staff"
   },
   "app_shield_uncommon": {
    "icon": "res://equipment/icons/shield_uncommon.png",

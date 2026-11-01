@@ -87,8 +87,9 @@ func run(j):
 	if j.get("weapon",""):
 		rules+=A["hide"]["baked_weapon"]
 		var g=gear_attach[h]["slots"]
-		attach_mesh(sk,g["weapon"]["bone"],"res://loot/gear/meshes/%s.glb"%j["weapon"],xf(g["weapon"]))
-		if j.get("weapon2","") and g.has("weapon_offhand"): attach_mesh(sk,g["weapon_offhand"]["bone"],"res://loot/gear/meshes/%s.glb"%j["weapon2"],xf(g["weapon_offhand"]))
+		var wm=j.get("weapon_mesh","res://loot/gear/meshes/%s.glb"%j["weapon"])
+		attach_mesh(sk,g["weapon"]["bone"],wm,xf(g["weapon"]))
+		if j.get("weapon2","") and g.has("weapon_offhand"): attach_mesh(sk,g["weapon_offhand"]["bone"],j.get("weapon_mesh","res://loot/gear/meshes/%s.glb"%j["weapon2"]),xf(g["weapon_offhand"]))
 		if j.get("shield","") and g.has("shield"): attach_mesh(sk,g["shield"]["bone"],"res://loot/gear/meshes/%s.glb"%j["shield"],xf(g["shield"]))
 	for ex in j.get("extra",[]): attach_mesh(sk,ex["bone"],ex["mesh"],xf(ex))
 	if j.get("hide",true) and rules.size(): hide_verts(sk,rules)

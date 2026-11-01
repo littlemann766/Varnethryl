@@ -31,3 +31,12 @@ These follow `/workspace/shots/terrain_pass/FINDINGS.md`. I did not edit any of 
 2. Apply the `_height_raw` hunk from `fix02_main_gd.patch`.
 3. Replace `terrain_fix2/data/terrain_n.png` with `terrain_n_v2.png`.
 The bake tool is `terrain_pass/mainland/tools/bake_n.gd`; its args are `script out.png`, then blur with σ 2.
+
+## Fix 3: soft layered fog
+**New:** `terrain_pass/mainland/fog_v2.gd` (`class_name FogV2`) sets up a thin distance haze (density 0.00042 instead of 0.0011, aerial perspective 0.78, so the distance fades into the sky colour) plus a low valley mist from height fog (fog_height 2 m, falloff 0.012). The fog colour is the horizon pulled 35 % toward cool blue-grey. The far ring keeps its silhouette, and the town is no longer a milky sheet.
+**Lucky (main.gd):**
+1. In `_env()`, replace the `env.fog_*` line with `FogV2.apply(env, Color(0.75, 0.82, 0.9))`.
+2. At the end of `_set_time()`, replace `env.fog_light_color = sky_mat.sky_horizon_color` with `FogV2.apply(env, sky_mat.sky_horizon_color, nf)`.
+3. In `apply_quality()`, replace the line `env.fog_enabled = true; env.fog_density = 0.0011` with `FogV2.apply(env, sky_mat.sky_horizon_color)`.
+4. In the altitude fog code (lines ~2846–2853), take the base from `FogV2.DENSITY` and also thin `env.fog_height_density = FogV2.MIST_DENSITY * lerpf(1.0, 0.2, k)`.
+Keep volumetric fog off on Mobile; this is plain exponential fog, so it costs nothing.

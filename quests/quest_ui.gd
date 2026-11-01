@@ -9,6 +9,10 @@ var who: Label
 var line: Label
 var next_b: Button
 var queue: Array = []
+var hint: Label
+var hint_t := 0.0
+const FALLBACK := "The Owner's Crew\n> Sail to Gullhaven"
+const HINT := "New story: head to the harbour, board your ship and set sail for Gullhaven."
 
 func setup(q: Node) -> void:
 	qm = q; layer = 41
@@ -26,16 +30,38 @@ func setup(q: Node) -> void:
 	next_b = Button.new(); next_b.text = "Next"; next_b.custom_minimum_size = Vector2(120, 40); next_b.size_flags_horizontal = Control.SIZE_SHRINK_END; next_b.pressed.connect(advance); v.add_child(next_b)
 	qm.changed.connect(_refresh); qm.dialogue.connect(say)
 	qm.quest_done.connect(func(_q, t): if t != "": say([["", t]]))
+	hint = Label.new(); hint.name = "QuestHint"; hint.text = HINT; hint.visible = false
+	hint.add_theme_font_size_override("font_size", 24); hint.add_theme_color_override("font_color", Color(1, 0.9, 0.55))
+	hint.add_theme_color_override("font_shadow_color", Color.BLACK); hint.add_theme_constant_override("shadow_offset_y", 2)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.position = Vector2(290, 300); hint.size = Vector2(700, 80); add_child(hint)
 	_refresh()
+
+## quests-test 2: a short one-time hint on the first start of the story (also on old saves that never saw it)
+func _maybe_hint() -> void:
+	if qm.flag("start_hint_seen"): return
+	var q: Dictionary = qm.qstate("crew_pilgrim")
+	if q.is_empty() or q.get("done", false) or int(q.get("step", 0)) != 0: return
+	qm.story().flags["start_hint_seen"] = true; qm.save()
+	hint_t = 12.0
 
 func _process(_dt: float) -> void:
 	var vui = get_tree().root.get_node_or_null("VUI")
-	var on: bool = vui != null and vui.hud != null and vui.hud.visible and not (vui.title and vui.title.visible)
-	tracker.visible = on and tracker.text != ""; journal_b.visible = on
+	# quests-test 2: shown on the normal HUD on land and at sea; hidden only on the title screen / when the HUD is off
+	var on: bool = vui != null and not (vui.get("title") and vui.title.visible) and (vui.get("hud") == null or vui.hud.visible)
+	if tracker.text == "": _refresh()
+	tracker.visible = on; journal_b.visible = on
 	if not on and journal: journal.visible = false
+	if on and hint_t <= 0.0 and not hint.visible: _maybe_hint()
+	if hint_t > 0.0:
+		hint_t -= _dt; hint.visible = on and hint_t > 0.0
+		hint.modulate.a = clampf(hint_t, 0.0, 1.0)
+	elif hint.visible: hint.visible = false
 
 func _refresh() -> void:
-	tracker.text = qm.tracker_text()
+	var t: String = qm.tracker_text()
+	tracker.text = t if t != "" else (FALLBACK if qm.active_ids().is_empty() and qm.qstate("crew_pilgrim").is_empty() else "")
+	if tracker.text == "": tracker.text = "Journal: no active quest"
 	if journal and journal.visible: _fill_journal()
 
 func say(lines: Array) -> void:

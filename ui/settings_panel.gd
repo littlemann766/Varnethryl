@@ -115,7 +115,7 @@ func build() -> void:
 			cb.pressed.connect(func(): var on: bool = not VPrefs.prefs.combat; VPrefs.prefs.combatSet = true; VPrefs.set_pref("combat", on); combat_toggled.emit(on)); cs.call(); syncs.append(cs)
 			gc.add_child(_row([cb]))
 			var ac := _card("About", "")
-			about_label = Button.new(); about_label.name = "about_version"; about_label.flat = true; about_label.text = "Varnethryl · v" + version + " · test " + str(ProjectSettings.get_setting("application/config/test_build", "?"))
+			about_label = Button.new(); about_label.name = "about_version"; about_label.flat = true; about_label.text = "Varnethryl · v" + version + " · " + (func(t: String): return ("test " + t) if t.is_valid_int() else t).call(str(ProjectSettings.get_setting("application/config/test_build", "?")))
 			about_label.alignment = HORIZONTAL_ALIGNMENT_LEFT; about_label.custom_minimum_size = Vector2(0, 44)
 			about_label.add_theme_color_override("font_color", Color("#f1d28a")); about_label.add_theme_color_override("font_pressed_color", Color("#f1d28a"))
 			about_label.button_up.connect(func(): tap_about())

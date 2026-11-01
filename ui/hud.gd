@@ -16,7 +16,7 @@ var defaults := {}
 
 func _ready() -> void:
 	name = "HUD"; set_anchors_and_offsets_preset(PRESET_FULL_RECT); mouse_filter = MOUSE_FILTER_IGNORE
-	badge = VStyle.label("VARNETHRYL v%s · test %s" % [version, test_no], 14, VStyle.GOLD); badge.name = "Badge"; badge.autowrap_mode = TextServer.AUTOWRAP_OFF
+	badge = VStyle.label("VARNETHRYL v%s · %s" % [version, _tag()], 14, VStyle.GOLD); badge.name = "Badge"; badge.autowrap_mode = TextServer.AUTOWRAP_OFF
 	badge.position = Vector2(12, 10); badge.add_theme_color_override("font_shadow_color", Color.BLACK); badge.add_theme_constant_override("shadow_offset_y", 2); add_child(badge)
 	menu_btn = Button.new(); menu_btn.name = "MenuBtn"; menu_btn.text = "☰ Menu"; menu_btn.size = Vector2(110, 44)
 	menu_btn.anchor_left = 1; menu_btn.anchor_right = 1; menu_btn.offset_left = -126; menu_btn.offset_right = -16; menu_btn.offset_top = 10; menu_btn.offset_bottom = 54; menu_btn.pressed.connect(func(): if not editing: menu_pressed.emit()); add_child(menu_btn)
@@ -30,7 +30,7 @@ func _ready() -> void:
 	load_layout()
 
 func set_fps(fps: float, show: bool) -> void:
-	badge.text = "VARNETHRYL v%s · test %s%s" % [version, test_no, ("   %d fps" % roundi(fps)) if show else ""]
+	badge.text = "VARNETHRYL v%s · %s%s" % [version, _tag(), ("   %d fps" % roundi(fps)) if show else ""]
 
 func begin_edit() -> void:
 	editing = true; edit_bar.visible = true
@@ -68,3 +68,6 @@ func _input(e: InputEvent) -> void:
 		else: drag_target = null
 	elif (e is InputEventMouseMotion or e is InputEventScreenDrag) and drag_target:
 		drag_target.position = (e.position - drag_off).clamp(Vector2.ZERO, size - drag_target.size); get_viewport().set_input_as_handled()
+
+## quests-test 2: a named test build ("QUESTS TEST 2") shows as-is; a number shows as "test N"
+func _tag() -> String: return test_no if not test_no.is_valid_int() else "test " + test_no

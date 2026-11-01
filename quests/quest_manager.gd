@@ -32,16 +32,32 @@ func story() -> Dictionary:
 	return s
 func save() -> void: _vs().write_state()
 
-## attach to the game scene when it shows up (main.gd has `sea` once _ready ran)
-func _process(_dt: float) -> void:
+## quests-test 2 (boss, S26: no tracker/Journal on a real phone): the UI no longer waits for the sea/world hook.
+## QuestUi lives on the scene-tree root as soon as VUI exists, so a failure or delay in the world hook (or a scene
+## without `sea`) can never hide the tracker/Journal. The world hook is attached separately, and the auto-start
+## quest is re-checked every second so a save swapped in later (write_snapshot/reload) still gets its quest.
+var _recheck := 0.0
+func _process(dt: float) -> void:
+	if ui == null or not is_instance_valid(ui): _attach_ui()
+	_recheck -= dt
+	if _recheck <= 0.0:
+		_recheck = 1.0
+		var before: int = story().quests.size()
+		start_auto()
+		if ui and is_instance_valid(ui) and story().quests.size() != before: ui._refresh()
 	if main != null and is_instance_valid(main):
 		if not _crew_applied and main.get("party") != null and main.get("warmed"): _crew_applied = true; apply_crew()   # loaded save: crew back in the party
 		return
 	var cs := get_tree().current_scene
 	if cs == null or cs.get("sea") == null: return
-	main = cs
+	main = cs; _crew_applied = false
 	world = load("res://quests/quest_world.gd").new(); world.name = "QuestWorld"; main.sea.add_child(world); world.setup(self, main)
-	ui = load("res://quests/quest_ui.gd").new(); ui.name = "QuestUi"; main.add_child(ui); ui.setup(self)
+	start_auto()
+
+func _attach_ui() -> void:
+	if get_tree().root.get_node_or_null("VUI") == null: return
+	ui = load("res://quests/quest_ui.gd").new(); ui.name = "QuestUi"
+	get_tree().root.add_child.call_deferred(ui); ui.setup(self)
 	start_auto()
 
 func start_auto() -> void:

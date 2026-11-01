@@ -1742,7 +1742,7 @@ func _process(dt: float) -> void:
 		ft_txt = "%.1f ms avg / %.1f ms worst" % [ft_acc / ft_n * 1000.0, ft_max * 1000.0]
 		ft_acc = 0.0; ft_n = 0; ft_max = 0.0
 	hud_label.visible = bool(VPrefs.prefs.get("showFps", false)) or bench_running
-	hud_label.text = "test %s | %s | FPS %d | %s | dc %d | %dk tris | %02d:%02d" % [VERSION, TIERS[tier], Engine.get_frames_per_second(), ft_txt,
+	hud_label.text = "%s | %s | FPS %d | %s | dc %d | %dk tris | %02d:%02d" % [("test " + VERSION) if VERSION.is_valid_int() else VERSION, TIERS[tier], Engine.get_frames_per_second(), ft_txt,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000), int(tod), int(fmod(tod, 1.0) * 60)]
 
 ## test 25 (boss: the Arcane Academy title stayed up while he flew far outside): a place/interior title shows when

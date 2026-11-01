@@ -274,3 +274,21 @@ The exit trigger is at `ice_cave.json` `exit_trigger`, about 4 m inside the mout
 
 Test: `ice_cave/tools/cave_test.gd`, using a capsule of r 0.35 / h 1.8 at 5 m/s from the spawn to the arena and both troll spawns.
 It passes in both directions in 53 s each. 37 of the 80 frost_realm props land on the cave floor. The other 43 fall outside the footprint and are skipped (no floor hit).
+
+## Fix 7b - Beth's unwired placement sets (frost town, volcano, hobcamps; port skipped)
+`terrain_pass/placements/beth_placements.gd` (class BethPlacements) loads `PLACEMENT_frost_town.json`, `PLACEMENT_volcano.json` and `PLACEMENT_hobcamps.json`.
+It applies the same filters as `_dressing()`: gate path, `_on_way`, `_in_building`, small blockers, water below y 0.6, and no hobcamp inside the walls. It also merges each file into a MultiMesh with `m._multimesh`.
+
+The volcano set predates the Titan (r 148), so all 150 of those items sat under it. The loader pushes each one out radially into a 152-212 m basalt, scree and ash band around the Titan, which also covers Fix 8's "hard cone/grass edge".
+
+The test on Lucky's terrain, roads, walls and buildings (`placements/plc_test.gd`) kept 379 items and dropped 37 on roads and 12 in water.
+
+**Lucky:**
+1. Copy `hobcamp/`, `volcano/` (the props), `frost/`, `trees/tree_pine_snow.glb`, `clusters/cluster_volcano.glb` and `props/{barrel,crate}.glb` into `res://assets/`. Keep the same subpaths, and run `--import`.
+2. Copy the 3 PLACEMENT jsons to `res://assets/data/`.
+3. Copy the script to `res://scripts/`.
+4. In `_ready()`, directly after `_dressing()`, add:
+```gdscript
+	if OS.get_environment("VARN_LITE") == "": BethPlacements.apply(self)   # terrain pass fix 7b
+```
+`PLACEMENT_port.json` is NOT wired. It is local to the old walled-harbour PORT_CENTER, and its 48 pier posts and 2 ships duplicate what HarborDistrict and `_ships()` already build. Leave it.

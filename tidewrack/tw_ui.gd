@@ -17,7 +17,8 @@ func _ready() -> void:
 	prompt = _b("", Vector2(-160, -470), func(): if _cb.is_valid(): _cb.call()); prompt.visible = false
 	gust_b = _b("Gust", Vector2(-420, -470), func(): if sea.ship and sea.ship.gust(): toast("Gust!"))
 	charts_b = _b("Charts", Vector2(-560, -470), open_charts)
-	night_b = _b("Night", Vector2(-700, -470), func(): sea.toggle_night()); night_b.visible = false
+	# right-hand sea button row (Gust -420, Night -290, prompt -160), clear of the ship in the middle of the screen
+	night_b = _b("Night", Vector2(-290, -470), func(): sea.toggle_night()); night_b.visible = false
 	# test 36 (boss: toast sat on the HP/MP line): top-centre, under the badge row, clear of the minimap and Menu button
 	msg = Label.new(); msg.name = "Toast"; msg.add_theme_font_size_override("font_size", 26); msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	msg.add_theme_color_override("font_shadow_color", Color.BLACK); msg.add_theme_constant_override("shadow_offset_y", 2)

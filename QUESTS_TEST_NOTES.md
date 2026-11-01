@@ -47,3 +47,9 @@ tests/docking_test.gd + tidewrack/tw_sea.gd changes, left untouched). Story: var
 - Players who chose the "Night" time preset crawl at sea until Wren joins (intended gate, but worth a boss OK).
 - The access patches are invisible colliders: Beth should fix the island collider (stair-foot corner, plateau seams).
 - godot-voxel moved on to 41a3b33 since this branch was cut from bc917c6; rebase/merge needed.
+
+## Round 4 (Nov 1, 2026, ~1:00 AM ET): floating galleon / Night button
+- Floating ship + Fly buttons: NOT quest code. Reproduced identically on base bc917c6: with the Owner Fly cheat flag on (cheats.request("fly", true), set only from the Owner cheat menu), tw_sea `_fly_step` treats the ship as flying without the Fly toggle being pressed; it rises to ~13-14 m on setting sail, hovers over land (shore 0 m), Fly UI shows, "Go ashore" hidden. With the flag off the ship stays at alt 0 on both. No quest code sets the fly flag (grep).
+- Night/Day button moved from screen centre (580,250) to the right-hand sea row (990,250) in tw_ui.gd.
+- Playthrough checks added: ship alt/Y stays 0 at sea, never over land (min shore >= 1 m), Fly UI never shown, Night button outside centre, HUD overlap clean at sea.
+- Results: playthrough 101/0; titan_quest 25/21 and tidewrack 83/1 (same as base); import 0 errors; APK rebuilt 01:00 AM ET.

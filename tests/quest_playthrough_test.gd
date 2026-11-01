@@ -13,6 +13,17 @@ func ok(c: bool, t: String) -> void:
 func _ready() -> void:
 	m = get_parent(); _run2.call_deferred()
 	get_tree().create_timer(3000.0).timeout.connect(func(): print("QT timeout"); get_tree().quit(2))
+## sea watch (boss Nov 1: galleon hanging over land with Fly buttons): every physics frame while sailing
+var sea_alt_max := 0.0
+var sea_shore_min := 1e9
+var fly_ui_seen := false
+var sail_frames := 0
+func _physics_process(_dt: float) -> void:
+	if sea == null or not sea.active or sea.ashore != "" or sea.diving or sea.in_cave != "" or sea.ship == null: return
+	sail_frames += 1
+	sea_alt_max = maxf(sea_alt_max, maxf(sea.ship.alt, absf(sea.ship.global_position.y - sea.global_position.y)))
+	sea_shore_min = minf(sea_shore_min, sea.shore_m(Vector2(sea.ship.position.x, sea.ship.position.z)))
+	if m.fly_controls and m.fly_controls.visible: fly_ui_seen = true
 func step_id() -> String:
 	var s: Dictionary = Q.current_step("crew_pilgrim"); return s.get("id", "<done>")
 func land(k: String) -> void:
@@ -198,6 +209,10 @@ func _run2() -> void:
 	sea.ui.night_b.pressed.emit(); await frames(2)
 	ok(sea.is_night(), "Wren: switch to night at sea")
 	night_cap_check(false, "night with Wren (night sailing)")
+	var nr: Rect2 = sea.ui.night_b.get_global_rect(); var vs: Vector2 = get_viewport().get_visible_rect().size
+	var mid := Rect2(vs * 0.25, vs * 0.5)
+	ok(not nr.intersects(mid), "Night button out of the middle of the screen (%s, middle %s)" % [nr, mid])
+	await hud_check("at sea with the Night button")
 	sea.ui.night_b.pressed.emit(); await frames(2)
 	ok(not sea.is_night(), "back to day")
 	# cave diving gate: Glasswyrm Cavern before Brynn
@@ -244,6 +259,9 @@ func _run2() -> void:
 	sea.board_ship(); await fade_wait()
 	var entered2 := await try_glasswyrm()
 	ok(entered2 and sea.in_cave == "glasswyrm_cavern", "Brynn aboard: skiff dives into Glasswyrm Cavern")
+	ok(sail_frames > 100 and sea_alt_max < 0.01, "ship stayed at sea level the whole voyage (max alt/Y %.2f m over %d frames)" % [sea_alt_max, sail_frames])
+	ok(sea_shore_min >= 1.0, "ship never sat over land (min shore distance %.1f m)" % sea_shore_min)
+	ok(not fly_ui_seen and not m.cheats.flags.fly, "Fly UI never shown at sea (fly cheat off, as on base)")
 	# ---------------- save round trip
 	var rs2: Dictionary = VS.read_save()
 	ok(rs2.status == "ok" and rs2.state.story.quests.crew_pilgrim.done and rs2.state.story.crew == ["pip", "wren", "brynn"] and int(rs2.state.questStep) == 3, "story saved through save_system (crew %s)" % str(rs2.state.story.crew))

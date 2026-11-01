@@ -86,6 +86,7 @@ func _run() -> void:
 		for f in DirAccess.get_files_at("res://tw/" + DIRS[reg]):
 			if f.begins_with(PRE[reg]) and f.ends_with("_col.glb") and not f.contains("storm"): add_col(ProjectSettings.globalize_path("res://tw/%s/%s" % [DIRS[reg], f]))
 		add_col("%s/meshes/%s/%s.glb" % [S5, reg, I.files.col])
+		if I.has("stage11"): add_col("%s/meshes/%s/%s.glb" % [S5, reg, I.stage11.files.col])   # Saltglass west-cove harbour (quay, jetty, sea stair)
 		var gate: StaticBody3D = null; var lift: AnimatableBody3D = null
 		if I.has("stage9"):   # stage 9 (Saltglass): lift + shortcut statics; the gate starts LOCKED, the lift platform parks at the bottom
 			add_col("%s/meshes/%s/%s.glb" % [S5, reg, I.stage9.files.col])
@@ -163,6 +164,9 @@ func _run() -> void:
 				out["toll: dock to booth window"] = await walk(ph, [r0[0], r0[1], Vector3(wd.x, wd.y, r0[1].z), wd], wd, 0.8)
 				var lt: Vector3 = pv3(R9.lift_to_plateau)[1]
 				out["toll: top landing to booth window"] = await walk(lt + Vector3(0, 0.8, 0), [Vector3(wt.x, wt.y, lt.z), wt], wt, 0.8)
+		if I.has("stage11"):
+			for nm in I.stage11.routes:
+				var rr := pv3(I.stage11.routes[nm]); out[nm.replace("_", " ")] = await walk(ph, rr, rr[-1], 2.0)
 		res[k] = out; var nok := 0
 		for r in out.values(): nok += 1 if r.ok else 0
 		print("ISLAND %s %d/%d" % [k, nok, out.size()])

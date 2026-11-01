@@ -37,7 +37,7 @@ GROUND = {'A': 'temperate', 'B': 'saltglass', 'frost': 'frost', 'ash': 'ash'}
 # per landing: window half-size, hill amplitude, POIs (type, name); first POI goes on the high ground
 ISL = {
  'gullhaven':      dict(R=170, amp=11, pois=[('watchtower', 'Gull Watchtower ruin'), ('shrine', 'Gull Shrine'), ('lore', 'Founders\' Stone'), ('chest', 'Harbourmaster\'s Cache')]),
- 'saltglass':      dict(R=170, amp=9,  pois=[('crystal_shrine', 'Saltglass Shrine'), ('crystal_grove', 'Singing Shards'), ('chest', 'Glass-diver\'s Chest'), ('lore', 'Salt-crusted Tablet'), ('watchtower', 'Saltglass Lookout', 'top'), ('chest', 'Clifftop Cache', 'top')], ramp=True, pier_stair=(62, 80), stair_avoid=['ocean_stage2/meshes/coast_saltglass_landing.glb']),
+ 'saltglass':      dict(R=170, amp=9,  pois=[('crystal_shrine', 'Saltglass Shrine'), ('crystal_grove', 'Singing Shards'), ('chest', 'Glass-diver\'s Chest'), ('lore', 'Salt-crusted Tablet'), ('watchtower', 'Saltglass Lookout', 'top'), ('chest', 'Clifftop Cache', 'top')], ramp=True, pier_stair=(62, 80), port_moved=True, stair_avoid=['ocean_stage2/meshes/coast_saltglass_landing.glb']),
  'frostreach':     dict(R=170, amp=10, pois=[('ice_cave', 'Rimehollow Ice Cave'), ('frost_shrine', 'Frostreach Cairn'), ('chest', 'Iced Chest'), ('lore', 'Frozen Waystone')]),
  'vent':           dict(R=170, amp=9,  pois=[('lava_vent', 'Ventmouth'), ('hot_pool', 'Steam Pools'), ('obsidian_shrine', 'Ember Shrine'), ('chest', 'Ash-buried Chest')]),
  'lantern_rock':   dict(R=120, amp=9,  pois=[('lighthouse', 'Old Lantern ruin'), ('hut_ruin', 'Keeper\'s Hut'), ('chest', 'Keeper\'s Strongbox'), ('lore', 'Lamp-oil Logbook')]),
@@ -577,7 +577,7 @@ def build(k):
         s, g, c = veg(GROUND[reg], (x, y, z), rng); solid += s; glow += g; colp += c
     if ramp:
         if ramp.get('decks'): s_, c_ = ramp_geo(ramp); solid += s_; colp += c_
-        if ramp.get('pier_stair'): s_, c_ = ramp_geo(ramp['pier_stair']); solid += s_; colp += c_
+        if ramp.get('pier_stair') and not cfg.get('port_moved'): s_, c_ = ramp_geo(ramp['pier_stair']); solid += s_; colp += c_   # stage 11: Saltglass port moved to the west cove; the pier stair tower is no longer built (layout logic unchanged so the island stays the same)
     for b0 in bridges:
         s_, c_ = bridge(b0, GROUND[reg]); solid += s_; colp += c_
         for st_ in b0.get('bank_stairs', []): s_, c_ = ramp_geo(st_); solid += s_; colp += c_

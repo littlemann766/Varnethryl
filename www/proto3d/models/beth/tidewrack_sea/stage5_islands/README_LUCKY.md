@@ -188,3 +188,20 @@ I checked it headless: broke → toast, 12 coins → ride (7 left), keepers cran
 **Walk test: 68/68** (66 earlier + "toll: dock to booth window" + "toll: top landing to booth window"). The booth colliders are loaded for every leg. Pier boards unchanged (same 6, your board).
 
 **Renders**: `renders/small/saltglass_tollbooth_before_after_{dock,top,wide}.jpg` (left before, right after; the dock keeper is mid-crank) and `renders/small/saltglass_lift_keeper_idle_crank.jpg` (front/back, idle top row, crank bottom row).
+
+## Stage 11 — Saltglass port moved to the west cove (medieval harbor; lift/shortcut/toll removed)
+**Stages 9 and 10 are superseded.** The old port on the island face (pier stair tower, dock lift, skybridge, locked shortcut ramp and gate, toll booths, old dock) is gone. A low timber-and-stone harbor now sits in the sheltered west cove (x -2370..-2326, z 62..114).
+
+**What moved / new files (region B, auto-loaded by `tw_sea.gd`):**
+- `meshes/B/coast_isl_saltglass_port{.glb,_lod1,_glow,_col}`: stone quay (x -2344..-2329, z 99..110, top y 2.2), timber jetty 3.4 m wide from (-2344, 2.2, 101.5) to (-2368, 2.2, 92), mooring posts, bollards, harbormaster hut (-2340.6, 107.6), crates and barrels, lantern posts. There is also a three-flight cut-stone sea stair at 18.8° from the quay to the headland top (-2319.5, 28.6, 76), then cobble and dirt paths up to the plateau. 13,792 tris, lod1 49.99 %.
+- `meshes/B/coast_isl_saltglass{,_lod1,_col}` rebuilt without the Stage 7 pier stair (49,658 tris, lod1 45 %). The plateau stair is kept; it still connects.
+- `../stage2/meshes/coast_saltglass_landing{,_lod1}.glb` stripped: the old docks, carved stair, old lift and beacon are removed. The houses and warehouse stay. **Copy both files over your stage2 copies.**
+
+**Docking (spec only; I did not touch `landings.json` or `tw_sea.gd`):** set saltglass in `godot-voxel/tidewrack/landings.json` to
+`moor (-2372, 0, 90.5)`, `shore (-2344, 2.2, 101.5)`, `inland [0.93, 0.37]`, `pier_m 30.1`.
+Stage2 `props.saltglass_landing.anchor` is now (-2380, 0, 88) and cam (-2405, 30, 84). The old anchor is kept as `anchor_v1`. Depth at the moor is about 7–9 m. Player spawn on arrival: the jetty head at (-2366, 2.3, 93).
+
+**Lucky must remove:** the `sg_lift` node/scene and its crank/keeper wiring; the shortcut gate and lever, plus the `sg_shortcut_unlocked` flag use; the toll and Wallet wiring (`wallet_stub.gd`, booth interact zones); and any references to `coast_isl_saltglass_lift*` and `coast_isl_saltglass_tollbooths*`. All of these are archived in `archive/stage9_10_lift_port/` (the keeper NPC is archived unused). Your old pier board at the old landing (-2024, -148) is gone; delete it.
+
+**Walk (Lucky capsule):** saltglass 12/12. Dock→plateau is 399 m and 64.4 s. Dock→Lookout is 456 m and 72.0 s. Dock→Cache is 436 m and 70.8 s. Add about 5 s for the 30 m jetty from the moor. All islands: 66/71; the 5 fails are the known `pier_boards` legs on your boards.
+Renders: `renders/small/saltglass_port_move_{sea,overhead,path}.jpg` (before | after).

@@ -166,15 +166,21 @@
    ],
    "yaw": 1.8970641810918603,
    "anchor": [
+    -2380.0,
+    0.0,
+    88.0
+   ],
+   "cam": [
+    -2405.0,
+    30,
+    84.0
+   ],
+   "anchor_v1": [
     -2024.0644626617432,
     0.0,
     -147.76896286010742
    ],
-   "cam": [
-    -1999.0889008453119,
-    30,
-    -148.05828541230258
-   ]
+   "stage11_note": "port moved to west cove; old docks/stair/lift stripped from this glb"
   },
   "coast_echo_grotto": {
    "pos": [

@@ -27,3 +27,8 @@
 - Still failing: Ember Vent and Scorched Chest (a steep terrain lip at 496,30,2268), Frozen Camp (a lip at -245,6,-2598) and Glass-diver's Chest (drops through at -2152,105,58).
 - 9 (stage 9): Saltglass dock lift (88.3 m, 6 m/s) + locked shortcut ramp tower (10 x 17.5 deg) + 80.7 m skybridge to the plateau; gate/lever + flags (saltglass_shortcut_open, saltglass_lift_unlocked) as props/*.tscn. Walk test 66/66 (57 old + 9 new). Renders saltglass_lift_shortcut_before_after_A/B/C.jpg.
 - 10: lift toll (5 / ride, 150 season pass `saltglass_lift_pass`) replaces the stage-9 lift flag; lift keeper voxel NPC (idle + crank, 21.8k / lod1 43.7%), 2 timber toll booths (4.2k, lod1 45%), Wallet API spec + stub, sg_lift.gd updated. Walk test 68/68.
+
+## 2026-10-31 — Stage 11: Saltglass port moved
+- Removed the lift, skybridge, shortcut, gate, toll booths, pier tower and old dock, and archived them in `archive/stage9_10_lift_port/` and `archive/pre_stage11/`.
+- Built a medieval harbor in the west cove (quay, jetty, hut, crates, lanterns) and an 18.8° cut-stone sea stair, plus ≤19.8° cobble and dirt paths. Tools: `build_stage11_port.py`, `plan_stage11_routes.py`, `tools/data/`.
+- Walk test: saltglass 12/12; all islands 66/71 (5 known Lucky board fails). Dock→plateau 399 m / 64 s.

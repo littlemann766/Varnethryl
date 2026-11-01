@@ -164,7 +164,7 @@
    "family": "sword",
    "tier": 1,
    "stats": {
-    "atk": 18
+    "atk": 20
    },
    "id": "iron_arming_sword",
    "rarity": "common",
@@ -194,7 +194,8 @@
    "family": "sword",
    "tier": 2,
    "stats": {
-    "atk": 36
+    "atk": 42,
+    "atk_speed_pct": 5
    },
    "id": "steel_knightly_sword",
    "rarity": "rare",
@@ -224,10 +225,15 @@
    "family": "sword",
    "tier": 3,
    "stats": {
-    "atk": 62,
-    "on_hit": "bleed"
+    "atk": 75
    },
    "id": "saltglass_longsword",
+   "perk": {
+    "name": "Brine-Edge",
+    "key": "lifesteal_pct",
+    "value": 6,
+    "desc": "Heal 6% of damage dealt."
+   },
    "rarity": "epic",
    "value": 2400,
    "sell": 720,
@@ -255,7 +261,7 @@
    "family": "rapier",
    "tier": 1,
    "stats": {
-    "atk": 16,
+    "atk": 18,
     "crit_pct": 8
    },
    "id": "iron_sidesword",
@@ -285,8 +291,9 @@
    "family": "rapier",
    "tier": 2,
    "stats": {
-    "atk": 32,
-    "crit_pct": 10
+    "atk": 38,
+    "crit_pct": 10,
+    "atk_speed_pct": 5
    },
    "id": "steel_rapier",
    "rarity": "rare",
@@ -315,11 +322,16 @@
    "family": "rapier",
    "tier": 3,
    "stats": {
-    "atk": 56,
-    "crit_pct": 12,
-    "on_hit": "riposte"
+    "atk": 68,
+    "crit_pct": 12
    },
    "id": "duelists_swept_hilt_rapier",
+   "perk": {
+    "name": "Riposte",
+    "key": "perfect_block_counter_pct",
+    "value": 150,
+    "desc": "After a perfect block, the next hit deals 150% and always crits."
+   },
    "rarity": "epic",
    "value": 2400,
    "sell": 720,
@@ -346,7 +358,7 @@
    "family": "greatsword",
    "tier": 1,
    "stats": {
-    "atk": 24
+    "atk": 27
    },
    "id": "iron_two_hander",
    "rarity": "common",
@@ -375,7 +387,8 @@
    "family": "greatsword",
    "tier": 2,
    "stats": {
-    "atk": 49
+    "atk": 57,
+    "atk_speed_pct": 5
    },
    "id": "steel_greatsword",
    "rarity": "rare",
@@ -404,10 +417,15 @@
    "family": "greatsword",
    "tier": 3,
    "stats": {
-    "atk": 84,
-    "on_hit": "frost_slow"
+    "atk": 101
    },
    "id": "rimeforged_zweihander",
+   "perk": {
+    "name": "Glacier Cleave",
+    "key": "charged_frost_wave",
+    "value": 1,
+    "desc": "Fully charged swings send a frost wave that slows by 40% for 3 s."
+   },
    "rarity": "epic",
    "value": 3360,
    "sell": 1008,
@@ -434,7 +452,7 @@
    "family": "dagger",
    "tier": 1,
    "stats": {
-    "atk": 13,
+    "atk": 14,
     "crit_pct": 12
    },
    "id": "iron_dagger",
@@ -465,8 +483,9 @@
    "family": "dagger",
    "tier": 2,
    "stats": {
-    "atk": 25,
-    "crit_pct": 14
+    "atk": 29,
+    "crit_pct": 14,
+    "atk_speed_pct": 5
    },
    "id": "steel_rondel_dagger",
    "rarity": "rare",
@@ -496,11 +515,16 @@
    "family": "dagger",
    "tier": 3,
    "stats": {
-    "atk": 43,
-    "crit_pct": 16,
-    "on_hit": "bleed"
+    "atk": 52,
+    "crit_pct": 16
    },
    "id": "saltglass_misericorde",
+   "perk": {
+    "name": "Mercy Stroke",
+    "key": "execute_below_hp_pct",
+    "value": 15,
+    "desc": "Hits on non-boss enemies under 15% HP kill them outright; bosses take +30% instead."
+   },
    "rarity": "epic",
    "value": 1440,
    "sell": 432,
@@ -528,7 +552,7 @@
    "family": "axe",
    "tier": 1,
    "stats": {
-    "atk": 21,
+    "atk": 23,
     "crit_pct": 3
    },
    "id": "iron_bearded_axe",
@@ -558,8 +582,9 @@
    "family": "axe",
    "tier": 2,
    "stats": {
-    "atk": 41,
-    "crit_pct": 5
+    "atk": 48,
+    "crit_pct": 5,
+    "atk_speed_pct": 5
    },
    "id": "steel_dane_axe",
    "rarity": "rare",
@@ -588,11 +613,16 @@
    "family": "axe",
    "tier": 3,
    "stats": {
-    "atk": 71,
-    "crit_pct": 7,
-    "on_hit": "burn_3s"
+    "atk": 86,
+    "crit_pct": 7
    },
    "id": "emberwrought_axe",
+   "perk": {
+    "name": "Ember Bite",
+    "key": "burn_on_hit_pct",
+    "value": 25,
+    "desc": "25% chance per hit to burn for 3 s (stacks 3x)."
+   },
    "rarity": "epic",
    "value": 2400,
    "sell": 720,
@@ -619,7 +649,7 @@
    "family": "mace",
    "tier": 1,
    "stats": {
-    "atk": 20
+    "atk": 22
    },
    "id": "iron_mace",
    "rarity": "common",
@@ -648,7 +678,8 @@
    "family": "mace",
    "tier": 2,
    "stats": {
-    "atk": 40
+    "atk": 46,
+    "atk_speed_pct": 5
    },
    "id": "steel_flanged_mace",
    "rarity": "rare",
@@ -677,10 +708,15 @@
    "family": "mace",
    "tier": 3,
    "stats": {
-    "atk": 68,
-    "on_hit": "stagger"
+    "atk": 82
    },
    "id": "hallowed_flanged_mace",
+   "perk": {
+    "name": "Hallowed Ring",
+    "key": "stagger_heal_party_pct",
+    "value": 3,
+    "desc": "Staggering an enemy heals the party 3% max HP."
+   },
    "rarity": "epic",
    "value": 2400,
    "sell": 720,
@@ -707,7 +743,7 @@
    "family": "spear",
    "tier": 1,
    "stats": {
-    "atk": 20,
+    "atk": 22,
     "crit_pct": 5
    },
    "id": "ash_spear",
@@ -737,8 +773,9 @@
    "family": "spear",
    "tier": 2,
    "stats": {
-    "atk": 40,
-    "crit_pct": 7
+    "atk": 46,
+    "crit_pct": 7,
+    "atk_speed_pct": 5
    },
    "id": "steel_winged_spear",
    "rarity": "rare",
@@ -767,11 +804,16 @@
    "family": "spear",
    "tier": 3,
    "stats": {
-    "atk": 68,
-    "crit_pct": 9,
-    "on_hit": "pierce"
+    "atk": 82,
+    "crit_pct": 9
    },
    "id": "saltglass_partisan",
+   "perk": {
+    "name": "Tidebreaker",
+    "key": "pierce_targets",
+    "value": 3,
+    "desc": "Thrusts pierce up to 3 enemies and ignore 20% defence."
+   },
    "rarity": "epic",
    "value": 2400,
    "sell": 720,
@@ -798,7 +840,7 @@
    "family": "staff",
    "tier": 1,
    "stats": {
-    "atk": 17,
+    "atk": 19,
     "skill_pct": 5
    },
    "id": "oak_quarterstaff",
@@ -833,8 +875,9 @@
    "family": "staff",
    "tier": 2,
    "stats": {
-    "atk": 34,
-    "skill_pct": 10
+    "atk": 40,
+    "skill_pct": 10,
+    "atk_speed_pct": 5
    },
    "id": "bound_rowan_staff",
    "rarity": "rare",
@@ -868,11 +911,16 @@
    "family": "staff",
    "tier": 3,
    "stats": {
-    "atk": 59,
-    "on_hit": "mp_on_hit",
+    "atk": 71,
     "skill_pct": 15
    },
    "id": "starglass_staff",
+   "perk": {
+    "name": "Starfall",
+    "key": "skill_cdr_pct",
+    "value": 15,
+    "desc": "Skill cooldowns -15%; every 5th skill cast is free."
+   },
    "rarity": "epic",
    "value": 1680,
    "sell": 504,
@@ -904,7 +952,7 @@
    "family": "scythe",
    "tier": 1,
    "stats": {
-    "atk": 22,
+    "atk": 24,
     "crit_pct": 4
    },
    "id": "field_scythe",
@@ -934,8 +982,9 @@
    "family": "scythe",
    "tier": 2,
    "stats": {
-    "atk": 43,
-    "crit_pct": 6
+    "atk": 50,
+    "crit_pct": 6,
+    "atk_speed_pct": 5
    },
    "id": "steel_war_scythe",
    "rarity": "rare",
@@ -964,11 +1013,16 @@
    "family": "scythe",
    "tier": 3,
    "stats": {
-    "atk": 74,
-    "crit_pct": 8,
-    "on_hit": "frost_slow"
+    "atk": 90,
+    "crit_pct": 8
    },
    "id": "rime_reaper",
+   "perk": {
+    "name": "Winter Harvest",
+    "key": "kill_restores_sp_pct",
+    "value": 20,
+    "desc": "Kills restore 20% SP and chill nearby enemies."
+   },
    "rarity": "epic",
    "value": 2400,
    "sell": 720,
@@ -995,7 +1049,7 @@
    "family": "bow",
    "tier": 1,
    "stats": {
-    "atk": 18,
+    "atk": 20,
     "crit_pct": 6
    },
    "id": "elm_longbow",
@@ -1025,8 +1079,9 @@
    "family": "bow",
    "tier": 2,
    "stats": {
-    "atk": 36,
-    "crit_pct": 8
+    "atk": 42,
+    "crit_pct": 8,
+    "atk_speed_pct": 5
    },
    "id": "yew_longbow",
    "rarity": "rare",
@@ -1055,11 +1110,16 @@
    "family": "bow",
    "tier": 3,
    "stats": {
-    "atk": 62,
-    "crit_pct": 10,
-    "on_hit": "pierce"
+    "atk": 75,
+    "crit_pct": 10
    },
    "id": "glasswyrm_recurve",
+   "perk": {
+    "name": "Wyrmglass Arrow",
+    "key": "crit_dmg_pct",
+    "value": 40,
+    "desc": "+40% crit damage; crits ricochet to a 2nd target."
+   },
    "rarity": "epic",
    "value": 2400,
    "sell": 720,
@@ -1086,7 +1146,7 @@
    "family": "crossbow",
    "tier": 1,
    "stats": {
-    "atk": 20,
+    "atk": 22,
     "crit_pct": 4
    },
    "id": "wooden_crossbow",
@@ -1117,8 +1177,9 @@
    "family": "crossbow",
    "tier": 2,
    "stats": {
-    "atk": 40,
-    "crit_pct": 6
+    "atk": 46,
+    "crit_pct": 6,
+    "atk_speed_pct": 5
    },
    "id": "steel_prod_crossbow",
    "rarity": "rare",
@@ -1148,11 +1209,16 @@
    "family": "crossbow",
    "tier": 3,
    "stats": {
-    "atk": 68,
-    "crit_pct": 8,
-    "on_hit": "shock"
+    "atk": 82,
+    "crit_pct": 8
    },
    "id": "stormsilk_arbalest",
+   "perk": {
+    "name": "Stormbolt",
+    "key": "chain_lightning_targets",
+    "value": 3,
+    "desc": "Bolts chain lightning to 3 nearby enemies."
+   },
    "rarity": "epic",
    "value": 2880,
    "sell": 864,
@@ -1180,7 +1246,7 @@
    "family": "lute",
    "tier": 1,
    "stats": {
-    "atk": 14,
+    "atk": 15,
     "aura_heal": 1
    },
    "id": "pine_lute",
@@ -1210,8 +1276,9 @@
    "family": "lute",
    "tier": 2,
    "stats": {
-    "atk": 27,
-    "aura_heal": 2
+    "atk": 32,
+    "aura_heal": 2,
+    "atk_speed_pct": 5
    },
    "id": "rosewood_lute",
    "rarity": "rare",
@@ -1240,11 +1307,16 @@
    "family": "lute",
    "tier": 3,
    "stats": {
-    "atk": 46,
-    "on_hit": "party_atk_5pct",
+    "atk": 56,
     "aura_heal": 3
    },
    "id": "court_lute_of_gullhaven",
+   "perk": {
+    "name": "Ballad of the Tide",
+    "key": "party_atk_pct",
+    "value": 12,
+    "desc": "Party +12% ATK while Cedric plays; nearby allies regen 1% HP/s."
+   },
    "rarity": "epic",
    "value": 1920,
    "sell": 576,
@@ -1271,7 +1343,7 @@
    "family": "whip",
    "tier": 1,
    "stats": {
-    "atk": 15,
+    "atk": 17,
     "crit_pct": 5
    },
    "id": "hide_whip",
@@ -1301,8 +1373,9 @@
    "family": "whip",
    "tier": 2,
    "stats": {
-    "atk": 31,
-    "crit_pct": 7
+    "atk": 36,
+    "crit_pct": 7,
+    "atk_speed_pct": 5
    },
    "id": "braided_bullwhip",
    "rarity": "rare",
@@ -1331,11 +1404,16 @@
    "family": "whip",
    "tier": 3,
    "stats": {
-    "atk": 53,
-    "crit_pct": 9,
-    "on_hit": "snare"
+    "atk": 64,
+    "crit_pct": 9
    },
    "id": "coil_scale_lash",
+   "perk": {
+    "name": "Coilbind",
+    "key": "snare_s",
+    "value": 2.5,
+    "desc": "Lash roots enemies for 2.5 s (bosses: 40% slow)."
+   },
    "rarity": "epic",
    "value": 2400,
    "sell": 720,
@@ -1362,7 +1440,7 @@
    "family": "knuckles",
    "tier": 1,
    "stats": {
-    "atk": 14,
+    "atk": 16,
     "crit_pct": 10
    },
    "id": "iron_knuckles",
@@ -1392,8 +1470,9 @@
    "family": "knuckles",
    "tier": 2,
    "stats": {
-    "atk": 29,
-    "crit_pct": 12
+    "atk": 34,
+    "crit_pct": 12,
+    "atk_speed_pct": 5
    },
    "id": "steel_cestus",
    "rarity": "rare",
@@ -1422,11 +1501,16 @@
    "family": "knuckles",
    "tier": 3,
    "stats": {
-    "atk": 50,
-    "crit_pct": 14,
-    "on_hit": "burn_3s"
+    "atk": 60,
+    "crit_pct": 14
    },
    "id": "ember_cestus",
+   "perk": {
+    "name": "Furnace Fists",
+    "key": "combo_burn_ramp_pct",
+    "value": 5,
+    "desc": "Each hit in a combo adds +5% damage (max +50%) and the 10th hit explodes."
+   },
    "rarity": "epic",
    "value": 1440,
    "sell": 432,
@@ -1473,13 +1557,13 @@
     "selene"
    ],
    "tris": {
-    "high": 13984,
-    "lod1": 3616
+    "high": 23516,
+    "lod1": 6024
    },
    "size_m": [
-    0.408,
-    0.372,
-    0.384
+    0.504,
+    0.552,
+    0.444
    ]
   },
   {
@@ -1488,8 +1572,9 @@
    "family": "light",
    "tier": 2,
    "stats": {
-    "def": 5,
-    "mp_pct": 8
+    "def": 7,
+    "mp_pct": 8,
+    "poise": 0.05
    },
    "id": "lined_coif",
    "rarity": "rare",
@@ -1508,13 +1593,13 @@
     "selene"
    ],
    "tris": {
-    "high": 14108,
-    "lod1": 3672
+    "high": 21064,
+    "lod1": 5416
    },
    "size_m": [
-    0.408,
-    0.456,
-    0.384
+    0.504,
+    0.444,
+    0.444
    ]
   },
   {
@@ -1523,11 +1608,17 @@
    "family": "light",
    "tier": 3,
    "stats": {
-    "def": 10,
+    "def": 12,
     "mp_pct": 12,
     "fire_res_pct": 20
    },
    "id": "wardens_silk_hood",
+   "perk": {
+    "name": "Warden's Sight",
+    "key": "crit_pct",
+    "value": 12,
+    "desc": "+12% crit and enemies' weak points glow."
+   },
    "rarity": "epic",
    "value": 900,
    "sell": 270,
@@ -1544,13 +1635,13 @@
     "selene"
    ],
    "tris": {
-    "high": 14108,
-    "lod1": 3672
+    "high": 22116,
+    "lod1": 5756
    },
    "size_m": [
-    0.408,
-    0.456,
-    0.384
+    0.504,
+    0.492,
+    0.444
    ]
   },
   {
@@ -1559,7 +1650,7 @@
    "family": "medium",
    "tier": 1,
    "stats": {
-    "def": 4
+    "def": 5
    },
    "id": "kettle_hat",
    "rarity": "common",
@@ -1581,13 +1672,13 @@
     "wren"
    ],
    "tris": {
-    "high": 15848,
-    "lod1": 3952
+    "high": 17120,
+    "lod1": 4428
    },
    "size_m": [
-    0.456,
-    0.48,
-    0.264
+    0.408,
+    0.444,
+    0.432
    ]
   },
   {
@@ -1596,7 +1687,8 @@
    "family": "medium",
    "tier": 2,
    "stats": {
-    "def": 9
+    "def": 10,
+    "poise": 0.05
    },
    "id": "nasal_helm",
    "rarity": "rare",
@@ -1618,13 +1710,13 @@
     "wren"
    ],
    "tris": {
-    "high": 15496,
-    "lod1": 3944
+    "high": 17348,
+    "lod1": 4440
    },
    "size_m": [
     0.408,
     0.456,
-    0.384
+    0.432
    ]
   },
   {
@@ -1633,10 +1725,16 @@
    "family": "medium",
    "tier": 3,
    "stats": {
-    "def": 15,
+    "def": 18,
     "frost_res_pct": 20
    },
    "id": "rimeguard_helm",
+   "perk": {
+    "name": "Rimeguard",
+    "key": "frost_immune",
+    "value": 1,
+    "desc": "Immune to frost slow and freeze; +30% frost resist."
+   },
    "rarity": "epic",
    "value": 1125,
    "sell": 338,
@@ -1656,13 +1754,13 @@
     "wren"
    ],
    "tris": {
-    "high": 15616,
-    "lod1": 3980
+    "high": 19188,
+    "lod1": 4960
    },
    "size_m": [
-    0.408,
-    0.456,
-    0.456
+    0.552,
+    0.468,
+    0.504
    ]
   },
   {
@@ -1671,7 +1769,7 @@
    "family": "heavy",
    "tier": 1,
    "stats": {
-    "def": 6,
+    "def": 7,
     "poise": 0.05
    },
    "id": "iron_bascinet",
@@ -1692,13 +1790,13 @@
     "owner"
    ],
    "tris": {
-    "high": 17916,
-    "lod1": 4500
+    "high": 20728,
+    "lod1": 5256
    },
    "size_m": [
-    0.408,
-    0.456,
-    0.384
+    0.384,
+    0.444,
+    0.468
    ]
   },
   {
@@ -1707,8 +1805,8 @@
    "family": "heavy",
    "tier": 2,
    "stats": {
-    "def": 13,
-    "poise": 0.1
+    "def": 14,
+    "poise": 0.15000000000000002
    },
    "id": "steel_barbute",
    "rarity": "rare",
@@ -1728,13 +1826,13 @@
     "owner"
    ],
    "tris": {
-    "high": 17916,
-    "lod1": 4500
+    "high": 20116,
+    "lod1": 5112
    },
    "size_m": [
-    0.408,
-    0.456,
-    0.384
+    0.432,
+    0.576,
+    0.48
    ]
   },
   {
@@ -1743,11 +1841,17 @@
    "family": "heavy",
    "tier": 3,
    "stats": {
-    "def": 21,
+    "def": 25,
     "poise": 0.15000000000000002,
     "frost_res_pct": 20
    },
    "id": "great_helm_of_the_vale",
+   "perk": {
+    "name": "Dread of the Vale",
+    "key": "fear_on_hit_taken_pct",
+    "value": 10,
+    "desc": "+25% poise; when hit, 10% chance to make the attacker cower for 1.5 s."
+   },
    "rarity": "epic",
    "value": 1500,
    "sell": 450,
@@ -1765,13 +1869,13 @@
     "owner"
    ],
    "tris": {
-    "high": 18164,
-    "lod1": 4572
+    "high": 21888,
+    "lod1": 5592
    },
    "size_m": [
-    0.408,
-    0.456,
-    0.504
+    0.624,
+    0.444,
+    0.492
    ]
   },
   {
@@ -1780,7 +1884,7 @@
    "family": "light",
    "tier": 1,
    "stats": {
-    "def": 6,
+    "def": 7,
     "mp_regen_pct": 10
    },
    "id": "quilted_robe",
@@ -1800,12 +1904,12 @@
     "selene"
    ],
    "tris": {
-    "high": 21976,
-    "lod1": 5232
+    "high": 23840,
+    "lod1": 5532
    },
    "size_m": [
-    0.468,
-    0.36,
+    0.516,
+    0.384,
     0.432
    ]
   },
@@ -1815,8 +1919,9 @@
    "family": "light",
    "tier": 2,
    "stats": {
-    "def": 12,
-    "mp_regen_pct": 20
+    "def": 15,
+    "mp_regen_pct": 20,
+    "poise": 0.05
    },
    "id": "bound_scholars_robe",
    "rarity": "rare",
@@ -1835,13 +1940,13 @@
     "selene"
    ],
    "tris": {
-    "high": 21976,
-    "lod1": 5232
+    "high": 29656,
+    "lod1": 6636
    },
    "size_m": [
-    0.468,
-    0.36,
-    0.432
+    0.54,
+    0.384,
+    0.48
    ]
   },
   {
@@ -1850,11 +1955,17 @@
    "family": "light",
    "tier": 3,
    "stats": {
-    "def": 22,
+    "def": 26,
     "mp_regen_pct": 30,
     "fire_res_pct": 30
    },
    "id": "starsilk_vestment",
+   "perk": {
+    "name": "Starsilk Ward",
+    "key": "spell_shield_pct_hp",
+    "value": 20,
+    "desc": "Every 20 s, a shield absorbs damage up to 20% max HP."
+   },
    "rarity": "epic",
    "value": 1920,
    "sell": 576,
@@ -1871,13 +1982,13 @@
     "selene"
    ],
    "tris": {
-    "high": 21976,
-    "lod1": 5232
+    "high": 29656,
+    "lod1": 6636
    },
    "size_m": [
-    0.468,
-    0.36,
-    0.432
+    0.54,
+    0.384,
+    0.48
    ]
   },
   {
@@ -1886,7 +1997,7 @@
    "family": "medium",
    "tier": 1,
    "stats": {
-    "def": 10,
+    "def": 11,
     "dodge_pct": 2
    },
    "id": "leather_jerkin",
@@ -1909,13 +2020,13 @@
     "wren"
    ],
    "tris": {
-    "high": 22360,
-    "lod1": 5592
+    "high": 23648,
+    "lod1": 5828
    },
    "size_m": [
-    0.636,
+    0.684,
     0.312,
-    0.456
+    0.48
    ]
   },
   {
@@ -1924,8 +2035,9 @@
    "family": "medium",
    "tier": 2,
    "stats": {
-    "def": 20,
-    "dodge_pct": 4
+    "def": 23,
+    "dodge_pct": 4,
+    "poise": 0.05
    },
    "id": "ring_sewn_jack",
    "rarity": "rare",
@@ -1947,13 +2059,13 @@
     "wren"
    ],
    "tris": {
-    "high": 22360,
-    "lod1": 5592
+    "high": 26888,
+    "lod1": 6424
    },
    "size_m": [
-    0.636,
-    0.312,
-    0.456
+    0.684,
+    0.348,
+    0.48
    ]
   },
   {
@@ -1962,11 +2074,17 @@
    "family": "medium",
    "tier": 3,
    "stats": {
-    "def": 34,
+    "def": 40,
     "dodge_pct": 6,
     "frost_res_pct": 30
    },
    "id": "brigandine_of_the_watch",
+   "perk": {
+    "name": "Watchman's Reflex",
+    "key": "dodge_heal_pct",
+    "value": 4,
+    "desc": "Perfect dodges heal 4% max HP and refund 15 SP."
+   },
    "rarity": "epic",
    "value": 2400,
    "sell": 720,
@@ -1986,13 +2104,13 @@
     "wren"
    ],
    "tris": {
-    "high": 22360,
-    "lod1": 5592
+    "high": 26888,
+    "lod1": 6424
    },
    "size_m": [
-    0.636,
-    0.312,
-    0.456
+    0.684,
+    0.348,
+    0.48
    ]
   },
   {
@@ -2001,7 +2119,7 @@
    "family": "heavy",
    "tier": 1,
    "stats": {
-    "def": 14,
+    "def": 15,
     "speed_pct": -3
    },
    "id": "iron_cuirass",
@@ -2022,13 +2140,13 @@
     "owner"
    ],
    "tris": {
-    "high": 22360,
-    "lod1": 5592
+    "high": 30396,
+    "lod1": 7184
    },
    "size_m": [
-    0.636,
-    0.312,
-    0.456
+    0.78,
+    0.36,
+    0.48
    ]
   },
   {
@@ -2037,8 +2155,9 @@
    "family": "heavy",
    "tier": 2,
    "stats": {
-    "def": 28,
-    "speed_pct": -3
+    "def": 32,
+    "speed_pct": -3,
+    "poise": 0.05
    },
    "id": "steel_breastplate",
    "rarity": "rare",
@@ -2058,13 +2177,13 @@
     "owner"
    ],
    "tris": {
-    "high": 22360,
-    "lod1": 5592
+    "high": 30612,
+    "lod1": 7240
    },
    "size_m": [
-    0.636,
-    0.312,
-    0.456
+    0.78,
+    0.36,
+    0.492
    ]
   },
   {
@@ -2073,11 +2192,17 @@
    "family": "heavy",
    "tier": 3,
    "stats": {
-    "def": 46,
+    "def": 55,
     "speed_pct": -3,
     "frost_res_pct": 30
    },
    "id": "rimewarden_harness",
+   "perk": {
+    "name": "Thornplate",
+    "key": "thorns_pct",
+    "value": 25,
+    "desc": "Reflect 25% of melee damage taken; frost resist +30%."
+   },
    "rarity": "epic",
    "value": 3200,
    "sell": 960,
@@ -2095,13 +2220,13 @@
     "owner"
    ],
    "tris": {
-    "high": 22360,
-    "lod1": 5592
+    "high": 31580,
+    "lod1": 7364
    },
    "size_m": [
-    0.636,
-    0.312,
-    0.456
+    0.78,
+    0.372,
+    0.492
    ]
   },
   {
@@ -2143,7 +2268,8 @@
    "tier": 2,
    "stats": {
     "block_pct": 18,
-    "def": 8
+    "def": 8,
+    "poise": 0.05
    },
    "id": "heater_shield",
    "rarity": "rare",
@@ -2178,6 +2304,12 @@
     "def": 14
    },
    "id": "gullhaven_kite_shield",
+   "perk": {
+    "name": "Seawall",
+    "key": "block_reflect_pct",
+    "value": 40,
+    "desc": "Blocks reflect 40% of the blocked damage; can block boss slams."
+   },
    "rarity": "epic",
    "value": 1600,
    "sell": 480,
@@ -2206,7 +2338,7 @@
    "family": "ring",
    "tier": 1,
    "stats": {
-    "crit_pct": 2
+    "crit_pct": 3
    },
    "id": "iron_band",
    "rarity": "common",
@@ -2256,7 +2388,8 @@
    "family": "ring",
    "tier": 2,
    "stats": {
-    "crit_pct": 4
+    "crit_pct": 6,
+    "atk_pct": 4
    },
    "id": "garnet_signet",
    "rarity": "rare",
@@ -2306,10 +2439,16 @@
    "family": "ring",
    "tier": 3,
    "stats": {
-    "crit_pct": 7,
-    "atk_pct": 5
+    "crit_pct": 10,
+    "atk_pct": 4
    },
    "id": "saltglass_seal_ring",
+   "perk": {
+    "name": "Seal of the Deep",
+    "key": "crit_heal_pct",
+    "value": 2,
+    "desc": "Crits heal 2% max HP."
+   },
    "rarity": "epic",
    "value": 2000,
    "sell": 600,
@@ -2407,7 +2546,8 @@
    "family": "amulet",
    "tier": 2,
    "stats": {
-    "hp_regen": 2
+    "hp_regen": 3,
+    "max_hp_pct": 5
    },
    "id": "garnet_pendant",
    "rarity": "rare",
@@ -2457,10 +2597,16 @@
    "family": "amulet",
    "tier": 3,
    "stats": {
-    "hp_regen": 3,
-    "revive_once_per_day": true
+    "hp_regen": 6,
+    "max_hp_pct": 5
    },
    "id": "glasswyrm_locket",
+   "perk": {
+    "name": "Last Light",
+    "key": "revive_once_per_day",
+    "value": 1,
+    "desc": "Once per in-game day, survive a killing blow at 30% HP."
+   },
    "rarity": "epic",
    "value": 1800,
    "sell": 540,
@@ -2539,8 +2685,8 @@
    "family": "collar",
    "tier": 2,
    "stats": {
-    "companion_hp_pct": 20,
-    "companion_atk_pct": 10
+    "companion_hp_pct": 25,
+    "companion_atk_pct": 12
    },
    "id": "brass_studded_collar",
    "rarity": "rare",
@@ -2570,10 +2716,16 @@
    "family": "collar",
    "tier": 3,
    "stats": {
-    "companion_hp_pct": 30,
-    "companion_atk_pct": 15
+    "companion_hp_pct": 45,
+    "companion_atk_pct": 22
    },
    "id": "starsilk_collar",
+   "perk": {
+    "name": "Bonded Spirit",
+    "key": "companion_shares_dmg_pct",
+    "value": 20,
+    "desc": "Companion takes 20% of the leader's damage and never despawns."
+   },
    "rarity": "epic",
    "value": 1100,
    "sell": 330,

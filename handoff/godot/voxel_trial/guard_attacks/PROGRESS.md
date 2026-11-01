@@ -7,3 +7,4 @@
 - 16:20 EDT: done; outputs, checks, events, preview mp4 committed. Scratch /workspace/ga_tmp deleted.
 - 2026-11-01 00:40 EDT cleanup pass (scratch /workspace/ga2/v5): swingcap_guard.py (run/walk arm-out 30) -> armfix_guard (PASS2, ABMAX16, GRAB0) -> fixsnap2.py (frame-evaluated snap slerp; fixes run fr5 forearm flip) -> handclear2.py (wrist re-aim of mace, iterate + exact pass). Interim: LOD0 overhead 0, run 1 frame; LOD1 overhead 1, run 0; walk/run arm-out 30.
 - 01:10 EDT: cleanup outputs installed + committed (360d289); Godot 0 err. Preview re-render running.
+- 01:58 EDT: preview re-rendered (LOD0, front 3/4, each clip once incl. run/walk, hit frames marked). Done; scratch /workspace/ga2 kept for now.

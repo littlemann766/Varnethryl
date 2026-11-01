@@ -62,3 +62,185 @@ The cause: placement used the smooth `height()`, but the ground is drawn as the 
 2. Per region, set `deep` from the same deep colour you pass to the water.
 3. Each frame (or in `_set_time`), set `horizon` to `m.env.fog_light_color`, or to the sky horizon if FogV2 isn't in yet.
 4. Keep `cam.far` ≥ 7,000 m at sea, or lower `fade_end` to about 0.85 × cam.far, so the ring finishes fading before the far clip.
+
+## Fix 6 - high cliff landings: built stone stairs instead of the generated board
+
+vent, aurora_arch, hot_spring and obsidian_arch sit on 13-17 m sheer cliffs, so the generated board was a long 18-19 deg plank.
+Beth built a stone landing for each one: a bridge over the cliff lip, a stepped 19 deg stair on piers with parapets, a 9 m timber
+jetty at y 1.4 over water 8-16 m deep, and lanterns.
+Files are in `tidewrack_sea/stage4/meshes/`: `ash_landing_{vent,hot_spring,obsidian_arch}` and `frost_landing_aurora_arch`, each with `.glb`, `_lod1` (45-47%) and `_col`.
+They are named with the region prefix, so `tw_sea` auto-loads them from stage4/meshes. There is no code change.
+
+**Lucky: copy the 12 glbs into `tidewrack/stage4/meshes/`, then merge these keys into `tidewrack/landings.json`.**
+`shore` and `inland` stay as they are. The `"jetty"` key turns off the generated board.
+```json
+{
+ "vent": {
+  "jetty": "ash_landing_vent",
+  "moor": [
+   -485.73,
+   0.0,
+   1811.48
+  ],
+  "spawn": [
+   -485.73,
+   1.5,
+   1817.98
+  ],
+  "pier_m": 61.9,
+  "inland_target": [
+   -485.73,
+   17.22,
+   1883.42
+  ],
+  "inland_route": [
+   [
+    -485.73,
+    1.5,
+    1817.98
+   ],
+   [
+    -485.73,
+    1.5,
+    1825.48
+   ],
+   [
+    -485.73,
+    16.58,
+    1869.42
+   ],
+   [
+    -485.73,
+    17.27,
+    1883.42
+   ]
+  ]
+ },
+ "aurora_arch": {
+  "jetty": "frost_landing_aurora_arch",
+  "moor": [
+   26.6,
+   0.0,
+   -2391.6
+  ],
+  "spawn": [
+   29.09,
+   1.5,
+   -2397.6
+  ],
+  "pier_m": 62.3,
+  "inland_target": [
+   54.28,
+   16.02,
+   -2458.4
+  ],
+  "inland_route": [
+   [
+    29.09,
+    1.5,
+    -2397.6
+   ],
+   [
+    31.96,
+    1.5,
+    -2404.53
+   ],
+   [
+    49.11,
+    16.88,
+    -2445.93
+   ],
+   [
+    54.28,
+    16.07,
+    -2458.4
+   ]
+  ]
+ },
+ "hot_spring": {
+  "jetty": "ash_landing_hot_spring",
+  "moor": [
+   1075.54,
+   0.0,
+   2015.39
+  ],
+  "spawn": [
+   1082.04,
+   1.5,
+   2015.39
+  ],
+  "pier_m": 66.7,
+  "inland_target": [
+   1155.29,
+   14.52,
+   2015.39
+  ],
+  "inland_route": [
+   [
+    1082.04,
+    1.5,
+    2015.39
+   ],
+   [
+    1089.54,
+    1.5,
+    2015.39
+   ],
+   [
+    1139.29,
+    18.58,
+    2015.39
+   ],
+   [
+    1155.29,
+    14.57,
+    2015.39
+   ]
+  ]
+ },
+ "obsidian_arch": {
+  "jetty": "ash_landing_obsidian_arch",
+  "moor": [
+   511.65,
+   0.0,
+   2656.65
+  ],
+  "spawn": [
+   505.64,
+   1.5,
+   2659.14
+  ],
+  "pier_m": 57.2,
+  "inland_target": [
+   449.59,
+   16.12,
+   2682.36
+  ],
+  "inland_route": [
+   [
+    505.64,
+    1.5,
+    2659.14
+   ],
+   [
+    498.71,
+    1.5,
+    2662.01
+   ],
+   [
+    461.6,
+    15.28,
+    2677.38
+   ],
+   [
+    449.59,
+    16.17,
+    2682.36
+   ]
+  ]
+ }
+}
+```
+Walk test: `stage4/tools/walk_stairs.gd`, using a capsule of r 0.35 / h 1.8, floor_max_angle 40, at 4 m/s.
+All 8 legs (up and down) pass in 15-20 s each, so the walk is about 1 s longer than the board.
+Rebuild: `python3 stage4/tools/build_landing_stairs.py landings.json stage4/meshes`. The cliff-top profiles are in `landing_rim_profiles.json`, from `tools/probe_land.gd`.

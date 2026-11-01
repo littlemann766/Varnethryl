@@ -45,9 +45,8 @@ Keep volumetric fog off on Mobile; this is plain exponential fog, so it costs no
 The cause: placement used the smooth `height()`, but the ground is drawn as the 10 m triangle grid, which is up to about 1.9 m off on hills.
 **New:**
 - `mainland/flowers_bake_v2.bin`: same format as `terrain_flowers/flowers_bake.bin`. Every one of the 230,540 instances is re-seated on the drawn triangle surface of the patched terrain, keeping its own baked offset. Floating >0.35 m went from 6,932 to 0, and buried >0.6 m from 3,093 to 0. (The audit's AABB metric counted 10.7k/4.4k; this is the per-instance origin metric.)
-- `mainland/terrain_scatter_v2.scn`: all 12,418 scatter instances and the BoulderCollision shapes re-seated the same way. By the origin metric they were already within 0.35 m; the audit's large numbers came from rock AABBs on slopes.
+- Scatter (`terrain_fix2/scatter/terrain_scatter.scn`): `reseat.gd` checked all 12,418 instances, and every one is already within 0.35 m of the drawn ground by the origin metric. The audit's large numbers came from rock AABBs on slopes. **No change is needed**, so I removed the re-saved 59 MB scene from the repo again.
 - Backups: `*_v1_backup.*`. Tool: `tools/reseat.gd` (args `old_main.gd new_main.gd outdir`). Re-run it whenever `height()` or the grid changes.
 **Lucky:**
 1. Copy `flowers_bake_v2.bin` → `terrain_flowers/flowers_bake.bin`.
-2. Copy `terrain_scatter_v2.scn` → `terrain_fix2/scatter/terrain_scatter.scn`.
 3. For anything else placed with `height()` (trees, dressing), consider a `surface_y(x, z)` helper that returns the grid-triangle height. The `surf()` code in `reseat.gd` is the exact formula.

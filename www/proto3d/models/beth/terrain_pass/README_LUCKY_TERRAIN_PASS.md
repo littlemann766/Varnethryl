@@ -343,3 +343,20 @@ Assets are in `tidewrack_sea/stage5_islands/waystones/`: `waystone{,_lod1 (29%),
 - Add an interact prompt "Travel by waystone" within 3 m.
 - On use: fade, teleport the hero to the other stone + 2 m along its facing, then unfade. The glow mesh uses an emissive (0.35, 0.8, 1.0) material.
 - Require that the far stone has been visited once (walked to) before it works, so the climb is still discovered the first time. That part is optional.
+
+## Fix 9 - natural mainland coastline (main.gd patch, applied after 8c)
+`terrain_pass/mainland/fix09_main_gd.patch`:
+- **New coast functions.** `shore_z(x)` and `coast_x(z)` now use `_coast_w()`: three-octave coves and headlands (±47 m) plus two narrow inlets.
+  - `_keep()` leaves only the real stone quays straight: the harbour-district quay (north shore, x HarborDistrict.X0-10 .. SEA_COAST_X+6) and the old port quay (west coast z 365-435).
+  - The lighthouse foot (z 440-468) also stays straight. The lighthouse now uses `coast_x(PORT.y+62) - 2` for its x.
+  - Each straight zone blends into the curves over 35 m.
+- **Signed coast distance.** New `sea_depth(x,z)` (> 0 at sea). `sea_mask()` = smoothstep(0, 8, sea_depth), so the "sea is west of the old straight line" assumptions are gone.
+  - The `in sea` test at line ~219 is now just `sea_mask > 0.5`.
+  - The hill fall-off (`dsea`) is measured from the real coast.
+- **Beach berm.** The old `maxf(h, 0.7)` over-plane hack is replaced by a berm 0-20 m inland (0.35→1.35 m, with a small ripple) that fades out by 60 m. It is skipped on the harbour pad.
+- **Sea mesh.** The rectangular `Sea` PlaneMesh is replaced by `_sea_mesh()`: 20 m cells wherever any corner is within 2 m of the sea, plus two outer skirts to 4 km.
+  - Its landward overhang (≤ 28 m) always lies under the berm, so there is no rectangle edge or seam.
+  - It is still one draw call with the same `_water_mat()`.
+- **Works with 8c.** The 8c shingle samples `coast_x()`, so it follows the new coves. The lake is unaffected; its water stays inland at y 0.
+
+If `patch` rejects a hunk, the replaced blocks are: shore_z/coast_x/sea_mask, `height()` lines dsea/beach, the Sea quad in `_hi_terrain`, and the lighthouse x.

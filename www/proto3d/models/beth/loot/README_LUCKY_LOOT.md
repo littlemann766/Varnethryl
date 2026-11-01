@@ -92,7 +92,7 @@ New files (copy the whole `loot/` folder to `res://loot/` as before):
    - Cedric's lute attaches to `chest` (slung on his back). Move it to `hand_R` with the weapon transform from the `weapon_offhand` math if you want it in hand while strumming.
    - Chest pieces are rigid shells on the `chest` bone with non-uniform scale fitted to each torso. Turn on cape_clamp or leave the cloth as is; capes stay outside them.
    - **Baked weapons.** Some voxel heroes already have a weapon in their mesh (Darius's sword shows in the sheets). While a gear weapon is equipped, either hide it (needs a weaponless variant from Lucian, which I didn't touch) or skip the gear weapon mesh for those heroes and only apply its stats.
-4. **Stats.** Weapon `atk` maps onto `base_item` atk. Head, chest and shield `def` add together. Extra keys: `crit_pct`, `on_hit` (bleed, burn_3s, frost_slow, stagger, pierce, shock, snare, riposte, mp_on_hit, party_atk_5pct), `skill_pct`, `aura_heal`, `mp_pct`, `mp_regen_pct`, `dodge_pct`, `speed_pct`, `poise`, `*_res_pct`, `block_pct`, `hp_regen`, `revive_once_per_day`, `atk_pct`, `companion_hp_pct`, `companion_atk_pct`. Anything you don't support yet can be ignored, because atk and def carry the balance.
+4. **Stats.** Weapon `atk` maps onto `base_item` atk (see Phase 2b below for the tier jumps and T3 perks). Head, chest and shield `def` add together. Extra keys: `crit_pct`, `on_hit` (bleed, burn_3s, frost_slow, stagger, pierce, shock, snare, riposte, mp_on_hit, party_atk_5pct), `skill_pct`, `aura_heal`, `mp_pct`, `mp_regen_pct`, `dodge_pct`, `speed_pct`, `poise`, `*_res_pct`, `block_pct`, `hp_regen`, `revive_once_per_day`, `atk_pct`, `companion_hp_pct`, `companion_atk_pct`. Anything you don't support yet can be ignored, because atk and def carry the balance.
 5. **Legacy items.** The phase 1 weapons and armour in `items.json` (rusted_shortsword ... ashwalker_mail, iron_buckler) stay as loot. Treat them as "any hero" gear in the `weapon`/`chest`/`shield` slots that shows no mesh (stats only), or sell-only.
 
 ## Drop wiring (drop_tables.json v2)
@@ -116,3 +116,42 @@ New files (copy the whole `loot/` folder to `res://loot/` as before):
 
 ## Phase 2 LOD (lod1 / High tris)
 All 72 gear meshes are at or under 50% (range 24-43%). Merchants are 25-29%, and stalls 26-28%. Per-item figures are in `gear.json` (`tris`).
+
+## Phase 2b: badass pass (look + stats)
+- **Look:** helmets are the hero piece.
+  - Heavy: T1 Iron Bascinet is now a flat-topped great helm with an eye slit and breaths. T2 Steel Barbute is a blackened houndskull visor bascinet with a mail aventail. T3 Great Helm of the Vale is a gilt great helm with horns, a crest and a glowing eye slit.
+  - Medium: nasal helm, then a spectacle guard, then T3 with a crest and swept wings.
+  - Light: shadowed hoods (the face is in darkness), a half-mask at T2, and a gilt spiked circlet at T3.
+  - Chest pieces gain gorgets, flared layered pauldrons, fur mantles on heavy and cloth mantles or capes on medium and light, plus lames and a peascod ridge.
+  - All metal has battle wear (dents, scratches, rust on T1).
+  - Palettes: T1 worn iron, T2 blackened steel with brass, T3 dark steel with gilt and a glow accent.
+  - **The attach pivots didn't change**, so `gear_attach.json` works as before.
+- **Tier jumps:** weapon ATK is 20 / 42 / 75 (x family multiplier). Chest DEF is heavy 15/32/55, medium 11/23/40 and light 7/15/26, and helmets give 45% of that. Shield block is 12/22/34%. T2 weapons add `atk_speed_pct` 5, and T2 armour adds `poise` +0.05.
+- **T3 perks:** every tier 3 item has a unique `perk` {name, key, value, desc} in `gear.json`. Show the name and desc in the tooltip. Implement them by `key`; anything not done yet can show as "(coming soon)".
+
+| T3 item | Perk | Key | Effect |
+|---|---|---|---|
+| Saltglass Longsword | Brine-Edge | `lifesteal_pct` = 6 | Heal 6% of damage dealt. |
+| Duelist's Swept-Hilt Rapier | Riposte | `perfect_block_counter_pct` = 150 | After a perfect block, the next hit deals 150% and always crits. |
+| Rimeforged Zweihander | Glacier Cleave | `charged_frost_wave` = 1 | Fully charged swings send a frost wave that slows by 40% for 3 s. |
+| Saltglass Misericorde | Mercy Stroke | `execute_below_hp_pct` = 15 | Hits on non-boss enemies under 15% HP kill them outright; bosses take +30% instead. |
+| Emberwrought Axe | Ember Bite | `burn_on_hit_pct` = 25 | 25% chance per hit to burn for 3 s (stacks 3x). |
+| Hallowed Flanged Mace | Hallowed Ring | `stagger_heal_party_pct` = 3 | Staggering an enemy heals the party 3% max HP. |
+| Saltglass Partisan | Tidebreaker | `pierce_targets` = 3 | Thrusts pierce up to 3 enemies and ignore 20% defence. |
+| Starglass Staff | Starfall | `skill_cdr_pct` = 15 | Skill cooldowns -15%; every 5th skill cast is free. |
+| Rime Reaper | Winter Harvest | `kill_restores_sp_pct` = 20 | Kills restore 20% SP and chill nearby enemies. |
+| Glasswyrm Recurve | Wyrmglass Arrow | `crit_dmg_pct` = 40 | +40% crit damage; crits ricochet to a 2nd target. |
+| Stormsilk Arbalest | Stormbolt | `chain_lightning_targets` = 3 | Bolts chain lightning to 3 nearby enemies. |
+| Court Lute of Gullhaven | Ballad of the Tide | `party_atk_pct` = 12 | Party +12% ATK while Cedric plays; nearby allies regen 1% HP/s. |
+| Coil-Scale Lash | Coilbind | `snare_s` = 2.5 | Lash roots enemies for 2.5 s (bosses: 40% slow). |
+| Ember Cestus | Furnace Fists | `combo_burn_ramp_pct` = 5 | Each hit in a combo adds +5% damage (max +50%) and the 10th hit explodes. |
+| Warden's Silk Hood | Warden's Sight | `crit_pct` = 12 | +12% crit and enemies' weak points glow. |
+| Rimeguard Helm | Rimeguard | `frost_immune` = 1 | Immune to frost slow and freeze; +30% frost resist. |
+| Great Helm of the Vale | Dread of the Vale | `fear_on_hit_taken_pct` = 10 | +25% poise; when hit, 10% chance to make the attacker cower for 1.5 s. |
+| Starsilk Vestment | Starsilk Ward | `spell_shield_pct_hp` = 20 | Every 20 s, a shield absorbs damage up to 20% max HP. |
+| Brigandine of the Watch | Watchman's Reflex | `dodge_heal_pct` = 4 | Perfect dodges heal 4% max HP and refund 15 SP. |
+| Rimewarden Harness | Thornplate | `thorns_pct` = 25 | Reflect 25% of melee damage taken; frost resist +30%. |
+| Gullhaven Kite Shield | Seawall | `block_reflect_pct` = 40 | Blocks reflect 40% of the blocked damage; can block boss slams. |
+| Saltglass Seal Ring | Seal of the Deep | `crit_heal_pct` = 2 | Crits heal 2% max HP. |
+| Glasswyrm Locket | Last Light | `revive_once_per_day` = 1 | Once per in-game day, survive a killing blow at 30% HP. |
+| Starsilk Collar | Bonded Spirit | `companion_shares_dmg_pct` = 20 | Companion takes 20% of the leader's damage and never despawns. |

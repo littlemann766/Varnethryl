@@ -168,6 +168,7 @@ func _build_region(id: String) -> void:
 	if id == "B": _place_b(root)
 	if id == "frost": _place_bergs(root)
 	_place_landings(id, root)
+	_access_patches(id, root)
 	_border_update()
 func _local_xf(mi: Node3D, top: Node3D) -> Transform3D:
 	var t := Transform3D.IDENTITY; var n: Node = mi
@@ -644,6 +645,34 @@ func _place_landings(id: String, root: Node3D) -> void:
 		var lb := MeshInstance3D.new(); var sp := SphereMesh.new(); sp.radius = 0.4; sp.height = 0.8; lb.mesh = sp; lb.material_override = lamp; n.add_child(lb); lb.position = post.position + Vector3(0, 2.2, 0)
 		var ol := OmniLight3D.new(); ol.light_color = Color(1, 0.8, 0.45); ol.light_energy = 3.0; ol.omni_range = 14.0; n.add_child(ol); ol.position = lb.position
 		var lab := Label3D.new(); lab.text = str(L.name); lab.font_size = 96; lab.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lab.no_depth_test = false; lab.modulate = Color(1, 0.93, 0.7); n.add_child(lab); lab.position = lb.position + Vector3(0, 1.6, 0)
+## quests-test: invisible walk-access patches (sea-local coords) where story routes snag on Beth's island colliders.
+## ["deck", region, a, b, width, lift]: a thin walkable plank whose top runs a->b (+lift) over rock seams/lips;
+## ["guide", region, a, b, height]: a vertical slab a->b that turns a dead corner into a funnel.
+## Merge note: new const + func, called once in _build_region after _place_landings; independent of the pier boards.
+const ACCESS_PATCHES := [
+	# Saltglass pier stair foot: coming off the pier head (6 m west of the stair) the hero wedged in the V between the
+	# stair's west cheek (x -2119.46) and the island face (normal 0.37,0,0.93). Slab along that face -> slide onto the stair.
+	["guide", "B", Vector3(-2122.6, 20.3, -91.3), Vector3(-2119.42, 20.3, -93.3), 2.6],
+	# Saltglass plateau path to the Glass-diver's Chest (route idx 108-117): rock seams/overhang lips stopped the hero ~16 m short.
+	["deck", "B", Vector3(-2206.66, 94.95, 55.73), Vector3(-2198.66, 95.58, 61.73), 3.0, 0.2],
+	["deck", "B", Vector3(-2198.66, 95.58, 61.73), Vector3(-2186.66, 96.34, 67.73), 3.0, 0.2],
+	["deck", "B", Vector3(-2186.66, 96.34, 67.73), Vector3(-2174.24, 96.44, 73.94), 3.0, 0.2],
+]
+func _access_patches(id: String, root: Node3D) -> void:
+	for P in ACCESS_PATCHES:
+		if P[1] != id: continue
+		var a: Vector3 = P[2]; var b: Vector3 = P[3]
+		var sb := StaticBody3D.new(); sb.name = "AccessPatch"; root.add_child(sb)
+		var cs := CollisionShape3D.new(); var bs := BoxShape3D.new(); cs.shape = bs; sb.add_child(cs)
+		if P[0] == "deck":
+			var lift := Vector3(0, float(P[5]), 0)
+			bs.size = Vector3(float(P[4]), 0.3, a.distance_to(b) + 1.0)
+			sb.look_at_from_position(to_global((a + b) * 0.5 + lift), to_global(b + lift), Vector3.UP)
+			sb.global_position -= sb.global_basis.y * 0.15
+		else:
+			var flat := Vector3(b.x, a.y, b.z)
+			bs.size = Vector3(0.3, float(P[4]), a.distance_to(flat))
+			sb.look_at_from_position(to_global((a + flat) * 0.5 + Vector3(0, float(P[4]) * 0.5, 0)), to_global(flat + Vector3(0, float(P[4]) * 0.5, 0)), Vector3.UP)
 func _region_ready(id: String) -> bool: return regions.get(id, {}).get("state", 0) == 2
 func go_ashore(k: String) -> void:
 	var L := landing(k)
@@ -690,6 +719,7 @@ func _walk(inp: Vector2, dt: float) -> void:
 	h.floor_snap_length = 0.6; h.floor_max_angle = deg_to_rad(50.0)
 	var before := h.global_position
 	h.move_and_slide()
+	_step_up(h, before, dir * spd * dt)
 	if spd > 0.1: m.hero_vis.rotation.y = lerp_angle(m.hero_vis.rotation.y, atan2(-dir.x, -dir.z), 10 * dt)
 	var lp := to_local(h.global_position)
 	# safety: on floor -> remember; in the sea / falling / no floor -> back to the last safe spot
@@ -721,4 +751,24 @@ func _walk(inp: Vector2, dt: float) -> void:
 	elif lp.distance_to(pier_head(L)) < 10.0: ui.set_prompt("Board ship", board_ship)
 	elif ashore == "gullhaven" and Vector2(lp.x, lp.z).distance_to(Vector2(M.s1.props.gullhaven.anchor[0], M.s1.props.gullhaven.anchor[2])) < 90.0: ui.set_prompt("Shipwright", ui.open_shipwright)
 	else: ui.set_prompt("", Callable())
+## quests-test: stair/lip step-up ashore. CharacterBody3D can't climb a vertical edge, so a hero walking into a small lip
+## (Saltglass pier-stair foot cheek, stair-top seam, rock seams on the plateau path to the Glass-diver's Chest) stalled.
+## Blocked while pushing on the floor -> try lifting up to 0.55 m and moving on; only if there is head room and the spot
+## ahead is free. Gravity/floor snap settle the hero next frame. Never fires mid-air, so no wall climbing.
+const STEP_UP := [0.2, 0.35, 0.55]
+func _step_up(h: CharacterBody3D, before: Vector3, want: Vector3) -> void:
+	if want.length() < 0.001 or not (h.is_on_floor() or _air_t < 0.1): return
+	var got := Vector2(h.global_position.x - before.x, h.global_position.z - before.z).length()
+	if got > want.length() * 0.6: return
+	var fwd := want.normalized() * maxf(want.length(), 0.08)
+	for up in STEP_UP:
+		var t := h.global_transform
+		if h.test_move(t, Vector3(0, up, 0)): return          # no head room
+		var t2 := t.translated(Vector3(0, up, 0))
+		if h.test_move(t2, fwd): continue                      # still blocked at this height
+		var t3 := t2.translated(fwd)
+		var down := PhysicsTestMotionResult3D.new()
+		if not h.test_move(t3, Vector3(0, -(up + 0.3), 0)): continue   # must land on something within the step (no stepping off ledges)
+		h.global_position = t3.origin; h.velocity.y = 0.0
+		return
 func sailing() -> bool: return active and ashore == "" and not diving

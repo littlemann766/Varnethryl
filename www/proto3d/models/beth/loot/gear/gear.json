@@ -1,0 +1,2599 @@
+{
+ "_note": "Beth loot phase 2: equippable hero gear. PROPOSED values. value = shop list price in gold; sell = what a merchant pays (30%). Tiers: 1 common (iron, sold in towns), 2 rare (steel, port smiths/limited stock + drops), 3 epic (named, boss/elite drops and chests only; not sold).",
+ "slots": [
+  "weapon",
+  "weapon_offhand",
+  "head",
+  "chest",
+  "shield",
+  "ring",
+  "trinket",
+  "collar"
+ ],
+ "hero_classes": {
+  "aldric": {
+   "weapon_family": "sword",
+   "hands": "R",
+   "armor": "heavy",
+   "shield": true
+  },
+  "elira": {
+   "weapon_family": "bow",
+   "hands": "L",
+   "armor": "medium",
+   "shield": false
+  },
+  "rowan": {
+   "weapon_family": "staff",
+   "hands": "R",
+   "armor": "light",
+   "shield": false
+  },
+  "thorne": {
+   "weapon_family": "staff",
+   "hands": "R",
+   "armor": "light",
+   "shield": false
+  },
+  "nyx": {
+   "weapon_family": "dagger",
+   "hands": "RL",
+   "armor": "medium",
+   "shield": false
+  },
+  "seraphine": {
+   "weapon_family": "mace",
+   "hands": "R",
+   "armor": "heavy",
+   "shield": true
+  },
+  "garruk": {
+   "weapon_family": "axe",
+   "hands": "R",
+   "armor": "heavy",
+   "shield": false
+  },
+  "mirelle": {
+   "weapon_family": "staff",
+   "hands": "R",
+   "armor": "light",
+   "shield": false
+  },
+  "cedric": {
+   "weapon_family": "lute",
+   "hands": "R",
+   "armor": "medium",
+   "shield": false
+  },
+  "morwen": {
+   "weapon_family": "scythe",
+   "hands": "R",
+   "armor": "medium",
+   "shield": false
+  },
+  "kael": {
+   "weapon_family": "staff",
+   "hands": "R",
+   "armor": "light",
+   "shield": false
+  },
+  "vesper": {
+   "weapon_family": "crossbow",
+   "hands": "R",
+   "armor": "medium",
+   "shield": false
+  },
+  "talia": {
+   "weapon_family": "staff",
+   "hands": "R",
+   "armor": "light",
+   "shield": false
+  },
+  "orin": {
+   "weapon_family": "spear",
+   "hands": "R",
+   "armor": "heavy",
+   "shield": false
+  },
+  "selene": {
+   "weapon_family": "staff",
+   "hands": "R",
+   "armor": "light",
+   "shield": false
+  },
+  "darius": {
+   "weapon_family": "greatsword",
+   "hands": "R",
+   "armor": "heavy",
+   "shield": false
+  },
+  "finn": {
+   "weapon_family": "rapier",
+   "hands": "R",
+   "armor": "medium",
+   "shield": false
+  },
+  "brynn": {
+   "weapon_family": "crossbow",
+   "hands": "R",
+   "armor": "medium",
+   "shield": false
+  },
+  "asha": {
+   "weapon_family": "knuckles",
+   "hands": "RL",
+   "armor": "medium",
+   "shield": false
+  },
+  "rook": {
+   "weapon_family": "whip",
+   "hands": "R",
+   "armor": "heavy",
+   "shield": false
+  },
+  "owner": {
+   "weapon_family": "sword",
+   "hands": "R",
+   "armor": "heavy",
+   "shield": true
+  },
+  "wren": {
+   "weapon_family": "dagger",
+   "hands": "R",
+   "armor": "medium",
+   "shield": false
+  },
+  "pip": {
+   "weapon_family": null,
+   "hands": "",
+   "armor": "companion",
+   "shield": false
+  },
+  "phoenix": {
+   "weapon_family": null,
+   "hands": "",
+   "armor": "companion",
+   "shield": false
+  }
+ },
+ "attach_file": "res://loot/gear/gear_attach.json",
+ "items": [
+  {
+   "name": "Iron Arming Sword",
+   "slot": "weapon",
+   "family": "sword",
+   "tier": 1,
+   "stats": {
+    "atk": 18
+   },
+   "id": "iron_arming_sword",
+   "rarity": "common",
+   "value": 60,
+   "sell": 18,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/iron_arming_sword.png",
+   "mesh": "res://loot/gear/meshes/iron_arming_sword.glb",
+   "mesh_lod1": "res://loot/gear/meshes/iron_arming_sword_lod1.glb",
+   "heroes": [
+    "aldric",
+    "owner"
+   ],
+   "tris": {
+    "high": 1948,
+    "lod1": 636
+   },
+   "size_m": [
+    0.225,
+    0.045,
+    0.87
+   ]
+  },
+  {
+   "name": "Steel Knightly Sword",
+   "slot": "weapon",
+   "family": "sword",
+   "tier": 2,
+   "stats": {
+    "atk": 36
+   },
+   "id": "steel_knightly_sword",
+   "rarity": "rare",
+   "value": 420,
+   "sell": 126,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_knightly_sword.png",
+   "mesh": "res://loot/gear/meshes/steel_knightly_sword.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_knightly_sword_lod1.glb",
+   "heroes": [
+    "aldric",
+    "owner"
+   ],
+   "tris": {
+    "high": 1964,
+    "lod1": 636
+   },
+   "size_m": [
+    0.225,
+    0.075,
+    0.87
+   ]
+  },
+  {
+   "name": "Saltglass Longsword",
+   "slot": "weapon",
+   "family": "sword",
+   "tier": 3,
+   "stats": {
+    "atk": 62,
+    "on_hit": "bleed"
+   },
+   "id": "saltglass_longsword",
+   "rarity": "epic",
+   "value": 2400,
+   "sell": 720,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/saltglass_longsword.png",
+   "mesh": "res://loot/gear/meshes/saltglass_longsword.glb",
+   "mesh_lod1": "res://loot/gear/meshes/saltglass_longsword_lod1.glb",
+   "heroes": [
+    "aldric",
+    "owner"
+   ],
+   "tris": {
+    "high": 1964,
+    "lod1": 636
+   },
+   "size_m": [
+    0.225,
+    0.075,
+    0.87
+   ]
+  },
+  {
+   "name": "Iron Sidesword",
+   "slot": "weapon",
+   "family": "rapier",
+   "tier": 1,
+   "stats": {
+    "atk": 16,
+    "crit_pct": 8
+   },
+   "id": "iron_sidesword",
+   "rarity": "common",
+   "value": 60,
+   "sell": 18,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/iron_sidesword.png",
+   "mesh": "res://loot/gear/meshes/iron_sidesword.glb",
+   "mesh_lod1": "res://loot/gear/meshes/iron_sidesword_lod1.glb",
+   "heroes": [
+    "finn"
+   ],
+   "tris": {
+    "high": 1436,
+    "lod1": 488
+   },
+   "size_m": [
+    0.165,
+    0.06,
+    1.005
+   ]
+  },
+  {
+   "name": "Steel Rapier",
+   "slot": "weapon",
+   "family": "rapier",
+   "tier": 2,
+   "stats": {
+    "atk": 32,
+    "crit_pct": 10
+   },
+   "id": "steel_rapier",
+   "rarity": "rare",
+   "value": 420,
+   "sell": 126,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_rapier.png",
+   "mesh": "res://loot/gear/meshes/steel_rapier.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_rapier_lod1.glb",
+   "heroes": [
+    "finn"
+   ],
+   "tris": {
+    "high": 1448,
+    "lod1": 488
+   },
+   "size_m": [
+    0.165,
+    0.075,
+    1.005
+   ]
+  },
+  {
+   "name": "Duelist's Swept-Hilt Rapier",
+   "slot": "weapon",
+   "family": "rapier",
+   "tier": 3,
+   "stats": {
+    "atk": 56,
+    "crit_pct": 12,
+    "on_hit": "riposte"
+   },
+   "id": "duelists_swept_hilt_rapier",
+   "rarity": "epic",
+   "value": 2400,
+   "sell": 720,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/duelists_swept_hilt_rapier.png",
+   "mesh": "res://loot/gear/meshes/duelists_swept_hilt_rapier.glb",
+   "mesh_lod1": "res://loot/gear/meshes/duelists_swept_hilt_rapier_lod1.glb",
+   "heroes": [
+    "finn"
+   ],
+   "tris": {
+    "high": 1448,
+    "lod1": 488
+   },
+   "size_m": [
+    0.165,
+    0.075,
+    1.005
+   ]
+  },
+  {
+   "name": "Iron Two-Hander",
+   "slot": "weapon",
+   "family": "greatsword",
+   "tier": 1,
+   "stats": {
+    "atk": 24
+   },
+   "id": "iron_two_hander",
+   "rarity": "common",
+   "value": 85,
+   "sell": 26,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/iron_two_hander.png",
+   "mesh": "res://loot/gear/meshes/iron_two_hander.glb",
+   "mesh_lod1": "res://loot/gear/meshes/iron_two_hander_lod1.glb",
+   "heroes": [
+    "darius"
+   ],
+   "tris": {
+    "high": 3492,
+    "lod1": 1064
+   },
+   "size_m": [
+    0.345,
+    0.045,
+    1.305
+   ]
+  },
+  {
+   "name": "Steel Greatsword",
+   "slot": "weapon",
+   "family": "greatsword",
+   "tier": 2,
+   "stats": {
+    "atk": 49
+   },
+   "id": "steel_greatsword",
+   "rarity": "rare",
+   "value": 590,
+   "sell": 177,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_greatsword.png",
+   "mesh": "res://loot/gear/meshes/steel_greatsword.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_greatsword_lod1.glb",
+   "heroes": [
+    "darius"
+   ],
+   "tris": {
+    "high": 3508,
+    "lod1": 1064
+   },
+   "size_m": [
+    0.345,
+    0.075,
+    1.305
+   ]
+  },
+  {
+   "name": "Rimeforged Zweihander",
+   "slot": "weapon",
+   "family": "greatsword",
+   "tier": 3,
+   "stats": {
+    "atk": 84,
+    "on_hit": "frost_slow"
+   },
+   "id": "rimeforged_zweihander",
+   "rarity": "epic",
+   "value": 3360,
+   "sell": 1008,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/rimeforged_zweihander.png",
+   "mesh": "res://loot/gear/meshes/rimeforged_zweihander.glb",
+   "mesh_lod1": "res://loot/gear/meshes/rimeforged_zweihander_lod1.glb",
+   "heroes": [
+    "darius"
+   ],
+   "tris": {
+    "high": 3508,
+    "lod1": 1064
+   },
+   "size_m": [
+    0.345,
+    0.075,
+    1.305
+   ]
+  },
+  {
+   "name": "Iron Dagger",
+   "slot": "weapon",
+   "family": "dagger",
+   "tier": 1,
+   "stats": {
+    "atk": 13,
+    "crit_pct": 12
+   },
+   "id": "iron_dagger",
+   "rarity": "common",
+   "value": 35,
+   "sell": 10,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/iron_dagger.png",
+   "mesh": "res://loot/gear/meshes/iron_dagger.glb",
+   "mesh_lod1": "res://loot/gear/meshes/iron_dagger_lod1.glb",
+   "heroes": [
+    "nyx",
+    "wren"
+   ],
+   "tris": {
+    "high": 860,
+    "lod1": 276
+   },
+   "size_m": [
+    0.135,
+    0.045,
+    0.405
+   ]
+  },
+  {
+   "name": "Steel Rondel Dagger",
+   "slot": "weapon",
+   "family": "dagger",
+   "tier": 2,
+   "stats": {
+    "atk": 25,
+    "crit_pct": 14
+   },
+   "id": "steel_rondel_dagger",
+   "rarity": "rare",
+   "value": 250,
+   "sell": 75,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_rondel_dagger.png",
+   "mesh": "res://loot/gear/meshes/steel_rondel_dagger.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_rondel_dagger_lod1.glb",
+   "heroes": [
+    "nyx",
+    "wren"
+   ],
+   "tris": {
+    "high": 876,
+    "lod1": 276
+   },
+   "size_m": [
+    0.135,
+    0.075,
+    0.405
+   ]
+  },
+  {
+   "name": "Saltglass Misericorde",
+   "slot": "weapon",
+   "family": "dagger",
+   "tier": 3,
+   "stats": {
+    "atk": 43,
+    "crit_pct": 16,
+    "on_hit": "bleed"
+   },
+   "id": "saltglass_misericorde",
+   "rarity": "epic",
+   "value": 1440,
+   "sell": 432,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/saltglass_misericorde.png",
+   "mesh": "res://loot/gear/meshes/saltglass_misericorde.glb",
+   "mesh_lod1": "res://loot/gear/meshes/saltglass_misericorde_lod1.glb",
+   "heroes": [
+    "nyx",
+    "wren"
+   ],
+   "tris": {
+    "high": 876,
+    "lod1": 276
+   },
+   "size_m": [
+    0.135,
+    0.075,
+    0.405
+   ]
+  },
+  {
+   "name": "Iron Bearded Axe",
+   "slot": "weapon",
+   "family": "axe",
+   "tier": 1,
+   "stats": {
+    "atk": 21,
+    "crit_pct": 3
+   },
+   "id": "iron_bearded_axe",
+   "rarity": "common",
+   "value": 60,
+   "sell": 18,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/iron_bearded_axe.png",
+   "mesh": "res://loot/gear/meshes/iron_bearded_axe.glb",
+   "mesh_lod1": "res://loot/gear/meshes/iron_bearded_axe_lod1.glb",
+   "heroes": [
+    "garruk"
+   ],
+   "tris": {
+    "high": 1856,
+    "lod1": 688
+   },
+   "size_m": [
+    0.285,
+    0.045,
+    0.795
+   ]
+  },
+  {
+   "name": "Steel Dane Axe",
+   "slot": "weapon",
+   "family": "axe",
+   "tier": 2,
+   "stats": {
+    "atk": 41,
+    "crit_pct": 5
+   },
+   "id": "steel_dane_axe",
+   "rarity": "rare",
+   "value": 420,
+   "sell": 126,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_dane_axe.png",
+   "mesh": "res://loot/gear/meshes/steel_dane_axe.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_dane_axe_lod1.glb",
+   "heroes": [
+    "garruk"
+   ],
+   "tris": {
+    "high": 1872,
+    "lod1": 688
+   },
+   "size_m": [
+    0.285,
+    0.075,
+    0.795
+   ]
+  },
+  {
+   "name": "Emberwrought Axe",
+   "slot": "weapon",
+   "family": "axe",
+   "tier": 3,
+   "stats": {
+    "atk": 71,
+    "crit_pct": 7,
+    "on_hit": "burn_3s"
+   },
+   "id": "emberwrought_axe",
+   "rarity": "epic",
+   "value": 2400,
+   "sell": 720,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/emberwrought_axe.png",
+   "mesh": "res://loot/gear/meshes/emberwrought_axe.glb",
+   "mesh_lod1": "res://loot/gear/meshes/emberwrought_axe_lod1.glb",
+   "heroes": [
+    "garruk"
+   ],
+   "tris": {
+    "high": 1872,
+    "lod1": 688
+   },
+   "size_m": [
+    0.285,
+    0.075,
+    0.795
+   ]
+  },
+  {
+   "name": "Iron Mace",
+   "slot": "weapon",
+   "family": "mace",
+   "tier": 1,
+   "stats": {
+    "atk": 20
+   },
+   "id": "iron_mace",
+   "rarity": "common",
+   "value": 60,
+   "sell": 18,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/iron_mace.png",
+   "mesh": "res://loot/gear/meshes/iron_mace.glb",
+   "mesh_lod1": "res://loot/gear/meshes/iron_mace_lod1.glb",
+   "heroes": [
+    "seraphine"
+   ],
+   "tris": {
+    "high": 1932,
+    "lod1": 672
+   },
+   "size_m": [
+    0.225,
+    0.21,
+    0.84
+   ]
+  },
+  {
+   "name": "Steel Flanged Mace",
+   "slot": "weapon",
+   "family": "mace",
+   "tier": 2,
+   "stats": {
+    "atk": 40
+   },
+   "id": "steel_flanged_mace",
+   "rarity": "rare",
+   "value": 420,
+   "sell": 126,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_flanged_mace.png",
+   "mesh": "res://loot/gear/meshes/steel_flanged_mace.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_flanged_mace_lod1.glb",
+   "heroes": [
+    "seraphine"
+   ],
+   "tris": {
+    "high": 1932,
+    "lod1": 672
+   },
+   "size_m": [
+    0.225,
+    0.21,
+    0.84
+   ]
+  },
+  {
+   "name": "Hallowed Flanged Mace",
+   "slot": "weapon",
+   "family": "mace",
+   "tier": 3,
+   "stats": {
+    "atk": 68,
+    "on_hit": "stagger"
+   },
+   "id": "hallowed_flanged_mace",
+   "rarity": "epic",
+   "value": 2400,
+   "sell": 720,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/hallowed_flanged_mace.png",
+   "mesh": "res://loot/gear/meshes/hallowed_flanged_mace.glb",
+   "mesh_lod1": "res://loot/gear/meshes/hallowed_flanged_mace_lod1.glb",
+   "heroes": [
+    "seraphine"
+   ],
+   "tris": {
+    "high": 1932,
+    "lod1": 672
+   },
+   "size_m": [
+    0.225,
+    0.21,
+    0.84
+   ]
+  },
+  {
+   "name": "Ash Spear",
+   "slot": "weapon",
+   "family": "spear",
+   "tier": 1,
+   "stats": {
+    "atk": 20,
+    "crit_pct": 5
+   },
+   "id": "ash_spear",
+   "rarity": "common",
+   "value": 60,
+   "sell": 18,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/ash_spear.png",
+   "mesh": "res://loot/gear/meshes/ash_spear.glb",
+   "mesh_lod1": "res://loot/gear/meshes/ash_spear_lod1.glb",
+   "heroes": [
+    "orin"
+   ],
+   "tris": {
+    "high": 1700,
+    "lod1": 712
+   },
+   "size_m": [
+    0.105,
+    0.045,
+    2.025
+   ]
+  },
+  {
+   "name": "Steel Winged Spear",
+   "slot": "weapon",
+   "family": "spear",
+   "tier": 2,
+   "stats": {
+    "atk": 40,
+    "crit_pct": 7
+   },
+   "id": "steel_winged_spear",
+   "rarity": "rare",
+   "value": 420,
+   "sell": 126,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_winged_spear.png",
+   "mesh": "res://loot/gear/meshes/steel_winged_spear.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_winged_spear_lod1.glb",
+   "heroes": [
+    "orin"
+   ],
+   "tris": {
+    "high": 1700,
+    "lod1": 712
+   },
+   "size_m": [
+    0.105,
+    0.045,
+    2.025
+   ]
+  },
+  {
+   "name": "Saltglass Partisan",
+   "slot": "weapon",
+   "family": "spear",
+   "tier": 3,
+   "stats": {
+    "atk": 68,
+    "crit_pct": 9,
+    "on_hit": "pierce"
+   },
+   "id": "saltglass_partisan",
+   "rarity": "epic",
+   "value": 2400,
+   "sell": 720,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/saltglass_partisan.png",
+   "mesh": "res://loot/gear/meshes/saltglass_partisan.glb",
+   "mesh_lod1": "res://loot/gear/meshes/saltglass_partisan_lod1.glb",
+   "heroes": [
+    "orin"
+   ],
+   "tris": {
+    "high": 1700,
+    "lod1": 712
+   },
+   "size_m": [
+    0.105,
+    0.045,
+    2.025
+   ]
+  },
+  {
+   "name": "Oak Quarterstaff",
+   "slot": "weapon",
+   "family": "staff",
+   "tier": 1,
+   "stats": {
+    "atk": 17,
+    "skill_pct": 5
+   },
+   "id": "oak_quarterstaff",
+   "rarity": "common",
+   "value": 40,
+   "sell": 12,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/oak_quarterstaff.png",
+   "mesh": "res://loot/gear/meshes/oak_quarterstaff.glb",
+   "mesh_lod1": "res://loot/gear/meshes/oak_quarterstaff_lod1.glb",
+   "heroes": [
+    "rowan",
+    "thorne",
+    "mirelle",
+    "kael",
+    "talia",
+    "selene"
+   ],
+   "tris": {
+    "high": 3032,
+    "lod1": 1096
+   },
+   "size_m": [
+    0.165,
+    0.15,
+    1.725
+   ]
+  },
+  {
+   "name": "Bound Rowan Staff",
+   "slot": "weapon",
+   "family": "staff",
+   "tier": 2,
+   "stats": {
+    "atk": 34,
+    "skill_pct": 10
+   },
+   "id": "bound_rowan_staff",
+   "rarity": "rare",
+   "value": 295,
+   "sell": 88,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/bound_rowan_staff.png",
+   "mesh": "res://loot/gear/meshes/bound_rowan_staff.glb",
+   "mesh_lod1": "res://loot/gear/meshes/bound_rowan_staff_lod1.glb",
+   "heroes": [
+    "rowan",
+    "thorne",
+    "mirelle",
+    "kael",
+    "talia",
+    "selene"
+   ],
+   "tris": {
+    "high": 3032,
+    "lod1": 1096
+   },
+   "size_m": [
+    0.165,
+    0.15,
+    1.725
+   ]
+  },
+  {
+   "name": "Starglass Staff",
+   "slot": "weapon",
+   "family": "staff",
+   "tier": 3,
+   "stats": {
+    "atk": 59,
+    "on_hit": "mp_on_hit",
+    "skill_pct": 15
+   },
+   "id": "starglass_staff",
+   "rarity": "epic",
+   "value": 1680,
+   "sell": 504,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/starglass_staff.png",
+   "mesh": "res://loot/gear/meshes/starglass_staff.glb",
+   "mesh_lod1": "res://loot/gear/meshes/starglass_staff_lod1.glb",
+   "heroes": [
+    "rowan",
+    "thorne",
+    "mirelle",
+    "kael",
+    "talia",
+    "selene"
+   ],
+   "tris": {
+    "high": 3032,
+    "lod1": 1096
+   },
+   "size_m": [
+    0.165,
+    0.15,
+    1.725
+   ]
+  },
+  {
+   "name": "Field Scythe",
+   "slot": "weapon",
+   "family": "scythe",
+   "tier": 1,
+   "stats": {
+    "atk": 22,
+    "crit_pct": 4
+   },
+   "id": "field_scythe",
+   "rarity": "common",
+   "value": 60,
+   "sell": 18,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/field_scythe.png",
+   "mesh": "res://loot/gear/meshes/field_scythe.glb",
+   "mesh_lod1": "res://loot/gear/meshes/field_scythe_lod1.glb",
+   "heroes": [
+    "morwen"
+   ],
+   "tris": {
+    "high": 3316,
+    "lod1": 1268
+   },
+   "size_m": [
+    0.705,
+    0.06,
+    1.62
+   ]
+  },
+  {
+   "name": "Steel War-Scythe",
+   "slot": "weapon",
+   "family": "scythe",
+   "tier": 2,
+   "stats": {
+    "atk": 43,
+    "crit_pct": 6
+   },
+   "id": "steel_war_scythe",
+   "rarity": "rare",
+   "value": 420,
+   "sell": 126,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_war_scythe.png",
+   "mesh": "res://loot/gear/meshes/steel_war_scythe.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_war_scythe_lod1.glb",
+   "heroes": [
+    "morwen"
+   ],
+   "tris": {
+    "high": 3316,
+    "lod1": 1268
+   },
+   "size_m": [
+    0.705,
+    0.06,
+    1.62
+   ]
+  },
+  {
+   "name": "Rime Reaper",
+   "slot": "weapon",
+   "family": "scythe",
+   "tier": 3,
+   "stats": {
+    "atk": 74,
+    "crit_pct": 8,
+    "on_hit": "frost_slow"
+   },
+   "id": "rime_reaper",
+   "rarity": "epic",
+   "value": 2400,
+   "sell": 720,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/rime_reaper.png",
+   "mesh": "res://loot/gear/meshes/rime_reaper.glb",
+   "mesh_lod1": "res://loot/gear/meshes/rime_reaper_lod1.glb",
+   "heroes": [
+    "morwen"
+   ],
+   "tris": {
+    "high": 3316,
+    "lod1": 1268
+   },
+   "size_m": [
+    0.705,
+    0.06,
+    1.62
+   ]
+  },
+  {
+   "name": "Elm Longbow",
+   "slot": "weapon",
+   "family": "bow",
+   "tier": 1,
+   "stats": {
+    "atk": 18,
+    "crit_pct": 6
+   },
+   "id": "elm_longbow",
+   "rarity": "common",
+   "value": 60,
+   "sell": 18,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/elm_longbow.png",
+   "mesh": "res://loot/gear/meshes/elm_longbow.glb",
+   "mesh_lod1": "res://loot/gear/meshes/elm_longbow_lod1.glb",
+   "heroes": [
+    "elira"
+   ],
+   "tris": {
+    "high": 2616,
+    "lod1": 1124
+   },
+   "size_m": [
+    0.225,
+    0.06,
+    1.395
+   ]
+  },
+  {
+   "name": "Yew Longbow",
+   "slot": "weapon",
+   "family": "bow",
+   "tier": 2,
+   "stats": {
+    "atk": 36,
+    "crit_pct": 8
+   },
+   "id": "yew_longbow",
+   "rarity": "rare",
+   "value": 420,
+   "sell": 126,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/yew_longbow.png",
+   "mesh": "res://loot/gear/meshes/yew_longbow.glb",
+   "mesh_lod1": "res://loot/gear/meshes/yew_longbow_lod1.glb",
+   "heroes": [
+    "elira"
+   ],
+   "tris": {
+    "high": 2616,
+    "lod1": 1124
+   },
+   "size_m": [
+    0.225,
+    0.06,
+    1.395
+   ]
+  },
+  {
+   "name": "Glasswyrm Recurve",
+   "slot": "weapon",
+   "family": "bow",
+   "tier": 3,
+   "stats": {
+    "atk": 62,
+    "crit_pct": 10,
+    "on_hit": "pierce"
+   },
+   "id": "glasswyrm_recurve",
+   "rarity": "epic",
+   "value": 2400,
+   "sell": 720,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/glasswyrm_recurve.png",
+   "mesh": "res://loot/gear/meshes/glasswyrm_recurve.glb",
+   "mesh_lod1": "res://loot/gear/meshes/glasswyrm_recurve_lod1.glb",
+   "heroes": [
+    "elira"
+   ],
+   "tris": {
+    "high": 2616,
+    "lod1": 1124
+   },
+   "size_m": [
+    0.225,
+    0.06,
+    1.395
+   ]
+  },
+  {
+   "name": "Wooden Crossbow",
+   "slot": "weapon",
+   "family": "crossbow",
+   "tier": 1,
+   "stats": {
+    "atk": 20,
+    "crit_pct": 4
+   },
+   "id": "wooden_crossbow",
+   "rarity": "common",
+   "value": 70,
+   "sell": 21,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/wooden_crossbow.png",
+   "mesh": "res://loot/gear/meshes/wooden_crossbow.glb",
+   "mesh_lod1": "res://loot/gear/meshes/wooden_crossbow_lod1.glb",
+   "heroes": [
+    "vesper",
+    "brynn"
+   ],
+   "tris": {
+    "high": 2724,
+    "lod1": 984
+   },
+   "size_m": [
+    0.615,
+    0.705,
+    0.15
+   ]
+  },
+  {
+   "name": "Steel-Prod Crossbow",
+   "slot": "weapon",
+   "family": "crossbow",
+   "tier": 2,
+   "stats": {
+    "atk": 40,
+    "crit_pct": 6
+   },
+   "id": "steel_prod_crossbow",
+   "rarity": "rare",
+   "value": 505,
+   "sell": 152,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_prod_crossbow.png",
+   "mesh": "res://loot/gear/meshes/steel_prod_crossbow.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_prod_crossbow_lod1.glb",
+   "heroes": [
+    "vesper",
+    "brynn"
+   ],
+   "tris": {
+    "high": 2732,
+    "lod1": 984
+   },
+   "size_m": [
+    0.615,
+    0.705,
+    0.15
+   ]
+  },
+  {
+   "name": "Stormsilk Arbalest",
+   "slot": "weapon",
+   "family": "crossbow",
+   "tier": 3,
+   "stats": {
+    "atk": 68,
+    "crit_pct": 8,
+    "on_hit": "shock"
+   },
+   "id": "stormsilk_arbalest",
+   "rarity": "epic",
+   "value": 2880,
+   "sell": 864,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/stormsilk_arbalest.png",
+   "mesh": "res://loot/gear/meshes/stormsilk_arbalest.glb",
+   "mesh_lod1": "res://loot/gear/meshes/stormsilk_arbalest_lod1.glb",
+   "heroes": [
+    "vesper",
+    "brynn"
+   ],
+   "tris": {
+    "high": 2732,
+    "lod1": 984
+   },
+   "size_m": [
+    0.615,
+    0.705,
+    0.15
+   ]
+  },
+  {
+   "name": "Pine Lute",
+   "slot": "weapon",
+   "family": "lute",
+   "tier": 1,
+   "stats": {
+    "atk": 14,
+    "aura_heal": 1
+   },
+   "id": "pine_lute",
+   "rarity": "common",
+   "value": 50,
+   "sell": 15,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/pine_lute.png",
+   "mesh": "res://loot/gear/meshes/pine_lute.glb",
+   "mesh_lod1": "res://loot/gear/meshes/pine_lute_lod1.glb",
+   "heroes": [
+    "cedric"
+   ],
+   "tris": {
+    "high": 4500,
+    "lod1": 1172
+   },
+   "size_m": [
+    0.315,
+    0.15,
+    0.855
+   ]
+  },
+  {
+   "name": "Rosewood Lute",
+   "slot": "weapon",
+   "family": "lute",
+   "tier": 2,
+   "stats": {
+    "atk": 27,
+    "aura_heal": 2
+   },
+   "id": "rosewood_lute",
+   "rarity": "rare",
+   "value": 335,
+   "sell": 100,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/rosewood_lute.png",
+   "mesh": "res://loot/gear/meshes/rosewood_lute.glb",
+   "mesh_lod1": "res://loot/gear/meshes/rosewood_lute_lod1.glb",
+   "heroes": [
+    "cedric"
+   ],
+   "tris": {
+    "high": 4508,
+    "lod1": 1172
+   },
+   "size_m": [
+    0.315,
+    0.15,
+    0.855
+   ]
+  },
+  {
+   "name": "Court Lute of Gullhaven",
+   "slot": "weapon",
+   "family": "lute",
+   "tier": 3,
+   "stats": {
+    "atk": 46,
+    "on_hit": "party_atk_5pct",
+    "aura_heal": 3
+   },
+   "id": "court_lute_of_gullhaven",
+   "rarity": "epic",
+   "value": 1920,
+   "sell": 576,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/court_lute_of_gullhaven.png",
+   "mesh": "res://loot/gear/meshes/court_lute_of_gullhaven.glb",
+   "mesh_lod1": "res://loot/gear/meshes/court_lute_of_gullhaven_lod1.glb",
+   "heroes": [
+    "cedric"
+   ],
+   "tris": {
+    "high": 4508,
+    "lod1": 1172
+   },
+   "size_m": [
+    0.315,
+    0.15,
+    0.855
+   ]
+  },
+  {
+   "name": "Hide Whip",
+   "slot": "weapon",
+   "family": "whip",
+   "tier": 1,
+   "stats": {
+    "atk": 15,
+    "crit_pct": 5
+   },
+   "id": "hide_whip",
+   "rarity": "common",
+   "value": 60,
+   "sell": 18,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/hide_whip.png",
+   "mesh": "res://loot/gear/meshes/hide_whip.glb",
+   "mesh_lod1": "res://loot/gear/meshes/hide_whip_lod1.glb",
+   "heroes": [
+    "rook"
+   ],
+   "tris": {
+    "high": 2576,
+    "lod1": 980
+   },
+   "size_m": [
+    0.345,
+    0.33,
+    0.27
+   ]
+  },
+  {
+   "name": "Braided Bullwhip",
+   "slot": "weapon",
+   "family": "whip",
+   "tier": 2,
+   "stats": {
+    "atk": 31,
+    "crit_pct": 7
+   },
+   "id": "braided_bullwhip",
+   "rarity": "rare",
+   "value": 420,
+   "sell": 126,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/braided_bullwhip.png",
+   "mesh": "res://loot/gear/meshes/braided_bullwhip.glb",
+   "mesh_lod1": "res://loot/gear/meshes/braided_bullwhip_lod1.glb",
+   "heroes": [
+    "rook"
+   ],
+   "tris": {
+    "high": 2576,
+    "lod1": 980
+   },
+   "size_m": [
+    0.345,
+    0.33,
+    0.27
+   ]
+  },
+  {
+   "name": "Coil-Scale Lash",
+   "slot": "weapon",
+   "family": "whip",
+   "tier": 3,
+   "stats": {
+    "atk": 53,
+    "crit_pct": 9,
+    "on_hit": "snare"
+   },
+   "id": "coil_scale_lash",
+   "rarity": "epic",
+   "value": 2400,
+   "sell": 720,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/coil_scale_lash.png",
+   "mesh": "res://loot/gear/meshes/coil_scale_lash.glb",
+   "mesh_lod1": "res://loot/gear/meshes/coil_scale_lash_lod1.glb",
+   "heroes": [
+    "rook"
+   ],
+   "tris": {
+    "high": 2576,
+    "lod1": 980
+   },
+   "size_m": [
+    0.345,
+    0.33,
+    0.27
+   ]
+  },
+  {
+   "name": "Iron Knuckles",
+   "slot": "weapon",
+   "family": "knuckles",
+   "tier": 1,
+   "stats": {
+    "atk": 14,
+    "crit_pct": 10
+   },
+   "id": "iron_knuckles",
+   "rarity": "common",
+   "value": 35,
+   "sell": 10,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/iron_knuckles.png",
+   "mesh": "res://loot/gear/meshes/iron_knuckles.glb",
+   "mesh_lod1": "res://loot/gear/meshes/iron_knuckles_lod1.glb",
+   "heroes": [
+    "asha"
+   ],
+   "tris": {
+    "high": 1368,
+    "lod1": 368
+   },
+   "size_m": [
+    0.18,
+    0.12,
+    0.21
+   ]
+  },
+  {
+   "name": "Steel Cestus",
+   "slot": "weapon",
+   "family": "knuckles",
+   "tier": 2,
+   "stats": {
+    "atk": 29,
+    "crit_pct": 12
+   },
+   "id": "steel_cestus",
+   "rarity": "rare",
+   "value": 250,
+   "sell": 75,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_cestus.png",
+   "mesh": "res://loot/gear/meshes/steel_cestus.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_cestus_lod1.glb",
+   "heroes": [
+    "asha"
+   ],
+   "tris": {
+    "high": 1368,
+    "lod1": 368
+   },
+   "size_m": [
+    0.18,
+    0.12,
+    0.21
+   ]
+  },
+  {
+   "name": "Ember Cestus",
+   "slot": "weapon",
+   "family": "knuckles",
+   "tier": 3,
+   "stats": {
+    "atk": 50,
+    "crit_pct": 14,
+    "on_hit": "burn_3s"
+   },
+   "id": "ember_cestus",
+   "rarity": "epic",
+   "value": 1440,
+   "sell": 432,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/ember_cestus.png",
+   "mesh": "res://loot/gear/meshes/ember_cestus.glb",
+   "mesh_lod1": "res://loot/gear/meshes/ember_cestus_lod1.glb",
+   "heroes": [
+    "asha"
+   ],
+   "tris": {
+    "high": 1368,
+    "lod1": 368
+   },
+   "size_m": [
+    0.18,
+    0.12,
+    0.21
+   ]
+  },
+  {
+   "name": "Wool Hood",
+   "slot": "head",
+   "family": "light",
+   "tier": 1,
+   "stats": {
+    "def": 3,
+    "mp_pct": 4
+   },
+   "id": "wool_hood",
+   "rarity": "common",
+   "value": 25,
+   "sell": 8,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/wool_hood.png",
+   "mesh": "res://loot/gear/meshes/wool_hood.glb",
+   "mesh_lod1": "res://loot/gear/meshes/wool_hood_lod1.glb",
+   "heroes": [
+    "rowan",
+    "thorne",
+    "mirelle",
+    "kael",
+    "talia",
+    "selene"
+   ],
+   "tris": {
+    "high": 13984,
+    "lod1": 3616
+   },
+   "size_m": [
+    0.408,
+    0.372,
+    0.384
+   ]
+  },
+  {
+   "name": "Lined Coif",
+   "slot": "head",
+   "family": "light",
+   "tier": 2,
+   "stats": {
+    "def": 5,
+    "mp_pct": 8
+   },
+   "id": "lined_coif",
+   "rarity": "rare",
+   "value": 170,
+   "sell": 51,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/lined_coif.png",
+   "mesh": "res://loot/gear/meshes/lined_coif.glb",
+   "mesh_lod1": "res://loot/gear/meshes/lined_coif_lod1.glb",
+   "heroes": [
+    "rowan",
+    "thorne",
+    "mirelle",
+    "kael",
+    "talia",
+    "selene"
+   ],
+   "tris": {
+    "high": 14108,
+    "lod1": 3672
+   },
+   "size_m": [
+    0.408,
+    0.456,
+    0.384
+   ]
+  },
+  {
+   "name": "Warden's Silk Hood",
+   "slot": "head",
+   "family": "light",
+   "tier": 3,
+   "stats": {
+    "def": 10,
+    "mp_pct": 12,
+    "fire_res_pct": 20
+   },
+   "id": "wardens_silk_hood",
+   "rarity": "epic",
+   "value": 900,
+   "sell": 270,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/wardens_silk_hood.png",
+   "mesh": "res://loot/gear/meshes/wardens_silk_hood.glb",
+   "mesh_lod1": "res://loot/gear/meshes/wardens_silk_hood_lod1.glb",
+   "heroes": [
+    "rowan",
+    "thorne",
+    "mirelle",
+    "kael",
+    "talia",
+    "selene"
+   ],
+   "tris": {
+    "high": 14108,
+    "lod1": 3672
+   },
+   "size_m": [
+    0.408,
+    0.456,
+    0.384
+   ]
+  },
+  {
+   "name": "Kettle Hat",
+   "slot": "head",
+   "family": "medium",
+   "tier": 1,
+   "stats": {
+    "def": 4
+   },
+   "id": "kettle_hat",
+   "rarity": "common",
+   "value": 30,
+   "sell": 9,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/kettle_hat.png",
+   "mesh": "res://loot/gear/meshes/kettle_hat.glb",
+   "mesh_lod1": "res://loot/gear/meshes/kettle_hat_lod1.glb",
+   "heroes": [
+    "elira",
+    "nyx",
+    "cedric",
+    "morwen",
+    "vesper",
+    "finn",
+    "brynn",
+    "asha",
+    "wren"
+   ],
+   "tris": {
+    "high": 15848,
+    "lod1": 3952
+   },
+   "size_m": [
+    0.456,
+    0.48,
+    0.264
+   ]
+  },
+  {
+   "name": "Nasal Helm",
+   "slot": "head",
+   "family": "medium",
+   "tier": 2,
+   "stats": {
+    "def": 9
+   },
+   "id": "nasal_helm",
+   "rarity": "rare",
+   "value": 210,
+   "sell": 63,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/nasal_helm.png",
+   "mesh": "res://loot/gear/meshes/nasal_helm.glb",
+   "mesh_lod1": "res://loot/gear/meshes/nasal_helm_lod1.glb",
+   "heroes": [
+    "elira",
+    "nyx",
+    "cedric",
+    "morwen",
+    "vesper",
+    "finn",
+    "brynn",
+    "asha",
+    "wren"
+   ],
+   "tris": {
+    "high": 15496,
+    "lod1": 3944
+   },
+   "size_m": [
+    0.408,
+    0.456,
+    0.384
+   ]
+  },
+  {
+   "name": "Rimeguard Helm",
+   "slot": "head",
+   "family": "medium",
+   "tier": 3,
+   "stats": {
+    "def": 15,
+    "frost_res_pct": 20
+   },
+   "id": "rimeguard_helm",
+   "rarity": "epic",
+   "value": 1125,
+   "sell": 338,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/rimeguard_helm.png",
+   "mesh": "res://loot/gear/meshes/rimeguard_helm.glb",
+   "mesh_lod1": "res://loot/gear/meshes/rimeguard_helm_lod1.glb",
+   "heroes": [
+    "elira",
+    "nyx",
+    "cedric",
+    "morwen",
+    "vesper",
+    "finn",
+    "brynn",
+    "asha",
+    "wren"
+   ],
+   "tris": {
+    "high": 15616,
+    "lod1": 3980
+   },
+   "size_m": [
+    0.408,
+    0.456,
+    0.456
+   ]
+  },
+  {
+   "name": "Iron Bascinet",
+   "slot": "head",
+   "family": "heavy",
+   "tier": 1,
+   "stats": {
+    "def": 6,
+    "poise": 0.05
+   },
+   "id": "iron_bascinet",
+   "rarity": "common",
+   "value": 40,
+   "sell": 12,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/iron_bascinet.png",
+   "mesh": "res://loot/gear/meshes/iron_bascinet.glb",
+   "mesh_lod1": "res://loot/gear/meshes/iron_bascinet_lod1.glb",
+   "heroes": [
+    "aldric",
+    "seraphine",
+    "garruk",
+    "orin",
+    "darius",
+    "rook",
+    "owner"
+   ],
+   "tris": {
+    "high": 17916,
+    "lod1": 4500
+   },
+   "size_m": [
+    0.408,
+    0.456,
+    0.384
+   ]
+  },
+  {
+   "name": "Steel Barbute",
+   "slot": "head",
+   "family": "heavy",
+   "tier": 2,
+   "stats": {
+    "def": 13,
+    "poise": 0.1
+   },
+   "id": "steel_barbute",
+   "rarity": "rare",
+   "value": 280,
+   "sell": 84,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_barbute.png",
+   "mesh": "res://loot/gear/meshes/steel_barbute.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_barbute_lod1.glb",
+   "heroes": [
+    "aldric",
+    "seraphine",
+    "garruk",
+    "orin",
+    "darius",
+    "rook",
+    "owner"
+   ],
+   "tris": {
+    "high": 17916,
+    "lod1": 4500
+   },
+   "size_m": [
+    0.408,
+    0.456,
+    0.384
+   ]
+  },
+  {
+   "name": "Great Helm of the Vale",
+   "slot": "head",
+   "family": "heavy",
+   "tier": 3,
+   "stats": {
+    "def": 21,
+    "poise": 0.15000000000000002,
+    "frost_res_pct": 20
+   },
+   "id": "great_helm_of_the_vale",
+   "rarity": "epic",
+   "value": 1500,
+   "sell": 450,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/great_helm_of_the_vale.png",
+   "mesh": "res://loot/gear/meshes/great_helm_of_the_vale.glb",
+   "mesh_lod1": "res://loot/gear/meshes/great_helm_of_the_vale_lod1.glb",
+   "heroes": [
+    "aldric",
+    "seraphine",
+    "garruk",
+    "orin",
+    "darius",
+    "rook",
+    "owner"
+   ],
+   "tris": {
+    "high": 18164,
+    "lod1": 4572
+   },
+   "size_m": [
+    0.408,
+    0.456,
+    0.504
+   ]
+  },
+  {
+   "name": "Quilted Robe",
+   "slot": "chest",
+   "family": "light",
+   "tier": 1,
+   "stats": {
+    "def": 6,
+    "mp_regen_pct": 10
+   },
+   "id": "quilted_robe",
+   "rarity": "common",
+   "value": 55,
+   "sell": 16,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/quilted_robe.png",
+   "mesh": "res://loot/gear/meshes/quilted_robe.glb",
+   "mesh_lod1": "res://loot/gear/meshes/quilted_robe_lod1.glb",
+   "heroes": [
+    "rowan",
+    "thorne",
+    "mirelle",
+    "kael",
+    "talia",
+    "selene"
+   ],
+   "tris": {
+    "high": 21976,
+    "lod1": 5232
+   },
+   "size_m": [
+    0.468,
+    0.36,
+    0.432
+   ]
+  },
+  {
+   "name": "Bound Scholar's Robe",
+   "slot": "chest",
+   "family": "light",
+   "tier": 2,
+   "stats": {
+    "def": 12,
+    "mp_regen_pct": 20
+   },
+   "id": "bound_scholars_robe",
+   "rarity": "rare",
+   "value": 390,
+   "sell": 117,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/bound_scholars_robe.png",
+   "mesh": "res://loot/gear/meshes/bound_scholars_robe.glb",
+   "mesh_lod1": "res://loot/gear/meshes/bound_scholars_robe_lod1.glb",
+   "heroes": [
+    "rowan",
+    "thorne",
+    "mirelle",
+    "kael",
+    "talia",
+    "selene"
+   ],
+   "tris": {
+    "high": 21976,
+    "lod1": 5232
+   },
+   "size_m": [
+    0.468,
+    0.36,
+    0.432
+   ]
+  },
+  {
+   "name": "Starsilk Vestment",
+   "slot": "chest",
+   "family": "light",
+   "tier": 3,
+   "stats": {
+    "def": 22,
+    "mp_regen_pct": 30,
+    "fire_res_pct": 30
+   },
+   "id": "starsilk_vestment",
+   "rarity": "epic",
+   "value": 1920,
+   "sell": 576,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/starsilk_vestment.png",
+   "mesh": "res://loot/gear/meshes/starsilk_vestment.glb",
+   "mesh_lod1": "res://loot/gear/meshes/starsilk_vestment_lod1.glb",
+   "heroes": [
+    "rowan",
+    "thorne",
+    "mirelle",
+    "kael",
+    "talia",
+    "selene"
+   ],
+   "tris": {
+    "high": 21976,
+    "lod1": 5232
+   },
+   "size_m": [
+    0.468,
+    0.36,
+    0.432
+   ]
+  },
+  {
+   "name": "Leather Jerkin",
+   "slot": "chest",
+   "family": "medium",
+   "tier": 1,
+   "stats": {
+    "def": 10,
+    "dodge_pct": 2
+   },
+   "id": "leather_jerkin",
+   "rarity": "common",
+   "value": 65,
+   "sell": 20,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/leather_jerkin.png",
+   "mesh": "res://loot/gear/meshes/leather_jerkin.glb",
+   "mesh_lod1": "res://loot/gear/meshes/leather_jerkin_lod1.glb",
+   "heroes": [
+    "elira",
+    "nyx",
+    "cedric",
+    "morwen",
+    "vesper",
+    "finn",
+    "brynn",
+    "asha",
+    "wren"
+   ],
+   "tris": {
+    "high": 22360,
+    "lod1": 5592
+   },
+   "size_m": [
+    0.636,
+    0.312,
+    0.456
+   ]
+  },
+  {
+   "name": "Ring-Sewn Jack",
+   "slot": "chest",
+   "family": "medium",
+   "tier": 2,
+   "stats": {
+    "def": 20,
+    "dodge_pct": 4
+   },
+   "id": "ring_sewn_jack",
+   "rarity": "rare",
+   "value": 485,
+   "sell": 146,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/ring_sewn_jack.png",
+   "mesh": "res://loot/gear/meshes/ring_sewn_jack.glb",
+   "mesh_lod1": "res://loot/gear/meshes/ring_sewn_jack_lod1.glb",
+   "heroes": [
+    "elira",
+    "nyx",
+    "cedric",
+    "morwen",
+    "vesper",
+    "finn",
+    "brynn",
+    "asha",
+    "wren"
+   ],
+   "tris": {
+    "high": 22360,
+    "lod1": 5592
+   },
+   "size_m": [
+    0.636,
+    0.312,
+    0.456
+   ]
+  },
+  {
+   "name": "Brigandine of the Watch",
+   "slot": "chest",
+   "family": "medium",
+   "tier": 3,
+   "stats": {
+    "def": 34,
+    "dodge_pct": 6,
+    "frost_res_pct": 30
+   },
+   "id": "brigandine_of_the_watch",
+   "rarity": "epic",
+   "value": 2400,
+   "sell": 720,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/brigandine_of_the_watch.png",
+   "mesh": "res://loot/gear/meshes/brigandine_of_the_watch.glb",
+   "mesh_lod1": "res://loot/gear/meshes/brigandine_of_the_watch_lod1.glb",
+   "heroes": [
+    "elira",
+    "nyx",
+    "cedric",
+    "morwen",
+    "vesper",
+    "finn",
+    "brynn",
+    "asha",
+    "wren"
+   ],
+   "tris": {
+    "high": 22360,
+    "lod1": 5592
+   },
+   "size_m": [
+    0.636,
+    0.312,
+    0.456
+   ]
+  },
+  {
+   "name": "Iron Cuirass",
+   "slot": "chest",
+   "family": "heavy",
+   "tier": 1,
+   "stats": {
+    "def": 14,
+    "speed_pct": -3
+   },
+   "id": "iron_cuirass",
+   "rarity": "common",
+   "value": 90,
+   "sell": 27,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/iron_cuirass.png",
+   "mesh": "res://loot/gear/meshes/iron_cuirass.glb",
+   "mesh_lod1": "res://loot/gear/meshes/iron_cuirass_lod1.glb",
+   "heroes": [
+    "aldric",
+    "seraphine",
+    "garruk",
+    "orin",
+    "darius",
+    "rook",
+    "owner"
+   ],
+   "tris": {
+    "high": 22360,
+    "lod1": 5592
+   },
+   "size_m": [
+    0.636,
+    0.312,
+    0.456
+   ]
+  },
+  {
+   "name": "Steel Breastplate",
+   "slot": "chest",
+   "family": "heavy",
+   "tier": 2,
+   "stats": {
+    "def": 28,
+    "speed_pct": -3
+   },
+   "id": "steel_breastplate",
+   "rarity": "rare",
+   "value": 650,
+   "sell": 195,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/steel_breastplate.png",
+   "mesh": "res://loot/gear/meshes/steel_breastplate.glb",
+   "mesh_lod1": "res://loot/gear/meshes/steel_breastplate_lod1.glb",
+   "heroes": [
+    "aldric",
+    "seraphine",
+    "garruk",
+    "orin",
+    "darius",
+    "rook",
+    "owner"
+   ],
+   "tris": {
+    "high": 22360,
+    "lod1": 5592
+   },
+   "size_m": [
+    0.636,
+    0.312,
+    0.456
+   ]
+  },
+  {
+   "name": "Rimewarden Harness",
+   "slot": "chest",
+   "family": "heavy",
+   "tier": 3,
+   "stats": {
+    "def": 46,
+    "speed_pct": -3,
+    "frost_res_pct": 30
+   },
+   "id": "rimewarden_harness",
+   "rarity": "epic",
+   "value": 3200,
+   "sell": 960,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/rimewarden_harness.png",
+   "mesh": "res://loot/gear/meshes/rimewarden_harness.glb",
+   "mesh_lod1": "res://loot/gear/meshes/rimewarden_harness_lod1.glb",
+   "heroes": [
+    "aldric",
+    "seraphine",
+    "garruk",
+    "orin",
+    "darius",
+    "rook",
+    "owner"
+   ],
+   "tris": {
+    "high": 22360,
+    "lod1": 5592
+   },
+   "size_m": [
+    0.636,
+    0.312,
+    0.456
+   ]
+  },
+  {
+   "name": "Round Buckler",
+   "slot": "shield",
+   "family": "shield",
+   "tier": 1,
+   "stats": {
+    "block_pct": 10,
+    "def": 4
+   },
+   "id": "round_buckler",
+   "rarity": "common",
+   "value": 50,
+   "sell": 15,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/round_buckler.png",
+   "mesh": "res://loot/gear/meshes/round_buckler.glb",
+   "mesh_lod1": "res://loot/gear/meshes/round_buckler_lod1.glb",
+   "heroes": [
+    "aldric",
+    "seraphine",
+    "owner"
+   ],
+   "tris": {
+    "high": 5816,
+    "lod1": 1652
+   },
+   "size_m": [
+    0.6,
+    0.075,
+    0.585
+   ]
+  },
+  {
+   "name": "Heater Shield",
+   "slot": "shield",
+   "family": "shield",
+   "tier": 2,
+   "stats": {
+    "block_pct": 18,
+    "def": 8
+   },
+   "id": "heater_shield",
+   "rarity": "rare",
+   "value": 320,
+   "sell": 96,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/heater_shield.png",
+   "mesh": "res://loot/gear/meshes/heater_shield.glb",
+   "mesh_lod1": "res://loot/gear/meshes/heater_shield_lod1.glb",
+   "heroes": [
+    "aldric",
+    "seraphine",
+    "owner"
+   ],
+   "tris": {
+    "high": 9048,
+    "lod1": 2524
+   },
+   "size_m": [
+    0.66,
+    0.075,
+    0.78
+   ]
+  },
+  {
+   "name": "Gullhaven Kite Shield",
+   "slot": "shield",
+   "family": "shield",
+   "tier": 3,
+   "stats": {
+    "block_pct": 28,
+    "def": 14
+   },
+   "id": "gullhaven_kite_shield",
+   "rarity": "epic",
+   "value": 1600,
+   "sell": 480,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/gullhaven_kite_shield.png",
+   "mesh": "res://loot/gear/meshes/gullhaven_kite_shield.glb",
+   "mesh_lod1": "res://loot/gear/meshes/gullhaven_kite_shield_lod1.glb",
+   "heroes": [
+    "aldric",
+    "seraphine",
+    "owner"
+   ],
+   "tris": {
+    "high": 9048,
+    "lod1": 2524
+   },
+   "size_m": [
+    0.66,
+    0.075,
+    0.78
+   ]
+  },
+  {
+   "name": "Iron Band",
+   "slot": "ring",
+   "family": "ring",
+   "tier": 1,
+   "stats": {
+    "crit_pct": 2
+   },
+   "id": "iron_band",
+   "rarity": "common",
+   "value": 80,
+   "sell": 24,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/iron_band.png",
+   "mesh": "res://loot/gear/meshes/iron_band.glb",
+   "mesh_lod1": "res://loot/gear/meshes/iron_band_lod1.glb",
+   "heroes": [
+    "aldric",
+    "elira",
+    "rowan",
+    "thorne",
+    "nyx",
+    "seraphine",
+    "garruk",
+    "mirelle",
+    "cedric",
+    "morwen",
+    "kael",
+    "vesper",
+    "talia",
+    "orin",
+    "selene",
+    "darius",
+    "finn",
+    "brynn",
+    "asha",
+    "rook",
+    "owner",
+    "wren"
+   ],
+   "tris": {
+    "high": 228,
+    "lod1": 84
+   },
+   "size_m": [
+    0.042,
+    0.048,
+    0.012
+   ]
+  },
+  {
+   "name": "Garnet Signet",
+   "slot": "ring",
+   "family": "ring",
+   "tier": 2,
+   "stats": {
+    "crit_pct": 4
+   },
+   "id": "garnet_signet",
+   "rarity": "rare",
+   "value": 450,
+   "sell": 135,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/garnet_signet.png",
+   "mesh": "res://loot/gear/meshes/garnet_signet.glb",
+   "mesh_lod1": "res://loot/gear/meshes/garnet_signet_lod1.glb",
+   "heroes": [
+    "aldric",
+    "elira",
+    "rowan",
+    "thorne",
+    "nyx",
+    "seraphine",
+    "garruk",
+    "mirelle",
+    "cedric",
+    "morwen",
+    "kael",
+    "vesper",
+    "talia",
+    "orin",
+    "selene",
+    "darius",
+    "finn",
+    "brynn",
+    "asha",
+    "rook",
+    "owner",
+    "wren"
+   ],
+   "tris": {
+    "high": 236,
+    "lod1": 84
+   },
+   "size_m": [
+    0.042,
+    0.048,
+    0.018
+   ]
+  },
+  {
+   "name": "Saltglass Seal Ring",
+   "slot": "ring",
+   "family": "ring",
+   "tier": 3,
+   "stats": {
+    "crit_pct": 7,
+    "atk_pct": 5
+   },
+   "id": "saltglass_seal_ring",
+   "rarity": "epic",
+   "value": 2000,
+   "sell": 600,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/saltglass_seal_ring.png",
+   "mesh": "res://loot/gear/meshes/saltglass_seal_ring.glb",
+   "mesh_lod1": "res://loot/gear/meshes/saltglass_seal_ring_lod1.glb",
+   "heroes": [
+    "aldric",
+    "elira",
+    "rowan",
+    "thorne",
+    "nyx",
+    "seraphine",
+    "garruk",
+    "mirelle",
+    "cedric",
+    "morwen",
+    "kael",
+    "vesper",
+    "talia",
+    "orin",
+    "selene",
+    "darius",
+    "finn",
+    "brynn",
+    "asha",
+    "rook",
+    "owner",
+    "wren"
+   ],
+   "tris": {
+    "high": 236,
+    "lod1": 84
+   },
+   "size_m": [
+    0.042,
+    0.048,
+    0.018
+   ]
+  },
+  {
+   "name": "Pewter Pilgrim Badge",
+   "slot": "trinket",
+   "family": "amulet",
+   "tier": 1,
+   "stats": {
+    "hp_regen": 1
+   },
+   "id": "pewter_pilgrim_badge",
+   "rarity": "common",
+   "value": 70,
+   "sell": 21,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/pewter_pilgrim_badge.png",
+   "mesh": "res://loot/gear/meshes/pewter_pilgrim_badge.glb",
+   "mesh_lod1": "res://loot/gear/meshes/pewter_pilgrim_badge_lod1.glb",
+   "heroes": [
+    "aldric",
+    "elira",
+    "rowan",
+    "thorne",
+    "nyx",
+    "seraphine",
+    "garruk",
+    "mirelle",
+    "cedric",
+    "morwen",
+    "kael",
+    "vesper",
+    "talia",
+    "orin",
+    "selene",
+    "darius",
+    "finn",
+    "brynn",
+    "asha",
+    "rook",
+    "owner",
+    "wren"
+   ],
+   "tris": {
+    "high": 760,
+    "lod1": 296
+   },
+   "size_m": [
+    0.184,
+    0.032,
+    0.216
+   ]
+  },
+  {
+   "name": "Garnet Pendant",
+   "slot": "trinket",
+   "family": "amulet",
+   "tier": 2,
+   "stats": {
+    "hp_regen": 2
+   },
+   "id": "garnet_pendant",
+   "rarity": "rare",
+   "value": 400,
+   "sell": 120,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/garnet_pendant.png",
+   "mesh": "res://loot/gear/meshes/garnet_pendant.glb",
+   "mesh_lod1": "res://loot/gear/meshes/garnet_pendant_lod1.glb",
+   "heroes": [
+    "aldric",
+    "elira",
+    "rowan",
+    "thorne",
+    "nyx",
+    "seraphine",
+    "garruk",
+    "mirelle",
+    "cedric",
+    "morwen",
+    "kael",
+    "vesper",
+    "talia",
+    "orin",
+    "selene",
+    "darius",
+    "finn",
+    "brynn",
+    "asha",
+    "rook",
+    "owner",
+    "wren"
+   ],
+   "tris": {
+    "high": 784,
+    "lod1": 304
+   },
+   "size_m": [
+    0.184,
+    0.04,
+    0.216
+   ]
+  },
+  {
+   "name": "Glasswyrm Locket",
+   "slot": "trinket",
+   "family": "amulet",
+   "tier": 3,
+   "stats": {
+    "hp_regen": 3,
+    "revive_once_per_day": true
+   },
+   "id": "glasswyrm_locket",
+   "rarity": "epic",
+   "value": 1800,
+   "sell": 540,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/glasswyrm_locket.png",
+   "mesh": "res://loot/gear/meshes/glasswyrm_locket.glb",
+   "mesh_lod1": "res://loot/gear/meshes/glasswyrm_locket_lod1.glb",
+   "heroes": [
+    "aldric",
+    "elira",
+    "rowan",
+    "thorne",
+    "nyx",
+    "seraphine",
+    "garruk",
+    "mirelle",
+    "cedric",
+    "morwen",
+    "kael",
+    "vesper",
+    "talia",
+    "orin",
+    "selene",
+    "darius",
+    "finn",
+    "brynn",
+    "asha",
+    "rook",
+    "owner",
+    "wren"
+   ],
+   "tris": {
+    "high": 960,
+    "lod1": 372
+   },
+   "size_m": [
+    0.184,
+    0.04,
+    0.224
+   ]
+  },
+  {
+   "name": "Leather Collar",
+   "slot": "collar",
+   "family": "collar",
+   "tier": 1,
+   "stats": {
+    "companion_hp_pct": 10,
+    "companion_atk_pct": 5
+   },
+   "id": "leather_collar",
+   "rarity": "common",
+   "value": 30,
+   "sell": 9,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/leather_collar.png",
+   "mesh": "res://loot/gear/meshes/leather_collar.glb",
+   "mesh_lod1": "res://loot/gear/meshes/leather_collar_lod1.glb",
+   "heroes": [
+    "pip",
+    "phoenix"
+   ],
+   "tris": {
+    "high": 1612,
+    "lod1": 508
+   },
+   "size_m": [
+    0.224,
+    0.24,
+    0.032
+   ]
+  },
+  {
+   "name": "Brass-Studded Collar",
+   "slot": "collar",
+   "family": "collar",
+   "tier": 2,
+   "stats": {
+    "companion_hp_pct": 20,
+    "companion_atk_pct": 10
+   },
+   "id": "brass_studded_collar",
+   "rarity": "rare",
+   "value": 200,
+   "sell": 60,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/brass_studded_collar.png",
+   "mesh": "res://loot/gear/meshes/brass_studded_collar.glb",
+   "mesh_lod1": "res://loot/gear/meshes/brass_studded_collar_lod1.glb",
+   "heroes": [
+    "pip",
+    "phoenix"
+   ],
+   "tris": {
+    "high": 1612,
+    "lod1": 508
+   },
+   "size_m": [
+    0.224,
+    0.24,
+    0.032
+   ]
+  },
+  {
+   "name": "Starsilk Collar",
+   "slot": "collar",
+   "family": "collar",
+   "tier": 3,
+   "stats": {
+    "companion_hp_pct": 30,
+    "companion_atk_pct": 15
+   },
+   "id": "starsilk_collar",
+   "rarity": "epic",
+   "value": 1100,
+   "sell": 330,
+   "stack": 1,
+   "icon": "res://loot/gear/icons/starsilk_collar.png",
+   "mesh": "res://loot/gear/meshes/starsilk_collar.glb",
+   "mesh_lod1": "res://loot/gear/meshes/starsilk_collar_lod1.glb",
+   "heroes": [
+    "pip",
+    "phoenix"
+   ],
+   "tris": {
+    "high": 1612,
+    "lod1": 508
+   },
+   "size_m": [
+    0.224,
+    0.24,
+    0.032
+   ]
+  }
+ ]
+}

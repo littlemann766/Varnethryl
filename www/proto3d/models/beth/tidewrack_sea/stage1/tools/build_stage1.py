@@ -364,6 +364,28 @@ def sail(w, h, billow, col, trim=None, stripes=None, n=8):
             a, b, d, e = V(i, j, key, c), V(i + 1, j, key, c), V(i, j + 1, key, c), V(i + 1, j + 1, key, c)
             ff += [(a, b, d), (d, b, e), (a, d, b), (d, e, b)]
     m = trimesh.Trimesh(vv, ff, process=False); m.visual = trimesh.visual.ColorVisuals(m, vertex_colors=np.array(cc)); return m
+def tri_sail(A, B, Cm, col, trim=None, stripes=None, n=6):
+    # triangular jib/spanker, hard-edged like sail(): stripes run foot-to-head in 6 bands from the mast (Cm/B side) to the tack A;
+    # grid lines sit on the band and trim borders and each colour region has its own vertices (no COLOR_0 blending)
+    A, B, Cm = (np.array(p, float) for p in (A, B, Cm))
+    sb = [k / 6 + d for k in range(6) for d in (0.0, 1 / 12)] + [1.0]; tb = [k / n for k in range(n + 1)]
+    if trim is not None: sb += [0.04, 0.96]; tb += [0.06, 0.94]
+    sb = sorted(set(round(x, 6) for x in sb)); tb = sorted(set(round(x, 6) for x in tb))
+    def P(s_, t_): F = Cm + s_ * (A - Cm); G = B + s_ * (A - B); return tuple(F + t_ * (G - F))
+    vv, cc, ff, idx = [], [], [], {}
+    def V(i, j, key, c):
+        k = (i, j, key)
+        if k not in idx: idx[k] = len(vv); vv.append(P(sb[i], tb[j])); cc.append(c)
+        return idx[k]
+    for i in range(len(sb) - 1):
+        for j in range(len(tb) - 1):
+            sm, tm = (sb[i] + sb[i + 1]) / 2, (tb[j] + tb[j + 1]) / 2; c, key = col, 0
+            if stripes is not None and int(sm * 6) % 2 == 1: c, key = stripes, 1
+            if trim is not None and (sm < 0.04 or sm > 0.96 or tm < 0.06 or tm > 0.94): c, key = trim, 2
+            a, b, d, e = V(i, j, key, c), V(i + 1, j, key, c), V(i, j + 1, key, c), V(i + 1, j + 1, key, c)
+            if i == len(sb) - 2: ff += [(a, b, d), (a, d, b)]  # last column collapses to the tack point
+            else: ff += [(a, b, d), (d, b, e), (a, d, b), (d, e, b)]
+    m = trimesh.Trimesh(vv, ff, process=False); m.visual = trimesh.visual.ColorVisuals(m, vertex_colors=np.array(cc)); return m
 TIERS = [  # name, sail colour, stripe, trim, rope, hull-trim colour, sail scale, extra sails, charm glow
     ('T1 Patched Canvas', C(214, 200, 168), None, C(150, 120, 80), C(150, 120, 80), C(170, 96, 60), 1.05, 0, C(150, 200, 210)),
     ('T2 Gullwing Rig', C(240, 236, 226), C(170, 40, 40), C(170, 40, 40), C(190, 160, 110), C(196, 150, 60), 1.15, 1, C(120, 230, 240)),
@@ -376,7 +398,9 @@ for key, fn, deck, scale in [('galleon', 'ship_tidewrack_sailing_ship.glb', 2.78
         for mz in (-7.0, -0.8, 5.3):
             sel = v[(np.abs(v[:, 2] - mz) < 1.2) & (np.abs(v[:, 0]) < 0.6)]; ms.append((mz, float(sel[:, 1].max())))
     if not ms: ms = [(0.0, v[:, 1].max())]
-    bow_z = v[:, 2].max(); stern_z = v[:, 2].min(); SPEC[key] = {'masts': [[round(z, 2), round(t, 2)] for z, t in ms], 'bow_z': round(bow_z, 2), 'deck_y': deck}
+    bow_z = v[:, 2].max(); stern_z = v[:, 2].min()
+    # bow_z is the bowsprit tip on the galleon (z 15, y 7.9) - stem_z is the hull stem at deck height, sprit_y the bowsprit tip height
+    stem_z = float(v[(v[:, 1] > deck - 1.0) & (v[:, 1] < deck + 1.0)][:, 2].max()); sprit_y = max(deck + 1.0, float(v[v[:, 2].argmax(), 1]) - 0.2); SPEC[key] = {'masts': [[round(z, 2), round(t, 2)] for z, t in ms], 'bow_z': round(bow_z, 2), 'deck_y': deck}
     for ti, (tn, sc, sp_, tr, rope, hull, ss, extra, glow) in enumerate(TIERS, 1):
         parts = []
         # sails: one main course + topsail per mast, slightly forward of the original sails so they cover them (add-on, see SHIP_UPGRADES.md)
@@ -386,13 +410,13 @@ for key, fn, deck, scale in [('galleon', 'ship_tidewrack_sailing_ship.glb', 2.78
             if key == 'galleon' or ti >= 2: parts.append(T(sail(w * 0.75, span * 0.3 * ss, 0.6 * scale * ss + 0.1, sc, tr, sp_), (0, deck + span * 0.74, mz + 0.45 * scale + 0.15)))
             parts.append(box((w * 1.05, 0.18 * scale + 0.06, 0.18 * scale + 0.06), C(90, 64, 40), (0, deck + span * 0.71, mz + 0.4 * scale + 0.1)))
         if extra >= 1:  # jib forward of the fore mast
-            fz, ftop = ms[-1]; jb = trimesh.Trimesh([(0, deck + 1.0, bow_z - 0.3), (0, ftop * 0.92, fz + 0.3), (0, deck + 1.2, fz + 0.5)], [(0, 1, 2), (0, 2, 1)], process=False); parts.append(paint(jb, sc))
+            fz, ftop = ms[-1]; parts.append(tri_sail((0, sprit_y, bow_z - 0.3), (0, ftop * 0.92, fz + 0.3), (0, deck + 1.2, fz + 0.5), sc, tr, sp_))
         if extra >= 2:  # spanker / gaff sail aft + bowsprit extension
             az, atop = ms[0]; sp2_ = trimesh.Trimesh([(0, deck + 1.2, az - 0.4), (0, atop * 0.8, az - 0.4), (0, deck + 1.6, stern_z + 1.0)], [(0, 1, 2), (0, 2, 1)], process=False); parts.append(paint(sp2_, sc))
-            parts.append(line((0, deck + 0.8, bow_z - 1.0), (0, deck + 2.2 * scale + 0.4, bow_z + 3.5 * scale), 0.12 * scale + 0.04, C(90, 64, 40)))
+            parts.append(line((0, sprit_y - 0.1, bow_z - 1.0), (0, sprit_y + 1.4 * scale + 0.3, bow_z + 3.5 * scale), 0.12 * scale + 0.04, C(90, 64, 40)))
         # rigging: stays + shrouds, more per tier
         for mz, top in ms:
-            parts.append(line((0, top - 0.3, mz), (0, deck + 0.3, bow_z - 0.5 if mz == ms[-1][0] else mz + 6 * scale), 0.04 * scale + 0.015, rope))
+            parts.append(line((0, top - 0.3, mz), (0, sprit_y if mz == ms[-1][0] else deck + 0.3, bow_z - 0.5 if mz == ms[-1][0] else mz + 6 * scale), 0.04 * scale + 0.015, rope))
             gi = g[np.argmin(np.abs(g[:, 1] - mz))]
             for k in range(1 + ti):
                 for sx in (-1, 1): parts.append(line((0, top * (0.95 - 0.12 * k), mz), (sx * gi[0], gi[2] + 0.1, mz - (k - ti / 2) * 0.9 * scale), 0.03 * scale + 0.012, rope))
@@ -402,7 +426,7 @@ for key, fn, deck, scale in [('galleon', 'ship_tidewrack_sailing_ship.glb', 2.78
                 parts.append(line((sx * (a_[0] + 0.05), a_[2] + 0.05, a_[1]), (sx * (b_[0] + 0.05), b_[2] + 0.05, b_[1]), 0.09 * scale + 0.03, hull, 6))
                 if ti >= 2: parts.append(line((sx * (a_[0] * 0.92 + 0.04), 0.35 * scale + 0.05, a_[1]), (sx * (b_[0] * 0.92 + 0.04), 0.35 * scale + 0.05, b_[1]), 0.07 * scale + 0.03, hull, 6))
         # figurehead at the bow (original designs: T1 carved post, T2 gull, T3 tide-warden with a lantern)
-        fh = (0, deck + 0.2 * scale, bow_z + 0.15); fs = 1.0 * scale + 0.25
+        fh = (0, deck + 0.2 * scale - 1.0 * (stem_z < bow_z - 1), stem_z - 0.6 * (stem_z < bow_z - 1)); fs = 1.0 * scale + 0.25  # on the stem, not floating at the sprit tip
         if ti == 1: f = merge([cyl(0.32, 1.1, C(150, 108, 64), (0, 0.55, 0.45), (0.35, 0, 0), 8, 0.22), ball(0.34, C(150, 108, 64), (0, 1.25, 0.62), 1, (1, 1.15, 1)), T(box((0.9, 0.1, 0.5), C(196, 150, 60)), (0, 0.75, 0.5), (0.3, 0, 0))])  # carved bust + brass collar
         elif ti == 2: f = merge([ball(0.5, C(240, 240, 235), (0, 0.6, 0.8), 1, (0.7, 0.6, 1.3)), T(box((2.6, 0.08, 0.7), C(240, 240, 235)), (0, 0.9, 0.6), (0.3, 0, 0)), cyl(0.12, 0.5, BRASS, (0, 0.6, 1.5), (1.57, 0, 0), 6, 0)])
         else: f = merge([cyl(0.3, 1.6, C(230, 200, 100), (0, 0.6, 0.6), (0.9, 0, 0), 8, 0.18), ball(0.32, C(230, 200, 100), (0, 1.4, 1.2)), T(box((0.12, 1.4, 1.6), C(40, 70, 120)), (0, 0.6, 0.3), (0.5, 0, 0)), ball(0.25, glow, (0, 1.0, 1.75))])

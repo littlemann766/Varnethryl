@@ -62,3 +62,4 @@ The galleon and skiff are upgraded separately.
 - The T1 figurehead reads like a log from the side, and the skiff trim line is a little wavy. These are for a polish pass.
 
 Sail stripes/trim are hard-edged (t38 fix): sail grid lines sit on the stripe borders and each colour band has its own vertices, so COLOR_0 no longer blends into soft gradients. lod1 stays at 45%.
+Jib (T2/T3) is striped to match the square sails with the same hard-edged split (tri_sail). The galleon figurehead now sits on the hull stem and the jib tack and forestay meet the bowsprit tip; before this they were placed at bow_z, the bowsprit tip x, and floated about 5 m ahead of the hull.

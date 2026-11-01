@@ -34,7 +34,9 @@ func save() -> void: _vs().write_state()
 
 ## attach to the game scene when it shows up (main.gd has `sea` once _ready ran)
 func _process(_dt: float) -> void:
-	if main != null and is_instance_valid(main): return
+	if main != null and is_instance_valid(main):
+		if not _crew_applied and main.get("party") != null and main.get("warmed"): _crew_applied = true; apply_crew()   # loaded save: crew back in the party
+		return
 	var cs := get_tree().current_scene
 	if cs == null or cs.get("sea") == null: return
 	main = cs
@@ -77,6 +79,12 @@ func pending(t: String, target: String) -> bool:
 				if q.is_empty() or (not q.get("done", false) and int(q.step) <= i): return true
 	return false
 func quest_def_ids() -> Array: return data.quests.keys()
+## the story's night sail (travel step with "night": true) lets the crew sail by night before Wren joins
+func night_sail_active() -> bool:
+	for qid in active_ids():
+		var s := current_step(qid)
+		if not s.is_empty() and s.type == "travel" and s.get("night", false): return true
+	return false
 func flag(k: String) -> bool: return bool(story().flags.get(k, false))
 func has_crew(id: String) -> bool: return story().crew.has(id)
 func tracker_text() -> String:
@@ -101,6 +109,9 @@ func notify(t: String, target: String, n := 1) -> bool:
 	for qid in active_ids():
 		var s := current_step(qid)
 		if s.is_empty() or s.type != t or s.target != target: continue
+		if t == "travel" and s.get("night", false) and main and main.sea and not main.sea.is_night():
+			main.sea.ui.toast("The keeper's signal only shows by night. Come back after dark.")
+			continue
 		hit = true
 		var q := qstate(qid)
 		var need := int(s.get("count", 1))
@@ -144,10 +155,31 @@ func recruit(id: String, write := true) -> void:
 	party_hook(id)
 	if write: save()
 	recruited.emit(id)
-## STUB for later beats: recruits will join party.gd as fight companions. Today Pip already follows the hero.
-func party_hook(_id: String) -> void:
-	pass
-
+## Recruits join party.gd as walking/fighting companions (their voxel model + clips via CharacterRig; party.gd's
+## _follow/_companion_fight do the rest). Crew first: at most FOLLOW_GAP.size() companions, non-crew ones make room.
+## Safe: a missing model is skipped with a warning (never crashes), the current hero is never doubled.
+var _crew_applied := false
+func party_hook(id: String) -> void:
+	if main == null or not is_instance_valid(main) or main.get("party") == null: return
+	var p: Node = main.party
+	var path := HeroRoster.model(id, true)
+	if path == "" or not ResourceLoader.exists(path):
+		push_warning("Quests: crew %s has no model (%s); not added to the party" % [id, path]); return
+	if str(p.hero_id) == id: return
+	var ids: Array = p.companion_ids.duplicate()
+	if ids.has(id): return
+	ids.append(id)
+	var cap: int = p.FOLLOW_GAP.size()
+	while ids.size() > cap:
+		var drop := -1
+		for i in ids.size(): if not story().crew.has(ids[i]): drop = i; break
+		ids.remove_at(drop if drop >= 0 else 0)
+	p._set_companions(ids)
+	if main.sea and main.sea.active:
+		if main.sea.ashore == "": main.sea.seat_crew()
+		else: main.sea.snap_crew()
+func apply_crew() -> void:
+	for id in story().crew: party_hook(id)
 ## debug / tests: wipe story progress
 func reset() -> void:
 	_vs().state["story"] = {}; story(); save(); start_auto(); changed.emit()

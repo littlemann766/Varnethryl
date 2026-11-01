@@ -27,7 +27,7 @@ for name in ('frostreach', 'frozen_wreck', 'aurora_arch'):
     src = f'{D}/frost_isl_{name}.glb'; b0 = f'{BK}/frost_isl_{name}.glb'
     if not os.path.exists(b0): shutil.copy(src, b0)
     ref = trimesh.load(b0, force='mesh'); lo, hi = ref.vertices.min(0), ref.vertices.max(0)
-    for suf in ('', '_lod1', '_col'):
+    for suf in ('', '_lod1'):   # visual only: the walk-tested _col stays as authored
         f = f'{D}/frost_isl_{name}{suf}.glb'; b = f'{BK}/frost_isl_{name}{suf}.glb'
         if not os.path.exists(b): shutil.copy(f, b)
         s = trimesh.load(b, force='scene'); n = 0

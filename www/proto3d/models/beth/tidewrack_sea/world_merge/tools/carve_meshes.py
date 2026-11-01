@@ -42,3 +42,13 @@ for reg, st, pre in JOBS:
         s, ch = do(reg, gsrc if os.path.exists(gsrc) else b)
         if ch: s.export(f); print(reg, os.path.basename(f), ch, 'verts moved')
         elif os.path.exists(b) and open(b,'rb').read() == open(f,'rb').read(): os.remove(b)
+# Frost collision = the authored col wherever the carve leaves it alone (walk-tested near every POI) + the re-gridded,
+# carved col only where the carve moved ground (no long slivers there). Overlap is harmless for collision.
+F = f'{ROOT}/stage4/meshes/frost_terrain_col.glb'; O = f'{ROOT}/stage4/meshes_v2_backup/frost_terrain_col.glb'
+o = trimesh.load(O, force='mesh'); g = trimesh.load(F, force='mesh')
+ho, _ = carve('frost', o.vertices[:, 0], o.vertices[:, 2], o.vertices[:, 1]); keep_o = (np.abs(ho - o.vertices[:, 1]) < 0.05)[o.faces].all(1)
+src = trimesh.load(f'{ROOT}/stage4/meshes_v2_backup/frost_terrain_col_grid.glb', force='mesh')
+moved = (np.abs(g.vertices[:, 1] - src.vertices[:, 1]) > 0.05) if len(src.vertices) == len(g.vertices) else np.ones(len(g.vertices), bool)
+keep_g = moved[g.faces].any(1)
+a = o.submesh([np.where(keep_o)[0]], append=True); b = g.submesh([np.where(keep_g)[0]], append=True)
+trimesh.util.concatenate([a, b]).export(F); print('frost col hybrid: authored', int(keep_o.sum()), '+ carved grid', int(keep_g.sum()), 'tris')

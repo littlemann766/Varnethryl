@@ -1,0 +1,348 @@
+{
+ "_note": "Exclusive roll is separate from the rarity roll. Sslythar fully disabled; its items/materials tagged hidden and appear in no enabled table.",
+ "bosses": [
+  {
+   "bossId": "ashen_titan",
+   "godot_ids": [
+    "titan",
+    "titan40",
+    "titan_volcano"
+   ],
+   "enabled": true,
+   "disabled_reason": null,
+   "theme": [
+    "molten_plate",
+    "heavy_weapons"
+   ],
+   "specialReward": "heart_of_the_mountain",
+   "themed_set": "ashen_titan",
+   "exclusives": [
+    {
+     "itemId": "worldbreaker",
+     "chance_pct": 4.0
+    },
+    {
+     "itemId": "heart_of_the_titan",
+     "chance_pct": 6.0
+    }
+   ],
+   "materials": [
+    {
+     "itemId": "mat_titan_core",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 100
+    },
+    {
+     "itemId": "mat_molten_ore",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 60
+    }
+   ],
+   "rarity_table": "boss_tier",
+   "pity": {
+    "exclusive_bonus_pct_per_failed_clear": 1.0,
+    "cap_pct": 30,
+    "guarantee_after_clears": 25,
+    "reset_on": "exclusive_awarded",
+    "per": "player_per_boss"
+   },
+   "first_clear_guarantee": {
+    "itemId": "plate_chest_epic"
+   },
+   "shared_pool_size": [
+    3,
+    5
+   ]
+  },
+  {
+   "bossId": "frost_troll_brothers",
+   "godot_ids": [
+    "frosttroll_a",
+    "frosttroll_b"
+   ],
+   "enabled": true,
+   "disabled_reason": null,
+   "theme": [
+    "heavy_frost_armor",
+    "warhammers"
+   ],
+   "specialReward": "twin_brothers_trophy",
+   "themed_set": "frostwarden",
+   "exclusives": [
+    {
+     "itemId": "winters_end",
+     "chance_pct": 4.0
+    },
+    {
+     "itemId": "frost_troll_totem",
+     "chance_pct": 6.0
+    }
+   ],
+   "materials": [
+    {
+     "itemId": "mat_frozen_heart",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 100
+    },
+    {
+     "itemId": "mat_troll_hide",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 60
+    }
+   ],
+   "rarity_table": "boss_tier",
+   "pity": {
+    "exclusive_bonus_pct_per_failed_clear": 1.0,
+    "cap_pct": 30,
+    "guarantee_after_clears": 25,
+    "reset_on": "exclusive_awarded",
+    "per": "player_per_boss"
+   },
+   "first_clear_guarantee": {
+    "itemId": "scale_chest_epic"
+   },
+   "shared_pool_size": [
+    3,
+    5
+   ]
+  },
+  {
+   "bossId": "balthrix",
+   "godot_ids": [
+    "vaelthryx"
+   ],
+   "enabled": true,
+   "disabled_reason": null,
+   "theme": [
+    "venom",
+    "serpent",
+    "petrified"
+   ],
+   "specialReward": "eye_of_balthrix",
+   "themed_set": "bloodfang",
+   "exclusives": [
+    {
+     "itemId": "serpents_kiss",
+     "chance_pct": 4.0
+    },
+    {
+     "itemId": "eye_of_balthrix",
+     "chance_pct": 6.0
+    }
+   ],
+   "materials": [
+    {
+     "itemId": "mat_basilisk_scale",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 100
+    },
+    {
+     "itemId": "mat_serpent_venom",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 60
+    }
+   ],
+   "rarity_table": "boss_tier",
+   "pity": {
+    "exclusive_bonus_pct_per_failed_clear": 1.0,
+    "cap_pct": 30,
+    "guarantee_after_clears": 25,
+    "reset_on": "exclusive_awarded",
+    "per": "player_per_boss"
+   },
+   "first_clear_guarantee": {
+    "itemId": "chain_chest_epic"
+   },
+   "shared_pool_size": [
+    3,
+    5
+   ]
+  },
+  {
+   "bossId": "cinder",
+   "godot_ids": [],
+   "enabled": false,
+   "disabled_reason": "boss not in Godot yet",
+   "theme": [
+    "phoenix",
+    "fire",
+    "celestial"
+   ],
+   "specialReward": "phoenix_feather_cosmetic",
+   "themed_set": "celestial_watcher",
+   "exclusives": [
+    {
+     "itemId": "eternal_cinder",
+     "chance_pct": 4.0
+    },
+    {
+     "itemId": "phoenix_feather",
+     "chance_pct": 6.0
+    }
+   ],
+   "materials": [
+    {
+     "itemId": "mat_phoenix_feather",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 100
+    },
+    {
+     "itemId": "mat_eternal_flame",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 60
+    }
+   ],
+   "rarity_table": "boss_tier",
+   "pity": {
+    "exclusive_bonus_pct_per_failed_clear": 1.0,
+    "cap_pct": 30,
+    "guarantee_after_clears": 25,
+    "reset_on": "exclusive_awarded",
+    "per": "player_per_boss"
+   },
+   "first_clear_guarantee": {
+    "itemId": "cloth_chest_epic"
+   },
+   "shared_pool_size": [
+    3,
+    5
+   ]
+  },
+  {
+   "bossId": "hydrella",
+   "godot_ids": [
+    "hydra"
+   ],
+   "enabled": true,
+   "disabled_reason": null,
+   "theme": [
+    "poison",
+    "regeneration"
+   ],
+   "specialReward": "hydra_companion_cosmetic",
+   "themed_set": "tidewarden",
+   "exclusives": [
+    {
+     "itemId": "soulrender",
+     "chance_pct": 4.0
+    }
+   ],
+   "materials": [
+    {
+     "itemId": "mat_hydra_fang",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 100
+    },
+    {
+     "itemId": "mat_hydra_heart",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 60
+    }
+   ],
+   "rarity_table": "boss_tier",
+   "pity": {
+    "exclusive_bonus_pct_per_failed_clear": 1.0,
+    "cap_pct": 30,
+    "guarantee_after_clears": 25,
+    "reset_on": "exclusive_awarded",
+    "per": "player_per_boss"
+   },
+   "first_clear_guarantee": {
+    "itemId": "scale_chest_epic"
+   },
+   "shared_pool_size": [
+    3,
+    5
+   ]
+  },
+  {
+   "bossId": "sslythar",
+   "godot_ids": [],
+   "enabled": false,
+   "disabled_reason": "keep_hidden_until_movement_animation_ready",
+   "theme": [
+    "ancient_dragon",
+    "void"
+   ],
+   "specialReward": "living_dragon_scale",
+   "themed_set": "dragonbane",
+   "exclusives": [
+    {
+     "itemId": "voidfang",
+     "chance_pct": 4.0
+    },
+    {
+     "itemId": "voidstone",
+     "chance_pct": 6.0
+    },
+    {
+     "itemId": "ancient_dragon_scale",
+     "chance_pct": 6.0
+    }
+   ],
+   "materials": [
+    {
+     "itemId": "mat_dragon_core",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 100
+    },
+    {
+     "itemId": "mat_abyssal_scale",
+     "qty": [
+      1,
+      3
+     ],
+     "chance_pct": 60
+    }
+   ],
+   "rarity_table": "boss_tier",
+   "pity": {
+    "exclusive_bonus_pct_per_failed_clear": 1.0,
+    "cap_pct": 30,
+    "guarantee_after_clears": 25,
+    "reset_on": "exclusive_awarded",
+    "per": "player_per_boss"
+   },
+   "first_clear_guarantee": {
+    "itemId": "scale_chest_epic"
+   },
+   "shared_pool_size": [
+    3,
+    5
+   ]
+  }
+ ]
+}

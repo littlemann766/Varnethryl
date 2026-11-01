@@ -1,0 +1,126 @@
+{
+ "order": [
+  "uncommon",
+  "common",
+  "rare",
+  "epic",
+  "legendary",
+  "masterwork"
+ ],
+ "note": "Gray=Uncommon is the LOWEST rarity, Green=Common next (spec naming kept verbatim). Rarity looks add geometry per rank, not just colour (see ../appearances.json + MAPPING.md).",
+ "rarities": {
+  "uncommon": {
+   "rank": 0,
+   "colorName": "gray",
+   "color": "#9a9a9a",
+   "itemLevel": 5,
+   "statMult": 1.0,
+   "substats": 1,
+   "sockets": 0,
+   "dropBaselinePct": 55,
+   "look": "worn_iron",
+   "lootBeam": {
+    "enabled": false,
+    "color": "#9a9a9a",
+    "height_m": 0,
+    "pulse": false,
+    "sound": null
+   }
+  },
+  "common": {
+   "rank": 1,
+   "colorName": "green",
+   "color": "#4caf50",
+   "itemLevel": 10,
+   "statMult": 1.12,
+   "substats": 2,
+   "sockets": 0,
+   "dropBaselinePct": 25,
+   "look": "straps_rivets",
+   "lootBeam": {
+    "enabled": false,
+    "color": "#4caf50",
+    "height_m": 0,
+    "pulse": false,
+    "sound": null
+   }
+  },
+  "rare": {
+   "rank": 2,
+   "colorName": "blue",
+   "color": "#3d7fe0",
+   "itemLevel": 20,
+   "statMult": 1.3,
+   "substats": 3,
+   "sockets": 1,
+   "dropBaselinePct": 14,
+   "look": "blackened_steel_brass",
+   "lootBeam": {
+    "enabled": true,
+    "color": "#3d7fe0",
+    "height_m": 2.5,
+    "pulse": false,
+    "sound": "drop_rare"
+   }
+  },
+  "epic": {
+   "rank": 3,
+   "colorName": "purple",
+   "color": "#9b4de0",
+   "itemLevel": 35,
+   "statMult": 1.55,
+   "substats": 4,
+   "sockets": 1,
+   "dropBaselinePct": 5,
+   "look": "gilt_flared_spiked_glow",
+   "lootBeam": {
+    "enabled": true,
+    "color": "#9b4de0",
+    "height_m": 4,
+    "pulse": false,
+    "sound": "drop_epic"
+   }
+  },
+  "legendary": {
+   "rank": 4,
+   "colorName": "gold",
+   "color": "#e0a526",
+   "itemLevel": 50,
+   "statMult": 1.85,
+   "substats": 5,
+   "sockets": 2,
+   "dropBaselinePct": 0.9,
+   "look": "filigree_crest_horns_runes",
+   "lootBeam": {
+    "enabled": true,
+    "color": "#e0a526",
+    "height_m": 6,
+    "pulse": true,
+    "sound": "drop_legendary"
+   }
+  },
+  "masterwork": {
+   "rank": 5,
+   "colorName": "red",
+   "color": "#d8312b",
+   "itemLevel": 60,
+   "statMult": 2.1,
+   "substats": 5,
+   "sockets": 3,
+   "dropBaselinePct": 0.1,
+   "look": "forge_scarred_molten_seams",
+   "lootBeam": {
+    "enabled": true,
+    "color": "#d8312b",
+    "height_m": 8,
+    "pulse": true,
+    "sound": "drop_masterwork"
+   }
+  }
+ },
+ "legacy_tier_map": {
+  "T1": "uncommon",
+  "T2": "rare",
+  "T3": "epic"
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "from": "guildbound_rpg_save_v1 version 1",
+ "to": "state.equipment schemaVersion 1",
+ "backup_key": "guildbound_rpg_save_v1_backup_pre_equipment",
+ "slot_map": {
+  "head": "helmet",
+  "weapon": "main_hand",
+  "shield": "off_hand",
+  "offhand": "off_hand",
+  "ring": "ring1",
+  "trinket": "amulet",
+  "armor": "chest",
+  "charm": "class_item"
+ },
+ "rarity_map_v0_tier": {
+  "T1": "uncommon",
+  "T2": "rare",
+  "T3": "epic"
+ },
+ "rarity_map_items_js_level_tier": {
+  "uncommon": "uncommon",
+  "rare": "rare",
+  "epic": "epic",
+  "mythic": "epic",
+  "legendary": "legendary",
+  "masterwork": "masterwork"
+ },
+ "enhancement": "copy level (0..15) verbatim; ascension=floor(level/3)",
+ "substats": "copy affixes -> substats {stat:map, value, enhancement=boost (clamped 0..10)}",
+ "stat_map": {
+  "hp": "VIT",
+  "crit": "CRIT",
+  "critDmg": "CRIT",
+  "speed": "HASTE",
+  "dodge": "AGI",
+  "lifesteal": "LIFESTEAL",
+  "reduction": "RES",
+  "cooldown": "COOLDOWN"
+ },
+ "id_map_rule": "gear.json base `<family>_<slot>_t<N>` -> `<family>_<newslot>_<rarity>`; weapons `<wfam>_t<N>` -> `<weaponType>_<rarity>`",
+ "rollback": "restore backup key; v1 data ignored by v0 code",
+ "idempotent": true
+}

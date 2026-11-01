@@ -1,0 +1,140 @@
+{
+ "gem_qualities": [
+  "chipped",
+  "flawed",
+  "normal",
+  "fine",
+  "superior",
+  "perfect",
+  "pristine"
+ ],
+ "combine": {
+  "rule": "3 of the same gem+quality -> 1 of the next quality",
+  "gold_cost_by_target_quality": {
+   "chipped": 50,
+   "flawed": 110,
+   "normal": 242,
+   "fine": 532,
+   "superior": 1171,
+   "perfect": 2576,
+   "pristine": 5668
+  },
+  "success_pct_by_target_quality": {
+   "flawed": 100,
+   "normal": 100,
+   "fine": 95,
+   "superior": 85,
+   "perfect": 70,
+   "pristine": 50
+  },
+  "on_fail": "keep 2 of 3, lose 1"
+ },
+ "sockets": {
+  "by_rarity": {
+   "uncommon": 0,
+   "common": 0,
+   "rare": 1,
+   "epic": 1,
+   "legendary": 2,
+   "masterwork": 3
+  },
+  "unlock_at_forge": true,
+  "unlock_cost": "see crafting.mystic_forge.unlock_socket"
+ },
+ "gem_stats": {
+  "ruby": "STR",
+  "sapphire": "MAG",
+  "emerald": "REGEN",
+  "amethyst": "COOLDOWN",
+  "diamond": "DEF",
+  "garnet": "VIT",
+  "obsidian": "RES",
+  "topaz": "HASTE",
+  "moonstone": "AGI",
+  "bloodstone": "LIFESTEAL",
+  "frost_crystal": "frost_res_pct",
+  "void_crystal": "CRIT"
+ },
+ "runes": {
+  "flame": {
+   "desc": "Burn chance on hit",
+   "slots": [
+    "main_hand",
+    "off_hand",
+    "chest"
+   ],
+   "one_per_item": true,
+   "cooldown_s": 30
+  },
+  "swiftness": {
+   "desc": "+move speed after dodge",
+   "slots": [
+    "main_hand",
+    "off_hand",
+    "chest"
+   ],
+   "one_per_item": true,
+   "cooldown_s": 30
+  },
+  "protection": {
+   "desc": "Shield on low HP (60 s cd)",
+   "slots": [
+    "main_hand",
+    "off_hand",
+    "chest"
+   ],
+   "one_per_item": true,
+   "cooldown_s": 30
+  },
+  "rebirth": {
+   "desc": "Revive once per dungeon",
+   "slots": [
+    "main_hand",
+    "off_hand",
+    "chest"
+   ],
+   "one_per_item": true,
+   "cooldown_s": 30
+  },
+  "destruction": {
+   "desc": "Ultimate +damage",
+   "slots": [
+    "main_hand",
+    "off_hand",
+    "chest"
+   ],
+   "one_per_item": true,
+   "cooldown_s": 30
+  },
+  "echoes": {
+   "desc": "Skill repeats at 30% power (rare)",
+   "slots": [
+    "main_hand",
+    "off_hand",
+    "chest"
+   ],
+   "one_per_item": true,
+   "cooldown_s": 30
+  },
+  "hunt": {
+   "desc": "Bonus damage to marked target",
+   "slots": [
+    "main_hand",
+    "off_hand",
+    "chest"
+   ],
+   "one_per_item": true,
+   "cooldown_s": 30
+  },
+  "guardian": {
+   "desc": "Redirect 10% of ally damage to you",
+   "slots": [
+    "main_hand",
+    "off_hand",
+    "chest"
+   ],
+   "one_per_item": true,
+   "cooldown_s": 30
+  }
+ }
+}

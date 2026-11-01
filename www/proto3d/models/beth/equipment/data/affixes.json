@@ -1,0 +1,619 @@
+{
+ "_note": "Prefix affixes (one per item, rolled from possibleAffixes). Values bounded per rarity; 'cursed' adds +X% damage and -X/2% max HP.",
+ "elements": [
+  "fire",
+  "frost",
+  "storm",
+  "shadow",
+  "holy",
+  "unholy",
+  "nature",
+  "arcane"
+ ],
+ "affixes": {
+  "titans": {
+   "label": "Titan's",
+   "effect": "STR",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "guardians": {
+   "label": "Guardian's",
+   "effect": "DEF",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "swift": {
+   "label": "Swift",
+   "effect": "AGI",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "arcane": {
+   "label": "Arcane",
+   "effect": "MAG",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "vital": {
+   "label": "Vital",
+   "effect": "VIT",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "vampiric": {
+   "label": "Vampiric",
+   "effect": "LIFESTEAL",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "unbreakable": {
+   "label": "Unbreakable",
+   "effect": "damage_reduction_pct",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "precise": {
+   "label": "Precise",
+   "effect": "CRIT",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "eternal": {
+   "label": "Eternal",
+   "effect": "REGEN",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "cursed": {
+   "label": "Cursed",
+   "effect": "power_with_drawback",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "dragonforged": {
+   "label": "Dragonforged",
+   "effect": "fire_damage_pct",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "frostbound": {
+   "label": "Frostbound",
+   "effect": "frost_res_pct",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "stormcharged": {
+   "label": "Stormcharged",
+   "effect": "storm_damage_pct",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "shadowwoven": {
+   "label": "Shadowwoven",
+   "effect": "evasion_pct",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "blessed": {
+   "label": "Blessed",
+   "effect": "healing_pct",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "berserkers": {
+   "label": "Berserker's",
+   "effect": "low_hp_damage_pct",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "wardens": {
+   "label": "Warden's",
+   "effect": "ally_protection_pct",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "soulbound": {
+   "label": "Soulbound",
+   "effect": "mana_regen_pct",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  },
+  "executioners": {
+   "label": "Executioner's",
+   "effect": "weakened_target_damage_pct",
+   "range_by_rarity": {
+    "uncommon": [
+     1.5,
+     4.0
+    ],
+    "common": [
+     1.7,
+     4.5
+    ],
+    "rare": [
+     2.0,
+     5.2
+    ],
+    "epic": [
+     2.3,
+     6.2
+    ],
+    "legendary": [
+     2.8,
+     7.4
+    ],
+    "masterwork": [
+     3.2,
+     8.4
+    ]
+   },
+   "stack_rule": "additive_capped"
+  }
+ },
+ "element_rules": {
+  "counters": {
+   "fire": "frost",
+   "frost": "storm",
+   "storm": "fire",
+   "shadow": "holy",
+   "holy": "unholy",
+   "unholy": "nature",
+   "nature": "shadow",
+   "arcane": "arcane"
+  },
+  "counter_bonus_pct": 15,
+  "resist_cap_pct": 60,
+  "no_multiplicative_stacking": true
+ }
+}

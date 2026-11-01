@@ -1,0 +1,131 @@
+{
+ "rarity_baseline": {
+  "uncommon": 55.0,
+  "common": 25.0,
+  "rare": 14.0,
+  "epic": 5.0,
+  "legendary": 0.9,
+  "masterwork": 0.1
+ },
+ "baseline_scope": "ordinary loot only",
+ "tables": {
+  "ordinary": {
+   "uncommon": 55,
+   "common": 25,
+   "rare": 14,
+   "epic": 5,
+   "legendary": 0.9,
+   "masterwork": 0.1
+  },
+  "elite": {
+   "uncommon": 35,
+   "common": 30,
+   "rare": 22,
+   "epic": 10,
+   "legendary": 2.6,
+   "masterwork": 0.4
+  },
+  "boss_tier": {
+   "uncommon": 0,
+   "common": 25,
+   "rare": 40,
+   "epic": 27,
+   "legendary": 7,
+   "masterwork": 1
+  },
+  "chest_common": {
+   "uncommon": 60,
+   "common": 28,
+   "rare": 11,
+   "epic": 1,
+   "legendary": 0,
+   "masterwork": 0
+  },
+  "chest_vault": {
+   "uncommon": 10,
+   "common": 25,
+   "rare": 35,
+   "epic": 22,
+   "legendary": 7,
+   "masterwork": 1
+  }
+ },
+ "pity": {
+  "rarity_pity": {
+   "epic_or_better_after_rolls": 60,
+   "legendary_or_better_after_rolls": 400,
+   "reset_on": "rarity_awarded_at_or_above",
+   "per": "player",
+   "visible_to_player": true
+  },
+  "exclusive_pity": "see boss_loot.json per boss"
+ },
+ "need_greed_pass": {
+  "timer_s": 60,
+  "order": [
+   "need",
+   "greed"
+  ],
+  "need_eligibility": "can_equip_family_or_weapon_type (any hero may wear any armor family -> need allowed if efficiency>=0.85 and slot matches a party hero)",
+  "roll": "1..100",
+  "tie_break": "sha256(encounterId+itemId+playerId) ascending",
+  "leader_override": false,
+  "unclaimed": "mail_to_random_greed_or_disenchant",
+  "unclaimed_expiry_h": 72,
+  "participation": {
+   "min_active_presence_pct": 60,
+   "credit": [
+    "damage",
+    "healing",
+    "mitigated_damage",
+    "objectives"
+   ],
+   "late_join_cutoff_pct_encounter": 50
+  }
+ },
+ "binding": {
+  "unbound": "tradeable",
+  "bind_on_equip": "tradeable until equipped",
+  "bind_on_pickup": "never tradeable",
+  "account_bound": "between own characters only",
+  "character_bound": "never moves",
+  "admin_only": "owner/co-owner gear, never tradeable"
+ },
+ "trade": {
+  "two_step_confirm": true,
+  "reset_confirm_on_change": true,
+  "atomic": true,
+  "server_validates": [
+   "ownership",
+   "capacity",
+   "binding",
+   "currency"
+  ],
+  "rate_limit_per_min": 6,
+  "log": true,
+  "market_later": {
+   "listing_fee_pct": 2,
+   "sale_fee_pct": 5,
+   "excluded": [
+    "bind_on_pickup",
+    "character_bound",
+    "admin_only"
+   ]
+  }
+ },
+ "hidden_content": {
+  "sslythar": {
+   "bosses": [
+    "sslythar"
+   ],
+   "items": [
+    "voidfang",
+    "ancient_dragon_scale",
+    "voidstone",
+    "mat_dragon_core",
+    "mat_abyssal_scale"
+   ],
+   "rule": "never in an enabled table until reveal"
+  }
+ }
+}

@@ -1,0 +1,5433 @@
+{
+ "professions": [
+  "blacksmith",
+  "leatherworker",
+  "tailor",
+  "jeweler",
+  "enchanter",
+  "alchemist",
+  "mystic_forge"
+ ],
+ "facilities": {
+  "blacksmith": "smithy",
+  "leatherworker": "stables",
+  "tailor": "market",
+  "jeweler": "treasury",
+  "enchanter": "mage_academy",
+  "alchemist": "apothecary",
+  "mystic_forge": "mage_academy"
+ },
+ "facility_note": "Uses existing buildings; Blacksmith (smithy) and Mage Academy first per spec 12. Interiors belong to Lucky.",
+ "mystic_forge": {
+  "stage_1": [
+   "enhance",
+   "ascend"
+  ],
+  "stage_2": [
+   "reroll_substats",
+   "replace_one_substat",
+   "unlock_socket"
+  ],
+  "stage_3": [
+   "apply_element",
+   "cosmetic_upgrade",
+   "boss_recipes",
+   "transfer_enhancement"
+  ],
+  "reroll_substats": {
+   "gold": "500*(rank+1)",
+   "mat": "mat_soul_fragment",
+   "qty": "2+rank"
+  },
+  "replace_one_substat": {
+   "gold": "1200*(rank+1)",
+   "lock_others": true,
+   "max_per_item": 3
+  },
+  "unlock_socket": {
+   "gold": [
+    0,
+    0,
+    800,
+    2000,
+    5000,
+    12000
+   ],
+   "mat": "mat_enchanted_crystal"
+  },
+  "transfer_enhancement": {
+   "max_levels": 9,
+   "loss_pct": 30,
+   "same_slot_only": true
+  },
+  "apply_element": {
+   "allowed_slots": [
+    "main_hand",
+    "off_hand",
+    "chest"
+   ],
+   "one_element_per_item": true
+  }
+ },
+ "boss_recipes": [
+  {
+   "recipeId": "r_worldbreaker",
+   "output": "worldbreaker",
+   "inputs": [
+    {
+     "itemId": "mat_titan_core",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_molten_ore",
+     "qty": 10
+    },
+    {
+     "itemId": "greatsword_epic",
+     "qty": 1
+    }
+   ],
+   "facility": "mage_academy",
+   "enabled": true
+  },
+  {
+   "recipeId": "r_voidfang",
+   "output": "voidfang",
+   "inputs": [
+    {
+     "itemId": "mat_dragon_core",
+     "qty": 1
+    },
+    {
+     "itemId": "mat_abyssal_scale",
+     "qty": 5
+    }
+   ],
+   "facility": "mage_academy",
+   "enabled": false,
+   "hidden": "sslythar"
+  }
+ ],
+ "recipes": [
+  {
+   "recipeId": "r_plate_helmet_uncommon",
+   "output": "plate_helmet_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_plate_helmet_common",
+   "output": "plate_helmet_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_plate_helmet_rare",
+   "output": "plate_helmet_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_plate_helmet_epic",
+   "output": "plate_helmet_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_plate_chest_uncommon",
+   "output": "plate_chest_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_plate_chest_common",
+   "output": "plate_chest_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_plate_chest_rare",
+   "output": "plate_chest_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_plate_chest_epic",
+   "output": "plate_chest_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_plate_shoulders_uncommon",
+   "output": "plate_shoulders_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_plate_shoulders_common",
+   "output": "plate_shoulders_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_plate_shoulders_rare",
+   "output": "plate_shoulders_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_plate_shoulders_epic",
+   "output": "plate_shoulders_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_plate_gloves_uncommon",
+   "output": "plate_gloves_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_plate_gloves_common",
+   "output": "plate_gloves_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_plate_gloves_rare",
+   "output": "plate_gloves_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_plate_gloves_epic",
+   "output": "plate_gloves_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_plate_legs_uncommon",
+   "output": "plate_legs_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_plate_legs_common",
+   "output": "plate_legs_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_plate_legs_rare",
+   "output": "plate_legs_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_plate_legs_epic",
+   "output": "plate_legs_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_plate_boots_uncommon",
+   "output": "plate_boots_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_plate_boots_common",
+   "output": "plate_boots_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_plate_boots_rare",
+   "output": "plate_boots_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_plate_boots_epic",
+   "output": "plate_boots_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_plate_belt_uncommon",
+   "output": "plate_belt_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_plate_belt_common",
+   "output": "plate_belt_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_plate_belt_rare",
+   "output": "plate_belt_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_plate_belt_epic",
+   "output": "plate_belt_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_plate_cloak_uncommon",
+   "output": "plate_cloak_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_plate_cloak_common",
+   "output": "plate_cloak_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_plate_cloak_rare",
+   "output": "plate_cloak_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_plate_cloak_epic",
+   "output": "plate_cloak_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_chain_helmet_uncommon",
+   "output": "chain_helmet_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_chain_helmet_common",
+   "output": "chain_helmet_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_chain_helmet_rare",
+   "output": "chain_helmet_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_chain_helmet_epic",
+   "output": "chain_helmet_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_chain_chest_uncommon",
+   "output": "chain_chest_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_chain_chest_common",
+   "output": "chain_chest_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_chain_chest_rare",
+   "output": "chain_chest_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_chain_chest_epic",
+   "output": "chain_chest_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_chain_shoulders_uncommon",
+   "output": "chain_shoulders_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_chain_shoulders_common",
+   "output": "chain_shoulders_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_chain_shoulders_rare",
+   "output": "chain_shoulders_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_chain_shoulders_epic",
+   "output": "chain_shoulders_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_chain_gloves_uncommon",
+   "output": "chain_gloves_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_chain_gloves_common",
+   "output": "chain_gloves_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_chain_gloves_rare",
+   "output": "chain_gloves_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_chain_gloves_epic",
+   "output": "chain_gloves_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_chain_legs_uncommon",
+   "output": "chain_legs_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_chain_legs_common",
+   "output": "chain_legs_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_chain_legs_rare",
+   "output": "chain_legs_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_chain_legs_epic",
+   "output": "chain_legs_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_chain_boots_uncommon",
+   "output": "chain_boots_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_chain_boots_common",
+   "output": "chain_boots_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_chain_boots_rare",
+   "output": "chain_boots_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_chain_boots_epic",
+   "output": "chain_boots_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_chain_belt_uncommon",
+   "output": "chain_belt_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_chain_belt_common",
+   "output": "chain_belt_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_chain_belt_rare",
+   "output": "chain_belt_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_chain_belt_epic",
+   "output": "chain_belt_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_chain_cloak_uncommon",
+   "output": "chain_cloak_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_chain_cloak_common",
+   "output": "chain_cloak_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_chain_cloak_rare",
+   "output": "chain_cloak_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_chain_cloak_epic",
+   "output": "chain_cloak_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_leather_helmet_uncommon",
+   "output": "leather_helmet_uncommon",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_leather_helmet_common",
+   "output": "leather_helmet_common",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_leather_helmet_rare",
+   "output": "leather_helmet_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_leather_helmet_epic",
+   "output": "leather_helmet_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_leather_chest_uncommon",
+   "output": "leather_chest_uncommon",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_leather_chest_common",
+   "output": "leather_chest_common",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_leather_chest_rare",
+   "output": "leather_chest_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_leather_chest_epic",
+   "output": "leather_chest_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_leather_shoulders_uncommon",
+   "output": "leather_shoulders_uncommon",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_leather_shoulders_common",
+   "output": "leather_shoulders_common",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_leather_shoulders_rare",
+   "output": "leather_shoulders_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_leather_shoulders_epic",
+   "output": "leather_shoulders_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_leather_gloves_uncommon",
+   "output": "leather_gloves_uncommon",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_leather_gloves_common",
+   "output": "leather_gloves_common",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_leather_gloves_rare",
+   "output": "leather_gloves_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_leather_gloves_epic",
+   "output": "leather_gloves_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_leather_legs_uncommon",
+   "output": "leather_legs_uncommon",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_leather_legs_common",
+   "output": "leather_legs_common",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_leather_legs_rare",
+   "output": "leather_legs_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_leather_legs_epic",
+   "output": "leather_legs_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_leather_boots_uncommon",
+   "output": "leather_boots_uncommon",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_leather_boots_common",
+   "output": "leather_boots_common",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_leather_boots_rare",
+   "output": "leather_boots_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_leather_boots_epic",
+   "output": "leather_boots_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_leather_belt_uncommon",
+   "output": "leather_belt_uncommon",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_leather_belt_common",
+   "output": "leather_belt_common",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_leather_belt_rare",
+   "output": "leather_belt_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_leather_belt_epic",
+   "output": "leather_belt_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_leather_cloak_uncommon",
+   "output": "leather_cloak_uncommon",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_leather_cloak_common",
+   "output": "leather_cloak_common",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_leather_cloak_rare",
+   "output": "leather_cloak_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_leather_cloak_epic",
+   "output": "leather_cloak_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_scale_helmet_uncommon",
+   "output": "scale_helmet_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_scale_helmet_common",
+   "output": "scale_helmet_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_scale_helmet_rare",
+   "output": "scale_helmet_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_scale_helmet_epic",
+   "output": "scale_helmet_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_scale_chest_uncommon",
+   "output": "scale_chest_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_scale_chest_common",
+   "output": "scale_chest_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_scale_chest_rare",
+   "output": "scale_chest_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_scale_chest_epic",
+   "output": "scale_chest_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_scale_shoulders_uncommon",
+   "output": "scale_shoulders_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_scale_shoulders_common",
+   "output": "scale_shoulders_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_scale_shoulders_rare",
+   "output": "scale_shoulders_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_scale_shoulders_epic",
+   "output": "scale_shoulders_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_scale_gloves_uncommon",
+   "output": "scale_gloves_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_scale_gloves_common",
+   "output": "scale_gloves_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_scale_gloves_rare",
+   "output": "scale_gloves_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_scale_gloves_epic",
+   "output": "scale_gloves_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_scale_legs_uncommon",
+   "output": "scale_legs_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_scale_legs_common",
+   "output": "scale_legs_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_scale_legs_rare",
+   "output": "scale_legs_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_scale_legs_epic",
+   "output": "scale_legs_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_scale_boots_uncommon",
+   "output": "scale_boots_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_scale_boots_common",
+   "output": "scale_boots_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_scale_boots_rare",
+   "output": "scale_boots_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_scale_boots_epic",
+   "output": "scale_boots_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_scale_belt_uncommon",
+   "output": "scale_belt_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_scale_belt_common",
+   "output": "scale_belt_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_scale_belt_rare",
+   "output": "scale_belt_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_scale_belt_epic",
+   "output": "scale_belt_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_scale_cloak_uncommon",
+   "output": "scale_cloak_uncommon",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_iron",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_scale_cloak_common",
+   "output": "scale_cloak_common",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_steel",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_scale_cloak_rare",
+   "output": "scale_cloak_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_scale_cloak_epic",
+   "output": "scale_cloak_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_cloth_helmet_uncommon",
+   "output": "cloth_helmet_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_cloth_helmet_common",
+   "output": "cloth_helmet_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_cloth_helmet_rare",
+   "output": "cloth_helmet_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_cloth_helmet_epic",
+   "output": "cloth_helmet_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_cloth_chest_uncommon",
+   "output": "cloth_chest_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_cloth_chest_common",
+   "output": "cloth_chest_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_cloth_chest_rare",
+   "output": "cloth_chest_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_cloth_chest_epic",
+   "output": "cloth_chest_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_cloth_shoulders_uncommon",
+   "output": "cloth_shoulders_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_cloth_shoulders_common",
+   "output": "cloth_shoulders_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_cloth_shoulders_rare",
+   "output": "cloth_shoulders_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_cloth_shoulders_epic",
+   "output": "cloth_shoulders_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_cloth_gloves_uncommon",
+   "output": "cloth_gloves_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_cloth_gloves_common",
+   "output": "cloth_gloves_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_cloth_gloves_rare",
+   "output": "cloth_gloves_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_cloth_gloves_epic",
+   "output": "cloth_gloves_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_cloth_legs_uncommon",
+   "output": "cloth_legs_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_cloth_legs_common",
+   "output": "cloth_legs_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_cloth_legs_rare",
+   "output": "cloth_legs_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_cloth_legs_epic",
+   "output": "cloth_legs_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_cloth_boots_uncommon",
+   "output": "cloth_boots_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_cloth_boots_common",
+   "output": "cloth_boots_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_cloth_boots_rare",
+   "output": "cloth_boots_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_cloth_boots_epic",
+   "output": "cloth_boots_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_cloth_belt_uncommon",
+   "output": "cloth_belt_uncommon",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_cloth_belt_common",
+   "output": "cloth_belt_common",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_cloth_belt_rare",
+   "output": "cloth_belt_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_cloth_belt_epic",
+   "output": "cloth_belt_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_cloth_cloak_uncommon",
+   "output": "cloth_cloak_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_cloth_cloak_common",
+   "output": "cloth_cloak_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_cloth_cloak_rare",
+   "output": "cloth_cloak_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_cloth_cloak_epic",
+   "output": "cloth_cloak_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_mystic_helmet_uncommon",
+   "output": "mystic_helmet_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_mystic_helmet_common",
+   "output": "mystic_helmet_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_mystic_helmet_rare",
+   "output": "mystic_helmet_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_mystic_helmet_epic",
+   "output": "mystic_helmet_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_mystic_chest_uncommon",
+   "output": "mystic_chest_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_mystic_chest_common",
+   "output": "mystic_chest_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_mystic_chest_rare",
+   "output": "mystic_chest_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_mystic_chest_epic",
+   "output": "mystic_chest_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_mystic_shoulders_uncommon",
+   "output": "mystic_shoulders_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_mystic_shoulders_common",
+   "output": "mystic_shoulders_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_mystic_shoulders_rare",
+   "output": "mystic_shoulders_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_mystic_shoulders_epic",
+   "output": "mystic_shoulders_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_mystic_gloves_uncommon",
+   "output": "mystic_gloves_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_mystic_gloves_common",
+   "output": "mystic_gloves_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_mystic_gloves_rare",
+   "output": "mystic_gloves_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_mystic_gloves_epic",
+   "output": "mystic_gloves_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_mystic_legs_uncommon",
+   "output": "mystic_legs_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_mystic_legs_common",
+   "output": "mystic_legs_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_mystic_legs_rare",
+   "output": "mystic_legs_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_mystic_legs_epic",
+   "output": "mystic_legs_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_mystic_boots_uncommon",
+   "output": "mystic_boots_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_mystic_boots_common",
+   "output": "mystic_boots_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_mystic_boots_rare",
+   "output": "mystic_boots_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_mystic_boots_epic",
+   "output": "mystic_boots_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_mystic_belt_uncommon",
+   "output": "mystic_belt_uncommon",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_mystic_belt_common",
+   "output": "mystic_belt_common",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "legacy_wolf_pelt",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_mystic_belt_rare",
+   "output": "mystic_belt_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_mystic_belt_epic",
+   "output": "mystic_belt_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_mystic_cloak_uncommon",
+   "output": "mystic_cloak_uncommon",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_mystic_cloak_common",
+   "output": "mystic_cloak_common",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_mystic_cloak_rare",
+   "output": "mystic_cloak_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_mystic_cloak_epic",
+   "output": "mystic_cloak_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_longsword_rare",
+   "output": "longsword_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_longsword_epic",
+   "output": "longsword_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_longsword_legendary",
+   "output": "longsword_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_short_sword_rare",
+   "output": "short_sword_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_short_sword_epic",
+   "output": "short_sword_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_short_sword_legendary",
+   "output": "short_sword_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_greatsword_rare",
+   "output": "greatsword_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_greatsword_epic",
+   "output": "greatsword_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_greatsword_legendary",
+   "output": "greatsword_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_dual_blades_rare",
+   "output": "dual_blades_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_dual_blades_epic",
+   "output": "dual_blades_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_dual_blades_legendary",
+   "output": "dual_blades_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_battle_axe_rare",
+   "output": "battle_axe_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_battle_axe_epic",
+   "output": "battle_axe_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_battle_axe_legendary",
+   "output": "battle_axe_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_mace_rare",
+   "output": "mace_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_mace_epic",
+   "output": "mace_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_mace_legendary",
+   "output": "mace_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_spear_rare",
+   "output": "spear_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_spear_epic",
+   "output": "spear_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_spear_legendary",
+   "output": "spear_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_two_handed_staff_rare",
+   "output": "two_handed_staff_rare",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_two_handed_staff_epic",
+   "output": "two_handed_staff_epic",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_two_handed_staff_legendary",
+   "output": "two_handed_staff_legendary",
+   "profession": "tailor",
+   "facility": "market",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_celestial_essence",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_scythe_rare",
+   "output": "scythe_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_scythe_epic",
+   "output": "scythe_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_scythe_legendary",
+   "output": "scythe_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_longbow_rare",
+   "output": "longbow_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_longbow_epic",
+   "output": "longbow_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_longbow_legendary",
+   "output": "longbow_legendary",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_dragon_scale",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_crossbow_rare",
+   "output": "crossbow_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_crossbow_epic",
+   "output": "crossbow_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_crossbow_legendary",
+   "output": "crossbow_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_instrument_rare",
+   "output": "instrument_rare",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_instrument_epic",
+   "output": "instrument_epic",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_troll_hide",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_instrument_legendary",
+   "output": "instrument_legendary",
+   "profession": "leatherworker",
+   "facility": "stables",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_dragon_scale",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_whip_rare",
+   "output": "whip_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_whip_epic",
+   "output": "whip_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_whip_legendary",
+   "output": "whip_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_fist_weapon_rare",
+   "output": "fist_weapon_rare",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_mithril",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_fist_weapon_epic",
+   "output": "fist_weapon_epic",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_adamantite",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_fist_weapon_legendary",
+   "output": "fist_weapon_legendary",
+   "profession": "blacksmith",
+   "facility": "smithy",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_starsteel",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_amulet_uncommon",
+   "output": "amulet_uncommon",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_amulet_common",
+   "output": "amulet_common",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_amulet_rare",
+   "output": "amulet_rare",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_amulet_epic",
+   "output": "amulet_epic",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_amulet_legendary",
+   "output": "amulet_legendary",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_celestial_essence",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_amulet_masterwork",
+   "output": "amulet_masterwork",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 125,
+   "gold": 9720,
+   "inputs": [
+    {
+     "itemId": "mat_celestial_essence",
+     "qty": 13
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 6
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 10
+    }
+   ],
+   "time_s": 180
+  },
+  {
+   "recipeId": "r_ring_uncommon",
+   "output": "ring_uncommon",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 40,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 3
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 30
+  },
+  {
+   "recipeId": "r_ring_common",
+   "output": "ring_common",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 25,
+   "gold": 120,
+   "inputs": [
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 2
+    }
+   ],
+   "time_s": 60
+  },
+  {
+   "recipeId": "r_ring_rare",
+   "output": "ring_rare",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 50,
+   "gold": 360,
+   "inputs": [
+    {
+     "itemId": "mat_enchanted_crystal",
+     "qty": 7
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 3
+    }
+   ],
+   "time_s": 90
+  },
+  {
+   "recipeId": "r_ring_epic",
+   "output": "ring_epic",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 75,
+   "gold": 1080,
+   "inputs": [
+    {
+     "itemId": "mat_soul_fragment",
+     "qty": 9
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 4
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 6
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_ring_legendary",
+   "output": "ring_legendary",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 100,
+   "gold": 3240,
+   "inputs": [
+    {
+     "itemId": "mat_celestial_essence",
+     "qty": 11
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 5
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 8
+    }
+   ],
+   "time_s": 150
+  },
+  {
+   "recipeId": "r_ring_masterwork",
+   "output": "ring_masterwork",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 125,
+   "gold": 9720,
+   "inputs": [
+    {
+     "itemId": "mat_celestial_essence",
+     "qty": 13
+    },
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 6
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 10
+    }
+   ],
+   "time_s": 180
+  },
+  {
+   "recipeId": "r_cut_ruby",
+   "output": "gem_ruby_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_cut_sapphire",
+   "output": "gem_sapphire_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_cut_emerald",
+   "output": "gem_emerald_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_cut_amethyst",
+   "output": "gem_amethyst_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_cut_diamond",
+   "output": "gem_diamond_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_cut_garnet",
+   "output": "gem_garnet_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_cut_obsidian",
+   "output": "gem_obsidian_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_cut_topaz",
+   "output": "gem_topaz_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_cut_moonstone",
+   "output": "gem_moonstone_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_cut_bloodstone",
+   "output": "gem_bloodstone_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_cut_frost_crystal",
+   "output": "gem_frost_crystal_chipped",
+   "profession": "jeweler",
+   "facility": "treasury",
+   "skill_req": 0,
+   "gold": 30,
+   "inputs": [
+    {
+     "itemId": "mat_forge_shard",
+     "qty": 1
+    }
+   ],
+   "time_s": 20
+  },
+  {
+   "recipeId": "r_rune_flame",
+   "output": "rune_flame",
+   "profession": "enchanter",
+   "facility": "mage_academy",
+   "skill_req": 75,
+   "gold": 900,
+   "inputs": [
+    {
+     "itemId": "mat_ancient_rune",
+     "qty": 2
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_rune_swiftness",
+   "output": "rune_swiftness",
+   "profession": "enchanter",
+   "facility": "mage_academy",
+   "skill_req": 75,
+   "gold": 900,
+   "inputs": [
+    {
+     "itemId": "mat_ancient_rune",
+     "qty": 2
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_rune_protection",
+   "output": "rune_protection",
+   "profession": "enchanter",
+   "facility": "mage_academy",
+   "skill_req": 75,
+   "gold": 900,
+   "inputs": [
+    {
+     "itemId": "mat_ancient_rune",
+     "qty": 2
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_rune_rebirth",
+   "output": "rune_rebirth",
+   "profession": "enchanter",
+   "facility": "mage_academy",
+   "skill_req": 75,
+   "gold": 900,
+   "inputs": [
+    {
+     "itemId": "mat_ancient_rune",
+     "qty": 2
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_rune_destruction",
+   "output": "rune_destruction",
+   "profession": "enchanter",
+   "facility": "mage_academy",
+   "skill_req": 75,
+   "gold": 900,
+   "inputs": [
+    {
+     "itemId": "mat_ancient_rune",
+     "qty": 2
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_rune_echoes",
+   "output": "rune_echoes",
+   "profession": "enchanter",
+   "facility": "mage_academy",
+   "skill_req": 75,
+   "gold": 900,
+   "inputs": [
+    {
+     "itemId": "mat_ancient_rune",
+     "qty": 2
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_rune_hunt",
+   "output": "rune_hunt",
+   "profession": "enchanter",
+   "facility": "mage_academy",
+   "skill_req": 75,
+   "gold": 900,
+   "inputs": [
+    {
+     "itemId": "mat_ancient_rune",
+     "qty": 2
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    }
+   ],
+   "time_s": 120
+  },
+  {
+   "recipeId": "r_rune_guardian",
+   "output": "rune_guardian",
+   "profession": "enchanter",
+   "facility": "mage_academy",
+   "skill_req": 75,
+   "gold": 900,
+   "inputs": [
+    {
+     "itemId": "mat_ancient_rune",
+     "qty": 2
+    },
+    {
+     "itemId": "mat_arcane_dust",
+     "qty": 5
+    }
+   ],
+   "time_s": 120
+  }
+ ],
+ "_missing_inputs": []
+}

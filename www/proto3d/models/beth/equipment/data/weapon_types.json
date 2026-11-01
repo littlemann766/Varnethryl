@@ -1,0 +1,232 @@
+{
+ "weapon_types": {
+  "longsword": {
+   "game_family": "sword",
+   "hands": 1,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "aldric",
+    "owner"
+   ],
+   "stat": "STR"
+  },
+  "short_sword": {
+   "game_family": "rapier",
+   "hands": 1,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "finn"
+   ],
+   "stat": "STR"
+  },
+  "greatsword": {
+   "game_family": "greatsword",
+   "hands": 2,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand",
+    "off_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "darius"
+   ],
+   "stat": "STR"
+  },
+  "dual_blades": {
+   "game_family": "dagger",
+   "hands": 1,
+   "dual_wield": true,
+   "occupies": [
+    "main_hand",
+    "off_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "nyx",
+    "wren"
+   ],
+   "stat": "STR"
+  },
+  "battle_axe": {
+   "game_family": "axe",
+   "hands": 1,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "garruk"
+   ],
+   "stat": "STR"
+  },
+  "mace": {
+   "game_family": "mace",
+   "hands": 1,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "seraphine"
+   ],
+   "stat": "STR"
+  },
+  "spear": {
+   "game_family": "spear",
+   "hands": 2,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand",
+    "off_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "orin"
+   ],
+   "stat": "STR"
+  },
+  "two_handed_staff": {
+   "game_family": "staff",
+   "hands": 2,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand",
+    "off_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "rowan",
+    "thorne",
+    "mirelle",
+    "kael",
+    "talia",
+    "selene"
+   ],
+   "stat": "MAG"
+  },
+  "scythe": {
+   "game_family": "scythe",
+   "hands": 2,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand",
+    "off_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "morwen"
+   ],
+   "stat": "STR"
+  },
+  "longbow": {
+   "game_family": "bow",
+   "hands": 2,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand",
+    "off_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "elira"
+   ],
+   "stat": "STR"
+  },
+  "crossbow": {
+   "game_family": "crossbow",
+   "hands": 2,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand",
+    "off_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "vesper",
+    "brynn"
+   ],
+   "stat": "STR"
+  },
+  "instrument": {
+   "game_family": "lute",
+   "hands": 2,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand",
+    "off_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "cedric"
+   ],
+   "stat": "MAG"
+  },
+  "whip": {
+   "game_family": "whip",
+   "hands": 1,
+   "dual_wield": false,
+   "occupies": [
+    "main_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "rook"
+   ],
+   "stat": "STR"
+  },
+  "fist_weapon": {
+   "game_family": "knuckles",
+   "hands": 1,
+   "dual_wield": true,
+   "occupies": [
+    "main_hand",
+    "off_hand"
+   ],
+   "animation_supported": true,
+   "heroes": [
+    "asha"
+   ],
+   "stat": "STR"
+  }
+ },
+ "not_yet_supported_spec_types": [
+  "dual_axes",
+  "warhammer",
+  "morningstar",
+  "lance",
+  "halberd",
+  "polearm",
+  "flail",
+  "claws",
+  "executioner",
+  "two_handed_hammer",
+  "shortbow",
+  "heavy_crossbow",
+  "repeating_crossbow",
+  "throwing_knives",
+  "throwing_axes",
+  "javelins",
+  "magical_bow",
+  "wand",
+  "one_handed_staff",
+  "grimoire",
+  "spellbook",
+  "orb",
+  "crystal",
+  "totem",
+  "holy_relic",
+  "necromantic_catalyst"
+ ],
+ "rule": "Do not add these to loot until attack animations exist (spec 10)."
+}

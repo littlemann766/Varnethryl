@@ -1,0 +1,649 @@
+{
+ "_note": "18 active sets (3 per family). Remaining spec concepts listed for later.",
+ "sets": [
+  {
+   "setId": "iron_bastion",
+   "name": "Iron Bastion",
+   "armorFamily": "plate",
+   "rarity": "epic",
+   "pieces": [
+    "plate_helmet_epic",
+    "plate_chest_epic",
+    "plate_shoulders_epic",
+    "plate_gloves_epic",
+    "plate_legs_epic",
+    "plate_boots_epic"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "damage_reduction_pct",
+     "value": 4,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "block_chance_pct",
+     "value": 6,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "bastion_wall_shield_on_block_pct_maxhp",
+     "value": 10,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "ashen_titan",
+   "name": "Ashen Titan",
+   "armorFamily": "plate",
+   "rarity": "legendary",
+   "pieces": [
+    "plate_helmet_legendary",
+    "plate_chest_legendary",
+    "plate_shoulders_legendary",
+    "plate_gloves_legendary",
+    "plate_legs_legendary",
+    "plate_boots_legendary"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "fire_damage_pct",
+     "value": 8,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "lava_resistance_pct",
+     "value": 25,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "molten_ground_burst_dmg_pct_atk",
+     "value": 60,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "kingsguard",
+   "name": "Kingsguard",
+   "armorFamily": "plate",
+   "rarity": "masterwork",
+   "pieces": [
+    "plate_helmet_masterwork",
+    "plate_chest_masterwork",
+    "plate_shoulders_masterwork",
+    "plate_gloves_masterwork",
+    "plate_legs_masterwork",
+    "plate_boots_masterwork"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "VIT_pct",
+     "value": 5,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "ally_damage_redirect_pct",
+     "value": 8,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "kings_rally_party_atk_pct_10s",
+     "value": 12,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "tidewarden",
+   "name": "Tidewarden",
+   "armorFamily": "scale",
+   "rarity": "epic",
+   "pieces": [
+    "scale_helmet_epic",
+    "scale_chest_epic",
+    "scale_shoulders_epic",
+    "scale_gloves_epic",
+    "scale_legs_epic",
+    "scale_boots_epic"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "RES_pct",
+     "value": 6,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "regen_in_water_pct_maxhp_s",
+     "value": 1,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "tidal_barrier_shield_pct_maxhp",
+     "value": 15,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "frostwarden",
+   "name": "Frostwarden",
+   "armorFamily": "scale",
+   "rarity": "legendary",
+   "pieces": [
+    "scale_helmet_legendary",
+    "scale_chest_legendary",
+    "scale_shoulders_legendary",
+    "scale_gloves_legendary",
+    "scale_legs_legendary",
+    "scale_boots_legendary"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "frost_resistance_pct",
+     "value": 8,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "slow_on_frost_attack_chance_pct",
+     "value": 15,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "frostguard_shield_below_health_pct",
+     "value": 25,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "dragonbane",
+   "name": "Dragonbane",
+   "armorFamily": "scale",
+   "rarity": "masterwork",
+   "pieces": [
+    "scale_helmet_masterwork",
+    "scale_chest_masterwork",
+    "scale_shoulders_masterwork",
+    "scale_gloves_masterwork",
+    "scale_legs_masterwork",
+    "scale_boots_masterwork"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "damage_vs_dragons_pct",
+     "value": 10,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "dragon_resistance_pct",
+     "value": 15,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "dragon_hunter_mark_bonus_pct",
+     "value": 20,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "bloodfang",
+   "name": "Bloodfang",
+   "armorFamily": "chain",
+   "rarity": "epic",
+   "pieces": [
+    "chain_helmet_epic",
+    "chain_chest_epic",
+    "chain_shoulders_epic",
+    "chain_gloves_epic",
+    "chain_legs_epic",
+    "chain_boots_epic"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "LIFESTEAL_pct",
+     "value": 1.5,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "bleed_on_crit_chance_pct",
+     "value": 12,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "bloodfrenzy_haste_pct_below_50hp",
+     "value": 15,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "stormcaller",
+   "name": "Stormcaller",
+   "armorFamily": "chain",
+   "rarity": "legendary",
+   "pieces": [
+    "chain_helmet_legendary",
+    "chain_chest_legendary",
+    "chain_shoulders_legendary",
+    "chain_gloves_legendary",
+    "chain_legs_legendary",
+    "chain_boots_legendary"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "storm_damage_pct",
+     "value": 8,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "chain_lightning_chance_pct",
+     "value": 10,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "stormcall_strike_every_s",
+     "value": 12,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "dwarven_kingsguard",
+   "name": "Dwarven Kingsguard",
+   "armorFamily": "chain",
+   "rarity": "masterwork",
+   "pieces": [
+    "chain_helmet_masterwork",
+    "chain_chest_masterwork",
+    "chain_shoulders_masterwork",
+    "chain_gloves_masterwork",
+    "chain_legs_masterwork",
+    "chain_boots_masterwork"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "DEF_pct",
+     "value": 6,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "stagger_immunity_s_after_hit",
+     "value": 2,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "mountain_stance_dr_pct_while_still",
+     "value": 20,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "wildheart",
+   "name": "Wildheart",
+   "armorFamily": "leather",
+   "rarity": "epic",
+   "pieces": [
+    "leather_helmet_epic",
+    "leather_chest_epic",
+    "leather_shoulders_epic",
+    "leather_gloves_epic",
+    "leather_legs_epic",
+    "leather_boots_epic"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "AGI_pct",
+     "value": 5,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "nature_damage_pct",
+     "value": 8,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "wild_surge_move_speed_pct_5s",
+     "value": 20,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "shadowveil",
+   "name": "Shadowveil",
+   "armorFamily": "leather",
+   "rarity": "legendary",
+   "pieces": [
+    "leather_helmet_legendary",
+    "leather_chest_legendary",
+    "leather_shoulders_legendary",
+    "leather_gloves_legendary",
+    "leather_legs_legendary",
+    "leather_boots_legendary"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "evasion_pct",
+     "value": 5,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "stealth_or_shadow_bonus_pct",
+     "value": 12,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "shadowveil_vanish_on_dodge_cd_s",
+     "value": 20,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "voidstalker",
+   "name": "Voidstalker",
+   "armorFamily": "leather",
+   "rarity": "masterwork",
+   "pieces": [
+    "leather_helmet_masterwork",
+    "leather_chest_masterwork",
+    "leather_shoulders_masterwork",
+    "leather_gloves_masterwork",
+    "leather_legs_masterwork",
+    "leather_boots_masterwork"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "CRIT_pct",
+     "value": 4,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "damage_vs_marked_pct",
+     "value": 12,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "void_step_teleport_strike_cd_s",
+     "value": 18,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "moonveil",
+   "name": "Moonveil",
+   "armorFamily": "cloth",
+   "rarity": "epic",
+   "pieces": [
+    "cloth_helmet_epic",
+    "cloth_chest_epic",
+    "cloth_shoulders_epic",
+    "cloth_gloves_epic",
+    "cloth_legs_epic",
+    "cloth_boots_epic"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "MAG_pct",
+     "value": 5,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "REGEN_pct",
+     "value": 8,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "moonlit_heal_party_pct_maxhp_cd_s",
+     "value": [
+      10,
+      30
+     ],
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "arcane_sovereign",
+   "name": "Arcane Sovereign",
+   "armorFamily": "cloth",
+   "rarity": "legendary",
+   "pieces": [
+    "cloth_helmet_legendary",
+    "cloth_chest_legendary",
+    "cloth_shoulders_legendary",
+    "cloth_gloves_legendary",
+    "cloth_legs_legendary",
+    "cloth_boots_legendary"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "arcane_damage_pct",
+     "value": 8,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "COOLDOWN_pct",
+     "value": 5,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "arcane_overflow_free_skill_chance_pct",
+     "value": 10,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "celestial_watcher",
+   "name": "Celestial Watcher",
+   "armorFamily": "cloth",
+   "rarity": "masterwork",
+   "pieces": [
+    "cloth_helmet_masterwork",
+    "cloth_chest_masterwork",
+    "cloth_shoulders_masterwork",
+    "cloth_gloves_masterwork",
+    "cloth_legs_masterwork",
+    "cloth_boots_masterwork"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "holy_damage_pct",
+     "value": 8,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "healing_pct",
+     "value": 8,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "star_ward_revive_once_per_dungeon",
+     "value": 1,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "plaguekeeper",
+   "name": "Plaguekeeper",
+   "armorFamily": "mystic",
+   "rarity": "epic",
+   "pieces": [
+    "mystic_helmet_epic",
+    "mystic_chest_epic",
+    "mystic_shoulders_epic",
+    "mystic_gloves_epic",
+    "mystic_legs_epic",
+    "mystic_boots_epic"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "unholy_damage_pct",
+     "value": 8,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "poison_duration_pct",
+     "value": 20,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "plague_burst_on_kill_dmg_pct_atk",
+     "value": 40,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "soulreaper",
+   "name": "Soulreaper",
+   "armorFamily": "mystic",
+   "rarity": "legendary",
+   "pieces": [
+    "mystic_helmet_legendary",
+    "mystic_chest_legendary",
+    "mystic_shoulders_legendary",
+    "mystic_gloves_legendary",
+    "mystic_legs_legendary",
+    "mystic_boots_legendary"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "soul_fragment_on_kill_heal_pct",
+     "value": 2,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "unholy_resist_pct",
+     "value": 12,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "reap_execute_below_hp_pct",
+     "value": 8,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  },
+  {
+   "setId": "astral_sovereign",
+   "name": "Astral Sovereign",
+   "armorFamily": "mystic",
+   "rarity": "masterwork",
+   "pieces": [
+    "mystic_helmet_masterwork",
+    "mystic_chest_masterwork",
+    "mystic_shoulders_masterwork",
+    "mystic_gloves_masterwork",
+    "mystic_legs_masterwork",
+    "mystic_boots_masterwork"
+   ],
+   "bonuses": [
+    {
+     "pieces": 2,
+     "effect": "MAG_pct",
+     "value": 7,
+     "tunable": true
+    },
+    {
+     "pieces": 4,
+     "effect": "all_resist_pct",
+     "value": 6,
+     "tunable": true
+    },
+    {
+     "pieces": 6,
+     "effect": "astral_convergence_skill_dmg_pct_10s",
+     "value": 25,
+     "tunable": true
+    }
+   ],
+   "mix_rule": "pieces from different sets count toward each set separately"
+  }
+ ],
+ "concepts_not_yet_built": [
+  "sunforged",
+  "gravewalker",
+  "bloodlord",
+  "wraithwalker",
+  "dreadlord",
+  "verdant_crown",
+  "arena_champion",
+  "elder_dragon_hunter",
+  "seraphim"
+ ]
+}

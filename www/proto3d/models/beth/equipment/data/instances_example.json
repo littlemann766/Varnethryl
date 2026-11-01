@@ -1,0 +1,135 @@
+{
+ "schemaVersion": 1,
+ "instances": [
+  {
+   "instanceId": "inst-plate_helmet_epic-player-1-9",
+   "itemId": "plate_helmet_epic",
+   "ownerId": "player-1",
+   "enhancement": 9,
+   "ascension": 3,
+   "substats": [
+    {
+     "stat": "VIT",
+     "value": 3.49,
+     "enhancement": 1
+    },
+    {
+     "stat": "STAMINA",
+     "value": 6.85,
+     "enhancement": 7
+    },
+    {
+     "stat": "RES",
+     "value": 2.35,
+     "enhancement": 3
+    },
+    {
+     "stat": "STR",
+     "value": 7.98,
+     "enhancement": 7
+    }
+   ],
+   "sockets": [
+    null
+   ],
+   "boundTo": null,
+   "cosmeticAppearanceId": null,
+   "createdAt": "2026-11-01T18:00:00Z"
+  },
+  {
+   "instanceId": "inst-leather_gloves_legendary-player-1-12",
+   "itemId": "leather_gloves_legendary",
+   "ownerId": "player-1",
+   "enhancement": 12,
+   "ascension": 4,
+   "substats": [
+    {
+     "stat": "LIFESTEAL",
+     "value": 1.07,
+     "enhancement": 8
+    },
+    {
+     "stat": "CRIT",
+     "value": 2.23,
+     "enhancement": 0
+    },
+    {
+     "stat": "AGI",
+     "value": 14.85,
+     "enhancement": 1
+    },
+    {
+     "stat": "HASTE",
+     "value": 2.29,
+     "enhancement": 9
+    }
+   ],
+   "sockets": [
+    null,
+    null
+   ],
+   "boundTo": null,
+   "cosmeticAppearanceId": null,
+   "createdAt": "2026-11-01T18:00:00Z"
+  },
+  {
+   "instanceId": "inst-worldbreaker-player-2-15",
+   "itemId": "worldbreaker",
+   "ownerId": "player-2",
+   "enhancement": 15,
+   "ascension": 5,
+   "substats": [
+    {
+     "stat": "STR",
+     "value": 14.0,
+     "enhancement": 10
+    },
+    {
+     "stat": "VIT",
+     "value": 4.49,
+     "enhancement": 10
+    },
+    {
+     "stat": "COOLDOWN",
+     "value": 1.66,
+     "enhancement": 10
+    },
+    {
+     "stat": "STAMINA",
+     "value": 10.83,
+     "enhancement": 4
+    },
+    {
+     "stat": "RES",
+     "value": 5.1,
+     "enhancement": 3
+    }
+   ],
+   "sockets": [
+    null,
+    null
+   ],
+   "boundTo": "player-2",
+   "cosmeticAppearanceId": null,
+   "createdAt": "2026-11-01T18:00:00Z"
+  },
+  {
+   "instanceId": "inst-chain_chest_uncommon-player-1-0",
+   "itemId": "chain_chest_uncommon",
+   "ownerId": "player-1",
+   "enhancement": 0,
+   "ascension": 0,
+   "substats": [
+    {
+     "stat": "DEF",
+     "value": 5.95,
+     "enhancement": 0
+    }
+   ],
+   "sockets": [],
+   "boundTo": null,
+   "cosmeticAppearanceId": null,
+   "createdAt": "2026-11-01T18:00:00Z"
+  }
+ ]
+}

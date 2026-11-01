@@ -1,0 +1,226 @@
+{
+ "_note": "Spec 6 says do not silently alter existing ascension. v0_live = current items.js behaviour (tier derived from floor(level/3)). v1_spec = rarity is fixed on the item, ascension is a separate counter granted at milestones. active_track stays v0_live until the boss approves switching.",
+ "active_track": "ascension_track_v0_live",
+ "enhancement_cap": 15,
+ "substat_enhancement_cap": 10,
+ "milestones": [
+  3,
+  6,
+  9,
+  12,
+  15
+ ],
+ "ascension_track_v0_live": {
+  "source": "varn-core/www/core/items.js",
+  "tier_by_level": {
+   "0": "uncommon",
+   "3": "rare",
+   "6": "epic",
+   "9": "mythic",
+   "12": "legendary",
+   "15": "masterwork"
+  },
+  "substats_by_level": {
+   "0": 0,
+   "3": 2,
+   "6": 3,
+   "9": 4,
+   "12": 5,
+   "15": 5
+  },
+  "ability_unlock_level": 3,
+  "cost": {
+   "gold": "100+level*120",
+   "shards": "2+floor(level*1.5)"
+  },
+  "hp_bonus_cap_pct": 28,
+  "note": "'mythic' has no v1 rarity; maps to epic+ascension 3 in migration"
+ },
+ "ascension_track_v1_spec": {
+  "ascension_by_milestone": {
+   "3": 1,
+   "6": 2,
+   "9": 3,
+   "12": 4,
+   "15": 5
+  },
+  "on_milestone": "+1 substat enhancement token, +5% base stats; new substat if below rarity count",
+  "rarity_milestones": {
+   "legendary": {
+    "at": 12,
+    "reward": "unlock legendary special effect tier 2"
+   },
+   "masterwork": {
+    "at": 15,
+    "reward": "unlock masterwork signature + forge-scar glow"
+   }
+  },
+  "max_enhancement_by_rarity": {
+   "uncommon": 9,
+   "common": 9,
+   "rare": 12,
+   "epic": 12,
+   "legendary": 15,
+   "masterwork": 15
+  }
+ },
+ "levels": [
+  {
+   "level": 1,
+   "gold": 220,
+   "shards": 3,
+   "material": "mat_iron",
+   "material_qty": 1,
+   "success_pct": 100,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 4
+  },
+  {
+   "level": 2,
+   "gold": 340,
+   "shards": 5,
+   "material": "mat_iron",
+   "material_qty": 1,
+   "success_pct": 100,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 8
+  },
+  {
+   "level": 3,
+   "gold": 460,
+   "shards": 6,
+   "material": "mat_steel",
+   "material_qty": 2,
+   "success_pct": 100,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 12
+  },
+  {
+   "level": 4,
+   "gold": 580,
+   "shards": 8,
+   "material": "mat_steel",
+   "material_qty": 2,
+   "success_pct": 100,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 16
+  },
+  {
+   "level": 5,
+   "gold": 700,
+   "shards": 9,
+   "material": "mat_steel",
+   "material_qty": 2,
+   "success_pct": 100,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 20
+  },
+  {
+   "level": 6,
+   "gold": 820,
+   "shards": 11,
+   "material": "mat_mithril",
+   "material_qty": 3,
+   "success_pct": 100,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 24
+  },
+  {
+   "level": 7,
+   "gold": 940,
+   "shards": 12,
+   "material": "mat_mithril",
+   "material_qty": 3,
+   "success_pct": 95,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 28
+  },
+  {
+   "level": 8,
+   "gold": 1060,
+   "shards": 14,
+   "material": "mat_mithril",
+   "material_qty": 3,
+   "success_pct": 90,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 32
+  },
+  {
+   "level": 9,
+   "gold": 1180,
+   "shards": 15,
+   "material": "mat_adamantite",
+   "material_qty": 4,
+   "success_pct": 85,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 36
+  },
+  {
+   "level": 10,
+   "gold": 1300,
+   "shards": 17,
+   "material": "mat_adamantite",
+   "material_qty": 4,
+   "success_pct": 80,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 40
+  },
+  {
+   "level": 11,
+   "gold": 1420,
+   "shards": 18,
+   "material": "mat_adamantite",
+   "material_qty": 4,
+   "success_pct": 75,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 44
+  },
+  {
+   "level": 12,
+   "gold": 1540,
+   "shards": 20,
+   "material": "mat_starsteel",
+   "material_qty": 5,
+   "success_pct": 70,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 48
+  },
+  {
+   "level": 13,
+   "gold": 1660,
+   "shards": 21,
+   "material": "mat_starsteel",
+   "material_qty": 5,
+   "success_pct": 65,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 52
+  },
+  {
+   "level": 14,
+   "gold": 1780,
+   "shards": 23,
+   "material": "mat_starsteel",
+   "material_qty": 5,
+   "success_pct": 60,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 56
+  },
+  {
+   "level": 15,
+   "gold": 1900,
+   "shards": 24,
+   "material": "mat_starsteel",
+   "material_qty": 6,
+   "success_pct": 55,
+   "on_fail": "keep level, lose materials",
+   "base_stat_bonus_pct": 60
+  }
+ ],
+ "no_destroy_on_fail": true,
+ "substat_enhance": {
+  "cost_gold": "60*(n+1)",
+  "material": "mat_arcane_dust",
+  "qty": "1+n//3",
+  "cap": 10
+ }
+}

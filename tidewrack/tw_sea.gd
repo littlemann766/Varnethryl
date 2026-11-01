@@ -89,7 +89,7 @@ func _mat_for(n: String) -> Material:
 		var l := _sh("stage4/shaders/lava_seam.gdshader"); l.set_shader_parameter("energy", 6.0); return l
 	if n == "ash_steam": return _sh("stage4/shaders/steam_plume.gdshader")
 	if n.begins_with("ash_"):   # stage 4 README: black basalt = vertex colour + metallic_specular 0.15 (else it mirrors the haze and reads beige)
-		var ar := _sh("stage1/shaders/vc_flat.gdshader"); ar.set_shader_parameter("lift", 0.1); ar.set_shader_parameter("ambient", 0.3); ar.set_shader_parameter("spec", 0.075); return ar   # test 37: lifted basalt (was pure black on screen)
+		var ar := _sh("stage1/shaders/vc_flat.gdshader"); ar.set_shader_parameter("lift", 0.14); ar.set_shader_parameter("ambient", 0.6); ar.set_shader_parameter("spec", 0.075); return ar   # test 37: lifted basalt (was pure black on screen)
 	return _sh("stage1/shaders/vc_flat.gdshader")   # test 37: flat normals + near-camera fade (glbs have no NORMAL)
 func _no_shadow(n: String) -> bool:
 	for k in ["_fog_layers", "_storm_sky", "_storm_sea", "_glow", "_steam", "_lava_seams", "buoy_", "upg_", "_ice_floes", "_icicles"]:

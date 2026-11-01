@@ -2477,7 +2477,8 @@ func _camera_prefs(inside: bool, dt: float) -> void:
 ## test 37 (t36 shots: black blackouts ashore at Vent Harbour / Gullhaven = camera inside the moored galleon, which has no
 ## camera collider): every visual mesh up to 45 m across that sits on the hero->camera line or around the camera fades out
 ## (GeometryInstance3D.transparency), so no collider is needed. On deck the ship's sails get a hero cut-out instead.
-var _mesh_faded := {}   # GeometryInstance3D -> original transparency
+var _mesh_faded := {}
+var _hero_cut_added := false   # GeometryInstance3D -> original transparency
 func _cam_fade() -> void:
 	if cam == null or hero == null or not cam.current: return
 	var on_deck: bool = sea != null and sea.active and sea.sailing()
@@ -2485,6 +2486,7 @@ func _cam_fade() -> void:
 		for s in sea.ships.values():
 			s.set_cut(on_deck and s == sea.ship, hero.global_position + Vector3(0, 1.0, 0), s.global_position.y + sea.deck_y() + 1.8)
 	var h: Vector3 = hero.global_position + Vector3(0, 1.2, 0); var c: Vector3 = cam.global_position
+	RenderingServer.global_shader_parameter_set("hero_cut", Vector4(h.x, h.y, h.z, 1.0 if P_view_third() and not bench_running else 0.0))
 	var want := {}
 	if not P_view_third() or bench_running: pass
 	else:
@@ -2513,7 +2515,7 @@ func _cam_fade() -> void:
 				if not f:
 					var q := PhysicsRayQueryParameters3D.create(h, c, 1 << 9); var hit := get_world_3d().direct_space_state.intersect_ray(q)
 					f = not hit.is_empty() and hit.collider == sh
-			sh.set_fade(0.85 if f else 0.0)
+			sh.set_fade(0.97 if f else 0.0)
 	for gi in _mesh_faded.keys():
 		if not is_instance_valid(gi): _mesh_faded.erase(gi); continue
 		if not want.has(gi): gi.transparency = _mesh_faded[gi]; _mesh_faded.erase(gi)

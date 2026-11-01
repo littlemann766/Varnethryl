@@ -38,3 +38,13 @@ Cost: about 15–60k tris per piece at lod0 (the chest is the heaviest). It stil
 ## v4 (Darius): helm and cloak polish
 - **Helm:** the per-height ellipse is now fitted to the skull only (head/jaw/eye-weighted cells) at the 93rd percentile with no air gap, and it keeps straight cheeks below the skull. It is noticeably slimmer and shorter from behind. The beard and hair sit under the helm and are hidden by the helm mask. Eye slits and all tier details are kept. Each rarity is about 8000 tris, with lod1 at 45%.
 - **Cloak:** a mantle and collar run from the cape top up to the neck and out to the shoulder edge, behind the body only. The trim is now just a gold hem. No plate or purple shows where it meets the pauldrons in walk or attack. About 4000 tris, lod1 at 45%.
+
+## v5: all 8 heroes
+Fitted sets now exist for darius (plate, on the weaponless rig), orin (plate), rook (scale), finn and elira (chain), wren (leather), and rowan and talia (cloth, robed).
+- Every piece uses the proficient family from MAPPING and comes in all 6 rarities.
+- Robed casters keep their robe: no chest or leg pieces, a cowl with an open face (no visor or horns), a thin mantle, cuff-only gloves, and a sash belt.
+- Chain, scale and leather pieces get the family surface (`armor3d.skin`).
+- The front direction is now taken from the feet, because most rigs have no eye or jaw bones.
+- Small loose bits are dropped from every piece except the helm.
+- The cloak is limited to the back half, and its shell is closed, which fixed the light speck on Darius's back.
+Each hero folder has its own `<hero>_body_mask.json` and `<hero>_<fam>_tris.json`.

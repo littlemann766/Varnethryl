@@ -7,7 +7,7 @@ import bl, armor3d as A, gmodels as G
 from vox import V
 from edata import RARITIES
 from mathutils.kdtree import KDTree
-args=sys.argv[sys.argv.index('--')+1:]; HERO,FAM,OUT=args[0],args[1],args[2]; os.makedirs(OUT,exist_ok=True)
+args=sys.argv[sys.argv.index('--')+1:]; HERO,FAM,OUT=args[0],args[1],args[2]; os.makedirs(OUT,exist_ok=True); ROBED=FAM in ('cloth','mystic')
 SRC=args[3] if len(args)>3 else f'/workspace/vmain/voxel/{HERO}_voxel.glb'   # v3: Darius uses Lucky's weaponless rig (af4e553, read-only copy)
 ONLY=args[4].split(',') if len(args)>4 else None
 RES=0.01
@@ -53,7 +53,8 @@ NV=[kd.find(p)[1] for p in spos]; cb=np.array([dom[i] for i in NV]); cbn=np.arra
 capew=np.array([sum(w for w,b in VW[i] if b.startswith('cape')) for i in NV])   # v3: cape cloth that is weighted mostly to upperChest at the top
 def tpar(pos,b):   # 0..1 along bone
     h,t=BH[b],BT[b]; d=t-h; return ((pos-h)@d)/(d@d)
-FRONT=np.sign(((BH['eye_L']+BH['eye_R'])/2-BH['head'])[1]) or -1.0
+_fv=co[np.isin(domname,['foot_L','toe_L','foot_R','toe_R'])]
+FRONT=float(np.sign(_fv[:,1].mean()-(BH['foot_L'][1]+BH['foot_R'][1])/2)) if len(_fv) else -1.0   # toes stick out in front of the ankles (works on every rig)
 neckz=BH['neck'][2]; beltz=BH['spine'][2]
 def ero(m,k=1): return ~dil(~m,k)
 def close(m,k): return ero(dil(m,k),k)
@@ -64,15 +65,17 @@ def region(slot,side=None):
         sx=abs(BH['upperArm_L'][0])-0.035; m&=abs(spos[:,0])<sx; m&=capew<0.15
     elif slot=='shoulder':
         ua='upperArm'+X; sgn=np.sign(BH[ua][0])
-        m=(np.isin(cbn,[ua,'shoulder'+X])&(tpar(spos,ua)<0.78))
+        m=(np.isin(cbn,[ua,'shoulder'+X])&(tpar(spos,ua)<(0.35 if ROBED else 0.78)))
         m|=np.isin(cbn,['upperChest','chest'])&(spos[:,0]*sgn>abs(BH[ua][0])-0.05)&(spos[:,2]>BH[ua][2]-0.09)
     elif slot=='glove':      # gauntlet + vambrace + couter (overlaps the rerebrace -> no elbow gap)
-        m=(cbn=='foreArm'+X)|((cbn=='upperArm'+X)&(tpar(spos,'upperArm'+X)>0.66))
+        m=((cbn=='foreArm'+X)&(tpar(spos,'foreArm'+X)>0.55)) if ROBED else ((cbn=='foreArm'+X)|((cbn=='upperArm'+X)&(tpar(spos,'upperArm'+X)>0.66)))   # robed: gauntlet + cuff only, the sleeve stays
         m|=np.array([n.endswith(X) and (n.startswith(('hand','fingers','index','middle','ring','pinky','thumb'))) for n in cbn])
     elif slot=='leg':        # cuisse + poleyn (overlaps the greave -> no knee gap)
         m=(cbn=='thigh'+X)|((cbn=='shin'+X)&(tpar(spos,'shin'+X)<0.24))
     elif slot=='boot':
         m=((cbn=='shin'+X)&(tpar(spos,'shin'+X)>=0.12))|np.isin(cbn,['foot'+X,'toe'+X])
+    elif slot=='belt' and ROBED:   # robed: a sash/girdle band only, the robe skirt stays
+        m=np.isin(cbn,['hips','spine','spine2'])&(abs(spos[:,2]-beltz)<0.03)
     elif slot=='belt':       # belt + faulds: covers the groin so the tabard no longer shows there
         m=(np.isin(cbn,['hips','spine','spine2'])|np.char.startswith(cbn.astype(str),'coat')|np.char.startswith(cbn.astype(str),'thigh'))&(spos[:,2]<beltz+0.035)&(spos[:,2]>beltz-0.17)
         m&=~(np.char.startswith(cbn.astype(str),'thigh')&(spos[:,2]<beltz-0.12))
@@ -80,7 +83,7 @@ def region(slot,side=None):
     elif slot=='helm':
         hb=BH['head']; m=(spos[:,2]>BH['neck'][2]+0.025)&(np.hypot(spos[:,0]-hb[0],spos[:,1]-hb[1])<0.19)   # everything above the neck: face+beard+hair (beard is upperChest-weighted on Darius)
     elif slot=='cloak':
-        m=np.char.startswith(cbn.astype(str),'cape')|(capew>=0.15)
+        m=(np.char.startswith(cbn.astype(str),'cape')|(capew>=0.15))&(((spos[:,1]-BH['spine'][1])*FRONT)<0.01)   # back half only (robe skirts on some rigs ride cape bones)
         ctop=spos[m,2].max() if m.any() else neckz; back=((spos[:,1]-BH['spine'][1])*FRONT)<-0.02
         sx=abs(BH['upperArm_L'][0])+0.06
         m|=back&(spos[:,2]>ctop-0.10)&(spos[:,2]<neckz+0.03)&(abs(spos[:,0])<sx)&~np.isin(cbn,['head','jaw'])   # v4: mantle up to the shoulders + collar behind the neck
@@ -92,6 +95,7 @@ THK={'chest':2,'shoulder':3,'glove':2,'leg':2,'boot':3,'belt':2,'helm':3,'cloak'
 TRI={'chest':7000,'helm':8000,'shoulder':5000,'belt':4500,'glove':3500,'leg':4500,'boot':4000,'cloak':4000}
 TEX={'chest':512,'helm':512,'cloak':512}
 PIECES=[('helm',None),('cloak',None),('chest',None),('belt',None)]+[(s,x) for s in ('shoulder','glove','leg','boot') for x in ('L','R')]
+if ROBED: PIECES=[p for p in PIECES if p[0] not in ('chest','leg')]; THK.update(helm=2,shoulder=2,belt=1)   # robed casters stay robed: no breastplate/cuisses over the robe
 def build_grid(slot,side,r,R):
     i=RARITIES.index(r); p=A.pal(FAM,r); t=THK[slot]+(1 if slot=='shoulder' and i>=3 else 0)
     layers=[R]; acc=R.copy()
@@ -101,12 +105,12 @@ def build_grid(slot,side,r,R):
     if slot=='helm':   # great helm: per-height ellipse fitted to this hero's head (+1 cm air), 3-voxel wall, flat-ish crown
         X_,Y_,Z_=np.indices(S); q=np.argwhere(R)
         sk_=np.zeros(S,bool); sel=np.isin(cbn,['head','jaw','eye_L','eye_R']); sk_[tuple(sidx[sel].T)]=True; qs=np.argwhere(sk_&R)
-        if len(qs)>200: q=qs        # v4: fit the skull only -> beard/hair go under the helm (hidden by the mask), not inside its silhouette
+        if len(qs)>200 and 'jaw' in BH: q=qs        # v4 (rigs with jaw/eye bones only; others weight the face to neck/chest, so fit all head cells): fit the skull only -> beard/hair go under the helm (hidden by the mask), not inside its silhouette
         cx_=np.median(q[:,0]); cy_=np.median(q[:,1]); z0=np.argwhere(R)[:,2].min(); z1=int(np.percentile(q[:,2],99))
         rx=np.zeros(S[2]); ry=np.zeros(S[2])
         for z in range(z0,z1+1):
             w=q[abs(q[:,2]-z)<=3]
-            if len(w): rx[z]=np.percentile(abs(w[:,0]-cx_),93); ry[z]=np.percentile(abs(w[:,1]-cy_),93)
+            if len(w): pc=93 if 'jaw' in BH else 88; rx[z]=np.percentile(abs(w[:,0]-cx_),pc); ry[z]=np.percentile(abs(w[:,1]-cy_),pc)
         for z in range(z0,z1+1): rx[z]=max(rx[max(z0,z-3):z+4].max(),1); ry[z]=max(ry[max(z0,z-3):z+4].max(),1)
         zr=np.where(rx>1)[0]; zm=zr.min() if len(zr) else z0
         rx[z0:zm]=rx[zm]; ry[z0:zm]=ry[zm]   # below the skull fit (jaw/neck): keep the skull width, straight cheeks
@@ -115,17 +119,18 @@ def build_grid(slot,side,r,R):
         wall=(eo<=1)&(e>1)&(Z_>=z0)&(Z_<=z1); cap=(eo<=1)&(Z_>z1)&(Z_<=z1+t)
         shell=(wall|cap)&out; inside=(e<=1)&(Z_>=z0)&(Z_<=z1)
         R=R|(inside&skin); HZ=(z0,z1)
-    if slot=='cloak': shell=(layers[-1]|layers[-2])&out   # cloak floats just outside the 2-3 cm back/shoulder plate
+    if slot=='cloak': shell=close((layers[-1]|layers[-2]),1)&out   # cloak floats just outside the plate; close() fills pin-holes (Darius back speck)
     if slot!='cloak': shell=close(shell,1)&out             # v3: fill the body's voxel lumps -> smooth plate surface, real thickness kept
     outer=shell&dil(out&~shell)
     Rin=R&~dil(skin&~R,2); core=dil(Rin,t+1)&shell; trim=shell&~core
     if slot=='helm': Zh=np.indices(S)[2]; trim=shell&((Zh<=HZ[0]+1)|((Zh>=HZ[1])&(Zh<=HZ[1]+1)&~(np.indices(S)[2]>HZ[1]+t)))
     g=np.zeros(S,np.int16); v=V(1); v.g=g
-    metal=v.c(p['metal']); dark=v.c(tuple(c*0.62 for c in p['metal'])); tr=v.c(p['trim'] if i>=2 else p['edge'])
+    base=p['leather'] if FAM=='leather' else A.PAL[r].get('cloth',p['metal']) if ROBED else p['metal']   # robed: rarity cloth colour, not the white robe
+    metal=v.c(base); dark=v.c(tuple(c*0.62 for c in base)); tr=v.c(p['trim'] if i>=2 else p['edge'])
     g[shell]=metal
     X_,Y_,Z_=np.indices(S)
     if slot=='cloak':
-        cl=p.get('cloth',(0.30,0.06,0.06)); g[shell]=v.c(cl); g[shell&(Z_%5==0)]=v.c(tuple(c*0.8 for c in cl))
+        cl=A.PAL[r].get('cloth',(0.30,0.06,0.06)); g[shell]=v.c(cl); g[shell&(Z_%5==0)]=v.c(tuple(c*0.8 for c in cl))
         zb=np.argwhere(shell)[:,2].min()
         if i>=2: g[shell&(Z_<=zb+1)]=tr   # v4: gold hem only (no trim blobs inside the cloak)
         idx=np.argwhere(g>0); a=idx.min(0)-1; b=idx.max(0)+2
@@ -135,18 +140,19 @@ def build_grid(slot,side,r,R):
         yc=np.median(idx[:,1]); yd=idx[:,1].ptp()/2; front=((Y_-yc)*FRONT>yd*0.35)
         blk=v.c((0.03,0.03,0.03))
         slit=shell&front&(Z_>=hz-2)&(Z_<=hz+1)&(abs(X_-cx)>=2)&(abs(X_-cx)<=11)
+        if ROBED: slit=shell&front&(Z_>=HZ[0])&(Z_<=hz+3)&(abs(X_-cx)<=9)   # cowl: open face
         g[slit]=blk; so=slit&dil(out&~shell); g[so]=0; shell&=~so; g[dil(slit)&shell&~outer&front]=blk   # recessed black eye slits
         rim=dil(slit,1)&outer&~slit&~dil(slit&False,0)
         if i>=1: g[rim&((Z_>hz+1)|(Z_<hz-2))]=v.c(p['edge'] if i<4 else p['trim'])   # bright lip above/below the slit so it reads on dark steel
         Xi,Yi,Zi=X_,Y_,Z_; lin=dil(slit,2)&~shell&~dil(out&~dil(shell,1),0)&(((Yi-yc)*FRONT)<((idx[:,1]-yc)*FRONT).max()-2); lin&=~slit; g[lin&out]=blk; shell|=lin&out   # dark liner behind the slit
-        if i>=1:   # visor plate: raised front below the slit, breaths on rare+
+        if i>=1 and not ROBED:   # visor plate: raised front below the slit, breaths on rare+
             vis=dil(outer&front&(Z_<hz-1)&(Z_>hz-12))&out&~shell&~dil(slit,1); g[vis]=metal; shell|=vis
             if i>=2: g[vis&((X_+Z_)%3==0)&(Z_<hz-4)&(abs(X_-cx)>2)]=blk
         if i>=2: g[outer&front&(abs(X_-cx)<=1)&(Z_<hz-1)]=tr; g[outer&(abs(Z_-(hz+2))<=0)]=tr  # cross + brow band
         top=idx[:,2].max()
         if i>=4:   # crest
             cr=(abs(X_-cx)<=1)&(Z_>top)&(Z_<=top+4)&dil(shell&(Z_>=top-1),4)&out; g[cr]=tr; shell|=cr
-        if i>=3:   # horns
+        if i>=3 and not ROBED:   # horns
             hc=v.c((0.88,0.84,0.74) if i<5 else (0.10,0.08,0.08)); ys=int(yc)
             xs=np.where(shell[:,ys,top-6])[0]; x0=xs.max() if len(xs) else cx+10; ccx=(xs.max()+xs.min())/2 if len(xs) else cx
             for k in range(16):
@@ -188,6 +194,7 @@ def build_grid(slot,side,r,R):
     idx=np.argwhere(g>0); a=idx.min(0)-1; b=idx.max(0)+2
     vv=V(1); vv.pal=v.pal; vv.g=g[a[0]:b[0],a[1]:b[1],a[2]:b[2]].copy()
     if i>=4: A.filigree(vv,p)
+    if FAM in ('chain','scale','leather') and slot not in ('cloak',): A.skin(vv,FAM,p,i)   # family surface (rings / scales / stitched leather)
     G.wear(vv,p,seed=hash((slot,side))%97)
     if i==5: A.molten(vv,p,seed=11)
     if i==0:
@@ -210,6 +217,22 @@ def skin_obj(ob,kdw):
             if bn not in vg: vg[bn]=ob.vertex_groups.new(name=bn)
             vg[bn].add([v.index],ww/s,'REPLACE')
     ob.parent=arm; m=ob.modifiers.new('Armature','ARMATURE'); m.object=arm
+def drop_islands(ob,frac=0.02):
+    """remove tiny disconnected bits (e.g. cells next to a baked prop in the hand)"""
+    import bmesh
+    bm=bmesh.new(); bm.from_mesh(ob.data); bm.verts.ensure_lookup_table(); seen=set(); comps=[]
+    for v0 in bm.verts:
+        if v0.index in seen: continue
+        st=[v0]; c=[]; seen.add(v0.index)
+        while st:
+            v=st.pop(); c.append(v)
+            for e in v.link_edges:
+                o=e.other_vert(v)
+                if o.index not in seen: seen.add(o.index); st.append(o)
+        comps.append(c)
+    n=len(bm.verts); kill=[v for c in comps if len(c)<frac*n for v in c]
+    if kill: bmesh.ops.delete(bm,geom=kill,context='VERTS')
+    bm.to_mesh(ob.data); bm.free(); return len(kill)
 def bake_low(hi,name,target,texres):
     sc=bpy.context.scene; sc.render.engine='CYCLES'; sc.cycles.samples=1; sc.cycles.device='CPU'
     for m in hi.data.materials:
@@ -238,13 +261,14 @@ for slot,side in PIECES:
     R=region(slot,side)
     bones=BONESET[slot](('_'+side)) if callable(BONESET[slot]) else BONESET[slot]; kdw=weight_kd(bones)
     M=(dil(R,3)&solid) if slot=='helm' else (dil(R,1)&skin)
-    if slot=='belt':   # also hide the tabard strip that hangs between the thighs under the front tasset
+    if slot=='belt' and not ROBED:   # also hide the tabard strip that hangs between the thighs under the front tasset
         tb=(abs(spos[:,0])<0.075)&(spos[:,2]>beltz-0.34)&(spos[:,2]<beltz-0.05)
         T_=np.zeros(S,bool); T_[tuple(sidx[tb].T)]=True; M|=dil(T_,2)&solid
     mi=np.argwhere(M); masks[name]={"cells":(np.ravel_multi_index(mi.T,S)).tolist()}
     for r in RARITIES:
         v,org=build_grid(slot,side,r,R); nm=f"{HERO}_{FAM}_{r}_{name}"
         bl.MATS.clear(); hi,_=bl.mesh_g(v,nm+"_hi",RES,origin=tuple(org)); hi,_=bl.smooth_plate(hi,v,RES,tuple(org),iters=5,fac=0.6)
+        if slot!='helm': drop_islands(hi)
         low=bake_low(hi,nm,TRI[slot],TEX.get(slot,256)); bpy.data.objects.remove(hi)
         l1=low.copy(); l1.data=low.data.copy(); bpy.context.scene.collection.objects.link(l1)
         bpy.ops.object.select_all(action='DESELECT'); l1.select_set(True); bpy.context.view_layer.objects.active=l1

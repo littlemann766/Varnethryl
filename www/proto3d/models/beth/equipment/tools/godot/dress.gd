@@ -240,9 +240,11 @@ func run(j):
 			if nm=="": continue
 			ap.play(nm); ap.seek(ap.get_animation(nm).length*shot.get("t",0.5),true); ap.pause()
 		var yaw=deg_to_rad(shot.get("yaw",30.0)); var dist=H*1.9
-		cam.projection=Camera3D.PROJECTION_ORTHOGONAL; cam.size=shot.get("size",H*1.08)
-		var cy=shot.get("cy",H*0.47)
-		cam.position=Vector3(sin(yaw)*6,cy+0.9*shot.get("el",1.0),cos(yaw)*6); cam.look_at(Vector3(0,cy,0))
+		cam.projection=Camera3D.PROJECTION_ORTHOGONAL; cam.size=shot.get("size",H*shot.get("sizef",1.08))
+		var cy=shot.get("cy",H*shot.get("cyf",0.47))
+		var tgt=Vector3(0,cy,0)
+		if shot.has("bone"): tgt=sk.global_transform*sk.get_bone_global_pose(sk.find_bone(shot["bone"])).origin+Vector3(0,shot.get("up",0.1),0)
+		cam.position=tgt+Vector3(sin(yaw)*6,0.9*shot.get("el",1.0),cos(yaw)*6); cam.look_at(tgt)
 		await get_tree().process_frame; await get_tree().process_frame; await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png(shot["out"])
 	root.queue_free(); await get_tree().process_frame

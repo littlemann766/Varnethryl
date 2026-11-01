@@ -376,6 +376,7 @@ func drive(inp: Vector2, dt: float) -> void:
 	var before := ship.position
 	_fly_step(dt)
 	ship.drive(inp, dt)
+	_night_cap()
 	var p := Vector2(ship.position.x, ship.position.z)
 	if in_cave == "" and ship.alt > 0.0:   # airborne: over reefs, bergs and shores, but the storm locks still hold
 		var r3 := region_at(p)
@@ -436,7 +437,11 @@ func _contexts() -> void:
 		var q: Dictionary = P2[CAVES[cave]]
 		var to := Vector2(q.pos[0], q.pos[2]) - p
 		if to.length() < 30.0 and Time.get_ticks_msec() > cave_cd:
-			if ship.kind == "skiff" and to.normalized().dot(Vector2(sin(ship.heading), cos(ship.heading))) > 0.4: _cave_enter(cave); return
+			if ship.kind == "skiff" and to.normalized().dot(Vector2(sin(ship.heading), cos(ship.heading))) > 0.4:
+				if not can_dive_caves():   # quests-test: cave diving is Brynn's ability
+					ui.toast("Only a diver knows the way into the sea caves. Find Brynn at Saltglass Landing.")
+					ship.speed = -absf(ship.speed) * 0.5; cave_cd = Time.get_ticks_msec() + 2500; return
+				_cave_enter(cave); return
 			ui.toast("Only the skiff fits in there.")
 	var dv := _v3(P2.sunken_ward.dive_buoy)
 	if p.distance_to(Vector2(dv.x, dv.z)) < float(P2.sunken_ward.ring_radius) and absf(ship.speed) < 3.0:
@@ -480,6 +485,7 @@ func chart_travel(k: String) -> String:
 	if not save.discovered_ports.has(k): return "Not charted yet."
 	if in_cave != "" or diving: return "Not from here."
 	if not unlocked(P[k][2]): return "That sea is closed by the storm."
+	if is_night() and not can_sail_night(): return "Too dark to chart a course at night. You need a navigator."
 	var fee := 0 if int(save.galleon_tier) >= 2 else 50
 	var st: Dictionary = m.get_tree().root.get_node("VSave").state
 	if int(st.get("gold", 0)) < fee: return "Not enough gold (%d)." % fee
@@ -653,10 +659,12 @@ const ACCESS_PATCHES := [
 	# Saltglass pier stair foot: coming off the pier head (6 m west of the stair) the hero wedged in the V between the
 	# stair's west cheek (x -2119.46) and the island face (normal 0.37,0,0.93). Slab along that face -> slide onto the stair.
 	["guide", "B", Vector3(-2122.6, 20.3, -91.3), Vector3(-2119.42, 20.3, -93.3), 2.6],
+	# ...and the island face's corner pokes ~0.4 m over the flight's west edge for its first metres: smooth wall along it
+	["guide", "B", Vector3(-2119.35, 20.3, -92.9), Vector3(-2119.35, 20.3, -96.5), 3.0],
 	# Saltglass plateau path to the Glass-diver's Chest (route idx 108-117): rock seams/overhang lips stopped the hero ~16 m short.
-	["deck", "B", Vector3(-2206.66, 94.95, 55.73), Vector3(-2198.66, 95.58, 61.73), 3.0, 0.2],
-	["deck", "B", Vector3(-2198.66, 95.58, 61.73), Vector3(-2186.66, 96.34, 67.73), 3.0, 0.2],
-	["deck", "B", Vector3(-2186.66, 96.34, 67.73), Vector3(-2174.24, 96.44, 73.94), 3.0, 0.2],
+	["deck", "B", Vector3(-2206.66, 94.95, 55.73), Vector3(-2198.66, 95.58, 61.73), 5.0, 0.2],
+	["deck", "B", Vector3(-2198.66, 95.58, 61.73), Vector3(-2186.66, 96.34, 67.73), 5.0, 0.2],
+	["deck", "B", Vector3(-2186.66, 96.34, 67.73), Vector3(-2174.24, 96.44, 73.94), 5.0, 0.2],
 ]
 func _access_patches(id: String, root: Node3D) -> void:
 	for P in ACCESS_PATCHES:
@@ -763,7 +771,11 @@ func _step_up(h: CharacterBody3D, before: Vector3, want: Vector3) -> void:
 	var fwd := want.normalized() * maxf(want.length(), 0.08)
 	for up in STEP_UP:
 		var t := h.global_transform
-		if h.test_move(t, Vector3(0, up, 0)): return          # no head room
+		if h.test_move(t, Vector3(0, up, 0)):
+			# no head room, or the capsule sank a few cm into a sloped seam (seen on the Saltglass Lookout path): if the
+			# spot `up` higher is free, lift there (unstick); otherwise give up
+			if _shape_free(h, t.translated(Vector3(0, up, 0))): h.global_position.y += up; h.velocity.y = 0.0
+			return
 		var t2 := t.translated(Vector3(0, up, 0))
 		if h.test_move(t2, fwd): continue                      # still blocked at this height
 		var t3 := t2.translated(fwd)
@@ -771,4 +783,32 @@ func _step_up(h: CharacterBody3D, before: Vector3, want: Vector3) -> void:
 		if not h.test_move(t3, Vector3(0, -(up + 0.3), 0)): continue   # must land on something within the step (no stepping off ledges)
 		h.global_position = t3.origin; h.velocity.y = 0.0
 		return
+# ---------------------------------------------------------------- quests-test: crew ship abilities (story flags in VSave.state.story)
+const NIGHT_CAP := 3.0   # m/s: without a navigator the crew only creeps along at night
+var _night_warned := 0
+func story_flag(k: String) -> bool:
+	var st = m.get_tree().root.get_node("VSave").state.get("story", {})
+	return st is Dictionary and bool(st.get("flags", {}).get(k, false))
+func is_night() -> bool: return float(m.tod) >= 20.0 or float(m.tod) < 5.0
+## Wren (night_sailing), or the story's own night sail to Lantern Rock (the harbourmaster's chart), or the Owner
+func can_sail_night() -> bool:
+	if unlock_all or story_flag("night_sailing"): return true
+	var q := m.get_tree().root.get_node_or_null("Quests")
+	return q != null and q.has_method("night_sail_active") and q.night_sail_active()
+func can_dive_caves() -> bool: return unlock_all or story_flag("cave_diving")
+func _night_cap() -> void:
+	if in_cave != "" or not is_night() or can_sail_night() or absf(ship.speed) <= NIGHT_CAP: return
+	ship.speed = signf(ship.speed) * NIGHT_CAP
+	if Time.get_ticks_msec() > _night_warned:
+		_night_warned = Time.get_ticks_msec() + 6000; ui.toast("Too dark to sail at speed. You need a navigator.")
+## Wren aboard: switch day/night at sea (TwUi "Night"/"Day" button)
+func toggle_night() -> void:
+	if not story_flag("night_sailing") and not unlock_all: return
+	m._set_time(11.0 if is_night() else 22.5)
+	ui.toast("Wren reads the stars: sailing by night." if is_night() else "Dawn breaks.")
+func _shape_free(h: CharacterBody3D, xf: Transform3D) -> bool:
+	var cs: CollisionShape3D = h.get_child(0)
+	var q := PhysicsShapeQueryParameters3D.new(); q.shape = cs.shape; q.transform = xf * cs.transform; q.collision_mask = h.collision_mask
+	q.exclude = [h.get_rid()]; q.margin = 0.02
+	return m.get_world_3d().direct_space_state.intersect_shape(q, 1).is_empty()
 func sailing() -> bool: return active and ashore == "" and not diving

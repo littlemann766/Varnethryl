@@ -6,6 +6,7 @@ var sea: Node
 var prompt: Button
 var gust_b: Button
 var charts_b: Button
+var night_b: Button   # quests-test: Wren's night sailing
 var panel: PanelContainer
 var veil: ColorRect
 var msg: Label
@@ -16,6 +17,7 @@ func _ready() -> void:
 	prompt = _b("", Vector2(-160, -470), func(): if _cb.is_valid(): _cb.call()); prompt.visible = false
 	gust_b = _b("Gust", Vector2(-420, -470), func(): if sea.ship and sea.ship.gust(): toast("Gust!"))
 	charts_b = _b("Charts", Vector2(-560, -470), open_charts)
+	night_b = _b("Night", Vector2(-700, -470), func(): sea.toggle_night()); night_b.visible = false
 	# test 36 (boss: toast sat on the HP/MP line): top-centre, under the badge row, clear of the minimap and Menu button
 	msg = Label.new(); msg.name = "Toast"; msg.add_theme_font_size_override("font_size", 26); msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	msg.add_theme_color_override("font_shadow_color", Color.BLACK); msg.add_theme_constant_override("shadow_offset_y", 2)
@@ -29,6 +31,8 @@ func _process(_dt: float) -> void:
 	gust_b.visible = on and sea.ship != null and sea.ship.tier > 0
 	if gust_b.visible: gust_b.text = "Gust" if sea.ship.gust_cd <= 0.0 else "Gust %ds" % int(ceil(sea.ship.gust_cd))
 	charts_b.visible = on and sea.ship != null and sea.ship.kind == "galleon" and charts_here()
+	night_b.visible = on and sea.sailing() and sea.story_flag("night_sailing")
+	if night_b.visible: night_b.text = "Day" if sea.is_night() else "Night"
 	if not sea.active:   # on land: "Set sail" beside the moored galleon at the Tidewrack main pier
 		var g: Array = sea.m._galleon_pier()
 		var near: bool = sea.m.hero.global_position.distance_to(g[0]) < 14.0

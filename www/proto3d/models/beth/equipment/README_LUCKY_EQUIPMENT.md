@@ -102,7 +102,7 @@ Without `is_srgb` the colours look too light or washed out. `tools/godot/dress.g
 Legendary gold palette softened to antique gold trim (0.86,0.66,0.26).
 
 ## Pickup models (polish 5)
-`meshes/pickups/<id>.glb` and `<id>_lod1.glb` are the world drop models for the 8 artifacts, 12 gems, 8 runes and 30 key materials.
+`meshes/pickups/<id>.glb` and `<id>_lod1.glb` are the world drop models for the 8 artifacts, 12 gems, 8 runes and 34 key materials.
 - Each matching `appearances.json` entry has a `pickup` block (mesh, lod1, pivot, size).
 - The pivot is at the bottom centre, about 0.29 m tall, with sRGB COLOR_0 like the rest.
 - They have no emissive faces; the rarity loot beam or glow comes from code.

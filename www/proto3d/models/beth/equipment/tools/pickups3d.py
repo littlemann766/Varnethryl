@@ -88,7 +88,9 @@ MAT={**{k:(lambda c:lambda v:ingot(v,c))(c) for k,c in METAL.items()},
  "frost_crystal":lambda v:shard(v,(0.62,0.86,0.98)),"arcane_dust":lambda v:pouch(v,(0.65,0.45,1.0)),"soul_fragment":lambda v:wisp(v,(0.55,0.85,0.95)),
  "celestial_essence":lambda v:vial(v,(0.95,0.92,0.70)),"void_essence":lambda v:vial(v,(0.45,0.12,0.70)),"ancient_rune":lambda v:rune(v,(0.85,0.75,0.45)),
  "enchanted_crystal":lambda v:shard(v,(0.70,0.50,1.0)),"elemental_core":lambda v:orb(v,(0.25,0.25,0.30),5,veins=(0.4,0.9,1.0)),
- "molten_ore":lambda v:ore(v,(0.3,0.2,0.2),(1.0,0.45,0.08)),"frozen_heart":lambda v:orb(v,(0.55,0.80,0.95),5,veins=(0.9,0.98,1.0)),"eternal_flame":lambda v:flame(v,(1.0,0.45,0.08))}
+ "molten_ore":lambda v:ore(v,(0.3,0.2,0.2),(1.0,0.45,0.08)),"frozen_heart":lambda v:orb(v,(0.55,0.80,0.95),5,veins=(0.9,0.98,1.0)),"eternal_flame":lambda v:flame(v,(1.0,0.45,0.08)),
+ "hydra_heart":lambda v:orb(v,(0.20,0.40,0.22),5,veins=(0.6,1.0,0.3)),"dragon_core":lambda v:orb(v,(0.35,0.10,0.06),5,veins=(1.0,0.6,0.1)),
+ "abyssal_scale":lambda v:scale(v,(0.10,0.14,0.30)),"forge_shard":lambda v:shard(v,(1.0,0.55,0.15))}
 def all_items():
     for k,f in ART.items(): yield "app_artifact_"+k,f
     for k,c in GEM.items(): yield "app_gem_"+k,(lambda c:lambda v:gem(v,c,glow=k!="obsidian"))(c)

@@ -50,3 +50,15 @@ The cause: placement used the smooth `height()`, but the ground is drawn as the 
 **Lucky:**
 1. Copy `flowers_bake_v2.bin` → `terrain_flowers/flowers_bake.bin`.
 3. For anything else placed with `height()` (trees, dressing), consider a `surface_y(x, z)` helper that returns the grid-triangle height. The `surf()` code in `reseat.gd` is the exact formula.
+
+## Fix 5: sea edge (dark rectangle past the 1,600 m water grid)
+**New:** `tidewrack_sea/stage1/meshes/ocean_far_ring.glb` and `stage1/shaders/ocean_far.gdshader`.
+- The ring is 768 tris, 1 draw call: an annulus from r 700 m to 9 km at y −0.25, sitting under the grid's edge so it can't z-fight.
+- The shader uses the region's deep colour, fading into `horizon` between `fade_start` 900 m and `fade_end` 6,500 m.
+**Lucky (tw_sea.gd):**
+1. In `_make_water()`, after `add_child(water)`:
+   `var ring: Node3D = load(R + "stage1/meshes/ocean_far_ring.glb").instantiate(); water.add_child(ring)`.
+   Give its MeshInstance3D a `ShaderMaterial` with `stage1/shaders/ocean_far.gdshader`, and turn shadows off. Being a child of `water`, it follows the camera with the existing snap.
+2. Per region, set `deep` from the same deep colour you pass to the water.
+3. Each frame (or in `_set_time`), set `horizon` to `m.env.fog_light_color`, or to the sky horizon if FogV2 isn't in yet.
+4. Keep `cam.far` ≥ 7,000 m at sea, or lower `fade_end` to about 0.85 × cam.far, so the ring finishes fading before the far clip.

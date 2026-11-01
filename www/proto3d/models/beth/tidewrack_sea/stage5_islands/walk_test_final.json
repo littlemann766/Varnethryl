@@ -273,33 +273,24 @@
    "t": 83.7
   },
   "Glass-diver's Chest": {
-   "at": [
-    -2151.8,
-    104.7,
-    57.7
-   ],
-   "hits": [],
-   "of": 172,
-   "ok": false,
-   "t": 90.1,
-   "why": "dropped_through",
-   "wp": 124
+   "ok": true,
+   "t": 88.0
   },
   "Salt-crusted Tablet": {
    "ok": true,
-   "t": 69.8
+   "t": 69.7
   },
   "Saltglass Lookout": {
    "ok": true,
-   "t": 89.2
+   "t": 89.1
   },
   "Saltglass Shrine": {
    "ok": true,
-   "t": 72.7
+   "t": 72.6
   },
   "Singing Shards": {
    "ok": true,
-   "t": 76.4
+   "t": 76.3
   },
   "pier stair down": {
    "ok": true,

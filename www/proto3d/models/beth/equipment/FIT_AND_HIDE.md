@@ -6,7 +6,7 @@ Files: `fit/armor_attach.json` (22 playable heroes x 14 parts), `fit/companion_a
 - Rigid segmented pieces, one BoneAttachment3D per part: helmet→head, chest→chest, shoulder_L/R→upperArm, glove_L/R→foreArm, leg_L/R→thigh, boot_shin_L/R→shin, boot_foot_L/R→foot, belt→hips, cloak→chest.
 - Child transform: `Transform3D(Basis(Quaternion(rotation))*Basis.from_scale(scale), position)`. Right-side parts have `mirror_of` = the _L mesh and a negative scale.x (Godot flips culling for mirrored instances).
 - Sizes come from each hero's skinned rest-pose vertices (limb core radius per bone, torso band, hips band), so the same mesh fits all 22 heroes.
-- Cloak is rigid on the chest (hangs to the knee) and HIDES the hero's own cape (`hide.cloak`). A skinned cloak on the capeV chain is a later upgrade (listed in README).
+- Cloak (`binding: skin_to_cape`): place the cloak mesh with the chest transform, then bind it to the hero's OWN cape bones: every cloak vertex copies the bone weights of the nearest hero cape vertex (rest pose); the top 0.18 m fades to the chest bone so the collar stays on the shoulders. The hero's cape is hidden (`hide.cloak`). Reference: `tools/godot/dress.gd skin_cloak()`. Do it once per hero+cloak at equip time (or cache). Zero physics cost: it swings with the existing cape animation.
 - Material: vertex colours are linear (glTF COLOR_0). Use `vertex_color_use_as_albedo=true`, `vertex_color_is_srgb=false`; surface 1 (`vox_glow`) is emissive.
 
 ## Hide rules (data in `hide` per hero)

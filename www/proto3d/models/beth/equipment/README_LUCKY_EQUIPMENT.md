@@ -76,7 +76,7 @@ Mount: copy/merge `www/proto3d/models/beth/equipment/` to `res://equipment/` (an
 | Every armor slot changes mesh / unequip restores | Phase 1.5, `appearances.json`; shots `onhero_<family>_by_rarity.png` |
 | Fit on all heroes, no severe clipping idle/walk/run/combat/skill | `fit/armor_attach.json`; shots `clipcheck_heroes_1/2.png` (22 heroes x idle/walk/run/attack/skill/hit/death, Godot 4.7). No `jump` clip in the hero rigs (Pip only); ultimate = `skill`. |
 | Weapon/shield hand transforms | phase-2 `loot/gear/gear_attach.json` |
-| Cloaks cheap | rigid cloak, zero physics cost; skinned capeV cloak is a later option |
+| Cloaks cheap | cloak skinned to the existing cape bones (skin_cloak), zero physics cost; shot polish/after_cloak_run.png |
 | Helmet hair/face rules | `hide.helmet_full` / `helmet_open` |
 | Rarity not only recolour | per-rank geometry (rivets/straps → brass bands + haute-pieces → spikes + flare + glow → filigree + horns/wings + gems → molten seams + forge spikes), see shots |
 | Multiplayer perf | ~3.8k tris avg per part high, lod1 ≤50%; full 8-slot kit 22k–65k tris high, 6.7k–15k lod1; use lod1 for remote players |
@@ -91,6 +91,6 @@ Mount: copy/merge `www/proto3d/models/beth/equipment/` to `res://equipment/` (an
 
 ## Known gaps / next art
 - Weapons use the phase-2 family meshes (T1/T2/T3) for 6 rarities; named weapons use the T3 mesh as a placeholder. Dedicated legendary/masterwork and named meshes are next.
-- Cloak is rigid; a skinned cloak on capeV bones would follow runs better.
+- Cloak now binds to the cape bones (polish 2).
 - Robed/tabard heroes (aldric, seraphine, rowan, thorne, mirelle, selene, …) hide part of the leg pieces under their skirts; it reads fine, but a "robe" hide rule would be the next step if the boss wants plate legs to show.
 - Class items, artifacts, gems, runes and materials have 2D icons only (no world mesh).

@@ -43,7 +43,7 @@ func attach_mesh(sk,bone,path,t):
 func hide_verts(sk,rules):
 	# collapse triangles whose vertices match a selector (dominant bone + rest model-space aabb / outside keep-sphere)
 	for mi in sk.find_children("*","MeshInstance3D",true,false):
-		if mi.get_parent() is BoneAttachment3D or mi.skin==null: continue
+		if mi.get_parent() is BoneAttachment3D or mi.skin==null or mi.has_meta("cloak"): continue
 		var skin=mi.skin; var am=mi.mesh; var nm=ArrayMesh.new()
 		for si in am.get_surface_count():
 			var arr=am.surface_get_arrays(si); var V=arr[Mesh.ARRAY_VERTEX]; var Bn=arr[Mesh.ARRAY_BONES]; var W=arr[Mesh.ARRAY_WEIGHTS]; var I=arr[Mesh.ARRAY_INDEX]
@@ -72,6 +72,78 @@ func hide_verts(sk,rules):
 			nm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arr,[],{},Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS if nb==8 else 0)
 			nm.surface_set_material(nm.get_surface_count()-1,am.surface_get_material(si))
 		mi.mesh=nm
+func body_rest(sk):
+	# rest-space positions + full bone/weight lists of the hero body (skeleton bone indices)
+	var out=[]
+	for mi in sk.find_children("*","MeshInstance3D",true,false):
+		if mi.get_parent() is BoneAttachment3D or mi.skin==null or mi.has_meta("cloak"): continue
+		var skin=mi.skin; var am=mi.mesh
+		for si in am.get_surface_count():
+			var arr=am.surface_get_arrays(si); var V=arr[Mesh.ARRAY_VERTEX]; var Bn=arr[Mesh.ARRAY_BONES]; var W=arr[Mesh.ARRAY_WEIGHTS]; var nb=W.size()/V.size()
+			for vi in V.size():
+				var bs=[]; var ws=[]; var best=-1; var bw=-1.0
+				for k in nb:
+					var bi=Bn[vi*nb+k]; var bb=skin.get_bind_bone(bi)
+					if bb<0: bb=sk.find_bone(String(skin.get_bind_name(bi)))
+					bs.append(bb); ws.append(W[vi*nb+k])
+					if W[vi*nb+k]>bw: bw=W[vi*nb+k]; best=bb
+				var rp=sk.get_bone_global_rest(best)*skin.get_bind_pose(Bn[vi*nb+ws.find(bw)])*V[vi]
+				out.append([rp,bs,ws,sk.get_bone_name(best)])
+	return out
+func skin_cloak(sk,path,t,chest_bone):
+	# Bind a cloak mesh to the hero's own cape bones: each cloak vertex copies the weights of the nearest cape vertex (rest pose);
+	# rows near the shoulders fade to the chest bone so the collar stays put.
+	var src=load(path).instantiate(); var smi=src.find_children("*","MeshInstance3D",true,false)[0]; var am=smi.mesh
+	var body=body_rest(sk); var cape=[]
+	for b in body:
+		if b[3].begins_with("cape"): cape.append(b)
+	var cb=sk.find_bone(chest_bone); var X=sk.get_bone_global_rest(cb)*t
+	var grid={}; var cs=0.06
+	for c in cape:
+		var key=Vector3i(floor(c[0].x/cs),floor(c[0].y/cs),floor(c[0].z/cs)); if not grid.has(key): grid[key]=[]
+		grid[key].append(c)
+	var top=-1e9
+	for c in cape: top=max(top,c[0].y)
+	var nm=ArrayMesh.new()
+	for si in am.get_surface_count():
+		var arr=am.surface_get_arrays(si); var V=arr[Mesh.ARRAY_VERTEX]; var NV=PackedVector3Array(); var BO=PackedInt32Array(); var WE=PackedFloat32Array()
+		var N=arr[Mesh.ARRAY_NORMAL]; var NN=PackedVector3Array()
+		for vi in V.size():
+			var p=X*V[vi]; NV.append(p); NN.append((X.basis*N[vi]).normalized())
+			var key=Vector3i(floor(p.x/cs),floor(p.y/cs),floor(p.z/cs)); var best=null; var bd=1e9
+			for dx in [-1,0,1]:
+				for dy in [-1,0,1]:
+					for dz in [-1,0,1]:
+						for c in grid.get(key+Vector3i(dx,dy,dz),[]):
+							var d=p.distance_squared_to(c[0])
+							if d<bd: bd=d; best=c
+			if best==null:   # search wider
+				for c in cape:
+					var d=p.distance_squared_to(c[0])
+					if d<bd: bd=d; best=c
+			var f=clamp((top-p.y)/0.18,0.0,1.0)   # 0 at the top of the cape -> chest-bound
+			if best==null: f=0.0
+			var bw={}; bw[cb]=1.0-f
+			if best!=null:
+				for k in best[1].size(): bw[best[1][k]]=bw.get(best[1][k],0.0)+best[2][k]*f
+			var ks=bw.keys(); ks.sort_custom(func(a,b): return bw[a]>bw[b])
+			var s=0.0
+			for k in 4: s+= bw[ks[k]] if k<ks.size() else 0.0
+			for k in 4:
+				BO.append(ks[k] if k<ks.size() else 0); WE.append((bw[ks[k]]/s) if k<ks.size() else 0.0)
+		var na=[]; na.resize(Mesh.ARRAY_MAX); na[Mesh.ARRAY_VERTEX]=NV; na[Mesh.ARRAY_NORMAL]=NN; na[Mesh.ARRAY_COLOR]=arr[Mesh.ARRAY_COLOR]; na[Mesh.ARRAY_INDEX]=arr[Mesh.ARRAY_INDEX]; na[Mesh.ARRAY_BONES]=BO; na[Mesh.ARRAY_WEIGHTS]=WE
+		nm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,na)
+	var skin=Skin.new()
+	for b in sk.get_bone_count(): skin.add_bind(b,sk.get_bone_global_rest(b).affine_inverse())
+	var mi=MeshInstance3D.new(); mi.mesh=nm; mi.skin=skin; mi.set_meta("cloak",true); sk.add_child(mi); mi.skeleton=NodePath("..")
+	mat_fix(mi,am)
+	src.free()
+func mat_fix(mi,am):
+	for si in mi.mesh.get_surface_count():
+		var srcm=am.surface_get_material(si); var mat=StandardMaterial3D.new(); mat.vertex_color_use_as_albedo=true; mat.roughness=0.75
+		if srcm and srcm.resource_name.begins_with("vox_glow"):
+			mat.emission_enabled=true; mat.emission_energy_multiplier=1.4; mat.emission_operator=BaseMaterial3D.EMISSION_OP_MULTIPLY; mat.emission=Color(1,1,1)
+		mi.set_surface_override_material(si,mat)
 func run(j):
 	var h=j["hero"]; var root=load("res://heroes/%s_voxel.glb"%h).instantiate(); add_child(root)
 	var sk=find_skel(root); var ap=find_ap(root); var A=attach.get(h,{}); var fam=j["family"]; var r=j["rarity"]
@@ -80,6 +152,8 @@ func run(j):
 		var parts={"helmet":["helmet"],"chest":["chest"],"shoulders":["shoulder_L","shoulder_R"],"gloves":["glove_L","glove_R"],"legs":["leg_L","leg_R"],"boots":["boot_shin_L","boot_shin_R","boot_foot_L","boot_foot_R"],"belt":["belt"],"cloak":["cloak"]}[slot]
 		for p in parts:
 			var d=A["parts"][p]; var mp=d.get("mirror_of",p)
+			if p=="cloak" and j.get("skinned_cloak",false):
+				skin_cloak(sk,"res://equipment/meshes/%s/%s_%s_%s.glb"%[fam,fam,r,mp],xf(d),d["bone"]); continue
 			attach_mesh(sk,d["bone"],"res://equipment/meshes/%s/%s_%s_%s.glb"%[fam,fam,r,mp],xf(d))
 		if slot=="helmet": rules+=A["hide"]["helmet_full" if fam in ["plate"] else "helmet_open"]
 		if slot=="cloak": rules+=A["hide"]["cloak"]

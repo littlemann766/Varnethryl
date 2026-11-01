@@ -1172,7 +1172,8 @@
      "tris": [
       3218,
       1304
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "worn_iron",
@@ -1191,7 +1192,8 @@
      "tris": [
       7744,
       1740
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "straps_rivets",
@@ -1210,7 +1212,8 @@
      "tris": [
       3442,
       1282
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "blackened_steel_brass",
@@ -1229,7 +1232,8 @@
      "tris": [
       3300,
       1410
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "gilt_flared_spiked_glow",
@@ -1248,7 +1252,8 @@
      "tris": [
       3464,
       1492
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "filigree_crest_horns_runes",
@@ -1267,7 +1272,8 @@
      "tris": [
       3692,
       1470
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "forge_scarred_molten_seams",
@@ -2444,7 +2450,8 @@
      "tris": [
       3318,
       1326
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "worn_iron",
@@ -2463,7 +2470,8 @@
      "tris": [
       7770,
       1772
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "straps_rivets",
@@ -2482,7 +2490,8 @@
      "tris": [
       3494,
       1302
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "blackened_steel_brass",
@@ -2501,7 +2510,8 @@
      "tris": [
       3300,
       1410
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "gilt_flared_spiked_glow",
@@ -2520,7 +2530,8 @@
      "tris": [
       3464,
       1492
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "filigree_crest_horns_runes",
@@ -2539,7 +2550,8 @@
      "tris": [
       3692,
       1470
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "forge_scarred_molten_seams",
@@ -3716,7 +3728,8 @@
      "tris": [
       3896,
       1480
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "worn_iron",
@@ -3735,7 +3748,8 @@
      "tris": [
       8412,
       1896
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "straps_rivets",
@@ -3754,7 +3768,8 @@
      "tris": [
       4070,
       1446
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "blackened_steel_brass",
@@ -3773,7 +3788,8 @@
      "tris": [
       3824,
       1514
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "gilt_flared_spiked_glow",
@@ -3792,7 +3808,8 @@
      "tris": [
       4004,
       1612
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "filigree_crest_horns_runes",
@@ -3811,7 +3828,8 @@
      "tris": [
       4232,
       1588
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "forge_scarred_molten_seams",
@@ -4988,7 +5006,8 @@
      "tris": [
       3318,
       1326
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "worn_iron",
@@ -5007,7 +5026,8 @@
      "tris": [
       7770,
       1772
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "straps_rivets",
@@ -5026,7 +5046,8 @@
      "tris": [
       3494,
       1302
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "blackened_steel_brass",
@@ -5045,7 +5066,8 @@
      "tris": [
       3300,
       1410
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "gilt_flared_spiked_glow",
@@ -5064,7 +5086,8 @@
      "tris": [
       3464,
       1492
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "filigree_crest_horns_runes",
@@ -5083,7 +5106,8 @@
      "tris": [
       3692,
       1470
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "forge_scarred_molten_seams",
@@ -6260,7 +6284,8 @@
      "tris": [
       3896,
       1480
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "worn_iron",
@@ -6279,7 +6304,8 @@
      "tris": [
       8412,
       1896
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "straps_rivets",
@@ -6298,7 +6324,8 @@
      "tris": [
       4070,
       1446
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "blackened_steel_brass",
@@ -6317,7 +6344,8 @@
      "tris": [
       3806,
       1502
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "gilt_flared_spiked_glow",
@@ -6336,7 +6364,8 @@
      "tris": [
       3982,
       1598
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "filigree_crest_horns_runes",
@@ -6355,7 +6384,8 @@
      "tris": [
       4208,
       1574
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "forge_scarred_molten_seams",
@@ -7532,7 +7562,8 @@
      "tris": [
       3896,
       1480
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "worn_iron",
@@ -7551,7 +7582,8 @@
      "tris": [
       8614,
       1914
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "straps_rivets",
@@ -7570,7 +7602,8 @@
      "tris": [
       4424,
       1510
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "blackened_steel_brass",
@@ -7589,7 +7622,8 @@
      "tris": [
       4150,
       1550
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "gilt_flared_spiked_glow",
@@ -7608,7 +7642,8 @@
      "tris": [
       4344,
       1638
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "filigree_crest_horns_runes",
@@ -7627,7 +7662,8 @@
      "tris": [
       4608,
       1588
-     ]
+     ],
+     "binding": "skin_to_cape"
     }
    ],
    "look": "forge_scarred_molten_seams",

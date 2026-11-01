@@ -314,3 +314,11 @@ These lod1 files were re-decimated from their base with gltfpack 1.3 (`-si 0.44 
 - `hi/buildings/bld_windmill_card`_lod1.glb
 - `tripo/volcano_game`_lod1.glb
 **Lucky:** copy the 4 tile lod1s over `tidewrack/stage2|stage4/meshes/` and `hi/buildings/bld_windmill_lod1.glb` over your windmill lod1, then re-import.
+
+## Fix 8b - frost strait blown out and blocky, ash strait flat grey
+`tidewrack_sea/stage4/tools/regrade_frost_ash.py` regraded the vertex colours of all 28 `frost_tile_*` and `ash_tile_*` files (base and lod1). Geometry and collision are unchanged.
+- Frost: snow is capped at 0.80, steep faces shade to glacier blue (0.42, 0.56, 0.70), with a soft noise breakup.
+- Ash: the flats are warm ash sand, the slopes dark basalt, with sparse ember-red patches on low steep rock.
+
+The originals are in `stage4/meshes_v1_backup/`. All `*_v1_backup` files were moved out of `meshes/` because `tw_sea` auto-loads every `frost_`/`ash_`/`coast_` glb in that folder.
+**Lucky:** copy the 28 tile glbs over yours. Suggested (your code): in the frost region set the ambient to (0.55, 0.62, 0.75) and use the FogV2 values from Fix 3.

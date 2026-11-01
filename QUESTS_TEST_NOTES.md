@@ -30,6 +30,12 @@ tests/docking_test.gd + tidewrack/tw_sea.gd changes, left untouched). Story: var
 - [x] Playthrough with no assists (8f513bf): QT RESULT pass=93 fail=0, 0 SCRIPT ERRORs, 0 ASHORE resets.
 - [x] TitanQuest test and tidewrack_test: identical PASS/FAIL to untouched bc917c6 (tq 25/21 display-only fails, tw 83/1).
 - [x] Headless import 0 errors; debug APK rebuilt: build/varnethryl-quests-test.apk.
+## Round 3 (boss Oct 31: "allow the owner to have it already but all other characters dont")
+- [x] Owner as active hero (party.gd hero_id == "owner") has night sailing from the start: full night speed, Charts at
+      night, Night/Day button. tw_sea.owner_active()/has_night_sailing(). Others keep the gate until Wren.
+- [x] Playthrough 96/0 (new: Owner full speed + button before Wren, Aldric capped before Wren), 0 script errors.
+- [x] titan_quest_test and tidewrack_test identical to bc917c6; import 0 errors; APK rebuilt 23:37 ET.
+
 ## Merge notes for Lucky
 - tw_sea.gd: new ACCESS_PATCHES + _access_patches() (one call after _place_landings), _step_up/_shape_free (one call
   after move_and_slide in _walk), night/cave helpers + _night_cap (one call after ship.drive), cave gate inside the

@@ -31,7 +31,7 @@ func _process(_dt: float) -> void:
 	gust_b.visible = on and sea.ship != null and sea.ship.tier > 0
 	if gust_b.visible: gust_b.text = "Gust" if sea.ship.gust_cd <= 0.0 else "Gust %ds" % int(ceil(sea.ship.gust_cd))
 	charts_b.visible = on and sea.ship != null and sea.ship.kind == "galleon" and charts_here()
-	night_b.visible = on and sea.sailing() and sea.story_flag("night_sailing")
+	night_b.visible = on and sea.sailing() and sea.has_night_sailing()
 	if night_b.visible: night_b.text = "Day" if sea.is_night() else "Night"
 	if not sea.active:   # on land: "Set sail" beside the moored galleon at the Tidewrack main pier
 		var g: Array = sea.m._galleon_pier()

@@ -791,8 +791,11 @@ func story_flag(k: String) -> bool:
 	return st is Dictionary and bool(st.get("flags", {}).get(k, false))
 func is_night() -> bool: return float(m.tod) >= 20.0 or float(m.tod) < 5.0
 ## Wren (night_sailing), or the story's own night sail to Lantern Rock (the harbourmaster's chart), or the Owner
+func owner_active() -> bool: return m.party != null and str(m.party.get("hero_id")) == "owner"   # party.gd active hero
+## boss Oct 31: the Owner has night sailing from the start; everyone else needs Wren
+func has_night_sailing() -> bool: return owner_active() or story_flag("night_sailing") or unlock_all
 func can_sail_night() -> bool:
-	if unlock_all or story_flag("night_sailing"): return true
+	if has_night_sailing(): return true
 	var q := m.get_tree().root.get_node_or_null("Quests")
 	return q != null and q.has_method("night_sail_active") and q.night_sail_active()
 func can_dive_caves() -> bool: return unlock_all or story_flag("cave_diving")
@@ -803,7 +806,7 @@ func _night_cap() -> void:
 		_night_warned = Time.get_ticks_msec() + 6000; ui.toast("Too dark to sail at speed. You need a navigator.")
 ## Wren aboard: switch day/night at sea (TwUi "Night"/"Day" button)
 func toggle_night() -> void:
-	if not story_flag("night_sailing") and not unlock_all: return
+	if not has_night_sailing(): return
 	m._set_time(11.0 if is_night() else 22.5)
 	ui.toast("Wren reads the stars: sailing by night." if is_night() else "Dawn breaks.")
 func _shape_free(h: CharacterBody3D, xf: Transform3D) -> bool:

@@ -53,3 +53,11 @@ tests/docking_test.gd + tidewrack/tw_sea.gd changes, left untouched). Story: var
 - Night/Day button moved from screen centre (580,250) to the right-hand sea row (990,250) in tw_ui.gd.
 - Playthrough checks added: ship alt/Y stays 0 at sea, never over land (min shore >= 1 m), Fly UI never shown, Night button outside centre, HUD overlap clean at sea.
 - Results: playthrough 101/0; titan_quest 25/21 and tidewrack 83/1 (same as base); import 0 errors; APK rebuilt 01:00 AM ET.
+
+## Round 5 (Nov 1, 2026, ~1:35 AM ET): cherry-pick of Lucky's 49c6b4d (fly only after tapping Fly)
+- Cherry-picked 49c6b4d cleanly (no conflicts) as 736be72 (main.gd, tw_sea.gd, ship_fly_test.gd, tidewrack_test.gd).
+- Night button kept at right-hand sea row (-290,-470 -> screen 990,250, 130x64): clear of Charts (-560..-430) and Gust (-420..-290); Fly column is x -404..-320 at y -312..-32, so no vertical overlap.
+- ship_fly_test 20/0; quest playthrough 101/0 (0 script errors); import 0 errors.
+- titan_quest 25/21, same as base 49c6b4d.
+- tidewrack 85/1 vs base 49c6b4d 86/0: only difference is "ash basalt ... materials" — that check was changed by voxel-heroes 2d96a78/ee93d25 (basalt on vc_flat), which quests-test (based on bc917c6) does not include; it already failed identically on bc917c6. Not from quest code.
+- APK rebuilt 01:31 AM ET.

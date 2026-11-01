@@ -1,0 +1,5 @@
+*_grid.glb
+*_prewobble.glb
+_merged_tmp.glb
+*.npy
+__pycache__/

@@ -1,0 +1,80 @@
+[
+ {
+  "where": "world",
+  "a": [
+   -162,
+   -2591
+  ],
+  "b": [
+   -216,
+   -2591
+  ],
+  "len_m": 54,
+  "exempt": "Frozen Wreck mooring"
+ },
+ {
+  "where": "world",
+  "a": [
+   -890,
+   -1942
+  ],
+  "b": [
+   -890,
+   -1984
+  ],
+  "len_m": 42,
+  "exempt": "Frostreach ice dock"
+ },
+ {
+  "where": "world",
+  "a": [
+   -96,
+   7
+  ],
+  "b": [
+   -66,
+   -23
+  ],
+  "len_m": 42,
+  "exempt": "Lantern Rock mooring"
+ },
+ {
+  "where": "world",
+  "a": [
+   -322,
+   -328
+  ],
+  "b": [
+   -358,
+   -316
+  ],
+  "len_m": 39,
+  "exempt": "Gullhaven mooring"
+ },
+ {
+  "where": "world",
+  "a": [
+   -375,
+   -286
+  ],
+  "b": [
+   -391,
+   -252
+  ],
+  "len_m": 37,
+  "exempt": "Gullhaven landing pier"
+ },
+ {
+  "where": "world",
+  "a": [
+   -448,
+   1846
+  ],
+  "b": [
+   -418,
+   1846
+  ],
+  "len_m": 30,
+  "exempt": "Vent Harbour mooring"
+ }
+]

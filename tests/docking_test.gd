@@ -223,7 +223,7 @@ func _run() -> void:
 		sea.ui.msg.text = ""
 		m.hero.global_position = sp + Vector3(0, 0.6, 0); m.hero.velocity = Vector3.ZERO; await frames(5)
 		var pw := await walk_to(sea.pier_head(d), 1.5, 25.0)
-		ok(pw.ok and pw.resets == 0, "%s: walked up the pier boards to the pier head (%.1f s, resets %d)" % [k, pw.t, pw.resets])
+		ok(pw.ok and pw.resets == 0, "%s: walked up the pier boards to the pier head (%.1f s, resets %d, ended %s, head %s, start %s)" % [k, pw.t, pw.resets, sea.to_local(m.hero.global_position), sea.pier_head(d), pa.lerp(pb, 0.06)])
 		m.hero.global_position = sea.to_global(sea.pier_head(d) + Vector3(0, 0.6, 0)); m.hero.velocity = Vector3.ZERO; await frames(5); sea.ui.msg.text = ""
 		if OS.get_environment("DK_POI") != "": await poi_walk(k, d)
 		var inl := sea._inland(d)
@@ -272,5 +272,6 @@ func _run() -> void:
 	ok(not sea.active and m.hero.global_position.distance_to(m._galleon_pier()[0]) < 3.0, "mainland: ashore on the Tidewrack pier beside the galleon")
 	await frames(5)
 	ok(sea.ui.prompt.text == "Set sail", "mainland: Set sail again from the same pier")
+	m._set_time(11.0); await frames(5)
 	await shot("mainland_pier")
 	print("DK DONE pass=%d fail=%d" % [npass, nfail]); get_tree().quit(0 if nfail == 0 else 1)

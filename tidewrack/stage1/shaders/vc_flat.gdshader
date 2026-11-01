@@ -3,7 +3,7 @@ shader_type spatial;
 // and some imported faces came out unlit (pure black wedges ashore at Gullhaven, black cliffs at Vent Harbour).
 // Same look as vc_lit.tres (vertex colour albedo, roughness 0.9) + near-camera dither fade (0.8 -> 3 m).
 uniform float lift = 0.0;
-uniform float ambient = 0.2;
+uniform float ambient = 0.3;
 uniform float spec = 0.5;
 global uniform vec4 hero_cut;   // xyz = hero chest (world), w = 1 when the third-person camera wants the cut-out
 varying vec3 wpos;

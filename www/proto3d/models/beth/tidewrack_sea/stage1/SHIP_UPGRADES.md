@@ -60,3 +60,5 @@ The galleon and skiff are upgraded separately.
   This is fine on the skiff and the galleon's fore and aft masts. Since the 2026-10-30 polish, all 3 galleon masts are covered.
 - A true swap needs a sail-less hull copy, with the sail faces cut out into a new file and the originals kept. That is a small follow-up.
 - The T1 figurehead reads like a log from the side, and the skiff trim line is a little wavy. These are for a polish pass.
+
+Sail stripes/trim are hard-edged (t38 fix): sail grid lines sit on the stripe borders and each colour band has its own vertices, so COLOR_0 no longer blends into soft gradients. lod1 stays at 45%.

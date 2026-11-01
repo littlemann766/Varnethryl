@@ -344,17 +344,25 @@ def masts(v, ymin, thr, nmax=3):
         if len(out) == nmax: break
     return sorted(out)
 def sail(w, h, billow, col, trim=None, stripes=None, n=8):
-    vv, cc, ff = [], [], []
-    for i in range(n + 1):
-        for j in range(n + 1):
-            u, t = i / n, j / n; x = (u - 0.5) * w * (1 - 0.12 * t); y = t * h; z = billow * math.sin(math.pi * u) * math.sin(math.pi * (0.15 + 0.85 * t))
-            vv.append((x, y, z)); c = col
-            if stripes is not None and int(u * 6) % 2 == 0: c = stripes
-            if trim is not None and (i in (0, n) or j in (0, n)): c = trim
-            cc.append(c)
-    for i in range(n):
-        for j in range(n):
-            a = i * (n + 1) + j; ff += [(a, a + n + 1, a + 1), (a + 1, a + n + 1, a + n + 2), (a, a + 1, a + n + 1), (a + 1, a + n + 2, a + n + 1)]
+    # hard-edged colours: grid lines sit exactly on the stripe/trim borders and every colour region gets its own
+    # vertices, so COLOR_0 never interpolates across a border (fixes soft-gradient stripes, t38)
+    ub = [0.0, 1.0] + [k / 6 + d for k in range(6) for d in (0.0, 1 / 12)]
+    tb = [k / n for k in range(n + 1)]
+    if trim is not None: ub += [0.035, 0.965]; tb += [0.05, 0.95]
+    ub = sorted(set(round(x, 6) for x in ub)); tb = sorted(set(round(x, 6) for x in tb))
+    def P(u, t): return ((u - 0.5) * w * (1 - 0.12 * t), t * h, billow * math.sin(math.pi * u) * math.sin(math.pi * (0.15 + 0.85 * t)))
+    vv, cc, ff, idx = [], [], [], {}
+    def V(i, j, key, c):
+        k = (i, j, key)
+        if k not in idx: idx[k] = len(vv); vv.append(P(ub[i], tb[j])); cc.append(c)
+        return idx[k]
+    for i in range(len(ub) - 1):
+        for j in range(len(tb) - 1):
+            um, tm = (ub[i] + ub[i + 1]) / 2, (tb[j] + tb[j + 1]) / 2; c, key = col, 0
+            if stripes is not None and int(um * 6) % 2 == 0: c, key = stripes, 1
+            if trim is not None and (um < 0.035 or um > 0.965 or tm < 0.05 or tm > 0.95): c, key = trim, 2
+            a, b, d, e = V(i, j, key, c), V(i + 1, j, key, c), V(i, j + 1, key, c), V(i + 1, j + 1, key, c)
+            ff += [(a, b, d), (d, b, e), (a, d, b), (d, e, b)]
     m = trimesh.Trimesh(vv, ff, process=False); m.visual = trimesh.visual.ColorVisuals(m, vertex_colors=np.array(cc)); return m
 TIERS = [  # name, sail colour, stripe, trim, rope, hull-trim colour, sail scale, extra sails, charm glow
     ('T1 Patched Canvas', C(214, 200, 168), None, C(150, 120, 80), C(150, 120, 80), C(170, 96, 60), 1.05, 0, C(150, 200, 210)),
@@ -406,3 +414,4 @@ for key, fn, deck, scale in [('galleon', 'ship_tidewrack_sailing_ship.glb', 2.78
         save(f'upg_{key}_t{ti}', merge(parts))
 json.dump({'stats': STATS, 'props': props, 'ships': SPEC}, open(os.path.join(OUT, 'stage1_manifest.json'), 'w'), indent=1, default=float)
 print('DONE')
+

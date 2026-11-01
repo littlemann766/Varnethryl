@@ -108,3 +108,11 @@ Legendary gold palette softened to antique gold trim (0.86,0.66,0.26).
 - They have no emissive faces; the rarity loot beam or glow comes from code.
 - Inventory still uses the 2D icons.
 Preview sheet: `shots/loot3/polish/pickups_3d.png`.
+
+## Smoothed plate (polish 6)
+Plate meshes are no longer greedy voxel boxes.
+- How they're built: voxel remesh at 1 voxel, a light smooth, then every vertex is recoloured straight from the voxel grid (`bl.smooth_plate`). That keeps the trim bands, rivets and filigree crisp while losing the stair-steps.
+- Smooth shading is on.
+- Triangle cost: about 2.8× the old plate. The heaviest single part is about 25k tris, and the whole plate set went from 209k to 591k summed over every part and rarity.
+- lod1 is also smoothed and is at most 33% of lod0. Use lod1 beyond about 8 m on mobile.
+- Other families stay voxel-style: chain, scale and leather read as texture, not slab.

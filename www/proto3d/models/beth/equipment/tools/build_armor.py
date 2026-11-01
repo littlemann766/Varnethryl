@@ -16,7 +16,9 @@ for fam in fams:
                 while len(greedy.quads(vv.g))>0.5*hi and k<8: vv=vv.down(); k*=2
                 for lod,(gg,s) in enumerate(((v,vs),(vv,vs*k))):
                     bl.reset(); bl.MATS.clear()
-                    ob,tr=bl.mesh_g(gg,n+("_lod1" if lod else ""),s,origin=tuple(-c*vs for c in piv))
+                    org=tuple(-c*vs for c in piv)
+                    ob,tr=bl.mesh_g(gg,n+("_lod1" if lod else ""),s,origin=org)
+                    if fam=="plate": ob,tr=bl.smooth_plate(ob,gg,s,org)   # polish: no voxel stair-steps on plate
                     bl.export(f"{O}/{fam}/{n}{'_lod1' if lod else ''}.glb",[ob]); st[lod]=tr
                 stats[n]=st
 json.dump(stats,open(f"/tmp/l3w/armor_stats_{'_'.join(fams)}.json","w"))

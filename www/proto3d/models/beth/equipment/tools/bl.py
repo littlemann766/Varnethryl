@@ -86,3 +86,38 @@ def srgb_fix_imported(objs):
                     g=nt.nodes.new('ShaderNodeGamma'); g.inputs[1].default_value=2.2
                     fs,ts=l.from_socket,l.to_socket; nt.links.remove(l); nt.links.new(fs,g.inputs[0]); nt.links.new(g.outputs[0],ts)
             m['srgbfix']=1
+FLAT_FACES=False   # crisp per-face colour on the smoothed surface (Godot interpolates per-vertex colour into mush)
+def smooth_plate(ob,v,vs,origin,tri_mult=99,rem=1.0,iters=2,fac=0.5):
+    """polish: kill the voxel stair-steps on plate. remesh -> smooth -> decimate, then re-colour every face straight from the voxel grid
+    (sample just inside the surface along -normal) so trim lines and rivets stay crisp. glow voxels keep material 1."""
+    t0=sum(len(p.vertices)-2 for p in ob.data.polygons)
+    bpy.ops.object.select_all(action='DESELECT'); ob.select_set(True); bpy.context.view_layer.objects.active=ob
+    m=ob.modifiers.new("r",'REMESH'); m.mode='VOXEL'; m.voxel_size=vs*rem; m.adaptivity=0; bpy.ops.object.modifier_apply(modifier="r")
+    m=ob.modifiers.new("s",'SMOOTH'); m.factor=fac; m.iterations=iters; bpy.ops.object.modifier_apply(modifier="s")
+    t1=sum(len(p.vertices)-2 for p in ob.data.polygons)
+    if t1>t0*tri_mult:
+        m=ob.modifiers.new("d",'DECIMATE'); m.ratio=t0*tri_mult/t1; bpy.ops.object.modifier_apply(modifier="d")
+    me=ob.data; g=v.g; off=np.array(origin); S=np.array(g.shape); me.update()
+    for a in list(me.color_attributes): me.color_attributes.remove(a)
+    ca=me.color_attributes.new("Col",'FLOAT_COLOR','CORNER')
+    if len(me.materials)<2: me.materials.clear(); me.materials.append(mat(0)); me.materials.append(mat(1))
+    from mathutils.kdtree import KDTree
+    pad=np.pad(g>0,1); core=pad[1:-1,1:-1,1:-1]&pad[2:,1:-1,1:-1]&pad[:-2,1:-1,1:-1]&pad[1:-1,2:,1:-1]&pad[1:-1,:-2,1:-1]&pad[1:-1,1:-1,2:]&pad[1:-1,1:-1,:-2]
+    surf=np.argwhere((g>0)&~core); kd=KDTree(len(surf))
+    for i,q in enumerate(surf): kd.insert(tuple((q+0.5)*vs+off),i)
+    kd.balance()
+    vc=[]
+    for vt in me.vertices:
+        ci=0; co=np.array(vt.co); n=np.array(vt.normal)
+        for d in (0.5,0.1,0.9):
+            q=np.floor((co-n*vs*d-off)/vs).astype(int)
+            if (q>=0).all() and (q<S).all() and g[tuple(q)]>0: ci=g[tuple(q)]; break
+        if not ci: ci=g[tuple(surf[kd.find(vt.co)[1]])]
+        vc.append(ci)
+    for p in me.polygons:
+        cs=[vc[me.loops[li].vertex_index] for li in p.loop_indices]; glow=any(v.pal[c][1] for c in cs)
+        fc=max(set(cs),key=cs.count) if FLAT_FACES else None
+        for li in p.loop_indices:
+            rgb,gl=v.pal[fc or vc[me.loops[li].vertex_index]]; ca.data[li].color=tuple(min(1,x)**(1.0 if SRGB else 2.2) for x in rgb)+(1,)
+        p.material_index=1 if glow and all(v.pal[c][1] for c in cs) else 0; p.use_smooth=True
+    return ob,sum(len(p.vertices)-2 for p in me.polygons)

@@ -61,3 +61,9 @@ tests/docking_test.gd + tidewrack/tw_sea.gd changes, left untouched). Story: var
 - titan_quest 25/21, same as base 49c6b4d.
 - tidewrack 85/1 vs base 49c6b4d 86/0: only difference is "ash basalt ... materials" — that check was changed by voxel-heroes 2d96a78/ee93d25 (basalt on vc_flat), which quests-test (based on bc917c6) does not include; it already failed identically on bc917c6. Not from quest code.
 - APK rebuilt 01:31 AM ET.
+
+## Round 6 — QUESTS TEST 2 (boss on S26: no tracker / Journal in town)
+- Cause: QuestUi was only created inside the Quests autoload's sea hook (current_scene with `sea` → QuestWorld.setup → then QuestUi). Anything that stops/delays that one chain on device (world hook failing, scene without `sea`) leaves no tracker and no Journal. Not reproducible on desktop (headless normal launch and xvfb both show it), so the UI is now independent of it.
+- Fix: QuestUi on the tree root as soon as VUI exists; tracker + Journal shown whenever the title is not up (land and sea); auto-start re-checked every 1 s (save swapped later still gets the quest); fallback "Sail to Gullhaven" text; one-time hint after the shader veil: "Head to the harbour, board your ship and set sail for Gullhaven."
+- Badge: config/test_build="QUESTS TEST 2" (named builds show as-is; tests/run_tests.gd's numeric test_build==version/code-1 check will fail on this branch by design).
+- Checks: import 0 errors; questrun 101/0; xvfb shots checks/quests_test2_land_tracker*.png. APK rebuilt build/varnethryl-quests-test.apk (debug, unsigned by Lucky).

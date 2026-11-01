@@ -66,7 +66,7 @@ def hits2(P,legs,s_,ab,fl,el,piv,hp,ep,eax):
     return int(np.isin(K(Q),legs).sum())
 D=math.radians
 def mkgrid(abmax,flmax): return sorted([(ab,fl) for ab in range(-24,abmax+1,8) for fl in range(-40,flmax+1,10)],key=lambda t:abs(t[0])+abs(t[1]))
-ABMAX=int(os.environ.get('ABMAX','8')); G0=mkgrid(ABMAX,60); GS=mkgrid(60,150); GB=mkgrid(88,60); GR=mkgrid(8,60)
+ABMAX=int(os.environ.get('ABMAX','8')); G0=mkgrid(ABMAX,int(os.environ.get('FLMAX','60'))); GS=mkgrid(60,150); GB=mkgrid(88,60); GR=mkgrid(int(os.environ.get('GRAB','8')),60)
 arm.animation_data_create(); res={}
 for act in sorted(bpy.data.actions,key=lambda x:x.name):
     cl=act.name.split('_'+arm.name)[0]
@@ -91,7 +91,14 @@ for act in sorted(bpy.data.actions,key=lambda x:x.name):
             prm[s_].append(best[1:])
     g=np.exp(-0.5*(np.arange(-4,5)/2.0)**2); g/=g.sum()
     for s_ in ua:
-        A=np.array(prm[s_],float); prm[s_]=np.stack([np.convolve(np.pad(A[:,i],4,mode='edge'),g,'valid') for i in range(3)],1)
+        A=np.array(prm[s_],float)
+        if os.environ.get('DILATE'):
+            R=int(os.environ['DILATE']); B=A.copy()
+            for t in range(len(A)):
+                for i in range(3):
+                    w=A[max(0,t-R):t+R+1,i]; B[t,i]=w[np.argmax(np.abs(w))]
+            A=B
+        prm[s_]=np.stack([np.convolve(np.pad(A[:,i],4,mode='edge'),g,'valid') for i in range(3)],1)
     for fr in range(f0,f1+1):
         sc.frame_set(fr); mw=arm.matrix_world; hpv=mw@arm.pose.bones[hips].head
         for s_,n in ua.items():

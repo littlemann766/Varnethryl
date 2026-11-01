@@ -2501,6 +2501,19 @@ func _cam_fade() -> void:
 			if hero.is_ancestor_of(gi): continue
 			if on_deck and sea.ship.is_ancestor_of(gi): continue   # sails use the cut-out
 			want[gi] = true
+	if sea and sea.active:   # ship: shader dither (GeometryInstance3D.transparency is not honoured by every renderer)
+		for sh in sea.ships.values():
+			var f := false
+			for gi in want.keys():
+				if sh.is_ancestor_of(gi): want.erase(gi)
+			if not on_deck or sh != sea.ship:   # fade only when the camera is in the hull or the hull blocks the hero
+				var lc: Vector3 = sh.global_transform.affine_inverse() * c
+				var hb := Vector3(7.5, 9.0, 18.0) if sh.kind == "galleon" else Vector3(3.0, 4.0, 5.5)
+				f = absf(lc.x) < hb.x and lc.y > -1.0 and lc.y < hb.y * 2.0 and absf(lc.z) < hb.z
+				if not f:
+					var q := PhysicsRayQueryParameters3D.create(h, c, 1 << 9); var hit := get_world_3d().direct_space_state.intersect_ray(q)
+					f = not hit.is_empty() and hit.collider == sh
+			sh.set_fade(0.85 if f else 0.0)
 	for gi in _mesh_faded.keys():
 		if not is_instance_valid(gi): _mesh_faded.erase(gi); continue
 		if not want.has(gi): gi.transparency = _mesh_faded[gi]; _mesh_faded.erase(gi)

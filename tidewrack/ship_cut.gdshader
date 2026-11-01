@@ -9,6 +9,7 @@ uniform float cut_on = 0.0;
 uniform vec3 hero_pos;
 uniform float cut_min_y = 0.0;
 uniform float cut_r = 4.0;
+uniform float fade_all = 0.0;   // test 37: camera fade ashore (camera inside / behind the moored hull)
 varying vec3 wpos;
 void vertex() { wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
 void fragment() {
@@ -16,6 +17,9 @@ void fragment() {
 	if (use_tex > 0.5) c *= texture(tex, UV).rgb;
 	ALBEDO = c * COLOR.rgb;
 	ROUGHNESS = 0.9;
+	if (!FRONT_FACING) NORMAL = -NORMAL;   // test 37: inside faces of the hull lit like the outside (was a black wedge ashore)
+	float dz = fract(sin(dot(floor(FRAGCOORD.xy), vec2(12.9898, 78.233))) * 43758.5453);
+	if (dz < max(fade_all, 1.0 - smoothstep(1.0, 4.0, length(VERTEX)))) discard;
 	if (cut_on > 0.5 && wpos.y > cut_min_y) {
 		vec3 hv = (VIEW_MATRIX * vec4(hero_pos, 1.0)).xyz;
 		if (-VERTEX.z < -hv.z - 1.0) {

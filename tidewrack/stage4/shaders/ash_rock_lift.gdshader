@@ -7,5 +7,9 @@ void fragment() {
 	float cd = length(VERTEX);   // near-camera dither fade (0.8 -> 3 m)
 	float d = fract(sin(dot(floor(FRAGCOORD.xy), vec2(12.9898, 78.233))) * 43758.5453);
 	if (d > smoothstep(0.8, 3.0, cd)) discard;
+	vec3 fn = normalize(cross(dFdx(VERTEX), dFdy(VERTEX)));   // flat face normal, always facing the camera
+	if (dot(fn, -VERTEX) < 0.0) fn = -fn;
+	NORMAL = fn;
+	EMISSION = ALBEDO * 0.18;   // ash-haze ambient floor: never pure black
 	ROUGHNESS = 0.9; SPECULAR = 0.15 * 0.5;
 }

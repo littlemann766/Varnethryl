@@ -24,6 +24,8 @@ var addon: Node3D
 var bob_t := 0.0
 const CUT_SHADER := preload("res://tidewrack/ship_cut.gdshader")
 var cut_mats: Array[ShaderMaterial] = []
+func set_fade(f: float) -> void:
+	for cm in cut_mats: cm.set_shader_parameter("fade_all", f)
 ## test 37: hero cut-out through sails/masts (on while the hero is on deck); min_y = world height of deck + 2 m
 func set_cut(on: bool, hero_pos: Vector3, min_y: float) -> void:
 	for cm in cut_mats:

@@ -144,6 +144,16 @@ func cam_probe(t: String) -> void:
 	for id in RenderingServer.instances_cull_aabb(AABB(c - Vector3.ONE * 0.5, Vector3.ONE), m.get_world_3d().scenario):
 		var o = instance_from_id(id)
 		if o is GeometryInstance3D: print("CPin ", o.get_path(), " aabb=", o.get_aabb().size)
+func pix_probe(t: String) -> void:
+	var vs: Vector2 = get_viewport().get_visible_rect().size
+	for px in [Vector2(960, 300), Vector2(990, 420), Vector2(300, 520), Vector2(700, 500)]:
+		var p: Vector2 = px * vs / Vector2(1024, 576)
+		var o: Vector3 = m.cam.project_ray_origin(p); var dv: Vector3 = m.cam.project_ray_normal(p)
+		var best := ""
+		for id in RenderingServer.instances_cull_ray(o, o + dv * 30.0, m.get_world_3d().scenario):
+			var g = instance_from_id(id)
+			if g is GeometryInstance3D: best += " " + str(g.get_path()).get_slice("/", 4) + "/" + g.name + str(g.get_aabb().size.round())
+		print("PX %s %s:%s" % [t, px, best])
 func dark_pct() -> float:
 	await frames(3); var img := get_viewport().get_texture().get_image(); var dark := 0; var tot := 0
 	for y in range(0, img.get_height(), 8):
@@ -157,10 +167,19 @@ func hide_probe(t: String) -> void:
 	for mi in sea.find_children("*", "GeometryInstance3D", true, false): cands.append(mi)
 	for mi in m.find_children("*", "GeometryInstance3D", true, false):
 		if not sea.is_ancestor_of(mi) and (mi as Node3D).is_visible_in_tree() and (mi as Node3D).global_position.distance_to(m.hero.global_position) < 60: cands.append(mi)
+	var groups := {}
 	for mi in cands:
 		if not mi.is_visible_in_tree(): continue
-		mi.visible = false; var d := await dark_pct(); mi.visible = true
-		if absf(d - base) > 2.0: print("HP   ", mi.get_path(), " -> %.1f" % d)
+		var key = mi.mesh if mi is MeshInstance3D and mi.mesh else mi
+		if not groups.has(key): groups[key] = []
+		groups[key].append(mi)
+	for key in groups:
+		for mi in groups[key]: mi.visible = false
+		var d := await dark_pct()
+		for mi in groups[key]: mi.visible = true
+		if absf(d - base) > 2.0: print("HP   ", groups[key][0].get_path(), " x", groups[key].size(), " -> %.1f" % d)
+	m.sun.visible = false; print("HP no sun %.1f" % await dark_pct()); m.sun.visible = true
+	m.sun.shadow_enabled = false; print("HP no shadow %.1f" % await dark_pct()); m.sun.shadow_enabled = true
 func fade_wait() -> void:
 	await get_tree().create_timer(1.4).timeout; await frames(3)
 func _run() -> void:
@@ -198,6 +217,7 @@ func _run() -> void:
 		if OS.get_environment("DK_CAMPROBE") != "": await cam_probe(k + " ashore")
 		if OS.get_environment("DK_HIDEPROBE") != "": m.yaw = atan2(inl.x, inl.z); await hide_probe(k)
 		if k in shots: await shot(k + "_ashore")
+		if OS.get_environment("DK_CAMPROBE") != "": pix_probe(k)
 		var start := sea.to_local(m.hero.global_position); var minh := 1e9; var resets := 0
 		var fw := Vector3(-sin(m.yaw), 0, -cos(m.yaw))
 		var iy := -1.0 if fw.dot(inl) > 0 else 1.0

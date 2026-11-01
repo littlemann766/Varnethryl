@@ -1,0 +1,84 @@
+{
+ "frame": "frost-realm LOCAL (PLACEMENT_frost_realm.json frame). Place the root at CAVE_ORIGIN (README).",
+ "entrance": [
+  -8.0,
+  0.0,
+  -58.0
+ ],
+ "spawn": [
+  -10.0,
+  0.6,
+  -45.0
+ ],
+ "spawn_yaw": 0.0,
+ "exit_trigger": {
+  "pos": [
+   -8.0,
+   1.0,
+   -62.0
+  ],
+  "radius": 4.0
+ },
+ "arena_center": [
+  -14.0,
+  0.0,
+  140.0
+ ],
+ "arena_radius": 60.0,
+ "troll_spawns": {
+  "frosttroll_a": [
+   -40.0,
+   0.0,
+   150.0
+  ],
+  "frosttroll_b": [
+   15.0,
+   0.0,
+   160.0
+  ]
+ },
+ "lights": [
+  [
+   -10,
+   8,
+   -40
+  ],
+  [
+   -18,
+   12,
+   10
+  ],
+  [
+   -20,
+   16,
+   55
+  ],
+  [
+   -14,
+   24,
+   110
+  ],
+  [
+   -50,
+   20,
+   150
+  ],
+  [
+   25,
+   20,
+   150
+  ],
+  [
+   -14,
+   22,
+   185
+  ]
+ ],
+ "tris": {
+  "hi": 19364,
+  "lod1": 3536,
+  "lod1_pct": 18.3,
+  "col": 3716,
+  "glow": 600
+ }
+}

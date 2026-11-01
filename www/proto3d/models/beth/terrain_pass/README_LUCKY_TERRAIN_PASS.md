@@ -244,3 +244,33 @@ They are named with the region prefix, so `tw_sea` auto-loads them from stage4/m
 Walk test: `stage4/tools/walk_stairs.gd`, using a capsule of r 0.35 / h 1.8, floor_max_angle 40, at 4 m/s.
 All 8 legs (up and down) pass in 15-20 s each, so the walk is about 1 s longer than the board.
 Rebuild: `python3 stage4/tools/build_landing_stairs.py landings.json stage4/meshes`. The cliff-top profiles are in `landing_rim_profiles.json`, from `tools/probe_land.gd`.
+
+## Fix 7a - Frost Troll Ice Cave (the cheats "frost" zone)
+Files are in `terrain_pass/ice_cave/`:
+- `ice_cave.glb` (19.4k tris) and `ice_cave_lod1.glb` (18%)
+- `ice_cave_col.glb` and `ice_cave_glow.glb` (emissive crystals)
+- `ice_cave.json` (spawn, exit trigger, arena, troll spawns and lights)
+- `ice_cave_zone.gd` (class IceCaveZone: builds the cave, collision, lights, its own environment and the PLACEMENT_frost_realm floor dressing)
+
+The cave is built in the legacy frost-realm local frame and placed at CAVE_ORIGIN (2250, -600, 0), well below the sea and off the mainland.
+It is a 12 m entrance tunnel that winds into a 160 x 110 m troll arena.
+
+**Lucky:**
+1. Copy `ice_cave/*.glb` and `ice_cave.json` to `res://assets/ice_cave/`.
+2. Copy `frost/*.glb` to `res://assets/frost/`.
+3. Copy `PLACEMENT_frost_realm.json` to `res://assets/data/`.
+4. Copy `ice_cave_zone.gd` to `res://scripts/`.
+5. In `main.gd` `cheat_tp_zone`, add:
+```gdscript
+		"frost":
+			if ice_cave == null: ice_cave = await IceCaveZone.new().build(self)
+			_teleport(ice_cave.spawn_point(), 0.0)   # the cave has its own WorldEnvironment; hide/disable the overworld env + sky while inside
+			party.director.spawn("frosttroll_a", ice_cave.troll_spawn("frosttroll_a"), hero); return true
+```
+   with `var ice_cave: IceCaveZone` declared at the top of main.gd.
+
+**Snag:** enemy ground inside the cave must come from `ice_cave.floor_y(local x, z)` (a raycast), not `height()`. Branch on `ice_cave and pos.y < -300` wherever enemies are grounded (next to the VOLC branch near line 1239).
+The exit trigger is at `ice_cave.json` `exit_trigger`, about 4 m inside the mouth. Teleport back to the village there.
+
+Test: `ice_cave/tools/cave_test.gd`, using a capsule of r 0.35 / h 1.8 at 5 m/s from the spawn to the arena and both troll spawns.
+It passes in both directions in 53 s each. 37 of the 80 frost_realm props land on the cave floor. The other 43 fall outside the footprint and are skipped (no floor hit).

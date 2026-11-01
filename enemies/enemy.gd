@@ -16,6 +16,8 @@ const TYPES := {
 	"titan_volcano": {"model": "res://characters/ashentitan_volcano_glow_lod1.glb", "height": 0.0, "data": "titan_volcano", "patterns": "", "r": 5.5},
 	# voxel-heroes: Lucian's holyknight_villain_voxel (varn-core dcfc9b2 capes_v1), a raider-class bad guy
 	"holyknight_villain": {"model": "res://voxel/holyknight_villain_voxel_lod1.glb", "height": HERO_M, "data": "raider", "patterns": "", "r": 0.6},
+	# quests-test: the Ashen Pilgrim's men = town guard voxel (guard clips), recoloured dark by QuestWorld
+	"knight_man": {"model": "res://voxel/town_guard_voxel_lod1.glb", "height": HERO_M, "data": "raider", "patterns": "", "r": 0.6},
 	"stonetroll": {"model": "res://characters/stonetroll_lod1.glb", "height": 3.0 * HERO_M, "data": "frosttroll", "patterns": "", "r": 1.6},
 }
 

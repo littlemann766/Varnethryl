@@ -46,6 +46,10 @@ var cave_env: Environment
 var under_env: Environment
 var cave_cd := 0
 var unlock_all := false     # Owner (cheats live only on his hero) sails anywhere
+## quests-test: QuestWorld hooks (travel steps = ashore at a landing; interact prompts for quest NPCs / points / pickups)
+signal went_ashore(k: String)
+signal left_shore(k: String)
+var quest_prompt := Callable()   # f(sea-local hero pos) -> [text, callback] or []
 
 func setup(main: Node) -> TidewrackSea:
 	m = main; name = "TidewrackSea"; position = OFF; visible = false
@@ -68,6 +72,8 @@ func _load_save() -> Dictionary:
 func write_save() -> void: m.get_tree().root.get_node("VSave").write_state()
 func unlocked(id: String) -> bool:
 	if unlock_all or id != "B": return true
+	var story = m.get_tree().root.get_node("VSave").state.get("story", {})   # quests-test: Wren's night chart opens the Saltglass Coast
+	if story is Dictionary and story.get("flags", {}).get("unlock_B", false): return true
 	return bool(save.get("coil_beaten", false))
 
 # ---------------------------------------------------------------- materials
@@ -655,11 +661,14 @@ func go_ashore(k: String) -> void:
 		if m.pip: m.pip.global_position = h.global_position + Vector3(1, 0, 1)
 		snap_crew()
 		if not save.discovered_ports.has(k) and ports().has(k): save.discovered_ports.append(k); write_save()
-		ui.set_prompt("", Callable()); ui.toast("Ashore at %s." % L.name))
+		ui.set_prompt("", Callable()); ui.toast("Ashore at %s." % L.name)
+		went_ashore.emit(k))
 func board_ship() -> void:
 	if ashore == "": return
 	ui.fade(func():
+		var was := ashore
 		ashore = ""
+		left_shore.emit(was)
 		if m.party: m.party.ground_snap = Callable()
 		m.hero.collision_layer = 0; m.hero.collision_mask = 0; m.hero.velocity = Vector3.ZERO
 		seat_crew(); ui.set_prompt("", Callable()); ui.toast("All aboard."))
@@ -707,7 +716,9 @@ func _walk(inp: Vector2, dt: float) -> void:
 	water.global_position = Vector3(snappedf(m.cam.global_position.x, 8.0), 0.0, snappedf(m.cam.global_position.z, 8.0)) + Vector3(0, global_position.y, 0)
 	_stream(Vector2(lp.x, lp.z))
 	var L := landing(ashore)
-	if lp.distance_to(pier_head(L)) < 10.0: ui.set_prompt("Board ship", board_ship)
+	var qp: Array = quest_prompt.call(lp) if quest_prompt.is_valid() else []
+	if not qp.is_empty(): ui.set_prompt(qp[0], qp[1])
+	elif lp.distance_to(pier_head(L)) < 10.0: ui.set_prompt("Board ship", board_ship)
 	elif ashore == "gullhaven" and Vector2(lp.x, lp.z).distance_to(Vector2(M.s1.props.gullhaven.anchor[0], M.s1.props.gullhaven.anchor[2])) < 90.0: ui.set_prompt("Shipwright", ui.open_shipwright)
 	else: ui.set_prompt("", Callable())
 func sailing() -> bool: return active and ashore == "" and not diving

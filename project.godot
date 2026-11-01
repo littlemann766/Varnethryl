@@ -15,6 +15,7 @@ VPrefs="*res://core/save/prefs.gd"
 VSave="*res://core/save/save_system.gd"
 VUI="*res://ui/ui_root.gd"
 Net="*res://net/Net.gd"
+Quests="*res://quests/quest_manager.gd"
 
 [boot_splash]
 

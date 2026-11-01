@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "crew": {
+    "pip":   {"name": "Pip",   "role": "Cabin hand", "ability": ""},
+    "wren":  {"name": "Wren",  "role": "Navigator",  "ability": "night_sailing"},
+    "brynn": {"name": "Brynn", "role": "Diver",      "ability": "cave_diving"}
+  },
+  "npcs": {
+    "harbourmaster": {"name": "Harbourmaster Odo", "model": "finn", "tint": [0.55, 0.62, 0.85], "landing": "gullhaven", "poi": "Harbourmaster's Cache", "route_t": 0.55},
+    "wren":  {"name": "Wren",  "model": "wren",  "landing": "lantern_rock", "poi": "Keeper's Hut", "route_t": 1.0},
+    "brynn": {"name": "Brynn", "model": "brynn", "landing": "saltglass", "poi": "Glass-diver's Chest", "route_t": 1.0}
+  },
+  "points": {
+    "founders_stone": {"name": "Founders' Stone", "landing": "gullhaven", "poi": "Founders' Stone", "verb": "Examine"},
+    "harbour_cache":  {"name": "Harbourmaster's Cache", "landing": "gullhaven", "poi": "Harbourmaster's Cache", "verb": "Open"},
+    "old_lantern":    {"name": "Old Lantern", "landing": "lantern_rock", "poi": "Old Lantern ruin", "verb": "Relight"},
+    "saltglass_lookout": {"name": "Saltglass Lookout", "landing": "saltglass", "poi": "Saltglass Lookout", "verb": "Look out"}
+  },
+  "pickups": {
+    "lamp_oil": {"name": "Lamp oil", "landing": "lantern_rock", "poi": "Keeper's Strongbox", "route_t": 1.0, "color": [1.0, 0.75, 0.3]}
+  },
+  "spawns": {
+    "knights_men": {"enemy": "knight_man", "landing": "saltglass", "poi": "Glass-diver's Chest", "route_t": [0.35, 0.5, 0.65], "tint": [0.35, 0.3, 0.32]}
+  },
+  "quests": {
+    "crew_pilgrim": {
+      "title": "The Owner's Crew & the Ashen Pilgrim",
+      "auto_start": true,
+      "end_text": "To be continued...",
+      "steps": [
+        {"id": "sail_gull", "type": "travel", "target": "gullhaven", "text": "Sail to Gullhaven"},
+        {"id": "stone", "type": "interact", "target": "founders_stone", "text": "Examine the Founders' Stone",
+         "dialogue": [["", "The Founders' Stone is cracked open. Ash-black boot prints lead to the harbour."], ["", "Someone has carved a burning eye into the rock: the sign of the Ashen Pilgrim."]]},
+        {"id": "harbourmaster", "type": "talk", "target": "harbourmaster", "text": "Talk to the hurt Harbourmaster",
+         "dialogue": [["Harbourmaster Odo", "A knight in scorched armour... he took the Stone's seal and cut me down."], ["Harbourmaster Odo", "He's hunting the old captain's crew. Only they know how the fire vents are sealed."], ["Harbourmaster Odo", "My cache, up the hill: the captain's chart and the crew list. Find them before he does."]]},
+        {"id": "cache", "type": "interact", "target": "harbour_cache", "text": "Open the Harbourmaster's Cache",
+         "dialogue": [["", "You take the captain's chart and the crew list."], ["Pip", "I'm coming too! Cabin hand Pip, reporting!"], ["", "First name on the list: the lighthouse keeper, Lantern Rock."]],
+         "give": {"captains_chart": 1, "crew_list": 1}, "recruit": "pip"},
+        {"id": "sail_lantern", "type": "travel", "target": "lantern_rock", "night": true, "text": "Night sail to Lantern Rock"},
+        {"id": "wren", "type": "talk", "target": "wren", "text": "Find the keeper at the Keeper's Hut",
+         "dialogue": [["Wren", "You're not with him? Good. The knight smashed the lantern and took the keeper's lens."], ["Wren", "There's lamp oil in the keeper's strongbox down by the pier. Help me relight it."]]},
+        {"id": "oil", "type": "collect", "target": "lamp_oil", "count": 1, "text": "Get lamp oil from the Keeper's Strongbox"},
+        {"id": "lantern", "type": "interact", "target": "old_lantern", "text": "Relight the Old Lantern",
+         "dialogue": [["", "The Old Lantern flares back to life over the dark sea."], ["Wren", "I can read the stars and the lights. With me aboard you can sail by night."], ["Wren", "He's after the diver next. Saltglass Landing, on the coast."]],
+         "recruit": "wren", "flags": {"day": true, "unlock_B": true}},
+        {"id": "sail_salt", "type": "travel", "target": "saltglass", "text": "Sail to Saltglass Landing"},
+        {"id": "men", "type": "kill", "target": "knights_men", "count": 3, "text": "Drive off the knight's men"},
+        {"id": "brynn", "type": "talk", "target": "brynn", "text": "Find Brynn at the Glass-diver's Chest",
+         "dialogue": [["Brynn", "They cracked the Singing Shards looking for me. Thanks for the rescue."], ["Brynn", "I know every sea cave on this coast. I'll get your skiff in and out of them."], ["Brynn", "Climb to the Lookout. You'll see where his ship went."]],
+         "recruit": "brynn"},
+        {"id": "lookout", "type": "interact", "target": "saltglass_lookout", "text": "Climb to the Saltglass Lookout",
+         "dialogue": [["", "Through the haze, a black-sailed ship slips into the mouth of Glasswyrm Cavern."], ["Brynn", "Glasswyrm Cavern. Only a skiff fits in there... and only a diver knows the way."]]}
+      ]
+    }
+  }
+}

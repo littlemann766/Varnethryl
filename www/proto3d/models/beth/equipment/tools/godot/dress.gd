@@ -36,7 +36,7 @@ func attach_mesh(sk,bone,path,t):
 	var m=load(path).instantiate(); ba.add_child(m); m.transform=t
 	for mi in m.find_children("*","MeshInstance3D",true,false):
 		for si in mi.mesh.get_surface_count():
-			var src=mi.mesh.surface_get_material(si); var mat=StandardMaterial3D.new(); mat.vertex_color_use_as_albedo=true; mat.roughness=0.75
+			var src=mi.mesh.surface_get_material(si); var mat=StandardMaterial3D.new(); mat.vertex_color_use_as_albedo=true; mat.vertex_color_is_srgb=true; mat.roughness=0.75
 			if src and src.resource_name.begins_with("vox_glow"):
 				mat.emission_enabled=true; mat.emission_energy_multiplier=1.4; mat.emission_operator=BaseMaterial3D.EMISSION_OP_MULTIPLY; mat.emission=Color(1,1,1)
 			mi.set_surface_override_material(si,mat)
@@ -148,7 +148,7 @@ func skin_cloak(sk,path,t,chest_bone):
 	src.free()
 func mat_fix(mi,am):
 	for si in mi.mesh.get_surface_count():
-		var srcm=am.surface_get_material(si); var mat=StandardMaterial3D.new(); mat.vertex_color_use_as_albedo=true; mat.roughness=0.75
+		var srcm=am.surface_get_material(si); var mat=StandardMaterial3D.new(); mat.vertex_color_use_as_albedo=true; mat.vertex_color_is_srgb=true; mat.roughness=0.75
 		if srcm and srcm.resource_name.begins_with("vox_glow"):
 			mat.emission_enabled=true; mat.emission_energy_multiplier=1.4; mat.emission_operator=BaseMaterial3D.EMISSION_OP_MULTIPLY; mat.emission=Color(1,1,1)
 		mi.set_surface_override_material(si,mat)

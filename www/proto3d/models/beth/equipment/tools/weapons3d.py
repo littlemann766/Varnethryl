@@ -198,9 +198,9 @@ def named(iid):
         v.put(9,7,105,v.c((0.4,1.0,0.5),1)); v.put(12,7,105,v.c((0.4,1.0,0.5),1))
         return finish(v,p,4,3),VS,pv
     if iid=="dawnbringer":
-        p=dict(P("legendary"),metal=(0.92,0.90,0.84),edge=(1.0,0.88,0.5),trim=(1.0,0.80,0.30),gem=(1.0,0.95,0.7),glow=1)
+        p=dict(P("legendary"),metal=(0.92,0.90,0.84),edge=(1.0,0.88,0.5),trim=(0.86,0.66,0.26),gem=(1.0,0.95,0.7),glow=1)
         v,pv=sword_like(p,4,48,3,10,9,"sword"); cx=int(pv[0]); gz=12
-        g=v.c((1.0,0.80,0.30)); gl=v.c((1.0,0.92,0.6),1)
+        g=v.c((0.86,0.66,0.26)); gl=v.c((1.0,0.92,0.6),1)
         for a in range(16):
             t=a*2*math.pi/16
             for r in range(3,7 if a%2 else 9): v.put(cx+r*math.cos(t),5,gz+r*math.sin(t),gl if r>=6 else g)  # sun disc

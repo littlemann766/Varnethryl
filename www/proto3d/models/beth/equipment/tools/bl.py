@@ -51,6 +51,7 @@ def rig_scene(res=256, ortho=0.5, el=28, yaw=32, target=(0,0,0.2)):
     cam.rotation_euler=(e,0,y)
     ld=bpy.data.lights.new("s",'SUN'); ld.energy=3.2; ld.angle=0.2; l=bpy.data.objects.new("s",ld); l.rotation_euler=(math.radians(40),math.radians(15),math.radians(-35)); sc.collection.objects.link(l)
     return cam
+SRGB=True   # Equipment v1 polish 4: COLOR_0 holds sRGB values; Godot material uses vertex_color_is_srgb=true (correct in Mobile/Forward+ AND Compatibility)
 def mesh_g(v,name,vs,origin):
     """greedy-meshed variant of mesh() (same colours/shading/materials)"""
     import greedy
@@ -64,7 +65,7 @@ def mesh_g(v,name,vs,origin):
         if np.dot(n,np.array(d))<0: cs=cs[::-1]
         i0=len(verts); verts+=[tuple(c*vs+off) for c in cs]; fs.append((i0,i0+1,i0+2,i0+3))
         rgb,glow=v.pal[ci]; sh=SH[tuple(d)]
-        cols.append(tuple(min(1,(c*(1 if glow else sh))**2.2) for c in rgb)+(1,)); mi.append(1 if glow else 0)
+        cols.append(tuple(min(1,(c*(1 if glow else sh))**(1.0 if SRGB else 2.2)) for c in rgb)+(1,)); mi.append(1 if glow else 0)
     me=bpy.data.meshes.new(name); me.from_pydata(verts,[],fs); me.update()
     ca=me.color_attributes.new("Col",'FLOAT_COLOR','CORNER')
     for f,c in zip(me.polygons,cols):
@@ -73,3 +74,15 @@ def mesh_g(v,name,vs,origin):
     for f,m in zip(me.polygons,mi): f.material_index=m
     ob=bpy.data.objects.new(name,me); bpy.context.scene.collection.objects.link(ob)
     return ob,len(fs)*2
+def srgb_fix_imported(objs):
+    """for Blender renders of sRGB-COLOR_0 glbs: insert a 2.2 gamma between the colour attribute and the BSDF"""
+    for o in objs:
+        for sl in getattr(o,'material_slots',[]):
+            m=sl.material
+            if not m or not m.use_nodes or m.get('srgbfix'): continue
+            nt=m.node_tree
+            for l in list(nt.links):
+                if l.from_node.bl_idname in('ShaderNodeVertexColor','ShaderNodeAttribute') and l.to_socket.name in('Base Color','Emission Color'):
+                    g=nt.nodes.new('ShaderNodeGamma'); g.inputs[1].default_value=2.2
+                    fs,ts=l.from_socket,l.to_socket; nt.links.remove(l); nt.links.new(fs,g.inputs[0]); nt.links.new(g.outputs[0],ts)
+            m['srgbfix']=1

@@ -19,7 +19,7 @@ for a in jobs:
     for f,part in files:
         bpy.ops.import_scene.gltf(filepath=f); ob=bpy.context.selected_objects[0]
         if part=="boot_foot_L": ob.location=(0,0,-0.30)
-        objs.append(ob)
+        objs.append(ob); bl.srgb_fix_imported([ob])
     bpy.context.view_layer.update()
     pts=[o.matrix_world@Vector(c) for o in objs for c in o.bound_box]
     mn=Vector([min(p[i] for p in pts) for i in range(3)]); mx=Vector([max(p[i] for p in pts) for i in range(3)]); c=(mn+mx)/2; d=max(mx-mn)
@@ -33,5 +33,5 @@ for a in jobs:
             if mt and mt.use_nodes:
                 b=mt.node_tree.nodes.get("Principled BSDF")
     cam=bl.rig_scene(res=128,ortho=d*1.25,el=20,yaw=25 if "cloak" not in a else 200,target=tuple(c))
-    sc=bpy.context.scene; sc.render.engine='BLENDER_EEVEE'; sc.eevee.taa_render_samples=8
+    sc=bpy.context.scene; sc.render.engine='BLENDER_EEVEE_NEXT' if bpy.app.version>=(4,2) else 'BLENDER_EEVEE'; sc.eevee.taa_render_samples=8
     sc.render.filepath=out; bpy.ops.render.render(write_still=True)

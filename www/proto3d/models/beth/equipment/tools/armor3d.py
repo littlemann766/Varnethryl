@@ -12,7 +12,7 @@ PAL={ # rarity looks (palette part); geometry added per rank below
  "common":dict(B[1],metal=(0.50,0.50,0.52),edge=(0.70,0.70,0.72),trim=(0.36,0.22,0.12),leather=(0.38,0.23,0.12),accent=(0.30,0.42,0.22)),
  "rare":dict(B[2]),
  "epic":dict(B[3]),
- "legendary":dict(B[3],metal=(0.20,0.21,0.25),trim=(1.0,0.80,0.30),edge=(1.0,0.86,0.45),cloth=(0.22,0.07,0.30),gem=(1.0,0.78,0.30),fur=(0.86,0.84,0.80),accent=(1.0,0.8,0.3)),
+ "legendary":dict(B[3],metal=(0.20,0.21,0.25),trim=(0.86,0.66,0.26),edge=(0.94,0.79,0.44),cloth=(0.22,0.07,0.30),gem=(0.92,0.70,0.28),fur=(0.86,0.84,0.80),accent=(0.88,0.68,0.27)),
  "masterwork":dict(B[3],metal=(0.13,0.10,0.10),trim=(0.50,0.10,0.07),edge=(1.0,0.42,0.08),cloth=(0.30,0.04,0.04),leather=(0.10,0.06,0.05),gem=(1.0,0.35,0.05),fur=(0.20,0.16,0.15),accent=(1.0,0.42,0.08),dent=(0.07,0.06,0.06),scratch=(0.36,0.30,0.30)),
 }
 FAMTINT={"plate":{},"chain":{},"scale":{},"leather":{},"cloth":{"cloth":None},"mystic":{}}

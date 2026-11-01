@@ -134,7 +134,7 @@ Walk test 53/57, with Lucky's pier boards left out. New built pieces are in the 
 - The **lever** at (-2097.6, 20.4, -77.4) is on the ramp side, so the player can only reach it by first climbing the stairs to the plateau, crossing the skybridge and walking down the ramp.
 - Pulling the lever raises the leaf 3.6 m into the gatehouse over 2.5 s and saves the flag **`saltglass_shortcut_open`**. On later loads the gate starts open.
 - From the dock side the prompt reads "Locked from the other side".
-- **Lift lock:** the lift uses its own flag, **`saltglass_lift_unlocked`**. Until that flag is saved, the lift parks at the TOP and the bottom call says "The lift is locked from above". Riding it down from the top once saves the flag, and after that it works from both ends. To make the lift always open, set `requires_flag = ""` on `SaltglassLift`. That's Robert's call.
+- **Lift lock:** *replaced in Stage 10.* The lift no longer has an unlock flag; it is a paid ride run by a keeper (see Stage 10).
 - Flags are stored by `WorldFlags` in `user://world_flags.cfg`. Point its two static funcs at your own save system if you have one.
 
 **Wiring (tw_sea.gd, `_walk`)**
@@ -152,3 +152,39 @@ Walk test 53/57, with Lucky's pier boards left out. New built pieces are in the 
 The shortcut legs only run as passable after the test removes the gate collider (the unlocked state). Pier boards are still excluded; the same 6 fail as before (aurora, ember, hot_spring, obsidian, saltglass, vent). That is your board, not stage 9.
 
 **Renders:** `renders/small/saltglass_lift_shortcut_before_after_A/B/C.jpg` (left before, right after). A is from the sea, B is from above with the skybridge, and C is a close-up of the gate, lever and lift door.
+
+## Stage 10 — Saltglass lift keeper + toll (replaces the Stage 9 lift unlock flag)
+The lift is now a paid ride. A **lift keeper** stands in a timber toll booth at each stop (dock and top). A ride costs **5 coins**, or the player can buy a **season pass for 150 coins** at either booth window, which makes every ride free. Calling the lift to your own stop is free. The shortcut ramp gate is unchanged: free for good once its lever is pulled (`saltglass_shortcut_open`). `saltglass_lift_unlocked` is gone; you can ignore it if a save already has it.
+
+**New art**
+- `meshes/B/coast_isl_saltglass_tollbooths{,_lod1,_glow,_col}.glb`: two timber booths (dock at (-2109.5, 20.4, -80.4), top at (-2109.5, 108.68, -80.4)). Each has a plank floor, a counter window facing the walkway, a pitched slate roof, a price sign ("RIDE 5" + coin, "PASS 150" + coin), a winch drum and a coin box. The dock booth stands on timber piles. The top booth is cantilevered off the lift shaft on iron struts, so no pillars come down through the dock booth. 4,240 tris, lod1 45%. Auto-loaded by the `coast_` prefix.
+- `props/lift_keeper.glb` + `lift_keeper_lod1.glb`: a voxel NPC built on the same mixamo rig as `town_guard_voxel` (cape bones dropped). He's a weathered winch operator with a grey beard, teal wool cap, faded blue shirt with rolled sleeves, leather apron (shoulder straps, pocket, brass buckle), thick leather gloves with cuffs, work trousers and boots. 21,808 tris; lod1 9,520 (43.7%).
+  - Clips: **`idle`** (2.5 s, the guard's idle) and **`crank`** (2.0 s = two turns, 1 rev/s: he leans in, both gloves on the grip, knees flex). Both are keyed at 24 fps with no retime.
+  - Built by `tools/build_stage10_keeper_blender.py` (Blender 4.2: `blender -b -P tools/build_stage10_keeper_blender.py -- out.glb 0.02`; use 0.03 for the lod1).
+- `props/sg_crank_handle.glb`: the winch handle. Origin = axle; it spins about local X. `props/sg_lift_keeper.tscn` + `.gd` put it at keeper-local (0, 1.12, 0.2), where his gloves are in the clip. The script loops `idle`, switches to `crank` while the lift moves, and spins the handle in step.
+- Builder: `tools/build_stage10_tollbooths.py` → manifest `islands.saltglass.stage10` (booth, keeper, crank axle and window points; prices).
+
+**Coin + inventory spec (Lucky owns the real systems; `props/wallet_stub.gd` is only a stand-in with these signatures)**
+| API (static, `Wallet`) | does |
+|---|---|
+| `coins() -> int` | current coins |
+| `add_coins(n: int, reason := "")` | add (or with n < 0, remove; never below 0) |
+| `pay(amount: int, reason := "") -> bool` | takes `amount` if affordable and returns true; otherwise takes nothing and returns false |
+| `has_item(id) -> bool`, `item_count(id) -> int`, `give_item(id, n := 1)` | inventory |
+| `buy(id) -> bool` | pay `ITEMS[id].price` + give the item; false if unaffordable or the player already owns a stack-1 item |
+- Item ids: **`saltglass_lift_pass`**: "Saltglass Lift Season Pass", price 150, stack 1, kind `key_item` (never consumed).
+- Save keys (suggested for your save; the stub uses them in `user://wallet_stub.cfg`): **`wallet.coins`** (int) and **`inventory.items`** (Dictionary id → count).
+- Reasons passed to `pay`: `saltglass_lift_ride` and `buy:saltglass_lift_pass`, in case you want them for a ledger.
+- "Not enough coins" prompts come from `sg_lift.gd` via its `toast(text)` signal (connect it to `ui.toast`): "Not enough coins - a ride costs 5 (you have N)." and "Not enough coins - the season pass costs 150 (you have N)."
+
+**`sg_lift.gd` (updated)**: exports `ride_price = 5`, `pass_price = 150`, `pass_item`, `window_bottom` / `window_top` (-2109.5, y, -77.2) and `keeper_paths` (the two `SaltglassLiftKeeper` nodes). Prompts from `prompt_for(hero_pos)`:
+- on the platform: "Ride up - 5 coins" (calls `Wallet.pay`), or "Ride up (season pass)" if the player holds the pass
+- at a booth window (no pass yet): "Buy season pass - 150 coins"
+- within 6 m of a booth while the lift is at the other stop: "Call lift" (free)
+I checked it headless: broke → toast, 12 coins → ride (7 left), keepers crank while moving and go back to idle on arrival, pass purchase fails at 7 coins and succeeds at 207 (57 left), then rides show "(season pass)" and the window prompt disappears.
+
+**Wiring**: same `_walk` prompt hook as Stage 9. Instance `sg_lift_keeper.tscn` twice at `stage10.dock.keeper` and `stage10.top.keeper` (yaw 0, facing +z), set the lift's `keeper_paths` to them, connect `toast`, and replace `Wallet` with your wallet (or make `Wallet` forward to it).
+
+**Walk test: 68/68** (66 earlier + "toll: dock to booth window" + "toll: top landing to booth window"). The booth colliders are loaded for every leg. Pier boards unchanged (same 6, your board).
+
+**Renders**: `renders/small/saltglass_tollbooth_before_after_{dock,top,wide}.jpg` (left before, right after; the dock keeper is mid-crank) and `renders/small/saltglass_lift_keeper_idle_crank.jpg` (front/back, idle top row, crank bottom row).

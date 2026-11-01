@@ -6912,6 +6912,65 @@
       ]
      ]
     }
+   },
+   "stage10": {
+    "files": {
+     "mesh": "coast_isl_saltglass_tollbooths",
+     "lod1": "coast_isl_saltglass_tollbooths_lod1",
+     "glow": "coast_isl_saltglass_tollbooths_glow",
+     "col": "coast_isl_saltglass_tollbooths_col"
+    },
+    "prices": {
+     "ride": 5,
+     "season_pass": 150,
+     "pass_item": "saltglass_lift_pass"
+    },
+    "dock": {
+     "booth": [
+      -2109.5,
+      20.4,
+      -80.4
+     ],
+     "keeper": [
+      -2109.5,
+      20.4,
+      -80.9
+     ],
+     "keeper_yaw_deg": 0.0,
+     "crank_axle": [
+      -2109.5,
+      21.52,
+      -80.7
+     ],
+     "window": [
+      -2109.5,
+      20.4,
+      -77.2
+     ]
+    },
+    "top": {
+     "booth": [
+      -2109.5,
+      108.68,
+      -80.4
+     ],
+     "keeper": [
+      -2109.5,
+      108.68,
+      -80.9
+     ],
+     "keeper_yaw_deg": 0.0,
+     "crank_axle": [
+      -2109.5,
+      109.8,
+      -80.7
+     ],
+     "window": [
+      -2109.5,
+      108.68,
+      -77.2
+     ]
+    }
    }
   },
   "frostreach": {
@@ -18202,6 +18261,17 @@
   },
   "sg_lever": {
    "tris": 48
+  },
+  "coast_isl_saltglass_tollbooths": {
+   "tris": 4240,
+   "lod1": 1906,
+   "lod1_pct": 45.0
+  },
+  "coast_isl_saltglass_tollbooths_glow": {
+   "tris": 24
+  },
+  "sg_crank_handle": {
+   "tris": 72
   }
  },
  "note": "Stage 5 island interiors. Files per island live in meshes/<region>/ with the region prefix; copy them into that region mesh dir.",

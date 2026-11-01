@@ -89,6 +89,7 @@ func _run() -> void:
 		var gate: StaticBody3D = null; var lift: AnimatableBody3D = null
 		if I.has("stage9"):   # stage 9 (Saltglass): lift + shortcut statics; the gate starts LOCKED, the lift platform parks at the bottom
 			add_col("%s/meshes/%s/%s.glb" % [S5, reg, I.stage9.files.col])
+			if I.has("stage10"): add_col("%s/meshes/%s/%s.glb" % [S5, reg, I.stage10.files.col])   # toll booths
 			gate = StaticBody3D.new(); var gcs := CollisionShape3D.new(); var gbs := BoxShape3D.new(); gbs.size = v3(I.stage9.gate.size); gcs.shape = gbs; gate.add_child(gcs); space_root.add_child(gate)
 			gate.global_position = v3(I.stage9.gate.pos) + Vector3(0, gbs.size.y / 2, 0)
 			lift = AnimatableBody3D.new(); lift.sync_to_physics = true
@@ -156,6 +157,12 @@ func _run() -> void:
 			var lr := lp.duplicate(); lr.reverse(); lr.append(v3(I.stage9.lift.top) + Vector3(0, 0.08, 0))
 			out["lift: plateau back to platform"] = await walk(lr[0] + Vector3(0, 0.8, 0), lr.slice(1), lr[-1], 0.6)
 			out["lift: ride down"] = await ride(lift, v3(I.stage9.lift.bottom), float(I.stage9.lift.speed))
+			if I.has("stage10"):   # toll booth windows reachable at both stops (the keeper sells rides / the season pass there)
+				var T10: Dictionary = I.stage10; var wd := v3(T10.dock.window) + Vector3(0, 0.08, 0); var wt := v3(T10.top.window) + Vector3(0, 0.08, 0)
+				var r0 := pv3(R9.dock_to_gate)
+				out["toll: dock to booth window"] = await walk(ph, [r0[0], r0[1], Vector3(wd.x, wd.y, r0[1].z), wd], wd, 0.8)
+				var lt: Vector3 = pv3(R9.lift_to_plateau)[1]
+				out["toll: top landing to booth window"] = await walk(lt + Vector3(0, 0.8, 0), [Vector3(wt.x, wt.y, lt.z), wt], wt, 0.8)
 		res[k] = out; var nok := 0
 		for r in out.values(): nok += 1 if r.ok else 0
 		print("ISLAND %s %d/%d" % [k, nok, out.size()])

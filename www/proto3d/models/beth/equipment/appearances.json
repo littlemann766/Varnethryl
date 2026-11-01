@@ -9224,312 +9224,746 @@
   "app_artifact_ancient_dragon_scale": {
    "icon": "res://equipment/icons/ancient_dragon_scale.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/artifact_ancient_dragon_scale.glb",
+    "lod1": "res://equipment/meshes/pickups/artifact_ancient_dragon_scale_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_artifact_heart_of_the_titan": {
    "icon": "res://equipment/icons/heart_of_the_titan.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/artifact_heart_of_the_titan.glb",
+    "lod1": "res://equipment/meshes/pickups/artifact_heart_of_the_titan_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_artifact_phoenix_feather": {
    "icon": "res://equipment/icons/phoenix_feather.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/artifact_phoenix_feather.glb",
+    "lod1": "res://equipment/meshes/pickups/artifact_phoenix_feather_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_artifact_eye_of_balthrix": {
    "icon": "res://equipment/icons/eye_of_balthrix.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/artifact_eye_of_balthrix.glb",
+    "lod1": "res://equipment/meshes/pickups/artifact_eye_of_balthrix_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_artifact_frost_troll_totem": {
    "icon": "res://equipment/icons/frost_troll_totem.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/artifact_frost_troll_totem.glb",
+    "lod1": "res://equipment/meshes/pickups/artifact_frost_troll_totem_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_artifact_celestial_fragment": {
    "icon": "res://equipment/icons/celestial_fragment.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/artifact_celestial_fragment.glb",
+    "lod1": "res://equipment/meshes/pickups/artifact_celestial_fragment_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_artifact_voidstone": {
    "icon": "res://equipment/icons/voidstone.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/artifact_voidstone.glb",
+    "lod1": "res://equipment/meshes/pickups/artifact_voidstone_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_artifact_kings_sigil": {
    "icon": "res://equipment/icons/kings_sigil.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/artifact_kings_sigil.glb",
+    "lod1": "res://equipment/meshes/pickups/artifact_kings_sigil_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_ruby": {
    "icon": "res://equipment/icons/gem_ruby.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_ruby.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_ruby_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_sapphire": {
    "icon": "res://equipment/icons/gem_sapphire.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_sapphire.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_sapphire_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_emerald": {
    "icon": "res://equipment/icons/gem_emerald.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_emerald.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_emerald_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_amethyst": {
    "icon": "res://equipment/icons/gem_amethyst.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_amethyst.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_amethyst_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_diamond": {
    "icon": "res://equipment/icons/gem_diamond.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_diamond.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_diamond_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_garnet": {
    "icon": "res://equipment/icons/gem_garnet.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_garnet.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_garnet_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_obsidian": {
    "icon": "res://equipment/icons/gem_obsidian.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_obsidian.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_obsidian_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_topaz": {
    "icon": "res://equipment/icons/gem_topaz.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_topaz.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_topaz_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_moonstone": {
    "icon": "res://equipment/icons/gem_moonstone.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_moonstone.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_moonstone_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_bloodstone": {
    "icon": "res://equipment/icons/gem_bloodstone.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_bloodstone.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_bloodstone_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_frost_crystal": {
    "icon": "res://equipment/icons/gem_frost_crystal.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_frost_crystal.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_frost_crystal_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_gem_void_crystal": {
    "icon": "res://equipment/icons/gem_void_crystal.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/gem_void_crystal.glb",
+    "lod1": "res://equipment/meshes/pickups/gem_void_crystal_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_rune_flame": {
    "icon": "res://equipment/icons/rune_flame.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/rune_flame.glb",
+    "lod1": "res://equipment/meshes/pickups/rune_flame_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_rune_swiftness": {
    "icon": "res://equipment/icons/rune_swiftness.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/rune_swiftness.glb",
+    "lod1": "res://equipment/meshes/pickups/rune_swiftness_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_rune_protection": {
    "icon": "res://equipment/icons/rune_protection.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/rune_protection.glb",
+    "lod1": "res://equipment/meshes/pickups/rune_protection_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_rune_rebirth": {
    "icon": "res://equipment/icons/rune_rebirth.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/rune_rebirth.glb",
+    "lod1": "res://equipment/meshes/pickups/rune_rebirth_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_rune_destruction": {
    "icon": "res://equipment/icons/rune_destruction.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/rune_destruction.glb",
+    "lod1": "res://equipment/meshes/pickups/rune_destruction_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_rune_echoes": {
    "icon": "res://equipment/icons/rune_echoes.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/rune_echoes.glb",
+    "lod1": "res://equipment/meshes/pickups/rune_echoes_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_rune_hunt": {
    "icon": "res://equipment/icons/rune_hunt.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/rune_hunt.glb",
+    "lod1": "res://equipment/meshes/pickups/rune_hunt_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_rune_guardian": {
    "icon": "res://equipment/icons/rune_guardian.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/rune_guardian.glb",
+    "lod1": "res://equipment/meshes/pickups/rune_guardian_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_iron": {
    "icon": "res://equipment/icons/mat_iron.png",
    "rarity_border": "res://equipment/ui/border_uncommon.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_iron.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_iron_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_steel": {
    "icon": "res://equipment/icons/mat_steel.png",
    "rarity_border": "res://equipment/ui/border_common.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_steel.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_steel_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_silver": {
    "icon": "res://equipment/icons/mat_silver.png",
    "rarity_border": "res://equipment/ui/border_common.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_silver.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_silver_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_gold": {
    "icon": "res://equipment/icons/mat_gold.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_gold.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_gold_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_mithril": {
    "icon": "res://equipment/icons/mat_mithril.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_mithril.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_mithril_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_adamantite": {
    "icon": "res://equipment/icons/mat_adamantite.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_adamantite.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_adamantite_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_darksteel": {
    "icon": "res://equipment/icons/mat_darksteel.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_darksteel.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_darksteel_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_starsteel": {
    "icon": "res://equipment/icons/mat_starsteel.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_starsteel.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_starsteel_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_dragonsteel": {
    "icon": "res://equipment/icons/mat_dragonsteel.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_dragonsteel.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_dragonsteel_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_voidsteel": {
    "icon": "res://equipment/icons/mat_voidsteel.png",
    "rarity_border": "res://equipment/ui/border_masterwork.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_voidsteel.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_voidsteel_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_dragon_scale": {
    "icon": "res://equipment/icons/mat_dragon_scale.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_dragon_scale.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_dragon_scale_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_basilisk_scale": {
    "icon": "res://equipment/icons/mat_basilisk_scale.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_basilisk_scale.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_basilisk_scale_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_phoenix_feather": {
    "icon": "res://equipment/icons/mat_phoenix_feather.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_phoenix_feather.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_phoenix_feather_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_troll_hide": {
    "icon": "res://equipment/icons/mat_troll_hide.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_troll_hide.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_troll_hide_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_hydra_fang": {
    "icon": "res://equipment/icons/mat_hydra_fang.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_hydra_fang.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_hydra_fang_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_titan_core": {
    "icon": "res://equipment/icons/mat_titan_core.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_titan_core.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_titan_core_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_serpent_venom": {
    "icon": "res://equipment/icons/mat_serpent_venom.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_serpent_venom.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_serpent_venom_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_ancient_bone": {
    "icon": "res://equipment/icons/mat_ancient_bone.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_ancient_bone.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_ancient_bone_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_demon_heart": {
    "icon": "res://equipment/icons/mat_demon_heart.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_demon_heart.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_demon_heart_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_frost_crystal": {
    "icon": "res://equipment/icons/mat_frost_crystal.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_frost_crystal.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_frost_crystal_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_arcane_dust": {
    "icon": "res://equipment/icons/mat_arcane_dust.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_arcane_dust.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_arcane_dust_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_soul_fragment": {
    "icon": "res://equipment/icons/mat_soul_fragment.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_soul_fragment.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_soul_fragment_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_celestial_essence": {
    "icon": "res://equipment/icons/mat_celestial_essence.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_celestial_essence.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_celestial_essence_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_void_essence": {
    "icon": "res://equipment/icons/mat_void_essence.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_void_essence.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_void_essence_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_ancient_rune": {
    "icon": "res://equipment/icons/mat_ancient_rune.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_ancient_rune.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_ancient_rune_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_enchanted_crystal": {
    "icon": "res://equipment/icons/mat_enchanted_crystal.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_enchanted_crystal.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_enchanted_crystal_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_elemental_core": {
    "icon": "res://equipment/icons/mat_elemental_core.png",
    "rarity_border": "res://equipment/ui/border_rare.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_elemental_core.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_elemental_core_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_molten_ore": {
    "icon": "res://equipment/icons/mat_molten_ore.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_molten_ore.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_molten_ore_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_frozen_heart": {
    "icon": "res://equipment/icons/mat_frozen_heart.png",
    "rarity_border": "res://equipment/ui/border_epic.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_frozen_heart.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_frozen_heart_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_eternal_flame": {
    "icon": "res://equipment/icons/mat_eternal_flame.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_eternal_flame.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_eternal_flame_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_hydra_heart": {
    "icon": "res://equipment/icons/mat_hydra_heart.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_hydra_heart.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_hydra_heart_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_dragon_core": {
    "icon": "res://equipment/icons/mat_dragon_core.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_dragon_core.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_dragon_core_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_abyssal_scale": {
    "icon": "res://equipment/icons/mat_abyssal_scale.png",
    "rarity_border": "res://equipment/ui/border_legendary.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_abyssal_scale.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_abyssal_scale_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_mat_forge_shard": {
    "icon": "res://equipment/icons/mat_forge_shard.png",
    "rarity_border": "res://equipment/ui/border_common.png",
-   "kind": "icon_only"
+   "kind": "icon_only",
+   "pickup": {
+    "mesh": "res://equipment/meshes/pickups/mat_forge_shard.glb",
+    "lod1": "res://equipment/meshes/pickups/mat_forge_shard_lod1.glb",
+    "pivot": "bottom_centre",
+    "size_m": 0.29,
+    "note": "world drop model; rests on ground, spin/bob + rarity loot beam in code"
+   }
   },
   "app_legacy_bread_cheese": {
    "icon": "res://equipment/icons/legacy_bread_cheese.png",

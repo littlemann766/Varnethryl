@@ -64,7 +64,7 @@ for reg, pre in (('A', 'arch_'), ('B', 'coast_'), ('ash', 'ash_')):
         rr = [lo[0] - 3, lo[2] - 3, hi[0] - lo[0] + 6, hi[2] - lo[2] + 6]; BH = raster(BASE[reg], rr, 2.0)
         def base(x, z):
             i = np.clip(((x - rr[0]) / 2.0).astype(int), 0, BH.shape[1] - 1); j = np.clip(((z - rr[1]) / 2.0).astype(int), 0, BH.shape[0] - 1); return BH[j, i]
-        for suf in ('', '_lod1', '_col'):
+        for suf in ('', '_lod1'):   # visual only: the walk-tested _col stays as authored (tucking it dropped walkers through)
             f = f'{D}/{name}{suf}.glb'; b = f'{BK}/{name}{suf}.glb'
             if not os.path.exists(f): continue
             if not os.path.exists(b): shutil.copy(f, b)

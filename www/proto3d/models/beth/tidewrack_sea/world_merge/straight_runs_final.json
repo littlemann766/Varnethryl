@@ -48,7 +48,7 @@
    -358,
    -316
   ],
-  "len_m": 39,
+  "len_m": 38,
   "exempt": "Gullhaven mooring"
  },
  {
@@ -63,6 +63,19 @@
   ],
   "len_m": 37,
   "exempt": "Gullhaven landing pier"
+ },
+ {
+  "where": "world",
+  "a": [
+   -176,
+   642
+  ],
+  "b": [
+   -176,
+   608
+  ],
+  "len_m": 33,
+  "exempt": "Coil Isle landing pier"
  },
  {
   "where": "world",

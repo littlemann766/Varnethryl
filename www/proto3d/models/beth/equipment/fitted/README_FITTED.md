@@ -20,3 +20,17 @@ Godot reference: `tools/godot/dress.gd` → `attach_fitted()` and `hide_mask()`.
 The helmet (great helm) and the cloak still use the v1 meshes.
 
 Cost: about 15–60k tris per piece at lod0 (the chest is the heaviest). It still needs decimation before mobile; see `darius_plate_tris.json`.
+
+## v3 (Darius only): fixes for the open issues on the pilot
+1. **Triangle budget.** The high-poly fitted shell is decimated to 3.5–8k tris per piece (helm 8000, chest 6988, shoulders 5000, belt 4495, legs 4480, cloak 3995, boots 4000, gloves 3500). lod1 is 45% of High.
+   - Colour is now a baked albedo texture embedded in the glb, not vertex colour: 512 px for helm, chest and cloak, 256 px for the rest. The bake is Cycles, emission, selected-to-active.
+   - Keep `vertex_color_use_as_albedo` and `vertex_color_is_srgb = true`. With no COLOR_0 the vertex colour is white, so the baked texture shows. `dress.gd mat_fix` copies `albedo_texture` across.
+2. **Helm and cloak are fitted, skinned pieces.**
+   - Helm: a great helm fitted per height to Darius's head and beard.
+     - Every tier: 3 cm wall, recessed black eye slits.
+     - Common and up: a bright lip round the slits and a raised visor plate. Rare and up: breaths, a gold cross and a brow band.
+     - Epic and up: horns. Legendary and up: crest. Masterwork: dark horns and molten veins.
+   - Cloak: built from the cape bones plus the cape cloth near the top (cape-weight ≥ 0.15). It floats 3–4 cm off the back so it clears the back plate.
+3. **Gaps closed.** A couter on the gloves (upper arm from t > 0.66) overlaps the rerebrace, and a poleyn on the legs (shin to t < 0.24) overlaps the 3 cm greave. There's a morphological close plus a 5-pass smooth, with leather straps on the backs of the arms and thighs, and the rivets and lames kept.
+4. **Tabard.** The belt now has faulds down to 17 cm below the belt plus a front tasset. The body mask also hides the tabard strip between the thighs.
+5. **Dark rod.** It was the baked sword on hand_R. The pieces are now fitted to, and rendered on, Lucky's weaponless rig `voxel/darius_voxel_noweapon.glb` (weaponless-rigs @ af4e553, read-only copy). Set `job.rig` to it. The skeleton is identical.

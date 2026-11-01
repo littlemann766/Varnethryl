@@ -193,11 +193,12 @@ func hide_mask(sk,maskp,slots):
 func mat_fix(mi,am):
 	for si in mi.mesh.get_surface_count():
 		var srcm=am.surface_get_material(si); var mat=StandardMaterial3D.new(); mat.vertex_color_use_as_albedo=true; mat.vertex_color_is_srgb=true; mat.roughness=0.75
+		if srcm is BaseMaterial3D and srcm.albedo_texture: mat.albedo_texture=srcm.albedo_texture; mat.roughness=0.62   # v3 fitted pieces: baked albedo (no COLOR_0 -> white vertex colour)
 		if srcm and srcm.resource_name.begins_with("vox_glow"):
 			mat.emission_enabled=true; mat.emission_energy_multiplier=1.4; mat.emission_operator=BaseMaterial3D.EMISSION_OP_MULTIPLY; mat.emission=Color(1,1,1)
 		mi.set_surface_override_material(si,mat)
 func run(j):
-	var h=j["hero"]; var root=load("res://heroes/%s_voxel.glb"%h).instantiate(); add_child(root)
+	var h=j["hero"]; var root=load(j.get("rig","res://heroes/%s_voxel.glb"%h)).instantiate(); add_child(root)
 	var sk=find_skel(root); var ap=find_ap(root); var A=attach.get(h,{}); var fam=j["family"]; var r=j["rarity"]
 	var rules=[]
 	for slot in j["slots"]:

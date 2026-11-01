@@ -214,10 +214,14 @@ func _run() -> void:
 		# test 37: walk the whole pier: sea end -> pier head on the real boards
 		var pa: Vector3 = sea._v3(d.moor) + sea._inland(d) * 3.0 + Vector3(0, 1.0, 0); var pb: Vector3 = sea.pier_head(d) - Vector3(0, 0.2, 0) + sea._inland(d) * 1.5
 		pa.y = maxf(pa.y, pb.y - Vector2(pb.x - pa.x, pb.z - pa.z).length() * tan(deg_to_rad(11.0)))
-		m.hero.global_position = sea.to_global(pa.lerp(pb, 0.06) + Vector3(0, 0.6, 0)); m.hero.velocity = Vector3.ZERO; await frames(5)
+		var sp: Vector3 = sea.to_global(pa.lerp(pb, 0.06)); var rq := PhysicsRayQueryParameters3D.create(sp + Vector3(0, 5, 0), sp - Vector3(0, 5, 0), 1); rq.exclude = [m.hero.get_rid()]
+		var rh: Dictionary = m.get_world_3d().direct_space_state.intersect_ray(rq)
+		print("DK PIERRAY %s start_local=%s hit=%s" % [k, pa.lerp(pb, 0.06), str(sea.to_local(rh.position)) + " " + str(rh.collider.get_parent().name) if rh else "none"])
+		sea.ui.msg.text = ""
+		m.hero.global_position = sp + Vector3(0, 0.6, 0); m.hero.velocity = Vector3.ZERO; await frames(5)
 		var pw := await walk_to(sea.pier_head(d), 1.5, 25.0)
 		ok(pw.ok and pw.resets == 0, "%s: walked up the pier boards to the pier head (%.1f s, resets %d)" % [k, pw.t, pw.resets])
-		m.hero.global_position = sea.to_global(sea.pier_head(d) + Vector3(0, 0.6, 0)); m.hero.velocity = Vector3.ZERO; await frames(5)
+		m.hero.global_position = sea.to_global(sea.pier_head(d) + Vector3(0, 0.6, 0)); m.hero.velocity = Vector3.ZERO; await frames(5); sea.ui.msg.text = ""
 		if OS.get_environment("DK_POI") != "": await poi_walk(k, d)
 		var inl := sea._inland(d)
 		m.yaw = atan2(inl.x, inl.z)   # camera looks inland: fwd = (-sin, -cos) = -inl, so the shot frames hero + pier + ship behind

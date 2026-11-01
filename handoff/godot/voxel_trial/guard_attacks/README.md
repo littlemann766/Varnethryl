@@ -22,3 +22,11 @@ Not checked: whether the mace actually connects with targets in game.
 - It calls play_attack("attack",1.3) and applies _strike() at once. Rotate through attack_slash/backhand/overhead/shield_bash and apply damage at events hit_frame/30/speed. Set SWING to at least duration/speed.
 - Use combat_idle while in reach and waiting, guard_stance/block when a monster attacks, and hit when g.hp drops.
 - Base-model issues not touched: armfix35 run has an 83 deg RightForeArm snap at frame 5 (LOD2: frames 7 and 16), and run arms reach 36 deg, walk arms 34.6 deg.
+
+## Cleanup pass (2026-11-01, Lucian)
+Fixed only the frames that clipped; key timing, clip lengths, and hit frames are unchanged. Capes untouched.
+- Arm/mace in legs (frames over 24 voxels): LOD1 overhead 3->0, backhand 1->0, hit 1->0; LOD0 overhead 9 (825 voxels)->0, hit 6->0, slash 4->0, backhand 2->0; LOD2 stays 0. Run and walk 0 on all LODs.
+- Run frame-5 RightForeArm flip (83 deg) is fixed. LOD2 run flips at frames 7 and 16 are also fixed.
+- Arm swing out: run 36.1->30.1, walk 34.6->30.3 (LOD0/1/2).
+- Method: swingcap_guard.py -> armfix_guard.py -> fixsnap2.py -> handclear2.py (wrist re-aim of the mace on clipping frames).
+- Residual: overhead right arm out reaches 39 deg (LOD0) / 43 deg (LOD1) at the end of the swing to clear the thigh. The LOD1 run has wrist steps of 42-56 deg at frames 2 and 19, and the LOD2 backhand has a 37 deg wrist step at frame 39.

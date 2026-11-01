@@ -409,7 +409,7 @@ func shore_m(p: Vector2) -> float:
 `world_merge/tools/straight_scan.py` finds every coast run that stays within 0.5 m of a straight line for 30 m or more (contours of the
 3 m land mask). `wobble_runs.py` breaks each one: terrain vertices within ~22 m are pushed sideways by an along-run noise (+-7 m), the
 same field for visual, lod1 and col (stage5 islands, arch_islands, all region tiles). Runs within 45 m of a port, pier, mooring or the
-Saltglass port mesh are built structures and are kept. 4 passes: 107 -> 7 runs, and all 7 are at piers/moorings (list in
+Saltglass port mesh are built structures and are kept. 4 passes: 107 -> 6 runs, and all 6 are at piers/moorings/the ice dock (list in
 `world_merge/straight_runs_final.json`). Also:
 - The three Frost POI islands no longer sit on the tiles as squares: their outer band tucks under the tile surface with an fbm edge and
   takes the tile colour (`isl_blend.py`); the other POI islands' square sea-floor skirts sink to -4 m in an fbm band (coast untouched,

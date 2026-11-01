@@ -17,19 +17,12 @@ Selectors use each vertex's REST model-space position and its dominant bone. Rem
 - `robe_hem` (apply whenever legs OR boots are equipped): removes skirt/tabard/robe verts below knee+6 cm that are farther than `keep_radius` from the leg bones (`skirt` selector: point-to-segment distance against the 4 leg segments). Greaves are now full-shin and solid with a knee rim/cop, so the armour reads below every robe.  `cloak`: all cape* bone verts.  `baked_weapon`: hand verts outside a keep-sphere around the fist.
 
 ## Built-in (baked) weapons — list for Lucian
-These rigs have a weapon modelled into the hand mesh, which doubles up with an equipped main_hand/off_hand. The `baked_weapon` hide rule removes it at runtime; Lucian may prefer to split it into its own mesh/bone in the rig:
+Only **darius** has a weapon modelled into the hand mesh (hand_R). His `baked_weapon` hide rule stays; his weaponless rig is on the `weaponless-rigs` branch at **af4e553** (sheet: `voxel/checks/weaponless_before_after.png`), which can replace the hide rule once wired.
 
-- **darius**: hand_R
-- **orin**: hand_L
-- **rook**: hand_R, hand_L
-- **finn**: hand_L
-- **elira**: hand_L
-- **wren**: hand_R, hand_L
-- **rowan**: hand_L
-- **talia**: hand_R, hand_L
+Removed (false positives from the 0.28 m hand-span check, which caught cape corners, sleeves and talons; Lucian confirmed no modelled weapon): orin, rook, finn, elira, wren, rowan, talia. Their `baked_weapon` lists are now empty so equipping a weapon no longer erases hands or cape corners. Wren checked on the sheet: robe sleeves only, no weapon.
 
 ## Fixed old issues
-- Doubled built-in weapons: hide rule above + list.
+- Doubled built-in weapons: Darius only (hide rule above; weaponless rig at af4e553).
 - Pip collar: now on neck1 between spine3 and head, sized from the neck (`fit/companion_attach.json`); was inside the head. Phoenix collar sized to the neck core, not the feathers.
 - Frostreach and Vent Harbour stalls: snapped onto the dock decks by raycast vs stage4 collision + harbour meshes (`loot/merchants/PLACEMENT_merchants.json`, `position_v0` keeps the old point). Shot: shots/loot3/fix_stalls_frostreach_vent.png.
 - Sslythar stays hidden: no meshes, no attach, items tagged hidden.

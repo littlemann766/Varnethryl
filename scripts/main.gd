@@ -289,6 +289,7 @@ func _ready() -> void:
 	if args.has("--landgen"): add_child(load("res://tests/landing_gen.gd").new())   # test 34
 	if args.has("--shipfly"): add_child(load("res://tests/ship_fly_test.gd").new())   # test 36
 	if args.has("--docking"): add_child(load("res://tests/docking_test.gd").new())   # test 34
+	if args.has("--questrun"): add_child(load("res://tests/quest_playthrough_test.gd").new())   # quests-test: beats 1-3 playthrough
 	if args.has("--vox34"): add_child(load("res://tests/vox34_shots.gd").new())   # test 34
 	if args.has("--minionshots"): add_child(load("res://tests/minion_shots.gd").new())   # test 34
 	if args.has("--vox31"): add_child(load("res://tests/vox31_shots.gd").new())   # test 31

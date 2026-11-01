@@ -37,13 +37,12 @@ func ground_local(lp: Vector3) -> Vector3:
 	q.exclude = [m.hero.get_rid()] + sea.ships.values().map(func(s): return s.get_rid())
 	var h: Dictionary = m.get_world_3d().direct_space_state.intersect_ray(q)
 	return sea.to_local(h.position) if h else lp
-## global ground height for Enemy.height_fn (x, z global)
-func ground_y(x: float, z: float) -> float:
-	var top := m.hero.global_position.y + 30.0
-	var q := PhysicsRayQueryParameters3D.create(Vector3(x, top, z), Vector3(x, top - 120.0, z), 1)
+## global ground height for Enemy.height_fn (x, z global), searched from the enemy's own height (switchback stairs/overhangs)
+func ground_near(x: float, z: float, y: float) -> float:
+	var q := PhysicsRayQueryParameters3D.create(Vector3(x, y + 1.5, z), Vector3(x, y - 8.0, z), 1)
 	q.exclude = [m.hero.get_rid()] + sea.ships.values().map(func(s): return s.get_rid())
 	var h: Dictionary = m.get_world_3d().direct_space_state.intersect_ray(q)
-	return h.position.y if h else m.hero.global_position.y
+	return float(h.position.y) if h else y
 
 func _on_ashore(k: String) -> void:
 	here = k
@@ -128,8 +127,8 @@ func _spawn_group(id: String, s: Dictionary) -> void:
 	for t in s.route_t:
 		var lp := ground_local(spot(s.landing, s.poi, float(t)))
 		var e: Enemy = d.spawn(s.enemy, sea.to_global(lp), m.hero)
-		e.height_fn = ground_y
-		e.position.y = ground_y(e.position.x, e.position.z); e.home = e.position
+		e.position.y = sea.to_global(lp).y; e.home = e.position
+		e.height_fn = func(x: float, z: float) -> float: return ground_near(x, z, e.position.y) if is_instance_valid(e) else 0.0
 		if s.has("tint"): (func(): if is_instance_valid(e): tint(e.rig, Color(s.tint[0], s.tint[1], s.tint[2]))).call_deferred()
 		e.died.connect(func(_e): qm.notify("kill", id))
 		enemies.append(e)

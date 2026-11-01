@@ -89,12 +89,8 @@ func _mat_for(n: String) -> Material:
 		var l := _sh("stage4/shaders/lava_seam.gdshader"); l.set_shader_parameter("energy", 6.0); return l
 	if n == "ash_steam": return _sh("stage4/shaders/steam_plume.gdshader")
 	if n.begins_with("ash_"):   # stage 4 README: black basalt = vertex colour + metallic_specular 0.15 (else it mirrors the haze and reads beige)
-		return _sh("stage4/shaders/ash_rock_lift.gdshader")   # test 37: lifted basalt (was pure black on screen)
-	# test 37: island rock/scatter right at the camera (no collider for the spring arm) dither-fades instead of filling the
-	# screen black (t36 Gullhaven wedge, Saltglass pillar)
-	var vm: StandardMaterial3D = (load(R + "stage1/shaders/vc_lit.tres") as StandardMaterial3D).duplicate()
-	vm.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER; vm.distance_fade_min_distance = 0.8; vm.distance_fade_max_distance = 3.0
-	return vm
+		var ar := _sh("stage1/shaders/vc_flat.gdshader"); ar.set_shader_parameter("lift", 0.1); ar.set_shader_parameter("ambient", 0.3); ar.set_shader_parameter("spec", 0.075); return ar   # test 37: lifted basalt (was pure black on screen)
+	return _sh("stage1/shaders/vc_flat.gdshader")   # test 37: flat normals + near-camera fade (glbs have no NORMAL)
 func _no_shadow(n: String) -> bool:
 	for k in ["_fog_layers", "_storm_sky", "_storm_sea", "_glow", "_steam", "_lava_seams", "buoy_", "upg_", "_ice_floes", "_icicles"]:
 		if n.find(k) >= 0: return true

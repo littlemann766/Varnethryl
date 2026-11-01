@@ -81,6 +81,9 @@ def region(slot,side=None):
         hb=BH['head']; m=(spos[:,2]>BH['neck'][2]+0.025)&(np.hypot(spos[:,0]-hb[0],spos[:,1]-hb[1])<0.19)   # everything above the neck: face+beard+hair (beard is upperChest-weighted on Darius)
     elif slot=='cloak':
         m=np.char.startswith(cbn.astype(str),'cape')|(capew>=0.15)
+        ctop=spos[m,2].max() if m.any() else neckz; back=((spos[:,1]-BH['spine'][1])*FRONT)<-0.02
+        sx=abs(BH['upperArm_L'][0])+0.06
+        m|=back&(spos[:,2]>ctop-0.10)&(spos[:,2]<neckz+0.03)&(abs(spos[:,0])<sx)&~np.isin(cbn,['head','jaw'])   # v4: mantle up to the shoulders + collar behind the neck
     R=np.zeros(S,bool); R[tuple(sidx[m].T)]=True; return R
 BONESET={'chest':['spine','spine2','chest','upperChest','hips'],'belt':['hips','spine','spine2','thigh_L','thigh_R'],'helm':['head','neck'],'cloak':[b for b in BH if b.startswith('cape')]+['upperChest','chest'],
  'shoulder':lambda X:['upperArm'+X,'shoulder'+X,'upperChest','chest'],'glove':lambda X:['upperArm'+X,'foreArm'+X,'hand'+X]+[f+n+X for f in ('index','middle','ring','pinky','thumb') for n in '123']+['fingers'+X],
@@ -96,12 +99,17 @@ def build_grid(slot,side,r,R):
         nx=dil(acc)&out&~acc; layers.append(nx); acc|=nx
     shell=acc&out
     if slot=='helm':   # great helm: per-height ellipse fitted to this hero's head (+1 cm air), 3-voxel wall, flat-ish crown
-        X_,Y_,Z_=np.indices(S); q=np.argwhere(R); cx_=np.median(q[:,0]); cy_=np.median(q[:,1]); z0,z1=q[:,2].min(),q[:,2].max()
+        X_,Y_,Z_=np.indices(S); q=np.argwhere(R)
+        sk_=np.zeros(S,bool); sel=np.isin(cbn,['head','jaw','eye_L','eye_R']); sk_[tuple(sidx[sel].T)]=True; qs=np.argwhere(sk_&R)
+        if len(qs)>200: q=qs        # v4: fit the skull only -> beard/hair go under the helm (hidden by the mask), not inside its silhouette
+        cx_=np.median(q[:,0]); cy_=np.median(q[:,1]); z0=np.argwhere(R)[:,2].min(); z1=int(np.percentile(q[:,2],99))
         rx=np.zeros(S[2]); ry=np.zeros(S[2])
         for z in range(z0,z1+1):
             w=q[abs(q[:,2]-z)<=3]
-            if len(w): rx[z]=np.percentile(abs(w[:,0]-cx_),97)+0.5; ry[z]=np.percentile(abs(w[:,1]-cy_),97)+0.5
-        for z in range(z0,z1+1): rx[z]=max(rx[max(z0,z-6):z+7].max(),1); ry[z]=max(ry[max(z0,z-6):z+7].max(),1)
+            if len(w): rx[z]=np.percentile(abs(w[:,0]-cx_),93); ry[z]=np.percentile(abs(w[:,1]-cy_),93)
+        for z in range(z0,z1+1): rx[z]=max(rx[max(z0,z-3):z+4].max(),1); ry[z]=max(ry[max(z0,z-3):z+4].max(),1)
+        zr=np.where(rx>1)[0]; zm=zr.min() if len(zr) else z0
+        rx[z0:zm]=rx[zm]; ry[z0:zm]=ry[zm]   # below the skull fit (jaw/neck): keep the skull width, straight cheeks
         RX=rx[np.clip(Z_,z0,z1)]; RY=ry[np.clip(Z_,z0,z1)]; e=((X_-cx_)/RX)**2+((Y_-cy_)/RY)**2
         eo=((X_-cx_)/(RX+t))**2+((Y_-cy_)/(RY+t))**2
         wall=(eo<=1)&(e>1)&(Z_>=z0)&(Z_<=z1); cap=(eo<=1)&(Z_>z1)&(Z_<=z1+t)
@@ -118,7 +126,8 @@ def build_grid(slot,side,r,R):
     X_,Y_,Z_=np.indices(S)
     if slot=='cloak':
         cl=p.get('cloth',(0.30,0.06,0.06)); g[shell]=v.c(cl); g[shell&(Z_%5==0)]=v.c(tuple(c*0.8 for c in cl))
-        if i>=2: g[trim&shell]=tr
+        zb=np.argwhere(shell)[:,2].min()
+        if i>=2: g[shell&(Z_<=zb+1)]=tr   # v4: gold hem only (no trim blobs inside the cloak)
         idx=np.argwhere(g>0); a=idx.min(0)-1; b=idx.max(0)+2
         vv=V(1); vv.pal=v.pal; vv.g=g[a[0]:b[0],a[1]:b[1],a[2]:b[2]].copy(); return vv,lo+a*RES
     if slot=='helm':

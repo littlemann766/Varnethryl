@@ -34,3 +34,7 @@ Cost: about 15–60k tris per piece at lod0 (the chest is the heaviest). It stil
 3. **Gaps closed.** A couter on the gloves (upper arm from t > 0.66) overlaps the rerebrace, and a poleyn on the legs (shin to t < 0.24) overlaps the 3 cm greave. There's a morphological close plus a 5-pass smooth, with leather straps on the backs of the arms and thighs, and the rivets and lames kept.
 4. **Tabard.** The belt now has faulds down to 17 cm below the belt plus a front tasset. The body mask also hides the tabard strip between the thighs.
 5. **Dark rod.** It was the baked sword on hand_R. The pieces are now fitted to, and rendered on, Lucky's weaponless rig `voxel/darius_voxel_noweapon.glb` (weaponless-rigs @ af4e553, read-only copy). Set `job.rig` to it. The skeleton is identical.
+
+## v4 (Darius): helm and cloak polish
+- **Helm:** the per-height ellipse is now fitted to the skull only (head/jaw/eye-weighted cells) at the 93rd percentile with no air gap, and it keeps straight cheeks below the skull. It is noticeably slimmer and shorter from behind. The beard and hair sit under the helm and are hidden by the helm mask. Eye slits and all tier details are kept. Each rarity is about 8000 tris, with lod1 at 45%.
+- **Cloak:** a mantle and collar run from the cape top up to the neck and out to the shoulder edge, behind the body only. The trim is now just a gold hem. No plate or purple shows where it meets the pauldrons in walk or attack. About 4000 tris, lod1 at 45%.

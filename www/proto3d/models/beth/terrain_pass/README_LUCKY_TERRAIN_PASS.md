@@ -292,3 +292,25 @@ The test on Lucky's terrain, roads, walls and buildings (`placements/plc_test.gd
 	if OS.get_environment("VARN_LITE") == "": BethPlacements.apply(self)   # terrain pass fix 7b
 ```
 `PLACEMENT_port.json` is NOT wired. It is local to the old walled-harbour PORT_CENTER, and its 48 pier posts and 2 ships duplicate what HarborDistrict and `_ships()` already build. Leave it.
+
+## Fix 8a - lod1 at or under 45%
+These lod1 files were re-decimated from their base with gltfpack 1.3 (`-si 0.44 -noq -kn -km`; buildings use `-si 0.4 -sa -km`). The originals are kept as `*_lod1_v1_backup.glb`.
+- Terrain tiles (coast_tile_x1z3/x1z1, frost_tile_x0z1/x1z0) are now 43%.
+- Buildings (windmill, stables, barn, farmhouse, lighthouse variants) are 31-39%.
+- tripo volcano_game is 36%.
+- windmill_card is 47%.
+
+- `tidewrack_sea/stage2/meshes/coast_tile_x1z3`_lod1.glb
+- `tidewrack_sea/stage2/meshes/coast_tile_x1z1`_lod1.glb
+- `tidewrack_sea/stage4/meshes/frost_tile_x0z1`_lod1.glb
+- `tidewrack_sea/stage4/meshes/frost_tile_x1z0`_lod1.glb
+- `hi/buildings/bld_windmill`_lod1.glb
+- `hi/buildings_card2/bld_stables_card2`_lod1.glb
+- `hi/buildings_card2/bld_barn_card2`_lod1.glb
+- `hi/buildings_card2/bld_farmhouse_card2`_lod1.glb
+- `hi/buildings_card2/bld_lighthouse_card2`_lod1.glb
+- `hi/buildings/bld_lighthouse_card`_lod1.glb
+- `hi/buildings/bld_lighthouse`_lod1.glb
+- `hi/buildings/bld_windmill_card`_lod1.glb
+- `tripo/volcano_game`_lod1.glb
+**Lucky:** copy the 4 tile lod1s over `tidewrack/stage2|stage4/meshes/` and `hi/buildings/bld_windmill_lod1.glb` over your windmill lod1, then re-import.

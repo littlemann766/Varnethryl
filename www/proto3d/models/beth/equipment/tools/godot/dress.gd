@@ -146,6 +146,50 @@ func skin_cloak(sk,path,t,chest_bone):
 	var mi=MeshInstance3D.new(); mi.mesh=nm; mi.skin=skin; mi.set_meta("cloak",true); sk.add_child(mi); mi.skeleton=NodePath("..")
 	mat_fix(mi,am)
 	src.free()
+func attach_fitted(sk,path):
+	# per-hero fitted armour: a skinned mesh exported against a copy of the hero rig; rebind by bone NAME onto the live skeleton
+	if not ResourceLoader.exists(path): push_warning("missing "+path); return
+	var inst=load(path).instantiate(); var src_sk=find_skel(inst)
+	for mi in inst.find_children("*","MeshInstance3D",true,false):
+		var os=mi.skin; var ns=Skin.new()
+		for b in os.get_bind_count():
+			var bn=String(os.get_bind_name(b))
+			if bn=="" and src_sk: bn=src_sk.get_bone_name(os.get_bind_bone(b))
+			ns.add_named_bind(bn,os.get_bind_pose(b))
+		var gx=mi.global_transform if mi.is_inside_tree() else mi.transform
+		mi.get_parent().remove_child(mi); mi.skin=ns; mi.set_meta("cloak",true); sk.add_child(mi); mi.skeleton=NodePath("..")
+		mat_fix(mi,mi.mesh)
+	inst.free()
+func hide_mask(sk,maskp,slots):
+	var M=JSON.parse_string(FileAccess.get_file_as_string(maskp)); var res=M["res"]; var o=M["origin_blender"]; var D=M["dims"]
+	var cells={}
+	for s in slots:
+		for c in M["slots"][s]["cells"]: cells[int(c)]=true
+	for mi in sk.find_children("*","MeshInstance3D",true,false):
+		if mi.get_parent() is BoneAttachment3D or mi.skin==null or mi.has_meta("cloak"): continue
+		var skin=mi.skin; var am=mi.mesh; var nm=ArrayMesh.new()
+		for si in am.get_surface_count():
+			var arr=am.surface_get_arrays(si); var Vv=arr[Mesh.ARRAY_VERTEX]; var Bn=arr[Mesh.ARRAY_BONES]; var W=arr[Mesh.ARRAY_WEIGHTS]; var I=arr[Mesh.ARRAY_INDEX]
+			var nb=W.size()/Vv.size(); var hid=PackedByteArray(); hid.resize(Vv.size())
+			for vi in Vv.size():
+				var best=0; var bw=-1.0
+				for k in nb:
+					if W[vi*nb+k]>bw: bw=W[vi*nb+k]; best=Bn[vi*nb+k]
+				var bone=skin.get_bind_bone(best)
+				if bone<0: bone=sk.find_bone(String(skin.get_bind_name(best)))
+				var rp=sk.get_bone_global_rest(bone)*skin.get_bind_pose(best)*Vv[vi]
+				var b=Vector3(rp.x,-rp.z,rp.y)
+				var ix=int(floor((b.x-o[0])/res)); var iy=int(floor((b.y-o[1])/res)); var iz=int(floor((b.z-o[2])/res))
+				if ix<0 or iy<0 or iz<0 or ix>=D[0] or iy>=D[1] or iz>=D[2]: continue
+				if cells.has((ix*int(D[1])+iy)*int(D[2])+iz): hid[vi]=1
+			var NI=PackedInt32Array()
+			for t in range(0,I.size(),3):
+				if hid[I[t]] and hid[I[t+1]] and hid[I[t+2]]: continue
+				NI.append(I[t]); NI.append(I[t+1]); NI.append(I[t+2])
+			arr[Mesh.ARRAY_INDEX]=NI
+			nm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arr,[],{},Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS if nb==8 else 0)
+			nm.surface_set_material(nm.get_surface_count()-1,am.surface_get_material(si))
+		mi.mesh=nm
 func mat_fix(mi,am):
 	for si in mi.mesh.get_surface_count():
 		var srcm=am.surface_get_material(si); var mat=StandardMaterial3D.new(); mat.vertex_color_use_as_albedo=true; mat.vertex_color_is_srgb=true; mat.roughness=0.75
@@ -176,6 +220,10 @@ func run(j):
 		if j.get("weapon2","") and g.has("weapon_offhand"): attach_mesh(sk,g["weapon_offhand"]["bone"],j.get("weapon_mesh","res://loot/gear/meshes/%s.glb"%j["weapon2"]),xf(g["weapon_offhand"]))
 		if j.get("shield","") and g.has("shield"): attach_mesh(sk,g["shield"]["bone"],"res://loot/gear/meshes/%s.glb"%j["shield"],xf(g["shield"]))
 	for ex in j.get("extra",[]): attach_mesh(sk,ex["bone"],ex["mesh"],xf(ex))
+	if j.has("fitted"):
+		var F=j["fitted"]
+		for p in F["pieces"]: attach_fitted(sk,"%s/%s_%s_%s_%s.glb"%[F["dir"],h,fam,r,p])
+		hide_mask(sk,"%s/%s_body_mask.json"%[F["dir"],h],F["pieces"])
 	if j.get("hide",true) and rules.size(): hide_verts(sk,rules)
 	var cam=get_node("cam"); var ab=AABB()
 	for mi in root.find_children("*","MeshInstance3D",true,false):

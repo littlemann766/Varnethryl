@@ -94,3 +94,9 @@ Mount: copy/merge `www/proto3d/models/beth/equipment/` to `res://equipment/` (an
 - Cloak now binds to the cape bones (polish 2).
 - Robed/tabard heroes: `hide.robe_hem` shortens the skirt at the knee when legs/boots are worn (polish 3).
 - Class items, artifacts, gems, runes and materials have 2D icons only (no world mesh).
+
+## Vertex colour = sRGB (polish 4, gold fix)
+All equipment `.glb` files now store **sRGB** values in COLOR_0. Use the material with
+`vertex_color_use_as_albedo = true` **and** `vertex_color_is_srgb = true`. This reads correctly in Mobile, Forward+ and Compatibility (it was verified in Compatibility with a swatch: the gold comes out as gold, not orange).
+Without `is_srgb` the colours look too light or washed out. `tools/godot/dress.gd` sets it already. In post-import, add `mat.vertex_color_is_srgb = true` for meshes under `equipment/`. I haven't touched the game's `post_import.gd`; that's yours to change.
+Legendary gold palette softened to antique gold trim (0.86,0.66,0.26).

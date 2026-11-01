@@ -211,6 +211,13 @@ func _run() -> void:
 		feet_check(k, "after disembark")
 		await hud_check(k + " ashore")
 		ok(sea.ui.charts_b.visible, "%s: Charts shown at the pier beside the ship" % k)
+		# test 37: walk the whole pier: sea end -> pier head on the real boards
+		var pa: Vector3 = sea._v3(d.moor) + sea._inland(d) * 3.0 + Vector3(0, 1.0, 0); var pb: Vector3 = sea.pier_head(d) - Vector3(0, 0.2, 0) + sea._inland(d) * 1.5
+		pa.y = maxf(pa.y, pb.y - Vector2(pb.x - pa.x, pb.z - pa.z).length() * tan(deg_to_rad(11.0)))
+		m.hero.global_position = sea.to_global(pa.lerp(pb, 0.06) + Vector3(0, 0.6, 0)); m.hero.velocity = Vector3.ZERO; await frames(5)
+		var pw := await walk_to(sea.pier_head(d), 1.5, 25.0)
+		ok(pw.ok and pw.resets == 0, "%s: walked up the pier boards to the pier head (%.1f s, resets %d)" % [k, pw.t, pw.resets])
+		m.hero.global_position = sea.to_global(sea.pier_head(d) + Vector3(0, 0.6, 0)); m.hero.velocity = Vector3.ZERO; await frames(5)
 		if OS.get_environment("DK_POI") != "": await poi_walk(k, d)
 		var inl := sea._inland(d)
 		m.yaw = atan2(inl.x, inl.z)   # camera looks inland: fwd = (-sin, -cos) = -inl, so the shot frames hero + pier + ship behind

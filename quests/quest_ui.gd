@@ -12,7 +12,7 @@ var queue: Array = []
 var hint: Label
 var hint_t := 0.0
 const FALLBACK := "The Owner's Crew\n> Sail to Gullhaven"
-const HINT := "New story: head to the harbour, board your ship and set sail for Gullhaven."
+const HINT := "Head to the harbour, board your ship and set sail for Gullhaven."
 
 func setup(q: Node) -> void:
 	qm = q; layer = 41
@@ -31,10 +31,10 @@ func setup(q: Node) -> void:
 	qm.changed.connect(_refresh); qm.dialogue.connect(say)
 	qm.quest_done.connect(func(_q, t): if t != "": say([["", t]]))
 	hint = Label.new(); hint.name = "QuestHint"; hint.text = HINT; hint.visible = false
-	hint.add_theme_font_size_override("font_size", 24); hint.add_theme_color_override("font_color", Color(1, 0.9, 0.55))
+	hint.add_theme_font_size_override("font_size", 20); hint.add_theme_color_override("font_color", Color(1, 0.9, 0.55))
 	hint.add_theme_color_override("font_shadow_color", Color.BLACK); hint.add_theme_constant_override("shadow_offset_y", 2)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.position = Vector2(290, 300); hint.size = Vector2(700, 80); add_child(hint)
+	hint.position = Vector2(430, 160); hint.size = Vector2(420, 72); add_child(hint)
 	_refresh()
 
 ## quests-test 2: a short one-time hint on the first start of the story (also on old saves that never saw it)

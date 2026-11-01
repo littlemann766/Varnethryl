@@ -1,0 +1,146 @@
+{
+ "_note": "UI art for Lucky (art only; UI code is Lucky's). All pixel art at 2x, nearest filtering. 9-slice margins in px at 2x.",
+ "rarity": {
+  "uncommon": {
+   "border": "res://equipment/ui/border_uncommon.png",
+   "tile_bg": "res://equipment/ui/tile_bg_uncommon.png",
+   "beam": "res://equipment/ui/beam_uncommon.png",
+   "color": "#9a9a9a",
+   "name_color": "#9a9a9a"
+  },
+  "common": {
+   "border": "res://equipment/ui/border_common.png",
+   "tile_bg": "res://equipment/ui/tile_bg_common.png",
+   "beam": "res://equipment/ui/beam_common.png",
+   "color": "#4caf50",
+   "name_color": "#4caf50"
+  },
+  "rare": {
+   "border": "res://equipment/ui/border_rare.png",
+   "tile_bg": "res://equipment/ui/tile_bg_rare.png",
+   "beam": "res://equipment/ui/beam_rare.png",
+   "color": "#3d7fe0",
+   "name_color": "#3d7fe0"
+  },
+  "epic": {
+   "border": "res://equipment/ui/border_epic.png",
+   "tile_bg": "res://equipment/ui/tile_bg_epic.png",
+   "beam": "res://equipment/ui/beam_epic.png",
+   "color": "#9b4de0",
+   "name_color": "#9b4de0"
+  },
+  "legendary": {
+   "border": "res://equipment/ui/border_legendary.png",
+   "tile_bg": "res://equipment/ui/tile_bg_legendary.png",
+   "beam": "res://equipment/ui/beam_legendary.png",
+   "color": "#e0a526",
+   "name_color": "#e0a526"
+  },
+  "masterwork": {
+   "border": "res://equipment/ui/border_masterwork.png",
+   "tile_bg": "res://equipment/ui/tile_bg_masterwork.png",
+   "beam": "res://equipment/ui/beam_masterwork.png",
+   "color": "#d8312b",
+   "name_color": "#d8312b"
+  }
+ },
+ "slots": {
+  "helmet": "res://equipment/ui/slot_helmet.png",
+  "chest": "res://equipment/ui/slot_chest.png",
+  "shoulders": "res://equipment/ui/slot_shoulders.png",
+  "gloves": "res://equipment/ui/slot_gloves.png",
+  "legs": "res://equipment/ui/slot_legs.png",
+  "boots": "res://equipment/ui/slot_boots.png",
+  "belt": "res://equipment/ui/slot_belt.png",
+  "cloak": "res://equipment/ui/slot_cloak.png",
+  "amulet": "res://equipment/ui/slot_amulet.png",
+  "ring1": "res://equipment/ui/slot_ring1.png",
+  "ring2": "res://equipment/ui/slot_ring2.png",
+  "main_hand": "res://equipment/ui/slot_main_hand.png",
+  "off_hand": "res://equipment/ui/slot_off_hand.png",
+  "class_item": "res://equipment/ui/slot_class_item.png"
+ },
+ "panel": {
+  "file": "res://equipment/ui/panel_equipment.png",
+  "nine_slice": [
+   16,
+   16,
+   16,
+   16
+  ]
+ },
+ "tooltip": {
+  "file": "res://equipment/ui/tooltip_frame.png",
+  "nine_slice": [
+   8,
+   8,
+   8,
+   8
+  ]
+ },
+ "border_nine_slice": [
+  14,
+  14,
+  14,
+  14
+ ],
+ "icon_size": 128,
+ "paperdoll_layout_px_at_2x": {
+  "helmet": [
+   146,
+   24
+  ],
+  "amulet": [
+   230,
+   40
+  ],
+  "cloak": [
+   62,
+   40
+  ],
+  "shoulders": [
+   62,
+   120
+  ],
+  "chest": [
+   146,
+   120
+  ],
+  "gloves": [
+   62,
+   200
+  ],
+  "belt": [
+   146,
+   200
+  ],
+  "legs": [
+   146,
+   280
+  ],
+  "boots": [
+   146,
+   360
+  ],
+  "ring1": [
+   230,
+   200
+  ],
+  "ring2": [
+   230,
+   280
+  ],
+  "main_hand": [
+   62,
+   360
+  ],
+  "off_hand": [
+   230,
+   360
+  ],
+  "class_item": [
+   230,
+   120
+  ]
+ }
+}

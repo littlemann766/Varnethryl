@@ -25,6 +25,11 @@
     "height_m": 0,
     "pulse": false,
     "sound": null
+   },
+   "ui": {
+    "border": "res://equipment/ui/border_uncommon.png",
+    "tile_bg": "res://equipment/ui/tile_bg_uncommon.png",
+    "beam": "res://equipment/ui/beam_uncommon.png"
    }
   },
   "common": {
@@ -43,6 +48,11 @@
     "height_m": 0,
     "pulse": false,
     "sound": null
+   },
+   "ui": {
+    "border": "res://equipment/ui/border_common.png",
+    "tile_bg": "res://equipment/ui/tile_bg_common.png",
+    "beam": "res://equipment/ui/beam_common.png"
    }
   },
   "rare": {
@@ -61,6 +71,11 @@
     "height_m": 2.5,
     "pulse": false,
     "sound": "drop_rare"
+   },
+   "ui": {
+    "border": "res://equipment/ui/border_rare.png",
+    "tile_bg": "res://equipment/ui/tile_bg_rare.png",
+    "beam": "res://equipment/ui/beam_rare.png"
    }
   },
   "epic": {
@@ -79,6 +94,11 @@
     "height_m": 4,
     "pulse": false,
     "sound": "drop_epic"
+   },
+   "ui": {
+    "border": "res://equipment/ui/border_epic.png",
+    "tile_bg": "res://equipment/ui/tile_bg_epic.png",
+    "beam": "res://equipment/ui/beam_epic.png"
    }
   },
   "legendary": {
@@ -97,6 +117,11 @@
     "height_m": 6,
     "pulse": true,
     "sound": "drop_legendary"
+   },
+   "ui": {
+    "border": "res://equipment/ui/border_legendary.png",
+    "tile_bg": "res://equipment/ui/tile_bg_legendary.png",
+    "beam": "res://equipment/ui/beam_legendary.png"
    }
   },
   "masterwork": {
@@ -115,6 +140,11 @@
     "height_m": 8,
     "pulse": true,
     "sound": "drop_masterwork"
+   },
+   "ui": {
+    "border": "res://equipment/ui/border_masterwork.png",
+    "tile_bg": "res://equipment/ui/tile_bg_masterwork.png",
+    "beam": "res://equipment/ui/beam_masterwork.png"
    }
   }
  },

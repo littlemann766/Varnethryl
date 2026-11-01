@@ -1,0 +1,22 @@
+--- scripts/main.gd	2026-11-01 00:06:56.000000000 -0400
++++ scripts/main_tp.gd	2026-11-01 00:12:40.929813160 -0400
+@@ -357,7 +357,9 @@
+ 		var rg := 1.0 - absf(noise.get_noise_2d(x * 2.3 + 900.0, z * 2.3 - 400.0))   # ridged peaks
+ 		var rg2 := 1.0 - absf(noise.get_noise_2d(x * 5.1 - 300.0, z * 5.1 + 700.0))
+ 		var massif := smoothstep(0.25, 0.75, noise.get_noise_2d(x * 0.45 + 1500.0, z * 0.45 - 800.0) * 0.5 + 0.5)   # separate massifs + saddles
+-		h += mr * (60.0 + (40.0 + 230.0 * rg * rg) * (0.3 + 0.7 * massif) + 45.0 * rg2 * rg2 * mr)
++		# terrain pass fix 2 (Beth): softened ridges - rg^2 crest rounded (rg^1.6 blended into a smooth knee), fine rg2 spikes 45 -> 14 m
++		var rgs := smoothstep(0.0, 1.0, rg); rgs = rgs * rgs * (0.55 + 0.45 * rgs)
++		h += mr * (60.0 + (40.0 + 215.0 * rgs) * (0.3 + 0.7 * massif) + 14.0 * rg2 * rg2 * mr)
+ 	return _road_soften(x, z, h)
+ 
+ ## the test 13 hills, kept only for the volcano pad height so the arena does not move
+@@ -400,7 +402,7 @@
+ 	var mi := MeshInstance3D.new(); mi.mesh = st.commit()
+ 	var m := ShaderMaterial.new(); mi.material_override = m
+ 	if OS.get_environment("VARN_NO_TFIX2") == "":   # test 23: Beth's terrain fix 2 (ground layers, baked smooth normals, dirt wear)
+-		m.shader = load("res://terrain_fix2/ground/ground2.gdshader")
++		m.shader = load("res://tp/ground3.gdshader")
+ 		for k in [["t_norm", "res://terrain_fix2/data/terrain_n.png"], ["t_data", "res://terrain_fix2/data/terrain_d.png"], ["grass_detail", "res://terrain_fix2/data/grass_detail.png"], ["dirt_albedo", "res://assets/roads/textures/dirt_albedo.png"], ["dirt_normal", "res://assets/roads/textures/dirt_normal.png"]]:
+ 			m.set_shader_parameter(k[0], load(k[1]))
+ 	else: m.shader = load("res://scripts/ground.gdshader")

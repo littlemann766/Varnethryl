@@ -122,3 +122,6 @@ Diagnosis (piece-by-piece renders): Rook chest spot and shin/foot dots persist w
 
 ## v24 (leftover polish, soft hold)
 Rook: every non-helm slot mask grown by 1 cell (coat slivers at mask edges). Robed capes wider (Talia +11cm, Rowan +8cm past the shoulder); speck-hide zone reaches 10 cells above the neck (hood). Darius/Orin/Finn/Elira/Wren unchanged from v22. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg11/
+
+## v25 (leftover polish, soft hold)
+Rook: under-arm body cells become chest plate (inner liner), ground-hem mask dil 3. Diagnosis Rowan (piece/weapon toggles): red shoulder bits = his body collar/pauldron flares above the cape -> hidden by the shoulder mask; left-hand scraps = partly hidden sleeve -> robed glove now covers the whole forearm when arms hang down. Talia: hand-skinned bits hanging below the hand hidden. Others unchanged. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg12/

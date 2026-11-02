@@ -158,7 +158,7 @@ def fit_limb(R,t,bones,pc,cap=False):
             if (bi==k).sum()>4: rf[k]=np.percentile(rq[bi==k],pc)
         nz=np.where(rf>0)[0]
         if not len(nz): continue
-        rf=np.interp(np.arange(nb),nz,rf[nz]); rf=np.minimum(_smooth(rf,3),0.095)
+        rf=np.interp(np.arange(nb),nz,rf[nz]); rf=np.minimum(_smooth(rf,3),0.135 if (HERO=='rook' and bn.startswith(('upperArm','foreArm'))) else 0.095)+(0.02 if (HERO=='rook' and bn.startswith('upperArm')) else 0)   # v27: Rook's thick sleeves -> wider rerebrace/pauldron closes the chest-arm gap
         uP=((P-h)@d)/L2; rP=np.linalg.norm(P-h-uP[:,None]*d,axis=1)
         rr=np.interp(np.clip((uP-u0)/(u1-u0+1e-9)*nb-0.5,0,nb-1),np.arange(nb),rf); inr=(uP>=u0)&(uP<=u1)
         lam,amp=LAMEP[0]; fr_=((uP-u0)*Lm%lam)/lam; off=fr_*amp
@@ -224,7 +224,7 @@ def build_grid(slot,side,r,R):
         ad=BH['hand_'+side]-BH['upperArm_'+side]
         if abs(ad[2])/np.linalg.norm(ad)<0.6:   # v26: near-horizontal arms (Talia): sleeve tips hanging below the forearm line
             a0=BH['foreArm_'+side]; dd=BH['hand_'+side]-a0; uq=((spos-a0)@dd)/(dd@dd); zl=a0[2]+np.clip(uq,0,1)*dd[2]
-            fa=fa|(np.isin(cbn,['foreArm_'+side,'upperArm_'+side])&(spos[:,2]<zl-0.05)&(uq>-0.6))
+            fa=fa|(np.isin(cbn,['foreArm_'+side,'upperArm_'+side])&(spos[:,2]<zl-0.02)&(uq>-0.6))
         FAR=np.zeros(S,bool); FAR[tuple(sidx[fa].T)]=True
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((INS|dil(CAPE,1)|DRP|dil(FAR,1))&solid).T,S).tolist()}
     layers=[R]; acc=R.copy()

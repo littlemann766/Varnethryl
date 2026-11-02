@@ -128,3 +128,6 @@ Rook: under-arm body cells become chest plate (inner liner), ground-hem mask dil
 
 ## v26 (leftover polish, soft hold)
 Diagnosis (Rook chest-only / no-chest / chest+arms side renders): the under-arm cluster is BODY (inner upper-arm/sleeve between chest plate and arm armour), not the chest mesh -> Rook liner/mask now covers upper- and fore-arm cells within 7cm of the torso side down from 2cm below the shoulder. Talia (glove/shoulder/weapon toggles): elbow specks are sleeve tips hanging below the forearm line -> hidden for near-horizontal arms only. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg13/
+
+## v27 (leftover polish, soft hold)
+Rook: arm tube radius cap 9.5->13.5cm (+2cm on the upper arm) so pauldron/rerebrace close the chest-arm gap from the armour side. Talia: sleeve tips hidden from 2cm below the forearm line. Others unchanged. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg14/

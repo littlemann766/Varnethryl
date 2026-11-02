@@ -132,3 +132,4 @@ Diagnosis (Rook chest-only / no-chest / chest+arms side renders): the under-arm 
 ## v27 (leftover polish, soft hold)
 Rook: arm tube radius cap 9.5->13.5cm (+2cm on the upper arm) so pauldron/rerebrace close the chest-arm gap from the armour side. Talia: sleeve tips hidden from 2cm below the forearm line. Others unchanged. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg14/
 - v28: gorget-tapered chest, hip-hugging belt, calm overlapping scale rows, slimmer robed tabard/cape. Tris 3538-7990, lod1<=50%. Shots fitted_rpg15.
+- v29: Rook arm widening undone + capped cuirass + foot-axis boots; robed full slim robe (bodice+flared skirt, sash, gold hem); flatter lames on Orin/Finn/Elira/Wren. Tris 3538-7990, lod1<=50%. Shots fitted_rpg16.

@@ -141,7 +141,7 @@ def fit_torso(R,t,pc):
         for k in range(k0,n): w_=((k-k0)/max(n-1-k0,1))**1.3; xr[k]=xr[k]*(1-w_)+nr*1.15*w_; yf[k]=yf[k]*(1-w_)+nr*w_; yb[k]=yb[k]*(1-w_)+nr*w_
     if HERO=='rook' and not BELTMODE[0]: xr[:]=np.minimum(xr,0.175/RES); yf[:]=np.minimum(yf,0.13/RES); yb[:]=np.minimum(yb,0.13/RES)   # v29: fitted scale cuirass, no barrel
     if HERO=='rook' and not BELTMODE[0]:
-        for k in range(int(n*0.35)): w_=1-k/max(int(n*0.35),1); xr[k]*=1-0.14*w_; yf[k]*=1-0.08*w_; yb[k]*=1-0.08*w_   # v30: waist taper
+        for k in range(int(n*0.6)): w_=(1-k/max(int(n*0.6),1))**0.8; xr[k]*=1-0.30*w_; yf[k]*=1-0.12*w_; yb[k]*=1-0.12*w_   # v32: V-taper broad chest -> narrow waist
     if BELTMODE[0]:   # belt/faulds hug the hips: cap the width so coats don't turn it into a lampshade
         cap_=np.percentile(xr,40); xr[:]=np.minimum(xr,cap_*(0.94 if HERO=='rook' else 1.08)); yf[:]=np.minimum(yf,np.percentile(yf,40)*(0.97 if HERO=='rook' else 1.1)); yb[:]=np.minimum(yb,np.percentile(yb,40)*(0.97 if HERO=='rook' else 1.1))
     Zc=np.clip(Z_-z0,0,n-1); dy=(Y_-cy)*FRONT; RX=xr[Zc]; RY=np.where(dy>0,yf[Zc],yb[Zc]); zr=(Z_>=z0)&(Z_<=z1)
@@ -205,6 +205,18 @@ def fit_piece(slot,side,R,t):
 def build_grid(slot,side,r,R):
     out=OUTG if OUTG is not None else globals()['out']
     i=RARITIES.index(r); p=A.pal(FAM,r); t=THK[slot]+(1 if slot=='shoulder' and i>=3 else 0)
+    if ROBED and slot=='glove':   # v32: cuff only along the forearm/hand axis (no hanging cape panel)
+        Pg=lo+(np.argwhere(R)+0.5)*RES; X__='_'+side
+        def sdg(a,b):
+            d_=BH[b]-BH[a]; u_=np.clip(((Pg-BH[a])@d_)/(d_@d_),0,1); return np.linalg.norm(Pg-BH[a]-u_[:,None]*d_,axis=1)
+        e_=BH['hand'+X__]+(BH['hand'+X__]-BH['foreArm'+X__])*0.45
+        BH['_e'+X__]=e_; dg=np.minimum(sdg('foreArm'+X__,'hand'+X__),sdg('hand'+X__,'_e'+X__)); th_=0.055
+        while (dg<=th_).sum()<300 and th_<0.2: th_+=0.02
+        q_=np.argwhere(R)[dg>th_]; R=R.copy(); R[tuple(q_.T)]=False
+        if True:   # v32b: slim full sleeve tube shoulder->wrist (+hand) so the cuff never floats when the body sleeve is hidden
+            I_=np.indices(S).reshape(3,-1).T; Pg=lo+(I_+0.5)*RES
+            R=R|((sdg('upperArm'+X__,'foreArm'+X__)<0.050)|(sdg('foreArm'+X__,'hand'+X__)<0.046)).reshape(S)
+        print('GLOVECUT',side,round(th_,3),int(R.sum()),flush=True)
     if ROBED and slot!='helm':
         nb=np.zeros(S,np.int8)
         for ax in range(3):
@@ -264,12 +276,15 @@ def build_grid(slot,side,r,R):
         CAPE=band&(ee>=1)&(ee<=1+1.7/np.minimum(RXz[Z_],RYz[Z_]));
         keep=np.isin(_bng(),['head','neck','jaw','eye_L','eye_R']+[b+s_ for b in ('upperArm','foreArm','hand','fingers','thumb1','thumb2','thumb3','index1','index2','index3','middle1','middle2','middle3','ring1','ring2','ring3','pinky1','pinky2','pinky3') for s_ in ('_L','_R')])
         xw_=lo[0]+(X_+0.5)*RES
-        HID=solid&(Z_>=zf-1)&(Z_<=zt)&((~keep)|(ee<1.15))&(abs(xw_)<0.55)
+        HID=solid&(Z_>=zf-1)&(Z_<=zt)&((~keep)|(ee<1.15))&(abs(xw_)<0.55)   # v32: hide everything just outside the robe sheet too
         def _sd(P,a_,b_): d_=BH[b_]-BH[a_]; u_=np.clip(((P-BH[a_])@d_)/(d_@d_),0,1); return np.linalg.norm(P-BH[a_]-u_[:,None]*d_,axis=1)
         sl_=np.zeros(len(spos),bool)
         for s_ in ('_L','_R'):   # v30: sleeve/robe chunks hanging off the arm below the shoulder
-            dd_=np.minimum(_sd(spos,'upperArm'+s_,'foreArm'+s_),_sd(spos,'foreArm'+s_,'hand'+s_)); sl_|=(dd_>0.06)&(spos[:,2]<BH['upperArm'+s_][2]-0.03)&~np.isin(cbn,['head','neck','jaw'])
+            dd_=np.minimum(_sd(spos,'upperArm'+s_,'foreArm'+s_),_sd(spos,'foreArm'+s_,'hand'+s_)); sl_|=(dd_>0.05)&(spos[:,2]<BH['upperArm'+s_][2]-0.03)&~np.isin(cbn,['head','neck','jaw'])
         SLV=np.zeros(S,bool); SLV[tuple(sidx[sl_].T)]=True; HID|=SLV
+        an_=np.zeros(len(spos),bool)
+        for s_ in ('_L','_R'): an_|=np.minimum(_sd(spos,'upperArm'+s_,'foreArm'+s_),_sd(spos,'foreArm'+s_,'hand'+s_))<=0.05
+        AN=np.zeros(S,bool); AN[tuple(sidx[an_].T)]=True; HID|=solid&(ee<1.6)&~AN&(Z_>=zf-1)&(Z_<=zt)&~np.isin(_bng(),['head','neck','jaw','eye_L','eye_R'])   # v32: bits just outside the robe, arms kept
         masks[name]={'cells':np.ravel_multi_index(np.argwhere(HID|(dil(CAPE,1)&solid)).T,S).tolist()}
         print('ROBE',int(CAPE.sum()),int(HID.sum()),flush=True)
     layers=[R]; acc=R.copy()
@@ -500,6 +515,7 @@ def build_grid(slot,side,r,R):
         Zb=np.indices(S)[2]; bev=dil(trim&shell)&out&~shell&dil(shell)&(np.roll(trim,1,2)|trim|np.roll(trim,-1,2)); g[bev]=tr if i>=2 else v.c(p['edge']); shell|=bev
         bev2=dil(bev)&out&~shell&dil(shell,2)&(np.roll(bev,1,2)|bev|np.roll(bev,-1,2)); g[bev2]=(tr if i>=2 else v.c(p['edge'])); shell|=bev2   # 2-voxel raised rolled rim
         lm2=LAMEM[0]&shell; rid=dil(lm2)&out&~shell&(np.roll(lm2,1,2)|lm2); g[rid]=v.c(tuple(min(1,c*1.5) for c in base)); shell|=rid   # raised lame ridge (bevelled plate edge, real geometry)
+        grv=shell&dil(out&~shell)&np.roll(lm2,-1,2)&~rid&~trim&~lm2; shell&=~grv; g[grv]=0   # v32: deep groove under each lame ridge
         hl=shell&np.roll(lm2,1,2)&~lm2&~trim&~rid; g[hl]=v.c(tuple(min(1,c*1.3) for c in base))
     if slot not in ('helm','cloak') and not _fit(slot) and not (slot=='boot' and HERO=='rook') and CAPE is None:   # v11: rolled rim on every piece edge -> visible plate thickness, reads as a worn piece not painted skin
         ed=shell&dil(skin&~dil(R,1),2)&dil(out&~shell); rl=dil(ed)&out&~shell&dil(skin&~dil(R,1),3)
@@ -604,7 +620,7 @@ for slot,side in PIECES:
     for r in RARITIES:
         v,org=build_grid(slot,side,r,R); nm=f"{HERO}_{FAM}_{r}_{name}"
         bl.MATS.clear(); hi,_=bl.mesh_g(v,nm+"_hi",RES,origin=tuple(org)); hi,_=bl.smooth_plate(hi,v,RES,tuple(org),iters=5,fac=0.6)
-        if slot!='helm': drop_islands(hi,(0.005 if slot=='shoulder' else 0.06) if ROBED else 0.03)
+        if slot!='helm': drop_islands(hi,(0.005 if slot=='shoulder' else 0.30 if slot=='glove' else 0.06) if ROBED else 0.03)
         low=bake_low(hi,nm,TRI[slot],TEX.get(slot,256)); bpy.data.objects.remove(hi)
         l1=low.copy(); l1.data=low.data.copy(); bpy.context.scene.collection.objects.link(l1)
         bpy.ops.object.select_all(action='DESELECT'); l1.select_set(True); bpy.context.view_layer.objects.active=l1

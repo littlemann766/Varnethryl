@@ -48,3 +48,9 @@ Fitted sets now exist for darius (plate, on the weaponless rig), orin (plate), r
 - Small loose bits are dropped from every piece except the helm.
 - The cloak is limited to the back half, and its shell is closed, which fixed the light speck on Darius's back.
 Each hero folder has its own `<hero>_body_mask.json` and `<hero>_<fam>_tris.json`.
+
+## v7 (all heroes)
+- Helm centred on the modelled head's own cells on rigs without jaw bones (Rook/Talia head bones sit 15-19 cm behind the face); ellipse fit at 100th pct; mask hides every body cell inside the helm envelope -> no faces under helms/hoods.
+- Robed (Rowan/Talia): no close(), no shoulder ridges/flare/spikes -> slimmer mantles.
+- Non-robed legs: mask hides skirt/tabard flaps the rigs weight to thigh/shin (>11.5 cm off the bone) that swung loose in attack1.
+- Thin pieces subdivided before decimate -> every High piece >= 3538 tris; lod1 = 45%.

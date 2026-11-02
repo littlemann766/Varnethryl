@@ -157,7 +157,7 @@ func attach_fitted(sk,path):
 			if bn=="" and src_sk: bn=src_sk.get_bone_name(os.get_bind_bone(b))
 			ns.add_named_bind(bn,os.get_bind_pose(b))
 		var gx=mi.global_transform if mi.is_inside_tree() else mi.transform
-		mi.get_parent().remove_child(mi); mi.skin=ns; mi.set_meta("cloak",true); sk.add_child(mi); mi.skeleton=NodePath("..")
+		mi.get_parent().remove_child(mi); mi.skin=ns; mi.set_meta("cloak",true); mi.name="fit_"+path.get_file().get_basename(); sk.add_child(mi); mi.skeleton=NodePath("..")
 		mat_fix(mi,mi.mesh)
 	inst.free()
 func hide_mask(sk,maskp,slots):
@@ -243,7 +243,15 @@ func run(j):
 		cam.projection=Camera3D.PROJECTION_ORTHOGONAL; cam.size=shot.get("size",H*shot.get("sizef",1.08))
 		var cy=shot.get("cy",H*shot.get("cyf",0.47))
 		var tgt=Vector3(0,cy,0)
-		if shot.has("bone"): tgt=sk.global_transform*sk.get_bone_global_pose(sk.find_bone(shot["bone"])).origin+Vector3(0,shot.get("up",0.1),0)
+		if shot.has("helm"):
+			var hb=AABB(); var got=false
+			for mi in root.find_children("*","MeshInstance3D",true,false):
+				if String(mi.get_path()).to_lower().contains("helm") or (mi.mesh and mi.mesh.resource_path.to_lower().contains("helm")):
+					var g=mi.global_transform*mi.get_aabb()
+					hb=hb.merge(g) if got else g; got=true
+			if got:
+				tgt=hb.get_center(); cam.size=max(hb.size.y,hb.size.x)*shot.get("helm",1.6)
+		elif shot.has("bone"): tgt=sk.global_transform*sk.get_bone_global_pose(sk.find_bone(shot["bone"])).origin+Vector3(0,shot.get("up",0.1),0)
 		cam.position=tgt+Vector3(sin(yaw)*6,0.9*shot.get("el",1.0),cos(yaw)*6); cam.look_at(tgt)
 		await get_tree().process_frame; await get_tree().process_frame; await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png(shot["out"])

@@ -92,3 +92,6 @@ Each hero folder has its own `<hero>_body_mask.json` and `<hero>_<fam>_tris.json
 
 ## v14 (RPG pass)
 Stepped overlapping lames (pauldron cascade, fauld, limb lames) with dark riveted lips, mail at elbows/knees, chest emblem+jewel (gold legendary, molten masterwork), wider leg side slab, dagged robed mantles. Tris 3538-7990, lod1<=50%. Shots: /workspace/shots/loot3/fitted_rpg/
+
+## v15 (robes, coats, unique helms)
+Per-hero helm silhouettes: darius comb+up-horns, orin plume+wings, rook ram horns, finn spike, elira comb+wings, wren spiked crown, rowan tall hood tip, talia brow diadem. Robed: slim top-of-shoulder mantle, cloak thk 1, sash+tabard to ankle, reduced hood flare. Leg cover slab foot..belt, |x|<0.75; glove mask dil 3. Chain fitted pieces: calm ring rows. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg2/

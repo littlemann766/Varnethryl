@@ -66,6 +66,7 @@ def region(slot,side=None):
     elif slot=='shoulder':
         ua='upperArm'+X; sgn=np.sign(BH[ua][0])
         m=(np.isin(cbn,[ua,'shoulder'+X])&(tpar(spos,ua)<(0.35 if ROBED else 0.78)))
+        if ROBED: m&=spos[:,2]>BH[ua][2]-0.01   # v15 slim: mantle rides on top of the shoulder only and drapes from there
         m|=np.isin(cbn,['upperChest','chest'])&(spos[:,0]*sgn>abs(BH[ua][0])-0.05)&(spos[:,2]>BH[ua][2]-0.09)
         m&=spos[:,2]<BH[ua][2]+9   # v10: no cap (1-vox pauldrons hug the shoulder; a cap exposed raw body voxels)
     elif slot=='glove':      # gauntlet + vambrace + couter (overlaps the rerebrace -> no elbow gap)
@@ -77,6 +78,7 @@ def region(slot,side=None):
         m=((cbn=='shin'+X)&(tpar(spos,'shin'+X)>=0.12))|np.isin(cbn,['foot'+X,'toe'+X])
     elif slot=='belt' and ROBED:   # robed: a sash/girdle band only, the robe skirt stays
         m=np.isin(cbn,['hips','spine','spine2'])&(abs(spos[:,2]-beltz)<0.03)
+        kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.17)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
     elif slot=='belt':       # belt + faulds: covers the groin so the tabard no longer shows there
         m=(np.isin(cbn,['hips','spine','spine2'])|np.char.startswith(cbn.astype(str),'coat')|np.char.startswith(cbn.astype(str),'thigh'))&(spos[:,2]<beltz+0.035)&(spos[:,2]>beltz-0.17)
         m&=~(np.char.startswith(cbn.astype(str),'thigh')&(spos[:,2]<beltz-0.12))
@@ -98,7 +100,7 @@ THK={'chest':2,'shoulder':2,'glove':2,'leg':2,'boot':2,'belt':2,'helm':3,'cloak'
 TRI={'chest':7000,'helm':7990,'shoulder':5020,'belt':4520,'glove':3540,'leg':4530,'boot':4030,'cloak':4030}
 TEX={'chest':512,'helm':512,'cloak':512}
 PIECES=[('helm',None),('cloak',None),('chest',None),('belt',None)]+[(s,x) for s in ('shoulder','glove','leg','boot') for x in ('L','R')]
-if ROBED: PIECES=[p for p in PIECES if p[0] not in ('chest','leg')]; THK.update(helm=2,shoulder=1,belt=1,glove=1,cloak=3)   # robed casters stay robed: no breastplate/cuisses over the robe
+if ROBED: PIECES=[p for p in PIECES if p[0] not in ('chest','leg')]; THK.update(helm=2,shoulder=1,belt=1,glove=1,cloak=1)   # robed casters stay robed: no breastplate/cuisses over the robe
 
 # ---------- v13: reshape -> armour follows a CLEANED silhouette (per-slice ellipse / per-bone tube fits), body hidden under it ----------
 OUTG=None
@@ -172,7 +174,7 @@ def fit_limb(R,t,bones,pc,cap=False):
     return shell,inside,env
 LAMEM=[None]; JOINTM=[None]; LAMEP=[(0.05,0.012)]; BELTMODE=[False]
 FITSET={'chest','belt','shoulder','glove','leg'}   # boots keep the hugging shell (foot axis unreliable)
-def _fit(slot): return slot in FITSET and not (ROBED and slot in ('glove','shoulder'))
+def _fit(slot): return slot in FITSET and not (ROBED and slot in ('glove','shoulder','belt'))
 def fit_piece(slot,side,R,t):
     X='_'+(side or '')
     if slot in ('chest','belt'): return fit_torso(R,t,84 if not ROBED else 70)
@@ -197,8 +199,9 @@ def build_grid(slot,side,r,R):
         shell,fin,fenv=fit_piece(slot,side,R,t); layers=[R,shell]; acc=shell|fin; print('FIT',slot,side,int(R.sum()),int(shell.sum()),int(fin.sum()),flush=True)
         if slot=='leg':   # v13: hide skirts/coats hanging around the legs on this side (Rook/Wren/Finn broad silhouettes) down to mid-shin
             Xg,Yg,Zg=np.indices(S); xw=lo[0]+(Xg+0.5)*RES; zw=lo[2]+(Zg+0.5)*RES; sg=np.sign(BH['thigh'+'_'+side][0])
-            zlo=(BH['shin_'+side][2]+BH['foot_'+side][2])/2; zhi=beltz-0.04
-            fenv=fenv|((zw>zlo)&(zw<zhi)&(abs(xw)<0.45)&(xw*sg>-0.005))
+            zlo=BH['foot_'+side][2]+0.02; zhi=beltz+0.02
+            fenv=fenv|((zw>zlo)&(zw<zhi)&(abs(xw)<0.75)&(xw*sg>-0.01))
+        if slot=='glove': fenv=fenv|dil(R,3)   # v15: stray coat bits near the hands
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((fenv|fin|dil(R,1))&solid).T,S).tolist()}
         out=~fin
     if slot=='helm':   # v8: skull-fitted helm (egg/dome profile, not a cylinder): great helm (plate/leather), bascinet+aventail (chain/scale), cowl (robed)
@@ -215,7 +218,7 @@ def build_grid(slot,side,r,R):
         def prof(T):   # radius scale per height + backward lean of the crown (bascinet point)
             U=(Z_-zs)/(Hd+T); Lw=np.clip((zs-Z_)/max(zs-zb,1),0,1.5)
             if STY=='basc': f=np.where(U>0,np.clip(1-U,0,1)**0.62*(1-0.25*U*U),1-0.10*Lw); lean=np.clip(U,0,1)*0.45*bb
-            elif STY=='cowl': f=np.where(U>0,np.sqrt(np.clip(1-U**2.2,0,1)),1+0.35*Lw**1.5); lean=np.clip(U,0,1)*0.35*bb
+            elif STY=='cowl': f=np.where(U>0,np.sqrt(np.clip(1-U**2.2,0,1)),1+0.12*Lw**1.5); lean=np.clip(U,0,1)*0.35*bb
             else: f=np.where(U>0,np.sqrt(np.clip(1-U**2.4,0,1)),1-0.08*Lw); lean=np.clip(U,0,1)*0.10*bb
             return f,lean
         def ell(T):
@@ -295,22 +298,49 @@ def build_grid(slot,side,r,R):
             g[rr&((X_+Y_)%4==0)]=edge   # rivets on the rim
             g[band&((X_+Y_)%5==0)]=edge
         top=int(np.argwhere(shell)[:,2].max())
-        if i>=2 and STY!='cowl':   # comb crest front-to-back along the crown centre (taller on higher tiers)
-            ch=2+(i-2)
-            cr=(abs(X_-cx)<=0)&(Z_>top-6)&(Z_<=top+ch)&ext&dil(shell&(Z_>=top-6),ch+1)&(fy>-0.9*H_['bb'])&(fy<0.8*H_['bf'])
-            g[cr]=tr; shell|=cr
-        if i>=3 and STY!='cowl':   # horns sweep out and up from the temples
-            hc=v.c((0.88,0.84,0.74) if i<5 else (0.10,0.08,0.08)); zh=int(H_['zs']+0.35*(H_['zt']-H_['zs'])); ys=int(round(H_['cy']-FRONT*0.1*H_['bb']))
+        HSTY={'darius':('comb','up'),'orin':('plume','wing'),'rook':('none','ram'),'finn':('spike','none'),'elira':('comb','wing'),'wren':('crown','none'),'rowan':('tip',None),'talia':('diadem',None)}.get(HERO,('comb','up'))   # v15: unique silhouette per hero
+        def stamp(x,y,z,r,col):
+            R_=int(np.ceil(r))
+            for dx in range(-R_,R_+1):
+                for dy in range(-R_,R_+1):
+                    for dz in range(-R_,R_+1):
+                        if dx*dx+dy*dy+dz*dz<=r*r:
+                            for xx in ((x+dx,int(round(2*cx-(x+dx)))) if x!=cx else (x+dx,)):
+                                q=(xx,int(y+dy),int(z+dz))
+                                if all(0<=q[j]<S[j] for j in range(3)) and not shell[q]: g[q]=col; shell[q]=True
+        cr_,hn_=HSTY; hc=v.c((0.88,0.84,0.74) if i<5 else (0.10,0.08,0.08)); cy=int(round(H_['cy']))
+        if STY!='cowl' and i>=2:
+            if cr_ in ('comb','plume'):
+                ch=2+(i-2)+(4 if cr_=='plume' else 0)
+                cr=(abs(X_-cx)<=(1 if cr_=='plume' else 0))&(Z_>top-6)&(Z_<=top+ch)&ext&dil(shell&(Z_>=top-6),ch+1)&(fy>-(1.4 if cr_=='plume' else 0.9)*H_['bb'])&(fy<0.8*H_['bf'])
+                g[cr]=tr if cr_=='comb' else v.c(A.PAL[r].get('cloth',(0.55,0.08,0.08))); shell|=cr
+                if cr_=='plume':   # plume falls down the back
+                    for k in range(10): stamp(cx,cy-FRONT*(H_['bb']+k*0.6),top+ch-k*1.2,1.6,v.c(A.PAL[r].get('cloth',(0.55,0.08,0.08))))
+            elif cr_=='spike':
+                for k in range(12+2*i): stamp(cx,cy,top-2+k,max(0.6,3.0-k*0.12),tr if k>5 else metal)
+            elif cr_=='crown':   # circlet of spikes around the crown
+                zc=top-4; pts=np.argwhere(outer[:,:,zc]) if 0<=zc<S[2] else np.zeros((0,2),int)
+                if len(pts):
+                    ang=np.arctan2(pts[:,1]-cy,pts[:,0]-cx)
+                    for a_ in np.linspace(-np.pi,np.pi,9)[:-1]:
+                        q=pts[np.argmin(abs(np.angle(np.exp(1j*(ang-a_)))))]
+                        for k in range(3+i): stamp(int(q[0]),q[1],zc+k,max(0.5,1.5-k*0.15),tr)
+        if STY!='cowl' and i>=(2 if hn_=='wing' else 3) and hn_!='none':
+            zh=int(H_['zs']+0.35*(H_['zt']-H_['zs'])); ys=int(round(H_['cy']-FRONT*0.1*H_['bb']))
             xs=np.where(shell[:,ys,zh])[0]; x0=xs.max() if len(xs) else cx+10
             for k in range(16):
-                x=x0-1+int(k*0.8); z=zh+int(k**1.45/3.0); r=max(0.6,2.6-k*0.13)
-                for dx in range(-3,4):
-                    for dy in range(-3,4):
-                        for dz in range(-3,4):
-                            if dx*dx+dy*dy+dz*dz<=r*r:
-                                for xx in (x+dx,int(round(2*cx-(x+dx)))):
-                                    q=(xx,ys+dy,z+dz)
-                                    if all(0<=q[j]<S[j] for j in range(3)) and not shell[q]: g[q]=hc if k<13 else tr; shell[q]=True
+                if hn_=='up': stamp(x0-1+int(k*0.8),ys,zh+int(k**1.45/3.0),max(0.6,2.6-k*0.13),hc if k<13 else tr)
+                elif hn_=='ram':   # curls back and down beside the cheek
+                    a_=k*0.45; stamp(x0+1+int(k*0.6),ys-FRONT*7*(1-np.cos(a_)),zh+3+7*np.sin(a_)-k*0.2,max(1.0,3.4-k*0.14),hc if k<14 else tr)
+                elif hn_=='wing':   # swept-back fin
+                    if k<15:
+                        for zz in range(0,max(1,15-k)): stamp(x0+int(k*0.75),ys-FRONT*int(k*0.8),zh-2+zz+int(k*0.6),0.9,tr if zz>=9-k or i>=4 and zz%3==0 else metal)
+        if STY=='cowl' and i>=2:
+            if cr_=='tip':   # tall pointed hood tip falling back
+                for k in range(6+i): stamp(cx,cy-FRONT*(0.6*H_['bb']+k*0.7),H_['zt']+2-k*0.3+min(k,4)*0.8,max(0.8,2.2-k*0.12),metal)
+            else:   # diadem across the brow with a jewel
+                db=outer&front&(abs(Z_-(ze+7))<=0)&(abs(X_-cx)<=H_['ax']*0.8); g[db]=tr; KEEP&=~db
+                stamp(cx,int(round(H_['cy']+FRONT*H_['bf']))+FRONT,ze+7,1.4,v.c((0.9,0.25,0.05) if i==5 else (0.15,0.35,0.85)))
     rows=None
     if slot in('chest','leg','shoulder','glove','boot'):
         if slot in('leg','glove'):   # leather straps on the back
@@ -361,7 +391,9 @@ def build_grid(slot,side,r,R):
     idx=np.argwhere(g>0); a=idx.min(0)-1; b=idx.max(0)+2
     vv=V(1); vv.pal=v.pal; vv.g=g[a[0]:b[0],a[1]:b[1],a[2]:b[2]].copy()
     if i>=4 and not ROBED and slot=='helm': A.filigree(vv,p)   # v11: gold rims carry legendary on body pieces (no speckle noise)   # v9: no gold blotches on robed mantles (trim hem only)
-    if FAM in ('chain','scale','leather') and slot not in ('cloak',): A.skin(vv,FAM,p,i)   # family surface (rings / scales / stitched leather)
+    if FAM=='chain' and _fit(slot):   # v15: calm mail - horizontal ring rows instead of a 1-voxel checker
+        Zc=np.indices(vv.g.shape)[2]; mm=(vv.g==vv.c(base)); vv.g[mm&((Zc%3)==0)]=vv.c(tuple(c*0.72 for c in base))
+    elif FAM in ('chain','scale','leather') and slot not in ('cloak',): A.skin(vv,FAM,p,i)   # family surface (rings / scales / stitched leather)
     if i<=1 or slot=='helm': G.wear(vv,p,seed=hash((slot,side))%97)   # v12: clean metal on rare+ body pieces (speckle read as voxel bulk)
     if i==5: A.molten(vv,p,seed=11)
     av_=AV[a[0]:b[0],a[1]:b[1],a[2]:b[2]]&(vv.g>0)

@@ -125,3 +125,6 @@ Rook: every non-helm slot mask grown by 1 cell (coat slivers at mask edges). Rob
 
 ## v25 (leftover polish, soft hold)
 Rook: under-arm body cells become chest plate (inner liner), ground-hem mask dil 3. Diagnosis Rowan (piece/weapon toggles): red shoulder bits = his body collar/pauldron flares above the cape -> hidden by the shoulder mask; left-hand scraps = partly hidden sleeve -> robed glove now covers the whole forearm when arms hang down. Talia: hand-skinned bits hanging below the hand hidden. Others unchanged. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg12/
+
+## v26 (leftover polish, soft hold)
+Diagnosis (Rook chest-only / no-chest / chest+arms side renders): the under-arm cluster is BODY (inner upper-arm/sleeve between chest plate and arm armour), not the chest mesh -> Rook liner/mask now covers upper- and fore-arm cells within 7cm of the torso side down from 2cm below the shoulder. Talia (glove/shoulder/weapon toggles): elbow specks are sleeve tips hanging below the forearm line -> hidden for near-horizontal arms only. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg13/

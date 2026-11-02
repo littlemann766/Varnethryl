@@ -221,6 +221,10 @@ def build_grid(slot,side,r,R):
         hd=np.linalg.norm(spos-BH['hand_'+side],axis=1); fa=np.isin(cbn,['hand_'+side])&((hd>0.11)|(spos[:,2]<BH['hand_'+side][2]-0.05))   # v22: loose bits skinned to the hand far from it (Talia elbow/hip specks)
         fl_=(spos[:,0]*sg>0.06)&(abs(spos[:,0])<abs(BH['upperArm_'+side][0])+0.14)&(spos[:,2]>BH['upperArm_'+side][2]-0.04)&(spos[:,2]<BH['neck'][2]+0.12)&~np.isin(cbn,['head','neck','jaw'])&~np.array([n.startswith(('hand','fore')) for n in cbn])   # v25: collar/pauldron flares poking above the cape (Rowan red bits)
         fa=fa|fl_
+        ad=BH['hand_'+side]-BH['upperArm_'+side]
+        if abs(ad[2])/np.linalg.norm(ad)<0.6:   # v26: near-horizontal arms (Talia): sleeve tips hanging below the forearm line
+            a0=BH['foreArm_'+side]; dd=BH['hand_'+side]-a0; uq=((spos-a0)@dd)/(dd@dd); zl=a0[2]+np.clip(uq,0,1)*dd[2]
+            fa=fa|(np.isin(cbn,['foreArm_'+side,'upperArm_'+side])&(spos[:,2]<zl-0.05)&(uq>-0.6))
         FAR=np.zeros(S,bool); FAR[tuple(sidx[fa].T)]=True
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((INS|dil(CAPE,1)|DRP|dil(FAR,1))&solid).T,S).tolist()}
     layers=[R]; acc=R.copy()
@@ -235,7 +239,7 @@ def build_grid(slot,side,r,R):
     if _fit(slot):   # v13 reshape (robed cuffs/mantles keep the draped shell)
         if slot=='chest':   # v20: hide the coat under the arms at the chest sides (Rook)
             xw_=lo[0]+(np.indices(S)[0]+0.5)*RES; zw_=lo[2]+(np.indices(S)[2]+0.5)*RES; ax_=abs(BH['upperArm_L'][0])
-            CSIDE=solid&(abs(xw_)<ax_+0.06)&(zw_>beltz-0.02)&(zw_<BH['upperArm_L'][2]-0.03)&~(np.isin(_bng(),['upperArm_L','upperArm_R','foreArm_L','foreArm_R','hand_L','hand_R'])&~((abs(xw_)<ax_+0.02)&(zw_<BH['upperArm_L'][2]-0.08)&np.isin(_bng(),['upperArm_L','upperArm_R'])))   # v21: under-arm sleeve hang hidden (arm is armoured)
+            CSIDE=solid&(abs(xw_)<ax_+0.06)&(zw_>beltz-0.02)&(zw_<BH['upperArm_L'][2]-0.03)&~(np.isin(_bng(),['upperArm_L','upperArm_R','foreArm_L','foreArm_R','hand_L','hand_R'])&~((abs(xw_)<ax_+(0.07 if HERO=='rook' else 0.02))&(zw_<BH['upperArm_L'][2]-(0.02 if HERO=='rook' else 0.08))&np.isin(_bng(),['upperArm_L','upperArm_R']+(['foreArm_L','foreArm_R'] if HERO=='rook' else []))))   # v21: under-arm sleeve hang hidden (arm is armoured)
             CSIDE|=solid&np.isin(_bng(),['shoulder_L','shoulder_R'])&(abs(xw_)<ax_+0.02)&(zw_<BH['upperArm_L'][2]-0.05)&(zw_>beltz-0.02)
         LAMEP[0]={'shoulder':(0.032,0.022),'glove':(0.045,0.010),'leg':(0.05,0.011)}.get(slot,(0.05,0.012)); BELTMODE[0]=(slot=='belt')
         shell,fin,fenv=fit_piece(slot,side,R,t); layers=[R,shell]; acc=shell|fin; print('FIT',slot,side,int(R.sum()),int(shell.sum()),int(fin.sum()),flush=True)

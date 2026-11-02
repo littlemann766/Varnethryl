@@ -209,11 +209,11 @@ rook DONE boot_L epic 4028 1812
 rook DONE boot_L legendary 4028 1812
 rook DONE boot_L masterwork 4028 1812
 rook DONE boot_R uncommon 4030 1812
-rook DONE boot_R common 4028 1812
-rook DONE boot_R rare 4028 1812
-rook DONE boot_R epic 4028 1812
-rook DONE boot_R legendary 4028 1812
-rook DONE boot_R masterwork 4028 1812
+rook DONE boot_R common 4030 1812
+rook DONE boot_R rare 4030 1812
+rook DONE boot_R epic 4030 1812
+rook DONE boot_R legendary 4030 1812
+rook DONE boot_R masterwork 4030 1812
 finn DONE helm uncommon 7990 3594
 finn DONE helm common 7990 3594
 finn DONE helm rare 7990 3594

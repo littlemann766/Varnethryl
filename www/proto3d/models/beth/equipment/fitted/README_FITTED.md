@@ -107,3 +107,6 @@ Robed pelerine wider (+9cm) and lower (starts at shoulder joint), slope flare 0.
 
 ## v19 (leftover polish, soft hold)
 Robed pelerine: rounded shoulder (sqrt profile), wider lower flare 0.35, thinner sheet (1.6 cells); hides specks within 1.35x of the sheet; T-pose drape mask widened to the ankle. Rook: boot foot trimmed to the foot (no coat-hem toe), synthetic thigh core so the cuisse meets the fauld; chest env +3. Sheets via tools/godot/r_sheets.py. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg6/
+
+## v20 (leftover polish, soft hold)
+Rook boot: close(2)+opening (smooth, no 1-voxel strays), rim band only at boot top, no rolled edge blotches, mask dil 3. Chest: hide non-arm body cells at the chest sides under the arms. Robed: cape speck-hide zone 1.6x (+6 above, -3 below), cape 2cm narrower and flare 0.28; skirt panel |x|<0.46. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg7/

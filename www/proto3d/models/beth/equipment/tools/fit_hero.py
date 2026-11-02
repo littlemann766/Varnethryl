@@ -76,7 +76,7 @@ def region(slot,side=None):
         m=(cbn=='thigh'+X)|((cbn=='shin'+X)&(tpar(spos,'shin'+X)<0.62))
         m|=np.char.startswith(cbn.astype(str),'coat')&(spos[:,0]*np.sign(BH['thigh'+X][0])>0)&(spos[:,2]<beltz-0.12)   # v16: coat-weighted shin cells (Rook) get a greave too
     elif slot=='boot':
-        m=((cbn=='shin'+X)&(tpar(spos,'shin'+X)>=0.12))|np.isin(cbn,['foot'+X,'toe'+X])
+        m=((cbn=='shin'+X)&(tpar(spos,'shin'+X)>=0.12))|(np.isin(cbn,['foot'+X,'toe'+X])&(((abs(spos[:,1]-BH['foot'+X][1])<0.17)&(spos[:,2]<BH['foot'+X][2]+0.12)) if HERO=='rook' else True))   # v19: boot follows the foot, not the coat hem
     elif slot=='belt' and ROBED:   # robed: a sash/girdle band only, the robe skirt stays
         m=np.isin(cbn,['hips','spine','spine2'])&(abs(spos[:,2]-beltz)<0.03)
         kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.42)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
@@ -130,7 +130,7 @@ def fit_torso(R,t,pc):
     E=lambda T: ((X_-cx)/(RX+T))**2+(dy/(RY+T))**2
     zm=z0+0.55*n if not BELTMODE[0] else z1+1; lam=6; fr=((z1-Z_)%lam)/lam; st=np.where(Z_<zm,fr*2.2,0)   # v14: faulds/plackart lames flare at their lower edge
     E2=lambda T: ((X_-cx)/(RX+T+st))**2+(dy/(RY+T+st))**2
-    e=E2(0); inside=(e<=1)&zr; shell=(E2(t)<=1)&(e>1)&zr; env=(E(t+(14 if BELTMODE[0] else 7))<=1)&zr
+    e=E2(0); inside=(e<=1)&zr; shell=(E2(t)<=1)&(e>1)&zr; env=(E(t+(14 if BELTMODE[0] else 10))<=1)&zr
     LAMEM[0]=shell&(Z_<zm)&(fr>0.8); JOINTM[0]=np.zeros(S,bool)
     return shell,inside,env
 def fit_limb(R,t,bones,pc,cap=False):
@@ -140,6 +140,7 @@ def fit_limb(R,t,bones,pc,cap=False):
     for bn in bones:
         if bn not in BH: continue
         qb=np.argwhere(Rb&(BN==bn))
+        if bn in SYN: qb=np.vstack([qb,SYN[bn]])
         if len(qb)<30: continue
         CH={'thigh':'shin','shin':'foot','upperArm':'foreArm','foreArm':'hand'}; base_,sd_=bn.split('_')[0],bn[len(bn.split('_')[0]):]
         h=BH[bn]
@@ -173,7 +174,7 @@ def fit_limb(R,t,bones,pc,cap=False):
             tmp=np.zeros(tuple(b-a),bool).reshape(-1); tmp[:]=v_; M_[sl]|=tmp.reshape(tuple(b-a))
     shell&=~inside
     return shell,inside,env
-LAMEM=[None]; JOINTM=[None]; LAMEP=[(0.05,0.012)]; BELTMODE=[False]
+SYN={}; LAMEM=[None]; JOINTM=[None]; LAMEP=[(0.05,0.012)]; BELTMODE=[False]
 FITSET={'chest','belt','shoulder','glove','leg'}   # boots keep the hugging shell (foot axis unreliable)
 def _fit(slot): return slot in FITSET and not (ROBED and slot in ('glove','shoulder','belt'))
 def fit_piece(slot,side,R,t):
@@ -199,20 +200,23 @@ def build_grid(slot,side,r,R):
         R=R|cyl; print("BOOTCYL",side,int(cyl.sum()),flush=True)
         out=out|(solid&~dil(R,1))   # v17: coat wraps the shins (Rook) -> no air next to them; let the greave grow through the hidden coat
     CAPE=None
+    if slot=='leg' and not ROBED:   # v19: thigh core (coat-wrapped thighs give the cuisse no cells near the hip)
+        h_=BH['thigh_'+side]; d_=BH['shin_'+side]-h_; I_=np.indices(S).reshape(3,-1).T; Pw=lo+(I_+0.5)*RES; uu=((Pw-h_)@d_)/(d_@d_)
+        cyl=((uu>-0.05)&(uu<0.9)&(np.linalg.norm(Pw-h_-uu[:,None]*d_,axis=1)<0.075)).reshape(S); SYN['thigh_'+side]=np.argwhere(cyl)
     if ROBED and slot=='shoulder':   # v17 pelerine: a thin conical cape sheet hanging from the neck over the shoulder (not a shell around the arm)
         X_,Y_,Z_=np.indices(S); vz=lambda z:(z-lo[2])/RES; sg=np.sign(BH['upperArm_'+side][0]); cx=(0-lo[0])/RES
         tc=np.isin(cbn,['chest','upperChest','spine2']); cy=np.median(sidx[tc][:,1]) if tc.any() else np.median(sidx[:,1])
         zt=vz(BH['neck'][2]+0.04); zs=vz(BH['upperArm_'+side][2]-0.01); zb=zs-0.30/RES
         sel=tc&(abs(spos[:,2]-BH['upperArm_'+side][2])<0.05); dyv=(sidx[sel][:,1]-cy)*FRONT if sel.any() else np.array([4.,-4.])
         rxs=abs(BH['upperArm_'+side][0])/RES+0.09/RES; ryf=np.percentile(dyv[dyv>0],95)+0.04/RES if (dyv>0).any() else 6; ryb=min(np.percentile(-dyv[dyv<0],95)+0.04/RES,0.17/RES) if (dyv<0).any() else 6; ryf=min(ryf,0.15/RES)
-        u=np.clip((zt-Z_)/max(zt-zs,1),0,1)+np.clip((zs-Z_)*0.22/max(zs-zb,1),0,0.22); r0=0.085/RES   # v17: steep shoulder slope, then hangs nearly straight down; r0=0.075/RES
+        u=np.sqrt(np.clip((zt-Z_)/max(zt-zs,1),0,1))+np.clip((zs-Z_)*0.35/max(zs-zb,1),0,0.35); r0=0.085/RES   # v17: steep shoulder slope, then hangs nearly straight down; r0=0.075/RES
         rx=r0+(rxs-r0)*u; dy=(Y_-cy)*FRONT; ry=r0+(np.where(dy>0,ryf,ryb)-r0)*u
         ee=np.sqrt(((X_-cx)/rx)**2+(dy/ry)**2); band=(Z_<=zt)&(Z_>=zb)&((X_-cx)*sg>=0)
-        CAPE=band&(ee>=1)&(ee<=1+2.2/np.minimum(rx,ry)); INS=band&(ee<1)
+        CAPE=band&(ee>=1)&(ee<=1+1.6/np.minimum(rx,ry)); INS=(band&(ee<1))|((Z_<=zt+3)&(Z_>=zb)&((X_-cx)*sg>=0)&(ee<1.35))   # v19: also hide specks just outside the sheet
         Zd=Z_; ang_=np.arctan2(dy,(X_-cx)*sg); CAPE&=~((Zd<=zb+3)&((np.floor(ang_*9)%2)==0))   # dagged hem (teeth around the rim)
         txh=abs(BH['upperArm_'+side][0])-0.02
         xw_=lo[0]+(X_+0.5)*RES; zw_=lo[2]+(Z_+0.5)*RES
-        DRP=solid&(abs(xw_)>txh+0.03)&(xw_*sg>0)&(zw_>beltz-0.45)&(zw_<BH['upperArm_'+side][2]-0.04)&~np.isin(_bng(),(['hand_'+side] if BH['hand_'+side][2]>BH['upperArm_'+side][2]-0.15 else ['foreArm_'+side,'hand_'+side]))   # sleeve drapes (T-pose arms: forearm drapes too) hanging below the T-pose arms
+        DRP=solid&(abs(xw_)>txh-0.04)&(xw_*sg>0)&(zw_>BH['foot_'+side][2]+0.05)&(zw_<BH['upperArm_'+side][2]-0.04)&~np.isin(_bng(),(['hand_'+side] if BH['hand_'+side][2]>BH['upperArm_'+side][2]-0.15 else ['foreArm_'+side,'hand_'+side]))   # sleeve drapes (T-pose arms: forearm drapes too) hanging below the T-pose arms
         print('CAPE',side,int(CAPE.sum()),int(INS.sum()),int(DRP.sum()),round(zt,1),round(zs,1),round(rxs,1),round(ryf,1),round(ryb,1),flush=True)
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((INS|dil(CAPE,1)|DRP)&solid).T,S).tolist()}
     layers=[R]; acc=R.copy()

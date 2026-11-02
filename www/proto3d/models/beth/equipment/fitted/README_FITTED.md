@@ -104,3 +104,6 @@ Grid +35cm headroom (crest/spike stamps were clipped). Finn: thick tapered spike
 
 ## v18 (leftover polish, soft hold)
 Robed pelerine wider (+9cm) and lower (starts at shoulder joint), slope flare 0.22, slimmer front/back depth (<=15/17cm). T-pose sleeve drapes hidden incl. forearm drapes, down to belt-45cm; skirt panel |x|<0.42. Rook: wider ankle bridge (r 7.5cm), forearm coat-cuff mask r 16cm. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg5/
+
+## v19 (leftover polish, soft hold)
+Robed pelerine: rounded shoulder (sqrt profile), wider lower flare 0.35, thinner sheet (1.6 cells); hides specks within 1.35x of the sheet; T-pose drape mask widened to the ankle. Rook: boot foot trimmed to the foot (no coat-hem toe), synthetic thigh core so the cuisse meets the fauld; chest env +3. Sheets via tools/godot/r_sheets.py. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg6/

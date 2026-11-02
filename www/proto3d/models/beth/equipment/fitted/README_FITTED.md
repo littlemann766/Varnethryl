@@ -69,3 +69,6 @@ Each hero folder has its own `<hero>_body_mask.json` and `<hero>_<fam>_tris.json
 - Very wide heads (Rook) fit at the 84th percentile -> snug helm.
 - Pauldrons capped at +4.5 cm over the shoulder joint (not Darius/Wren).
 - Robed: no filigree, gold only on the hem -> clean mantles.
+
+## v10 slim (all 8 heroes)
+- Armour wall 1 vox (chest/shoulder/glove/leg/belt), boots 2; pin-hole fill limited to the armour's own thickness off the body (no bridging bulk); pauldron height cap removed (1-vox pauldrons follow the shoulder; a cap exposed raw body voxels). Lames/rivets/cops/straps and v8/v9 helms unchanged.

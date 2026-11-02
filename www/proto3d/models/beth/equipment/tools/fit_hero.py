@@ -67,7 +67,7 @@ def region(slot,side=None):
         ua='upperArm'+X; sgn=np.sign(BH[ua][0])
         m=(np.isin(cbn,[ua,'shoulder'+X])&(tpar(spos,ua)<(0.35 if ROBED else 0.78)))
         m|=np.isin(cbn,['upperChest','chest'])&(spos[:,0]*sgn>abs(BH[ua][0])-0.05)&(spos[:,2]>BH[ua][2]-0.09)
-        m&=spos[:,2]<BH[ua][2]+(0.045 if HERO not in ('darius','wren') else 9)   # v9: pauldron no higher than ~4.5 cm over the shoulder joint (doesn't tower beside the helm); Darius approved as-is
+        m&=spos[:,2]<BH[ua][2]+9   # v10: no cap (1-vox pauldrons hug the shoulder; a cap exposed raw body voxels)
     elif slot=='glove':      # gauntlet + vambrace + couter (overlaps the rerebrace -> no elbow gap)
         m=((cbn=='foreArm'+X)&(tpar(spos,'foreArm'+X)>0.55)) if ROBED else ((cbn=='foreArm'+X)|((cbn=='upperArm'+X)&(tpar(spos,'upperArm'+X)>0.66)))   # robed: gauntlet + cuff only, the sleeve stays
         m|=np.array([n.endswith(X) and (n.startswith(('hand','fingers','index','middle','ring','pinky','thumb'))) for n in cbn])
@@ -94,7 +94,7 @@ def region(slot,side=None):
 BONESET={'chest':['spine','spine2','chest','upperChest','hips'],'belt':['hips','spine','spine2','thigh_L','thigh_R'],'helm':['head','neck'],'cloak':[b for b in BH if b.startswith('cape')]+['upperChest','chest'],
  'shoulder':lambda X:['upperArm'+X,'shoulder'+X,'upperChest','chest'],'glove':lambda X:['upperArm'+X,'foreArm'+X,'hand'+X]+[f+n+X for f in ('index','middle','ring','pinky','thumb') for n in '123']+['fingers'+X],
  'leg':lambda X:['thigh'+X,'shin'+X,'hips'],'boot':lambda X:['shin'+X,'foot'+X,'toe'+X]}
-THK={'chest':2,'shoulder':2,'glove':2,'leg':2,'boot':3,'belt':2,'helm':3,'cloak':4}
+THK={'chest':1,'shoulder':1,'glove':1,'leg':1,'boot':2,'belt':1,'helm':3,'cloak':4}
 TRI={'chest':7000,'helm':7990,'shoulder':5020,'belt':4520,'glove':3540,'leg':4530,'boot':4030,'cloak':4030}
 TEX={'chest':512,'helm':512,'cloak':512}
 PIECES=[('helm',None),('cloak',None),('chest',None),('belt',None)]+[(s,x) for s in ('shoulder','glove','leg','boot') for x in ('L','R')]
@@ -141,7 +141,7 @@ def build_grid(slot,side,r,R):
         R=R|(inside&skin)
         masks[name]={'cells':np.ravel_multi_index(np.argwhere(((ell(t+9)<=1)&(Z_>=zbot-(3 if ROBED else 8))|inside|dil(R,3))&solid).T,S).tolist()}   # hide every body cell inside the helm envelope   # v7: hide every body cell inside the helm envelope (faces under helm/hood)
     if slot=='cloak': shell=close((layers[-1]|layers[-2]),1)&out   # cloak floats just outside the plate; close() fills pin-holes (Darius back speck)
-    if slot not in ('cloak','helm') and not ROBED: shell=close(shell,1)&out             # v3: fill the body's voxel lumps -> smooth plate surface, real thickness kept
+    if slot not in ('cloak','helm') and not ROBED: shell=close(shell,1)&out&dil(R,t)   # v10: fill pin-holes only within the armour's own thickness of the body (no bridging bulk)             # v3: fill the body's voxel lumps -> smooth plate surface, real thickness kept
     outer=shell&dil(out&~shell)
     Rin=R&~dil(skin&~R,2); core=dil(Rin,t+1)&shell; trim=shell&~core
     if slot=='helm': trim=np.zeros(S,bool)

@@ -60,6 +60,11 @@ def ero(m,k=1): return ~dil(~m,k)
 def close(m,k): return ero(dil(m,k),k)
 def _fax(X):
     f_=BH['foot'+X]; d_=np.array([0,FRONT*0.14,-0.03]); u_=np.clip(((spos-f_)@d_)/(d_@d_),-0.1,1); return np.linalg.norm(spos-f_-u_[:,None]*d_,axis=1)
+def _axd(X):
+    def sd(a,b):
+        d_=BH[b]-BH[a]; u_=np.clip(((spos-BH[a])@d_)/(d_@d_),0,1); return np.linalg.norm(spos-BH[a]-u_[:,None]*d_,axis=1)
+    e_=BH['hand'+X]+(BH['hand'+X]-BH['foreArm'+X])*0.45; d_=e_-BH['hand'+X]; u_=np.clip(((spos-BH['hand'+X])@d_)/(d_@d_),0,1)
+    return np.minimum(np.minimum(sd('upperArm'+X,'foreArm'+X),sd('foreArm'+X,'hand'+X)),np.linalg.norm(spos-BH['hand'+X]-u_[:,None]*d_,axis=1))
 def region(slot,side=None):
     m=np.zeros(len(sidx),bool); X='_'+(side or '')
     if slot=='chest':
@@ -77,8 +82,10 @@ def region(slot,side=None):
     elif slot=='leg':        # cuisse + poleyn (overlaps the greave -> no knee gap)
         m=(cbn=='thigh'+X)|((cbn=='shin'+X)&(tpar(spos,'shin'+X)<0.62))
         m|=np.char.startswith(cbn.astype(str),'coat')&(spos[:,0]*np.sign(BH['thigh'+X][0])>0)&(spos[:,2]<beltz-0.12)   # v16: coat-weighted shin cells (Rook) get a greave too
+        if ROBED: m&=_axd(X)<0.06   # v31: no hanging sleeve chunks in the cuff
     elif slot=='boot':
-        m=((cbn=='shin'+X)&(tpar(spos,'shin'+X)>=0.12))|(np.isin(cbn,['foot'+X,'toe'+X])&((_fax(X)<0.065) if HERO=='rook' else True))   # v29: no claw hem bits   # v19: boot follows the foot, not the coat hem
+        m=((cbn=='shin'+X)&(tpar(spos,'shin'+X)>=0.12))|(np.isin(cbn,['foot'+X,'toe'+X])&((_fax(X)<0.065) if HERO in ('rook','rowan','talia') else True))   # v29: no claw hem bits   # v19: boot follows the foot, not the coat hem
+    if slot=='boot' and ROBED: m&=(cbn!='shin'+X)|(np.linalg.norm((spos-BH['shin'+X])[:,:2],axis=1)<0.07)   # v31: no skirt hem in the boot
     elif slot=='belt' and ROBED:   # robed: a sash/girdle band only, the robe skirt stays
         m=np.isin(cbn,['hips','spine','spine2'])&(abs(spos[:,2]-beltz)<0.03)
         kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.40)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
@@ -95,6 +102,7 @@ def region(slot,side=None):
         ctop=spos[m,2].max() if m.any() else neckz; back=((spos[:,1]-BH['spine'][1])*FRONT)<-0.02
         sx=abs(BH['upperArm_L'][0])+0.06
         m|=back&(spos[:,2]>ctop-0.10)&(spos[:,2]<neckz+0.03)&(abs(spos[:,0])<sx)&~np.isin(cbn,['head','jaw'])   # v4: mantle up to the shoulders + collar behind the neck
+    if slot=='cloak' and ROBED: m&=(spos[:,2]>beltz-0.02)&(abs(spos[:,0])<0.24)   # v31: short back mantle, the robe skirt carries the rest
     R=np.zeros(S,bool); R[tuple(sidx[m].T)]=True; return R
 BONESET={'chest':['spine','spine2','chest','upperChest','hips'],'belt':['hips','spine','spine2','thigh_L','thigh_R'],'helm':['head','neck'],'cloak':[b for b in BH if b.startswith('cape')]+['upperChest','chest'],
  'shoulder':lambda X:['upperArm'+X,'shoulder'+X,'upperChest','chest'],'glove':lambda X:['upperArm'+X,'foreArm'+X,'hand'+X]+[f+n+X for f in ('index','middle','ring','pinky','thumb') for n in '123']+['fingers'+X],
@@ -207,8 +215,12 @@ def build_grid(slot,side,r,R):
         rr_=np.linalg.norm(Pw-h_-uu[:,None]*d_,axis=1); cyl=((uu>0.2)&(uu<1.05)&(rr_<0.065)).reshape(S)
         fq=sidx[cbn=='foot_'+side]
         if len(fq): fc=lo+(np.median(fq,0)+0.5)*RES; d2=fc-f_; u2=((Pw-f_)@d2)/max(d2@d2,1e-6); r2=np.linalg.norm(Pw-f_-u2[:,None]*d2,axis=1); cyl|=((u2>-0.2)&(u2<1.0)&(r2<0.075)).reshape(S)   # ankle bridge to the foot (Rook's feet sit forward)
+        if HERO=='rook':   # v31: rebuilt boot - clean greave tube + sabaton along the foot axis, no body/coat cells (no claws)
+            fd=np.array([0,FRONT*0.16,-0.035]); u3=((Pw-f_)@fd)/(fd@fd); r3=np.linalg.norm(Pw-f_-u3[:,None]*fd,axis=1)
+            sab=((u3>-0.25)&(u3<1.1)&(r3<0.058-0.012*np.clip(u3,0,1))).reshape(S)
+            grv=((uu>0.15)&(uu<1.02)&(rr_<0.062)).reshape(S); R=sab|grv; cyl=R
         R=R|cyl; print("BOOTCYL",side,int(cyl.sum()),flush=True)
-        out=out|(solid&~dil(R,1))   # v17: coat wraps the shins (Rook) -> no air next to them; let the greave grow through the hidden coat
+        out=(~R) if HERO=='rook' else out|(solid&~dil(R,1))   # v17: coat wraps the shins (Rook) -> no air next to them; let the greave grow through the hidden coat
     CAPE=None
     if slot=='leg' and not ROBED:   # v19: thigh core (coat-wrapped thighs give the cuisse no cells near the hip)
         h_=BH['thigh_'+side]; d_=BH['shin_'+side]-h_; I_=np.indices(S).reshape(3,-1).T; Pw=lo+(I_+0.5)*RES; uu=((Pw-h_)@d_)/(d_@d_)
@@ -256,7 +268,7 @@ def build_grid(slot,side,r,R):
         def _sd(P,a_,b_): d_=BH[b_]-BH[a_]; u_=np.clip(((P-BH[a_])@d_)/(d_@d_),0,1); return np.linalg.norm(P-BH[a_]-u_[:,None]*d_,axis=1)
         sl_=np.zeros(len(spos),bool)
         for s_ in ('_L','_R'):   # v30: sleeve/robe chunks hanging off the arm below the shoulder
-            dd_=np.minimum(_sd(spos,'upperArm'+s_,'foreArm'+s_),_sd(spos,'foreArm'+s_,'hand'+s_)); sl_|=(dd_>0.075)&(spos[:,2]<BH['upperArm'+s_][2]-0.03)&~np.isin(cbn,['head','neck','jaw'])
+            dd_=np.minimum(_sd(spos,'upperArm'+s_,'foreArm'+s_),_sd(spos,'foreArm'+s_,'hand'+s_)); sl_|=(dd_>0.06)&(spos[:,2]<BH['upperArm'+s_][2]-0.03)&~np.isin(cbn,['head','neck','jaw'])
         SLV=np.zeros(S,bool); SLV[tuple(sidx[sl_].T)]=True; HID|=SLV
         masks[name]={'cells':np.ravel_multi_index(np.argwhere(HID|(dil(CAPE,1)&solid)).T,S).tolist()}
         print('ROBE',int(CAPE.sum()),int(HID.sum()),flush=True)
@@ -267,7 +279,8 @@ def build_grid(slot,side,r,R):
     if CAPE is not None: shell=CAPE.copy(); R=CAPE&False|R
     if (slot=='boot' and HERO=='rook'):   # v20: smooth the boot (close pin-holes/lumps), drop loose voxels behind the heel
         shell=close(shell,2)&out; op=dil(ero(shell,1),1)&shell; shell=op if op.sum()>0.6*shell.sum() else shell   # opening drops 1-voxel strays
-        HEM=np.zeros(S,bool); sgf=np.sign(BH['foot_'+side][0]); hq=(np.isin(cbn,['foot_'+side,'toe_'+side])&(spos[:,2]<BH['foot_'+side][2]+0.18))|((spos[:,2]<BH['shin_'+side][2]-0.02)&(spos[:,0]*sgf>-0.01)&~np.isin(cbn,['hand_L','hand_R','foreArm_L','foreArm_R']));   # v30: whole coat hem + claw bits below the knee on this side HEM[tuple(sidx[hq].T)]=True   # v21: coat hem on the ground skinned to the foot
+        HEM=np.zeros(S,bool); sgf=np.sign(BH['foot_'+side][0]); hq=(np.isin(cbn,['foot_'+side,'toe_'+side])&(spos[:,2]<BH['foot_'+side][2]+0.18))|((spos[:,2]<BH['shin_'+side][2]-0.02)&(spos[:,0]*sgf>-0.01)&~np.isin(cbn,['hand_L','hand_R','foreArm_L','foreArm_R']));   # v30: whole coat hem + claw bits below the knee on this side
+        HEM[tuple(sidx[hq].T)]=True   # v21: coat hem on the ground skinned to the foot
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((dil(R,3)|dil(HEM,3))&solid).T,S).tolist()}
     if _fit(slot):   # v13 reshape (robed cuffs/mantles keep the draped shell)
         if slot=='chest':   # v20: hide the coat under the arms at the chest sides (Rook)
@@ -485,7 +498,9 @@ def build_grid(slot,side,r,R):
     g[trim&shell]=tr
     if HERO in ('orin','finn','elira','wren') and _fit(slot):   # v30: bevelled plate edges - raised rolled rim + light chamfer above each lame lip
         Zb=np.indices(S)[2]; bev=dil(trim&shell)&out&~shell&dil(shell)&(np.roll(trim,1,2)|trim|np.roll(trim,-1,2)); g[bev]=tr if i>=2 else v.c(p['edge']); shell|=bev
-        lm2=LAMEM[0]&shell; hl=shell&np.roll(lm2,1,2)&~lm2&~trim; g[hl]=v.c(tuple(min(1,c*1.45) for c in base))
+        bev2=dil(bev)&out&~shell&dil(shell,2)&(np.roll(bev,1,2)|bev|np.roll(bev,-1,2)); g[bev2]=(tr if i>=2 else v.c(p['edge'])); shell|=bev2   # 2-voxel raised rolled rim
+        lm2=LAMEM[0]&shell; rid=dil(lm2)&out&~shell&(np.roll(lm2,1,2)|lm2); g[rid]=v.c(tuple(min(1,c*1.5) for c in base)); shell|=rid   # raised lame ridge (bevelled plate edge, real geometry)
+        hl=shell&np.roll(lm2,1,2)&~lm2&~trim&~rid; g[hl]=v.c(tuple(min(1,c*1.3) for c in base))
     if slot not in ('helm','cloak') and not _fit(slot) and not (slot=='boot' and HERO=='rook') and CAPE is None:   # v11: rolled rim on every piece edge -> visible plate thickness, reads as a worn piece not painted skin
         ed=shell&dil(skin&~dil(R,1),2)&dil(out&~shell); rl=dil(ed)&out&~shell&dil(skin&~dil(R,1),3)
         g[rl]=tr if i>=2 else v.c(p['edge']) if not ROBED else dark; shell|=rl

@@ -72,3 +72,9 @@ Each hero folder has its own `<hero>_body_mask.json` and `<hero>_<fam>_tris.json
 
 ## v10 slim (all 8 heroes)
 - Armour wall 1 vox (chest/shoulder/glove/leg/belt), boots 2; pin-hole fill limited to the armour's own thickness off the body (no bridging bulk); pauldron height cap removed (1-vox pauldrons follow the shoulder; a cap exposed raw body voxels). Lames/rivets/cops/straps and v8/v9 helms unchanged.
+
+## v11 worn (all 8 heroes)
+- Walls back to 2 vox with a raised rolled rim on every piece edge (gold on rare+/legendary, edge steel below, dark on robed) -> pieces read as worn kit with real thickness, not painted skin.
+- Legendary filigree speckle only on helms; body pieces carry gold rims.
+- Chest covers coat/hips-weighted front cells and overlaps the belt, min half-width 15 cm (Wren tunic bleed).
+- Helm mask also hides head/neck/chest/hair-weighted gear above the neck (Rook's beige back gear).

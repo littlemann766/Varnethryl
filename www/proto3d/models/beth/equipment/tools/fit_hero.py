@@ -61,8 +61,8 @@ def close(m,k): return ero(dil(m,k),k)
 def region(slot,side=None):
     m=np.zeros(len(sidx),bool); X='_'+(side or '')
     if slot=='chest':
-        m=np.isin(cbn,['spine','spine2','chest','upperChest'])&(spos[:,2]<neckz-0.005)&(spos[:,2]>beltz+0.02)
-        sx=abs(BH['upperArm_L'][0])-0.035; m&=abs(spos[:,0])<sx; m&=capew<0.15
+        m=(np.isin(cbn,['spine','spine2','chest','upperChest','hips'])|np.char.startswith(cbn.astype(str),'coat'))&(spos[:,2]<neckz-0.005)&(spos[:,2]>beltz-0.03)   # v11: overlaps the belt (no tunic bleed between them)
+        sx=max(abs(BH['upperArm_L'][0])-0.035,0.15); m&=abs(spos[:,0])<sx; m&=(capew<0.15)|(((spos[:,1]-BH['spine'][1])*FRONT)>0)   # v11: front cells always (Wren's coat-weighted tunic)
     elif slot=='shoulder':
         ua='upperArm'+X; sgn=np.sign(BH[ua][0])
         m=(np.isin(cbn,[ua,'shoulder'+X])&(tpar(spos,ua)<(0.35 if ROBED else 0.78)))
@@ -94,7 +94,7 @@ def region(slot,side=None):
 BONESET={'chest':['spine','spine2','chest','upperChest','hips'],'belt':['hips','spine','spine2','thigh_L','thigh_R'],'helm':['head','neck'],'cloak':[b for b in BH if b.startswith('cape')]+['upperChest','chest'],
  'shoulder':lambda X:['upperArm'+X,'shoulder'+X,'upperChest','chest'],'glove':lambda X:['upperArm'+X,'foreArm'+X,'hand'+X]+[f+n+X for f in ('index','middle','ring','pinky','thumb') for n in '123']+['fingers'+X],
  'leg':lambda X:['thigh'+X,'shin'+X,'hips'],'boot':lambda X:['shin'+X,'foot'+X,'toe'+X]}
-THK={'chest':1,'shoulder':1,'glove':1,'leg':1,'boot':2,'belt':1,'helm':3,'cloak':4}
+THK={'chest':2,'shoulder':2,'glove':2,'leg':2,'boot':2,'belt':2,'helm':3,'cloak':4}
 TRI={'chest':7000,'helm':7990,'shoulder':5020,'belt':4520,'glove':3540,'leg':4530,'boot':4030,'cloak':4030}
 TEX={'chest':512,'helm':512,'cloak':512}
 PIECES=[('helm',None),('cloak',None),('chest',None),('belt',None)]+[(s,x) for s in ('shoulder','glove','leg','boot') for x in ('L','R')]
@@ -139,7 +139,10 @@ def build_grid(slot,side,r,R):
             ea=((X_-cx_)/(ax+1+3*fl))**2+(dy/(ry+1+3*fl))**2; eai=((X_-cx_)/(ax-1+3*fl))**2+(dy/(ry-1+3*fl))**2
             av=(ea<=1)&(eai>1)&(Z_<zr)&(Z_>=za)&out; shell|=av; HG['av']=av; inside|=(eai<=1)&(Z_<zr)&(Z_>=za)
         R=R|(inside&skin)
-        masks[name]={'cells':np.ravel_multi_index(np.argwhere(((ell(t+9)<=1)&(Z_>=zbot-(3 if ROBED else 8))|inside|dil(R,3))&solid).T,S).tolist()}   # hide every body cell inside the helm envelope   # v7: hide every body cell inside the helm envelope (faces under helm/hood)
+        hg_=np.isin(cbn,['head','neck','jaw','eye_L','eye_R','chest','upperChest','spine2'])|np.char.startswith(cbn.astype(str),'hair')
+        hg_&=spos[:,2]>BH['neck'][2]-0.02; HGM=np.zeros(S,bool); HGM[tuple(sidx[hg_].T)]=True   # v11: hide gear riding above the neck (Rook's beige back gear)
+        HGM=dil(HGM,1)&solid&~((ell(t+9)>1)&(Z_<zbot-8)&False)
+        masks[name]={'cells':np.ravel_multi_index(np.argwhere((HGM|(ell(t+9)<=1)&(Z_>=zbot-(3 if ROBED else 8))|inside|dil(R,3))&solid).T,S).tolist()}   # hide every body cell inside the helm envelope   # v7: hide every body cell inside the helm envelope (faces under helm/hood)
     if slot=='cloak': shell=close((layers[-1]|layers[-2]),1)&out   # cloak floats just outside the plate; close() fills pin-holes (Darius back speck)
     if slot not in ('cloak','helm') and not ROBED: shell=close(shell,1)&out&dil(R,t)   # v10: fill pin-holes only within the armour's own thickness of the body (no bridging bulk)             # v3: fill the body's voxel lumps -> smooth plate surface, real thickness kept
     outer=shell&dil(out&~shell)
@@ -239,10 +242,13 @@ def build_grid(slot,side,r,R):
             zz=np.argwhere(R)[:,2]; zm=int(np.median(zz)); sd=((Y_-np.median(np.argwhere(R)[:,1]))*FRONT<0) if slot!='chest' else (abs(X_-int(round((0-lo[0])/RES)))>int(0.11/RES))
             stp=dil(outer&sd&(abs(Z_-zm)<=1))&out&~shell&(abs(Z_-zm)<=1); g[stp]=leather; shell|=stp; g[stp&((X_+Y_)%9==0)]=edge
     g[trim&shell]=tr
+    if slot not in ('helm','cloak'):   # v11: rolled rim on every piece edge -> visible plate thickness, reads as a worn piece not painted skin
+        ed=shell&dil(skin&~dil(R,1),2)&dil(out&~shell); rl=dil(ed)&out&~shell&dil(skin&~dil(R,1),3)
+        g[rl]=tr if i>=2 else v.c(p['edge']) if not ROBED else dark; shell|=rl
     # crop
     idx=np.argwhere(g>0); a=idx.min(0)-1; b=idx.max(0)+2
     vv=V(1); vv.pal=v.pal; vv.g=g[a[0]:b[0],a[1]:b[1],a[2]:b[2]].copy()
-    if i>=4 and not ROBED: A.filigree(vv,p)   # v9: no gold blotches on robed mantles (trim hem only)
+    if i>=4 and not ROBED and slot=='helm': A.filigree(vv,p)   # v11: gold rims carry legendary on body pieces (no speckle noise)   # v9: no gold blotches on robed mantles (trim hem only)
     if FAM in ('chain','scale','leather') and slot not in ('cloak',): A.skin(vv,FAM,p,i)   # family surface (rings / scales / stitched leather)
     G.wear(vv,p,seed=hash((slot,side))%97)
     if i==5: A.molten(vv,p,seed=11)

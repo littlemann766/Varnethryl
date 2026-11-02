@@ -73,12 +73,13 @@ def region(slot,side=None):
         m=((cbn=='foreArm'+X)&(tpar(spos,'foreArm'+X)>0.55)) if ROBED else ((cbn=='foreArm'+X)|((cbn=='upperArm'+X)&(tpar(spos,'upperArm'+X)>0.66)))   # robed: gauntlet + cuff only, the sleeve stays
         m|=np.array([n.endswith(X) and (n.startswith(('hand','fingers','index','middle','ring','pinky','thumb'))) for n in cbn])
     elif slot=='leg':        # cuisse + poleyn (overlaps the greave -> no knee gap)
-        m=(cbn=='thigh'+X)|((cbn=='shin'+X)&(tpar(spos,'shin'+X)<0.24))
+        m=(cbn=='thigh'+X)|((cbn=='shin'+X)&(tpar(spos,'shin'+X)<0.62))
+        m|=np.char.startswith(cbn.astype(str),'coat')&(spos[:,0]*np.sign(BH['thigh'+X][0])>0)&(spos[:,2]<beltz-0.12)   # v16: coat-weighted shin cells (Rook) get a greave too
     elif slot=='boot':
         m=((cbn=='shin'+X)&(tpar(spos,'shin'+X)>=0.12))|np.isin(cbn,['foot'+X,'toe'+X])
     elif slot=='belt' and ROBED:   # robed: a sash/girdle band only, the robe skirt stays
         m=np.isin(cbn,['hips','spine','spine2'])&(abs(spos[:,2]-beltz)<0.03)
-        kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.17)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
+        kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.30)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
     elif slot=='belt':       # belt + faulds: covers the groin so the tabard no longer shows there
         m=(np.isin(cbn,['hips','spine','spine2'])|np.char.startswith(cbn.astype(str),'coat')|np.char.startswith(cbn.astype(str),'thigh'))&(spos[:,2]<beltz+0.035)&(spos[:,2]>beltz-0.17)
         m&=~(np.char.startswith(cbn.astype(str),'thigh')&(spos[:,2]<beltz-0.12))
@@ -201,7 +202,7 @@ def build_grid(slot,side,r,R):
             Xg,Yg,Zg=np.indices(S); xw=lo[0]+(Xg+0.5)*RES; zw=lo[2]+(Zg+0.5)*RES; sg=np.sign(BH['thigh'+'_'+side][0])
             zlo=BH['foot_'+side][2]+0.02; zhi=beltz+0.02
             fenv=fenv|((zw>zlo)&(zw<zhi)&(abs(xw)<0.75)&(xw*sg>-0.01))
-        if slot=='glove': fenv=fenv|dil(R,3)   # v15: stray coat bits near the hands
+        if slot in ('glove','shoulder'): fenv=fenv|dil(R,3)   # v15: stray coat bits near the hands
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((fenv|fin|dil(R,1))&solid).T,S).tolist()}
         out=~fin
     if slot=='helm':   # v8: skull-fitted helm (egg/dome profile, not a cylinder): great helm (plate/leather), bascinet+aventail (chain/scale), cowl (robed)
@@ -247,14 +248,20 @@ def build_grid(slot,side,r,R):
     Rin=R&~dil(skin&~R,2); core=dil(Rin,t+1)&shell; trim=shell&~core
     if _fit(slot): zq=np.argwhere(shell)[:,2]; trim=shell&((np.indices(S)[2]<=zq.min()+1)|(np.indices(S)[2]>=zq.max()-1))   # v13: rolled edge = top/bottom band of the fitted piece
     if slot=='helm': trim=np.zeros(S,bool)
-    if ROBED and slot not in ('helm','cloak'): zz_=np.argwhere(shell)[:,2]; trim=shell&(np.indices(S)[2]<=zz_.min()+1)   # v9: robed: gold only on the hem, no edge blotches
+    if ROBED and slot not in ('helm','cloak'): zz_=np.argwhere(shell)[:,2]; trim=shell&(np.indices(S)[2]<=zz_.min()+1)
+    FOLD=ROBED and slot in ('belt','shoulder')   # v16 vertical drape folds   # v9: robed: gold only on the hem, no edge blotches
     if ROBED and slot=='shoulder':   # v14 draped mantle: dagged (scalloped) lower edge
         Xd,Yd,Zd=np.indices(S); zq=np.argwhere(shell)[:,2]; zb_=zq.min()
+        sg_=np.sign(BH['upperArm_'+side][0]); ax_=(BH['upperArm_'+side][0]-lo[0])/RES
+        bot=shell&~np.roll(shell,1,2)&((Xd-ax_)*sg_>-1)   # bottom ring, outer half
+        for k in range(1,13): shell|=np.roll(bot,-k,2)&out&~dil(~out,1)   # v16: cape hangs straight down off the shoulder, clear of the arm
+        zq=np.argwhere(shell)[:,2]; zb_=zq.min()
         shell&=~((Zd<=zb_+3)&(((Xd//3)+(Yd//3))%2==0))
     g=np.zeros(S,np.int16); v=V(1); v.g=g; KEEP=np.zeros(S,bool); AV=HG['av'] if slot=='helm' and 'av' in HG else np.zeros(S,bool)
     base=p['leather'] if FAM=='leather' else A.PAL[r].get('cloth',p['metal']) if ROBED else p['metal']   # robed: rarity cloth colour, not the white robe
     metal=v.c(base); dark=v.c(tuple(c*0.62 for c in base)); tr=v.c(p['trim'] if i>=2 else p['edge'])
     g[shell]=metal
+    if FOLD: g[shell&((X_f:=np.indices(S)[0])%4==0)]=dark
     if _fit(slot):   # v14: lame lips dark + rivets, mail at elbows/knees, chest emblem (named-piece look)
         X1,Y1,Z1=np.indices(S); lm=LAMEM[0]&shell; g[lm]=dark; g[lm&((X1+Y1)%8==0)&((Z1%3)==0)]=v.c(p['edge'] if i<4 else p['trim'])
         jm=JOINTM[0]&shell&~lm; g[jm]=v.c(tuple(min(1,c*1.3) for c in base)); g[jm&(((X1+Y1+Z1)%2)==0)]=v.c(tuple(c*0.5 for c in base))
@@ -317,7 +324,9 @@ def build_grid(slot,side,r,R):
                 if cr_=='plume':   # plume falls down the back
                     for k in range(10): stamp(cx,cy-FRONT*(H_['bb']+k*0.6),top+ch-k*1.2,1.6,v.c(A.PAL[r].get('cloth',(0.55,0.08,0.08))))
             elif cr_=='spike':
-                for k in range(12+2*i): stamp(cx,cy,top-2+k,max(0.6,3.0-k*0.12),tr if k>5 else metal)
+                ap=np.argwhere(shell&(Z_==top)).mean(0).astype(int)
+                for k in range(22+2*i): stamp(int(ap[0]),int(ap[1]),top+k,1.1,tr)   # thin tall finial spike
+                stamp(int(ap[0]),int(ap[1]),top+2,2.6,tr); stamp(int(ap[0]),int(ap[1]),top+12,2.0,v.c((0.55,0.08,0.08)) if i<5 else v.c((0.9,0.3,0.05)))   # collar ring + mid knop
             elif cr_=='crown':   # circlet of spikes around the crown
                 zc=top-4; pts=np.argwhere(outer[:,:,zc]) if 0<=zc<S[2] else np.zeros((0,2),int)
                 if len(pts):

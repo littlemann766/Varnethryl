@@ -95,3 +95,6 @@ Stepped overlapping lames (pauldron cascade, fauld, limb lames) with dark rivete
 
 ## v15 (robes, coats, unique helms)
 Per-hero helm silhouettes: darius comb+up-horns, orin plume+wings, rook ram horns, finn spike, elira comb+wings, wren spiked crown, rowan tall hood tip, talia brow diadem. Robed: slim top-of-shoulder mantle, cloak thk 1, sash+tabard to ankle, reduced hood flare. Leg cover slab foot..belt, |x|<0.75; glove mask dil 3. Chain fitted pieces: calm ring rows. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg2/
+
+## v16 (leftover polish, soft hold)
+Robed: full skirt panel to ankle |x|<0.30 with vertical drape folds, shoulder mantles get a hanging cape curtain on the outer side. Leg greave to 62% shin + coat-weighted shin cells. Shoulder mask dil 3 (coat flaps). Finn: finial spike with collar + knop at helm apex. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg3/

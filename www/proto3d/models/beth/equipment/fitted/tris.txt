@@ -502,12 +502,12 @@ talia DONE belt rare 4520 2034
 talia DONE belt epic 4520 2034
 talia DONE belt legendary 4520 2034
 talia DONE belt masterwork 4520 2034
-talia DONE shoulder_L uncommon 5020 2258
+talia DONE shoulder_L uncommon 5018 2258
 talia DONE shoulder_L common 5020 2258
 talia DONE shoulder_L rare 5020 2258
-talia DONE shoulder_L epic 5018 2258
-talia DONE shoulder_L legendary 5018 2258
-talia DONE shoulder_L masterwork 5018 2258
+talia DONE shoulder_L epic 5020 2258
+talia DONE shoulder_L legendary 5020 2258
+talia DONE shoulder_L masterwork 5020 2258
 talia DONE shoulder_R uncommon 5020 2258
 talia DONE shoulder_R common 5020 2258
 talia DONE shoulder_R rare 5020 2258

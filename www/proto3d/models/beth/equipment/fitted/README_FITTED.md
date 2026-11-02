@@ -98,3 +98,6 @@ Per-hero helm silhouettes: darius comb+up-horns, orin plume+wings, rook ram horn
 
 ## v16 (leftover polish, soft hold)
 Robed: full skirt panel to ankle |x|<0.30 with vertical drape folds, shoulder mantles get a hanging cape curtain on the outer side. Leg greave to 62% shin + coat-weighted shin cells. Shoulder mask dil 3 (coat flaps). Finn: finial spike with collar + knop at helm apex. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg3/
+
+## v17 (leftover polish, soft hold)
+Grid +35cm headroom (crest/spike stamps were clipped). Finn: thick tapered spike + gold ball finial + jewel knop. Rook: coat wraps shins (no air) -> boots get a synthetic greave core along shin->foot + ankle bridge, grown through the hidden coat; glove mask covers arm-axis coat cuffs. Robed: pelerine = thin conical cape sheet from neck over shoulders (dagged rim), hides T-pose sleeve drapes; skirt panel |x|<0.38. Mask dims changed (z) - always rebuild full heroes. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg4/

@@ -28,7 +28,7 @@ domname=np.array([gn[d] if d>=0 else '' for d in dom])
 BH={b.name:np.array(arm.matrix_world@b.head_local) for b in arm.data.bones}; BT={b.name:np.array(arm.matrix_world@b.tail_local) for b in arm.data.bones}
 # ---------- voxelise body (rest pose) ----------
 me.calc_loop_triangles(); T=np.array([t.vertices for t in me.loop_triangles]); P=co[T]
-lo=co.min(0)-0.08; hi=co.max(0)+0.08; S=np.ceil((hi-lo)/RES).astype(int)+1
+lo=co.min(0)-0.08; hi=co.max(0)+np.array([0.08,0.08,0.35]); S=np.ceil((hi-lo)/RES).astype(int)+1
 surf=np.zeros(S,bool)
 L=np.max(np.linalg.norm(P[:,[1,2,0]]-P,axis=2),1); N=np.clip(np.ceil(L/(RES*0.5)).astype(int),1,40)
 for n in np.unique(N):
@@ -79,7 +79,7 @@ def region(slot,side=None):
         m=((cbn=='shin'+X)&(tpar(spos,'shin'+X)>=0.12))|np.isin(cbn,['foot'+X,'toe'+X])
     elif slot=='belt' and ROBED:   # robed: a sash/girdle band only, the robe skirt stays
         m=np.isin(cbn,['hips','spine','spine2'])&(abs(spos[:,2]-beltz)<0.03)
-        kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.30)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
+        kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.38)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
     elif slot=='belt':       # belt + faulds: covers the groin so the tabard no longer shows there
         m=(np.isin(cbn,['hips','spine','spine2'])|np.char.startswith(cbn.astype(str),'coat')|np.char.startswith(cbn.astype(str),'thigh'))&(spos[:,2]<beltz+0.035)&(spos[:,2]>beltz-0.17)
         m&=~(np.char.startswith(cbn.astype(str),'thigh')&(spos[:,2]<beltz-0.12))
@@ -191,10 +191,35 @@ def build_grid(slot,side,r,R):
         for ax in range(3):
             for d in (1,-1): nb+=np.roll(R,d,ax)
         R=R&(nb>=3)   # v6: drop 1-voxel spurs -> no blobby edges on robed sets
+    if slot=='boot' and not ROBED:
+        h_=BH['shin_'+side]; f_=BH['foot_'+side]; I_=np.indices(S).reshape(3,-1).T; Pw=lo+(I_+0.5)*RES; d_=f_-h_; uu=((Pw-h_)@d_)/(d_@d_)
+        rr_=np.linalg.norm(Pw-h_-uu[:,None]*d_,axis=1); cyl=((uu>0.2)&(uu<1.05)&(rr_<0.065)).reshape(S)
+        fq=sidx[cbn=='foot_'+side]
+        if len(fq): fc=lo+(np.median(fq,0)+0.5)*RES; d2=fc-f_; u2=((Pw-f_)@d2)/max(d2@d2,1e-6); r2=np.linalg.norm(Pw-f_-u2[:,None]*d2,axis=1); cyl|=((u2>-0.1)&(u2<1.0)&(r2<0.06)).reshape(S)   # ankle bridge to the foot (Rook's feet sit forward)
+        R=R|cyl; print("BOOTCYL",side,int(cyl.sum()),flush=True)
+        out=out|(solid&~dil(R,1))   # v17: coat wraps the shins (Rook) -> no air next to them; let the greave grow through the hidden coat
+    CAPE=None
+    if ROBED and slot=='shoulder':   # v17 pelerine: a thin conical cape sheet hanging from the neck over the shoulder (not a shell around the arm)
+        X_,Y_,Z_=np.indices(S); vz=lambda z:(z-lo[2])/RES; sg=np.sign(BH['upperArm_'+side][0]); cx=(0-lo[0])/RES
+        tc=np.isin(cbn,['chest','upperChest','spine2']); cy=np.median(sidx[tc][:,1]) if tc.any() else np.median(sidx[:,1])
+        zt=vz(BH['neck'][2]+0.05); zs=vz(BH['upperArm_'+side][2]+0.05); zb=zs-0.30/RES
+        sel=tc&(abs(spos[:,2]-BH['upperArm_'+side][2])<0.05); dyv=(sidx[sel][:,1]-cy)*FRONT if sel.any() else np.array([4.,-4.])
+        rxs=abs(BH['upperArm_'+side][0])/RES+0.05/RES; ryf=np.percentile(dyv[dyv>0],95)+0.04/RES if (dyv>0).any() else 6; ryb=min(np.percentile(-dyv[dyv<0],95)+0.04/RES,0.20/RES) if (dyv<0).any() else 6; ryf=min(ryf,0.18/RES)
+        u=np.clip((zt-Z_)/max(zt-zs,1),0,1)+np.clip((zs-Z_)*0.12/max(zs-zb,1),0,0.12); r0=0.075/RES   # v17: steep shoulder slope, then hangs nearly straight down; r0=0.075/RES
+        rx=r0+(rxs-r0)*u; dy=(Y_-cy)*FRONT; ry=r0+(np.where(dy>0,ryf,ryb)-r0)*u
+        ee=np.sqrt(((X_-cx)/rx)**2+(dy/ry)**2); band=(Z_<=zt)&(Z_>=zb)&((X_-cx)*sg>=0)
+        CAPE=band&(ee>=1)&(ee<=1+2.2/np.minimum(rx,ry)); INS=band&(ee<1)
+        Zd=Z_; ang_=np.arctan2(dy,(X_-cx)*sg); CAPE&=~((Zd<=zb+3)&((np.floor(ang_*9)%2)==0))   # dagged hem (teeth around the rim)
+        txh=abs(BH['upperArm_'+side][0])-0.02
+        xw_=lo[0]+(X_+0.5)*RES; zw_=lo[2]+(Z_+0.5)*RES
+        DRP=solid&(abs(xw_)>txh+0.03)&(xw_*sg>0)&(zw_>beltz-0.30)&(zw_<BH['upperArm_'+side][2]-0.05)&~np.isin(_bng(),['foreArm_'+side,'hand_'+side])   # sleeve drapes hanging below the T-pose arms
+        print('CAPE',side,int(CAPE.sum()),int(INS.sum()),int(DRP.sum()),round(zt,1),round(zs,1),round(rxs,1),round(ryf,1),round(ryb,1),flush=True)
+        masks[name]={'cells':np.ravel_multi_index(np.argwhere((INS|dil(CAPE,1)|DRP)&solid).T,S).tolist()}
     layers=[R]; acc=R.copy()
     for k in range(t):
         nx=dil(acc)&out&~acc; layers.append(nx); acc|=nx
     shell=acc&out
+    if CAPE is not None: shell=CAPE.copy(); R=CAPE&False|R
     if _fit(slot):   # v13 reshape (robed cuffs/mantles keep the draped shell)
         LAMEP[0]={'shoulder':(0.032,0.022),'glove':(0.045,0.010),'leg':(0.05,0.011)}.get(slot,(0.05,0.012)); BELTMODE[0]=(slot=='belt')
         shell,fin,fenv=fit_piece(slot,side,R,t); layers=[R,shell]; acc=shell|fin; print('FIT',slot,side,int(R.sum()),int(shell.sum()),int(fin.sum()),flush=True)
@@ -202,7 +227,13 @@ def build_grid(slot,side,r,R):
             Xg,Yg,Zg=np.indices(S); xw=lo[0]+(Xg+0.5)*RES; zw=lo[2]+(Zg+0.5)*RES; sg=np.sign(BH['thigh'+'_'+side][0])
             zlo=BH['foot_'+side][2]+0.02; zhi=beltz+0.02
             fenv=fenv|((zw>zlo)&(zw<zhi)&(abs(xw)<0.75)&(xw*sg>-0.01))
-        if slot in ('glove','shoulder'): fenv=fenv|dil(R,3)   # v15: stray coat bits near the hands
+        if slot in ('glove','shoulder'): fenv=fenv|dil(R,3)
+        if slot=='glove':   # v17: coat sleeve cuffs hanging off the elbow/forearm (Rook)
+            I_=np.indices(S).reshape(3,-1).T; Pw=lo+(I_+0.5)*RES; cm=np.zeros(len(Pw),bool)
+            for a_,b_ in (('upperArm_'+side,'foreArm_'+side),('foreArm_'+side,'hand_'+side)):
+                if a_ in BH and b_ in BH:
+                    h_=BH[a_]; d_=BH[b_]-h_; uu=((Pw-h_)@d_)/(d_@d_); cm|=(uu>0.3)&(uu<1.1)&(np.linalg.norm(Pw-h_-uu[:,None]*d_,axis=1)<0.13)
+            fenv=fenv|(cm.reshape(S)&~np.isin(_bng(),['chest','upperChest','spine','spine2','hips','head','neck']))   # v15: stray coat bits near the hands
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((fenv|fin|dil(R,1))&solid).T,S).tolist()}
         out=~fin
     if slot=='helm':   # v8: skull-fitted helm (egg/dome profile, not a cylinder): great helm (plate/leather), bascinet+aventail (chain/scale), cowl (robed)
@@ -250,11 +281,8 @@ def build_grid(slot,side,r,R):
     if slot=='helm': trim=np.zeros(S,bool)
     if ROBED and slot not in ('helm','cloak'): zz_=np.argwhere(shell)[:,2]; trim=shell&(np.indices(S)[2]<=zz_.min()+1)
     FOLD=ROBED and slot in ('belt','shoulder')   # v16 vertical drape folds   # v9: robed: gold only on the hem, no edge blotches
-    if ROBED and slot=='shoulder':   # v14 draped mantle: dagged (scalloped) lower edge
+    if ROBED and slot=='shoulder' and CAPE is None:   # v14 draped mantle: dagged (scalloped) lower edge
         Xd,Yd,Zd=np.indices(S); zq=np.argwhere(shell)[:,2]; zb_=zq.min()
-        sg_=np.sign(BH['upperArm_'+side][0]); ax_=(BH['upperArm_'+side][0]-lo[0])/RES
-        bot=shell&~np.roll(shell,1,2)&((Xd-ax_)*sg_>-1)   # bottom ring, outer half
-        for k in range(1,13): shell|=np.roll(bot,-k,2)&out&~dil(~out,1)   # v16: cape hangs straight down off the shoulder, clear of the arm
         zq=np.argwhere(shell)[:,2]; zb_=zq.min()
         shell&=~((Zd<=zb_+3)&(((Xd//3)+(Yd//3))%2==0))
     g=np.zeros(S,np.int16); v=V(1); v.g=g; KEEP=np.zeros(S,bool); AV=HG['av'] if slot=='helm' and 'av' in HG else np.zeros(S,bool)
@@ -325,8 +353,10 @@ def build_grid(slot,side,r,R):
                     for k in range(10): stamp(cx,cy-FRONT*(H_['bb']+k*0.6),top+ch-k*1.2,1.6,v.c(A.PAL[r].get('cloth',(0.55,0.08,0.08))))
             elif cr_=='spike':
                 ap=np.argwhere(shell&(Z_==top)).mean(0).astype(int)
-                for k in range(22+2*i): stamp(int(ap[0]),int(ap[1]),top+k,1.1,tr)   # thin tall finial spike
-                stamp(int(ap[0]),int(ap[1]),top+2,2.6,tr); stamp(int(ap[0]),int(ap[1]),top+12,2.0,v.c((0.55,0.08,0.08)) if i<5 else v.c((0.9,0.3,0.05)))   # collar ring + mid knop
+                L_=20+2*i
+                for k in range(L_): stamp(int(ap[0]),int(ap[1]),top-2+k,2.4-1.0*k/L_,metal if k<L_*0.6 else tr)   # thick tapered shaft
+                stamp(int(ap[0]),int(ap[1]),top,3.4,tr); stamp(int(ap[0]),int(ap[1]),top+L_,3.0,tr)   # collar + gold ball finial
+                stamp(int(ap[0]),int(ap[1]),top+int(L_*0.55),2.6,v.c((0.55,0.08,0.08)) if i<5 else v.c((0.9,0.3,0.05)))   # jewel knop
             elif cr_=='crown':   # circlet of spikes around the crown
                 zc=top-4; pts=np.argwhere(outer[:,:,zc]) if 0<=zc<S[2] else np.zeros((0,2),int)
                 if len(pts):
@@ -493,7 +523,7 @@ for slot,side in PIECES:
     for r in RARITIES:
         v,org=build_grid(slot,side,r,R); nm=f"{HERO}_{FAM}_{r}_{name}"
         bl.MATS.clear(); hi,_=bl.mesh_g(v,nm+"_hi",RES,origin=tuple(org)); hi,_=bl.smooth_plate(hi,v,RES,tuple(org),iters=5,fac=0.6)
-        if slot!='helm': drop_islands(hi,0.06 if ROBED else 0.03)
+        if slot!='helm': drop_islands(hi,(0.005 if slot=='shoulder' else 0.06) if ROBED else 0.03)
         low=bake_low(hi,nm,TRI[slot],TEX.get(slot,256)); bpy.data.objects.remove(hi)
         l1=low.copy(); l1.data=low.data.copy(); bpy.context.scene.collection.objects.link(l1)
         bpy.ops.object.select_all(action='DESELECT'); l1.select_set(True); bpy.context.view_layer.objects.active=l1

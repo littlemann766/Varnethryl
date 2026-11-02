@@ -216,7 +216,7 @@ def build_grid(slot,side,r,R):
         Zd=Z_; ang_=np.arctan2(dy,(X_-cx)*sg); CAPE&=~((Zd<=zb+3)&((np.floor(ang_*9)%2)==0))   # dagged hem (teeth around the rim)
         txh=abs(BH['upperArm_'+side][0])-0.02
         xw_=lo[0]+(X_+0.5)*RES; zw_=lo[2]+(Z_+0.5)*RES
-        DRP=solid&(abs(xw_)>txh-0.08)&(xw_*sg>0)&(zw_>BH['foot_'+side][2]+0.05)&(zw_<BH['upperArm_'+side][2]-0.04)&~np.isin(_bng(),(['hand_'+side] if BH['hand_'+side][2]>BH['upperArm_'+side][2]-0.15 else ['foreArm_'+side,'hand_'+side]))   # sleeve drapes (T-pose arms: forearm drapes too) hanging below the T-pose arms
+        DRP=solid&(abs(xw_)>txh-0.12)&(xw_*sg>0)&(zw_>BH['foot_'+side][2]+0.05)&(zw_<BH['upperArm_'+side][2]-0.04)&~np.isin(_bng(),(['hand_'+side] if BH['hand_'+side][2]>BH['upperArm_'+side][2]-0.15 else ['foreArm_'+side,'hand_'+side]))   # sleeve drapes (T-pose arms: forearm drapes too) hanging below the T-pose arms
         print('CAPE',side,int(CAPE.sum()),int(INS.sum()),int(DRP.sum()),round(zt,1),round(zs,1),round(rxs,1),round(ryf,1),round(ryb,1),flush=True)
         hd=np.linalg.norm(spos-BH['hand_'+side],axis=1); fa=np.isin(cbn,['hand_'+side])&(hd>0.11)   # v22: loose bits skinned to the hand far from it (Talia elbow/hip specks)
         FAR=np.zeros(S,bool); FAR[tuple(sidx[fa].T)]=True

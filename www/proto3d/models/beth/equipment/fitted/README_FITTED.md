@@ -116,3 +116,6 @@ Rook: ground coat hem skinned to the foot (cells up to 40cm from the foot joint)
 
 ## v22 (leftover polish, soft hold)
 Chest armour grows over the under-arm gap (CSIDE cells become plate); Rook chest envelope pc95. Rook ground-hem mask to foot+18cm, dil 2. Robed: hand-skinned bits >11cm from the hand hidden. Diagnostic: Rook body under the chest piece is a wide coat outside the chest env; Talia specks are her fur/feather spikes. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg9/
+
+## v23 (leftover polish, soft hold)
+Diagnosis (piece-by-piece renders): Rook chest spot and shin/foot dots persist with any single piece removed and without the weapon -> they were body triangles at mask edges surviving the 2-of-3 hide rule. dress.gd now drops any body triangle touching a hidden cell (1-of-3). Talia drape cover 4cm further in. Darius/Orin/Rook/Finn/Elira/Wren pieces unchanged from v22 (rule is renderer-side). Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg10/

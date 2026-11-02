@@ -184,7 +184,7 @@ func hide_mask(sk,maskp,slots):
 				if cells.has((ix*int(D[1])+iy)*int(D[2])+iz): hid[vi]=1
 			var NI=PackedInt32Array()
 			for t in range(0,I.size(),3):
-				if hid[I[t]] and hid[I[t+1]] and hid[I[t+2]]: continue
+				if int(hid[I[t]])+int(hid[I[t+1]])+int(hid[I[t+2]])>=2: continue   # v13: drop edge fragments of the hidden body
 				NI.append(I[t]); NI.append(I[t+1]); NI.append(I[t+2])
 			arr[Mesh.ARRAY_INDEX]=NI
 			nm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arr,[],{},Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS if nb==8 else 0)

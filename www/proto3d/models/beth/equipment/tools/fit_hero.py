@@ -94,12 +94,85 @@ def region(slot,side=None):
 BONESET={'chest':['spine','spine2','chest','upperChest','hips'],'belt':['hips','spine','spine2','thigh_L','thigh_R'],'helm':['head','neck'],'cloak':[b for b in BH if b.startswith('cape')]+['upperChest','chest'],
  'shoulder':lambda X:['upperArm'+X,'shoulder'+X,'upperChest','chest'],'glove':lambda X:['upperArm'+X,'foreArm'+X,'hand'+X]+[f+n+X for f in ('index','middle','ring','pinky','thumb') for n in '123']+['fingers'+X],
  'leg':lambda X:['thigh'+X,'shin'+X,'hips'],'boot':lambda X:['shin'+X,'foot'+X,'toe'+X]}
-THK={'chest':1,'shoulder':1,'glove':1,'leg':1,'boot':1,'belt':1,'helm':3,'cloak':4}
+THK={'chest':2,'shoulder':2,'glove':2,'leg':2,'boot':2,'belt':2,'helm':3,'cloak':4}
 TRI={'chest':7000,'helm':7990,'shoulder':5020,'belt':4520,'glove':3540,'leg':4530,'boot':4030,'cloak':4030}
 TEX={'chest':512,'helm':512,'cloak':512}
 PIECES=[('helm',None),('cloak',None),('chest',None),('belt',None)]+[(s,x) for s in ('shoulder','glove','leg','boot') for x in ('L','R')]
 if ROBED: PIECES=[p for p in PIECES if p[0] not in ('chest','leg')]; THK.update(helm=2,shoulder=1,belt=1,glove=1,cloak=3)   # robed casters stay robed: no breastplate/cuisses over the robe
+
+# ---------- v13: reshape -> armour follows a CLEANED silhouette (per-slice ellipse / per-bone tube fits), body hidden under it ----------
+OUTG=None
+BNG=None
+def _bng():
+    global BNG
+    if BNG is None:
+        BNG=np.full(S,'',dtype=object); BNG[tuple(sidx.T)]=cbn
+    return BNG
+def _smooth(a,w):
+    if len(a)<3: return a
+    k=np.ones(w)/w; pad=np.pad(a,(w//2,w//2),mode='edge'); return np.convolve(pad,k,mode='valid')[:len(a)]
+def fit_torso(R,t,pc):
+    X_,Y_,Z_=np.indices(S); q=np.argwhere(R); cx=(0-lo[0])/RES; cy=np.median(q[:,1])
+    z0,z1=q[:,2].min(),q[:,2].max(); n=z1-z0+1; xr=np.zeros(n); yf=np.zeros(n); yb=np.zeros(n)
+    for k in range(n):
+        w=q[abs(q[:,2]-(z0+k))<=2]
+        if len(w)<8: continue
+        dy=(w[:,1]-cy)*FRONT; xr[k]=np.percentile(abs(w[:,0]-cx),pc)
+        yf[k]=np.percentile(dy[dy>0],pc) if (dy>0).sum()>3 else 0; yb[k]=np.percentile(-dy[dy<0],pc) if (dy<0).sum()>3 else 0
+    for a_ in (xr,yf,yb):
+        nz=np.where(a_>0)[0]
+        if len(nz): a_[:]=np.interp(np.arange(n),nz,a_[nz])
+        a_[:]=np.maximum(_smooth(a_,9),2)
+    Zc=np.clip(Z_-z0,0,n-1); dy=(Y_-cy)*FRONT; RX=xr[Zc]; RY=np.where(dy>0,yf[Zc],yb[Zc]); zr=(Z_>=z0)&(Z_<=z1)
+    E=lambda T: ((X_-cx)/(RX+T))**2+(dy/(RY+T))**2
+    e=E(0); inside=(e<=1)&zr; shell=(E(t)<=1)&(e>1)&zr; env=(E(t+7)<=1)&zr
+    return shell,inside,env
+def fit_limb(R,t,bones,pc,cap=False):
+    BN=_bng(); DR=dil(R,15); a=np.maximum(np.argwhere(DR).min(0),0); b=np.minimum(np.argwhere(DR).max(0)+1,S)
+    sl=tuple(slice(a[j],b[j]) for j in range(3)); I=np.indices(tuple(b-a)).reshape(3,-1).T+a; P=lo+(I+0.5)*RES
+    inside=np.zeros(S,bool); shell=np.zeros(S,bool); env=np.zeros(S,bool); Rb=R&(BN!='')
+    for bn in bones:
+        if bn not in BH: continue
+        qb=np.argwhere(Rb&(BN==bn))
+        if len(qb)<30: continue
+        CH={'thigh':'shin','shin':'foot','upperArm':'foreArm','foreArm':'hand'}; base_,sd_=bn.split('_')[0],bn[len(bn.split('_')[0]):]
+        h=BH[bn]
+        if base_ in CH and CH[base_]+sd_ in BH: tl=BH[CH[base_]+sd_]
+        elif base_=='hand': tl=h+(h-BH['foreArm'+sd_])*0.45
+        elif base_ in ('foot','toe'): tl=h+np.array([0,FRONT*0.14,-0.03])
+        else: tl=BT[bn]
+        d=tl-h; L2=d@d; Lm=np.sqrt(L2)   # v13: axis = joint to child joint (glTF bone tails are arbitrary)
+        Q=lo+(qb+0.5)*RES; u=((Q-h)@d)/L2; rq=np.linalg.norm(Q-h-u[:,None]*d,axis=1)
+        ok_=(u>-0.25)&(u<1.25)&(rq<0.16); u,rq=u[ok_],rq[ok_]
+        if len(u)<30: continue
+        u0,u1=np.percentile(u,1),np.percentile(u,99); nb=max(int((u1-u0)*Lm/0.015),1); rf=np.zeros(nb)
+        bi=np.clip(((u-u0)/(u1-u0+1e-9)*nb).astype(int),0,nb-1)
+        for k in range(nb):
+            if (bi==k).sum()>4: rf[k]=np.percentile(rq[bi==k],pc)
+        nz=np.where(rf>0)[0]
+        if not len(nz): continue
+        rf=np.interp(np.arange(nb),nz,rf[nz]); rf=np.minimum(_smooth(rf,3),0.095)
+        uP=((P-h)@d)/L2; rP=np.linalg.norm(P-h-uP[:,None]*d,axis=1)
+        rr=np.interp(np.clip((uP-u0)/(u1-u0+1e-9)*nb-0.5,0,nb-1),np.arange(nb),rf); inr=(uP>=u0)&(uP<=u1)
+        T=t*RES; ins=inr&(rP<=rr); sh=inr&(rP>rr)&(rP<=rr+T); en=inr&(rP<=rr+(0.13 if bn.startswith(('thigh','shin')) else 0.06))   # legs: hide skirts/fur flaps too
+        if cap:   # pauldron dome over the joint
+            c0=h+u0*d; dc=np.linalg.norm(P-c0,axis=1); bc=uP<u0; r0=rf[0]
+            ins|=bc&(dc<=r0); sh|=bc&(dc>r0)&(dc<=r0+T); en|=bc&(dc<=r0+0.06)
+        for M_,v_ in ((inside,ins),(shell,sh),(env,en)):
+            tmp=np.zeros(tuple(b-a),bool).reshape(-1); tmp[:]=v_; M_[sl]|=tmp.reshape(tuple(b-a))
+    shell&=~inside
+    return shell,inside,env
+FITSET={'chest','belt','shoulder','glove','leg'}   # boots keep the hugging shell (foot axis unreliable)
+def _fit(slot): return slot in FITSET and not (ROBED and slot=='glove')
+def fit_piece(slot,side,R,t):
+    X='_'+(side or '')
+    if slot in ('chest','belt'): return fit_torso(R,t,84 if not ROBED else 70)
+    if slot=='shoulder': return fit_limb(R,t,['upperArm'+X],40 if ROBED else 60,cap=not ROBED)   # robed: slim mantle, no dome
+    if slot=='glove': return fit_limb(R,t,['upperArm'+X,'foreArm'+X,'hand'+X],60)
+    if slot=='leg': return fit_limb(R,t,['thigh'+X,'shin'+X],55)
+    if slot=='boot': return fit_limb(R,t,['shin'+X,'foot'+X,'toe'+X],65)
 def build_grid(slot,side,r,R):
+    out=OUTG if OUTG is not None else globals()['out']
     i=RARITIES.index(r); p=A.pal(FAM,r); t=THK[slot]+(1 if slot=='shoulder' and i>=3 else 0)
     if ROBED and slot!='helm':
         nb=np.zeros(S,np.int8)
@@ -110,6 +183,14 @@ def build_grid(slot,side,r,R):
     for k in range(t):
         nx=dil(acc)&out&~acc; layers.append(nx); acc|=nx
     shell=acc&out
+    if slot in FITSET and not (ROBED and slot=='glove'):   # v13 reshape (robed cuffs keep the hugging shell)
+        shell,fin,fenv=fit_piece(slot,side,R,t); layers=[R,shell]; acc=shell|fin; print('FIT',slot,side,int(R.sum()),int(shell.sum()),int(fin.sum()),flush=True)
+        if slot=='leg':   # v13: hide skirts/coats hanging around the legs on this side (Rook/Wren/Finn broad silhouettes) down to mid-shin
+            Xg,Yg,Zg=np.indices(S); xw=lo[0]+(Xg+0.5)*RES; zw=lo[2]+(Zg+0.5)*RES; sg=np.sign(BH['thigh'+'_'+side][0])
+            zlo=(BH['shin_'+side][2]+BH['foot_'+side][2])/2; zhi=beltz-0.04
+            fenv=fenv|((zw>zlo)&(zw<zhi)&(abs(xw)<0.34)&(xw*sg>-0.005))
+        masks[name]={'cells':np.ravel_multi_index(np.argwhere((fenv|fin|dil(R,1))&solid).T,S).tolist()}
+        out=~fin
     if slot=='helm':   # v8: skull-fitted helm (egg/dome profile, not a cylinder): great helm (plate/leather), bascinet+aventail (chain/scale), cowl (robed)
         X_,Y_,Z_=np.indices(S); qa=np.argwhere(R)
         sk_=np.zeros(S,bool); sel=np.isin(cbn,['head','jaw','eye_L','eye_R']); sk_[tuple(sidx[sel].T)]=True; q=np.argwhere(sk_&R)
@@ -148,9 +229,10 @@ def build_grid(slot,side,r,R):
         HGM=dil(HGM,1)&solid&~((ell(t+9)>1)&(Z_<zbot-8)&False)
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((HGM|(ell(t+9)<=1)&(Z_>=zbot-(3 if ROBED else 8))|inside|dil(R,3))&solid).T,S).tolist()}   # hide every body cell inside the helm envelope   # v7: hide every body cell inside the helm envelope (faces under helm/hood)
     if slot=='cloak': shell=close((layers[-1]|layers[-2]),1)&out   # cloak floats just outside the plate; close() fills pin-holes (Darius back speck)
-    if slot not in ('cloak','helm') and not ROBED: shell=close(shell,1)&out&dil(R,t)   # v10: fill pin-holes only within the armour's own thickness of the body (no bridging bulk)             # v3: fill the body's voxel lumps -> smooth plate surface, real thickness kept
+    if slot not in ('cloak','helm') and not _fit(slot) and not ROBED: shell=close(shell,1)&out&dil(R,t)   # v10: fill pin-holes only within the armour's own thickness of the body (no bridging bulk)             # v3: fill the body's voxel lumps -> smooth plate surface, real thickness kept
     outer=shell&dil(out&~shell)
     Rin=R&~dil(skin&~R,2); core=dil(Rin,t+1)&shell; trim=shell&~core
+    if _fit(slot): zq=np.argwhere(shell)[:,2]; trim=shell&((np.indices(S)[2]<=zq.min()+1)|(np.indices(S)[2]>=zq.max()-1))   # v13: rolled edge = top/bottom band of the fitted piece
     if slot=='helm': trim=np.zeros(S,bool)
     if ROBED and slot not in ('helm','cloak'): zz_=np.argwhere(shell)[:,2]; trim=shell&(np.indices(S)[2]<=zz_.min()+1)   # v9: robed: gold only on the hem, no edge blotches
     g=np.zeros(S,np.int16); v=V(1); v.g=g; KEEP=np.zeros(S,bool); AV=HG['av'] if slot=='helm' and 'av' in HG else np.zeros(S,bool)
@@ -250,7 +332,7 @@ def build_grid(slot,side,r,R):
             zz=np.argwhere(R)[:,2]; zm=int(np.median(zz)); sd=((Y_-np.median(np.argwhere(R)[:,1]))*FRONT<0) if slot!='chest' else (abs(X_-int(round((0-lo[0])/RES)))>int(0.11/RES))
             stp=dil(outer&sd&(abs(Z_-zm)<=1))&out&~shell&(abs(Z_-zm)<=1); g[stp]=leather; shell|=stp; g[stp&((X_+Y_)%9==0)]=edge
     g[trim&shell]=tr
-    if slot not in ('helm','cloak'):   # v11: rolled rim on every piece edge -> visible plate thickness, reads as a worn piece not painted skin
+    if slot not in ('helm','cloak') and not _fit(slot):   # v11: rolled rim on every piece edge -> visible plate thickness, reads as a worn piece not painted skin
         ed=shell&dil(skin&~dil(R,1),2)&dil(out&~shell); rl=dil(ed)&out&~shell&dil(skin&~dil(R,1),3)
         g[rl]=tr if i>=2 else v.c(p['edge']) if not ROBED else dark; shell|=rl
     # crop
@@ -308,10 +390,12 @@ def bake_low(hi,name,target,texres):
     for m in hi.data.materials:
         nt=m.node_tree; nt.nodes.clear(); a=nt.nodes.new('ShaderNodeVertexColor'); a.layer_name='Col'; e=nt.nodes.new('ShaderNodeEmission'); o=nt.nodes.new('ShaderNodeOutputMaterial')
         nt.links.new(a.outputs[0],e.inputs[0]); nt.links.new(e.outputs[0],o.inputs[0])
+    print('HI',name,len(hi.data.polygons),flush=True)
     lo_=hi.copy(); lo_.data=hi.data.copy(); bpy.context.scene.collection.objects.link(lo_)
     t1=len(lo_.data.polygons)*2 if any(len(p.vertices)==4 for p in lo_.data.polygons) else len(lo_.data.polygons)
     bpy.ops.object.select_all(action='DESELECT'); lo_.select_set(True); bpy.context.view_layer.objects.active=lo_
-    while sum(len(p.vertices)-2 for p in lo_.data.polygons)<target*1.05:   # v7: thin pieces: subdivide so the budget floor (>=3.5k) is met
+    for _k in range(6):
+        if not len(lo_.data.polygons) or sum(len(p.vertices)-2 for p in lo_.data.polygons)>=target*1.05: break   # v7: thin pieces: subdivide so the budget floor (>=3.5k) is met
         s_=lo_.modifiers.new('s','SUBSURF'); s_.subdivision_type='SIMPLE'; s_.levels=1; bpy.ops.object.modifier_apply(modifier='s')
     m=lo_.modifiers.new('d','DECIMATE'); m.ratio=min(1,target/max(1,sum(len(p.vertices)-2 for p in lo_.data.polygons))); bpy.ops.object.modifier_apply(modifier='d')
     bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.uv.smart_project(angle_limit=1.15,island_margin=0.004); bpy.ops.object.mode_set(mode='OBJECT')

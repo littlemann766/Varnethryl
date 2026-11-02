@@ -83,3 +83,9 @@ Each hero folder has its own `<hero>_body_mask.json` and `<hero>_<fam>_tris.json
 - Body pieces: 1-vox walls + rolled rims, wider-spaced lame lips, sparse rivets, no surface speckle on rare+ (clean metal), mail showing around plate couters/poleyns, grooves instead of raised shoulder ridges.
 - Helms: great helms get a 2-lame gorget to the collar; bascinets close to the chin with a pig-faced snout visor + breaths over the aventail.
 - Chest takes coat-weighted cells on all sides (Wren).
+
+## v13 reshape (all 8 heroes)
+- Chest/belt: per-slice ellipse fit (84th pct; robed sash 70th), smoothed along height -> clean cuirass/faulds silhouette instead of mirroring voxel lumps.
+- Shoulders/gloves/legs: per-bone tube fit along joint->child-joint axes (pauldron dome cap; robed mantle slim, no dome; robed cuffs and all boots keep the hugging shell).
+- Masks hide every body cell inside each fitted envelope (+6 cm limbs, +13 cm and a side half-slab to mid-shin on legs for skirts/coats; torso +7 vox). dress.gd hides a body tri when 2 of 3 verts are masked (no edge fragments).
+- Rims = top/bottom band of each fitted piece; lames/rivets/straps/cops/joint mail and v8-v12 helms unchanged.

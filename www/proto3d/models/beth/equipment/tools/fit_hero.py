@@ -79,7 +79,7 @@ def region(slot,side=None):
         m=((cbn=='shin'+X)&(tpar(spos,'shin'+X)>=0.12))|(np.isin(cbn,['foot'+X,'toe'+X])&(((abs(spos[:,1]-BH['foot'+X][1])<0.17)&(spos[:,2]<BH['foot'+X][2]+0.12)) if HERO=='rook' else True))   # v19: boot follows the foot, not the coat hem
     elif slot=='belt' and ROBED:   # robed: a sash/girdle band only, the robe skirt stays
         m=np.isin(cbn,['hips','spine','spine2'])&(abs(spos[:,2]-beltz)<0.03)
-        kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.46)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
+        kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.40)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
     elif slot=='belt':       # belt + faulds: covers the groin so the tabard no longer shows there
         m=(np.isin(cbn,['hips','spine','spine2'])|np.char.startswith(cbn.astype(str),'coat')|np.char.startswith(cbn.astype(str),'thigh'))&(spos[:,2]<beltz+0.035)&(spos[:,2]>beltz-0.17)
         m&=~(np.char.startswith(cbn.astype(str),'thigh')&(spos[:,2]<beltz-0.12))
@@ -126,9 +126,14 @@ def fit_torso(R,t,pc):
         nz=np.where(a_>0)[0]
         if len(nz): a_[:]=np.interp(np.arange(n),nz,a_[nz])
         a_[:]=np.maximum(_smooth(a_,9),2)
+    if not BELTMODE[0]:   # v28: breastplate rolls in to a gorget at the top (no open-bucket rim)
+        k0=int(n*0.80); nr=0.085/RES
+        for k in range(k0,n): w_=((k-k0)/max(n-1-k0,1))**1.3; xr[k]=xr[k]*(1-w_)+nr*1.15*w_; yf[k]=yf[k]*(1-w_)+nr*w_; yb[k]=yb[k]*(1-w_)+nr*w_
+    else:   # belt/faulds hug the hips: cap the width so coats don't turn it into a lampshade
+        cap_=np.percentile(xr,40); xr[:]=np.minimum(xr,cap_*1.08); yf[:]=np.minimum(yf,np.percentile(yf,40)*1.1); yb[:]=np.minimum(yb,np.percentile(yb,40)*1.1)
     Zc=np.clip(Z_-z0,0,n-1); dy=(Y_-cy)*FRONT; RX=xr[Zc]; RY=np.where(dy>0,yf[Zc],yb[Zc]); zr=(Z_>=z0)&(Z_<=z1)
     E=lambda T: ((X_-cx)/(RX+T))**2+(dy/(RY+T))**2
-    zm=z0+0.55*n if not BELTMODE[0] else z1+1; lam=6; fr=((z1-Z_)%lam)/lam; st=np.where(Z_<zm,fr*2.2,0)   # v14: faulds/plackart lames flare at their lower edge
+    zm=z0+0.55*n if not BELTMODE[0] else z1+1; lam=6; fr=((z1-Z_)%lam)/lam; st=np.where(Z_<zm,fr*(1.2 if BELTMODE[0] else 1.8),0)   # v14: faulds/plackart lames flare at their lower edge
     E2=lambda T: ((X_-cx)/(RX+T+st))**2+(dy/(RY+T+st))**2
     e=E2(0); inside=(e<=1)&zr; shell=(E2(t)<=1)&(e>1)&zr; env=(E(t+(14 if BELTMODE[0] else 10))<=1)&zr
     LAMEM[0]=shell&(Z_<zm)&(fr>0.8); JOINTM[0]=np.zeros(S,bool)
@@ -206,7 +211,7 @@ def build_grid(slot,side,r,R):
     if ROBED and slot=='shoulder':   # v17 pelerine: a thin conical cape sheet hanging from the neck over the shoulder (not a shell around the arm)
         X_,Y_,Z_=np.indices(S); vz=lambda z:(z-lo[2])/RES; sg=np.sign(BH['upperArm_'+side][0]); cx=(0-lo[0])/RES
         tc=np.isin(cbn,['chest','upperChest','spine2']); cy=np.median(sidx[tc][:,1]) if tc.any() else np.median(sidx[:,1])
-        zt=vz(BH['neck'][2]+0.04); zs=vz(BH['upperArm_'+side][2]-0.01); zb=zs-0.30/RES
+        zt=vz(BH['neck'][2]+0.04); zs=vz(BH['upperArm_'+side][2]-0.01); zb=zs-0.24/RES
         sel=tc&(abs(spos[:,2]-BH['upperArm_'+side][2])<0.05); dyv=(sidx[sel][:,1]-cy)*FRONT if sel.any() else np.array([4.,-4.])
         rxs=abs(BH['upperArm_'+side][0])/RES+(0.11 if HERO=='talia' else 0.08)/RES; ryf=np.percentile(dyv[dyv>0],95)+0.04/RES if (dyv>0).any() else 6; ryb=min(np.percentile(-dyv[dyv<0],95)+0.04/RES,0.17/RES) if (dyv<0).any() else 6; ryf=min(ryf,0.15/RES)
         u=np.sqrt(np.clip((zt-Z_)/max(zt-zs,1),0,1))+np.clip((zs-Z_)*0.28/max(zs-zb,1),0,0.28); r0=0.085/RES   # v17: steep shoulder slope, then hangs nearly straight down; r0=0.075/RES
@@ -452,7 +457,10 @@ def build_grid(slot,side,r,R):
     idx=np.argwhere(g>0); a=idx.min(0)-1; b=idx.max(0)+2
     vv=V(1); vv.pal=v.pal; vv.g=g[a[0]:b[0],a[1]:b[1],a[2]:b[2]].copy()
     if i>=4 and not ROBED and slot=='helm': A.filigree(vv,p)   # v11: gold rims carry legendary on body pieces (no speckle noise)   # v9: no gold blotches on robed mantles (trim hem only)
-    if FAM=='chain' and _fit(slot):   # v15: calm mail - horizontal ring rows instead of a 1-voxel checker
+    if FAM=='scale' and slot not in ('cloak','helm'):   # v28: overlapping scale rows (brick-offset dark scale edges), no speckle
+        Xc,Yc,Zc=np.indices(vv.g.shape); mm=(vv.g==vv.c(base)); rw=(Zc//3)%2
+        vv.g[mm&((Zc%3)==0)]=vv.c(tuple(c*0.62 for c in base)); vv.g[mm&((Zc%3)!=0)&(((Xc+Yc+rw*2)%4)==0)]=vv.c(tuple(c*0.80 for c in base))
+    elif FAM=='chain' and _fit(slot):   # v15: calm mail - horizontal ring rows instead of a 1-voxel checker
         Zc=np.indices(vv.g.shape)[2]; mm=(vv.g==vv.c(base)); vv.g[mm&((Zc%3)==0)]=vv.c(tuple(c*0.72 for c in base))
     elif FAM in ('chain','scale','leather') and slot not in ('cloak',): A.skin(vv,FAM,p,i)   # family surface (rings / scales / stitched leather)
     if i<=1 or slot=='helm': G.wear(vv,p,seed=hash((slot,side))%97)   # v12: clean metal on rare+ body pieces (speckle read as voxel bulk)

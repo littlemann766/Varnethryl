@@ -79,7 +79,7 @@ def region(slot,side=None):
         m=((cbn=='shin'+X)&(tpar(spos,'shin'+X)>=0.12))|np.isin(cbn,['foot'+X,'toe'+X])
     elif slot=='belt' and ROBED:   # robed: a sash/girdle band only, the robe skirt stays
         m=np.isin(cbn,['hips','spine','spine2'])&(abs(spos[:,2]-beltz)<0.03)
-        kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.38)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
+        kz=BH['foot_L'][2]+0.04; m|=(spos[:,2]<beltz)&(spos[:,2]>kz)&(abs(spos[:,0])<0.42)&~np.array([n.startswith(('hand','fing','index','middle','ring','pinky','thumb','foreArm','upperArm')) for n in cbn])   # v15: tabard panel hides the patterned skirt
     elif slot=='belt':       # belt + faulds: covers the groin so the tabard no longer shows there
         m=(np.isin(cbn,['hips','spine','spine2'])|np.char.startswith(cbn.astype(str),'coat')|np.char.startswith(cbn.astype(str),'thigh'))&(spos[:,2]<beltz+0.035)&(spos[:,2]>beltz-0.17)
         m&=~(np.char.startswith(cbn.astype(str),'thigh')&(spos[:,2]<beltz-0.12))
@@ -195,24 +195,24 @@ def build_grid(slot,side,r,R):
         h_=BH['shin_'+side]; f_=BH['foot_'+side]; I_=np.indices(S).reshape(3,-1).T; Pw=lo+(I_+0.5)*RES; d_=f_-h_; uu=((Pw-h_)@d_)/(d_@d_)
         rr_=np.linalg.norm(Pw-h_-uu[:,None]*d_,axis=1); cyl=((uu>0.2)&(uu<1.05)&(rr_<0.065)).reshape(S)
         fq=sidx[cbn=='foot_'+side]
-        if len(fq): fc=lo+(np.median(fq,0)+0.5)*RES; d2=fc-f_; u2=((Pw-f_)@d2)/max(d2@d2,1e-6); r2=np.linalg.norm(Pw-f_-u2[:,None]*d2,axis=1); cyl|=((u2>-0.1)&(u2<1.0)&(r2<0.06)).reshape(S)   # ankle bridge to the foot (Rook's feet sit forward)
+        if len(fq): fc=lo+(np.median(fq,0)+0.5)*RES; d2=fc-f_; u2=((Pw-f_)@d2)/max(d2@d2,1e-6); r2=np.linalg.norm(Pw-f_-u2[:,None]*d2,axis=1); cyl|=((u2>-0.2)&(u2<1.0)&(r2<0.075)).reshape(S)   # ankle bridge to the foot (Rook's feet sit forward)
         R=R|cyl; print("BOOTCYL",side,int(cyl.sum()),flush=True)
         out=out|(solid&~dil(R,1))   # v17: coat wraps the shins (Rook) -> no air next to them; let the greave grow through the hidden coat
     CAPE=None
     if ROBED and slot=='shoulder':   # v17 pelerine: a thin conical cape sheet hanging from the neck over the shoulder (not a shell around the arm)
         X_,Y_,Z_=np.indices(S); vz=lambda z:(z-lo[2])/RES; sg=np.sign(BH['upperArm_'+side][0]); cx=(0-lo[0])/RES
         tc=np.isin(cbn,['chest','upperChest','spine2']); cy=np.median(sidx[tc][:,1]) if tc.any() else np.median(sidx[:,1])
-        zt=vz(BH['neck'][2]+0.05); zs=vz(BH['upperArm_'+side][2]+0.05); zb=zs-0.30/RES
+        zt=vz(BH['neck'][2]+0.04); zs=vz(BH['upperArm_'+side][2]-0.01); zb=zs-0.30/RES
         sel=tc&(abs(spos[:,2]-BH['upperArm_'+side][2])<0.05); dyv=(sidx[sel][:,1]-cy)*FRONT if sel.any() else np.array([4.,-4.])
-        rxs=abs(BH['upperArm_'+side][0])/RES+0.05/RES; ryf=np.percentile(dyv[dyv>0],95)+0.04/RES if (dyv>0).any() else 6; ryb=min(np.percentile(-dyv[dyv<0],95)+0.04/RES,0.20/RES) if (dyv<0).any() else 6; ryf=min(ryf,0.18/RES)
-        u=np.clip((zt-Z_)/max(zt-zs,1),0,1)+np.clip((zs-Z_)*0.12/max(zs-zb,1),0,0.12); r0=0.075/RES   # v17: steep shoulder slope, then hangs nearly straight down; r0=0.075/RES
+        rxs=abs(BH['upperArm_'+side][0])/RES+0.09/RES; ryf=np.percentile(dyv[dyv>0],95)+0.04/RES if (dyv>0).any() else 6; ryb=min(np.percentile(-dyv[dyv<0],95)+0.04/RES,0.17/RES) if (dyv<0).any() else 6; ryf=min(ryf,0.15/RES)
+        u=np.clip((zt-Z_)/max(zt-zs,1),0,1)+np.clip((zs-Z_)*0.22/max(zs-zb,1),0,0.22); r0=0.085/RES   # v17: steep shoulder slope, then hangs nearly straight down; r0=0.075/RES
         rx=r0+(rxs-r0)*u; dy=(Y_-cy)*FRONT; ry=r0+(np.where(dy>0,ryf,ryb)-r0)*u
         ee=np.sqrt(((X_-cx)/rx)**2+(dy/ry)**2); band=(Z_<=zt)&(Z_>=zb)&((X_-cx)*sg>=0)
         CAPE=band&(ee>=1)&(ee<=1+2.2/np.minimum(rx,ry)); INS=band&(ee<1)
         Zd=Z_; ang_=np.arctan2(dy,(X_-cx)*sg); CAPE&=~((Zd<=zb+3)&((np.floor(ang_*9)%2)==0))   # dagged hem (teeth around the rim)
         txh=abs(BH['upperArm_'+side][0])-0.02
         xw_=lo[0]+(X_+0.5)*RES; zw_=lo[2]+(Z_+0.5)*RES
-        DRP=solid&(abs(xw_)>txh+0.03)&(xw_*sg>0)&(zw_>beltz-0.30)&(zw_<BH['upperArm_'+side][2]-0.05)&~np.isin(_bng(),['foreArm_'+side,'hand_'+side])   # sleeve drapes hanging below the T-pose arms
+        DRP=solid&(abs(xw_)>txh+0.03)&(xw_*sg>0)&(zw_>beltz-0.45)&(zw_<BH['upperArm_'+side][2]-0.04)&~np.isin(_bng(),(['hand_'+side] if BH['hand_'+side][2]>BH['upperArm_'+side][2]-0.15 else ['foreArm_'+side,'hand_'+side]))   # sleeve drapes (T-pose arms: forearm drapes too) hanging below the T-pose arms
         print('CAPE',side,int(CAPE.sum()),int(INS.sum()),int(DRP.sum()),round(zt,1),round(zs,1),round(rxs,1),round(ryf,1),round(ryb,1),flush=True)
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((INS|dil(CAPE,1)|DRP)&solid).T,S).tolist()}
     layers=[R]; acc=R.copy()
@@ -232,7 +232,7 @@ def build_grid(slot,side,r,R):
             I_=np.indices(S).reshape(3,-1).T; Pw=lo+(I_+0.5)*RES; cm=np.zeros(len(Pw),bool)
             for a_,b_ in (('upperArm_'+side,'foreArm_'+side),('foreArm_'+side,'hand_'+side)):
                 if a_ in BH and b_ in BH:
-                    h_=BH[a_]; d_=BH[b_]-h_; uu=((Pw-h_)@d_)/(d_@d_); cm|=(uu>0.3)&(uu<1.1)&(np.linalg.norm(Pw-h_-uu[:,None]*d_,axis=1)<0.13)
+                    h_=BH[a_]; d_=BH[b_]-h_; uu=((Pw-h_)@d_)/(d_@d_); cm|=(uu>0.3)&(uu<1.1)&(np.linalg.norm(Pw-h_-uu[:,None]*d_,axis=1)<0.16)
             fenv=fenv|(cm.reshape(S)&~np.isin(_bng(),['chest','upperChest','spine','spine2','hips','head','neck']))   # v15: stray coat bits near the hands
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((fenv|fin|dil(R,1))&solid).T,S).tolist()}
         out=~fin

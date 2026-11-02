@@ -101,3 +101,6 @@ Robed: full skirt panel to ankle |x|<0.30 with vertical drape folds, shoulder ma
 
 ## v17 (leftover polish, soft hold)
 Grid +35cm headroom (crest/spike stamps were clipped). Finn: thick tapered spike + gold ball finial + jewel knop. Rook: coat wraps shins (no air) -> boots get a synthetic greave core along shin->foot + ankle bridge, grown through the hidden coat; glove mask covers arm-axis coat cuffs. Robed: pelerine = thin conical cape sheet from neck over shoulders (dagged rim), hides T-pose sleeve drapes; skirt panel |x|<0.38. Mask dims changed (z) - always rebuild full heroes. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg4/
+
+## v18 (leftover polish, soft hold)
+Robed pelerine wider (+9cm) and lower (starts at shoulder joint), slope flare 0.22, slimmer front/back depth (<=15/17cm). T-pose sleeve drapes hidden incl. forearm drapes, down to belt-45cm; skirt panel |x|<0.42. Rook: wider ankle bridge (r 7.5cm), forearm coat-cuff mask r 16cm. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg5/

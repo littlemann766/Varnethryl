@@ -1,0 +1,68 @@
+{
+ "A": {
+  "instances": 1630,
+  "by_kind": {
+   "tuft": 529,
+   "bush": 313,
+   "stones": 259,
+   "boulder": 99,
+   "pine": 248,
+   "oak": 182
+  },
+  "chunks": 32,
+  "tris_high": 158518,
+  "tris_lod1": 33660,
+  "lod1_pct": 21.2,
+  "col_tris": 6348
+ },
+ "B": {
+  "instances": 2609,
+  "by_kind": {
+   "dune_grass": 586,
+   "shore_pine": 268,
+   "stones": 581,
+   "scrub": 537,
+   "boulder": 283,
+   "salt_crystal": 354
+  },
+  "chunks": 39,
+  "tris_high": 235572,
+  "tris_lod1": 49828,
+  "lod1_pct": 21.2,
+  "col_tris": 6612
+ },
+ "frost": {
+  "instances": 3247,
+  "by_kind": {
+   "snow_pine": 937,
+   "ice_shard": 538,
+   "stones": 859,
+   "boulder": 702,
+   "dead_tree": 211
+  },
+  "chunks": 68,
+  "tris_high": 405491,
+  "tris_lod1": 79282,
+  "lod1_pct": 19.6,
+  "col_tris": 22200
+ },
+ "ash": {
+  "instances": 5062,
+  "by_kind": {
+   "obsidian": 404,
+   "ash_grass": 818,
+   "stones": 870,
+   "cinders": 851,
+   "lava_rocks": 532,
+   "dead_tree": 345,
+   "basalt": 501,
+   "boulder": 411,
+   "sulfur": 330
+  },
+  "chunks": 30,
+  "tris_high": 560859,
+  "tris_lod1": 109805,
+  "lod1_pct": 19.6,
+  "col_tris": 21468
+ }
+}

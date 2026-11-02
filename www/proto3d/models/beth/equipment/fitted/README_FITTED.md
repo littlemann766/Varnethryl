@@ -62,3 +62,10 @@ Each hero folder has its own `<hero>_body_mask.json` and `<hero>_<fam>_tris.json
   - cloth: open cowl with oval face opening, black shadow, pointed back.
   - rare+: comb crest (taller per tier); epic+: horns; legendary gold trim; masterwork blackened + molten.
 - Armour: shoulder wall 2 vox; overlapping lame lips with domed rivets (plate/scale/leather; pauldrons/sabatons on all), couters/poleyns over elbow/knee, raised leather buckle straps. Robed sets keep no chest/leg plate.
+
+## v9 (orin, rook, finn, elira, wren, rowan, talia; Darius kept at approved v8)
+- Aventail (Finn/Elira/Rook): riveted-ring mail pattern, gold lower edge on legendary, molten glints on masterwork.
+- Helm mask reaches 9 vox out and 8 vox under the rim on armoured heroes (Wren's blue collar/specks hidden).
+- Very wide heads (Rook) fit at the 84th percentile -> snug helm.
+- Pauldrons capped at +4.5 cm over the shoulder joint (not Darius/Wren).
+- Robed: no filigree, gold only on the hem -> clean mantles.

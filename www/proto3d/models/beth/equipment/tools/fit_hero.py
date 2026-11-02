@@ -67,6 +67,7 @@ def region(slot,side=None):
         ua='upperArm'+X; sgn=np.sign(BH[ua][0])
         m=(np.isin(cbn,[ua,'shoulder'+X])&(tpar(spos,ua)<(0.35 if ROBED else 0.78)))
         m|=np.isin(cbn,['upperChest','chest'])&(spos[:,0]*sgn>abs(BH[ua][0])-0.05)&(spos[:,2]>BH[ua][2]-0.09)
+        m&=spos[:,2]<BH[ua][2]+(0.045 if HERO not in ('darius','wren') else 9)   # v9: pauldron no higher than ~4.5 cm over the shoulder joint (doesn't tower beside the helm); Darius approved as-is
     elif slot=='glove':      # gauntlet + vambrace + couter (overlaps the rerebrace -> no elbow gap)
         m=((cbn=='foreArm'+X)&(tpar(spos,'foreArm'+X)>0.55)) if ROBED else ((cbn=='foreArm'+X)|((cbn=='upperArm'+X)&(tpar(spos,'upperArm'+X)>0.66)))   # robed: gauntlet + cuff only, the sleeve stays
         m|=np.array([n.endswith(X) and (n.startswith(('hand','fingers','index','middle','ring','pinky','thumb'))) for n in cbn])
@@ -115,6 +116,7 @@ def build_grid(slot,side,r,R):
         if len(q)<200: q=qa
         cx_=(0-lo[0])/RES; cy_=np.median(q[:,1]); zb=qa[:,2].min(); zt=np.percentile(q[:,2],99.5); Hh=zt-zb
         fy=(q[:,1]-cy_)*FRONT; up=q[:,2]>zb+0.35*Hh; PC=97
+        if np.percentile(abs(q[up,0]-cx_),97)*RES>0.12: PC=84   # v9: very wide heads (Rook) -> snug fit, overflow hidden by the mask
         ax=np.percentile(abs(q[up,0]-cx_),PC)+1.0; bf=np.percentile(fy[up&(fy>0)],PC)+1.0; bb=np.percentile(-fy[up&(fy<0)],PC)+1.0
         STY='cowl' if ROBED else ('basc' if FAM in ('chain','scale') else 'great')
         zs=zb+0.52*Hh; Hd=zt-zs+1.5
@@ -137,13 +139,14 @@ def build_grid(slot,side,r,R):
             ea=((X_-cx_)/(ax+1+3*fl))**2+(dy/(ry+1+3*fl))**2; eai=((X_-cx_)/(ax-1+3*fl))**2+(dy/(ry-1+3*fl))**2
             av=(ea<=1)&(eai>1)&(Z_<zr)&(Z_>=za)&out; shell|=av; HG['av']=av; inside|=(eai<=1)&(Z_<zr)&(Z_>=za)
         R=R|(inside&skin)
-        masks[name]={'cells':np.ravel_multi_index(np.argwhere(((ell(t+5)<=1)&(Z_>=zbot-3)|inside|dil(R,3))&solid).T,S).tolist()}   # hide every body cell inside the helm envelope   # v7: hide every body cell inside the helm envelope (faces under helm/hood)
+        masks[name]={'cells':np.ravel_multi_index(np.argwhere(((ell(t+9)<=1)&(Z_>=zbot-(3 if ROBED else 8))|inside|dil(R,3))&solid).T,S).tolist()}   # hide every body cell inside the helm envelope   # v7: hide every body cell inside the helm envelope (faces under helm/hood)
     if slot=='cloak': shell=close((layers[-1]|layers[-2]),1)&out   # cloak floats just outside the plate; close() fills pin-holes (Darius back speck)
     if slot not in ('cloak','helm') and not ROBED: shell=close(shell,1)&out             # v3: fill the body's voxel lumps -> smooth plate surface, real thickness kept
     outer=shell&dil(out&~shell)
     Rin=R&~dil(skin&~R,2); core=dil(Rin,t+1)&shell; trim=shell&~core
     if slot=='helm': trim=np.zeros(S,bool)
-    g=np.zeros(S,np.int16); v=V(1); v.g=g; KEEP=np.zeros(S,bool)
+    if ROBED and slot not in ('helm','cloak'): zz_=np.argwhere(shell)[:,2]; trim=shell&(np.indices(S)[2]<=zz_.min()+1)   # v9: robed: gold only on the hem, no edge blotches
+    g=np.zeros(S,np.int16); v=V(1); v.g=g; KEEP=np.zeros(S,bool); AV=HG['av'] if slot=='helm' and 'av' in HG else np.zeros(S,bool)
     base=p['leather'] if FAM=='leather' else A.PAL[r].get('cloth',p['metal']) if ROBED else p['metal']   # robed: rarity cloth colour, not the white robe
     metal=v.c(base); dark=v.c(tuple(c*0.62 for c in base)); tr=v.c(p['trim'] if i>=2 else p['edge'])
     g[shell]=metal
@@ -239,10 +242,16 @@ def build_grid(slot,side,r,R):
     # crop
     idx=np.argwhere(g>0); a=idx.min(0)-1; b=idx.max(0)+2
     vv=V(1); vv.pal=v.pal; vv.g=g[a[0]:b[0],a[1]:b[1],a[2]:b[2]].copy()
-    if i>=4: A.filigree(vv,p)
+    if i>=4 and not ROBED: A.filigree(vv,p)   # v9: no gold blotches on robed mantles (trim hem only)
     if FAM in ('chain','scale','leather') and slot not in ('cloak',): A.skin(vv,FAM,p,i)   # family surface (rings / scales / stitched leather)
     G.wear(vv,p,seed=hash((slot,side))%97)
     if i==5: A.molten(vv,p,seed=11)
+    av_=AV[a[0]:b[0],a[1]:b[1],a[2]:b[2]]&(vv.g>0)
+    if av_.any():   # v9: real riveted-ring mail on the aventail (light rings, dark gaps, row shading)
+        Xa,Ya,Za=np.indices(vv.g.shape); mb=tuple(min(1,c*1.35) for c in base); md=tuple(c*0.45 for c in base)
+        vv.g[av_]=vv.c(mb); vv.g[av_&(((Xa+Ya+Za+(Za//1))%2)==0)]=vv.c(tuple(c*1.0 for c in base)); vv.g[av_&((Za%3)==0)&(((Xa+Ya)%2)==0)]=vv.c(md)
+        if i>=4: vv.g[av_&(Za==Za[av_].min())]=vv.c(p['trim'])
+        if i==5: vv.g[av_&((Xa*7+Za*3)%17==0)]=vv.c((0.9,0.35,0.05))
     kk=KEEP[a[0]:b[0],a[1]:b[1],a[2]:b[2]]&(vv.g>0); vv.g[kk]=vv.c((0.02,0.02,0.025))   # hood shadow stays black after filigree/wear/molten
     if i==0:
         m=np.isin(vv.g,[vv.c(p['edge'])]); rng=np.random.default_rng(3); q=np.argwhere(m); q=q[rng.random(len(q))<0.08]; vv.g[tuple(q.T)]=0

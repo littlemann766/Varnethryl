@@ -78,3 +78,8 @@ Each hero folder has its own `<hero>_body_mask.json` and `<hero>_<fam>_tris.json
 - Legendary filigree speckle only on helms; body pieces carry gold rims.
 - Chest covers coat/hips-weighted front cells and overlaps the belt, min half-width 15 cm (Wren tunic bleed).
 - Helm mask also hides head/neck/chest/hair-weighted gear above the neck (Rook's beige back gear).
+
+## v12 (all 8 heroes)
+- Body pieces: 1-vox walls + rolled rims, wider-spaced lame lips, sparse rivets, no surface speckle on rare+ (clean metal), mail showing around plate couters/poleyns, grooves instead of raised shoulder ridges.
+- Helms: great helms get a 2-lame gorget to the collar; bascinets close to the chin with a pig-faced snout visor + breaths over the aventail.
+- Chest takes coat-weighted cells on all sides (Wren).

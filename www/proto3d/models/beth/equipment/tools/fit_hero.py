@@ -62,7 +62,7 @@ def region(slot,side=None):
     m=np.zeros(len(sidx),bool); X='_'+(side or '')
     if slot=='chest':
         m=(np.isin(cbn,['spine','spine2','chest','upperChest','hips'])|np.char.startswith(cbn.astype(str),'coat'))&(spos[:,2]<neckz-0.005)&(spos[:,2]>beltz-0.03)   # v11: overlaps the belt (no tunic bleed between them)
-        sx=max(abs(BH['upperArm_L'][0])-0.035,0.15); m&=abs(spos[:,0])<sx; m&=(capew<0.15)|(((spos[:,1]-BH['spine'][1])*FRONT)>0)   # v11: front cells always (Wren's coat-weighted tunic)
+        sx=max(abs(BH['upperArm_L'][0])-0.035,0.15); m&=abs(spos[:,0])<sx; m&=(capew<0.15)|(((spos[:,1]-BH['spine'][1])*FRONT)>0)|np.char.startswith(cbn.astype(str),'coat')   # v11: front cells always (Wren's coat-weighted tunic)
     elif slot=='shoulder':
         ua='upperArm'+X; sgn=np.sign(BH[ua][0])
         m=(np.isin(cbn,[ua,'shoulder'+X])&(tpar(spos,ua)<(0.35 if ROBED else 0.78)))
@@ -94,7 +94,7 @@ def region(slot,side=None):
 BONESET={'chest':['spine','spine2','chest','upperChest','hips'],'belt':['hips','spine','spine2','thigh_L','thigh_R'],'helm':['head','neck'],'cloak':[b for b in BH if b.startswith('cape')]+['upperChest','chest'],
  'shoulder':lambda X:['upperArm'+X,'shoulder'+X,'upperChest','chest'],'glove':lambda X:['upperArm'+X,'foreArm'+X,'hand'+X]+[f+n+X for f in ('index','middle','ring','pinky','thumb') for n in '123']+['fingers'+X],
  'leg':lambda X:['thigh'+X,'shin'+X,'hips'],'boot':lambda X:['shin'+X,'foot'+X,'toe'+X]}
-THK={'chest':2,'shoulder':2,'glove':2,'leg':2,'boot':2,'belt':2,'helm':3,'cloak':4}
+THK={'chest':1,'shoulder':1,'glove':1,'leg':1,'boot':1,'belt':1,'helm':3,'cloak':4}
 TRI={'chest':7000,'helm':7990,'shoulder':5020,'belt':4520,'glove':3540,'leg':4530,'boot':4030,'cloak':4030}
 TEX={'chest':512,'helm':512,'cloak':512}
 PIECES=[('helm',None),('cloak',None),('chest',None),('belt',None)]+[(s,x) for s in ('shoulder','glove','leg','boot') for x in ('L','R')]
@@ -120,7 +120,7 @@ def build_grid(slot,side,r,R):
         ax=np.percentile(abs(q[up,0]-cx_),PC)+1.0; bf=np.percentile(fy[up&(fy>0)],PC)+1.0; bb=np.percentile(-fy[up&(fy<0)],PC)+1.0
         STY='cowl' if ROBED else ('basc' if FAM in ('chain','scale') else 'great')
         zs=zb+0.52*Hh; Hd=zt-zs+1.5
-        zbot={'great':zb-1,'basc':zb+0.30*Hh,'cowl':zb-2}[STY]
+        zbot={'great':zb-1,'basc':zb-1,'cowl':zb-2}[STY]   # v12: bascinet closes to the chin with a snout visor
         def prof(T):   # radius scale per height + backward lean of the crown (bascinet point)
             U=(Z_-zs)/(Hd+T); Lw=np.clip((zs-Z_)/max(zs-zb,1),0,1.5)
             if STY=='basc': f=np.where(U>0,np.clip(1-U,0,1)**0.62*(1-0.25*U*U),1-0.10*Lw); lean=np.clip(U,0,1)*0.45*bb
@@ -138,6 +138,10 @@ def build_grid(slot,side,r,R):
             dy=(Y_-cy_)*FRONT; ry=np.where(dy>0,bf,bb)
             ea=((X_-cx_)/(ax+1+3*fl))**2+(dy/(ry+1+3*fl))**2; eai=((X_-cx_)/(ax-1+3*fl))**2+(dy/(ry-1+3*fl))**2
             av=(ea<=1)&(eai>1)&(Z_<zr)&(Z_>=za)&out; shell|=av; HG['av']=av; inside|=(eai<=1)&(Z_<zr)&(Z_>=za)
+        if STY=='great':   # v12 gorget: two thin lames from the helm rim down to the collar
+            zr=int(zbot); za=int(round((BH['neck'][2]-0.04-lo[2])/RES)); dy=(Y_-cy_)*FRONT; ry=np.where(dy>0,bf,bb)
+            go=(((X_-cx_)/(ax+t+1))**2+(dy/(ry+t+1))**2<=1)&(((X_-cx_)/(ax+1))**2+(dy/(ry+1))**2>1)&(Z_<zr)&(Z_>=za)
+            shell|=go; HG['go']=go
         R=R|(inside&skin)
         hg_=np.isin(cbn,['head','neck','jaw','eye_L','eye_R','chest','upperChest','spine2'])|np.char.startswith(cbn.astype(str),'hair')
         hg_&=spos[:,2]>BH['neck'][2]-0.02; HGM=np.zeros(S,bool); HGM[tuple(sidx[hg_].T)]=True   # v11: hide gear riding above the neck (Rook's beige back gear)
@@ -177,6 +181,10 @@ def build_grid(slot,side,r,R):
             band=outer&(abs(Z_-(ze+3))<=1); bump=dil(band)&ext&~shell&(abs(Z_-(ze+3))<=1); g[bump]=tr if i>=2 else metal; shell|=bump   # raised brow band
             g[dil(slit,1)&outer&(Z_<ze-1)&(Z_>=ze-2)]=edge   # bright lower lip
             kl=outer&front&(abs(X_-cx)<=1)&(Z_<ze-1); kb=dil(kl)&ext&~shell&(abs(X_-cx)<=0)&(Z_<ze-1)&(Z_>=HZ[0]); g[kb]=tr if i>=2 else metal; shell|=kb   # face keel
+            if STY=='basc':   # v12 pig-faced snout: visor pushed forward below the slit, tapering to a point
+                for k_ in range(1,4):
+                    sn=dil(outer&front&(Z_<ze-1)&(Z_>HZ[0]+2)&(abs(X_-cx)<=H_['ax']*(0.55-0.12*k_)),1)&ext&~shell&(Z_<ze-1)&(Z_>HZ[0]+2)&(abs(X_-cx)<=H_['ax']*(0.55-0.12*k_)); g[sn]=metal; shell|=sn; ext=ext&~sn; outer=shell&dil(ext&~shell)
+                g[outer&front&(Z_<ze-2)&((Z_%2)==0)&((X_%2)==0)&(abs(X_-cx)>=2)&(abs(X_-cx)<=H_['ax']*0.4)]=blk
             if STY=='great' and i>=1:   # breaths: rows of black holes on the right cheek of the face plate
                 br=outer&front&(Z_<ze-3)&(Z_>HZ[0]+3)&((X_-cx)*1>=3)&((X_-cx)<=H_['ax']*0.65)&((Z_%3)==0)&((X_%2)==0); g[br]=blk
             rim=outer&(Z_<=HZ[0]+1)&~(H_.get('av',np.zeros(S,bool))); rr=dil(rim)&ext&~shell&(Z_<=HZ[0]+1); g[rr]=tr if i>=2 else dark; shell|=rr
@@ -206,10 +214,8 @@ def build_grid(slot,side,r,R):
         per={'chest':18,'leg':16,'shoulder':7,'glove':14,'boot':15}[slot]; rows=(Z_%per==0)
         if slot=='shoulder':
             ridge=dil(outer&rows)&out&~shell&dil(shell)
-            if i>=1 and not ROBED: g[ridge]=dark; shell|=ridge
+            pass   # v12: no raised ridges (grooves only)
         if i>=1: g[outer&rows]=dark
-        if i>=1:
-            riv=outer&(np.roll(rows,1,2))&((X_+Y_)%7==0); g[riv]=v.c(p['edge'])
     if slot=='chest' and i>=2:
         cx=int(round((0-lo[0])/RES)); keel=outer&(abs(X_-cx)<=1)&(np.sign(Y_-np.median(np.argwhere(R)[:,1]))==FRONT)
         k2=dil(keel)&out&~shell&dil(shell); g[k2]=tr; shell|=k2
@@ -226,18 +232,20 @@ def build_grid(slot,side,r,R):
                         if z<S[2] and out[x,y,z]: g[x,y,z]=v.c((0.10,0.08,0.08)) if k<6 else tr; shell[x,y,z]=True
     if slot!='helm' and not ROBED:   # v8: real layering -> overlapping lames, raised rivets, couters/poleyns, raised straps
         ext=~shell; outer=shell&dil(out&~shell); leather=v.c((0.24,0.15,0.09)); edge=v.c(p['edge'])
-        lp={'chest':6,'leg':5,'shoulder':4,'glove':5,'boot':5,'belt':4}.get(slot)
+        lp={'chest':8,'leg':7,'shoulder':5,'glove':7,'boot':6,'belt':5}.get(slot)
         if lp and FAM in ('plate','scale','leather') or slot in ('shoulder','boot'):
             zc=np.argwhere(shell)[:,2]; zmid=np.percentile(zc,55)
             band=outer&((Z_%lp)==0)&((Z_<zmid) if slot=='chest' else True)
             st=dil(band)&out&~shell&(np.roll(band,1,2)|band|np.roll(band,-1,2)); g[st]=dark; shell|=st   # lame lip (each plate overlaps the next)
-            rv=st&((X_+Y_)%6==0); g[rv]=edge
-            rv2=dil(rv)&out&~shell&((X_+Y_)%6==0); g[rv2]=edge; shell|=rv2   # domed rivet heads
+            rv=st&((X_+Y_)%9==0); g[rv]=edge
+            rv2=dil(rv)&out&~shell&((X_+Y_)%9==0); g[rv2]=edge; shell|=rv2   # domed rivet heads
         if slot in ('glove','leg') and FAM!='leather':   # couter / poleyn: round cop over the joint
             jb=('foreArm_' if slot=='glove' else 'shin_')+side; jp=(BH[jb]-lo)/RES
             d2=(X_-jp[0])**2+(Y_-jp[1])**2+(Z_-jp[2])**2; facing=((Y_-jp[1])*FRONT>0) if slot=='leg' else ((Y_-jp[1])*FRONT<0)
             cop=dil(outer&(d2<=5.5**2)&facing,1)&out&~shell&(d2<=6.5**2); g[cop]=metal if i<2 else tr; shell|=cop
             cop2=dil(cop)&out&~shell&(d2<=3.0**2)&facing; g[cop2]=metal; shell|=cop2
+            if FAM=='plate':   # v12: mail showing at the joint around the cop (layered kit)
+                mz=outer&(d2>6.5**2)&(d2<=9.5**2)&~cop; g[mz]=v.c(tuple(min(1,c*1.25) for c in base)); g[mz&(((X_+Y_+Z_)%2)==0)]=v.c(tuple(c*0.55 for c in base))
         if slot in ('chest','leg','glove','boot'):   # raised leather buckle straps
             zz=np.argwhere(R)[:,2]; zm=int(np.median(zz)); sd=((Y_-np.median(np.argwhere(R)[:,1]))*FRONT<0) if slot!='chest' else (abs(X_-int(round((0-lo[0])/RES)))>int(0.11/RES))
             stp=dil(outer&sd&(abs(Z_-zm)<=1))&out&~shell&(abs(Z_-zm)<=1); g[stp]=leather; shell|=stp; g[stp&((X_+Y_)%9==0)]=edge
@@ -250,7 +258,7 @@ def build_grid(slot,side,r,R):
     vv=V(1); vv.pal=v.pal; vv.g=g[a[0]:b[0],a[1]:b[1],a[2]:b[2]].copy()
     if i>=4 and not ROBED and slot=='helm': A.filigree(vv,p)   # v11: gold rims carry legendary on body pieces (no speckle noise)   # v9: no gold blotches on robed mantles (trim hem only)
     if FAM in ('chain','scale','leather') and slot not in ('cloak',): A.skin(vv,FAM,p,i)   # family surface (rings / scales / stitched leather)
-    G.wear(vv,p,seed=hash((slot,side))%97)
+    if i<=1 or slot=='helm': G.wear(vv,p,seed=hash((slot,side))%97)   # v12: clean metal on rare+ body pieces (speckle read as voxel bulk)
     if i==5: A.molten(vv,p,seed=11)
     av_=AV[a[0]:b[0],a[1]:b[1],a[2]:b[2]]&(vv.g>0)
     if av_.any():   # v9: real riveted-ring mail on the aventail (light rings, dark gaps, row shading)

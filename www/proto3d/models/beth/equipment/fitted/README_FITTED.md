@@ -89,3 +89,6 @@ Each hero folder has its own `<hero>_body_mask.json` and `<hero>_<fam>_tris.json
 - Shoulders/gloves/legs: per-bone tube fit along joint->child-joint axes (pauldron dome cap; robed mantle slim, no dome; robed cuffs and all boots keep the hugging shell).
 - Masks hide every body cell inside each fitted envelope (+6 cm limbs, +13 cm and a side half-slab to mid-shin on legs for skirts/coats; torso +7 vox). dress.gd hides a body tri when 2 of 3 verts are masked (no edge fragments).
 - Rims = top/bottom band of each fitted piece; lames/rivets/straps/cops/joint mail and v8-v12 helms unchanged.
+
+## v14 (RPG pass)
+Stepped overlapping lames (pauldron cascade, fauld, limb lames) with dark riveted lips, mail at elbows/knees, chest emblem+jewel (gold legendary, molten masterwork), wider leg side slab, dagged robed mantles. Tris 3538-7990, lod1<=50%. Shots: /workspace/shots/loot3/fitted_rpg/

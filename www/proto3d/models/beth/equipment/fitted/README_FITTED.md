@@ -119,3 +119,6 @@ Chest armour grows over the under-arm gap (CSIDE cells become plate); Rook chest
 
 ## v23 (leftover polish, soft hold)
 Diagnosis (piece-by-piece renders): Rook chest spot and shin/foot dots persist with any single piece removed and without the weapon -> they were body triangles at mask edges surviving the 2-of-3 hide rule. dress.gd now drops any body triangle touching a hidden cell (1-of-3). Talia drape cover 4cm further in. Darius/Orin/Rook/Finn/Elira/Wren pieces unchanged from v22 (rule is renderer-side). Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg10/
+
+## v24 (leftover polish, soft hold)
+Rook: every non-helm slot mask grown by 1 cell (coat slivers at mask edges). Robed capes wider (Talia +11cm, Rowan +8cm past the shoulder); speck-hide zone reaches 10 cells above the neck (hood). Darius/Orin/Finn/Elira/Wren unchanged from v22. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg11/

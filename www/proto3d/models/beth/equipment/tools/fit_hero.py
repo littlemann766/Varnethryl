@@ -208,11 +208,11 @@ def build_grid(slot,side,r,R):
         tc=np.isin(cbn,['chest','upperChest','spine2']); cy=np.median(sidx[tc][:,1]) if tc.any() else np.median(sidx[:,1])
         zt=vz(BH['neck'][2]+0.04); zs=vz(BH['upperArm_'+side][2]-0.01); zb=zs-0.30/RES
         sel=tc&(abs(spos[:,2]-BH['upperArm_'+side][2])<0.05); dyv=(sidx[sel][:,1]-cy)*FRONT if sel.any() else np.array([4.,-4.])
-        rxs=abs(BH['upperArm_'+side][0])/RES+0.07/RES; ryf=np.percentile(dyv[dyv>0],95)+0.04/RES if (dyv>0).any() else 6; ryb=min(np.percentile(-dyv[dyv<0],95)+0.04/RES,0.17/RES) if (dyv<0).any() else 6; ryf=min(ryf,0.15/RES)
+        rxs=abs(BH['upperArm_'+side][0])/RES+(0.11 if HERO=='talia' else 0.08)/RES; ryf=np.percentile(dyv[dyv>0],95)+0.04/RES if (dyv>0).any() else 6; ryb=min(np.percentile(-dyv[dyv<0],95)+0.04/RES,0.17/RES) if (dyv<0).any() else 6; ryf=min(ryf,0.15/RES)
         u=np.sqrt(np.clip((zt-Z_)/max(zt-zs,1),0,1))+np.clip((zs-Z_)*0.28/max(zs-zb,1),0,0.28); r0=0.085/RES   # v17: steep shoulder slope, then hangs nearly straight down; r0=0.075/RES
         rx=r0+(rxs-r0)*u; dy=(Y_-cy)*FRONT; ry=r0+(np.where(dy>0,ryf,ryb)-r0)*u
         ee=np.sqrt(((X_-cx)/rx)**2+(dy/ry)**2); band=(Z_<=zt)&(Z_>=zb)&((X_-cx)*sg>=0)
-        CAPE=band&(ee>=1)&(ee<=1+1.6/np.minimum(rx,ry)); INS=(band&(ee<1))|((Z_<=zt+6)&(Z_>=zb-3)&((X_-cx)*sg>=0)&(ee<1.9))   # v19: also hide specks just outside the sheet
+        CAPE=band&(ee>=1)&(ee<=1+1.6/np.minimum(rx,ry)); INS=(band&(ee<1))|((Z_<=zt+10)&(Z_>=zb-3)&((X_-cx)*sg>=0)&(ee<1.9))   # v19: also hide specks just outside the sheet
         Zd=Z_; ang_=np.arctan2(dy,(X_-cx)*sg); CAPE&=~((Zd<=zb+3)&((np.floor(ang_*9)%2)==0))   # dagged hem (teeth around the rim)
         txh=abs(BH['upperArm_'+side][0])-0.02
         xw_=lo[0]+(X_+0.5)*RES; zw_=lo[2]+(Z_+0.5)*RES
@@ -551,6 +551,10 @@ for slot,side in PIECES:
             ob.data.calc_loop_triangles(); stats[ob.name]=len(ob.data.loop_triangles)
         for ob in (low,l1): bpy.data.objects.remove(ob)
         print('DONE',name,r,stats[nm],stats[nm+'_lod1'],flush=True)
+if HERO=='rook':   # v24: Rook's coat leaves 1-cell slivers at every mask edge -> grow each non-helm slot mask by 1 cell (body only)
+    for k_ in list(masks):
+        if k_=='helm': continue
+        m_=np.zeros(S,bool); m_.flat[np.array(masks[k_]['cells'],dtype=np.int64)]=True; masks[k_]={'cells':np.ravel_multi_index(np.argwhere(dil(m_,1)&solid).T,S).tolist()}
 mp=f"{OUT}/{HERO}_body_mask.json"
 if ONLY and os.path.exists(mp): old=json.load(open(mp))["slots"]; old.update(masks); masks=old
 json.dump({"hero":HERO,"res":RES,"origin_blender":lo.tolist(),"dims":S.tolist(),

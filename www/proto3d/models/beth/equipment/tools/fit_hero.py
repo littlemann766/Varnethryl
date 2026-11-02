@@ -212,11 +212,11 @@ def build_grid(slot,side,r,R):
         u=np.sqrt(np.clip((zt-Z_)/max(zt-zs,1),0,1))+np.clip((zs-Z_)*0.28/max(zs-zb,1),0,0.28); r0=0.085/RES   # v17: steep shoulder slope, then hangs nearly straight down; r0=0.075/RES
         rx=r0+(rxs-r0)*u; dy=(Y_-cy)*FRONT; ry=r0+(np.where(dy>0,ryf,ryb)-r0)*u
         ee=np.sqrt(((X_-cx)/rx)**2+(dy/ry)**2); band=(Z_<=zt)&(Z_>=zb)&((X_-cx)*sg>=0)
-        CAPE=band&(ee>=1)&(ee<=1+1.6/np.minimum(rx,ry)); INS=(band&(ee<1))|((Z_<=zt+6)&(Z_>=zb-3)&((X_-cx)*sg>=0)&(ee<1.6))   # v19: also hide specks just outside the sheet
+        CAPE=band&(ee>=1)&(ee<=1+1.6/np.minimum(rx,ry)); INS=(band&(ee<1))|((Z_<=zt+6)&(Z_>=zb-3)&((X_-cx)*sg>=0)&(ee<1.9))   # v19: also hide specks just outside the sheet
         Zd=Z_; ang_=np.arctan2(dy,(X_-cx)*sg); CAPE&=~((Zd<=zb+3)&((np.floor(ang_*9)%2)==0))   # dagged hem (teeth around the rim)
         txh=abs(BH['upperArm_'+side][0])-0.02
         xw_=lo[0]+(X_+0.5)*RES; zw_=lo[2]+(Z_+0.5)*RES
-        DRP=solid&(abs(xw_)>txh-0.04)&(xw_*sg>0)&(zw_>BH['foot_'+side][2]+0.05)&(zw_<BH['upperArm_'+side][2]-0.04)&~np.isin(_bng(),(['hand_'+side] if BH['hand_'+side][2]>BH['upperArm_'+side][2]-0.15 else ['foreArm_'+side,'hand_'+side]))   # sleeve drapes (T-pose arms: forearm drapes too) hanging below the T-pose arms
+        DRP=solid&(abs(xw_)>txh-0.08)&(xw_*sg>0)&(zw_>BH['foot_'+side][2]+0.05)&(zw_<BH['upperArm_'+side][2]-0.04)&~np.isin(_bng(),(['hand_'+side] if BH['hand_'+side][2]>BH['upperArm_'+side][2]-0.15 else ['foreArm_'+side,'hand_'+side]))   # sleeve drapes (T-pose arms: forearm drapes too) hanging below the T-pose arms
         print('CAPE',side,int(CAPE.sum()),int(INS.sum()),int(DRP.sum()),round(zt,1),round(zs,1),round(rxs,1),round(ryf,1),round(ryb,1),flush=True)
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((INS|dil(CAPE,1)|DRP)&solid).T,S).tolist()}
     layers=[R]; acc=R.copy()
@@ -226,11 +226,13 @@ def build_grid(slot,side,r,R):
     if CAPE is not None: shell=CAPE.copy(); R=CAPE&False|R
     if (slot=='boot' and HERO=='rook'):   # v20: smooth the boot (close pin-holes/lumps), drop loose voxels behind the heel
         shell=close(shell,2)&out; op=dil(ero(shell,1),1)&shell; shell=op if op.sum()>0.6*shell.sum() else shell   # opening drops 1-voxel strays
-        masks[name]={'cells':np.ravel_multi_index(np.argwhere(dil(R,3)&solid).T,S).tolist()}
+        HEM=np.zeros(S,bool); hq=np.isin(cbn,['foot_'+side,'toe_'+side])&(spos[:,2]<BH['foot_'+side][2]+0.12); HEM[tuple(sidx[hq].T)]=True   # v21: coat hem on the ground skinned to the foot
+        masks[name]={'cells':np.ravel_multi_index(np.argwhere((dil(R,3)|dil(HEM,1))&solid).T,S).tolist()}
     if _fit(slot):   # v13 reshape (robed cuffs/mantles keep the draped shell)
         if slot=='chest':   # v20: hide the coat under the arms at the chest sides (Rook)
             xw_=lo[0]+(np.indices(S)[0]+0.5)*RES; zw_=lo[2]+(np.indices(S)[2]+0.5)*RES; ax_=abs(BH['upperArm_L'][0])
-            CSIDE=solid&(abs(xw_)<ax_+0.06)&(zw_>beltz-0.02)&(zw_<BH['upperArm_L'][2]-0.03)&~np.isin(_bng(),['upperArm_L','upperArm_R','foreArm_L','foreArm_R','hand_L','hand_R'])
+            CSIDE=solid&(abs(xw_)<ax_+0.06)&(zw_>beltz-0.02)&(zw_<BH['upperArm_L'][2]-0.03)&~(np.isin(_bng(),['upperArm_L','upperArm_R','foreArm_L','foreArm_R','hand_L','hand_R'])&~((abs(xw_)<ax_+0.02)&(zw_<BH['upperArm_L'][2]-0.08)&np.isin(_bng(),['upperArm_L','upperArm_R'])))   # v21: under-arm sleeve hang hidden (arm is armoured)
+            CSIDE|=solid&np.isin(_bng(),['shoulder_L','shoulder_R'])&(abs(xw_)<ax_+0.02)&(zw_<BH['upperArm_L'][2]-0.05)&(zw_>beltz-0.02)
         LAMEP[0]={'shoulder':(0.032,0.022),'glove':(0.045,0.010),'leg':(0.05,0.011)}.get(slot,(0.05,0.012)); BELTMODE[0]=(slot=='belt')
         shell,fin,fenv=fit_piece(slot,side,R,t); layers=[R,shell]; acc=shell|fin; print('FIT',slot,side,int(R.sum()),int(shell.sum()),int(fin.sum()),flush=True)
         if slot=='leg':   # v13: hide skirts/coats hanging around the legs on this side (Rook/Wren/Finn broad silhouettes) down to mid-shin

@@ -110,3 +110,6 @@ Robed pelerine: rounded shoulder (sqrt profile), wider lower flare 0.35, thinner
 
 ## v20 (leftover polish, soft hold)
 Rook boot: close(2)+opening (smooth, no 1-voxel strays), rim band only at boot top, no rolled edge blotches, mask dil 3. Chest: hide non-arm body cells at the chest sides under the arms. Robed: cape speck-hide zone 1.6x (+6 above, -3 below), cape 2cm narrower and flare 0.28; skirt panel |x|<0.46. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg7/
+
+## v21 (leftover polish, soft hold)
+Rook: ground coat hem skinned to the foot (cells up to 40cm from the foot joint) hidden via the boot mask; under-arm upperArm/shoulder-weighted cells near the torso below shoulder-8cm hidden by the chest mask. Robed: speck-hide zone 1.9x, drape mask 4cm further in. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg8/

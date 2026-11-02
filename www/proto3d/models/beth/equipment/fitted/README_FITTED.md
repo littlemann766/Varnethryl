@@ -54,3 +54,11 @@ Each hero folder has its own `<hero>_body_mask.json` and `<hero>_<fam>_tris.json
 - Robed (Rowan/Talia): no close(), no shoulder ridges/flare/spikes -> slimmer mantles.
 - Non-robed legs: mask hides skirt/tabard flaps the rigs weight to thigh/shin (>11.5 cm off the bone) that swung loose in attack1.
 - Thin pieces subdivided before decimate -> every High piece >= 3538 tris; lod1 = 45%.
+
+## v8 rebuild (all heroes) — replaces the v7 "barrel" helms
+- Helms: skull-fitted egg/dome profile (front/back radii fitted separately, crown leans back), wall allowed over body cells (no holes), body masked inside.
+  - plate/leather: great helm to the chin, recessed eye slit, raised brow band, face keel, breaths, riveted rim.
+  - chain/scale: pointed bascinet + flared mail aventail to the shoulders.
+  - cloth: open cowl with oval face opening, black shadow, pointed back.
+  - rare+: comb crest (taller per tier); epic+: horns; legendary gold trim; masterwork blackened + molten.
+- Armour: shoulder wall 2 vox; overlapping lame lips with domed rivets (plate/scale/leather; pauldrons/sabatons on all), couters/poleyns over elbow/knee, raised leather buckle straps. Robed sets keep no chest/leg plate.

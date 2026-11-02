@@ -113,3 +113,6 @@ Rook boot: close(2)+opening (smooth, no 1-voxel strays), rim band only at boot t
 
 ## v21 (leftover polish, soft hold)
 Rook: ground coat hem skinned to the foot (cells up to 40cm from the foot joint) hidden via the boot mask; under-arm upperArm/shoulder-weighted cells near the torso below shoulder-8cm hidden by the chest mask. Robed: speck-hide zone 1.9x, drape mask 4cm further in. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg8/
+
+## v22 (leftover polish, soft hold)
+Chest armour grows over the under-arm gap (CSIDE cells become plate); Rook chest envelope pc95. Rook ground-hem mask to foot+18cm, dil 2. Robed: hand-skinned bits >11cm from the hand hidden. Diagnostic: Rook body under the chest piece is a wide coat outside the chest env; Talia specks are her fur/feather spikes. Tris 3538-7990, lod1<=50%. Shots /workspace/shots/loot3/fitted_rpg9/

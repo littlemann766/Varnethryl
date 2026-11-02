@@ -179,7 +179,7 @@ FITSET={'chest','belt','shoulder','glove','leg'}   # boots keep the hugging shel
 def _fit(slot): return slot in FITSET and not (ROBED and slot in ('glove','shoulder','belt'))
 def fit_piece(slot,side,R,t):
     X='_'+(side or '')
-    if slot in ('chest','belt'): return fit_torso(R,t,84 if not ROBED else 70)
+    if slot in ('chest','belt'): return fit_torso(R,t,(95 if HERO=='rook' and slot=='chest' else 84) if not ROBED else 70)   # v22: Rook's coat bulges at the chest sides -> envelope it
     if slot=='shoulder': return fit_limb(R,t,['upperArm'+X],40 if ROBED else 60,cap=not ROBED)   # robed: slim mantle, no dome
     if slot=='glove': return fit_limb(R,t,['upperArm'+X,'foreArm'+X,'hand'+X],60)
     if slot=='leg': return fit_limb(R,t,['thigh'+X,'shin'+X],55)
@@ -218,7 +218,9 @@ def build_grid(slot,side,r,R):
         xw_=lo[0]+(X_+0.5)*RES; zw_=lo[2]+(Z_+0.5)*RES
         DRP=solid&(abs(xw_)>txh-0.08)&(xw_*sg>0)&(zw_>BH['foot_'+side][2]+0.05)&(zw_<BH['upperArm_'+side][2]-0.04)&~np.isin(_bng(),(['hand_'+side] if BH['hand_'+side][2]>BH['upperArm_'+side][2]-0.15 else ['foreArm_'+side,'hand_'+side]))   # sleeve drapes (T-pose arms: forearm drapes too) hanging below the T-pose arms
         print('CAPE',side,int(CAPE.sum()),int(INS.sum()),int(DRP.sum()),round(zt,1),round(zs,1),round(rxs,1),round(ryf,1),round(ryb,1),flush=True)
-        masks[name]={'cells':np.ravel_multi_index(np.argwhere((INS|dil(CAPE,1)|DRP)&solid).T,S).tolist()}
+        hd=np.linalg.norm(spos-BH['hand_'+side],axis=1); fa=np.isin(cbn,['hand_'+side])&(hd>0.11)   # v22: loose bits skinned to the hand far from it (Talia elbow/hip specks)
+        FAR=np.zeros(S,bool); FAR[tuple(sidx[fa].T)]=True
+        masks[name]={'cells':np.ravel_multi_index(np.argwhere((INS|dil(CAPE,1)|DRP|dil(FAR,1))&solid).T,S).tolist()}
     layers=[R]; acc=R.copy()
     for k in range(t):
         nx=dil(acc)&out&~acc; layers.append(nx); acc|=nx
@@ -226,8 +228,8 @@ def build_grid(slot,side,r,R):
     if CAPE is not None: shell=CAPE.copy(); R=CAPE&False|R
     if (slot=='boot' and HERO=='rook'):   # v20: smooth the boot (close pin-holes/lumps), drop loose voxels behind the heel
         shell=close(shell,2)&out; op=dil(ero(shell,1),1)&shell; shell=op if op.sum()>0.6*shell.sum() else shell   # opening drops 1-voxel strays
-        HEM=np.zeros(S,bool); hq=np.isin(cbn,['foot_'+side,'toe_'+side])&(spos[:,2]<BH['foot_'+side][2]+0.12); HEM[tuple(sidx[hq].T)]=True   # v21: coat hem on the ground skinned to the foot
-        masks[name]={'cells':np.ravel_multi_index(np.argwhere((dil(R,3)|dil(HEM,1))&solid).T,S).tolist()}
+        HEM=np.zeros(S,bool); hq=np.isin(cbn,['foot_'+side,'toe_'+side])&(spos[:,2]<BH['foot_'+side][2]+0.18); HEM[tuple(sidx[hq].T)]=True   # v21: coat hem on the ground skinned to the foot
+        masks[name]={'cells':np.ravel_multi_index(np.argwhere((dil(R,3)|dil(HEM,2))&solid).T,S).tolist()}
     if _fit(slot):   # v13 reshape (robed cuffs/mantles keep the draped shell)
         if slot=='chest':   # v20: hide the coat under the arms at the chest sides (Rook)
             xw_=lo[0]+(np.indices(S)[0]+0.5)*RES; zw_=lo[2]+(np.indices(S)[2]+0.5)*RES; ax_=abs(BH['upperArm_L'][0])
@@ -246,7 +248,7 @@ def build_grid(slot,side,r,R):
                 if a_ in BH and b_ in BH:
                     h_=BH[a_]; d_=BH[b_]-h_; uu=((Pw-h_)@d_)/(d_@d_); cm|=(uu>0.3)&(uu<1.1)&(np.linalg.norm(Pw-h_-uu[:,None]*d_,axis=1)<0.16)
             fenv=fenv|(cm.reshape(S)&~np.isin(_bng(),['chest','upperChest','spine','spine2','hips','head','neck']))   # v15: stray coat bits near the hands
-        if slot=='chest': fenv=fenv|CSIDE
+        if slot=='chest': fenv=fenv|CSIDE; shell=shell|(dil(CSIDE&~fin,1)&~fin&dil(shell|fin,3)&(solid|out))   # v22: armour closes over the under-arm gap (no body/inner wall visible)
         masks[name]={'cells':np.ravel_multi_index(np.argwhere((fenv|fin|dil(R,1))&solid).T,S).tolist()}
         out=~fin
     if slot=='helm':   # v8: skull-fitted helm (egg/dome profile, not a cylinder): great helm (plate/leather), bascinet+aventail (chain/scale), cowl (robed)

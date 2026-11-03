@@ -1,1 +1,1 @@
-{"high_tris": 62522, "lod1_tris": 28134, "ratio": 0.45, "bones": 86, "clips": ["attack", "attack2", "death", "fly_ascend", "fly_bank_L", "fly_bank_R", "fly_descend", "fly_fast", "fly_forward", "fly_hover", "hit", "idle", "run", "walk"], "textures": "2048 JPEG base/ORM/normal"}
+{"high_tris": 62522, "lod1_tris": 28134, "ratio": 0.45, "bones": 100, "clips": ["attack", "attack2", "death", "fly_ascend", "fly_bank_L", "fly_bank_R", "fly_descend", "fly_fast", "fly_forward", "fly_hover", "hit", "idle", "run", "walk"], "textures": "2048 JPEG base/ORM/normal"}

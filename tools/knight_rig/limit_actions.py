@@ -42,4 +42,4 @@ for a in bpy.data.actions:
             for f in fcs: f.update()
             n+=1
 print('LIMITED',n)
-bpy.ops.wm.save_as_mainfile(filepath=f'{OUT}/stage5.blend')
+bpy.ops.wm.save_as_mainfile(filepath=f'{OUT}/stage'+__import__('os').environ.get('LIMSET','6')+'.blend')

@@ -582,5 +582,19 @@
   "shrunk": 19642,
   "dropped": 4897,
   "ext_len_m": 0.07
+ },
+ "midrig": {
+  "parts": 39,
+  "helpers": [
+   "mid_upperArm_L",
+   "mid_upperArm_R",
+   "mid_tabard_B_02",
+   "mid_tabard_B_03",
+   "mid_tabard_F_02",
+   "mid_tabard_F_03",
+   "mid_shin_L",
+   "mid_shin_R",
+   "mid_foreArm_R"
+  ]
  }
 }

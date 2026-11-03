@@ -25,3 +25,8 @@ Each strip is kept only if it is hidden at rest from 90 view directions (sampled
 ## v5 - joint limits on the baked clips (tools/knight_rig/limits.py + limit_actions.py, stage4 -> stage5)
 Mesh/texture unchanged (rest identical to v4). Every clip's bone rotations are soft-limited: angle' = L*tanh(angle/L), L per bone (deg): upperArm 26, foreArm 45, hand 32, shoulder 7, pauldron 18, thigh 30, shin 48, foot 22, toe 18, neck 20, head 26, wing 12, tabard 14; spine2/upperChest folded into chest (rigid cuirass, L 14). Hips untouched.
 Godot: if you play other clips, clamp with the same limits (SkeletonModifier3D / retarget step). Big swings (attack overhead, run stride) are visibly toned down.
+
+## v6 - bigger moves (limits.py LIMSET=6, limit_actions.py -> stage6, then midrig.py)
+Mesh/texture unchanged. Soft knee limit per bone: full clip motion up to K=0.75*L, then eased (tanh) toward L.
+L (deg): upperArm 170, foreArm 115, hand 50, shoulder 30, pauldron 60, thigh 85, shin 120, foot 50, toe 20, torso(folded spine) 35, neck 25, head 30, wing 28, tabard 28, hips 180 (free).
+Seam smear: the blended connective pieces (male 43, female 39) are now 100% rigid on mid_<bone> helpers that copy 50% of the child joint's rotation -> zero texture stretch everywhere (0 blended tris); costs some extra clipping. Helpers are baked into the clips.

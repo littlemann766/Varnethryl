@@ -1,0 +1,112 @@
+{
+ "male_anim_v4_1869bb8": {
+  "vis_pct": 11.31,
+  "holes_px": 10344,
+  "worst_hole_pose": "attack2@7",
+  "worst_hole_px": 684,
+  "pen_mean": 131.5
+ },
+ "male_anim_v5_364ed1d": {
+  "vis_pct": 7.96,
+  "holes_px": 4973,
+  "worst_hole_pose": "attack2@12",
+  "worst_hole_px": 236,
+  "pen_mean": 132.0
+ },
+ "male_anim_v6": {
+  "vis_pct": 10.71,
+  "holes_px": 8758,
+  "worst_hole_pose": "attack2@7",
+  "worst_hole_px": 763,
+  "pen_mean": 189.4
+ },
+ "male_extreme_v4_1869bb8": {
+  "vis_pct": 5.71,
+  "holes_px": 1986,
+  "worst_hole_pose": "arms_up",
+  "worst_hole_px": 681,
+  "pen_mean": 41.3
+ },
+ "male_extreme_v5_364ed1d": {
+  "vis_pct": 3.46,
+  "holes_px": 1067,
+  "worst_hole_pose": "spine_twist",
+  "worst_hole_px": 160,
+  "pen_mean": 42.8
+ },
+ "male_extreme_v6": {
+  "vis_pct": 5.64,
+  "holes_px": 1562,
+  "worst_hole_pose": "arms_up",
+  "worst_hole_px": 555,
+  "pen_mean": 72.2
+ },
+ "male_stretch_v6": {
+  "rigid_edge_stretch_max": 0.0006,
+  "plate_texel_stretch_max": 0.0274,
+  "band_texel_stretch_p95": 0.0,
+  "band_texel_stretch_max": 0.0
+ },
+ "male_look_front": 36.7,
+ "male_look_back": 45.6,
+ "male_look_helm": 32.5,
+ "male_look_shoulders": 32.0,
+ "male_look_chest": 29.1,
+ "male_look_legs": 31.7,
+ "male_look_wings": 41.6,
+ "female_anim_v4_1869bb8": {
+  "vis_pct": 7.63,
+  "holes_px": 20979,
+  "worst_hole_pose": "run@20",
+  "worst_hole_px": 567,
+  "pen_mean": 89.4
+ },
+ "female_anim_v5_364ed1d": {
+  "vis_pct": 5.67,
+  "holes_px": 14566,
+  "worst_hole_pose": "walk@28",
+  "worst_hole_px": 448,
+  "pen_mean": 85.1
+ },
+ "female_anim_v6": {
+  "vis_pct": 7.9,
+  "holes_px": 22126,
+  "worst_hole_pose": "run@0",
+  "worst_hole_px": 876,
+  "pen_mean": 142.7
+ },
+ "female_extreme_v4_1869bb8": {
+  "vis_pct": 4.87,
+  "holes_px": 3441,
+  "worst_hole_pose": "arms_up",
+  "worst_hole_px": 760,
+  "pen_mean": 35.0
+ },
+ "female_extreme_v5_364ed1d": {
+  "vis_pct": 2.71,
+  "holes_px": 1849,
+  "worst_hole_pose": "arms_forward",
+  "worst_hole_px": 317,
+  "pen_mean": 34.4
+ },
+ "female_extreme_v6": {
+  "vis_pct": 4.8,
+  "holes_px": 3297,
+  "worst_hole_pose": "arms_forward",
+  "worst_hole_px": 701,
+  "pen_mean": 58.6
+ },
+ "female_stretch_v6": {
+  "rigid_edge_stretch_max": 0.0002,
+  "plate_texel_stretch_max": 0.0015,
+  "band_texel_stretch_p95": 0.0,
+  "band_texel_stretch_max": 0.0
+ },
+ "female_look_front": 37.0,
+ "female_look_back": 47.5,
+ "female_look_helm": 32.5,
+ "female_look_shoulders": 31.7,
+ "female_look_chest": 28.2,
+ "female_look_legs": 33.0,
+ "female_look_wings": 41.7
+}

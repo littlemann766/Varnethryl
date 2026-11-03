@@ -55,10 +55,10 @@ res={}; wpos=np.zeros(len(T)); wneg=np.zeros(len(T)); worst=np.zeros(len(T)); wo
 def measure(name):
     V=verts(); L,Ar=tri_metrics(V); s=np.abs(L/np.maximum(L0,1e-9)-1).max(1); a=np.abs(Ar/np.maximum(A0,1e-12)-1)
     s[~ok]=0; a[~ok]=0
-    Mp=frame2d(V); F=Mp@np.linalg.pinv(M0); sv=np.linalg.svd(F,compute_uv=False); tx=np.maximum(sv[:,0]-1,1-sv[:,1]); tx[~ok]=0; np.maximum(texw,tx,out=texw); per_pose[name+'#tex']=(float(tx[tb].max()),float(np.percentile(tx[tb],95)),float(np.percentile(tx[tb],50)),int((tx[tb]>0.10).sum()))
+    Mp=frame2d(V); F=Mp@np.linalg.pinv(M0); sv=np.linalg.svd(F,compute_uv=False); tx=np.maximum(sv[:,0]-1,1-sv[:,1]); tx[~ok]=0; np.maximum(texw,tx,out=texw); exec("per_pose[name+'#tex']=(float(tx[tb].max()),float(np.percentile(tx[tb],95)),float(np.percentile(tx[tb],50)),int((tx[tb]>0.10).sum()))") if tb.any() else None
     r_=L/np.maximum(L0,1e-9)-1; r_[~ok]=0; np.maximum(wpos,r_.max(1),out=wpos); np.minimum(wneg,r_.min(1),out=wneg)
     np.maximum(worst,s,out=worst); np.maximum(worst_a,a,out=worst_a)
-    U_=tb&~tcoll; per_pose[name+'#under']=(float(r_.max(1)[U_].max()),float(np.percentile(r_.max(1)[U_],95)),float(np.percentile(r_.max(1)[U_],50)))
+    exec('U_=tb&~tcoll') if tb.any() else None; exec("per_pose[name+'#under']=(float(r_.max(1)[U_].max()),float(np.percentile(r_.max(1)[U_],95)),float(np.percentile(r_.max(1)[U_],50)))") if tb.any() else None
     per_pose[name]=(float(s[~tb].max()),float(s[tb].max()) if tb.any() else 0.0,float(np.percentile(s[tb],95)) if tb.any() else 0.0)
     return V,s
 SAVE={}

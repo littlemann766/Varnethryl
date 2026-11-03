@@ -7,12 +7,7 @@ for a in bpy.data.actions:
     for fc in list(a.fcurves) if hasattr(a,'fcurves') else []:
         bn=fc.data_path.split('"')[1] if '"' in fc.data_path else ''
         if (fc.data_path.endswith('location') and bn not in ('hips','root')) or fc.data_path.endswith('scale'): a.fcurves.remove(fc)
-img=bpy.data.images.load('/tmp/kr/base.jpg')
-nt=me.materials[0].node_tree; bs=[n for n in nt.nodes if n.type=='BSDF_PRINCIPLED'][0]
-tx=[n for n in nt.nodes if n.type=='TEX_IMAGE']
-for n in tx: nt.nodes.remove(n)
-t=nt.nodes.new('ShaderNodeTexImage'); t.image=img; nt.links.new(t.outputs['Color'],bs.inputs['Base Color'])
-bs.inputs['Metallic'].default_value=0.65; bs.inputs['Roughness'].default_value=0.38
+exec(open('/tmp/kr/mat.py').read()); setup_mat(me)
 for pb in ARM.pose.bones: pb.rotation_mode='QUATERNION'
 ARM.animation_data_create()
 def q(ax,deg): return Quaternion(ax,math.radians(deg))
@@ -28,7 +23,7 @@ def setpose(nm):
         k=[x for x in acts if x.startswith(nm)]
         if k: a=acts[k[0]]; ARM.animation_data.action=a; f0,f1=a.frame_range; sc.frame_set(int(f0+(f1-f0)*0.45))
     bpy.context.view_layer.update()
-sc.render.engine='BLENDER_EEVEE'; sc.eevee.taa_render_samples=16; sc.render.resolution_x=360; sc.render.resolution_y=480
+sc.render.engine='BLENDER_EEVEE'; sc.eevee.taa_render_samples=24; sc.view_settings.view_transform='Standard'; sc.render.resolution_x=360; sc.render.resolution_y=480
 cam=bpy.data.objects.new('cam',bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera=cam; cam.data.type='ORTHO'
 w=bpy.data.worlds.new('w'); sc.world=w; w.use_nodes=True; w.node_tree.nodes['Background'].inputs[0].default_value=(0.55,0.57,0.6,1); w.node_tree.nodes['Background'].inputs[1].default_value=0.9
 sun=bpy.data.objects.new('sun',bpy.data.lights.new('sun','SUN')); sc.collection.objects.link(sun); sun.rotation_euler=(math.radians(50),0,math.radians(-30)); sun.data.energy=3.5

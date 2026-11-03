@@ -1,0 +1,42 @@
+{
+ "male_front": {
+  "MAE_0_255": 0.56,
+  "PSNR_dB": 36.7,
+  "pct_px_diff_gt16": 0.57
+ },
+ "male_back": {
+  "MAE_0_255": 0.21,
+  "PSNR_dB": 45.6,
+  "pct_px_diff_gt16": 0.08
+ },
+ "male_helm": {
+  "MAE_0_255": 1.38,
+  "PSNR_dB": 32.5,
+  "pct_px_diff_gt16": 1.28
+ },
+ "male_shoulder": {
+  "MAE_0_255": 1.76,
+  "PSNR_dB": 31.8,
+  "pct_px_diff_gt16": 1.66
+ },
+ "female_front": {
+  "MAE_0_255": 0.5,
+  "PSNR_dB": 37.0,
+  "pct_px_diff_gt16": 0.51
+ },
+ "female_back": {
+  "MAE_0_255": 0.19,
+  "PSNR_dB": 47.5,
+  "pct_px_diff_gt16": 0.07
+ },
+ "female_helm": {
+  "MAE_0_255": 1.4,
+  "PSNR_dB": 32.5,
+  "pct_px_diff_gt16": 1.17
+ },
+ "female_shoulder": {
+  "MAE_0_255": 1.87,
+  "PSNR_dB": 31.0,
+  "pct_px_diff_gt16": 1.97
+ }
+}

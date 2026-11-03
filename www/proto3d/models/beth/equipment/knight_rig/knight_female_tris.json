@@ -1,1 +1,1 @@
-{"under_faces_high": 2420, "high_tris": 45948, "lod1_tris": 20676, "ratio": 0.45, "bones": 78}
+{"high_tris": 41108, "lod1_tris": 18498, "ratio": 0.45, "bones": 86, "clips": ["attack1", "attack2", "attack3", "death", "fly_ascend", "fly_bank_L", "fly_bank_R", "fly_descend", "fly_fast", "fly_forward", "fly_hover", "hit", "idle", "jump", "jump_hang", "jump_land", "jump_start", "run", "skill", "swim_stroke", "swim_tread", "walk"], "textures": "2048 JPEG base/ORM/normal"}

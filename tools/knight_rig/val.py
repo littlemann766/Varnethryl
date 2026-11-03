@@ -7,7 +7,13 @@ ARM.data.pose_position='POSE'; sc=bpy.context.scene
 me.calc_loop_triangles(); T=np.array([t.vertices for t in me.loop_triangles])
 pid=np.zeros(len(me.vertices),np.int32); me.attributes['part'].data.foreach_get('value',pid)
 bl=np.zeros(len(me.vertices),np.int32); me.attributes['blended'].data.foreach_get('value',bl)
-tb=bl[T].max(1)>0; tcoll=bl[T].max(1)==2
+wmax=np.array([max([g.weight for g in vv.groups]+[0]) for vv in me.vertices]); gmain=np.array([max(vv.groups,key=lambda g:g.weight).group if len(vv.groups) else -1 for vv in me.vertices])
+tb=~((wmax[T].min(1)>=0.999)&(gmain[T[:,0]]==gmain[T[:,1]])&(gmain[T[:,1]]==gmain[T[:,2]])); tcoll=np.zeros(len(T),bool)
+def frame2d(V):
+    A,B,C=V[T[:,0]],V[T[:,1]],V[T[:,2]]; e1=B-A; e2=C-A; l1=np.linalg.norm(e1,axis=1)+1e-12; u=e1/l1[:,None]
+    n=np.cross(e1,e2); w=np.cross(n,e1); w/=np.linalg.norm(w,axis=1)[:,None]+1e-12
+    M=np.zeros((len(T),2,2)); M[:,0,0]=l1; M[:,0,1]=(e2*u).sum(1); M[:,1,1]=(e2*w).sum(1); return M
+texw=np.zeros(len(T))
 def verts():
     dg=bpy.context.evaluated_depsgraph_get(); ev=fig.evaluated_get(dg); m=ev.to_mesh()
     a=np.zeros(len(m.vertices)*3); m.vertices.foreach_get('co',a); ev.to_mesh_clear(); return a.reshape(-1,3)
@@ -21,7 +27,7 @@ POSES=[]
 def reset():
     ARM.animation_data.action=None
     for pb in ARM.pose.bones: pb.location=(0,0,0); pb.rotation_quaternion=(1,0,0,0); pb.scale=(1,1,1)
-reset(); bpy.context.view_layer.update(); V0=verts(); L0,A0=tri_metrics(V0); ok=(L0.min(1)>1e-6)&(A0>1e-10)
+reset(); bpy.context.view_layer.update(); V0=verts(); L0,A0=tri_metrics(V0); M0=frame2d(V0); ok=(L0.min(1)>1e-6)&(A0>1e-10)
 # strip non-root translation/scale keys (rotation-only retarget)
 for a in bpy.data.actions:
     for fc in list(a.fcurves) if hasattr(a,'fcurves') else []:
@@ -46,6 +52,7 @@ res={}; wpos=np.zeros(len(T)); wneg=np.zeros(len(T)); worst=np.zeros(len(T)); wo
 def measure(name):
     V=verts(); L,Ar=tri_metrics(V); s=np.abs(L/np.maximum(L0,1e-9)-1).max(1); a=np.abs(Ar/np.maximum(A0,1e-12)-1)
     s[~ok]=0; a[~ok]=0
+    Mp=frame2d(V); F=Mp@np.linalg.pinv(M0); sv=np.linalg.svd(F,compute_uv=False); tx=np.maximum(sv[:,0]-1,1-sv[:,1]); tx[~ok]=0; np.maximum(texw,tx,out=texw); per_pose[name+'#tex']=(float(tx[tb].max()),float(np.percentile(tx[tb],95)),float(np.percentile(tx[tb],50)),int((tx[tb]>0.10).sum()))
     r_=L/np.maximum(L0,1e-9)-1; r_[~ok]=0; np.maximum(wpos,r_.max(1),out=wpos); np.minimum(wneg,r_.min(1),out=wneg)
     np.maximum(worst,s,out=worst); np.maximum(worst_a,a,out=worst_a)
     U_=tb&~tcoll; per_pose[name+'#under']=(float(r_.max(1)[U_].max()),float(np.percentile(r_.max(1)[U_],95)),float(np.percentile(r_.max(1)[U_],50)))
@@ -73,6 +80,7 @@ st={'rigid_tris':int((~tb).sum()),'blended_tris':int(tb.sum()),
 st['under_edge_stretch_max_excl_collapsed']=mx(worst[tb&~tcoll]); st['under_edge_stretch_p95_excl_collapsed']=pc(worst[tb&~tcoll]); st['under_edge_stretch_p50']=float(np.median(worst[tb])) if tb.any() else 0; st['under_collapsed_tris']=int(tcoll.sum())
 U=tb&~tcoll; st['under_elong_max']=mx(wpos[U]); st['under_elong_p95']=pc(wpos[U]); st['under_elong_p50']=float(np.median(wpos[U])); st['under_compress_p95']=pc(-wneg[U]); st['under_compress_max']=mx(-wneg[U])
 np.save(f'{OUT}/under_elong_{MODE}.npy',wpos)
+st['band_texel_stretch_max']=mx(texw[tb]); st['band_texel_stretch_p99']=float(np.percentile(texw[tb],99)) if tb.any() else 0; st['band_texel_stretch_p95']=pc(texw[tb]); st['band_tris_over_5pct']=int((texw[tb]>0.05).sum()); st['band_tris_over_10pct']=int((texw[tb]>0.10).sum()); st['plate_texel_stretch_max']=mx(texw[~tb]); st['plate_texel_p95']=pc(texw[~tb]); np.save(f'{OUT}/texel_{MODE}.npy',texw); np.save(f'{OUT}/bandtri_{MODE}.npy',tb)
 small=A0<1e-7; st['area_max_excl_submm2_tris']=mx(worst_a[~small])
 print('STATS',json.dumps(st)); json.dump({'stats':st,'per_pose':per_pose},open(f'{OUT}/stretch_{MODE}.json','w'),indent=1)
 # worst offending blended parts

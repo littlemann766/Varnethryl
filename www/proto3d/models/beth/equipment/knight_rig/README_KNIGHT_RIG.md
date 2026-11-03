@@ -9,11 +9,11 @@ Runtime notes: foreArm_twist should follow 50% of hand roll (CopyTransformModifi
 Retarget is rotation-only (loc/scale only on hips/root). Texture kept as albedo; keep vertex_color_is_srgb in import.
 lod1: ~45% tris, each vertex snapped to a single bone.
 
-## v2 - joint gaps (tools/knight_rig/gaps.py -> stage3)
-- Fragment fix: small pieces (<120 verts) bound to upperArm/shoulder that touch big torso plates are re-bound rigidly to the bone of the plate they touch (male 74, female 49 pieces).
-- Lame overlap: every core plate grown ~5 mm about its own centroid (rigid rest-pose scale, cap 4%) so neighbours overlap.
-- Cloth underlayer (material `gambeson`, dark, double-sided, untextured): 14 tubes - neck, waist, shoulders, elbows, wrists, hips, knees, ankles - fitted per sector inside the plate shells and LBS-blended between the two bones (wrist also uses foreArm_twist). Rest-hidden by ray test from 36 view dirs; verts still visible through source-mesh openings are collapsed to the axis.
-- Plates stay 100% rigid (edge stretch max <0.1%). Underlayer stretch reported separately in knight_*_stretch.json (under_*).
-- Gap check (gapcheck.py, 3 views x all poses): joint-region pixels showing background or back-faces; before/after in knight_*_gapcheck_*.json and gap_summary.json.
-- lod1: plates snapped to one bone, underlayer keeps its blend.
-- Not solved: plate-plate interpenetration in deep poses (rigid plates cannot slide), tabard/tasset chains need runtime spring motion.
+## v3 - faithful rework (v2 underlayer/plate scaling REVERTED)
+Mesh = boss original geometry, untouched (rest renders vs his GLB: PSNR 31-47 dB, see lookmatch.json). Full PBR kept: base, ORM, normal at 2048 JPEG.
+Pipeline: parts.py -> rig.py -> bind3.py (NORT=1) -> opt.py -> export3.py.
+- Joint-spanning (connective) parts: not cut; smoothstep weight band (6-12 cm, tabard 8, wing 5) across the label boundary; non-adjacent mislabels folded to the majority bone.
+- Plates: 100% rigid. Helper bones: pauldron_L/R (45% upperArm), elbow_L/R (50% foreArm), knee_L/R (50% shin), tasset_L/R (85% thigh). Tabard_F/B_01-02 driven by both thighs (X only).
+- opt.py: each rigid part re-homed (hierarchy distance <=2) to the bone that best keeps rest contacts across 42-54 animation frames.
+- All clips baked with the helpers/twist into the GLB (plain bone tracks). No corrective shape keys.
+- Result vs e0fbc6c: see gap_summary_v3.json. Plates rigid (<0.1% edge), seam bands stretch a lot (see stretch json). Gaps/clipping NOT solved: the source mesh has no geometry under the plates.

@@ -1,0 +1,275 @@
+{
+ "arch_isl_coil_isle": {
+  "region": "A",
+  "tris_before": 40268,
+  "tris_high": 40268,
+  "tris_lod1": 18120,
+  "moved_verts": 0
+ },
+ "arch_isl_gullhaven": {
+  "region": "A",
+  "tris_before": 51126,
+  "tris_high": 51126,
+  "tris_lod1": 23006,
+  "moved_verts": 0
+ },
+ "arch_isl_lantern_rock": {
+  "region": "A",
+  "tris_before": 37480,
+  "tris_high": 37480,
+  "tris_lod1": 16865,
+  "moved_verts": 0
+ },
+ "arch_isl_saltwatch_keep": {
+  "region": "A",
+  "tris_before": 8086,
+  "tris_high": 8086,
+  "tris_lod1": 3637,
+  "moved_verts": 0
+ },
+ "arch_islands": {
+  "region": "A",
+  "tris_before": 73322,
+  "tris_high": 113938,
+  "tris_lod1": 32993,
+  "moved_verts": 47967
+ },
+ "coast_isl_beached_wreck": {
+  "region": "B",
+  "tris_before": 14220,
+  "tris_high": 14220,
+  "tris_lod1": 6398,
+  "moved_verts": 0
+ },
+ "coast_isl_saltglass": {
+  "region": "B",
+  "tris_before": 49658,
+  "tris_high": 49658,
+  "tris_lod1": 22346,
+  "moved_verts": 0
+ },
+ "coast_tile_x0z0": {
+  "region": "B",
+  "tris_before": 25570,
+  "tris_high": 43190,
+  "tris_lod1": 11067,
+  "moved_verts": 21034
+ },
+ "coast_tile_x0z1": {
+  "region": "B",
+  "tris_before": 18800,
+  "tris_high": 32502,
+  "tris_lod1": 7005,
+  "moved_verts": 15193
+ },
+ "coast_tile_x0z2": {
+  "region": "B",
+  "tris_before": 25960,
+  "tris_high": 53104,
+  "tris_lod1": 10176,
+  "moved_verts": 25967
+ },
+ "coast_tile_x0z3": {
+  "region": "B",
+  "tris_before": 25562,
+  "tris_high": 88344,
+  "tris_lod1": 11640,
+  "moved_verts": 43400
+ },
+ "coast_tile_x1z0": {
+  "region": "B",
+  "tris_before": 18216,
+  "tris_high": 49308,
+  "tris_lod1": 8418,
+  "moved_verts": 24153
+ },
+ "coast_tile_x1z1": {
+  "region": "B",
+  "tris_before": 16574,
+  "tris_high": 59992,
+  "tris_lod1": 7292,
+  "moved_verts": 27122
+ },
+ "coast_tile_x1z2": {
+  "region": "B",
+  "tris_before": 12776,
+  "tris_high": 38868,
+  "tris_lod1": 5843,
+  "moved_verts": 18729
+ },
+ "coast_tile_x1z3": {
+  "region": "B",
+  "tris_before": 16130,
+  "tris_high": 28658,
+  "tris_lod1": 7097,
+  "moved_verts": 13839
+ },
+ "coast_tile_x2z1": {
+  "region": "B",
+  "tris_before": 6469,
+  "tris_high": 6879,
+  "tris_lod1": 2246,
+  "moved_verts": 3013
+ },
+ "coast_tile_x2z2": {
+  "region": "B",
+  "tris_before": 2969,
+  "tris_high": 5231,
+  "tris_lod1": 1256,
+  "moved_verts": 2451
+ },
+ "coast_tile_x2z3": {
+  "region": "B",
+  "tris_before": 4586,
+  "tris_high": 4586,
+  "tris_lod1": 1876,
+  "moved_verts": 2024
+ },
+ "frost_isl_aurora_arch": {
+  "region": "frost",
+  "tris_before": 32660,
+  "tris_high": 32660,
+  "tris_lod1": 14695,
+  "moved_verts": 0
+ },
+ "frost_isl_frostreach": {
+  "region": "frost",
+  "tris_before": 38088,
+  "tris_high": 38088,
+  "tris_lod1": 17139,
+  "moved_verts": 0
+ },
+ "frost_isl_frozen_wreck": {
+  "region": "frost",
+  "tris_before": 31906,
+  "tris_high": 31906,
+  "tris_lod1": 14357,
+  "moved_verts": 0
+ },
+ "frost_tile_x0z0": {
+  "region": "frost",
+  "tris_before": 24918,
+  "tris_high": 75652,
+  "tris_lod1": 6194,
+  "moved_verts": 37552
+ },
+ "frost_tile_x0z1": {
+  "region": "frost",
+  "tris_before": 23258,
+  "tris_high": 72324,
+  "tris_lod1": 5724,
+  "moved_verts": 35679
+ },
+ "frost_tile_x1z0": {
+  "region": "frost",
+  "tris_before": 26000,
+  "tris_high": 100984,
+  "tris_lod1": 6500,
+  "moved_verts": 50228
+ },
+ "frost_tile_x1z1": {
+  "region": "frost",
+  "tris_before": 15310,
+  "tris_high": 35956,
+  "tris_lod1": 3722,
+  "moved_verts": 16188
+ },
+ "frost_tile_x2z0": {
+  "region": "frost",
+  "tris_before": 23970,
+  "tris_high": 69876,
+  "tris_lod1": 5954,
+  "moved_verts": 32623
+ },
+ "frost_tile_x2z1": {
+  "region": "frost",
+  "tris_before": 21556,
+  "tris_high": 79856,
+  "tris_lod1": 5308,
+  "moved_verts": 39334
+ },
+ "frost_tile_x3z0": {
+  "region": "frost",
+  "tris_before": 20470,
+  "tris_high": 31756,
+  "tris_lod1": 4998,
+  "moved_verts": 15613
+ },
+ "frost_tile_x3z1": {
+  "region": "frost",
+  "tris_before": 3326,
+  "tris_high": 3326,
+  "tris_lod1": 710,
+  "moved_verts": 1459
+ },
+ "ash_isl_ember_wreck": {
+  "region": "ash",
+  "tris_before": 29610,
+  "tris_high": 29610,
+  "tris_lod1": 13323,
+  "moved_verts": 0
+ },
+ "ash_isl_hot_spring": {
+  "region": "ash",
+  "tris_before": 15192,
+  "tris_high": 15192,
+  "tris_lod1": 6835,
+  "moved_verts": 0
+ },
+ "ash_isl_obsidian_arch": {
+  "region": "ash",
+  "tris_before": 40238,
+  "tris_high": 40238,
+  "tris_lod1": 18106,
+  "moved_verts": 0
+ },
+ "ash_isl_vent": {
+  "region": "ash",
+  "tris_before": 51400,
+  "tris_high": 51400,
+  "tris_lod1": 23129,
+  "moved_verts": 0
+ },
+ "ash_tile_x0z0": {
+  "region": "ash",
+  "tris_before": 4428,
+  "tris_high": 4612,
+  "tris_lod1": 1846,
+  "moved_verts": 1860
+ },
+ "ash_tile_x0z1": {
+  "region": "ash",
+  "tris_before": 12588,
+  "tris_high": 14384,
+  "tris_lod1": 5126,
+  "moved_verts": 6084
+ },
+ "ash_tile_x1z0": {
+  "region": "ash",
+  "tris_before": 19647,
+  "tris_high": 31113,
+  "tris_lod1": 8821,
+  "moved_verts": 11379
+ },
+ "ash_tile_x1z1": {
+  "region": "ash",
+  "tris_before": 20206,
+  "tris_high": 33416,
+  "tris_lod1": 9412,
+  "moved_verts": 13840
+ },
+ "ash_tile_x2z0": {
+  "region": "ash",
+  "tris_before": 7891,
+  "tris_high": 8575,
+  "tris_lod1": 3463,
+  "moved_verts": 2635
+ },
+ "ash_tile_x2z1": {
+  "region": "ash",
+  "tris_before": 10242,
+  "tris_high": 13298,
+  "tris_lod1": 5081,
+  "moved_verts": 4332
+ }
+}

@@ -12,8 +12,8 @@ for o in list(bpy.data.objects):
 for a in list(bpy.data.actions): bpy.data.actions.remove(a)
 ARM.animation_data_clear()
 BH={b.name:np.array(ARM.matrix_world@b.head_local) for b in ARM.data.bones}
-STEEL=np.array([0.50,0.52,0.55]); EDGE=np.array([0.70,0.71,0.73]); DARK=np.array([0.03,0.03,0.035]); LEATH=np.array([0.30,0.17,0.09])
-MAIL=np.array([0.46,0.47,0.50]); MAILD=np.array([0.22,0.22,0.24]); RIV=np.array([0.80,0.78,0.70]); BRASS=np.array([0.62,0.48,0.24])
+STEEL=np.array([0.66,0.67,0.69]); EDGE=np.array([0.15,0.14,0.14]); DARK=np.array([0.03,0.03,0.035]); LEATH=np.array([0.30,0.17,0.09])
+MAIL=np.array([0.46,0.47,0.50]); MAILD=np.array([0.22,0.22,0.24]); RIV=np.array([0.74,0.60,0.32]); GOLD=np.array([0.70,0.56,0.30]); SOFT=np.array([0.50,0.51,0.53]); BRASS=np.array([0.62,0.48,0.24])
 def nz(v): n=np.linalg.norm(v,axis=-1,keepdims=True); return v/np.maximum(n,1e-9)
 class Mesh:
     def __init__(s): s.V=[]; s.F=[]; s.C=[]
@@ -25,6 +25,9 @@ def frames(P,up=np.array([0,-1.0,0])):
 def loft(M,P,A,B,N=24,th=(0,2*math.pi),t=0.010,ex=2.4,col=None,push=None,rim=0.004,up=np.array([0,-1.0,0]),U=None,W=None,closed=None):
     """P[K,3] path, A/B radii along U/W (U=front by default). th arc range (0=front). shell thickness t (inward). col(k,j,ang,pt)->rgb."""
     N=max(8,int(round(N*NM))); P=np.asarray(P,float); K=len(P); A=np.broadcast_to(np.asarray(A,float),(K,)); B=np.broadcast_to(np.asarray(B,float),(K,))
+    if K==2 and rim>0:   # v2: keep a steel face between the blackened rims
+        q=np.array([0,0.18,0.82,1.0]); P=P[0]+np.outer(q,P[1]-P[0]); A=A[0]+q*(A[1]-A[0]); B=B[0]+q*(B[1]-B[0]); K=4
+        if U is not None: U=np.repeat(U[:1],4,0); W=np.repeat(W[:1],4,0)
     if U is None: _,U,W=frames(P,up)
     full=abs(th[1]-th[0]-2*math.pi)<1e-6 if closed is None else closed
     J=N if full else N+1; ang=np.linspace(th[0],th[1],J,endpoint=not full)
@@ -246,6 +249,165 @@ def boot_L(M):
         Pl=np.array([[x,yy+0.006,Ht[kk+2]*0.5],[x,yy-0.006,Ht[kk+2]*0.5]])
         loft(M,Pl,np.full(2,Ht[kk+2]*0.5+0.004),np.full(2,Wd[kk+2]+0.004),N=20,th=(-1.7,1.7),t=0.004,rim=0,U=np.tile([0,0,1.0],(2,1)),W=np.tile([1.0,0,0],(2,1)),col=lambda *a:EDGE*0.9)
     return [('shin_L',k),('foot_L',a),('toe_L',BH['toe_L']),(None,np.array([x,-0.20,0.03]))],0.2
+
+# ================= v2 silhouette pass =================
+def torso(M):
+    # V-taper: broad chest, cinched waist; sculpted pecs + segmented ab plate; flared tasset skirt
+    Z=np.array([0.935,0.975,1.03,1.08,1.14,1.21,1.28,1.34,1.39,1.43,1.47,1.50,1.525])
+    HW=np.array([0.160,0.150,0.138,0.134,0.142,0.165,0.192,0.212,0.222,0.220,0.205,0.168,0.118])
+    HD=np.array([0.114,0.108,0.102,0.100,0.106,0.118,0.130,0.136,0.136,0.130,0.118,0.100,0.082])
+    P=np.c_[np.zeros_like(Z),np.full_like(Z,cy),Z]
+    def push(k,ang,pts,U,W):
+        x=pts[:,0]; fr=np.clip(np.cos(ang),0,1)**0.7; z=Z[k]
+        keel=0.012*np.exp(-(x/0.03)**2)*(1.18<z<1.47)
+        pec=0.020*np.exp(-((np.abs(x)-0.090)/0.055)**2)*np.exp(-((z-1.345)/0.065)**2)
+        ab=0.010*np.exp(-(x/0.07)**2)*(1.0<z<1.20)*(1 if k in (2,4) else 0.0)
+        d=np.zeros_like(pts); d[:,1]=-(keel+pec+ab)*fr
+        back=np.clip(-np.cos(ang),0,1); d[:,1]+=0.010*np.exp(-((np.abs(x)-0.075)/0.05)**2)*np.exp(-((z-1.36)/0.08)**2)*back   # shoulder blades
+        return d
+    def col(k,j,a,p):
+        if k==3 and math.cos(a)>0.2: return EDGE   # pec/ab seam (blackened)
+        if abs(p[0])<0.004 and math.cos(a)>0.9 and 1.18<Z[k]<1.47: return STEEL*1.12
+        return STEEL
+    O=loft(M,P,HD,HW,N=30,t=0.011,push=push,col=col,rim=0.005)
+    rivets(M,O,len(Z)-2,[4,8,22,26],np.array([0,cy,1.5]))
+    # ab lames (stacked, front)
+    for i,z0 in enumerate([0.985,1.04,1.095]):
+        Zp=np.array([z0,z0+0.065]); Pp=np.c_[np.zeros(2),np.full(2,cy),Zp]
+        Op=loft(M,Pp,np.interp(Zp,Z,HD)+0.008,np.interp(Zp,Z,HW)+0.005,N=18,th=(-1.2,1.2),t=0.007,rim=0.004,
+                push=lambda k,a,pts,U,W:np.c_[np.zeros(len(a)),-0.010*np.exp(-(pts[:,0]/0.06)**2)*np.clip(np.cos(a),0,1),np.zeros(len(a))])
+        rivets(M,Op,0,[3,15],np.array([0,cy,z0]),0.0045)
+    Zb=np.array([0.925,0.962]); Pb=np.c_[np.zeros(2),np.full(2,cy),Zb]
+    Ob=loft(M,Pb,np.full(2,0.120),np.full(2,0.165),N=40,t=0.006,rim=0,col=lambda *a:LEATH)
+    box(M,Ob[1,0]+np.array([0,-0.004,-0.02]),np.eye(3),(0.022,0.006,0.020),GOLD)
+    # flared fauld lames
+    for i in range(3):
+        z0=0.935-i*0.04; Zf=np.array([z0,z0-0.052]); Pf=np.c_[np.zeros(2),np.full(2,cy),Zf]
+        Of=loft(M,Pf,np.array([0.118+i*0.012,0.136+i*0.014]),np.array([0.163+i*0.012,0.186+i*0.016]),N=30,th=(-2.3,2.3),t=0.008,rim=0.004,col=lambda *a:SOFT)
+        rivets(M,Of,0,[4,10,16,22,28],np.array([0,cy,z0]),0.0045)
+    # tassets: two flared plates hanging over the thighs (3 lames each)
+    for sx in (1,-1):
+        for i in range(3):
+            z0=0.83-i*0.05; c0=np.array([sx*0.088,cy-0.02,z0]); c1=np.array([sx*(0.098+0.006*i),cy-0.035,z0-0.065])
+            Ot=loft(M,np.array([c0,c1]),np.array([0.078+0.008*i,0.088+0.010*i]),np.array([0.078,0.090]),N=12,th=(-1.15,1.15),t=0.007,rim=0.004,col=lambda *a:SOFT)
+            rivets(M,Ot,0,[2,10],c0,0.0042)
+    Zm=np.linspace(0.88,0.74,6); Pm=np.c_[np.zeros(6),np.full(6,cy),Zm]
+    loft(M,Pm,np.linspace(0.116,0.140,6),np.linspace(0.160,0.182,6),N=28,t=0.004,rim=0,col=lambda k,j,a,p:MAIL if (k+j)%2 else MAILD)
+    for i in range(2):
+        Zg=np.array([1.515+i*0.03,1.565+i*0.03]); Pg=np.c_[np.zeros(2),np.full(2,cy-0.004),Zg]
+        loft(M,Pg,np.array([0.098-i*0.014,0.078-i*0.012]),np.array([0.122-i*0.016,0.096-i*0.012]),N=36,t=0.007,rim=0.004,col=lambda *a:SOFT)
+    return [('hips',np.array([0,cy,0.70])),('spine',np.array([0,cy,0.978])),('spine2',np.array([0,cy,1.147])),('chest',np.array([0,cy,1.316])),('upperChest',np.array([0,cy,1.448])),('neck',np.array([0,cy,1.551])),(None,np.array([0,cy,1.62]))]
+HORNS=False
+def helm(M):
+    hc=np.array([0,-0.100,0]); Z=np.array([1.505,1.545,1.60,1.65,1.695,1.710,1.715,1.745,1.750,1.775,1.80,1.83,1.855,1.872,1.884])
+    HW=np.array([0.142,0.126,0.127,0.132,0.134,0.134,0.134,0.133,0.133,0.131,0.124,0.110,0.088,0.058,0.022])
+    HD=np.array([0.160,0.141,0.145,0.151,0.154,0.155,0.155,0.154,0.154,0.151,0.142,0.126,0.100,0.066,0.025])
+    P=np.c_[np.zeros_like(Z),np.full_like(Z,hc[1]+0.006),Z]
+    slit=lambda k,a:(k in (6,7)) and math.cos(a)>0.40 and not (abs(math.sin(a))<0.05)
+    def push(k,ang,pts,U,W):
+        d=np.zeros_like(pts); fr=np.clip(np.cos(ang),0,1)
+        d[:,1]-=0.026*np.exp(-(pts[:,0]/0.028)**2)*fr*(Z[k]<1.86)
+        sl=np.array([slit(k,a) for a in ang]); d[sl]+=-np.outer(np.cos(ang[sl]),U)*0.020
+        return d
+    def col(k,j,a,p):
+        if slit(k,a): return DARK
+        if k in (5,8) and math.cos(a)>0.40: return EDGE      # blackened slit lips
+        if 2<=k<=4 and math.sin(a)<-0.25 and math.cos(a)>0.05 and (j%3==0): return DARK
+        if abs(p[0])<0.006 and math.cos(a)>0.8: return STEEL*1.12
+        return STEEL
+    O=loft(M,P,HD,HW,N=64,t=0.012,push=push,col=col,rim=0.006)
+    ctr=np.array([0,hc[1],1.72]); rivets(M,O,1,list(range(0,64,6)),ctr,0.005)
+    Pb=np.c_[np.zeros(2),np.full(2,hc[1]+0.006),np.array([1.756,1.774])]
+    Ob=loft(M,Pb,np.full(2,0.158),np.full(2,0.138),N=64,t=0.006,rim=0.002,col=lambda k,j,a,p:STEEL*1.05,push=lambda k,ang,pts,U,W:np.c_[np.zeros(len(ang)),-0.026*np.exp(-(pts[:,0]/0.028)**2)*np.clip(np.cos(ang),0,1),np.zeros(len(ang))])
+    rivets(M,Ob,1,[6,14,22,42,50,58],ctr,0.0058)
+    # tall crest fin, front to back over the crown
+    th=np.linspace(-0.35,math.pi*0.92,22); Rr=0.132; ccen=np.array([0,hc[1]+0.006,1.745])
+    Pc=np.array([ccen+np.array([0,-math.cos(t)*Rr*1.02,math.sin(t)*Rr*0.97+0.005]) for t in th])
+    hgt=0.055*np.sin(np.clip((th+0.35)/(math.pi*0.92+0.35),0,1)*math.pi)**0.6+0.006
+    Uc=nz(Pc-ccen); Wc=np.tile([1.0,0,0],(len(th),1))
+    Pmid=Pc+Uc*(hgt[:,None]*0.5)
+    loft(M,Pmid,hgt*0.5,np.full(len(th),0.007),N=10,U=Uc,W=Wc,t=0.003,rim=0.002,col=lambda k,j,a,p:EDGE if j in (2,3,4,5,6,7) and math.cos(a)>0.7 else STEEL)
+    if HORNS:
+        for sx in (1,-1):
+            base=np.array([sx*0.125,hc[1]+0.01,1.80]); K=12; tt=np.linspace(0,1,K)
+            Ph=np.array([base+np.array([sx*(0.10*t),-0.05*t*t,0.16*t**1.4]) for t in tt])
+            loft(M,Ph,0.030*(1-tt)+0.003,0.030*(1-tt)+0.003,N=14,t=0.004,rim=0,col=lambda k,j,a,p:EDGE if k<2 else (DARK*3 if k<9 else GOLD))
+    return [('head',np.array([0,-0.10,1.60])),(None,np.array([0,-0.10,1.95]))]
+def pauldron_L(M):
+    s=BH['upperArm_L']; e=BH['foreArm_L']; ax=nz(e-s); L=np.linalg.norm(e-s); out=nz(np.array([1,0,0.55]))
+    c=s+np.array([0.028,0,0.055])   # rides above the shoulder line
+    K=10; tt=np.linspace(0,1,K); Pd=np.array([c+out*(0.080-0.110*t) for t in tt])
+    rad=0.132*np.sin(np.clip(tt*1.35+0.12,0,math.pi/2))+0.004
+    Up=np.tile([0,-1.0,0],(K,1)); Wp=np.tile(nz(np.cross(out,[0,-1.0,0])),(K,1))
+    Od=loft(M,Pd,rad*0.92,rad*1.06,N=44,th=(-2.6,2.6),t=0.010,rim=0.007,U=Up,W=Wp,closed=False,
+            push=lambda k,a,pts,U,W:np.outer(np.full(len(a),0.008*(k==5)),out),col=lambda k,j,a,p:EDGE if k==5 else STEEL)
+    rivets(M,Od,K-1,[4,13,22,31,40],c,0.0062)
+    # haute-piece: raised neck guard standing up on the inner edge
+    hp=c+np.array([-0.075,0,0.055]); Ph=np.array([hp,hp+np.array([0.004,0,0.045])])
+    loft(M,Ph,np.array([0.075,0.080]),np.array([0.010,0.010]),N=16,th=(-1.3,1.3),U=np.tile([0,-1.0,0],(2,1)),W=np.tile([1.0,0,0],(2,1)),t=0.006,rim=0.004,col=lambda *a:STEEL)
+    # 4 stacked flared lames with visible overlap
+    for i in range(4):
+        t0=0.02+i*0.115; p0=s+ax*t0*L+np.array([0.01,0,0.0]); p1=s+ax*(t0+0.16)*L+np.array([0.016,0,0])
+        Ol=loft(M,np.array([p0,p1]),np.array([0.096-i*0.009,0.108-i*0.009]),np.array([0.086-i*0.008,0.098-i*0.008]),N=32,th=(-2.5,2.5),t=0.008,rim=0.005)
+        rivets(M,Ol,0,[5,16,27],p0,0.005)
+    # rerebrace lames
+    for i in range(2):
+        p0=s+ax*(0.56+i*0.17)*L; p1=s+ax*(0.74+i*0.17)*L
+        loft(M,np.array([p0,p1]),np.array([0.058+0.003*i,0.062+0.003*i]),np.array([0.054,0.058]),N=28,t=0.007,rim=0.004)
+    return [('shoulder_L',BH['shoulder_L']),('upperArm_L',s),('foreArm_L',e)],0.15
+def glove_L(M):
+    s=BH['upperArm_L']; e=BH['foreArm_L']; h=BH['hand_L']; fa=nz(h-e); L=np.linalg.norm(h-e)
+    cE=e+np.array([0,0.022,0.0]); bk=nz(np.array([0,1.0,0])-(np.array([0,1.0,0])@fa)*fa)
+    K=6; tt=np.linspace(0,1,K); Pc=np.array([cE+bk*(0.055-0.065*t) for t in tt]); rad=0.068*np.sin(np.clip(tt*1.4+0.15,0,math.pi/2))
+    loft(M,Pc,rad,rad*0.9,N=26,th=(-2.8,2.8),t=0.008,rim=0.005,U=np.tile(fa,(K,1)),W=np.tile(nz(np.cross(bk,fa)),(K,1)),closed=False)
+    dome(M,cE+bk*0.057,0.011,bk,seg=8,col=GOLD)
+    side=nz(np.cross(fa,bk)); wc=cE+side*0.055   # elbow fan wing
+    loft(M,np.array([wc-fa*0.03,wc+fa*0.035]),np.array([0.004,0.040]),np.array([0.030,0.030]),N=16,U=np.tile(side,(2,1)),W=np.tile(bk,(2,1)),t=0.005,rim=0.004,th=(-1.4,1.4))
+    for i in range(2):   # vambrace in two overlapping plates
+        Pv=np.array([e+fa*L*t for t in np.linspace(0.10+i*0.42,0.55+i*0.42,4)])
+        loft(M,Pv,np.linspace(0.054-0.008*i,0.046-0.008*i,4),np.linspace(0.050-0.008*i,0.042-0.008*i,4),N=30,t=0.007,rim=0.004,
+             push=lambda k,a,pts,U,W:np.outer(0.008*np.exp(-(np.sin(a)/0.25)**2)*(np.cos(a)>0),U))
+    strap(M,np.array([e+fa*L*0.33]*2),0.056,0.052,(1.4,4.9),N=12)
+    Pg=np.array([h-fa*0.040,h+fa*0.014]); Og=loft(M,Pg,np.array([0.050,0.072]),np.array([0.044,0.062]),N=30,t=0.007,rim=0.005)
+    rivets(M,Og,1,[3,10,18,25],h,0.005)
+    hd=nz(BH['middle3_L']-h); Lh=np.linalg.norm(BH['middle3_L']-h)+0.04
+    for i,(t0,t1) in enumerate([(0.0,0.40),(0.36,0.56),(0.53,0.72),(0.69,0.86),(0.83,1.0)]):
+        Ph=np.array([h+hd*Lh*t0,h+hd*Lh*t1]); w=0.052-0.004*i
+        Oh=loft(M,Ph,np.array([w,w-0.003]),np.array([0.028,0.025]),N=22,t=0.006,rim=0.003)
+    rivets(M,Oh,0,[0],h,0.004)
+    th=BH['thumb1_L']; td=nz(BH['thumb3_L']-th)
+    loft(M,np.array([th,th+td*0.07]),np.array([0.020,0.016]),np.array([0.018,0.014]),N=14,t=0.005,rim=0.002)
+    return [('upperArm_L',s),('foreArm_L',e),('hand_L',h),(None,h+hd*0.2)],0.12
+def leg_L(M):
+    s=BH['thigh_L']; e=BH['shin_L']; ax=nz(e-s); L=np.linalg.norm(e-s)
+    # mail underlayer (whole thigh)
+    Pm=np.array([s+ax*L*t for t in np.linspace(0.10,0.92,6)])
+    loft(M,Pm,np.linspace(0.078,0.058,6),np.linspace(0.076,0.056,6),N=30,t=0.004,rim=0,col=lambda k,j,a,p:MAIL if (k+j)%2 else MAILD)
+    # cuisse: 4 stacked plate lames over the front/sides, each overlapping the next
+    for i in range(4):
+        t0=0.14+i*0.18; Pc=np.array([s+ax*L*t for t in (t0,t0+0.11,t0+0.22)])
+        r0=0.090-0.006*i
+        Oc=loft(M,Pc,np.array([r0,r0+0.002,r0+0.006]),np.array([r0-0.004,r0-0.002,r0+0.002]),N=30,th=(-2.0,2.0),t=0.008,rim=0.005,
+                push=lambda k,a,pts,U,W:np.outer(0.008*np.exp(-(np.sin(a)/0.22)**2)*(np.cos(a)>0),U))
+        rivets(M,Oc,0,[5,15,25],s+ax*L*t0,0.0048)
+    strap(M,np.array([s+ax*L*0.5]*2),0.080,0.076,(2.2,4.1),N=10)
+    # poleyn: knee cup + big fan wing + lame above & below
+    kc=e+np.array([0,-0.048,0.005]); fw=np.array([0,-1.0,0]); K=7; tt=np.linspace(0,1,K)
+    Pk=np.array([kc+fw*(0.040-0.050*t) for t in tt]); rad=0.066*np.sin(np.clip(tt*1.45+0.15,0,math.pi/2))+0.002
+    loft(M,Pk,rad,rad*0.95,N=28,U=np.tile([0,0,1.0],(K,1)),W=np.tile([1.0,0,0],(K,1)),t=0.008,rim=0.006)
+    dome(M,kc+fw*0.042,0.012,fw,seg=8,col=GOLD)
+    Pw=np.array([kc+np.array([0.052,0.025,0.035]),kc+np.array([0.074,0.040,-0.035])])
+    loft(M,Pw,np.array([0.040,0.034]),np.array([0.030,0.024]),N=18,t=0.006,rim=0.004,up=np.array([0,-1.0,0]))
+    for dz in (0.07,-0.07):
+        c0=kc+np.array([0,0.02,dz]); loft(M,np.array([c0-np.array([0,0,0.016]),c0+np.array([0,0,0.016])]),np.full(2,0.064),np.full(2,0.062),N=24,th=(-1.9,1.9),t=0.006,rim=0.004,U=np.tile(fw,(2,1)),W=np.tile([1.0,0,0],(2,1)))
+    return [('hips',BH['hips']+np.array([0.09,0,0.06])),('thigh_L',s),('shin_L',e),(None,e+ax*0.25)],0.15
+_boot_v1=boot_L
+def boot_L(M):
+    r=_boot_v1(M)
+    a=BH['foot_L']; x=a[0]   # flared ankle cuff over the sabaton top
+    P=np.array([[x,-0.005,0.135],[x,-0.01,0.105]]); loft(M,P,np.array([0.054,0.064]),np.array([0.050,0.060]),N=30,t=0.006,rim=0.004,up=np.array([0,-1.0,0]))
+    return r
+
 # ---------------- build / export ----------------
 TRI={}
 NM=1.0
@@ -253,6 +415,9 @@ NMS={'shoulder_L':1.45,'shoulder_R':1.45,'glove_L':1.45,'glove_R':1.45,'leg_L':1
 def build(name,fn,mirror=False):
     global NM; NM=NMS.get(name,1.0); M=Mesh(); r=fn(M); chain,bl=(r if isinstance(r,tuple) else (r,0.22))
     V,F,C=M.arrays(); W=chain_w(V,chain,bl)
+    q=np.floor(V/0.012); h=np.sin(q@np.array([12.9898,78.233,37.719]))*43758.5453; nse=h-np.floor(h)   # 1.2 cm cells -> blotchy wear
+    lit=C.mean(1)>0.45; f=0.86+0.16*nse; f[(nse>0.985)]=1.22   # battle wear: mottled steel + bright scratches
+    C[lit]=np.clip(C[lit]*f[lit,None],0,1)
     if mirror:
         V=V*np.array([-1,1,1]); F=F[:,::-1]; W=[{mirror_name(k):v for k,v in w.items()} for w in W]
     me=bpy.data.meshes.new(name); me.from_pydata(V.tolist(),[],F.tolist()); me.update()
@@ -290,4 +455,6 @@ for nm,fn,mr in [('helm',helm,False),('chest',torso,False),('shoulder_L',pauldro
                  ('leg_L',leg_L,False),('leg_R',leg_L,True),('boot_L',boot_L,False),('boot_R',boot_L,True)]:
     if ONLY and nm not in ONLY: continue
     build(nm,fn,mr)
+if not ONLY or 'helm_horned' in ONLY:
+    HORNS=True; build('helm_horned',helm,False)
 json.dump(TRI,open(f'{OUT}/generic_male_plate_tris.json','w'),indent=1)

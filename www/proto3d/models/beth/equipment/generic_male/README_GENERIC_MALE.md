@@ -17,3 +17,15 @@ Godot (`tools/generic_armor/gen_dress.gd`):
 - `hide_body()` hides body triangles by dominant bone, per equipped piece. Capes stay.
 
 Colour is COLOR_0 vertex colour, so keep `vertex_color_use_as_albedo` and `vertex_color_is_srgb = true`. Tri counts are in `generic_male_plate_tris.json`: every High piece is 4.0–6.4k and every lod1 is 45%.
+
+## v2: silhouette pass
+- **Torso:** V-taper (22 cm chest half-width down to a 13 cm waist). Sculpted pecs, shoulder blades and 3 stacked ab lames. Flared faulds plus two 3-lame tassets over the thighs.
+- **Pauldrons:** larger (13 cm dome) and raised above the shoulder line, with a haute-piece neck guard, 4 stacked flared lames and 2 rerebrace lames.
+- **Gauntlets:** elbow cop with a fan wing, a two-plate vambrace, a larger flared cuff and wider finger lames.
+- **Legs:** 4 overlapping cuisse lames over mail, a bigger poleyn with a fan wing, and lames above and below the knee. The boots get a flared ankle cuff.
+- **Helm:** a taller eye slit with blackened lips and a dark interior, a crest fin, and a lower bevor flare that covers longer necks.
+  - Optional horned variant: `generic_male_plate_helm_horned`.
+- **Finish:**
+  - Brighter steel with blotchy wear and scratches.
+  - Blackened rims on every plate, gold rivets and a gold buckle.
+- **Rook's shoes:** `gen_dress.gd` now also hides any non-cape body vertex at shoe height on a booted side.

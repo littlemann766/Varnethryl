@@ -1,52 +1,57 @@
 {
  "helm": {
-  "high": 4676,
-  "lod1": 2104,
+  "high": 6050,
+  "lod1": 2722,
   "ratio": 0.45
  },
  "chest": {
-  "high": 6330,
-  "lod1": 2847,
+  "high": 7982,
+  "lod1": 3591,
   "ratio": 0.45
  },
  "shoulder_L": {
-  "high": 4072,
-  "lod1": 1832,
+  "high": 7586,
+  "lod1": 3412,
   "ratio": 0.45
  },
  "shoulder_R": {
-  "high": 4072,
-  "lod1": 1832,
+  "high": 7586,
+  "lod1": 3412,
   "ratio": 0.45
  },
  "glove_L": {
-  "high": 4156,
-  "lod1": 1870,
+  "high": 6558,
+  "lod1": 2950,
   "ratio": 0.45
  },
  "glove_R": {
-  "high": 4156,
-  "lod1": 1870,
+  "high": 6558,
+  "lod1": 2950,
   "ratio": 0.45
  },
  "leg_L": {
-  "high": 4170,
-  "lod1": 1876,
+  "high": 5424,
+  "lod1": 2440,
   "ratio": 0.45
  },
  "leg_R": {
-  "high": 4170,
-  "lod1": 1876,
+  "high": 5424,
+  "lod1": 2440,
   "ratio": 0.45
  },
  "boot_L": {
-  "high": 4078,
-  "lod1": 1834,
+  "high": 4718,
+  "lod1": 2122,
   "ratio": 0.45
  },
  "boot_R": {
-  "high": 4078,
-  "lod1": 1834,
+  "high": 4718,
+  "lod1": 2122,
+  "ratio": 0.45
+ },
+ "helm_horned": {
+  "high": 7394,
+  "lod1": 3326,
   "ratio": 0.45
  }
 }

@@ -6,7 +6,7 @@ const HIDE={
  "shoulder_L":{"bones":["upperArm_L"]},"shoulder_R":{"bones":["upperArm_R"]},
  "glove_L":{"bones":["foreArm_L","hand_L","fingers_L"],"suffix_hand":"_L"},"glove_R":{"bones":["foreArm_R","hand_R","fingers_R"],"suffix_hand":"_R"},
  "leg_L":{"bones":["thigh_L","coat_L","coat2_L"],"hips_below":1.0},"leg_R":{"bones":["thigh_R","coat_R","coat2_R"],"hips_below":-1.0},
- "boot_L":{"bones":["shin_L","foot_L","toe_L","coat3_L"]},"boot_R":{"bones":["shin_R","foot_R","toe_R","coat3_R"]}}
+ "boot_L":{"bones":["shin_L","foot_L","toe_L","coat3_L"]},"boot_R":{"bones":["shin_R","foot_R","toe_R","coat3_R"]},"helm_horned":{"bones":["head","neck","jaw","eye_L","eye_R"],"prefix":["hair"],"above_neck":true}}
 var ref_head=null
 func _ready():
 	var args=OS.get_cmdline_user_args(); var jobs=JSON.parse_string(FileAccess.get_file_as_string(args[0]))
@@ -61,6 +61,9 @@ func hide_body(sk,pieces):
 		if r.has("hips_below"): hips_below.append(r["hips_below"])
 		if r.has("suffix_hand"): hand_sfx.append(r["suffix_hand"])
 	var hipy=sk.get_bone_global_rest(sk.find_bone("hips")).origin.y; var cut=hipy-0.20
+	var feet_sides=[]; var ankle_y=sk.get_bone_global_rest(sk.find_bone("foot_L")).origin.y
+	if "boot_L" in pieces: feet_sides.append(1.0)
+	if "boot_R" in pieces: feet_sides.append(-1.0)
 	var neck=sk.get_bone_global_rest(sk.find_bone("neck")).origin; var head=sk.get_bone_global_rest(sk.find_bone("head")).origin
 	for mi in bodies(sk):
 		var skin=mi.skin; var am=mi.mesh; var nm=ArrayMesh.new()
@@ -84,6 +87,8 @@ func hide_body(sk,pieces):
 						if rp.y<=cut and rp.x*sg>=0: h=true
 				if coat_above and bn.begins_with("coat") and rp.y>cut: h=true
 				if above_neck and rp.y>neck.y+0.02 and Vector2(rp.x-head.x,rp.z-head.z).length()<0.24 and not bn.begins_with("cape"): h=true
+				for sg in feet_sides:   # v2: anything at shoe height on a booted side (Rook's oversized shoes)
+					if rp.x*sg>=-0.02 and rp.y<ankle_y+0.09 and not bn.begins_with("cape"): h=true
 				if h: hid[vi]=1
 			var NI=PackedInt32Array()
 			for t in range(0,I.size(),3):
@@ -160,6 +165,7 @@ func run(j):
 	zs.sort(); var zm=(zs[3])
 	for p in offs: offs[p]=Vector3(0,offs[p].y,zm) if p!="helm" else Vector3(0,offs[p].y,offs[p].z)   # one shared depth shift per hero (skeleton sits behind the modelled body on some rigs)
 	print("OFFS ",j["rig"]," ",offs)
+	offs["helm_horned"]=offs["helm"]
 	for p in pieces: attach(sk,"res://armor/generic_male_plate_%s.glb"%p,offs[p])
 	if pieces.size(): hide_body(sk,pieces)
 	var cam=get_node("cam")

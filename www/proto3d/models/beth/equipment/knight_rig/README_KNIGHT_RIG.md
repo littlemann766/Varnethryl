@@ -21,3 +21,7 @@ Pipeline: parts.py -> rig.py -> bind3.py (NORT=1) -> opt.py -> export3.py.
 ## v4 - joint rim extensions (tools/knight_rig/extend.py, EXTL=0.07, after opt.py -> stage4)
 Open boundary rims of rigid joint plates (pauldron/shoulder/arm/elbow/hand/neck/torso/hips/tasset/thigh/knee/shin/foot; helm excluded) facing a joint within 14 cm are extruded up to 7 cm along the surface, as separate rigid strips on the plate's own bone with UVs mirrored back into the plate's own UV island (his texels, no smear) and their own verts (original normals untouched).
 Each strip is kept only if it is hidden at rest from 90 view directions (sampled along its length); otherwise shrunk, then dropped. Result: rest look unchanged, but only a few hundred rims qualify (male 345 edges, female 195), so the gain is small. See summary_v4.json.
+
+## v5 - joint limits on the baked clips (tools/knight_rig/limits.py + limit_actions.py, stage4 -> stage5)
+Mesh/texture unchanged (rest identical to v4). Every clip's bone rotations are soft-limited: angle' = L*tanh(angle/L), L per bone (deg): upperArm 26, foreArm 45, hand 32, shoulder 7, pauldron 18, thigh 30, shin 48, foot 22, toe 18, neck 20, head 26, wing 12, tabard 14; spine2/upperChest folded into chest (rigid cuirass, L 14). Hips untouched.
+Godot: if you play other clips, clamp with the same limits (SkeletonModifier3D / retarget step). Big swings (attack overhead, run stride) are visibly toned down.

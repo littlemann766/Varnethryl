@@ -27,8 +27,8 @@ sc.render.engine='BLENDER_EEVEE'; sc.eevee.taa_render_samples=32; sc.render.reso
 w=bpy.data.worlds.new('w'); sc.world=w; w.use_nodes=True; w.node_tree.nodes['Background'].inputs[0].default_value=(0.55,0.57,0.6,1); w.node_tree.nodes['Background'].inputs[1].default_value=0.9
 sun=bpy.data.objects.new('sun',bpy.data.lights.new('sun','SUN')); sc.collection.objects.link(sun); sun.rotation_euler=(math.radians(50),0,math.radians(-30)); sun.data.energy=3.5
 cam=bpy.data.objects.new('cam',bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera=cam; cam.data.type='ORTHO'
-for yaw,tag,zoom in ((20,'front',1.0),(200,'back',1.0),(15,'helm',0.28),(60,'shoulder',0.35)):
-    t=Vector(c) if tag in('front','back') else Vector((c[0],c[1],lo[2]+h*(0.90 if tag=='helm' else 0.78)))
+for yaw,tag,zoom,zf in ((20,'front',1.0,.5),(200,'back',1.0,.5),(15,'helm',0.28,.90),(60,'shoulders',0.42,.78),(10,'chest',0.35,.68),(25,'legs',0.55,.27),(200,'wings',0.6,.80)):
+    t=Vector(c) if tag in('front','back') else Vector((c[0],c[1],lo[2]+h*zf))
     cam.data.ortho_scale=h*1.08*zoom
     d_=h*3; cam.location=t+Vector((math.sin(math.radians(yaw))*d_,-math.cos(math.radians(yaw))*d_,h*0.12)); cam.rotation_euler=(t-cam.location).to_track_quat('-Z','Y').to_euler()
     cam.data.clip_end=d_*3

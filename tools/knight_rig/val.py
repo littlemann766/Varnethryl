@@ -48,6 +48,9 @@ EXT={'arms_up':{'upperArm_L':q((0,1,0),-140),'upperArm_R':q((0,1,0),140)},
  'wings_flap':{f'wing_{X}_0{i}':q((0,1,0),(25 if X=="L" else -25)) for X in 'LR' for i in range(1,5)},
  'tabard_sway15':{**{f'tabard_F_0{i}':q((1,0,0),-15) for i in (1,2,3)},**{f'tabard_B_0{i}':q((1,0,0),15) for i in (1,2,3)}},
  'tabard_swing':{**{f'tabard_F_0{i}':q((1,0,0),-30) for i in (1,2,3)},**{f'tabard_B_0{i}':q((1,0,0),30) for i in (1,2,3)}}}
+import os
+if os.environ.get('LIMIT'):
+    exec(open('/tmp/kr/limits.py').read()); EXT={k:{b:soft(q_,b) for b,q_ in vv.items()} for k,vv in EXT.items()}
 res={}; wpos=np.zeros(len(T)); wneg=np.zeros(len(T)); worst=np.zeros(len(T)); worst_a=np.zeros(len(T)); per_pose={}
 def measure(name):
     V=verts(); L,Ar=tri_metrics(V); s=np.abs(L/np.maximum(L0,1e-9)-1).max(1); a=np.abs(Ar/np.maximum(A0,1e-12)-1)

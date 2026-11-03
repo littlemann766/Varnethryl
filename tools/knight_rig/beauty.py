@@ -21,7 +21,7 @@ def setpose(nm):
             if b in ARM.pose.bones: ARM.pose.bones[b].rotation_quaternion=qq
     elif nm!='rest':
         k=[x for x in acts if x.startswith(nm)]
-        if k: a=acts[k[0]]; ARM.animation_data.action=a; f0,f1=a.frame_range; sc.frame_set(int(f0+(f1-f0)*0.45))
+        if k: a=acts[k[0]]; ARM.animation_data.action=a; f0,f1=a.frame_range; sc.frame_set(int(f0+(f1-f0)*float(__import__('os').environ.get('FR','0.45'))))
     bpy.context.view_layer.update()
 sc.render.engine='BLENDER_EEVEE'; sc.eevee.taa_render_samples=24; sc.view_settings.view_transform='Standard'; sc.render.resolution_x=360; sc.render.resolution_y=480
 cam=bpy.data.objects.new('cam',bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera=cam; cam.data.type='ORTHO'
@@ -29,6 +29,6 @@ w=bpy.data.worlds.new('w'); sc.world=w; w.use_nodes=True; w.node_tree.nodes['Bac
 sun=bpy.data.objects.new('sun',bpy.data.lights.new('sun','SUN')); sc.collection.objects.link(sun); sun.rotation_euler=(math.radians(50),0,math.radians(-30)); sun.data.energy=3.5
 def look(yaw,tgt,size,dist=5,el=0.6):
     cam.data.ortho_scale=size; t=Vector(tgt); cam.location=t+Vector((math.sin(math.radians(yaw))*dist,-math.cos(math.radians(yaw))*dist,el)); cam.rotation_euler=(t-cam.location).to_track_quat('-Z','Y').to_euler()
-SH=[('rest',25,(0,-0.1,1.0),2.6),('arms_up',25,(0,-0.1,1.1),2.8),('arms_up',90,(0.2,0,1.35),1.1),('elbows_140',60,(0.3,0,1.15),1.1),('kick',80,(0,0,0.7),1.6),('crouch',70,(0,0,0.6),1.8),('spine_twist',25,(0,0,1.2),1.4),('split',0,(0,0,0.7),1.6),('walk',60,(0,-0.1,1.0),2.6),('attack',30,(0,-0.1,1.0),2.6),('run',80,(0,-0.1,1.0),2.6)]
+SH=[(n,y,(0,-0.1,1.0),2.6) for n in ('idle','walk','run','attack','hit','death') for y in (30,110)]
 for i,(nm,yaw,tg,sz) in enumerate(SH):
     setpose(nm); look(yaw,tg,sz); sc.render.filepath=f'{RAW}/{i:02d}_{nm}_{yaw}.png'; bpy.ops.render.render(write_still=True)

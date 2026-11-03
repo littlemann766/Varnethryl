@@ -165,7 +165,7 @@ func run(j):
 	var zs=[]
 	for p in ["chest","shoulder_L","shoulder_R","leg_L","leg_R","boot_L","boot_R"]: zs.append(offs[p].z)
 	zs.sort(); var zm=(zs[3])
-	for p in offs: offs[p]=Vector3(0,offs[p].y,zm) if p!="helm" else Vector3(0,offs[p].y,offs[p].z)   # one shared depth shift per hero (skeleton sits behind the modelled body on some rigs)
+	for p in offs: offs[p]=Vector3(0,offs[p].y,zm)   # v3: helm uses the body depth shift too (head-centroid was skewed by hair; Elira helm sat ~4-10 cm off)   # one shared depth shift per hero (skeleton sits behind the modelled body on some rigs)
 	print("OFFS ",j["rig"]," ",offs)
 	offs["helm_horned"]=offs["helm"]
 	for p in pieces: attach(sk,"res://armor/%s%s.glb"%[j.get("prefix","generic_male_plate_"),p],offs[p])

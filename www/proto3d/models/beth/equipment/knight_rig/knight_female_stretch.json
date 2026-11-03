@@ -1,14 +1,14 @@
 {
  "stats": {
-  "rigid_tris": 34366,
+  "rigid_tris": 34756,
   "blended_tris": 6742,
   "rigid_edge_stretch_max": 0.00020319326229545354,
-  "rigid_edge_stretch_p95": 3.1776019979112835e-05,
+  "rigid_edge_stretch_p95": 3.1698322588119554e-05,
   "rigid_area_max": 0.0012991571282969794,
-  "rigid_area_p95": 3.540465904994239e-05,
+  "rigid_area_p95": 3.539687441181383e-05,
   "blended_edge_stretch_max": 1.8838568538671923,
   "blended_edge_stretch_p95": 0.8884344278380221,
-  "all_edge_stretch_p95": 0.5562528603758334,
+  "all_edge_stretch_p95": 0.5527663292218987,
   "all_edge_stretch_max": 1.8838568538671923,
   "all_area_max": 1.7468348933258357,
   "tris_over_10pct": 4510,
@@ -28,7 +28,7 @@
   "band_tris_over_5pct": 5461,
   "band_tris_over_10pct": 4646,
   "plate_texel_stretch_max": 0.0014537560149523454,
-  "plate_texel_p95": 3.6890380669424294e-05,
+  "plate_texel_p95": 3.686818982140405e-05,
   "area_max_excl_submm2_tris": 1.7468348933258357
  },
  "per_pose": {
@@ -140,7 +140,7 @@
    0.0030155998571975706
   ],
   "attack1@16": [
-   6.749114263326916e-05,
+   7.483729925916727e-05,
    0.7710177478612149,
    0.30948861878232975
   ],

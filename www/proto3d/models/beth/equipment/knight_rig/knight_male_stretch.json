@@ -1,14 +1,14 @@
 {
  "stats": {
-  "rigid_tris": 51697,
+  "rigid_tris": 52387,
   "blended_tris": 10135,
   "rigid_edge_stretch_max": 0.0008082919563854318,
-  "rigid_edge_stretch_p95": 3.5666707399073516e-05,
+  "rigid_edge_stretch_p95": 3.560680281790018e-05,
   "rigid_area_max": 0.02162863401399151,
-  "rigid_area_p95": 3.997427181978707e-05,
+  "rigid_area_p95": 3.998319642948277e-05,
   "blended_edge_stretch_max": 2.8533385993788976,
   "blended_edge_stretch_p95": 1.0606531959940375,
-  "all_edge_stretch_p95": 0.4199282083911566,
+  "all_edge_stretch_p95": 0.4154960057578516,
   "all_edge_stretch_max": 2.8533385993788976,
   "all_area_max": 3.0575341646772474,
   "tris_over_10pct": 6703,
@@ -28,7 +28,7 @@
   "band_tris_over_5pct": 8445,
   "band_tris_over_10pct": 7060,
   "plate_texel_stretch_max": 0.03684222209194199,
-  "plate_texel_p95": 4.1928272524582866e-05,
+  "plate_texel_p95": 4.195734196447141e-05,
   "area_max_excl_submm2_tris": 3.0575341646772474
  },
  "per_pose": {
@@ -1228,7 +1228,7 @@
    0.0
   ],
   "crouch": [
-   4.869927840833732e-05,
+   6.297951566325288e-05,
    1.096341430403557,
    0.5345771496717409
   ],

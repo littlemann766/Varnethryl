@@ -1335,5 +1335,12 @@
    9.0,
    1.7
   ]
- ]
+ ],
+ "rim_extension": {
+  "edges_ext": 345,
+  "verts_ext": 604,
+  "shrunk": 18561,
+  "dropped": 4619,
+  "ext_len_m": 0.07
+ }
 }

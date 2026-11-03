@@ -1,0 +1,134 @@
+{
+ "male_anim": {
+  "v3_6c256ee": {
+   "holes_px": 11101,
+   "backface_px": 186879,
+   "vis_pct": 11.65,
+   "pen_pts_mean": 142.8
+  },
+  "v4": {
+   "holes_px": 10344,
+   "backface_px": 181891,
+   "vis_pct": 11.31,
+   "pen_pts_mean": 131.5
+  }
+ },
+ "male_extreme": {
+  "v3_6c256ee": {
+   "holes_px": 2125,
+   "backface_px": 15520,
+   "vis_pct": 5.86,
+   "pen_pts_mean": 50.5
+  },
+  "v4": {
+   "holes_px": 1986,
+   "backface_px": 15186,
+   "vis_pct": 5.71,
+   "pen_pts_mean": 41.3
+  }
+ },
+ "male_rest": {
+  "v3_6c256ee": {
+   "holes_px": 72,
+   "backface_px": 2,
+   "vis_pct": 0.32,
+   "pen_pts_mean": 0.0
+  },
+  "v4": {
+   "holes_px": 72,
+   "backface_px": 2,
+   "vis_pct": 0.32,
+   "pen_pts_mean": 0.0
+  }
+ },
+ "male_stretch": {
+  "rigid_tris": 52387,
+  "rigid_edge_stretch_max": 0.0008082919563854318,
+  "rigid_edge_stretch_p95": 3.560680281790018e-05,
+  "plate_texel_stretch_max": 0.03684222209194199,
+  "band_texel_stretch_p95": 1.2073843448819188,
+  "band_texel_stretch_max": 2.905509965843177
+ },
+ "male_look_front": {
+  "PSNR_dB": 36.7,
+  "pct_px_gt16": 0.58
+ },
+ "male_look_back": {
+  "PSNR_dB": 45.6,
+  "pct_px_gt16": 0.08
+ },
+ "male_look_helm": {
+  "PSNR_dB": 32.5,
+  "pct_px_gt16": 1.28
+ },
+ "male_look_shoulder": {
+  "PSNR_dB": 31.8,
+  "pct_px_gt16": 1.66
+ },
+ "female_anim": {
+  "v3_6c256ee": {
+   "holes_px": 21930,
+   "backface_px": 146732,
+   "vis_pct": 7.89,
+   "pen_pts_mean": 100.1
+  },
+  "v4": {
+   "holes_px": 20979,
+   "backface_px": 142215,
+   "vis_pct": 7.63,
+   "pen_pts_mean": 89.4
+  }
+ },
+ "female_extreme": {
+  "v3_6c256ee": {
+   "holes_px": 3570,
+   "backface_px": 11388,
+   "vis_pct": 4.98,
+   "pen_pts_mean": 37.0
+  },
+  "v4": {
+   "holes_px": 3441,
+   "backface_px": 11185,
+   "vis_pct": 4.87,
+   "pen_pts_mean": 35.0
+  }
+ },
+ "female_rest": {
+  "v3_6c256ee": {
+   "holes_px": 182,
+   "backface_px": 5,
+   "vis_pct": 0.81,
+   "pen_pts_mean": 0.0
+  },
+  "v4": {
+   "holes_px": 182,
+   "backface_px": 5,
+   "vis_pct": 0.81,
+   "pen_pts_mean": 0.0
+  }
+ },
+ "female_stretch": {
+  "rigid_tris": 34756,
+  "rigid_edge_stretch_max": 0.00020319326229545354,
+  "rigid_edge_stretch_p95": 3.1698322588119554e-05,
+  "plate_texel_stretch_max": 0.0014537560149523454,
+  "band_texel_stretch_p95": 0.9557466020153191,
+  "band_texel_stretch_max": 2.0431466224096986
+ },
+ "female_look_front": {
+  "PSNR_dB": 37.0,
+  "pct_px_gt16": 0.51
+ },
+ "female_look_back": {
+  "PSNR_dB": 47.5,
+  "pct_px_gt16": 0.07
+ },
+ "female_look_helm": {
+  "PSNR_dB": 32.5,
+  "pct_px_gt16": 1.17
+ },
+ "female_look_shoulder": {
+  "PSNR_dB": 31.0,
+  "pct_px_gt16": 1.97
+ }
+}

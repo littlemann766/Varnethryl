@@ -575,5 +575,12 @@
    9.7,
    4.3
   ]
- ]
+ ],
+ "rim_extension": {
+  "edges_ext": 195,
+  "verts_ext": 351,
+  "shrunk": 19642,
+  "dropped": 4897,
+  "ext_len_m": 0.07
+ }
 }

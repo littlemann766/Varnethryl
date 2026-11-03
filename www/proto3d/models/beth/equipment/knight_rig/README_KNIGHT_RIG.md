@@ -17,3 +17,7 @@ Pipeline: parts.py -> rig.py -> bind3.py (NORT=1) -> opt.py -> export3.py.
 - opt.py: each rigid part re-homed (hierarchy distance <=2) to the bone that best keeps rest contacts across 42-54 animation frames.
 - All clips baked with the helpers/twist into the GLB (plain bone tracks). No corrective shape keys.
 - Result vs e0fbc6c: see gap_summary_v3.json. Plates rigid (<0.1% edge), seam bands stretch a lot (see stretch json). Gaps/clipping NOT solved: the source mesh has no geometry under the plates.
+
+## v4 - joint rim extensions (tools/knight_rig/extend.py, EXTL=0.07, after opt.py -> stage4)
+Open boundary rims of rigid joint plates (pauldron/shoulder/arm/elbow/hand/neck/torso/hips/tasset/thigh/knee/shin/foot; helm excluded) facing a joint within 14 cm are extruded up to 7 cm along the surface, as separate rigid strips on the plate's own bone with UVs mirrored back into the plate's own UV island (his texels, no smear) and their own verts (original normals untouched).
+Each strip is kept only if it is hidden at rest from 90 view directions (sampled along its length); otherwise shrunk, then dropped. Result: rest look unchanged, but only a few hundred rims qualify (male 345 edges, female 195), so the gain is small. See summary_v4.json.

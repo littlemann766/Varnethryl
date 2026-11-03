@@ -1,6 +1,6 @@
 import bpy,sys,json,numpy as np
 G=sys.argv[-1]; OUT=f'/tmp/kr/{G}'
-bpy.ops.wm.open_mainfile(filepath=f'{OUT}/stage3.blend')
+bpy.ops.wm.open_mainfile(filepath=f'{OUT}/'+__import__('os').environ.get('STG','stage3')+'.blend')
 exec(open('/tmp/kr/mat.py').read())
 ARM=bpy.data.objects['knight_rig']; fig=bpy.data.objects[f'knight_{G}']; ARM.data.pose_position='POSE'
 setup_mat(fig.data)

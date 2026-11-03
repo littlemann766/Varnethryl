@@ -1,0 +1,13 @@
+EXT={'arms_up':{'upperArm_L':q((0,1,0),-140),'upperArm_R':q((0,1,0),140)},
+ 'arms_forward':{'upperArm_L':q((1,0,0),95),'upperArm_R':q((1,0,0),95),'foreArm_L':q((1,0,0),60),'foreArm_R':q((1,0,0),60)},
+ 'elbows_140':{'foreArm_L':q((1,0,0),140),'foreArm_R':q((1,0,0),140)},
+ 'wrist_twist90':{'hand_L':q((0,0,1),90),'hand_R':q((0,0,1),-90),'foreArm_L':q((1,0,0),40),'foreArm_R':q((1,0,0),40)},
+ 'kick':{'thigh_L':q((1,0,0),-95),'shin_L':q((1,0,0),110),'thigh_R':q((1,0,0),30)},
+ 'crouch':{'thigh_L':q((1,0,0),-110),'thigh_R':q((1,0,0),-110),'shin_L':q((1,0,0),130),'shin_R':q((1,0,0),130),'foot_L':q((1,0,0),-30),'foot_R':q((1,0,0),-30)},
+ 'split':{'thigh_L':q((0,1,0),-60),'thigh_R':q((0,1,0),60)},
+ 'spine_twist':{'spine2':q((0,0,1),25),'chest':q((0,0,1),20),'upperChest':q((0,0,1),15),'neck':q((0,0,1),35),'head':q((0,0,1),35)},
+ 'spine_bend':{'spine2':q((1,0,0),25),'chest':q((1,0,0),20),'upperChest':q((1,0,0),15),'head':q((1,0,0),-30)},
+ 'fist':{f'{f}{k}{X}':q((1,0,0),80) for f in ('index','middle','ring','pinky') for k in (1,2,3) for X in ('_L','_R')},
+ 'wings_flap':{f'wing_{X}_0{i}':q((0,1,0),(25 if X=="L" else -25)) for X in 'LR' for i in range(1,5)},
+ 'tabard_sway15':{**{f'tabard_F_0{i}':q((1,0,0),-15) for i in (1,2,3)},**{f'tabard_B_0{i}':q((1,0,0),15) for i in (1,2,3)}},
+ 'tabard_swing':{**{f'tabard_F_0{i}':q((1,0,0),-30) for i in (1,2,3)},**{f'tabard_B_0{i}':q((1,0,0),30) for i in (1,2,3)}}}

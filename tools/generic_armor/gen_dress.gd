@@ -123,6 +123,8 @@ func attach(sk,path,off):
 		mi.get_parent().remove_child(mi); mi.skin=ns; mi.set_meta("armor",true); mi.name="armor_"+path.get_file().get_basename(); sk.add_child(mi); mi.skeleton=NodePath("..")
 		for si in mi.mesh.get_surface_count():
 			var mat=StandardMaterial3D.new(); mat.vertex_color_use_as_albedo=true; mat.vertex_color_is_srgb=true; mat.metallic=0.2; mat.roughness=0.5; mat.metallic_specular=0.4
+			var srcm=mi.mesh.surface_get_material(si)
+			if srcm is BaseMaterial3D and srcm.albedo_texture: mat.albedo_texture=srcm.albedo_texture; mat.metallic=0.6; mat.roughness=0.4   # ref armour keeps its baked base-colour texture
 			mi.set_surface_override_material(si,mat)
 	inst.free()
 const GRP={"helm":["head"],"chest":["spine","spine2","chest","upperChest"],"shoulder_L":["upperArm_L"],"shoulder_R":["upperArm_R"],"glove_L":["foreArm_L"],"glove_R":["foreArm_R"],"leg_L":["thigh_L"],"leg_R":["thigh_R"],"boot_L":["shin_L"],"boot_R":["shin_R"]}
@@ -154,7 +156,7 @@ func group_stats(sk):
 func run(j):
 	var root=load(j["rig"]).instantiate(); add_child(root); var sk=find_t(root,"Skeleton3D"); var ap=find_t(root,"AnimationPlayer")
 	var st=group_stats(sk)
-	if REFS==null: REFS=st   # first job = reference male rig (Darius)
+	if REFS==null or j.get("ref_reset",false): REFS=st   # first job = reference male rig (Darius)
 	var pieces=j.get("pieces",[]); var offs={}
 	for p in GRP:
 		var d=st[p]["c"]-REFS[p]["c"]; var o=Vector3(0,0,clamp(d.z,-0.2,0.2))
@@ -166,7 +168,7 @@ func run(j):
 	for p in offs: offs[p]=Vector3(0,offs[p].y,zm) if p!="helm" else Vector3(0,offs[p].y,offs[p].z)   # one shared depth shift per hero (skeleton sits behind the modelled body on some rigs)
 	print("OFFS ",j["rig"]," ",offs)
 	offs["helm_horned"]=offs["helm"]
-	for p in pieces: attach(sk,"res://armor/generic_male_plate_%s.glb"%p,offs[p])
+	for p in pieces: attach(sk,"res://armor/%s%s.glb"%[j.get("prefix","generic_male_plate_"),p],offs[p])
 	if pieces.size(): hide_body(sk,pieces)
 	var cam=get_node("cam")
 	for shot in j["shots"]:

@@ -1,0 +1,62 @@
+{
+ "helm": {
+  "src": 3006,
+  "high": 7600,
+  "lod1": 3420,
+  "ratio": 0.45
+ },
+ "chest": {
+  "src": 6845,
+  "high": 6845,
+  "lod1": 3080,
+  "ratio": 0.45
+ },
+ "shoulder_L": {
+  "src": 3611,
+  "high": 3611,
+  "lod1": 1624,
+  "ratio": 0.45
+ },
+ "shoulder_R": {
+  "src": 2412,
+  "high": 6500,
+  "lod1": 2925,
+  "ratio": 0.45
+ },
+ "glove_L": {
+  "src": 3469,
+  "high": 6500,
+  "lod1": 2925,
+  "ratio": 0.45
+ },
+ "glove_R": {
+  "src": 2734,
+  "high": 6500,
+  "lod1": 2925,
+  "ratio": 0.45
+ },
+ "leg_L": {
+  "src": 8355,
+  "high": 6499,
+  "lod1": 2924,
+  "ratio": 0.45
+ },
+ "leg_R": {
+  "src": 3824,
+  "high": 3824,
+  "lod1": 1720,
+  "ratio": 0.45
+ },
+ "boot_L": {
+  "src": 3570,
+  "high": 6500,
+  "lod1": 2924,
+  "ratio": 0.45
+ },
+ "boot_R": {
+  "src": 3380,
+  "high": 6499,
+  "lod1": 2923,
+  "ratio": 0.45
+ }
+}

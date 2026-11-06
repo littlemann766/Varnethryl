@@ -170,11 +170,12 @@ def blur_color(V, C, terrain, pin_at, island):
     t = np.nonzero(terrain)[0]
     np.add.at(sumC, (ij[t, 0], ij[t, 1]), C[t, :3])
     np.add.at(cnt, (ij[t, 0], ij[t, 1]), 1)
-    sig = 2.1 if island else 3.3
+    # light blend only: a wide blur was washing the ground into a soft smear
+    sig = 1.3 if island else 1.8
     sumB = ndimage.gaussian_filter(sumC, sigma=(sig, sig, 0))
     cntB = ndimage.gaussian_filter(cnt, sigma=sig)
     blur = sumB[ij[:, 0], ij[:, 1]] / np.maximum(cntB[ij[:, 0], ij[:, 1], None], 1e-6)
-    mix = np.full(len(V), 0.40 if island else 0.56)
+    mix = np.full(len(V), 0.16 if island else 0.22)
     mix[pin_at] = 0.10
     C2 = C.copy()
     C2[t, :3] = C[t, :3] * (1 - mix[t, None]) + blur[t] * mix[t, None]

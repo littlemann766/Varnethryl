@@ -36,19 +36,19 @@
   "kind": "named_land",
   "nearest_named": "saltwatch_keep",
   "nearest_m": 79.1,
-  "scatter": 190,
+  "scatter": 139,
   "scatter_kinds": {
-   "bush": 31,
-   "stones": 19,
-   "tuft": 28,
-   "flower": 24,
-   "driftwood": 8,
-   "oak": 19,
-   "pine": 17,
-   "oak_warm": 11,
-   "pine_bent": 13,
-   "slab": 8,
-   "boulder": 12
+   "bush": 30,
+   "pine": 9,
+   "oak": 8,
+   "tuft": 22,
+   "stones": 18,
+   "flower": 16,
+   "boulder": 7,
+   "oak_warm": 10,
+   "slab": 7,
+   "driftwood": 5,
+   "pine_bent": 7
   }
  },
  {
@@ -68,19 +68,19 @@
   "kind": "named_land",
   "nearest_named": "gullhaven",
   "nearest_m": 142.0,
-  "scatter": 509,
+  "scatter": 377,
   "scatter_kinds": {
-   "tuft": 69,
-   "bush": 89,
-   "boulder": 29,
-   "oak_warm": 20,
-   "driftwood": 26,
-   "pine": 70,
-   "oak": 60,
-   "stones": 42,
-   "pine_bent": 26,
-   "slab": 24,
-   "flower": 54
+   "tuft": 54,
+   "boulder": 20,
+   "oak": 33,
+   "pine": 60,
+   "bush": 58,
+   "flower": 50,
+   "stones": 32,
+   "driftwood": 19,
+   "pine_bent": 21,
+   "slab": 19,
+   "oak_warm": 11
   }
  },
  {
@@ -144,16 +144,15 @@
   "kind": "islet",
   "nearest_named": "saltwatch_keep",
   "nearest_m": 244.2,
-  "scatter": 14,
+  "scatter": 16,
   "scatter_kinds": {
+   "pine": 2,
    "stones": 1,
-   "pine": 1,
    "bush": 3,
-   "tuft": 4,
+   "tuft": 7,
    "boulder": 1,
    "slab": 1,
-   "flower": 2,
-   "oak_warm": 1
+   "flower": 1
   }
  },
  {
@@ -193,19 +192,18 @@
   "kind": "named_land",
   "nearest_named": "coil_isle",
   "nearest_m": 118.3,
-  "scatter": 49,
+  "scatter": 39,
   "scatter_kinds": {
-   "flower": 6,
-   "bush": 7,
-   "boulder": 4,
-   "pine": 4,
-   "tuft": 10,
    "slab": 2,
-   "pine_bent": 2,
-   "oak_warm": 1,
-   "stones": 10,
+   "flower": 4,
+   "driftwood": 2,
+   "bush": 7,
+   "stones": 6,
+   "tuft": 7,
+   "pine": 3,
    "oak": 2,
-   "driftwood": 1
+   "boulder": 3,
+   "pine_bent": 3
   }
  },
  {
@@ -225,12 +223,13 @@
   "kind": "islet",
   "nearest_named": "gullhaven",
   "nearest_m": 291.1,
-  "scatter": 8,
+  "scatter": 10,
   "scatter_kinds": {
    "tuft": 1,
-   "pine_bent": 1,
-   "bush": 4,
-   "slab": 1,
+   "pine_bent": 2,
+   "bush": 3,
+   "boulder": 2,
+   "driftwood": 1,
    "flower": 1
   }
  },
@@ -251,15 +250,16 @@
   "kind": "islet",
   "nearest_named": "lantern_rock",
   "nearest_m": 224.9,
-  "scatter": 12,
+  "scatter": 13,
   "scatter_kinds": {
-   "flower": 2,
-   "oak": 1,
+   "tuft": 1,
+   "flower": 3,
    "pine": 1,
-   "bush": 4,
+   "oak": 1,
+   "bush": 3,
    "boulder": 1,
    "slab": 1,
-   "tuft": 2
+   "stones": 2
   }
  },
  {
@@ -279,19 +279,19 @@
   "kind": "main",
   "nearest_named": "lantern_rock",
   "nearest_m": 97.9,
-  "scatter": 441,
+  "scatter": 311,
   "scatter_kinds": {
-   "boulder": 25,
-   "flower": 44,
-   "stones": 54,
-   "driftwood": 15,
-   "pine": 72,
-   "pine_bent": 29,
-   "tuft": 63,
-   "oak": 36,
-   "bush": 70,
-   "oak_warm": 20,
-   "slab": 13
+   "pine_bent": 21,
+   "tuft": 40,
+   "pine": 51,
+   "bush": 49,
+   "boulder": 15,
+   "oak": 32,
+   "flower": 28,
+   "stones": 43,
+   "slab": 11,
+   "oak_warm": 14,
+   "driftwood": 7
   }
  },
  {
@@ -311,8 +311,17 @@
   "kind": "islet",
   "nearest_named": "coil_isle",
   "nearest_m": 372.5,
-  "scatter": 0,
-  "scatter_kinds": {}
+  "scatter": 14,
+  "scatter_kinds": {
+   "stones": 1,
+   "pine_bent": 1,
+   "oak_warm": 2,
+   "bush": 5,
+   "slab": 1,
+   "boulder": 2,
+   "flower": 1,
+   "tuft": 1
+  }
  },
  {
   "area_m2": 400.0,
@@ -351,14 +360,14 @@
   "kind": "islet",
   "nearest_named": "coil_isle",
   "nearest_m": 370.2,
-  "scatter": 15,
+  "scatter": 16,
   "scatter_kinds": {
-   "tuft": 5,
+   "tuft": 6,
    "boulder": 3,
    "oak": 1,
    "bush": 3,
    "flower": 2,
-   "oak_warm": 1
+   "pine_bent": 1
   }
  },
  {
@@ -398,14 +407,15 @@
   "kind": "islet",
   "nearest_named": "lantern_rock",
   "nearest_m": 412.5,
-  "scatter": 7,
+  "scatter": 11,
   "scatter_kinds": {
-   "tuft": 2,
-   "pine_bent": 1,
-   "bush": 1,
+   "tuft": 1,
+   "oak": 1,
+   "bush": 5,
+   "boulder": 1,
    "slab": 1,
-   "stones": 1,
-   "driftwood": 1
+   "driftwood": 1,
+   "flower": 1
   }
  },
  {
@@ -425,19 +435,19 @@
   "kind": "islet",
   "nearest_named": "coil_isle",
   "nearest_m": 568.6,
-  "scatter": 67,
+  "scatter": 104,
   "scatter_kinds": {
-   "oak_warm": 7,
-   "tuft": 5,
-   "driftwood": 2,
-   "bush": 10,
-   "flower": 12,
-   "pine": 11,
-   "oak": 5,
-   "stones": 3,
+   "pine": 17,
+   "pine_bent": 9,
+   "oak_warm": 9,
+   "oak": 7,
+   "bush": 16,
+   "tuft": 11,
+   "driftwood": 3,
+   "flower": 16,
+   "stones": 8,
    "slab": 2,
-   "pine_bent": 6,
-   "boulder": 4
+   "boulder": 6
   }
  },
  {
@@ -457,19 +467,19 @@
   "kind": "islet",
   "nearest_named": "lantern_rock",
   "nearest_m": 873.6,
-  "scatter": 83,
+  "scatter": 115,
   "scatter_kinds": {
-   "flower": 8,
-   "bush": 16,
-   "oak": 8,
-   "stones": 10,
+   "flower": 13,
+   "bush": 25,
+   "oak": 11,
+   "stones": 13,
    "oak_warm": 2,
+   "tuft": 16,
+   "pine": 13,
    "pine_bent": 8,
-   "tuft": 10,
    "boulder": 4,
-   "slab": 4,
-   "driftwood": 5,
-   "pine": 8
+   "slab": 5,
+   "driftwood": 5
   }
  },
  {
@@ -489,14 +499,15 @@
   "kind": "islet",
   "nearest_named": "lantern_rock",
   "nearest_m": 1011.9,
-  "scatter": 7,
+  "scatter": 11,
   "scatter_kinds": {
+   "stones": 2,
    "boulder": 1,
+   "oak_warm": 1,
+   "oak": 1,
+   "bush": 4,
    "slab": 1,
-   "stones": 1,
-   "driftwood": 1,
-   "tuft": 2,
-   "flower": 1
+   "tuft": 1
   }
  },
  {
@@ -511,19 +522,19 @@
   ],
   "nearest_named": "lantern_rock",
   "nearest_m": 0,
-  "scatter": 453,
+  "scatter": 574,
   "scatter_kinds": {
-   "flower": 58,
-   "boulder": 29,
-   "pine_bent": 40,
-   "slab": 17,
-   "tuft": 66,
-   "bush": 72,
-   "stones": 43,
-   "pine": 55,
-   "oak": 31,
-   "driftwood": 20,
-   "oak_warm": 22
+   "flower": 69,
+   "bush": 83,
+   "boulder": 32,
+   "pine_bent": 54,
+   "slab": 28,
+   "stones": 53,
+   "tuft": 82,
+   "pine": 76,
+   "oak": 42,
+   "driftwood": 23,
+   "oak_warm": 32
   },
   "bbox": null,
   "mesh": "arch_isl_lantern_rock"
@@ -540,19 +551,19 @@
   ],
   "nearest_named": "gullhaven",
   "nearest_m": 0,
-  "scatter": 343,
+  "scatter": 432,
   "scatter_kinds": {
-   "tuft": 44,
-   "stones": 29,
-   "pine": 43,
-   "bush": 64,
-   "oak": 26,
-   "pine_bent": 26,
-   "slab": 20,
-   "oak_warm": 15,
-   "flower": 48,
-   "boulder": 14,
-   "driftwood": 14
+   "tuft": 57,
+   "stones": 33,
+   "oak_warm": 22,
+   "pine": 50,
+   "bush": 79,
+   "oak": 39,
+   "pine_bent": 28,
+   "slab": 19,
+   "flower": 66,
+   "boulder": 22,
+   "driftwood": 17
   },
   "bbox": null,
   "mesh": "arch_isl_gullhaven"
@@ -569,17 +580,19 @@
   ],
   "nearest_named": "saltwatch_keep",
   "nearest_m": 0,
-  "scatter": 16,
+  "scatter": 28,
   "scatter_kinds": {
-   "flower": 2,
+   "flower": 1,
    "driftwood": 2,
    "tuft": 1,
-   "slab": 2,
-   "oak_warm": 1,
-   "stones": 2,
+   "slab": 4,
+   "stones": 4,
+   "oak_warm": 2,
+   "pine_bent": 4,
+   "bush": 6,
+   "pine": 2,
    "oak": 1,
-   "pine": 1,
-   "bush": 4
+   "boulder": 1
   },
   "bbox": null,
   "mesh": "arch_isl_saltwatch_keep"
@@ -596,18 +609,18 @@
   ],
   "nearest_named": "coil_isle",
   "nearest_m": 0,
-  "scatter": 289,
+  "scatter": 367,
   "scatter_kinds": {
-   "driftwood": 18,
-   "boulder": 18,
-   "pine_bent": 16,
-   "tuft": 66,
-   "bush": 41,
-   "pine": 27,
-   "slab": 13,
-   "oak_warm": 10,
-   "flower": 30,
-   "stones": 28,
+   "driftwood": 25,
+   "boulder": 17,
+   "pine_bent": 23,
+   "tuft": 74,
+   "bush": 63,
+   "flower": 39,
+   "pine": 36,
+   "slab": 20,
+   "oak_warm": 12,
+   "stones": 36,
    "oak": 22
   },
   "bbox": null,
@@ -630,18 +643,18 @@
   "kind": "main",
   "nearest_named": "saltglass",
   "nearest_m": 56.0,
-  "scatter": 2039,
+  "scatter": 2633,
   "scatter_kinds": {
-   "shore_pine": 169,
-   "boulder": 169,
-   "salt_crystal": 218,
-   "dune_grass": 342,
-   "scrub": 332,
-   "stones": 298,
-   "driftwood": 93,
-   "slab": 126,
-   "salt_flower": 120,
-   "salt_bush": 172
+   "dune_grass": 420,
+   "salt_bush": 220,
+   "slab": 167,
+   "scrub": 435,
+   "driftwood": 133,
+   "boulder": 218,
+   "stones": 407,
+   "salt_flower": 177,
+   "salt_crystal": 269,
+   "shore_pine": 187
   }
  },
  {
@@ -721,18 +734,18 @@
   "kind": "islet",
   "nearest_named": "beached_wreck",
   "nearest_m": 404.7,
-  "scatter": 32,
+  "scatter": 36,
   "scatter_kinds": {
    "scrub": 4,
    "salt_crystal": 5,
-   "stones": 6,
+   "salt_bush": 2,
    "salt_flower": 2,
+   "stones": 6,
    "driftwood": 1,
-   "slab": 2,
-   "shore_pine": 4,
-   "dune_grass": 5,
-   "salt_bush": 1,
-   "boulder": 2
+   "slab": 3,
+   "shore_pine": 5,
+   "dune_grass": 7,
+   "boulder": 1
   }
  },
  {
@@ -752,14 +765,13 @@
   "kind": "islet",
   "nearest_named": "saltglass",
   "nearest_m": 443.9,
-  "scatter": 8,
+  "scatter": 7,
   "scatter_kinds": {
    "boulder": 2,
-   "stones": 2,
-   "dune_grass": 1,
-   "salt_crystal": 1,
    "salt_bush": 1,
-   "driftwood": 1
+   "driftwood": 1,
+   "salt_flower": 2,
+   "scrub": 1
   }
  },
  {
@@ -779,10 +791,11 @@
   "kind": "islet",
   "nearest_named": "saltglass",
   "nearest_m": 509.6,
-  "scatter": 2,
+  "scatter": 3,
   "scatter_kinds": {
    "dune_grass": 1,
-   "slab": 1
+   "slab": 1,
+   "scrub": 1
   }
  },
  {
@@ -802,18 +815,18 @@
   "kind": "islet",
   "nearest_named": "saltglass",
   "nearest_m": 638.5,
-  "scatter": 74,
+  "scatter": 110,
   "scatter_kinds": {
-   "scrub": 11,
-   "salt_crystal": 4,
-   "stones": 12,
-   "dune_grass": 14,
-   "salt_bush": 10,
+   "scrub": 21,
+   "salt_crystal": 7,
+   "dune_grass": 17,
+   "stones": 16,
+   "salt_bush": 17,
    "shore_pine": 9,
-   "driftwood": 5,
-   "slab": 3,
-   "boulder": 3,
-   "salt_flower": 3
+   "salt_flower": 7,
+   "driftwood": 7,
+   "boulder": 5,
+   "slab": 4
   }
  },
  {
@@ -833,17 +846,17 @@
   "kind": "islet",
   "nearest_named": "saltglass",
   "nearest_m": 926.7,
-  "scatter": 22,
+  "scatter": 21,
   "scatter_kinds": {
-   "scrub": 3,
-   "slab": 2,
+   "scrub": 4,
    "stones": 3,
-   "dune_grass": 2,
-   "shore_pine": 5,
+   "slab": 1,
+   "dune_grass": 1,
+   "shore_pine": 4,
    "salt_bush": 3,
-   "boulder": 1,
-   "salt_crystal": 2,
-   "driftwood": 1
+   "boulder": 3,
+   "driftwood": 1,
+   "salt_flower": 1
   }
  },
  {
@@ -858,18 +871,18 @@
   ],
   "nearest_named": "saltglass",
   "nearest_m": 0,
-  "scatter": 212,
+  "scatter": 286,
   "scatter_kinds": {
-   "scrub": 36,
-   "salt_crystal": 31,
-   "stones": 37,
-   "boulder": 21,
-   "slab": 7,
-   "dune_grass": 32,
-   "driftwood": 10,
-   "shore_pine": 13,
-   "salt_bush": 16,
-   "salt_flower": 9
+   "stones": 60,
+   "salt_bush": 25,
+   "dune_grass": 42,
+   "scrub": 43,
+   "salt_crystal": 33,
+   "boulder": 23,
+   "slab": 12,
+   "salt_flower": 10,
+   "driftwood": 16,
+   "shore_pine": 22
   },
   "bbox": null,
   "mesh": "coast_isl_saltglass"
@@ -886,18 +899,18 @@
   ],
   "nearest_named": "beached_wreck",
   "nearest_m": 0,
-  "scatter": 55,
+  "scatter": 91,
   "scatter_kinds": {
-   "dune_grass": 12,
-   "salt_bush": 5,
-   "stones": 4,
-   "slab": 2,
-   "scrub": 12,
-   "salt_crystal": 4,
-   "driftwood": 1,
-   "boulder": 3,
-   "shore_pine": 8,
-   "salt_flower": 4
+   "stones": 14,
+   "dune_grass": 20,
+   "driftwood": 4,
+   "slab": 4,
+   "salt_crystal": 8,
+   "scrub": 16,
+   "salt_bush": 6,
+   "shore_pine": 11,
+   "salt_flower": 6,
+   "boulder": 2
   },
   "bbox": null,
   "mesh": "coast_isl_beached_wreck"
@@ -939,16 +952,16 @@
   "kind": "main",
   "nearest_named": "frozen_wreck",
   "nearest_m": 362.9,
-  "scatter": 2349,
+  "scatter": 2611,
   "scatter_kinds": {
-   "snow_bent": 180,
-   "boulder": 334,
-   "dead_tree": 134,
-   "snow_pine": 449,
-   "snow_bush": 293,
-   "stones": 449,
-   "ice_shard": 354,
-   "slab": 156
+   "snow_pine": 454,
+   "boulder": 384,
+   "snow_bush": 333,
+   "stones": 515,
+   "slab": 181,
+   "snow_bent": 194,
+   "dead_tree": 148,
+   "ice_shard": 402
   }
  },
  {
@@ -988,16 +1001,16 @@
   "kind": "islet",
   "nearest_named": "frostreach",
   "nearest_m": 283.6,
-  "scatter": 36,
+  "scatter": 49,
   "scatter_kinds": {
-   "ice_shard": 12,
-   "boulder": 7,
-   "dead_tree": 2,
-   "slab": 3,
-   "snow_pine": 4,
-   "snow_bent": 2,
-   "stones": 3,
-   "snow_bush": 3
+   "snow_bush": 6,
+   "stones": 11,
+   "snow_bent": 4,
+   "slab": 2,
+   "snow_pine": 8,
+   "ice_shard": 8,
+   "boulder": 9,
+   "dead_tree": 1
   }
  },
  {
@@ -1017,15 +1030,16 @@
   "kind": "islet",
   "nearest_named": "frostreach",
   "nearest_m": 405.5,
-  "scatter": 16,
+  "scatter": 22,
   "scatter_kinds": {
-   "snow_bush": 7,
+   "ice_shard": 2,
+   "slab": 3,
+   "stones": 5,
    "snow_pine": 1,
+   "dead_tree": 2,
    "snow_bent": 1,
-   "dead_tree": 1,
-   "slab": 2,
-   "stones": 2,
-   "ice_shard": 2
+   "snow_bush": 7,
+   "boulder": 1
   }
  },
  {
@@ -1065,16 +1079,16 @@
   "kind": "islet",
   "nearest_named": "aurora_arch",
   "nearest_m": 445.0,
-  "scatter": 468,
+  "scatter": 664,
   "scatter_kinds": {
-   "snow_pine": 91,
-   "stones": 95,
-   "boulder": 65,
-   "ice_shard": 74,
-   "dead_tree": 27,
-   "slab": 19,
-   "snow_bush": 56,
-   "snow_bent": 41
+   "snow_bush": 73,
+   "ice_shard": 103,
+   "snow_pine": 110,
+   "slab": 46,
+   "boulder": 105,
+   "snow_bent": 51,
+   "stones": 144,
+   "dead_tree": 32
   }
  },
  {
@@ -1094,16 +1108,16 @@
   "kind": "islet",
   "nearest_named": "aurora_arch",
   "nearest_m": 649.3,
-  "scatter": 63,
+  "scatter": 92,
   "scatter_kinds": {
+   "stones": 27,
+   "snow_pine": 12,
+   "ice_shard": 13,
+   "slab": 9,
+   "boulder": 8,
    "snow_bent": 6,
-   "snow_pine": 6,
-   "stones": 13,
-   "dead_tree": 2,
-   "ice_shard": 14,
-   "boulder": 7,
-   "snow_bush": 10,
-   "slab": 5
+   "snow_bush": 15,
+   "dead_tree": 2
   }
  },
  {
@@ -1143,8 +1157,13 @@
   "kind": "islet",
   "nearest_named": "aurora_arch",
   "nearest_m": 1020.6,
-  "scatter": 0,
-  "scatter_kinds": {}
+  "scatter": 6,
+  "scatter_kinds": {
+   "stones": 2,
+   "ice_shard": 1,
+   "snow_bush": 2,
+   "boulder": 1
+  }
  },
  {
   "id": "frostreach",
@@ -1158,16 +1177,16 @@
   ],
   "nearest_named": "frostreach",
   "nearest_m": 0,
-  "scatter": 67,
+  "scatter": 85,
   "scatter_kinds": {
-   "snow_pine": 6,
    "slab": 3,
-   "stones": 15,
-   "ice_shard": 7,
-   "snow_bent": 5,
-   "boulder": 7,
-   "snow_bush": 16,
-   "dead_tree": 8
+   "snow_pine": 18,
+   "boulder": 13,
+   "snow_bush": 15,
+   "ice_shard": 9,
+   "stones": 20,
+   "dead_tree": 5,
+   "snow_bent": 2
   },
   "bbox": null,
   "mesh": "frost_isl_frostreach"
@@ -1184,16 +1203,16 @@
   ],
   "nearest_named": "frozen_wreck",
   "nearest_m": 0,
-  "scatter": 153,
+  "scatter": 198,
   "scatter_kinds": {
-   "boulder": 22,
-   "stones": 29,
-   "snow_pine": 33,
-   "snow_bent": 12,
-   "dead_tree": 8,
-   "ice_shard": 20,
-   "snow_bush": 19,
-   "slab": 10
+   "snow_pine": 31,
+   "dead_tree": 14,
+   "stones": 30,
+   "snow_bent": 24,
+   "slab": 18,
+   "ice_shard": 22,
+   "boulder": 33,
+   "snow_bush": 26
   },
   "bbox": null,
   "mesh": "frost_isl_frozen_wreck"
@@ -1210,16 +1229,16 @@
   ],
   "nearest_named": "aurora_arch",
   "nearest_m": 0,
-  "scatter": 186,
+  "scatter": 223,
   "scatter_kinds": {
-   "boulder": 36,
-   "snow_bent": 15,
-   "ice_shard": 30,
-   "slab": 8,
-   "snow_pine": 32,
-   "stones": 33,
-   "snow_bush": 26,
-   "dead_tree": 6
+   "snow_pine": 40,
+   "boulder": 43,
+   "slab": 14,
+   "dead_tree": 14,
+   "ice_shard": 35,
+   "snow_bush": 25,
+   "snow_bent": 17,
+   "stones": 35
   },
   "bbox": null,
   "mesh": "frost_isl_aurora_arch"
@@ -1241,18 +1260,18 @@
   "kind": "islet",
   "nearest_named": "vent",
   "nearest_m": 913.8,
-  "scatter": 498,
+  "scatter": 691,
   "scatter_kinds": {
-   "dead_tree": 59,
-   "cinders": 40,
-   "boulder": 45,
-   "stones": 58,
-   "basalt": 64,
-   "obsidian": 52,
-   "ash_grass": 64,
-   "lava_rocks": 58,
-   "sulfur": 27,
-   "dead_bent": 31
+   "ash_grass": 79,
+   "dead_tree": 93,
+   "basalt": 87,
+   "sulfur": 57,
+   "cinders": 67,
+   "obsidian": 44,
+   "lava_rocks": 75,
+   "boulder": 60,
+   "stones": 79,
+   "dead_bent": 50
   }
  },
  {
@@ -1272,18 +1291,18 @@
   "kind": "islet",
   "nearest_named": "vent",
   "nearest_m": 577.0,
-  "scatter": 21,
+  "scatter": 23,
   "scatter_kinds": {
-   "sulfur": 2,
-   "dead_bent": 4,
-   "ash_grass": 5,
-   "basalt": 2,
-   "obsidian": 2,
-   "dead_tree": 1,
-   "cinders": 1,
-   "stones": 2,
+   "stones": 4,
+   "lava_rocks": 4,
+   "obsidian": 1,
    "boulder": 1,
-   "lava_rocks": 1
+   "ash_grass": 6,
+   "cinders": 2,
+   "basalt": 1,
+   "dead_tree": 2,
+   "dead_bent": 1,
+   "sulfur": 1
   }
  },
  {
@@ -1303,18 +1322,18 @@
   "kind": "islet",
   "nearest_named": "vent",
   "nearest_m": 182.7,
-  "scatter": 404,
+  "scatter": 548,
   "scatter_kinds": {
-   "cinders": 41,
-   "dead_tree": 37,
-   "basalt": 66,
-   "lava_rocks": 48,
-   "ash_grass": 50,
-   "stones": 40,
-   "sulfur": 34,
-   "boulder": 40,
-   "dead_bent": 19,
-   "obsidian": 29
+   "cinders": 45,
+   "sulfur": 55,
+   "dead_bent": 25,
+   "lava_rocks": 68,
+   "boulder": 43,
+   "basalt": 61,
+   "stones": 63,
+   "obsidian": 43,
+   "dead_tree": 65,
+   "ash_grass": 80
   }
  },
  {
@@ -1354,18 +1373,18 @@
   "kind": "main",
   "nearest_named": "ember_wreck",
   "nearest_m": 251.1,
-  "scatter": 989,
+  "scatter": 1194,
   "scatter_kinds": {
-   "cinders": 100,
-   "sulfur": 87,
-   "boulder": 73,
-   "stones": 134,
-   "lava_rocks": 134,
-   "ash_grass": 119,
-   "basalt": 110,
-   "obsidian": 81,
-   "dead_tree": 101,
-   "dead_bent": 50
+   "basalt": 143,
+   "stones": 145,
+   "dead_tree": 112,
+   "cinders": 140,
+   "sulfur": 123,
+   "lava_rocks": 152,
+   "ash_grass": 148,
+   "obsidian": 87,
+   "dead_bent": 59,
+   "boulder": 85
   }
  },
  {
@@ -1460,20 +1479,20 @@
   ],
   "nearest_named": "vent",
   "nearest_m": 0,
-  "scatter": 347,
+  "scatter": 449,
   "scatter_kinds": {
-   "sulfur": 34,
-   "obsidian": 33,
-   "dead_tree": 31,
-   "boulder": 27,
-   "stones": 43,
-   "basalt": 45,
-   "ash_grass": 38,
-   "lava_rocks": 31,
-   "cinders": 35,
-   "dead_bent": 18,
-   "boulder_cluster": 9,
-   "lava_spire": 3
+   "dead_tree": 38,
+   "cinders": 40,
+   "sulfur": 41,
+   "obsidian": 51,
+   "ash_grass": 55,
+   "boulder": 44,
+   "basalt": 50,
+   "stones": 49,
+   "lava_rocks": 53,
+   "dead_bent": 13,
+   "lava_spire": 11,
+   "boulder_cluster": 4
   },
   "bbox": null,
   "mesh": "ash_isl_vent"
@@ -1490,20 +1509,19 @@
   ],
   "nearest_named": "ember_wreck",
   "nearest_m": 0,
-  "scatter": 194,
+  "scatter": 229,
   "scatter_kinds": {
-   "sulfur": 17,
-   "ash_grass": 29,
-   "boulder": 14,
-   "lava_rocks": 17,
-   "dead_tree": 15,
+   "lava_rocks": 25,
+   "dead_bent": 6,
+   "dead_tree": 14,
+   "ash_grass": 28,
+   "basalt": 33,
+   "sulfur": 22,
+   "cinders": 30,
    "stones": 28,
-   "basalt": 23,
-   "cinders": 24,
-   "obsidian": 18,
-   "dead_bent": 2,
-   "boulder_cluster": 3,
-   "lava_spire": 4
+   "obsidian": 17,
+   "boulder": 22,
+   "boulder_cluster": 4
   },
   "bbox": null,
   "mesh": "ash_isl_ember_wreck"
@@ -1520,19 +1538,19 @@
   ],
   "nearest_named": "hot_spring",
   "nearest_m": 0,
-  "scatter": 49,
+  "scatter": 62,
   "scatter_kinds": {
-   "obsidian": 6,
-   "stones": 7,
-   "cinders": 6,
-   "basalt": 3,
-   "boulder": 3,
    "ash_grass": 10,
-   "dead_tree": 3,
+   "cinders": 7,
+   "stones": 9,
+   "obsidian": 11,
+   "boulder": 2,
+   "basalt": 6,
+   "sulfur": 6,
    "lava_rocks": 4,
    "dead_bent": 3,
-   "sulfur": 3,
-   "lava_spire": 1
+   "dead_tree": 3,
+   "boulder_cluster": 1
   },
   "bbox": null,
   "mesh": "ash_isl_hot_spring"
@@ -1549,20 +1567,20 @@
   ],
   "nearest_named": "obsidian_arch",
   "nearest_m": 0,
-  "scatter": 315,
+  "scatter": 478,
   "scatter_kinds": {
-   "cinders": 34,
-   "obsidian": 29,
-   "sulfur": 35,
-   "stones": 40,
-   "ash_grass": 41,
-   "basalt": 32,
-   "dead_tree": 21,
-   "lava_rocks": 33,
-   "dead_bent": 6,
-   "boulder": 29,
-   "boulder_cluster": 8,
-   "lava_spire": 7
+   "ash_grass": 74,
+   "basalt": 53,
+   "sulfur": 42,
+   "lava_rocks": 56,
+   "stones": 56,
+   "boulder": 30,
+   "obsidian": 48,
+   "dead_tree": 35,
+   "cinders": 52,
+   "dead_bent": 16,
+   "boulder_cluster": 10,
+   "lava_spire": 6
   },
   "bbox": null,
   "mesh": "ash_isl_obsidian_arch"

@@ -66,62 +66,112 @@ def place(p, s=1.0, yaw=0.0, dy=0.0, shear=(0, 0)):
     v = v + [0, dy, 0]
     return v, f, c
 
-BARK = np.array([0.28, 0.18, 0.11])
+BARK = np.array([0.32, 0.20, 0.12])
+def _limb(rng, length, r0, r1, n, col):
+    return loft([ring(rng, r0, 0, n, 0.25), ring(rng, r1, length, n, 0.2)], [col, col * 0.8], False)
+
 def pine(hi, rng, snow=False, tone=1.0, style=0):
-    n = 7 if hi else 5
-    h = rng.uniform(6.5, 13 if style == 0 else 9)
-    parts = [loft([ring(rng, 0.26, -0.3, n), ring(rng, 0.11, h * 0.55, n, 0.1)], [BARK * 0.85, BARK], False)]
-    lv = (4 if hi else 2) if style != 2 else (3 if hi else 2)
-    col = np.array([0.10, 0.24, 0.13]) * tone * rng.uniform(0.82, 1.18)
-    shear = (rng.normal(0, 0.18), rng.normal(0, 0.18)) if style == 1 else (0, 0)
-    built = []
-    for k in range(lv):
-        t = k / lv
-        rad = (1 - t) * (h * (0.22 if style == 0 else 0.30)) + 0.45
-        y = h * (0.18 + 0.72 * t)
-        tip = np.array([0.86, 0.90, 0.95]) if snow else col * 1.15
-        built.append(cone(rng, rad, y, h * (0.40 if hi else 0.5) * (1 - t * 0.25), n, col * (0.8 + 0.25 * t), tip))
+    """Irregular pine: curved trunk, side boughs, offset crowns. Not a stack of centred cones."""
+    n = 6 if hi else 5
+    h = float(rng.uniform(7.5, 12.5 if style == 0 else 9.5))
+    bark = BARK * float(rng.uniform(0.8, 1.15))
+    leaf = np.array([0.07, 0.20, 0.10]) * tone * float(rng.uniform(0.8, 1.2))
+    if style == 2:
+        leaf = leaf * np.array([1.15, 0.95, 0.8])
+    trunk = _limb(rng, h * 0.78, 0.32, 0.08, n, bark)
+    tv, tf, tc = trunk
+    tv = tv.copy()
+    lean = float(rng.normal(0.12 if style == 1 else 0.0, 0.08))
+    tv[:, 0] += np.sin(np.clip(tv[:, 1], 0, None) / h * np.pi) * lean * h * 0.15
+    tv[:, 2] += np.sin(np.clip(tv[:, 1], 0, None) / h * 2.2) * abs(lean) * h * 0.08
+    parts = [(tv, tf, tc)]
+    crowns = [(0.42, 0.20, 0.32), (0.62, 0.15, 0.30), (0.80, 0.09, 0.26)]
+    if not hi:
+        crowns = crowns[1:]
+    for i, (ty, rad, ch) in enumerate(crowns):
+        col = leaf * (0.65 + 0.18 * i)
+        tip = np.array([0.82, 0.86, 0.90]) if snow else col * 1.25
+        cv, cf, cc = cone(rng, h * rad, 0, h * ch, n + 2, col, tip)
+        cv = cv.copy()
+        cv[:, 0] *= float(rng.uniform(0.72, 1.2))
+        cv[:, 2] *= float(rng.uniform(0.7, 1.15))
+        off = rng.normal(0, h * rad * 0.35, 3); off[1] = 0
         if snow:
-            v, f, c = built[-1]
-            c = np.where((v[:, 1] > y + h * 0.12)[:, None], np.array([0.84, 0.89, 0.94]), c)
-            built[-1] = (v, f, c)
-    parts += built
-    v, f, c = merge(parts)
-    return place((v, f, c), 1, 0, 0, shear), h
+            cc = np.where((cv[:, 1] > h * ch * 0.45)[:, None], np.array([0.80, 0.86, 0.92]), cc)
+        parts.append((cv + [off[0], h * ty, off[2]], cf, cc))
+    nb = 5 if hi else 0
+    for k in range(nb):
+        a = float(rng.random() * 6.283)
+        yy = h * float(rng.uniform(0.28, 0.72))
+        L = float(rng.uniform(0.9, 1.8))
+        br = _limb(rng, L, 0.07, 0.02, 4, bark * 0.9)
+        parts.append(place(br, 1, a, yy, (np.cos(a) * 0.85, np.sin(a) * 0.85)))
+        tu_col = leaf * float(rng.uniform(0.7, 1.05))
+        tu = cone(rng, 0.45, 0, 0.7, 5, tu_col, np.array([0.84, 0.88, 0.92]) if snow else tu_col * 1.2)
+        end = np.array([np.cos(a) * L * 0.8, yy + L * 0.35, np.sin(a) * L * 0.8])
+        parts.append((tu[0] + end, tu[1], tu[2]))
+    return merge(parts), h
 
 def oak(hi, rng, tone=1.0, style=0):
-    n = 6 if hi else 5
-    h = rng.uniform(4.5, 8.5)
-    parts = [loft([ring(rng, 0.32, -0.3, n, 0.15), ring(rng, 0.16, h * 0.55, n)], [BARK, BARK * 0.9], False)]
-    col = np.array([0.22, 0.38, 0.14]) * tone * rng.uniform(0.75, 1.2)
+    """Forked trunk and separate leaf masses, darker underneath."""
+    n = 5 if hi else 4
+    h = float(rng.uniform(5.0, 8.5))
+    bark = BARK * float(rng.uniform(0.75, 1.1))
+    parts = [_limb(rng, h * 0.55, 0.38, 0.16, n, bark)]
+    col = np.array([0.16, 0.34, 0.10]) * tone * float(rng.uniform(0.75, 1.15))
     if style == 1:
-        col = col * np.array([1.15, 0.9, 0.75])  # early autumn
-    blobs = 3 if hi else 1
-    sub = 1 if hi else 0
-    for k in range(blobs):
-        off = rng.normal(0, 0.8, 3) * [1, 0.35, 1] if k else np.zeros(3)
-        v, f, c = blob(rng, rng.uniform(1.5, 2.5), sub, col, (1.0, 0.72, rng.uniform(0.8, 1.15)), 0.35)
-        parts.append((v + [off[0], h * 0.72 + off[1], off[2]], f, c))
+        col = col * np.array([1.25, 0.85, 0.55])
+    forks = 3 if hi else 1
+    for k in range(forks):
+        a = float(rng.random() * 6.283)
+        L = float(rng.uniform(1.2, 2.2))
+        yy = h * float(rng.uniform(0.45, 0.7))
+        parts.append(place(_limb(rng, L, 0.12, 0.04, 4, bark), 1, a, yy, (np.cos(a) * 0.55, np.sin(a) * 0.55)))
+        rad = float(rng.uniform(1.1, 2.0))
+        v, f, c = blob(rng, rad, 0, col, (float(rng.uniform(0.8, 1.3)), 0.62, float(rng.uniform(0.75, 1.2))), 0.45)
+        c = c.copy()
+        c[v[:, 1] < 0] *= 0.55
+        end = np.array([np.cos(a) * L * 0.65, yy + L * 0.25 + rad * 0.3, np.sin(a) * L * 0.65])
+        if k == 0:
+            end = np.array([0, h * 0.85, 0])
+        parts.append((v + end, f, c))
     return merge(parts), h
 
 def dead(hi, rng):
     n = 5 if hi else 4
-    h = rng.uniform(3.5, 7)
-    B = np.array([0.16, 0.12, 0.10]) * rng.uniform(0.8, 1.2)
-    parts = [loft([ring(rng, 0.22, -0.2, n, 0.2), ring(rng, 0.05, h, n)], [B, B * 1.3])]
-    for k in range(3 if hi else 1):
-        a = rng.random() * 6.28; y = h * rng.uniform(0.45, 0.85); L = rng.uniform(0.8, 2.0)
-        v, f, c = loft([ring(rng, 0.06, 0, 4), ring(rng, 0.02, L, 4)], [B, B * 0.8], False)
-        v = v.copy(); d = np.array([np.cos(a), rng.uniform(0.2, 0.8), np.sin(a)])
-        v[:, 0] += v[:, 1] * d[0]; v[:, 2] += v[:, 1] * d[2]; v[:, 1] *= d[1]
-        parts.append((v + [0, y, 0], f, c))
+    h = float(rng.uniform(4.0, 8.0))
+    B = np.array([0.22, 0.16, 0.12]) * float(rng.uniform(0.75, 1.15))
+    trunk = _limb(rng, h, 0.28, 0.05, n, B)
+    tv, tf, tc = trunk
+    tv = tv.copy()
+    tv[:, 0] += np.sin(np.clip(tv[:, 1], 0, None) / h * 2.5) * 0.4
+    parts = [(tv, tf, tc)]
+    for k in range(5 if hi else 2):
+        a = float(rng.random() * 6.283)
+        y = h * float(rng.uniform(0.35, 0.9))
+        L = float(rng.uniform(0.8, 2.4))
+        parts.append(place(_limb(rng, L, 0.06, 0.015, 4, B * 0.85), 1, a, y, (np.cos(a) * float(rng.uniform(0.4, 1.1)), np.sin(a) * float(rng.uniform(0.3, 0.9)))))
     return merge(parts), h
 
 def rock(hi, rng, col, big=False, slab=False):
-    r = rng.uniform(1.1, 2.8) if big else rng.uniform(0.28, 0.85)
-    sq = (rng.uniform(0.9, 1.5), rng.uniform(0.28, 0.45), rng.uniform(0.7, 1.2)) if slab else (1, rng.uniform(0.45, 0.85), rng.uniform(0.75, 1.25))
-    v, f, c = blob(rng, r, 1 if (hi and big) else 0, col * rng.uniform(0.82, 1.15), sq, 0.4)
-    return (v - [0, r * sq[1] * 0.35, 0], f, c), r
+    """Faceted stone from a convex hull, dark creases, lighter crown. Not a smooth ball."""
+    r = float(rng.uniform(1.3, 2.6) if big else rng.uniform(0.35, 0.9))
+    n = 16 if big else 9
+    p = rng.normal(size=(n, 3))
+    p /= np.linalg.norm(p, axis=1, keepdims=True) + 1e-9
+    sy = float(rng.uniform(0.28, 0.42) if slab else rng.uniform(0.45, 0.75))
+    p *= np.array([r * float(rng.uniform(0.85, 1.35)), r * sy, r * float(rng.uniform(0.75, 1.25))])
+    p[:, 1] -= r * sy * 0.25
+    p[0] *= 0.45
+    hull = trimesh.convex.convex_hull(p)
+    V = np.asarray(hull.vertices, np.float64)
+    F = np.asarray(hull.faces, np.int64)
+    y = V[:, 1]
+    t = (y - y.min()) / (np.ptp(y) + 1e-6)
+    base = np.array(col) * float(rng.uniform(0.82, 1.12))
+    C = base * (0.38 + 0.75 * t)[:, None]
+    C[t > 0.78] = C[t > 0.78] * 0.7 + np.array([0.32, 0.34, 0.26]) * 0.3
+    return (V, F, np.clip(C, 0, 1)), r
 
 def crystal(hi, rng, col, glint):
     parts = []
@@ -131,8 +181,22 @@ def crystal(hi, rng, col, glint):
     return merge(parts), 2.0
 
 def bush(hi, rng, col):
-    v, f, c = blob(rng, rng.uniform(0.55, 1.25), 1 if hi else 0, col * rng.uniform(0.8, 1.2), (rng.uniform(0.8, 1.3), 0.65, 1), 0.4)
-    return (v + [0, 0.25, 0], f, c), 1.0
+    """Several leaf clumps on short stems, not one sphere."""
+    parts = []
+    ncol = np.array(col) * float(rng.uniform(0.85, 1.15))
+    clumps = 4 if hi else 2
+    for k in range(clumps):
+        ang = float(rng.random() * 6.283)
+        rad = float(rng.uniform(0.35, 0.7))
+        dist = float(rng.uniform(0.05, 0.45)) if k else 0.0
+        stem_h = float(rng.uniform(0.25, 0.55))
+        parts.append(_limb(rng, stem_h, 0.04, 0.02, 4, BARK * 0.7))
+        pv, pf, pc = parts[-1]
+        parts[-1] = (pv + [np.cos(ang) * dist, 0, np.sin(ang) * dist], pf, pc)
+        v, f, c = blob(rng, rad, 0, ncol * float(rng.uniform(0.8, 1.15)), (float(rng.uniform(0.8, 1.3)), 0.7, float(rng.uniform(0.8, 1.2))), 0.4)
+        c = c.copy(); c[v[:, 1] < 0] *= 0.6
+        parts.append((v + [np.cos(ang) * dist, stem_h + rad * 0.35, np.sin(ang) * dist], f, c))
+    return merge(parts), 1.2
 
 def tuft(hi, rng, col, flower=None):
     parts = []
@@ -310,6 +374,159 @@ def lookup_comp(grid, xz):
     out[ok] = lab[ij[ok, 0], ij[ok, 1]]
     return out
 
+def _pool(ms):
+    pts = []; sl = []
+    for b, s in ms:
+        V = np.asarray(s.vertices); F = np.asarray(s.faces); C = np.asarray(s.visual.vertex_colors)
+        if len(F) == 0:
+            continue
+        A = C[:, 3] > 127
+        fm = A[F].all(1)
+        if not fm.any():
+            continue
+        cen = V[F[fm]].mean(1)
+        fn = s.face_normals[fm]
+        sd = np.degrees(np.arccos(np.clip(np.abs(fn[:, 1]), 0, 1)))
+        step = max(1, len(cen) // 4000)
+        pts.append(cen[::step]); sl.append(sd[::step])
+    if not pts:
+        return np.zeros((0, 3)), np.zeros(0)
+    return np.concatenate(pts), np.concatenate(sl)
+
+def _idx(sp, names):
+    out = []
+    for i, s_ in enumerate(sp):
+        if s_[0] in names:
+            out.append(i)
+    return out
+
+def ensure_groves(region, ms, P, kind, lab, sp, block, crecs):
+    """Plant a real cluster just off each route, and rocks on skerries. Paths themselves stay clear."""
+    pool, slope = _pool(ms)
+    if len(pool) == 0:
+        return P, kind, lab, []
+    plan = {
+        "A": (["pine", "oak", "pine_bent", "oak_warm"], ["bush"], ["boulder", "stones", "slab"], 6, 8, 4),
+        "B": (["shore_pine"], ["scrub", "salt_bush"], ["boulder", "stones", "slab"], 5, 8, 4),
+        "frost": (["snow_pine", "snow_bent"], ["snow_bush"], ["boulder", "stones", "slab"], 5, 6, 4),
+        "ash": (["dead_tree", "dead_bent"], ["ash_grass"], ["boulder", "lava_rocks", "basalt"], 4, 6, 5),
+    }[region]
+    trees, bushes, rocks, nt, nb, nr = plan
+    it, ib, ir = _idx(sp, trees), _idx(sp, bushes), _idx(sp, rocks)
+    notes = []
+    rng = np.random.default_rng(100 + len(region) * 17)
+    route_pts = []
+    piers = []
+    for k, I in MAN["islands"].items():
+        if I["region"] != region:
+            continue
+        if I.get("pier_head"):
+            piers.append(np.array(I["pier_head"], float)[[0, 2]])
+        for po in I.get("pois", []):
+            rt = po.get("route") or []
+            if rt:
+                arr = np.array(rt, float).reshape(-1, 3)[:, [0, 2]]
+                route_pts.append(arr[::max(1, len(arr) // 30)])
+    route_pts = np.concatenate(route_pts) if route_pts else np.zeros((0, 2))
+
+    def blocked(xz):
+        # keep the path and the pier clear; the wide scatter mask was eating whole small islands
+        if len(route_pts) and np.min(np.hypot(route_pts[:, 0] - xz[0], route_pts[:, 1] - xz[1])) < 4.0:
+            return True
+        for p in piers:
+            if np.hypot(p[0] - xz[0], p[1] - xz[1]) < 8.0:
+                return True
+        return False
+
+    def add_near(center, names_idx, nneed, rad, max_slope):
+        nonlocal P, kind, lab
+        if nneed <= 0 or not names_idx or len(pool) == 0:
+            return 0
+        # space new plants only against trees and boulders, so a tuft-covered clearing can still take a grove
+        solid = np.array([sp[int(k)][3] >= 1 for k in kind]) if len(kind) else np.zeros(0, bool)
+        have = P[solid] if len(P) and solid.any() else np.zeros((0, 3))
+        added = 0
+        for k in range(nneed * 6):
+            ang = (k / max(nneed, 1)) * 6.283 + k * 0.17
+            rr = 3.5 + (k % 4) * 1.6
+            xz = np.array([center[0] + np.cos(ang) * rr, center[2] + np.sin(ang) * rr])
+            if blocked(xz):
+                continue
+            j = int(np.argmin(np.hypot(pool[:, 0] - xz[0], pool[:, 2] - xz[1])))
+            if np.hypot(pool[j, 0] - xz[0], pool[j, 2] - xz[1]) > 7 or slope[j] > max_slope or pool[j, 1] < 0.5:
+                continue
+            q = pool[j]
+            if blocked(q[[0, 2]]):
+                continue
+            if len(have) and np.min(np.hypot(have[:, 0] - q[0], have[:, 2] - q[2])) < 3.2:
+                continue
+            P = np.concatenate([P, q.reshape(1, 3)])
+            kind = np.concatenate([kind, [int(names_idx[added % len(names_idx)])]])
+            lab = np.concatenate([lab, [np.int32(-2)]])
+            have = np.concatenate([have, q.reshape(1, 3)])
+            added += 1
+            if added >= nneed:
+                break
+        return added
+
+    # playable islands: cluster 8–16 m off the route, not on it
+    for k, I in MAN["islands"].items():
+        if I["region"] != region:
+            continue
+        routes = []
+        for po in I.get("pois", []):
+            rt = po.get("route") or []
+            if rt:
+                routes.append(np.array(rt, float).reshape(-1, 3))
+        if not routes:
+            ph = np.array(I["pier_head"], float)
+            R = ph.reshape(1, 3)
+        else:
+            R = max(routes, key=len)
+        # distance from each ground sample to the route, so the cluster sits beside the path on real land
+        rt = R[:, [0, 2]]
+        # subsample the route for the distance query
+        rt = rt[::max(1, len(rt) // 40)]
+        droute = np.full(len(pool), 1e9)
+        for p in rt:
+            droute = np.minimum(droute, np.hypot(pool[:, 0] - p[0], pool[:, 2] - p[1]))
+        ok = np.nonzero((droute > 7) & (droute < 16) & (slope < 24) & (pool[:, 1] > 1.0))[0]
+        if len(ok) == 0:
+            ok = np.nonzero((droute > 4) & (droute < 28) & (slope < 30) & (pool[:, 1] > 0.6))[0]
+        if len(ok) == 0:
+            notes.append(dict(id=k, kind="named", planted=0, note="no gentle ground off the route"))
+            continue
+        # prefer a spot near the middle of the route, not an end out at sea
+        mid = R[len(R) // 2]
+        dm = np.hypot(pool[ok, 0] - mid[0], pool[ok, 2] - mid[2])
+        spot = pool[ok[int(np.argmin(dm))]]
+        a = add_near(spot, it, nt, 14, 24) + add_near(spot, ib, nb, 12, 28) + add_near(spot, ir, nr, 12, 36)
+        notes.append(dict(id=k, kind="named", planted=int(a), spot=[float(spot[0]), float(spot[1]), float(spot[2])]))
+    for rec in crecs:
+        if rec.get("kind") != "islet":
+            continue
+        c = np.array([rec["centroid"][0], 2.0, rec["centroid"][1]])
+        if any(n.get("spot") and np.hypot(n["spot"][0] - c[0], n["spot"][2] - c[2]) < 70 for n in notes):
+            continue
+        area = rec.get("area_m2") or 0
+        d = np.hypot(pool[:, 0] - c[0], pool[:, 2] - c[2])
+        ok = np.nonzero((d < 40) & (slope < 30) & (pool[:, 1] > 0.5))[0]
+        if len(ok) == 0:
+            notes.append(dict(id=rec["id"], kind="bare_unplaceable", planted=0, area_m2=area,
+                              note="no gentle sample; left as rock shore only"))
+            continue
+        spot = pool[ok[int(np.argmin(d[ok]))]]
+        if area < 2500:
+            a = add_near(spot, ir, 4, 12, 42)
+            notes.append(dict(id=rec["id"], kind="bare_rock", planted=int(a), area_m2=area,
+                              spot=[float(spot[0]), float(spot[1]), float(spot[2])],
+                              note="ecologically bare: rocks and shore material, no trees"))
+        else:
+            a = add_near(spot, it, 4, 16, 24) + add_near(spot, ib, 5, 14, 30) + add_near(spot, ir, 3, 14, 36)
+            notes.append(dict(id=rec["id"], kind="islet_grove", planted=int(a), area_m2=area,
+                              spot=[float(spot[0]), float(spot[1]), float(spot[2])]))
+    return P, kind, lab, notes
+
 def main():
     pin, _routes = build_pins()
     from scipy.ndimage import binary_dilation
@@ -317,6 +534,8 @@ def main():
     block_col = binary_dilation(pin, iterations=3)   # ~6 m, trees and boulders
     rng = np.random.default_rng(11)
     all_comp = []
+    all_groves = []
+    placements = []
     stats = {}
     for region, (subdir, pre) in REG.items():
         src = os.path.join(ROOT, subdir)
@@ -365,7 +584,7 @@ def main():
         tree = np.array([sp[k][3] == 1 for k in kind])
         keep &= ~(tree & (forest < -0.15))
         # groves: thin the open ground a bit, never strip an islet that has little forest noise
-        thin = rng.random(len(P)) < np.clip(0.35 + forest * 0.9, 0.25, 1)
+        thin = rng.random(len(P)) < np.clip(0.55 + forest * 0.6, 0.4, 1)
         keep &= thin
         P, kind, sl, lab = P[keep], kind[keep], sl[keep], lab[keep]
         if len(P):
@@ -520,10 +739,14 @@ def main():
                 P = np.concatenate([P, extra_p])
                 kind = np.concatenate([kind, np.array(extra_k, int)])
                 lab = np.concatenate([lab, np.full(len(extra_p), -1, np.int32)])
+        n_before = len(P)
+        P, kind, lab, grove_notes = ensure_groves(region, ms, P, kind, lab, sp, block, crecs)
+        print(region, "grove +", len(P) - n_before, "lab-2", int((lab == -2).sum()) if len(lab) else 0, flush=True)
         # build chunks
         if len(P) == 0:
             stats[region] = dict(instances=0, tris_high=0, tris_lod1=0, chunks=0)
             all_comp.extend(crecs)
+            all_groves.extend(grove_notes)
             continue
         ch = np.floor(P[:, [0, 2]] / 256).astype(int)
         keys = np.unique(ch, axis=0)
@@ -539,6 +762,7 @@ def main():
                     v, f, c = place((v, f, c), sc, yaw)
                     dst.append((v + P[i] - [0, 0.12, 0], f, c))
                 cnt[sp[knd][0]] = cnt.get(sp[knd][0], 0) + 1
+                placements.append(dict(region=region, kind=sp[knd][0], x=float(P[i, 0]), y=float(P[i, 1]), z=float(P[i, 2])))
                 if sp[knd][3] >= 1:
                     w = 0.45 if sp[knd][3] == 1 else (3.2 * sc if sp[knd][3] == 3 else 1.2 * sc)
                     bx = trimesh.creation.box([w, 2.6, w])
@@ -585,6 +809,7 @@ def main():
                              tris_high=tot[0], tris_lod1=tot[1],
                              lod1_pct=round(100 * tot[1] / max(tot[0], 1), 1), col_tris=tot[2])
         print(region, stats[region]["instances"], "tris", tot[0], "lod1%", stats[region]["lod1_pct"], cnt, flush=True)
+        all_groves.extend(grove_notes)
         all_comp.extend(crecs)
         all_comp.extend(named_rows)
     json.dump(stats, open(os.path.join(ROOT, "scatter_stats.json"), "w"), indent=1)
@@ -595,7 +820,9 @@ def main():
         r.pop("lab", None)
         clean.append(r)
     json.dump(clean, open(os.path.join(ROOT, "island_inventory.json"), "w"), indent=1)
-    print("components listed", len(clean), flush=True)
+    json.dump(all_groves, open(os.path.join(ROOT, "grove_notes.json"), "w"), indent=1)
+    json.dump(placements, open(os.path.join(ROOT, "placements.json"), "w"))
+    print("components listed", len(clean), "placements", len(placements), "groves", len(all_groves), flush=True)
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,93 @@
+[
+ {
+  "name": "lantern_rock_grove",
+  "x": 62.28934765054587,
+  "z": -2.7297801800848682,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "gullhaven_grove",
+  "x": -378.1073440237559,
+  "z": -414.2340550671018,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "saltwatch_keep_grove",
+  "x": -579.7265353732639,
+  "z": 376.83888414171,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "coil_isle_grove",
+  "x": -103.52131822374132,
+  "z": 729.4345228407119,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "saltglass_grove",
+  "x": -2491.4586146638126,
+  "z": 34.738008506341735,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "beached_wreck_grove",
+  "x": -2532.1802571614585,
+  "z": 931.7942097981771,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "frostreach_grove",
+  "x": -1089.7363653531545,
+  "z": -1920.7435748918126,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "frozen_wreck_grove",
+  "x": -319.7995281797467,
+  "z": -2633.514951763731,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "aurora_arch_grove",
+  "x": -12.639877228509814,
+  "z": -2518.589227585566,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "vent_grove",
+  "x": -521.3609051174587,
+  "z": 1983.3280368381074,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "ember_wreck_grove",
+  "x": 521.6721014814757,
+  "z": 2270.4386996296494,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "hot_spring_grove",
+  "x": 1268.1175455207544,
+  "z": 2103.932559771789,
+  "radius": 14,
+  "min_trees": 3
+ },
+ {
+  "name": "obsidian_arch_grove",
+  "x": 370.7046774269665,
+  "z": 2631.4112762009513,
+  "radius": 14,
+  "min_trees": 3
+ }
+]

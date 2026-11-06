@@ -1,0 +1,469 @@
+[
+ {
+  "id": "lantern_rock",
+  "kind": "named",
+  "planted": 16,
+  "spot": [
+   61.35807673136393,
+   45.55599848429362,
+   -5.344285329182942
+  ]
+ },
+ {
+  "id": "gullhaven",
+  "kind": "named",
+  "planted": 7,
+  "spot": [
+   -373.3504130045573,
+   28.059704462687176,
+   -415.9155680338542
+  ]
+ },
+ {
+  "id": "saltwatch_keep",
+  "kind": "named",
+  "planted": 12,
+  "spot": [
+   -579.5043131510416,
+   2.838531017303467,
+   374.22777303059894
+  ]
+ },
+ {
+  "id": "coil_isle",
+  "kind": "named",
+  "planted": 12,
+  "spot": [
+   -105.9102071126302,
+   6.990860303243001,
+   732.0456339518229
+  ]
+ },
+ {
+  "id": "A_islet_-1158_-277",
+  "kind": "bare_rock",
+  "planted": 4,
+  "area_m2": 1600.0,
+  "spot": [
+   -1163.9594319661458,
+   19.08356539408366,
+   -275.2996419270833
+  ],
+  "note": "ecologically bare: rocks and shore material, no trees"
+ },
+ {
+  "id": "A_islet_-716_-554",
+  "kind": "bare_rock",
+  "planted": 2,
+  "area_m2": 400.0,
+  "spot": [
+   -710.0,
+   1.1140440702438354,
+   -548.0
+  ],
+  "note": "ecologically bare: rocks and shore material, no trees"
+ },
+ {
+  "id": "A_islet_-509_637",
+  "kind": "islet_grove",
+  "planted": 1,
+  "area_m2": 3200.0,
+  "spot": [
+   -507.9310302734375,
+   2.2369691530863443,
+   650.0
+  ]
+ },
+ {
+  "id": "A_islet_-412_-802",
+  "kind": "bare_rock",
+  "planted": 2,
+  "area_m2": 400.0,
+  "spot": [
+   -404.0,
+   2.468823273976644,
+   -788.0
+  ],
+  "note": "ecologically bare: rocks and shore material, no trees"
+ },
+ {
+  "id": "A_islet_-313_-31",
+  "kind": "bare_rock",
+  "planted": 1,
+  "area_m2": 800.0,
+  "spot": [
+   -308.0,
+   1.6260268290837605,
+   -32.0
+  ],
+  "note": "ecologically bare: rocks and shore material, no trees"
+ },
+ {
+  "id": "A_islet_-49_326",
+  "kind": "islet_grove",
+  "planted": 2,
+  "area_m2": 5200.0,
+  "spot": [
+   -49.84057108561198,
+   18.833396911621094,
+   332.8506774902344
+  ]
+ },
+ {
+  "id": "A_islet_-4_446",
+  "kind": "bare_unplaceable",
+  "planted": 0,
+  "area_m2": 400.0,
+  "note": "no gentle sample; left as rock shore only"
+ },
+ {
+  "id": "A_islet_188_558",
+  "kind": "bare_rock",
+  "planted": 3,
+  "area_m2": 2000.0,
+  "spot": [
+   182.0,
+   3.806835174560547,
+   560.0
+  ],
+  "note": "ecologically bare: rocks and shore material, no trees"
+ },
+ {
+  "id": "A_islet_278_-425",
+  "kind": "bare_unplaceable",
+  "planted": 0,
+  "area_m2": 400.0,
+  "note": "no gentle sample; left as rock shore only"
+ },
+ {
+  "id": "A_islet_311_205",
+  "kind": "islet_grove",
+  "planted": 3,
+  "area_m2": 2800.0,
+  "spot": [
+   313.6106872558594,
+   19.11444346110026,
+   207.49955240885416
+  ]
+ },
+ {
+  "id": "A_islet_405_636",
+  "kind": "islet_grove",
+  "planted": 2,
+  "area_m2": 27200.0,
+  "spot": [
+   409.5,
+   20.45649019877116,
+   626.0
+  ]
+ },
+ {
+  "id": "A_islet_808_-333",
+  "kind": "islet_grove",
+  "planted": 6,
+  "area_m2": 27600.0,
+  "spot": [
+   837.5,
+   20.167267481486004,
+   -332.0
+  ]
+ },
+ {
+  "id": "A_islet_894_-487",
+  "kind": "bare_unplaceable",
+  "planted": 0,
+  "area_m2": 2400.0,
+  "note": "no gentle sample; left as rock shore only"
+ },
+ {
+  "id": "saltglass",
+  "kind": "named",
+  "planted": 7,
+  "spot": [
+   -2306.0,
+   48.602657318115234,
+   -20.0
+  ]
+ },
+ {
+  "id": "beached_wreck",
+  "kind": "named",
+  "planted": 6,
+  "spot": [
+   -2529.5135904947915,
+   38.80429331461588,
+   932.7942097981771
+  ]
+ },
+ {
+  "id": "B_islet_-2413_773",
+  "kind": "bare_unplaceable",
+  "planted": 0,
+  "area_m2": 400.0,
+  "note": "no gentle sample; left as rock shore only"
+ },
+ {
+  "id": "B_islet_-2100_1174",
+  "kind": "islet_grove",
+  "planted": 2,
+  "area_m2": 9600.0,
+  "spot": [
+   -2096.0,
+   5.675628185272217,
+   1186.0
+  ]
+ },
+ {
+  "id": "B_islet_-2077_-253",
+  "kind": "bare_unplaceable",
+  "planted": 0,
+  "area_m2": 800.0,
+  "note": "no gentle sample; left as rock shore only"
+ },
+ {
+  "id": "B_islet_-1950_425",
+  "kind": "bare_rock",
+  "planted": 2,
+  "area_m2": 400.0,
+  "spot": [
+   -1950.5,
+   3.156734029452006,
+   424.0
+  ],
+  "note": "ecologically bare: rocks and shore material, no trees"
+ },
+ {
+  "id": "B_islet_-1710_179",
+  "kind": "islet_grove",
+  "planted": 10,
+  "area_m2": 46800.0,
+  "spot": [
+   -1714.0,
+   24.69102605183919,
+   176.0
+  ]
+ },
+ {
+  "id": "B_islet_-1474_-216",
+  "kind": "islet_grove",
+  "planted": 4,
+  "area_m2": 12400.0,
+  "spot": [
+   -1473.5025227864583,
+   8.178354740142822,
+   -217.9946746826172
+  ]
+ },
+ {
+  "id": "frostreach",
+  "kind": "named",
+  "planted": 2,
+  "spot": [
+   -912.5,
+   1.1365247170130413,
+   -2045.0
+  ]
+ },
+ {
+  "id": "frozen_wreck",
+  "kind": "named",
+  "planted": 11,
+  "spot": [
+   -320.4055887858073,
+   2.687940994898478,
+   -2636.1210123697915
+  ]
+ },
+ {
+  "id": "aurora_arch",
+  "kind": "named",
+  "planted": 7,
+  "spot": [
+   -8.738576253255209,
+   21.58148129781087,
+   -2520.1035970052085
+  ]
+ },
+ {
+  "id": "frost_islet_-2195_-1700",
+  "kind": "bare_rock",
+  "planted": 2,
+  "area_m2": 2000.0,
+  "spot": [
+   -2188.756591796875,
+   4.808763345082601,
+   -1699.9954020182292
+  ],
+  "note": "ecologically bare: rocks and shore material, no trees"
+ },
+ {
+  "id": "frost_islet_-2078_-2344",
+  "kind": "bare_rock",
+  "planted": 1,
+  "area_m2": 400.0,
+  "spot": [
+   -2080.0,
+   4.199517170588176,
+   -2335.0
+  ],
+  "note": "ecologically bare: rocks and shore material, no trees"
+ },
+ {
+  "id": "frost_islet_-1223_-1804",
+  "kind": "islet_grove",
+  "planted": 8,
+  "area_m2": 67600.0,
+  "spot": [
+   -1217.7032063802083,
+   18.49957529703776,
+   -1807.9535319010417
+  ]
+ },
+ {
+  "id": "frost_islet_-1383_-1886",
+  "kind": "islet_grove",
+  "planted": 5,
+  "area_m2": 5600.0,
+  "spot": [
+   -1376.8885904947917,
+   22.78664716084798,
+   -1883.1197916666667
+  ]
+ },
+ {
+  "id": "frost_islet_-25_-2011",
+  "kind": "islet_grove",
+  "planted": 3,
+  "area_m2": 445600.0,
+  "spot": [
+   -17.958009084065754,
+   48.72190729777018,
+   -2007.7087809244792
+  ]
+ },
+ {
+  "id": "frost_islet_478_-1960",
+  "kind": "islet_grove",
+  "planted": 5,
+  "area_m2": 73200.0,
+  "spot": [
+   482.5,
+   7.381759166717529,
+   -1962.5
+  ]
+ },
+ {
+  "id": "frost_islet_699_-2081",
+  "kind": "bare_rock",
+  "planted": 4,
+  "area_m2": 1200.0,
+  "spot": [
+   700.0,
+   0.9450000127156576,
+   -2082.5
+  ],
+  "note": "ecologically bare: rocks and shore material, no trees"
+ },
+ {
+  "id": "frost_islet_1070_-2402",
+  "kind": "bare_rock",
+  "planted": 1,
+  "area_m2": 400.0,
+  "spot": [
+   1070.0,
+   1.2144469022750854,
+   -2402.5
+  ],
+  "note": "ecologically bare: rocks and shore material, no trees"
+ },
+ {
+  "id": "vent",
+  "kind": "named",
+  "planted": 12,
+  "spot": [
+   -519.0605672200521,
+   34.084940592447914,
+   1985.0869547526042
+  ]
+ },
+ {
+  "id": "ember_wreck",
+  "kind": "named",
+  "planted": 11,
+  "spot": [
+   520.0614217122396,
+   21.539249420166016,
+   2267.3413899739585
+  ]
+ },
+ {
+  "id": "hot_spring",
+  "kind": "named",
+  "planted": 5,
+  "spot": [
+   1200.9527994791667,
+   6.201594988505046,
+   2032.0575358072917
+  ]
+ },
+ {
+  "id": "obsidian_arch",
+  "kind": "named",
+  "planted": 10,
+  "spot": [
+   371.89414469401044,
+   18.20943323771159,
+   2635.3419596354165
+  ]
+ },
+ {
+  "id": "ash_islet_-1245_2382",
+  "kind": "islet_grove",
+  "planted": 2,
+  "area_m2": 125200.0,
+  "spot": [
+   -1250.0,
+   27.674808502197266,
+   2383.0
+  ]
+ },
+ {
+  "id": "ash_islet_-753_2385",
+  "kind": "islet_grove",
+  "planted": 4,
+  "area_m2": 8800.0,
+  "spot": [
+   -758.0,
+   15.26516056060791,
+   2383.0
+  ]
+ },
+ {
+  "id": "ash_islet_-223_1995",
+  "kind": "bare_unplaceable",
+  "planted": 0,
+  "area_m2": 800.0,
+  "note": "no gentle sample; left as rock shore only"
+ },
+ {
+  "id": "ash_islet_-54_2265",
+  "kind": "bare_unplaceable",
+  "planted": 0,
+  "area_m2": 1200.0,
+  "note": "no gentle sample; left as rock shore only"
+ },
+ {
+  "id": "ash_islet_-73_2722",
+  "kind": "bare_unplaceable",
+  "planted": 0,
+  "area_m2": 800.0,
+  "note": "no gentle sample; left as rock shore only"
+ },
+ {
+  "id": "ash_islet_597_1983",
+  "kind": "bare_unplaceable",
+  "planted": 0,
+  "area_m2": 1600.0,
+  "note": "no gentle sample; left as rock shore only"
+ }
+]

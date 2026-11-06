@@ -1,0 +1,22 @@
+{
+ "sources": {
+  "male_body": "origin/weaponless-rigs:voxel/darius_voxel_noweapon.glb",
+  "female_body": "origin/main:voxel/talia_voxel.glb",
+  "other_male": "origin/main:voxel/rook_voxel.glb",
+  "armor_after": "knight_rig/knight_{male,female}.glb on this branch",
+  "armor_before": "same files at parent of the reseat commit (v6 binding)"
+ },
+ "jump": "absent from those three hero GLBs. knight_female.glb names jump/jump_hang/jump_land/jump_start/swim_* but every channel is two identical keys.",
+ "render_px": "1400x1860 EEVEE, neutral sun+fill",
+ "pixel_diff_before_after_reseat": {
+  "male_idle_front_px_gt40": 728,
+  "male_walk_front_px_gt40": 2292,
+  "male_run_front_px_gt40": 2375,
+  "male_attack_front_px_gt40": 4794,
+  "female_idle_front_px_gt40": 3035,
+  "female_run_side_px_gt40": 7705,
+  "female_attack1_front_px_gt40": 338231,
+  "frame_pixels": 2604000
+ },
+ "not_finished": true
+}

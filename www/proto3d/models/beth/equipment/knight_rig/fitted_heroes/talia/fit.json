@@ -36,38 +36,41 @@
   },
   "underlayer_factor": 1.05,
   "underlayer_verts_by_bone": {
-    "hips": 16,
-    "spine": 16,
-    "chest": 16,
-    "neck": 16,
-    "shoulder_L": 16,
-    "shoulder_R": 16,
-    "upperArm_L": 68,
-    "upperArm_R": 68,
-    "foreArm_L": 16,
-    "foreArm_R": 16,
-    "thigh_L": 42,
-    "thigh_R": 42,
-    "shin_L": 16,
-    "shin_R": 16,
-    "foot_L": 16,
-    "foot_R": 16
+    "hips": 40,
+    "chest": 40,
+    "upperArm_L": 40,
+    "foreArm_L": 40,
+    "thigh_L": 40,
+    "shin_L": 40,
+    "upperArm_R": 40,
+    "foreArm_R": 40,
+    "thigh_R": 40,
+    "shin_R": 40
   },
   "underlayer_color_linear": [
-    0.198,
-    0.102,
-    0.042,
+    0.055,
+    0.052,
+    0.048,
     1.0
   ],
   "armor_ratios": {
-    "torso": 1.0,
-    "head": 1.0,
-    "arm_L": 0.9,
-    "leg_L": 0.921,
-    "arm_R": 0.9,
-    "leg_R": 0.921
+    "torso": 0.928,
+    "arm_L": 0.642,
+    "leg_L": 1.0,
+    "arm_R": 0.642,
+    "leg_R": 1.0,
+    "helm_shift_cm": 0.99
   },
-  "helm_scale": 1.0,
+  "hair_masked_for_equipped_preview": {
+    "removed": 31,
+    "hair": 5420,
+    "face": 14132,
+    "fists_seated_cm": {
+      "_L": 17.2,
+      "_R": 18.1
+    }
+  },
+  "animation": "Clips are copied in full. No angle limit and no pose-bone scale.",
   "covered_by_source_skin": [
     "head",
     "hair",

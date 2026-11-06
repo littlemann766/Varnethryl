@@ -252,13 +252,18 @@ def by_name(meshes, token):
     return [m for m in meshes if token in m.name.lower()]
 
 
-def render_character(hid, source, body, outfit, armor):
+def render_character(hid, source, body, outfit, armor, equipped_body=None):
     sc, cam = setup()
     # source original, its own file
     src_arm, src_meshes = import_glb(source)
     src_acts = actions_of(src_arm)
-    # derived
-    hero, hero_meshes = import_glb(body)
+    # Unequipped body keeps every hair vertex. Equipped body drops only
+    # the hair that intersects the helm.
+    plain_arm, plain_meshes = import_glb(body)
+    if equipped_body:
+        hero, hero_meshes = import_glb(equipped_body)
+    else:
+        hero, hero_meshes = plain_arm, plain_meshes
     acts = actions_of(hero)
     out_arm, out_meshes = import_glb(outfit)
     arm, arm_meshes = import_glb(armor)
@@ -285,6 +290,7 @@ def render_character(hid, source, body, outfit, armor):
     print(hid, "rest aim deg", round(err, 3), flush=True)
     show(src_meshes, False)
     show(out_meshes, False)
+    show(plain_meshes, False)
     show(keep, True)
     show(under, True)
     show(arm_meshes, True)
@@ -303,10 +309,13 @@ def render_character(hid, source, body, outfit, armor):
     st = Vector((st.x, st.y, st.z + 0.35))
     shot(sc, cam, f"{OUT}/{hid}_rest_original_front.png", st, 18, 2.05, 1100, 1500)
 
-    # reversible composite
+    # reversible composite: full hair, outfit, no mail, no armor
     show(src_meshes, False)
-    show(keep, True)
-    show(under, False)
+    show(hero_meshes, False)
+    show(plain_meshes, True)
+    for m in plain_meshes:
+        if "underlayer" in m.name.lower():
+            m.hide_render = True
     show(out_meshes, True)
     # outfit has its own armature; pose both at rest. They share the source rest.
     zero(hero)
@@ -337,6 +346,7 @@ def render_character(hid, source, body, outfit, armor):
         # outfit armature is separate; not shown
         show(src_meshes, False)
         show(out_meshes, False)
+        show(plain_meshes, False)
         show(keep, True)
         show(under, True)
         show(arm_meshes, True)
@@ -381,6 +391,7 @@ def main():
             f"{base}/{hid}/{hid}_body.glb",
             f"{base}/{hid}/{hid}_outfit.glb",
             f"{base}/{hid}/{hid}_armor_fit.glb",
+            equipped_body=f"{base}/{hid}/{hid}_body_equipped.glb",
         )
     print("DONE")
 

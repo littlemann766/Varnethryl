@@ -39,7 +39,13 @@ Head, hair, face, and the fist are real source vertices. Torso, upper arm, forea
 
 ## How the armor is sized
 
-One scale per chain, baked at rest: torso (not shrunk below the authored cuirass), each arm (not below 0.90, so a shorter arm does not turn the plates into fragments), each leg. The helm is slid onto the head cloud and is not shrunk off the face. Gauntlets are moved onto the fist when the fist mesh does not sit on the hand bone. Wings, tabard, and the eagle stay on the torso scale. Helper plates still take a fraction of the parent rotation in the review scene only.
+The plates are not edited one bone at a time. That tore the helm, the hips, and the knees into slivers.
+
+The whole sculpt gets one scale about the hips so the head height matches. Each arm then gets one uniform scale and one aim, so the arm plates stay one assembly. Pauldrons stay on the cuirass. Legs that are already within 4% are left. Clip rotations are copied in full. There is no angle limit and no pose-bone scale. A 0.90 clamp was a rest-size floor in an earlier file and was not a limit on the animation. It is gone.
+
+The liner is dark mail, about 2–4 cm in radius, with weights blended along the span. It is there for the neck, elbow, and knee openings. It is not a flesh-colored body.
+
+Hair is removed only on the equipped copy, and only where a hair vertex is within 1.6 cm of the helm. The face is not removed. Hair the helm does not cover stays. A fist that does not sit on its hand bone is moved onto that bone on the equipped copy only. The unequipped body keeps the source position so the outfit still matches.
 
 Limb direction during a clip uses the same rest-aware aim as `review_bind_fit.py`: copy the clip's local rotation, then aim the long bones around the joint. Bone lengths stay at the fitted rest.
 

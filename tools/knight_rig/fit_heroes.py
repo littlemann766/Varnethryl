@@ -399,8 +399,116 @@ def ball(center, radius, n=8):
     return verts, nrm, faces
 
 
+def _mail_span(p0, p1, radius, n_side=10, n_ring=4):
+    """Tube from p0 to p1. Returns verts, normals, faces, param t in 0..1."""
+    d = np.asarray(p1, float) - np.asarray(p0, float)
+    length = float(np.linalg.norm(d))
+    if length < 0.02:
+        empty = np.zeros((0, 3))
+        return empty, empty, np.zeros((0, 3), int), np.zeros(0)
+    z = d / length
+    up = np.array([0.0, 0.0, 1.0]) if abs(z[1]) < 0.85 else np.array([1.0, 0.0, 0.0])
+    x = np.cross(up, z)
+    x /= np.linalg.norm(x)
+    y = np.cross(z, x)
+    ang = np.linspace(0, 2 * np.pi, n_side, endpoint=False)
+    rings = []
+    ts = []
+    for t in np.linspace(0.0, 1.0, n_ring):
+        c = np.asarray(p0, float) + d * t
+        ring = c + (np.cos(ang)[:, None] * x + np.sin(ang)[:, None] * y) * radius
+        rings.append(ring)
+        ts.append(np.full(n_side, t))
+    verts = np.vstack(rings)
+    ts = np.concatenate(ts)
+    faces = []
+    for r in range(n_ring - 1):
+        for i in range(n_side):
+            j = (i + 1) % n_side
+            a = r * n_side + i
+            b = r * n_side + j
+            c = (r + 1) * n_side + j
+            e = (r + 1) * n_side + i
+            faces.append([a, b, c])
+            faces.append([a, c, e])
+    faces = np.array(faces, int)
+    nrm = np.zeros_like(verts)
+    for f in faces:
+        fn = np.cross(verts[f[1]] - verts[f[0]], verts[f[2]] - verts[f[0]])
+        nrm[f] += fn
+    nrm /= np.linalg.norm(nrm, axis=1, keepdims=True) + 1e-12
+    return verts, nrm, faces, ts
+
+
 def build_underlayer(hero_pos, joint_index, factor):
-    """Slim body in the hero's mesh space. Rigid weight, one bone per vertex."""
+    """Dark mail liner. Tight radii, weights blended along each span.
+
+    This is not a flesh mannequin. It stays under the plates and shows at
+    the neck, elbow, and knee when those plates open. `factor` is unused;
+    a fatter body is what made the slabs cut through the armor.
+    """
+    del factor
+    spans = [
+        ("hips", "chest", "hips", "chest", 0.042),
+        ("chest", "head", "chest", "head", 0.038),
+    ]
+    for side in ("_L", "_R"):
+        spans += [
+            (f"upperArm{side}", f"foreArm{side}", f"upperArm{side}", f"foreArm{side}", 0.024),
+            (f"foreArm{side}", f"hand{side}", f"foreArm{side}", f"hand{side}", 0.020),
+            (f"thigh{side}", f"shin{side}", f"thigh{side}", f"shin{side}", 0.030),
+            (f"shin{side}", f"foot{side}", f"shin{side}", f"foot{side}", 0.024),
+        ]
+    vs, ns, fs, js, ws = [], [], [], [], []
+    counts = {}
+
+    def add(v, n, f, t, bone_a, bone_b):
+        if len(v) == 0 or bone_a not in joint_index:
+            return
+        base = sum(len(x) for x in vs)
+        vs.append(v.astype(np.float32))
+        ns.append(n.astype(np.float32))
+        fs.append(f + base)
+        jj = np.zeros((len(v), 4), np.uint8)
+        ww = np.zeros((len(v), 4), np.float32)
+        ia = joint_index[bone_a]
+        ib = joint_index.get(bone_b, ia)
+        jj[:, 0] = ia
+        jj[:, 1] = ib
+        ww[:, 0] = 1.0 - t
+        ww[:, 1] = t
+        # keep a fully rigid span when both ends are the same bone
+        if ia == ib:
+            ww[:, 0] = 1.0
+            ww[:, 1] = 0.0
+        js.append(jj)
+        ws.append(ww)
+        counts[bone_a] = counts.get(bone_a, 0) + len(v)
+
+    for a, b, ba, bb, radius in spans:
+        if a not in hero_pos or b not in hero_pos:
+            continue
+        # Neck span starts at the chest and reaches into the head so the
+        # collar follows the skull instead of leaving a hole under the helm.
+        p0 = hero_pos[a]
+        p1 = hero_pos[b]
+        if b == "head":
+            p1 = p1 + np.array([0.0, 0.045, 0.0])
+        v, n, f, t = _mail_span(p0, p1, radius)
+        add(v, n, f, t, ba if ba in joint_index else a, bb if bb in joint_index else ba)
+    if not vs:
+        raise RuntimeError("underlayer empty")
+    pos = np.vstack(vs)
+    nrm = np.vstack(ns)
+    faces = np.vstack(fs).astype(np.uint32)
+    joints = np.vstack(js)
+    weights = np.vstack(ws)
+    uv = np.zeros((len(pos), 2), np.float32)
+    return pos, nrm, uv, joints, weights, faces, counts
+
+
+def _retired_build_underlayer(hero_pos, joint_index, factor):
+    """Previous flesh cylinders. Kept out of the build path."""
     R = {
         "torso": 0.100 * factor,
         "neck": 0.064 * factor,
@@ -603,13 +711,13 @@ def write_partition(src_js, src_blob, kept, outfit, under, color, body_path, out
     up, un, uu, uj, uw, uf, _counts = under
     uprim = pack_mesh(js, blob, up, un, uu, uj, uw, uf)
     js["materials"].append({
-        "name": "underlayer_skin",
+        "name": "underlayer_mail",
         "pbrMetallicRoughness": {
             "baseColorFactor": color,
-            "metallicFactor": 0.0,
-            "roughnessFactor": 0.82,
+            "metallicFactor": 0.72,
+            "roughnessFactor": 0.40,
         },
-        "doubleSided": True,
+        "doubleSided": False,
     })
     uprim["material"] = len(js["materials"]) - 1
     js["meshes"].append({"name": "underlayer", "primitives": [uprim]})
@@ -976,6 +1084,379 @@ def helm_fit(hero_js, hero_blob, armor_path):
     return scale
 
 
+def _arm_names(names, side):
+    out = []
+    for name in names:
+        if chain_of(name) == "arm" + side:
+            out.append(name)
+            continue
+        # Pauldrons stay with the cuirass. Scaling them with a short arm
+        # pulls the shoulder armor off the chest.
+        if name in (f"elbow{side}",):
+            out.append(name)
+    return out
+
+
+def _leg_names(names, side):
+    return [n for n in names if chain_of(n) == "leg" + side]
+
+
+def _apply_similarity(pos, mask, pivot_from, pivot_to, direction_from, direction_to):
+    """One rotation and one uniform scale. Every selected vertex moves together."""
+    span = np.asarray(direction_from, float)
+    target = np.asarray(direction_to, float)
+    ls = float(np.linalg.norm(span))
+    lt = float(np.linalg.norm(target))
+    if ls < 1e-5 or lt < 1e-5:
+        return 1.0
+    scale = lt / ls
+    rot = rot_between(span, target)
+    src = pos[mask] - np.asarray(pivot_from, float)
+    pos[mask] = np.asarray(pivot_to, float) + (src * scale) @ rot.T
+    return float(scale)
+
+
+def _move_joints(desired, names, selected, pivot_from, pivot_to, direction_from, direction_to, old_pos):
+    span = np.asarray(direction_from, float)
+    target = np.asarray(direction_to, float)
+    ls = float(np.linalg.norm(span))
+    lt = float(np.linalg.norm(target))
+    if ls < 1e-5 or lt < 1e-5:
+        return
+    scale = lt / ls
+    rot = rot_between(span, target)
+    for name in selected:
+        if name not in old_pos:
+            continue
+        src = old_pos[name] - np.asarray(pivot_from, float)
+        desired[name] = np.asarray(pivot_to, float) + rot @ (src * scale)
+
+
+def fit_plates(hero_pos, armor_js, armor_blob, out_path):
+    """Place the shared sculpt on the hero without tearing plates apart.
+
+    The whole armor gets one scale about the hips so the height matches.
+    Each arm, and each leg, then gets one more uniform scale and one aim
+    so that assembly stays in one piece. Nothing here changes clip amplitude.
+    """
+    names, apos, node_of, _, parent = joint_maps(armor_js)
+    prim = armor_js["meshes"][0]["primitives"][0]
+    pos = read_acc(armor_js, armor_blob, prim["attributes"]["POSITION"]).astype(np.float64)
+    nrm = read_acc(armor_js, armor_blob, prim["attributes"]["NORMAL"]).astype(np.float64)
+    joints = read_acc(armor_js, armor_blob, prim["attributes"]["JOINTS_0"]).astype(np.int32)
+    weights = read_acc(armor_js, armor_blob, prim["attributes"]["WEIGHTS_0"]).astype(np.float32)
+    bname = np.array(names)[dominant(joints, weights)]
+
+    def dist(table, a, b):
+        if a not in table or b not in table:
+            return None
+        return float(np.linalg.norm(table[a] - table[b]))
+
+    h_len = dist(hero_pos, "hips", "head")
+    a_len = dist(apos, "hips", "head")
+    s_torso = 1.0 if not h_len or not a_len else float(np.clip(h_len / a_len, 0.85, 1.15))
+    hip_a = apos["hips"]
+    hip_h = hero_pos["hips"]
+    pos[:] = hip_h + (pos - hip_a) * s_torso
+    moved = {n: hip_h + (apos[n] - hip_a) * s_torso for n in names}
+    ratios = {"torso": round(s_torso, 3)}
+
+    def assembly(side, names_fn, root, tip):
+        selected = names_fn(names, side)
+        if root not in moved or tip not in moved or root not in hero_pos or tip not in hero_pos:
+            return
+        mask = np.isin(bname, selected)
+        if not np.any(mask):
+            return
+        span = moved[tip] - moved[root]
+        target = hero_pos[tip] - hero_pos[root]
+        scale = _apply_similarity(pos, mask, moved[root], hero_pos[root], span, target)
+        _move_joints(moved, names, selected, moved[root], hero_pos[root], span, target, dict(moved))
+        # _move_joints read old positions from the dict it also writes. Recompute
+        # from the pre-assembly positions captured below.
+        ratios["scale" + side + root[:4]] = round(float(scale), 3)
+
+    # Recompute assembly with a snapshot so joints and verts share one transform.
+    for side in ("_L", "_R"):
+        for names_fn, root, tip, key in (
+            (_arm_names, f"upperArm{side}", f"hand{side}", f"arm{side}"),
+            (_leg_names, f"thigh{side}", f"foot{side}", f"leg{side}"),
+        ):
+            selected = names_fn(names, side)
+            if root not in moved or tip not in moved or root not in hero_pos or tip not in hero_pos:
+                continue
+            before = {n: moved[n].copy() for n in selected if n in moved}
+            span = before[tip] - before[root] if tip in before and root in before else None
+            if span is None:
+                continue
+            target = hero_pos[tip] - hero_pos[root]
+            if float(np.linalg.norm(span)) < 1e-5:
+                continue
+            scale = float(np.linalg.norm(target) / np.linalg.norm(span))
+            # Legs already follow the torso scale on these rigs. A second scale
+            # under a few percent only slides the greaves.
+            if key.startswith("leg") and 0.96 <= scale <= 1.04:
+                ratios[key] = 1.0
+                continue
+            mask = np.isin(bname, selected)
+            rot = rot_between(span, target)
+            src = pos[mask] - before[root]
+            pos[mask] = hero_pos[root] + (src * scale) @ rot.T
+            nrm[mask] = nrm[mask] @ rot.T
+            for n in selected:
+                if n not in before:
+                    continue
+                moved[n] = hero_pos[root] + rot @ ((before[n] - before[root]) * scale)
+            ratios[key] = round(scale, 3)
+
+    # Helm: slide the head shell toward the head cloud, rigidly, and only a
+    # short way so it stays on the gorget. Do not scale it.
+    head_m = bname == "head"
+    if head_m.any() and "head" in hero_pos:
+        helm_c = pos[head_m].mean(0)
+        # The hair cloud sits above the skull. Aim the helm at the head bone,
+        # not at the hair centroid, or the visor climbs off the face.
+        delta = hero_pos["head"] - moved.get("head", helm_c)
+        # Prefer a small lift toward the head bone if the helm is low.
+        if float(np.linalg.norm(delta)) > 1e-6:
+            cap = 0.035
+            if float(np.linalg.norm(delta)) > cap:
+                delta = delta / np.linalg.norm(delta) * cap
+            pos[head_m] += delta
+            if "head" in moved:
+                moved["head"] = moved["head"] + delta
+            neck_m = bname == "neck"
+            if neck_m.any():
+                pos[neck_m] += delta * 0.45
+                if "neck" in moved:
+                    moved["neck"] = moved["neck"] + delta * 0.45
+        ratios["helm_shift_cm"] = round(float(np.linalg.norm(delta)) * 100, 2)
+
+    # Normals: uniform scale and rotation. Rotate normals by the same arm/leg
+    # rotation is approximate; renormalize. Torso scale does not change them.
+    nrm /= np.linalg.norm(nrm, axis=1, keepdims=True) + 1e-12
+
+    blob = bytearray(armor_blob)
+    acc = armor_js["accessors"][prim["attributes"]["POSITION"]]
+    bv = armor_js["bufferViews"][acc["bufferView"]]
+    start = bv.get("byteOffset", 0) + acc.get("byteOffset", 0)
+    raw = np.ascontiguousarray(pos.astype(np.float32)).tobytes()
+    blob[start:start + len(raw)] = raw
+    nacc = armor_js["accessors"][prim["attributes"]["NORMAL"]]
+    nbv = armor_js["bufferViews"][nacc["bufferView"]]
+    nstart = nbv.get("byteOffset", 0) + nacc.get("byteOffset", 0)
+    nraw = np.ascontiguousarray(nrm.astype(np.float32)).tobytes()
+    blob[nstart:nstart + len(nraw)] = nraw
+
+    js = json.loads(json.dumps(armor_js))
+    order = []
+    seen = set()
+
+    def walk(i):
+        if i in seen:
+            return
+        seen.add(i)
+        if i in parent:
+            walk(parent[i])
+        order.append(i)
+
+    for n in node_of.values():
+        walk(n)
+    world = {}
+
+    def local_matrix(node):
+        t = np.array(node.get("translation", [0, 0, 0]), float)
+        r = np.array(node.get("rotation", [0, 0, 0, 1]), float)
+        s = np.array(node.get("scale", [1, 1, 1]), float)
+        m = np.eye(4)
+        m[:3, :3] = quat_mat(r) @ np.diag(s)
+        m[:3, 3] = t
+        return m
+
+    name_by_node = {node_of[n]: n for n in node_of}
+    for i in order:
+        node = js["nodes"][i]
+        mat = local_matrix(node)
+        if i in parent and parent[i] in world:
+            nm = name_by_node.get(i)
+            if nm in moved:
+                pw = world[parent[i]]
+                t = np.linalg.lstsq(pw[:3, :3], moved[nm] - pw[:3, 3], rcond=None)[0]
+                node["translation"] = [float(x) for x in t]
+                mat = local_matrix(node)
+            world[i] = world[parent[i]] @ mat
+        else:
+            world[i] = mat
+
+    skin = js["skins"][0]
+    ibm = np.zeros((len(skin["joints"]), 4, 4), np.float32)
+    for ji, node_i in enumerate(skin["joints"]):
+        ibm[ji] = np.linalg.inv(world[node_i]).T.astype(np.float32)
+    a = js["accessors"][skin["inverseBindMatrices"]]
+    ibv = js["bufferViews"][a["bufferView"]]
+    istart = ibv.get("byteOffset", 0) + a.get("byteOffset", 0)
+    ibraw = np.ascontiguousarray(ibm).tobytes()
+    blob[istart:istart + len(ibraw)] = ibraw
+    acc["min"] = pos.min(0).astype(float).tolist()
+    acc["max"] = pos.max(0).astype(float).tolist()
+    save_glb(js, blob, out_path)
+    return ratios
+
+
+def mask_hair_under_helm(body_path, armor_path, out_path):
+    """Drop hair vertices that intersect the helm. The face stays.
+
+    The unequipped body file is not modified. This equipped copy is the only
+    place hair is removed, and only where it occupies the same space as the helm.
+    """
+    bjs, bblob = load_glb(body_path)
+    ajs, ablob = load_glb(armor_path)
+    bnames, _, _, _, _ = joint_maps(bjs)
+    anames, _, _, _, _ = joint_maps(ajs)
+    bprim = bjs["meshes"][0]["primitives"][0]
+    pos = read_acc(bjs, bblob, bprim["attributes"]["POSITION"]).astype(np.float64)
+    uv = read_acc(bjs, bblob, bprim["attributes"]["TEXCOORD_0"]).astype(np.float64)
+    joints = read_acc(bjs, bblob, bprim["attributes"]["JOINTS_0"]).astype(np.int32)
+    weights = read_acc(bjs, bblob, bprim["attributes"]["WEIGHTS_0"]).astype(np.float32)
+    bone = np.array(bnames)[dominant(joints, weights)]
+    head = bone == "head"
+    aprim = ajs["meshes"][0]["primitives"][0]
+    apos = read_acc(ajs, ablob, aprim["attributes"]["POSITION"]).astype(np.float64)
+    aj = read_acc(ajs, ablob, aprim["attributes"]["JOINTS_0"]).astype(np.int32)
+    aw = read_acc(ajs, ablob, aprim["attributes"]["WEIGHTS_0"]).astype(np.float32)
+    abone = np.array(anames)[dominant(aj, aw)]
+    helm = apos[abone == "head"]
+    if helm.shape[0] < 20 or head.sum() < 20:
+        return {"removed": 0}
+    # Color sample: dark texels are hair. Lighter texels on the head are the face.
+    im = bjs["images"][0]
+    bv = bjs["bufferViews"][im["bufferView"]]
+    png = bytes(bblob[bv.get("byteOffset", 0):bv.get("byteOffset", 0) + bv["byteLength"]])
+    img = np.asarray(Image.open(io.BytesIO(png)).convert("RGB"))
+    h, w = img.shape[:2]
+    sel = np.where(head)[0]
+    u = np.clip(uv[sel, 0], 0, 0.999)
+    v = np.clip(uv[sel, 1], 0, 0.999)
+    xs = np.clip((u * w).astype(int), 0, w - 1)
+    ys = np.clip(((1.0 - v) * h).astype(int), 0, h - 1)
+    lum = img[ys, xs].astype(np.float64).mean(1) / 255.0
+    # Face is the lighter front of the head. Never delete it.
+    face = np.zeros(len(pos), bool)
+    face[sel[lum >= 0.28]] = True
+    hair = head & ~face
+    # Also treat the crown as hair even when a texel is mid-grey.
+    crown = head & (pos[:, 1] > np.percentile(pos[head, 1], 72))
+    hair = hair | crown
+    face = head & ~hair
+    try:
+        from scipy.spatial import cKDTree
+        tree = cKDTree(helm)
+        dist, _ = tree.query(pos[hair], k=1)
+    except Exception:
+        # Fallback: distance to helm centroid compared with the helm's own radius.
+        hc = helm.mean(0)
+        hr = np.percentile(np.linalg.norm(helm - hc, axis=1), 55)
+        dist = np.linalg.norm(pos[hair] - hc, axis=1)
+        dist = np.where(dist < hr, 0.0, dist)
+    drop_local = dist < 0.016
+    drop = np.zeros(len(pos), bool)
+    drop[np.where(hair)[0][drop_local]] = True
+    # Face is protected even if the distance test would have caught it.
+    drop[face] = False
+    keep = ~drop
+    if drop.sum() == 0:
+        keep = np.ones(len(pos), bool)
+    remap = -np.ones(len(pos), np.int64)
+    remap[keep] = np.arange(keep.sum())
+    indices = read_acc(bjs, bblob, bprim["indices"]).astype(np.int64).reshape(-1, 3)
+    tri_ok = keep[indices].all(1)
+    faces = remap[indices[tri_ok]].astype(np.uint32)
+    nrm = read_acc(bjs, bblob, bprim["attributes"]["NORMAL"]).astype(np.float32)
+    uv32 = read_acc(bjs, bblob, bprim["attributes"]["TEXCOORD_0"]).astype(np.float32)
+    j8 = read_acc(bjs, bblob, bprim["attributes"]["JOINTS_0"]).astype(np.uint8)
+    w32 = read_acc(bjs, bblob, bprim["attributes"]["WEIGHTS_0"]).astype(np.float32)
+    js = json.loads(json.dumps(bjs))
+    blob = bytearray(bblob)
+    packed = pack_mesh(
+        js, blob,
+        pos[keep].astype(np.float32), nrm[keep], uv32[keep], j8[keep], w32[keep], faces,
+    )
+    packed["material"] = bprim.get("material", 0)
+    js["meshes"][0]["primitives"] = [packed]
+    save_glb(js, blob, out_path)
+    seated = _seat_fists(out_path)
+    return {
+        "removed": int(drop.sum()),
+        "hair": int(hair.sum()),
+        "face": int(face.sum()),
+        "fists_seated_cm": seated,
+    }
+
+
+def _seat_fists(path):
+    """Move a fist that does not sit on its hand bone onto that bone.
+
+    Some rigs leave the hand voxels well below the wrist. The sleeve used to
+    hide the gap. The equipped preview puts the fist on the wrist. The
+    unequipped body file is left where the source modeled it.
+    """
+    js, blob = load_glb(path)
+    names, jpos, _, _, _ = joint_maps(js)
+    prim = js["meshes"][0]["primitives"][0]
+    pos = read_acc(js, blob, prim["attributes"]["POSITION"]).astype(np.float64)
+    joints = read_acc(js, blob, prim["attributes"]["JOINTS_0"]).astype(np.int32)
+    weights = read_acc(js, blob, prim["attributes"]["WEIGHTS_0"]).astype(np.float32)
+    bone = np.array(names)[dominant(joints, weights)]
+    shifts = {}
+    for side in ("_L", "_R"):
+        name = "hand" + side
+        if name not in jpos:
+            continue
+        m = bone == name
+        if m.sum() < 8:
+            continue
+        delta = jpos[name] - pos[m].mean(0)
+        dist = float(np.linalg.norm(delta))
+        if dist < 0.03:
+            shifts[side] = 0.0
+            continue
+        # Rook's hand voxels sit about 34 cm off the wrist. The sleeve hid that.
+        # Cap high enough to actually reach the bone.
+        if dist > 0.40:
+            delta = delta / dist * 0.40
+            dist = 0.40
+        pos[m] += delta
+        shifts[side] = round(dist * 100, 1)
+    if not any(shifts.values()):
+        return shifts
+    acc = js["accessors"][prim["attributes"]["POSITION"]]
+    bv = js["bufferViews"][acc["bufferView"]]
+    start = bv.get("byteOffset", 0) + acc.get("byteOffset", 0)
+    raw = np.ascontiguousarray(pos.astype(np.float32)).tobytes()
+    # The equipped mesh was repacked, so the position view is at the end and
+    # this in-place write is only valid when the accessor still points at a
+    # tightly packed float view of the same length. Repack if the size differs.
+    if len(raw) != bv["byteLength"]:
+        nrm = read_acc(js, blob, prim["attributes"]["NORMAL"]).astype(np.float32)
+        uv = read_acc(js, blob, prim["attributes"]["TEXCOORD_0"]).astype(np.float32)
+        j8 = read_acc(js, blob, prim["attributes"]["JOINTS_0"]).astype(np.uint8)
+        w32 = read_acc(js, blob, prim["attributes"]["WEIGHTS_0"]).astype(np.float32)
+        faces = read_acc(js, blob, prim["indices"]).astype(np.uint32)
+        js2 = json.loads(json.dumps(js))
+        blob2 = bytearray(blob)
+        packed = pack_mesh(js2, blob2, pos.astype(np.float32), nrm, uv, j8, w32, faces.reshape(-1, 3))
+        packed["material"] = prim.get("material", 0)
+        js2["meshes"][0]["primitives"] = [packed]
+        save_glb(js2, blob2, path)
+        return shifts
+    blob = bytearray(blob)
+    blob[start:start + len(raw)] = raw
+    acc["min"] = pos.min(0).astype(float).tolist()
+    acc["max"] = pos.max(0).astype(float).tolist()
+    save_glb(js, blob, path)
+    return shifts
+
+
 def build_one(hid):
     spec = PILOTS[hid]
     print("BUILD", hid, flush=True)
@@ -987,14 +1468,19 @@ def build_one(hid):
     region["boundary_copies_in_outfit"] = int(len(outfit[0]) - region["outfit_verts"])
     out_dir = os.path.join(ROOT, hid)
     os.makedirs(out_dir, exist_ok=True)
+    mail = [0.055, 0.052, 0.048, 1.0]
     counts = write_partition(
-        js, blob, kept, outfit, under, color,
+        js, blob, kept, outfit, under, mail,
         os.path.join(out_dir, f"{hid}_body.glb"),
         os.path.join(out_dir, f"{hid}_outfit.glb"),
     )
     armor_js, armor_blob = load_glb(ARMOR[spec["armor"]])
-    ratios, _ = fit_armor(jpos, armor_js, armor_blob, os.path.join(out_dir, f"{hid}_armor_fit.glb"))
-    helm = helm_fit(js, blob, os.path.join(out_dir, f"{hid}_armor_fit.glb"))
+    ratios = fit_plates(jpos, armor_js, armor_blob, os.path.join(out_dir, f"{hid}_armor_fit.glb"))
+    hair = mask_hair_under_helm(
+        os.path.join(out_dir, f"{hid}_body.glb"),
+        os.path.join(out_dir, f"{hid}_armor_fit.glb"),
+        os.path.join(out_dir, f"{hid}_body_equipped.glb"),
+    )
     # clips
     clips = [a["name"] for a in js.get("animations", [])]
     report = {
@@ -1010,9 +1496,10 @@ def build_one(hid):
         "partition": region,
         "underlayer_factor": round(factor, 3),
         "underlayer_verts_by_bone": counts,
-        "underlayer_color_linear": [round(c, 3) for c in color],
-        "armor_ratios": {k: round(v, 3) for k, v in ratios.items()},
-        "helm_scale": round(helm, 3),
+        "underlayer_color_linear": mail,
+        "armor_ratios": ratios,
+        "hair_masked_for_equipped_preview": hair,
+        "animation": "Clips are copied in full. No angle limit and no pose-bone scale.",
         "covered_by_source_skin": ["head", "hair", "face", "hands"],
         "no_source_skin_under": ["torso", "upper_arm", "forearm", "thigh", "shin", "foot"],
         "unequipped": "body keep + outfit (underlayer hidden) restores the source partition",
@@ -1020,7 +1507,7 @@ def build_one(hid):
         "cape_rule": "Outfit holds every cape/coat bone vertex. Equipping hides that outfit, so the hero cape is off while the armor's own cloak stays. Unequipping shows the outfit again, cape included.",
     }
     json.dump(report, open(os.path.join(out_dir, "fit.json"), "w"), indent=2)
-    print(json.dumps({k: report[k] for k in ("partition", "armor_ratios", "helm_scale", "jump_clip")}, indent=2), flush=True)
+    print(json.dumps({k: report[k] for k in ("partition", "armor_ratios", "hair_masked_for_equipped_preview", "jump_clip")}, indent=2), flush=True)
     return report
 
 

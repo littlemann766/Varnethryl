@@ -142,23 +142,50 @@ void fragment() {
 		ground = mix(ground, rcol, rockv);
 		ground = mix(ground, ground * vec3(0.52, 0.56, 0.58), wet * clamp(sandw + shore, 0.0, 1.0));
 		ground *= 0.95 + 0.07 * fbm(xz * 0.011);
-		// a little of the baked colour so islands in one region are not identical, without covering the photo
-		ground *= mix(vec3(1.0), clamp(base / max(lum, 0.18), vec3(0.45), vec3(1.35)), 0.18);
+		// Frost vertex colour is pale blue-grey but not bright enough to pass the snow
+		// test, so the grass and earth mix was painting mustard bands across the snow.
+		// Flats are cold snow. Steep faces, including a triangle the smoothed normal
+		// still calls gentle, are darker blue-grey rock. No grass, no sand.
+		float fr = 0.0;
+		if (region == 2) {
+			vec3 fw = cross(dFdx(wpos), dFdy(wpos));
+			float fl = length(fw);
+			float faceSlope = fl > 1e-4 ? (1.0 - abs(fw.y / fl)) : slope;
+			fr = smoothstep(0.08, 0.46, max(slope, faceSlope));
+			vec3 snowF = ncol * vec3(1.18, 1.26, 1.40);
+			vec3 rockF = rcol * vec3(0.30, 0.34, 0.44);
+			ground = mix(snowF, rockF, fr);
+			ground = mix(ground, rockF * vec3(0.70, 0.76, 0.86), shore * (1.0 - fr) * 0.7);
+			ground *= 0.96 + 0.05 * fbm(xz * 0.02);
+		} else {
+			// a little of the baked colour so islands in one region are not identical, without covering the photo
+			ground *= mix(vec3(1.0), clamp(base / max(lum, 0.18), vec3(0.45), vec3(1.35)), 0.18);
+		}
 		ALBEDO = ground * (1.0 - lift * 2.0) + vec3(lift, lift * 0.95, lift * 0.9);
 		vec3 tg = sample_nrm(grass_nrm, xz, 2.0);
 		vec3 te = sample_nrm(earth_nrm, xz, 2.0);
 		vec3 tsand = sample_nrm(sand_nrm, xz, 2.4);
 		vec3 tsn = sample_nrm(snow_nrm, xz, 3.2);
 		vec3 ts = normalize(mix(mix(mix(tg, te, wear), tsand, sandw), tsn, wsnow));
+		if (region == 2) ts = tsn;
 		float ns = detail * mix(0.42, 0.12, smoothstep(0.05, 0.45, px));
-		ts.xy *= ns;
+		ts.xy *= ns * (region == 2 ? 1.7 : 1.0);
 		vec3 N = n;
 		vec3 T = normalize(vec3(1.0, 0.0, 0.0) - N * N.x);
 		vec3 B = normalize(vec3(0.0, 0.0, 1.0) - N * N.z);
 		vec3 wG = normalize(T * ts.x + B * ts.y + N * ts.z);
 		vec3 wR = tri_nrm(rock_nrm, wpos, n, 1.8);
-		vec3 wN = normalize(mix(wG, wR, rockv));
-		NORMAL = normalize(mix(normalize((VIEW_MATRIX * vec4(wN, 0.0)).xyz), fn, 0.22));
+		vec3 wN = normalize(mix(wG, wR, region == 2 ? fr : rockv));
+		vec3 vN = normalize((VIEW_MATRIX * vec4(wN, 0.0)).xyz);
+		if (region == 2) {
+			// Averaged vertex normal, plus a little relief. The flat face normal is
+			// what made each large triangle shade as one card. The triangle edges
+			// in the silhouette are unchanged.
+			vec3 vSmooth = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
+			NORMAL = normalize(mix(vSmooth, vN, 0.72));
+		} else {
+			NORMAL = normalize(mix(vN, fn, 0.22));
+		}
 		EMISSION = ALBEDO * min(ambient, 0.32) * 0.4;
 		if (region == 3) EMISSION += vec3(0.55, 0.16, 0.03) * smoothstep(0.03, 0.0, abs(fbm(xz * 0.03) - 0.5)) * (1.0 - slope) * 0.18;
 		float rg = mix(rough_in(grass_rgh, xz, 2.0, 0.90, 0.98), rough_in(earth_rgh, xz, 2.0, 0.88, 0.96), wear);
@@ -166,6 +193,7 @@ void fragment() {
 		rg = mix(rg, rough_in(snow_rgh, xz, 3.2, 0.93, 0.99), wsnow);
 		rg = mix(rg, rough_in(rock_rgh, wpos.xz, 1.8, 0.80, 0.92), rockv);
 		rg = mix(rg, 0.58, wet * clamp(sandw + shore * 0.5, 0.0, 1.0));
+		if (region == 2) rg = mix(mix(0.96, 0.86, fr), 0.70, shore * (1.0 - fr));
 		ROUGHNESS = clamp(rg, 0.5, 1.0);
 		SPECULAR = min(spec, 0.16) * mix(0.35, 1.0, wet * sandw);
 	}

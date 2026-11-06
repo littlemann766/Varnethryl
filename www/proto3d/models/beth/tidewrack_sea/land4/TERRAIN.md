@@ -39,8 +39,8 @@ Texture set on disk is about 21 MB of 1024 JPEG (15 files). In the preview they 
 | `B_ground` | Saltgrass flat in front, sandstone hills behind. |
 | `saltglass_ground` | On the island, about 86 m inland of the port, so the frame is the slope and not the quay wall. |
 | `gullhaven_coast` | Sand photograph on the bank, rock on the offshore stacks. |
-| `frost_ground` | Snow photograph on the slope. A sun glint remains up the hill. The flake texture is visible around it. |
-| `frost_skyline` | Cliff profile from offshore, camera above the sea, not inside the face. Snow cap, rock on the wall. Distant rock still reads a little gridded. |
+| `frost_ground` | Cold white and blue-grey snow on the slope. Grass and earth are not mixed in. |
+| `frost_skyline` | Snow on the gentler shoulder, darker blue-grey rock where the face is actually steep. |
 | `ash_skyline` | The cone against the sky, from offshore. The earlier black frame was the camera inside the mesh. This one is not. Most of the frame is sky and sea, so the pixel delta is only 0.07. Judge the mountain, not the percentage. |
 | `ash_ground` | Dark soil and rock at eye height. |
 
@@ -49,6 +49,8 @@ Texture set on disk is about 21 MB of 1024 JPEG (15 files). In the preview they 
 - `hot_spring_coast` looks down a dark face. The after frame is mostly black. Use `ash_coast` and `hot_spring_ground` instead.
 - `hot_spring_skyline` is the bridge and the crystal props. The terrain change is small (pixel delta 0.08) because the props dominate.
 - Distant cliff faces can still show a faint tile or the mesh facets. Mipmaps hide the fine photo; they do not hide a large triangle.
+- Frost no longer takes the grass and earth mix. Pale frost vertex colour was below the snow test, so that mix painted mustard bands. Flats are the snow photograph, graded cold. A face that is steep in either the smoothed normal or the triangle itself is darker blue-grey rock. The waterline is that rock, not sand. Lighting uses the averaged vertex normal plus the snow or rock relief, so a triangle shades less like one flat card. The triangle edges are still the mesh. Moving or splitting them would change the surface the routes sit on, so they were left. A gentle snow slope can still read as large facets. That is the geometry, not a colour tint.
+- The shader is still 15 samplers and about 26 texture reads. It has not been timed on a phone. Mainland collision is still the separate blocker; these glbs do not replace it.
 - Specular on snow and on some grass slopes is still hot where the camera faces the sun. Roughness is floored on snow. It is not a measured phone exposure.
 
 ## Every island

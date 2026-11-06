@@ -2,7 +2,7 @@
 
 Photographic surfaces for the island terrain shader. The shader samples these in world metres (grass and soil 2 m, sand 2.4 m, snow 3.2 m, rock 1.8 m) and blends two rotated scales so a single repeat does not line up. Normals are OpenGL (+Y). Roughness is the CC0 roughness map, copied into RGB so the loader always has a red channel; the values are the published map.
 
-No pixel grading was applied to the photographs. The shader darkens and desaturates them so the grass is not neon and the snow is not blown out.
+No pixel grading was applied to the photographs. The shader darkens them so the grass is not neon and the snow is not blown out. Roughness is not used raw: the grass map sits around 0.25, which reads as polished. The shader remaps each roughness photo into a dry range and only lowers it on wet sand.
 
 ## License
 

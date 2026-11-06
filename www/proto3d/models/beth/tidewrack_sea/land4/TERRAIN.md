@@ -1,5 +1,11 @@
 # Land4 terrain review — textured ground
 
+Grass and snow roughness from the CC0 photos is smooth (grass median about 0.25). Used raw, and worse if the JPEG is read as sRGB, that is a broad specular blob, the polished-carpet look. The shader keeps the photo's variation but places grass and earth in 0.88–0.98, snow in 0.93–0.99, dry sand in 0.84–0.94, rock in 0.80–0.92. Wet sand is the only surface allowed down to about 0.58. Specular is capped. Normal strength is about half of the first textured pass, so the grain stays in the albedo.
+
+Cliff and soil repeats are broken by mixing rotated copies at nearly equal weight (0.42–0.58) over about 70 m. Rock adds a third copy at 90 degrees. A mask that swings to 0 or 1 leaves one aligned tile on a wall. A small-scale mask drew diamonds. Neither is used.
+
+What is still visible, and is not claimed fixed: distant frost faces still show the terrain mesh's large triangles. The frost snow cap still has broad yellow-green bands where the biome blend sits on a tilted slope. Rock still has the photograph's own pebble grain. This is a GL Compatibility preview, not a phone capture. 15 samplers, about 29 texture reads per fragment.
+
 The ground is the subject. Scatter is still in the drop-in meshes and is not what these stills are for. `renders/terrain/*.jpg` is land3 on the left and land4 on the right, same camera, no scatter loaded. Godot 4.4.1 GL Compatibility on llvmpipe. That is a preview, not a Galaxy S26 Vulkan capture.
 
 Shader compile on this 50-shot set: 0 errors. Median pixels changed by more than 12 levels: **0.48** (`renders/terrain/pixel_diff.json`).

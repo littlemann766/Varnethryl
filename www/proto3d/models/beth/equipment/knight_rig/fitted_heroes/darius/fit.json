@@ -1,0 +1,85 @@
+{
+  "id": "darius",
+  "source": "origin/weaponless-rigs:voxel/darius_voxel_noweapon.glb",
+  "source_blob": "d3746fc89957989499f5b854b28d189c78a9ed4a",
+  "source_untouched": true,
+  "armor_set": "male",
+  "armor_source": "/workspace/www/proto3d/models/beth/equipment/knight_rig/knight_male.glb",
+  "why": "Male the sculpt was built on. Weaponless rig, so the baked sword is not in the source.",
+  "clips": [
+    "attack2",
+    "attack",
+    "death",
+    "fly_ascend",
+    "fly_bank_L",
+    "fly_bank_R",
+    "fly_descend",
+    "fly_fast",
+    "fly_forward",
+    "fly_hover",
+    "hit",
+    "idle",
+    "run",
+    "walk"
+  ],
+  "jump_clip": false,
+  "partition": {
+    "head_hair_face": 42440,
+    "hands": 1288,
+    "outfit_verts": 205783,
+    "keep_verts": 43697,
+    "source_verts": 249480,
+    "outfit_mesh_verts": 205819,
+    "boundary_copies_in_outfit": 36
+  },
+  "underlayer_factor": 0.987,
+  "underlayer_verts_by_bone": {
+    "spine": 16,
+    "chest": 16,
+    "neck": 16,
+    "shoulder_L": 16,
+    "shoulder_R": 16,
+    "upperArm_L": 68,
+    "upperArm_R": 68,
+    "foreArm_L": 16,
+    "foreArm_R": 16,
+    "thigh_L": 42,
+    "thigh_R": 42,
+    "shin_L": 16,
+    "shin_R": 16,
+    "foot_L": 16,
+    "foot_R": 16
+  },
+  "underlayer_color_linear": [
+    0.558,
+    0.462,
+    0.296,
+    1.0
+  ],
+  "armor_ratios": {
+    "torso": 1.0,
+    "head": 1.0,
+    "arm_L": 1.083,
+    "leg_L": 1.0,
+    "arm_R": 1.082,
+    "leg_R": 1.0
+  },
+  "helm_scale": 1.0,
+  "covered_by_source_skin": [
+    "head",
+    "hair",
+    "face",
+    "hands"
+  ],
+  "no_source_skin_under": [
+    "torso",
+    "upper_arm",
+    "forearm",
+    "thigh",
+    "shin",
+    "foot"
+  ],
+  "unequipped": "body keep + outfit (underlayer hidden) restores the source partition",
+  "equipped": "body keep + underlayer + fitted armor; outfit and its cape stay off",
+  "cape_rule": "Outfit holds every cape/coat bone vertex. Equipping hides that outfit, so the hero cape is off while the armor's own cloak stays. Unequipping shows the outfit again, cape included."
+}

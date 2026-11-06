@@ -49,3 +49,11 @@ Each hero is one mesh. Cape and coat-bone vertices are hidden on a review copy o
 Rest hips already match on Darius. Talia's hips sit 7.9 cm deeper and 2.6 cm lower; Rook's sit 15.4 cm deeper and 3.4 cm higher. The review translates the armor onto the hero hips and does not scale it. Median distance from limb vertices to the armor surface: Darius 2.1–2.6 cm, Talia about 6 cm, Rook 5–7 cm. Share of limb vertices more than 4 cm out: Darius 18–30%, Talia about 62%, Rook 56–67%.
 
 Darius idle, run, and attack now wear the armor in the same pose as the body. His coat still stands outside the plates. Talia's gauntlet follows her forearm; her robe is larger than the female armor and is not a separate garment. Rook's torso and robe are wider than the male armor, which sits inside him. There is still no jump clip in these hero files.
+
+## Outfit split and per-character fit (review only)
+
+Approved as a review of the shared sculpt, not a gameplay change. `tools/knight_rig/fit_heroes.py` reads the source GLBs and writes derived files under `fitted_heroes/`. The shared knight GLBs and the hero sources are not edited. Process, roster, and counts: `fitted_heroes/PROCESS.md` and `fitted_heroes/coverage.json`.
+
+The 22 playable heroes are aldric, asha, brynn, cedric, darius, elira, finn, garruk, kael, mirelle, morwen, nyx, orin, owner, rook, rowan, selene, seraphine, talia, thorne, vesper, and wren. This pass fits Darius (male, weaponless rig), Talia (female), and Rook (taller male). The other 19 are listed and not fitted. None of the 22 voxel files has a jump clip.
+
+Head, hair, face, and the fist stay. Coat, robe, skirt, sleeves, and cape move to `<id>_outfit.glb`. Torso and limbs have no source skin under the clothes, so `<id>_body.glb` adds a rigid underlayer on those bones. Equipped is keep + underlayer + a sized copy of the shared armor. Unequipped is keep + outfit, which puts the cape back. The size is baked into the armor rest pose (one scale per torso, arm, and leg). It is not animated, so the plates do not stretch in a clip. The review still aims the long bones around the joint.

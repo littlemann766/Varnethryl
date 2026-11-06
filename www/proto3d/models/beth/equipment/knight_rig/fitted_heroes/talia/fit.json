@@ -1,0 +1,88 @@
+{
+  "id": "talia",
+  "source": "origin/main:voxel/talia_voxel.glb",
+  "source_blob": "a1155620d822c23bfe77afc0561623e60c22bcf8",
+  "source_untouched": true,
+  "armor_set": "female",
+  "armor_source": "/workspace/www/proto3d/models/beth/equipment/knight_rig/knight_female.glb",
+  "why": "Female build. Shorter arms than the female armor, robe is the torso.",
+  "clips": [
+    "attack1",
+    "attack2",
+    "attack3",
+    "death",
+    "fly_ascend",
+    "fly_bank_L",
+    "fly_bank_R",
+    "fly_descend",
+    "fly_fast",
+    "fly_forward",
+    "fly_hover",
+    "hit",
+    "idle",
+    "run",
+    "skill",
+    "walk"
+  ],
+  "jump_clip": false,
+  "partition": {
+    "head_hair_face": 19552,
+    "hands": 1584,
+    "outfit_verts": 301115,
+    "keep_verts": 20729,
+    "source_verts": 321844,
+    "outfit_mesh_verts": 301164,
+    "boundary_copies_in_outfit": 49
+  },
+  "underlayer_factor": 1.05,
+  "underlayer_verts_by_bone": {
+    "hips": 16,
+    "spine": 16,
+    "chest": 16,
+    "neck": 16,
+    "shoulder_L": 16,
+    "shoulder_R": 16,
+    "upperArm_L": 68,
+    "upperArm_R": 68,
+    "foreArm_L": 16,
+    "foreArm_R": 16,
+    "thigh_L": 42,
+    "thigh_R": 42,
+    "shin_L": 16,
+    "shin_R": 16,
+    "foot_L": 16,
+    "foot_R": 16
+  },
+  "underlayer_color_linear": [
+    0.198,
+    0.102,
+    0.042,
+    1.0
+  ],
+  "armor_ratios": {
+    "torso": 1.0,
+    "head": 1.0,
+    "arm_L": 0.9,
+    "leg_L": 0.921,
+    "arm_R": 0.9,
+    "leg_R": 0.921
+  },
+  "helm_scale": 1.0,
+  "covered_by_source_skin": [
+    "head",
+    "hair",
+    "face",
+    "hands"
+  ],
+  "no_source_skin_under": [
+    "torso",
+    "upper_arm",
+    "forearm",
+    "thigh",
+    "shin",
+    "foot"
+  ],
+  "unequipped": "body keep + outfit (underlayer hidden) restores the source partition",
+  "equipped": "body keep + underlayer + fitted armor; outfit and its cape stay off",
+  "cape_rule": "Outfit holds every cape/coat bone vertex. Equipping hides that outfit, so the hero cape is off while the armor's own cloak stays. Unequipping shows the outfit again, cape included."
+}

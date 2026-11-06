@@ -1,0 +1,21 @@
+; Godot 4.4 preview project for land4 stills. Compatibility renderer only.
+config_version=5
+
+[application]
+config/name="land4preview"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/resizable=false
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
+
+[shader_globals]
+hero_cut={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}

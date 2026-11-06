@@ -1,0 +1,327 @@
+[
+ {
+  "name": "A_border",
+  "mean_abs": 18.73,
+  "pct_changed": 41.0
+ },
+ {
+  "name": "A_ground_close",
+  "mean_abs": 16.32,
+  "pct_changed": 45.69
+ },
+ {
+  "name": "A_mountain",
+  "mean_abs": 10.92,
+  "pct_changed": 11.96
+ },
+ {
+  "name": "A_shore",
+  "mean_abs": 27.45,
+  "pct_changed": 33.27
+ },
+ {
+  "name": "B_border",
+  "mean_abs": 8.83,
+  "pct_changed": 29.62
+ },
+ {
+  "name": "B_ground_close",
+  "mean_abs": 12.54,
+  "pct_changed": 39.6
+ },
+ {
+  "name": "B_mountain",
+  "mean_abs": 8.33,
+  "pct_changed": 33.67
+ },
+ {
+  "name": "B_shore",
+  "mean_abs": 5.28,
+  "pct_changed": 19.62
+ },
+ {
+  "name": "ash_border",
+  "mean_abs": 6.92,
+  "pct_changed": 23.1
+ },
+ {
+  "name": "ash_ground_close",
+  "mean_abs": 3.77,
+  "pct_changed": 8.56
+ },
+ {
+  "name": "ash_mountain",
+  "mean_abs": 12.02,
+  "pct_changed": 56.83
+ },
+ {
+  "name": "ash_shore",
+  "mean_abs": 4.75,
+  "pct_changed": 16.05
+ },
+ {
+  "name": "aurora_arch_close",
+  "mean_abs": 14.19,
+  "pct_changed": 47.14
+ },
+ {
+  "name": "aurora_arch_silhouette",
+  "mean_abs": 8.65,
+  "pct_changed": 28.56
+ },
+ {
+  "name": "beached_wreck_close",
+  "mean_abs": 2.66,
+  "pct_changed": 9.23
+ },
+ {
+  "name": "beached_wreck_silhouette",
+  "mean_abs": 17.72,
+  "pct_changed": 52.14
+ },
+ {
+  "name": "coil_isle_close",
+  "mean_abs": 8.64,
+  "pct_changed": 37.22
+ },
+ {
+  "name": "coil_isle_silhouette",
+  "mean_abs": 20.79,
+  "pct_changed": 39.47
+ },
+ {
+  "name": "ember_wreck_close",
+  "mean_abs": 4.4,
+  "pct_changed": 11.25
+ },
+ {
+  "name": "ember_wreck_silhouette",
+  "mean_abs": 9.02,
+  "pct_changed": 33.03
+ },
+ {
+  "name": "frost_border",
+  "mean_abs": 7.48,
+  "pct_changed": 19.51
+ },
+ {
+  "name": "frost_ground_close",
+  "mean_abs": 10.63,
+  "pct_changed": 31.83
+ },
+ {
+  "name": "frost_mountain",
+  "mean_abs": 3.98,
+  "pct_changed": 7.23
+ },
+ {
+  "name": "frost_shore",
+  "mean_abs": 2.4,
+  "pct_changed": 10.3
+ },
+ {
+  "name": "frostreach_close",
+  "mean_abs": 1.08,
+  "pct_changed": 2.32
+ },
+ {
+  "name": "frostreach_silhouette",
+  "mean_abs": 6.92,
+  "pct_changed": 22.52
+ },
+ {
+  "name": "frozen_wreck_close",
+  "mean_abs": 4.24,
+  "pct_changed": 7.91
+ },
+ {
+  "name": "frozen_wreck_silhouette",
+  "mean_abs": 9.88,
+  "pct_changed": 23.64
+ },
+ {
+  "name": "gullhaven_close",
+  "mean_abs": 11.67,
+  "pct_changed": 50.51
+ },
+ {
+  "name": "gullhaven_silhouette",
+  "mean_abs": 15.09,
+  "pct_changed": 38.12
+ },
+ {
+  "name": "hot_spring_close",
+  "mean_abs": 2.5,
+  "pct_changed": 7.53
+ },
+ {
+  "name": "hot_spring_silhouette",
+  "mean_abs": 2.51,
+  "pct_changed": 5.63
+ },
+ {
+  "name": "islet_-1223_-1804",
+  "mean_abs": 12.33,
+  "pct_changed": 13.05
+ },
+ {
+  "name": "islet_-1245_2382",
+  "mean_abs": 12.09,
+  "pct_changed": 24.66
+ },
+ {
+  "name": "islet_-1383_-1886",
+  "mean_abs": 7.54,
+  "pct_changed": 33.86
+ },
+ {
+  "name": "islet_-1474_-216",
+  "mean_abs": 12.64,
+  "pct_changed": 35.9
+ },
+ {
+  "name": "islet_-1710_179",
+  "mean_abs": 11.95,
+  "pct_changed": 35.7
+ },
+ {
+  "name": "islet_-2100_1174",
+  "mean_abs": 22.59,
+  "pct_changed": 35.84
+ },
+ {
+  "name": "islet_-2195_-1700",
+  "mean_abs": 4.15,
+  "pct_changed": 12.87
+ },
+ {
+  "name": "islet_-241_-25",
+  "mean_abs": 8.37,
+  "pct_changed": 27.85
+ },
+ {
+  "name": "islet_-25_-2011",
+  "mean_abs": 5.59,
+  "pct_changed": 15.06
+ },
+ {
+  "name": "islet_-49_326",
+  "mean_abs": 5.91,
+  "pct_changed": 24.87
+ },
+ {
+  "name": "islet_-509_637",
+  "mean_abs": 31.37,
+  "pct_changed": 51.22
+ },
+ {
+  "name": "islet_-533_2050",
+  "mean_abs": 7.62,
+  "pct_changed": 21.25
+ },
+ {
+  "name": "islet_-753_2385",
+  "mean_abs": 5.68,
+  "pct_changed": 18.53
+ },
+ {
+  "name": "islet_188_558",
+  "mean_abs": 27.83,
+  "pct_changed": 50.64
+ },
+ {
+  "name": "islet_311_205",
+  "mean_abs": 14.95,
+  "pct_changed": 33.41
+ },
+ {
+  "name": "islet_405_636",
+  "mean_abs": 23.83,
+  "pct_changed": 37.57
+ },
+ {
+  "name": "islet_478_-1960",
+  "mean_abs": 5.24,
+  "pct_changed": 17.3
+ },
+ {
+  "name": "islet_808_-333",
+  "mean_abs": 20.26,
+  "pct_changed": 48.35
+ },
+ {
+  "name": "islet_894_-487",
+  "mean_abs": 6.12,
+  "pct_changed": 22.0
+ },
+ {
+  "name": "lantern_rock_close",
+  "mean_abs": 11.31,
+  "pct_changed": 42.86
+ },
+ {
+  "name": "lantern_rock_silhouette",
+  "mean_abs": 12.93,
+  "pct_changed": 53.4
+ },
+ {
+  "name": "obsidian_arch_close",
+  "mean_abs": 3.21,
+  "pct_changed": 8.61
+ },
+ {
+  "name": "obsidian_arch_silhouette",
+  "mean_abs": 5.03,
+  "pct_changed": 16.22
+ },
+ {
+  "name": "saltglass_close",
+  "mean_abs": 0.47,
+  "pct_changed": 1.14
+ },
+ {
+  "name": "saltglass_silhouette",
+  "mean_abs": 4.27,
+  "pct_changed": 14.71
+ },
+ {
+  "name": "saltwatch_keep_close",
+  "mean_abs": 4.17,
+  "pct_changed": 17.7
+ },
+ {
+  "name": "saltwatch_keep_silhouette",
+  "mean_abs": 13.3,
+  "pct_changed": 37.13
+ },
+ {
+  "name": "skerry_-2078_-2344",
+  "mean_abs": 10.37,
+  "pct_changed": 29.5
+ },
+ {
+  "name": "skerry_-223_1995",
+  "mean_abs": 1.17,
+  "pct_changed": 1.93
+ },
+ {
+  "name": "skerry_-2413_773",
+  "mean_abs": 20.73,
+  "pct_changed": 48.42
+ },
+ {
+  "name": "skerry_-716_-554",
+  "mean_abs": 13.21,
+  "pct_changed": 39.88
+ },
+ {
+  "name": "vent_close",
+  "mean_abs": 2.62,
+  "pct_changed": 5.29
+ },
+ {
+  "name": "vent_silhouette",
+  "mean_abs": 10.28,
+  "pct_changed": 36.12
+ }
+]

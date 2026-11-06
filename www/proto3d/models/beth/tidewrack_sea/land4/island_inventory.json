@@ -1,0 +1,1570 @@
+[
+ {
+  "area_m2": 1600.0,
+  "centroid": [
+   -1158.3856875101726,
+   -276.6727355321248
+  ],
+  "bbox": [
+   -1173.9452311197917,
+   -290.49659220377606,
+   -1143.5017496744792,
+   -262.0760091145833
+  ],
+  "id": "A_islet_-1158_-277",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "gullhaven",
+  "nearest_m": 806.4,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 61600.0,
+  "centroid": [
+   -608.746897903381,
+   365.3755079569719
+  ],
+  "bbox": [
+   -1010.5313313802084,
+   241.92937723795572,
+   -520.1709798177084,
+   459.9528503417969
+  ],
+  "id": "A_named_saltwatch_keep",
+  "region": "A",
+  "kind": "named_land",
+  "nearest_named": "saltwatch_keep",
+  "nearest_m": 79.1,
+  "scatter": 190,
+  "scatter_kinds": {
+   "bush": 31,
+   "stones": 19,
+   "tuft": 28,
+   "flower": 24,
+   "driftwood": 8,
+   "oak": 19,
+   "pine": 17,
+   "oak_warm": 11,
+   "pine_bent": 13,
+   "slab": 8,
+   "boulder": 12
+  }
+ },
+ {
+  "area_m2": 209200.0,
+  "centroid": [
+   -456.5124327195833,
+   -416.5986353319366
+  ],
+  "bbox": [
+   -774.1417846679688,
+   -800.0,
+   -202.29122416178384,
+   -63.80691274007162
+  ],
+  "id": "A_named_gullhaven",
+  "region": "A",
+  "kind": "named_land",
+  "nearest_named": "gullhaven",
+  "nearest_m": 142.0,
+  "scatter": 509,
+  "scatter_kinds": {
+   "tuft": 69,
+   "bush": 89,
+   "boulder": 29,
+   "oak_warm": 20,
+   "driftwood": 26,
+   "pine": 70,
+   "oak": 60,
+   "stones": 42,
+   "pine_bent": 26,
+   "slab": 24,
+   "flower": 54
+  }
+ },
+ {
+  "area_m2": 400.0,
+  "centroid": [
+   -716.0,
+   -554.0
+  ],
+  "bbox": [
+   -716.0,
+   -554.0,
+   -716.0,
+   -554.0
+  ],
+  "id": "A_islet_-716_-554",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "gullhaven",
+  "nearest_m": 432.1,
+  "scatter": 3,
+  "scatter_kinds": {
+   "boulder": 1,
+   "stones": 1,
+   "tuft": 1
+  }
+ },
+ {
+  "area_m2": 1200.0,
+  "centroid": [
+   -567.5408935546875,
+   273.030432217363
+  ],
+  "bbox": [
+   -578.3309936523438,
+   260.0734354654948,
+   -557.0312296549479,
+   284.3885498046875
+  ],
+  "id": "A_named_saltwatch_keep",
+  "region": "A",
+  "kind": "named_land",
+  "nearest_named": "saltwatch_keep",
+  "nearest_m": 125.2,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 3200.0,
+  "centroid": [
+   -508.92168737340853,
+   636.6666666666666
+  ],
+  "bbox": [
+   -523.7731323242188,
+   586.0,
+   -490.0,
+   674.0
+  ],
+  "id": "A_islet_-509_637",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "saltwatch_keep",
+  "nearest_m": 244.2,
+  "scatter": 14,
+  "scatter_kinds": {
+   "stones": 1,
+   "pine": 1,
+   "bush": 3,
+   "tuft": 4,
+   "boulder": 1,
+   "slab": 1,
+   "flower": 2,
+   "oak_warm": 1
+  }
+ },
+ {
+  "area_m2": 400.0,
+  "centroid": [
+   -412.0,
+   -802.0
+  ],
+  "bbox": [
+   -412.0,
+   -802.0,
+   -412.0,
+   -802.0
+  ],
+  "id": "A_islet_-412_-802",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "gullhaven",
+  "nearest_m": 486.3,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 86000.0,
+  "centroid": [
+   -45.830805824447886,
+   656.7626917600384
+  ],
+  "bbox": [
+   -400.0,
+   382.0,
+   76.17976379394531,
+   778.0456339518229
+  ],
+  "id": "A_named_coil_isle",
+  "region": "A",
+  "kind": "named_land",
+  "nearest_named": "coil_isle",
+  "nearest_m": 118.3,
+  "scatter": 49,
+  "scatter_kinds": {
+   "flower": 6,
+   "bush": 7,
+   "boulder": 4,
+   "pine": 4,
+   "tuft": 10,
+   "slab": 2,
+   "pine_bent": 2,
+   "oak_warm": 1,
+   "stones": 10,
+   "oak": 2,
+   "driftwood": 1
+  }
+ },
+ {
+  "area_m2": 800.0,
+  "centroid": [
+   -313.0,
+   -31.0
+  ],
+  "bbox": [
+   -322.0,
+   -40.0,
+   -304.0,
+   -22.0
+  ],
+  "id": "A_islet_-313_-31",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "gullhaven",
+  "nearest_m": 291.1,
+  "scatter": 8,
+  "scatter_kinds": {
+   "tuft": 1,
+   "pine_bent": 1,
+   "bush": 4,
+   "slab": 1,
+   "flower": 1
+  }
+ },
+ {
+  "area_m2": 2400.0,
+  "centroid": [
+   -240.76876629523514,
+   -24.889219847865075
+  ],
+  "bbox": [
+   -290.0,
+   -38.24325942993164,
+   -222.82818094889322,
+   -6.465778350830078
+  ],
+  "id": "A_islet_-241_-25",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "lantern_rock",
+  "nearest_m": 224.9,
+  "scatter": 12,
+  "scatter_kinds": {
+   "flower": 2,
+   "oak": 1,
+   "pine": 1,
+   "bush": 4,
+   "boulder": 1,
+   "slab": 1,
+   "tuft": 2
+  }
+ },
+ {
+  "area_m2": 251200.0,
+  "centroid": [
+   80.50112037752386,
+   -55.699483111245414
+  ],
+  "bbox": [
+   -178.94237263997397,
+   -394.28651936848956,
+   404.3627624511719,
+   198.25131225585938
+  ],
+  "id": "A_main",
+  "region": "A",
+  "kind": "main",
+  "nearest_named": "lantern_rock",
+  "nearest_m": 97.9,
+  "scatter": 441,
+  "scatter_kinds": {
+   "boulder": 25,
+   "flower": 44,
+   "stones": 54,
+   "driftwood": 15,
+   "pine": 72,
+   "pine_bent": 29,
+   "tuft": 63,
+   "oak": 36,
+   "bush": 70,
+   "oak_warm": 20,
+   "slab": 13
+  }
+ },
+ {
+  "area_m2": 5200.0,
+  "centroid": [
+   -48.88510337873553,
+   326.36688957484904
+  ],
+  "bbox": [
+   -74.78807067871094,
+   274.04955037434894,
+   4.025431235631307,
+   353.1692199707031
+  ],
+  "id": "A_islet_-49_326",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "coil_isle",
+  "nearest_m": 372.5,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 400.0,
+  "centroid": [
+   -4.0,
+   446.0
+  ],
+  "bbox": [
+   -4.0,
+   446.0,
+   -4.0,
+   446.0
+  ],
+  "id": "A_islet_-4_446",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "coil_isle",
+  "nearest_m": 283.3,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 2000.0,
+  "centroid": [
+   187.6,
+   558.4
+  ],
+  "bbox": [
+   166.0,
+   544.0,
+   206.0,
+   584.0
+  ],
+  "id": "A_islet_188_558",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "coil_isle",
+  "nearest_m": 370.2,
+  "scatter": 15,
+  "scatter_kinds": {
+   "tuft": 5,
+   "boulder": 3,
+   "oak": 1,
+   "bush": 3,
+   "flower": 2,
+   "oak_warm": 1
+  }
+ },
+ {
+  "area_m2": 400.0,
+  "centroid": [
+   277.9516838921441,
+   -424.5364820692275
+  ],
+  "bbox": [
+   276.97369384765625,
+   -426.51649983723956,
+   279.8911844889323,
+   -422.0600077311198
+  ],
+  "id": "A_islet_278_-425",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "lantern_rock",
+  "nearest_m": 479.7,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 2800.0,
+  "centroid": [
+   310.50307072353894,
+   204.80379033492784
+  ],
+  "bbox": [
+   297.49964396158856,
+   194.61420186360678,
+   323.46886189778644,
+   219.5084431966146
+  ],
+  "id": "A_islet_311_205",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "lantern_rock",
+  "nearest_m": 412.5,
+  "scatter": 7,
+  "scatter_kinds": {
+   "tuft": 2,
+   "pine_bent": 1,
+   "bush": 1,
+   "slab": 1,
+   "stones": 1,
+   "driftwood": 1
+  }
+ },
+ {
+  "area_m2": 27200.0,
+  "centroid": [
+   405.23213208545405,
+   635.8848547446701
+  ],
+  "bbox": [
+   282.34979248046875,
+   504.43565877278644,
+   487.8754069010417,
+   728.0
+  ],
+  "id": "A_islet_405_636",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "coil_isle",
+  "nearest_m": 568.6,
+  "scatter": 67,
+  "scatter_kinds": {
+   "oak_warm": 7,
+   "tuft": 5,
+   "driftwood": 2,
+   "bush": 10,
+   "flower": 12,
+   "pine": 11,
+   "oak": 5,
+   "stones": 3,
+   "slab": 2,
+   "pine_bent": 6,
+   "boulder": 4
+  }
+ },
+ {
+  "area_m2": 27600.0,
+  "centroid": [
+   808.1568830138187,
+   -333.2030538270758
+  ],
+  "bbox": [
+   702.6783854166666,
+   -406.5325419108073,
+   929.5793050130209,
+   -217.5
+  ],
+  "id": "A_islet_808_-333",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "lantern_rock",
+  "nearest_m": 873.6,
+  "scatter": 83,
+  "scatter_kinds": {
+   "flower": 8,
+   "bush": 16,
+   "oak": 8,
+   "stones": 10,
+   "oak_warm": 2,
+   "pine_bent": 8,
+   "tuft": 10,
+   "boulder": 4,
+   "slab": 4,
+   "driftwood": 5,
+   "pine": 8
+  }
+ },
+ {
+  "area_m2": 2400.0,
+  "centroid": [
+   893.9271123096197,
+   -486.92812016034367
+  ],
+  "bbox": [
+   881.0689697265625,
+   -501.4490152994792,
+   906.6790364583334,
+   -471.5290934244792
+  ],
+  "id": "A_islet_894_-487",
+  "region": "A",
+  "kind": "islet",
+  "nearest_named": "lantern_rock",
+  "nearest_m": 1011.9,
+  "scatter": 7,
+  "scatter_kinds": {
+   "boulder": 1,
+   "slab": 1,
+   "stones": 1,
+   "driftwood": 1,
+   "tuft": 2,
+   "flower": 1
+  }
+ },
+ {
+  "id": "lantern_rock",
+  "region": "A",
+  "kind": "named_island",
+  "name": "Lantern Rock",
+  "area_m2": 48508,
+  "centroid": [
+   -16.9144687652588,
+   -46.1563606262207
+  ],
+  "nearest_named": "lantern_rock",
+  "nearest_m": 0,
+  "scatter": 453,
+  "scatter_kinds": {
+   "flower": 58,
+   "boulder": 29,
+   "pine_bent": 40,
+   "slab": 17,
+   "tuft": 66,
+   "bush": 72,
+   "stones": 43,
+   "pine": 55,
+   "oak": 31,
+   "driftwood": 20,
+   "oak_warm": 22
+  },
+  "bbox": null,
+  "mesh": "arch_isl_lantern_rock"
+ },
+ {
+  "id": "gullhaven",
+  "region": "A",
+  "kind": "named_island",
+  "name": "Gullhaven",
+  "area_m2": 89596,
+  "centroid": [
+   -353.144409179688,
+   -319.307250976562
+  ],
+  "nearest_named": "gullhaven",
+  "nearest_m": 0,
+  "scatter": 343,
+  "scatter_kinds": {
+   "tuft": 44,
+   "stones": 29,
+   "pine": 43,
+   "bush": 64,
+   "oak": 26,
+   "pine_bent": 26,
+   "slab": 20,
+   "oak_warm": 15,
+   "flower": 48,
+   "boulder": 14,
+   "driftwood": 14
+  },
+  "bbox": null,
+  "mesh": "arch_isl_gullhaven"
+ },
+ {
+  "id": "saltwatch_keep",
+  "region": "A",
+  "kind": "named_island",
+  "name": "Saltwatch Keep",
+  "area_m2": 7400,
+  "centroid": [
+   -535.019409179688,
+   393.901794433594
+  ],
+  "nearest_named": "saltwatch_keep",
+  "nearest_m": 0,
+  "scatter": 16,
+  "scatter_kinds": {
+   "flower": 2,
+   "driftwood": 2,
+   "tuft": 1,
+   "slab": 2,
+   "oak_warm": 1,
+   "stones": 2,
+   "oak": 1,
+   "pine": 1,
+   "bush": 4
+  },
+  "bbox": null,
+  "mesh": "arch_isl_saltwatch_keep"
+ },
+ {
+  "id": "coil_isle",
+  "region": "A",
+  "kind": "named_island",
+  "name": "Coil Isle",
+  "area_m2": 51160,
+  "centroid": [
+   -161.576873779297,
+   681.378967285156
+  ],
+  "nearest_named": "coil_isle",
+  "nearest_m": 0,
+  "scatter": 289,
+  "scatter_kinds": {
+   "driftwood": 18,
+   "boulder": 18,
+   "pine_bent": 16,
+   "tuft": 66,
+   "bush": 41,
+   "pine": 27,
+   "slab": 13,
+   "oak_warm": 10,
+   "flower": 30,
+   "stones": 28,
+   "oak": 22
+  },
+  "bbox": null,
+  "mesh": "arch_isl_coil_isle"
+ },
+ {
+  "area_m2": 1387600.0,
+  "centroid": [
+   -2391.062600862467,
+   131.76504526927124
+  ],
+  "bbox": [
+   -2834.5609537760415,
+   -1306.10693359375,
+   -1896.5269368489583,
+   1478.5539143880208
+  ],
+  "id": "B_main",
+  "region": "B",
+  "kind": "main",
+  "nearest_named": "saltglass",
+  "nearest_m": 56.0,
+  "scatter": 2039,
+  "scatter_kinds": {
+   "shore_pine": 169,
+   "boulder": 169,
+   "salt_crystal": 218,
+   "dune_grass": 342,
+   "scrub": 332,
+   "stones": 298,
+   "driftwood": 93,
+   "slab": 126,
+   "salt_flower": 120,
+   "salt_bush": 172
+  }
+ },
+ {
+  "area_m2": 10400.0,
+  "centroid": [
+   -2468.8364816010953,
+   32.098198072670286
+  ],
+  "bbox": [
+   -2535.7655436197915,
+   -9.241349220275879,
+   -2430.1686197916665,
+   71.56088765462239
+  ],
+  "id": "B_named_saltglass",
+  "region": "B",
+  "kind": "named_land",
+  "nearest_named": "saltglass",
+  "nearest_m": 142.8,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 1200.0,
+  "centroid": [
+   -2444.6666666666665,
+   955.3333333333334
+  ],
+  "bbox": [
+   -2456.0,
+   946.0,
+   -2438.0,
+   962.0
+  ],
+  "id": "B_named_beached_wreck",
+  "region": "B",
+  "kind": "named_land",
+  "nearest_named": "beached_wreck",
+  "nearest_m": 5.2,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 400.0,
+  "centroid": [
+   -2413.0,
+   773.0
+  ],
+  "bbox": [
+   -2416.0,
+   770.0,
+   -2410.0,
+   776.0
+  ],
+  "id": "B_islet_-2413_773",
+  "region": "B",
+  "kind": "islet",
+  "nearest_named": "beached_wreck",
+  "nearest_m": 183.1,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 9600.0,
+  "centroid": [
+   -2099.8820584204886,
+   1174.1987892068844
+  ],
+  "bbox": [
+   -2154.9796549479165,
+   1123.9424235026042,
+   -2047.94384765625,
+   1209.9176432291667
+  ],
+  "id": "B_islet_-2100_1174",
+  "region": "B",
+  "kind": "islet",
+  "nearest_named": "beached_wreck",
+  "nearest_m": 404.7,
+  "scatter": 32,
+  "scatter_kinds": {
+   "scrub": 4,
+   "salt_crystal": 5,
+   "stones": 6,
+   "salt_flower": 2,
+   "driftwood": 1,
+   "slab": 2,
+   "shore_pine": 4,
+   "dune_grass": 5,
+   "salt_bush": 1,
+   "boulder": 2
+  }
+ },
+ {
+  "area_m2": 800.0,
+  "centroid": [
+   -2077.30859375,
+   -253.37504238552515
+  ],
+  "bbox": [
+   -2080.133544921875,
+   -258.9008076985677,
+   -2071.866455078125,
+   -250.12512715657553
+  ],
+  "id": "B_islet_-2077_-253",
+  "region": "B",
+  "kind": "islet",
+  "nearest_named": "saltglass",
+  "nearest_m": 443.9,
+  "scatter": 8,
+  "scatter_kinds": {
+   "boulder": 2,
+   "stones": 2,
+   "dune_grass": 1,
+   "salt_crystal": 1,
+   "salt_bush": 1,
+   "driftwood": 1
+  }
+ },
+ {
+  "area_m2": 400.0,
+  "centroid": [
+   -1949.991427951389,
+   424.63006930881073
+  ],
+  "bbox": [
+   -1954.08349609375,
+   421.9157409667969,
+   -1946.4281412760417,
+   428.00157674153644
+  ],
+  "id": "B_islet_-1950_425",
+  "region": "B",
+  "kind": "islet",
+  "nearest_named": "saltglass",
+  "nearest_m": 509.6,
+  "scatter": 2,
+  "scatter_kinds": {
+   "dune_grass": 1,
+   "slab": 1
+  }
+ },
+ {
+  "area_m2": 46800.0,
+  "centroid": [
+   -1710.1779980886663,
+   178.8730195654475
+  ],
+  "bbox": [
+   -1847.887451171875,
+   101.94454447428386,
+   -1551.9976399739583,
+   292.2054443359375
+  ],
+  "id": "B_islet_-1710_179",
+  "region": "B",
+  "kind": "islet",
+  "nearest_named": "saltglass",
+  "nearest_m": 638.5,
+  "scatter": 74,
+  "scatter_kinds": {
+   "scrub": 11,
+   "salt_crystal": 4,
+   "stones": 12,
+   "dune_grass": 14,
+   "salt_bush": 10,
+   "shore_pine": 9,
+   "driftwood": 5,
+   "slab": 3,
+   "boulder": 3,
+   "salt_flower": 3
+  }
+ },
+ {
+  "area_m2": 12400.0,
+  "centroid": [
+   -1473.50733642293,
+   -216.32820459983805
+  ],
+  "bbox": [
+   -1571.0731608072917,
+   -272.5954996744792,
+   -1431.4036051432292,
+   -129.92251586914062
+  ],
+  "id": "B_islet_-1474_-216",
+  "region": "B",
+  "kind": "islet",
+  "nearest_named": "saltglass",
+  "nearest_m": 926.7,
+  "scatter": 22,
+  "scatter_kinds": {
+   "scrub": 3,
+   "slab": 2,
+   "stones": 3,
+   "dune_grass": 2,
+   "shore_pine": 5,
+   "salt_bush": 3,
+   "boulder": 1,
+   "salt_crystal": 2,
+   "driftwood": 1
+  }
+ },
+ {
+  "id": "saltglass",
+  "region": "B",
+  "kind": "named_island",
+  "name": "Saltglass Landing",
+  "area_m2": 78908,
+  "centroid": [
+   -2344.0,
+   101.5
+  ],
+  "nearest_named": "saltglass",
+  "nearest_m": 0,
+  "scatter": 212,
+  "scatter_kinds": {
+   "scrub": 36,
+   "salt_crystal": 31,
+   "stones": 37,
+   "boulder": 21,
+   "slab": 7,
+   "dune_grass": 32,
+   "driftwood": 10,
+   "shore_pine": 13,
+   "salt_bush": 16,
+   "salt_flower": 9
+  },
+  "bbox": null,
+  "mesh": "coast_isl_saltglass"
+ },
+ {
+  "id": "beached_wreck",
+  "region": "B",
+  "kind": "named_island",
+  "name": "Beached Wreck",
+  "area_m2": 11924,
+  "centroid": [
+   -2439.55053710938,
+   954.164428710938
+  ],
+  "nearest_named": "beached_wreck",
+  "nearest_m": 0,
+  "scatter": 55,
+  "scatter_kinds": {
+   "dune_grass": 12,
+   "salt_bush": 5,
+   "stones": 4,
+   "slab": 2,
+   "scrub": 12,
+   "salt_crystal": 4,
+   "driftwood": 1,
+   "boulder": 3,
+   "shore_pine": 8,
+   "salt_flower": 4
+  },
+  "bbox": null,
+  "mesh": "coast_isl_beached_wreck"
+ },
+ {
+  "area_m2": 2000.0,
+  "centroid": [
+   -2194.5626085069443,
+   -1699.550509982639
+  ],
+  "bbox": [
+   -2203.9755045572915,
+   -1703.75,
+   -2180.0,
+   -1693.75
+  ],
+  "id": "frost_islet_-2195_-1700",
+  "region": "frost",
+  "kind": "islet",
+  "nearest_named": "frostreach",
+  "nearest_m": 1238.2,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 2108800.0,
+  "centroid": [
+   -586.4704799437869,
+   -2452.7117334768623
+  ],
+  "bbox": [
+   -2137.1328938802085,
+   -2946.3416341145835,
+   1416.91748046875,
+   -1665.3859456380208
+  ],
+  "id": "frost_main",
+  "region": "frost",
+  "kind": "main",
+  "nearest_named": "frozen_wreck",
+  "nearest_m": 362.9,
+  "scatter": 2349,
+  "scatter_kinds": {
+   "snow_bent": 180,
+   "boulder": 334,
+   "dead_tree": 134,
+   "snow_pine": 449,
+   "snow_bush": 293,
+   "stones": 449,
+   "ice_shard": 354,
+   "slab": 156
+  }
+ },
+ {
+  "area_m2": 400.0,
+  "centroid": [
+   -2077.5,
+   -2343.75
+  ],
+  "bbox": [
+   -2080.0,
+   -2345.0,
+   -2075.0,
+   -2342.5
+  ],
+  "id": "frost_islet_-2078_-2344",
+  "region": "frost",
+  "kind": "islet",
+  "nearest_named": "frostreach",
+  "nearest_m": 1161.7,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 67600.0,
+  "centroid": [
+   -1223.414413655107,
+   -1804.1901073401998
+  ],
+  "bbox": [
+   -1436.7007242838542,
+   -1959.06982421875,
+   -1028.9265950520833,
+   -1628.6066080729167
+  ],
+  "id": "frost_islet_-1223_-1804",
+  "region": "frost",
+  "kind": "islet",
+  "nearest_named": "frostreach",
+  "nearest_m": 283.6,
+  "scatter": 36,
+  "scatter_kinds": {
+   "ice_shard": 12,
+   "boulder": 7,
+   "dead_tree": 2,
+   "slab": 3,
+   "snow_pine": 4,
+   "snow_bent": 2,
+   "stones": 3,
+   "snow_bush": 3
+  }
+ },
+ {
+  "area_m2": 5600.0,
+  "centroid": [
+   -1382.5329406582978,
+   -1885.6191682694218
+  ],
+  "bbox": [
+   -1416.875,
+   -1913.21044921875,
+   -1357.8125,
+   -1838.7092692057292
+  ],
+  "id": "frost_islet_-1383_-1886",
+  "region": "frost",
+  "kind": "islet",
+  "nearest_named": "frostreach",
+  "nearest_m": 405.5,
+  "scatter": 16,
+  "scatter_kinds": {
+   "snow_bush": 7,
+   "snow_pine": 1,
+   "snow_bent": 1,
+   "dead_tree": 1,
+   "slab": 2,
+   "stones": 2,
+   "ice_shard": 2
+  }
+ },
+ {
+  "area_m2": 400.0,
+  "centroid": [
+   -955.0,
+   -1967.5
+  ],
+  "bbox": [
+   -955.0,
+   -1967.5,
+   -955.0,
+   -1967.5
+  ],
+  "id": "frost_named_frostreach",
+  "region": "frost",
+  "kind": "named_land",
+  "nearest_named": "frostreach",
+  "nearest_m": 30.8,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 445600.0,
+  "centroid": [
+   -25.401602469379025,
+   -2010.6554480909613
+  ],
+  "bbox": [
+   -507.5,
+   -2363.5183919270835,
+   436.2305908203125,
+   -1600.6201985677083
+  ],
+  "id": "frost_islet_-25_-2011",
+  "region": "frost",
+  "kind": "islet",
+  "nearest_named": "aurora_arch",
+  "nearest_m": 445.0,
+  "scatter": 468,
+  "scatter_kinds": {
+   "snow_pine": 91,
+   "stones": 95,
+   "boulder": 65,
+   "ice_shard": 74,
+   "dead_tree": 27,
+   "slab": 19,
+   "snow_bush": 56,
+   "snow_bent": 41
+  }
+ },
+ {
+  "area_m2": 73200.0,
+  "centroid": [
+   477.7269098428243,
+   -1960.2066373879693
+  ],
+  "bbox": [
+   302.71400960286456,
+   -2105.0,
+   676.2298990885416,
+   -1707.5
+  ],
+  "id": "frost_islet_478_-1960",
+  "region": "frost",
+  "kind": "islet",
+  "nearest_named": "aurora_arch",
+  "nearest_m": 649.3,
+  "scatter": 63,
+  "scatter_kinds": {
+   "snow_bent": 6,
+   "snow_pine": 6,
+   "stones": 13,
+   "dead_tree": 2,
+   "ice_shard": 14,
+   "boulder": 7,
+   "snow_bush": 10,
+   "slab": 5
+  }
+ },
+ {
+  "area_m2": 1200.0,
+  "centroid": [
+   699.1666666666666,
+   -2080.8333333333335
+  ],
+  "bbox": [
+   695.0,
+   -2082.5,
+   702.5,
+   -2080.0
+  ],
+  "id": "frost_islet_699_-2081",
+  "region": "frost",
+  "kind": "islet",
+  "nearest_named": "aurora_arch",
+  "nearest_m": 746.0,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 400.0,
+  "centroid": [
+   1070.0,
+   -2402.5
+  ],
+  "bbox": [
+   1070.0,
+   -2402.5,
+   1070.0,
+   -2402.5
+  ],
+  "id": "frost_islet_1070_-2402",
+  "region": "frost",
+  "kind": "islet",
+  "nearest_named": "aurora_arch",
+  "nearest_m": 1020.6,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "id": "frostreach",
+  "region": "frost",
+  "kind": "named_island",
+  "name": "Frostreach Ice Dock",
+  "area_m2": 20324,
+  "centroid": [
+   -982.912170410156,
+   -1954.53295898438
+  ],
+  "nearest_named": "frostreach",
+  "nearest_m": 0,
+  "scatter": 67,
+  "scatter_kinds": {
+   "snow_pine": 6,
+   "slab": 3,
+   "stones": 15,
+   "ice_shard": 7,
+   "snow_bent": 5,
+   "boulder": 7,
+   "snow_bush": 16,
+   "dead_tree": 8
+  },
+  "bbox": null,
+  "mesh": "frost_isl_frostreach"
+ },
+ {
+  "id": "frozen_wreck",
+  "region": "frost",
+  "kind": "named_island",
+  "name": "Frozen Wreck",
+  "area_m2": 44340,
+  "centroid": [
+   -249.392196655273,
+   -2587.10766601562
+  ],
+  "nearest_named": "frozen_wreck",
+  "nearest_m": 0,
+  "scatter": 153,
+  "scatter_kinds": {
+   "boulder": 22,
+   "stones": 29,
+   "snow_pine": 33,
+   "snow_bent": 12,
+   "dead_tree": 8,
+   "ice_shard": 20,
+   "snow_bush": 19,
+   "slab": 10
+  },
+  "bbox": null,
+  "mesh": "frost_isl_frozen_wreck"
+ },
+ {
+  "id": "aurora_arch",
+  "region": "frost",
+  "kind": "named_island",
+  "name": "Aurora Arch",
+  "area_m2": 48468,
+  "centroid": [
+   50.449348449707,
+   -2449.16430664062
+  ],
+  "nearest_named": "aurora_arch",
+  "nearest_m": 0,
+  "scatter": 186,
+  "scatter_kinds": {
+   "boulder": 36,
+   "snow_bent": 15,
+   "ice_shard": 30,
+   "slab": 8,
+   "snow_pine": 32,
+   "stones": 33,
+   "snow_bush": 26,
+   "dead_tree": 6
+  },
+  "bbox": null,
+  "mesh": "frost_isl_aurora_arch"
+ },
+ {
+  "area_m2": 125200.0,
+  "centroid": [
+   -1244.8428042589294,
+   2382.130511093886
+  ],
+  "bbox": [
+   -1591.9644368489583,
+   2230.1836751302085,
+   -1002.2581583658854,
+   2648.5
+  ],
+  "id": "ash_islet_-1245_2382",
+  "region": "ash",
+  "kind": "islet",
+  "nearest_named": "vent",
+  "nearest_m": 913.8,
+  "scatter": 498,
+  "scatter_kinds": {
+   "dead_tree": 59,
+   "cinders": 40,
+   "boulder": 45,
+   "stones": 58,
+   "basalt": 64,
+   "obsidian": 52,
+   "ash_grass": 64,
+   "lava_rocks": 58,
+   "sulfur": 27,
+   "dead_bent": 31
+  }
+ },
+ {
+  "area_m2": 8800.0,
+  "centroid": [
+   -752.5131750567157,
+   2384.9978581323044
+  ],
+  "bbox": [
+   -767.0127563476562,
+   2345.0,
+   -685.0090535481771,
+   2431.0
+  ],
+  "id": "ash_islet_-753_2385",
+  "region": "ash",
+  "kind": "islet",
+  "nearest_named": "vent",
+  "nearest_m": 577.0,
+  "scatter": 21,
+  "scatter_kinds": {
+   "sulfur": 2,
+   "dead_bent": 4,
+   "ash_grass": 5,
+   "basalt": 2,
+   "obsidian": 2,
+   "dead_tree": 1,
+   "cinders": 1,
+   "stones": 2,
+   "boulder": 1,
+   "lava_rocks": 1
+  }
+ },
+ {
+  "area_m2": 166800.0,
+  "centroid": [
+   -533.0638857280793,
+   2049.8763864378598
+  ],
+  "bbox": [
+   -754.0,
+   1847.0,
+   -212.01131184895834,
+   2304.8474934895835
+  ],
+  "id": "ash_islet_-533_2050",
+  "region": "ash",
+  "kind": "islet",
+  "nearest_named": "vent",
+  "nearest_m": 182.7,
+  "scatter": 404,
+  "scatter_kinds": {
+   "cinders": 41,
+   "dead_tree": 37,
+   "basalt": 66,
+   "lava_rocks": 48,
+   "ash_grass": 50,
+   "stones": 40,
+   "sulfur": 34,
+   "boulder": 40,
+   "dead_bent": 19,
+   "obsidian": 29
+  }
+ },
+ {
+  "area_m2": 800.0,
+  "centroid": [
+   -223.179349009196,
+   1995.371268717448
+  ],
+  "bbox": [
+   -226.30261739095053,
+   1990.7207438151042,
+   -217.69072977701822,
+   1998.5470377604167
+  ],
+  "id": "ash_islet_-223_1995",
+  "region": "ash",
+  "kind": "islet",
+  "nearest_named": "vent",
+  "nearest_m": 289.5,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 488000.0,
+  "centroid": [
+   405.74872251099924,
+   2388.1022782776536
+  ],
+  "bbox": [
+   -110.73691304524739,
+   1901.0,
+   724.465087890625,
+   2971.0
+  ],
+  "id": "ash_main",
+  "region": "ash",
+  "kind": "main",
+  "nearest_named": "ember_wreck",
+  "nearest_m": 251.1,
+  "scatter": 989,
+  "scatter_kinds": {
+   "cinders": 100,
+   "sulfur": 87,
+   "boulder": 73,
+   "stones": 134,
+   "lava_rocks": 134,
+   "ash_grass": 119,
+   "basalt": 110,
+   "obsidian": 81,
+   "dead_tree": 101,
+   "dead_bent": 50
+  }
+ },
+ {
+  "area_m2": 1200.0,
+  "centroid": [
+   -54.24827559789022,
+   2264.8141682942705
+  ],
+  "bbox": [
+   -64.0,
+   2255.0,
+   -48.495583852132164,
+   2270.0
+  ],
+  "id": "ash_islet_-54_2265",
+  "region": "ash",
+  "kind": "islet",
+  "nearest_named": "vent",
+  "nearest_m": 582.5,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 800.0,
+  "centroid": [
+   -73.25695673624675,
+   2721.7564154730903
+  ],
+  "bbox": [
+   -74.77973175048828,
+   2717.0679524739585,
+   -72.42350769042969,
+   2724.9153645833335
+  ],
+  "id": "ash_islet_-73_2722",
+  "region": "ash",
+  "kind": "islet",
+  "nearest_named": "obsidian_arch",
+  "nearest_m": 533.8,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 1600.0,
+  "centroid": [
+   597.0286506910003,
+   1982.9799494939798
+  ],
+  "bbox": [
+   589.6978352864584,
+   1978.69580078125,
+   604.2704264322916,
+   1987.3001708984375
+  ],
+  "id": "ash_islet_597_1983",
+  "region": "ash",
+  "kind": "islet",
+  "nearest_named": "ember_wreck",
+  "nearest_m": 286.7,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "area_m2": 32800.0,
+  "centroid": [
+   1231.7333519596161,
+   2060.726336648073
+  ],
+  "bbox": [
+   1136.0,
+   1956.435791015625,
+   1358.60009765625,
+   2161.0
+  ],
+  "id": "ash_named_hot_spring",
+  "region": "ash",
+  "kind": "named_land",
+  "nearest_named": "hot_spring",
+  "nearest_m": 100.3,
+  "scatter": 0,
+  "scatter_kinds": {}
+ },
+ {
+  "id": "vent",
+  "region": "ash",
+  "kind": "named_island",
+  "name": "Vent Harbour",
+  "area_m2": 84080,
+  "centroid": [
+   -485.727203369141,
+   1873.42028808594
+  ],
+  "nearest_named": "vent",
+  "nearest_m": 0,
+  "scatter": 347,
+  "scatter_kinds": {
+   "sulfur": 34,
+   "obsidian": 33,
+   "dead_tree": 31,
+   "boulder": 27,
+   "stones": 43,
+   "basalt": 45,
+   "ash_grass": 38,
+   "lava_rocks": 31,
+   "cinders": 35,
+   "dead_bent": 18,
+   "boulder_cluster": 9,
+   "lava_spire": 3
+  },
+  "bbox": null,
+  "mesh": "ash_isl_vent"
+ },
+ {
+  "id": "ember_wreck",
+  "region": "ash",
+  "kind": "named_island",
+  "name": "Ember Wreck",
+  "area_m2": 26180,
+  "centroid": [
+   626.333984375,
+   2268.15356445312
+  ],
+  "nearest_named": "ember_wreck",
+  "nearest_m": 0,
+  "scatter": 194,
+  "scatter_kinds": {
+   "sulfur": 17,
+   "ash_grass": 29,
+   "boulder": 14,
+   "lava_rocks": 17,
+   "dead_tree": 15,
+   "stones": 28,
+   "basalt": 23,
+   "cinders": 24,
+   "obsidian": 18,
+   "dead_bent": 2,
+   "boulder_cluster": 3,
+   "lava_spire": 4
+  },
+  "bbox": null,
+  "mesh": "ash_isl_ember_wreck"
+ },
+ {
+  "id": "hot_spring",
+  "region": "ash",
+  "kind": "named_island",
+  "name": "Hot Spring Grotto",
+  "area_m2": 14312,
+  "centroid": [
+   1142.2861328125,
+   2015.39086914062
+  ],
+  "nearest_named": "hot_spring",
+  "nearest_m": 0,
+  "scatter": 49,
+  "scatter_kinds": {
+   "obsidian": 6,
+   "stones": 7,
+   "cinders": 6,
+   "basalt": 3,
+   "boulder": 3,
+   "ash_grass": 10,
+   "dead_tree": 3,
+   "lava_rocks": 4,
+   "dead_bent": 3,
+   "sulfur": 3,
+   "lava_spire": 1
+  },
+  "bbox": null,
+  "mesh": "ash_isl_hot_spring"
+ },
+ {
+  "id": "obsidian_arch",
+  "region": "ash",
+  "kind": "named_island",
+  "name": "Obsidian Arch",
+  "area_m2": 51112,
+  "centroid": [
+   458.833343505859,
+   2678.52978515625
+  ],
+  "nearest_named": "obsidian_arch",
+  "nearest_m": 0,
+  "scatter": 315,
+  "scatter_kinds": {
+   "cinders": 34,
+   "obsidian": 29,
+   "sulfur": 35,
+   "stones": 40,
+   "ash_grass": 41,
+   "basalt": 32,
+   "dead_tree": 21,
+   "lava_rocks": 33,
+   "dead_bent": 6,
+   "boulder": 29,
+   "boulder_cluster": 8,
+   "lava_spire": 7
+  },
+  "bbox": null,
+  "mesh": "ash_isl_obsidian_arch"
+ }
+]

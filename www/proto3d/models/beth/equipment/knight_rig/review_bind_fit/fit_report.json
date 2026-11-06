@@ -1,0 +1,38 @@
+{
+  "what": "Review-only bind-aware fit. Armor mesh not scaled. Plates not deformed. Hero GLBs not edited.",
+  "method": "Copy the clip's local rotation (both rigs share bone axes), then aim upperArm, foreArm, hand, thigh, shin, and foot so the armor child offset points along the hero's posed limb. Rotation is about the joint. Armor bone lengths stay. Hips are translated onto the hero hips. Short shoulder and spine bones are not aimed.",
+  "clothing": {
+    "mesh_count": 1,
+    "hidden_in_review_only": "vertices whose strongest weight is coat* or cape*",
+    "hidden_counts": {"darius": 12072, "talia": 41300, "rook": 12808},
+    "not_separable": "The bulky coat, robe, skirt, and shoulder shell are weighted to chest, hips, upperChest, and shoulder. Hiding those bones would delete the torso. They were left visible."
+  },
+  "aim_error_deg_mean": 0.01,
+  "rest_hip_delta_m_blender_xyz": {
+    "darius": [0.0, 0.0, 0.0],
+    "talia": [0.0, 0.079, -0.026],
+    "rook": [0.0, 0.154, 0.034]
+  },
+  "body_verts_farther_than_4cm": {
+    "darius_idle_limbs": 0.214,
+    "darius_run_limbs": 0.182,
+    "darius_attack_limbs": 0.296,
+    "talia_idle_limbs": 0.631,
+    "talia_run_limbs": 0.624,
+    "talia_attack1_limbs": 0.623,
+    "rook_idle_limbs": 0.625,
+    "rook_run_limbs": 0.558,
+    "rook_attack1_limbs": 0.669
+  },
+  "limb_median_distance_m": {
+    "darius_idle": 0.022,
+    "darius_run": 0.021,
+    "darius_attack": 0.026,
+    "talia_idle": 0.062,
+    "talia_run": 0.060,
+    "talia_attack1": 0.061,
+    "rook_idle": 0.061,
+    "rook_run": 0.050,
+    "rook_attack1": 0.074
+  }
+}

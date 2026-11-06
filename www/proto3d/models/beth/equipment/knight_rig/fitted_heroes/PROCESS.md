@@ -35,7 +35,7 @@ Keep vertices plus outfit vertices are a partition of the source. Positions, nor
 
 ## Where the source has no skin
 
-Head, hair, face, and the fist are real source vertices. Torso, upper arm, forearm, thigh, shin, and foot are the clothing shell on the body bones. There is no second skin mesh under them. The underlayer is a rigid tube-and-joint mesh on those bones, thinner than the plates, so a bend shows body instead of a hole. It is not a new coat.
+Head, hair, face, and the fist are real source vertices. Torso, upper arm, forearm, thigh, shin, and foot are the clothing shell on the body bones. There is no second skin mesh under them. `ref_male` and `ref_female` are armor, not bodies. The dark mail liner is a filler so a removed sleeve does not leave a hole. It is not an anatomical reconstruction, and it is not a substitute for a missing skin mesh.
 
 ## How the armor is sized
 
@@ -43,9 +43,20 @@ The plates are not edited one bone at a time. That tore the helm, the hips, and 
 
 The whole sculpt gets one scale about the hips so the head height matches. Each arm then gets one uniform scale and one aim, so the arm plates stay one assembly. Pauldrons stay on the cuirass. Legs that are already within 4% are left. Clip rotations are copied in full. There is no angle limit and no pose-bone scale. A 0.90 clamp was a rest-size floor in an earlier file and was not a limit on the animation. It is gone.
 
-The liner is dark mail, about 2–4 cm in radius, with weights blended along the span. It is there for the neck, elbow, and knee openings. It is not a flesh-colored body.
+The liner is dark mail, about 2–4 cm in radius, with weights blended along the span. It fills openings. It is not skin.
 
-Hair is removed only on the equipped copy, and only where a hair vertex is within 1.6 cm of the helm. The face is not removed. Hair the helm does not cover stays. A fist that does not sit on its hand bone is moved onto that bone on the equipped copy only. The unequipped body keeps the source position so the outfit still matches.
+## Bind-pose audit
+
+`fitted_heroes/bind_audit.json` records the check. For Talia and Rook, with no animation applied:
+
+- `jointMatrix = nodeWorld * inverseBindMatrix`. The inverse-bind matrices are column-major. `JOINTS_0` indexes `skin.joints`, and that list is not `0..n` node ids.
+- Max vertex residual of the reconstruction against the authored positions is 2.0e-7 m (Talia) and 3.3e-7 m (Rook). `||jointMatrix - I||` max is under 1e-6.
+- The hand joint's node-world origin equals `inv(IBM)` to 0.1 mm.
+- Blender, animations off, same camera: the original file and the baked reconstruction differ by 0 pixels.
+
+The 14 cm (Talia) and 34 cm (Rook) hand figures are distances, in that correct bind space, from the hand-joint origin to hand-weighted vertices. They are not a bad matrix. Talia's forearm surface comes within 2.6 cm of the hand joint and meets the hand-weighted surface. Rook's forearm comes within 7.9 cm; the hand-weighted surface meets the forearm surface, and the nearest hand-weighted vertex is 28 cm from the joint. Darius's hand joint is 1.2 cm from his hand surface. The arm-length ratios (Talia 0.64, Rook 0.71 against the knight) are the same measurement on two skeletons that both satisfy `world @ IBM = I`. They are real bone-length differences. They were not re-applied in this audit.
+
+Fists are not translated onto the joint, and hair is not deleted. `<id>_body_equipped.glb` is a copy of `<id>_body.glb`. The attachment coordinate is the bind-space joint origin.
 
 Limb direction during a clip uses the same rest-aware aim as `review_bind_fit.py`: copy the clip's local rotation, then aim the long bones around the joint. Bone lengths stay at the fitted rest.
 

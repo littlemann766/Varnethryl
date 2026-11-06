@@ -1476,11 +1476,8 @@ def build_one(hid):
     )
     armor_js, armor_blob = load_glb(ARMOR[spec["armor"]])
     ratios = fit_plates(jpos, armor_js, armor_blob, os.path.join(out_dir, f"{hid}_armor_fit.glb"))
-    hair = mask_hair_under_helm(
-        os.path.join(out_dir, f"{hid}_body.glb"),
-        os.path.join(out_dir, f"{hid}_armor_fit.glb"),
-        os.path.join(out_dir, f"{hid}_body_equipped.glb"),
-    )
+    # The bind-pose audit showed the source already reconstructs (world @ IBM = I).
+    # Moving fists onto the joint, or deleting hair, changes that pose. Do not.
     # clips
     clips = [a["name"] for a in js.get("animations", [])]
     report = {
@@ -1498,7 +1495,7 @@ def build_one(hid):
         "underlayer_verts_by_bone": counts,
         "underlayer_color_linear": mail,
         "armor_ratios": ratios,
-        "hair_masked_for_equipped_preview": hair,
+        "attachment": "Bind-space joint origin. Node world translation matches inv(IBM). Hero vertices are not moved.",
         "animation": "Clips are copied in full. No angle limit and no pose-bone scale.",
         "covered_by_source_skin": ["head", "hair", "face", "hands"],
         "no_source_skin_under": ["torso", "upper_arm", "forearm", "thigh", "shin", "foot"],
@@ -1507,7 +1504,7 @@ def build_one(hid):
         "cape_rule": "Outfit holds every cape/coat bone vertex. Equipping hides that outfit, so the hero cape is off while the armor's own cloak stays. Unequipping shows the outfit again, cape included.",
     }
     json.dump(report, open(os.path.join(out_dir, "fit.json"), "w"), indent=2)
-    print(json.dumps({k: report[k] for k in ("partition", "armor_ratios", "hair_masked_for_equipped_preview", "jump_clip")}, indent=2), flush=True)
+    print(json.dumps({k: report[k] for k in ("partition", "armor_ratios", "attachment", "jump_clip")}, indent=2), flush=True)
     return report
 
 

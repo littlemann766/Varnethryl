@@ -59,15 +59,6 @@
     "leg_R": 1.0,
     "helm_shift_cm": 0.0
   },
-  "hair_masked_for_equipped_preview": {
-    "removed": 11,
-    "hair": 10448,
-    "face": 30328,
-    "fists_seated_cm": {
-      "_L": 5.3,
-      "_R": 5.2
-    }
-  },
   "animation": "Clips are copied in full. No angle limit and no pose-bone scale.",
   "covered_by_source_skin": [
     "head",
@@ -85,5 +76,11 @@
   ],
   "unequipped": "body keep + outfit (underlayer hidden) restores the source partition",
   "equipped": "body keep + underlayer + fitted armor; outfit and its cape stay off",
-  "cape_rule": "Outfit holds every cape/coat bone vertex. Equipping hides that outfit, so the hero cape is off while the armor's own cloak stays. Unequipping shows the outfit again, cape included."
+  "cape_rule": "Outfit holds every cape/coat bone vertex. Equipping hides that outfit, so the hero cape is off while the armor's own cloak stays. Unequipping shows the outfit again, cape included.",
+  "bind_audit": {
+    "equipped_preview": "copy of body.glb; fists and hair are not moved",
+    "attachment": "bind-space joint origin (node world == inv IBM)",
+    "hand_L_joint_to_nearest_hand_vert_m": 0.012,
+    "hand_surface_meets_forearm": true
+  }
 }

@@ -2,7 +2,9 @@
 
 Terrain evidence (ground, slopes, coasts, silhouettes, no scatter in the shot) is `TERRAIN.md` and `renders/terrain/`. Read that before the scatter notes. The mainland mountain gully is **not** applied.
 
-Same drop-in shape as land3 (`../land3/README_LUCKY_LAND3.md`). Copy `land4/stageN/meshes/*` over the land3 (or game) terrain visuals of the same names, and `shaders/vc_terrain.gdshader` over `res://tidewrack/stage1/shaders/vc_terrain.gdshader`. Do **not** replace `*_col.glb`, `*_terrain_col.glb`, stage5 harbour/path meshes, or anything under equipment/. The Saltglass stair, cove harbour, lift removal and toll are untouched.
+Same drop-in shape as land3 (`../land3/README_LUCKY_LAND3.md`). Copy `land4/stageN/meshes/*` over the land3 (or game) terrain visuals of the same names. Do **not** replace `*_col.glb`, `*_terrain_col.glb`, stage5 harbour/path meshes, or anything under equipment/. The Saltglass stair, cove harbour, lift removal and toll are untouched.
+
+Do **not** copy `shaders/vc_terrain.gdshader` over the game shader until the 15 texture uniforms are set. The review shader samples CC0 albedo, normal and roughness (`textures/TEXTURES.md`). `preview/render.gd` `bind_terrain()` is the binding. Without those textures the ground will not match these stills.
 
 `_mat_for` stays the land3 snippet (`lift 0.1, ambient 1.25, spec 0.075` on ash). `detail` still scales the near grass for Low.
 
@@ -14,7 +16,7 @@ Priority was the silhouette and the waterline, then the ground and the scatter.
 
 - **Silhouette.** Steep free faces are midpoint-split (waterline faces included) and Taubin-smoothed. The old ridged/strata displacement is what read as sawtooth crests and corrugated frost. Walkable ground, tile seams, route/POI/pier/bridge corridors, the Saltglass harbour footprint, glow decals, overhangs (arches) and edges longer than 18 m (pillars, rails) are pinned. Measured route-vertex motion is **0 m on every terrain mesh**. Peak heights stay within about 1 m (see `terrain_stats.json`).
 - **Shore.** The shader's wet line follows a wandering height instead of a bathtub ring. A short visual apron is added only where a mesh boundary is actually the sea (several playable islets). Tile boundaries are the underwater cut, so they are not skirted; their waterline faces are the ones that got split and rounded.
-- **Ground.** `vc_terrain.gdshader` keeps each region's colours (temperate, salt and sandstone, blue-grey snow, basalt/ash/ember) and breaks the straight blade stripes, the parallel sand sine, and the tight frost sastrugi. Biome weights wander so grass/sand/snow/rock don't meet on a contour. Baked vertex colours are blurred in world space except on the route keep-out, and a wet tint is baked near the water so lod1 gets it too.
+- **Ground.** The review shader samples grass, soil, sand, rock and snow photographs (albedo, normal, roughness) at a fixed world scale, with slope rock on a triplanar map and a soft shore. Vertex colour still picks the biome. See `TERRAIN.md` and `textures/TEXTURES.md`. The old value-noise grass is what the left half of `renders/terrain/gullhaven_ground.jpg` shows.
 - **Scatter.** More than one tree, bush and rock shape per region, plus shore wrack. Every one of the 13 playable islands has scatter (Saltwatch, the smallest, has 16). Islets down to a few hundred square metres are in `COVERAGE.md`. A few skerries have 0 instances: no gentle point cleared the keep-out. They are listed, not skipped. Ash spires and boulder clusters are spaced landmarks again (110), not a carpet.
 
 ## Budgets (High, whole region — the game streams tiles and 256 m chunks)

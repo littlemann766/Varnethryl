@@ -16,6 +16,26 @@ func sh(p: String) -> ShaderMaterial:
 	m.shader = load(p)
 	return m
 
+var _maps := {}
+func grab(name: String) -> Texture2D:
+	if _maps.has(name):
+		return _maps[name]
+	var p := ProjectSettings.globalize_path("res://").path_join("../textures/%s.jpg" % name)
+	var img := Image.load_from_file(p)
+	if img == null:
+		push_error("missing texture " + p)
+		return null
+	img.generate_mipmaps()
+	var t := ImageTexture.create_from_image(img)
+	_maps[name] = t
+	return t
+
+func bind_terrain(mat: ShaderMaterial) -> void:
+	for key in ["grass", "earth", "sand", "rock", "snow"]:
+		mat.set_shader_parameter(key + "_col", grab(key + "_albedo"))
+		mat.set_shader_parameter(key + "_nrm", grab(key + "_normal"))
+		mat.set_shader_parameter(key + "_rgh", grab(key + "_rough"))
+
 func _run() -> void:
 	var a := OS.get_cmdline_user_args()
 	var shots: Array = JSON.parse_string(FileAccess.get_file_as_string(a[0]))
@@ -127,10 +147,11 @@ func _build(top: Node3D, reg: String, files: Array, after: bool) -> void:
 		if after and bool(f.terrain):
 			mat = sh(terrain_shader)
 			mat.set_shader_parameter("region", ["A", "B", "frost", "ash"].find(reg))
+			bind_terrain(mat)
 			if reg == "ash":
-				mat.set_shader_parameter("lift", 0.1)
-				mat.set_shader_parameter("ambient", 1.25)
-				mat.set_shader_parameter("spec", 0.075)
+				mat.set_shader_parameter("lift", 0.06)
+				mat.set_shader_parameter("ambient", 0.45)
+				mat.set_shader_parameter("spec", 0.12)
 		elif (not after) and bool(f.terrain):
 			mat = sh(terrain_shader)
 			mat.set_shader_parameter("region", ["A", "B", "frost", "ash"].find(reg))

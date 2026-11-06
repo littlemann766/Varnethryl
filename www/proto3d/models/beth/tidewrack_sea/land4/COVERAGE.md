@@ -2,7 +2,7 @@
 
 Scatter on a `named_land` row can read 0 because those points are counted on the matching `named_island` row (pier neighbourhood). That is the same ground, not a missed island.
 
-A skerry with scatter 0 had no gentle sample that cleared the path/prop keep-out. It is listed so it is not a silent omission.
+A skerry with scatter 0 had no gentle sample that cleared the path/prop keep-out. It is listed so it is not a silent omission. Those bare skerries still use the land4 terrain shader, so the surface is the rock and sand photographs, not a flat vertex colour.
 
 ## Playable islands (stage5 manifest, 13)
 

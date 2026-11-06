@@ -1,48 +1,61 @@
-# Land4 terrain review (this pass)
+# Land4 terrain review — textured ground
 
-The ground is the subject. Scatter is still in the drop-in meshes, and it is not what these stills are for. `renders/terrain/*.jpg` is land3 on the left and land4 on the right, same camera, **no scatter loaded**. Godot 4.4 GL Compatibility on llvmpipe. Not a Galaxy S26 Vulkan capture.
+The ground is the subject. Scatter is still in the drop-in meshes and is not what these stills are for. `renders/terrain/*.jpg` is land3 on the left and land4 on the right, same camera, no scatter loaded. Godot 4.4.1 GL Compatibility on llvmpipe. That is a preview, not a Galaxy S26 Vulkan capture.
 
-## Completed this round
+Shader compile on this 50-shot set: 0 errors. Median pixels changed by more than 12 levels: **0.48** (`renders/terrain/pixel_diff.json`).
 
-- Ground detail is isotropic and world-scaled. Fine grain is about 15 cm and mid grain about 0.8–1.5 m, two frequencies that are not integer multiples. Fine grain is turned off when one pixel covers more than about 10 cm of ground, which is what stretched the old 4:1 blade noise into foreground streaks. Gullhaven at eye height no longer shows those streaks. The material is still procedural value noise, not a finished texture: a faint lattice can show when the camera looks straight down (`B_ground`). Do not call the grass finished.
-- The hard horizontal frost band was the shader. Rock weight was multiplied by `smoothstep` on world height, so a sheer face changed colour on a level line. That term is gone. Rock follows slope only.
-- The white and blue slivers above the frost cliff are not the terrain shader. They are `stage4/meshes/frost_icicles.glb` (23k tris, icicle fringes). In the cliff window, most of those verts sit metres above the surface directly below them because they hang off the lip. They are left as that prop. Terrain proof shots do not load them. The prop file was not edited.
-- Shader compile on this 50-shot set: 0 errors.
-- Long coast and ridge edges were split earlier. Routes stay pinned. Collision files were not replaced.
+## What the ground is now
 
-## Not done
+`shaders/vc_terrain.gdshader` samples five CC0 surface sets (albedo, normal, roughness). The photographs and the license are in `textures/TEXTURES.md`. Tile size is in metres: grass and soil 2 m, sand 2.4 m, snow 3.2 m, rock 1.8 m on a triplanar blend so a cliff does not stretch. A second, larger copy of the same photo is mixed at 22% everywhere. An earlier spatial blend-mask made diamond cells at eye height, so that mask is gone.
 
-- A photographed or tiled albedo set. There is no ground texture in this pass, only the procedural shader. Down-view lattice and grazing softness are the limit of that.
-- `ash_skyline` is inside the mesh (black). `saltglass_ground` clips the surface and is mostly water. `hot_spring_coast` and `beached_wreck_coast` barely change. Do not use those four as proof.
-- Mainland mountains. `scripts/main.gd` is on `origin/main` and not on this branch. Its `_height_raw` still has the old needle term (`230 * rg * rg` and `45 * rg2 * rg2`). The gully line would change height for r ≳ 800 m and therefore collision. It was not applied. See `terrain_pass/mainland_land4/REMAINING_GULLY.md`.
+Baked vertex colour still chooses the biome (grass, sand, snow, slope rock). The photo is what you see. Grass is darkened and pulled toward olive so it is not the land3 neon. Snow is darkened and its roughness is held at 0.82 or above so the flake texture is not a white specular disk. Ash flats are the cliff rock cooled and darkened, mixed with the soil set. That is basalt-coloured stone, not a separate vesicular basalt scan (Rock035 was reviewed and left out to stay at 15 samplers).
 
-## Frames that show the terrain
+Placed props (vertex alpha under 0.5) stay vertex colour. `hero_cut` is unchanged. The random near-fade that dithered the foreground is gone. Only fragments closer than 0.2 m are discarded.
 
-Use these. Median pixels changed across the 50 shots is about 25%.
+## Budgets
 
-| shot | what you should see |
+Terrain and scatter triangle counts are unchanged from the smooth pass:
+
+| region | terrain before | terrain high | lod1 | scatter instances | scatter high |
+|---|---:|---:|---:|---:|---:|
+| A Archipelago | 251k | 386k | 154k (40%) | 2600 | 176k |
+| B Saltglass | 475k | 794k | 318k (40%) | 2467 | 108k |
+| frost | 572k | 942k | 377k (40%) | 3418 | 160k |
+| ash | 242k | 378k | 151k (40%) | 2893 | 135k |
+
+Texture set on disk is about 21 MB of 1024 JPEG (15 files). In the preview they are uploaded with mipmaps. The shader binds **15 samplers** (the usual GL Compatibility limit is 16) and takes about 26 texture reads per fragment: two albedo taps for grass, soil, sand and snow, triplanar rock, one normal each, one roughness each. `detail` only scales normal strength. It does not drop taps. This was not timed on a phone.
+
+## Frames to look at
+
+| shot | what is in the frame |
 |---|---|
-| `gullhaven_ground` | green Archipelago ground at eye height, hills behind, 64% of pixels changed |
-| `A_ground`, `coil_isle_ground`, `lantern_rock_ground` | same, on other Archipelago ground |
-| `frost_skyline` | ice cliff: pale cap, blue-grey face, 63% changed |
-| `A_coast` | rock lip into the water, grass on the bank |
-| `ash_ground` | dark basalt slope, ember cracks, the hill line |
-| `B_skyline`, `saltglass_skyline` | Saltglass relief where the camera cleared the cliff |
+| `gullhaven_ground` | Eye height. Left is the streaked neon grass. Right is the grass photograph, soil in the wear, sand at the bottom of the frame. |
+| `B_ground` | Saltgrass flat in front, sandstone hills behind. |
+| `saltglass_ground` | On the island, about 86 m inland of the port, so the frame is the slope and not the quay wall. |
+| `gullhaven_coast` | Sand photograph on the bank, rock on the offshore stacks. |
+| `frost_ground` | Snow photograph on the slope. A sun glint remains up the hill. The flake texture is visible around it. |
+| `frost_skyline` | Cliff profile from offshore, camera above the sea, not inside the face. Snow cap, rock on the wall. Distant rock still reads a little gridded. |
+| `ash_skyline` | The cone against the sky, from offshore. The earlier black frame was the camera inside the mesh. This one is not. Most of the frame is sky and sea, so the pixel delta is only 0.07. Judge the mountain, not the percentage. |
+| `ash_ground` | Dark soil and rock at eye height. |
 
-## Frames that do not prove anything
+## Frames that are weak
 
-- `ash_skyline` is inside the rock. The picture is black. Do not use it.
-- `saltglass_ground` sits in the surface, so the near-fade dithers and the frame is mostly water. Do not use it.
-- `hot_spring_coast` and `beached_wreck_coast` barely change (0–2%). The camera is on ground the pin held still.
+- `hot_spring_coast` looks down a dark face. The after frame is mostly black. Use `ash_coast` and `hot_spring_ground` instead.
+- `hot_spring_skyline` is the bridge and the crystal props. The terrain change is small (pixel delta 0.08) because the props dominate.
+- Distant cliff faces can still show a faint tile or the mesh facets. Mipmaps hide the fine photo; they do not hide a large triangle.
+- Specular on snow and on some grass slopes is still hot where the camera faces the sun. Roughness is floored on snow. It is not a measured phone exposure.
 
 ## Every island
 
-Playable islands each have a `*_ground` and a `*_coast` frame, and a `*_skyline` where the mesh rises past 14 m. Smaller land components, including skerries left as rock with no trees, are listed in `COVERAGE.md` and `grove_notes.json`. A skerry marked `bare_rock` or `bare_unplaceable` is bare on purpose: shore and rock material only, no trees.
+All 13 playable islands have `*_ground`, `*_coast`, and `*_skyline` when the mesh rises past 14 m. The same shader runs on every terrain mesh in the four regions, including islets and skerries. A skerry marked `bare_rock` or `bare_unplaceable` in `COVERAGE.md` has no trees on purpose. It still gets the rock and shore materials.
 
-## Mainland
+Cameras were placed on the land3 surface (highest triangle at that xz), with the eye 1.6–1.7 m up on ground shots and at least 6 m up on slopes. Offshore skylines sit at 8 m above the sea when the sample is water, so they are not under the water plane and not inside the body. A few coast frames are still awkward. They are named above.
 
-Not done, and not claimed done. `main.gd` is not in this checkout. Fix 2 already rounded the crest and cut the 45 m spikes to 14 m (`terrain_pass/mainland/fix02_main_gd.patch`). The remaining land2 line, an erosion gully only for r ≳ 800 m, is written in `terrain_pass/mainland_land4/REMAINING_GULLY.md` and was **not** applied. Applying it moves mountain collision and needs a normal rebake plus a scatter reseat in the game. There is no in-engine mainland render in this pass.
+## Not changed
 
-## Paths
-
-Route vertices were measured at 0 m of motion on the first smooth. This coast split only moves verts that are not on the route pin, and only up to 0.7 m. Collision glbs were not replaced. The Saltglass stair, harbour and toll were not redesigned.
+- Routes. The earlier smooth measured 0 m of motion on route vertices. This pass does not move meshes.
+- Collision glbs. Not replaced.
+- Saltglass stair, harbour, lift, toll. Not redesigned.
+- Mainland. `main.gd` is not on this branch. The gully term would change height for r ≳ 800 m and therefore collision. It was not applied. See `terrain_pass/mainland_land4/REMAINING_GULLY.md`. No mainland render.
+- Knight rig, armor, `vertex_color_is_srgb`. Not touched.
+- The game does not load this shader yet. `preview/render.gd` is what binds the textures. Copying the shader into the game without those 15 uniforms will not show this ground.

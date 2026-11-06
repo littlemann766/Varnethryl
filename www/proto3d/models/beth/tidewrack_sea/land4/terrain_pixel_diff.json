@@ -1,502 +1,202 @@
 [
  {
   "name": "A_coast",
-  "pct_changed": 12.8,
-  "center_sat": 113.0,
-  "center_mean": [
-   35.5,
-   117.0,
-   142.4
-  ]
+  "pct_changed": 10.5
  },
  {
   "name": "A_ground",
-  "pct_changed": 47.9,
-  "center_sat": 57.1,
-  "center_mean": [
-   59.8,
-   76.0,
-   37.0
-  ]
+  "pct_changed": 45.0
  },
  {
   "name": "A_skyline",
-  "pct_changed": 22.1,
-  "center_sat": 28.1,
-  "center_mean": [
-   153.2,
-   154.4,
-   137.3
-  ]
+  "pct_changed": 30.4
  },
  {
   "name": "B_coast",
-  "pct_changed": 11.9,
-  "center_sat": 105.2,
-  "center_mean": [
-   25.7,
-   91.4,
-   117.8
-  ]
+  "pct_changed": 13.6
  },
  {
   "name": "B_ground",
-  "pct_changed": 38.4,
-  "center_sat": 44.2,
-  "center_mean": [
-   48.1,
-   60.3,
-   30.1
-  ]
+  "pct_changed": 41.3
  },
  {
   "name": "B_skyline",
-  "pct_changed": 39.2,
-  "center_sat": 12.6,
-  "center_mean": [
-   35.1,
-   28.5,
-   25.3
-  ]
+  "pct_changed": 54.9
  },
  {
   "name": "ash_coast",
-  "pct_changed": 28.2,
-  "center_sat": 34.6,
-  "center_mean": [
-   60.3,
-   38.2,
-   26.6
-  ]
+  "pct_changed": 28.4
  },
  {
   "name": "ash_ground",
-  "pct_changed": 17.6,
-  "center_sat": 27.1,
-  "center_mean": [
-   57.8,
-   40.8,
-   30.8
-  ]
+  "pct_changed": 9.4
  },
  {
   "name": "ash_skyline",
-  "pct_changed": 94.0,
-  "center_sat": 1.5,
-  "center_mean": [
-   1.5,
-   0.0,
-   0.0
-  ]
+  "pct_changed": 94.0
  },
  {
   "name": "aurora_arch_coast",
-  "pct_changed": 13.2,
-  "center_sat": 13.0,
-  "center_mean": [
-   180.5,
-   187.2,
-   193.5
-  ]
+  "pct_changed": 7.5
  },
  {
   "name": "aurora_arch_ground",
-  "pct_changed": 14.8,
-  "center_sat": 18.6,
-  "center_mean": [
-   207.0,
-   218.8,
-   224.8
-  ]
+  "pct_changed": 38.3
  },
  {
   "name": "aurora_arch_skyline",
-  "pct_changed": 48.8,
-  "center_sat": 2.3,
-  "center_mean": [
-   233.0,
-   234.8,
-   235.3
-  ]
+  "pct_changed": 63.0
  },
  {
   "name": "beached_wreck_coast",
-  "pct_changed": 2.0,
-  "center_sat": 51.9,
-  "center_mean": [
-   56.2,
-   86.8,
-   93.4
-  ]
+  "pct_changed": 3.4
  },
  {
   "name": "beached_wreck_ground",
-  "pct_changed": 5.5,
-  "center_sat": 69.9,
-  "center_mean": [
-   146.0,
-   173.3,
-   189.7
-  ]
+  "pct_changed": 10.3
  },
  {
   "name": "beached_wreck_skyline",
-  "pct_changed": 27.9,
-  "center_sat": 54.4,
-  "center_mean": [
-   166.4,
-   144.1,
-   117.6
-  ]
+  "pct_changed": 38.7
  },
  {
   "name": "coil_isle_coast",
-  "pct_changed": 32.5,
-  "center_sat": 91.0,
-  "center_mean": [
-   141.8,
-   165.9,
-   140.7
-  ]
+  "pct_changed": 28.8
  },
  {
   "name": "coil_isle_ground",
-  "pct_changed": 34.1,
-  "center_sat": 38.2,
-  "center_mean": [
-   42.8,
-   60.6,
-   36.1
-  ]
+  "pct_changed": 29.0
  },
  {
   "name": "coil_isle_skyline",
-  "pct_changed": 25.2,
-  "center_sat": 41.5,
-  "center_mean": [
-   58.8,
-   95.2,
-   55.6
-  ]
+  "pct_changed": 25.6
  },
  {
   "name": "ember_wreck_coast",
-  "pct_changed": 15.8,
-  "center_sat": 24.1,
-  "center_mean": [
-   65.9,
-   54.4,
-   41.8
-  ]
+  "pct_changed": 8.9
  },
  {
   "name": "ember_wreck_ground",
-  "pct_changed": 27.8,
-  "center_sat": 26.9,
-  "center_mean": [
-   71.3,
-   57.7,
-   44.5
-  ]
+  "pct_changed": 14.9
  },
  {
   "name": "ember_wreck_skyline",
-  "pct_changed": 20.3,
-  "center_sat": 27.1,
-  "center_mean": [
-   77.7,
-   64.3,
-   50.5
-  ]
+  "pct_changed": 26.1
  },
  {
   "name": "frost_coast",
-  "pct_changed": 11.0,
-  "center_sat": 73.0,
-  "center_mean": [
-   115.5,
-   162.3,
-   188.6
-  ]
+  "pct_changed": 9.5
  },
  {
   "name": "frost_ground",
-  "pct_changed": 30.9,
-  "center_sat": 52.2,
-  "center_mean": [
-   87.9,
-   85.7,
-   105.3
-  ]
+  "pct_changed": 27.7
  },
  {
   "name": "frost_skyline",
-  "pct_changed": 63.2,
-  "center_sat": 34.6,
-  "center_mean": [
-   114.6,
-   132.2,
-   149.2
-  ]
+  "pct_changed": 65.8
  },
  {
   "name": "frostreach_coast",
-  "pct_changed": 21.3,
-  "center_sat": 76.8,
-  "center_mean": [
-   136.6,
-   187.2,
-   213.4
-  ]
+  "pct_changed": 26.5
  },
  {
   "name": "frostreach_ground",
-  "pct_changed": 20.4,
-  "center_sat": 6.8,
-  "center_mean": [
-   227.2,
-   231.5,
-   233.9
-  ]
+  "pct_changed": 21.4
  },
  {
   "name": "frostreach_skyline",
-  "pct_changed": 100.0,
-  "center_sat": 63.5,
-  "center_mean": [
-   116.2,
-   148.1,
-   179.7
-  ]
+  "pct_changed": 100.0
  },
  {
   "name": "frozen_wreck_coast",
-  "pct_changed": 19.4,
-  "center_sat": 50.0,
-  "center_mean": [
-   178.7,
-   180.0,
-   190.8
-  ]
+  "pct_changed": 27.2
  },
  {
   "name": "frozen_wreck_ground",
-  "pct_changed": 47.7,
-  "center_sat": 11.0,
-  "center_mean": [
-   226.0,
-   232.9,
-   237.0
-  ]
+  "pct_changed": 58.3
  },
  {
   "name": "frozen_wreck_skyline",
-  "pct_changed": 54.5,
-  "center_sat": 4.1,
-  "center_mean": [
-   225.8,
-   228.4,
-   229.9
-  ]
+  "pct_changed": 66.1
  },
  {
   "name": "gullhaven_coast",
-  "pct_changed": 13.0,
-  "center_sat": 121.8,
-  "center_mean": [
-   101.8,
-   184.2,
-   207.7
-  ]
+  "pct_changed": 12.1
  },
  {
   "name": "gullhaven_ground",
-  "pct_changed": 64.2,
-  "center_sat": 90.3,
-  "center_mean": [
-   44.1,
-   118.7,
-   28.4
-  ]
+  "pct_changed": 69.2
  },
  {
   "name": "gullhaven_skyline",
-  "pct_changed": 26.8,
-  "center_sat": 67.7,
-  "center_mean": [
-   48.3,
-   106.2,
-   40.7
-  ]
+  "pct_changed": 30.8
  },
  {
   "name": "hot_spring_coast",
-  "pct_changed": 0.0,
-  "center_sat": 61.5,
-  "center_mean": [
-   105.9,
-   75.6,
-   44.3
-  ]
+  "pct_changed": 0.0
  },
  {
   "name": "hot_spring_ground",
-  "pct_changed": 23.6,
-  "center_sat": 50.9,
-  "center_mean": [
-   100.3,
-   83.1,
-   52.7
-  ]
+  "pct_changed": 25.8
  },
  {
   "name": "hot_spring_skyline",
-  "pct_changed": 11.9,
-  "center_sat": 18.1,
-  "center_mean": [
-   56.9,
-   55.5,
-   51.6
-  ]
+  "pct_changed": 12.5
  },
  {
   "name": "lantern_rock_coast",
-  "pct_changed": 52.8,
-  "center_sat": 51.5,
-  "center_mean": [
-   26.7,
-   71.0,
-   22.3
-  ]
+  "pct_changed": 52.1
  },
  {
   "name": "lantern_rock_ground",
-  "pct_changed": 60.5,
-  "center_sat": 60.8,
-  "center_mean": [
-   51.6,
-   64.0,
-   28.6
-  ]
+  "pct_changed": 55.1
  },
  {
   "name": "lantern_rock_skyline",
-  "pct_changed": 38.2,
-  "center_sat": 48.0,
-  "center_mean": [
-   43.5,
-   87.2,
-   41.3
-  ]
+  "pct_changed": 48.8
  },
  {
   "name": "obsidian_arch_coast",
-  "pct_changed": 22.9,
-  "center_sat": 23.2,
-  "center_mean": [
-   115.7,
-   104.9,
-   92.5
-  ]
+  "pct_changed": 11.6
  },
  {
   "name": "obsidian_arch_ground",
-  "pct_changed": 15.5,
-  "center_sat": 25.0,
-  "center_mean": [
-   69.1,
-   56.8,
-   44.0
-  ]
+  "pct_changed": 9.6
  },
  {
   "name": "obsidian_arch_skyline",
-  "pct_changed": 62.8,
-  "center_sat": 13.7,
-  "center_mean": [
-   59.3,
-   52.3,
-   45.5
-  ]
+  "pct_changed": 61.3
  },
  {
   "name": "saltglass_coast",
-  "pct_changed": 5.4,
-  "center_sat": 55.0,
-  "center_mean": [
-   95.5,
-   121.0,
-   144.1
-  ]
+  "pct_changed": 6.6
  },
  {
   "name": "saltglass_ground",
-  "pct_changed": 2.4,
-  "center_sat": 79.2,
-  "center_mean": [
-   136.2,
-   186.5,
-   206.7
-  ]
+  "pct_changed": 5.7
  },
  {
   "name": "saltglass_skyline",
-  "pct_changed": 47.0,
-  "center_sat": 38.9,
-  "center_mean": [
-   164.9,
-   141.2,
-   128.3
-  ]
+  "pct_changed": 52.0
  },
  {
   "name": "saltwatch_keep_coast",
-  "pct_changed": 28.9,
-  "center_sat": 105.4,
-  "center_mean": [
-   120.5,
-   157.2,
-   145.7
-  ]
+  "pct_changed": 25.9
  },
  {
   "name": "saltwatch_keep_ground",
-  "pct_changed": 25.8,
-  "center_sat": 44.6,
-  "center_mean": [
-   50.1,
-   79.3,
-   42.8
-  ]
+  "pct_changed": 20.6
  },
  {
   "name": "vent_coast",
-  "pct_changed": 9.2,
-  "center_sat": 23.7,
-  "center_mean": [
-   121.2,
-   110.2,
-   97.5
-  ]
+  "pct_changed": 1.5
  },
  {
   "name": "vent_ground",
-  "pct_changed": 11.9,
-  "center_sat": 20.3,
-  "center_mean": [
-   43.4,
-   32.3,
-   23.1
-  ]
+  "pct_changed": 8.4
  },
  {
   "name": "vent_skyline",
-  "pct_changed": 20.9,
-  "center_sat": 38.3,
-  "center_mean": [
-   75.1,
-   57.6,
-   36.8
-  ]
+  "pct_changed": 13.9
  }
 ]

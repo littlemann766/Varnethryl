@@ -4,7 +4,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SEA = os.path.abspath(os.path.join(ROOT, ".."))
 LAND3 = os.path.join(SEA, "land3")
 REG = {"A": ("stage1/meshes/", "arch_"), "B": ("stage2/meshes/", "coast_"), "frost": ("stage4/meshes/", "frost_"), "ash": ("stage4/meshes/", "ash_")}
-SKIP = ("storm", "fog", "ocean", "buoy", "upg_", "hero", "floe", "iceberg", "hidden", "sunken", "coil_joints")
+SKIP = ("storm", "fog", "ocean", "buoy", "upg_", "hero", "floe", "iceberg", "icicle", "hidden", "sunken", "coil_joints")
 
 def is_terrain(b):
     return "_tile_" in b or b == "arch_islands" or ("_isl_" in b and not b.endswith("_glow") and not b.endswith("_port"))

@@ -2,14 +2,19 @@
 
 The ground is the subject. Scatter is still in the drop-in meshes, and it is not what these stills are for. `renders/terrain/*.jpg` is land3 on the left and land4 on the right, same camera, **no scatter loaded**. Godot 4.4 GL Compatibility on llvmpipe. Not a Galaxy S26 Vulkan capture.
 
-## What was wrong, and what changed
+## Completed this round
 
-- A terrain shader edit used `dirt` before it was declared. Godot dropped the shader and the ground drew as the white default. That is why Gullhaven looked like snow. It compiles now (`SHADER ERROR` count 0 on the 50-shot set).
-- Near grass is two crossed high-frequency grains. The earlier domain-warp version drew closed contour lines; that is gone.
-- Snow no longer self-lights into a flat sheet. Steep faces take a darker blue-grey rock, so a frost cliff has a cap and a face. Same camera, land3 is the blown-white cliff.
-- Slopes steeper than about 25° pick up region rock. A sea cliff does too, down to about 8 m, so the lip is stone rather than grass.
-- The wet line stays within about a metre of the water. It does not climb the hill.
-- Long coastal faces and long ridge edges were split once more (`tools/refine_coast.py`). Walkable verts and the route/pier pin do not move. Extra motion on free verts is clamped to 0.7 m.
+- Ground detail is isotropic and world-scaled. Fine grain is about 15 cm and mid grain about 0.8–1.5 m, two frequencies that are not integer multiples. Fine grain is turned off when one pixel covers more than about 10 cm of ground, which is what stretched the old 4:1 blade noise into foreground streaks. Gullhaven at eye height no longer shows those streaks. The material is still procedural value noise, not a finished texture: a faint lattice can show when the camera looks straight down (`B_ground`). Do not call the grass finished.
+- The hard horizontal frost band was the shader. Rock weight was multiplied by `smoothstep` on world height, so a sheer face changed colour on a level line. That term is gone. Rock follows slope only.
+- The white and blue slivers above the frost cliff are not the terrain shader. They are `stage4/meshes/frost_icicles.glb` (23k tris, icicle fringes). In the cliff window, most of those verts sit metres above the surface directly below them because they hang off the lip. They are left as that prop. Terrain proof shots do not load them. The prop file was not edited.
+- Shader compile on this 50-shot set: 0 errors.
+- Long coast and ridge edges were split earlier. Routes stay pinned. Collision files were not replaced.
+
+## Not done
+
+- A photographed or tiled albedo set. There is no ground texture in this pass, only the procedural shader. Down-view lattice and grazing softness are the limit of that.
+- `ash_skyline` is inside the mesh (black). `saltglass_ground` clips the surface and is mostly water. `hot_spring_coast` and `beached_wreck_coast` barely change. Do not use those four as proof.
+- Mainland mountains. `scripts/main.gd` is on `origin/main` and not on this branch. Its `_height_raw` still has the old needle term (`230 * rg * rg` and `45 * rg2 * rg2`). The gully line would change height for r ≳ 800 m and therefore collision. It was not applied. See `terrain_pass/mainland_land4/REMAINING_GULLY.md`.
 
 ## Frames that show the terrain
 

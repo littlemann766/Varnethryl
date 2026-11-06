@@ -1,6 +1,10 @@
 # Mainland mountain — remaining piece, not applied
 
-`main.gd` is not in this checkout, so this was not applied and there is no mainland render here. Do not treat the mainland mountains as finished.
+Read-only check of `origin/main:scripts/main.gd` (2026-11-06): `_height_raw` still has the needle term
+
+`h += mr * (60.0 + (40.0 + 230.0 * rg * rg) * (0.3 + 0.7 * massif) + 45.0 * rg2 * rg2 * mr)`.
+
+That file is not on `beth-world-art`. Applying the gully changes height for r ≳ 800 m and therefore collision. It was not applied, and there is no mainland render. Do not treat the mainland mountains as finished.
 
 Fix 2 (`../mainland/fix02_main_gd.patch`) is already the smooth knee and the cut from a 45 m fine spike to 14 m. What land2 still asked for, and what is still missing, is the gully term. It only runs where `mr > 0` (r ≳ 800 m). After fix 2, the mountain line would become:
 

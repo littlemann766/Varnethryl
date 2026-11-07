@@ -2839,7 +2839,9 @@ func _cfg_volcano_done() -> bool:
 	var cf := ConfigFile.new()
 	if cf.load(STORY_CFG) == OK:
 		var v = cf.get_value("story", "volcano_done", false)
-		return v == true or v == 1
+		if typeof(v) == TYPE_BOOL: return v
+		if typeof(v) == TYPE_INT or typeof(v) == TYPE_FLOAT: return int(v) == 1
+		return str(v) == "true"
 	if not FileAccess.file_exists(STORY_CFG): return false
 	return VSave.volcano_done_in_cfg_text(FileAccess.get_file_as_string(STORY_CFG))
 ## The JSON save and story.cfg can each survive the other being missing or unreadable.

@@ -2,9 +2,9 @@
 
 Grass and snow roughness from the CC0 photos is smooth (grass median about 0.25). Used raw, and worse if the JPEG is read as sRGB, that is a broad specular blob, the polished-carpet look. The shader keeps the photo's variation but places grass and earth in 0.88–0.98, snow in 0.93–0.99, dry sand in 0.84–0.94, rock in 0.80–0.92. Wet sand is the only surface allowed down to about 0.58. Specular is capped. Normal strength is about half of the first textured pass, so the grain stays in the albedo.
 
-Cliff and soil repeats are broken by mixing rotated copies at nearly equal weight (0.42–0.58) over about 70 m. Rock adds a third copy at 90 degrees. A mask that swings to 0 or 1 leaves one aligned tile on a wall. A small-scale mask drew diamonds. Neither is used.
+The repeat is broken without a third tap. Grass, soil, sand and snow keep the metre-scale photo and mix in a rotated copy at about three times the size, weight about 0.12–0.34, with a mild bend in the UV. Rock, which was showing straight columns on cliffs, mixes more widely (about 0.18–0.74) and the bend follows the cliff, including height. The third rock tap is gone. A small-scale mask that drew diamonds is still not used.
 
-What is still visible, and is not claimed fixed: distant frost faces still show the terrain mesh's large triangles. The frost snow cap still has broad yellow-green bands where the biome blend sits on a tilted slope. Rock still has the photograph's own pebble grain. This is a GL Compatibility preview, not a phone capture. 15 samplers, about 29 texture reads per fragment.
+What is still visible, and is not claimed fixed: distant frost faces still show the terrain mesh's large triangles. Rock still has the photograph's own grain, and a close frost cliff can still show a faint column. This is a GL Compatibility preview, not a phone capture. 15 samplers, 26 texture reads per fragment (was 29).
 
 The ground is the subject. Scatter is still in the drop-in meshes and is not what these stills are for. `renders/terrain/*.jpg` is land3 on the left and land4 on the right, same camera, no scatter loaded. Godot 4.4.1 GL Compatibility on llvmpipe. That is a preview, not a Galaxy S26 Vulkan capture.
 
@@ -29,7 +29,7 @@ Terrain and scatter triangle counts are unchanged from the smooth pass:
 | frost | 572k | 942k | 377k (40%) | 3418 | 160k |
 | ash | 242k | 378k | 151k (40%) | 2893 | 135k |
 
-Texture set on disk is about 21 MB of 1024 JPEG (15 files). In the preview they are uploaded with mipmaps. The shader binds **15 samplers** (the usual GL Compatibility limit is 16) and takes about 26 texture reads per fragment: two albedo taps for grass, soil, sand and snow, triplanar rock, one normal each, one roughness each. `detail` only scales normal strength. It does not drop taps. This was not timed on a phone.
+Texture set on disk is about 21 MB of 1024 JPEG (15 files). In the preview they are uploaded with mipmaps. The shader binds **15 samplers** (the usual GL Compatibility limit is 16) and takes **26 texture reads** per fragment: two albedo taps for grass, soil, sand and snow, two albedo taps on each of the three rock planes, one normal each, one roughness each. The old third rock tap is not taken. `detail` only scales normal strength. It does not drop taps. This was not timed on a phone.
 
 ## Frames to look at
 
@@ -49,8 +49,9 @@ Texture set on disk is about 21 MB of 1024 JPEG (15 files). In the preview they 
 - `hot_spring_coast` looks down a dark face. The after frame is mostly black. Use `ash_coast` and `hot_spring_ground` instead.
 - `hot_spring_skyline` is the bridge and the crystal props. The terrain change is small (pixel delta 0.08) because the props dominate.
 - Distant cliff faces can still show a faint tile or the mesh facets. Mipmaps hide the fine photo; they do not hide a large triangle.
-- Frost no longer takes the grass and earth mix. Pale frost vertex colour was below the snow test, so that mix painted mustard bands. Flats are the snow photograph, graded cold. A face that is steep in either the smoothed normal or the triangle itself is darker blue-grey rock. The waterline is that rock, not sand. Lighting uses the averaged vertex normal plus the snow or rock relief, so a triangle shades less like one flat card. The triangle edges are still the mesh. Moving or splitting them would change the surface the routes sit on, so they were left. A gentle snow slope can still read as large facets. That is the geometry, not a colour tint.
-- The shader is still 15 samplers and about 26 texture reads. It has not been timed on a phone. Mainland collision is still the separate blocker; these glbs do not replace it.
+- Frost stays on the cold palette: snow on gentle faces, darker blue-grey rock on steep faces and at the waterline, no grass. The triangle edges are still the mesh. A trial that split long edges and slid only the new vertices rounded the crests and also opened dark cuts in the gullies once the slide was large enough to read offshore. Tile borders were held on the old edge and the cuts still appeared, so the trial was not kept. No terrain vertex in this commit moved. A gentle snow slope can still read as large facets.
+- Grass, sand and rock meet over a wider, noisier band. Skerries use this same shader. The photographs and the matte roughness ranges are unchanged.
+- The shader is 15 samplers and 26 texture reads. It has not been timed on a phone. Mainland collision is still the separate blocker; these glbs do not replace it.
 - Specular on snow and on some grass slopes is still hot where the camera faces the sun. Roughness is floored on snow. It is not a measured phone exposure.
 
 ## Every island
@@ -61,7 +62,7 @@ Cameras were placed on the land3 surface (highest triangle at that xz), with the
 
 ## Not changed
 
-- Routes. The earlier smooth measured 0 m of motion on route vertices. This pass does not move meshes.
+- Routes. No terrain vertex was moved. The facet trial was discarded before this commit.
 - Collision glbs. Not replaced.
 - Saltglass stair, harbour, lift, toll. Not redesigned.
 - Mainland. `main.gd` is not on this branch. The gully term would change height for r ≳ 800 m and therefore collision. It was not applied. See `terrain_pass/mainland_land4/REMAINING_GULLY.md`. No mainland render.

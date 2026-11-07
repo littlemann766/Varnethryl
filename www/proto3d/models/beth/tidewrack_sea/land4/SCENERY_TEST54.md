@@ -1,6 +1,6 @@
 # Island scenery for test 54 — separate from the frozen terrain commit
 
-Terrain shader, arrays, and meshes stay at `86e61c6e`. This commit only changes scatter visuals, adds `shaders/vc_scatter.gdshader`, and adds `tw_sea_scatter_test54.patch`. Collider glbs were not rewritten.
+Terrain shader, arrays, and terrain meshes stay at `86e61c6e`. Collider glbs were not rewritten. Cone canopies, block bushes and spike flowers were replaced with clusters that sit in the same patch. Brown trunks, limbs and stone were copied vertex for vertex. `trunk_bounds.json` lists each kept piece taller than 2 m (centroid and AABB) for Lucky's collider pass.
 
 Test 54 (`33ec05515fa2907c1d6958e39e884eed92955776`) has no `land_scatter` files. `tw_sea.gd` `_files` will load any `arch_` / `coast_` / `frost_` / `ash_` glb you copy into `res://tidewrack/stageN/meshes/`, and any name ending in `_col` becomes a trimesh static body. It is not drawn.
 
@@ -33,7 +33,7 @@ Grass, flowers, bushes, stones, driftwood, and crystals are class 0 and do not b
 
 ## Counts
 
-From `scatter_stats.json`, unchanged by this shading pass: Archipelago 2673 instances, 156k high tris, lod1 42%. Saltglass 3231, 154k, lod1 51%. Frost 4049, 217k, lod1 45%. Ash 3754, 130k, lod1 52%. Low tier uses lod1 when the file exists. Not measured on a Galaxy S26.
+Instance counts are unchanged (Archipelago 2673, Saltglass 3231, Frost 4049, Ash 3754). High scatter triangles are now 2.73 million across all four regions, lod1 537 thousand. The previous cones were 657 thousand high. Low tier still uses lod1. Not measured on a Galaxy S26. A whole region is not on screen at once; test 54 streams by distance.
 
 ## Patch
 

@@ -184,6 +184,8 @@ func _build(top: Node3D, reg: String, files: Array, after: bool) -> void:
 				mat.set_shader_parameter("lift", 0.1)
 				mat.set_shader_parameter("ambient", 1.25)
 				mat.set_shader_parameter("spec", 0.075)
+		elif after and ("land_scatter" in p):
+			mat = sh("res://shaders/vc_scatter.gdshader")
 		elif reg == "ash":
 			mat = sh("res://vc_flat.gdshader")
 			mat.set_shader_parameter("lift", 0.14)

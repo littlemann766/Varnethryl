@@ -1,6 +1,17 @@
-# Test 54 art drop — land4 ground, no armor, no collision
+# Test 54 art drop — blocked on the godot-voxel branch ref
 
-Art bytes are commit `4f8c97f8` on `beth-world-art`. This note does not change a mesh or the shader. Godot test 54 was not in this workspace, and `godot-voxel` is not a repo the art token can see (`littlemann766/godot-voxel` and `littlemann76/godot-voxel` do not resolve). The call site below is the one land1 and land3 already used on test 49: `tw_sea.gd` `_mat_for`. Open test 54 and confirm that function still exists before pasting. If it moved, the files below are still the art. Only the call site changes.
+`godot-voxel` is a branch of `https://github.com/littlemann766/Varnethryl`. It is not a separate repository. Checked from this clone:
+
+```
+git fetch origin refs/heads/godot-voxel:refs/remotes/origin/godot-voxel
+fatal: couldn't find remote ref refs/heads/godot-voxel
+```
+
+`git ls-remote --heads origin` has no `refs/heads/godot-voxel` and no other head whose name contains `voxel`. Compatibility of the 15 bindings against that branch was not validated. The `_mat_for` paste further down is the land1/land3 note from test 49. It is not a verified test 54 call site. Do not apply it until `refs/heads/godot-voxel` exists and someone reads `_mat_for` on that SHA.
+
+A tag named `godot-test-54` does exist. It is not the branch. It was not used as a substitute, and its tree was not read for this check. For the record only: `refs/tags/godot-test-54` is `33ec05515fa2907c1d6958e39e884eed92955776`, the same SHA as `refs/heads/main` at the time of this fetch.
+
+Art files named below are still `4f8c97f8` on `beth-world-art`. This note does not change a mesh or the shader. Nothing was pushed to `godot-voxel`, `main`, or a release.
 
 Do not merge this branch. Do not copy armor, PR27, `equipment/`, mainland `main.gd`, or any collision mesh.
 

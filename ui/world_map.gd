@@ -44,18 +44,28 @@ func owner_view() -> bool:
 func _vs() -> Node: return get_tree().root.get_node("VSave") if is_inside_tree() else Engine.get_main_loop().root.get_node("VSave")
 
 # ---------------------------------------------------------------- fog
+var _fog_keep_stored := false
+static func decode_fog(encoded, expect: int) -> PackedByteArray:
+	if typeof(encoded) != TYPE_STRING or encoded == "": return PackedByteArray()
+	var raw := Marshalls.base64_to_raw(encoded)
+	if raw.is_empty(): return PackedByteArray()
+	var out := raw.decompress(expect, FileAccess.COMPRESSION_DEFLATE)
+	return out if out.size() == expect else PackedByteArray()
 func load_fog() -> void:
 	fog = PackedByteArray(); fog.resize(GW * GH)
+	_fog_keep_stored = false
 	var s = _vs().state.get("fog", "")
 	if s is String and s != "":
-		var raw := Marshalls.base64_to_raw(s).decompress(GW * GH, FileAccess.COMPRESSION_DEFLATE)
-		if raw.size() == GW * GH: fog = raw
+		var raw := decode_fog(s, GW * GH)
+		if raw.is_empty(): _fog_keep_stored = true   # do not later overwrite a blob we could not read
+		else: fog = raw
 	fog_tex = null; dirty = false; n_seen = 0
 	fog_rgba = Image.create(GW, GH, false, Image.FORMAT_RGBA8); fog_rgba.fill(HIDDEN)
 	for i in fog.size():
 		if fog[i] > 0: n_seen += 1; fog_rgba.set_pixel(i % GW, i / GW, SEEN)
 	_refresh_tex()
 func save_fog() -> void:
+	if _fog_keep_stored: return
 	_vs().state["fog"] = Marshalls.raw_to_base64(fog.compress(FileAccess.COMPRESSION_DEFLATE)); _vs().write_state()
 func cell(w: Vector2) -> Vector2i: return Vector2i(int((w.x - WORLD.position.x) / CELL), int((w.y - WORLD.position.y) / CELL))
 func revealed(w: Vector2) -> bool:

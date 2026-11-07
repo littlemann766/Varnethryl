@@ -103,6 +103,8 @@ func _pick_hero(id: int) -> void:
 		if s.party.size() >= int(s.get("partyCap", 3)): s.party[s.party.size() - 1] = id
 		else: s.party.append(id)
 	s.active = id
+	var skin: String = VSave.skin_for_index(id)
+	if skin != "": s["heroId"] = skin
 	VSave.write_state(VSave.sanitize_party(s))
 	hero_selected.emit(id)
 

@@ -118,6 +118,7 @@ func enter(b: Dictionary) -> void:
 	if main.sun: main.sun.visible = false
 	_env_inside(true)
 	cooldown = 0.8
+	_remember_place(true)
 
 func exit() -> void:
 	if main.has_method("hide_where"): main.hide_where()   # test 25
@@ -132,6 +133,20 @@ func exit() -> void:
 	if main.sun: main.sun.visible = true
 	_env_inside(false)
 	cooldown = 1.0
+	_remember_place(false)
+
+func _remember_place(inside: bool) -> void:
+	var vs = get_tree().root.get_node_or_null("VSave") if is_inside_tree() else null
+	if vs == null or typeof(vs.state) != TYPE_DICTIONARY: return
+	var st: Dictionary = vs.state
+	if inside and not cur_bld.is_empty() and cur.get("node") != null and main and main.hero:
+		var local: Vector3 = (cur.node as Node3D).to_local((main.hero as Node3D).global_position)
+		st["interior"] = {"inside": true, "id": str(cur_bld.get("id", "")), "x": local.x, "z": local.z, "y": local.y, "yaw": float(main.get("yaw"))}
+	elif typeof(st.get("interior")) == TYPE_DICTIONARY:
+		st.interior["inside"] = false
+		if main and main.hero and vs.has_method("note_land_position"):
+			vs.note_land_position((main.hero as Node3D).position.x, (main.hero as Node3D).position.z, float(main.get("yaw")))
+	vs.write_state()
 
 func _teleport(p: Vector3, facing: float) -> void:
 	var hero: CharacterBody3D = main.hero

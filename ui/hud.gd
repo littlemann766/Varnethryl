@@ -43,18 +43,31 @@ func reset_layout() -> void:
 	for m in movable:
 		var o: Vector4 = defaults[m.name]; m.offset_left = o.x; m.offset_top = o.y; m.offset_right = o.z; m.offset_bottom = o.w
 
+static func layout_point(entry):
+	if not (entry is Array) or entry.size() < 2: return null
+	if not (typeof(entry[0]) in [TYPE_INT, TYPE_FLOAT]) or not (typeof(entry[1]) in [TYPE_INT, TYPE_FLOAT]): return null
+	if not is_finite(float(entry[0])) or not is_finite(float(entry[1])): return null
+	return Vector2(float(entry[0]), float(entry[1]))
+
 func save_layout() -> void:
 	var d := {}
 	for m in movable: d[m.name] = [m.position.x, m.position.y]
-	var f := FileAccess.open(LAYOUT_PATH, FileAccess.WRITE)
-	if f: f.store_string(JSON.stringify(d))
+	var tmp := LAYOUT_PATH + ".tmp"
+	var f := FileAccess.open(tmp, FileAccess.WRITE)
+	if f == null: return
+	f.store_string(JSON.stringify(d))
+	f.close()
+	if DirAccess.rename_absolute(tmp, LAYOUT_PATH) != OK:
+		DirAccess.remove_absolute(LAYOUT_PATH)
+		DirAccess.rename_absolute(tmp, LAYOUT_PATH)
 func load_layout() -> void:
 	reset_layout()
 	if not FileAccess.file_exists(LAYOUT_PATH): return
 	var d = JSON.parse_string(FileAccess.get_file_as_string(LAYOUT_PATH))
 	if typeof(d) != TYPE_DICTIONARY: return
 	for m in movable:
-		if d.has(m.name) and d[m.name] is Array: m.position = Vector2(d[m.name][0], d[m.name][1]).clamp(Vector2.ZERO, size - m.size)
+		var pt = layout_point(d.get(m.name))
+		if pt != null: m.position = pt.clamp(Vector2.ZERO, size - m.size)
 
 func _input(e: InputEvent) -> void:
 	if not editing: return

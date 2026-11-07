@@ -88,6 +88,7 @@ func _case_outside() -> void:
 	var at := Vector2(m.hero.position.x, m.hero.position.z)
 	ok(at.distance_to(Vector2(1000.0, -200.0)) < 2.0, "Play resumed outside town at (%.1f, %.1f)" % [at.x, at.y])
 	ok(at.distance_to(TOWN) > 100.0, "outside-town resume did not stay in town")
+	ok(m.hero.collision_mask == 1 and m.hero.collision_layer == 1, "mainland resume keeps body collision")
 	await _shutdown(m)
 
 func _case_interior() -> void:
@@ -105,6 +106,7 @@ func _case_interior() -> void:
 		var local: Vector3 = (m.interiors.cur.node as Node3D).to_local(m.hero.global_position)
 		ok(Vector2(local.x - 1.25, local.z + 1.5).length() < 1.0, "inn local position restored (%.2f, %.2f)" % [local.x, local.z])
 	ok(str(m.party.hero_id) == "elira", "interior relaunch kept Elira")
+	ok(m.hero.collision_mask == 1 and m.hero.collision_layer == 1, "interior resume keeps body collision")
 	await _shutdown(m)
 
 func _case_sea() -> void:
@@ -129,4 +131,8 @@ func _case_sea() -> void:
 		var hero_at := Vector2(m.hero.global_position.x, m.hero.global_position.z)
 		ok(hero_at.distance_to(TOWN) > 100.0, "sea resume did not leave the hero in town")
 	ok(str(m.party.hero_id) == "pip", "sea relaunch kept Pip")
+	ok(m.hero.collision_mask == 0 and m.hero.collision_layer == 0, "sailing resume lifts body collision for the deck ride")
+	m.sea.leave_to_harbour()
+	await _frames(2)
+	ok(not m.sea.active and m.hero.collision_mask == 1 and m.hero.collision_layer == 1, "leaving the ship restores collision on the quay")
 	await _shutdown(m)

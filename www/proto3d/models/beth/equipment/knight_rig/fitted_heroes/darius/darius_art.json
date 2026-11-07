@@ -14,5 +14,6 @@
     "kept": 3907
   },
   "bind_residual_deg": 0.0,
-  "clips": "Every Darius key time. Plates stay rigid. Arms and legs reach the fist and the foot."
+  "clips": "Every Darius key time. Plates stay rigid. Arms and legs reach the fist and the foot. Idle frame 0 is the closed sculpt. Run and attack still open the hollow limb shells.",
+  "shell_caps": "53 mouths on the limb shells are capped. That does not cover the gap when a shell swings away."
 }

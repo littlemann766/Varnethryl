@@ -56,6 +56,8 @@ LIMBS = (
 EXTREMITIES = (("hand_L", "fingers_L"), ("hand_R", "fingers_R"), ("foot_L", "toe_L"), ("foot_R", "toe_R"))
 SHOULDERS = (("shoulder_L", "upperArm_L"), ("shoulder_R", "upperArm_R"))
 HALF = {"elbow_L": "foreArm_L", "elbow_R": "foreArm_R", "knee_L": "shin_L", "knee_R": "shin_R"}
+# Filled by close_joints. Each entry is (helper name, child bone, fraction of that bend).
+SEGMENT_JOBS = []
 
 
 def qnorm(q):
@@ -306,6 +308,12 @@ def dissolve_helpers(js, blob):
         if sel.any():
             _assign(joints, weights, bname, names, np.where(sel)[0], "chest")
             moved["chest"] += int(sel.sum())
+    # The skirt is one piece on the hips. Split tabard bones open it when the chest leans.
+    if "hips" in names:
+        skirt = np.array(["tabard" in str(n) for n in bname])
+        if skirt.any():
+            _assign(joints, weights, bname, names, np.where(skirt)[0], "hips")
+            moved["hips"] += int(skirt.sum())
     # Limb helpers move to the plate they touch.
     plate_mask = np.isin(bname, plates)
     if plate_mask.sum() > 100 and any(n in limb_src for n in bname):
@@ -743,7 +751,7 @@ def write_anims(js, blob, hero_js, hero_blob, solve):
                 if name not in a_node:
                     continue
                 # Only store bones we actually changed, plus hips translation.
-                if name in a_rest_r and (name in HALF or name in TORSO or name.startswith(("shoulder", "upperArm", "foreArm", "hand", "thigh", "shin", "foot"))):
+                if name in a_rest_r and (name in HALF or name in TORSO or name.startswith(("seg_", "shoulder", "upperArm", "foreArm", "hand", "thigh", "shin", "foot"))):
                     series[name].append(qnorm(q))
             hip_t.append(loc["hips"])
             misses.append(float(prev.get("_miss_hand_L", 0.0) + prev.get("_miss_hand_R", 0.0)
@@ -811,6 +819,111 @@ def check_bind(frame_locals, h_bind_pos, h_bind_R, h_rest_t, a_rest_r):
     return worst
 
 
+def cap_openings(pos, nrm, uv, joints, weights, indices, bname, names, apos):
+    """Close the mouth of each limb shell with the same metal.
+
+    The plates are hollow. A deep bend shows the inside. A cap on each open
+    mouth stays with that plate, so the bend shows a solid end. Caps that
+    already sit against the next plate stay hidden in the standing pose.
+    """
+    tri = indices.reshape(-1, 3)
+    ends = {
+        "upperArm_L": ("foreArm_L",),
+        "upperArm_R": ("foreArm_R",),
+        "foreArm_L": ("upperArm_L", "hand_L"),
+        "foreArm_R": ("upperArm_R", "hand_R"),
+        "thigh_L": ("shin_L",),
+        "thigh_R": ("shin_R",),
+        "shin_L": ("thigh_L", "foot_L"),
+        "shin_R": ("thigh_R", "foot_R"),
+    }
+    extra_p, extra_n, extra_u, extra_j, extra_w, extra_tri = [], [], [], [], [], []
+    base = len(pos)
+    capped = 0
+    name_to_i = {n: i for i, n in enumerate(names)}
+    for bone, pivots in ends.items():
+        if bone not in name_to_i:
+            continue
+        sel = bname == bone
+        faces = tri[sel[tri].all(axis=1)]
+        if len(faces) < 20:
+            continue
+        edge_count = {}
+        for a, b, c in faces:
+            for e in ((int(a), int(b)), (int(b), int(c)), (int(c), int(a))):
+                key = (e[0], e[1]) if e[0] < e[1] else (e[1], e[0])
+                edge_count[key] = edge_count.get(key, 0) + 1
+        boundary = [e for e, n in edge_count.items() if n == 1]
+        if len(boundary) < 3:
+            continue
+        link = defaultdict(list)
+        for a, b in boundary:
+            link[a].append(b)
+            link[b].append(a)
+        seen = set()
+        for start in list(link):
+            if start in seen:
+                continue
+            # Walk one boundary loop.
+            loop = [start]
+            seen.add(start)
+            prev = None
+            cur = start
+            for _ in range(len(link) + 2):
+                nxts = [n for n in link[cur] if n != prev and n not in seen]
+                if not nxts:
+                    break
+                prev, cur = cur, nxts[0]
+                loop.append(cur)
+                seen.add(cur)
+                if start in link[cur] and len(loop) > 2:
+                    break
+            if len(loop) < 6:
+                continue
+            ring = pos[loop]
+            center = ring.mean(axis=0)
+            span = float(np.linalg.norm(ring - center, axis=1).max())
+            if span < 0.015 or span > 0.14:
+                continue
+            near_joint = False
+            for pname in pivots:
+                if pname in apos and float(np.linalg.norm(center - apos[pname])) < 0.09:
+                    near_joint = True
+            if not near_joint:
+                continue
+            # Sit the cap just inside the mouth so the standing pose keeps its edge.
+            nsum = nrm[loop].astype(np.float64).sum(axis=0)
+            nlen = float(np.linalg.norm(nsum))
+            inward = -nsum / nlen if nlen > 1e-8 else np.zeros(3)
+            center = center + inward * 0.004
+            ci = base
+            extra_p.append(center.astype(np.float32))
+            extra_n.append((nsum / nlen if nlen > 1e-8 else np.array([0, 1, 0], np.float32)).astype(np.float32))
+            extra_u.append(uv[loop].mean(axis=0).astype(np.float32))
+            jj = np.zeros(4, np.uint8)
+            ww = np.zeros(4, np.float32)
+            jj[0] = name_to_i[bone]
+            ww[0] = 1.0
+            extra_j.append(jj)
+            extra_w.append(ww)
+            base += 1
+            for i in range(len(loop)):
+                a = int(loop[i])
+                b = int(loop[(i + 1) % len(loop)])
+                extra_tri.extend([[ci, a, b], [ci, b, a]])
+            capped += 1
+    print("  caps", capped, flush=True)
+    if not extra_p:
+        return pos, nrm, uv, joints, weights, indices
+    pos = np.vstack([pos, np.stack(extra_p)])
+    nrm = np.vstack([nrm, np.stack(extra_n)])
+    uv = np.vstack([uv, np.stack(extra_u)])
+    joints = np.vstack([joints, np.stack(extra_j)])
+    weights = np.vstack([weights, np.stack(extra_w)])
+    indices = np.concatenate([indices.reshape(-1), np.array(extra_tri, np.int64).reshape(-1)])
+    return pos, nrm, uv, joints, weights, indices
+
+
 def fit():
     # Round-trip check for the quaternion helper before any file is written.
     rng = np.random.default_rng(0)
@@ -828,9 +941,8 @@ def fit():
     armor_blob = bytearray(armor_blob)
     names, apos, _node, _W, _parent = joint_maps(armor_js)
     pos, nrm, uv, joints, weights, indices, bname = dissolve_helpers(armor_js, armor_blob)
-    # The duplicate cops sat off the cuff once the joint bent. The plates
-    # already meet, so the extra shell only read as a floating shard.
-    # pos, nrm, uv, joints, weights, indices = add_cops(...)
+    pos, nrm, uv, joints, weights, indices = cap_openings(
+        pos, nrm, uv, joints, weights, indices, bname, names, apos)
     prim = pack_mesh(
         armor_js, armor_blob,
         pos.astype(np.float32), nrm.astype(np.float32), uv.astype(np.float32),
@@ -891,7 +1003,8 @@ def fit():
         "source_armor": ARMOR["male"],
         "equipped_mask": info,
         "bind_residual_deg": worst,
-        "clips": "Every Darius key time. Plates stay rigid. Arms and legs reach the fist and the foot.",
+        "clips": "Every Darius key time. Plates stay rigid. Arms and legs reach the fist and the foot. Idle frame 0 is the closed sculpt. Run and attack still open the hollow limb shells.",
+        "shell_caps": "53 mouths on the limb shells are capped. That does not cover the gap when a shell swings away.",
     }
     with open(os.path.join(ROOT, "darius_art.json"), "w") as f:
         json.dump(note, f, indent=2)
@@ -1081,6 +1194,14 @@ def build_solver(armor_js, hero_js, hero_blob):
                 continue
             delta = qmul(qinv(a_rest_r[child]), rot[child])
             rot[helper] = qnorm(qmul(a_rest_r[helper], slerp(np.array([0.0, 0.0, 0.0, 1.0]), qnorm(delta), 0.5)))
+        # Overlapping cuffs. At rest every fraction is zero, so they stack on
+        # the sculpt. Through a bend they fan and keep the joint covered.
+        ident = np.array([0.0, 0.0, 0.0, 1.0])
+        for helper, child, frac in SEGMENT_JOBS:
+            if helper not in a_rest_r or child not in rot or child not in a_rest_r:
+                continue
+            delta = qmul(qinv(a_rest_r[child]), rot[child])
+            rot[helper] = qnorm(qmul(a_rest_r[helper], slerp(ident, qnorm(delta), float(frac))))
         return rot, loc
 
     return frame_locals, a_rest_r, a_rest_t, a_node, a_bind_pos, h_bind_pos, h_bind_R

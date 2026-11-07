@@ -1,9 +1,10 @@
-"""Give existing flowers thickness, and make low-tier crowns one shape.
+"""Flowers become a shallow bloom. Low-tier pines become a cone of needle boughs.
 
-High tree cards are not rewritten. Flowers stay on the cards that are
-already there: one head becomes three crossed faces so the side is not a
-disk. Low-tier leaf cards are replaced, inside the same crown box, by fewer
-larger fans that overlap. Grass, trunks, ground, and colliders stay.
+High tree cards are not rewritten. A flower keeps its place and its painted
+head: two faces a few degrees apart, tipped so the petals read from the side
+and from above. A low-tier pine keeps its crown box and is rebuilt as short
+needle fans along drooping boughs, the same cells the high pines use. Grass,
+trunks, ground, and colliders stay.
 """
 import json
 import os
@@ -59,7 +60,8 @@ def paint_flowers():
     cup = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
     _soft_petal(cup, 256, 268, 5, 132, 48, (232, 176, 46, 255), (98, 58, 18, 255), -12)
     daisy = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
-    _soft_petal(daisy, 256, 250, 6, 168, 26, (244, 240, 228, 255), (214, 164, 42, 255), 8)
+    # Wider, shorter petals. The thin ones read as a star once the head has any thickness.
+    _soft_petal(daisy, 256, 256, 8, 128, 34, (244, 240, 228, 255), (214, 164, 42, 255), 6)
     sprig = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
     _soft_petal(sprig, 210, 150, 5, 72, 26, (196, 78, 104, 255), (110, 32, 52, 255))
     _soft_petal(sprig, 320, 210, 5, 52, 18, (176, 64, 92, 255), (100, 28, 46, 255), 18)
@@ -161,43 +163,76 @@ def _quads(F, faces):
     return out.values()
 
 
+def _one_card(V, C, UV, F, fis):
+    verts = np.unique(F[fis])
+    p = V[verts].astype(np.float64)
+    if len(p) < 3:
+        return None
+    p0 = p[0]
+    dist = np.linalg.norm(p[1:] - p0, axis=1)
+    order = np.argsort(dist)
+    right = p[1:][order[0]] - p0
+    up = p[1:][order[1]] - p0 if len(order) > 1 else np.array([0.0, 0.2, 0.0])
+    if abs(right[1]) > abs(up[1]):
+        right, up = up, right
+    if np.linalg.norm(right) < 1e-4 or np.linalg.norm(up) < 1e-4:
+        return None
+    col = C[verts].mean(0)[:3]
+    if col.max() > 1.5:
+        col = col / 255.0
+    return dict(center=p.mean(0), right=right, up=up, col=col,
+                cell=_cell(float(UV[verts, 0].mean())))
+
+
+def _bloom(right, up):
+    """Tip the head so it is readable from the side and from above."""
+    width = float(np.linalg.norm(right))
+    height = float(np.linalg.norm(up))
+    normal = np.cross(right, up)
+    face = np.array([normal[0], 0.0, normal[2]])
+    if np.linalg.norm(face) < 1e-4:
+        face = np.array([right[0], 0.0, right[2]])
+    if np.linalg.norm(face) < 1e-4:
+        face = np.array([1.0, 0.0, 0.0])
+    face = _norm(face)
+    tilt = 1.05
+    new_up = _norm(np.array([face[0] * np.sin(tilt), np.cos(tilt), face[2] * np.sin(tilt)])) * height
+    new_right = np.cross(new_up, np.array([0.0, 1.0, 0.0]))
+    if np.linalg.norm(new_right) < 1e-4:
+        new_right = np.array([width, 0.0, 0.0])
+    new_right = _norm(new_right) * width
+    if np.dot(new_right, right) < 0:
+        new_right = -new_right
+    return new_right, new_up
+
+
 def deepen_flowers(V, C, UV, F, faces):
-    """One flat head becomes crossed faces of the same size and place."""
+    """Two nearly aligned faces. A wide spin turns a daisy into a pinwheel."""
+    cards = []
+    for fis in _quads(F, faces):
+        card = _one_card(V, C, UV, F, fis)
+        if card is not None:
+            cards.append(card)
+    if not cards:
+        return 0, None
+    cents = np.array([c["center"] for c in cards])
+    groups = _cluster_cards(cents, 0.22, 0.35)
     m = Mesh()
     n = 0
-    for fis in _quads(F, faces):
-        verts = np.unique(F[fis])
-        p = V[verts].astype(np.float64)
-        if len(p) < 3:
-            continue
-        p0 = p[0]
-        d = np.linalg.norm(p[1:] - p0, axis=1)
-        order = np.argsort(d)
-        right = p[1:][order[0]] - p0
-        up = p[1:][order[1]] - p0 if len(order) > 1 else np.array([0.0, 0.2, 0.0])
-        if abs(right[1]) > abs(up[1]):
-            right, up = up, right
-        if np.linalg.norm(right) < 1e-4 or np.linalg.norm(up) < 1e-4:
-            continue
-        center = p.mean(0)
-        col = C[verts].mean(0)[:3]
-        if col.max() > 1.5:
-            col = col / 255.0
-        cell = _cell(float(UV[verts, 0].mean()))
-        # Pitch the head so it reads as a bloom, not a vertical sign.
-        axis = _norm(np.cross(up, right))
-        up = _rot(up, axis, 0.85)
-        right = _rot(right, axis, 0.85)
-        turns = 2 if cell == FLOWER_P else 3
-        spin = _norm(up)
-        for k in range(turns):
-            ang = k * (np.pi / turns)
-            rgt = _rot(right, spin, ang) * (1.0 - 0.05 * k)
-            u = up * (1.0 - 0.04 * k)
-            m.card(center - rgt * 0.5 - u * 0.5, rgt, u, col, cell)
+    for idxs in groups.values():
+        sel = [cards[i] for i in idxs]
+        # The largest face is the bloom. The others were the old crossing.
+        q = max(sel, key=lambda c: float(np.linalg.norm(c["right"]) * np.linalg.norm(c["up"])))
+        center, col, cell = q["center"], q["col"], q["cell"]
+        right, up = _bloom(q["right"], q["up"])
+        # A few degrees, so the side has thickness and the petals still line up.
+        yaw = 0.14 if cell == FLOWER_P else (0.18 if cell == FLOWER_W else 0.22)
+        m.card(center - right * 0.5 - up * 0.5, right, up, col, cell)
+        r2 = _rot(right, np.array([0.0, 1.0, 0.0]), yaw) * 0.96
+        u2 = _rot(up, np.array([0.0, 1.0, 0.0]), yaw) * 0.96
+        m.card(center - r2 * 0.5 - u2 * 0.5 + np.array([0.0, 0.012, 0.0]), r2, u2, col, cell)
         n += 1
-    arr = m.arrays()
-    return n, arr
+    return n, m.arrays()
 
 
 def _cluster_cards(cents, link, vlink):
@@ -244,7 +279,7 @@ def fill_crowns(V, C, UV, F, faces):
         for c in cards:
             c["col"] = c["col"] / 255.0
     cents = np.array([c["cen"] for c in cards])
-    groups = _cluster_cards(cents, 1.35, 1.7)
+    groups = _cluster_cards(cents, 1.8, 2.8)
     m = Mesh()
     crowns = 0
     for idxs in groups.values():
@@ -259,25 +294,40 @@ def fill_crowns(V, C, UV, F, faces):
         u = float(np.mean([c["u"] for c in sel]))
         cx = float(np.mean([c["cen"][0] for c in sel]))
         cz = float(np.mean([c["cen"][2] for c in sel]))
-        pine = u < 0.50 and h > max(r, 0.4) * 1.05 and h > 1.3
+        # Shape, not the current cell. An earlier pass painted these with broad leaves.
+        pine = h > max(r, 0.35) * 1.15 and h > 1.4
         if pine:
-            # Dense leaf photos, not the sparse needle fan. The fan's empty
-            # texels are what broke the low crown into whiskers. The taper
-            # still reads as a pine. High meshes keep the needle cards.
-            shells = 6
-            # Start a little under the old leaves so the crown meets the trunk.
-            y0 = vmin[1] - min(0.3, h * 0.06)
-            for i in range(shells):
-                t = (i + 0.5) / shells
-                rad = max(r * (1.08 - 0.82 * t), 0.35)
-                card_h = float(np.clip(h / shells * 1.9, 0.5, h * 0.4))
-                card_w = float(np.clip(rad * 1.55, 0.45, r * 1.2 + 0.1))
-                y = y0 + (vmax[1] - y0) * t
-                y = float(np.clip(y, y0 + card_h * 0.45, vmax[1] - card_h * 0.35))
-                up = np.array([0.0, card_h, 0.0])
-                a0 = i * 0.7
-                right = np.array([np.cos(a0), 0.0, np.sin(a0)]) * card_w
-                m.cluster(np.array([cx, y, cz]), right, up, col, BUSH if i < 3 else LEAF)
+            # Upright fans, leaning out, overlapping the next ring. A horizontal
+            # card reads as a shelf. Two faces a third of a turn apart give the
+            # bough some depth without turning it into a star.
+            y0 = float(vmin[1])
+            rings = int(np.clip(round(h / 0.42), 6, 12))
+            arms = 6
+            for ring in range(rings):
+                t = (ring + 0.45) / rings
+                y = h * (0.04 + 0.92 * t)
+                rad = max(r * (1.06 - 0.94 * t), 0.22)
+                for k in range(arms):
+                    a = (k / arms) * np.pi * 2.0 + ring * 0.55
+                    ca, sa = np.cos(a), np.sin(a)
+                    up = _norm(np.array([ca * 0.46, 0.78, sa * 0.46]))
+                    card = float(np.clip(0.42 + rad * 0.38, 0.5, 0.84))
+                    upv = up * card
+                    right = _norm(np.cross(up, np.array([0.0, 1.0, 0.0]))) * card * 0.82
+                    ctr = np.array([cx + ca * rad * 0.7, y0 + y, cz + sa * rad * 0.7])
+                    cell = PINE_A if (ring + k) % 2 == 0 else PINE_B
+                    m.card(ctr - right * 0.5 - upv * 0.5, right, upv, col, cell)
+                    r2 = _rot(right, _norm(up), 0.65)
+                    m.card(ctr - r2 * 0.5 - upv * 0.5, r2, upv, col, cell)
+            trunk = np.array([cx, y0 + min(0.35, h * 0.08), cz])
+            for i in range(3):
+                a = i / 3.0 * np.pi * 2.0 + 0.5
+                tip = np.array([
+                    cx + np.cos(a) * r * 0.6,
+                    y0 + h * (0.28 + 0.18 * i),
+                    cz + np.sin(a) * r * 0.6,
+                ])
+                m.twig(trunk, tip, col)
         else:
             cell = BUSH if u > 0.75 else (LEAF if u > 0.5 else PINE_A)
             card = float(np.clip(max(r * 1.15, h * 0.85), 0.4, max(h, r) * 1.15 + 0.2))
@@ -363,7 +413,36 @@ def kind_of(fn):
     return None
 
 
+def thicken_needles():
+    """Close holes in the pine fans. The strokes stay needles, not a leaf blob.
+
+    High and low share this atlas, so the change is a fuller fan of the same
+    needles. Running again is a no-op once the fan is already filled.
+    """
+    im = Image.open(ATLAS).convert("RGBA")
+    probe = np.asarray(im.crop((0, 0, CELL, CELL)))
+    if float((probe[:, :, 3] > 80).mean()) > 0.28:
+        return
+    for col in (0, 1):
+        src = im.crop((col * CELL, 0, (col + 1) * CELL, CELL))
+        layer = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
+        for ang, dx, dy in ((0, 0, 0), (8, 18, 10), (-11, -16, 8), (5, 10, -20), (-7, -12, -14)):
+            spun = src.rotate(ang, resample=Image.Resampling.BICUBIC)
+            layer.alpha_composite(spun, (dx, dy))
+        arr = np.asarray(layer).astype(np.float32)
+        # Keep the fan's pointed outline. Tips stay thin.
+        y, x = np.mgrid[0:CELL, 0:CELL]
+        ny = y / (CELL - 1)
+        nx = np.abs((x / (CELL - 1)) * 2 - 1)
+        half = 0.22 + 0.74 * ny
+        fall = np.clip((half - nx) / 0.16, 0, 1)
+        arr[:, :, 3] *= fall
+        im.paste(Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGBA"), (col * CELL, 0))
+    im.save(ATLAS)
+
+
 def main():
+    thicken_needles()
     paint_flowers()
     flowers = crowns = files = 0
     for dp, _, fs in os.walk(ROOT):

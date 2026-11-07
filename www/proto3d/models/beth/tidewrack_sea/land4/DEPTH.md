@@ -1,3 +1,27 @@
+# Conifer crowns and flower blooms — delta on top of `4ef48e9f`
+
+`4ef48e9f` is unchanged. Review this commit on its own. Do not merge the pull request as a whole.
+
+## What was wrong
+
+The low-tier pines were stacked broadleaf shells. They read as green discs, not as the same conifer as the high trees. Each daisy was three full cards spun through each other, so the head was a pinwheel. The sprig was the same kind of crossing.
+
+## What changed
+
+A low-tier pine is rebuilt inside its crown box as upright needle fans, leaning out, two faces a third of a turn apart, overlapping the next ring. Three thin twigs mark the boughs. The fans use the pine cells, not the leaf photo. 5,588 crowns. The pine cells themselves are a fuller fan of the same needles (about 36% opaque, was about 15%). High and low share that atlas, so high pines keep their cards and branches and read a little fuller. High broadleaf cards are untouched.
+
+A flower is two faces a few degrees apart, tipped so the petals read from the side and from above. The daisy petals are shorter and wider, so the head is a bloom rather than a star. 2,949 heads.
+
+Kept vertices match the `4ef48e9f` position, normal, and color bytes. Trunks, ground, colliders, and the 14 colliderless visuals are untouched. No new solid. No `tw_sea` change. Still four samplers in `vc_scatter.gdshader`.
+
+High scatter triangles 3,397,357 (was 3,399,709). Lod scatter 791,654 (was 296,986). Lod canopy 52,320 (was 7,932). The low tier spends the triangles on a filled cone. Godot 4.7 Forward Mobile, llvmpipe. Not a phone.
+
+## Left alone
+
+- High tree card positions. Only the shared needle fan is fuller.
+- Terrain `86e61c6e`, gameplay, and armor.
+- Low-tier crowns are still more regularly whorled than the high pines. A few twigs show between the fans up close.
+
 # Flower depth and low-tier crowns — delta on top of `a3e69eba`
 
 `a3e69eba` is unchanged. Review this commit on its own. Do not merge the pull request as a whole.

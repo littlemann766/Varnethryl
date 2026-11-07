@@ -92,7 +92,9 @@ class Mesh:
         corners = [origin, origin + right, origin + right + up, origin + up]
         base = len(self.V)
         tang = _norm(right)
-        col = np.array(color, np.float64)
+        col = np.array(color, np.float64).reshape(-1)
+        if col.shape[0] == 3:
+            col = np.concatenate([col, [1.0]])
         for p, uv in zip(corners, uvs):
             self.V.append(np.array(p, np.float64))
             self.C.append(col.copy())
@@ -101,11 +103,30 @@ class Mesh:
             self.T.append([tang[0], tang[1], tang[2], 1.0])
         self.F += [[base, base + 1, base + 2], [base, base + 2, base + 3]]
 
-    def crossed(self, origin, right, up, color, cell, twist=1.15):
-        center = origin + right * 0.5 + up * 0.5
-        self.card(center - right * 0.5 - up * 0.5, right, up, color, cell)
-        r2 = _rot(right, _norm(up), twist)
-        self.card(center - r2 * 0.5 - up * 0.5, r2, up, color, cell)
+    def cluster(self, center, right, up, color, cell):
+        """Three cards around one centre so the clump has depth from the side."""
+        axis = _norm(up)
+        for ang in (0.0, 1.05, 2.15):
+            r = right if ang == 0.0 else _rot(right, axis, ang)
+            self.card(center - r * 0.5 - up * 0.5, r, up, color, cell)
+
+    def twig(self, a, b, color):
+        """A thin soft twig. Not a trunk: a few centimetres wide, no collider."""
+        d = b - a
+        ln = np.linalg.norm(d)
+        if ln < 0.15:
+            return
+        up = d
+        side = np.cross(d, np.array([0.0, 1.0, 0.0]))
+        if np.linalg.norm(side) < 1e-4:
+            side = np.cross(d, np.array([1.0, 0.0, 0.0]))
+        side = _norm(side) * 0.045
+        # Flat colour, a few centimetres wide. Not a bark-mapped trunk and not a collider.
+        flat = np.array([0.34, 0.2, 0.09, KIND_FLAT])
+        axis = _norm(d)
+        self.card(a - side * 0.5, side, up, flat, 0)
+        side2 = _rot(side, axis, 1.57)
+        self.card(a - side2 * 0.5, side2, up, flat, 0)
 
     def arrays(self):
         if not self.V:
@@ -121,15 +142,19 @@ def _count(size, lod, kind):
     # cover the old patch with overlapping sprigs, not a handful of cards
     cover = r * max(h, r * 0.8)
     if kind == "pine":
-        lo, hi = (7, 12) if lod else (16, 28)
-        div = 0.48 if lod else 0.22
+        lo, hi = (8, 14) if lod else (18, 34)
+        div = 0.42 if lod else 0.16
     elif kind == "bush":
-        lo, hi = (6, 9) if lod else (12, 18)
-        div = 0.32 if lod else 0.14
+        lo, hi = (6, 10) if lod else (14, 22)
+        div = 0.28 if lod else 0.11
     else:
-        lo, hi = (6, 10) if lod else (16, 26)
-        div = 0.42 if lod else 0.18
+        lo, hi = (7, 12) if lod else (18, 32)
+        div = 0.36 if lod else 0.14
     return int(np.clip(cover / div, lo, hi)), h, r
+
+
+def _twig_color(col):
+    return np.array([0.32, 0.2, 0.1], np.float64)
 
 
 def pine_cards(center, size, col, lod):
@@ -137,20 +162,24 @@ def pine_cards(center, size, col, lod):
     rng = _rng(center, 1)
     m = Mesh()
     for i in range(n):
-        t = (i + 0.35) / n
-        y = h * (0.08 + 0.86 * t)
-        rad = r * (1.02 - 0.86 * t) * (0.55 if i % 3 == 0 else 0.92)
-        a = rng.uniform(0, 6.283)
+        t = ((i % max(n // 3, 1)) + 0.35) / max(n // 3, 1)
+        shell = i % 3
+        y = h * (0.05 + 0.9 * min(t, 1.0))
+        rad = r * (1.08 - 0.9 * min(t, 1.0)) * (0.42 + 0.29 * shell)
+        a = (i * 2.399) + rng.uniform(-0.2, 0.2)
         ca, sa = np.cos(a), np.sin(a)
-        radial = np.array([ca, 0.0, sa])
-        # droop outward so the tier reads as a bough, not a vertical plane
-        up = _norm(np.array([ca * 0.55, 0.72, sa * 0.55]))
-        card = float(np.clip(max(rad, 0.45) * 1.25, 0.5, 1.7))
-        upv = up * card * 0.85
-        right = _norm(np.cross(up, radial)) * card
-        origin = radial * rad + np.array([0.0, y, 0.0]) - right * 0.5 - upv * 0.45
-        cell = PINE_A if i % 2 == 0 else PINE_B
-        m.crossed(origin, right, upv, col, cell, twist=rng.uniform(0.9, 1.4))
+        up = _norm(np.array([ca * 0.62, 0.55, sa * 0.62]))
+        card = float(np.clip(0.28 + rad * 0.72, 0.34, 0.92))
+        upv = up * card * rng.uniform(0.75, 1.05)
+        right = _norm(np.cross(up, np.array([ca, 0.0, sa]))) * card * rng.uniform(0.85, 1.1)
+        ctr = np.array([ca, 0.0, sa]) * rad + np.array([0.0, y, 0.0])
+        m.cluster(ctr, right, upv, col, PINE_A if i % 2 == 0 else PINE_B)
+    if not lod:
+        wood = _twig_color(col)
+        for i in range(3):
+            a = i / 3 * 6.283 + 0.4
+            tip = np.array([np.cos(a) * r * 0.55, h * (0.35 + 0.15 * i), np.sin(a) * r * 0.55])
+            m.twig(np.array([0.0, h * 0.08, 0.0]), tip, wood)
     return _place(m, center, size)
 
 
@@ -160,18 +189,28 @@ def broad_cards(center, size, col, lod, grounded):
     m = Mesh()
     cell = BUSH if grounded else LEAF
     for i in range(n):
-        a = rng.uniform(0, 6.283)
+        shell = i % 3
+        a = (i * 2.399) + rng.uniform(-0.25, 0.25)
         ca, sa = np.cos(a), np.sin(a)
-        dist = r * rng.uniform(0.15, 0.88)
-        y = h * (rng.uniform(0.02, 0.25) if grounded else rng.uniform(0.2, 0.85))
-        up = _norm(np.array([ca * 0.25, 1.0, sa * 0.25]))
-        card = float(np.clip(max(r, 0.4) * rng.uniform(0.72, 1.05), 0.42, 1.15 if grounded else 1.75))
-        upv = up * card * (0.7 if grounded else 0.62)
-        right = _norm(np.array([-sa, 0.0, ca])) * card
-        origin = np.array([ca * dist, y, sa * dist]) - right * 0.5
+        dist = r * (0.2 + 0.28 * shell) * rng.uniform(0.85, 1.05)
         if grounded:
-            origin[1] = max(origin[1], 0.0)
-        m.crossed(origin, right, upv, col, cell, twist=rng.uniform(0.8, 1.3))
+            y = h * rng.uniform(0.02, 0.55)
+        else:
+            y = h * (0.15 + 0.75 * rng.random() * (0.55 + 0.2 * shell))
+        up = _norm(np.array([ca * 0.15, 1.0, sa * 0.15]))
+        card = float(np.clip(0.32 + r * (0.28 if grounded else 0.22), 0.36, 0.85 if grounded else 1.05))
+        upv = up * card * rng.uniform(0.8, 1.15)
+        right = _norm(np.array([-sa, 0.0, ca])) * card * rng.uniform(0.85, 1.15)
+        ctr = np.array([ca * dist, y + card * 0.15, sa * dist])
+        if grounded:
+            ctr[1] = max(ctr[1], card * 0.25)
+        m.cluster(ctr, right, upv, col, cell)
+    if not grounded and not lod:
+        wood = _twig_color(col)
+        for i in range(4):
+            a = i / 4 * 6.283
+            tip = np.array([np.cos(a) * r * 0.7, h * rng.uniform(0.35, 0.75), np.sin(a) * r * 0.7])
+            m.twig(np.array([0.0, h * 0.05, 0.0]), tip, wood)
     return _place(m, center, size)
 
 
@@ -180,7 +219,7 @@ def grass_cards(center, size, col, lod, flower):
     r = max(float(max(size[0], size[2])) * 0.45, 0.12)
     rng = _rng(center, 3)
     m = Mesh()
-    n = 2 if lod else 3
+    n = 3 if lod else 6
     for i in range(n):
         a = i / n * np.pi + rng.uniform(-0.2, 0.2)
         card_w = r * rng.uniform(0.7, 1.15)
@@ -193,11 +232,12 @@ def grass_cards(center, size, col, lod, flower):
         fw = max(h * 0.55, 0.16)
         fh = fw * 0.95
         cell = FLOWER_W if flower.mean() > 0.72 else (FLOWER_P if flower[0] > flower[1] + 0.08 else FLOWER_Y)
-        for i in range(2):
-            a = i * 1.2 + 0.4
-            right = np.array([np.cos(a), 0.0, np.sin(a)]) * fw
-            up = np.array([0.05, fh, 0.0])
-            origin = np.array([0.0, h * 0.72, 0.0]) - right * 0.5 - up * 0.15
+        for i in range(3):
+            a = i * 1.15 + 0.3
+            scale = 0.72 if i == 2 else 1.0
+            right = np.array([np.cos(a), 0.0, np.sin(a)]) * fw * scale
+            up = np.array([0.04 * i, fh * scale, 0.02])
+            origin = np.array([0.0, h * (0.62 + 0.08 * i), 0.0]) - right * 0.5 - up * 0.2
             m.card(origin, right, up, flower, cell)
     return _place(m, center, size)
 
@@ -232,9 +272,9 @@ def bark_frame(v, nrm):
     pu, pv = x @ b, x @ p
     ang = np.arctan2(pu, pv)
     rad = float(np.sqrt(pu ** 2 + pv ** 2).mean())
-    repeats = float(np.clip(2 * np.pi * max(rad, 0.08) / 0.9, 1.0, 5.0))
+    repeats = float(np.clip(2 * np.pi * max(rad, 0.08) / 0.42, 2.0, 8.0))
     u = ang / (2 * np.pi) * repeats
-    vv = along / 0.85
+    vv = along / 0.48
     uv = np.stack([u, vv], 1)
     # tangent follows U (around the trunk) and stays perpendicular to the mesh normal
     tang = np.cross(axis, nrm)
@@ -317,8 +357,9 @@ def rebuild(V, F, C, N, lod=False):
         nv, nf, nc, nu, nn, nt = built
         base = len(out.V)
         out.V += list(nv)
-        rgba = np.concatenate([nc, np.ones((len(nv), 1))], 1)
-        out.C += list(rgba)
+        if nc.shape[1] == 3:
+            nc = np.concatenate([nc, np.ones((len(nc), 1))], 1)
+        out.C += list(nc)
         out.UV += list(nu)
         out.N += list(nn)
         out.T += list(nt)

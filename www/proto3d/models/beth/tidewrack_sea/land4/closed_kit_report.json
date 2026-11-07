@@ -1,0 +1,269 @@
+{
+ "dressed": [
+  {
+   "file": "stage1/meshes/arch_isl_coil_isle.glb",
+   "canopy": "stage1/meshes/arch_canopy_coil_isle.glb",
+   "kits": 37,
+   "pines": 0,
+   "bushes": 37,
+   "dropped": 0.021,
+   "canopy_faces": 4044,
+   "kept_verts": 20794
+  },
+  {
+   "file": "stage1/meshes/arch_isl_coil_isle_lod1.glb",
+   "canopy": "stage1/meshes/arch_canopy_coil_isle_lod1.glb",
+   "kits": 37,
+   "pines": 0,
+   "bushes": 37,
+   "dropped": 0.051,
+   "canopy_faces": 1710,
+   "kept_verts": 7760
+  },
+  {
+   "file": "stage1/meshes/arch_isl_gullhaven.glb",
+   "canopy": "stage1/meshes/arch_canopy_gullhaven.glb",
+   "kits": 36,
+   "pines": 0,
+   "bushes": 36,
+   "dropped": 0.053,
+   "canopy_faces": 4182,
+   "kept_verts": 33917
+  },
+  {
+   "file": "stage1/meshes/arch_isl_gullhaven_lod1.glb",
+   "canopy": "stage1/meshes/arch_canopy_gullhaven_lod1.glb",
+   "kits": 35,
+   "pines": 0,
+   "bushes": 35,
+   "dropped": 0.013,
+   "canopy_faces": 1728,
+   "kept_verts": 13066
+  },
+  {
+   "file": "stage1/meshes/arch_isl_lantern_rock.glb",
+   "canopy": "stage1/meshes/arch_canopy_lantern_rock.glb",
+   "kits": 29,
+   "pines": 1,
+   "bushes": 28,
+   "dropped": 0.118,
+   "canopy_faces": 4122,
+   "kept_verts": 19013
+  },
+  {
+   "file": "stage1/meshes/arch_isl_lantern_rock_lod1.glb",
+   "canopy": "stage1/meshes/arch_canopy_lantern_rock_lod1.glb",
+   "kits": 25,
+   "pines": 0,
+   "bushes": 25,
+   "dropped": 0.081,
+   "canopy_faces": 1152,
+   "kept_verts": 7347
+  },
+  {
+   "file": "stage1/meshes/arch_isl_saltwatch_keep.glb",
+   "canopy": "stage1/meshes/arch_canopy_saltwatch_keep.glb",
+   "kits": 9,
+   "pines": 3,
+   "bushes": 6,
+   "dropped": 0.0,
+   "canopy_faces": 3006,
+   "kept_verts": 4246
+  },
+  {
+   "file": "stage1/meshes/arch_isl_saltwatch_keep_lod1.glb",
+   "canopy": "stage1/meshes/arch_canopy_saltwatch_keep_lod1.glb",
+   "kits": 6,
+   "pines": 1,
+   "bushes": 5,
+   "dropped": 0.005,
+   "canopy_faces": 330,
+   "kept_verts": 1770
+  },
+  {
+   "file": "stage2/meshes/coast_isl_beached_wreck.glb",
+   "canopy": "stage2/meshes/coast_canopy_beached_wreck.glb",
+   "kits": 3,
+   "pines": 1,
+   "bushes": 2,
+   "dropped": 0.0,
+   "canopy_faces": 1248,
+   "kept_verts": 8081
+  },
+  {
+   "file": "stage2/meshes/coast_isl_saltglass.glb",
+   "canopy": "stage2/meshes/coast_canopy_saltglass.glb",
+   "kits": 39,
+   "pines": 3,
+   "bushes": 36,
+   "dropped": 0.13,
+   "canopy_faces": 5790,
+   "kept_verts": 42178
+  },
+  {
+   "file": "stage2/meshes/coast_isl_saltglass_lod1.glb",
+   "canopy": "stage2/meshes/coast_canopy_saltglass_lod1.glb",
+   "kits": 40,
+   "pines": 4,
+   "bushes": 36,
+   "dropped": 0.142,
+   "canopy_faces": 1776,
+   "kept_verts": 16756
+  }
+ ],
+ "buried": [
+  {
+   "file": "stage1/meshes/arch_isl_coil_isle.glb",
+   "why": "buried under the surface",
+   "at": [
+    -15.18,
+    5.22,
+    752.93
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_coil_isle.glb",
+   "why": "buried under the surface",
+   "at": [
+    -49.25,
+    0.48,
+    530.59
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_coil_isle_lod1.glb",
+   "why": "buried under the surface",
+   "at": [
+    33.37,
+    4.8,
+    742.12
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_coil_isle_lod1.glb",
+   "why": "buried under the surface",
+   "at": [
+    -49.25,
+    0.48,
+    530.6
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_gullhaven_lod1.glb",
+   "why": "buried under the surface",
+   "at": [
+    -534.02,
+    21.75,
+    -438.18
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_lantern_rock.glb",
+   "why": "buried under the surface",
+   "at": [
+    181.49,
+    0.49,
+    -120.96
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_lantern_rock.glb",
+   "why": "buried under the surface",
+   "at": [
+    -8.96,
+    4.27,
+    96.01
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_lantern_rock_lod1.glb",
+   "why": "buried under the surface",
+   "at": [
+    57.95,
+    41.8,
+    -33.52
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_lantern_rock_lod1.glb",
+   "why": "buried under the surface",
+   "at": [
+    181.53,
+    0.46,
+    -121.0
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_lantern_rock_lod1.glb",
+   "why": "buried under the surface",
+   "at": [
+    -1.28,
+    29.0,
+    64.03
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_lantern_rock_lod1.glb",
+   "why": "buried under the surface",
+   "at": [
+    127.71,
+    24.67,
+    47.64
+   ]
+  },
+  {
+   "file": "stage1/meshes/arch_isl_lantern_rock_lod1.glb",
+   "why": "buried under the surface",
+   "at": [
+    -8.87,
+    4.2,
+    96.19
+   ]
+  },
+  {
+   "file": "stage2/meshes/coast_isl_beached_wreck.glb",
+   "why": "buried under the surface",
+   "at": [
+    -2649.71,
+    0.38,
+    995.68
+   ]
+  },
+  {
+   "file": "stage2/meshes/coast_isl_saltglass.glb",
+   "why": "buried under the surface",
+   "at": [
+    -2266.51,
+    73.87,
+    20.7
+   ]
+  },
+  {
+   "file": "stage2/meshes/coast_isl_saltglass.glb",
+   "why": "buried under the surface",
+   "at": [
+    -2376.26,
+    24.94,
+    -37.94
+   ]
+  },
+  {
+   "file": "stage2/meshes/coast_isl_saltglass.glb",
+   "why": "buried under the surface",
+   "at": [
+    -2155.43,
+    35.77,
+    -157.68
+   ]
+  },
+  {
+   "file": "stage2/meshes/coast_isl_saltglass_lod1.glb",
+   "why": "buried under the surface",
+   "at": [
+    -2155.44,
+    35.77,
+    -157.7
+   ]
+  }
+ ]
+}

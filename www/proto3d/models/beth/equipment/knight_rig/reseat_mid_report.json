@@ -1,0 +1,301 @@
+[
+ {
+  "file": "/workspace/www/proto3d/models/beth/equipment/knight_rig/knight_male.glb",
+  "islands": [
+   {
+    "mid": "mid_upperArm_L",
+    "n": 189,
+    "to": "upperArm_L",
+    "dist_parent_m": 0.0869,
+    "dist_child_m": 0.0559
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 236,
+    "to": "shoulder_R",
+    "dist_parent_m": 0.0326,
+    "dist_child_m": 0.0396
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 274,
+    "to": "shoulder_R",
+    "dist_parent_m": 0.0281,
+    "dist_child_m": 0.044
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 184,
+    "to": "upperArm_R",
+    "dist_parent_m": 0.0812,
+    "dist_child_m": 0.0302
+   },
+   {
+    "mid": "mid_foreArm_R",
+    "n": 186,
+    "to": "upperArm_R",
+    "dist_parent_m": 0.0117,
+    "dist_child_m": 0.0499
+   },
+   {
+    "mid": "mid_hand_R",
+    "n": 196,
+    "to": "hand_R",
+    "dist_parent_m": 0.0221,
+    "dist_child_m": 0.0132
+   },
+   {
+    "mid": "mid_shin_R",
+    "n": 324,
+    "to": "shin_R",
+    "dist_parent_m": 0.0226,
+    "dist_child_m": 0.0182
+   },
+   {
+    "mid": "mid_shin_R",
+    "n": 232,
+    "to": "shin_R",
+    "dist_parent_m": 0.0253,
+    "dist_child_m": 0.0154
+   }
+  ],
+  "verts_moved": 1821,
+  "position_bytes_unchanged": true,
+  "normal_count": 51244,
+  "reloaded_positions_match": true,
+  "unique_islands": 8
+ },
+ {
+  "file": "/workspace/www/proto3d/models/beth/equipment/knight_rig/knight_female.glb",
+  "islands": [
+   {
+    "mid": "mid_upperArm_L",
+    "n": 170,
+    "to": "upperArm_L",
+    "dist_parent_m": 0.0887,
+    "dist_child_m": 0.0206
+   },
+   {
+    "mid": "mid_upperArm_L",
+    "n": 230,
+    "to": "upperArm_L",
+    "dist_parent_m": 0.1626,
+    "dist_child_m": 0.0695
+   },
+   {
+    "mid": "mid_upperArm_L",
+    "n": 203,
+    "to": "upperArm_L",
+    "dist_parent_m": 0.1636,
+    "dist_child_m": 0.0617
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 285,
+    "to": "pauldron_R",
+    "dist_parent_m": 0.0146,
+    "dist_child_m": 0.1268
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 151,
+    "to": "pauldron_R",
+    "dist_parent_m": 0.0112,
+    "dist_child_m": 0.0794
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 256,
+    "to": "upperArm_R",
+    "dist_parent_m": 0.0614,
+    "dist_child_m": 0.0263
+   },
+   {
+    "mid": "mid_foreArm_R",
+    "n": 257,
+    "to": "foreArm_R",
+    "dist_parent_m": 0.0381,
+    "dist_child_m": 0.0158
+   },
+   {
+    "mid": "mid_shin_L",
+    "n": 316,
+    "to": "shin_L",
+    "dist_parent_m": 0.0344,
+    "dist_child_m": 0.0188
+   },
+   {
+    "mid": "mid_shin_L",
+    "n": 217,
+    "to": "shin_L",
+    "dist_parent_m": 0.04,
+    "dist_child_m": 0.0193
+   },
+   {
+    "mid": "mid_shin_R",
+    "n": 528,
+    "to": "shin_R",
+    "dist_parent_m": 0.0512,
+    "dist_child_m": 0.0172
+   },
+   {
+    "mid": "mid_shin_R",
+    "n": 249,
+    "to": "shin_R",
+    "dist_parent_m": 0.0359,
+    "dist_child_m": 0.02
+   }
+  ],
+  "verts_moved": 2862,
+  "position_bytes_unchanged": true,
+  "normal_count": 34391,
+  "reloaded_positions_match": true,
+  "unique_islands": 11
+ },
+ {
+  "file": "/workspace/www/proto3d/models/beth/equipment/knight_rig/knight_male_lod1.glb",
+  "islands": [
+   {
+    "mid": "mid_upperArm_L",
+    "n": 91,
+    "to": "upperArm_L",
+    "dist_parent_m": 0.091,
+    "dist_child_m": 0.0573
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 80,
+    "to": "shoulder_R",
+    "dist_parent_m": 0.0309,
+    "dist_child_m": 0.0387
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 107,
+    "to": "shoulder_R",
+    "dist_parent_m": 0.0294,
+    "dist_child_m": 0.0499
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 84,
+    "to": "upperArm_R",
+    "dist_parent_m": 0.0807,
+    "dist_child_m": 0.0299
+   },
+   {
+    "mid": "mid_foreArm_R",
+    "n": 87,
+    "to": "upperArm_R",
+    "dist_parent_m": 0.0076,
+    "dist_child_m": 0.0485
+   },
+   {
+    "mid": "mid_hand_R",
+    "n": 106,
+    "to": "hand_R",
+    "dist_parent_m": 0.0195,
+    "dist_child_m": 0.0089
+   },
+   {
+    "mid": "mid_shin_R",
+    "n": 121,
+    "to": "shin_R",
+    "dist_parent_m": 0.0191,
+    "dist_child_m": 0.0127
+   },
+   {
+    "mid": "mid_shin_R",
+    "n": 66,
+    "to": "shin_R",
+    "dist_parent_m": 0.0242,
+    "dist_child_m": 0.0109
+   }
+  ],
+  "verts_moved": 742,
+  "position_bytes_unchanged": true,
+  "normal_count": 30781,
+  "reloaded_positions_match": true,
+  "unique_islands": 8
+ },
+ {
+  "file": "/workspace/www/proto3d/models/beth/equipment/knight_rig/knight_female_lod1.glb",
+  "islands": [
+   {
+    "mid": "mid_upperArm_L",
+    "n": 85,
+    "to": "upperArm_L",
+    "dist_parent_m": 0.0984,
+    "dist_child_m": 0.0151
+   },
+   {
+    "mid": "mid_upperArm_L",
+    "n": 86,
+    "to": "upperArm_L",
+    "dist_parent_m": 0.1914,
+    "dist_child_m": 0.0858
+   },
+   {
+    "mid": "mid_upperArm_L",
+    "n": 81,
+    "to": "upperArm_L",
+    "dist_parent_m": 0.1884,
+    "dist_child_m": 0.0918
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 97,
+    "to": "pauldron_R",
+    "dist_parent_m": 0.0134,
+    "dist_child_m": 0.1418
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 77,
+    "to": "pauldron_R",
+    "dist_parent_m": 0.0021,
+    "dist_child_m": 0.0839
+   },
+   {
+    "mid": "mid_upperArm_R",
+    "n": 121,
+    "to": "upperArm_R",
+    "dist_parent_m": 0.0723,
+    "dist_child_m": 0.0214
+   },
+   {
+    "mid": "mid_foreArm_R",
+    "n": 122,
+    "to": "foreArm_R",
+    "dist_parent_m": 0.0345,
+    "dist_child_m": 0.0136
+   },
+   {
+    "mid": "mid_shin_L",
+    "n": 106,
+    "to": "shin_L",
+    "dist_parent_m": 0.0333,
+    "dist_child_m": 0.0076
+   },
+   {
+    "mid": "mid_shin_R",
+    "n": 187,
+    "to": "shin_R",
+    "dist_parent_m": 0.0518,
+    "dist_child_m": 0.0075
+   },
+   {
+    "mid": "mid_shin_R",
+    "n": 65,
+    "to": "shin_R",
+    "dist_parent_m": 0.0401,
+    "dist_child_m": 0.0135
+   }
+  ],
+  "verts_moved": 1027,
+  "position_bytes_unchanged": true,
+  "normal_count": 20476,
+  "reloaded_positions_match": true,
+  "unique_islands": 10
+ }
+]

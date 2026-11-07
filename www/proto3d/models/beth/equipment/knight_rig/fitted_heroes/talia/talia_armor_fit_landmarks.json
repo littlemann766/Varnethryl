@@ -1,0 +1,34 @@
+{
+  "torso_height_scale": 0.928,
+  "arm_L": {
+    "landmark_scale": 0.851,
+    "fist": [
+      0.373,
+      0.857,
+      0.011
+    ],
+    "gauntlet_after": [
+      0.373,
+      0.857,
+      0.011
+    ],
+    "gauntlet_to_fist_cm": 0.0,
+    "fist_to_hand_joint_cm": 17.2
+  },
+  "arm_R": {
+    "landmark_scale": 0.867,
+    "fist": [
+      -0.411,
+      0.855,
+      0.051
+    ],
+    "gauntlet_after": [
+      -0.411,
+      0.855,
+      0.051
+    ],
+    "gauntlet_to_fist_cm": 0.0,
+    "fist_to_hand_joint_cm": 18.1
+  },
+  "helm_shift_cm": 4.0
+}

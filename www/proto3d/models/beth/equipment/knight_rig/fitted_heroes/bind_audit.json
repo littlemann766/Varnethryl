@@ -1,0 +1,31 @@
+{
+  "method": "jointMatrix = nodeWorld * inverseBindMatrix, IBM read column-major, JOINTS_0 indexes skin.joints. No animation.",
+  "talia": {
+    "verts": 321844,
+    "residual_max_m": 2.032e-07,
+    "residual_mean_m": 5.84e-08,
+    "joint_matrix_minus_I_max": 7.63e-07,
+    "render_abs_diff_mean": 0.0,
+    "hand_L_world_m": [
+      0.4092,
+      1.0237,
+      0.0223
+    ],
+    "hand_L_matches_inv_ibm": true
+  },
+  "rook": {
+    "verts": 281600,
+    "residual_max_m": 3.314e-07,
+    "residual_mean_m": 6.09e-08,
+    "joint_matrix_minus_I_max": 8.59e-07,
+    "render_abs_diff_mean": 0.0,
+    "hand_L_world_m": [
+      0.5482,
+      1.1671,
+      -0.0527
+    ],
+    "hand_L_matches_inv_ibm": true
+  },
+  "conclusion": "Source bind pose reconstructs. The 14 cm and 34 cm figures are distances from the hand joint origin to hand-weighted vertices inside a correct reconstruction. They are not a misread matrix. The pipeline bug was moving those vertices and deleting hair.",
+  "missing_asset": "No separate unarmored skin mesh. Hero files are one clothed skinned mesh. ref_male and ref_female are armor only. A mail liner is not an anatomical body."
+}

@@ -1,9 +1,7 @@
-"""Flowers become a shallow bloom. Low-tier pines become a cone of needle boughs.
+"""Break the even whorl on low-tier pines. Flowers and high cards stay.
 
-High tree cards are not rewritten. A flower keeps its place and its painted
-head: two faces a few degrees apart, tipped so the petals read from the side
-and from above. A low-tier pine keeps its crown box and is rebuilt as short
-needle fans along drooping boughs, the same cells the high pines use. Grass,
+A low-tier pine keeps its crown box. The fans are the same needle cells, but
+the boughs no longer share a height or a six-sided turn. Grass, flowers,
 trunks, ground, and colliders stay.
 """
 import json
@@ -268,13 +266,13 @@ def _cluster_cards(cents, link, vlink):
 def fill_crowns(V, C, UV, F, faces):
     """Fewer, larger fans inside each low-tier crown box."""
     if len(faces) == 0:
-        return 0, None
+        return 0, None, []
     cards = []
     for fi in faces:
         f = F[fi]
         p = V[f].astype(np.float64)
         cards.append(dict(cen=p.mean(0), col=C[f].mean(0)[:3], u=float(UV[f, 0].mean()),
-                          vmin=p.min(0), vmax=p.max(0)))
+                          vmin=p.min(0), vmax=p.max(0), fi=int(fi)))
     if cards and cards[0]["col"].max() > 1.5:
         for c in cards:
             c["col"] = c["col"] / 255.0
@@ -282,6 +280,7 @@ def fill_crowns(V, C, UV, F, faces):
     groups = _cluster_cards(cents, 1.8, 2.8)
     m = Mesh()
     crowns = 0
+    consumed = []
     for idxs in groups.values():
         sel = [cards[i] for i in idxs]
         vmin = np.min([c["vmin"] for c in sel], axis=0)
@@ -297,56 +296,66 @@ def fill_crowns(V, C, UV, F, faces):
         # Shape, not the current cell. An earlier pass painted these with broad leaves.
         pine = h > max(r, 0.35) * 1.15 and h > 1.4
         if pine:
-            # Upright fans, leaning out, overlapping the next ring. A horizontal
-            # card reads as a shelf. Two faces a third of a turn apart give the
-            # bough some depth without turning it into a star.
+            # Same number of fans as the even whorl, but not on a shared ring.
+            # Height is stratified so the cone stays filled. Reach and lean
+            # wander, so the outline is not a sawtooth.
             y0 = float(vmin[1])
-            rings = int(np.clip(round(h / 0.42), 6, 12))
-            arms = 6
-            for ring in range(rings):
-                t = (ring + 0.45) / rings
-                y = h * (0.04 + 0.92 * t)
-                rad = max(r * (1.06 - 0.94 * t), 0.22)
+            bands = int(np.clip(round(h / 0.4), 6, 11))
+            seed = int(abs(cx * 13.7 + cz * 7.1 + y0) * 1000) % (2**31 - 1) or 1
+            rng = np.random.default_rng(seed)
+            phase = float(rng.uniform(0, 6.283))
+            for b in range(bands):
+                t = (b + 0.45) / bands
+                ymid = h * (0.04 + 0.9 * t)
+                cone = max(r * (1.04 - 0.9 * t), 0.24)
+                # A slow bulge, so the outline is not a straight sawtooth taper.
+                cone *= 0.94 + 0.08 * np.sin(t * 6.283 * 2.15 + phase)
+                arms = int(rng.integers(5, 8))
+                spin = float(rng.uniform(0, 6.283))
+                step = 6.283 / arms
                 for k in range(arms):
-                    a = (k / arms) * np.pi * 2.0 + ring * 0.55
+                    a = spin + k * step + float(rng.uniform(-0.28, 0.28))
                     ca, sa = np.cos(a), np.sin(a)
-                    up = _norm(np.array([ca * 0.46, 0.78, sa * 0.46]))
-                    card = float(np.clip(0.42 + rad * 0.38, 0.5, 0.84))
+                    y = ymid + float(rng.uniform(-0.4, 0.4)) * (h / bands)
+                    reach = cone * float(rng.uniform(0.88, 1.06))
+                    lean = float(rng.uniform(0.32, 0.55))
+                    rise = float(rng.uniform(0.72, 0.92))
+                    up = _norm(np.array([ca * lean, rise, sa * lean]))
+                    card = float(np.clip(0.48 + reach * 0.3, 0.54, 0.86))
                     upv = up * card
-                    right = _norm(np.cross(up, np.array([0.0, 1.0, 0.0]))) * card * 0.82
-                    ctr = np.array([cx + ca * rad * 0.7, y0 + y, cz + sa * rad * 0.7])
-                    cell = PINE_A if (ring + k) % 2 == 0 else PINE_B
+                    right = _norm(np.cross(up, np.array([0.0, 1.0, 0.0]))) * card * float(rng.uniform(0.78, 0.94))
+                    ctr = np.array([cx + ca * reach * 0.68, y0 + y, cz + sa * reach * 0.68])
+                    cell = PINE_A if (b + k) % 2 == 0 else PINE_B
                     m.card(ctr - right * 0.5 - upv * 0.5, right, upv, col, cell)
-                    r2 = _rot(right, _norm(up), 0.65)
+                    r2 = _rot(right, _norm(up), float(rng.uniform(0.5, 0.95)))
                     m.card(ctr - r2 * 0.5 - upv * 0.5, r2, upv, col, cell)
-            trunk = np.array([cx, y0 + min(0.35, h * 0.08), cz])
-            for i in range(3):
-                a = i / 3.0 * np.pi * 2.0 + 0.5
-                tip = np.array([
-                    cx + np.cos(a) * r * 0.6,
-                    y0 + h * (0.28 + 0.18 * i),
-                    cz + np.sin(a) * r * 0.6,
-                ])
+            # Two short twigs inside the fat part of the cone.
+            a0 = float(rng.uniform(0, 6.283))
+            for i in range(2):
+                th = 0.28 + 0.14 * i
+                local = max(r * (1.04 - 0.9 * th) * 0.42, 0.15)
+                a = a0 + (1.9 + i * float(rng.uniform(0.7, 1.3)))
+                trunk = np.array([cx, y0 + h * 0.14, cz])
+                tip = np.array([cx + np.cos(a) * local, y0 + h * th, cz + np.sin(a) * local])
                 m.twig(trunk, tip, col)
-        else:
-            cell = BUSH if u > 0.75 else (LEAF if u > 0.5 else PINE_A)
-            card = float(np.clip(max(r * 1.15, h * 0.85), 0.4, max(h, r) * 1.15 + 0.2))
-            ctr = np.array([cx, float(vmin[1] + h * 0.48), cz])
-            up = np.array([0.05, card, 0.0])
-            right = np.array([card, 0.0, 0.08])
-            m.cluster(ctr, right, up, col, cell)
-            if r > 0.6:
-                ctr2 = ctr + np.array([r * 0.15, h * 0.08, 0.0])
-                m.cluster(ctr2, _rot(right, _norm(up), 0.8) * 0.8, up * 0.75, col, cell)
-        crowns += 1
-    return crowns, m.arrays()
+            consumed.extend(int(cards[i]["fi"]) for i in idxs)
+            crowns += 1
+    return crowns, m.arrays(), consumed
 
 
-def process(path, lod):
+def process(path, lod, crowns_only=False):
     P, N, C, UV, T, F = load_full(path)
     Cc = C.astype(np.float64)
-    flower_f = _faces_of(_flower_mask(UV, Cc), F)
+    flower_f = np.zeros(0, np.int64) if crowns_only else _faces_of(_flower_mask(UV, Cc), F)
     leaf_f = _faces_of(_leaf_mask(UV, Cc), F) if lod else np.zeros(0, np.int64)
+    pine_faces = []
+    if crowns_only:
+        if len(leaf_f) == 0:
+            return 0, 0
+        nc, arr, pine_faces = fill_crowns(P, Cc, UV, F, leaf_f)
+        if not pine_faces:
+            return 0, 0
+        leaf_f = np.asarray(pine_faces, np.int64)
     drop_f = np.zeros(len(F), np.bool_)
     if len(flower_f):
         drop_f[flower_f] = True
@@ -361,15 +370,20 @@ def process(path, lod):
     drop_v &= ~used
     keep = ~drop_v
     blocks = []
-    nf = nc = 0
-    if len(flower_f):
-        nf, arr = deepen_flowers(P, Cc, UV, F, flower_f)
+    nf = 0
+    if crowns_only:
         if arr is not None:
             blocks.append(arr)
-    if lod and len(leaf_f):
-        nc, arr = fill_crowns(P, Cc, UV, F, leaf_f)
-        if arr is not None:
-            blocks.append(arr)
+    else:
+        nc = 0
+        if len(flower_f):
+            nf, arr = deepen_flowers(P, Cc, UV, F, flower_f)
+            if arr is not None:
+                blocks.append(arr)
+        if lod and len(leaf_f):
+            nc, arr, _pine = fill_crowns(P, Cc, UV, F, leaf_f)
+            if arr is not None:
+                blocks.append(arr)
     remap = -np.ones(len(P), np.int64)
     nkeep = int(keep.sum())
     remap[keep] = np.arange(nkeep)
@@ -442,21 +456,18 @@ def thicken_needles():
 
 
 def main():
-    thicken_needles()
-    paint_flowers()
-    flowers = crowns = files = 0
+    # Flowers and the atlas stay. Only the low-tier pine fans are rewritten.
+    crowns = files = 0
     for dp, _, fs in os.walk(ROOT):
         for fn in sorted(fs):
-            kind = kind_of(fn)
-            if kind is None:
+            if kind_of(fn) != "lod":
                 continue
             path = os.path.join(dp, fn)
-            nf, nc = process(path, kind == "lod")
-            if nf or nc:
+            _nf, nc = process(path, True, crowns_only=True)
+            if nc:
                 files += 1
-                flowers += nf
                 crowns += nc
-    print("files", files, "flowers", flowers, "crowns", crowns)
+    print("files", files, "crowns", crowns)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,23 @@
+# Uneven low-tier conifer outline — delta on top of `a5c7eaed`
+
+`a5c7eaed` is unchanged. Review this commit on its own. Do not merge the pull request as a whole.
+
+## What was wrong
+
+The low-tier pines were filled, but every ring had the same six boughs at the same height. From the side the crown was a repeated sawtooth.
+
+## What changed
+
+Only the low-tier pine fans move. Each band has five to seven boughs, a different turn, and a small height scatter, and the cone radius swells and pinches a little along the height. Two short twigs sit inside the fat part of the crown. Flowers, the atlas, high cards, shrubs, trunks, and colliders stay. 3,010 pines.
+
+Kept vertices match the `a5c7eaed` position, normal, and color bytes. Still four samplers. No `tw_sea` change.
+
+High scatter triangles 3,397,357 (unchanged). Lod scatter 821,022 (was 791,654). Lod canopy 52,996 (was 52,320). Godot 4.7 Forward Mobile, llvmpipe. Not a phone.
+
+## Left alone
+
+The bands still read up close. A tall crown is lumpier than the old sawtooth and still more regular than a high pine. A few brown sticks show through the foliage. The daisy and the high trees match `a5c7eaed` in the comparison frames.
+
 # Conifer crowns and flower blooms — delta on top of `4ef48e9f`
 
 `4ef48e9f` is unchanged. Review this commit on its own. Do not merge the pull request as a whole.

@@ -2415,6 +2415,7 @@ func _hook_ui() -> void:
 		if cheats.coowner_ok and Net.is_online(): return "coowner"
 		return ""
 	cheats.said.connect(_toast)
+	VUI.notice.connect(_toast)
 	VUI.cheat_api = cheats
 	# test 11: on-screen Fly / ▲ / ▼ for the Owner and CoOwner (ui/fly_controls.gd), menu toggle kept in sync
 	var fl := CanvasLayer.new(); fl.layer = 5; fl.name = "FlyLayer"; add_child(fl)
@@ -2485,21 +2486,29 @@ func _on_play_solo() -> void:
 	# Town (-6, 26) is only the fallback when the save has no usable place. Mainland, Tidewrack
 	# and interiors are restored. See VSave.resume_place.
 	var place: Dictionary = VSave.resume_place(VSave.state)
-	match str(place.get("kind", "town")):
+	var kind := str(place.get("kind", "town"))
+	var restored := false
+	var detail := ""
+	match kind:
 		"sea":
 			if sea:
 				sea.enter(str(place.get("ship", "galleon")), Vector3(float(place.x), 0.0, float(place.z)), float(place.get("yaw", 0.0)))
-				return
+				restored = true
+				detail = str(place.get("ship", "galleon"))
 		"interior":
-			if _resume_interior(str(place.get("id", "")), Vector3(float(place.x), float(place.get("y", 0.0)), float(place.z)), float(place.get("yaw", 0.0))): return
+			detail = str(place.get("id", "building")).capitalize()
+			restored = _resume_interior(str(place.get("id", "")), Vector3(float(place.x), float(place.get("y", 0.0)), float(place.z)), float(place.get("yaw", 0.0)))
 		"interior_legacy":
 			var legacy_id: String = _interior_id_from_index(int(place.get("index", -1)))
-			if legacy_id != "" and _resume_interior(legacy_id, Vector3.INF, 0.0): return
+			detail = legacy_id.capitalize() if legacy_id != "" else "building"
+			restored = legacy_id != "" and _resume_interior(legacy_id, Vector3.INF, 0.0)
 		"land":
 			_teleport(Vector3(float(place.x), 0.0, float(place.z)), float(place.get("yaw", 0.0)))
-			return
+			restored = true
 		_:
 			pass
+	var who := str(party.hero_id) if party else ""
+	_toast(SaveStatus.resume_done(kind, who, detail, restored))
 
 func _interior_id_from_index(i: int) -> String:
 	if i < 0: return ""

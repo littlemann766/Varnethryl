@@ -24,6 +24,7 @@ signal owner_cheat(key: String, value)
 signal coowner_requested
 signal owner_set(on: bool)
 signal dev_action(key: String)
+signal notice(text: String)
 
 ## test 13: one source of truth = project setting application/config/version (export versionName matches)
 static var VERSION: String = str(ProjectSettings.get_setting("application/config/version", "1.9.3"))
@@ -41,6 +42,7 @@ var mode := "solo"
 var get_snapshot: Callable
 var _autosave_t := 0.0
 var _hero_from_title := false
+var _save_failed := false
 
 func _ready() -> void:
 	layer = 20; process_mode = Node.PROCESS_MODE_ALWAYS
@@ -87,6 +89,9 @@ func _set_owner(v: bool) -> void:
 
 func show_title() -> void:
 	quick.hide(); settings.hide(); heroes.hide(); title.show(); hud.visible = false; title.focus_play()
+	if title.has_method("refresh_save_line"): title.refresh_save_line()
+
+func save_failed() -> bool: return _save_failed
 
 func _enter(m: String) -> void:
 	mode = m; title.hide(); hud.visible = true
@@ -120,7 +125,7 @@ func toggle_menu(open = null) -> void:
 	menu_toggled.emit(o)
 
 func return_to_title() -> void:
-	toggle_menu(false); _save_now(); VSave.clear_session(); mode = "solo"
+	toggle_menu(false); _save_now(true); VSave.clear_session(); mode = "solo"
 	returned_to_title.emit(); show_title()
 
 func _owner_entry() -> void:
@@ -138,11 +143,23 @@ func set_fps(fps: float) -> void: hud.set_fps(fps, VPrefs.prefs.showFps)
 func _save_session() -> void:
 	var snap: Dictionary = get_snapshot.call() if get_snapshot.is_valid() else {}
 	VSave.save_session(mode, "", "", snap)
-func _save_now() -> void:
+func _save_now(explicit := false) -> bool:
+	var wrote := true
+	var attempted := false
 	if get_snapshot.is_valid():
 		var snap: Dictionary = get_snapshot.call()
-		if not snap.is_empty(): VSave.write_snapshot(snap)
+		if not snap.is_empty():
+			attempted = true
+			wrote = VSave.write_snapshot(snap)
 	if not title.visible: _save_session()
+	if attempted and not wrote:
+		if not _save_failed:
+			_save_failed = true
+			notice.emit(SaveStatus.fail_line())
+	elif attempted and wrote:
+		_save_failed = false
+		if explicit: notice.emit("Save written.")
+	return wrote
 
 func _process(dt: float) -> void:
 	if hud.visible and VPrefs.prefs.showFps: hud.set_fps(Engine.get_frames_per_second(), true)

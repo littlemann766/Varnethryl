@@ -34,7 +34,25 @@ func _ready() -> void:
 		var sig: String = d[2]; b.pressed.connect(func(): emit_signal(sig))
 		if d[0] == "play": VStyle.primary(b)
 		acts.add_child(b); buttons[d[0]] = b
-	var bot := VStyle.label("Your adventure continues from the existing local save. Nothing is reset.", 12, Color("#bfb39a"))
-	bot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; v.add_child(bot)
+	var bot := VStyle.label("", 20, Color("#f4e2b0"))
+	bot.name = "SaveStatus"
+	bot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	bot.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	bot.custom_minimum_size = Vector2(500, 72)
+	bot.add_theme_color_override("font_shadow_color", Color.BLACK)
+	bot.add_theme_constant_override("shadow_offset_y", 2)
+	v.add_child(bot)
+	refresh_save_line()
 
 func focus_play() -> void: buttons.play.grab_focus()
+
+func refresh_save_line() -> void:
+	var bot := find_child("SaveStatus", true, false)
+	if bot == null: return
+	var owner := false
+	var ui := get_tree().root.get_node_or_null("VUI")
+	if ui and ui.get("gate") != null and ui.gate.has_method("is_owner"): owner = ui.gate.is_owner()
+	var line := SaveStatus.title_line(owner)
+	if ui and ui.has_method("save_failed") and ui.save_failed():
+		line = SaveStatus.fail_line() + "\n" + line
+	bot.text = line

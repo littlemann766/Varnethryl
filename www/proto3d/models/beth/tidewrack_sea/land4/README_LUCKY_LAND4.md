@@ -1,6 +1,6 @@
 # Land pass 4 (Beth) — supersedes land3 for review. Nothing to main/live. None of Lucky's files edited.
 
-`LUCKY_TEST54.md` records that `origin/refs/heads/godot-voxel` is missing, so the test 54 call site is not verified. Do not paste the test 49 `_mat_for` block until that branch can be read. Art bytes remain `4f8c97f8`. The ash numbers below (`lift 0.1 / ambient 1.25`) are the older land3 values, not the approved stills (`lift 0.06`, `ambient 0.45`, `spec 0.12`).
+`LUCKY_TEST54.md` is the drop-in checked against tag `godot-test-54` (`33ec05515fa2907c1d6958e39e884eed92955776`). The tag does not use `vc_terrain` yet. Do not paste the test 49 `_mat_for` block. The ash numbers below (`lift 0.1 / ambient 1.25`) are the older land3 values, not the approved stills (`lift 0.06`, `ambient 0.45`, `spec 0.12`).
 
 Terrain evidence (ground, slopes, coasts, silhouettes, no scatter in the shot) is `TERRAIN.md` and `renders/terrain/`. Read that before the scatter notes. The mainland mountain gully is **not** applied.
 

@@ -1,127 +1,144 @@
-# Test 54 art drop — blocked on the godot-voxel branch ref
+# Test 54 art candidate — checked against the tag, not applied
 
-`godot-voxel` is a branch of `https://github.com/littlemann766/Varnethryl`. It is not a separate repository. Checked from this clone:
+Target is the immutable tag `godot-test-54` at `33ec05515fa2907c1d6958e39e884eed92955776` in `https://github.com/littlemann766/Varnethryl`. That SHA is also `refs/heads/main` at the time of the fetch. `refs/heads/godot-voxel` still does not exist. Nothing here was pushed to the tag or to `main`.
+
+The tag tree is a Godot project, not a release-only APK. `project.godot` is present (`config/features` is `4.7` and `Mobile`, `config/version` is `1.9.3`, `config/test_build` is `33`). `run/main_scene` is `res://main.tscn`. Tidewrack is loaded by `tidewrack/tw_sea.gd`.
+
+## What the tag actually binds
+
+`TidewrackSea._mat_for` (`tidewrack/tw_sea.gd` lines 77–92) does **not** use `vc_terrain.gdshader`. There is no such shader anywhere under the tag's `tidewrack/`.
+
+- Fog, storm, glow, lava, and steam return their own shaders.
+- Every visual whose name starts with `ash_` then gets a `StandardMaterial3D` (vertex color, roughness 0.9, metallic specular 0.15).
+- Everything else, including archipelago and frost terrain, returns `res://tidewrack/stage1/shaders/vc_lit.tres`, a `StandardMaterial3D` with `vertex_color_use_as_albedo` and roughness 0.9.
+
+The test 49 `_mat_for` snippet that assumed `vc_terrain` was already wired is wrong for this tag. Do not paste that older block.
+
+`_build_region` sets `material_override = _mat_for(b)` on each visual glb. Names ending in `_col` are turned into trimesh static bodies and are not drawn. `_files` loads every `arch_` / `coast_` / `frost_` / `ash_` glb in the stage mesh folder except `_lod1` (low tier swaps to `_lod1` inside `_path` when `tier < 2` and the lod file exists).
+
+`project.godot` sets `renderer/rendering_method="mobile"` and `renderer/rendering_method.mobile="mobile"`. The Android preset (`export_presets.cfg`, package `com.varnethryl.godottest`, arm64, versionName `1.9.3`) does not override the renderer. This is not the Compatibility GLES renderer.
+
+There is no `hero_cut` reference in the tag. The land4 shader declares `global uniform vec4 hero_cut` and only cuts when `hero_cut.w > 0.5`. Left unset, that stays off.
+
+## Art files (unchanged, commit 4f8c97f8)
+
+Shader: `www/proto3d/models/beth/tidewrack_sea/land4/shaders/vc_terrain.gdshader`
+Copy to `res://tidewrack/stage1/shaders/vc_terrain.gdshader`.
+
+Fifteen jpgs in `land4/textures/`, copy to `res://tidewrack/land4/textures/`. Uniforms are `grass|earth|sand|rock|snow` plus `_col` / `_nrm` / `_rgh`. Sources, CC0 ambientCG: Grass004, Ground048, Ground054, Rock023, Snow001. See `textures/TEXTURES.md`.
+
+Load them the way the stills did: `Image.load_from_file`, `generate_mipmaps`, `ImageTexture`. Do not rely on the importer's sRGB flag.
+
+Terrain glbs to copy onto the same `res://tidewrack/` relative path. 78 files. These are the high mesh and its `_lod1` only. No `_col`, no `land_scatter`, no ports, no glow.
+
+The 13 `*_isl_*` meshes are not inside the tile meshes (sampled: Gullhaven is not in `arch_islands`, Frostreach is not in a frost tile). The tag's `arch_islands.glb` does cover the Gullhaven area with the old surface. Replacing `arch_islands.glb` without also adding `arch_isl_gullhaven.glb` (and the other `*_isl_*` files) leaves a hole. Adding them does not stack a second copy of the same triangles.
 
 ```
-git fetch origin refs/heads/godot-voxel:refs/remotes/origin/godot-voxel
-fatal: couldn't find remote ref refs/heads/godot-voxel
+stage1/meshes/arch_isl_coil_isle.glb
+stage1/meshes/arch_isl_coil_isle_lod1.glb
+stage1/meshes/arch_isl_gullhaven.glb
+stage1/meshes/arch_isl_gullhaven_lod1.glb
+stage1/meshes/arch_isl_lantern_rock.glb
+stage1/meshes/arch_isl_lantern_rock_lod1.glb
+stage1/meshes/arch_isl_saltwatch_keep.glb
+stage1/meshes/arch_isl_saltwatch_keep_lod1.glb
+stage1/meshes/arch_islands.glb
+stage1/meshes/arch_islands_lod1.glb
+stage2/meshes/coast_isl_beached_wreck.glb
+stage2/meshes/coast_isl_beached_wreck_lod1.glb
+stage2/meshes/coast_isl_saltglass.glb
+stage2/meshes/coast_isl_saltglass_lod1.glb
+stage2/meshes/coast_tile_x0z0.glb
+stage2/meshes/coast_tile_x0z0_lod1.glb
+stage2/meshes/coast_tile_x0z1.glb
+stage2/meshes/coast_tile_x0z1_lod1.glb
+stage2/meshes/coast_tile_x0z2.glb
+stage2/meshes/coast_tile_x0z2_lod1.glb
+stage2/meshes/coast_tile_x0z3.glb
+stage2/meshes/coast_tile_x0z3_lod1.glb
+stage2/meshes/coast_tile_x1z0.glb
+stage2/meshes/coast_tile_x1z0_lod1.glb
+stage2/meshes/coast_tile_x1z1.glb
+stage2/meshes/coast_tile_x1z1_lod1.glb
+stage2/meshes/coast_tile_x1z2.glb
+stage2/meshes/coast_tile_x1z2_lod1.glb
+stage2/meshes/coast_tile_x1z3.glb
+stage2/meshes/coast_tile_x1z3_lod1.glb
+stage2/meshes/coast_tile_x2z1.glb
+stage2/meshes/coast_tile_x2z1_lod1.glb
+stage2/meshes/coast_tile_x2z2.glb
+stage2/meshes/coast_tile_x2z2_lod1.glb
+stage2/meshes/coast_tile_x2z3.glb
+stage2/meshes/coast_tile_x2z3_lod1.glb
+stage4/meshes/ash_isl_ember_wreck.glb
+stage4/meshes/ash_isl_ember_wreck_lod1.glb
+stage4/meshes/ash_isl_hot_spring.glb
+stage4/meshes/ash_isl_hot_spring_lod1.glb
+stage4/meshes/ash_isl_obsidian_arch.glb
+stage4/meshes/ash_isl_obsidian_arch_lod1.glb
+stage4/meshes/ash_isl_vent.glb
+stage4/meshes/ash_isl_vent_lod1.glb
+stage4/meshes/ash_tile_x0z0.glb
+stage4/meshes/ash_tile_x0z0_lod1.glb
+stage4/meshes/ash_tile_x0z1.glb
+stage4/meshes/ash_tile_x0z1_lod1.glb
+stage4/meshes/ash_tile_x1z0.glb
+stage4/meshes/ash_tile_x1z0_lod1.glb
+stage4/meshes/ash_tile_x1z1.glb
+stage4/meshes/ash_tile_x1z1_lod1.glb
+stage4/meshes/ash_tile_x2z0.glb
+stage4/meshes/ash_tile_x2z0_lod1.glb
+stage4/meshes/ash_tile_x2z1.glb
+stage4/meshes/ash_tile_x2z1_lod1.glb
+stage4/meshes/frost_isl_aurora_arch.glb
+stage4/meshes/frost_isl_aurora_arch_lod1.glb
+stage4/meshes/frost_isl_frostreach.glb
+stage4/meshes/frost_isl_frostreach_lod1.glb
+stage4/meshes/frost_isl_frozen_wreck.glb
+stage4/meshes/frost_isl_frozen_wreck_lod1.glb
+stage4/meshes/frost_tile_x0z0.glb
+stage4/meshes/frost_tile_x0z0_lod1.glb
+stage4/meshes/frost_tile_x0z1.glb
+stage4/meshes/frost_tile_x0z1_lod1.glb
+stage4/meshes/frost_tile_x1z0.glb
+stage4/meshes/frost_tile_x1z0_lod1.glb
+stage4/meshes/frost_tile_x1z1.glb
+stage4/meshes/frost_tile_x1z1_lod1.glb
+stage4/meshes/frost_tile_x2z0.glb
+stage4/meshes/frost_tile_x2z0_lod1.glb
+stage4/meshes/frost_tile_x2z1.glb
+stage4/meshes/frost_tile_x2z1_lod1.glb
+stage4/meshes/frost_tile_x3z0.glb
+stage4/meshes/frost_tile_x3z0_lod1.glb
+stage4/meshes/frost_tile_x3z1.glb
+stage4/meshes/frost_tile_x3z1_lod1.glb
 ```
 
-`git ls-remote --heads origin` has no `refs/heads/godot-voxel` and no other head whose name contains `voxel`. Compatibility of the 15 bindings against that branch was not validated. The `_mat_for` paste further down is the land1/land3 note from test 49. It is not a verified test 54 call site. Do not apply it until `refs/heads/godot-voxel` exists and someone reads `_mat_for` on that SHA.
+Do not copy `land4/stageN/meshes/*_col.glb` or `*land_scatter*`. The tag's collision glbs stay. Do not copy `equipment/`, armor, or PR27. Do not edit `main.gd`.
 
-A tag named `godot-test-54` does exist. It is not the branch. It was not used as a substitute, and its tree was not read for this check. For the record only: `refs/tags/godot-test-54` is `33ec05515fa2907c1d6958e39e884eed92955776`, the same SHA as `refs/heads/main` at the time of this fetch.
+## Patch
 
-Art files named below are still `4f8c97f8` on `beth-world-art`. This note does not change a mesh or the shader. Nothing was pushed to `godot-voxel`, `main`, or a release.
+`tw_sea_land4_test54.patch` applies to `tidewrack/tw_sea.gd` from the tag. Dry-run against that blob succeeded (`patch --dry-run`). It inserts one branch **before** the ash `StandardMaterial3D` return, so ash terrain is not left on the basalt material, and it does not catch lava, steam, glow, ports, or scatter.
 
-Do not merge this branch. Do not copy armor, PR27, `equipment/`, mainland `main.gd`, or any collision mesh.
+Region order is `arch_` 0, `coast_` 1, `frost_` 2, `ash_` 3. Frost's cold snow and blue-grey rock is `region == 2`. Ash terrain uses `lift 0.06`, `ambient 0.45`, `spec 0.12` (the approved stills). Other regions keep the shader defaults (`lift 0.03`, `ambient 0.35`, `spec 0.4`). Low tier sets `detail` to 0.55. That only scales normals. It does not drop samples.
 
-## Copy
+Apply from a checkout of the tag, not from `main` if they ever diverge:
 
-From `www/proto3d/models/beth/tidewrack_sea/land4/` at `4f8c97f8`.
-
-Terrain visuals only. A file is in scope when the name contains `_tile_` or `_isl_` or is exactly `arch_islands`, and the name does not contain `_col`, `land_scatter`, `_glow`, or `_port`. Copy those glbs, including `_lod1`, over `res://tidewrack/stageN/meshes/` of the same name. Copying the whole `meshes/` folder will overwrite scatter colliders. Do not.
-
-| From | To |
-|---|---|
-| `shaders/vc_terrain.gdshader` | `res://tidewrack/stage1/shaders/vc_terrain.gdshader` |
-| `textures/*.jpg` (15 files, listed below) | `res://tidewrack/land4/textures/` |
-
-The shader replaces the procedural land1/land3 ground. It draws black or empty on any sampler that is not set.
-
-## Fifteen bindings
-
-CC0 1.0 ambientCG, recorded in `textures/TEXTURES.md`. No purchase. The shader names are the uniforms.
-
-| Uniform | File | Source |
-|---|---|---|
-| `grass_col` | `grass_albedo.jpg` | Grass004 albedo |
-| `grass_nrm` | `grass_normal.jpg` | Grass004 normal, OpenGL +Y |
-| `grass_rgh` | `grass_rough.jpg` | Grass004 roughness |
-| `earth_col` | `earth_albedo.jpg` | Ground048 albedo |
-| `earth_nrm` | `earth_normal.jpg` | Ground048 normal |
-| `earth_rgh` | `earth_rough.jpg` | Ground048 roughness |
-| `sand_col` | `sand_albedo.jpg` | Ground054 albedo |
-| `sand_nrm` | `sand_normal.jpg` | Ground054 normal |
-| `sand_rgh` | `sand_rough.jpg` | Ground054 roughness |
-| `rock_col` | `rock_albedo.jpg` | Rock023 albedo |
-| `rock_nrm` | `rock_normal.jpg` | Rock023 normal |
-| `rock_rgh` | `rock_rough.jpg` | Rock023 roughness |
-| `snow_col` | `snow_albedo.jpg` | Snow001 albedo |
-| `snow_nrm` | `snow_normal.jpg` | Snow001 normal |
-| `snow_rgh` | `snow_rough.jpg` | Snow001 roughness |
-
-`preview/render.gd` `bind_terrain()` is the loader the stills used: `Image.load_from_file`, then `generate_mipmaps()`, then `ImageTexture`. Use that, not the editor importer. An importer that marks the normal or the roughness as sRGB will not match the stills.
-
-## Code
-
-Region index is part of the look. Frost is `2`. Archipelago `0`, Saltglass `1`, Ash `3`. A different order paints frost with grass or ash.
-
-`hero_cut` is a `global uniform vec4` already used by the land1 shader. Leave it.
-
-In `_mat_for`, for terrain names only:
-
-```gdscript
-if n.contains("_tile_") or n == "arch_islands" or (n.contains("_isl_") and not n.ends_with("_glow") and not n.ends_with("_port")):
-    var t := _sh("stage1/shaders/vc_terrain.gdshader")
-    t.set_shader_parameter("region", ["arch_", "coast_", "frost_", "ash_"].find(n.substr(0, n.find("_") + 1)))
-    _bind_land4(t)
-    if n.begins_with("ash_"):
-        t.set_shader_parameter("lift", 0.06)
-        t.set_shader_parameter("ambient", 0.45)
-        t.set_shader_parameter("spec", 0.12)
-    if not high():
-        t.set_shader_parameter("detail", 0.55)
-    return t
+```
+git checkout 33ec05515fa2907c1d6958e39e884eed92955776
+git apply path/to/tw_sea_land4_test54.patch
 ```
 
-Ash `0.06 / 0.45 / 0.12` is what the approved stills used. The older land3 line `0.1 / 1.25 / 0.075` is not this pass.
+## Renderer limit
 
-```gdscript
-var _land4_tex := {}
-func _bind_land4(mat: ShaderMaterial) -> void:
-    var root := "res://tidewrack/land4/textures/"
-    for key in ["grass", "earth", "sand", "rock", "snow"]:
-        mat.set_shader_parameter(key + "_col", _land4_jpg(root + key + "_albedo.jpg"))
-        mat.set_shader_parameter(key + "_nrm", _land4_jpg(root + key + "_normal.jpg"))
-        mat.set_shader_parameter(key + "_rgh", _land4_jpg(root + key + "_rough.jpg"))
+15 `sampler2D` uniforms. The helpers expand to 26 `texture()` reads per fragment: two albedo taps for grass, soil, sand, and snow (8), two albedo taps on each of three rock planes (6), four ground normals plus three rock normals (7), five roughness taps.
 
-func _land4_jpg(res_path: String) -> Texture2D:
-    if _land4_tex.has(res_path):
-        return _land4_tex[res_path]
-    var img := Image.load_from_file(ProjectSettings.globalize_path(res_path))
-    if img == null:
-        push_error("land4 texture missing: " + res_path)
-        return null
-    img.generate_mipmaps()
-    var tex := ImageTexture.create_from_image(img)
-    _land4_tex[res_path] = tex
-    return tex
-```
+The Compatibility renderer's GLES ceiling is 16 textures per shader. This project does not use that renderer. The Mobile renderer is Vulkan. Vulkan's guaranteed `maxPerStageDescriptorSamplers` is 16, and a spatial shader also receives the engine's lighting samplers (shadows, radiance) on top of the 15 uniforms. A device that only exposes the spec minimum can fail to link. A 2026 flagship usually exposes more than 16. That was not measured.
 
-`detail` only scales normal strength. Low does not drop samples. The fragment shader takes 26 texture reads. It was not timed on a phone.
+Compile evidence: Godot 4.4.1 GL Compatibility on llvmpipe linked this shader. The tag asks for Godot 4.7 Mobile. Godot 4.7 is not installed here (`/tmp/godot` is 4.4.1). No phone run. If the S26 build shows magenta terrain, the shader failed to link. Remove the `_land4_terrain` branch and the ground returns to `vc_lit.tres` or the ash `StandardMaterial3D`.
 
-Warm the shader the same way the other terrain shaders are warmed, or the first frame hitch is the compile.
+## Not in this candidate
 
-## What this does not change
+Frost cliff outlines are still the mesh from `4f8c97f8`. The normal-slide rounder opened dark gullies and was not kept. The shader does not change the silhouette.
 
-- Collision glbs, route vertices, Saltglass stair, harbour, lift, toll.
-- Mainland height. The gully term is still not applied.
-- Armor and PR27. Nothing under `equipment/`.
-- `vertex_color_is_srgb`. COLOR_0 is still uint8 normalized, same as land1–3.
-- Frost cliff outlines. They are the mesh. A slide of new vertices along normals opened dark cuts in the gullies and was thrown out. Do not run a rounder. The shader does not change the silhouette.
-
-## Check on test 54
-
-- Gullhaven at eye height: photographed grass, matte, not the old neon blades.
-- Frost slope: cold white and blue-grey snow, no yellow-green bands. Steep faces are darker blue-grey rock and still faceted.
-- Ash ground: dark. If it looks like the old bright basalt, the lift/ambient lines were the land3 ones.
-- A Saltglass route still meets the ground. If the feet float or sink, a collision file was replaced. Put the old col glbs back.
-- Armor is the test 54 armor. If it changed, the wrong tree was copied.
-
-## If it fails
-
-- Magenta or missing ground: the shader compiled without a sampler, or one jpg path is wrong. The `push_error` names the file. Put the previous `vc_terrain.gdshader` back if you need the build playable in the next minute.
-- Shader fails to link on the phone: 15 samplers plus the engine can pass a GLES limit. Same rollback. The Compatibility preview on this machine linked. That is llvmpipe, not the S26.
-- Stills of this art are Godot 4.4.1 GL Compatibility, not a Vulkan phone capture. Brightness on the S26 will not match the jpg.
-
-The Capacitor workflow `.github/workflows/build-android.yml` builds the web game, not Godot test 54. This machine has no Android SDK and no Godot Android export templates, so no terrain APK was made here. Test 54 is the playable check.
+Stills are not a Galaxy S26 capture. The Capacitor workflow in `.github/workflows/build-android.yml` is the web game, not this Godot project.

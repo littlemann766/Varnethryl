@@ -1,0 +1,53 @@
+--- a/tidewrack/tw_sea.gd
++++ b/tidewrack/tw_sea.gd
+@@ -88,9 +88,50 @@
+ 	if n == "ash_lava_seams":
+ 		var l := _sh("stage4/shaders/lava_seam.gdshader"); l.set_shader_parameter("energy", 6.0); return l
+ 	if n == "ash_steam": return _sh("stage4/shaders/steam_plume.gdshader")
++	# land4 photo ground. Must sit above the ash StandardMaterial return.
++	if _land4_terrain(n):
++		return _land4_mat(n)
+ 	if n.begins_with("ash_"):   # stage 4 README: black basalt = vertex colour + metallic_specular 0.15 (else it mirrors the haze and reads beige)
+ 		var b := StandardMaterial3D.new(); b.vertex_color_use_as_albedo = true; b.roughness = 0.9; b.metallic_specular = 0.15; return b
+ 	return load(R + "stage1/shaders/vc_lit.tres")
++
++func _land4_terrain(n: String) -> bool:
++	if n.contains("land_scatter") or n.ends_with("_col") or n.ends_with("_glow") or n.ends_with("_port"):
++		return false
++	return n.contains("_tile_") or n == "arch_islands" or n.contains("_isl_")
++
++func _land4_mat(n: String) -> ShaderMaterial:
++	var t := _sh("stage1/shaders/vc_terrain.gdshader")
++	t.set_shader_parameter("region", ["arch_", "coast_", "frost_", "ash_"].find(n.substr(0, n.find("_") + 1)))
++	_bind_land4(t)
++	if n.begins_with("ash_"):
++		t.set_shader_parameter("lift", 0.06)
++		t.set_shader_parameter("ambient", 0.45)
++		t.set_shader_parameter("spec", 0.12)
++	if not high():
++		t.set_shader_parameter("detail", 0.55)
++	return t
++
++var _land4_tex := {}
++func _bind_land4(mat: ShaderMaterial) -> void:
++	var root := "res://tidewrack/land4/textures/"
++	for key in ["grass", "earth", "sand", "rock", "snow"]:
++		mat.set_shader_parameter(key + "_col", _land4_jpg(root + key + "_albedo.jpg"))
++		mat.set_shader_parameter(key + "_nrm", _land4_jpg(root + key + "_normal.jpg"))
++		mat.set_shader_parameter(key + "_rgh", _land4_jpg(root + key + "_rough.jpg"))
++
++func _land4_jpg(res_path: String) -> Texture2D:
++	if _land4_tex.has(res_path):
++		return _land4_tex[res_path]
++	var img := Image.load_from_file(ProjectSettings.globalize_path(res_path))
++	if img == null:
++		push_error("land4 texture missing: " + res_path)
++		return null
++	img.generate_mipmaps()
++	var tex := ImageTexture.create_from_image(img)
++	_land4_tex[res_path] = tex
++	return tex
++
+ func _no_shadow(n: String) -> bool:
+ 	for k in ["_fog_layers", "_storm_sky", "_storm_sea", "_glow", "_steam", "_lava_seams", "buoy_", "upg_", "_ice_floes", "_icicles"]:
+ 		if n.find(k) >= 0: return true

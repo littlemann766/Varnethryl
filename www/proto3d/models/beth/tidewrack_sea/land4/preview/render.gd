@@ -16,25 +16,50 @@ func sh(p: String) -> ShaderMaterial:
 	m.shader = load(p)
 	return m
 
-var _maps := {}
-func grab(name: String) -> Texture2D:
-	if _maps.has(name):
-		return _maps[name]
+var _surf_col: Texture2DArray
+var _surf_nrm: Texture2DArray
+
+func _jpg(name: String) -> Image:
 	var p := ProjectSettings.globalize_path("res://").path_join("../textures/%s.jpg" % name)
 	var img := Image.load_from_file(p)
 	if img == null:
 		push_error("missing texture " + p)
 		return null
+	if img.get_format() != Image.FORMAT_RGB8:
+		img.convert(Image.FORMAT_RGB8)
+	return img
+
+# Roughness byte goes into the normal photo's B. XY stay the normal. Z is rebuilt in the shader.
+func _pack_nrm(nrm: Image, rgh: Image) -> Image:
+	var nb := nrm.get_data()
+	var rb := rgh.get_data()
+	var out := nb.duplicate()
+	var n := mini(out.size() / 3, rb.size() / 3)
+	for i in n:
+		out[i * 3 + 2] = rb[i * 3]
+	var img := Image.create_from_data(nrm.get_width(), nrm.get_height(), false, Image.FORMAT_RGB8, out)
 	img.generate_mipmaps()
-	var t := ImageTexture.create_from_image(img)
-	_maps[name] = t
-	return t
+	return img
 
 func bind_terrain(mat: ShaderMaterial) -> void:
-	for key in ["grass", "earth", "sand", "rock", "snow"]:
-		mat.set_shader_parameter(key + "_col", grab(key + "_albedo"))
-		mat.set_shader_parameter(key + "_nrm", grab(key + "_normal"))
-		mat.set_shader_parameter(key + "_rgh", grab(key + "_rough"))
+	if _surf_col == null:
+		var cols: Array[Image] = []
+		var nrms: Array[Image] = []
+		for key in ["grass", "earth", "sand", "rock", "snow"]:
+			var alb := _jpg(key + "_albedo")
+			alb.generate_mipmaps()
+			cols.append(alb)
+			nrms.append(_pack_nrm(_jpg(key + "_normal"), _jpg(key + "_rough")))
+		_surf_col = Texture2DArray.new()
+		var err := _surf_col.create_from_images(cols)
+		if err != OK:
+			push_error("surf_col array " + str(err))
+		_surf_nrm = Texture2DArray.new()
+		err = _surf_nrm.create_from_images(nrms)
+		if err != OK:
+			push_error("surf_nrm array " + str(err))
+	mat.set_shader_parameter("surf_col", _surf_col)
+	mat.set_shader_parameter("surf_nrm", _surf_nrm)
 
 func _run() -> void:
 	var a := OS.get_cmdline_user_args()

@@ -20,14 +20,16 @@ The test 49 `_mat_for` snippet that assumed `vc_terrain` was already wired is wr
 
 There is no `hero_cut` reference in the tag. The land4 shader declares `global uniform vec4 hero_cut` and only cuts when `hero_cut.w > 0.5`. Left unset, that stays off.
 
-## Art files (unchanged, commit 4f8c97f8)
+## Art files
+
+Meshes are the `4f8c97f8` terrain visuals. The shader in this commit is the same grade and blend, with the 15 `sampler2D` uniforms replaced by two `sampler2DArray`s.
 
 Shader: `www/proto3d/models/beth/tidewrack_sea/land4/shaders/vc_terrain.gdshader`
 Copy to `res://tidewrack/stage1/shaders/vc_terrain.gdshader`.
 
-Fifteen jpgs in `land4/textures/`, copy to `res://tidewrack/land4/textures/`. Uniforms are `grass|earth|sand|rock|snow` plus `_col` / `_nrm` / `_rgh`. Sources, CC0 ambientCG: Grass004, Ground048, Ground054, Rock023, Snow001. See `textures/TEXTURES.md`.
+Uniforms: `surf_col` (albedo, `source_color`) and `surf_nrm` (normal XY, roughness in B). Layers, in order: grass, earth, sand, rock, snow. The patch builds both arrays at load from the 15 jpgs. Sources stay the CC0 ambientCG files in `textures/TEXTURES.md`: Grass004, Ground048, Ground054, Rock023, Snow001.
 
-Load them the way the stills did: `Image.load_from_file`, `generate_mipmaps`, `ImageTexture`. Do not rely on the importer's sRGB flag.
+Copy those 15 jpgs to `res://tidewrack/land4/textures/`. The patch uses `Image.load_from_file`, packs roughness into the normal's blue byte, then `Texture2DArray.create_from_images`. Do not rely on the importer's sRGB flag.
 
 Terrain glbs to copy onto the same `res://tidewrack/` relative path. 78 files. These are the high mesh and its `_lod1` only. No `_col`, no `land_scatter`, no ports, no glow.
 
@@ -129,13 +131,13 @@ git checkout 33ec05515fa2907c1d6958e39e884eed92955776
 git apply path/to/tw_sea_land4_test54.patch
 ```
 
-## Renderer limit
+## Renderer check
 
-15 `sampler2D` uniforms. The helpers expand to 26 `texture()` reads per fragment: two albedo taps for grass, soil, sand, and snow (8), two albedo taps on each of three rock planes (6), four ground normals plus three rock normals (7), five roughness taps.
+Godot `4.7.stable.official.5b4e0cb0f`, started as `--rendering-method mobile`. The log line was `Vulkan 1.4.318 - Forward Mobile - Using Device #0: Unknown - llvmpipe (LLVM 20.1.2, 256 bits)`. That is Mesa lavapipe, a software Vulkan device (`PHYSICAL_DEVICE_TYPE_CPU`, driver `llvmpipe`, Mesa 25.2.8). It is the Mobile renderer, not the Compatibility GLES backend. It is not a phone and not a GPU.
 
-The Compatibility renderer's GLES ceiling is 16 textures per shader. This project does not use that renderer. The Mobile renderer is Vulkan. Vulkan's guaranteed `maxPerStageDescriptorSamplers` is 16, and a spatial shader also receives the engine's lighting samplers (shadows, radiance) on top of the 15 uniforms. A device that only exposes the spec minimum can fail to link. A 2026 flagship usually exposes more than 16. That was not measured.
+The packed shader linked. The run log has no `SHADER ERROR`. Six viewports were saved (Gullhaven ground and coast, Saltglass ground, frost skyline and coast, ash ground). Against the same cameras rendered a minute earlier with the 15-sampler shader on this same Forward Mobile device, every frame's mean absolute difference was under 1 level and no pixel moved by more than 12. The photographs, frost grade, and matte roughness remap are the same code. Roughness is read from the normal array's B channel. Normal Z is rebuilt from XY.
 
-Compile evidence: Godot 4.4.1 GL Compatibility on llvmpipe linked this shader. The tag asks for Godot 4.7 Mobile. Godot 4.7 is not installed here (`/tmp/godot` is 4.4.1). No phone run. If the S26 build shows magenta terrain, the shader failed to link. Remove the `_land4_terrain` branch and the ground returns to `vc_lit.tres` or the ash `StandardMaterial3D`.
+User samplers are 2. The fragment still does the same photograph taps (about 26 `texture()` calls). Those are bandwidth, not extra sampler slots. Vulkan's guaranteed `maxPerStageDescriptorSamplers` is 16, and the Mobile lighting pass adds its own samplers on top of the user's. Two terrain samplers leave that headroom. This lavapipe device reports `maxPerStageDescriptorSamplers = 1000000`, so the run does not prove a 16-sampler phone. It does prove Godot 4.7 Forward Mobile compiles and draws the packed shader. Not timed on a Galaxy S26. If that phone shows magenta terrain, remove the `_land4_terrain` branch and the ground returns to `vc_lit.tres` or the ash `StandardMaterial3D`.
 
 ## Not in this candidate
 

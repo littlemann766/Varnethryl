@@ -29,7 +29,7 @@ Terrain and scatter triangle counts are unchanged from the smooth pass:
 | frost | 572k | 942k | 377k (40%) | 3418 | 160k |
 | ash | 242k | 378k | 151k (40%) | 2893 | 135k |
 
-Texture set on disk is about 21 MB of 1024 JPEG (15 files). In the preview they are uploaded with mipmaps. The shader binds **15 samplers** (the usual GL Compatibility limit is 16) and takes **26 texture reads** per fragment: two albedo taps for grass, soil, sand and snow, two albedo taps on each of the three rock planes, one normal each, one roughness each. The old third rock tap is not taken. `detail` only scales normal strength. It does not drop taps. This was not timed on a phone.
+Texture set on disk is about 21 MB of 1024 JPEG (15 files). In the preview they are uploaded with mipmaps. The shader binds **2 `sampler2DArray`s** (albedo, and normal-with-roughness-in-B). Layers are grass, earth, sand, rock, snow. It still takes about 26 texture reads per fragment. Godot 4.7 Forward Mobile on lavapipe linked it. That is not a phone. `detail` only scales normal strength. It does not drop taps.
 
 ## Frames to look at
 

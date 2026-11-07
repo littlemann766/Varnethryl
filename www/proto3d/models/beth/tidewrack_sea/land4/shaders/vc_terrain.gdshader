@@ -8,21 +8,16 @@ uniform float lift = 0.03;
 uniform float ambient = 0.35;
 uniform float spec = 0.4;
 uniform float detail = 1.0;
-uniform sampler2D grass_col : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D grass_nrm : repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D grass_rgh : repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D earth_col : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D earth_nrm : repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D earth_rgh : repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D sand_col : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D sand_nrm : repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D sand_rgh : repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D rock_col : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D rock_nrm : repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D rock_rgh : repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D snow_col : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D snow_nrm : repeat_enable, filter_linear_mipmap_anisotropic;
-uniform sampler2D snow_rgh : repeat_enable, filter_linear_mipmap_anisotropic;
+// Two arrays, not 15 samplers. Layers: 0 grass, 1 earth, 2 sand, 3 rock, 4 snow.
+// surf_nrm is the normal photo with roughness in B. Z is rebuilt from XY.
+// Leaves the Mobile renderer room for its own lighting samplers.
+uniform sampler2DArray surf_col : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
+uniform sampler2DArray surf_nrm : repeat_enable, filter_linear_mipmap_anisotropic;
+const float LY_GRASS = 0.0;
+const float LY_EARTH = 1.0;
+const float LY_SAND = 2.0;
+const float LY_ROCK = 3.0;
+const float LY_SNOW = 4.0;
 global uniform vec4 hero_cut;
 varying vec3 wpos;
 varying vec3 wnrm;
@@ -38,41 +33,43 @@ float tile_w(vec2 world) { return smoothstep(0.22, 0.78, fbm(world * 0.04 + 1.7)
 vec2 bend(vec2 world) {
 	return vec2(fbm(world * 0.046 + 1.3), fbm(world * 0.046 + 6.8)) - 0.5;
 }
-vec3 sample_col(sampler2D tex, vec2 world, float meters, float w, float warp_amp, float lo, float hi) {
+vec3 sample_col(float layer, vec2 world, float meters, float w, float warp_amp, float lo, float hi) {
 	vec2 uv = world / meters + bend(world) * warp_amp;
 	vec2 uvb = mat2(vec2(0.82, -0.57), vec2(0.57, 0.82)) * (uv * 0.37) + vec2(4.7, 2.2);
-	vec3 a = texture(tex, uv).rgb;
-	vec3 b = texture(tex, uvb).rgb;
+	vec3 a = texture(surf_col, vec3(uv, layer)).rgb;
+	vec3 b = texture(surf_col, vec3(uvb, layer)).rgb;
 	return mix(a, b, mix(lo, hi, w));
 }
-vec3 sample_nrm(sampler2D tex, vec2 world, float meters, float warp_amp) {
+vec3 sample_nrm(float layer, vec2 world, float meters, float warp_amp) {
 	vec2 uv = world / meters + bend(world) * warp_amp;
-	return texture(tex, uv).xyz * 2.0 - 1.0;
+	vec2 xy = texture(surf_nrm, vec3(uv, layer)).xy * 2.0 - 1.0;
+	float z = sqrt(clamp(1.0 - dot(xy, xy), 0.0, 1.0));
+	return vec3(xy, z);
 }
 // The CC0 roughness photos are smooth (grass median ~0.25). Used raw they read as
 // polished carpet, and an sRGB decode would make that worse. Keep the photo's
 // variation, but sit it in a dry range. Wet sand is lowered later, on purpose.
-float rough_in(sampler2D tex, vec2 world, float meters, float lo, float hi) {
+float rough_in(float layer, vec2 world, float meters, float lo, float hi) {
 	vec2 uv = world / meters + bend(world) * 0.46;
-	return mix(lo, hi, clamp(texture(tex, uv).r, 0.0, 1.0));
+	return mix(lo, hi, clamp(texture(surf_nrm, vec3(uv, layer)).b, 0.0, 1.0));
 }
-vec3 tri_col(sampler2D tex, vec3 p, vec3 n, float meters) {
+vec3 tri_col(vec3 p, vec3 n, float meters) {
 	vec3 b = pow(abs(n), vec3(4.0));
 	b /= b.x + b.y + b.z;
 	// Each plane carries its own weight, including height, so a vertical face
 	// does not repeat in a straight column.
 	// Rock mixes widely between a bent copy and a rotated larger copy, so a
 	// cliff face does not keep one straight tile column.
-	return sample_col(tex, p.zy, meters, tile_w(p.zy), 1.35, 0.18, 0.74) * b.x
-		+ sample_col(tex, p.xz, meters, tile_w(p.xz), 1.35, 0.18, 0.74) * b.y
-		+ sample_col(tex, p.xy, meters, tile_w(p.xy), 1.35, 0.18, 0.74) * b.z;
+	return sample_col(LY_ROCK, p.zy, meters, tile_w(p.zy), 1.35, 0.18, 0.74) * b.x
+		+ sample_col(LY_ROCK, p.xz, meters, tile_w(p.xz), 1.35, 0.18, 0.74) * b.y
+		+ sample_col(LY_ROCK, p.xy, meters, tile_w(p.xy), 1.35, 0.18, 0.74) * b.z;
 }
-vec3 tri_nrm(sampler2D tex, vec3 p, vec3 nrm, float meters) {
+vec3 tri_nrm(vec3 p, vec3 nrm, float meters) {
 	vec3 b = pow(abs(nrm), vec3(4.0));
 	b /= b.x + b.y + b.z;
-	vec3 tx = sample_nrm(tex, p.zy, meters, 1.35);
-	vec3 ty = sample_nrm(tex, p.xz, meters, 1.35);
-	vec3 tz = sample_nrm(tex, p.xy, meters, 1.35);
+	vec3 tx = sample_nrm(LY_ROCK, p.zy, meters, 1.35);
+	vec3 ty = sample_nrm(LY_ROCK, p.xz, meters, 1.35);
+	vec3 tz = sample_nrm(LY_ROCK, p.xy, meters, 1.35);
 	vec3 wx = vec3(tx.z * sign(nrm.x + 1e-4), tx.y, tx.x);
 	vec3 wy = vec3(ty.x, ty.z * sign(nrm.y + 1e-4), ty.y);
 	vec3 wz = vec3(tz.x, tz.y, tz.z * sign(nrm.z + 1e-4));
@@ -128,11 +125,11 @@ void fragment() {
 		float rockv = smoothstep(0.08 + wob * 0.12, 0.58, slope);
 		float tw = tile_w(xz);
 		// 2 m grass and soil, 2.4 m sand, 3.2 m snow, 1.8 m rock. Mipmaps cover distance.
-		vec3 gcol = grade_grass(sample_col(grass_col, xz, 2.0, tw, 0.42, 0.12, 0.34));
-		vec3 ecol = grade_earth(sample_col(earth_col, xz, 2.0, tw, 0.42, 0.12, 0.34));
-		vec3 scol = grade_sand(sample_col(sand_col, xz, 2.4, tw, 0.42, 0.12, 0.34));
-		vec3 ncol = grade_snow(sample_col(snow_col, xz, 3.2, tw, 0.42, 0.12, 0.34));
-		vec3 rcol = grade_rock(tri_col(rock_col, wpos, n, 1.8));
+		vec3 gcol = grade_grass(sample_col(LY_GRASS, xz, 2.0, tw, 0.42, 0.12, 0.34));
+		vec3 ecol = grade_earth(sample_col(LY_EARTH, xz, 2.0, tw, 0.42, 0.12, 0.34));
+		vec3 scol = grade_sand(sample_col(LY_SAND, xz, 2.4, tw, 0.42, 0.12, 0.34));
+		vec3 ncol = grade_snow(sample_col(LY_SNOW, xz, 3.2, tw, 0.42, 0.12, 0.34));
+		vec3 rcol = grade_rock(tri_col(wpos, n, 1.8));
 		float wear = clamp(0.12 + (1.0 - sat) * 0.25 + smoothstep(0.45, 0.78, fbm(xz * 0.09)) * 0.45, 0.08, 0.7);
 		vec3 meadow = mix(gcol, ecol, wear);
 		if (region == 1) meadow = mix(meadow, scol * vec3(1.08, 1.06, 1.0), (1.0 - wgrass) * 0.62);
@@ -167,10 +164,10 @@ void fragment() {
 			ground *= mix(vec3(1.0), clamp(base / max(lum, 0.18), vec3(0.45), vec3(1.35)), 0.18);
 		}
 		ALBEDO = ground * (1.0 - lift * 2.0) + vec3(lift, lift * 0.95, lift * 0.9);
-		vec3 tg = sample_nrm(grass_nrm, xz, 2.0, 0.42);
-		vec3 te = sample_nrm(earth_nrm, xz, 2.0, 0.42);
-		vec3 tsand = sample_nrm(sand_nrm, xz, 2.4, 0.42);
-		vec3 tsn = sample_nrm(snow_nrm, xz, 3.2, 0.42);
+		vec3 tg = sample_nrm(LY_GRASS, xz, 2.0, 0.42);
+		vec3 te = sample_nrm(LY_EARTH, xz, 2.0, 0.42);
+		vec3 tsand = sample_nrm(LY_SAND, xz, 2.4, 0.42);
+		vec3 tsn = sample_nrm(LY_SNOW, xz, 3.2, 0.42);
 		vec3 ts = normalize(mix(mix(mix(tg, te, wear), tsand, sandw), tsn, wsnow));
 		if (region == 2) ts = tsn;
 		float ns = detail * mix(0.42, 0.12, smoothstep(0.05, 0.45, px));
@@ -179,7 +176,7 @@ void fragment() {
 		vec3 T = normalize(vec3(1.0, 0.0, 0.0) - N * N.x);
 		vec3 B = normalize(vec3(0.0, 0.0, 1.0) - N * N.z);
 		vec3 wG = normalize(T * ts.x + B * ts.y + N * ts.z);
-		vec3 wR = tri_nrm(rock_nrm, wpos, n, 1.8);
+		vec3 wR = tri_nrm(wpos, n, 1.8);
 		vec3 wN = normalize(mix(wG, wR, region == 2 ? fr : rockv));
 		vec3 vN = normalize((VIEW_MATRIX * vec4(wN, 0.0)).xyz);
 		if (region == 2) {
@@ -194,10 +191,10 @@ void fragment() {
 		}
 		EMISSION = ALBEDO * min(ambient, 0.32) * 0.4;
 		if (region == 3) EMISSION += vec3(0.55, 0.16, 0.03) * smoothstep(0.03, 0.0, abs(fbm(xz * 0.03) - 0.5)) * (1.0 - slope) * 0.18;
-		float rg = mix(rough_in(grass_rgh, xz, 2.0, 0.90, 0.98), rough_in(earth_rgh, xz, 2.0, 0.88, 0.96), wear);
-		rg = mix(rg, rough_in(sand_rgh, xz, 2.4, 0.84, 0.94), sandw);
-		rg = mix(rg, rough_in(snow_rgh, xz, 3.2, 0.93, 0.99), wsnow);
-		rg = mix(rg, rough_in(rock_rgh, wpos.xz, 1.8, 0.80, 0.92), rockv);
+		float rg = mix(rough_in(LY_GRASS, xz, 2.0, 0.90, 0.98), rough_in(LY_EARTH, xz, 2.0, 0.88, 0.96), wear);
+		rg = mix(rg, rough_in(LY_SAND, xz, 2.4, 0.84, 0.94), sandw);
+		rg = mix(rg, rough_in(LY_SNOW, xz, 3.2, 0.93, 0.99), wsnow);
+		rg = mix(rg, rough_in(LY_ROCK, wpos.xz, 1.8, 0.80, 0.92), rockv);
 		rg = mix(rg, 0.58, wet * clamp(sandw + shore * 0.5, 0.0, 1.0));
 		if (region == 2) rg = mix(mix(0.96, 0.86, fr), 0.70, shore * (1.0 - fr));
 		ROUGHNESS = clamp(rg, 0.5, 1.0);

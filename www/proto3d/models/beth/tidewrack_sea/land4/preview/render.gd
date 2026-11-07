@@ -213,7 +213,7 @@ func _build(top: Node3D, reg: String, files: Array, after: bool) -> void:
 				mat.set_shader_parameter("lift", 0.1)
 				mat.set_shader_parameter("ambient", 1.25)
 				mat.set_shader_parameter("spec", 0.075)
-		elif after and ("land_scatter" in p):
+		elif after and ("land_scatter" in p or "_canopy" in p):
 			mat = sh("res://shaders/vc_scatter.gdshader")
 			bind_scatter(mat)
 		elif reg == "ash":

@@ -1,0 +1,11 @@
+--- a/tidewrack/tw_sea.gd
++++ b/tidewrack/tw_sea.gd
+@@ -85,6 +85,8 @@
+ 	if n.ends_with("_glow"): return _sh(("stage4" if st4 else "stage3") + "/shaders/glow_vc.gdshader")
+ 	if n.contains("land_scatter"):
+ 		return _scatter_mat()
++	if n.contains("_canopy"):
++		return _scatter_mat()
+ 	if n == "ash_lava_seams":
+ 		var l := _sh("stage4/shaders/lava_seam.gdshader"); l.set_shader_parameter("energy", 6.0); return l
+ 	if n == "ash_steam": return _sh("stage4/shaders/steam_plume.gdshader")

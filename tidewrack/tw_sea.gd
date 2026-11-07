@@ -270,6 +270,7 @@ func enter(kind := "galleon", at := Vector3.INF, yaw := INF) -> void:
 	sun_dist = m.sun.directional_shadow_max_distance; m.sun.directional_shadow_max_distance = 60.0   # README: 60 m shadows at sea
 	cur_region = region_at(Vector2(at.x, at.z)); _stream(Vector2(at.x, at.z))
 	_port_check(true)
+	_remember_voyage(true, kind, at, yaw if _num(yaw) else 0.0)
 func leave_to_harbour() -> void:
 	active = false; visible = false; in_cave = ""; diving = false; m.cam.environment = null
 	m.hero.collision_layer = 1; m.hero.collision_mask = 1; m.pip.visible = true; unseat_crew()
@@ -278,6 +279,26 @@ func leave_to_harbour() -> void:
 	var g: Array = m._galleon_pier()
 	m.hide_where(); m.hero.global_position = g[0]; m.hero.velocity = Vector3.ZERO; m.yaw = g[1]
 	ui.set_prompt("", Callable())
+	_remember_voyage(false, "", g[0], float(g[1]))
+func _num(v) -> bool:
+	return (typeof(v) == TYPE_FLOAT or typeof(v) == TYPE_INT) and is_finite(float(v))
+## Remember the ship without replacing the last mainland p3d. Docking writes the pier instead.
+func _remember_voyage(aboard: bool, kind: String, at: Vector3, yaw: float) -> void:
+	var vs := m.get_tree().root.get_node_or_null("VSave")
+	if vs == null: return
+	var st: Dictionary = vs.state
+	if typeof(st.get("sea")) != TYPE_DICTIONARY:
+		st["sea"] = {"galleon_tier": 0, "skiff_tier": 0, "discovered_ports": ["tidewrack"], "coil_beaten": false, "items": {}}
+	if aboard:
+		st["sea"]["aboard"] = true
+		st["sea"]["ship"] = kind if kind in ["galleon", "skiff"] else "galleon"
+		st["sea"]["x"] = at.x
+		st["sea"]["z"] = at.z
+		st["sea"]["yaw"] = yaw
+	else:
+		st["sea"]["aboard"] = false
+		if vs.has_method("note_land_position"): vs.note_land_position(at.x, at.z, yaw)
+	vs.write_state()
 func _board(kind: String, at: Vector3, yaw: float) -> void:
 	if not ships.has(kind):
 		var s := TwShip.new().setup(kind, int(save.get(kind + "_tier", 0)), high()); add_child(s)

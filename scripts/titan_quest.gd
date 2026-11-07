@@ -59,7 +59,7 @@ func setup(main: Node) -> TitanQuest:
 	embers = _embers(); add_child(embers); embers.emitting = false
 	for f in m.volc_fx: if f is CPUParticles3D: smokes.append([f, (f as CPUParticles3D).amount])
 	_giver(); _ui()
-	if m.has_method("volcano_quest_done") and m.volcano_quest_done(): apply_aftermath()   # test 24: persists across reloads
+	_resume_from_save()   # test 24 completion, plus an accepted or in-progress fight
 	return self
 
 ## test 24 (boss: "the volcano must stay destroyed while the Titan is out"): the quest-complete aftermath, applied
@@ -157,7 +157,47 @@ func _giver() -> void:
 func accept() -> void:
 	if state != "none": return
 	state = "active"; qlabel.text = "Quest: " + QUEST + "\nClimb the volcano and enter the crater."; qlabel.visible = true
+	_persist()
 	if m.has_method("_toast"): m._toast("New quest: " + QUEST)
+
+## Saved story, or the legacy story.cfg flag. Completion wins over a half-written fight.
+func _resume_from_save() -> void:
+	var cfg_done: bool = m.has_method("volcano_quest_done") and bool(m.volcano_quest_done())
+	var p: Dictionary = VSave.volcano_resume(VSave.state, cfg_done)
+	match str(p.state):
+		"won": apply_aftermath()
+		"fight": _resume_fight(int(p.stage), float(p.hp))
+		"active":
+			state = "active"
+			qlabel.text = "Quest: " + QUEST + "\nClimb the volcano and enter the crater."
+			qlabel.visible = true
+
+func _resume_fight(stage_n: int, hp_frac: float) -> void:
+	state = "fight"
+	_show_stage(clampi(stage_n, 1, 3))
+	titan.position = Vector3(VolcanoTitan.CENTER.x, base.y + STAGE_Y[stage - 1], VolcanoTitan.CENTER.z)
+	titan.visible = true; titan.active = true; titan.set_state("chase")
+	if titan.max_hp > 0.0: titan.hp = maxf(1.0, titan.max_hp * clampf(hp_frac, 0.0, 1.0))
+	if ring: ring.visible = true
+	if embers: embers.emitting = true
+	if bar: bar.visible = true
+	if qlabel:
+		qlabel.text = "Quest: " + QUEST + "\nDefeat the Ashen Titan."
+		qlabel.visible = true
+
+func progress_snapshot() -> Dictionary:
+	if state == "none": return {}
+	var st := "fight" if state == "intro" or state == "fight" else state
+	var frac := 1.0
+	if titan != null and titan.max_hp > 0.0: frac = clampf(float(titan.hp) / float(titan.max_hp), 0.0, 1.0)
+	if st == "won": frac = 0.0
+	return {"qstate": st, "qstage": stage, "qhp": frac}
+
+func _persist() -> void:
+	if m == null or not m.has_method("save_volcano_quest") or state == "none": return
+	var snap := progress_snapshot()
+	if snap.is_empty(): return
+	m.save_volcano_quest(str(snap.qstate), int(snap.qstage), float(snap.qhp))
 
 func _physics_process(dt: float) -> void:
 	if titan == null or m.hero == null: return
@@ -197,6 +237,7 @@ func _hide_titan() -> void:
 func start_intro() -> void:
 	if state == "intro" or state == "fight" or state == "won": return
 	state = "intro"; t_intro = 0.0; qlabel.text = "Quest: " + QUEST + "\nDefeat the Ashen Titan."
+	_persist()   # reload mid-intro resumes the fight instead of replaying the crawl from nothing
 	titan.visible = true; ring.visible = true; embers.emitting = true
 	# wide camera over the crater, looking at the pool from the ramp side
 	intro_cam = Camera3D.new(); intro_cam.far = 1500; add_child(intro_cam)
@@ -229,6 +270,7 @@ func _begin_fight() -> void:
 	if intro_cam: intro_cam.current = false; intro_cam.queue_free(); intro_cam = null
 	if m.cam: m.cam.current = true
 	state = "fight"; titan.active = true; titan.set_state("chase"); bar.visible = true
+	_persist()
 
 # ---------- stages ----------
 func swap_stage(n: int) -> void:
@@ -236,6 +278,7 @@ func swap_stage(n: int) -> void:
 	shake(0.6, 0.6); _burst()
 	titan.rig.play_attack("volcano_roar", 1.0)
 	_show_stage(n)
+	_persist()
 	var tw := create_tween()
 	tw.tween_interval(0.2)
 	tw.tween_property(titan, "position:y", base.y + STAGE_Y[n - 1], 1.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)

@@ -53,9 +53,22 @@ func load_prefs() -> Dictionary:
 
 func save_prefs() -> bool:
 	prefs = sanitize(prefs)
-	var f := FileAccess.open(path, FileAccess.WRITE)
+	# Write beside the file and replace it. Opening the live path with WRITE truncates first,
+	# so a crash mid-save used to leave preferences unreadable and reset them on next launch.
+	var tmp := path + ".tmp"
+	var f := FileAccess.open(tmp, FileAccess.WRITE)
 	if f == null: return false
 	f.store_string(JSON.stringify(prefs))
+	f.close()
+	if DirAccess.rename_absolute(tmp, path) != OK:
+		var bak := path + ".replacing"
+		if FileAccess.file_exists(bak): DirAccess.remove_absolute(bak)
+		if FileAccess.file_exists(path) and DirAccess.rename_absolute(path, bak) != OK:
+			DirAccess.remove_absolute(path)
+		if DirAccess.rename_absolute(tmp, path) != OK:
+			if FileAccess.file_exists(bak): DirAccess.remove_absolute(bak)
+			return false
+		if FileAccess.file_exists(bak): DirAccess.remove_absolute(bak)
 	changed.emit(prefs)
 	return true
 

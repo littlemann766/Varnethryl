@@ -266,6 +266,7 @@ func _ready() -> void:
 	interiors = InteriorManager.new(); add_child(interiors); interiors.setup(self)
 	if not bench or OS.get_environment("BENCH_ONLY") == "flywarm": guards = TownGuards.new().setup(self, CITY_HALF, GATES); add_child(guards)   # voxel-heroes
 	apply_quality()
+	_sync_story_flags()
 	if not bench and volcano_quest_done(): spawn_world_boss(false)   # test 15: the world boss roams outside the walls only after the volcano quest (story)
 	_hook_ui()
 	if bench: _run_bench()
@@ -2347,7 +2348,30 @@ func _hook_ui() -> void:
 		if changed: _warm_veiled())
 	VUI.menu_toggled.connect(func(o): menu_open = o)
 	VUI.get_snapshot = func() -> Dictionary:
-		return {"x": hero.position.x, "z": hero.position.z, "yaw": yaw, "zone": "village", "hero": int(VSave.state.get("active", 0))}
+		var snap := {"x": hero.position.x, "z": hero.position.z, "yaw": yaw, "zone": "village", "hero": int(VSave.state.get("active", 0)), "at_sea": false, "at_interior": false}
+		if party: snap["heroId"] = str(party.hero_id)
+		if titan_quest and titan_quest.has_method("progress_snapshot"):
+			var q = titan_quest.progress_snapshot()
+			if typeof(q) == TYPE_DICTIONARY:
+				for k in q: snap[k] = q[k]
+		# Interior cells live around world (4000, 4000). Sea ships live around world z 20000.
+		# Neither coordinate is a mainland position; storing them in p3d made relaunch reject the
+		# save and drop the player in town as whoever the default roster entry was.
+		if interiors and interiors.active() and interiors.cur.get("node") != null:
+			var local: Vector3 = (interiors.cur.node as Node3D).to_local(hero.global_position)
+			snap["at_interior"] = true
+			snap["interior"] = str(interiors.cur_bld.get("id", ""))
+			snap["x"] = local.x
+			snap["z"] = local.z
+			snap["iy"] = local.y
+		elif sea and sea.active and sea.ship:
+			snap["at_sea"] = true
+			snap["zone"] = "tidewrack"
+			snap["x"] = sea.ship.position.x
+			snap["z"] = sea.ship.position.z
+			snap["yaw"] = sea.ship.heading
+			snap["ship"] = str(sea.ship.kind)
+		return snap
 	VUI.play_solo.connect(_on_play_solo)
 	VUI.multiplayer_requested.connect(_on_multiplayer)
 	VUI.travel_requested.connect(_on_travel)
@@ -2378,10 +2402,19 @@ func _hook_ui() -> void:
 	VUI.hero_selected.connect(func(id: int):
 		var hid := _roster_id(id)
 		if hid != "" and party.hero_id != hid: party.set_hero(hid))
-	var act_id := _roster_id(int(VSave.state.get("active", 0)))
-	# the boss plays as the Owner: an unlocked owner gate always starts on the Owner hero (HUD said "Hero: Aldric")
-	if VUI.gate and VUI.gate.is_owner(): party.set_hero("owner")
-	elif act_id != "" and not bench: party.set_hero(act_id)
+	# Restore the character you were playing. heroId is the roster model. Old saves have only the
+	# numeric active index. An unlocked owner gate still starts as Owner when no character was saved.
+	var saved_skin: String = VSave.resume_skin(VSave.state, VUI.gate != null and VUI.gate.is_owner())
+	if saved_skin == "": saved_skin = _roster_id(int(VSave.state.get("active", 0)))
+	if saved_skin != "" and not bench: party.set_hero(saved_skin)
+	party.hero_changed.connect(func(id: String):
+		if id == "": return
+		var snap := {"x": hero.position.x, "z": hero.position.z, "yaw": yaw}
+		if VUI.get_snapshot.is_valid():
+			var got = VUI.get_snapshot.call()
+			if typeof(got) == TYPE_DICTIONARY: snap = got
+		snap["heroId"] = id
+		VSave.write_snapshot(snap))
 	VUI.owner_set.connect(func(on: bool): if on and not bench and party.hero_id != "owner": party.set_hero("owner"))
 	Net.state_provider = func() -> Dictionary:
 		var st: Dictionary = party.net_state(); st.erase("position"); st.erase("heading")
@@ -2416,8 +2449,46 @@ func _teleport(p: Vector3, yw: float) -> void:
 
 func _on_play_solo() -> void:
 	Net.leave(); _clear_remotes()
-	var pos = VSave.read_pos(VSave.read_save().get("state"), CITY_HALF * 3.0)
-	if pos != null: _teleport(Vector3(pos.x, 0, pos.z), pos.yaw)
+	# Town (-6, 26) is only the fallback when the save has no usable place. Mainland, Tidewrack
+	# and interiors are restored. See VSave.resume_place.
+	var place: Dictionary = VSave.resume_place(VSave.state)
+	match str(place.get("kind", "town")):
+		"sea":
+			if sea:
+				sea.enter(str(place.get("ship", "galleon")), Vector3(float(place.x), 0.0, float(place.z)), float(place.get("yaw", 0.0)))
+				return
+		"interior":
+			if _resume_interior(str(place.get("id", "")), Vector3(float(place.x), float(place.get("y", 0.0)), float(place.z)), float(place.get("yaw", 0.0))): return
+		"interior_legacy":
+			var legacy_id: String = _interior_id_from_index(int(place.get("index", -1)))
+			if legacy_id != "" and _resume_interior(legacy_id, Vector3.INF, 0.0): return
+		"land":
+			_teleport(Vector3(float(place.x), 0.0, float(place.z)), float(place.get("yaw", 0.0)))
+			return
+		_:
+			pass
+
+func _interior_id_from_index(i: int) -> String:
+	if i < 0: return ""
+	var keys: Array = InteriorDefs.D.keys()
+	if i < keys.size(): return str(keys[i])
+	var extra: Array = InteriorExtraDefs.D.keys()
+	var j := i - keys.size()
+	if j >= 0 and j < extra.size(): return str(extra[j])
+	return ""
+
+## Rebuild that interior and stand at the saved local spot. Vector3.INF keeps the door spawn.
+func _resume_interior(id: String, local: Vector3, facing: float) -> bool:
+	if interiors == null or id == "" or not interiors.has_interior(id): return false
+	var building: Dictionary = {}
+	for b in buildings:
+		if str(b.get("id", "")) == id: building = b; break
+	if building.is_empty(): return false
+	interiors.enter(building)
+	if local != Vector3.INF and interiors.cur.get("node") != null:
+		interiors._teleport((interiors.cur.node as Node3D).to_global(local), facing)
+		interiors._remember_place(true)
+	return true
 
 func _on_multiplayer(world: String) -> void:
 	var w := world if world != "" else "Liongate-1"
@@ -2762,11 +2833,49 @@ func _set_fade(node: Node, on: bool) -> void:
 var world_boss: WorldBoss
 const STORY_CFG := "user://story.cfg"
 func volcano_quest_done() -> bool:
+	if VSave.volcano_progress(VSave.state).state == "won": return true
+	return _cfg_volcano_done()
+func _cfg_volcano_done() -> bool:
 	var cf := ConfigFile.new()
-	return cf.load(STORY_CFG) == OK and bool(cf.get_value("story", "volcano_done", false))
+	if cf.load(STORY_CFG) == OK:
+		var v = cf.get_value("story", "volcano_done", false)
+		return v == true or v == 1
+	if not FileAccess.file_exists(STORY_CFG): return false
+	return VSave.volcano_done_in_cfg_text(FileAccess.get_file_as_string(STORY_CFG))
+## The JSON save and story.cfg can each survive the other being missing or unreadable.
+func _sync_story_flags() -> void:
+	var save_won: bool = str(VSave.volcano_progress(VSave.state).get("state", "")) == "won"
+	var cfg_won: bool = _cfg_volcano_done()
+	if save_won == cfg_won: return
+	if save_won: _write_story_cfg_done()
+	else:
+		VSave.set_volcano_progress("won", 3, 0.0)
+		VSave.write_state()
+func _write_story_cfg_done() -> bool:
+	if FileAccess.file_exists(STORY_CFG):
+		var probe := ConfigFile.new()
+		if probe.load(STORY_CFG) != OK:
+			var bytes := FileAccess.get_file_as_bytes(STORY_CFG)
+			var dest := STORY_CFG + ".corrupt"
+			if FileAccess.file_exists(dest): dest = "%s.corrupt-%d" % [STORY_CFG, int(Time.get_unix_time_from_system() * 1000.0)]
+			if not bytes.is_empty():
+				var q := FileAccess.open(dest, FileAccess.WRITE)
+				if q: q.store_buffer(bytes); q.close()
+	var cf := ConfigFile.new()
+	cf.load(STORY_CFG)
+	cf.set_value("story", "volcano_done", true)
+	var tmp := STORY_CFG + ".tmp"
+	if cf.save(tmp) != OK: return cf.save(STORY_CFG) == OK
+	if DirAccess.rename_absolute(tmp, STORY_CFG) == OK: return true
+	return cf.save(STORY_CFG) == OK
+## TitanQuest persists accepted / fight / won here. Won also refreshes the legacy cfg flag.
+func save_volcano_quest(st: String, stage: int, hp: float) -> void:
+	VSave.set_volcano_progress(st, stage, hp)
+	if VSave.volcano_progress(VSave.state).state == "won": _write_story_cfg_done()
+	VSave.write_state()
 ## called by TitanQuest._win: persist the story flag, then the world boss rises on the outskirts
 func on_volcano_quest_done() -> void:
-	var cf := ConfigFile.new(); cf.load(STORY_CFG); cf.set_value("story", "volcano_done", true); cf.save(STORY_CFG)
+	save_volcano_quest("won", 3, 0.0)
 	if OS.get_cmdline_user_args().has("--bench") or bench_running or world_boss != null: return
 	get_tree().create_timer(8.0).timeout.connect(func():
 		spawn_world_boss(false)

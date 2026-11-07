@@ -170,9 +170,11 @@ func net_state() -> Dictionary:
 		"hero": HeroRoster.display_name(hero_id), "skin": hero_id, "moving": v.length() > 0.2}
 
 func _unhandled_input(e: InputEvent) -> void:
+	# Title and the ☰ menu block play input. Space is jump (main.gd), not a second basic-attack binding.
+	if main and main.has_method("_input_blocked") and main._input_blocked(): return
 	if e is InputEventKey and e.pressed and not e.echo:
 		match e.keycode:
-			KEY_J, KEY_SPACE: combat.use(0)
+			KEY_J: combat.use(0)
 			KEY_1: combat.use(1)
 			KEY_2: combat.use(2)
 			KEY_3: combat.use(3)

@@ -9,6 +9,10 @@ func ok(c: bool, msg: String) -> void:
 func _run() -> void:
 	var m = load("res://main.tscn").instantiate(); root.add_child(m)
 	for i in 40: await process_frame
+	# The title screen blocks the joystick. The running jump is measured in play, where movement works.
+	var ui = root.get_node_or_null("VUI")
+	if ui: ui._enter("solo")
+	for i in 8: await physics_frame
 	var h: CharacterBody3D = m.hero
 	h.global_position = Vector3(0, m.height(0, 30) + 0.5, 30)
 	for i in 60: await physics_frame

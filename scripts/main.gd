@@ -210,6 +210,7 @@ const JUMP_H := 1.2
 var JUMP_V := sqrt(2.0 * 20.0 * JUMP_H)
 var jump_req := false
 var jump_count := 0
+var _space_down := false
 var flight := false      # test 13: HUD ✈ toggles real flight; the menu "fly" cheat only unlocks the button
 var landing := false
 func flying_now() -> bool: return flight and bool(cheat.get("fly", false))
@@ -220,6 +221,26 @@ func request_jump() -> void: jump_req = true
 func set_flight(on: bool) -> void:
 	if flight and not on: landing = true
 	flight = on
+	refresh_body_collision()
+
+## Noclip is not a movement mode. It is on only when an owner/co-owner cheat role is active AND the noclip
+## flag is on. Sailing lifts the body so the deck ride does not snag. Fly, teleport, and losing the role do not.
+func noclip_allowed() -> bool:
+	if cheats == null or not cheats.has_method("role"): return false
+	var r := str(cheats.role())
+	return (r == "owner" or r == "coowner") and bool(cheats.flags.get("noclip", false))
+
+func refresh_body_collision() -> void:
+	if hero == null: return
+	var sailing := sea != null and bool(sea.get("active"))
+	var clip := (not sailing) and noclip_allowed()
+	cheat.noclip = clip
+	if sailing:
+		hero.collision_layer = 0
+		hero.collision_mask = 0
+	else:
+		hero.collision_layer = 1
+		hero.collision_mask = 0 if clip else 1
 var fly_controls: FlyControls
 var net_proxy: Node
 const JS_UNITS := 1.4205   # JS world units per metre (server/JS clients use world units)
@@ -847,16 +868,23 @@ var _pier_spot := []
 ## the moored galleon at the Tidewrack main pier: [deck-side spot on the pier, yaw]
 func _galleon_pier() -> Array:
 	var r: Node3D = ships[0][0] if ships.size() > 0 else null
-	if r == null: return [Vector3(PORT.x, 0.5, PORT.y), 0.0]
-	if _pier_spot.is_empty():   # whichever side of the hull has the pier deck under it (ray onto the colliders)
-		var best := r.global_position + r.global_basis.x * 6.5; var by := -99.0
-		for sd in [1.0, -1.0]:
-			for dd in [5.0, 6.5, 8.0]:
-				var c: Vector3 = r.global_position + r.global_basis.x * (sd * dd); var q := PhysicsRayQueryParameters3D.create(c + Vector3(0, 20, 0), c - Vector3(0, 20, 0), 1)
-				var h := get_world_3d().direct_space_state.intersect_ray(q)
-				if h and h.position.y > by and h.position.y < 3.0 and not (h.collider in ships.map(func(x): return x[3])): by = h.position.y; best = h.position
-		if by < 0.0: return [best, r.rotation.y]   # not ready yet: physics may still be settling
-		_pier_spot = [best + Vector3(0, 0.3, 0), r.rotation.y]
+	if r == null: return [Vector3(PORT.x, 0.6, PORT.y), 0.0]
+	if _pier_spot.is_empty():
+		# The moored galleon's pier is along local Z. Side rays (local X) hit the sea floor at y=-4,
+		# and returning that point dropped disembark under the water. Accept only quay/deck hits.
+		var best := r.global_position + r.global_basis.z * 6.5
+		var by := -99.0
+		var ship_cols: Array = ships.map(func(x): return x[3])
+		for axis in [r.global_basis.z, r.global_basis.x]:
+			for sd in [1.0, -1.0]:
+				for dd in [5.0, 6.5, 8.0, 10.0]:
+					var c: Vector3 = r.global_position + axis * (sd * dd)
+					var q := PhysicsRayQueryParameters3D.create(c + Vector3(0, 8, 0), c + Vector3(0, -1.0, 0), 1)
+					var hit := get_world_3d().direct_space_state.intersect_ray(q)
+					if hit and hit.position.y >= 0.2 and hit.position.y <= 2.4 and hit.position.y > by and not (hit.collider in ship_cols):
+						by = hit.position.y; best = hit.position
+		if by < 0.0: return [Vector3(best.x, 0.8, best.z), r.rotation.y]   # colliders not ready: stay above the waterline, don't cache
+		_pier_spot = [best + Vector3(0, 0.35, 0), r.rotation.y]
 	return _pier_spot
 func _ships() -> void:
 	var hs := harbour_spot(); var c: Vector2 = hs[0]
@@ -1450,7 +1478,7 @@ func _showcase() -> void:
 	# one of every tree kind in a row west of the plaza, for close-up checks
 	var kinds := ["blossom", "oak", "birch", "oak_autumn", "oak_deep", "pine", "pine_snow", "bush", "bush_autumn"]
 	for i in kinds.size():
-		var p := Vector3(-150 + i * 9.0, 0, 158)
+		var p := Vector3(-150 + i * 9.0, height(-150 + i * 9.0, 158), 158)
 		_trees_hi(kinds[i], [Transform3D(Basis(), p)], 0.04, false)
 		blockers.append([Vector2(p.x, p.z), 3.0])
 		_static_box(p + Vector3(0, 1.5, 0), Vector3(0.7, 3, 0.7))
@@ -1643,6 +1671,7 @@ func _joy(p: Vector2) -> void:
 
 func _physics_process(dt: float) -> void:
 	if hero == null: return
+	refresh_body_collision()
 	var inp := joy_vec if not _input_blocked() else Vector2.ZERO
 	var k := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	if k.length() > 0.1: inp = k
@@ -1691,7 +1720,10 @@ var _tacc := 0.0
 func _process(dt: float) -> void:
 	for lm in lava_mats: lm.uv1_offset.x = fmod(lm.uv1_offset.x + dt * 0.02, 1.0); lm.uv1_offset.y = fmod(lm.uv1_offset.y + dt * 0.013, 1.0)
 	if fly_controls: fly_controls.visible = VUI.hud != null and VUI.hud.visible and not (VUI.title and VUI.title.visible) and not (sea and sea.active and not (cheats and cheats.flags.fly and not sea.diving))   # test 33: fly buttons at sea only with the fly cheat on
-	if Input.is_key_pressed(KEY_SPACE) and hero and hero.is_on_floor(): request_jump()
+	# Space is jump only, and only on the press, so holding it does not chain hops or swing the basic attack.
+	var space_down := Input.is_key_pressed(KEY_SPACE)
+	if space_down and not _space_down and hero and hero.is_on_floor() and not flying_now() and not _input_blocked(): request_jump()
+	_space_down = space_down
 	_bob_ships(dt)
 	if hero == null: return
 	if titan_quest == null and party and party.director and volc_base != Vector3.ZERO:
@@ -2412,6 +2444,7 @@ func _teleport(p: Vector3, yw: float) -> void:
 	hide_where()   # test 25
 	hero.position = Vector3(p.x, height(p.x, p.z) + 0.2, p.z); hero.velocity = Vector3.ZERO
 	yaw = yw; hero_vis.rotation.y = yw; pip.position = hero.position + Vector3(1, 0, 1)
+	refresh_body_collision()
 	if party and party.rig and party.rig.cloth: party.rig.cloth.call_deferred("reset")   # no cape fling on teleport
 
 func _on_play_solo() -> void:

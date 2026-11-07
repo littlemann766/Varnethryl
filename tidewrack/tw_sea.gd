@@ -273,6 +273,7 @@ func enter(kind := "galleon", at := Vector3.INF, yaw := INF) -> void:
 func leave_to_harbour() -> void:
 	active = false; visible = false; in_cave = ""; diving = false; m.cam.environment = null
 	m.hero.collision_layer = 1; m.hero.collision_mask = 1; m.pip.visible = true; unseat_crew()
+	if m.has_method("refresh_body_collision"): m.refresh_body_collision()
 	m.sun.directional_shadow_max_distance = sun_dist
 	var g: Array = m._galleon_pier()
 	m.hide_where(); m.hero.global_position = g[0]; m.hero.velocity = Vector3.ZERO; m.yaw = g[1]

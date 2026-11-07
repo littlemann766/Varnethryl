@@ -81,7 +81,8 @@ func _apply(key: String, v) -> bool:
 		"fly_down": if main: main.fly_alt = clampf(main.fly_alt - 3.0, 0.0, fly_cap())
 		"noclip":
 			flags.noclip = bool(v)
-			if main: main.hero.collision_mask = 0 if flags.noclip else 1
+			if main and main.has_method("refresh_body_collision"): main.refresh_body_collision()
+			elif main: main.hero.collision_mask = 0 if flags.noclip and role() != "" else 1
 		"bump":   # JS "Bumps": enemies/props shove the hero. Off = enemy contact cannot push or stagger you.
 			flags.bump = bool(v)
 		"speed":
@@ -164,4 +165,4 @@ func _clear_all() -> void:
 	for k in ["god", "unlimited", "nocd", "fly", "noclip", "titan_form", "inf_gold"]: flags[k] = false
 	flags.speed = 1.0
 	if main:
-		main.cheat.fly = false; main.cheat.speed = 1.0; main.hero.collision_mask = 1; main.hero_vis.scale = Vector3.ONE
+		main.cheat.fly = false; main.cheat.speed = 1.0; main.cheat.noclip = false; main.hero.collision_mask = 1; main.hero.collision_layer = 1; main.hero_vis.scale = Vector3.ONE

@@ -2,7 +2,7 @@
 import json, struct
 import numpy as np
 
-def write_glb(path, V, F, C, N=None, name='mesh'):
+def write_glb(path, V, F, C, N=None, UV=None, T=None, name='mesh'):
     V = np.asarray(V, np.float32); F = np.asarray(F, np.uint32).reshape(-1); C = np.asarray(C, np.float32)
     bufs = []; views = []; acc = []; off = 0
     def add(arr, target, comp, typ, count, mm=False):
@@ -17,6 +17,10 @@ def write_glb(path, V, F, C, N=None, name='mesh'):
     attrs = {'POSITION': add(V, 34962, 5126, 'VEC3', len(V), True)}
     if N is not None:
         attrs['NORMAL'] = add(np.asarray(N, np.float32), 34962, 5126, 'VEC3', len(V))
+    if UV is not None:
+        attrs['TEXCOORD_0'] = add(np.asarray(UV, np.float32), 34962, 5126, 'VEC2', len(V))
+    if T is not None:
+        attrs['TANGENT'] = add(np.asarray(T, np.float32), 34962, 5126, 'VEC4', len(V))
     attrs['COLOR_0'] = add(np.clip(np.round(C * 255), 0, 255).astype(np.uint8), 34962, 5121, 'VEC4', len(V))
     acc[-1]['normalized'] = True
     ind = add(F, 34963, 5125, 'SCALAR', len(F))

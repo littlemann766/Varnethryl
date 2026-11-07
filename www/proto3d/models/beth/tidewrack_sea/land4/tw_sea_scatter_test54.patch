@@ -5,7 +5,45 @@
  	if n.ends_with("_storm_sea"): return _sh("stage1/shaders/storm_sea.gdshader")
  	if n.ends_with("_glow"): return _sh(("stage4" if st4 else "stage3") + "/shaders/glow_vc.gdshader")
 +	if n.contains("land_scatter"):
-+		return _sh("stage1/shaders/vc_scatter.gdshader")
++		return _scatter_mat()
  	if n == "ash_lava_seams":
  		var l := _sh("stage4/shaders/lava_seam.gdshader"); l.set_shader_parameter("energy", 6.0); return l
  	if n == "ash_steam": return _sh("stage4/shaders/steam_plume.gdshader")
+@@ -96,6 +98,37 @@
+ 		if n.find(k) >= 0: return true
+ 	return false
+ 
++var _scatter_bark: Texture2D
++var _scatter_bark_n: Texture2D
++var _scatter_rock: Texture2D
++var _scatter_atlas: Texture2D
++
++func _scatter_mat() -> ShaderMaterial:
++	var m := _sh("stage1/shaders/vc_scatter.gdshader")
++	if _scatter_bark == null:
++		var root := "res://tidewrack/land4/textures/"
++		_scatter_bark = _scatter_tex(root + "bark_albedo.jpg", false)
++		_scatter_bark_n = _scatter_tex(root + "bark_normal.jpg", false)
++		_scatter_rock = _scatter_tex(root + "rock_albedo.jpg", false)
++		_scatter_atlas = _scatter_tex(root + "foliage_atlas.png", true)
++	m.set_shader_parameter("bark_col", _scatter_bark)
++	m.set_shader_parameter("bark_nrm", _scatter_bark_n)
++	m.set_shader_parameter("rock_col", _scatter_rock)
++	m.set_shader_parameter("leaf_atlas", _scatter_atlas)
++	return m
++
++func _scatter_tex(res_path: String, rgba: bool) -> Texture2D:
++	var img := Image.load_from_file(ProjectSettings.globalize_path(res_path))
++	if img == null:
++		push_error("scatter texture missing: " + res_path)
++		img = Image.create(4, 4, false, Image.FORMAT_RGBA8 if rgba else Image.FORMAT_RGB8)
++	elif rgba and img.get_format() != Image.FORMAT_RGBA8:
++		img.convert(Image.FORMAT_RGBA8)
++	elif (not rgba) and img.get_format() != Image.FORMAT_RGB8:
++		img.convert(Image.FORMAT_RGB8)
++	img.generate_mipmaps()
++	return ImageTexture.create_from_image(img)
++
+ # ---------------------------------------------------------------- regions / streaming
+ func _files(id: String) -> Array:
+ 	var d: Dictionary = REGIONS[id]; var out := []

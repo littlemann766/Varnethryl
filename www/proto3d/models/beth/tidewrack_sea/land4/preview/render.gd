@@ -18,6 +18,10 @@ func sh(p: String) -> ShaderMaterial:
 
 var _surf_col: Texture2DArray
 var _surf_nrm: Texture2DArray
+var _bark: Texture2D
+var _bark_n: Texture2D
+var _rock: Texture2D
+var _atlas: Texture2D
 
 func _jpg(name: String) -> Image:
 	var p := ProjectSettings.globalize_path("res://").path_join("../textures/%s.jpg" % name)
@@ -60,6 +64,31 @@ func bind_terrain(mat: ShaderMaterial) -> void:
 			push_error("surf_nrm array " + str(err))
 	mat.set_shader_parameter("surf_col", _surf_col)
 	mat.set_shader_parameter("surf_nrm", _surf_nrm)
+
+func _scatter_img(name: String, rgba: bool) -> Image:
+	var ext := ".png" if rgba else ".jpg"
+	var p := ProjectSettings.globalize_path("res://").path_join("../textures/%s%s" % [name, ext])
+	var img := Image.load_from_file(p)
+	if img == null:
+		push_error("missing texture " + p)
+		return Image.create(4, 4, false, Image.FORMAT_RGBA8 if rgba else Image.FORMAT_RGB8)
+	if rgba and img.get_format() != Image.FORMAT_RGBA8:
+		img.convert(Image.FORMAT_RGBA8)
+	if (not rgba) and img.get_format() != Image.FORMAT_RGB8:
+		img.convert(Image.FORMAT_RGB8)
+	img.generate_mipmaps()
+	return img
+
+func bind_scatter(mat: ShaderMaterial) -> void:
+	if _bark == null:
+		_bark = ImageTexture.create_from_image(_scatter_img("bark_albedo", false))
+		_bark_n = ImageTexture.create_from_image(_scatter_img("bark_normal", false))
+		_rock = ImageTexture.create_from_image(_scatter_img("rock_albedo", false))
+		_atlas = ImageTexture.create_from_image(_scatter_img("foliage_atlas", true))
+	mat.set_shader_parameter("bark_col", _bark)
+	mat.set_shader_parameter("bark_nrm", _bark_n)
+	mat.set_shader_parameter("rock_col", _rock)
+	mat.set_shader_parameter("leaf_atlas", _atlas)
 
 func _run() -> void:
 	var a := OS.get_cmdline_user_args()
@@ -186,6 +215,7 @@ func _build(top: Node3D, reg: String, files: Array, after: bool) -> void:
 				mat.set_shader_parameter("spec", 0.075)
 		elif after and ("land_scatter" in p):
 			mat = sh("res://shaders/vc_scatter.gdshader")
+			bind_scatter(mat)
 		elif reg == "ash":
 			mat = sh("res://vc_flat.gdshader")
 			mat.set_shader_parameter("lift", 0.14)

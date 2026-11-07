@@ -2,7 +2,7 @@
 
 Terrain shader, arrays, and terrain meshes stay at `86e61c6e`. Collider glbs were not rewritten. `trunk_bounds.json` is the manifest already sent to Lucky and was not rewritten.
 
-Foliage is cutout cards in the old canopy patch. A tall piece is a cone of needle fans (Foliage001 blades). A wide piece is a cluster of photographed leaves (LeafSet001). Bushes sit on the old ground contact. Grass is blade cards. Flower heads are painted on those blades. Trunks and rocks keep their vertices. Trunks take a cylindrical UV into Bark012 (albedo and normal). Rocks sample the existing Rock023 photo. `trunk_bounds.json` was not rewritten.
+Foliage is cutout cards in the old canopy patch. Each clump is three cards around one centre, in inner, mid, and outer shells, so the crown has depth from the side instead of one flat cross. A tall piece uses needle fans (Foliage001). A wide piece uses photographed leaves (LeafSet001). A few twigs, about 4.5 cm wide and flat-coloured, sit inside the old canopy. They are not trunks and they are not in `trunk_bounds.json`. Bushes sit on the old ground contact. Grass is six blade cards. Flower heads are three painted cards on those blades. Trunks and rocks keep their vertices. Trunk UVs are finer (about half a metre per bark tile) into Bark012 albedo and normal. Rocks sample the existing Rock023 photo. `trunk_bounds.json` was not rewritten. `58fb79d8` is the sparser card pass and is not the candidate.
 
 Test 54 (`33ec05515fa2907c1d6958e39e884eed92955776`) has no `land_scatter` files. `tw_sea.gd` `_files` will load any `arch_` / `coast_` / `frost_` / `ash_` glb you copy into `res://tidewrack/stageN/meshes/`, and any name ending in `_col` becomes a trimesh static body. It is not drawn.
 
@@ -36,9 +36,11 @@ Grass, flowers, bushes, stones, driftwood, and crystals are class 0 and do not b
 
 ## Counts
 
-Instance counts are unchanged (Archipelago 2673, Saltglass 3231, Frost 4049, Ash 3754). High scatter triangles are 1.97 million across all four regions, lod1 444 thousand. The faceted-cone pass was 895 thousand high. The sphere pass was 2.73 million high. The original cones were 657 thousand high. Low tier still uses lod1. Cards are alpha-scissor, not blended, so they write depth. Not measured on a Galaxy S26.
+Instance counts are unchanged (Archipelago 2673, Saltglass 3231, Frost 4049, Ash 3754). High scatter triangles are 3,434,273 across all four regions, lod1 610,850. The previous card pass (`58fb79d8`) was 1.97 million high. The faceted-cone pass was 895 thousand high. The sphere pass was 2.73 million high. The original cones were 657 thousand high. The heaviest chunk is `arch_land_scatter_c20_19.glb` at 156,431 faces. The median high chunk is about 11 thousand. Low tier still uses lod1. Cards are alpha-scissor, not blended, so they write depth. Not measured on a Galaxy S26.
 
-What still shows: a card facing the camera is a flat clump, and a big oak is several of those clumps rather than one solid mass. Dead ash trees stay bare. Flower heads are painted, not photographed. Bark is the photograph on the old vertices, not a remodelled trunk.
+Every solid trunk and rock vertex from the cone source (`d9d03837`, same positions as `86e61c6e`) is still in the mesh: 489,978 vertices, 0 missing, 364 files. Collider glbs, terrain meshes, and terrain shaders were not edited.
+
+What still shows: the stacked green pines on Gullhaven are triangles inside the frozen island mesh `arch_isl_gullhaven.glb`, so this pass did not dress them. Dead ash trees stay bare. Flower heads are painted, not photographed. Bark is the photograph on the old vertices, tiled finer, not a remodelled trunk. A small high clump is still a separate patch where the old cone was a separate patch.
 
 ## Patch
 
@@ -46,6 +48,8 @@ What still shows: a card facing the camera is a flat clump, and a big oak is sev
 
 ## Check
 
-Godot `4.7.stable.official.5b4e0cb0f`, `--rendering-method mobile`. Log: `Vulkan 1.4.318 - Forward Mobile` on lavapipe (software Vulkan, not a phone). No `SHADER ERROR`. Frames: Gullhaven ground and coast, Saltglass harbour, frost ground, ash ground. Audio still falls back to the dummy driver. That error is the missing sound card, not this shader.
+Godot `4.7.stable.official.5b4e0cb0f`, `--rendering-method mobile`. Log: `Vulkan 1.4.318 - Forward Mobile` on lavapipe (software Vulkan, not a phone). No `SHADER ERROR`. Both sides of the comparison use `vc_terrain_land4.gdshader`, the same sun, and the same cameras. Left is the cone pass `b3675082`. Right is this pass. Frames: tree close, tree side, bush, bark, flower, Gullhaven ground, frost ground, ash ground. Audio still falls back to the dummy driver. That error is the missing sound card, not this shader.
+
+No new texture files. Provenance stays `textures/FOLIAGE.md` (ambientCG Bark012, Foliage001, LeafSet001, Rock023 already in the terrain set). The scatter patch is still `tw_sea_scatter_test54.patch`.
 
 Bare skerries that had no gentle ground off the route were left as rock. See `COVERAGE.md`.

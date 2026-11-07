@@ -1,0 +1,18 @@
+{
+  "armor": "/workspace/www/proto3d/models/beth/equipment/knight_rig/fitted_heroes/darius/darius_armor_fit.glb",
+  "equipped_body": "/workspace/www/proto3d/models/beth/equipment/knight_rig/fitted_heroes/darius/darius_body_equipped.glb",
+  "unequipped_body": "/workspace/www/proto3d/models/beth/equipment/knight_rig/fitted_heroes/darius/darius_body.glb",
+  "unequipped_outfit": "/workspace/www/proto3d/models/beth/equipment/knight_rig/fitted_heroes/darius/darius_outfit.glb",
+  "source_hero": "/tmp/heroes/darius_voxel_noweapon.glb",
+  "source_armor": "/workspace/www/proto3d/models/beth/equipment/knight_rig/knight_male.glb",
+  "equipped_mask": {
+    "hair": 1664,
+    "head_hidden": 37655,
+    "face": 3121,
+    "hand_hidden": 471,
+    "hand_kept": 786,
+    "kept": 3907
+  },
+  "bind_residual_deg": 0.0,
+  "clips": "Every Darius key time. Plates stay rigid. Arms and legs reach the fist and the foot."
+}

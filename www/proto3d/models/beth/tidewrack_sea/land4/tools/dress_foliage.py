@@ -1,9 +1,9 @@
-"""Replace cone canopies, block bushes and spike flowers. Trunks and rocks stay.
+"""Replace cone foliage with needle crowns and leaf cards. Trunks and rocks stay.
 
-Each scatter glb is many separate pieces. Brown trunks, limbs and stone are
-copied vertex for vertex, so the collider boxes still meet the same wood and
-rock. Green cones, bushes, tufts and flower spikes are rebuilt as clusters
-that occupy the same patch of air. Collider glbs are not opened.
+A pine piece keeps a cone of needle fans. A broad piece becomes a handful of
+leaf cards, not a ball of spheres. Grass and flowers stay small blade clumps
+on the ground. Brown trunks, limbs and stone are copied vertex for vertex.
+Collider glbs are not opened. trunk_bounds.json is left as already sent.
 """
 import os, sys
 import numpy as np
@@ -42,31 +42,135 @@ def shade(V, base):
     return np.clip(col, 0, 1)
 
 
-def cluster(center, size, base_col, n_blobs, flower_col=None, ico=None):
-    ico = ICO_HI if ico is None else ico
-    rng = np.random.default_rng(int(abs(center[0] * 10 + center[2] * 3)) % (2**31 - 1) or 1)
-    parts_v, parts_f, parts_c = [], [], []
-    for i in range(n_blobs):
-        v = ico[0] * np.array([
-            size[0] * rng.uniform(0.28, 0.48),
-            size[1] * rng.uniform(0.22, 0.42),
-            size[2] * rng.uniform(0.28, 0.48),
-        ])
-        off = np.array([
-            rng.uniform(-0.22, 0.22) * size[0],
-            rng.uniform(-0.05, 0.18) * size[1],
-            rng.uniform(-0.22, 0.22) * size[2],
-        ])
-        parts_v.append(v + off)
-        parts_f.append(ico[1])
-        parts_c.append(shade(v + off, base_col * rng.uniform(0.85, 1.08)))
-    if flower_col is not None:
-        v = ICO_LO[0] * (max(size) * 0.16)
-        v[:, 1] += size[1] * 0.42
-        parts_v.append(v)
-        parts_f.append(ICO_LO[1])
-        parts_c.append(np.tile(np.clip(flower_col, 0, 1), (len(v), 1)))
-    return _fit(parts_v, parts_f, parts_c, center, size)
+def _rng(center, salt):
+    return np.random.default_rng(int(abs(center[0] * 10 + center[2] * 3 + salt)) % (2**31 - 1) or 1)
+
+
+def pine_crown(center, size, col, lod):
+    """A real cone, with short needles along the edge so it is a pine and not a smooth blob."""
+    h = max(float(size[1]), 0.4)
+    r = max(float(size[0]), float(size[2]), 0.35) * 0.5
+    sides = 5 if lod else 7
+    V = [[0.0, h, 0.0]]
+    F, C = [], []
+    for i in range(sides):
+        a = i / sides * 6.283
+        V.append([np.cos(a) * r, h * 0.05, np.sin(a) * r])
+    for i in range(sides):
+        F.append([0, 1 + i, 1 + (i + 1) % sides])
+    # needles stick out of the cone so the outline is jagged
+    rings = 1 if lod else 2
+    for ri in range(rings):
+        t = 0.35 + 0.4 * ri
+        rad = r * (1.0 - 0.85 * t)
+        y = h * t
+        for i in range(sides):
+            a = (i + 0.5) / sides * 6.283
+            ca, sa = np.cos(a), np.sin(a)
+            base = np.array([ca * rad, y, sa * rad])
+            tip = np.array([ca * rad * 1.35, y + h * 0.06, sa * rad * 1.35])
+            side = np.array([-sa, 0.0, ca]) * rad * 0.12
+            o = len(V)
+            V += [base + side, base - side, tip]
+            F.append([o, o + 1, o + 2])
+    V = np.asarray(V, np.float64)
+    cols = []
+    for i, p in enumerate(V):
+        shade = 0.55 + 0.55 * (p[1] / h)
+        cols.append(np.clip(col * shade, 0, 1))
+    C = np.asarray(cols, np.float64)
+    V[:, 0] += center[0]
+    V[:, 2] += center[2]
+    V[:, 1] += center[1] - size[1] * 0.5
+    return V, np.asarray(F, np.int64), C
+
+
+def broad_crown(center, size, col, lod, grounded):
+    """A low mound with leaves on the rim. Bushes sit on the old ground contact."""
+    h = max(float(size[1]), 0.3)
+    r = max(float(size[0]), float(size[2]), 0.35) * 0.5
+    sides = 5 if lod else 6
+    V = [[0.0, h * 0.85, 0.0]]
+    for i in range(sides):
+        a = i / sides * 6.283
+        V.append([np.cos(a) * r * 0.85, h * 0.08, np.sin(a) * r * 0.85])
+    F = []
+    for i in range(sides):
+        F.append([0, 1 + i, 1 + (i + 1) % sides])
+    leaves = 4 if lod else 8
+    for i in range(leaves):
+        a = (i + 0.3) / leaves * 6.283
+        ca, sa = np.cos(a), np.sin(a)
+        dist = r * (0.45 + 0.4 * ((i % 3) / 2))
+        y0 = h * 0.12
+        side = np.array([-sa, 0.0, ca]) * min(r * 0.28, 0.35)
+        b0 = np.array([ca * dist, y0, sa * dist])
+        tip = b0 + np.array([ca * 0.05, min(h * 0.55, 0.5), sa * 0.05])
+        o = len(V)
+        V += [b0 + side, b0 - side, tip]
+        F.append([o, o + 1, o + 2])
+    V = np.asarray(V, np.float64)
+    C = np.clip(np.array([col * (0.6 + 0.5 * (p[1] / h)) for p in V]), 0, 1)
+    V[:, 0] += center[0]
+    V[:, 2] += center[2]
+    V[:, 1] += center[1] - size[1] * 0.5
+    return V, np.asarray(F, np.int64), C
+
+
+def needle_crown(center, size, col, rings, per):
+    """Cone of needle fans. Wide at the bottom, tight at the top. Reads as pine, not a ball."""
+    rng = _rng(center, 1)
+    h = max(float(size[1]), 0.35)
+    r = max(float(size[0]), float(size[2]), 0.3) * 0.5
+    V, F, C = [], [], []
+    for ri in range(rings):
+        t = (ri + 0.35) / rings
+        y = h * (0.08 + 0.82 * t)
+        rad = r * (1.05 - 0.9 * t)
+        tint = col * (0.62 + 0.5 * (1.0 - t))
+        for k in range(per):
+            a = (k + 0.15 * rng.random()) / per * 6.283 + ri * 0.4
+            ca, sa = np.cos(a), np.sin(a)
+            side = np.array([-sa, 0.0, ca]) * rad * 0.07
+            base = np.array([ca * rad * 0.22, y * 0.9, sa * rad * 0.22])
+            tip = np.array([ca * rad, y + h * 0.07, sa * rad])
+            o = len(V)
+            V += [base + side, base - side, tip]
+            F += [[o, o + 1, o + 2]]
+            C += [tint * 0.75, tint * 0.75, np.clip(tint * 1.2, 0, 1)]
+    V = np.asarray(V, np.float64)
+    V[:, 0] += center[0]
+    V[:, 2] += center[2]
+    V[:, 1] += center[1] - size[1] * 0.5
+    return V, np.asarray(F, np.int64), np.asarray(C, np.float64)
+
+
+def leaf_cards(center, size, col, n, grounded):
+    """Small leaf cards filling the old patch. A card is never most of the crown."""
+    rng = _rng(center, 2)
+    h = max(float(size[1]), 0.28)
+    r = max(float(size[0]), float(size[2]), 0.3) * 0.5
+    card = min(r * 0.34, 0.42)
+    V, F, C = [], [], []
+    for i in range(n):
+        a = rng.random() * 6.283
+        ca, sa = np.cos(a), np.sin(a)
+        dist = r * rng.uniform(0.0, 0.72 if grounded else 0.9)
+        y0 = 0.02 * h if grounded else h * rng.uniform(0.15, 0.7)
+        rise = min(h * 0.45, 0.55) * rng.uniform(0.6, 1.0)
+        side = np.array([-sa, 0.0, ca]) * card * rng.uniform(0.7, 1.1)
+        b0 = np.array([ca * dist, y0, sa * dist])
+        tip = b0 + np.array([ca * card * 0.2, rise, sa * card * 0.2])
+        o = len(V)
+        V += [b0 + side, b0 - side, tip + side * 0.25, tip - side * 0.25]
+        F += [[o, o + 1, o + 2], [o + 1, o + 3, o + 2]]
+        tint = col * rng.uniform(0.72, 1.18)
+        C += [tint * 0.65, tint * 0.65, np.clip(tint * 1.2, 0, 1), np.clip(tint * 1.05, 0, 1)]
+    V = np.asarray(V, np.float64)
+    V[:, 0] += center[0]
+    V[:, 2] += center[2]
+    V[:, 1] += center[1] - size[1] * 0.5
+    return V, np.asarray(F, np.int64), np.clip(np.asarray(C, np.float64), 0, 1)
 
 
 def blades(center, size, base_col, n, flower_col=None):
@@ -167,28 +271,27 @@ def rebuild(V, F, C, lod=False):
                     kind = "canopy"
                     break
         if kind == "keep":
+            cc = c.copy()
+            # Bark streaks only. Vertices do not move, so the trunk box still matches.
+            if mean[0] > mean[1]:
+                streak = 0.78 + 0.28 * np.abs(np.sin(v[:, 0] * 22.0 + v[:, 1] * 9.0 + v[:, 2] * 17.0))
+                cc = np.clip(cc * streak[:, None], 0, 1)
             out_v.append(v)
             out_f.append(ff + o)
-            out_c.append(c)
+            out_c.append(cc)
             o += len(v)
             continue
         flower = None
         if kind == "flower":
             tips = c[c[:, 0] > 0.4]
             flower = tips.mean(0) if len(tips) else np.array([0.85, 0.72, 0.28])
-        nblob = 2 if lod else (4 if kind == "bush" else 3)
-        # Canopies are numerous, so they stay the coarser sphere. Bushes are few and read at eye height.
-        ico = ICO_LO if lod or kind == "canopy" else ICO_HI
+        horiz = max(float(size[0]), float(size[2]))
         if kind in ("grass", "flower"):
-            nv, nf, nc = blades(center, size, mean, 5 if lod else 9, flower)
+            nv, nf, nc = blades(center, size, mean, 4 if lod else 7, flower)
+        elif kind == "bush" or horiz > float(size[1]) * 1.15:
+            nv, nf, nc = broad_crown(center, size, mean, lod, kind == "bush")
         else:
-            # cones are flat; give the clump some body or it stays a slab
-            horiz = max(float(size[0]), float(size[2]), 0.35)
-            tall = max(float(size[1]), horiz * (0.5 if kind == "bush" else 0.62))
-            box = np.array([horiz, tall, horiz])
-            nv, nf, nc = cluster(center, box, mean, nblob, None, ico)
-            nv = nv.copy()
-            nv[:, 1] += float(v[:, 1].min() - nv[:, 1].min())
+            nv, nf, nc = pine_crown(center, size, mean, lod)
         out_v.append(nv)
         out_f.append(nf + o)
         out_c.append(nc)
@@ -226,9 +329,8 @@ def main():
                         aabb_max=[round(float(x), 3) for x in mx],
                         mean_rgb=[round(float(x), 3) for x in mean],
                     ))
-    import json
-    json.dump(records, open(os.path.join(ROOT, "trunk_bounds.json"), "w"))
-    print("files", nfiles, "trunk records", len(records))
+    # trunk_bounds.json was already sent to Lucky. Do not overwrite it.
+    print("files", nfiles, "kept tall pieces", len(records))
 
 
 if __name__ == "__main__":

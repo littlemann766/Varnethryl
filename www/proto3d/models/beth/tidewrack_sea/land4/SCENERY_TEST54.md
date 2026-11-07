@@ -1,6 +1,8 @@
 # Island scenery for test 54 — separate from the frozen terrain commit
 
-Terrain shader, arrays, and terrain meshes stay at `86e61c6e`. Collider glbs were not rewritten. Cone canopies, block bushes and spike flowers were replaced with clusters that sit in the same patch. Brown trunks, limbs and stone were copied vertex for vertex. `trunk_bounds.json` lists each kept piece taller than 2 m (centroid and AABB) for Lucky's collider pass.
+Terrain shader, arrays, and terrain meshes stay at `86e61c6e`. Collider glbs were not rewritten. `trunk_bounds.json` is the manifest already sent to Lucky and was not rewritten.
+
+Foliage is rebuilt from the original cones, not from the sphere clusters. A tall green piece becomes a cone with short needles on the rim, so a pine stays a pine. A wide piece becomes a low mound with a jagged rim, and a bush sits on the old ground contact. Grass and flowers stay small blade clumps. Brown trunks, limbs and stone are the same vertices. Trunk color has a vertical streak only.
 
 Test 54 (`33ec05515fa2907c1d6958e39e884eed92955776`) has no `land_scatter` files. `tw_sea.gd` `_files` will load any `arch_` / `coast_` / `frost_` / `ash_` glb you copy into `res://tidewrack/stageN/meshes/`, and any name ending in `_col` becomes a trimesh static body. It is not drawn.
 
@@ -33,7 +35,9 @@ Grass, flowers, bushes, stones, driftwood, and crystals are class 0 and do not b
 
 ## Counts
 
-Instance counts are unchanged (Archipelago 2673, Saltglass 3231, Frost 4049, Ash 3754). High scatter triangles are now 2.73 million across all four regions, lod1 537 thousand. The previous cones were 657 thousand high. Low tier still uses lod1. Not measured on a Galaxy S26. A whole region is not on screen at once; test 54 streams by distance.
+Instance counts are unchanged (Archipelago 2673, Saltglass 3231, Frost 4049, Ash 3754). High scatter triangles are 895 thousand across all four regions, lod1 337 thousand. The sphere-cluster pass was 2.73 million high. The original cones were 657 thousand high. Low tier still uses lod1. Not measured on a Galaxy S26.
+
+What this does not do: up close a pine tier is still a faceted cone with a few needle spikes, and a broad crown is still a dark mound. There is no leaf alpha texture on the scatter shader, so individual needles are not drawn. Bark is a color streak on the old vertices, not a bark surface. Dead ash trees stay bare.
 
 ## Patch
 

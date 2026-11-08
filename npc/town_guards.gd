@@ -29,6 +29,9 @@ const ZONE := 30.0          # m beyond the walls
 const LEASH := 15.0
 const PER_TARGET := 3
 const RESPOND := 90.0       # m: only guards this close to an intruder answer it (others hold their gate)
+## Horde prototype: a guard will not be walked off the approach. Past this distance from the post
+## they drop the target and go back, even if the threat is still inside the old 90 m bubble.
+const POST_LEASH := 34.0
 const IGNORE := ["titan", "titan_volcano"]
 var city_half := 185.0
 var kills := 0
@@ -77,11 +80,11 @@ func hostiles() -> Array:
 func _assign() -> void:
 	for g in guards:
 		var t = g.tgt
-		if t != null and (not is_instance_valid(t) or not t.alive() or not in_zone(t.global_position, LEASH)): g.tgt = null; g.ret = true
+		if t != null and (not is_instance_valid(t) or not t.alive() or not in_zone(t.global_position, LEASH) or (g.post as Vector3).distance_to(t.global_position) > POST_LEASH): g.tgt = null; g.ret = true
 	for e in hostiles():
 		var have := guards.filter(func(g): return g.tgt == e).size()
 		if have >= PER_TARGET: continue
-		var free := guards.filter(func(g): return g.tgt == null and g.down_t <= 0.0 and (g.post as Vector3).distance_to(e.global_position) < RESPOND)
+		var free := guards.filter(func(g): return g.tgt == null and g.down_t <= 0.0 and (g.post as Vector3).distance_to(e.global_position) < minf(RESPOND, POST_LEASH))
 		free.sort_custom(func(a, b): return (a.node as Node3D).global_position.distance_to(e.global_position) < (b.node as Node3D).global_position.distance_to(e.global_position))
 		for g in free.slice(0, PER_TARGET - have): g.tgt = e
 

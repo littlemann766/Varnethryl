@@ -4,6 +4,10 @@ extends Node3D
 
 const PK := 2.8
 const CITY_HALF := 185.0
+## Wall square used by the mesh and by TownHaven. Outer face = CITY_HALF + WALL_T/2.
+const WALL_H := 8.0
+const WALL_T := 3.0
+const GATE_HALF := 7.0
 ## test 33: the HUD test number comes from ONE setting (project.godot application/config/test_build), bumped per build;
 ## run_tests checks it == export_presets version/code - 1.
 var VERSION: String = str(ProjectSettings.get_setting("application/config/test_build", "?"))
@@ -178,6 +182,9 @@ var walk_t := 0.0
 var limbs := []
 var bench := false
 var guards: TownGuards
+var horde: HordeDirector
+var undead_boundary: UndeadBoundary
+var town_defense: TownDefense
 var rng := RandomNumberGenerator.new()
 var noise := FastNoiseLite.new()
 var env: Environment
@@ -251,6 +258,8 @@ var warmed := false
 const MAP_RECT := Rect2(-260, -260, 520, 520)
 
 func _ready() -> void:
+	# Haven is on before enemies, AI, or a resumed hit can run. Fail closed until this line.
+	TownHaven.arm(self)
 	rng.seed = 1905
 	noise.seed = 7; noise.frequency = 0.0035; noise.fractal_octaves = 4
 	var args := OS.get_cmdline_user_args()
@@ -286,6 +295,11 @@ func _ready() -> void:
 	party = load("res://heroes/party.gd").new(); add_child(party); party.setup(self, not bench)
 	interiors = InteriorManager.new(); add_child(interiors); interiors.setup(self)
 	if not bench or OS.get_environment("BENCH_ONLY") == "flywarm": guards = TownGuards.new().setup(self, CITY_HALF, GATES); add_child(guards)   # voxel-heroes
+	undead_boundary = UndeadBoundary.new(); add_child(undead_boundary); undead_boundary.setup(self)
+	if OS.get_environment("VARN_NO_HORDE") == "" and not bench:
+		town_defense = TownDefense.new(); add_child(town_defense); town_defense.build(self)
+		horde = HordeDirector.new(); add_child(horde); horde.setup(self)
+	undead_boundary.sweep()
 	apply_quality()
 	_sync_story_flags()
 	if not bench and volcano_quest_done(): spawn_world_boss(false)   # test 15: the world boss roams outside the walls only after the volcano quest (story)
@@ -728,8 +742,8 @@ func _walls_and_gate() -> void:
 	var stone := StandardMaterial3D.new(); stone.albedo_texture = load("res://interiors/tex/fieldstone_albedo.jpg"); stone.albedo_color = Color(0.86, 0.84, 0.8)
 	stone.normal_enabled = true; stone.normal_texture = load("res://interiors/tex/fieldstone_normal.png"); stone.normal_scale = 0.8
 	stone.uv1_triplanar = true; stone.uv1_world_triplanar = true; stone.uv1_scale = Vector3.ONE / 2.2; stone.roughness = 0.9
-	var H := 8.0; var T := 3.0
-	var G := 7.0   # half gate opening
+	var H := WALL_H; var T := WALL_T
+	var G := GATE_HALF   # half gate opening
 	var L := CITY_HALF - G; var cpos := (CITY_HALF + G) / 2.0
 	var runs := []
 	for sd in [-1, 1]:
@@ -760,6 +774,46 @@ func _walls_and_gate() -> void:
 			vm.position = gc + along * (cos(a) * R) + Vector3(0, 3.2 + sin(a) * (8.0 - 3.2) / 1.0 * 0.95, 0)
 			vm.basis = Basis(Vector3.UP, atan2(out.x, out.z)) * Basis(Vector3(0, 0, 1), -(a - PI / 2) * (1.0 if out.x == 0 else 1.0))
 			add_child(vm)
+	_seal_wall_lips(stone)
+
+## Where the ground rises over the flat wall (the corners leave the town pad), stack the same
+## fieldstone so the lip is not a step over the parapet. Gate mouths are left open.
+var wall_lip_count := 0
+func _seal_wall_lips(stone: Material) -> void:
+	wall_lip_count = 0
+	var raised_max := 0.0
+	for side in 4:
+		for i in 17:
+			var t := -1.0 + 2.0 * float(i) / 16.0
+			var p := Vector2.ZERO
+			match side:
+				0: p = Vector2(t * CITY_HALF, CITY_HALF)
+				1: p = Vector2(t * CITY_HALF, -CITY_HALF)
+				2: p = Vector2(CITY_HALF, t * CITY_HALF)
+				3: p = Vector2(-CITY_HALF, t * CITY_HALF)
+			if _gate_mouth(p): continue
+			var gy := height(p.x, p.y)
+			raised_max = maxf(raised_max, gy)
+			if gy <= WALL_H - 2.5: continue
+			var crest := gy + 3.0
+			var y0 := WALL_H - 0.2
+			var h := crest - y0
+			var box := Vector3(WALL_T + 0.8, h, WALL_T + 0.8)
+			_static_box(Vector3(p.x, y0 + h * 0.5, p.y), box)
+			var mi := MeshInstance3D.new()
+			var bm := BoxMesh.new()
+			bm.size = box
+			bm.material = stone
+			mi.mesh = bm
+			mi.position = Vector3(p.x, y0 + h * 0.5, p.y)
+			add_child(mi)
+			wall_lip_count += 1
+	print("WALL_LIPS raised=%d max_ground=%.2f wall_top=%.1f" % [wall_lip_count, raised_max, WALL_H])
+
+func _gate_mouth(p: Vector2) -> bool:
+	if absf(absf(p.y) - CITY_HALF) < 2.0 and absf(p.x) < GATE_HALF + 1.5: return true
+	if absf(absf(p.x) - CITY_HALF) < 2.0 and absf(p.y) < GATE_HALF + 1.5: return true
+	return false
 
 ## test 8: Beth's street kit (assets/card2/prop_*, shared card2 atlas, 3 LODs). Dressed by each building's door,
 ## kept 2.4 m+ to the side of the doorway so door lanes and interior triggers stay clear.
@@ -2482,6 +2536,8 @@ func _teleport(p: Vector3, yw: float) -> void:
 
 func _on_play_solo() -> void:
 	Net.leave(); _clear_remotes()
+	# Expulsion runs before the resumed body can take a hit, and never moves that body.
+	if undead_boundary: undead_boundary.sweep()
 	# Town (-6, 26) is only the fallback when the save has no usable place. Mainland, Tidewrack
 	# and interiors are restored. See VSave.resume_place.
 	var place: Dictionary = VSave.resume_place(VSave.state)
@@ -2489,17 +2545,23 @@ func _on_play_solo() -> void:
 		"sea":
 			if sea:
 				sea.enter(str(place.get("ship", "galleon")), Vector3(float(place.x), 0.0, float(place.z)), float(place.get("yaw", 0.0)))
+				if undead_boundary: undead_boundary.sweep()
 				return
 		"interior":
-			if _resume_interior(str(place.get("id", "")), Vector3(float(place.x), float(place.get("y", 0.0)), float(place.z)), float(place.get("yaw", 0.0))): return
+			if _resume_interior(str(place.get("id", "")), Vector3(float(place.x), float(place.get("y", 0.0)), float(place.z)), float(place.get("yaw", 0.0))):
+				if undead_boundary: undead_boundary.sweep()
+				return
 		"interior_legacy":
 			var legacy_id: String = _interior_id_from_index(int(place.get("index", -1)))
-			if legacy_id != "" and _resume_interior(legacy_id, Vector3.INF, 0.0): return
+			if legacy_id != "" and _resume_interior(legacy_id, Vector3.INF, 0.0):
+				if undead_boundary: undead_boundary.sweep()
+				return
 		"land":
 			_teleport(Vector3(float(place.x), 0.0, float(place.z)), float(place.get("yaw", 0.0)))
+			if undead_boundary: undead_boundary.sweep()
 			return
 		_:
-			pass
+			if undead_boundary: undead_boundary.sweep()
 
 func _interior_id_from_index(i: int) -> String:
 	if i < 0: return ""

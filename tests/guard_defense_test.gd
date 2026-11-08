@@ -8,7 +8,10 @@ func ok(c: bool, msg: String) -> void:
 	if not c: fails += 1
 func f(k: int) -> void:
 	for i in k: await physics_frame; await process_frame
-func _initialize() -> void: _run.call_deferred()
+func _initialize() -> void:
+	# The horde is a separate crowd. This check is still the gate-guard vs stone troll case.
+	OS.set_environment("VARN_NO_HORDE", "1")
+	_run.call_deferred()
 func _run() -> void:
 	m = load("res://main.tscn").instantiate(); root.add_child(m)
 	await f(30)

@@ -25,6 +25,7 @@ func setup(hero: Node3D, hc: HeroCombat, ground_fn: Callable, spawn_defaults := 
 	return self
 
 func spawn(tid: String, pos: Vector3, hero: Node3D) -> Enemy:
+	if TownHaven.is_undead_type(tid): return _spawn_undead(tid, pos, hero)
 	var e := Enemy.new()
 	add_child(e)
 	# never spawn on top of the player: keep (radius + 5 m) clear of the hero
@@ -38,6 +39,28 @@ func spawn(tid: String, pos: Vector3, hero: Node3D) -> Enemy:
 	e.setup(tid, pos, ground)
 	_wire(e, hero)
 	return e
+
+## Undead never use the duelist Enemy. Interior points are moved outside before the node is live.
+func _spawn_undead(tid: String, pos: Vector3, hero: Node3D) -> Enemy:
+	var body_r := HordeZombie.body_radius(tid)
+	pos = TownHaven.sanitize_spawn(pos, body_r)
+	if hero:
+		var d := Vector2(pos.x - hero.global_position.x, pos.z - hero.global_position.z)
+		if d.length() < body_r + 5.0:
+			var away := Vector2(pos.x, pos.z)
+			if away.length() < 1.0: away = Vector2(0, 1)
+			var np := away.normalized() * (TownHaven.stand_off(body_r) + 6.0)
+			pos.x = np.x
+			pos.z = np.y
+			pos = TownHaven.sanitize_spawn(pos, body_r)
+	if ground.is_valid(): pos.y = ground.call(pos.x, pos.z)
+	var z := HordeZombie.new()
+	add_child(z)
+	z.setup_horde(tid, pos, ground)
+	z.last_safe = z.global_position
+	_wire(z, hero)
+	TownHaven.note({"e": "spawn", "id": tid, "x": snappedf(z.global_position.x, 0.01), "z": snappedf(z.global_position.z, 0.01), "inside": TownHaven.body_inside(Vector2(z.global_position.x, z.global_position.z), body_r)})
+	return z
 
 func _wire(e: Enemy, hero: Node3D) -> void:
 	e.target = hero

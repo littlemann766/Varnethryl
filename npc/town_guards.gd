@@ -28,11 +28,14 @@ const RUN := 6.11
 const ZONE := 30.0          # m beyond the walls
 const LEASH := 15.0
 const PER_TARGET := 3
-const RESPOND := 90.0       # m: only guards this close to an intruder answer it (others hold their gate)
-## Travel cap from the post. 60 m still reaches the old defence edge (walls + 30 m zone + 15 m
-## leash is about 58.5 m from the innermost gate post). A chase past that is refused, so a runner
-## cannot drag the guard into the field. Acquisition stays 90 m.
+const RESPOND := 90.0       # m: a guard whose post is farther than this never takes that target
+## Travel cap from the post. About 58.5 m reaches the old defence edge (walls + 30 m zone + 15 m
+## leash) from the innermost gate post. The take test is distance <= this cap, so the effective
+## acquisition range is 60 m, not 90 m. The 90 m figure only keeps a far post from answering.
 const POST_LEASH := 60.0
+
+static func effective_acquire() -> float:
+	return minf(RESPOND, POST_LEASH)
 const IGNORE := ["titan", "titan_volcano"]
 var city_half := 185.0
 var kills := 0
@@ -95,8 +98,7 @@ func _assign() -> void:
 		if have >= PER_TARGET: continue
 		var free := guards.filter(func(g):
 			var d := (g.post as Vector3).distance_to(e.global_position)
-			# Notice range stays 90 m. A target past the 60 m post leash is not taken, so the
-			# same frame cannot drop it and pick it up again.
+			# Effective take range is the 60 m leash. 90 m only rejects a post that is farther than that.
 			return g.tgt == null and g.down_t <= 0.0 and d < RESPOND and d <= POST_LEASH)
 		free.sort_custom(func(a, b): return (a.node as Node3D).global_position.distance_to(e.global_position) < (b.node as Node3D).global_position.distance_to(e.global_position))
 		for g in free.slice(0, PER_TARGET - have): g.tgt = e

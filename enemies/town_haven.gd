@@ -1,13 +1,15 @@
 class_name TownHaven
 extends RefCounted
-## Safe haven for this prototype: Liongate's walled square, and the inhabited harbour.
-## Harbour coverage is the paved district (warehouses, Harbour Master, fish market, Salty Anchor)
-## plus the coast building row (chandlery, warehouse, fisher cottages). It does not include the
-## piers, the open sea, the shore road between those two pads, or the farmhouse.
-## Every height counts. Interiors count only when that building's exterior sits in one of these pads.
+## Safe haven for this prototype: Liongate, and one inhabited harbour waterfront.
+## The harbour is the paved district, a short threshold at the Tidewrack road mouth,
+## the dry land from the Salty Anchor through to the cottages, and the lighthouse.
+## It does not include the piers, the open sea, the road back to the city, the ground
+## east of the cottages, or the farmhouse. The lighthouse column takes in a few metres
+## of water on the rock's west side so the tower and its door stay inside.
+## Every height counts. An interior counts when that building's exterior sits in the haven.
 ## Every hostile uses the same rule: no spawn inside, no body across the edge, no hit while the hero is inside.
 
-const COVERAGE := "Liongate walled square, plus the inhabited harbour pads (district and coast cottages). Not the piers, open sea, farmhouse, or Tidewrack."
+const COVERAGE := "Liongate, plus one connected harbour: paved district, Tidewrack road-mouth threshold, dry land from the Salty Anchor to the cottages, and the lighthouse. Not the piers, open sea, inland road, ground east of the cottages, or farmhouse. The lighthouse column includes a few metres of water on the rock's west side."
 const EVIDENCE_MAX := 800
 const SUBSTEP_M := 0.2
 const MAX_SWEEP_M := 80.0
@@ -50,36 +52,24 @@ static func inside_xz(x: float, z: float) -> bool:
 static func liongate_inside(x: float, z: float) -> bool:
 	return maxf(absf(x), absf(z)) < outer_limit()
 
-## Quay deck only. The 34 m piers past this stay outside, on the water.
+## Quay deck only. The timber piers past this stay on the water.
 const QUAY_LIP := 5.0
+## Tidewrack road enters at (-387, 322), five metres east of the district. This threshold
+## covers that entrance. It does not follow the road inland toward (-336, 269).
+const MOUTH_RECT := Rect2(-404.0, 310.0, 26.0, 34.0)
+## West edge stops east of the piers (x about -472). It is west of the straight coast so the lighthouse rock is inside.
+const WATERFRONT_WEST := -452.0
+## East edge of the coast strip. The road mouth is a separate threshold, so this does not cover the field east of the cottages.
+const WATERFRONT_EAST := -396.0
+## Lighthouse origin is the coast point plus 62 m south. This clears the measured door and the tower base.
+const LIGHTHOUSE_SOUTH := 482.0
 
 static func harbour_rects() -> Array:
 	var hd = load("res://scripts/harbor_district.gd")
-	var district := Rect2(float(hd.X0), float(hd.Z0), float(hd.X1) - float(hd.X0), float(hd.SHORE_Z) - float(hd.Z0) + QUAY_LIP)
-	return [district, port_row()]
-
-## Beth's port row: warehouse, chandlery, and the three cottages. Seaward side stops at the coast.
-static func port_row() -> Rect2:
-	var spot: Vector2 = _ms().harbour_spot()[0]
-	var coast: float = float(_ms().SEA_COAST_X)
-	var minx := INF
-	var maxx := -INF
-	var minz := INF
-	var maxz := -INF
-	for pd in InteriorExtraDoors.PORT_DOORS:
-		var d: Vector3 = pd[1]
-		var wx := spot.x - d.z
-		var wz := spot.y + d.x
-		minx = minf(minx, wx)
-		maxx = maxf(maxx, wx)
-		minz = minf(minz, wz)
-		maxz = maxf(maxz, wz)
-	minx -= 8.0
-	maxx += 18.0
-	minz -= 12.0
-	maxz += 12.0
-	minx = maxf(minx, coast - 1.0)
-	return Rect2(minx, minz, maxx - minx, maxz - minz)
+	var district := Rect2(float(hd.X0), float(hd.Z0), float(hd.X1) - float(hd.X0), float(hd.SHORE_Z) + QUAY_LIP - float(hd.Z0))
+	var z0 := float(hd.SHORE_Z) - 2.0
+	var waterfront := Rect2(WATERFRONT_WEST, z0, WATERFRONT_EAST - WATERFRONT_WEST, LIGHTHOUSE_SOUTH - z0)
+	return [district, MOUTH_RECT, waterfront]
 
 static func harbour_inside(x: float, z: float) -> bool:
 	var p := Vector2(x, z)
@@ -111,8 +101,8 @@ static func blocked(p: Vector2, body_r: float) -> bool:
 	return body_inside(p, body_r) or obstacle_hit(p, body_r)
 
 ## Fail closed until the scene arms the haven, then recompute from the hero's position every hit.
-## A building interior counts when its exterior sits in Liongate or the inhabited harbour.
-## The farmhouse and the lighthouse do not. The interior cell itself is parked near x=4000.
+## A building interior counts when its exterior sits in Liongate or on the inhabited waterfront.
+## The farmhouse does not. The interior cell itself is parked near x=4000.
 static func town_interior_active() -> bool:
 	var m := main_node
 	if m == null: return false

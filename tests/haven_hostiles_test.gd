@@ -126,8 +126,8 @@ func _world() -> void:
 	var ui = root.get_node_or_null("VUI")
 	if ui and ui.get("title"): ui.title.hide()
 	ok(TownHaven.armed, "Liongate haven is armed before the first awaited frame")
-	ok(is_equal_approx(TownGuards.RESPOND, 90.0), "guard acquisition is still 90 m")
-	ok(TownGuards.POST_LEASH >= 58.0 and TownGuards.POST_LEASH < TownGuards.RESPOND, "post leash covers the old zone edge and is shorter than acquisition")
+	ok(is_equal_approx(TownGuards.RESPOND, 90.0), "a post farther than 90 m still does not answer")
+	ok(is_equal_approx(TownGuards.effective_acquire(), 60.0), "effective acquisition is the 60 m leash, not 90 m")
 	for e in m.party.director.living():
 		e.kill_now(Vector3.ZERO)
 	await f(3)

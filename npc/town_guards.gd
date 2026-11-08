@@ -93,7 +93,11 @@ func _assign() -> void:
 	for e in hostiles():
 		var have := guards.filter(func(g): return g.tgt == e).size()
 		if have >= PER_TARGET: continue
-		var free := guards.filter(func(g): return g.tgt == null and g.down_t <= 0.0 and (g.post as Vector3).distance_to(e.global_position) < RESPOND)
+		var free := guards.filter(func(g):
+			var d := (g.post as Vector3).distance_to(e.global_position)
+			# Notice range stays 90 m. A target past the 60 m post leash is not taken, so the
+			# same frame cannot drop it and pick it up again.
+			return g.tgt == null and g.down_t <= 0.0 and d < RESPOND and d <= POST_LEASH)
 		free.sort_custom(func(a, b): return (a.node as Node3D).global_position.distance_to(e.global_position) < (b.node as Node3D).global_position.distance_to(e.global_position))
 		for g in free.slice(0, PER_TARGET - have): g.tgt = e
 

@@ -1,12 +1,13 @@
 class_name TownHaven
 extends RefCounted
-## Liongate haven. Coverage is the one walled square in the main town (CITY_HALF), every height,
-## plus interiors of buildings whose exterior sits in that square.
-## It is not a plaza radius, and it is not every settlement: the farmhouse, harbour, and Tidewrack
-## are outside this prototype. Every hostile (wolf, troll, titan, horde) uses the same rule:
-## no spawn inside, no body across the outer face, no hit while the hero is inside.
+## Safe haven for this prototype: Liongate's walled square, and the inhabited harbour.
+## Harbour coverage is the paved district (warehouses, Harbour Master, fish market, Salty Anchor)
+## plus the coast building row (chandlery, warehouse, fisher cottages). It does not include the
+## piers, the open sea, the shore road between those two pads, or the farmhouse.
+## Every height counts. Interiors count only when that building's exterior sits in one of these pads.
+## Every hostile uses the same rule: no spawn inside, no body across the edge, no hit while the hero is inside.
 
-const COVERAGE := "Liongate walled square only. Not the farmhouse, harbour, Tidewrack, or any other settlement."
+const COVERAGE := "Liongate walled square, plus the inhabited harbour pads (district and coast cottages). Not the piers, open sea, farmhouse, or Tidewrack."
 const EVIDENCE_MAX := 800
 const SUBSTEP_M := 0.2
 const MAX_SWEEP_M := 80.0
@@ -44,12 +45,61 @@ static func add_obstacle(rect: Rect2) -> void:
 	if rect.size.x > 0.01 and rect.size.y > 0.01: obstacles.append(rect)
 
 static func inside_xz(x: float, z: float) -> bool:
+	return liongate_inside(x, z) or harbour_inside(x, z)
+
+static func liongate_inside(x: float, z: float) -> bool:
 	return maxf(absf(x), absf(z)) < outer_limit()
+
+## Quay deck only. The 34 m piers past this stay outside, on the water.
+const QUAY_LIP := 5.0
+
+static func harbour_rects() -> Array:
+	var hd = load("res://scripts/harbor_district.gd")
+	var district := Rect2(float(hd.X0), float(hd.Z0), float(hd.X1) - float(hd.X0), float(hd.SHORE_Z) - float(hd.Z0) + QUAY_LIP)
+	return [district, port_row()]
+
+## Beth's port row: warehouse, chandlery, and the three cottages. Seaward side stops at the coast.
+static func port_row() -> Rect2:
+	var spot: Vector2 = _ms().harbour_spot()[0]
+	var coast: float = float(_ms().SEA_COAST_X)
+	var minx := INF
+	var maxx := -INF
+	var minz := INF
+	var maxz := -INF
+	for pd in InteriorExtraDoors.PORT_DOORS:
+		var d: Vector3 = pd[1]
+		var wx := spot.x - d.z
+		var wz := spot.y + d.x
+		minx = minf(minx, wx)
+		maxx = maxf(maxx, wx)
+		minz = minf(minz, wz)
+		maxz = maxf(maxz, wz)
+	minx -= 8.0
+	maxx += 18.0
+	minz -= 12.0
+	maxz += 12.0
+	minx = maxf(minx, coast - 1.0)
+	return Rect2(minx, minz, maxx - minx, maxz - minz)
+
+static func harbour_inside(x: float, z: float) -> bool:
+	var p := Vector2(x, z)
+	for r in harbour_rects():
+		if _open_rect(r, p): return true
+	return false
+
+static func _open_rect(r: Rect2, p: Vector2) -> bool:
+	return p.x > r.position.x and p.x < r.end.x and p.y > r.position.y and p.y < r.end.y
 
 static func inside(p: Vector3) -> bool: return inside_xz(p.x, p.z)
 
-static func body_inside(p: Vector2, body_r: float) -> bool:
+static func _liongate_body(p: Vector2, body_r: float) -> bool:
 	return maxf(absf(p.x), absf(p.y)) < stand_off(body_r) - 1e-4
+
+static func body_inside(p: Vector2, body_r: float) -> bool:
+	if _liongate_body(p, body_r): return true
+	for r in harbour_rects():
+		if r.grow(body_r).has_point(p) and _open_rect(r.grow(body_r - 1e-4), p): return true
+	return false
 
 static func obstacle_hit(p: Vector2, body_r: float) -> bool:
 	for r in obstacles:
@@ -61,8 +111,8 @@ static func blocked(p: Vector2, body_r: float) -> bool:
 	return body_inside(p, body_r) or obstacle_hit(p, body_r)
 
 ## Fail closed until the scene arms the haven, then recompute from the hero's position every hit.
-## A town building interior (the inn, the keep, ...) counts even though its cell is parked at x=4000.
-## The farmhouse is outside the walls, so its interior is not this haven.
+## A building interior counts when its exterior sits in Liongate or the inhabited harbour.
+## The farmhouse and the lighthouse do not. The interior cell itself is parked near x=4000.
 static func town_interior_active() -> bool:
 	var m := main_node
 	if m == null: return false
@@ -106,20 +156,53 @@ static func far_parking(p: Vector2) -> bool:
 
 static func nearest_outside(p: Vector2, body_r: float) -> Vector2:
 	if far_parking(p): p = Vector2(0.0, stand_off(body_r) + 12.0)
+	if not body_inside(p, body_r) and not obstacle_hit(p, body_r): return p
+	return _nudge_obstacles(_exit_protected(p, body_r), body_r)
+
+static func _push_square(p: Vector2, body_r: float) -> Vector2:
 	var lim := stand_off(body_r)
 	var ax := absf(p.x)
 	var az := absf(p.y)
 	var out := p
-	if maxf(ax, az) >= lim and not obstacle_hit(p, body_r): return p
 	if ax >= az:
 		out.x = signf(p.x if ax > 0.001 else 1.0) * lim
 		out.y = clampf(p.y, -lim + 0.05, lim - 0.05)
 	else:
 		out.y = signf(p.y if az > 0.001 else 1.0) * lim
 		out.x = clampf(p.x, -lim + 0.05, lim - 0.05)
-	if body_inside(out, body_r):
-		out = Vector2(0.0, lim)
-	return _nudge_obstacles(out, body_r)
+	if _liongate_body(out, body_r): out = Vector2(0.0, lim)
+	return out
+
+static func _exit_rect(p: Vector2, rect: Rect2, body_r: float) -> Vector2:
+	var g := rect.grow(body_r)
+	if p.x <= g.position.x or p.x >= g.end.x or p.y <= g.position.y or p.y >= g.end.y: return p
+	var left := p.x - g.position.x
+	var right := g.end.x - p.x
+	var down := p.y - g.position.y
+	var up := g.end.y - p.y
+	var m := minf(minf(left, right), minf(down, up))
+	var out := p
+	if is_equal_approx(m, left): out.x = g.position.x - 0.05
+	elif is_equal_approx(m, right): out.x = g.end.x + 0.05
+	elif is_equal_approx(m, down): out.y = g.position.y - 0.05
+	else: out.y = g.end.y + 0.05
+	return out
+
+static func _exit_protected(p: Vector2, body_r: float) -> Vector2:
+	var out := p
+	if _liongate_body(out, body_r): out = _push_square(out, body_r)
+	for _i in 3:
+		var moved := false
+		for r in harbour_rects():
+			var nxt := _exit_rect(out, r, body_r)
+			if nxt.distance_to(out) > 0.001:
+				out = nxt
+				moved = true
+		if _liongate_body(out, body_r):
+			out = _push_square(out, body_r)
+			moved = true
+		if not moved: break
+	return out
 
 static func sanitize_spawn(pos: Vector3, body_r: float) -> Vector3:
 	var out := nearest_outside(Vector2(pos.x, pos.z), body_r)
@@ -187,11 +270,7 @@ static func _nudge_obstacles(p: Vector2, body_r: float) -> Vector2:
 			push += away.normalized()
 		if push.length() < 0.001: push = _outward_normal(cur)
 		cur += push.normalized() * 0.6
-		if body_inside(cur, body_r):
-			if absf(cur.x) >= absf(cur.y):
-				cur.x = signf(cur.x if absf(cur.x) > 0.001 else 1.0) * (lim + 0.5)
-			else:
-				cur.y = signf(cur.y if absf(cur.y) > 0.001 else 1.0) * (lim + 0.5)
+		if body_inside(cur, body_r): cur = _exit_protected(cur, body_r)
 	if obstacle_hit(cur, body_r) or body_inside(cur, body_r):
 		var dir := cur
 		if dir.length() < 0.01: dir = Vector2(0, 1)
@@ -204,19 +283,22 @@ static func _nudge_obstacles(p: Vector2, body_r: float) -> Vector2:
 		return dir * (lim + 40.0)
 	return cur
 
-## True when the open town square contains any point of the segment.
+## True when the segment touches Liongate or an inhabited harbour pad.
 static func segment_enters(a: Vector2, b: Vector2) -> bool:
 	if inside_xz(a.x, a.y) or inside_xz(b.x, b.y): return true
 	var lim := outer_limit() - 1e-4
-	var t0 := 0.0
-	var t1 := 1.0
 	var dx := b.x - a.x
 	var dz := b.y - a.y
-	if not _slab(a.x, dx, -lim, lim, t0, t1): return false
 	var span: Array = _slab_span(a.x, dx, -lim, lim, 0.0, 1.0)
-	if not span[0]: return false
-	span = _slab_span(a.y, dz, -lim, lim, float(span[1]), float(span[2]))
-	return span[0]
+	if span[0]:
+		span = _slab_span(a.y, dz, -lim, lim, float(span[1]), float(span[2]))
+		if span[0]: return true
+	for r in harbour_rects():
+		var hit: Array = _slab_span(a.x, dx, r.position.x, r.end.x, 0.0, 1.0)
+		if not hit[0]: continue
+		hit = _slab_span(a.y, dz, r.position.y, r.end.y, float(hit[1]), float(hit[2]))
+		if hit[0]: return true
+	return false
 
 static func _slab(origin: float, delta: float, lo: float, hi: float, t0: float, t1: float) -> bool:
 	return _slab_span(origin, delta, lo, hi, t0, t1)[0]

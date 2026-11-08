@@ -58,6 +58,13 @@ func _bounds() -> void:
 	ok(not TownHaven.harbour_inside(-336.0, 269.0), "the road back toward the city stays outside")
 	ok(not TownHaven.harbour_inside(-370.0, 280.0), "ground east of the warehouses stays outside")
 	ok(not TownHaven.harbour_inside(-385.0, 450.0), "ground east of the lighthouse stays outside")
+	var sea_east: float = float(load("res://scripts/main.gd").SEA_COAST_X) - 1.0
+	var offshore: float = sea_east - TownHaven.WATERFRONT_WEST
+	print("OFFSHORE sea_plane_east=%.1f west_edge=%.1f width=%.1f" % [sea_east, TownHaven.WATERFRONT_WEST, offshore])
+	ok(is_equal_approx(offshore, 11.4), "waterfront covers 11.4 m of the sea plane (measured %.1f)" % offshore)
+	for z in [330.0, 350.0, 400.0, 453.3, 470.0]:
+		ok(TownHaven.harbour_inside(sea_east - 11.0, z), "11 m offshore is inside along the waterfront at z %.1f" % z)
+		ok(not TownHaven.harbour_inside(sea_east - 12.0, z), "12 m offshore is outside along the waterfront at z %.1f" % z)
 	ok(not TownHaven.harbour_inside(-468.0, 400.0), "water west of the lighthouse rock stays outside")
 	ok(TownHaven.harbour_inside(-440.2, 453.3), "the lighthouse door is inside the waterfront")
 	ok(not TownHaven.inside_xz(-290.0, -288.0), "farmhouse stays outside")

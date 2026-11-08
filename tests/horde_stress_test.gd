@@ -31,11 +31,15 @@ func _run() -> void:
 	var tick_max := 0
 	var wall0 := Time.get_ticks_usec()
 	var mem_series: Array = []
+	var hp0: float = m.party.combat.hp
+	var secs := 24
+	var raw := OS.get_environment("VARN_STRESS_SECONDS")
+	if raw.is_valid_int(): secs = maxi(int(raw), 1)
 	# Fill to the hard cap, then run a sustained stretch and a death wave.
 	var filled: int = m.horde.debug_fill(HordeDirector.HARD_CAP)
 	ok(filled <= HordeDirector.HARD_CAP and filled >= HordeDirector.CAP, "fill stays within the hard cap (%d)" % filled)
 	var horde0 := _horde_nodes(m)
-	for sec in 24:
+	for sec in secs:
 		var t0 := Time.get_ticks_usec()
 		for _i in 60: await physics_frame
 		var dt := int(Time.get_ticks_usec() - t0)
@@ -64,6 +68,7 @@ func _run() -> void:
 	corpse_max = maxi(corpse_max, m.horde.corpse_count())
 	list_max = maxi(list_max, m.party.director.enemies.size())
 	var mem1 := int(Performance.get_monitor(Performance.MEMORY_STATIC))
+	var hp1: float = m.party.combat.hp
 	var nodes1 := _nodes(m)
 	var wall_ms := float(Time.get_ticks_usec() - wall0) / 1000.0
 	var mean_frame_ms := float(tick_sum) / float(maxi(tick_n, 1)) / 60.0 / 1000.0
@@ -77,6 +82,7 @@ func _run() -> void:
 	ok(corpse_max <= HordeDirector.CORPSE_CAP, "corpses stayed capped (%d)" % corpse_max)
 	ok(list_max <= HordeDirector.HARD_CAP + HordeDirector.CORPSE_CAP + 16, "enemy list stayed bounded (%d)" % list_max)
 	ok(inside_max == 0, "stress crowd never entered the town")
+	ok(is_equal_approx(hp1, hp0), "hero HP held through the stress (%.0f -> %.0f)" % [hp0, hp1])
 	ok(horde_nodes_max <= horde0 + 80, "horde node count stayed with the cap (%d -> %d)" % [horde0, horde_nodes_max])
 	# After the first 4 s, further static-memory growth on this desktop run. Not a phone budget.
 	ok(tail < 48 * 1024 * 1024, "static memory growth after 4s was %d bytes" % tail)
@@ -85,7 +91,7 @@ func _run() -> void:
 		"alive_max": alive_max, "corpse_max": corpse_max, "list_max": list_max, "inside_max": inside_max,
 		"nodes0": nodes0, "nodes1": nodes1, "horde_nodes": horde0, "horde_nodes_max": horde_nodes_max,
 		"mem0": mem0, "mem1": mem1, "growth": growth, "tail_growth": tail, "series": mem_series,
-		"note": "Desktop headless Godot 4.7, lite town, 24 undead, 24 simulated seconds. wall_ms is wall clock. Not a phone measurement.",
+		"note": "Desktop headless Godot 4.7, lite town, 24 undead, %d simulated seconds. wall_ms is wall clock. Not a phone measurement." % tick_n,
 		"simulated_s": tick_n, "wall_ms": wall_ms,
 	}
 	TownHaven.note(ev)

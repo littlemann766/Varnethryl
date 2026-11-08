@@ -3,13 +3,14 @@ extends RefCounted
 ## Safe haven for this prototype: Liongate, and one inhabited harbour waterfront.
 ## The harbour is the paved district, a short threshold at the Tidewrack road mouth,
 ## the dry land from the Salty Anchor through to the cottages, and the lighthouse.
-## It does not include the piers, the open sea, the road back to the city, the ground
-## east of the cottages, or the farmhouse. The lighthouse column takes in a few metres
-## of water on the rock's west side so the tower and its door stay inside.
+## It does not include the piers, the open sea past the west edge, the road back to the city,
+## the ground east of the cottages, or the farmhouse. The waterfront column also covers
+## 11.4 m of the sea plane (its east edge is SEA_COAST_X - 1, the west edge is x = -452)
+## from the shore down to the lighthouse, not only beside the tower.
 ## Every height counts. An interior counts when that building's exterior sits in the haven.
 ## Every hostile uses the same rule: no spawn inside, no body across the edge, no hit while the hero is inside.
 
-const COVERAGE := "Liongate, plus one connected harbour: paved district, Tidewrack road-mouth threshold, dry land from the Salty Anchor to the cottages, and the lighthouse. Not the piers, open sea, inland road, ground east of the cottages, or farmhouse. The lighthouse column includes a few metres of water on the rock's west side."
+const COVERAGE := "Liongate, plus one connected harbour: paved district, Tidewrack road-mouth threshold, dry land from the Salty Anchor to the cottages, and the lighthouse. Piers, open sea past x=-452, inland road, ground east of the cottages, and the farmhouse stay outside. The same waterfront column covers 11.4 m of the sea plane along the whole shore, not only beside the lighthouse."
 const EVIDENCE_MAX := 800
 const SUBSTEP_M := 0.2
 const MAX_SWEEP_M := 80.0
@@ -57,7 +58,7 @@ const QUAY_LIP := 5.0
 ## Tidewrack road enters at (-387, 322), five metres east of the district. This threshold
 ## covers that entrance. It does not follow the road inland toward (-336, 269).
 const MOUTH_RECT := Rect2(-404.0, 310.0, 26.0, 34.0)
-## West edge stops east of the piers (x about -472). It is west of the straight coast so the lighthouse rock is inside.
+## West edge stops east of the piers (x about -472). It is 11.4 m west of the sea plane's east edge (SEA_COAST_X - 1), along the whole waterfront, so the lighthouse rock is inside and a strip of sea is too.
 const WATERFRONT_WEST := -452.0
 ## East edge of the coast strip. The road mouth is a separate threshold, so this does not cover the field east of the cottages.
 const WATERFRONT_EAST := -396.0

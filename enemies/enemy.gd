@@ -97,6 +97,7 @@ func _pick_pattern() -> Dictionary:
 
 func _physics_process(dt: float) -> void:
 	if target == null: return
+	_snap_outside()
 	var to := target.global_position - global_position; to.y = 0
 	var d := to.length()
 	# phone budget: far enemies freeze their AnimationTree and skip AI
@@ -105,6 +106,23 @@ func _physics_process(dt: float) -> void:
 	if far: return
 	t_state += dt; atk_cd = max(0.0, atk_cd - dt)
 	ai_step(dt, to, d)
+	_snap_outside()
+
+## Liongate: a chase step cannot cross the outer wall, including a long hitch.
+func _step_xz(delta: Vector3) -> void:
+	var a := Vector2(global_position.x, global_position.z)
+	var b := a + Vector2(delta.x, delta.z)
+	var n := TownHaven.clamp_move(a, b, radius)
+	global_position.x = n.x
+	global_position.z = n.y
+
+func _snap_outside() -> void:
+	var a := Vector2(global_position.x, global_position.z)
+	if not TownHaven.body_inside(a, radius) and not TownHaven.far_parking(a): return
+	var n := TownHaven.clamp_move(a, a, radius)
+	global_position.x = n.x
+	global_position.z = n.y
+	if height_fn.is_valid(): global_position.y = float(height_fn.call(global_position.x, global_position.z))
 
 func ai_step(dt: float, to: Vector3, d: float) -> void:
 	var dir: Vector3 = to / maxf(d, 0.001)
@@ -116,7 +134,7 @@ func ai_step(dt: float, to: Vector3, d: float) -> void:
 			if (global_position - home).length() > leash_m or d > leash_m * 1.5: set_state("return"); return
 			if pattern.is_empty(): pattern = _pick_pattern()
 			if d > reach_m() * 0.8:
-				position += dir * speed_mps * (1.25 if phase == 2 else 1.0) * dt; moving = 1.0
+				_step_xz(dir * speed_mps * (1.25 if phase == 2 else 1.0) * dt); moving = 1.0
 			if d <= reach_m() and atk_cd <= 0.0:
 				set_state("telegraph")
 				if CLIP_HITS.has(type_id):   # test 14: Lucian's attackN plays from the wind-up; damage lands on its hit frame
@@ -140,7 +158,7 @@ func ai_step(dt: float, to: Vector3, d: float) -> void:
 		"return":
 			var h := home - global_position; h.y = 0
 			if h.length() < 1.6: hp = max_hp; phase = 1; pat_i = 0; set_state("idle")
-			else: position += h.normalized() * speed_mps * dt; moving = 1.0; _face(h.normalized(), dt)
+			else: _step_xz(h.normalized() * speed_mps * dt); moving = 1.0; _face(h.normalized(), dt)
 	if height_fn.is_valid(): position.y = height_fn.call(position.x, position.z)
 	if rig.root_walk > 0.0: rig.set_move_mps(moving * speed_mps * (1.25 if phase == 2 and state == "chase" else 1.0))
 	else: rig.set_locomotion(moving)

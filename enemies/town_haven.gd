@@ -1,10 +1,12 @@
 class_name TownHaven
 extends RefCounted
-## Walled-town haven for the horde prototype. The protected volume is the whole square inside the
-## outer face of the existing walls (scripts/main.gd CITY_HALF + WALL_T/2), at every height.
-## It is not a plaza radius. Undead may not spawn, stand, be pushed, or land a hit inside it.
-## Legacy non-undead enemies are intentionally unchanged.
+## Liongate haven. Coverage is the one walled square in the main town (CITY_HALF), every height,
+## plus interiors of buildings whose exterior sits in that square.
+## It is not a plaza radius, and it is not every settlement: the farmhouse, harbour, and Tidewrack
+## are outside this prototype. Every hostile (wolf, troll, titan, horde) uses the same rule:
+## no spawn inside, no body across the outer face, no hit while the hero is inside.
 
+const COVERAGE := "Liongate walled square only. Not the farmhouse, harbour, Tidewrack, or any other settlement."
 const EVIDENCE_MAX := 800
 const SUBSTEP_M := 0.2
 const MAX_SWEEP_M := 80.0
@@ -169,22 +171,38 @@ static func _outward_normal(p: Vector2) -> Vector2:
 	if absf(p.x) > absf(p.y): return Vector2(signf(p.x if absf(p.x) > 0.001 else 1.0), 0.0)
 	return Vector2(0.0, signf(p.y if absf(p.y) > 0.001 else 1.0))
 
+## Push off barricades without calling back into nearest_outside. A fat body on the
+## wall line used to bounce into the square and recurse.
 static func _nudge_obstacles(p: Vector2, body_r: float) -> Vector2:
 	var cur := p
-	for _k in 6:
-		if not obstacle_hit(cur, body_r): return cur
+	var lim := stand_off(body_r)
+	for _k in 8:
+		if not obstacle_hit(cur, body_r) and not body_inside(cur, body_r): return cur
 		var push := Vector2.ZERO
 		for r in obstacles:
 			var grow := Rect2(r.position - Vector2(body_r, body_r), r.size + Vector2(body_r * 2.0, body_r * 2.0))
 			if not grow.has_point(cur): continue
-			var c := grow.get_center()
-			var away := cur - c
+			var away := cur - grow.get_center()
 			if away.length() < 0.001: away = _outward_normal(cur)
 			push += away.normalized()
 		if push.length() < 0.001: push = _outward_normal(cur)
-		cur += push.normalized() * 0.35
-		if body_inside(cur, body_r): cur = nearest_outside(cur, body_r)
-	return cur if not blocked(cur, body_r) else p
+		cur += push.normalized() * 0.6
+		if body_inside(cur, body_r):
+			if absf(cur.x) >= absf(cur.y):
+				cur.x = signf(cur.x if absf(cur.x) > 0.001 else 1.0) * (lim + 0.5)
+			else:
+				cur.y = signf(cur.y if absf(cur.y) > 0.001 else 1.0) * (lim + 0.5)
+	if obstacle_hit(cur, body_r) or body_inside(cur, body_r):
+		var dir := cur
+		if dir.length() < 0.01: dir = Vector2(0, 1)
+		dir = dir.normalized()
+		var rad := maxf(cur.length(), lim)
+		for _i in 16:
+			rad += body_r + 0.75
+			var try_p := dir * rad
+			if not obstacle_hit(try_p, body_r) and not body_inside(try_p, body_r): return try_p
+		return dir * (lim + 40.0)
+	return cur
 
 ## True when the open town square contains any point of the segment.
 static func segment_enters(a: Vector2, b: Vector2) -> bool:

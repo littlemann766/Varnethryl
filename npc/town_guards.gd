@@ -29,9 +29,10 @@ const ZONE := 30.0          # m beyond the walls
 const LEASH := 15.0
 const PER_TARGET := 3
 const RESPOND := 90.0       # m: only guards this close to an intruder answer it (others hold their gate)
-## Horde prototype: a guard will not be walked off the approach. Past this distance from the post
-## they drop the target and go back, even if the threat is still inside the old 90 m bubble.
-const POST_LEASH := 34.0
+## Travel cap from the post. 60 m still reaches the old defence edge (walls + 30 m zone + 15 m
+## leash is about 58.5 m from the innermost gate post). A chase past that is refused, so a runner
+## cannot drag the guard into the field. Acquisition stays 90 m.
+const POST_LEASH := 60.0
 const IGNORE := ["titan", "titan_volcano"]
 var city_half := 185.0
 var kills := 0
@@ -71,6 +72,14 @@ func _gy(p: Vector3) -> float:
 
 func in_zone(p: Vector3, pad := 0.0) -> bool: return maxf(absf(p.x), absf(p.z)) <= city_half + ZONE + pad
 
+func _cap_goal(post: Vector3, goal: Vector3) -> Vector3:
+	var a := Vector2(post.x, post.z)
+	var b := Vector2(goal.x, goal.z)
+	var d := a.distance_to(b)
+	if d <= POST_LEASH or d < 0.001: return goal
+	var p := a + (b - a) * (POST_LEASH / d)
+	return Vector3(p.x, goal.y, p.y)
+
 func hostiles() -> Array:
 	var d = main.party.director if main and main.get("party") and main.party.get("director") else null
 	if d == null: return []
@@ -84,7 +93,7 @@ func _assign() -> void:
 	for e in hostiles():
 		var have := guards.filter(func(g): return g.tgt == e).size()
 		if have >= PER_TARGET: continue
-		var free := guards.filter(func(g): return g.tgt == null and g.down_t <= 0.0 and (g.post as Vector3).distance_to(e.global_position) < minf(RESPOND, POST_LEASH))
+		var free := guards.filter(func(g): return g.tgt == null and g.down_t <= 0.0 and (g.post as Vector3).distance_to(e.global_position) < RESPOND)
 		free.sort_custom(func(a, b): return (a.node as Node3D).global_position.distance_to(e.global_position) < (b.node as Node3D).global_position.distance_to(e.global_position))
 		for g in free.slice(0, PER_TARGET - have): g.tgt = e
 
@@ -104,7 +113,9 @@ func _defend(g: Dictionary, dt: float) -> bool:
 	if g.down_t > 0.0: g.down_t -= dt
 	var e = g.tgt
 	var goal: Vector3
-	if e != null: goal = e.global_position; g.ret = true
+	if e != null:
+		goal = _cap_goal(g.post, e.global_position)
+		g.ret = true
 	elif g.ret and n.global_position.distance_to(g.post) > 0.6: goal = g.post
 	else:
 		g.ret = false; g.hp = minf(MAX_HP, g.hp + MAX_HP * 0.05 * dt); return false

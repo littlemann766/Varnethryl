@@ -16,20 +16,31 @@ func _run() -> void:
 	party.set_hero("darius"); await f(2)
 	m.spawn_world_boss(true); await f(5)
 	var wb: WorldBoss = m.world_boss
+	# The fissure decal starts at the origin until a ritual places it. Damage checks stand outside Liongate.
+	_stand_outside(wb)
 	for r in ["fissure", "wave"]:
 		c.hp = c.max_hp; c._titan_log.clear()
-		wb.ritual = r; m.hero.global_position = wb.crack.global_position if r == "fissure" else wb.global_position + Vector3(30, 0, 0)
+		wb.ritual = r
+		if r == "fissure":
+			wb.crack.global_position = m.hero.global_position
+		else:
+			m.hero.global_position = wb.global_position + Vector3(30, 0, 0)
 		var h0 := c.hp; wb._complete(); await f(2)
 		var d := h0 - c.hp
 		ok(d > 0.0 and d <= 0.15 * REF, "world boss %s: %.0f dmg (%.1f%% of %d)" % [r, d, 100.0 * d / REF, REF])
 	# overlap: 12 slams + waves in the same second
 	c.hp = c.max_hp; c._titan_log.clear()
+	_stand_outside(wb)
 	for i in 12:
-		wb.ritual = "fissure" if i % 2 == 0 else "wave"; m.hero.global_position = wb.crack.global_position; wb._complete()
+		wb.ritual = "fissure" if i % 2 == 0 else "wave"
+		if wb.ritual == "fissure": wb.crack.global_position = m.hero.global_position
+		else: m.hero.global_position = wb.global_position + Vector3(30, 0, 0)
+		wb._complete()
 	await f(2)
 	ok(c.hp > 0.0 and c.max_hp - c.hp <= 0.35 * REF + 1.0, "12 overlapping world-boss slams: hp %.0f/%.0f (lost %.1f%%)" % [c.hp, c.max_hp, 100.0 * (c.max_hp - c.hp) / REF])
 	# enemy Titans (6x roaming Titan + volcano Titan): every pattern + aoe, spammed
 	var d2: EnemyDirector = party.director
+	_stand_outside(wb)
 	var t: Enemy = d2.spawn("titan", m.hero.global_position + Vector3(0, 0, -6), m.hero)
 	var vts := d2.enemies.filter(func(e): return e is VolcanoTitan)
 	for e in [t] + vts:
@@ -44,12 +55,24 @@ func _run() -> void:
 		ok(c.hp > 0.0, "%s: 60 stacked stomps/swats/sweeps -> hero alive, hp %.0f/%.0f" % [e.type_id, c.hp, c.max_hp])
 	# Owner: cheat HP irrelevant, same absolute small hits
 	party.set_hero("owner"); await f(2); c._titan_log.clear()
-	var o0 := c.hp; wb.ritual = "fissure"; m.hero.global_position = wb.crack.global_position; wb._complete(); await f(2)
+	_stand_outside(wb)
+	var o0 := c.hp; wb.ritual = "fissure"; wb.crack.global_position = m.hero.global_position; wb._complete(); await f(2)
 	ok(o0 - c.hp <= 0.15 * REF, "owner takes the same small hit (%.0f)" % (o0 - c.hp))
 	# other enemies unchanged (frost troll still uses its normal damage)
 	party.set_hero("darius"); await f(2); c.hp = c.max_hp
+	_stand_outside(wb)
 	var tr: Enemy = d2.spawn("frosttroll_a", m.hero.global_position + Vector3(0, 0, -4), m.hero)
 	var h2 := c.hp; d2._aoe(tr, m.hero.global_position, 50.0, 1.0)
 	ok(h2 - c.hp > 0.15 * REF, "frost troll damage unchanged (%.0f)" % (h2 - c.hp))
+	var outside_loss := h2 - c.hp
+	m.hero.global_position = Vector3(0, m.height(0, 20), 20)
+	c.hp = c.max_hp
+	d2._aoe(tr, m.hero.global_position, 50.0, 1.0)
+	ok(is_equal_approx(c.hp, c.max_hp), "the same frost troll AOE does nothing inside Liongate (outside hit was %.0f)" % outside_loss)
 	print("TITAN_DMG %d checks, %d failed -> %s" % [n, fails, "PASS" if fails == 0 else "FAIL"])
 	quit(1 if fails else 0)
+
+func _stand_outside(wb: WorldBoss) -> void:
+	var p := wb.global_position + Vector3(18, 0, 0)
+	if maxf(absf(p.x), absf(p.z)) < 220.0: p = Vector3(40, 0, 280)
+	m.hero.global_position = Vector3(p.x, m.height(p.x, p.z), p.z)

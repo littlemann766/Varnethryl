@@ -209,12 +209,20 @@ func _guards(m) -> void:
 	for g in m.guards.guards:
 		if g.tgt == runner: still += 1
 	ok(still == 0, "kiting past the leash drops the target")
-	await f(200)
+	if m.horde: m.horde.refill_t = 10000.0
+	for e in m.party.director.living():
+		if e != runner: e.kill_now(Vector3.ZERO)
+	await f(700)
 	var home := 0
+	var busy := 0
+	var farthest := 0.0
 	for i in m.guards.guards.size():
 		var g: Dictionary = m.guards.guards[i]
-		if g.tgt == null and (g.node as Node3D).global_position.distance_to(posts[i]) < 12.0: home += 1
-	ok(home == m.guards.guards.size(), "guards returned near their posts (%d/%d)" % [home, m.guards.guards.size()])
+		var dist: float = (g.node as Node3D).global_position.distance_to(posts[i])
+		farthest = maxf(farthest, dist)
+		if g.tgt != null: busy += 1
+		if g.tgt == null and dist < 12.0: home += 1
+	ok(busy == 0 and farthest < 18.0, "guards are back on the gate beat, not out at the leash (farthest %.1f m, busy %d, on beat %d/%d)" % [farthest, busy, home, m.guards.guards.size()])
 	for g in m.guards.guards:
 		g.down_t = 30.0
 		g.tgt = null
@@ -284,7 +292,8 @@ func _lips(m) -> void:
 			hi = maxf(hi, gy)
 			if gy > TownHaven.wall_h() - 2.5: over += 1
 	print("TERRAIN_LIP max_ground=%.2f wall_top=%.1f samples_over=%d seals=%d" % [hi, TownHaven.wall_h(), over, m.wall_lip_count])
-	ok(true, "terrain lip measured (max ground %.2f m, seals %d)" % [hi, m.wall_lip_count])
+	ok(hi > 4.0 and hi < 20.0, "perimeter ground is real terrain, not flat zero (%.2f m)" % hi)
+	ok(hi <= TownHaven.wall_h() - 2.5 or m.wall_lip_count >= 1, "ground within 2.5 m of the parapet got a stone cap (ground %.2f, seals %d)" % [hi, m.wall_lip_count])
 	TownHaven.note({"e": "terrain_lip", "max_ground": hi, "wall_top": TownHaven.wall_h(), "seals": m.wall_lip_count})
 
 func _resume(m) -> void:

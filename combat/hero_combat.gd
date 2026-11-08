@@ -136,8 +136,12 @@ const TITAN_WIN := 5.0
 const TITAN_WIN_CAP := 0.35
 var _titan_log: Array = []   # [time_s, dmg]
 static func titan_ref_hp() -> float: return float(CombatData.data().PLAYER.hp)
+func _haven_blocks() -> bool:
+	return body != null and TownHaven.hero_safe(body.global_position)
+
 func titan_hit(frac := TITAN_HIT) -> int:
 	if hp <= 0.0: return 0
+	if _haven_blocks(): return 0
 	var now := Time.get_ticks_msec() / 1000.0
 	_titan_log = _titan_log.filter(func(e): return now - float(e[0]) < TITAN_WIN)
 	var used_ := 0.0
@@ -157,6 +161,7 @@ func titan_hit(frac := TITAN_HIT) -> int:
 
 func take_hit(atk: float, mult := 1.0) -> int:
 	if hp <= 0.0: return 0
+	if _haven_blocks(): return 0
 	var P: Dictionary = CombatData.data().PLAYER
 	var h := maxf(12.0, round(atk * mult * 1000.0 / (1000.0 + float(P.def))))
 	if reduce_t > 0.0: h *= (1.0 - reduce)

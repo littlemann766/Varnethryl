@@ -35,7 +35,7 @@ func _run() -> void:
 	var filled: int = m.horde.debug_fill(HordeDirector.HARD_CAP)
 	ok(filled <= HordeDirector.HARD_CAP and filled >= HordeDirector.CAP, "fill stays within the hard cap (%d)" % filled)
 	var horde0 := _horde_nodes(m)
-	for sec in 12:
+	for sec in 24:
 		var t0 := Time.get_ticks_usec()
 		for _i in 60: await physics_frame
 		var dt := int(Time.get_ticks_usec() - t0)
@@ -69,8 +69,9 @@ func _run() -> void:
 	var mean_frame_ms := float(tick_sum) / float(maxi(tick_n, 1)) / 60.0 / 1000.0
 	var max_frame_ms := float(tick_max) / 60.0 / 1000.0
 	var growth := mem1 - mem0
-	var tail := int(mem_series[mem_series.size() - 1]) - int(mem_series[3]) if mem_series.size() >= 8 else growth
-	print("STRESS_DESKTOP seconds=%d wall_ms=%.0f mean_frame_ms=%.2f max_frame_ms=%.2f alive_max=%d corpse_max=%d list_max=%d inside_max=%d scene_nodes %d->%d horde_nodes %d->%d static_mem %d->%d growth=%d tail_growth=%d" % [
+	var tail := int(mem_series[mem_series.size() - 1]) - int(mem_series[7]) if mem_series.size() >= 16 else growth
+	print("STRESS_TIME simulated_s=%d wall_s=%.2f (wall clock is not simulated time, and this is not a phone result)" % [tick_n, wall_ms / 1000.0])
+	print("STRESS_DESKTOP simulated_s=%d wall_ms=%.0f mean_frame_ms=%.2f max_frame_ms=%.2f alive_max=%d corpse_max=%d list_max=%d inside_max=%d scene_nodes %d->%d horde_nodes %d->%d static_mem %d->%d growth=%d tail_growth=%d" % [
 		tick_n, wall_ms, mean_frame_ms, max_frame_ms, alive_max, corpse_max, list_max, inside_max, nodes0, nodes1, horde0, horde_nodes_max, mem0, mem1, growth, tail])
 	ok(alive_max <= HordeDirector.HARD_CAP, "alive never passed the hard cap")
 	ok(corpse_max <= HordeDirector.CORPSE_CAP, "corpses stayed capped (%d)" % corpse_max)
@@ -84,7 +85,8 @@ func _run() -> void:
 		"alive_max": alive_max, "corpse_max": corpse_max, "list_max": list_max, "inside_max": inside_max,
 		"nodes0": nodes0, "nodes1": nodes1, "horde_nodes": horde0, "horde_nodes_max": horde_nodes_max,
 		"mem0": mem0, "mem1": mem1, "growth": growth, "tail_growth": tail, "series": mem_series,
-		"note": "Desktop headless Godot 4.7, lite town, 24 undead. Not a phone measurement.",
+		"note": "Desktop headless Godot 4.7, lite town, 24 undead, 24 simulated seconds. wall_ms is wall clock. Not a phone measurement.",
+		"simulated_s": tick_n, "wall_ms": wall_ms,
 	}
 	TownHaven.note(ev)
 	DirAccess.make_dir_recursive_absolute("/opt/cursor/artifacts")

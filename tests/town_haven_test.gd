@@ -20,7 +20,7 @@ func _run() -> void:
 	_movement()
 	_attacks()
 	_spawn_paths()
-	_unsupported()
+	print("COVERAGE %s" % TownHaven.COVERAGE)
 	print("TOWN_HAVEN %d checks, %d failed" % [n, fails])
 	quit(1 if fails else 0)
 
@@ -206,13 +206,10 @@ func _spawn_paths() -> void:
 	var again := horde.respawn_at("shambler", Vector3(5, 0, 5))
 	ok(again != null and not TownHaven.inside(again.global_position), "respawn inside the town is pushed out")
 	var wolf: Enemy = d.spawn("wolf", Vector3(30, 0, 30), hero)
-	ok(not (wolf is HordeZombie) and TownHaven.inside(wolf.global_position), "legacy wolf is unchanged and can still stand inside (known limit)")
-
-func _unsupported() -> void:
-	print("NA ranged: zombie horde has no projectile. Not counted as a pass.")
-	print("NA aoe: zombie horde has no area damage. Not counted as a pass.")
-	print("NA legacy_knockback: Enemy.take_damage does not move a body. Horde shove is the tested push.")
-	ok(true, "unsupported ranged/aoe/legacy knockback recorded as N/A")
+	var wolf_at := wolf.global_position
+	ok(not (wolf is HordeZombie) and not TownHaven.body_inside(Vector2(wolf_at.x, wolf_at.z), wolf.radius), "wolf spawn inside Liongate is pushed outside (%s)" % wolf_at)
+	wolf.take_damage(1, Vector3.ZERO)
+	ok(wolf.global_position.distance_to(wolf_at) < 0.001, "Enemy.take_damage does not move the body")
 
 class _Host extends Node:
 	var party

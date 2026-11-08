@@ -19,9 +19,9 @@ func sweep() -> int:
 	for e in d.enemies:
 		if not is_instance_valid(e): continue
 		kept.append(e)
-		if not TownHaven.is_undead_enemy(e): continue
+		if not (e is Enemy): continue
 		if e is HordeZombie: e.cancel_if_hero_safe()
-		var r := float(e.radius) if e.get("radius") != null else HordeZombie.BODY_R
+		var r := float(e.radius) if e.get("radius") != null else 0.6
 		var flat := Vector2(e.global_position.x, e.global_position.z)
 		if not TownHaven.body_inside(flat, r) and not TownHaven.far_parking(flat): continue
 		var back := Vector3.ZERO

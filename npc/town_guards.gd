@@ -15,10 +15,12 @@ var guards: Array = []     # [{node, rig, a, b, to_b, wait, post, hp, tgt, atk_t
 ## test 31 (boss: "guards should be high level and attack any incoming monsters"): city defence.
 ## Level 60 guards (town-area monsters are 5-30, frost trolls 45-52). Each guard: 20,000 HP, swings every 1.1 s for 22% of a
 ## normal monster's max HP (a wolf/raider/skeleton dies in ~5 swings from one guard), 1.5% for bosses (frost trolls).
-## Defence zone: the walled square (|x|,|z| <= 185 m) plus 30 m beyond the walls. Up to 3 nearest guards within 90 m answer each
-## intruder; they run (6.1 m/s, run clip), attack with the guard attack clip, give up past the zone + 15 m leash, and go
-## back to their posts when it is dead or gone. They only ever target Enemy nodes from the EnemyDirector: never players,
-## remote players, companions or townsfolk. The Ashen Titans (enemy "titan"/"titan_volcano" and the WorldBoss) are left out.
+## Close defence. Gate posts sit about 13.5 to 6.5 m inside the outer wall face. A 22 m cap from the
+## post reaches about 7 m past that face: the gate mouth and a short apron, not the field.
+## Up to 3 nearest guards answer a target inside that cap. A post farther than 90 m never answers.
+## They run (6.1 m/s), strike, drop a target that leaves the cap, and walk back to the post.
+## They only ever target Enemy nodes from the EnemyDirector: never players, remote players, companions
+## or townsfolk. The Ashen Titans (enemy "titan"/"titan_volcano" and the WorldBoss) are left out.
 const LEVEL := 60
 const MAX_HP := 20000.0
 const DMG_FRAC := 0.22
@@ -28,7 +30,15 @@ const RUN := 6.11
 const ZONE := 30.0          # m beyond the walls
 const LEASH := 15.0
 const PER_TARGET := 3
-const RESPOND := 90.0       # m: only guards this close to an intruder answer it (others hold their gate)
+const RESPOND := 90.0       # m: a guard whose post is farther than this never takes that target
+## Travel and take cap from the guard's own post. 22 m from the innermost gate post (about 171.5 m
+## from center) ends near 193.5 m, 7 m outside the wall face at 186.5 m. The gathered horde stands
+## about 18 m outside that face, so guards do not walk out and clear it. The take test is
+## distance <= this cap, so the effective acquisition range is 22 m. 90 m only rejects a far post.
+const POST_LEASH := 22.0
+
+static func effective_acquire() -> float:
+	return minf(RESPOND, POST_LEASH)
 const IGNORE := ["titan", "titan_volcano"]
 var city_half := 185.0
 var kills := 0
@@ -68,6 +78,14 @@ func _gy(p: Vector3) -> float:
 
 func in_zone(p: Vector3, pad := 0.0) -> bool: return maxf(absf(p.x), absf(p.z)) <= city_half + ZONE + pad
 
+func _cap_goal(post: Vector3, goal: Vector3) -> Vector3:
+	var a := Vector2(post.x, post.z)
+	var b := Vector2(goal.x, goal.z)
+	var d := a.distance_to(b)
+	if d <= POST_LEASH or d < 0.001: return goal
+	var p := a + (b - a) * (POST_LEASH / d)
+	return Vector3(p.x, goal.y, p.y)
+
 func hostiles() -> Array:
 	var d = main.party.director if main and main.get("party") and main.party.get("director") else null
 	if d == null: return []
@@ -77,11 +95,14 @@ func hostiles() -> Array:
 func _assign() -> void:
 	for g in guards:
 		var t = g.tgt
-		if t != null and (not is_instance_valid(t) or not t.alive() or not in_zone(t.global_position, LEASH)): g.tgt = null; g.ret = true
+		if t != null and (not is_instance_valid(t) or not t.alive() or not in_zone(t.global_position, LEASH) or (g.post as Vector3).distance_to(t.global_position) > POST_LEASH): g.tgt = null; g.ret = true
 	for e in hostiles():
 		var have := guards.filter(func(g): return g.tgt == e).size()
 		if have >= PER_TARGET: continue
-		var free := guards.filter(func(g): return g.tgt == null and g.down_t <= 0.0 and (g.post as Vector3).distance_to(e.global_position) < RESPOND)
+		var free := guards.filter(func(g):
+			var d := (g.post as Vector3).distance_to(e.global_position)
+			# Effective take range is the 22 m apron. 90 m only rejects a post that is farther than that.
+			return g.tgt == null and g.down_t <= 0.0 and d < RESPOND and d <= POST_LEASH)
 		free.sort_custom(func(a, b): return (a.node as Node3D).global_position.distance_to(e.global_position) < (b.node as Node3D).global_position.distance_to(e.global_position))
 		for g in free.slice(0, PER_TARGET - have): g.tgt = e
 
@@ -101,7 +122,13 @@ func _defend(g: Dictionary, dt: float) -> bool:
 	if g.down_t > 0.0: g.down_t -= dt
 	var e = g.tgt
 	var goal: Vector3
-	if e != null: goal = e.global_position; g.ret = true
+	var press := _crowd_press(g.post)
+	if e != null:
+		goal = _cap_goal(g.post, e.global_position)
+		g.ret = true
+	elif press != Vector3.INF:
+		goal = _cap_goal(g.post, press)
+		g.ret = true
 	elif g.ret and n.global_position.distance_to(g.post) > 0.6: goal = g.post
 	else:
 		g.ret = false; g.hp = minf(MAX_HP, g.hp + MAX_HP * 0.05 * dt); return false
@@ -117,6 +144,14 @@ func _defend(g: Dictionary, dt: float) -> bool:
 		if e != null and g.atk_t <= 0.0:
 			g.atk_t = SWING; r.play_attack("attack", 1.3); _strike(g, e)
 	return true
+
+func _crowd_press(post: Vector3) -> Vector3:
+	if main == null or main.get("horde") == null or main.horde == null: return Vector3.INF
+	var crowd = main.horde.get("crowd")
+	if crowd == null: return Vector3.INF
+	var i: int = crowd.nearest_in_leash(post, POST_LEASH)
+	if i < 0: return Vector3.INF
+	return Vector3(crowd.px[i], 0.0, crowd.pz[i])
 
 func _physics_process(dt: float) -> void:
 	var hp: Vector3 = main.hero.global_position if main and main.get("hero") else Vector3.ZERO

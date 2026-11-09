@@ -25,32 +25,64 @@ func setup(hero: Node3D, hc: HeroCombat, ground_fn: Callable, spawn_defaults := 
 	return self
 
 func spawn(tid: String, pos: Vector3, hero: Node3D) -> Enemy:
+	if TownHaven.is_undead_type(tid): return _spawn_undead(tid, pos, hero)
 	var e := Enemy.new()
 	add_child(e)
-	# never spawn on top of the player: keep (radius + 5 m) clear of the hero
+	# never spawn on top of the player, and never inside Liongate
 	var r: float = float(Enemy.TYPES[tid].r) if Enemy.TYPES.has(tid) else 2.0
+	pos = TownHaven.sanitize_spawn(pos, r)
 	var d := Vector2(pos.x - hero.global_position.x, pos.z - hero.global_position.z)
 	if d.length() < r + 5.0:
-		var dir2 := d.normalized() if d.length() > 0.01 else Vector2(0, -1)
-		var np := Vector2(hero.global_position.x, hero.global_position.z) + dir2 * (r + 5.0)
+		var away := Vector2(pos.x, pos.z)
+		if away.length() < 1.0: away = Vector2(0, 1)
+		var np := away.normalized() * maxf(r + 6.0, TownHaven.stand_off(r) + 2.0)
 		pos.x = np.x; pos.z = np.y
+	pos = TownHaven.sanitize_spawn(pos, r)
 	if ground.is_valid(): pos.y = ground.call(pos.x, pos.z)
 	e.setup(tid, pos, ground)
 	_wire(e, hero)
+	TownHaven.note({"e": "spawn", "id": tid, "x": snappedf(e.global_position.x, 0.01), "z": snappedf(e.global_position.z, 0.01), "inside": TownHaven.body_inside(Vector2(e.global_position.x, e.global_position.z), r)})
 	return e
+
+## Undead never use the duelist Enemy. Interior points are moved outside before the node is live.
+func _spawn_undead(tid: String, pos: Vector3, hero: Node3D) -> Enemy:
+	var body_r := HordeZombie.body_radius(tid)
+	pos = TownHaven.sanitize_spawn(pos, body_r)
+	if hero:
+		var d := Vector2(pos.x - hero.global_position.x, pos.z - hero.global_position.z)
+		if d.length() < body_r + 5.0:
+			var away := Vector2(pos.x, pos.z)
+			if away.length() < 1.0: away = Vector2(0, 1)
+			var np := away.normalized() * (TownHaven.stand_off(body_r) + 6.0)
+			pos.x = np.x
+			pos.z = np.y
+			pos = TownHaven.sanitize_spawn(pos, body_r)
+	if ground.is_valid(): pos.y = ground.call(pos.x, pos.z)
+	var z := HordeZombie.new()
+	add_child(z)
+	z.setup_horde(tid, pos, ground)
+	z.last_safe = z.global_position
+	_wire(z, hero)
+	TownHaven.note({"e": "spawn", "id": tid, "x": snappedf(z.global_position.x, 0.01), "z": snappedf(z.global_position.z, 0.01), "inside": TownHaven.body_inside(Vector2(z.global_position.x, z.global_position.z), body_r)})
+	return z
 
 func _wire(e: Enemy, hero: Node3D) -> void:
 	e.target = hero
 	enemies.append(e)
 	e.attacked.connect(func(en, p): _on_attack(en, p))
 
+func _hero_inside() -> bool:
+	return combat != null and combat.body != null and TownHaven.hero_safe(combat.body.global_position)
+
 func _on_attack(e: Enemy, p: Dictionary) -> void:
 	if e is VolcanoTitan: return       # its damage comes from clip events (aoe)
+	if _hero_inside(): return          # hit time: a swing already in the air does not land inside Liongate
 	if combat and e.pattern_hits(p if not p.is_empty() else {"shape": "cone", "cos": 0.3}, combat.body.global_position):
 		if _is_titan(e): combat.titan_hit(HeroCombat.TITAN_HIT * clampf(float(p.get("dmg", 1.0)), 0.5, 1.0))   # test 26
 		else: combat.take_hit(float(e.def.atk), float(p.get("dmg", 1.0)))
 
 func _aoe(e: Enemy, c: Vector3, r: float, mult: float) -> void:
+	if _hero_inside(): return          # Titan rings and in-flight impacts too
 	if combat and Vector2(c.x - combat.body.global_position.x, c.z - combat.body.global_position.z).length() <= r:
 		if _is_titan(e): combat.titan_hit(HeroCombat.TITAN_HIT * clampf(mult, 0.5, 1.0))   # test 26
 		else: combat.take_hit(float(e.def.atk), mult)

@@ -8,7 +8,10 @@ func ok(c: bool, msg: String) -> void:
 	if not c: fails += 1
 func f(k: int) -> void:
 	for i in k: await physics_frame; await process_frame
-func _initialize() -> void: _run.call_deferred()
+func _initialize() -> void:
+	# The horde is a separate crowd. This check is still the gate-guard vs stone troll case.
+	OS.set_environment("VARN_NO_HORDE", "1")
+	_run.call_deferred()
 func _run() -> void:
 	m = load("res://main.tscn").instantiate(); root.add_child(m)
 	await f(30)
@@ -34,7 +37,7 @@ func _run() -> void:
 	ti.kill_now(Vector3.ZERO); await f(5)
 	# a stone troll walks to the South Gate (hero inside the city as its target)
 	var posts := G.guards.map(func(g): return g.post)
-	var e: Enemy = d.spawn("stonetroll", Vector3(4, 0, 185 + 45), m.hero); e.target = m.hero; e.set_state("chase")
+	var e: Enemy = d.spawn("stonetroll", Vector3(4, 0, 190), m.hero); e.target = m.hero; e.set_state("chase")
 	m.hero.global_position = Vector3(0, 0, 120)
 	var hits := [0]; G.guard_hit.connect(func(en, dm): if en == e: hits[0] += 1)
 	var engaged := false; var t := 0

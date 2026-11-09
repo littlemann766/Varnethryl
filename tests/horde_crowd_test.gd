@@ -72,6 +72,7 @@ func _run() -> void:
 	await _guards(m, crowd)
 	await _blocked(m, crowd)
 	await _sustain(m, crowd)
+	await _unpromoted(m, crowd)
 	print("CROWD_LOGIC %d checks, %d failed near=%d rendered=%d simulated=%d" % [n, fails, crowd.near_n, crowd.rendered_n, crowd.alive_n])
 	quit(1 if fails else 0)
 
@@ -134,6 +135,9 @@ func _hits(m, crowd: HordeCrowd) -> void:
 	actor.global_position = Vector3(0, 0.2, stand + 0.4)
 	m.hero.global_position = actor.global_position + Vector3(0, 0, 1.0)
 	var body_i := crowd._index_of(actor.crowd_id)
+	if body_i >= 0: crowd.hp[body_i] = 190.0
+	actor.hp = 190.0
+	var kept_id := actor.crowd_id
 	var rec_before: float = actor.hp
 	var neighbor := -1
 	for i in crowd.id.size():
@@ -151,6 +155,8 @@ func _hits(m, crowd: HordeCrowd) -> void:
 	m.party.combat._area(sk, 0, Vector2(m.hero.global_position.x, m.hero.global_position.z), Vector2(0, -1), 1.0)
 	for _i in 2: await physics_frame
 	ok(hits[0] == 1, "the pooled body is damaged once (%d signals)" % hits[0])
+	ok(actor.crowd_id == kept_id, "the swing keeps the same crowd id")
+	body_i = crowd._index_of(actor.crowd_id)
 	if body_i >= 0:
 		ok(absf(crowd.hp[body_i] - actor.hp) < 0.2, "the record matches the body after one swing (%.0f vs %.0f)" % [crowd.hp[body_i], actor.hp])
 		ok(crowd.hp[body_i] < rec_before, "the swing actually wounded the body record")
@@ -234,3 +240,54 @@ func _sustain(m, crowd: HordeCrowd) -> void:
 	ok(peak_list <= HordeCrowd.NEAR_CAP + 16, "the enemy list does not grow with the simulated crowd (%d)" % peak_list)
 	ok(crowd.alive_n <= before, "no extra zombies appear while refill is off (%d -> %d)" % [before, crowd.alive_n])
 	ok(crowd.inside_count() == 0, "the sustained fight stays outside the haven")
+
+func _unpromoted(m, crowd: HordeCrowd) -> void:
+	for g in m.guards.guards:
+		g.down_t = 30.0
+		g.tgt = null
+	m.hero.global_position = Vector3(0, 1.0, 198)
+	for _i in 20: await physics_frame
+	ok(crowd.near_n == HordeCrowd.NEAR_CAP, "the pool is full before the extra bite")
+	var extra := -1
+	for i in crowd.id.size():
+		if (crowd.flags[i] & 1) == 0 or (crowd.flags[i] & 2) != 0: continue
+		extra = i
+		break
+	ok(extra >= 0, "an unpromoted zombie is still in the press")
+	if extra < 0: return
+	crowd.px[extra] = m.hero.global_position.x + 0.8
+	crowd.pz[extra] = m.hero.global_position.z
+	crowd.bite_cd[extra] = 0.0
+	var bites0: int = crowd.bites
+	m.party.combat.hp = m.party.combat.max_hp
+	var hp0: float = m.party.combat.hp
+	for _i in 20: await physics_frame
+	ok(crowd.bites > bites0 and m.party.combat.hp < hp0, "an unpromoted zombie in reach still bites (bites %d, hp %.0f)" % [crowd.bites - bites0, m.party.combat.hp])
+	var bites1: int = crowd.bites
+	var hp1: float = m.party.combat.hp
+	m.hero.global_position = Vector3(0, 1.0, 24)
+	for _i in 20: await physics_frame
+	ok(crowd.bites == bites1 and is_equal_approx(m.party.combat.hp, hp1), "that bite stops inside the haven")
+	for g in m.guards.guards:
+		g.down_t = 0.0
+		g.tgt = null
+	var guard_i := -1
+	for i in crowd.id.size():
+		if (crowd.flags[i] & 1) == 0 or (crowd.flags[i] & 2) != 0: continue
+		guard_i = i
+		break
+	ok(guard_i >= 0, "a record remains for the apron")
+	if guard_i < 0: return
+	crowd.px[guard_i] = 0.0
+	crowd.pz[guard_i] = 190.0
+	crowd.bite_cd[guard_i] = 0.0
+	var hp_z: float = crowd.hp[guard_i]
+	var hits0: int = crowd.guard_hits
+	m.hero.global_position = Vector3(0, 1.0, 40)
+	for _i in 150: await physics_frame
+	var far := 0.0
+	for g in m.guards.guards:
+		far = maxf(far, (g.node as Node3D).global_position.distance_to(g.post))
+	print("UNPROMOTED_GUARD hits=%d hp %.0f->%.0f farthest=%.2f" % [crowd.guard_hits - hits0, hp_z, crowd.hp[guard_i], far])
+	ok(crowd.guard_hits > hits0 and crowd.hp[guard_i] < hp_z, "a guard damages the unpromoted record on the apron")
+	ok(far <= TownGuards.POST_LEASH + 0.5, "the guard stays inside the apron while doing it (%.2f m)" % far)

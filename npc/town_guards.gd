@@ -122,8 +122,12 @@ func _defend(g: Dictionary, dt: float) -> bool:
 	if g.down_t > 0.0: g.down_t -= dt
 	var e = g.tgt
 	var goal: Vector3
+	var press := _crowd_press(g.post)
 	if e != null:
 		goal = _cap_goal(g.post, e.global_position)
+		g.ret = true
+	elif press != Vector3.INF:
+		goal = _cap_goal(g.post, press)
 		g.ret = true
 	elif g.ret and n.global_position.distance_to(g.post) > 0.6: goal = g.post
 	else:
@@ -140,6 +144,14 @@ func _defend(g: Dictionary, dt: float) -> bool:
 		if e != null and g.atk_t <= 0.0:
 			g.atk_t = SWING; r.play_attack("attack", 1.3); _strike(g, e)
 	return true
+
+func _crowd_press(post: Vector3) -> Vector3:
+	if main == null or main.get("horde") == null or main.horde == null: return Vector3.INF
+	var crowd = main.horde.get("crowd")
+	if crowd == null: return Vector3.INF
+	var i: int = crowd.nearest_in_leash(post, POST_LEASH)
+	if i < 0: return Vector3.INF
+	return Vector3(crowd.px[i], 0.0, crowd.pz[i])
 
 func _physics_process(dt: float) -> void:
 	var hp: Vector3 = main.hero.global_position if main and main.get("hero") else Vector3.ZERO

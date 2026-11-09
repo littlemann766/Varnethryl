@@ -1,14 +1,15 @@
 class_name HordeCrowd
 extends Node
 ## Data-oriented horde. Thousands are simulated records with stable ids.
+## The phone validation budget is SIM_DEFAULT records and NEAR_CAP bodies.
+## SIM_MAX is a later device ceiling, not a claim the phone holds 4000.
 ## Only a small pool becomes HordeZombie bodies for nearby combat.
 ## Everyone else is a batched placeholder. Dead ids are never reused.
 
-const SIM_DEFAULT := 192
+const SIM_DEFAULT := 1000
 const NEAR_CAP := 16
-## Visible budget matches the sim ceiling. Software GL drew 4096 placeholder
-## capsules at about 6 ms/frame on this desktop. The boot crowd is still 192.
-## The expensive part of a 4000 crowd is the simulation step, not the draw upload.
+## Visible budget matches the sim ceiling. Far capsules stay full world size.
+## Detail tiers change how often a zombie is simulated, not how big it is drawn.
 const RENDER_CAP := 4096
 const MID_RADIUS := 80.0
 const RENDER_RADIUS := 260.0
@@ -25,6 +26,10 @@ const ROLE_NAME := ["shambler", "runner", "undead_knight", "undead_sailor"]
 const ROLE_SPEED := [1.25, 3.35, 1.15, 1.20]
 const ROLE_HP := [190.0, 140.0, 260.0, 240.0]
 const ROLE_AGGRO := [18.0, 34.0, 18.0, 18.0]
+const ROLE_ATK := [18.0, 16.0, 20.0, 18.0]
+const BITE_REACH := 1.40
+const FAR_RADIUS := 90.0
+const FAR_STRIDE := 4
 
 var director: HordeDirector
 var target_n := SIM_DEFAULT
@@ -41,6 +46,8 @@ var retired: Dictionary = {}
 var id: PackedInt32Array = PackedInt32Array()
 var px: PackedFloat32Array = PackedFloat32Array()
 var pz: PackedFloat32Array = PackedFloat32Array()
+var py: PackedFloat32Array = PackedFloat32Array()
+var pycell: PackedInt32Array = PackedInt32Array()
 var hp: PackedFloat32Array = PackedFloat32Array()
 var hold_x: PackedFloat32Array = PackedFloat32Array()
 var hold_z: PackedFloat32Array = PackedFloat32Array()
@@ -50,10 +57,17 @@ var slot_i: PackedInt32Array = PackedInt32Array()
 var flags: PackedInt32Array = PackedInt32Array() # 1 alive, 2 promoted
 var pool_i: PackedInt32Array = PackedInt32Array()
 var dead_for: PackedFloat32Array = PackedFloat32Array()
+var bite_cd: PackedFloat32Array = PackedFloat32Array()
 
 var pool: Array = []
+var _tick := 0
+var _sea = null
+var bites := 0
+var guard_hits := 0
+var prof_us := {"sync": 0, "integrate": 0, "draw": 0, "promote": 0, "frames": 0}
 var _meshes: Array = []
 var _free: Array = []
+var _scratch: Array = []
 
 func setup(host: HordeDirector, count: int) -> void:
 	director = host
@@ -76,12 +90,22 @@ func step(dt: float) -> void:
 	if director == null or director.main == null or director.main.hero == null: return
 	var hero: Vector3 = director.main.hero.global_position
 	var hero_safe := TownHaven.hero_safe(hero)
+	var t0 := Time.get_ticks_usec()
 	_sync_promoted()
 	_demote_far(hero)
 	_reap(dt)
+	prof_us.sync += int(Time.get_ticks_usec() - t0)
+	t0 = Time.get_ticks_usec()
 	_integrate(dt, hero, hero_safe)
+	_guard_contact()
+	prof_us.integrate += int(Time.get_ticks_usec() - t0)
+	t0 = Time.get_ticks_usec()
 	_promote(hero)
+	prof_us.promote += int(Time.get_ticks_usec() - t0)
+	t0 = Time.get_ticks_usec()
 	_draw(hero)
+	prof_us.draw += int(Time.get_ticks_usec() - t0)
+	prof_us.frames += 1
 	if alive_n < target_n and OS.get_environment("VARN_NO_HORDE_REFILL") == "":
 		director.refill_t -= dt
 		if director.refill_t <= 0.0:
@@ -245,6 +269,8 @@ func _spawn_new(g: int, slot: int) -> int:
 		id.push_back(0)
 		px.push_back(0.0)
 		pz.push_back(0.0)
+		py.push_back(0.7)
+		pycell.push_back(1 << 30)
 		hp.push_back(0.0)
 		hold_x.push_back(0.0)
 		hold_z.push_back(0.0)
@@ -254,6 +280,7 @@ func _spawn_new(g: int, slot: int) -> int:
 		flags.push_back(0)
 		pool_i.push_back(-1)
 		dead_for.push_back(0.0)
+		bite_cd.push_back(0.0)
 	if slot < 0: slot = _next_slot(g)
 	var sim := next_id
 	next_id += 1
@@ -265,6 +292,7 @@ func _spawn_new(g: int, slot: int) -> int:
 	var spawn := hold + dir * back
 	if TownHaven.body_inside(spawn, BODY_R) or TownHaven.in_escape_wedge(spawn):
 		spawn = hold
+	pycell[use] = 1 << 30
 	id[use] = sim
 	role[use] = rr
 	gate[use] = g
@@ -277,6 +305,7 @@ func _spawn_new(g: int, slot: int) -> int:
 	flags[use] = 1
 	pool_i[use] = -1
 	dead_for[use] = 0.0
+	bite_cd[use] = 0.0
 	alive_n += 1
 	return sim
 
@@ -352,42 +381,119 @@ func _demote_far(hero: Vector3) -> void:
 		near_n = maxi(0, near_n - 1)
 
 func _integrate(dt: float, hero: Vector3, hero_safe: bool) -> void:
+	_tick += 1
 	var noise := director.noise_r > 0.0
+	var nx0 := director.noise_at.x
+	var nz0 := director.noise_at.y
+	var nr := director.noise_r
+	var phase := _tick & 3
+	var far2 := FAR_RADIUS * FAR_RADIUS
+	var combat = director.main.party.combat if director.main.get("party") else null
 	for i in id.size():
 		if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: continue
-		var tx := hold_x[i]
-		var tz := hold_z[i]
 		var dx := hero.x - px[i]
 		var dz := hero.z - pz[i]
-		var dist := sqrt(dx * dx + dz * dz)
+		var d2 := dx * dx + dz * dz
+		var border := _near_hazard(px[i], pz[i])
+		var far := d2 > far2 and not border
+		if far and (i & 3) != phase: continue
+		var used := dt * (float(FAR_STRIDE) if far else 1.0)
+		var dist := sqrt(d2)
+		var tx := hold_x[i]
+		var tz := hold_z[i]
 		var rr: int = role[i]
 		if not hero_safe and dist <= ROLE_AGGRO[rr]:
 			tx = hero.x
 			tz = hero.z
-		elif noise and Vector2(px[i], pz[i]).distance_to(director.noise_at) <= director.noise_r:
-			tx = director.noise_at.x
-			tz = director.noise_at.y
+		elif noise:
+			var ndx := px[i] - nx0
+			var ndz := pz[i] - nz0
+			if ndx * ndx + ndz * ndz <= nr * nr:
+				tx = nx0
+				tz = nz0
+		if not hero_safe and dist <= BITE_REACH:
+			bite_cd[i] = maxf(0.0, bite_cd[i] - used)
+			if bite_cd[i] <= 0.0 and combat != null:
+				bite_cd[i] = 0.85
+				combat.take_hit(ROLE_ATK[rr], 1.0)
+				bites += 1
 		var mx := tx - px[i]
 		var mz := tz - pz[i]
-		var md := sqrt(mx * mx + mz * mz)
-		if md < 0.12: continue
-		var step := minf(ROLE_SPEED[rr] * dt, md)
-		var nx := px[i] + mx / md * step
-		var nz := pz[i] + mz / md * step
-		var nxt := _constrain(Vector2(px[i], pz[i]), Vector2(nx, nz))
+		var md2 := mx * mx + mz * mz
+		if md2 < 0.014: continue
+		var md := sqrt(md2)
+		var step := minf(ROLE_SPEED[rr] * used, md)
+		var nxt := _constrain(px[i], pz[i], px[i] + mx / md * step, pz[i] + mz / md * step)
 		px[i] = nxt.x
 		pz[i] = nxt.y
 
-func _on_sea(p: Vector2) -> bool:
-	return float(load("res://scripts/main.gd").sea_mask(p.x, p.y)) > 0.5
+func _near_hazard(x: float, z: float) -> bool:
+	var lim := TownHaven.outer_limit()
+	var m := maxf(absf(x), absf(z))
+	if m > lim - 8.0 and m < lim + 24.0: return true
+	if x < -380.0 and z > 250.0: return true
+	return TownHaven.obstacles.size() > 0
 
-func _constrain(cur: Vector2, nxt: Vector2) -> Vector2:
-	var sea := _on_sea(nxt)
-	var blocked := sea or TownHaven.body_inside(nxt, BODY_R) or TownHaven.body_inside(cur, BODY_R) or TownHaven.obstacle_hit(nxt, BODY_R) or TownHaven.obstacle_hit(cur, BODY_R)
-	if not blocked: return nxt
+func _on_sea(x: float, z: float) -> bool:
+	if z < 300.0 and x > -400.0: return false
+	if _sea == null: _sea = load("res://scripts/main.gd")
+	return float(_sea.sea_mask(x, z)) > 0.5
+
+func _constrain(x0: float, z0: float, x1: float, z1: float) -> Vector2:
+	var sea := _on_sea(x1, z1)
+	var cur := Vector2(x0, z0)
+	var nxt := Vector2(x1, z1)
+	if not sea and not _near_hazard(x1, z1) and not _near_hazard(x0, z0):
+		return nxt
 	if sea and not TownHaven.body_inside(nxt, BODY_R):
 		return cur
-	return TownHaven.clamp_move(cur, nxt, BODY_R)
+	if TownHaven.body_inside(nxt, BODY_R) or TownHaven.body_inside(cur, BODY_R) or TownHaven.obstacle_hit(nxt, BODY_R) or TownHaven.obstacle_hit(cur, BODY_R) or sea:
+		return TownHaven.clamp_move(cur, nxt, BODY_R)
+	return nxt
+
+func nearest_in_leash(post: Vector3, leash: float) -> int:
+	var best := -1
+	var best_d := leash * leash
+	for i in id.size():
+		if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: continue
+		var dx := px[i] - post.x
+		var dz := pz[i] - post.z
+		var d2 := dx * dx + dz * dz
+		if d2 < best_d:
+			best_d = d2
+			best = i
+	return best
+
+func _guard_contact() -> void:
+	var guards = director.main.get("guards")
+	if guards == null: return
+	for g in guards.guards:
+		if float(g.down_t) > 0.0: continue
+		var n: Node3D = g.node
+		var post: Vector3 = g.post
+		var gx := n.global_position.x
+		var gz := n.global_position.z
+		for i in id.size():
+			if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: continue
+			var dx := px[i] - gx
+			var dz := pz[i] - gz
+			if dx * dx + dz * dz > 2.56: continue
+			var pdx := px[i] - post.x
+			var pdz := pz[i] - post.z
+			if pdx * pdx + pdz * pdz > TownGuards.POST_LEASH * TownGuards.POST_LEASH: continue
+			if bite_cd[i] > 0.0:
+				bite_cd[i] = maxf(0.0, bite_cd[i] - 0.016)
+				continue
+			bite_cd[i] = 1.1
+			_hurt(i, int(ceil(ROLE_HP[role[i]] * TownGuards.DMG_FRAC)))
+			guard_hits += 1
+			g.hp = float(g.hp) - ROLE_ATK[role[i]] * 0.3
+			if float(g.hp) <= 0.0:
+				g.hp = TownGuards.MAX_HP
+				g.down_t = 20.0
+				g.tgt = null
+				g.ret = true
+			break
 
 func _promote(hero: Vector3) -> void:
 	if near_n >= NEAR_CAP: return
@@ -425,39 +531,49 @@ func _promote_index(i: int, hero: Vector3) -> bool:
 	return true
 
 func _draw(hero: Vector3) -> void:
-	var picked: Array = []
 	var far2 := RENDER_RADIUS * RENDER_RADIUS
+	var n := 0
 	for i in id.size():
 		if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: continue
 		var dx := px[i] - hero.x
 		var dz := pz[i] - hero.z
 		var d2 := dx * dx + dz * dz
 		if d2 > far2: continue
-		picked.append({"i": i, "d2": d2})
-	picked.sort_custom(func(a, b): return float(a.d2) < float(b.d2))
-	if picked.size() > render_cap: picked = picked.slice(0, render_cap)
-	var buckets: Array = [[], [], [], []]
+		if n >= _scratch.size(): _scratch.append(Vector2(float(i), d2))
+		else: _scratch[n] = Vector2(float(i), d2)
+		n += 1
+	if n > render_cap:
+		var head := _scratch.slice(0, n)
+		head.sort_custom(func(a, b): return float(a.y) < float(b.y))
+		for k in render_cap: _scratch[k] = head[k]
+		n = render_cap
 	rendered_mid = 0
 	rendered_far = 0
+	rendered_n = n
 	var mid2 := MID_RADIUS * MID_RADIUS
-	for item in picked:
-		var i: int = int(item.i)
-		buckets[role[i]].append(item)
-		if float(item.d2) <= mid2: rendered_mid += 1
-		else: rendered_far += 1
-	rendered_n = picked.size()
-	var ground_ok := director.main.has_method("height")
 	for r in 4:
+		var count := 0
+		for k in n:
+			if role[int(_scratch[k].x)] == r: count += 1
 		var mm: MultiMesh = (_meshes[r] as MultiMeshInstance3D).multimesh
-		var list: Array = buckets[r]
-		mm.visible_instance_count = list.size()
-		for k in list.size():
-			var item: Dictionary = list[k]
-			var i: int = int(item.i)
-			var y := 0.7
-			if ground_ok: y = float(director.main.height(px[i], pz[i])) + 0.7
-			var scale := 1.0 if float(item.d2) <= mid2 else 0.62
-			mm.set_instance_transform(k, Transform3D(Basis().scaled(Vector3(scale, scale, scale)), Vector3(px[i], y, pz[i])))
+		mm.visible_instance_count = count
+		var w := 0
+		for k in n:
+			var i: int = int(_scratch[k].x)
+			if role[i] != r: continue
+			mm.set_instance_transform(w, Transform3D(Basis(), Vector3(px[i], _sample_y(i), pz[i])))
+			w += 1
+			if _scratch[k].y <= mid2: rendered_mid += 1
+			else: rendered_far += 1
+
+func _sample_y(i: int) -> float:
+	var cell := ((int(px[i]) >> 2) << 16) ^ (int(pz[i]) >> 2)
+	if pycell[i] == cell: return py[i]
+	pycell[i] = cell
+	var y := 0.7
+	if director.main.has_method("height"): y = float(director.main.height(px[i], pz[i])) + 0.7
+	py[i] = y
+	return y
 
 func _hurt(i: int, dmg: int) -> void:
 	hp[i] = maxf(0.0, hp[i] - float(dmg))

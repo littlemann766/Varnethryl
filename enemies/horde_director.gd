@@ -4,7 +4,7 @@ extends Node
 ## Alive count and corpses are capped. Nothing here is written into the save.
 
 ## Boot population. The scalable ceiling and the near-combat pool live on HordeCrowd.
-const CAP := 192
+const CAP := 1000
 const HARD_CAP := 4096
 const CORPSE_CAP := 6
 const CORPSE_SEC := 8.0

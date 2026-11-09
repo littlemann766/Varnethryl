@@ -34,6 +34,7 @@ func _run() -> void:
 	await _obstacle(m, crowd)
 	await _haven_plant(m, crowd)
 	await _sea_plant(m, crowd)
+	await _slots(m, crowd)
 	await _respawn(m, crowd)
 	await _player_hits(m, crowd)
 	print("FAIR_COMBAT %d checks, %d failed bites=%d" % [n, fails, crowd.bites])
@@ -261,34 +262,116 @@ func _haven_plant(m, crowd: HordeCrowd) -> void:
 	ok(crowd.bites == bites0 and is_equal_approx(m.party.combat.hp, hp0), "the planted record still has not bitten")
 	ok(not TownHaven.body_inside(Vector2(crowd.px[idx], crowd.pz[idx]), HordeZombie.BODY_R), "the planted record is expelled from the haven")
 
+func _expect_dry(crowd: HordeCrowd, idx: int, label: String) -> void:
+	var p := Vector2(crowd.px[idx], crowd.pz[idx])
+	var sea: bool = crowd.on_sea(p.x, p.y)
+	var inside: bool = TownHaven.body_inside(p, HordeZombie.BODY_R)
+	print("DRY %s (%.1f, %.1f) sea %s inside %s" % [label, p.x, p.y, sea, inside])
+	ok(not sea and not inside, "%s lands on dry ground outside the haven (%.1f, %.1f)" % [label, p.x, p.y])
+
+func _plant_sea(crowd: HordeCrowd, idx: int, at: Vector2) -> void:
+	crowd.px[idx] = at.x
+	crowd.pz[idx] = at.y
+	crowd.hold_x[idx] = at.x
+	crowd.hold_z[idx] = at.y
+	crowd.wind_t[idx] = 0.0
+	crowd.lock_t[idx] = 0.0
+
 func _sea_plant(m, crowd: HordeCrowd) -> void:
 	await _quiet(m, crowd)
-	var idx := _free_index(crowd)
-	ok(idx >= 0, "a record is free to plant in the sea")
-	if idx < 0: return
-	crowd.px[idx] = -470.0
-	crowd.pz[idx] = 400.0
-	crowd.hold_x[idx] = -470.0
-	crowd.hold_z[idx] = 400.0
-	ok(crowd.on_sea(-470.0, 400.0), "the planted point starts in the sea")
-	await physics_frame
-	var still: bool = crowd.on_sea(crowd.px[idx], crowd.pz[idx])
-	print("SEA_PLANT (%.1f, %.1f) sea %s" % [crowd.px[idx], crowd.pz[idx], still])
-	ok(not still, "a sea-started record is moved to land on the next step")
-	ok(not TownHaven.body_inside(Vector2(crowd.px[idx], crowd.pz[idx]), HordeZombie.BODY_R), "that landing is outside the haven")
-	var walker := _free_index(crowd)
-	if walker == idx:
-		for i in crowd.id.size():
-			if i == idx or (crowd.flags[i] & 1) == 0 or (crowd.flags[i] & 2) != 0: continue
-			walker = i
-			break
-	crowd.px[walker] = -390.0
-	crowd.pz[walker] = 400.0
-	crowd.hold_x[walker] = -520.0
-	crowd.hold_z[walker] = 400.0
 	m.hero.global_position = Vector3(200, 1, -200)
+	var spots: Array[Vector2] = [Vector2(-500, 360), Vector2(-1200, 800), Vector2(-2000, 2200), Vector2(-430, 400)]
+	var labels := ["sea -500,360", "far sea -1200,800", "far sea -2000,2200", "waterfront -430,400"]
+	for s in spots.size():
+		var idx := _free_index(crowd)
+		ok(idx >= 0, "a record is free for %s" % labels[s])
+		if idx < 0: return
+		_plant_sea(crowd, idx, spots[s])
+		var bites0: int = crowd.bites
+		var hp0: float = m.party.combat.hp
+		for _f in 2: await physics_frame
+		_expect_dry(crowd, idx, labels[s])
+		ok(crowd.bites == bites0 and is_equal_approx(m.party.combat.hp, hp0), "%s does not bite while it is corrected" % labels[s])
+		ok(Vector2(crowd.px[idx], crowd.pz[idx]).distance_to(spots[s]) > 2.0, "%s does not stay on the illegal point" % labels[s])
+	var coast := float(load("res://scripts/main.gd").coast_x(520.0))
+	var walker := _free_index(crowd)
+	ok(walker >= 0, "a record is free for the land march")
+	if walker < 0: return
+	var start := Vector2(coast - 1.0, 520.0)
+	_plant_sea(crowd, walker, start)
+	crowd.hold_x[walker] = coast - 40.0
+	crowd.hold_z[walker] = 520.0
+	for _i in 2: await physics_frame
+	ok(not crowd.on_sea(crowd.px[walker], crowd.pz[walker]) and not TownHaven.body_inside(Vector2(crowd.px[walker], crowd.pz[walker]), HordeZombie.BODY_R), "the march starts on dry ground outside the haven (%.1f, %.1f)" % [crowd.px[walker], crowd.pz[walker]])
+	var x0: float = crowd.px[walker]
+	for _i in 180: await physics_frame
+	print("LAND_MARCH (%.1f, %.1f) from %.1f coast %.1f sea %s" % [crowd.px[walker], crowd.pz[walker], x0, coast, crowd.on_sea(crowd.px[walker], crowd.pz[walker])])
+	ok(crowd.px[walker] < x0 - 0.4, "the land march actually moves toward the sea (%.2f -> %.2f)" % [x0, crowd.px[walker]])
+	ok(not crowd.on_sea(crowd.px[walker], crowd.pz[walker]), "the land march stops on the shore (%.1f, %.1f)" % [crowd.px[walker], crowd.pz[walker]])
+	ok(not TownHaven.body_inside(Vector2(crowd.px[walker], crowd.pz[walker]), HordeZombie.BODY_R), "the land march stays outside the haven")
+
+func _slots(m, crowd: HordeCrowd) -> void:
+	await _quiet(m, crowd)
+	for g in m.guards.guards:
+		g.down_t = 999.0
+		g.tgt = null
+	m.hero.global_position = Vector3(0, 1.0, 200)
+	m.party.combat.hp = m.party.combat.max_hp
+	var ring: Array[int] = []
+	var placed := 0
+	for i in crowd.id.size():
+		if placed >= 24: break
+		if (crowd.flags[i] & 1) == 0 or (crowd.flags[i] & 2) != 0: continue
+		var ang := float(placed) / 24.0 * TAU
+		crowd.px[i] = m.hero.global_position.x + cos(ang) * 1.0
+		crowd.pz[i] = m.hero.global_position.z + sin(ang) * 1.0
+		crowd.hold_x[i] = crowd.px[i]
+		crowd.hold_z[i] = crowd.pz[i]
+		crowd.wind_t[i] = 0.0
+		crowd.lock_t[i] = 0.0
+		crowd.hp[i] = 190.0
+		ring.append(i)
+		placed += 1
+	ok(placed == 24, "24 attackers stand in bite range (%d)" % placed)
+	var max_imp := 0
+	var total := 0
+	var near_peak := 0
+	for _i in 180:
+		await physics_frame
+		max_imp = maxi(max_imp, crowd.impacts_frame)
+		total += crowd.impacts_frame
+		near_peak = maxi(near_peak, crowd.near_n)
+	print("SLOTS frames=180 max_impacts=%d total=%d near_peak=%d hp %.0f" % [max_imp, total, near_peak, m.party.combat.hp])
+	ok(max_imp <= HordeCrowd.MAX_CONTACT, "bodies and records together stay within 4 impacts in one frame (%d)" % max_imp)
+	ok(max_imp > 0 and total > 0 and m.party.combat.hp < m.party.combat.max_hp, "the shared slots still land hits (total %d)" % total)
+	ok(near_peak == HordeCrowd.NEAR_CAP and crowd.near_n == HordeCrowd.NEAR_CAP, "the fight fills the body pool (%d)" % crowd.near_n)
+	var killed: Array[int] = []
+	var bodies := 0
+	var loose := 0
+	for i in ring:
+		if not crowd.id_alive(int(crowd.id[i])): continue
+		if (crowd.flags[i] & 2) != 0 and bodies < 2:
+			killed.append(int(crowd.id[i]))
+			crowd.kill_id(int(crowd.id[i]))
+			bodies += 1
+		elif (crowd.flags[i] & 2) == 0 and loose < 1:
+			killed.append(int(crowd.id[i]))
+			crowd.kill_id(int(crowd.id[i]))
+			loose += 1
+	ok(bodies == 2 and loose == 1, "two bodies and one record were killed")
 	for _i in 40: await physics_frame
-	ok(not crowd.on_sea(crowd.px[walker], crowd.pz[walker]), "a land march still stops before the sea (%.1f, %.1f)" % [crowd.px[walker], crowd.pz[walker]])
+	var held := true
+	for sim in killed:
+		if crowd.id_alive(sim) or not crowd.retired.has(sim): held = false
+	print("SLOT_DEATH held %s near %d" % [held, crowd.near_n])
+	ok(held, "killed crowd ids stay retired")
+	ok(crowd.near_n == HordeCrowd.NEAR_CAP, "a freed body slot is filled from the ring (%d)" % crowd.near_n)
+	var before: int = crowd.impacts_total
+	m.hero.global_position = Vector3(0, 1.0, 24)
+	for _i in 25: await physics_frame
+	ok(crowd.near_n == 0, "leaving the press demotes the pool (%d)" % crowd.near_n)
+	ok(crowd.impacts_total == before, "no horde impact lands after the hero is inside")
+	ok(crowd.inside_count() == 0, "the ring never enters the town")
 
 func _respawn(m, crowd: HordeCrowd) -> void:
 	await _quiet(m, crowd)

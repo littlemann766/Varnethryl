@@ -66,6 +66,8 @@ var bite_cd: PackedFloat32Array = PackedFloat32Array()
 var wind_t: PackedFloat32Array = PackedFloat32Array()
 var lock_t: PackedFloat32Array = PackedFloat32Array()
 var strike_budget := MAX_CONTACT
+var impacts_frame := 0
+var impacts_total := 0
 
 var pool: Array = []
 var _tick := 0
@@ -102,6 +104,7 @@ func step(dt: float) -> void:
 	var hero: Vector3 = director.main.hero.global_position
 	var hero_safe := TownHaven.hero_safe(hero)
 	strike_budget = MAX_CONTACT
+	impacts_frame = 0
 	var t0 := Time.get_ticks_usec()
 	_sync_promoted()
 	_demote_far(hero)
@@ -471,6 +474,8 @@ func _integrate(dt: float, hero: Vector3, hero_safe: bool) -> void:
 func claim_strike() -> bool:
 	if strike_budget <= 0: return false
 	strike_budget -= 1
+	impacts_frame += 1
+	impacts_total += 1
 	return true
 
 func _clear_wind() -> void:
@@ -633,24 +638,26 @@ func _near_hazard(x: float, z: float) -> bool:
 func on_sea(x: float, z: float) -> bool:
 	return _on_sea(x, z)
 
+## Dry ground outside the haven. The west sea's first dry cells sit inside the waterfront,
+## so a short ray from open water stops in that strip and would keep the sea point.
+## One coast jump, then a capped inland walk. Not used for records that are already legal.
 func nearest_land(x: float, z: float) -> Vector2:
 	var origin := Vector2(x, z)
 	if _safe_ground(origin): return origin
-	var best := origin
-	var best_d := 100000.0
-	for dir_i in 8:
-		var ang := float(dir_i) * TAU / 8.0
-		var dir := Vector2(cos(ang), sin(ang))
-		var p := origin
-		for _step in 24:
-			p += dir * 4.0
-			if not _safe_ground(p): continue
-			var d := p.distance_to(origin)
-			if d < best_d:
-				best_d = d
-				best = p
-			break
-	return best
+	if _sea == null: _sea = load("res://scripts/main.gd")
+	var cx := float(_sea.coast_x(z)) + 2.0
+	var nz := float(_sea.shore_z(x)) - 2.0
+	var seeds: Array[Vector2] = [Vector2(cx, z), Vector2(x, nz), Vector2(cx, nz)]
+	var dirs: Array[Vector2] = [Vector2(1, 0), Vector2(0, -1)]
+	for seed in seeds:
+		for dir in dirs:
+			var p := seed
+			for _i in 48:
+				if _safe_ground(p): return p
+				p += dir * 8.0
+	var fallback := Vector2(-370.0, 280.0)
+	if _safe_ground(fallback): return fallback
+	return Vector2(0.0, TownHaven.stand_off(BODY_R) + 24.0)
 
 func _safe_ground(p: Vector2) -> bool:
 	return not _on_sea(p.x, p.y) and not TownHaven.body_inside(p, BODY_R) and not TownHaven.obstacle_hit(p, BODY_R)

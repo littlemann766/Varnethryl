@@ -30,18 +30,21 @@ func _run() -> void:
 		var t0 := Time.get_ticks_usec()
 		crowd.setup(dir, n)
 		var boot_ms := float(Time.get_ticks_usec() - t0) / 1000.0
+		host.hero.global_position = Vector3(0, 1, 198)
 		var frames := 90
 		var step0 := Time.get_ticks_usec()
 		var inside_max := 0
+		var near_peak := 0
 		for _i in frames:
 			crowd.step(1.0 / 60.0)
 			inside_max = maxi(inside_max, crowd.inside_count())
+			near_peak = maxi(near_peak, crowd.near_n)
 		var step_ms := float(Time.get_ticks_usec() - step0) / 1000.0
 		var mem1 := int(Performance.get_monitor(Performance.MEMORY_STATIC))
 		var nodes := 0
 		for z in crowd.pool:
 			if z.crowd_id >= 0: nodes += 1
-		print("BENCH_COHORT n=%d boot_ms=%.1f step_ms_total=%.1f ms_per_frame=%.3f alive=%d near=%d rendered=%d physics_bodies=%d inside=%d static_mem=%d" % [n, boot_ms, step_ms, step_ms / float(frames), crowd.alive_n, crowd.near_n, crowd.rendered_n, nodes, inside_max, mem1 - mem0])
+		print("BENCH_COHORT n=%d boot_ms=%.1f step_ms_total=%.1f ms_per_frame=%.3f alive=%d near_peak=%d near=%d rendered=%d mid=%d far=%d physics_bodies=%d inside=%d static_mem=%d" % [n, boot_ms, step_ms, step_ms / float(frames), crowd.alive_n, near_peak, crowd.near_n, crowd.rendered_n, crowd.rendered_mid, crowd.rendered_far, nodes, inside_max, mem1 - mem0])
 		dir.queue_free()
 		await process_frame
 	print("BENCH_DONE")

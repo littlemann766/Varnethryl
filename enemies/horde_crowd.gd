@@ -6,7 +6,11 @@ extends Node
 
 const SIM_DEFAULT := 192
 const NEAR_CAP := 16
-const RENDER_CAP := 256
+## Visible budget matches the sim ceiling. Software GL drew 4096 placeholder
+## capsules at about 6 ms/frame on this desktop. The boot crowd is still 192.
+## The expensive part of a 4000 crowd is the simulation step, not the draw upload.
+const RENDER_CAP := 4096
+const MID_RADIUS := 80.0
 const RENDER_RADIUS := 260.0
 const NEAR_IN := 26.0
 const NEAR_OUT := 42.0
@@ -28,6 +32,9 @@ var alive_n := 0
 var corpse_n := 0
 var near_n := 0
 var rendered_n := 0
+var rendered_mid := 0
+var rendered_far := 0
+var render_cap := RENDER_CAP
 var next_id := 1
 var retired: Dictionary = {}
 
@@ -51,6 +58,8 @@ var _free: Array = []
 func setup(host: HordeDirector, count: int) -> void:
 	director = host
 	target_n = clampi(count, 1, SIM_MAX)
+	var raw := OS.get_environment("VARN_HORDE_RENDER")
+	if raw.is_valid_int(): render_cap = clampi(int(raw), 1, SIM_MAX)
 	_build_pool()
 	_build_meshes()
 	ensure_count(target_n)
@@ -220,7 +229,7 @@ func _build_meshes() -> void:
 			_: mat.albedo_color = Color(0.4, 0.55, 0.32)
 		cap.material = mat
 		mm.mesh = cap
-		mm.instance_count = RENDER_CAP
+		mm.instance_count = maxi(render_cap, 1)
 		mm.visible_instance_count = 0
 		mi.multimesh = mm
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -369,10 +378,16 @@ func _integrate(dt: float, hero: Vector3, hero_safe: bool) -> void:
 		px[i] = nxt.x
 		pz[i] = nxt.y
 
+func _on_sea(p: Vector2) -> bool:
+	return float(load("res://scripts/main.gd").sea_mask(p.x, p.y)) > 0.5
+
 func _constrain(cur: Vector2, nxt: Vector2) -> Vector2:
-	if TownHaven.body_inside(nxt, BODY_R) or TownHaven.obstacle_hit(nxt, BODY_R) or TownHaven.body_inside(cur, BODY_R):
-		return TownHaven.clamp_move(cur, nxt, BODY_R)
-	return nxt
+	var sea := _on_sea(nxt)
+	var blocked := sea or TownHaven.body_inside(nxt, BODY_R) or TownHaven.body_inside(cur, BODY_R) or TownHaven.obstacle_hit(nxt, BODY_R) or TownHaven.obstacle_hit(cur, BODY_R)
+	if not blocked: return nxt
+	if sea and not TownHaven.body_inside(nxt, BODY_R):
+		return cur
+	return TownHaven.clamp_move(cur, nxt, BODY_R)
 
 func _promote(hero: Vector3) -> void:
 	if near_n >= NEAR_CAP: return
@@ -410,29 +425,39 @@ func _promote_index(i: int, hero: Vector3) -> bool:
 	return true
 
 func _draw(hero: Vector3) -> void:
-	var buckets: Array = [[], [], [], []]
-	var r2 := RENDER_RADIUS * RENDER_RADIUS
-	var used := 0
+	var picked: Array = []
+	var far2 := RENDER_RADIUS * RENDER_RADIUS
 	for i in id.size():
-		if used >= RENDER_CAP: break
 		if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: continue
 		var dx := px[i] - hero.x
 		var dz := pz[i] - hero.z
-		if dx * dx + dz * dz > r2: continue
-		buckets[role[i]].append(i)
-		used += 1
-	rendered_n = used
+		var d2 := dx * dx + dz * dz
+		if d2 > far2: continue
+		picked.append({"i": i, "d2": d2})
+	picked.sort_custom(func(a, b): return float(a.d2) < float(b.d2))
+	if picked.size() > render_cap: picked = picked.slice(0, render_cap)
+	var buckets: Array = [[], [], [], []]
+	rendered_mid = 0
+	rendered_far = 0
+	var mid2 := MID_RADIUS * MID_RADIUS
+	for item in picked:
+		var i: int = int(item.i)
+		buckets[role[i]].append(item)
+		if float(item.d2) <= mid2: rendered_mid += 1
+		else: rendered_far += 1
+	rendered_n = picked.size()
 	var ground_ok := director.main.has_method("height")
 	for r in 4:
 		var mm: MultiMesh = (_meshes[r] as MultiMeshInstance3D).multimesh
 		var list: Array = buckets[r]
-		var n := mini(list.size(), RENDER_CAP)
-		mm.visible_instance_count = n
-		for k in n:
-			var i: int = list[k]
+		mm.visible_instance_count = list.size()
+		for k in list.size():
+			var item: Dictionary = list[k]
+			var i: int = int(item.i)
 			var y := 0.7
 			if ground_ok: y = float(director.main.height(px[i], pz[i])) + 0.7
-			mm.set_instance_transform(k, Transform3D(Basis(), Vector3(px[i], y, pz[i])))
+			var scale := 1.0 if float(item.d2) <= mid2 else 0.62
+			mm.set_instance_transform(k, Transform3D(Basis().scaled(Vector3(scale, scale, scale)), Vector3(px[i], y, pz[i])))
 
 func _hurt(i: int, dmg: int) -> void:
 	hp[i] = maxf(0.0, hp[i] - float(dmg))

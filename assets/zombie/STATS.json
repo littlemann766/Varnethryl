@@ -1,0 +1,122 @@
+{
+  "triangles": {
+    "female_villager": {
+      "opaque_tris": 9228,
+      "cloth_tris": 1584,
+      "total": 10812
+    },
+    "male_villager": {
+      "opaque_tris": 9504,
+      "cloth_tris": 788,
+      "total": 10292
+    },
+    "male_sailor": {
+      "opaque_tris": 9136,
+      "cloth_tris": 216,
+      "total": 9352
+    },
+    "male_knight": {
+      "opaque_tris": 9724,
+      "cloth_tris": 788,
+      "total": 10512
+    }
+  },
+  "far_lod_tris": 212,
+  "impostor_tris": 4,
+  "pose_times": {
+    "idle": 1.25,
+    "walk": 0.622,
+    "run": 0.428,
+    "attack1": 0.45,
+    "attack2": 0.469,
+    "attack3": 0.75,
+    "hit": 0.169,
+    "death": 1.583
+  },
+  "clip_lengths": {
+    "idle": 2.5,
+    "walk": 1.3333333730697632,
+    "run": 0.9166666865348816,
+    "attack1": 1.0,
+    "attack2": 1.0416666269302368,
+    "attack3": 1.6666666269302368,
+    "hit": 0.375,
+    "death": 1.5833333730697632
+  },
+  "bone_stretch": {
+    "idle": {
+      "max_bone_stretch_m": 0.0,
+      "bone": "hips->spine",
+      "max_scale": 1.0
+    },
+    "walk": {
+      "max_bone_stretch_m": 0.0,
+      "bone": "chest->neck",
+      "max_scale": 1.0
+    },
+    "run": {
+      "max_bone_stretch_m": 0.0,
+      "bone": "neck->head",
+      "max_scale": 1.0
+    },
+    "attack1": {
+      "max_bone_stretch_m": 0.001,
+      "bone": "thigh_L->shin_L",
+      "max_scale": 1.0
+    },
+    "attack2": {
+      "max_bone_stretch_m": 0.001,
+      "bone": "thigh_R->shin_R",
+      "max_scale": 1.0
+    },
+    "attack3": {
+      "max_bone_stretch_m": 0.001,
+      "bone": "thigh_L->shin_L",
+      "max_scale": 1.0
+    },
+    "hit": {
+      "max_bone_stretch_m": 0.001,
+      "bone": "thigh_R->shin_R",
+      "max_scale": 1.0
+    },
+    "death": {
+      "max_bone_stretch_m": 0.001,
+      "bone": "thigh_L->shin_L",
+      "max_scale": 1.0
+    }
+  },
+  "attack_hand_to_head_m": {
+    "attack1": 0.627,
+    "attack2": 0.44,
+    "attack3": 0.5
+  },
+  "bind_skin_error_m": 0.0,
+  "missing_clips": [
+    "bite",
+    "bite_windup"
+  ],
+  "skeleton": [
+    "root",
+    "hips",
+    "spine",
+    "chest",
+    "cape",
+    "neck",
+    "head",
+    "shoulder_L",
+    "upperArm_L",
+    "foreArm_L",
+    "hand_L",
+    "shoulder_R",
+    "upperArm_R",
+    "foreArm_R",
+    "hand_R",
+    "thigh_L",
+    "shin_L",
+    "foot_L",
+    "thigh_R",
+    "shin_R",
+    "foot_R"
+  ],
+  "texture": "2048 albedo RGBA, 2048 normal, 2048 ORM"
+}

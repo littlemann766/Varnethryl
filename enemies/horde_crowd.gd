@@ -107,6 +107,7 @@ func step(dt: float) -> void:
 	impacts_frame = 0
 	var t0 := Time.get_ticks_usec()
 	_sync_promoted()
+	_settle_illegal()
 	_demote_far(hero)
 	_reap(dt)
 	prof_us.sync += int(Time.get_ticks_usec() - t0)
@@ -429,11 +430,6 @@ func _integrate(dt: float, hero: Vector3, hero_safe: bool) -> void:
 	var combat = director.main.party.combat if director.main.get("party") else null
 	for i in id.size():
 		if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: continue
-		if _illegal(px[i], pz[i]):
-			var safe := _safe_point(px[i], pz[i])
-			px[i] = safe.x
-			pz[i] = safe.y
-			wind_t[i] = 0.0
 		var dx := hero.x - px[i]
 		var dz := hero.z - pz[i]
 		var d2 := dx * dx + dz * dz
@@ -638,6 +634,37 @@ func _near_hazard(x: float, z: float) -> bool:
 func on_sea(x: float, z: float) -> bool:
 	return _on_sea(x, z)
 
+func illegal_at(x: float, z: float) -> bool:
+	return _illegal(x, z)
+
+func safe_point(x: float, z: float) -> Vector2:
+	return _safe_point(x, z)
+
+## One correction for a record and its body. Does not change id, HP, or cooldown.
+func _settle_illegal() -> void:
+	for i in id.size():
+		if (flags[i] & 1) == 0: continue
+		var zx := px[i]
+		var zz := pz[i]
+		var z: HordeZombie = null
+		if (flags[i] & 2) != 0 and pool_i[i] >= 0:
+			z = pool[pool_i[i]]
+			if is_instance_valid(z) and z.alive():
+				zx = z.global_position.x
+				zz = z.global_position.z
+			else:
+				z = null
+		if not _illegal(zx, zz): continue
+		var safe := _safe_point(zx, zz)
+		px[i] = safe.x
+		pz[i] = safe.y
+		pycell[i] = 1 << 30
+		if z == null: continue
+		z.global_position.x = safe.x
+		z.global_position.z = safe.y
+		if z.height_fn.is_valid(): z.global_position.y = float(z.height_fn.call(safe.x, safe.y))
+		z.last_safe = z.global_position
+
 ## Dry ground outside the haven. The west sea's first dry cells sit inside the waterfront,
 ## so a short ray from open water stops in that strip and would keep the sea point.
 ## One coast jump, then a capped inland walk. Not used for records that are already legal.
@@ -762,6 +789,10 @@ func _promote_index(i: int, hero: Vector3) -> bool:
 			slot = p
 			break
 	if slot < 0: return false
+	if _illegal(px[i], pz[i]):
+		var safe := _safe_point(px[i], pz[i])
+		px[i] = safe.x
+		pz[i] = safe.y
 	var z: HordeZombie = pool[slot]
 	var ground: Callable = director.main.party.director.ground
 	var pos := Vector3(px[i], 0.0, pz[i])

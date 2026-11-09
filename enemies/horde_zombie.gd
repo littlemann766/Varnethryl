@@ -246,6 +246,14 @@ func _physics_process(dt: float) -> void:
 		left -= slice
 
 func _step(dt: float) -> void:
+	var crowd := _crowd()
+	if crowd != null and crowd_id >= 0 and crowd.illegal_at(global_position.x, global_position.z):
+		var safe := crowd.safe_point(global_position.x, global_position.z)
+		_commit(safe)
+		var rec := crowd._index_of(crowd_id)
+		if rec >= 0:
+			crowd.px[rec] = safe.x
+			crowd.pz[rec] = safe.y
 	var hero_p := target.global_position
 	var here := Vector2(global_position.x, global_position.z)
 	var goal := _goal(hero_p, here)
@@ -259,8 +267,12 @@ func _step(dt: float) -> void:
 			dest = here + lung.normalized() * minf(2.4 * dt / maxf(windup_need, 0.05) + speed_mps * dt, lung.length())
 	dest = _separate(dest)
 	var nxt := TownHaven.clamp_move(here, dest, radius)
+	if crowd != null and crowd_id >= 0 and crowd.on_sea(nxt.x, nxt.y):
+		nxt = here if not crowd.on_sea(here.x, here.y) else crowd.safe_point(here.x, here.y)
 	allow_wedge = _hero_in_wedge(hero_p, here)
 	nxt = _wedge(nxt)
+	if crowd != null and crowd_id >= 0 and crowd.on_sea(nxt.x, nxt.y):
+		nxt = here if not crowd.on_sea(here.x, here.y) else crowd.safe_point(here.x, here.y)
 	_commit(nxt)
 	_face_toward(goal - here, dt)
 	_attack(dt, hero_p)

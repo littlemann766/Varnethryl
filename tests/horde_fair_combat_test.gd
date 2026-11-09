@@ -34,6 +34,7 @@ func _run() -> void:
 	await _obstacle(m, crowd)
 	await _haven_plant(m, crowd)
 	await _sea_plant(m, crowd)
+	await _promoted_invalid(m, crowd)
 	await _slots(m, crowd)
 	await _respawn(m, crowd)
 	await _player_hits(m, crowd)
@@ -309,6 +310,88 @@ func _sea_plant(m, crowd: HordeCrowd) -> void:
 	ok(crowd.px[walker] < x0 - 0.4, "the land march actually moves toward the sea (%.2f -> %.2f)" % [x0, crowd.px[walker]])
 	ok(not crowd.on_sea(crowd.px[walker], crowd.pz[walker]), "the land march stops on the shore (%.1f, %.1f)" % [crowd.px[walker], crowd.pz[walker]])
 	ok(not TownHaven.body_inside(Vector2(crowd.px[walker], crowd.pz[walker]), HordeZombie.BODY_R), "the land march stays outside the haven")
+
+func _promoted_invalid(m, crowd: HordeCrowd) -> void:
+	await _quiet(m, crowd)
+	for g in m.guards.guards:
+		g.down_t = 999.0
+		g.tgt = null
+	var idx := _free_index(crowd)
+	ok(idx >= 0, "a record can be promoted for the invalid-body checks")
+	if idx < 0: return
+	var shore := Vector2(-389.6, 360.0)
+	m.hero.global_position = Vector3(shore.x, 1.0, shore.y)
+	crowd.px[idx] = shore.x + 1.0
+	crowd.pz[idx] = shore.y
+	crowd.hold_x[idx] = crowd.px[idx]
+	crowd.hold_z[idx] = crowd.pz[idx]
+	crowd.hp[idx] = 150.0
+	crowd.lock_t[idx] = 5.0
+	crowd.wind_t[idx] = 0.2
+	var sim := int(crowd.id[idx])
+	ok(crowd._promote_index(idx, m.hero.global_position), "the shore record promotes")
+	var body: HordeZombie = crowd.pool[crowd.pool_i[idx]]
+	for _i in 20: await physics_frame
+	var drifted := Vector2(body.global_position.x, body.global_position.z).distance_to(Vector2(shore.x + 1.0, shore.y))
+	print("PROMOTED_SHORE (%.1f, %.1f) drift %.2f lock %.2f" % [body.global_position.x, body.global_position.z, drifted, body.crowd_lock])
+	ok(drifted < 6.0, "a valid shore body is not teleported (%.2f m)" % drifted)
+	ok(not crowd.on_sea(body.global_position.x, body.global_position.z), "the valid shore body stays on land")
+	ok(not TownHaven.body_inside(Vector2(body.global_position.x, body.global_position.z), HordeZombie.BODY_R), "the valid shore body stays outside the haven")
+	ok(body.crowd_id == sim and crowd.id[idx] == sim, "the shore body keeps its id")
+	body.global_position = Vector3(-500, body.global_position.y, 360)
+	body.crowd_lock = 5.0
+	crowd.lock_t[idx] = 5.0
+	body.hp = 150.0
+	crowd.hp[idx] = 150.0
+	for _i in 2: await physics_frame
+	var bp := Vector2(body.global_position.x, body.global_position.z)
+	var rp := Vector2(crowd.px[idx], crowd.pz[idx])
+	print("PROMOTED_SEA body (%.1f, %.1f) record (%.1f, %.1f) lock %.2f hp %.0f" % [bp.x, bp.y, rp.x, rp.y, body.crowd_lock, body.hp])
+	ok(not crowd.on_sea(bp.x, bp.y) and not crowd.on_sea(rp.x, rp.y), "a promoted sea plant is dry on both the body and the record")
+	ok(not TownHaven.body_inside(bp, HordeZombie.BODY_R) and not TownHaven.body_inside(rp, HordeZombie.BODY_R), "a promoted sea plant is outside the haven on both sides")
+	ok(bp.distance_to(rp) < 1.5, "the body and the record do not split after the sea correction (%.2f m)" % bp.distance_to(rp))
+	ok(body.crowd_id == sim and crowd.id_alive(sim), "the sea correction keeps the same id")
+	ok(is_equal_approx(body.hp, 150.0) and is_equal_approx(crowd.hp[idx], 150.0), "the sea correction keeps HP")
+	ok(body.crowd_lock > 4.5, "the sea correction keeps the cooldown (%.2f)" % body.crowd_lock)
+	var prom := (crowd.flags[idx] & 2) != 0
+	var flips := 0
+	for _i in 8:
+		await physics_frame
+		var now := (crowd.flags[idx] & 2) != 0
+		if now != prom:
+			flips += 1
+			prom = now
+	ok(flips <= 1, "promotion does not oscillate after the sea correction (%d flips)" % flips)
+	ok(not crowd.on_sea(crowd.px[idx], crowd.pz[idx]), "the record is still dry after the sea correction settles")
+	m.hero.global_position = Vector3(-389.6, 1.0, 400.0)
+	body.global_position = Vector3(-430, body.global_position.y, 400)
+	body.crowd_lock = 5.0
+	body.hp = 150.0
+	for _i in 2: await physics_frame
+	bp = Vector2(body.global_position.x, body.global_position.z)
+	var back := crowd._index_of(sim)
+	ok(back >= 0, "the haven plant still has its record")
+	if back < 0: return
+	rp = Vector2(crowd.px[back], crowd.pz[back])
+	print("PROMOTED_HAVEN body (%.1f, %.1f) record (%.1f, %.1f)" % [bp.x, bp.y, rp.x, rp.y])
+	ok(not crowd.on_sea(bp.x, bp.y) and not crowd.on_sea(rp.x, rp.y), "a promoted haven plant is dry on both sides")
+	ok(not TownHaven.body_inside(bp, HordeZombie.BODY_R) and not TownHaven.body_inside(rp, HordeZombie.BODY_R), "a promoted haven plant is outside the haven on both sides")
+	ok(bp.distance_to(rp) < 1.5, "the body and the record match after the haven correction")
+	ok(crowd.id[back] == sim and is_equal_approx(body.hp, 150.0), "the haven correction keeps id and HP")
+	ok(body.crowd_lock > 4.5, "the haven correction keeps the cooldown (%.2f)" % body.crowd_lock)
+	m.hero.global_position = Vector3(220, 1, -80)
+	for _i in 12: await physics_frame
+	back = crowd._index_of(sim)
+	ok(back >= 0 and (crowd.flags[back] & 2) == 0, "walking away demotes the corrected body")
+	ok(not crowd.on_sea(crowd.px[back], crowd.pz[back]) and not TownHaven.body_inside(Vector2(crowd.px[back], crowd.pz[back]), HordeZombie.BODY_R), "the demoted record stays on dry ground outside the haven")
+	ok(crowd.id_alive(sim) and is_equal_approx(crowd.hp[back], 150.0), "demotion keeps the same id and HP")
+	m.hero.global_position = Vector3(crowd.px[back], 1.0, crowd.pz[back])
+	for _i in 8: await physics_frame
+	back = crowd._index_of(sim)
+	ok(back >= 0 and (crowd.flags[back] & 2) != 0, "returning promotes the same id again")
+	var again: HordeZombie = crowd.pool[crowd.pool_i[back]]
+	ok(again.crowd_id == sim, "the new body is the same crowd id")
+	ok(not crowd.on_sea(again.global_position.x, again.global_position.z) and not TownHaven.body_inside(Vector2(again.global_position.x, again.global_position.z), HordeZombie.BODY_R), "the re-promoted body is still on dry ground outside the haven")
 
 func _slots(m, crowd: HordeCrowd) -> void:
 	await _quiet(m, crowd)

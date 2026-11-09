@@ -76,8 +76,23 @@ func _run() -> void:
 	print("CROWD_LOGIC %d checks, %d failed near=%d rendered=%d simulated=%d" % [n, fails, crowd.near_n, crowd.rendered_n, crowd.alive_n])
 	quit(1 if fails else 0)
 
+func _gather(crowd: HordeCrowd, at: Vector3, count: int) -> void:
+	var placed := 0
+	for i in crowd.id.size():
+		if placed >= count: break
+		if (crowd.flags[i] & 1) == 0 or (crowd.flags[i] & 2) != 0: continue
+		var ang := float(placed) / float(count) * TAU
+		crowd.px[i] = at.x + cos(ang) * 6.0
+		crowd.pz[i] = at.z + sin(ang) * 6.0
+		crowd.hold_x[i] = crowd.px[i]
+		crowd.hold_z[i] = crowd.pz[i]
+		crowd.wind_t[i] = 0.0
+		crowd.lock_t[i] = 0.0
+		placed += 1
+
 func _near_cycle(m, crowd: HordeCrowd) -> void:
 	m.hero.global_position = Vector3(0, 1.0, 198)
+	_gather(crowd, m.hero.global_position, 24)
 	for _i in 45: await physics_frame
 	print("NEAR_OUTSIDE near=%d rendered=%d simulated=%d" % [crowd.near_n, crowd.rendered_n, crowd.alive_n])
 	ok(crowd.near_n == HordeCrowd.NEAR_CAP, "standing in the south press promotes the full pool (%d)" % crowd.near_n)
@@ -184,6 +199,7 @@ func _guards(m, crowd: HordeCrowd) -> void:
 		g.tgt = null
 		g.hp = TownGuards.MAX_HP
 	m.hero.global_position = Vector3(0, 1.0, 192)
+	_gather(crowd, Vector3(0, 1.0, 198), 24)
 	for _i in 90: await physics_frame
 	var busy := 0
 	var horde_tgt := 0
@@ -229,6 +245,7 @@ func _blocked(m, crowd: HordeCrowd) -> void:
 func _sustain(m, crowd: HordeCrowd) -> void:
 	var before: int = crowd.alive_n
 	m.hero.global_position = Vector3(0, 1.0, 198)
+	_gather(crowd, m.hero.global_position, 24)
 	var peak_near := 0
 	var peak_list := 0
 	for _i in 180:
@@ -246,6 +263,7 @@ func _unpromoted(m, crowd: HordeCrowd) -> void:
 		g.down_t = 30.0
 		g.tgt = null
 	m.hero.global_position = Vector3(0, 1.0, 198)
+	_gather(crowd, m.hero.global_position, 24)
 	for _i in 20: await physics_frame
 	ok(crowd.near_n == HordeCrowd.NEAR_CAP, "the pool is full before the extra bite")
 	var extra := -1

@@ -30,15 +30,15 @@ func _run() -> void:
 	ok(m.horde.alive_count() == HordeCrowd.SIM_DEFAULT, "simulated crowd is the boot default (%d)" % m.horde.alive_count())
 	ok(m.horde.near_count() <= HordeCrowd.NEAR_CAP, "near combat actors stay pooled (%d)" % m.horde.near_count())
 	print("COUNTS simulated=%d rendered=%d near=%d" % [m.horde.alive_count(), m.horde.rendered_count(), m.horde.near_count()])
-	ok(m.horde.rendered_count() >= 400, "at least 400 zombies are in the draw from town (%d rendered of %d simulated)" % [m.horde.rendered_count(), m.horde.alive_count()])
+	ok(m.horde.rendered_count() < 400, "the field is spread, not a gate-sized draw (%d rendered of %d simulated)" % [m.horde.rendered_count(), m.horde.alive_count()])
 	var south_eye := Vector3(0, 1.7, 160)
 	var through: int = m.horde.crowd.count_through_south(south_eye)
 	var south_pack: int = m.horde.crowd.count_near(Vector3(0, 1, 200), 32.0)
 	print("ENCOUNTER through_south_gate=%d near_outside_south=%d alive=%d" % [through, south_pack, m.horde.alive_count()])
-	ok(through >= 200, "looking out the south gate shows the advancing mass (%d)" % through)
-	ok(south_pack >= 40, "the south approach holds a deep pack within 32 m of the road (%d)" % south_pack)
+	ok(through < 200, "the gate looks onto scattered field zombies, not the old packed mass (%d)" % through)
+	ok(south_pack <= 12, "the south road holds at most a small group (%d)" % south_pack)
 	var from_spawn: int = m.horde.crowd.count_through_south(Vector3(-6, 1.7, 26))
-	ok(from_spawn >= 6, "the town spawn can see the south pack through the gate (%d)" % from_spawn)
+	ok(from_spawn <= 24, "town spawn does not look out on a packed gate (%d)" % from_spawn)
 	var inside := 0
 	var wedge := 0
 	for e in m.party.director.enemies:
@@ -65,7 +65,7 @@ func _run() -> void:
 	print("GUARDS_HOLD farthest=%.2f busy=%d leash=%.0f through=%d alive=%d" % [far, busy, TownGuards.POST_LEASH, still_through, m.horde.alive_count()])
 	ok(far <= TownGuards.POST_LEASH + 0.35, "guards stayed on the apron (farthest %.2f m)" % far)
 	ok(busy == 0, "guards did not acquire the gathered horde (%d)" % busy)
-	ok(still_through >= 200, "the south crowd is still in the gate view after 8 s (%d)" % still_through)
+	ok(still_through < 200, "the gate view stays the scattered field, not a horde (%d)" % still_through)
 	ok(is_equal_approx(m.party.combat.hp, hp0), "standing inside the gate took no damage")
 	print("HORDE_ENCOUNTER %d checks, %d failed" % [n, fails])
 	quit(1 if fails else 0)

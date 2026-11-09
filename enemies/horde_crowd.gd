@@ -21,6 +21,12 @@ const ALONG := 1.7
 const ROW := 1.85
 const FRONT := 18.0
 const BODY_R := 0.46
+## Loose field groups. Centers sit on a 26 m grid so packs of 1–6 stay separated.
+const GROUP_GAP := 26.0
+const GROUP_MAX := 6
+const WANDER_R := 5.5
+const FIELD_MIN := 36.0
+const FIELD_MAX := 680.0
 
 const ROLE_NAME := ["shambler", "runner", "undead_knight", "undead_sailor"]
 const ROLE_SPEED := [1.25, 3.35, 1.15, 1.20]
@@ -78,6 +84,8 @@ var prof_us := {"sync": 0, "integrate": 0, "draw": 0, "promote": 0, "frames": 0}
 var _meshes: Array = []
 var _free: Array = []
 var _scratch: Array = []
+var _homes: Array[Vector2] = []
+var _home_i := 0
 var _contact: PackedInt32Array = PackedInt32Array()
 var _contact_n := 0
 var _sep_idx: PackedInt32Array = PackedInt32Array()
@@ -89,6 +97,7 @@ func setup(host: HordeDirector, count: int) -> void:
 	if raw.is_valid_int(): render_cap = clampi(int(raw), 1, SIM_MAX)
 	_build_pool()
 	_build_meshes()
+	_build_homes(target_n)
 	ensure_count(target_n)
 
 func ensure_count(n: int) -> int:
@@ -316,17 +325,11 @@ func _spawn_new(g: int, slot: int) -> int:
 		bite_cd.push_back(0.0)
 		wind_t.push_back(0.0)
 		lock_t.push_back(0.0)
-	if slot < 0: slot = _next_slot(g)
+	if slot < 0: slot = _home_i
 	var sim := next_id
 	next_id += 1
-	var rr := _role_for(g, slot)
-	var hold := formation_xz(g, slot)
-	var dir := gate_dir(g)
-	var back := 0.0
-	if slot >= _gate_share(g) / 2: back = 22.0
-	var spawn := hold + dir * back
-	if TownHaven.body_inside(spawn, BODY_R) or TownHaven.in_escape_wedge(spawn):
-		spawn = hold
+	var rr := _role_for_id(sim)
+	var hold := _next_home()
 	pycell[use] = 1 << 30
 	id[use] = sim
 	role[use] = rr
@@ -334,8 +337,8 @@ func _spawn_new(g: int, slot: int) -> int:
 	slot_i[use] = slot
 	hold_x[use] = hold.x
 	hold_z[use] = hold.y
-	px[use] = spawn.x
-	pz[use] = spawn.y
+	px[use] = hold.x
+	pz[use] = hold.y
 	hp[use] = ROLE_HP[rr]
 	flags[use] = 1
 	pool_i[use] = -1
@@ -377,6 +380,81 @@ func _next_slot(g: int) -> int:
 	var s := 0
 	while used.has(s): s += 1
 	return s
+
+func _role_for_id(sim: int) -> int:
+	var roll := sim % 20
+	if roll == 0: return 2
+	if roll == 1: return 3
+	if roll < 5: return 1
+	return 0
+
+func _home_ok(p: Vector2) -> bool:
+	if p.length() < TownHaven.outer_limit() + FIELD_MIN: return false
+	if p.length() > FIELD_MAX: return false
+	if TownHaven.body_inside(p, BODY_R): return false
+	if TownHaven.in_escape_wedge(p): return false
+	if TownHaven.far_parking(p): return false
+	if TownHaven.obstacle_hit(p, BODY_R): return false
+	return not _on_sea(p.x, p.y)
+
+func _build_homes(n: int) -> void:
+	if _homes.size() >= n: return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 60060
+	var cells: Array[Vector2] = []
+	var x := -FIELD_MAX
+	while x <= FIELD_MAX:
+		var z := -FIELD_MAX
+		while z <= FIELD_MAX:
+			var c := Vector2(x, z)
+			if _home_ok(c): cells.append(c)
+			z += GROUP_GAP
+		x += GROUP_GAP
+	for i in range(cells.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var swap: Vector2 = cells[i]
+		cells[i] = cells[j]
+		cells[j] = swap
+	var ci := 0
+	while _homes.size() < n and ci < cells.size():
+		var center: Vector2 = cells[ci]
+		ci += 1
+		var room := mini(rng.randi_range(1, GROUP_MAX), n - _homes.size())
+		for m in room:
+			var spot := center
+			if m > 0:
+				var ang := rng.randf() * TAU
+				var rad := rng.randf_range(1.8, 5.0)
+				var try_p := center + Vector2(cos(ang), sin(ang)) * rad
+				if _home_ok(try_p): spot = try_p
+			_homes.append(spot)
+	var extra := 0
+	while _homes.size() < n and extra < n * 4:
+		extra += 1
+		var ang := rng.randf() * TAU
+		var rad := rng.randf_range(TownHaven.outer_limit() + FIELD_MIN + 8.0, FIELD_MAX - 8.0)
+		var p := Vector2(cos(ang), sin(ang)) * rad
+		if not _home_ok(p): continue
+		var crowded := false
+		for h in _homes:
+			if h.distance_to(p) < GROUP_GAP * 0.85:
+				crowded = true
+				break
+		if not crowded: _homes.append(p)
+
+func _next_home() -> Vector2:
+	if _home_i >= _homes.size(): _build_homes(_homes.size() + 32)
+	if _home_i >= _homes.size():
+		return Vector2(0.0, TownHaven.outer_limit() + FIELD_MIN + 8.0)
+	var h: Vector2 = _homes[_home_i]
+	_home_i += 1
+	return h
+
+func _wander_at(i: int) -> Vector2:
+	var phase := float(id[i]) * 0.37 + float(_tick) * 0.035
+	var w := Vector2(hold_x[i] + cos(phase) * WANDER_R, hold_z[i] + sin(phase * 0.81) * WANDER_R)
+	if not _home_ok(w): return Vector2(hold_x[i], hold_z[i])
+	return w
 
 func _role_for(g: int, slot: int) -> int:
 	if g == 1 and slot < 2: return 2
@@ -451,6 +529,10 @@ func _integrate(dt: float, hero: Vector3, hero_safe: bool) -> void:
 			if ndx * ndx + ndz * ndz <= nr * nr:
 				tx = nx0
 				tz = nz0
+		else:
+			var wander := _wander_at(i)
+			tx = wander.x
+			tz = wander.y
 		var mx := tx - px[i]
 		var mz := tz - pz[i]
 		var md2 := mx * mx + mz * mz

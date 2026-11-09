@@ -6,8 +6,10 @@ extends Enemy
 
 const BODY_R := 0.46
 const BITE_REACH := 1.40
+const BITE_HEIGHT := 2.5
 const GRAB_REACH := 0.95
 const SEPARATION := 0.82
+const RECOVER := 0.65
 const MODEL_HOOK := {
 	"shambler": "",
 	"runner": "",
@@ -26,6 +28,7 @@ var windup_need := 0.45
 var dead_for := 0.0
 var allow_wedge := false
 var crowd_id := -1
+var crowd_lock := 0.0
 var _visual_ready := false
 var _label: Label3D
 
@@ -155,7 +158,7 @@ func kill_now(_from: Vector3) -> void:
 	_die()
 
 ## Bind a pooled body to one simulated crowd member. The sim id stays the identity.
-func bind_crowd(tid: String, pos: Vector3, hp_now: float, hero: Node3D, ground: Callable, hold: Vector2, sim_id: int) -> void:
+func bind_crowd(tid: String, pos: Vector3, hp_now: float, hero: Node3D, ground: Callable, hold: Vector2, sim_id: int, wind: float = 0.0, lock: float = 0.0) -> void:
 	var spec := profile(tid)
 	var new_role := str(spec.role)
 	type_id = tid
@@ -182,12 +185,20 @@ func bind_crowd(tid: String, pos: Vector3, hp_now: float, hero: Node3D, ground: 
 	anchor = hold
 	target = hero
 	visible = true
-	pending_kind = ""
 	dead_for = 0.0
-	set_state("approach")
+	crowd_lock = maxf(0.0, lock)
+	if wind > 0.0 and crowd_lock <= 0.0:
+		pending_kind = "bite"
+		state = "windup"
+		t_state = wind
+	else:
+		pending_kind = ""
+		state = "approach"
+		t_state = 0.0
 
 func release_crowd() -> void:
 	crowd_id = -1
+	crowd_lock = 0.0
 	target = null
 	pending_kind = ""
 	visible = false
@@ -222,6 +233,7 @@ func _physics_process(dt: float) -> void:
 	if not alive():
 		dead_for += dt
 		return
+	if crowd_lock > 0.0: crowd_lock = maxf(0.0, crowd_lock - dt)
 	if target == null or not is_instance_valid(target): return
 	# Far undead tick every 4th frame. The playable ring around town is inside this.
 	var flat := Vector2(global_position.x - target.global_position.x, global_position.z - target.global_position.z).length()
@@ -313,15 +325,24 @@ func _face_toward(to: Vector2, dt: float) -> void:
 	var yaw := atan2(-to.x, -to.y)
 	rotation.y = lerp_angle(rotation.y, yaw, minf(1.0, dt * 5.0))
 
+func _height_ok(hero_p: Vector3) -> bool:
+	return absf(hero_p.y - global_position.y) <= BITE_HEIGHT
+
 func _attack(dt: float, hero_p: Vector3) -> void:
 	var d := Vector2(hero_p.x - global_position.x, hero_p.z - global_position.z).length()
+	if crowd_lock > 0.0:
+		if state == "windup" or state == "recover":
+			cancel_strike()
+			state = "approach"
+			t_state = 0.0
+		return
 	if state == "recover":
 		t_state += dt
-		if t_state >= 0.65:
+		if t_state >= RECOVER:
 			set_state("approach")
 		return
 	if state != "windup":
-		if d <= BITE_REACH:
+		if d <= BITE_REACH and _height_ok(hero_p) and TownHaven.strike_allowed(global_position, hero_p, "bite"):
 			pending_kind = "lunge" if runner and d > GRAB_REACH else ("grab" if d <= GRAB_REACH else "bite")
 			set_state("windup")
 		return
@@ -331,22 +352,31 @@ func _attack(dt: float, hero_p: Vector3) -> void:
 		set_state("approach")
 		return
 	if t_state < windup_need: return
-	_resolve(hero_p)
-	set_state("recover")
+	if _resolve(hero_p): set_state("recover")
 
-func _resolve(hero_p: Vector3) -> void:
+func _crowd() -> HordeCrowd:
+	var p := get_parent()
+	if p is HordeCrowd: return p
+	return null
+
+func _resolve(hero_p: Vector3) -> bool:
 	var kind := pending_kind
-	pending_kind = ""
 	var c := _combat()
-	if c == null: return
+	if c == null:
+		pending_kind = ""
+		return true
 	var allowed := TownHaven.strike_allowed(global_position, hero_p, kind)
 	var reach := BITE_REACH + 0.15
 	var dist := Vector2(hero_p.x - global_position.x, hero_p.z - global_position.z).length()
 	var hp_before := c.hp
 	var dealt := 0
-	if allowed and dist <= reach and kind != "":
+	var connected := allowed and dist <= reach and _height_ok(hero_p) and kind != ""
+	if connected:
+		var horde := _crowd()
+		if horde != null and not horde.claim_strike(): return false
 		var atk := float(def.atk) + (6.0 if kind == "grab" else 0.0)
 		dealt = c.take_hit(atk, 1.0)
+	pending_kind = ""
 	TownHaven.note({
 		"e": "strike", "kind": kind, "allowed": allowed, "dealt": dealt,
 		"hp_before": hp_before, "hp_after": c.hp,
@@ -354,6 +384,7 @@ func _resolve(hero_p: Vector3) -> void:
 		"tx": snappedf(hero_p.x, 0.01), "tz": snappedf(hero_p.z, 0.01),
 		"hero_inside": TownHaven.inside(hero_p),
 	})
+	return true
 
 func _combat() -> HeroCombat:
 	if combat != null and is_instance_valid(combat): return combat

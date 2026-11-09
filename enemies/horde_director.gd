@@ -83,16 +83,48 @@ static func pressure_pos(spec: Dictionary) -> Vector2:
 	var dir := Vector2(sin(a), cos(a))
 	return dir * (TownHaven.stand_off(HordeZombie.BODY_R) + 0.45)
 
-## Interior coordinates are pushed outside before a record exists.
+## Interior and sea requests are pushed to the nearest safe ground, then that spot is used.
+## They are not replaced by whoever is already standing in a gate formation.
 func respawn_at(tid: String, pos: Vector3) -> Enemy:
-	var placed := Vector2(pos.x, pos.z)
-	if TownHaven.body_inside(placed, HordeZombie.BODY_R) or TownHaven.far_parking(placed):
-		placed = TownHaven.nearest_outside(placed, HordeZombie.BODY_R)
+	var role_name := _respawn_role(tid)
+	var flat := Vector2(pos.x, pos.z)
+	if TownHaven.body_inside(flat, HordeZombie.BODY_R) or TownHaven.far_parking(flat) or TownHaven.obstacle_hit(flat, HordeZombie.BODY_R):
+		flat = TownHaven.nearest_outside(flat, HordeZombie.BODY_R)
+	if crowd != null and crowd.on_sea(flat.x, flat.y):
+		flat = crowd.nearest_land(flat.x, flat.y)
+	elif crowd == null and _sea_cell(flat.x, flat.y):
+		flat = TownHaven.nearest_outside(flat, HordeZombie.BODY_R)
+	var placed := Vector3(flat.x, pos.y, flat.y)
 	if crowd == null:
-		return _spawn_loose(tid, Vector3(placed.x, pos.y, placed.y))
+		return _spawn_loose(role_name, placed)
 	if crowd.alive_n >= HordeCrowd.SIM_MAX: return null
-	crowd._spawn_new(0, -1)
-	return crowd.deploy_actor("shambler" if tid == "" else tid)
+	var sim := crowd._spawn_new(0, -1)
+	var idx := crowd._index_of(sim)
+	if idx < 0: return null
+	var rr := HordeCrowd.ROLE_NAME.find(role_name)
+	if rr < 0: rr = 0
+	crowd.role[idx] = rr
+	crowd.hp[idx] = HordeCrowd.ROLE_HP[rr]
+	crowd.px[idx] = flat.x
+	crowd.pz[idx] = flat.y
+	crowd.hold_x[idx] = flat.x
+	crowd.hold_z[idx] = flat.y
+	crowd.wind_t[idx] = 0.0
+	crowd.lock_t[idx] = 0.0
+	if not crowd._promote_index(idx, main.hero.global_position if main and main.hero else Vector3.ZERO):
+		return null
+	return crowd.pool[crowd.pool_i[idx]]
+
+func _respawn_role(tid: String) -> String:
+	var s := tid.to_lower()
+	if s.contains("runner"): return "runner"
+	if s.contains("knight"): return "undead_knight"
+	if s.contains("sailor"): return "undead_sailor"
+	return "shambler"
+
+func _sea_cell(x: float, z: float) -> bool:
+	if z < 300.0 and x > -400.0: return false
+	return float(load("res://scripts/main.gd").sea_mask(x, z)) > 0.5
 
 func _spawn_loose(tid: String, pos: Vector3) -> HordeZombie:
 	var d: EnemyDirector = main.party.director

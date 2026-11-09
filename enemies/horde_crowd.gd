@@ -28,6 +28,11 @@ const ROLE_HP := [190.0, 140.0, 260.0, 240.0]
 const ROLE_AGGRO := [18.0, 34.0, 18.0, 18.0]
 const ROLE_ATK := [18.0, 16.0, 20.0, 18.0]
 const BITE_REACH := 1.40
+const BITE_HEIGHT := 2.5
+const RECOVER := 0.65
+## How many of the packed crowd may swing at the hero at once.
+const MAX_CONTACT := 4
+const ROLE_WIND := [0.45, 0.28, 0.50, 0.48]
 const FAR_RADIUS := 90.0
 const FAR_STRIDE := 4
 
@@ -58,6 +63,9 @@ var flags: PackedInt32Array = PackedInt32Array() # 1 alive, 2 promoted
 var pool_i: PackedInt32Array = PackedInt32Array()
 var dead_for: PackedFloat32Array = PackedFloat32Array()
 var bite_cd: PackedFloat32Array = PackedFloat32Array()
+var wind_t: PackedFloat32Array = PackedFloat32Array()
+var lock_t: PackedFloat32Array = PackedFloat32Array()
+var strike_budget := MAX_CONTACT
 
 var pool: Array = []
 var _tick := 0
@@ -68,6 +76,9 @@ var prof_us := {"sync": 0, "integrate": 0, "draw": 0, "promote": 0, "frames": 0}
 var _meshes: Array = []
 var _free: Array = []
 var _scratch: Array = []
+var _contact: PackedInt32Array = PackedInt32Array()
+var _contact_n := 0
+var _sep_idx: PackedInt32Array = PackedInt32Array()
 
 func setup(host: HordeDirector, count: int) -> void:
 	director = host
@@ -90,6 +101,7 @@ func step(dt: float) -> void:
 	if director == null or director.main == null or director.main.hero == null: return
 	var hero: Vector3 = director.main.hero.global_position
 	var hero_safe := TownHaven.hero_safe(hero)
+	strike_budget = MAX_CONTACT
 	var t0 := Time.get_ticks_usec()
 	_sync_promoted()
 	_demote_far(hero)
@@ -111,6 +123,23 @@ func step(dt: float) -> void:
 		if director.refill_t <= 0.0:
 			director.refill_t = HordeDirector.REFILL_SEC
 			_spawn_new(_pick_gate(), -1)
+
+func damage_index(i: int, dmg: int) -> bool:
+	if i < 0 or i >= flags.size(): return false
+	if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: return false
+	_hurt(i, dmg)
+	return true
+
+func nearest_unpromoted(origin: Vector2, range_m: float) -> int:
+	var best := -1
+	var bd := range_m
+	for i in id.size():
+		if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: continue
+		var d := Vector2(px[i], pz[i]).distance_to(origin) - BODY_R
+		if d < bd:
+			bd = d
+			best = i
+	return best
 
 func damage_shape(sk: Dictionary, center: Vector2, fwd: Vector2, reach: float, dmg: int) -> int:
 	var hit := 0
@@ -281,6 +310,8 @@ func _spawn_new(g: int, slot: int) -> int:
 		pool_i.push_back(-1)
 		dead_for.push_back(0.0)
 		bite_cd.push_back(0.0)
+		wind_t.push_back(0.0)
+		lock_t.push_back(0.0)
 	if slot < 0: slot = _next_slot(g)
 	var sim := next_id
 	next_id += 1
@@ -306,6 +337,8 @@ func _spawn_new(g: int, slot: int) -> int:
 	pool_i[use] = -1
 	dead_for[use] = 0.0
 	bite_cd[use] = 0.0
+	wind_t[use] = 0.0
+	lock_t[use] = 0.0
 	alive_n += 1
 	return sim
 
@@ -362,6 +395,7 @@ func _sync_promoted() -> void:
 		px[i] = z.global_position.x
 		pz[i] = z.global_position.z
 		hp[i] = z.hp
+		_copy_attack(i, z)
 		near_n += 1
 
 func _demote_far(hero: Vector3) -> void:
@@ -373,6 +407,7 @@ func _demote_far(hero: Vector3) -> void:
 			px[i] = z.global_position.x
 			pz[i] = z.global_position.z
 			hp[i] = z.hp
+			_copy_attack(i, z)
 			var d: EnemyDirector = director.main.party.director
 			d.enemies.erase(z)
 			z.release_crowd()
@@ -391,6 +426,11 @@ func _integrate(dt: float, hero: Vector3, hero_safe: bool) -> void:
 	var combat = director.main.party.combat if director.main.get("party") else null
 	for i in id.size():
 		if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: continue
+		if _illegal(px[i], pz[i]):
+			var safe := _safe_point(px[i], pz[i])
+			px[i] = safe.x
+			pz[i] = safe.y
+			wind_t[i] = 0.0
 		var dx := hero.x - px[i]
 		var dz := hero.z - pz[i]
 		var d2 := dx * dx + dz * dz
@@ -398,11 +438,12 @@ func _integrate(dt: float, hero: Vector3, hero_safe: bool) -> void:
 		var far := d2 > far2 and not border
 		if far and (i & 3) != phase: continue
 		var used := dt * (float(FAR_STRIDE) if far else 1.0)
+		if lock_t[i] > 0.0: lock_t[i] = maxf(0.0, lock_t[i] - used)
 		var dist := sqrt(d2)
 		var tx := hold_x[i]
 		var tz := hold_z[i]
 		var rr: int = role[i]
-		if not hero_safe and dist <= ROLE_AGGRO[rr]:
+		if not hero_safe and dist <= ROLE_AGGRO[rr] and absf(hero.y - _feet_y(i)) <= BITE_HEIGHT:
 			tx = hero.x
 			tz = hero.z
 		elif noise:
@@ -411,12 +452,6 @@ func _integrate(dt: float, hero: Vector3, hero_safe: bool) -> void:
 			if ndx * ndx + ndz * ndz <= nr * nr:
 				tx = nx0
 				tz = nz0
-		if not hero_safe and dist <= BITE_REACH:
-			bite_cd[i] = maxf(0.0, bite_cd[i] - used)
-			if bite_cd[i] <= 0.0 and combat != null:
-				bite_cd[i] = 0.85
-				combat.take_hit(ROLE_ATK[rr], 1.0)
-				bites += 1
 		var mx := tx - px[i]
 		var mz := tz - pz[i]
 		var md2 := mx * mx + mz * mz
@@ -426,6 +461,167 @@ func _integrate(dt: float, hero: Vector3, hero_safe: bool) -> void:
 		var nxt := _constrain(px[i], pz[i], px[i] + mx / md * step, pz[i] + mz / md * step)
 		px[i] = nxt.x
 		pz[i] = nxt.y
+	if hero_safe:
+		_clear_wind()
+		return
+	_pick_contact(hero)
+	_separate_cluster(hero)
+	_record_attacks(dt, hero, combat)
+
+func claim_strike() -> bool:
+	if strike_budget <= 0: return false
+	strike_budget -= 1
+	return true
+
+func _clear_wind() -> void:
+	for i in id.size():
+		if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: continue
+		wind_t[i] = 0.0
+
+func _feet_y(i: int) -> float:
+	return _sample_y(i) - 0.7
+
+func _in_bite(i: int, hero: Vector3) -> bool:
+	var dx := hero.x - px[i]
+	var dz := hero.z - pz[i]
+	if dx * dx + dz * dz > BITE_REACH * BITE_REACH: return false
+	if absf(hero.y - _feet_y(i)) > BITE_HEIGHT: return false
+	if TownHaven.body_inside(Vector2(px[i], pz[i]), BODY_R): return false
+	return TownHaven.strike_allowed(Vector3(px[i], _feet_y(i), pz[i]), hero, "bite")
+
+func _can_swing(i: int) -> bool:
+	return (flags[i] & 1) != 0 and (flags[i] & 2) == 0 and lock_t[i] <= 0.0
+
+func _is_contact(i: int) -> bool:
+	for k in _contact_n:
+		if _contact[k] == i: return true
+	return false
+
+func _pick_contact(hero: Vector3) -> void:
+	if _contact.size() < MAX_CONTACT: _contact.resize(MAX_CONTACT)
+	var kept := PackedInt32Array()
+	for k in _contact_n:
+		var prev: int = _contact[k]
+		if prev < 0 or prev >= id.size(): continue
+		if (flags[prev] & 1) == 0 or (flags[prev] & 2) != 0: continue
+		if not _in_bite(prev, hero): continue
+		kept.append(prev)
+	_contact_n = 0
+	for prev in kept:
+		_contact[_contact_n] = prev
+		_contact_n += 1
+		if _contact_n >= MAX_CONTACT: return
+	for i in id.size():
+		if not _can_swing(i) or wind_t[i] <= 0.0: continue
+		if _is_contact(i) or not _in_bite(i, hero): continue
+		_contact[_contact_n] = i
+		_contact_n += 1
+		if _contact_n >= MAX_CONTACT: return
+	var room := MAX_CONTACT - _contact_n
+	var pick_i := PackedInt32Array()
+	var pick_d := PackedFloat32Array()
+	pick_i.resize(room)
+	pick_d.resize(room)
+	var have := 0
+	for i in id.size():
+		if not _can_swing(i) or _is_contact(i): continue
+		if not _in_bite(i, hero): continue
+		var d := Vector2(px[i] - hero.x, pz[i] - hero.z).length()
+		if have < room:
+			pick_i[have] = i
+			pick_d[have] = d
+			have += 1
+			continue
+		var worst := 0
+		for k in room:
+			if pick_d[k] > pick_d[worst]: worst = k
+		if d < pick_d[worst]:
+			pick_d[worst] = d
+			pick_i[worst] = i
+	for k in have:
+		_contact[_contact_n] = pick_i[k]
+		_contact_n += 1
+
+func _separate_cluster(hero: Vector3) -> void:
+	var n := 0
+	var reach2 := 4.0 * 4.0
+	for i in id.size():
+		if (flags[i] & 1) == 0 or (flags[i] & 2) != 0: continue
+		var dx := px[i] - hero.x
+		var dz := pz[i] - hero.z
+		if dx * dx + dz * dz > reach2: continue
+		if _sep_idx.size() == n: _sep_idx.append(i)
+		else: _sep_idx[n] = i
+		n += 1
+		if n >= 256: break
+	if n < 2: return
+	var sep := HordeZombie.SEPARATION
+	for a in n:
+		var i: int = _sep_idx[a]
+		var pushx := 0.0
+		var pushz := 0.0
+		for b in n:
+			if a == b: continue
+			var j: int = _sep_idx[b]
+			var ox := px[i] - px[j]
+			var oz := pz[i] - pz[j]
+			var d2 := ox * ox + oz * oz
+			if d2 >= sep * sep: continue
+			if d2 <= 0.0001:
+				ox = 0.17 if (i & 1) == 0 else -0.13
+				oz = 0.09 if (i & 2) == 0 else -0.11
+				d2 = ox * ox + oz * oz
+			var d := sqrt(d2)
+			var overlap := sep - d
+			pushx += ox / d * overlap
+			pushz += oz / d * overlap
+		var pl := sqrt(pushx * pushx + pushz * pushz)
+		if pl < 0.001: continue
+		if pl > 0.55:
+			pushx = pushx / pl * 0.55
+			pushz = pushz / pl * 0.55
+		var nx := px[i] + pushx
+		var nz := pz[i] + pushz
+		if _is_contact(i):
+			var hx := nx - hero.x
+			var hz := nz - hero.z
+			var hd := sqrt(hx * hx + hz * hz)
+			var keep := BITE_REACH * 0.72
+			if hd > keep and hd > 0.001:
+				nx = hero.x + hx / hd * keep
+				nz = hero.z + hz / hd * keep
+		var nxt := _constrain(px[i], pz[i], nx, nz)
+		px[i] = nxt.x
+		pz[i] = nxt.y
+
+func _record_attacks(dt: float, hero: Vector3, combat) -> void:
+	for c in _contact_n:
+		var i: int = _contact[c]
+		if not _can_swing(i) or not _in_bite(i, hero): continue
+		wind_t[i] += dt
+		var need: float = ROLE_WIND[role[i]]
+		if wind_t[i] < need: continue
+		if not claim_strike():
+			wind_t[i] = need
+			continue
+		wind_t[i] = 0.0
+		lock_t[i] = RECOVER
+		if combat != null: combat.take_hit(ROLE_ATK[role[i]], 1.0)
+		bites += 1
+
+func _copy_attack(i: int, z: HordeZombie) -> void:
+	if z.crowd_lock > 0.0:
+		lock_t[i] = z.crowd_lock
+		wind_t[i] = 0.0
+	elif z.state == "windup":
+		wind_t[i] = z.t_state
+		lock_t[i] = 0.0
+	elif z.state == "recover":
+		wind_t[i] = 0.0
+		lock_t[i] = maxf(0.0, RECOVER - z.t_state)
+	else:
+		wind_t[i] = 0.0
+		lock_t[i] = 0.0
 
 func _near_hazard(x: float, z: float) -> bool:
 	var lim := TownHaven.outer_limit()
@@ -433,6 +629,45 @@ func _near_hazard(x: float, z: float) -> bool:
 	if m > lim - 8.0 and m < lim + 24.0: return true
 	if x < -380.0 and z > 250.0: return true
 	return TownHaven.obstacles.size() > 0
+
+func on_sea(x: float, z: float) -> bool:
+	return _on_sea(x, z)
+
+func nearest_land(x: float, z: float) -> Vector2:
+	var origin := Vector2(x, z)
+	if _safe_ground(origin): return origin
+	var best := origin
+	var best_d := 100000.0
+	for dir_i in 8:
+		var ang := float(dir_i) * TAU / 8.0
+		var dir := Vector2(cos(ang), sin(ang))
+		var p := origin
+		for _step in 24:
+			p += dir * 4.0
+			if not _safe_ground(p): continue
+			var d := p.distance_to(origin)
+			if d < best_d:
+				best_d = d
+				best = p
+			break
+	return best
+
+func _safe_ground(p: Vector2) -> bool:
+	return not _on_sea(p.x, p.y) and not TownHaven.body_inside(p, BODY_R) and not TownHaven.obstacle_hit(p, BODY_R)
+
+func _illegal(x: float, z: float) -> bool:
+	if TownHaven.obstacles.size() > 0 and TownHaven.obstacle_hit(Vector2(x, z), BODY_R): return true
+	if _on_sea(x, z): return true
+	if x < -380.0 and z > 250.0: return TownHaven.body_inside(Vector2(x, z), BODY_R)
+	if maxf(absf(x), absf(z)) < TownHaven.outer_limit() + 1.0: return TownHaven.body_inside(Vector2(x, z), BODY_R)
+	return false
+
+func _safe_point(x: float, z: float) -> Vector2:
+	var p := Vector2(x, z)
+	if TownHaven.body_inside(p, BODY_R) or TownHaven.obstacle_hit(p, BODY_R) or TownHaven.far_parking(p):
+		p = TownHaven.nearest_outside(p, BODY_R)
+	if _on_sea(p.x, p.y): p = nearest_land(p.x, p.y)
+	return p
 
 func _on_sea(x: float, z: float) -> bool:
 	if z < 300.0 and x > -400.0: return false
@@ -523,7 +758,7 @@ func _promote_index(i: int, hero: Vector3) -> bool:
 	var z: HordeZombie = pool[slot]
 	var ground: Callable = director.main.party.director.ground
 	var pos := Vector3(px[i], 0.0, pz[i])
-	z.bind_crowd(ROLE_NAME[role[i]], pos, hp[i], director.main.hero, ground, Vector2(hold_x[i], hold_z[i]), id[i])
+	z.bind_crowd(ROLE_NAME[role[i]], pos, hp[i], director.main.hero, ground, Vector2(hold_x[i], hold_z[i]), id[i], wind_t[i], lock_t[i])
 	var d: EnemyDirector = director.main.party.director
 	if d.enemies.find(z) < 0: d.enemies.append(z)
 	flags[i] = flags[i] | 2

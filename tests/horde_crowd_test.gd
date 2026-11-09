@@ -258,11 +258,18 @@ func _unpromoted(m, crowd: HordeCrowd) -> void:
 	crowd.px[extra] = m.hero.global_position.x + 0.8
 	crowd.pz[extra] = m.hero.global_position.z
 	crowd.bite_cd[extra] = 0.0
+	crowd.wind_t[extra] = 0.0
+	crowd.lock_t[extra] = 0.0
+	for i in crowd.id.size():
+		if i == extra or (crowd.flags[i] & 1) == 0 or (crowd.flags[i] & 2) != 0: continue
+		if Vector2(crowd.px[i] - m.hero.global_position.x, crowd.pz[i] - m.hero.global_position.z).length() < 3.0:
+			crowd.pz[i] += 12.0
+			crowd.wind_t[i] = 0.0
 	var bites0: int = crowd.bites
 	m.party.combat.hp = m.party.combat.max_hp
 	var hp0: float = m.party.combat.hp
-	for _i in 20: await physics_frame
-	ok(crowd.bites > bites0 and m.party.combat.hp < hp0, "an unpromoted zombie in reach still bites (bites %d, hp %.0f)" % [crowd.bites - bites0, m.party.combat.hp])
+	for _i in 55: await physics_frame
+	ok(crowd.bites > bites0 and m.party.combat.hp < hp0, "an unpromoted zombie in reach still bites after its windup (bites %d, hp %.0f)" % [crowd.bites - bites0, m.party.combat.hp])
 	var bites1: int = crowd.bites
 	var hp1: float = m.party.combat.hp
 	m.hero.global_position = Vector3(0, 1.0, 24)

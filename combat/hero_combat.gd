@@ -46,6 +46,40 @@ func _pos2() -> Vector2: return Vector2(body.global_position.x, body.global_posi
 func _living() -> Array:
 	return enemies.call().filter(func(e): return is_instance_valid(e) and e.alive()) if enemies.is_valid() else []
 
+func _aim_point(range_m: float) -> Vector3:
+	var e := _nearest(range_m)
+	var best := Vector3(1.0e9, 0, 0)
+	var bd := range_m
+	if e:
+		best = e.global_position
+		bd = _enemy_gap(e)
+	var ri := _crowd_index(range_m)
+	if ri >= 0 and _record_gap(ri) < bd:
+		var crowd = _horde_crowd()
+		best = Vector3(crowd.px[ri], body.global_position.y, crowd.pz[ri])
+	return best
+
+func _crowd_index(range_m: float) -> int:
+	var crowd = _horde_crowd()
+	if crowd == null: return -1
+	return int(crowd.nearest_unpromoted(_pos2(), range_m))
+
+func _record_gap(i: int) -> float:
+	var crowd = _horde_crowd()
+	return Vector2(crowd.px[i], crowd.pz[i]).distance_to(_pos2()) - HordeCrowd.BODY_R
+
+func _enemy_gap(e: Enemy) -> float:
+	return Vector2(e.global_position.x, e.global_position.z).distance_to(_pos2()) - e.radius
+
+func _damage_record(i: int, slot: int, sk: Dictionary, mult := 1.0) -> void:
+	var crowd = _horde_crowd()
+	if crowd == null: return
+	if slot > 0 and one_shot(hero_id, sk):
+		crowd.kill_id(int(crowd.id[i]))
+		return
+	var r: Dictionary = CombatRules.basic_damage(hero_id, dmg_pct(), rng) if slot == 0 else CombatRules.skill_damage(hero_id, sk, dmg_pct(), rng)
+	crowd.damage_index(i, int(r.dmg * mult))
+
 func _nearest(range_m: float) -> Enemy:
 	var best: Enemy = null; var bd := range_m
 	for e: Enemy in _living():
@@ -58,10 +92,10 @@ func use(slot: int) -> bool:
 	if sk.is_empty() or not CombatRules.can_use(hero_id, slot, sk, st): return false
 	CombatRules.commit(hero_id, slot, sk, st)
 	if rig: rig.play_attack("saber_slash" if hero_id == "owner" and slot > 0 else "", 1.8 if slot == 0 else 1.3)
-	# auto-face the nearest enemy (phone friendly)
-	var n := _nearest(12.0)
-	if n and facing:
-		var v := n.global_position - body.global_position
+	# auto-face the nearest enemy or unpromoted crowd record (phone friendly)
+	var aim := _aim_point(12.0)
+	if aim.x < 1.0e8 and facing:
+		var v := aim - body.global_position
 		facing.rotation.y = atan2(-v.x, -v.z)
 	var wind := 0.08 if slot == 0 else float(sk.get("windup", 0.18))
 	_pending.append([wind, func(): _resolve(slot, sk)])
@@ -104,17 +138,30 @@ func _resolve(slot: int, sk: Dictionary) -> void:
 	match kind:
 		"melee", "aoe", "line": _area(sk, slot, _pos2(), fwd)
 		"ranged":
-			var e := _nearest(float(sk.get("range", 16)) * CombatRules.UNIT_M * reach)
-			if e: _hit(e, slot, sk)
+			var range_m := float(sk.get("range", 16)) * CombatRules.UNIT_M * reach
+			var e := _nearest(range_m)
+			var ri := _crowd_index(range_m)
+			if ri >= 0 and (e == null or _record_gap(ri) <= _enemy_gap(e)): _damage_record(ri, slot, sk)
+			elif e: _hit(e, slot, sk)
 		"dash":
 			var d := float(sk.get("dist", 8)) * CombatRules.UNIT_M
 			body.global_position += Vector3(fwd.x, 0, fwd.y) * d * 0.6
 			_area(sk, slot, _pos2(), fwd)
 		"blink":
-			var e2 := _nearest(float(sk.get("range", 14)) * CombatRules.UNIT_M)
-			if e2:
-				var back := (e2.global_position - body.global_position); back.y = 0
-				body.global_position = e2.global_position + back.normalized() * (e2.radius + 0.8)
+			var blink_r := float(sk.get("range", 14)) * CombatRules.UNIT_M
+			var e2 := _nearest(blink_r)
+			var bi := _crowd_index(blink_r)
+			if bi >= 0 and (e2 == null or _record_gap(bi) <= _enemy_gap(e2)):
+				var crowd = _horde_crowd()
+				var pos := Vector3(crowd.px[bi], body.global_position.y, crowd.pz[bi])
+				var back := pos - body.global_position
+				back.y = 0
+				if back.length() < 0.05: back = Vector3(0, 0, 1)
+				body.global_position = pos + back.normalized() * (HordeCrowd.BODY_R + 0.8)
+				_damage_record(bi, slot, sk)
+			elif e2:
+				var back2 := (e2.global_position - body.global_position); back2.y = 0
+				body.global_position = e2.global_position + back2.normalized() * (e2.radius + 0.8)
 				_hit(e2, slot, sk)
 		"storm":
 			for i in 3: _pending.append([0.25 * i, func(): _area(sk, slot, _pos2(), _fwd(), 1.0 / 3.0)])

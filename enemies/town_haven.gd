@@ -315,9 +315,25 @@ static func strike_allowed(attacker: Vector3, target: Vector3, kind: String) -> 
 	if not armed: return false
 	if hero_safe(target): return false
 	if inside(attacker): return false
-	if segment_enters(Vector2(attacker.x, attacker.z), Vector2(target.x, target.z)): return false
+	var a := Vector2(attacker.x, attacker.z)
+	var b := Vector2(target.x, target.z)
+	if segment_enters(a, b): return false
+	if segment_hits_obstacle(a, b): return false
 	if kind == "": return false
 	return true
+
+## True when the segment crosses a solid obstacle, even if both centers stand clear of it.
+static func segment_hits_obstacle(a: Vector2, b: Vector2) -> bool:
+	var dx := b.x - a.x
+	var dz := b.y - a.y
+	for r in obstacles:
+		var rect: Rect2 = r
+		if rect.has_point(a) or rect.has_point(b): return true
+		var hit: Array = _slab_span(a.x, dx, rect.position.x, rect.end.x, 0.0, 1.0)
+		if not hit[0]: continue
+		hit = _slab_span(a.y, dz, rect.position.y, rect.end.y, float(hit[1]), float(hit[2]))
+		if hit[0]: return true
+	return false
 
 static func note(ev: Dictionary) -> void:
 	if evidence.size() >= EVIDENCE_MAX: return

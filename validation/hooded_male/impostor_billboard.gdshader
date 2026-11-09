@@ -35,10 +35,12 @@ void vertex() {
 void fragment() {
 	float col = mod(v_idx, 4.0);
 	float row = floor(v_idx / 4.0);
-	// Quad UV.y is 0 at the feet. The atlas stores the head at the top of the cell,
-	// which is the high-V side, so the feet sample the low-V side of the cell.
-	float v_in = 1.0 - UV.y;
-	vec2 uv = vec2((col + UV.x) / 4.0, (1.0 - (row + 1.0) / 2.0) + v_in / 2.0);
+	// QuadMesh faces +Z. PlaneMesh writes UV (1-u, 1-v) with v=0 on the low edge,
+	// so UV.y is 0 at the top of the card and 1 at the feet. The atlas keeps the
+	// head at the top of each cell, and Godot 4 reads UV.y 0 from the top of the
+	// texture. Sampling UV.y straight keeps the head up. Inverting it plants the
+	// head in the grass.
+	vec2 uv = vec2((col + UV.x) / 4.0, (row + UV.y) * 0.5);
 	vec4 tex = texture(atlas, uv);
 	if (tex.a < 0.5) {
 		discard;

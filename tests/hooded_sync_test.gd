@@ -123,9 +123,12 @@ func _death_and_again(m, crowd: HordeCrowd) -> void:
 		await process_frame
 	var hood := body.get_node_or_null("Hooded")
 	ok(body.state == "defeated", "death sets the defeated state")
+	ok(body.visible, "the death clip stays visible")
 	if hood is HoodedPresenter:
 		ok(str(hood.clip) == "death", "death plays the death clip and holds it (%s)" % hood.clip)
-	ok(not crowd.id_alive(sim), "the killed id stays retired")
+	ok(crowd.id_alive(sim), "the id stays while the death clip plays")
+	for _i in 100: await physics_frame
+	ok(not crowd.id_alive(sim), "the killed id retires after the death hold")
 	var again := crowd.deploy_actor("shambler")
 	ok(again != null and again.get_node_or_null("Hooded") is HoodedPresenter, "the next promotion reuses a hooded body")
 	m.hero.global_position = Vector3(400, 1, 400)

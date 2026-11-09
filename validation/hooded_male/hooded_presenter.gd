@@ -153,33 +153,28 @@ func _find_skel(n: Node) -> Skeleton3D:
 func _fix_materials(n: Node) -> void:
 	if n is MeshInstance3D:
 		var mi := n as MeshInstance3D
+		# A moving fighter is not a lightmap object, and the near view keeps the full mesh.
+		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		mi.lod_bias = 128.0
 		if mi.mesh:
 			for i in mi.mesh.get_surface_count():
 				var m: Material = mi.get_active_material(i)
 				if m == null:
 					m = mi.mesh.surface_get_material(i)
 				if m is StandardMaterial3D:
-					var sm := m as StandardMaterial3D
-					var changed := false
-					if sm.albedo_texture == null and not sm.vertex_color_use_as_albedo:
-						sm.vertex_color_use_as_albedo = true
-						sm.metallic_specular = 0.0
-						changed = true
-						notes.append("surface %d uses vertex color as albedo" % i)
-					if sm.cull_mode != BaseMaterial3D.CULL_DISABLED or sm.metallic > 0.001:
-						sm = sm.duplicate() as StandardMaterial3D
-						sm.cull_mode = BaseMaterial3D.CULL_DISABLED
-						sm.metallic = 0.0
-						sm.metallic_specular = 0.0
-						mi.set_surface_override_material(i, sm)
-						changed = true
-						notes.append("material override surface %d metallic->0 double-sided" % i)
-					if changed and sm.albedo_texture == null:
-						mi.set_surface_override_material(i, sm)
-				if mi.get_surface_override_material(i) is StandardMaterial3D:
-					var used := mi.get_surface_override_material(i) as StandardMaterial3D
-					if not _fade_mats.has(used): _fade_mats.append(used)
-				elif m is StandardMaterial3D and not _fade_mats.has(m):
-					_fade_mats.append(m)
+					var src := m as StandardMaterial3D
+					var sm := StandardMaterial3D.new()
+					sm.albedo_texture = src.albedo_texture
+					sm.albedo_color = Color(1, 1, 1, 1)
+					sm.metallic = 0.0
+					sm.metallic_specular = 0.0
+					sm.roughness = 1.0
+					sm.cull_mode = BaseMaterial3D.CULL_DISABLED
+					# The cloth albedo is very dark. Unshaded keeps the rags readable in daylight,
+					# the same way the far cards are drawn.
+					sm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+					mi.set_surface_override_material(i, sm)
+					if not _fade_mats.has(sm): _fade_mats.append(sm)
+					notes.append("surface %d fresh cloth" % i)
 	for c in n.get_children():
 		_fix_materials(c)

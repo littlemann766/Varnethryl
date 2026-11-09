@@ -36,6 +36,8 @@ const ROLE_ATK := [18.0, 16.0, 20.0, 18.0]
 const BITE_REACH := 1.40
 const BITE_HEIGHT := 2.5
 const RECOVER := 0.65
+## A promoted body stays on screen long enough for the death clip before the slot is released.
+const DEATH_HOLD := 1.35
 ## How many of the packed crowd may swing at the hero at once.
 const MAX_CONTACT := 4
 const ROLE_WIND := [0.80, 0.80, 0.80, 0.80]
@@ -473,6 +475,9 @@ func _sync_promoted() -> void:
 			pool_i[i] = -1
 			continue
 		if not z.alive():
+			if z.dead_for < DEATH_HOLD:
+				near_n += 1
+				continue
 			_kill(i)
 			continue
 		px[i] = z.global_position.x
@@ -486,6 +491,7 @@ func _demote_far(hero: Vector3) -> void:
 		if (flags[i] & 1) == 0 or (flags[i] & 2) == 0: continue
 		if Vector2(px[i] - hero.x, pz[i] - hero.z).length() <= NEAR_OUT: continue
 		var z: HordeZombie = pool[pool_i[i]]
+		if is_instance_valid(z) and not z.alive(): continue
 		if is_instance_valid(z) and z.alive():
 			px[i] = z.global_position.x
 			pz[i] = z.global_position.z

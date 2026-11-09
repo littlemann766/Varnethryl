@@ -133,8 +133,8 @@ func _cooldown(m, crowd: HordeCrowd) -> void:
 	ok(m.party.combat.hp < hp1, "clearing the cooldown lets that body bite (hp %.0f)" % m.party.combat.hp)
 	var alive_before := crowd.id_alive(sim)
 	body.kill_now(Vector3.ZERO)
-	for _i in 20: await physics_frame
-	ok(alive_before and not crowd.id_alive(sim) and crowd.retired.has(sim), "killing the body retires the id")
+	for _i in 100: await physics_frame
+	ok(alive_before and not crowd.id_alive(sim) and crowd.retired.has(sim), "killing the body retires the id after the death clip")
 
 func _packed(m, crowd: HordeCrowd) -> void:
 	_park(crowd, 500.0)

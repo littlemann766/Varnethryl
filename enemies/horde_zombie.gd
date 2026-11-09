@@ -25,6 +25,8 @@ var pending_kind := ""
 var windup_need := 0.45
 var dead_for := 0.0
 var allow_wedge := false
+var crowd_id := -1
+var _visual_ready := false
 var _label: Label3D
 
 static func body_radius(_tid := "") -> float: return BODY_R
@@ -73,6 +75,7 @@ func setup_horde(tid: String, pos: Vector3, ground: Callable) -> HordeZombie:
 	state = "approach"
 	name = "%s_%d" % [tid, get_instance_id()]
 	_build_visual()
+	_visual_ready = true
 	return self
 
 func _build_visual() -> void:
@@ -150,6 +153,51 @@ func kill_now(_from: Vector3) -> void:
 	if not alive(): return
 	hp = 0.0
 	_die()
+
+## Bind a pooled body to one simulated crowd member. The sim id stays the identity.
+func bind_crowd(tid: String, pos: Vector3, hp_now: float, hero: Node3D, ground: Callable, hold: Vector2, sim_id: int) -> void:
+	var spec := profile(tid)
+	var new_role := str(spec.role)
+	type_id = tid
+	runner = bool(spec.runner)
+	def = {"hp": int(spec.hp), "atk": float(spec.atk), "boss": false, "reach": 1.2, "stagger": 0.4, "name": new_role}
+	max_hp = float(spec.hp)
+	hp = hp_now
+	radius = BODY_R
+	speed_mps = float(spec.speed)
+	windup_need = float(spec.windup)
+	height_fn = ground
+	crowd_id = sim_id
+	if not _visual_ready or role != new_role:
+		role = new_role
+		_clear_visual()
+		_build_visual()
+		_visual_ready = true
+	else:
+		role = new_role
+	global_position = pos
+	if height_fn.is_valid(): global_position.y = float(height_fn.call(pos.x, pos.z))
+	home = global_position
+	last_safe = global_position
+	anchor = hold
+	target = hero
+	visible = true
+	pending_kind = ""
+	dead_for = 0.0
+	set_state("approach")
+
+func release_crowd() -> void:
+	crowd_id = -1
+	target = null
+	pending_kind = ""
+	visible = false
+	set_state("defeated")
+
+func _clear_visual() -> void:
+	for c in get_children():
+		remove_child(c)
+		c.free()
+	_label = null
 
 func _die() -> void:
 	cancel_strike()

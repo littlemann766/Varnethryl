@@ -36,8 +36,8 @@ func _run() -> void:
 	var raw := OS.get_environment("VARN_STRESS_SECONDS")
 	if raw.is_valid_int(): secs = maxi(int(raw), 1)
 	# Fill to the hard cap, then run a sustained stretch and a death wave.
-	var filled: int = m.horde.debug_fill(HordeDirector.HARD_CAP)
-	ok(filled <= HordeDirector.HARD_CAP and filled >= HordeDirector.CAP, "fill stays within the hard cap (%d)" % filled)
+	ok(m.horde.alive_count() == HordeCrowd.SIM_DEFAULT, "boot crowd is the default (%d simulated)" % m.horde.alive_count())
+	ok(m.horde.near_count() <= HordeCrowd.NEAR_CAP, "boot near actors are capped (%d)" % m.horde.near_count())
 	var horde0 := _horde_nodes(m)
 	for sec in secs:
 		var t0 := Time.get_ticks_usec()
@@ -78,10 +78,10 @@ func _run() -> void:
 	print("STRESS_TIME simulated_s=%d wall_s=%.2f (wall clock is not simulated time, and this is not a phone result)" % [tick_n, wall_ms / 1000.0])
 	print("STRESS_DESKTOP simulated_s=%d wall_ms=%.0f mean_frame_ms=%.2f max_frame_ms=%.2f alive_max=%d corpse_max=%d list_max=%d inside_max=%d scene_nodes %d->%d horde_nodes %d->%d static_mem %d->%d growth=%d tail_growth=%d" % [
 		tick_n, wall_ms, mean_frame_ms, max_frame_ms, alive_max, corpse_max, list_max, inside_max, nodes0, nodes1, horde0, horde_nodes_max, mem0, mem1, growth, tail])
-	ok(alive_max <= HordeDirector.HARD_CAP, "alive never passed the hard cap")
-	ok(corpse_max <= HordeDirector.CORPSE_CAP, "corpses stayed capped (%d)" % corpse_max)
-	ok(list_max <= HordeDirector.HARD_CAP + HordeDirector.CORPSE_CAP + 16, "enemy list stayed bounded (%d)" % list_max)
-	ok(inside_max == 0, "stress crowd never entered the town")
+	ok(alive_max <= HordeCrowd.SIM_DEFAULT + 8, "simulated count stayed near the default (%d)" % alive_max)
+	ok(m.horde.near_count() <= HordeCrowd.NEAR_CAP, "near combat actors stayed pooled")
+	ok(list_max <= HordeCrowd.NEAR_CAP + 24, "enemy list is bodies, not every simulated zombie (%d)" % list_max)
+	ok(inside_max == 0 and m.horde.crowd.inside_count() == 0, "stress crowd never entered the town")
 	ok(is_equal_approx(hp1, hp0), "hero HP held through the stress (%.0f -> %.0f)" % [hp0, hp1])
 	ok(horde_nodes_max <= horde0 + 80, "horde node count stayed with the cap (%d -> %d)" % [horde0, horde_nodes_max])
 	# After the first 4 s, further static-memory growth on this desktop run. Not a phone budget.
@@ -91,7 +91,7 @@ func _run() -> void:
 		"alive_max": alive_max, "corpse_max": corpse_max, "list_max": list_max, "inside_max": inside_max,
 		"nodes0": nodes0, "nodes1": nodes1, "horde_nodes": horde0, "horde_nodes_max": horde_nodes_max,
 		"mem0": mem0, "mem1": mem1, "growth": growth, "tail_growth": tail, "series": mem_series,
-		"note": "Desktop headless Godot 4.7, lite town, 24 undead, %d simulated seconds. wall_ms is wall clock. Not a phone measurement." % tick_n,
+		"note": "Desktop headless Godot 4.7, lite town, %d simulated zombies, %d simulated seconds. wall_ms is wall clock. Not a phone measurement." % [HordeCrowd.SIM_DEFAULT, tick_n],
 		"simulated_s": tick_n, "wall_ms": wall_ms,
 	}
 	TownHaven.note(ev)

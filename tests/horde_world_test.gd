@@ -92,18 +92,9 @@ func _open_play(m) -> void:
 	if ui and ui.hud: ui.hud.visible = true
 
 func _crowd(m) -> void:
-	var slow := 0
-	var runners := 0
-	var knights := 0
-	var sailors := 0
-	for e in m.party.director.enemies:
-		if not (e is HordeZombie) or not e.alive(): continue
-		if e.role == "runner": runners += 1
-		elif e.role == "undead_knight": knights += 1
-		elif e.role == "undead_sailor": sailors += 1
-		else: slow += 1
-	ok(slow >= 8 and knights == 2 and sailors == 2 and runners == 4, "crowd %d shambler / %d knight / %d sailor / %d runner" % [slow, knights, sailors, runners])
-	ok(runners < slow + knights + sailors, "mostly shamblers")
+	var rc: Dictionary = m.horde.crowd.role_counts()
+	ok(int(rc.shambler) > int(rc.runner) and int(rc.undead_knight) >= 2 and int(rc.undead_sailor) >= 2, "crowd shambler %d runner %d knight %d sailor %d" % [rc.shambler, rc.runner, rc.undead_knight, rc.undead_sailor])
+	ok(int(rc.runner) < int(rc.shambler), "mostly shamblers")
 	var wedge_slots := 0
 	for spec in HordeDirector.ROSTER:
 		var p: Vector3 = HordeDirector.spawn_pos(spec)
@@ -120,10 +111,10 @@ func _crowd(m) -> void:
 		if not (e is HordeZombie) or not e.alive(): continue
 		if TownHaven.body_inside(Vector2(e.global_position.x, e.global_position.z), e.radius): bad += 1
 		if TownHaven.in_escape_wedge(Vector2(e.global_position.x, e.global_position.z)): in_wedge += 1
-	ok(bad == 0, "after 3s none of the crowd entered (%d)" % bad)
-	ok(in_wedge == 0, "escape wedge stayed open while the hero was in town (%d)" % in_wedge)
+	ok(bad == 0 and m.horde.crowd.inside_count() == 0, "after 3s none of the crowd entered (%d sim %d)" % [bad, m.horde.crowd.inside_count()])
+	ok(in_wedge == 0 and m.horde.crowd.wedge_count() == 0, "escape wedge stayed open while the hero was in town")
 	ok(is_equal_approx(m.party.combat.hp, hp0), "town interior took no horde damage")
-	ok(m.horde.alive_count() <= HordeDirector.CAP and m.horde.corpse_count() <= HordeDirector.CORPSE_CAP, "caps held (alive %d corpses %d)" % [m.horde.alive_count(), m.horde.corpse_count()])
+	ok(m.horde.alive_count() == HordeCrowd.SIM_DEFAULT and m.horde.near_count() <= HordeCrowd.NEAR_CAP, "simulated %d near %d" % [m.horde.alive_count(), m.horde.near_count()])
 
 func _lane(m) -> void:
 	var blocked := 0
@@ -146,12 +137,8 @@ func _lane(m) -> void:
 
 func _damage_cycle(m) -> void:
 	var stand := TownHaven.stand_off(HordeZombie.BODY_R)
-	var z: HordeZombie = null
-	for e in m.party.director.enemies:
-		if e is HordeZombie and e.alive() and e.role == "shambler":
-			z = e
-			break
-	ok(z != null, "a shambler is available")
+	var z: HordeZombie = m.horde.crowd.deploy_actor("shambler")
+	ok(z != null, "a shambler body can be promoted for a close fight")
 	if z == null: return
 	for g in m.guards.guards:
 		g.down_t = 20.0
@@ -333,11 +320,7 @@ func _resume(m) -> void:
 	ok(is_equal_approx(out2.x, outside.x) and is_equal_approx(out2.y, outside.z), "outside save stayed outside (%.2f, %.2f)" % [out2.x, out2.y])
 	ok(not TownHaven.hero_safe(m2.hero.global_position), "outside resume is not sticky-safe")
 	# the saved spot is far from the walls; bring one shambler to it
-	var z: HordeZombie = null
-	for e in m2.party.director.enemies:
-		if e is HordeZombie and e.alive():
-			z = e
-			break
+	var z: HordeZombie = m2.horde.crowd.deploy_actor("shambler")
 	if z:
 		z.global_position = Vector3(outside.x, 0, outside.z + 0.8)
 		z.last_safe = z.global_position

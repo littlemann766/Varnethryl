@@ -85,7 +85,18 @@ func _area(sk: Dictionary, slot: int, center: Vector2, fwd: Vector2, mult := 1.0
 	for e: Enemy in _living():
 		if CombatRules.in_shape(sk, center, fwd, Vector2(e.global_position.x, e.global_position.z), e.radius, reach):
 			_hit(e, slot, sk, mult); n += 1
+	var crowd = _horde_crowd()
+	if crowd:
+		var r: Dictionary = CombatRules.basic_damage(hero_id, dmg_pct(), rng) if slot == 0 else CombatRules.skill_damage(hero_id, sk, dmg_pct(), rng)
+		n += crowd.damage_shape(sk, center, fwd, reach, int(r.dmg * mult))
 	return n
+
+func _horde_crowd():
+	var m = TownHaven.main_node
+	if m == null: return null
+	var h = m.get("horde")
+	if h == null: return null
+	return h.get("crowd")
 
 func _resolve(slot: int, sk: Dictionary) -> void:
 	var kind: String = sk.get("kind", "melee")
@@ -115,6 +126,8 @@ func _resolve(slot: int, sk: Dictionary) -> void:
 						if one_shot(hero_id, sk): e.kill_now(body.global_position)
 						else: e.take_damage(int(e.hp) + 1, body.global_position)
 						damaged_enemy.emit(e, int(e.max_hp), true)
+				var crowd = _horde_crowd()
+				if crowd: crowd.kill_disk(Vector2(body.global_position.x, body.global_position.z), R)
 			else:
 				var c := _pos2() + fwd * 6.0
 				var s2 := sk.duplicate(); s2.range = float(sk.get("radius", 8)); s2.arc = -1

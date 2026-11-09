@@ -81,12 +81,13 @@ func _box(pos: Vector3, size: Vector3, mat: Material) -> void:
 	root.add_child(mi)
 
 func _crowd() -> void:
-	for spec in HordeDirector.ROSTER:
-		var at: Vector3 = HordeDirector.spawn_pos(spec)
+	for slot in 48:
+		var at := HordeCrowd.formation_xz(0, slot)
+		var role_name: String = HordeCrowd.ROLE_NAME[0 if slot % 7 != 3 else 1]
 		var z := HordeZombie.new()
 		root.add_child(z)
-		z.setup_horde(str(spec.id), at, func(_x, _z): return 0.0)
-		z.rotation.y = PI if str(spec.gate) == "south" else 0.0
+		z.setup_horde(role_name, Vector3(at.x, 0.0, at.y), func(_x, _z): return 0.0)
+		z.rotation.y = PI
 
 func _wedge() -> Vector2:
 	var a := deg_to_rad(135.0)
@@ -99,7 +100,7 @@ func _aim(from: Vector3, at: Vector3) -> void:
 func _save(name: String) -> void:
 	for _i in 4: await process_frame
 	var img: Image = root.get_viewport().get_texture().get_image()
-	var path := "/cursor/stores/self/transfer/test59/%s.png" % name
-	DirAccess.make_dir_recursive_absolute("/cursor/stores/self/transfer/test59")
+	var path := "/cursor/stores/self/transfer/test59-crowd/%s.png" % name
+	DirAccess.make_dir_recursive_absolute("/cursor/stores/self/transfer/test59-crowd")
 	img.save_png(path)
 	print("SHOT %s %dx%d" % [path, img.get_width(), img.get_height()])

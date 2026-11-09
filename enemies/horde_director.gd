@@ -3,8 +3,9 @@ extends Node
 ## One bounded crowd outside the walled town. Not a replacement for wolves, trolls, or the titan.
 ## Alive count and corpses are capped. Nothing here is written into the save.
 
-const CAP := 16
-const HARD_CAP := 24
+## Boot population. The scalable ceiling and the near-combat pool live on HordeCrowd.
+const CAP := 192
+const HARD_CAP := 4096
 const CORPSE_CAP := 6
 const CORPSE_SEC := 8.0
 const REFILL_SEC := 7.0
@@ -32,7 +33,7 @@ const ROSTER := [
 ]
 
 var main: Node
-var slots: Array = []
+var crowd: HordeCrowd
 var noise_at := Vector2.ZERO
 var noise_r := 0.0
 var noise_t := 0.0
@@ -43,10 +44,14 @@ var culled := 0
 func setup(m: Node) -> void:
 	main = m
 	name = "Horde"
-	for spec in ROSTER:
-		var pos := spawn_pos(spec)
-		var z := _spawn_slot(spec, pos)
-		slots.append({"spec": spec, "node": z})
+	crowd = HordeCrowd.new()
+	crowd.name = "HordeCrowd"
+	add_child(crowd)
+	var n := HordeCrowd.SIM_DEFAULT
+	var raw := OS.get_environment("VARN_HORDE_SIM")
+	if raw.is_valid_int(): n = clampi(int(raw), 1, HordeCrowd.SIM_MAX)
+	crowd.setup(self, n)
+	spawned = crowd.alive_n
 	var combat = m.party.combat if m.get("party") else null
 	if combat and not combat.used.is_connected(_on_combat):
 		combat.used.connect(_on_combat)
@@ -78,50 +83,44 @@ static func pressure_pos(spec: Dictionary) -> Vector2:
 	var dir := Vector2(sin(a), cos(a))
 	return dir * (TownHaven.stand_off(HordeZombie.BODY_R) + 0.45)
 
-func _spawn_slot(spec: Dictionary, pos: Vector3) -> HordeZombie:
-	if alive_count() >= HARD_CAP: return null
+## Interior coordinates are pushed outside before a record exists.
+func respawn_at(tid: String, pos: Vector3) -> Enemy:
+	var placed := Vector2(pos.x, pos.z)
+	if TownHaven.body_inside(placed, HordeZombie.BODY_R) or TownHaven.far_parking(placed):
+		placed = TownHaven.nearest_outside(placed, HordeZombie.BODY_R)
+	if crowd == null:
+		return _spawn_loose(tid, Vector3(placed.x, pos.y, placed.y))
+	if crowd.alive_n >= HordeCrowd.SIM_MAX: return null
+	crowd._spawn_new(0, -1)
+	return crowd.deploy_actor("shambler" if tid == "" else tid)
+
+func _spawn_loose(tid: String, pos: Vector3) -> HordeZombie:
 	var d: EnemyDirector = main.party.director
-	var z := d.spawn(str(spec.id), pos, main.hero)
+	var z := d.spawn(tid, pos, main.hero)
 	if z is HordeZombie:
-		z.anchor = pressure_pos(spec)
-		z.combat = main.party.combat
+		z.anchor = Vector2(z.global_position.x, z.global_position.z)
 		spawned += 1
 	return z
 
-## The only respawn entry. Interior coordinates are pushed back outside before the node exists.
-func respawn_at(tid: String, pos: Vector3) -> Enemy:
-	if alive_count() >= HARD_CAP: return null
-	var spec := {"id": tid, "ang": 0.0, "dist": 40.0}
-	var placed := Vector2(pos.x, pos.z)
-	if placed.length() > 1.0:
-		spec.ang = rad_to_deg(atan2(placed.x, placed.y))
-		spec.dist = maxf(8.0, placed.length() - TownHaven.outer_limit())
-	var z := _spawn_slot(spec, pos)
-	slots.append({"spec": spec, "node": z})
-	return z
-
 func debug_fill(n: int) -> int:
-	var guard := 0
-	while alive_count() < mini(n, HARD_CAP) and guard < HARD_CAP + 2:
-		respawn_at("shambler", Vector3(6.0 + guard, 0.0, TownHaven.outer_limit() + 28.0))
-		guard += 1
-	return alive_count()
+	if crowd == null: return alive_count()
+	return crowd.ensure_count(mini(n, HordeCrowd.SIM_MAX))
 
 func alive_count() -> int:
-	var n := 0
-	var d = main.party.director if main and main.get("party") else null
-	if d == null: return 0
-	for e in d.enemies:
-		if is_instance_valid(e) and e is HordeZombie and e.alive(): n += 1
-	return n
+	if crowd: return crowd.alive_n
+	return 0
+
+func near_count() -> int:
+	if crowd: return crowd.near_n
+	return 0
+
+func rendered_count() -> int:
+	if crowd: return crowd.rendered_n
+	return 0
 
 func corpse_count() -> int:
-	var n := 0
-	var d = main.party.director if main and main.get("party") else null
-	if d == null: return 0
-	for e in d.enemies:
-		if is_instance_valid(e) and e is HordeZombie and not e.alive(): n += 1
-	return n
+	if crowd: return crowd.corpse_n
+	return 0
 
 func hear(world: Vector3, radius: float) -> void:
 	var p := Vector2(world.x, world.z)
@@ -144,46 +143,4 @@ func _physics_process(dt: float) -> void:
 	var spd := Vector2(main.hero.velocity.x, main.hero.velocity.z).length()
 	if spd > 4.8: hear(main.hero.global_position, 28.0)
 	elif spd > 0.35: hear(main.hero.global_position, 10.0)
-	_cull(dt)
-	if OS.get_environment("VARN_NO_HORDE_REFILL") != "": return
-	refill_t -= dt
-	if refill_t > 0.0: return
-	refill_t = REFILL_SEC
-	_refill_one()
-
-func _cull(dt: float) -> void:
-	var corpses: Array = []
-	for s in slots:
-		var z = s.node
-		if z != null and is_instance_valid(z) and not z.alive():
-			z.dead_for += 0.0 # zombie already counts this
-			corpses.append(s)
-	corpses.sort_custom(func(a, b): return float(a.node.dead_for) > float(b.node.dead_for))
-	while corpses.size() > CORPSE_CAP:
-		_release(corpses[0])
-		corpses.remove_at(0)
-	for s in corpses:
-		if is_instance_valid(s.node) and s.node.dead_for >= CORPSE_SEC: _release(s)
-
-func _refill_one() -> void:
-	if alive_count() >= CAP: return
-	for s in slots:
-		var z = s.node
-		if z != null and is_instance_valid(z): continue
-		var spec: Dictionary = s.spec
-		if TownHaven.in_escape_wedge(_spec_xz(spec)): continue
-		s.node = _spawn_slot(spec, spawn_pos(spec))
-		return
-
-func _spec_xz(spec: Dictionary) -> Vector2:
-	var p := spawn_pos(spec)
-	return Vector2(p.x, p.z)
-
-func _release(s: Dictionary) -> void:
-	var z = s.node
-	s.node = null
-	if z == null or not is_instance_valid(z): return
-	var d = main.party.director if main and main.get("party") else null
-	if d: d.enemies.erase(z)
-	z.queue_free()
-	culled += 1
+	if crowd: crowd.step(dt)

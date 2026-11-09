@@ -25,25 +25,19 @@ func _run() -> void:
 		m.cheats.flags.god = false
 		m.cheats.flags.bump = false
 	for _i in 30: await physics_frame
-	var slow := 0
-	var runners := 0
-	var knights := 0
-	var sailors := 0
-	for e in m.party.director.enemies:
-		if not (e is HordeZombie) or not e.alive(): continue
-		if e.role == "runner": runners += 1
-		elif e.role == "undead_knight": knights += 1
-		elif e.role == "undead_sailor": sailors += 1
-		else: slow += 1
-	ok(slow == 8 and knights == 2 and sailors == 2 and runners == 4, "roster %d shambler / %d knight / %d sailor / %d runner" % [slow, knights, sailors, runners])
-	ok(m.horde.alive_count() == HordeDirector.CAP, "the crowd starts at the alive cap (%d)" % m.horde.alive_count())
+	var rc: Dictionary = m.horde.crowd.role_counts()
+	ok(int(rc.shambler) > int(rc.runner) and int(rc.undead_knight) >= 2 and int(rc.undead_sailor) >= 2, "roster shambler %d runner %d knight %d sailor %d" % [rc.shambler, rc.runner, rc.undead_knight, rc.undead_sailor])
+	ok(m.horde.alive_count() == HordeCrowd.SIM_DEFAULT, "simulated crowd is the boot default (%d)" % m.horde.alive_count())
+	ok(m.horde.near_count() <= HordeCrowd.NEAR_CAP, "near combat actors stay pooled (%d)" % m.horde.near_count())
+	print("COUNTS simulated=%d rendered=%d near=%d" % [m.horde.alive_count(), m.horde.rendered_count(), m.horde.near_count()])
+	ok(m.horde.rendered_count() >= 64, "a real batch is in view from town (%d rendered)" % m.horde.rendered_count())
 	var south_eye := Vector3(0, 1.7, 160)
-	var through := _count_through(m, south_eye)
-	var south_pack := _count_near(m, Vector3(0, 1, 200), 32.0)
+	var through: int = m.horde.crowd.count_through_south(south_eye)
+	var south_pack: int = m.horde.crowd.count_near(Vector3(0, 1, 200), 32.0)
 	print("ENCOUNTER through_south_gate=%d near_outside_south=%d alive=%d" % [through, south_pack, m.horde.alive_count()])
 	ok(through >= 8, "looking out the south gate shows a gathered crowd (%d)" % through)
 	ok(south_pack >= 8, "the south approach holds a pack within 32 m of the road (%d)" % south_pack)
-	var from_spawn := _count_through(m, Vector3(-6, 1.7, 26))
+	var from_spawn: int = m.horde.crowd.count_through_south(Vector3(-6, 1.7, 26))
 	ok(from_spawn >= 6, "the town spawn can see the south pack through the gate (%d)" % from_spawn)
 	var inside := 0
 	var wedge := 0
@@ -67,7 +61,7 @@ func _run() -> void:
 		var d: float = (g.node as Node3D).global_position.distance_to(g.post)
 		far = maxf(far, d)
 		if g.tgt != null: busy += 1
-	var still_through := _count_through(m, south_eye)
+	var still_through: int = m.horde.crowd.count_through_south(south_eye)
 	print("GUARDS_HOLD farthest=%.2f busy=%d leash=%.0f through=%d alive=%d" % [far, busy, TownGuards.POST_LEASH, still_through, m.horde.alive_count()])
 	ok(far <= TownGuards.POST_LEASH + 0.35, "guards stayed on the apron (farthest %.2f m)" % far)
 	ok(busy == 0, "guards did not acquire the gathered horde (%d)" % busy)

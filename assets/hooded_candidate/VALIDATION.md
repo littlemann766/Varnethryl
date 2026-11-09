@@ -10,7 +10,9 @@ Harness: `validation/hooded_male/hooded_validate.gd`, driven with `--display-dri
 
 **Pass** for import, rest appearance, and the embedded clips on this machine.
 
-**Not a pass** for production wiring, for a finished LOD, or for a phone cost.
+**Not a pass** for production wiring or for a phone cost.
+
+The LOD paragraph below is the first import. It is out of date. The crowd that was kept is the 8-view atlas on a camera-facing card, checked again in `SAFETY.md`. The 783-tri mesh is an optional fallback and is not certified.
 
 ## What imported
 
@@ -59,3 +61,7 @@ While the 16 skinned bodies and 72 far instances were visible, the same `force_d
 ## Evidence
 
 Godot PNGs, `report.json`, and `contact_sheet.png` are in the run artifacts under `hooded_validate/`. The harness prints `VALIDATE_DONE` when it finishes.
+
+## Safety pass
+
+A later pass re-rendered the six clips, the blends, an orbit, and the near-to-far card on a fresh Godot import of the packaged files (empty `.godot`, no project autoloads). Verdict and the frames that were looked at are in `SAFETY.md`. Phone performance is still untested. `MODEL_HOOK` is still empty.

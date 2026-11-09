@@ -72,7 +72,8 @@ func play_clip(nm: String, blend: float, speed: float) -> void:
 ## Drive from a HordeZombie parent when one exists. The production script is not modified.
 func _process(dt: float) -> void:
 	var z := get_parent()
-	if z == null or not (z is HordeZombie):
+	# Property check, not a hard type, so this file still loads in a project that has not compiled HordeZombie.
+	if z == null or z.get("state") == null:
 		return
 	if _saw_hp < 0.0:
 		_saw_hp = z.hp

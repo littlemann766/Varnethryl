@@ -261,22 +261,22 @@ func _guard_ranges(m, wolf: Enemy) -> void:
 			break
 	ok(have, "south-gate post found")
 	if not have: return
-	ok(is_equal_approx(TownGuards.effective_acquire(), 60.0), "effective acquisition is 60 m")
-	var near := _spot_at(m, anchor, 40.61)
-	var far := _spot_at(m, anchor, 62.49)
-	ok(near != Vector3.INF and far != Vector3.INF, "placed the 40.61 m and 62.49 m probes")
+	ok(is_equal_approx(TownGuards.effective_acquire(), 22.0), "effective acquisition is 22 m")
+	var near := _spot_at(m, anchor, 16.0)
+	var far := _spot_at(m, anchor, 36.0)
+	ok(near != Vector3.INF and far != Vector3.INF, "placed the 16 m and 36 m probes")
 	if near == Vector3.INF or far == Vector3.INF: return
-	ok(absf(_nearest_post(m, near) - 40.61) <= 0.2, "near probe measures %.2f m" % _nearest_post(m, near))
-	ok(absf(_nearest_post(m, far) - 62.49) <= 0.2, "far probe measures %.2f m" % _nearest_post(m, far))
+	ok(absf(_nearest_post(m, near) - 16.0) <= 0.2, "near probe measures %.2f m" % _nearest_post(m, near))
+	ok(absf(_nearest_post(m, far) - 36.0) <= 0.2, "far probe measures %.2f m" % _nearest_post(m, far))
 	ok(m.guards.in_zone(near) and m.guards.in_zone(far), "both probes stay in the defence zone")
 	_reset_posts(m)
 	_park(m, wolf, near)
 	var engaged := await _watch(m, wolf, 90)
 	print("GUARD_NEAR frames=%d tracked=%d peak=%.2f" % [int(engaged.frames), int(engaged.tracked), float(engaged.max)])
-	ok(int(engaged.frames) == 90, "40.61 m probe sampled every frame (%d)" % int(engaged.frames))
-	ok(int(engaged.tracked) > 0, "a wolf at 40.61 m is acquired (%d of 90 frames)" % int(engaged.tracked))
+	ok(int(engaged.frames) == 90, "16 m probe sampled every frame (%d)" % int(engaged.frames))
+	ok(int(engaged.tracked) > 0, "a wolf at 16 m is acquired (%d of 90 frames)" % int(engaged.tracked))
 	ok(float(engaged.max) <= TownGuards.POST_LEASH + 0.35, "that chase stays inside the leash (per-frame max %.2f m)" % float(engaged.max))
-	ok(wolf.alive(), "the 40.61 m wolf stays alive")
+	ok(wolf.alive(), "the 16 m wolf stays alive")
 	_park(m, wolf, far)
 	var home := await _watch(m, wolf, 420)
 	var series: Array = home.series
@@ -285,8 +285,8 @@ func _guard_ranges(m, wolf: Enemy) -> void:
 		if float(series[i]) > float(series[i - 1]) + 0.05: rose += 1
 	var last: float = float(series[series.size() - 1])
 	print("GUARD_FRAMES frames=%d tracked=%d peak=%.2f last=%.2f rises=%d" % [int(home.frames), int(home.tracked), float(home.max), last, rose])
-	ok(int(home.frames) == 420, "62.49 m return sampled every frame")
-	ok(int(home.tracked) == 0 and wolf.alive(), "the living wolf at 62.49 m is not taken on any frame")
+	ok(int(home.frames) == 420, "36 m return sampled every frame")
+	ok(int(home.tracked) == 0 and wolf.alive(), "the living wolf at 36 m is not taken on any frame")
 	ok(rose == 0, "distance from post does not start a new chase (rises %d)" % rose)
 	ok(last <= TownGuards.BEAT + 0.5, "last frame is on the beat (%.2f m)" % last)
 

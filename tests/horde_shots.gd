@@ -31,16 +31,14 @@ func _run() -> void:
 	var ui := root.get_node_or_null("VUI")
 	if ui and ui.get("title"): ui.title.hide()
 	if ui and ui.get("hud"): ui.hud.visible = false
-	var dir := "/opt/cursor/artifacts"
-	DirAccess.make_dir_recursive_absolute(dir)
 	for _i in 8: await process_frame
-	_aim(Vector3(0, 5.5, 208), Vector3(0, 1.6, 186))
+	_aim(Vector3(0, 6.0, 230), Vector3(0, 1.2, 204))
 	await _save("horde_south_gate_crowd")
-	_aim(Vector3(0, 3.2, 168), Vector3(0, 1.5, 190))
+	_aim(Vector3(0, 3.4, 168), Vector3(0, 1.4, 210))
 	await _save("horde_inside_looking_out")
-	_aim(Vector3(7.2, 2.1, 196.5), Vector3(4.2, 1.3, 190.5))
+	_aim(Vector3(0, 2.4, -214), Vector3(0, 1.4, -204))
 	await _save("horde_placeholder_knight")
-	_aim(Vector3(-8.0, 2.1, 196.8), Vector3(-4.6, 1.3, 190.6))
+	_aim(Vector3(214, 2.4, 0), Vector3(204, 1.4, 0))
 	await _save("horde_placeholder_sailor")
 	var w := _wedge()
 	_aim(Vector3(w.x, 8, w.y), Vector3(0, 2, 0))
@@ -83,19 +81,12 @@ func _box(pos: Vector3, size: Vector3, mat: Material) -> void:
 	root.add_child(mi)
 
 func _crowd() -> void:
-	var r := HordeZombie.BODY_R
-	for i in 9:
-		var x := -8.0 + i * 2.0
-		var from := Vector2(x, TownHaven.outer_limit() + 14.0)
-		var at := TownHaven.clamp_move(from, Vector2(x, 0.0), r)
-		var role := "shambler"
-		if i == 1: role = "undead_sailor"
-		elif i == 7: role = "undead_knight"
-		elif i == 3 or i == 8: role = "runner"
+	for spec in HordeDirector.ROSTER:
+		var at: Vector3 = HordeDirector.spawn_pos(spec)
 		var z := HordeZombie.new()
 		root.add_child(z)
-		z.setup_horde(role, Vector3(at.x, 0, at.y), func(_x, _z): return 0.0)
-		z.rotation.y = PI
+		z.setup_horde(str(spec.id), at, func(_x, _z): return 0.0)
+		z.rotation.y = PI if str(spec.gate) == "south" else 0.0
 
 func _wedge() -> Vector2:
 	var a := deg_to_rad(135.0)
@@ -108,6 +99,7 @@ func _aim(from: Vector3, at: Vector3) -> void:
 func _save(name: String) -> void:
 	for _i in 4: await process_frame
 	var img: Image = root.get_viewport().get_texture().get_image()
-	var path := "/opt/cursor/artifacts/%s.png" % name
+	var path := "/cursor/stores/self/transfer/test59/%s.png" % name
+	DirAccess.make_dir_recursive_absolute("/cursor/stores/self/transfer/test59")
 	img.save_png(path)
 	print("SHOT %s %dx%d" % [path, img.get_width(), img.get_height()])

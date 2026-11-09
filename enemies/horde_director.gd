@@ -8,24 +8,27 @@ const HARD_CAP := 24
 const CORPSE_CAP := 6
 const CORPSE_SEC := 8.0
 const REFILL_SEC := 7.0
-## angle 0 = south (+Z). The northeast wedge 115..155 is intentionally empty.
+## Packs stand in the gate openings, past the guard apron, so a player looking out a gate
+## sees a crowd. The old ring pressed the wall beside the gates, and the opening showed one body.
+## "out" is metres past the outer face. "along" is metres across that gate. The northeast
+## wedge is not a gate, so none of these packs sit in it.
 const ROSTER := [
-	{"id": "shambler", "ang": 0.0, "dist": 34.0},
-	{"id": "shambler", "ang": 12.0, "dist": 40.0},
-	{"id": "shambler", "ang": -14.0, "dist": 38.0},
-	{"id": "shambler", "ang": 28.0, "dist": 46.0},
-	{"id": "shambler", "ang": -32.0, "dist": 44.0},
-	{"id": "undead_knight", "ang": 168.0, "dist": 36.0},
-	{"id": "undead_knight", "ang": 196.0, "dist": 42.0},
-	{"id": "undead_sailor", "ang": 78.0, "dist": 36.0},
-	{"id": "undead_sailor", "ang": -78.0, "dist": 40.0},
-	{"id": "shambler", "ang": 248.0, "dist": 36.0},
-	{"id": "shambler", "ang": 270.0, "dist": 42.0},
-	{"id": "shambler", "ang": 292.0, "dist": 48.0},
-	{"id": "runner", "ang": 18.0, "dist": 52.0},
-	{"id": "runner", "ang": -24.0, "dist": 50.0},
-	{"id": "runner", "ang": 96.0, "dist": 54.0},
-	{"id": "runner", "ang": 236.0, "dist": 56.0},
+	{"id": "shambler", "gate": "south", "along": -4.8, "out": 18.0},
+	{"id": "shambler", "gate": "south", "along": -1.6, "out": 18.0},
+	{"id": "shambler", "gate": "south", "along": 1.6, "out": 18.0},
+	{"id": "shambler", "gate": "south", "along": 4.8, "out": 18.0},
+	{"id": "shambler", "gate": "south", "along": -3.2, "out": 23.0},
+	{"id": "shambler", "gate": "south", "along": 3.2, "out": 23.0},
+	{"id": "runner", "gate": "south", "along": -4.2, "out": 28.0},
+	{"id": "runner", "gate": "south", "along": 4.2, "out": 28.0},
+	{"id": "undead_knight", "gate": "north", "along": -2.2, "out": 18.0},
+	{"id": "undead_knight", "gate": "north", "along": 2.2, "out": 18.0},
+	{"id": "shambler", "gate": "north", "along": 0.0, "out": 23.0},
+	{"id": "undead_sailor", "gate": "east", "along": -2.2, "out": 18.0},
+	{"id": "undead_sailor", "gate": "east", "along": 2.2, "out": 18.0},
+	{"id": "runner", "gate": "east", "along": 0.0, "out": 24.0},
+	{"id": "shambler", "gate": "west", "along": 0.0, "out": 18.0},
+	{"id": "runner", "gate": "west", "along": 0.0, "out": 24.0},
 ]
 
 var main: Node
@@ -48,13 +51,29 @@ func setup(m: Node) -> void:
 	if combat and not combat.used.is_connected(_on_combat):
 		combat.used.connect(_on_combat)
 
+static func _gate_dir(gate: String) -> Vector2:
+	match gate:
+		"north": return Vector2(0, -1)
+		"east": return Vector2(1, 0)
+		"west": return Vector2(-1, 0)
+		_: return Vector2(0, 1)
+
 static func spawn_pos(spec: Dictionary) -> Vector3:
+	if spec.has("gate"):
+		var dir := _gate_dir(str(spec.gate))
+		var along := Vector2(-dir.y, dir.x)
+		var p := dir * (TownHaven.outer_limit() + float(spec.out)) + along * float(spec.along)
+		return Vector3(p.x, 0.0, p.y)
 	var a := deg_to_rad(float(spec.ang))
-	var dir := Vector2(sin(a), cos(a))
-	var p := dir * (TownHaven.outer_limit() + float(spec.dist))
-	return Vector3(p.x, 0.0, p.y)
+	var legacy := Vector2(sin(a), cos(a))
+	var q := legacy * (TownHaven.outer_limit() + float(spec.dist))
+	return Vector3(q.x, 0.0, q.y)
 
 static func pressure_pos(spec: Dictionary) -> Vector2:
+	# Gate packs hold the gathering. They do not walk into the guard apron.
+	if spec.has("gate"):
+		var p := spawn_pos(spec)
+		return Vector2(p.x, p.z)
 	var a := deg_to_rad(float(spec.ang))
 	var dir := Vector2(sin(a), cos(a))
 	return dir * (TownHaven.stand_off(HordeZombie.BODY_R) + 0.45)

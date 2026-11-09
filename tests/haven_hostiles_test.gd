@@ -127,16 +127,16 @@ func _world() -> void:
 	if ui and ui.get("title"): ui.title.hide()
 	ok(TownHaven.armed, "Liongate haven is armed before the first awaited frame")
 	ok(is_equal_approx(TownGuards.RESPOND, 90.0), "a post farther than 90 m still does not answer")
-	ok(is_equal_approx(TownGuards.effective_acquire(), 60.0), "effective acquisition is the 60 m leash, not 90 m")
+	ok(is_equal_approx(TownGuards.effective_acquire(), 22.0), "effective acquisition is the 22 m gate apron")
 	for e in m.party.director.living():
 		e.kill_now(Vector3.ZERO)
 	await f(3)
-	# Inside the old defence zone (walls + 30 m) and farther than the rejected 34 m post filter.
-	var wolf: Enemy = m.party.director.spawn("wolf", Vector3(30, 0, 210), m.hero)
+	# On the gate apron, inside the 22 m cap. A wolf farther out in the old 60 m field is not taken.
+	var wolf: Enemy = m.party.director.spawn("wolf", Vector3(4, 0, 190), m.hero)
 	var nearest := 1.0e9
 	for g in m.guards.guards:
 		nearest = minf(nearest, (g.post as Vector3).distance_to(wolf.global_position))
-	ok(nearest > 34.0 and nearest <= TownGuards.POST_LEASH, "this wolf is outside the old 34 m bubble and inside the post leash (%.1f m)" % nearest)
+	ok(nearest <= TownGuards.POST_LEASH and nearest > 8.0, "apron wolf is inside the close leash (%.1f m)" % nearest)
 	m.hero.global_position = Vector3(0, 0.4, 24)
 	m.party.combat.hp = m.party.combat.max_hp
 	await f(20)
@@ -145,8 +145,19 @@ func _world() -> void:
 	for g in m.guards.guards:
 		if g.tgt == wolf: answered += 1
 		wandered = maxf(wandered, (g.node as Node3D).global_position.distance_to(g.post))
-	ok(answered > 0, "south-gate guards acquire a wolf ~45 m out (%d)" % answered)
-	ok(wandered <= TownGuards.POST_LEASH + 1.5, "those guards stayed within the post leash (%.1f m)" % wandered)
+	ok(answered > 0, "south-gate guards acquire a wolf on the apron (%d, %.1f m)" % [answered, nearest])
+	ok(wandered <= TownGuards.POST_LEASH + 0.5, "those guards stayed within the post leash (%.1f m)" % wandered)
+	var field: Enemy = m.party.director.spawn("wolf", Vector3(30, 0, 210), m.hero)
+	var field_d := 1.0e9
+	for g in m.guards.guards:
+		field_d = minf(field_d, (g.post as Vector3).distance_to(field.global_position))
+	ok(field_d > TownGuards.POST_LEASH, "the field wolf is outside the apron (%.1f m)" % field_d)
+	await f(20)
+	var field_taken := 0
+	for g in m.guards.guards:
+		if g.tgt == field: field_taken += 1
+	ok(field_taken == 0, "guards do not leave the apron for the field wolf")
+	field.kill_now(Vector3.ZERO)
 	wolf.global_position = Vector3(0, 0, 340)
 	await f(15)
 	var still := 0

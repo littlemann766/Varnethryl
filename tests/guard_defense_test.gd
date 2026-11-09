@@ -37,7 +37,7 @@ func _run() -> void:
 	ti.kill_now(Vector3.ZERO); await f(5)
 	# a stone troll walks to the South Gate (hero inside the city as its target)
 	var posts := G.guards.map(func(g): return g.post)
-	var e: Enemy = d.spawn("stonetroll", Vector3(4, 0, 185 + 45), m.hero); e.target = m.hero; e.set_state("chase")
+	var e: Enemy = d.spawn("stonetroll", Vector3(4, 0, 190), m.hero); e.target = m.hero; e.set_state("chase")
 	m.hero.global_position = Vector3(0, 0, 120)
 	var hits := [0]; G.guard_hit.connect(func(en, dm): if en == e: hits[0] += 1)
 	var engaged := false; var t := 0

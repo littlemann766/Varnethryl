@@ -15,10 +15,12 @@ var guards: Array = []     # [{node, rig, a, b, to_b, wait, post, hp, tgt, atk_t
 ## test 31 (boss: "guards should be high level and attack any incoming monsters"): city defence.
 ## Level 60 guards (town-area monsters are 5-30, frost trolls 45-52). Each guard: 20,000 HP, swings every 1.1 s for 22% of a
 ## normal monster's max HP (a wolf/raider/skeleton dies in ~5 swings from one guard), 1.5% for bosses (frost trolls).
-## Defence zone: the walled square (|x|,|z| <= 185 m) plus 30 m beyond the walls. Up to 3 nearest guards within 90 m answer each
-## intruder; they run (6.1 m/s, run clip), attack with the guard attack clip, give up past the zone + 15 m leash, and go
-## back to their posts when it is dead or gone. They only ever target Enemy nodes from the EnemyDirector: never players,
-## remote players, companions or townsfolk. The Ashen Titans (enemy "titan"/"titan_volcano" and the WorldBoss) are left out.
+## Close defence. Gate posts sit about 13.5 to 6.5 m inside the outer wall face. A 22 m cap from the
+## post reaches about 7 m past that face: the gate mouth and a short apron, not the field.
+## Up to 3 nearest guards answer a target inside that cap. A post farther than 90 m never answers.
+## They run (6.1 m/s), strike, drop a target that leaves the cap, and walk back to the post.
+## They only ever target Enemy nodes from the EnemyDirector: never players, remote players, companions
+## or townsfolk. The Ashen Titans (enemy "titan"/"titan_volcano" and the WorldBoss) are left out.
 const LEVEL := 60
 const MAX_HP := 20000.0
 const DMG_FRAC := 0.22
@@ -29,10 +31,11 @@ const ZONE := 30.0          # m beyond the walls
 const LEASH := 15.0
 const PER_TARGET := 3
 const RESPOND := 90.0       # m: a guard whose post is farther than this never takes that target
-## Travel cap from the post. About 58.5 m reaches the old defence edge (walls + 30 m zone + 15 m
-## leash) from the innermost gate post. The take test is distance <= this cap, so the effective
-## acquisition range is 60 m, not 90 m. The 90 m figure only keeps a far post from answering.
-const POST_LEASH := 60.0
+## Travel and take cap from the guard's own post. 22 m from the innermost gate post (about 171.5 m
+## from center) ends near 193.5 m, 7 m outside the wall face at 186.5 m. The gathered horde stands
+## about 18 m outside that face, so guards do not walk out and clear it. The take test is
+## distance <= this cap, so the effective acquisition range is 22 m. 90 m only rejects a far post.
+const POST_LEASH := 22.0
 
 static func effective_acquire() -> float:
 	return minf(RESPOND, POST_LEASH)
@@ -98,7 +101,7 @@ func _assign() -> void:
 		if have >= PER_TARGET: continue
 		var free := guards.filter(func(g):
 			var d := (g.post as Vector3).distance_to(e.global_position)
-			# Effective take range is the 60 m leash. 90 m only rejects a post that is farther than that.
+			# Effective take range is the 22 m apron. 90 m only rejects a post that is farther than that.
 			return g.tgt == null and g.down_t <= 0.0 and d < RESPOND and d <= POST_LEASH)
 		free.sort_custom(func(a, b): return (a.node as Node3D).global_position.distance_to(e.global_position) < (b.node as Node3D).global_position.distance_to(e.global_position))
 		for g in free.slice(0, PER_TARGET - have): g.tgt = e

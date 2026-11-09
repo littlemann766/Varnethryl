@@ -192,7 +192,7 @@ func _guards(m) -> void:
 	for g in m.guards.guards:
 		if g.tgt == runner: chasing += 1
 	ok(chasing == 0, "a runner 75 m past the post does not pull guards (%d)" % chasing)
-	runner.global_position = Vector3(0, 0, 200)
+	runner.global_position = Vector3(0, 0, 188)
 	runner.last_safe = runner.global_position
 	await f(45)
 	var answered := 0

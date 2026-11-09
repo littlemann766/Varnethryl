@@ -2,7 +2,7 @@ class_name HordeZombie
 extends Enemy
 ## Placeholder undead. Shamblers, runners, undead knights and undead sailors share this zombie
 ## brain: they advance, herd, and bite. They do not telegraph, duel, or use soldier patterns.
-## Beth's meshes are not in this build. MODEL_HOOK is the swap point; leave it empty until then.
+## Near bodies use Beth's hooded mobile mesh. Far records use the 8-direction card.
 
 const BODY_R := 0.46
 const BITE_REACH := 1.40
@@ -10,12 +10,9 @@ const BITE_HEIGHT := 2.5
 const GRAB_REACH := 0.95
 const SEPARATION := 0.82
 const RECOVER := 0.65
-const MODEL_HOOK := {
-	"shambler": "",
-	"runner": "",
-	"undead_knight": "",
-	"undead_sailor": "",
-}
+const HOODED_GLB := "res://assets/hooded_candidate/hooded_male_mobile.glb"
+## Visual bite of attack2. Damage waits for this, not the old 0.45 s / 0.28 s timers.
+const STRIKE_AT := 0.80
 static var _mats := {}
 
 var role := "shambler"
@@ -37,15 +34,15 @@ static func body_radius(_tid := "") -> float: return BODY_R
 static func profile(tid: String) -> Dictionary:
 	match tid:
 		"runner", "horde_runner":
-			return {"speed": 3.35, "hp": 140, "atk": 16.0, "role": "runner", "runner": true, "windup": 0.28}
+			return {"speed": 3.35, "hp": 140, "atk": 16.0, "role": "runner", "runner": true, "windup": STRIKE_AT}
 		"undead_knight":
-			return {"speed": 1.15, "hp": 260, "atk": 20.0, "role": "undead_knight", "runner": false, "windup": 0.5}
+			return {"speed": 1.15, "hp": 260, "atk": 20.0, "role": "undead_knight", "runner": false, "windup": STRIKE_AT}
 		"undead_sailor":
-			return {"speed": 1.20, "hp": 240, "atk": 18.0, "role": "undead_sailor", "runner": false, "windup": 0.48}
+			return {"speed": 1.20, "hp": 240, "atk": 18.0, "role": "undead_sailor", "runner": false, "windup": STRIKE_AT}
 		"skeleton":
-			return {"speed": 1.25, "hp": 190, "atk": 18.0, "role": "shambler", "runner": false, "windup": 0.45}
+			return {"speed": 1.25, "hp": 190, "atk": 18.0, "role": "shambler", "runner": false, "windup": STRIKE_AT}
 		_:
-			return {"speed": 1.25, "hp": 190, "atk": 18.0, "role": "shambler", "runner": false, "windup": 0.45}
+			return {"speed": 1.25, "hp": 190, "atk": 18.0, "role": "shambler", "runner": false, "windup": STRIKE_AT}
 
 static func _mat(role_name: String) -> StandardMaterial3D:
 	if _mats.has(role_name): return _mats[role_name]
@@ -83,11 +80,11 @@ func setup_horde(tid: String, pos: Vector3, ground: Callable) -> HordeZombie:
 
 func _build_visual() -> void:
 	var mat := _mat(role)
-	var hook := str(MODEL_HOOK.get(role, ""))
-	if hook != "" and ResourceLoader.exists(hook):
-		var packed: PackedScene = load(hook)
-		var mdl := packed.instantiate()
-		add_child(mdl)
+	if ResourceLoader.exists(HOODED_GLB):
+		var vis := HoodedPresenter.new()
+		vis.name = "Hooded"
+		add_child(vis)
+		return
 	else:
 		var body := MeshInstance3D.new()
 		var cap := CapsuleMesh.new()
@@ -150,7 +147,12 @@ func pattern_hits(_p: Dictionary, _pt: Vector3) -> bool: return false
 func take_damage(dmg: int, _from: Vector3) -> void:
 	if not alive(): return
 	hp = maxf(0.0, hp - float(dmg))
-	if hp <= 0.0: _die()
+	if hp <= 0.0:
+		_die()
+		return
+	if state == "windup":
+		cancel_strike()
+		set_state("approach")
 
 func kill_now(_from: Vector3) -> void:
 	if not alive(): return

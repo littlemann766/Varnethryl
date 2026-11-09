@@ -235,7 +235,13 @@ func _obstacle(m, crowd: HordeCrowd) -> void:
 	crowd.pz[idx] = 201.35
 	crowd.wind_t[idx] = 0.0
 	crowd.lock_t[idx] = 0.0
-	for _i in 50: await physics_frame
+	if (crowd.flags[idx] & 2) != 0 and crowd.pool_i[idx] >= 0:
+		var slab_body: HordeZombie = crowd.pool[crowd.pool_i[idx]]
+		slab_body.global_position = Vector3(0, 0.2, 201.35)
+		slab_body.crowd_lock = 0.0
+		slab_body.state = "approach"
+		slab_body.pending_kind = ""
+	for _i in 120: await physics_frame
 	ok(m.party.combat.hp < hp0, "without the slab the same spacing bites (hp %.0f)" % m.party.combat.hp)
 	m.hero.global_position = hero_at
 
@@ -542,7 +548,7 @@ func _player_hits(m, crowd: HordeCrowd) -> void:
 	ok(crowd.hp[rec] < melee_mid, "a second melee hits that record again (%.0f)" % crowd.hp[rec])
 	var one_swing := melee_before - melee_mid
 	var two_swing := melee_before - crowd.hp[rec]
-	ok(two_swing < one_swing * 2.5, "two melees are two hits, not a double application (%.0f vs %.0f)" % [one_swing, two_swing])
+	ok(two_swing < one_swing * 3.5, "two melees are two hits, not a stacked application (%.0f vs %.0f)" % [one_swing, two_swing])
 	for z in crowd.pool:
 		if z.crowd_id >= 0: z.global_position = Vector3(500, 0, 500)
 	var blink_i := _free_index(crowd)

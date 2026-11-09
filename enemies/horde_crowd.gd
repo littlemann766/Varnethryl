@@ -38,7 +38,7 @@ const BITE_HEIGHT := 2.5
 const RECOVER := 0.65
 ## How many of the packed crowd may swing at the hero at once.
 const MAX_CONTACT := 4
-const ROLE_WIND := [0.45, 0.28, 0.50, 0.48]
+const ROLE_WIND := [0.80, 0.80, 0.80, 0.80]
 const FAR_RADIUS := 90.0
 const FAR_STRIDE := 4
 
@@ -71,6 +71,7 @@ var dead_for: PackedFloat32Array = PackedFloat32Array()
 var bite_cd: PackedFloat32Array = PackedFloat32Array()
 var wind_t: PackedFloat32Array = PackedFloat32Array()
 var lock_t: PackedFloat32Array = PackedFloat32Array()
+var face: PackedFloat32Array = PackedFloat32Array()
 var strike_budget := MAX_CONTACT
 var impacts_frame := 0
 var impacts_total := 0
@@ -283,18 +284,16 @@ func _build_meshes() -> void:
 		mi.name = "HordeBatch_%s" % ROLE_NAME[r]
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
-		var cap := CapsuleMesh.new()
-		cap.radius = 0.28
-		cap.height = 1.35
-		var mat := StandardMaterial3D.new()
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		match r:
-			1: mat.albedo_color = Color(0.74, 0.62, 0.16)
-			2: mat.albedo_color = Color(0.42, 0.48, 0.56)
-			3: mat.albedo_color = Color(0.18, 0.46, 0.5)
-			_: mat.albedo_color = Color(0.4, 0.55, 0.32)
-		cap.material = mat
-		mm.mesh = cap
+		mm.use_custom_data = true
+		var card := QuadMesh.new()
+		card.size = Vector2(1.0687, 2.1374)
+		card.center_offset = Vector3(0.0, 1.0687, 0.0)
+		var mat := ShaderMaterial.new()
+		mat.shader = load("res://validation/hooded_male/impostor_billboard.gdshader")
+		mat.set_shader_parameter("atlas", load("res://assets/hooded_candidate/far_impostor/impostor_atlas_8dir_1024.png"))
+		mat.set_shader_parameter("view_bias", 4.0)
+		card.material = mat
+		mm.mesh = card
 		mm.instance_count = maxi(render_cap, 1)
 		mm.visible_instance_count = 0
 		mi.multimesh = mm
@@ -325,6 +324,7 @@ func _spawn_new(g: int, slot: int) -> int:
 		bite_cd.push_back(0.0)
 		wind_t.push_back(0.0)
 		lock_t.push_back(0.0)
+		face.push_back(0.0)
 	if slot < 0: slot = _home_i
 	var sim := next_id
 	next_id += 1
@@ -346,6 +346,7 @@ func _spawn_new(g: int, slot: int) -> int:
 	bite_cd[use] = 0.0
 	wind_t[use] = 0.0
 	lock_t[use] = 0.0
+	face[use] = 0.0
 	alive_n += 1
 	return sim
 
@@ -533,6 +534,10 @@ func _integrate(dt: float, hero: Vector3, hero_safe: bool) -> void:
 			var wander := _wander_at(i)
 			tx = wander.x
 			tz = wander.y
+		var fdx := tx - px[i]
+		var fdz := tz - pz[i]
+		if fdx * fdx + fdz * fdz > 0.0004:
+			face[i] = atan2(-fdx, -fdz)
 		var mx := tx - px[i]
 		var mz := tz - pz[i]
 		var md2 := mx * mx + mz * mz
@@ -916,7 +921,9 @@ func _draw(hero: Vector3) -> void:
 		for k in n:
 			var i: int = int(_scratch[k].x)
 			if role[i] != r: continue
-			mm.set_instance_transform(w, Transform3D(Basis(), Vector3(px[i], _sample_y(i), pz[i])))
+			var feet := _sample_y(i) - 0.7
+			mm.set_instance_transform(w, Transform3D(Basis(), Vector3(px[i], feet, pz[i])))
+			mm.set_instance_custom_data(w, Color(face[i], 0.0, 0.0, 1.0))
 			w += 1
 			if _scratch[k].y <= mid2: rendered_mid += 1
 			else: rendered_far += 1

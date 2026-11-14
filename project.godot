@@ -15,6 +15,7 @@ VPrefs="*res://core/save/prefs.gd"
 VSave="*res://core/save/save_system.gd"
 VUI="*res://ui/ui_root.gd"
 Net="*res://net/Net.gd"
+DesktopWindow="*res://core/desktop_window.gd"
 
 [boot_splash]
 
@@ -26,6 +27,11 @@ use_filter=true
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720
+window/size/window_width_override=1600
+window/size/window_height_override=900
+window/size/mode=2
+window/size/resizable=true
+window/size/initial_position_type=1
 window/handheld/orientation=0
 window/stretch/mode="canvas_items"
 

@@ -1691,6 +1691,18 @@ func _apply_time_mode() -> void:
 func _input_blocked() -> bool:
 	return menu_open or (VUI.title != null and VUI.title.visible)
 
+## Arrow keys already drive movement. WASD is the same vector, and it stays idle while a text field is focused.
+func _keyboard_move() -> Vector2:
+	var k := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	if k.length() > 0.1:
+		return k
+	var focus := get_viewport().gui_get_focus_owner()
+	if focus is LineEdit or focus is TextEdit:
+		return Vector2.ZERO
+	return Vector2(
+		float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
+		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
+
 func _unhandled_input(e: InputEvent) -> void:
 	if _input_blocked():
 		joy_touch = -1; cam_touch = -1; joy_vec = Vector2.ZERO
@@ -1728,7 +1740,7 @@ func _physics_process(dt: float) -> void:
 	if hero == null: return
 	refresh_body_collision()
 	var inp := joy_vec if not _input_blocked() else Vector2.ZERO
-	var k := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	var k := _keyboard_move()
 	if k.length() > 0.1: inp = k
 	if sea and sea.active: sea.drive(inp, dt); return   # test 32: sailing / diving in the Tidewrack Sea
 	var fwd := Vector3(-sin(yaw), 0, -cos(yaw)); var right := Vector3(cos(yaw), 0, -sin(yaw))
